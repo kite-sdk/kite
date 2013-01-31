@@ -69,7 +69,7 @@ public class HDFSDatasetRepository implements DatasetRepository {
   }
 
   @Override
-  public Dataset get(String name) {
+  public Dataset get(String name) throws IOException {
     Preconditions.checkArgument(name != null, "Dataset name can not be null");
     Preconditions.checkState(rootDirectory != null,
         "Dataset repository root directory can not be null");
@@ -82,8 +82,8 @@ public class HDFSDatasetRepository implements DatasetRepository {
 
     Dataset ds = new Dataset();
 
-    Schema schema = new Schema.Parser().parse(datasetMetadataPath.toUri()
-        .getPath());
+    Schema schema = new Schema.Parser().parse(new File(datasetMetadataPath
+        .toUri().getPath()));
 
     ds.setSchema(schema);
 
