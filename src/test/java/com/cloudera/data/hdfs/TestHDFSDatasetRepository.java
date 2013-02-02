@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -38,7 +39,7 @@ public class TestHDFSDatasetRepository {
 
     testSchema = Schema.createRecord("Test", "Test record schema",
         "com.cloudera.data.hdfs", false);
-    testSchema.setFields(Lists.newArrayList(new Schema.Field("name", Schema
+    testSchema.setFields(Lists.newArrayList(new Field("name", Schema
         .create(Type.STRING), null, null)));
   }
 
