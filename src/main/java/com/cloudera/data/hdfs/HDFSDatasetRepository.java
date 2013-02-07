@@ -25,7 +25,7 @@ public class HDFSDatasetRepository implements DatasetRepository {
 
   private Path pathForDataset(String name) {
     Preconditions.checkState(rootDirectory != null,
-        "HDFSDataset repository root directory can not be null");
+        "Dataset repository root directory can not be null");
 
     return new Path(rootDirectory, name.replace('.', '/'));
   }
@@ -39,11 +39,12 @@ public class HDFSDatasetRepository implements DatasetRepository {
   }
 
   public HDFSDataset create(String name, Schema schema) throws IOException {
-    Preconditions.checkArgument(name != null, "HDFSDataset name can not be null");
+    Preconditions.checkArgument(name != null,
+        "Dataset name can not be null");
     Preconditions.checkArgument(schema != null,
-        "HDFSDataset schema can not be null");
+        "Dataset schema can not be null");
     Preconditions.checkState(fileSystem != null,
-        "HDFSDataset repository filesystem implementation can not be null");
+        "Dataset repository filesystem implementation can not be null");
 
     HDFSDataset ds = new HDFSDataset();
     Path datasetDataPath = pathForDatasetData(name);
@@ -71,11 +72,12 @@ public class HDFSDatasetRepository implements DatasetRepository {
 
   @Override
   public HDFSDataset get(String name) throws IOException {
-    Preconditions.checkArgument(name != null, "HDFSDataset name can not be null");
+    Preconditions.checkArgument(name != null,
+        "Dataset name can not be null");
     Preconditions.checkState(rootDirectory != null,
-        "HDFSDataset repository root directory can not be null");
+        "Dataset repository root directory can not be null");
     Preconditions.checkState(fileSystem != null,
-        "HDFSDataset repository filesystem implementation can not be null");
+        "Dataset repository filesystem implementation can not be null");
 
     logger.debug("Loading dataset:{}", name);
 
@@ -92,12 +94,6 @@ public class HDFSDatasetRepository implements DatasetRepository {
     logger.debug("Loaded dataset:{}", ds);
 
     return ds;
-  }
-
-  @Override
-  public HDFSDataset get(String name, long version) {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   @Override

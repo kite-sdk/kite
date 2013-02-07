@@ -14,13 +14,4 @@ public interface DatasetRepository {
    */
   public HDFSDataset get(String name) throws IOException;
 
-  /**
-   * Get a specific version of a named dataset.
-   * 
-   * @param name
-   * @param version
-   * @return
-   */
-  public HDFSDataset get(String name, long version);
-
 }
