@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
 
-public class TestDataset {
+public class TestHDFSDataset {
 
   private static final Logger logger = LoggerFactory
-      .getLogger(TestDataset.class);
+      .getLogger(TestHDFSDataset.class);
 
   @Test
   public void test() throws IOException {
