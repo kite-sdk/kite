@@ -1,6 +1,7 @@
 package com.cloudera.data.hdfs;
 
-import java.io.DataInputStream;
+import java.io.File;
+import java.io.IOException;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Closeables;
+import com.google.common.io.Resources;
 
 public class TestDataset {
 
@@ -16,11 +18,11 @@ public class TestDataset {
       .getLogger(TestDataset.class);
 
   @Test
-  public void test() {
+  public void test() throws IOException {
     Dataset ds = new Dataset();
 
-    ds.setSchema(new Schema.Parser()
-        .parse("{ \"type\": \"record\", \"name\": \"user\", \"fields\": [ { \"type\": \"string\", \"name\": \"username\" } ] }"));
+    ds.setSchema(new Schema.Parser().parse(new File(Resources.getResource(
+        "user.avsc").getPath())));
 
     Schema schema = ds.getSchema();
     Record record = new Record(schema);
@@ -31,9 +33,6 @@ public class TestDataset {
 
     logger.debug("record:{}", record);
 
-    DataInputStream inputStream = ds.open();
-
-    Closeables.closeQuietly(inputStream);
     Closeables.closeQuietly(ds);
   }
 

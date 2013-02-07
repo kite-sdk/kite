@@ -1,18 +1,22 @@
 package com.cloudera.data.hdfs;
 
 import java.io.Closeable;
-import java.io.DataInputStream;
 import java.util.Map;
 
 import org.apache.avro.Schema;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 
 public class Dataset implements Closeable {
 
+  private FileSystem fileSystem;
+  private Path dataDirectory;
+
   private String name;
-  private String path;
   private Schema schema;
   private Map<String, String> properties;
 
@@ -20,8 +24,8 @@ public class Dataset implements Closeable {
     properties = Maps.newHashMap();
   }
 
-  public DataInputStream open() {
-    return null;
+  public HDFSDatasetWriter getWriter() {
+    return new HDFSDatasetWriter(fileSystem, new Path(""), schema);
   }
 
   @Override
@@ -37,10 +41,69 @@ public class Dataset implements Closeable {
     this.schema = schema;
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+
+  public void setProperties(Map<String, String> properties) {
+    this.properties = properties;
+  }
+
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("name", name).add("path", path)
+    return Objects.toStringHelper(this).add("name", name)
         .add("properties", properties).toString();
+  }
+
+  public static class Builder implements Supplier<Dataset> {
+
+    private Dataset dataset;
+
+    public Builder() {
+      dataset = new Dataset();
+    }
+
+    public Builder fileSystem(FileSystem fileSystem) {
+      dataset.fileSystem = fileSystem;
+      return this;
+    }
+
+    public Builder name(String name) {
+      dataset.name = name;
+      return this;
+    }
+
+    public Builder dataDirectory(Path dataDirectory) {
+      dataset.dataDirectory = dataDirectory;
+      return this;
+    }
+
+    public Builder schema(Schema schema) {
+      dataset.schema = schema;
+      return this;
+    }
+
+    public Builder properties(Map<String, String> properties) {
+      dataset.properties = properties;
+      return this;
+    }
+
+    @Override
+    public Dataset get() {
+      Dataset current = dataset;
+      dataset = new Dataset();
+
+      return current;
+    }
+
   }
 
 }
