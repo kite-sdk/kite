@@ -42,8 +42,12 @@ public class TestHDFSDatasetWriter {
 
     writer.open();
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 100; i++) {
       writer.write("entry " + i);
+
+      if (i % 10 == 0) {
+        writer.flush();
+      }
     }
 
     writer.close();
