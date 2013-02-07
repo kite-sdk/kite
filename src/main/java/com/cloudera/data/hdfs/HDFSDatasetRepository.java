@@ -86,6 +86,7 @@ public class HDFSDatasetRepository implements DatasetRepository {
         .toUri().getPath()));
 
     ds.setSchema(schema);
+    ds.setName(name);
 
     logger.debug("Loaded dataset:{}", ds);
 
