@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.data.DatasetRepository;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -24,7 +25,7 @@ public class HDFSDatasetRepository implements DatasetRepository {
 
   private Path pathForDataset(String name) {
     Preconditions.checkState(rootDirectory != null,
-        "Dataset repository root directory can not be null");
+        "HDFSDataset repository root directory can not be null");
 
     return new Path(rootDirectory, name.replace('.', '/'));
   }
@@ -37,14 +38,14 @@ public class HDFSDatasetRepository implements DatasetRepository {
     return new Path(pathForDataset(name), "schema.avsc");
   }
 
-  public Dataset create(String name, Schema schema) throws IOException {
-    Preconditions.checkArgument(name != null, "Dataset name can not be null");
+  public HDFSDataset create(String name, Schema schema) throws IOException {
+    Preconditions.checkArgument(name != null, "HDFSDataset name can not be null");
     Preconditions.checkArgument(schema != null,
-        "Dataset schema can not be null");
+        "HDFSDataset schema can not be null");
     Preconditions.checkState(fileSystem != null,
-        "Dataset repository filesystem implementation can not be null");
+        "HDFSDataset repository filesystem implementation can not be null");
 
-    Dataset ds = new Dataset();
+    HDFSDataset ds = new HDFSDataset();
     Path datasetDataPath = pathForDatasetData(name);
     Path datasetMetadataPath = pathForDatasetMetadata(name);
 
@@ -69,18 +70,18 @@ public class HDFSDatasetRepository implements DatasetRepository {
   }
 
   @Override
-  public Dataset get(String name) throws IOException {
-    Preconditions.checkArgument(name != null, "Dataset name can not be null");
+  public HDFSDataset get(String name) throws IOException {
+    Preconditions.checkArgument(name != null, "HDFSDataset name can not be null");
     Preconditions.checkState(rootDirectory != null,
-        "Dataset repository root directory can not be null");
+        "HDFSDataset repository root directory can not be null");
     Preconditions.checkState(fileSystem != null,
-        "Dataset repository filesystem implementation can not be null");
+        "HDFSDataset repository filesystem implementation can not be null");
 
     logger.debug("Loading dataset:{}", name);
 
     Path datasetMetadataPath = pathForDatasetMetadata(name);
 
-    Dataset ds = new Dataset();
+    HDFSDataset ds = new HDFSDataset();
 
     Schema schema = new Schema.Parser().parse(new File(datasetMetadataPath
         .toUri().getPath()));
@@ -94,7 +95,7 @@ public class HDFSDatasetRepository implements DatasetRepository {
   }
 
   @Override
-  public Dataset get(String name, long version) {
+  public HDFSDataset get(String name, long version) {
     // TODO Auto-generated method stub
     return null;
   }

@@ -11,7 +11,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 
-public class Dataset implements Closeable {
+public class HDFSDataset implements Closeable {
 
   private FileSystem fileSystem;
   private Path dataDirectory;
@@ -20,7 +20,7 @@ public class Dataset implements Closeable {
   private Schema schema;
   private Map<String, String> properties;
 
-  public Dataset() {
+  public HDFSDataset() {
     properties = Maps.newHashMap();
   }
 
@@ -63,12 +63,12 @@ public class Dataset implements Closeable {
         .add("properties", properties).toString();
   }
 
-  public static class Builder implements Supplier<Dataset> {
+  public static class Builder implements Supplier<HDFSDataset> {
 
-    private Dataset dataset;
+    private HDFSDataset dataset;
 
     public Builder() {
-      dataset = new Dataset();
+      dataset = new HDFSDataset();
     }
 
     public Builder fileSystem(FileSystem fileSystem) {
@@ -97,9 +97,9 @@ public class Dataset implements Closeable {
     }
 
     @Override
-    public Dataset get() {
-      Dataset current = dataset;
-      dataset = new Dataset();
+    public HDFSDataset get() {
+      HDFSDataset current = dataset;
+      dataset = new HDFSDataset();
 
       return current;
     }

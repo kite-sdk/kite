@@ -50,11 +50,11 @@ public class TestHDFSDatasetRepository {
 
   @Test
   public void testCreate() throws IOException {
-    Dataset dataset = repo.create("test1", testSchema);
+    HDFSDataset dataset = repo.create("test1", testSchema);
 
-    Assert.assertTrue("Dataset data directory exists",
+    Assert.assertTrue("HDFSDataset data directory exists",
         fileSystem.exists(new Path(testDirectory, "data/test1/data")));
-    Assert.assertTrue("Dataset metadata file exists",
+    Assert.assertTrue("HDFSDataset metadata file exists",
         fileSystem.exists(new Path(testDirectory, "data/test1/schema.avsc")));
 
     Schema serializedSchema = new Schema.Parser().parse(new File(testDirectory
@@ -62,7 +62,7 @@ public class TestHDFSDatasetRepository {
 
     Schema schema = dataset.getSchema();
 
-    Assert.assertEquals("Dataset schema matches what's serialized to disk",
+    Assert.assertEquals("HDFSDataset schema matches what's serialized to disk",
         schema, serializedSchema);
 
     Assert.assertNotNull(schema);
@@ -77,7 +77,7 @@ public class TestHDFSDatasetRepository {
     // Just invoke the creation test so we have a dataset to test with.
     testCreate();
 
-    Dataset dataset = repo.get("test1");
+    HDFSDataset dataset = repo.get("test1");
 
     Assert.assertNotNull(dataset);
 

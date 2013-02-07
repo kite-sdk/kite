@@ -19,7 +19,7 @@ public class TestDataset {
 
   @Test
   public void test() throws IOException {
-    Dataset ds = new Dataset();
+    HDFSDataset ds = new HDFSDataset();
 
     ds.setSchema(new Schema.Parser().parse(new File(Resources.getResource(
         "user.avsc").getPath())));
