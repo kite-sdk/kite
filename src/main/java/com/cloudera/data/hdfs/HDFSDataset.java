@@ -1,6 +1,5 @@
 package com.cloudera.data.hdfs;
 
-import java.io.Closeable;
 import java.util.Map;
 
 import org.apache.avro.Schema;
@@ -11,7 +10,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 
-public class HDFSDataset implements Closeable {
+public class HDFSDataset {
 
   private FileSystem fileSystem;
   private Path dataDirectory;
@@ -26,11 +25,6 @@ public class HDFSDataset implements Closeable {
 
   public HDFSDatasetWriter getWriter() {
     return new HDFSDatasetWriter(fileSystem, new Path(""), schema);
-  }
-
-  @Override
-  public void close() {
-
   }
 
   public Schema getSchema() {

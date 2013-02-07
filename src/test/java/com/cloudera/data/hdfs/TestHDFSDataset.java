@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
 
 public class TestHDFSDataset {
@@ -32,8 +31,6 @@ public class TestHDFSDataset {
     record.put("username", "test");
 
     logger.debug("record:{}", record);
-
-    Closeables.closeQuietly(ds);
   }
 
 }
