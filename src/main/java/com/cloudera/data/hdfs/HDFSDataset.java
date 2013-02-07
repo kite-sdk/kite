@@ -6,11 +6,12 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.cloudera.data.Dataset;
 import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 
-public class HDFSDataset {
+public class HDFSDataset implements Dataset {
 
   private FileSystem fileSystem;
   private Path dataDirectory;

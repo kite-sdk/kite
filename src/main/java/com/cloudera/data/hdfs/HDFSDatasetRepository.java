@@ -15,7 +15,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
 
-public class HDFSDatasetRepository implements DatasetRepository {
+public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
   private static final Logger logger = LoggerFactory
       .getLogger(HDFSDatasetRepository.class);
@@ -38,6 +38,7 @@ public class HDFSDatasetRepository implements DatasetRepository {
     return new Path(pathForDataset(name), "schema.avsc");
   }
 
+  @Override
   public HDFSDataset create(String name, Schema schema) throws IOException {
     Preconditions.checkArgument(name != null, "Dataset name can not be null");
     Preconditions.checkArgument(schema != null,
