@@ -1,6 +1,5 @@
 package com.cloudera.data.hdfs;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.apache.avro.Schema;
@@ -10,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetRepository;
+import com.cloudera.data.hdfs.util.Paths;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -39,8 +39,7 @@ public class HDFSDatasetRepository implements DatasetRepository {
   }
 
   public HDFSDataset create(String name, Schema schema) throws IOException {
-    Preconditions.checkArgument(name != null,
-        "Dataset name can not be null");
+    Preconditions.checkArgument(name != null, "Dataset name can not be null");
     Preconditions.checkArgument(schema != null,
         "Dataset schema can not be null");
     Preconditions.checkState(fileSystem != null,
@@ -62,8 +61,8 @@ public class HDFSDatasetRepository implements DatasetRepository {
       logger.debug("Serializing dataset schema:{}", schema.toString());
     }
 
-    Files.write(schema.toString(), new File(datasetMetadataPath.toUri()
-        .getPath()), Charsets.UTF_8);
+    Files.write(schema.toString(), Paths.toFile(datasetMetadataPath),
+        Charsets.UTF_8);
 
     ds.setSchema(schema);
 
@@ -72,8 +71,7 @@ public class HDFSDatasetRepository implements DatasetRepository {
 
   @Override
   public HDFSDataset get(String name) throws IOException {
-    Preconditions.checkArgument(name != null,
-        "Dataset name can not be null");
+    Preconditions.checkArgument(name != null, "Dataset name can not be null");
     Preconditions.checkState(rootDirectory != null,
         "Dataset repository root directory can not be null");
     Preconditions.checkState(fileSystem != null,
@@ -85,8 +83,8 @@ public class HDFSDatasetRepository implements DatasetRepository {
 
     HDFSDataset ds = new HDFSDataset();
 
-    Schema schema = new Schema.Parser().parse(new File(datasetMetadataPath
-        .toUri().getPath()));
+    Schema schema = new Schema.Parser()
+        .parse(Paths.toFile(datasetMetadataPath));
 
     ds.setSchema(schema);
     ds.setName(name);
