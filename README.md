@@ -8,6 +8,7 @@ set of APIs that helps developers build robust systems and applications
 with CDH and Cloudera Manager.
 
 Category: Storage and Access
+
 CDK Module: data.hdfs
 
 ## License
