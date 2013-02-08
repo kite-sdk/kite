@@ -1,7 +1,6 @@
 package com.cloudera.data.hdfs;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.Flushable;
 import java.io.IOException;
 
@@ -14,6 +13,7 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.data.hdfs.util.Paths;
 import com.google.common.base.Objects;
 import com.google.common.io.Closeables;
 
@@ -44,7 +44,7 @@ public class HDFSDatasetWriter<E> implements Flushable, Closeable {
 
     writer = new ReflectDatumWriter<E>();
     dataFileWriter = new DataFileWriter<E>(writer);
-    dataFileWriter.create(schema, new File(pathTmp.toUri().getPath()));
+    dataFileWriter.create(schema, Paths.toFile(pathTmp));
   }
 
   public void write(E entity) throws IOException {

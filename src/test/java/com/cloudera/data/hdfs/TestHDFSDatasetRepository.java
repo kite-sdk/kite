@@ -14,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cloudera.data.hdfs.util.Paths;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -60,8 +61,8 @@ public class TestHDFSDatasetRepository {
         fileSystem.exists(new Path(testDirectory, "data/test1/schema.avsc")));
 
     Schema schema = dataset.getSchema();
-    Schema serializedSchema = new Schema.Parser().parse(new File(testDirectory
-        .toUri().getPath(), "data/test1/schema.avsc"));
+    Schema serializedSchema = new Schema.Parser().parse(new File(Paths
+        .toFile(testDirectory), "data/test1/schema.avsc"));
 
     Assert.assertEquals("Dataset schema matches what's serialized to disk",
         schema, serializedSchema);
