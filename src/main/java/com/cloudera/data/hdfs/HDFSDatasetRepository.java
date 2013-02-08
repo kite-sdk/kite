@@ -46,7 +46,6 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     Preconditions.checkState(fileSystem != null,
         "Dataset repository filesystem implementation can not be null");
 
-    HDFSDataset ds = new HDFSDataset();
     Path datasetDataPath = pathForDatasetData(name);
     Path datasetMetadataPath = pathForDatasetMetadata(name);
 
@@ -65,9 +64,8 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     Files.write(schema.toString(), Paths.toFile(datasetMetadataPath),
         Charsets.UTF_8);
 
-    ds.setSchema(schema);
-
-    return ds;
+    return new HDFSDataset.Builder().dataDirectory(datasetDataPath)
+        .fileSystem(fileSystem).name(name).schema(schema).get();
   }
 
   @Override
@@ -80,15 +78,14 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
     logger.debug("Loading dataset:{}", name);
 
+    Path datasetDataPath = pathForDatasetData(name);
     Path datasetMetadataPath = pathForDatasetMetadata(name);
-
-    HDFSDataset ds = new HDFSDataset();
 
     Schema schema = new Schema.Parser()
         .parse(Paths.toFile(datasetMetadataPath));
 
-    ds.setSchema(schema);
-    ds.setName(name);
+    HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
+        .dataDirectory(datasetDataPath).name(name).schema(schema).get();
 
     logger.debug("Loaded dataset:{}", ds);
 
