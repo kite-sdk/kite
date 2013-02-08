@@ -23,6 +23,11 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
   private Path rootDirectory;
   private FileSystem fileSystem;
 
+  public HDFSDatasetRepository(FileSystem fileSystem, Path rootDirectory) {
+    this.fileSystem = fileSystem;
+    this.rootDirectory = rootDirectory;
+  }
+
   private Path pathForDataset(String name) {
     Preconditions.checkState(rootDirectory != null,
         "Dataset repository root directory can not be null");
@@ -102,16 +107,8 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     return rootDirectory;
   }
 
-  public void setRootDirectory(Path rootDirectory) {
-    this.rootDirectory = rootDirectory;
-  }
-
   public FileSystem getFileSystem() {
     return fileSystem;
-  }
-
-  public void setFileSystem(FileSystem fileSystem) {
-    this.fileSystem = fileSystem;
   }
 
 }

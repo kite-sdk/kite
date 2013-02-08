@@ -32,10 +32,8 @@ public class TestHDFSDatasetRepository {
 
     fileSystem = FileSystem.get(conf);
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    repo = new HDFSDatasetRepository();
-
-    repo.setFileSystem(fileSystem);
-    repo.setRootDirectory(new Path(testDirectory, "data"));
+    repo = new HDFSDatasetRepository(fileSystem,
+        new Path(testDirectory, "data"));
 
     testSchema = Schema.createRecord("Test", "Test record schema",
         "com.cloudera.data.hdfs", false);

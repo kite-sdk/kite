@@ -15,7 +15,6 @@ public class HDFSDataset implements Dataset {
 
   private FileSystem fileSystem;
   private Path dataDirectory;
-
   private String name;
   private Schema schema;
   private Map<String, String> properties;
