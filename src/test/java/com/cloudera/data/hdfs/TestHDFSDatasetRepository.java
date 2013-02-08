@@ -52,24 +52,21 @@ public class TestHDFSDatasetRepository {
   public void testCreate() throws IOException {
     HDFSDataset dataset = repo.create("test1", testSchema);
 
-    Assert.assertTrue("HDFSDataset data directory exists",
+    Assert.assertEquals("Dataset name is propagated", "test1",
+        dataset.getName());
+    Assert.assertEquals("Dataset schema is propagated", testSchema,
+        dataset.getSchema());
+    Assert.assertTrue("Dataset data directory exists",
         fileSystem.exists(new Path(testDirectory, "data/test1/data")));
-    Assert.assertTrue("HDFSDataset metadata file exists",
+    Assert.assertTrue("Dataset metadata file exists",
         fileSystem.exists(new Path(testDirectory, "data/test1/schema.avsc")));
 
+    Schema schema = dataset.getSchema();
     Schema serializedSchema = new Schema.Parser().parse(new File(testDirectory
         .toUri().getPath(), "data/test1/schema.avsc"));
 
-    Schema schema = dataset.getSchema();
-
-    Assert.assertEquals("HDFSDataset schema matches what's serialized to disk",
+    Assert.assertEquals("Dataset schema matches what's serialized to disk",
         schema, serializedSchema);
-
-    Assert.assertNotNull(schema);
-    Assert.assertTrue(schema.getType().equals(Type.RECORD));
-    Assert.assertNotNull(schema.getField("name"));
-    Assert.assertTrue(schema.getField("name").schema().getType()
-        .equals(Type.STRING));
   }
 
   @Test
@@ -79,11 +76,11 @@ public class TestHDFSDatasetRepository {
 
     HDFSDataset dataset = repo.get("test1");
 
-    Assert.assertNotNull(dataset);
-
-    Schema schema = dataset.getSchema();
-
-    Assert.assertNotNull(schema);
+    Assert.assertNotNull("Dataset is loaded and produced", dataset);
+    Assert.assertEquals("Dataset name is propagated", "test1",
+        dataset.getName());
+    Assert.assertEquals("Dataset schema is loaded", testSchema,
+        dataset.getSchema());
   }
 
 }
