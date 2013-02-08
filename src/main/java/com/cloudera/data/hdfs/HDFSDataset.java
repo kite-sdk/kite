@@ -28,6 +28,7 @@ public class HDFSDataset implements Dataset {
     return new HDFSDatasetWriter(fileSystem, new Path(""), schema);
   }
 
+  @Override
   public Schema getSchema() {
     return schema;
   }
@@ -36,6 +37,7 @@ public class HDFSDataset implements Dataset {
     this.schema = schema;
   }
 
+  @Override
   public String getName() {
     return name;
   }
