@@ -7,7 +7,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.cloudera.data.Dataset;
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 
@@ -24,7 +26,9 @@ public class HDFSDataset implements Dataset {
   }
 
   public HDFSDatasetWriter getWriter() {
-    return new HDFSDatasetWriter(fileSystem, new Path(""), schema);
+    return new HDFSDatasetWriter(fileSystem, new Path(dataDirectory, Joiner.on(
+        '-').join(System.currentTimeMillis(), Thread.currentThread().getId())),
+        schema);
   }
 
   @Override
@@ -95,12 +99,17 @@ public class HDFSDataset implements Dataset {
 
     @Override
     public HDFSDataset get() {
+      Preconditions.checkState(dataset.name != null, "No dataset name defined");
+      Preconditions.checkState(dataset.schema != null,
+          "No dataset schema defined");
+      Preconditions.checkState(dataset.fileSystem != null,
+          "No filesystem defined");
+
       HDFSDataset current = dataset;
       dataset = new HDFSDataset();
 
       return current;
     }
-
   }
 
 }
