@@ -56,8 +56,9 @@ public class HDFSDataset implements Dataset {
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("name", name)
-        .add("properties", properties).toString();
+    return Objects.toStringHelper(this).add("name", name).add("schema", schema)
+        .add("dataDirectory", dataDirectory).add("properties", properties)
+        .toString();
   }
 
   public static class Builder implements Supplier<HDFSDataset> {
