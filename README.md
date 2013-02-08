@@ -1,4 +1,4 @@
-= Cloudera Development Kit - HDFS Data Module
+# Cloudera Development Kit - HDFS Data Module
 
 The HDFS Data Module is a collection of APIs that drastically simplify
 working with datasets in the Hadoop Distributed FileSystem (HDFS).
@@ -10,7 +10,7 @@ with CDH and Cloudera Manager.
 Category: Storage and Access
 CDK Module: data.hdfs
 
-== License ==
+## License
 
 Copyright 2013 Cloudera Inc.
 
