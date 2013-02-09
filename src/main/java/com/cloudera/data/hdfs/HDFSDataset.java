@@ -26,9 +26,12 @@ public class HDFSDataset implements Dataset {
   }
 
   public HDFSDatasetWriter getWriter() {
-    return new HDFSDatasetWriter(fileSystem, new Path(dataDirectory, Joiner.on(
-        '-').join(System.currentTimeMillis(), Thread.currentThread().getId())),
-        schema);
+    // FIXME: This file name is not guaranteed to be truly unique.
+    Path dataFile = new Path(dataDirectory, Joiner.on('-').join(
+        System.currentTimeMillis(), Thread.currentThread().getId()));
+
+    return new HDFSDatasetWriter.Builder().fileSystem(fileSystem)
+        .path(dataFile).schema(schema).get();
   }
 
   @Override

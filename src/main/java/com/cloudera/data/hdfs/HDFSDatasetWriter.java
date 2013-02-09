@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.hdfs.util.Paths;
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 import com.google.common.io.Closeables;
 
 public class HDFSDatasetWriter<E> implements Flushable, Closeable {
@@ -73,6 +75,39 @@ public class HDFSDatasetWriter<E> implements Flushable, Closeable {
   public String toString() {
     return Objects.toStringHelper(this).add("path", path)
         .add("pathTmp", pathTmp).add("schema", schema).toString();
+  }
+
+  public static class Builder implements Supplier<HDFSDatasetWriter> {
+
+    private FileSystem fileSystem;
+    private Path path;
+    private Schema schema;
+
+    public Builder fileSystem(FileSystem fileSystem) {
+      this.fileSystem = fileSystem;
+      return this;
+    }
+
+    public Builder path(Path path) {
+      this.path = path;
+      return this;
+    }
+
+    public Builder schema(Schema schema) {
+      this.schema = schema;
+      return this;
+    }
+
+    @Override
+    public HDFSDatasetWriter get() {
+      Preconditions
+          .checkState(fileSystem != null, "File system is not defined");
+      Preconditions.checkState(path != null, "Path is not defined");
+      Preconditions.checkState(schema != null, "Schema is not defined");
+
+      return new HDFSDatasetWriter(fileSystem, path, schema);
+    }
+
   }
 
 }
