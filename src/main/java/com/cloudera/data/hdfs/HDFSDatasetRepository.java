@@ -51,6 +51,10 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     Preconditions.checkState(fileSystem != null,
         "Dataset repository filesystem implementation can not be null");
 
+    if (fileSystem.exists(rootDirectory)) {
+      throw new IOException("Attempt to create an existing dataset:" + name);
+    }
+
     Path datasetDataPath = pathForDatasetData(name);
     Path datasetMetadataPath = pathForDatasetMetadata(name);
 
