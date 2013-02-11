@@ -28,21 +28,6 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     this.rootDirectory = rootDirectory;
   }
 
-  private Path pathForDataset(String name) {
-    Preconditions.checkState(rootDirectory != null,
-        "Dataset repository root directory can not be null");
-
-    return new Path(rootDirectory, name.replace('.', '/'));
-  }
-
-  private Path pathForDatasetData(String name) {
-    return new Path(pathForDataset(name), "data");
-  }
-
-  private Path pathForDatasetMetadata(String name) {
-    return new Path(pathForDataset(name), "schema.avsc");
-  }
-
   @Override
   public HDFSDataset create(String name, Schema schema) throws IOException {
     Preconditions.checkArgument(name != null, "Dataset name can not be null");
@@ -99,6 +84,21 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     logger.debug("Loaded dataset:{}", ds);
 
     return ds;
+  }
+
+  private Path pathForDataset(String name) {
+    Preconditions.checkState(rootDirectory != null,
+        "Dataset repository root directory can not be null");
+
+    return new Path(rootDirectory, name.replace('.', '/'));
+  }
+
+  private Path pathForDatasetData(String name) {
+    return new Path(pathForDataset(name), "data");
+  }
+
+  private Path pathForDatasetMetadata(String name) {
+    return new Path(pathForDataset(name), "schema.avsc");
   }
 
   @Override
