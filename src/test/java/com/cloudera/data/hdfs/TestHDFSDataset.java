@@ -74,9 +74,10 @@ public class TestHDFSDataset {
     Record record = new GenericRecordBuilder(testSchema)
         .set("username", "test").build();
 
-    HDFSDatasetWriter writer = null;
+    HDFSDatasetWriter<Record> writer = null;
 
     try {
+      // TODO: Fix the cast situation. (Leave this warning until we do.)
       writer = ds.getWriter();
 
       writer.open();
