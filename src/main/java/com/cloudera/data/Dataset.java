@@ -32,4 +32,8 @@ public interface Dataset {
    */
   Schema getSchema();
 
+  PartitionExpression getPartitionExpression();
+
+  boolean isPartitioned();
+
 }

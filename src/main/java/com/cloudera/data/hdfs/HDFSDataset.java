@@ -7,6 +7,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.cloudera.data.Dataset;
+import com.cloudera.data.PartitionExpression;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -19,6 +20,7 @@ public class HDFSDataset implements Dataset {
   private Path dataDirectory;
   private String name;
   private Schema schema;
+  private PartitionExpression partitionExpression;
   private Map<String, String> properties;
 
   public HDFSDataset() {
@@ -56,6 +58,16 @@ public class HDFSDataset implements Dataset {
     this.name = name;
   }
 
+  @Override
+  public PartitionExpression getPartitionExpression() {
+    return partitionExpression;
+  }
+
+  @Override
+  public boolean isPartitioned() {
+    return partitionExpression != null;
+  }
+
   public Map<String, String> getProperties() {
     return properties;
   }
@@ -67,8 +79,9 @@ public class HDFSDataset implements Dataset {
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("name", name).add("schema", schema)
-        .add("dataDirectory", dataDirectory).add("properties", properties)
-        .toString();
+        .add("dataDirectory", dataDirectory)
+        .add("partitionExpression", partitionExpression)
+        .add("properties", properties).toString();
   }
 
   public static class Builder implements Supplier<HDFSDataset> {
@@ -96,6 +109,11 @@ public class HDFSDataset implements Dataset {
 
     public Builder schema(Schema schema) {
       dataset.schema = schema;
+      return this;
+    }
+
+    public Builder partitionExpression(PartitionExpression partitionExpression) {
+      dataset.partitionExpression = partitionExpression;
       return this;
     }
 

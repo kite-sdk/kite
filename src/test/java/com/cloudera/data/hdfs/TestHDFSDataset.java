@@ -67,6 +67,8 @@ public class TestHDFSDataset {
 
     logger.debug("Writing to dataset:{}", ds);
 
+    Assert.assertFalse("Dataset is not partition", ds.isPartitioned());
+
     /*
      * Turns out ReflectDatumWriter subclasses GenericDatumWriter so this
      * actually works.
