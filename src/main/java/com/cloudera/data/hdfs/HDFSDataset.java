@@ -34,6 +34,10 @@ public class HDFSDataset implements Dataset {
         .path(dataFile).schema(schema).get();
   }
 
+  public HDFSDatasetReader getReader() {
+    return null;
+  }
+
   @Override
   public Schema getSchema() {
     return schema;
