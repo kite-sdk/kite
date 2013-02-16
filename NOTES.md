@@ -85,15 +85,22 @@ and the partition expression:
 
 data in HDFS might look like this:
 
-    /app_id=1/<files>
+    /events/1/<files>
 
 With the expression:
 
     [record.app_id, record.timestamp % 1000]
  
-...data will be partitioned first by the application ID, followed by the event
+data will be partitioned first by the application ID, followed by the event
 timestamp modulo 1000, which will bin data into buckets numbered 0 through
 999, with a reasonably even distribution given a steady stream of events.
+
+    /events/1/0/<files>
+    /events/1/1/<files>
+    ...
+    /events/1/999/<files>
+    /events/2/0/<files>
+    ...
 
 It's also possible to install and invoke custom functions, or invoke Java
 methods on objects in JEXL. This is incredibly powerful, and allows for
