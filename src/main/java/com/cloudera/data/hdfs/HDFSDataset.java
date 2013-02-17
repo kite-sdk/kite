@@ -40,6 +40,7 @@ public class HDFSDataset implements Dataset {
     DatasetWriter<E> writer = null;
 
     if (isPartitioned()) {
+      // FIXME: Why does this complain about a resource leak and now others?
       writer = new PartitionedDatasetWriter<E>(this);
     } else {
       // FIXME: This file name is not guaranteed to be truly unique.
