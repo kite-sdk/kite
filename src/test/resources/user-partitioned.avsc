@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "user",
-  "cdk.partition.expression": "[record.username.hashCode() % 2]",
+  "cdk.partition.expression": "[(record.username.hashCode() % 2).toString()]",
   "fields": [
     {
       "type": "string",
