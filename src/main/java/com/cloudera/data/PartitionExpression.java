@@ -30,10 +30,10 @@ public class PartitionExpression {
 
     context.set("record", record);
 
-    logger.debug("expression:{} context:{}", expression, context);
+    //logger.debug("expression:{} context:{}", expression, context);
     Object object = expression.evaluate(context);
 
-    logger.debug("result:{} type:{}", object, object.getClass());
+    //logger.debug("result:{} type:{}", object, object.getClass());
 
     StringBuilder builder = new StringBuilder();
 
@@ -45,11 +45,8 @@ public class PartitionExpression {
 
         builder.append(element.toString());
       }
-    } else if (object instanceof String) {
-      builder.append(object);
     } else {
-      throw new IllegalArgumentException(
-          "Partition expression produced an illegal result:" + object);
+      builder.append(object.toString());
     }
 
     return builder.toString();
