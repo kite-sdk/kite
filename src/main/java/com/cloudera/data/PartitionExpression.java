@@ -10,6 +10,8 @@ import org.apache.commons.jexl2.MapContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Objects;
+
 public class PartitionExpression {
 
   private static final Logger logger = LoggerFactory
@@ -37,6 +39,12 @@ public class PartitionExpression {
     logger.debug("result:{} type:{}", object, object.getClass());
 
     return Arrays.asList((Object[]) object);
+  }
+
+  @Override
+  public String toString() {
+    return Objects.toStringHelper(this).add("expression", expression)
+        .add("engine", engine).toString();
   }
 
 }
