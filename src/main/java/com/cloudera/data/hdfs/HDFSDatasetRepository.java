@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetRepository;
+import com.cloudera.data.PartitionExpression;
 import com.cloudera.data.hdfs.util.Paths;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
@@ -60,8 +61,18 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     Files.write(schema.toString(), Paths.toFile(datasetMetadataPath),
         Charsets.UTF_8);
 
-    return new HDFSDataset.Builder().dataDirectory(datasetDataPath)
-        .fileSystem(fileSystem).name(name).schema(schema).get();
+    HDFSDataset.Builder datasetBuilder = new HDFSDataset.Builder()
+        .dataDirectory(datasetDataPath).fileSystem(fileSystem).name(name)
+        .schema(schema);
+
+    String partitionExpression = schema.getProp("cdk.partition.expression");
+
+    if (partitionExpression != null) {
+      datasetBuilder.partitionExpression(new PartitionExpression(
+          partitionExpression));
+    }
+
+    return datasetBuilder.get();
   }
 
   @Override
@@ -80,8 +91,18 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     Schema schema = new Schema.Parser()
         .parse(Paths.toFile(datasetMetadataPath));
 
-    HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
-        .dataDirectory(datasetDataPath).name(name).schema(schema).get();
+    String partitionExpression = schema.getProp("cdk.partition.expression");
+
+    HDFSDataset.Builder datasetBuilder = new HDFSDataset.Builder()
+        .fileSystem(fileSystem).dataDirectory(datasetDataPath).name(name)
+        .schema(schema);
+
+    if (partitionExpression != null) {
+      datasetBuilder.partitionExpression(new PartitionExpression(
+          partitionExpression));
+    }
+
+    HDFSDataset ds = datasetBuilder.get();
 
     logger.debug("Loaded dataset:{}", ds);
 
