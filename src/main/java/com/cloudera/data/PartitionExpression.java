@@ -4,15 +4,10 @@ import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.MapContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 
 public class PartitionExpression {
-
-  private static final Logger logger = LoggerFactory
-      .getLogger(PartitionExpression.class);
 
   private JexlEngine engine;
   private Expression expression;
