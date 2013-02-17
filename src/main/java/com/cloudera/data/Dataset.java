@@ -56,6 +56,7 @@ public interface Dataset {
    *          If true, automatically create the partition if doesn't exist,
    *          otherwise, return null.
    */
-  Partition getPartition(String name, boolean autoCreate) throws IOException;
+  <E> Partition<E> getPartition(String name, boolean autoCreate)
+      throws IOException;
 
 }
