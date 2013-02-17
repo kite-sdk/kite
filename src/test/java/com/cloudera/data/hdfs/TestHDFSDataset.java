@@ -16,8 +16,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.PartitionExpression;
-import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
@@ -77,7 +77,7 @@ public class TestHDFSDataset {
     Record record = new GenericRecordBuilder(testSchema)
         .set("username", "test").build();
 
-    HDFSDatasetWriter<Record> writer = null;
+    DatasetWriter<Record> writer = null;
 
     try {
       // TODO: Fix the cast situation. (Leave this warning until we do.)
@@ -90,7 +90,9 @@ public class TestHDFSDataset {
       writer.write(record);
       writer.flush();
     } finally {
-      Closeables.close(writer, false);
+      if (writer != null) {
+        writer.close();
+      }
     }
   }
 
@@ -108,7 +110,7 @@ public class TestHDFSDataset {
 
     Record record = new GenericRecordBuilder(testSchema)
         .set("username", "test").build();
-    HDFSDatasetWriter<Record> writer = null;
+    DatasetWriter<Record> writer = null;
 
     try {
       writer = ds.getWriter();
@@ -118,7 +120,9 @@ public class TestHDFSDataset {
       writer.write(record);
       writer.flush();
     } finally {
-      Closeables.close(writer, false);
+      if (writer != null) {
+        writer.close();
+      }
     }
   }
 

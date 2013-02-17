@@ -1,13 +1,19 @@
 package com.cloudera.data.hdfs;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.Dataset;
+import com.cloudera.data.DatasetWriter;
+import com.cloudera.data.Partition;
 import com.cloudera.data.PartitionExpression;
+import com.cloudera.data.PartitionedDatasetWriter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -15,6 +21,9 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 
 public class HDFSDataset implements Dataset {
+
+  private static final Logger logger = LoggerFactory
+      .getLogger(HDFSDataset.class);
 
   private FileSystem fileSystem;
   private Path dataDirectory;
@@ -27,13 +36,21 @@ public class HDFSDataset implements Dataset {
     properties = Maps.newHashMap();
   }
 
-  public HDFSDatasetWriter getWriter() {
-    // FIXME: This file name is not guaranteed to be truly unique.
-    Path dataFile = new Path(dataDirectory, Joiner.on('-').join(
-        System.currentTimeMillis(), Thread.currentThread().getId()));
+  public <E> DatasetWriter<E> getWriter() {
+    DatasetWriter<E> writer = null;
 
-    return new HDFSDatasetWriter.Builder().fileSystem(fileSystem)
-        .path(dataFile).schema(schema).get();
+    if (isPartitioned()) {
+      writer = new PartitionedDatasetWriter<E>(this);
+    } else {
+      // FIXME: This file name is not guaranteed to be truly unique.
+      Path dataFile = new Path(dataDirectory, Joiner.on('-').join(
+          System.currentTimeMillis(), Thread.currentThread().getId()));
+
+      writer = new HDFSDatasetWriter.Builder<E>().fileSystem(fileSystem)
+          .path(dataFile).schema(schema).get();
+    }
+
+    return writer;
   }
 
   public HDFSDatasetReader getReader() {
@@ -66,6 +83,26 @@ public class HDFSDataset implements Dataset {
   @Override
   public boolean isPartitioned() {
     return partitionExpression != null;
+  }
+
+  @Override
+  public <E> Partition<E> getPartition(String name, boolean allowCreate)
+      throws IOException {
+
+    Preconditions.checkState(isPartitioned(),
+        "Attempt to get a partition on a non-partitioned dataset (name:%s)",
+        name);
+
+    logger.debug("Loading partition name:{} allowCreate:{}", name, allowCreate);
+
+    Path partitionDirectory = new Path(dataDirectory, name);
+
+    if (allowCreate && !fileSystem.exists(partitionDirectory)) {
+      fileSystem.mkdirs(partitionDirectory);
+    }
+
+    return new HDFSPartition.Builder<E>().fileSystem(fileSystem)
+        .directory(new Path(dataDirectory, name)).schema(schema).get();
   }
 
   public Map<String, String> getProperties() {
