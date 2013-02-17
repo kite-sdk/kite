@@ -1,13 +1,15 @@
 package com.cloudera.data;
 
-interface Partition {
+import java.io.IOException;
+
+public interface Partition<E> {
 
   String getName();
 
   PartitionExpression getExpression();
 
-  void getReader();
+  void getReader() throws IOException;
 
-  void getWriter();
+  DatasetWriter<E> getWriter() throws IOException;
 
 }

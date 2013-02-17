@@ -1,5 +1,7 @@
 package com.cloudera.data;
 
+import java.io.IOException;
+
 import org.apache.avro.Schema;
 
 /**
@@ -32,8 +34,28 @@ public interface Dataset {
    */
   Schema getSchema();
 
+  /**
+   * Get the {@link PartitionExpression}, if this dataset is partitioned.
+   * Calling this method on a non-partitioned dataset is an error. Instead, use
+   * the {@link #isPartitioned()} method prior to invocation.
+   */
   PartitionExpression getPartitionExpression();
 
+  /**
+   * Returns true if the dataset is partitioned (i.e. has an associated
+   * {@link PartitionExpression}, false otherwise.
+   */
   boolean isPartitioned();
+
+  /**
+   * Get a partition by name, possibly creating it if it doesn't already exist.
+   * 
+   * @param name
+   *          The partition name
+   * @param autoCreate
+   *          If true, automatically create the partition if doesn't exist,
+   *          otherwise, return null.
+   */
+  Partition getPartition(String name, boolean autoCreate) throws IOException;
 
 }
