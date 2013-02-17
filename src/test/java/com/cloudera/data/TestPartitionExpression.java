@@ -1,15 +1,18 @@
 package com.cloudera.data;
 
-import java.util.List;
 import java.util.Map;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
 public class TestPartitionExpression {
+
+  private static final Logger logger = LoggerFactory
+      .getLogger(TestPartitionExpression.class);
 
   @Test
   public void testSingleField() {
@@ -58,12 +61,12 @@ public class TestPartitionExpression {
 
     for (int i = 1; i <= 30; i++) {
       vars.put("user_id", i);
-      List<Object> partitionKeys = expression.evaluate(vars);
+      String partitionName = expression.evaluate(vars);
 
-      Assert.assertNotNull(partitionKeys);
-      Assert.assertEquals(2, partitionKeys.size());
-      Assert.assertEquals("2013", partitionKeys.get(0));
-      Assert.assertEquals(i % 7, partitionKeys.get(1));
+      logger.debug("partition name:{}", partitionName);
+
+      Assert.assertNotNull(partitionName);
+      Assert.assertEquals("2013/" + i % 7, partitionName);
     }
   }
 

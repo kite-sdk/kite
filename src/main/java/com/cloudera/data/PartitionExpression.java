@@ -1,8 +1,5 @@
 package com.cloudera.data;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.JexlEngine;
@@ -28,7 +25,7 @@ public class PartitionExpression {
     this.expression = engine.createExpression(expression);
   }
 
-  public List<Object> evaluate(Object record) {
+  public String evaluate(Object record) {
     JexlContext context = new MapContext();
 
     context.set("record", record);
@@ -38,7 +35,24 @@ public class PartitionExpression {
 
     logger.debug("result:{} type:{}", object, object.getClass());
 
-    return Arrays.asList((Object[]) object);
+    StringBuilder builder = new StringBuilder();
+
+    if (object instanceof Object[]) {
+      for (Object element : (Object[]) object) {
+        if (builder.length() > 0) {
+          builder.append("/");
+        }
+
+        builder.append(element.toString());
+      }
+    } else if (object instanceof String) {
+      builder.append(object);
+    } else {
+      throw new IllegalArgumentException(
+          "Partition expression produced an illegal result:" + object);
+    }
+
+    return builder.toString();
   }
 
   @Override
