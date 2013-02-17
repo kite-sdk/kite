@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "user",
+  "cdk.partition.expression": "[record.username.hashCode() % 2]",
+  "fields": [
+    {
+      "type": "string",
+      "name": "username"
+    }
+  ]
+}
