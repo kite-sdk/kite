@@ -38,7 +38,7 @@ public class TestHDFSDatasetWriter {
   public void testWrite() throws IOException {
     HDFSDatasetWriter<String> writer = new HDFSDatasetWriter<String>(
         fileSystem, new Path(testDirectory.getAbsolutePath(), "write-1.avro"),
-        Schema.create(Type.STRING));
+        Schema.create(Type.STRING), true);
 
     writer.open();
 

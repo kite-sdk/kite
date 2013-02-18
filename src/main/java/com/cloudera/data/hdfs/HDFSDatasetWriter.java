@@ -5,6 +5,7 @@ import java.io.Flushable;
 import java.io.IOException;
 
 import org.apache.avro.Schema;
+import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.reflect.ReflectDatumWriter;
@@ -29,17 +30,21 @@ public class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   private Path path;
   private Schema schema;
   private FileSystem fileSystem;
+  private boolean enableCompression;
 
   private Path pathTmp;
   private DataFileWriter<E> dataFileWriter;
   private DatumWriter<E> writer;
   private Status status;
 
-  public HDFSDatasetWriter(FileSystem fileSystem, Path path, Schema schema) {
+  public HDFSDatasetWriter(FileSystem fileSystem, Path path, Schema schema,
+      boolean enableCompression) {
+
     this.fileSystem = fileSystem;
     this.path = path;
     this.pathTmp = new Path(path.getParent(), path.getName() + ".tmp");
     this.schema = schema;
+    this.enableCompression = enableCompression;
     this.status = Status.NEW;
   }
 
@@ -54,6 +59,16 @@ public class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
 
     writer = new ReflectDatumWriter<E>();
     dataFileWriter = new DataFileWriter<E>(writer);
+
+    /*
+     * We may want to expose the codec in the writer and simply rely on the
+     * builder and proper instantiation from dataset-level configuration.
+     * Hard-coding snappy seems a little too draconian.
+     */
+    if (enableCompression) {
+      dataFileWriter.setCodec(CodecFactory.snappyCodec());
+    }
+
     dataFileWriter.create(schema, Paths.toFile(pathTmp));
 
     status = Status.OPEN;
@@ -95,7 +110,8 @@ public class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("path", path)
-        .add("pathTmp", pathTmp).add("schema", schema).add("status", status)
+        .add("pathTmp", pathTmp).add("schema", schema)
+        .add("enableCompression", enableCompression).add("status", status)
         .toString();
   }
 
@@ -108,6 +124,11 @@ public class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
     private FileSystem fileSystem;
     private Path path;
     private Schema schema;
+    private boolean enableCompression;
+
+    public Builder() {
+      enableCompression = true;
+    }
 
     public Builder<E> fileSystem(FileSystem fileSystem) {
       this.fileSystem = fileSystem;
@@ -124,6 +145,11 @@ public class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
       return this;
     }
 
+    public Builder<E> enableCompression(boolean enableCompression) {
+      this.enableCompression = enableCompression;
+      return this;
+    }
+
     @Override
     public HDFSDatasetWriter<E> get() {
       Preconditions
@@ -131,7 +157,10 @@ public class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
       Preconditions.checkState(path != null, "Path is not defined");
       Preconditions.checkState(schema != null, "Schema is not defined");
 
-      return new HDFSDatasetWriter<E>(fileSystem, path, schema);
+      HDFSDatasetWriter<E> writer = new HDFSDatasetWriter<E>(fileSystem, path,
+          schema, enableCompression);
+
+      return writer;
     }
 
   }
