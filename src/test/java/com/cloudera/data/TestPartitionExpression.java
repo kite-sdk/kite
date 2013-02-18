@@ -21,7 +21,9 @@ public class TestPartitionExpression {
     Map<String, Object> vars = Maps.newHashMap();
     vars.put("year", "2013");
 
-    expression.evaluate(vars);
+    String result = expression.evaluate(vars);
+
+    Assert.assertEquals("2013", result);
   }
 
   @Test
@@ -33,7 +35,9 @@ public class TestPartitionExpression {
     vars.put("year", "2013");
     vars.put("month", "01");
 
-    expression.evaluate(vars);
+    String result = expression.evaluate(vars);
+
+    Assert.assertEquals("2013/01", result);
   }
 
   @Test
@@ -44,11 +48,15 @@ public class TestPartitionExpression {
     Map<String, Object> vars = Maps.newHashMap();
     vars.put("year", "2013");
 
-    expression.evaluate(vars);
+    String result = expression.evaluate(vars);
+
+    Assert.assertEquals("2013/00", result);
 
     vars.put("month", "01");
 
-    expression.evaluate(vars);
+    result = expression.evaluate(vars);
+
+    Assert.assertEquals("2013/01", result);
   }
 
   @Test
