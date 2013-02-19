@@ -40,6 +40,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
     logger.debug("Opening partitioned dataset writer w/expression:{}",
         expression);
 
+    /* TODO: Break out the inline anonymous classes. This is too hairy to read. */
     cachedWriters = CacheBuilder.newBuilder().maximumSize(maxWriters)
         .removalListener(new RemovalListener<String, DatasetWriter<E>>() {
 
