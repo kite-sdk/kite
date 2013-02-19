@@ -58,7 +58,8 @@ public class HDFSDataset implements Dataset {
 
   @Override
   public <E> DatasetReader<E> getReader() {
-    return null;
+    throw new UnsupportedOperationException(
+        "Attempt to get a reader for dataset:" + name);
   }
 
   @Override
