@@ -59,8 +59,38 @@ public interface Dataset {
   <E> Partition<E> getPartition(String name, boolean autoCreate)
       throws IOException;
 
+  /**
+   * <p>
+   * Get an appropriate {@link DatasetWriter} implementation based on the
+   * underlying {@code Dataset} implementation.
+   * </p>
+   * <p>
+   * Implementations are free to return different types of writers depending on
+   * the disposition of the data. For example, a partitioned dataset may use a
+   * different writer than that of a non-partitioned dataset. Clients should not
+   * make any assumptions about the returned implementations. {@link Dataset}
+   * implementations are free to change them at any time.
+   * </p>
+   * 
+   * @throws IOException
+   */
   <E> DatasetWriter<E> getWriter() throws IOException;
 
+  /**
+   * <p>
+   * Get an appropriate {@link DatasetReader} implementation based on the
+   * underlying {@code Dataset} implementation.
+   * </p>
+   * <p>
+   * Implementations are free to return different types of readers depending on
+   * the disposition of the data. For example, a partitioned dataset may use a
+   * different reader than that of a non-partitioned dataset. Clients should not
+   * make any assumptions about the returned implementations. {@code Dataset}
+   * implementations are free to change them at any time.
+   * </p>
+   * 
+   * @throws IOException
+   */
   <E> DatasetReader<E> getReader() throws IOException;
 
 }
