@@ -8,10 +8,11 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.data.DatasetReader;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-public class HDFSDatasetReader implements Closeable {
+public class HDFSDatasetReader<E> implements DatasetReader<E>, Closeable {
 
   private FileSystem fileSystem;
   private Path path;
@@ -25,11 +26,25 @@ public class HDFSDatasetReader implements Closeable {
     state = State.NEW;
   }
 
+  @Override
   public void open() {
     Preconditions.checkState(state.equals(State.NEW),
         "A reader may not be opened more than once - current state:%s", state);
 
     state = State.OPEN;
+  }
+
+  @Override
+  public boolean hasNext() {
+    return false;
+  }
+
+  @Override
+  public E read() {
+    Preconditions.checkState(state.equals(State.OPEN),
+        "Attempt to read from a file in state:%s", state);
+
+    return null;
   }
 
   @Override
@@ -39,6 +54,7 @@ public class HDFSDatasetReader implements Closeable {
     }
 
     logger.debug("Closing reader on path:{}", path);
+    state = State.CLOSED;
   }
 
   @Override
