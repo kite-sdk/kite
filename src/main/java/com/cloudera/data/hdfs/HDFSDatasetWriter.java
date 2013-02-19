@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetWriter;
-import com.cloudera.data.hdfs.util.Paths;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
@@ -69,8 +68,7 @@ public class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
       dataFileWriter.setCodec(CodecFactory.snappyCodec());
     }
 
-    // FIXME: This is broken! It only works for the local filesystem.
-    dataFileWriter.create(schema, Paths.toFile(pathTmp));
+    dataFileWriter.create(schema, fileSystem.create(pathTmp, true));
 
     status = Status.OPEN;
   }
