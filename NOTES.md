@@ -106,3 +106,33 @@ with a reasonably even distribution given a steady stream of events.
 It's also possible to install and invoke custom functions, or invoke Java
 methods on objects in JEXL. This is incredibly powerful, and allows for
 natural, database-style, partitioning of datasets by value, range, or hash.
+
+# Open Questions
+
+*Configuration*
+
+It's still unclear how best to configure attributes on repos and datasets. To a
+lesser extent, readers and writers take their cues (i.e. inherit) from their
+dataset, since the latter acts as a factory for the former instances. Currently,
+we use properties on the Avro Schema instance as this is carried throughout the
+lifecycle of the dataset, and automatically serialized along with it, but there
+may be a nicer way to do this.
+
+*Concurrency Model*
+
+Instances of DatasetRepository, Dataset, and Partition should probably be thread
+safe. Readers and writers, on the other hand, probably shouldn't be. Discuss.
+Either way, we need to be explicit.
+
+*Schema Storage*
+
+The schema with which a dataset is created must always be stored somewhere by
+the implementation. Should we have an SPI interface that implementations use to
+store and retrieve schemas, rather than self-managing, as they're expected to do
+today? This might be a nice extension point for partners or users with an
+existing way of handling this kind of data.
+
+*Schema Evolution*
+
+We _must_ allow schema evolution of datasets. The question is what kind of
+changes we permit, and how schema changes are applied.
