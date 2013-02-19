@@ -99,7 +99,7 @@ public class TestHDFSDataset {
   @Test
   public void testPartitionedWriter() throws IOException {
     PartitionExpression expression = new PartitionExpression(
-        "[record.username.hashCode() % 2]");
+        "[record.username.hashCode() % 2]", false);
 
     HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
         .dataDirectory(testDirectory).name("partitioned-users")

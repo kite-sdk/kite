@@ -69,7 +69,7 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
     if (partitionExpression != null) {
       datasetBuilder.partitionExpression(new PartitionExpression(
-          partitionExpression));
+          partitionExpression, true));
     }
 
     return datasetBuilder.get();
@@ -99,7 +99,7 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
     if (partitionExpression != null) {
       datasetBuilder.partitionExpression(new PartitionExpression(
-          partitionExpression));
+          partitionExpression, true));
     }
 
     HDFSDataset ds = datasetBuilder.get();

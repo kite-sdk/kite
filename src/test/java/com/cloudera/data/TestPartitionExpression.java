@@ -16,7 +16,8 @@ public class TestPartitionExpression {
 
   @Test
   public void testSingleField() {
-    PartitionExpression expression = new PartitionExpression("record.year");
+    PartitionExpression expression = new PartitionExpression("record.year",
+        false);
 
     Map<String, Object> vars = Maps.newHashMap();
     vars.put("year", "2013");
@@ -29,7 +30,7 @@ public class TestPartitionExpression {
   @Test
   public void testMultiField() {
     PartitionExpression expression = new PartitionExpression(
-        "[record.year, record.month]");
+        "[record.year, record.month]", false);
 
     Map<String, Object> vars = Maps.newHashMap();
     vars.put("year", "2013");
@@ -43,7 +44,7 @@ public class TestPartitionExpression {
   @Test
   public void testOptionalField() {
     PartitionExpression expression = new PartitionExpression(
-        "[record.year, record.month ?: \"00\"]");
+        "[record.year, record.month ?: \"00\"]", false);
 
     Map<String, Object> vars = Maps.newHashMap();
     vars.put("year", "2013");
@@ -62,7 +63,7 @@ public class TestPartitionExpression {
   @Test
   public void testHashedField() {
     PartitionExpression expression = new PartitionExpression(
-        "[record.year, record.user_id % 7]");
+        "[record.year, record.user_id % 7]", false);
 
     Map<String, Object> vars = Maps.newHashMap();
     vars.put("year", "2013");
