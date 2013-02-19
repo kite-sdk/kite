@@ -69,6 +69,7 @@ public class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
       dataFileWriter.setCodec(CodecFactory.snappyCodec());
     }
 
+    // FIXME: This is broken! It only works for the local filesystem.
     dataFileWriter.create(schema, Paths.toFile(pathTmp));
 
     status = Status.OPEN;
