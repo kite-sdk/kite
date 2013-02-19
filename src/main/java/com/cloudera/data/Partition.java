@@ -8,7 +8,7 @@ public interface Partition<E> {
 
   PartitionExpression getExpression();
 
-  void getReader() throws IOException;
+  DatasetReader<E> getReader() throws IOException;
 
   DatasetWriter<E> getWriter() throws IOException;
 

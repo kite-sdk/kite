@@ -6,6 +6,8 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.cloudera.data.DatasetReader;
+import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.Partition;
 import com.cloudera.data.PartitionExpression;
 import com.google.common.base.Joiner;
@@ -31,13 +33,13 @@ public class HDFSPartition<E> implements Partition<E> {
   }
 
   @Override
-  public void getReader() {
+  public DatasetReader<E> getReader() {
     throw new UnsupportedOperationException(
         "Attempt to get a reader for partition:" + name);
   }
 
   @Override
-  public HDFSDatasetWriter<E> getWriter() throws IOException {
+  public DatasetWriter<E> getWriter() throws IOException {
     // FIXME: This file name is not guaranteed to be truly unique.
     Path dataFile = new Path(directory, Joiner.on('-').join(
         System.currentTimeMillis(), Thread.currentThread().getId()));
