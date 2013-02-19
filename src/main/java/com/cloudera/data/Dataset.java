@@ -59,4 +59,8 @@ public interface Dataset {
   <E> Partition<E> getPartition(String name, boolean autoCreate)
       throws IOException;
 
+  <E> DatasetWriter<E> getWriter() throws IOException;
+
+  <E> DatasetReader<E> getReader() throws IOException;
+
 }

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.Dataset;
+import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.Partition;
 import com.cloudera.data.PartitionExpression;
@@ -36,6 +37,7 @@ public class HDFSDataset implements Dataset {
     properties = Maps.newHashMap();
   }
 
+  @Override
   public <E> DatasetWriter<E> getWriter() {
     DatasetWriter<E> writer = null;
 
@@ -54,7 +56,8 @@ public class HDFSDataset implements Dataset {
     return writer;
   }
 
-  public HDFSDatasetReader getReader() {
+  @Override
+  public <E> DatasetReader<E> getReader() {
     return null;
   }
 
