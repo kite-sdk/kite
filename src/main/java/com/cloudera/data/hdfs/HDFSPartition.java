@@ -9,33 +9,20 @@ import org.apache.hadoop.fs.Path;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.Partition;
-import com.cloudera.data.PartitionExpression;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 
 public class HDFSPartition<E> implements Partition<E> {
 
-  private String name;
-
   private Schema schema;
   private FileSystem fileSystem;
   private Path directory;
 
   @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public PartitionExpression getExpression() {
-    return null;
-  }
-
-  @Override
   public DatasetReader<E> getReader() {
     throw new UnsupportedOperationException(
-        "Attempt to get a reader for partition:" + name);
+        "Attempt to get a reader for partition:" + directory);
   }
 
   @Override
