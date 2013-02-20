@@ -1,10 +1,16 @@
 package com.cloudera.data.hdfs;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.RemoteIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
@@ -12,17 +18,39 @@ import com.cloudera.data.Partition;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
+import com.google.common.collect.Lists;
 
 public class HDFSPartition<E> implements Partition<E> {
+
+  private static final Logger logger = LoggerFactory
+      .getLogger(HDFSPartition.class);
 
   private Schema schema;
   private FileSystem fileSystem;
   private Path directory;
 
+  private List<Path> files;
+
   @Override
-  public DatasetReader<E> getReader() {
-    throw new UnsupportedOperationException(
-        "Attempt to get a reader for partition:" + directory);
+  public DatasetReader<E> getReader() throws FileNotFoundException, IOException {
+    if (files == null) {
+      logger.debug("First request for a reader - building file list");
+
+      files = Lists.newLinkedList();
+
+      RemoteIterator<LocatedFileStatus> iterator = fileSystem.listFiles(
+          directory, true);
+
+      while (iterator.hasNext()) {
+        LocatedFileStatus fileStatus = iterator.next();
+
+        files.add(fileStatus.getPath());
+        logger.debug("adding {} to the partition file list",
+            fileStatus.getPath());
+      }
+    }
+
+    return new MultiFileDatasetReader<E>(fileSystem, files, schema);
   }
 
   @Override

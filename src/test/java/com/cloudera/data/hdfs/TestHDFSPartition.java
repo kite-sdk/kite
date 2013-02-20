@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.Partition;
 import com.google.common.io.Files;
@@ -43,6 +44,9 @@ public class TestHDFSPartition {
 
     Assert.assertNotNull(partition);
 
+    int testRecords = 50;
+    int records = 0;
+
     DatasetWriter<String> writer = null;
 
     try {
@@ -50,12 +54,39 @@ public class TestHDFSPartition {
 
       writer.open();
 
-      writer.write("test");
+      while (records < testRecords) {
+        writer.write("test-" + records);
+        records++;
+      }
     } finally {
       if (writer != null) {
         writer.close();
       }
     }
+
+    Assert.assertEquals(testRecords, records);
+
+    DatasetReader<String> reader = null;
+    records = 0;
+
+    try {
+      reader = partition.getReader();
+
+      reader.open();
+
+      while (reader.hasNext()) {
+        String record = reader.read();
+
+        Assert.assertNotNull(record);
+        records++;
+      }
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+
+    Assert.assertEquals(testRecords, records);
   }
 
 }
