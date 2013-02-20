@@ -27,11 +27,11 @@ public class TestMultiFileDatasetReader {
 
   @Test
   public void test() throws IOException {
+    Path testFile = new Path(Resources.getResource("strings-100.avro")
+        .getFile());
+
     MultiFileDatasetReader<String> reader = new MultiFileDatasetReader<String>(
-        fileSystem, Lists.newArrayList(
-            new Path(Resources.getResource("strings-100.avro").getFile()),
-            new Path(Resources.getResource("strings-100.avro").getFile())),
-        testSchema);
+        fileSystem, Lists.newArrayList(testFile, testFile), testSchema);
 
     int records = 0;
 
