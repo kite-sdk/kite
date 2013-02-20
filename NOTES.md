@@ -136,3 +136,47 @@ existing way of handling this kind of data.
 
 We _must_ allow schema evolution of datasets. The question is what kind of
 changes we permit, and how schema changes are applied.
+
+*Generic Methods vs. Classes*
+
+In a few places, I've used generic methods rather than classes/interfaces. This
+is because the best API is still unclear to me. Further, since we're working
+with strongly typed data in a strongly typed language, our use of generics is
+going to be important. Here's a brief tour of the issue.
+
+DatasetRepository takes a type param of DS extends Dataset so concrete
+implementations can specify concrete instances of Dataset with implementation-
+specific methods. Dataset is a factory for readers and writers, both of which
+must produce or accept types that depend on the supplied Schema. Today, this
+winds up looking like the following.
+
+    HDFSDatasetRepository repo = new HDFSDatasetRepository(
+      fileSystem, new Path(...)
+    );
+
+    HDFSDataset data = repo.create("events", eventSchema);
+
+    HDFSDatasetWriter<Event> writer = data.getWriter();
+
+    writer.write(new Event(...));
+
+Note hat HDFSDataset doesn't take a type param. Instead, getWriter() is defined
+as a template method (<E> DatasetWriter<E> getWriter()). In this specific
+example, it's obvious that the user knows the proper type parameter and could
+easily supply it in the definition. However, in the case of an existing dataset,
+this is less clear.
+
+    // If HDFSDataset has a type, it could only be <?>.
+    HDFSDataset data = repo.get("events");
+
+Once we have a handle to HDFSDataset, we could provide a method that tells us
+what type should be expected. Of course, this doesn't help later definitions.
+
+    // I don't know what type to use and reflection can't help due to erasure.
+    HDFSDatasetWriter<?> writer = data.getWriter();
+
+It seems like the only thing to do is be JDBC-ish in our treatment. That is,
+if the developer knows the table (dataset), they must have some idea how to
+access and manipulate it. Of course, that's not 100% true since JDBC supports
+introspective operations. The user does have the Schema, thought, so they could
+do something similar. Maybe we should do it for them?
