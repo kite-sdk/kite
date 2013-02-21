@@ -110,6 +110,12 @@ public class HDFSDataset implements Dataset {
         .directory(new Path(dataDirectory, name)).schema(schema).get();
   }
 
+  @Override
+  public <E> Iterable<Partition<E>> getPartitions() throws IOException {
+    throw new UnsupportedOperationException(
+        "Attempt to get partitions for dataset:" + name);
+  }
+
   public Map<String, String> getProperties() {
     return properties;
   }

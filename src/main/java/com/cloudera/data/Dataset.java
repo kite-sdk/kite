@@ -93,4 +93,6 @@ public interface Dataset {
    */
   <E> DatasetReader<E> getReader() throws IOException;
 
+  <E> Iterable<Partition<E>> getPartitions() throws IOException;
+
 }
