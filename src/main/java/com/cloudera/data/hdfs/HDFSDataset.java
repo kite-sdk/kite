@@ -1,7 +1,6 @@
 package com.cloudera.data.hdfs;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
@@ -19,7 +18,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
-import com.google.common.collect.Maps;
 
 public class HDFSDataset implements Dataset {
 
@@ -31,11 +29,6 @@ public class HDFSDataset implements Dataset {
   private String name;
   private Schema schema;
   private PartitionExpression partitionExpression;
-  private Map<String, String> properties;
-
-  public HDFSDataset() {
-    properties = Maps.newHashMap();
-  }
 
   @Override
   public <E> DatasetWriter<E> getWriter() {
@@ -116,20 +109,12 @@ public class HDFSDataset implements Dataset {
         "Attempt to get partitions for dataset:" + name);
   }
 
-  public Map<String, String> getProperties() {
-    return properties;
-  }
-
-  public void setProperties(Map<String, String> properties) {
-    this.properties = properties;
-  }
-
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("name", name).add("schema", schema)
         .add("dataDirectory", dataDirectory)
         .add("partitionExpression", partitionExpression)
-        .add("properties", properties).toString();
+        .toString();
   }
 
   public static class Builder implements Supplier<HDFSDataset> {
@@ -162,11 +147,6 @@ public class HDFSDataset implements Dataset {
 
     public Builder partitionExpression(PartitionExpression partitionExpression) {
       dataset.partitionExpression = partitionExpression;
-      return this;
-    }
-
-    public Builder properties(Map<String, String> properties) {
-      dataset.properties = properties;
       return this;
     }
 
