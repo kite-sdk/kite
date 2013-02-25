@@ -180,3 +180,118 @@ if the developer knows the table (dataset), they must have some idea how to
 access and manipulate it. Of course, that's not 100% true since JDBC supports
 introspective operations. The user does have the Schema, thought, so they could
 do something similar. Maybe we should do it for them?
+
+# Partition Refactoring
+
+Turns out that both datasets and partitions:
+
+* have a name
+* have a schema
+* produce readers and writers
+* may be partitioned
+
+It's only the implementations that potentially treat a top level partition (i.e.
+a dataset) differently. That said, most developers segfault on overly generic
+recursive structures. Datasets having datasets is confusing. Equally, a
+partition being a top level construct is weird. Really, what we want is a top
+level object called a dataset.
+
+Repo
+  create(String, Schema): Dataset
+  load(String): Dataset
+
+Dataset
+  getName(): String
+  getSchema(): Schema
+
+  getReader(): DatasetReader<E>
+  getWriter(): DatasetWriter<E>
+
+  isPartitioned(): boolean
+  getPartitionStrategy(): PartitionStrategy
+  getPartitions(): List<Dataset>
+
+PartitionStrategy
+  getExpression(): PartitionExpression
+  getAllowAddition(): boolean // isFixed?
+
+PartitionExpression
+  apply(String): Object
+
+Non-Partitioned:
+
+    /txs
+      /schema.avsc
+      /data
+        /*.avro
+
+Date:
+
+    /txs
+      /schema.avsc
+      /data
+        /dt=20130101
+          /*.avro
+        /dt=20130102
+          /*.avro
+        /dt=20130103
+          /*.avro
+
+Date -> summary.hashCode % 53
+
+    /txs
+      /data
+        /dt=20130101
+          /hash.summary=0
+            /*.avro
+          /hash.summary=1
+            /*.avro
+        /dt=20130102
+          /hash.summary=0
+            /*.avro
+          /hash.summary=1
+            /*.avro
+
+HDFS Implementation Details
+
+HDFSDataset implements Dataset
+  name: String
+  schema: Schema
+  partitionStrategy: PartitionStrategy
+
+  directory: Path
+  dataDirectory: Path
+  metadataProvier: MetadataProvider
+
+  Note: directory == dataDirectory for partitions
+
+  def dropPartition(String name): boolean = {
+    val p = getPartition(name)
+    fileSystem.delete(p.getDataDirectory(), true)
+  }
+
+  def addPartition(String name): Dataset = {
+    if (pStrat.getAllowAddition()) {
+      val p = new HDFSDataset(fileSystem, schema)
+      p.directory = new Path(directory, name);
+      p.dataDirectory = p.directory;
+      fileSystem.mkdir(p.dataDirectory)
+      p
+    } else {
+      throw new UnsupportedOperationException()
+    }
+  }
+
+A fully qualified name is:
+
+    fq-name := repo dataset partition* data-fragment*
+
+    data-fragment := id
+    partition := id '=' value
+    dataset := name-component
+    repo := name-component
+
+    name-component := ( name-component '.' ) | id
+
+    id := [a-zA-Z0-9]+
+    value := .*
