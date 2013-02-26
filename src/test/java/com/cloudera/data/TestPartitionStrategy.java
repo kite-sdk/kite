@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.partition.HashPartitionStrategy;
 import com.cloudera.data.partition.IdentityPartitionStrategy;
 import com.google.common.collect.Lists;
@@ -47,8 +46,8 @@ public class TestPartitionStrategy {
     assertEquals("month", p.getName());
     assertEquals(12, p.getCardinality());
 
-    assertEquals("userId", p.getPartition().getName());
-    assertEquals(7, p.getPartition().getCardinality());
+    assertEquals("userId", p.getPartitionStrategy().getName());
+    assertEquals(7, p.getPartitionStrategy().getCardinality());
 
     Entity e = new Entity();
     e.setMonth(2);

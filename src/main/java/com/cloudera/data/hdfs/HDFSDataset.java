@@ -112,7 +112,7 @@ public class HDFSDataset implements Dataset {
         .dataDirectory(partitionDirectory).schema(schema);
 
     if (partitionStrategy.isPartitioned()) {
-      builder.partitionStrategy(getPartitionStrategy().getPartition());
+      builder.partitionStrategy(getPartitionStrategy().getPartitionStrategy());
     }
 
     return builder.get();

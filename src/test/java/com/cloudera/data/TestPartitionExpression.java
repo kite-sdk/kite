@@ -21,7 +21,7 @@ public class TestPartitionExpression {
     Assert.assertEquals(HashPartitionStrategy.class, strategy.getClass());
     Assert.assertEquals("username", strategy.getName());
     Assert.assertEquals(2, strategy.getCardinality());
-    Assert.assertNull(strategy.getPartition());
+    Assert.assertNull(strategy.getPartitionStrategy());
   }
 
   @Test
@@ -35,13 +35,13 @@ public class TestPartitionExpression {
     Assert.assertEquals(HashPartitionStrategy.class, strategy.getClass());
     Assert.assertEquals("username", strategy.getName());
     Assert.assertEquals(2, strategy.getCardinality());
-    Assert.assertNotNull(strategy.getPartition());
+    Assert.assertNotNull(strategy.getPartitionStrategy());
 
-    PartitionStrategy substrategy = strategy.getPartition();
+    PartitionStrategy substrategy = strategy.getPartitionStrategy();
     Assert.assertEquals(HashPartitionStrategy.class, substrategy.getClass());
     Assert.assertEquals("username2", substrategy.getName());
     Assert.assertEquals(3, substrategy.getCardinality());
-    Assert.assertNull(substrategy.getPartition());
+    Assert.assertNull(substrategy.getPartitionStrategy());
   }
 
 }

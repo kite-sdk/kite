@@ -32,10 +32,10 @@ public abstract class PartitionStrategy implements Function<Object, Object> {
 
   public int getAggregateCardinality() {
     return cardinality
-        * (isPartitioned() ? getPartition().getCardinality() : 1);
+        * (isPartitioned() ? getPartitionStrategy().getCardinality() : 1);
   }
 
-  public PartitionStrategy getPartition() {
+  public PartitionStrategy getPartitionStrategy() {
     return partition;
   }
 
