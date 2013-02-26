@@ -10,6 +10,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.cloudera.data.hdfs.HDFSDatasetRepository;
@@ -41,12 +42,14 @@ public class TestPartitionedDatasetWriter {
     fileSystem.delete(testDirectory, true);
   }
 
+  @Ignore
   @Test
   public void testBasicOpenClose() throws IOException {
     writer.open();
     writer.close();
   }
 
+  @Ignore
   @Test
   public void testWriter() throws IOException {
     Record record = new GenericRecordBuilder(testSchema).set("username",
