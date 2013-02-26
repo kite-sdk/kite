@@ -23,6 +23,14 @@ public class PartitionExpression {
     this.isStrict = isStrict;
   }
 
+  public PartitionStrategy evaluate() {
+    Object object = expression.evaluate(null);
+    Preconditions.checkArgument(object instanceof PartitionStrategy,
+        "Partition expression did not produce PartitionStrategy result for value:%s",
+        object);
+    return (PartitionStrategy) object;
+  }
+
   public String evaluate(Object record) {
     JexlContext context = new MapContext();
 

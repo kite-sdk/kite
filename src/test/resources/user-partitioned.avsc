@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "user",
-  "cdk.partition.expression": "[(record.username.hashCode() % 2).toString()]",
+  "cdk.partition.expression": "new(\"com.cloudera.data.partition.HashPartitionStrategy\", \"username\", 2)",
   "fields": [
     {
       "type": "string",

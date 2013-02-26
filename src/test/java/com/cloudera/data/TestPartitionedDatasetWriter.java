@@ -42,14 +42,12 @@ public class TestPartitionedDatasetWriter {
     fileSystem.delete(testDirectory, true);
   }
 
-  @Ignore
   @Test
   public void testBasicOpenClose() throws IOException {
     writer.open();
     writer.close();
   }
 
-  @Ignore
   @Test
   public void testWriter() throws IOException {
     Record record = new GenericRecordBuilder(testSchema).set("username",
