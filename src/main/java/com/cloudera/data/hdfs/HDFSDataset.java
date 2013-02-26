@@ -13,6 +13,7 @@ import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.PartitionExpression;
 import com.cloudera.data.PartitionedDatasetWriter;
+import com.cloudera.data.partition.PartitionStrategy;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -28,7 +29,7 @@ public class HDFSDataset implements Dataset {
   private Path dataDirectory;
   private String name;
   private Schema schema;
-  private PartitionExpression partitionExpression;
+  private PartitionStrategy partitionStrategy;
 
   @Override
   public <E> DatasetWriter<E> getWriter() {
@@ -75,12 +76,17 @@ public class HDFSDataset implements Dataset {
 
   @Override
   public PartitionExpression getPartitionExpression() {
-    return partitionExpression;
+    throw new UnsupportedOperationException("Use getPartitionStrategy()!");
+  }
+
+  @Override
+  public PartitionStrategy getPartitionStrategy() {
+    return partitionStrategy;
   }
 
   @Override
   public boolean isPartitioned() {
-    return partitionExpression != null;
+    return partitionStrategy != null;
   }
 
   @Override
@@ -93,15 +99,22 @@ public class HDFSDataset implements Dataset {
 
     logger.debug("Loading partition name:{} allowCreate:{}", name, allowCreate);
 
-    Path partitionDirectory = new Path(dataDirectory, name);
+    Path partitionDirectory = new Path(dataDirectory,
+        partitionStrategy.getName() + "=" + name);
 
     if (allowCreate && !fileSystem.exists(partitionDirectory)) {
       fileSystem.mkdirs(partitionDirectory);
     }
 
-    return new HDFSDataset.Builder().fileSystem(fileSystem)
-        .directory(directory).dataDirectory(new Path(dataDirectory, name))
-        .schema(schema).get();
+    Builder builder = new HDFSDataset.Builder().name(name)
+        .fileSystem(fileSystem).directory(directory)
+        .dataDirectory(partitionDirectory).schema(schema);
+
+    if (partitionStrategy.isPartitioned()) {
+      builder.partitionStrategy(getPartitionStrategy().getPartition());
+    }
+
+    return builder.get();
   }
 
   @Override
@@ -114,7 +127,7 @@ public class HDFSDataset implements Dataset {
   public String toString() {
     return Objects.toStringHelper(this).add("name", name).add("schema", schema)
         .add("directory", directory).add("dataDirectory", dataDirectory)
-        .add("partitionExpression", partitionExpression).toString();
+        .add("partitionStrategy", partitionStrategy).toString();
   }
 
   public static class Builder implements Supplier<HDFSDataset> {
@@ -150,8 +163,8 @@ public class HDFSDataset implements Dataset {
       return this;
     }
 
-    public Builder partitionExpression(PartitionExpression partitionExpression) {
-      dataset.partitionExpression = partitionExpression;
+    public Builder partitionStrategy(PartitionStrategy partitionStrategy) {
+      dataset.partitionStrategy = partitionStrategy;
       return this;
     }
 
