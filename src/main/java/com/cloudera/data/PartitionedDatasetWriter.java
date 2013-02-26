@@ -97,7 +97,8 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
 
   @Override
   public void flush() throws IOException {
-    logger.debug("Flushing all cached writers");
+    logger.debug("Flushing all cached writers for partition:{}",
+        partitionStrategy.getName());
 
     /*
      * There's a potential for flushing entries that are created by other
@@ -107,15 +108,20 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
      * partitions to prevent cached writer contention.
      */
     for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
+      logger.debug("Flushing partition writer:{}.{}",
+          partitionStrategy.getName(), writer);
       writer.flush();
     }
   }
 
   @Override
   public void close() throws IOException {
-    logger.debug("Closing all cached writers");
+    logger.debug("Closing all cached writers for partition:{}",
+        partitionStrategy.getName());
 
     for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
+      logger.debug("Closing partition writer:{}.{}",
+          partitionStrategy.getName(), writer);
       writer.close();
     }
   }

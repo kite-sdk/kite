@@ -97,7 +97,8 @@ public class HDFSDataset implements Dataset {
         "Attempt to get a partition on a non-partitioned dataset (name:%s)",
         name);
 
-    logger.debug("Loading partition name:{} allowCreate:{}", name, allowCreate);
+    logger.debug("Loading partition:{}.{} allowCreate:{}", new Object[] {
+        partitionStrategy.getName(), name, allowCreate });
 
     Path partitionDirectory = new Path(dataDirectory,
         partitionStrategy.getName() + "=" + name);
