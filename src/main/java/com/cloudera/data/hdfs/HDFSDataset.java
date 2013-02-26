@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
-import com.cloudera.data.Partition;
 import com.cloudera.data.PartitionExpression;
 import com.cloudera.data.PartitionedDatasetWriter;
 import com.google.common.base.Joiner;
@@ -25,6 +24,7 @@ public class HDFSDataset implements Dataset {
       .getLogger(HDFSDataset.class);
 
   private FileSystem fileSystem;
+  private Path directory;
   private Path dataDirectory;
   private String name;
   private Schema schema;
@@ -35,7 +35,7 @@ public class HDFSDataset implements Dataset {
     DatasetWriter<E> writer = null;
 
     if (isPartitioned()) {
-      // FIXME: Why does this complain about a resource leak and now others?
+      // FIXME: Why does this complain about a resource leak and not others?
       writer = new PartitionedDatasetWriter<E>(this);
     } else {
       // FIXME: This file name is not guaranteed to be truly unique.
@@ -84,7 +84,7 @@ public class HDFSDataset implements Dataset {
   }
 
   @Override
-  public <E> Partition<E> getPartition(String name, boolean allowCreate)
+  public Dataset getPartition(String name, boolean allowCreate)
       throws IOException {
 
     Preconditions.checkState(isPartitioned(),
@@ -99,12 +99,13 @@ public class HDFSDataset implements Dataset {
       fileSystem.mkdirs(partitionDirectory);
     }
 
-    return new HDFSPartition.Builder<E>().fileSystem(fileSystem)
-        .directory(new Path(dataDirectory, name)).schema(schema).get();
+    return new HDFSDataset.Builder().fileSystem(fileSystem)
+        .directory(directory).dataDirectory(new Path(dataDirectory, name))
+        .schema(schema).get();
   }
 
   @Override
-  public <E> Iterable<Partition<E>> getPartitions() throws IOException {
+  public Iterable<Dataset> getPartitions() throws IOException {
     throw new UnsupportedOperationException(
         "Attempt to get partitions for dataset:" + name);
   }
@@ -112,9 +113,8 @@ public class HDFSDataset implements Dataset {
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("name", name).add("schema", schema)
-        .add("dataDirectory", dataDirectory)
-        .add("partitionExpression", partitionExpression)
-        .toString();
+        .add("directory", directory).add("dataDirectory", dataDirectory)
+        .add("partitionExpression", partitionExpression).toString();
   }
 
   public static class Builder implements Supplier<HDFSDataset> {
@@ -132,6 +132,11 @@ public class HDFSDataset implements Dataset {
 
     public Builder name(String name) {
       dataset.name = name;
+      return this;
+    }
+
+    public Builder directory(Path directory) {
+      dataset.directory = directory;
       return this;
     }
 
@@ -155,6 +160,10 @@ public class HDFSDataset implements Dataset {
       Preconditions.checkState(dataset.name != null, "No dataset name defined");
       Preconditions.checkState(dataset.schema != null,
           "No dataset schema defined");
+      Preconditions.checkState(dataset.directory != null,
+          "No dataset directory defined");
+      Preconditions.checkState(dataset.dataDirectory != null,
+          "No dataset data directory defined");
       Preconditions.checkState(dataset.fileSystem != null,
           "No filesystem defined");
 
