@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetWriter;
+import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.partition.HashPartitionStrategy;
-import com.cloudera.data.partition.PartitionStrategy;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 

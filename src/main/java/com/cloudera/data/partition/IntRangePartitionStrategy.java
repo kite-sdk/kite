@@ -1,5 +1,7 @@
 package com.cloudera.data.partition;
 
+import com.cloudera.data.PartitionStrategy;
+
 public class IntRangePartitionStrategy extends PartitionStrategy {
 
   private int[] upperBounds;

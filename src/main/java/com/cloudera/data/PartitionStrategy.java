@@ -1,4 +1,4 @@
-package com.cloudera.data.partition;
+package com.cloudera.data;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;

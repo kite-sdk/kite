@@ -3,6 +3,8 @@ package com.cloudera.data.partition;
 import java.util.List;
 import java.util.Set;
 
+import com.cloudera.data.PartitionStrategy;
+
 public class ListPartitionStrategy extends PartitionStrategy {
 
   private List<Set<?>> values;

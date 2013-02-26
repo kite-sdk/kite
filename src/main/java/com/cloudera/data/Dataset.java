@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.apache.avro.Schema;
 
-import com.cloudera.data.partition.PartitionStrategy;
 
 /**
  * A logical representation of a set of data entities.

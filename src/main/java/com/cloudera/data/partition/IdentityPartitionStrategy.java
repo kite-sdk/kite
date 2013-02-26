@@ -1,5 +1,7 @@
 package com.cloudera.data.partition;
 
+import com.cloudera.data.PartitionStrategy;
+
 public class IdentityPartitionStrategy extends PartitionStrategy {
 
   public IdentityPartitionStrategy(String name, int buckets) {

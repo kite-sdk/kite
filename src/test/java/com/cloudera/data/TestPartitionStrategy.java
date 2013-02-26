@@ -1,4 +1,4 @@
-package com.cloudera.data.partition;
+package com.cloudera.data;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,6 +6,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.data.PartitionStrategy;
+import com.cloudera.data.partition.HashPartitionStrategy;
+import com.cloudera.data.partition.IdentityPartitionStrategy;
 import com.google.common.collect.Lists;
 
 public class TestPartitionStrategy {
