@@ -56,8 +56,7 @@ public interface Dataset {
    *          If true, automatically create the partition if doesn't exist,
    *          otherwise, return null.
    */
-  <E> Partition<E> getPartition(String name, boolean autoCreate)
-      throws IOException;
+  Dataset getPartition(String name, boolean autoCreate) throws IOException;
 
   /**
    * <p>
@@ -93,6 +92,18 @@ public interface Dataset {
    */
   <E> DatasetReader<E> getReader() throws IOException;
 
-  <E> Iterable<Partition<E>> getPartitions() throws IOException;
+  /**
+   * <p>
+   * Return partitions, if this dataset is partitioned.
+   * </p>
+   * <p>
+   * Note that, depending on the implementation, the returned iterable may hold
+   * system resources until exhausted and/or finalized.
+   * </p>
+   * 
+   * @return an iterable over all partitions of this dataset
+   * @throws IOException
+   */
+  Iterable<Dataset> getPartitions() throws IOException;
 
 }
