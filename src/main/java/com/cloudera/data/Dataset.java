@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.apache.avro.Schema;
 
+import com.cloudera.data.partition.PartitionStrategy;
+
 /**
  * A logical representation of a set of data entities.
  * 
@@ -40,6 +42,8 @@ public interface Dataset {
    * the {@link #isPartitioned()} method prior to invocation.
    */
   PartitionExpression getPartitionExpression();
+
+  PartitionStrategy getPartitionStrategy();
 
   /**
    * Returns true if the dataset is partitioned (i.e. has an associated
