@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "user",
+  "fields": [
+    {
+      "type": "string",
+      "name": "username"
+    },
+    {
+      "type": "string",
+      "name": "email"
+    }
+  ]
+}

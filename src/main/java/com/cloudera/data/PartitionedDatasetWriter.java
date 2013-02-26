@@ -81,7 +81,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
 
   @Override
   public void write(E entity) throws IOException {
-    String name = partitionStrategy.applyToEntity(entity).toString();
+    String name = partitionStrategy.getLabels(entity);
     DatasetWriter<E> writer = null;
 
     try {

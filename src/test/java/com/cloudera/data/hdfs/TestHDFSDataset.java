@@ -29,12 +29,15 @@ public class TestHDFSDataset {
   private FileSystem fileSystem;
   private Path testDirectory;
   private Schema testSchema;
+  private Schema testSchema2;
 
   @Before
   public void setUp() throws IOException {
     fileSystem = FileSystem.get(new Configuration());
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
     testSchema = new Schema.Parser().parse(Resources.getResource("user.avsc")
+        .openStream());
+    testSchema2 = new Schema.Parser().parse(Resources.getResource("user2.avsc")
         .openStream());
   }
 
@@ -114,7 +117,7 @@ public class TestHDFSDataset {
   @Test
   public void testPartitionedWriterDouble() throws IOException {
     PartitionStrategy partitionStrategy = new HashPartitionStrategy("username",
-        2, new HashPartitionStrategy("username2", 3));
+        2, new HashPartitionStrategy("email", 3));
 
     HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
         .directory(testDirectory).dataDirectory(testDirectory)
@@ -124,7 +127,7 @@ public class TestHDFSDataset {
     Assert.assertTrue("Dataset is partitioned", ds.isPartitioned());
     Assert.assertEquals(partitionStrategy, ds.getPartitionStrategy());
 
-    writeTestUsers(ds, 10);
+    writeTestUsers2(ds, 10);
   }
 
   private void writeTestUsers(HDFSDataset ds, int count) throws IOException {
@@ -138,6 +141,29 @@ public class TestHDFSDataset {
       for (int i = 0; i < count; i++) {
         Record record = new GenericRecordBuilder(testSchema).set("username",
             "test-" + i).build();
+
+        writer.write(record);
+      }
+
+      writer.flush();
+    } finally {
+      if (writer != null) {
+        writer.close();
+      }
+    }
+  }
+
+  private void writeTestUsers2(HDFSDataset ds, int count) throws IOException {
+    DatasetWriter<Record> writer = null;
+
+    try {
+      writer = ds.getWriter();
+
+      writer.open();
+
+      for (int i = 0; i < count; i++) {
+        Record record = new GenericRecordBuilder(testSchema2).set("username",
+            "test-" + i).set("email", "email-" + i).build();
 
         writer.write(record);
       }

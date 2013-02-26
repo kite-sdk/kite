@@ -2,6 +2,7 @@ package com.cloudera.data.hdfs;
 
 import java.io.IOException;
 
+import com.google.common.base.Splitter;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -30,12 +31,13 @@ public class HDFSDataset implements Dataset {
   private String name;
   private Schema schema;
   private PartitionStrategy partitionStrategy;
+  private boolean isRoot = true;
 
   @Override
   public <E> DatasetWriter<E> getWriter() {
     DatasetWriter<E> writer = null;
 
-    if (isPartitioned()) {
+    if (isPartitioned() && isRoot) {
       // FIXME: Why does this complain about a resource leak and not others?
       writer = new PartitionedDatasetWriter<E>(this);
     } else {
@@ -100,8 +102,12 @@ public class HDFSDataset implements Dataset {
     logger.debug("Loading partition:{}.{} allowCreate:{}", new Object[] {
         partitionStrategy.getName(), name, allowCreate });
 
-    Path partitionDirectory = new Path(dataDirectory,
-        partitionStrategy.getName() + "=" + name);
+    Path partitionDirectory = dataDirectory;
+    PartitionStrategy part = partitionStrategy;
+    for (String label : Splitter.on("/").split(name)) { // TODO: should not have to split - use collection
+      partitionDirectory = new Path(partitionDirectory, part.getName() + "=" + label);
+      part = partitionStrategy.getPartitionStrategy();
+    }
 
     if (allowCreate && !fileSystem.exists(partitionDirectory)) {
       fileSystem.mkdirs(partitionDirectory);
@@ -109,7 +115,7 @@ public class HDFSDataset implements Dataset {
 
     Builder builder = new HDFSDataset.Builder().name(name)
         .fileSystem(fileSystem).directory(directory)
-        .dataDirectory(partitionDirectory).schema(schema);
+        .dataDirectory(partitionDirectory).schema(schema).isRoot(false);
 
     if (partitionStrategy.isPartitioned()) {
       builder.partitionStrategy(getPartitionStrategy().getPartitionStrategy());
@@ -166,6 +172,11 @@ public class HDFSDataset implements Dataset {
 
     public Builder partitionStrategy(PartitionStrategy partitionStrategy) {
       dataset.partitionStrategy = partitionStrategy;
+      return this;
+    }
+
+    public  Builder isRoot(boolean isRoot) {
+      dataset.isRoot = isRoot;
       return this;
     }
 
