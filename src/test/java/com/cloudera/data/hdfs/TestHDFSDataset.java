@@ -96,7 +96,7 @@ public class TestHDFSDataset {
   }
 
   @Test
-  public void testPartitionedWriter() throws IOException {
+  public void testPartitionedWriterSingle() throws IOException {
     PartitionStrategy partitionStrategy = new HashPartitionStrategy("username",
         2);
 
@@ -108,6 +108,26 @@ public class TestHDFSDataset {
     Assert.assertTrue("Dataset is partitioned", ds.isPartitioned());
     Assert.assertEquals(partitionStrategy, ds.getPartitionStrategy());
 
+    writeTestUsers(ds, 10);
+  }
+
+  @Test
+  public void testPartitionedWriterDouble() throws IOException {
+    PartitionStrategy partitionStrategy = new HashPartitionStrategy("username",
+        2, new HashPartitionStrategy("username2", 3));
+
+    HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
+        .directory(testDirectory).dataDirectory(testDirectory)
+        .name("partitioned-users").schema(testSchema)
+        .partitionStrategy(partitionStrategy).get();
+
+    Assert.assertTrue("Dataset is partitioned", ds.isPartitioned());
+    Assert.assertEquals(partitionStrategy, ds.getPartitionStrategy());
+
+    writeTestUsers(ds, 10);
+  }
+
+  private void writeTestUsers(HDFSDataset ds, int count) throws IOException {
     DatasetWriter<Record> writer = null;
 
     try {
@@ -115,7 +135,7 @@ public class TestHDFSDataset {
 
       writer.open();
 
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < count; i++) {
         Record record = new GenericRecordBuilder(testSchema).set("username",
             "test-" + i).build();
 
