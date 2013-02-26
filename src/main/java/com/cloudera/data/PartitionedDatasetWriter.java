@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.data.partition.PartitionStrategy;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -23,7 +24,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
   private final Dataset dataset;
   private int maxWriters;
 
-  private final PartitionExpression expression;
+  private final PartitionStrategy partitionStrategy;
   private LoadingCache<String, DatasetWriter<E>> cachedWriters;
 
   public PartitionedDatasetWriter(Dataset dataset) {
@@ -31,14 +32,15 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
         + " is not partitioned");
 
     this.dataset = dataset;
-    this.expression = dataset.getPartitionExpression();
-    this.maxWriters = 10;
+    this.partitionStrategy = dataset.getPartitionStrategy();
+    this.maxWriters = Math.min(10, dataset.getPartitionStrategy()
+        .getAggregateCardinality());
   }
 
   @Override
   public void open() {
-    logger.debug("Opening partitioned dataset writer w/expression:{}",
-        expression);
+    logger.debug("Opening partitioned dataset writer w/strategy:{}",
+        partitionStrategy);
 
     /* TODO: Break out the inline anonymous classes. This is too hairy to read. */
     cachedWriters = CacheBuilder.newBuilder().maximumSize(maxWriters)
@@ -68,7 +70,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
 
           @Override
           public DatasetWriter<E> load(String key) throws Exception {
-            Partition<E> partition = dataset.getPartition(key, true);
+            Dataset partition = dataset.getPartition(key, true);
             DatasetWriter<E> writer = partition.getWriter();
 
             writer.open();
@@ -80,7 +82,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
 
   @Override
   public void write(E entity) throws IOException {
-    String name = expression.evaluate(entity);
+    String name = partitionStrategy.apply(entity).toString();
     DatasetWriter<E> writer = null;
 
     try {
@@ -120,7 +122,8 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("expression", expression)
+    return Objects.toStringHelper(this)
+        .add("partitionStrategy", partitionStrategy)
         .add("maxWriters", maxWriters).add("dataset", dataset)
         .add("cachedWriters", cachedWriters).toString();
   }
