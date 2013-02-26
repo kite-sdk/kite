@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetRepository;
-import com.cloudera.data.PartitionExpression;
 import com.cloudera.data.hdfs.util.Paths;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
@@ -62,14 +61,18 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
         Charsets.UTF_8);
 
     HDFSDataset.Builder datasetBuilder = new HDFSDataset.Builder()
-        .dataDirectory(datasetDataPath).fileSystem(fileSystem).name(name)
-        .schema(schema);
+        .directory(datasetPath).dataDirectory(datasetDataPath)
+        .fileSystem(fileSystem).name(name).schema(schema);
 
     String partitionExpression = schema.getProp("cdk.partition.expression");
 
     if (partitionExpression != null) {
-      datasetBuilder.partitionExpression(new PartitionExpression(
-          partitionExpression, true));
+      throw new UnsupportedOperationException(
+          "We don't yet support partitioning with the new partitioning code");
+      /*
+       * datasetBuilder.partitionStrategy(new PartitionExpression(
+       * partitionExpression, true));
+       */
     }
 
     return datasetBuilder.get();
@@ -85,6 +88,7 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
     logger.debug("Loading dataset:{}", name);
 
+    Path datasetDirectory = pathForDataset(name);
     Path datasetDataPath = pathForDatasetData(name);
     Path datasetMetadataPath = pathForDatasetMetadata(name);
 
@@ -94,12 +98,16 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     String partitionExpression = schema.getProp("cdk.partition.expression");
 
     HDFSDataset.Builder datasetBuilder = new HDFSDataset.Builder()
-        .fileSystem(fileSystem).dataDirectory(datasetDataPath).name(name)
-        .schema(schema);
+        .fileSystem(fileSystem).directory(datasetDirectory)
+        .dataDirectory(datasetDataPath).name(name).schema(schema);
 
     if (partitionExpression != null) {
-      datasetBuilder.partitionExpression(new PartitionExpression(
-          partitionExpression, true));
+      throw new UnsupportedOperationException(
+          "We don't yet support partitioning with the new partitioning code");
+      /*
+       * datasetBuilder.partitionStrategy(new PartitionExpression(
+       * partitionExpression, true));
+       */
     }
 
     HDFSDataset ds = datasetBuilder.get();
