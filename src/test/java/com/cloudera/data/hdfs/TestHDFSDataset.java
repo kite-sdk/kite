@@ -16,7 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetWriter;
-import com.cloudera.data.PartitionExpression;
+import com.cloudera.data.partition.HashPartitionStrategy;
+import com.cloudera.data.partition.PartitionStrategy;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
@@ -96,19 +97,17 @@ public class TestHDFSDataset {
 
   @Test
   public void testPartitionedWriter() throws IOException {
-    PartitionExpression expression = new PartitionExpression(
-        "[record.username.hashCode() % 2]", false);
+    PartitionStrategy partitionStrategy = new HashPartitionStrategy("username",
+        2);
 
     HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
         .directory(testDirectory).dataDirectory(testDirectory)
         .name("partitioned-users").schema(testSchema)
-        .partitionExpression(expression).get();
+        .partitionStrategy(partitionStrategy).get();
 
     Assert.assertTrue("Dataset is partitioned", ds.isPartitioned());
-    Assert.assertEquals(expression, ds.getPartitionExpression());
+    Assert.assertEquals(partitionStrategy, ds.getPartitionStrategy());
 
-    Record record = new GenericRecordBuilder(testSchema)
-        .set("username", "test").build();
     DatasetWriter<Record> writer = null;
 
     try {
@@ -116,7 +115,13 @@ public class TestHDFSDataset {
 
       writer.open();
 
-      writer.write(record);
+      for (int i = 0; i < 10; i++) {
+        Record record = new GenericRecordBuilder(testSchema).set("username",
+            "test-" + i).build();
+
+        writer.write(record);
+      }
+
       writer.flush();
     } finally {
       if (writer != null) {
