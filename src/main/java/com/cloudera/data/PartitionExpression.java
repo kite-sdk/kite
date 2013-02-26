@@ -31,44 +31,10 @@ public class PartitionExpression {
     return (PartitionStrategy) object;
   }
 
-  public String evaluate(Object record) {
-    JexlContext context = new MapContext();
-
-    context.set("record", record);
-
-    Object object = expression.evaluate(context);
-
-    StringBuilder builder = new StringBuilder();
-
-    if (object instanceof Object[]) {
-      for (Object element : (Object[]) object) {
-        if (builder.length() > 0) {
-          builder.append("/");
-        }
-
-        builder.append(stringifyOrFail(element));
-      }
-    } else {
-      builder.append(stringifyOrFail(object));
-    }
-
-    return builder.toString();
-  }
-
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("expression", expression)
         .add("isStrict", isStrict).add("engine", engine).toString();
-  }
-
-  private String stringifyOrFail(Object object) {
-    if (isStrict) {
-      Preconditions.checkArgument(object instanceof String,
-          "Partition expression did not produce string result for value:%s",
-          object);
-    }
-
-    return object.toString();
   }
 
 }
