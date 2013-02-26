@@ -1,6 +1,5 @@
 package com.cloudera.data.hdfs;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.apache.avro.Schema;
@@ -47,8 +46,7 @@ public class TestHDFSDataset {
   public void test() throws IOException {
     HDFSDataset ds = new HDFSDataset();
 
-    ds.setSchema(new Schema.Parser().parse(new File(Resources.getResource(
-        "user.avsc").getPath())));
+    ds.setSchema(testSchema);
 
     Schema schema = ds.getSchema();
     Record record = new Record(schema);
@@ -64,7 +62,7 @@ public class TestHDFSDataset {
   public void testGetWriter() throws IOException {
     HDFSDataset ds = new HDFSDataset.Builder().name("test").schema(testSchema)
         .fileSystem(FileSystem.get(new Configuration()))
-        .dataDirectory(testDirectory).get();
+        .directory(testDirectory).dataDirectory(testDirectory).get();
 
     logger.debug("Writing to dataset:{}", ds);
 
@@ -102,8 +100,9 @@ public class TestHDFSDataset {
         "[record.username.hashCode() % 2]", false);
 
     HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
-        .dataDirectory(testDirectory).name("partitioned-users")
-        .schema(testSchema).partitionExpression(expression).get();
+        .directory(testDirectory).dataDirectory(testDirectory)
+        .name("partitioned-users").schema(testSchema)
+        .partitionExpression(expression).get();
 
     Assert.assertTrue("Dataset is partitioned", ds.isPartitioned());
     Assert.assertEquals(expression, ds.getPartitionExpression());
