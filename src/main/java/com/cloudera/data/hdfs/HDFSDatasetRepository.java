@@ -101,12 +101,9 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
         .dataDirectory(datasetDataPath).name(name).schema(schema);
 
     if (partitionExpression != null) {
-      throw new UnsupportedOperationException(
-          "We don't yet support partitioning with the new partitioning code");
-      /*
-       * datasetBuilder.partitionStrategy(new PartitionExpression(
-       * partitionExpression, true));
-       */
+      logger.debug("Partition expression: {}", partitionExpression);
+      PartitionExpression expr = new PartitionExpression(partitionExpression, true);
+      datasetBuilder.partitionStrategy(expr.evaluate());
     }
 
     HDFSDataset ds = datasetBuilder.get();

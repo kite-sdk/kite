@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
-import com.cloudera.data.PartitionExpression;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.PartitionedDatasetWriter;
 import com.google.common.base.Joiner;
@@ -74,11 +73,6 @@ public class HDFSDataset implements Dataset {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  @Override
-  public PartitionExpression getPartitionExpression() {
-    throw new UnsupportedOperationException("Use getPartitionStrategy()!");
   }
 
   @Override

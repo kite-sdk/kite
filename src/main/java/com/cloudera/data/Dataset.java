@@ -36,17 +36,15 @@ public interface Dataset {
   Schema getSchema();
 
   /**
-   * Get the {@link PartitionExpression}, if this dataset is partitioned.
+   * Get the {@link PartitionStrategy}, if this dataset is partitioned.
    * Calling this method on a non-partitioned dataset is an error. Instead, use
    * the {@link #isPartitioned()} method prior to invocation.
    */
-  PartitionExpression getPartitionExpression();
-
   PartitionStrategy getPartitionStrategy();
 
   /**
    * Returns true if the dataset is partitioned (i.e. has an associated
-   * {@link PartitionExpression}, false otherwise.
+   * {@link PartitionStrategy}, false otherwise.
    */
   boolean isPartitioned();
 
