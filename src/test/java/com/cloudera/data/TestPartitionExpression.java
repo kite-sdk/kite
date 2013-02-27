@@ -13,23 +13,22 @@ public class TestPartitionExpression {
 
   @Test
   public void testPartitionStrategy() {
-    PartitionExpression expression = new PartitionExpression(
-        "new(\"com.cloudera.data.partition.HashPartitionStrategy\", \"username\", 2)",
-        true);
+    String expr = "hash(\"username\", 2)";
+    PartitionExpression expression = new PartitionExpression(expr, true);
 
     PartitionStrategy strategy = expression.evaluate();
     Assert.assertEquals(HashPartitionStrategy.class, strategy.getClass());
     Assert.assertEquals("username", strategy.getName());
     Assert.assertEquals(2, strategy.getCardinality());
     Assert.assertNull(strategy.getPartitionStrategy());
+
+    Assert.assertEquals(expr, PartitionExpression.toExpression(strategy));
   }
 
   @Test
   public void testSubpartitionStrategy() {
-    PartitionExpression expression = new PartitionExpression(
-        "new(\"com.cloudera.data.partition.HashPartitionStrategy\", \"username\", 2, " +
-            "new(\"com.cloudera.data.partition.HashPartitionStrategy\", \"username2\", 3))",
-        true);
+    String expr = "[hash(\"username\", 2), hash(\"username2\", 3)]";
+    PartitionExpression expression = new PartitionExpression(expr, true);
 
     PartitionStrategy strategy = expression.evaluate();
     Assert.assertEquals(HashPartitionStrategy.class, strategy.getClass());
@@ -42,6 +41,8 @@ public class TestPartitionExpression {
     Assert.assertEquals("username2", substrategy.getName());
     Assert.assertEquals(3, substrategy.getCardinality());
     Assert.assertNull(substrategy.getPartitionStrategy());
+
+    Assert.assertEquals(expr, PartitionExpression.toExpression(strategy));
   }
 
 }

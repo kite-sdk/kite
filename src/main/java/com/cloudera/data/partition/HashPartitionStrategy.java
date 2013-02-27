@@ -5,12 +5,11 @@ import com.cloudera.data.PartitionStrategy;
 public class HashPartitionStrategy extends PartitionStrategy {
 
   public HashPartitionStrategy(String name, int buckets) {
-    this(name, buckets, null);
+    super(name, buckets, null);
   }
 
   public HashPartitionStrategy(String name, int buckets,
       PartitionStrategy subpartition) {
-
     super(name, buckets, subpartition);
   }
 

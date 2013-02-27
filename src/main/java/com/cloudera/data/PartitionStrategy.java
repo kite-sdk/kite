@@ -15,6 +15,10 @@ public abstract class PartitionStrategy implements Function<Object, Object> {
   private int cardinality;
   private PartitionStrategy partition;
 
+  protected PartitionStrategy(String name, int cardinality) {
+    this(name, cardinality, null);
+  }
+
   protected PartitionStrategy(String name, int cardinality,
       PartitionStrategy partition) {
 
@@ -38,6 +42,10 @@ public abstract class PartitionStrategy implements Function<Object, Object> {
 
   public PartitionStrategy getPartitionStrategy() {
     return partition;
+  }
+
+  void setPartitionStrategy(PartitionStrategy partitionStrategy) {
+    this.partition = partitionStrategy;
   }
 
   public boolean isPartitioned() {
