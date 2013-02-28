@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.partition.HashPartitionStrategy;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
@@ -100,8 +99,8 @@ public class TestHDFSDataset {
 
   @Test
   public void testPartitionedWriterSingle() throws IOException {
-    PartitionStrategy partitionStrategy = new HashPartitionStrategy("username",
-        2);
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .hash("username", 2).get();
 
     HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
         .directory(testDirectory).dataDirectory(testDirectory)
@@ -116,8 +115,10 @@ public class TestHDFSDataset {
 
   @Test
   public void testPartitionedWriterDouble() throws IOException {
-    PartitionStrategy partitionStrategy = new HashPartitionStrategy("username",
-        2, new HashPartitionStrategy("email", 3));
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .hash("username", 2)
+        .hash("email", 3)
+        .get();
 
     HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
         .directory(testDirectory).dataDirectory(testDirectory)

@@ -1,7 +1,11 @@
 package com.cloudera.data;
 
+import com.cloudera.data.partition.HashPartitionStrategy;
+import com.cloudera.data.partition.IdentityPartitionStrategy;
+import com.cloudera.data.partition.IntRangePartitionStrategy;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
+import com.google.common.base.Supplier;
 import org.apache.avro.generic.GenericRecord;
 
 import java.beans.IntrospectionException;
@@ -77,6 +81,39 @@ public abstract class PartitionStrategy implements Function<Object, Object> {
   public String toString() {
     return Objects.toStringHelper(this).add("name", name)
         .add("cardinality", cardinality).add("partition", partition).toString();
+  }
+
+  public static class Builder implements Supplier<PartitionStrategy> {
+
+    private PartitionStrategy partitionStrategy;
+
+    private void addPartitionStrategy(PartitionStrategy strategy) {
+      if (partitionStrategy == null) {
+        partitionStrategy = strategy;
+      } else {
+        partitionStrategy.setPartitionStrategy(strategy);
+      }
+    }
+
+    public Builder hash(String name, int buckets) {
+      addPartitionStrategy(new HashPartitionStrategy(name, buckets));
+      return this;
+    }
+
+    public Builder identity(String name, int buckets) {
+      addPartitionStrategy(new IdentityPartitionStrategy(name, buckets));
+      return this;
+    }
+
+    public Builder range(String name, int... upperBounds) {
+      addPartitionStrategy(new IntRangePartitionStrategy(name, upperBounds));
+      return this;
+    }
+
+    @Override
+    public PartitionStrategy get() {
+      return partitionStrategy;
+    }
   }
 
 }
