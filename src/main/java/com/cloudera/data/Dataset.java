@@ -49,15 +49,18 @@ public interface Dataset {
   boolean isPartitioned();
 
   /**
-   * Get a partition by name, possibly creating it if it doesn't already exist.
+   * Get a partition by key, possibly creating the partition if it doesn't
+   * already exist.
    * 
-   * @param name
-   *          The partition name
+   * @param key
+   *          The partition key, an array consisting of the value for each
+   *          partition field in the {@link PartitionStrategy}.
    * @param autoCreate
    *          If true, automatically create the partition if doesn't exist,
    *          otherwise, return null.
    */
-  Dataset getPartition(String name, boolean autoCreate) throws IOException;
+  // TODO: this is an internal API for writers, not for end users
+  Dataset getPartition(Object[] key, boolean autoCreate) throws IOException;
 
   /**
    * <p>

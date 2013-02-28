@@ -2,6 +2,7 @@ package com.cloudera.data;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
   private int maxWriters;
 
   private final PartitionStrategy partitionStrategy;
-  private LoadingCache<String, DatasetWriter<E>> cachedWriters;
+  private LoadingCache<Object[], DatasetWriter<E>> cachedWriters;
 
   public PartitionedDatasetWriter(Dataset dataset) {
     Preconditions.checkArgument(dataset.isPartitioned(), "Dataset " + dataset
@@ -43,11 +44,11 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
 
     /* TODO: Break out the inline anonymous classes. This is too hairy to read. */
     cachedWriters = CacheBuilder.newBuilder().maximumSize(maxWriters)
-        .removalListener(new RemovalListener<String, DatasetWriter<E>>() {
+        .removalListener(new RemovalListener<Object[], DatasetWriter<E>>() {
 
           @Override
           public void onRemoval(
-              RemovalNotification<String, DatasetWriter<E>> notification) {
+              RemovalNotification<Object[], DatasetWriter<E>> notification) {
 
             DatasetWriter<E> writer = notification.getValue();
 
@@ -65,10 +66,10 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
             }
           }
 
-        }).build(new CacheLoader<String, DatasetWriter<E>>() {
+        }).build(new CacheLoader<Object[], DatasetWriter<E>>() {
 
           @Override
-          public DatasetWriter<E> load(String key) throws Exception {
+          public DatasetWriter<E> load(Object[] key) throws Exception {
             Dataset partition = dataset.getPartition(key, true);
             DatasetWriter<E> writer = partition.getWriter();
 
@@ -81,14 +82,14 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
 
   @Override
   public void write(E entity) throws IOException {
-    String name = partitionStrategy.getPartitionKey(entity);
+    Object[] key = partitionStrategy.getPartitionKey(entity);
     DatasetWriter<E> writer = null;
 
     try {
-      writer = cachedWriters.get(name);
+      writer = cachedWriters.get(key);
     } catch (ExecutionException e) {
       throw new IOException("Unable to get a writer for entity:" + entity
-          + " partitionName:" + name, e);
+          + " partition key:" + Arrays.asList(key), e);
     }
 
     writer.write(entity);

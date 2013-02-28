@@ -86,7 +86,7 @@ public class HDFSDataset implements Dataset {
   }
 
   @Override
-  public Dataset getPartition(String name, boolean allowCreate)
+  public Dataset getPartition(Object[] key, boolean allowCreate)
       throws IOException {
 
     Preconditions.checkState(isPartitioned(),
