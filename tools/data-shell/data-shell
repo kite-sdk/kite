@@ -1,0 +1,19 @@
+#!/bin/sh
+
+SCALA=`type -p scala`
+MVN=`type -p mvn`
+
+[ -f "pom.xml" ] || { echo "Please run me from the top level project directory" ; exit 1 ; }
+[ -x "$SCALA" ] || { echo "Unable to find the scala executable (check your path)" ; exit 1 ; }
+[ -x "$MVN" ] || { echo "Unable to find the mvn executable (check your path)" ; exit 1 ; }
+
+[ -d "target/classes" ] || { echo "No target/classes directory (did you do a mvn compile yet?)" ; exit 1 ; }
+
+echo "== Determining classpath. Please wait..."
+
+dep_classpath=`$MVN dependency:build-classpath | grep -v '^\['`
+full_classpath="target/test-classes:target/classes:$dep_classpath"
+
+echo "== Starting a shell with CDK Data classes"
+
+"$SCALA" -cp "$full_classpath" -i tools/data-shell/data-shell-inc.scala $*
