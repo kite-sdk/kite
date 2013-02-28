@@ -82,26 +82,34 @@ Given the dataset "events" with the following schema:
 
 and the partition expression:
 
-    [record.app_id]
+    [identity("app_id", 100)]
 
 data in HDFS might look like this:
 
-    /events/1/<files>
+    /events/app_id=1/<files>
+
+The 100 is an estimate of the number of different apps in the system, which is
+used as a hint for the number of writer threads when writing partitions.
 
 With the expression:
 
-    [record.app_id, record.timestamp % 1000]
+    [identity("app_id", 100), hash("timestamp", 1000)]
  
 data will be partitioned first by the application ID, followed by the event
 timestamp modulo 1000, which will bin data into buckets numbered 0 through 999,
 with a reasonably even distribution given a steady stream of events.
 
-    /events/1/0/<files>
-    /events/1/1/<files>
+    /events/app_id=1/timestamp=0/<files>
+    /events/app_id=1/timestamp=1/<files>
     ...
-    /events/1/999/<files>
-    /events/2/0/<files>
+    /events/app_id=1/timestamp=999/<files>
+    /events/app_id=2/timestamp=0/<files>
     ...
+
+The *partition key* is the list of partition values, i.e. (1, 0) for the first
+event, (1, 1) for the second, etc. Partition keys are abstract, and are mapped
+into *partition paths* on HDFS: /app_id=1/timestamp=0, /app_id=1/timestamp=1
+etc.
 
 It's also possible to install and invoke custom functions, or invoke Java
 methods on objects in JEXL. This is incredibly powerful, and allows for
