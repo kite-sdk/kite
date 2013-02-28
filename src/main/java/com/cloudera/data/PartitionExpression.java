@@ -1,18 +1,15 @@
 package com.cloudera.data;
 
-import com.cloudera.data.partition.HashPartitionStrategy;
-import com.cloudera.data.partition.IdentityPartitionStrategy;
-import com.cloudera.data.partition.IntRangePartitionStrategy;
+import com.cloudera.data.partition.HashFieldPartitioner;
+import com.cloudera.data.partition.IdentityFieldPartitioner;
 import com.cloudera.data.partition.PartitionFunctions;
 import org.apache.commons.jexl2.Expression;
-import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.JexlEngine;
-import org.apache.commons.jexl2.MapContext;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PartitionExpression {
@@ -35,16 +32,12 @@ public class PartitionExpression {
 
   public PartitionStrategy evaluate() {
     Object object = expression.evaluate(null);
-    if (object instanceof PartitionStrategy) {
-      return (PartitionStrategy) object;
-    } else if (object instanceof PartitionStrategy[]) {
-      PartitionStrategy[] strategies = (PartitionStrategy[]) object;
-      for (int i = strategies.length - 2; i >= 0; i--) {
-        strategies[i].setPartitionStrategy(strategies[i + 1]);
-      }
-      return strategies[0];
+    if (object instanceof FieldPartitioner) {
+      return new PartitionStrategy((FieldPartitioner) object);
+    } else if (object instanceof FieldPartitioner[]) {
+      return new PartitionStrategy((FieldPartitioner[]) object);
     } else {
-      throw new IllegalArgumentException("Partition expression did not produce PartitionStrategy result (or array) for value:" + object);
+      throw new IllegalArgumentException("Partition expression did not produce FieldPartitioner result (or array) for value:" + object);
     }
   }
 
@@ -53,31 +46,30 @@ public class PartitionExpression {
    * in an Avro property if the PartitionStrategy is passed as an object.
    */
   public static String toExpression(PartitionStrategy partitionStrategy) {
-    if (!partitionStrategy.isPartitioned()) {
-      return toAtomicExpression(partitionStrategy);
+    List<FieldPartitioner> fieldPartitioners = partitionStrategy.getFieldPartitioners();
+    if (fieldPartitioners.size() == 1) {
+      return toExpression(fieldPartitioners.get(0));
     }
     StringBuilder sb = new StringBuilder();
     sb.append("[");
-    PartitionStrategy part = partitionStrategy;
-    do {
+    for (FieldPartitioner fieldPartitioner : fieldPartitioners) {
       if (sb.length() > 1) {
         sb.append(", ");
       }
-      sb.append(toAtomicExpression(part));
-      part = part.getPartitionStrategy();
-    } while (part != null);
+      sb.append(toExpression(fieldPartitioner));
+    }
     sb.append("]");
     return sb.toString();
   }
 
-  private static String toAtomicExpression(PartitionStrategy partitionStrategy) {
+  private static String toExpression(FieldPartitioner fieldPartitioner) {
     // TODO: add other strategies
-    if (partitionStrategy instanceof HashPartitionStrategy) {
-      return String.format("hash(\"%s\", %s)", partitionStrategy.getName(), partitionStrategy.getCardinality());
-    } else if (partitionStrategy instanceof IdentityPartitionStrategy) {
-      return String.format("identity(\"%s\", %s)", partitionStrategy.getName(), partitionStrategy.getCardinality());
+    if (fieldPartitioner instanceof HashFieldPartitioner) {
+      return String.format("hash(\"%s\", %s)", fieldPartitioner.getName(), fieldPartitioner.getCardinality());
+    } else if (fieldPartitioner instanceof IdentityFieldPartitioner) {
+      return String.format("identity(\"%s\", %s)", fieldPartitioner.getName(), fieldPartitioner.getCardinality());
     }
-    throw new IllegalArgumentException("Unrecognized PartitionStrategy: " + partitionStrategy);
+    throw new IllegalArgumentException("Unrecognized PartitionStrategy: " + fieldPartitioner);
   }
 
   @Override

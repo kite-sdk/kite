@@ -33,7 +33,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
     this.dataset = dataset;
     this.partitionStrategy = dataset.getPartitionStrategy();
     this.maxWriters = Math.min(10, dataset.getPartitionStrategy()
-        .getAggregateCardinality());
+        .getCardinality());
   }
 
   @Override
@@ -81,7 +81,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
 
   @Override
   public void write(E entity) throws IOException {
-    String name = partitionStrategy.getLabels(entity);
+    String name = partitionStrategy.getPartitionKey(entity);
     DatasetWriter<E> writer = null;
 
     try {

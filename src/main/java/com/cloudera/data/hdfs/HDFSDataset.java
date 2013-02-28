@@ -97,10 +97,10 @@ public class HDFSDataset implements Dataset {
         partitionStrategy.getName(), name, allowCreate });
 
     Path partitionDirectory = dataDirectory;
-    PartitionStrategy part = partitionStrategy;
+    int i = 0;
     for (String label : Splitter.on("/").split(name)) { // TODO: should not have to split - use collection
-      partitionDirectory = new Path(partitionDirectory, part.getName() + "=" + label);
-      part = partitionStrategy.getPartitionStrategy();
+      String fieldName = partitionStrategy.getFieldPartitioners().get(i++).getName();
+      partitionDirectory = new Path(partitionDirectory, fieldName + "=" + label);
     }
 
     if (allowCreate && !fileSystem.exists(partitionDirectory)) {
@@ -110,10 +110,6 @@ public class HDFSDataset implements Dataset {
     Builder builder = new HDFSDataset.Builder().name(name)
         .fileSystem(fileSystem).directory(directory)
         .dataDirectory(partitionDirectory).schema(schema).isRoot(false);
-
-    if (partitionStrategy.isPartitioned()) {
-      builder.partitionStrategy(getPartitionStrategy().getPartitionStrategy());
-    }
 
     return builder.get();
   }

@@ -1,18 +1,14 @@
 package com.cloudera.data.partition;
 
+import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.PartitionStrategy;
 
-public class IntRangePartitionStrategy extends PartitionStrategy {
+public class IntRangeFieldPartitioner extends FieldPartitioner {
 
   private int[] upperBounds;
 
-  public IntRangePartitionStrategy(String name, int... upperBounds) {
-    this(null, name, upperBounds.length);
-  }
-
-  public IntRangePartitionStrategy(PartitionStrategy subpartition, String name,
-      int... upperBounds) {
-    super(name, upperBounds.length, subpartition);
+  public IntRangeFieldPartitioner(String name, int... upperBounds) {
+    super(name, upperBounds.length);
     this.upperBounds = upperBounds;
   }
 

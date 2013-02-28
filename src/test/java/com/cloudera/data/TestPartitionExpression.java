@@ -1,10 +1,12 @@
 package com.cloudera.data;
 
-import com.cloudera.data.partition.HashPartitionStrategy;
+import com.cloudera.data.partition.HashFieldPartitioner;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class TestPartitionExpression {
 
@@ -17,10 +19,12 @@ public class TestPartitionExpression {
     PartitionExpression expression = new PartitionExpression(expr, true);
 
     PartitionStrategy strategy = expression.evaluate();
-    Assert.assertEquals(HashPartitionStrategy.class, strategy.getClass());
-    Assert.assertEquals("username", strategy.getName());
-    Assert.assertEquals(2, strategy.getCardinality());
-    Assert.assertNull(strategy.getPartitionStrategy());
+    List<FieldPartitioner> fieldPartitioners = strategy.getFieldPartitioners();
+    Assert.assertEquals(1, fieldPartitioners.size());
+    FieldPartitioner fp = fieldPartitioners.get(0);
+    Assert.assertEquals(HashFieldPartitioner.class, fp.getClass());
+    Assert.assertEquals("username", fp.getName());
+    Assert.assertEquals(2, fp.getCardinality());
 
     Assert.assertEquals(expr, PartitionExpression.toExpression(strategy));
   }
@@ -31,16 +35,18 @@ public class TestPartitionExpression {
     PartitionExpression expression = new PartitionExpression(expr, true);
 
     PartitionStrategy strategy = expression.evaluate();
-    Assert.assertEquals(HashPartitionStrategy.class, strategy.getClass());
-    Assert.assertEquals("username", strategy.getName());
-    Assert.assertEquals(2, strategy.getCardinality());
-    Assert.assertNotNull(strategy.getPartitionStrategy());
+    List<FieldPartitioner> fieldPartitioners = strategy.getFieldPartitioners();
+    Assert.assertEquals(2, fieldPartitioners.size());
 
-    PartitionStrategy substrategy = strategy.getPartitionStrategy();
-    Assert.assertEquals(HashPartitionStrategy.class, substrategy.getClass());
-    Assert.assertEquals("username2", substrategy.getName());
-    Assert.assertEquals(3, substrategy.getCardinality());
-    Assert.assertNull(substrategy.getPartitionStrategy());
+    FieldPartitioner fp0 = fieldPartitioners.get(0);
+    Assert.assertEquals(HashFieldPartitioner.class, fp0.getClass());
+    Assert.assertEquals("username", fp0.getName());
+    Assert.assertEquals(2, fp0.getCardinality());
+
+    FieldPartitioner fp1 = fieldPartitioners.get(1);
+    Assert.assertEquals(HashFieldPartitioner.class, fp1.getClass());
+    Assert.assertEquals("username2", fp1.getName());
+    Assert.assertEquals(3, fp1.getCardinality());
 
     Assert.assertEquals(expr, PartitionExpression.toExpression(strategy));
   }
