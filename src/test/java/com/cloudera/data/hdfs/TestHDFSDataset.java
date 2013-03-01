@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.Set;
 
 import com.cloudera.data.DatasetReader;
+import com.cloudera.data.PartitionKey;
 import com.google.common.collect.Sets;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
@@ -130,6 +130,8 @@ public class TestHDFSDataset {
 
     writeTestUsers(ds, 10);
     readTestUsers(ds, 10);
+    int total = readTestUsersInPartition(ds, 0) + readTestUsersInPartition(ds, 1);
+    Assert.assertEquals(10, total);
   }
 
   @Test
@@ -149,6 +151,16 @@ public class TestHDFSDataset {
 
     writeTestUsers2(ds, 10);
     readTestUsers2(ds, 10);
+    int totalP1 = readTestUsersInPartition(ds, 0) + readTestUsersInPartition(ds, 1);
+    Assert.assertEquals(10, totalP1);
+
+    int totalP2 = 0;
+    for (int i1 = 0; i1 < 2; i1++) {
+      for (int i2 = 0; i2 < 3; i2++) {
+        totalP2 += readTestUsersInPartition(ds, i1, i2);
+      }
+    }
+    Assert.assertEquals(10, totalP2);
   }
 
   private void writeTestUsers(HDFSDataset ds, int count) throws IOException {
@@ -199,6 +211,47 @@ public class TestHDFSDataset {
         reader.close();
       }
     }
+  }
+
+  private int readTestUsersInPartition(HDFSDataset ds, int partition) throws IOException {
+    int readCount = 0;
+    DatasetReader<Record> reader = null;
+    try {
+      PartitionKey key = new PartitionKey(new Object[] {partition});
+      reader = ds.getPartition(key, false).getReader();
+      reader.open();
+      while(reader.hasNext()) {
+        Record actualRecord = reader.read();
+        Assert.assertEquals(partition, (actualRecord.get("username").hashCode() & Integer.MAX_VALUE) % 2);
+        readCount++;
+      }
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+    return readCount;
+  }
+
+  private int readTestUsersInPartition(HDFSDataset ds, int p1, int p2) throws IOException {
+    int readCount = 0;
+    DatasetReader<Record> reader = null;
+    try {
+      PartitionKey key = new PartitionKey(new Object[] {p1, p2});
+      reader = ds.getPartition(key, false).getReader();
+      reader.open();
+      while(reader.hasNext()) {
+        Record actualRecord = reader.read();
+        Assert.assertEquals(p1, (actualRecord.get("username").hashCode() & Integer.MAX_VALUE) % 2);
+        Assert.assertEquals(p2, (actualRecord.get("email").hashCode() & Integer.MAX_VALUE) % 3);
+        readCount++;
+      }
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+    return readCount;
   }
 
   private void writeTestUsers2(HDFSDataset ds, int count) throws IOException {
