@@ -36,15 +36,12 @@ public class TestHDFSDataset {
   private FileSystem fileSystem;
   private Path testDirectory;
   private Schema testSchema;
-  private Schema testSchema2;
 
   @Before
   public void setUp() throws IOException {
     fileSystem = FileSystem.get(new Configuration());
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
     testSchema = new Schema.Parser().parse(Resources.getResource("user.avsc")
-        .openStream());
-    testSchema2 = new Schema.Parser().parse(Resources.getResource("user2.avsc")
         .openStream());
   }
 
@@ -84,7 +81,7 @@ public class TestHDFSDataset {
      * actually works.
      */
     Record record = new GenericRecordBuilder(testSchema)
-        .set("username", "test").build();
+        .set("username", "test").set("email", "email-test").build();
 
     DatasetWriter<Record> writer = null;
 
@@ -111,6 +108,7 @@ public class TestHDFSDataset {
       Assert.assertTrue(reader.hasNext());
       Record actualRecord = reader.read();
       Assert.assertEquals(record.get("username"), actualRecord.get("username"));
+      Assert.assertEquals(record.get("email"), actualRecord.get("email"));
       Assert.assertFalse(reader.hasNext());
     } finally {
       if (reader != null) {
@@ -134,8 +132,8 @@ public class TestHDFSDataset {
 
     writeTestUsers(ds, 10);
     readTestUsers(ds, 10);
-    int total = readTestUsersInPartition(ds, 0, null)
-        + readTestUsersInPartition(ds, 1, null);
+    int total = readTestUsersInPartition(ds, new PartitionKey(0), null)
+        + readTestUsersInPartition(ds, new PartitionKey(1), null);
     Assert.assertEquals(10, total);
 
     Assert.assertEquals(2, Iterables.size(ds.getPartitions()));
@@ -158,22 +156,22 @@ public class TestHDFSDataset {
 
     HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
         .directory(testDirectory).dataDirectory(testDirectory)
-        .name("partitioned-users").schema(testSchema2)
+        .name("partitioned-users").schema(testSchema)
         .partitionStrategy(partitionStrategy).get();
 
     Assert.assertTrue("Dataset is partitioned", ds.isPartitioned());
     Assert.assertEquals(partitionStrategy, ds.getPartitionStrategy());
 
-    writeTestUsers2(ds, 10);
-    readTestUsers2(ds, 10);
-    int total = readTestUsersInPartition(ds, 0, "email")
-        + readTestUsersInPartition(ds, 1, "email");
+    writeTestUsers(ds, 10);
+    readTestUsers(ds, 10);
+    int total = readTestUsersInPartition(ds, new PartitionKey(0), "email")
+        + readTestUsersInPartition(ds, new PartitionKey(1), "email");
     Assert.assertEquals(10, total);
 
     total = 0;
     for (int i1 = 0; i1 < 2; i1++) {
       for (int i2 = 0; i2 < 3; i2++) {
-        total += readTestUsersInPartition(ds, i1, i2);
+        total += readTestUsersInPartition(ds, new PartitionKey(i1, i2), null);
       }
     }
     Assert.assertEquals(10, total);
@@ -217,7 +215,7 @@ public class TestHDFSDataset {
 
       for (int i = 0; i < count; i++) {
         Record record = new GenericRecordBuilder(testSchema).set("username",
-            "test-" + i).build();
+            "test-" + i).set("email", "email-" + i).build();
 
         writer.write(record);
       }
@@ -247,6 +245,7 @@ public class TestHDFSDataset {
         Assert.assertTrue(reader.hasNext());
         Record actualRecord = reader.read();
         Assert.assertTrue(usernames.remove((String) actualRecord.get("username")));
+        Assert.assertNotNull(actualRecord.get("email"));
       }
       Assert.assertTrue(usernames.isEmpty());
       Assert.assertFalse(reader.hasNext());
@@ -257,11 +256,10 @@ public class TestHDFSDataset {
     }
   }
 
-  private int readTestUsersInPartition(HDFSDataset ds, int p1, String subpartitionName) throws IOException {
+  private int readTestUsersInPartition(HDFSDataset ds, PartitionKey key, String subpartitionName) throws IOException {
     int readCount = 0;
     DatasetReader<Record> reader = null;
     try {
-      PartitionKey key = new PartitionKey(new Object[] {p1});
       Dataset partition = ds.getPartition(key, false);
       if (subpartitionName != null) {
         List<FieldPartitioner> fieldPartitioners = partition.getPartitionStrategy().getFieldPartitioners();
@@ -272,7 +270,10 @@ public class TestHDFSDataset {
       reader.open();
       while(reader.hasNext()) {
         Record actualRecord = reader.read();
-        Assert.assertEquals(p1, (actualRecord.get("username").hashCode() & Integer.MAX_VALUE) % 2);
+        Assert.assertEquals(key.getValues()[0], (actualRecord.get("username").hashCode() & Integer.MAX_VALUE) % 2);
+        if (key.getLength() > 1) {
+          Assert.assertEquals(key.getValues()[1], (actualRecord.get("email").hashCode() & Integer.MAX_VALUE) % 3);
+        }
         readCount++;
       }
     } finally {
@@ -281,79 +282,6 @@ public class TestHDFSDataset {
       }
     }
     return readCount;
-  }
-
-  private int readTestUsersInPartition(HDFSDataset ds, int p1, int p2) throws IOException {
-    int readCount = 0;
-    DatasetReader<Record> reader = null;
-    try {
-      PartitionKey key = new PartitionKey(new Object[] {p1, p2});
-      reader = ds.getPartition(key, false).getReader();
-      reader.open();
-      while(reader.hasNext()) {
-        Record actualRecord = reader.read();
-        Assert.assertEquals(p1, (actualRecord.get("username").hashCode() & Integer.MAX_VALUE) % 2);
-        Assert.assertEquals(p2, (actualRecord.get("email").hashCode() & Integer.MAX_VALUE) % 3);
-        readCount++;
-      }
-    } finally {
-      if (reader != null) {
-        reader.close();
-      }
-    }
-    return readCount;
-  }
-
-  private void writeTestUsers2(HDFSDataset ds, int count) throws IOException {
-    DatasetWriter<Record> writer = null;
-
-    try {
-      writer = ds.getWriter();
-
-      writer.open();
-
-      for (int i = 0; i < count; i++) {
-        Record record = new GenericRecordBuilder(testSchema2).set("username",
-            "test-" + i).set("email", "email-" + i).build();
-
-        writer.write(record);
-      }
-
-      writer.flush();
-    } finally {
-      if (writer != null) {
-        writer.close();
-      }
-    }
-  }
-
-
-  private void readTestUsers2(HDFSDataset ds, int count) throws IOException {
-    DatasetReader<Record> reader = null;
-
-    try {
-      reader = ds.getReader();
-
-      reader.open();
-
-      // record order is not guaranteed, so check that we have read all the records
-      Set<String> usernames = Sets.newHashSet();
-      for (int i = 0; i < count; i++) {
-        usernames.add("test-" + i);
-      }
-      for (int i = 0; i < count; i++) {
-        Assert.assertTrue(reader.hasNext());
-        Record actualRecord = reader.read();
-        Assert.assertTrue(usernames.remove((String) actualRecord.get("username")));
-        Assert.assertNotNull(actualRecord.get("email"));
-      }
-      Assert.assertTrue(usernames.isEmpty());
-      Assert.assertFalse(reader.hasNext());
-    } finally {
-      if (reader != null) {
-        reader.close();
-      }
-    }
   }
 
 }

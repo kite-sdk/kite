@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class PartitionKey {
   private Object[] values; // TODO: use List
 
-  public PartitionKey(Object[] values) {
+  public PartitionKey(Object... values) {
     this.values = values;
   }
 
