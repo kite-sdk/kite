@@ -1,11 +1,9 @@
 package com.cloudera.data.hdfs;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.base.Function;
-import com.google.common.base.Splitter;
+import com.cloudera.data.PartitionKey;
 import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileStatus;
@@ -58,18 +56,18 @@ public class HDFSDataset implements Dataset {
 
   @Override
   public <E> DatasetReader<E> getReader() throws IOException {
-    if (isPartitioned()) {
-      throw new UnsupportedOperationException(
-          "Attempt to get a reader for dataset:" + name);
-    } else {
-      FileStatus[] fileStatuses = fileSystem.listStatus(dataDirectory);
-      List<Path> paths = Lists.transform(Arrays.asList(fileStatuses),
-          new Function<FileStatus, Path>() {
-            @Override public Path apply(FileStatus fileStatus) {
-              return fileStatus.getPath();
-            }
-      });
-      return new MultiFileDatasetReader<E>(fileSystem, paths, schema);
+    List<Path> paths = Lists.newArrayList();
+    accumulateDatafilePaths(dataDirectory, paths);
+    return new MultiFileDatasetReader<E>(fileSystem, paths, schema);
+  }
+
+  private void accumulateDatafilePaths(Path directory, List<Path> paths) throws IOException {
+    for (FileStatus status : fileSystem.listStatus(directory)) {
+      if (status.isDirectory()) {
+        accumulateDatafilePaths(status.getPath(), paths);
+      } else {
+        paths.add(status.getPath());
+      }
     }
   }
 
@@ -102,7 +100,7 @@ public class HDFSDataset implements Dataset {
   }
 
   @Override
-  public Dataset getPartition(Object[] key, boolean allowCreate)
+  public Dataset getPartition(PartitionKey key, boolean allowCreate)
       throws IOException {
 
     Preconditions.checkState(isPartitioned(),
@@ -113,9 +111,9 @@ public class HDFSDataset implements Dataset {
         partitionStrategy.getName(), name, allowCreate });
 
     Path partitionDirectory = dataDirectory;
-    for (int i = 0; i < key.length; i++) {
+    for (int i = 0; i < key.getValues().length; i++) {
       String fieldName = partitionStrategy.getFieldPartitioners().get(i).getName();
-      partitionDirectory = new Path(partitionDirectory, fieldName + "=" + key[i]);
+      partitionDirectory = new Path(partitionDirectory, fieldName + "=" + key.getValues()[i]);
     }
 
     if (allowCreate && !fileSystem.exists(partitionDirectory)) {

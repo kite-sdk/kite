@@ -60,7 +60,7 @@ public interface Dataset {
    *          otherwise, return null.
    */
   // TODO: this is an internal API for writers, not for end users
-  Dataset getPartition(Object[] key, boolean autoCreate) throws IOException;
+  Dataset getPartition(PartitionKey key, boolean autoCreate) throws IOException;
 
   /**
    * <p>

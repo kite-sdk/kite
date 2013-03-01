@@ -57,20 +57,20 @@ public class PartitionStrategy {
   /**
    * Returns a key that represents the value of the partition.
    */
-  Object[] getPartitionKey(Object entity) {
-    Object[] partitionKey = new Object[fieldPartitioners.size()]; // TODO: reuse
+  PartitionKey getPartitionKey(Object entity) {
+    Object[] values = new Object[fieldPartitioners.size()]; // TODO: reuse
     try {
       for (int i = 0; i < fieldPartitioners.size(); i++) {
         FieldPartitioner fp = fieldPartitioners.get(i);
         if (entity instanceof GenericRecord) {
-          partitionKey[i] = fp.apply(((GenericRecord) entity).get(fp.getName()));
+          values[i] = fp.apply(((GenericRecord) entity).get(fp.getName()));
         } else {
           PropertyDescriptor propertyDescriptor = new PropertyDescriptor(fp.getName(), entity.getClass());
           Object value = propertyDescriptor.getReadMethod().invoke(entity);
-          partitionKey[i] = fp.apply(value);
+          values[i] = fp.apply(value);
         }
       }
-      return partitionKey;
+      return new PartitionKey(values);
     } catch (IllegalAccessException e) {
       throw new RuntimeException("Cannot read property " + getName() + " from " + entity, e);
     } catch (InvocationTargetException e) {

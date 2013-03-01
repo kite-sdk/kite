@@ -25,7 +25,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
   private int maxWriters;
 
   private final PartitionStrategy partitionStrategy;
-  private LoadingCache<Object[], DatasetWriter<E>> cachedWriters;
+  private LoadingCache<PartitionKey, DatasetWriter<E>> cachedWriters;
 
   public PartitionedDatasetWriter(Dataset dataset) {
     Preconditions.checkArgument(dataset.isPartitioned(), "Dataset " + dataset
@@ -37,9 +37,9 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
         .getCardinality());
   }
 
-  class DatasetWriterCacheLoader extends CacheLoader<Object[], DatasetWriter<E>> {
+  class DatasetWriterCacheLoader extends CacheLoader<PartitionKey, DatasetWriter<E>> {
     @Override
-    public DatasetWriter<E> load(Object[] key) throws Exception {
+    public DatasetWriter<E> load(PartitionKey key) throws Exception {
       Dataset partition = dataset.getPartition(key, true);
       DatasetWriter<E> writer = partition.getWriter();
 
@@ -48,10 +48,10 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
     }
   }
 
-  class DatasetWriterRemovalStrategy implements RemovalListener<Object[], DatasetWriter<E>> {
+  class DatasetWriterRemovalStrategy implements RemovalListener<PartitionKey, DatasetWriter<E>> {
     @Override
     public void onRemoval(
-        RemovalNotification<Object[], DatasetWriter<E>> notification) {
+        RemovalNotification<PartitionKey, DatasetWriter<E>> notification) {
 
       DatasetWriter<E> writer = notification.getValue();
 
@@ -82,7 +82,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
 
   @Override
   public void write(E entity) throws IOException {
-    Object[] key = partitionStrategy.getPartitionKey(entity);
+    PartitionKey key = partitionStrategy.getPartitionKey(entity);
     DatasetWriter<E> writer = null;
 
     try {
