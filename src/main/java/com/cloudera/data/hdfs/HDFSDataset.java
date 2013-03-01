@@ -122,15 +122,36 @@ public class HDFSDataset implements Dataset {
 
     Builder builder = new HDFSDataset.Builder().name(name)
         .fileSystem(fileSystem).directory(directory)
-        .dataDirectory(partitionDirectory).schema(schema).isRoot(false);
+        .dataDirectory(partitionDirectory).schema(schema).isRoot(false)
+        .partitionStrategy(partitionStrategy.getSubpartitionStrategy(key.getLength()));
 
     return builder.get();
   }
 
   @Override
   public Iterable<Dataset> getPartitions() throws IOException {
-    throw new UnsupportedOperationException(
-        "Attempt to get partitions for dataset:" + name);
+    Preconditions.checkState(isPartitioned(),
+        "Attempt to get partitions on a non-partitioned dataset (name:%s)",
+        name);
+    List<Path> partitionDirectories = Lists.newArrayList(dataDirectory);
+    for (int i = 0; i < partitionStrategy.getFieldPartitioners().size(); i++) {
+      List<Path> subpaths = Lists.newArrayList();
+      for (Path p : partitionDirectories) {
+        for (FileStatus stat : fileSystem.listStatus(p)) {
+          subpaths.add(stat.getPath());
+        }
+      }
+      partitionDirectories = subpaths;
+    }
+    List<Dataset> partitions = Lists.newArrayList();
+    for (Path p : partitionDirectories) {
+      Builder builder = new HDFSDataset.Builder().name(name)
+          .fileSystem(fileSystem).directory(directory)
+          .schema(schema).isRoot(false)
+          .dataDirectory(p);
+      partitions.add(builder.get());
+    }
+    return partitions;
   }
 
   @Override

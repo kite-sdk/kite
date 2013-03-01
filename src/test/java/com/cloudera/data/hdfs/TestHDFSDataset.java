@@ -1,10 +1,14 @@
 package com.cloudera.data.hdfs;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
+import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetReader;
+import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.PartitionKey;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
@@ -130,8 +134,19 @@ public class TestHDFSDataset {
 
     writeTestUsers(ds, 10);
     readTestUsers(ds, 10);
-    int total = readTestUsersInPartition(ds, 0) + readTestUsersInPartition(ds, 1);
+    int total = readTestUsersInPartition(ds, 0, null)
+        + readTestUsersInPartition(ds, 1, null);
     Assert.assertEquals(10, total);
+
+    Assert.assertEquals(2, Iterables.size(ds.getPartitions()));
+    total = 0;
+    for (Dataset dataset : ds.getPartitions()) {
+      Assert.assertFalse("Partitions should not have further partitions",
+          dataset.isPartitioned());
+      total += datasetSize(dataset);
+    }
+    Assert.assertEquals(10, total);
+
   }
 
   @Test
@@ -151,16 +166,45 @@ public class TestHDFSDataset {
 
     writeTestUsers2(ds, 10);
     readTestUsers2(ds, 10);
-    int totalP1 = readTestUsersInPartition(ds, 0) + readTestUsersInPartition(ds, 1);
-    Assert.assertEquals(10, totalP1);
+    int total = readTestUsersInPartition(ds, 0, "email")
+        + readTestUsersInPartition(ds, 1, "email");
+    Assert.assertEquals(10, total);
 
-    int totalP2 = 0;
+    total = 0;
     for (int i1 = 0; i1 < 2; i1++) {
       for (int i2 = 0; i2 < 3; i2++) {
-        totalP2 += readTestUsersInPartition(ds, i1, i2);
+        total += readTestUsersInPartition(ds, i1, i2);
       }
     }
-    Assert.assertEquals(10, totalP2);
+    Assert.assertEquals(10, total);
+
+    Assert.assertEquals(6, Iterables.size(ds.getPartitions()));
+    total = 0;
+    for (Dataset dataset : ds.getPartitions()) {
+      Assert.assertFalse("Partitions should not have further partitions",
+          dataset.isPartitioned());
+      total += datasetSize(dataset);
+    }
+    Assert.assertEquals(10, total);
+
+  }
+
+  private int datasetSize(Dataset ds) throws IOException {
+    int size = 0;
+    DatasetReader<Record> reader = null;
+    try {
+      reader = ds.getReader();
+      reader.open();
+      while (reader.hasNext()) {
+        reader.read();
+        size++;
+      }
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+    return size;
   }
 
   private void writeTestUsers(HDFSDataset ds, int count) throws IOException {
@@ -213,16 +257,22 @@ public class TestHDFSDataset {
     }
   }
 
-  private int readTestUsersInPartition(HDFSDataset ds, int partition) throws IOException {
+  private int readTestUsersInPartition(HDFSDataset ds, int p1, String subpartitionName) throws IOException {
     int readCount = 0;
     DatasetReader<Record> reader = null;
     try {
-      PartitionKey key = new PartitionKey(new Object[] {partition});
-      reader = ds.getPartition(key, false).getReader();
+      PartitionKey key = new PartitionKey(new Object[] {p1});
+      Dataset partition = ds.getPartition(key, false);
+      if (subpartitionName != null) {
+        List<FieldPartitioner> fieldPartitioners = partition.getPartitionStrategy().getFieldPartitioners();
+        Assert.assertEquals(1, fieldPartitioners.size());
+        Assert.assertEquals(subpartitionName, fieldPartitioners.get(0).getName());
+      }
+      reader = partition.getReader();
       reader.open();
       while(reader.hasNext()) {
         Record actualRecord = reader.read();
-        Assert.assertEquals(partition, (actualRecord.get("username").hashCode() & Integer.MAX_VALUE) % 2);
+        Assert.assertEquals(p1, (actualRecord.get("username").hashCode() & Integer.MAX_VALUE) % 2);
         readCount++;
       }
     } finally {

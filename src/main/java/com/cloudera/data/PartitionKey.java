@@ -29,4 +29,8 @@ public class PartitionKey {
   public int hashCode() {
     return values != null ? Arrays.hashCode(values) : 0;
   }
+
+  public int getLength() {
+    return values.length;
+  }
 }

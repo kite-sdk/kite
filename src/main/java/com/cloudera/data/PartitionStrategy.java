@@ -26,6 +26,10 @@ public class PartitionStrategy {
     }
   }
 
+  public PartitionStrategy(List<FieldPartitioner> partitioners) {
+    fieldPartitioners.addAll(partitioners);
+  }
+
   private void addFieldPartitioner(FieldPartitioner fieldPartitioner) {
     fieldPartitioners.add(fieldPartitioner);
   }
@@ -78,6 +82,19 @@ public class PartitionStrategy {
     } catch (IntrospectionException e) {
       throw new RuntimeException("Cannot read property " + getName() + " from " + entity, e);
     }
+  }
+
+  /**
+   * Return a {@link PartitionStrategy} for subpartitions starting at the given index.
+   */
+  public PartitionStrategy getSubpartitionStrategy(int startIndex) {
+    if (startIndex == 0) {
+      return this;
+    }
+    if (startIndex == fieldPartitioners.size()) {
+      return null;
+    }
+    return new PartitionStrategy(fieldPartitioners.subList(startIndex, fieldPartitioners.size()));
   }
 
   @Override
