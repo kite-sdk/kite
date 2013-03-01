@@ -2,7 +2,9 @@ package com.cloudera.data.hdfs;
 
 import java.io.IOException;
 
+import com.cloudera.data.DatasetReader;
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
@@ -62,7 +64,7 @@ public class TestHDFSDataset {
   }
 
   @Test
-  public void testGetWriter() throws IOException {
+  public void testWriteAndRead() throws IOException {
     HDFSDataset ds = new HDFSDataset.Builder().name("test").schema(testSchema)
         .fileSystem(FileSystem.get(new Configuration()))
         .directory(testDirectory).dataDirectory(testDirectory).get();
@@ -93,6 +95,20 @@ public class TestHDFSDataset {
     } finally {
       if (writer != null) {
         writer.close();
+      }
+    }
+
+    DatasetReader<Record> reader = null;
+    try {
+      reader = ds.getReader();
+      reader.open();
+      Assert.assertTrue(reader.hasNext());
+      Record actualRecord = reader.read();
+      Assert.assertEquals(record.get("username"), actualRecord.get("username"));
+      Assert.assertFalse(reader.hasNext());
+    } finally {
+      if (reader != null) {
+        reader.close();
       }
     }
   }

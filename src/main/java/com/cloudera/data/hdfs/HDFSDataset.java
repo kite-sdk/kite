@@ -1,9 +1,14 @@
 package com.cloudera.data.hdfs;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
+import com.google.common.base.Function;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
@@ -52,9 +57,20 @@ public class HDFSDataset implements Dataset {
   }
 
   @Override
-  public <E> DatasetReader<E> getReader() {
-    throw new UnsupportedOperationException(
-        "Attempt to get a reader for dataset:" + name);
+  public <E> DatasetReader<E> getReader() throws IOException {
+    if (isPartitioned()) {
+      throw new UnsupportedOperationException(
+          "Attempt to get a reader for dataset:" + name);
+    } else {
+      FileStatus[] fileStatuses = fileSystem.listStatus(dataDirectory);
+      List<Path> paths = Lists.transform(Arrays.asList(fileStatuses),
+          new Function<FileStatus, Path>() {
+            @Override public Path apply(FileStatus fileStatus) {
+              return fileStatus.getPath();
+            }
+      });
+      return new MultiFileDatasetReader<E>(fileSystem, paths, schema);
+    }
   }
 
   @Override
