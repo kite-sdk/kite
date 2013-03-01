@@ -1,8 +1,10 @@
 package com.cloudera.data.hdfs;
 
 import java.io.IOException;
+import java.util.Set;
 
 import com.cloudera.data.DatasetReader;
+import com.google.common.collect.Sets;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
@@ -127,6 +129,7 @@ public class TestHDFSDataset {
     Assert.assertEquals(partitionStrategy, ds.getPartitionStrategy());
 
     writeTestUsers(ds, 10);
+    readTestUsers(ds, 10);
   }
 
   @Test
@@ -138,13 +141,14 @@ public class TestHDFSDataset {
 
     HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
         .directory(testDirectory).dataDirectory(testDirectory)
-        .name("partitioned-users").schema(testSchema)
+        .name("partitioned-users").schema(testSchema2)
         .partitionStrategy(partitionStrategy).get();
 
     Assert.assertTrue("Dataset is partitioned", ds.isPartitioned());
     Assert.assertEquals(partitionStrategy, ds.getPartitionStrategy());
 
     writeTestUsers2(ds, 10);
+    readTestUsers2(ds, 10);
   }
 
   private void writeTestUsers(HDFSDataset ds, int count) throws IOException {
@@ -170,6 +174,33 @@ public class TestHDFSDataset {
     }
   }
 
+  private void readTestUsers(HDFSDataset ds, int count) throws IOException {
+    DatasetReader<Record> reader = null;
+
+    try {
+      reader = ds.getReader();
+
+      reader.open();
+
+      // record order is not guaranteed, so check that we have read all the records
+      Set<String> usernames = Sets.newHashSet();
+      for (int i = 0; i < count; i++) {
+        usernames.add("test-" + i);
+      }
+      for (int i = 0; i < count; i++) {
+        Assert.assertTrue(reader.hasNext());
+        Record actualRecord = reader.read();
+        Assert.assertTrue(usernames.remove((String) actualRecord.get("username")));
+      }
+      Assert.assertTrue(usernames.isEmpty());
+      Assert.assertFalse(reader.hasNext());
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+  }
+
   private void writeTestUsers2(HDFSDataset ds, int count) throws IOException {
     DatasetWriter<Record> writer = null;
 
@@ -189,6 +220,35 @@ public class TestHDFSDataset {
     } finally {
       if (writer != null) {
         writer.close();
+      }
+    }
+  }
+
+
+  private void readTestUsers2(HDFSDataset ds, int count) throws IOException {
+    DatasetReader<Record> reader = null;
+
+    try {
+      reader = ds.getReader();
+
+      reader.open();
+
+      // record order is not guaranteed, so check that we have read all the records
+      Set<String> usernames = Sets.newHashSet();
+      for (int i = 0; i < count; i++) {
+        usernames.add("test-" + i);
+      }
+      for (int i = 0; i < count; i++) {
+        Assert.assertTrue(reader.hasNext());
+        Record actualRecord = reader.read();
+        Assert.assertTrue(usernames.remove((String) actualRecord.get("username")));
+        Assert.assertNotNull(actualRecord.get("email"));
+      }
+      Assert.assertTrue(usernames.isEmpty());
+      Assert.assertFalse(reader.hasNext());
+    } finally {
+      if (reader != null) {
+        reader.close();
       }
     }
   }
