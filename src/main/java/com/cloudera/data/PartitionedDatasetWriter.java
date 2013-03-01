@@ -37,47 +37,47 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
         .getCardinality());
   }
 
+  class DatasetWriterCacheLoader extends CacheLoader<Object[], DatasetWriter<E>> {
+    @Override
+    public DatasetWriter<E> load(Object[] key) throws Exception {
+      Dataset partition = dataset.getPartition(key, true);
+      DatasetWriter<E> writer = partition.getWriter();
+
+      writer.open();
+      return writer;
+    }
+  }
+
+  class DatasetWriterRemovalStrategy implements RemovalListener<Object[], DatasetWriter<E>> {
+    @Override
+    public void onRemoval(
+        RemovalNotification<Object[], DatasetWriter<E>> notification) {
+
+      DatasetWriter<E> writer = notification.getValue();
+
+      logger.debug("Removing writer:{} for partition:{}", writer,
+          notification.getKey());
+
+      try {
+        writer.close();
+      } catch (IOException e) {
+        logger
+            .error(
+                "Failed to close the dataset writer:{} - {} (this may cause problems)",
+                writer, e.getMessage());
+        logger.debug("Stack trace follows:", e);
+      }
+    }
+  }
+
   @Override
   public void open() {
     logger.debug("Opening partitioned dataset writer w/strategy:{}",
         partitionStrategy);
 
-    /* TODO: Break out the inline anonymous classes. This is too hairy to read. */
     cachedWriters = CacheBuilder.newBuilder().maximumSize(maxWriters)
-        .removalListener(new RemovalListener<Object[], DatasetWriter<E>>() {
-
-          @Override
-          public void onRemoval(
-              RemovalNotification<Object[], DatasetWriter<E>> notification) {
-
-            DatasetWriter<E> writer = notification.getValue();
-
-            logger.debug("Removing writer:{} for partition:{}", writer,
-                notification.getKey());
-
-            try {
-              writer.close();
-            } catch (IOException e) {
-              logger
-                  .error(
-                      "Failed to close the dataset writer:{} - {} (this may cause problems)",
-                      writer, e.getMessage());
-              logger.debug("Stack trace follows:", e);
-            }
-          }
-
-        }).build(new CacheLoader<Object[], DatasetWriter<E>>() {
-
-          @Override
-          public DatasetWriter<E> load(Object[] key) throws Exception {
-            Dataset partition = dataset.getPartition(key, true);
-            DatasetWriter<E> writer = partition.getWriter();
-
-            writer.open();
-            return writer;
-          }
-
-        });
+        .removalListener(new DatasetWriterRemovalStrategy())
+        .build(new DatasetWriterCacheLoader());
   }
 
   @Override
