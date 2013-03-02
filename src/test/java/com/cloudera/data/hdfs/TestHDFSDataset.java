@@ -41,7 +41,7 @@ public class TestHDFSDataset {
   public void setUp() throws IOException {
     fileSystem = FileSystem.get(new Configuration());
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    testSchema = new Schema.Parser().parse(Resources.getResource("user.avsc")
+    testSchema = new Schema.Parser().parse(Resources.getResource("schema/user.avsc")
         .openStream());
   }
 

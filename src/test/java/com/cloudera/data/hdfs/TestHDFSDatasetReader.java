@@ -21,7 +21,7 @@ public class TestHDFSDatasetReader {
   @Before
   public void setUp() throws IOException {
     fileSystem = FileSystem.get(new Configuration());
-    testSchema = new Schema.Parser().parse(Resources.getResource("string.avsc")
+    testSchema = new Schema.Parser().parse(Resources.getResource("schema/string.avsc")
         .openStream());
   }
 
@@ -32,7 +32,7 @@ public class TestHDFSDatasetReader {
 
     try {
       reader = new HDFSDatasetReader<String>(fileSystem, new Path(Resources
-          .getResource("strings-100.avro").getFile()), testSchema);
+          .getResource("data/strings-100.avro").getFile()), testSchema);
 
       reader.open();
 

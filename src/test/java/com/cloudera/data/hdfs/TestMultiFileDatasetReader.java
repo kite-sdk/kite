@@ -21,13 +21,13 @@ public class TestMultiFileDatasetReader {
   @Before
   public void setUp() throws IOException {
     fileSystem = FileSystem.get(new Configuration());
-    testSchema = new Schema.Parser().parse(Resources.getResource("string.avsc")
+    testSchema = new Schema.Parser().parse(Resources.getResource("schema/string.avsc")
         .openStream());
   }
 
   @Test
   public void test() throws IOException {
-    Path testFile = new Path(Resources.getResource("strings-100.avro")
+    Path testFile = new Path(Resources.getResource("data/strings-100.avro")
         .getFile());
 
     MultiFileDatasetReader<String> reader = new MultiFileDatasetReader<String>(

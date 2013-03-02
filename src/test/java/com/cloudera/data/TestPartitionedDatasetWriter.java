@@ -30,7 +30,7 @@ public class TestPartitionedDatasetWriter {
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
     fileSystem = FileSystem.get(new Configuration());
     testSchema = new Schema.Parser().parse(Resources.getResource(
-        "user-partitioned.avsc").openStream());
+        "schema/user-partitioned.avsc").openStream());
     repo = new HDFSDatasetRepository(fileSystem, testDirectory);
     writer = new PartitionedDatasetWriter<Object>(repo.create("users",
         testSchema));
