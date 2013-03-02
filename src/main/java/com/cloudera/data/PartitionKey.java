@@ -1,36 +1,42 @@
 package com.cloudera.data;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class PartitionKey {
-  private Object[] values; // TODO: use List
+
+  private List<Object> values;
 
   public PartitionKey(Object... values) {
-    this.values = values;
+    this.values = Arrays.asList(values);
   }
 
-  public Object[] getValues() {
+  public List<Object> getValues() {
     return values;
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
 
     PartitionKey that = (PartitionKey) o;
 
-    if (!Arrays.equals(values, that.values)) return false;
+    if (!values.equals(that.values))
+      return false;
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    return values != null ? Arrays.hashCode(values) : 0;
+    return values != null ? values.hashCode() : 0;
   }
 
   public int getLength() {
-    return values.length;
+    return values.size();
   }
+
 }

@@ -3,8 +3,6 @@ package com.cloudera.data.hdfs;
 import java.io.IOException;
 import java.util.List;
 
-import com.cloudera.data.PartitionKey;
-import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -15,12 +13,14 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
+import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.PartitionedDatasetWriter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
+import com.google.common.collect.Lists;
 
 public class HDFSDataset implements Dataset {
 
@@ -61,7 +61,8 @@ public class HDFSDataset implements Dataset {
     return new MultiFileDatasetReader<E>(fileSystem, paths, schema);
   }
 
-  private void accumulateDatafilePaths(Path directory, List<Path> paths) throws IOException {
+  private void accumulateDatafilePaths(Path directory, List<Path> paths)
+      throws IOException {
     for (FileStatus status : fileSystem.listStatus(directory)) {
       if (status.isDirectory()) {
         accumulateDatafilePaths(status.getPath(), paths);
@@ -111,19 +112,26 @@ public class HDFSDataset implements Dataset {
         partitionStrategy.getName(), name, allowCreate });
 
     Path partitionDirectory = dataDirectory;
-    for (int i = 0; i < key.getValues().length; i++) {
-      String fieldName = partitionStrategy.getFieldPartitioners().get(i).getName();
-      partitionDirectory = new Path(partitionDirectory, fieldName + "=" + key.getValues()[i]);
+    for (int i = 0; i < key.getValues().size(); i++) {
+      String fieldName = partitionStrategy.getFieldPartitioners().get(i)
+          .getName();
+      partitionDirectory = new Path(partitionDirectory, fieldName + "="
+          + key.getValues().get(i));
     }
 
     if (allowCreate && !fileSystem.exists(partitionDirectory)) {
       fileSystem.mkdirs(partitionDirectory);
     }
 
-    Builder builder = new HDFSDataset.Builder().name(name)
-        .fileSystem(fileSystem).directory(directory)
-        .dataDirectory(partitionDirectory).schema(schema).isRoot(false)
-        .partitionStrategy(partitionStrategy.getSubpartitionStrategy(key.getLength()));
+    Builder builder = new HDFSDataset.Builder()
+        .name(name)
+        .fileSystem(fileSystem)
+        .directory(directory)
+        .dataDirectory(partitionDirectory)
+        .schema(schema)
+        .isRoot(false)
+        .partitionStrategy(
+            partitionStrategy.getSubpartitionStrategy(key.getLength()));
 
     return builder.get();
   }
@@ -146,9 +154,8 @@ public class HDFSDataset implements Dataset {
     List<Dataset> partitions = Lists.newArrayList();
     for (Path p : partitionDirectories) {
       Builder builder = new HDFSDataset.Builder().name(name)
-          .fileSystem(fileSystem).directory(directory)
-          .schema(schema).isRoot(false)
-          .dataDirectory(p);
+          .fileSystem(fileSystem).directory(directory).schema(schema)
+          .isRoot(false).dataDirectory(p);
       partitions.add(builder.get());
     }
     return partitions;
@@ -199,7 +206,7 @@ public class HDFSDataset implements Dataset {
       return this;
     }
 
-    public  Builder isRoot(boolean isRoot) {
+    public Builder isRoot(boolean isRoot) {
       dataset.isRoot = isRoot;
       return this;
     }

@@ -4,12 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import com.cloudera.data.Dataset;
-import com.cloudera.data.DatasetReader;
-import com.cloudera.data.FieldPartitioner;
-import com.cloudera.data.PartitionKey;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -23,8 +17,14 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.data.Dataset;
+import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
+import com.cloudera.data.FieldPartitioner;
+import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
@@ -119,8 +119,8 @@ public class TestHDFSDataset {
 
   @Test
   public void testPartitionedWriterSingle() throws IOException {
-    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-        .hash("username", 2).get();
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", 2).get();
 
     HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
         .directory(testDirectory).dataDirectory(testDirectory)
@@ -150,9 +150,7 @@ public class TestHDFSDataset {
   @Test
   public void testPartitionedWriterDouble() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-        .hash("username", 2)
-        .hash("email", 3)
-        .get();
+        .hash("username", 2).hash("email", 3).get();
 
     HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
         .directory(testDirectory).dataDirectory(testDirectory)
@@ -214,8 +212,8 @@ public class TestHDFSDataset {
       writer.open();
 
       for (int i = 0; i < count; i++) {
-        Record record = new GenericRecordBuilder(testSchema).set("username",
-            "test-" + i).set("email", "email-" + i).build();
+        Record record = new GenericRecordBuilder(testSchema)
+            .set("username", "test-" + i).set("email", "email-" + i).build();
 
         writer.write(record);
       }
@@ -236,7 +234,8 @@ public class TestHDFSDataset {
 
       reader.open();
 
-      // record order is not guaranteed, so check that we have read all the records
+      // record order is not guaranteed, so check that we have read all the
+      // records
       Set<String> usernames = Sets.newHashSet();
       for (int i = 0; i < count; i++) {
         usernames.add("test-" + i);
@@ -244,7 +243,8 @@ public class TestHDFSDataset {
       for (int i = 0; i < count; i++) {
         Assert.assertTrue(reader.hasNext());
         Record actualRecord = reader.read();
-        Assert.assertTrue(usernames.remove((String) actualRecord.get("username")));
+        Assert.assertTrue(usernames.remove((String) actualRecord
+            .get("username")));
         Assert.assertNotNull(actualRecord.get("email"));
       }
       Assert.assertTrue(usernames.isEmpty());
@@ -256,23 +256,28 @@ public class TestHDFSDataset {
     }
   }
 
-  private int readTestUsersInPartition(HDFSDataset ds, PartitionKey key, String subpartitionName) throws IOException {
+  private int readTestUsersInPartition(HDFSDataset ds, PartitionKey key,
+      String subpartitionName) throws IOException {
     int readCount = 0;
     DatasetReader<Record> reader = null;
     try {
       Dataset partition = ds.getPartition(key, false);
       if (subpartitionName != null) {
-        List<FieldPartitioner> fieldPartitioners = partition.getPartitionStrategy().getFieldPartitioners();
+        List<FieldPartitioner> fieldPartitioners = partition
+            .getPartitionStrategy().getFieldPartitioners();
         Assert.assertEquals(1, fieldPartitioners.size());
-        Assert.assertEquals(subpartitionName, fieldPartitioners.get(0).getName());
+        Assert.assertEquals(subpartitionName, fieldPartitioners.get(0)
+            .getName());
       }
       reader = partition.getReader();
       reader.open();
-      while(reader.hasNext()) {
+      while (reader.hasNext()) {
         Record actualRecord = reader.read();
-        Assert.assertEquals(key.getValues()[0], (actualRecord.get("username").hashCode() & Integer.MAX_VALUE) % 2);
+        Assert.assertEquals(key.getValues().get(0),
+            (actualRecord.get("username").hashCode() & Integer.MAX_VALUE) % 2);
         if (key.getLength() > 1) {
-          Assert.assertEquals(key.getValues()[1], (actualRecord.get("email").hashCode() & Integer.MAX_VALUE) % 3);
+          Assert.assertEquals(key.getValues().get(1), (actualRecord
+              .get("email").hashCode() & Integer.MAX_VALUE) % 3);
         }
         readCount++;
       }
