@@ -123,7 +123,7 @@ public class HDFSDataset implements Dataset {
       fileSystem.mkdirs(partitionDirectory);
     }
 
-    Builder builder = new HDFSDataset.Builder()
+    return new HDFSDataset.Builder()
         .name(name)
         .fileSystem(fileSystem)
         .directory(directory)
@@ -131,9 +131,7 @@ public class HDFSDataset implements Dataset {
         .schema(schema)
         .isRoot(false)
         .partitionStrategy(
-            partitionStrategy.getSubpartitionStrategy(key.getLength()));
-
-    return builder.get();
+            partitionStrategy.getSubpartitionStrategy(key.getLength())).get();
   }
 
   @Override
