@@ -1,32 +1,38 @@
 package com.cloudera.data;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
+import org.apache.avro.generic.GenericRecord;
+
 import com.cloudera.data.partition.HashFieldPartitioner;
 import com.cloudera.data.partition.IdentityFieldPartitioner;
 import com.cloudera.data.partition.IntRangeFieldPartitioner;
 import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
-import org.apache.avro.generic.GenericRecord;
-
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 public class PartitionStrategy {
 
-  private List<FieldPartitioner> fieldPartitioners = fieldPartitioners = Lists.newArrayList();
+  private List<FieldPartitioner> fieldPartitioners;
 
   protected PartitionStrategy() {
+    fieldPartitioners = Lists.newArrayList();
   }
 
   public PartitionStrategy(FieldPartitioner... partitioners) {
+    this();
+
     for (FieldPartitioner fieldPartitioner : partitioners) {
       addFieldPartitioner(fieldPartitioner);
     }
   }
 
   public PartitionStrategy(List<FieldPartitioner> partitioners) {
+    this();
+
     fieldPartitioners.addAll(partitioners);
   }
 
@@ -69,23 +75,28 @@ public class PartitionStrategy {
         if (entity instanceof GenericRecord) {
           values[i] = fp.apply(((GenericRecord) entity).get(fp.getName()));
         } else {
-          PropertyDescriptor propertyDescriptor = new PropertyDescriptor(fp.getName(), entity.getClass());
+          PropertyDescriptor propertyDescriptor = new PropertyDescriptor(
+              fp.getName(), entity.getClass());
           Object value = propertyDescriptor.getReadMethod().invoke(entity);
           values[i] = fp.apply(value);
         }
       }
       return new PartitionKey(values);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException("Cannot read property " + getName() + " from " + entity, e);
+      throw new RuntimeException("Cannot read property " + getName() + " from "
+          + entity, e);
     } catch (InvocationTargetException e) {
-      throw new RuntimeException("Cannot read property " + getName() + " from " + entity, e);
+      throw new RuntimeException("Cannot read property " + getName() + " from "
+          + entity, e);
     } catch (IntrospectionException e) {
-      throw new RuntimeException("Cannot read property " + getName() + " from " + entity, e);
+      throw new RuntimeException("Cannot read property " + getName() + " from "
+          + entity, e);
     }
   }
 
   /**
-   * Return a {@link PartitionStrategy} for subpartitions starting at the given index.
+   * Return a {@link PartitionStrategy} for subpartitions starting at the given
+   * index.
    */
   public PartitionStrategy getSubpartitionStrategy(int startIndex) {
     if (startIndex == 0) {
@@ -94,12 +105,14 @@ public class PartitionStrategy {
     if (startIndex == fieldPartitioners.size()) {
       return null;
     }
-    return new PartitionStrategy(fieldPartitioners.subList(startIndex, fieldPartitioners.size()));
+    return new PartitionStrategy(fieldPartitioners.subList(startIndex,
+        fieldPartitioners.size()));
   }
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("fieldPartitioners", fieldPartitioners).toString();
+    return Objects.toStringHelper(this)
+        .add("fieldPartitioners", fieldPartitioners).toString();
   }
 
   public static class Builder implements Supplier<PartitionStrategy> {
@@ -107,17 +120,20 @@ public class PartitionStrategy {
     private PartitionStrategy partitionStrategy = new PartitionStrategy();
 
     public Builder hash(String name, int buckets) {
-      partitionStrategy.addFieldPartitioner(new HashFieldPartitioner(name, buckets));
+      partitionStrategy.addFieldPartitioner(new HashFieldPartitioner(name,
+          buckets));
       return this;
     }
 
     public Builder identity(String name, int buckets) {
-      partitionStrategy.addFieldPartitioner(new IdentityFieldPartitioner(name, buckets));
+      partitionStrategy.addFieldPartitioner(new IdentityFieldPartitioner(name,
+          buckets));
       return this;
     }
 
     public Builder range(String name, int... upperBounds) {
-      partitionStrategy.addFieldPartitioner(new IntRangeFieldPartitioner(name, upperBounds));
+      partitionStrategy.addFieldPartitioner(new IntRangeFieldPartitioner(name,
+          upperBounds));
       return this;
     }
 
