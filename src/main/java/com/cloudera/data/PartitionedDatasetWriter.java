@@ -2,6 +2,7 @@ package com.cloudera.data;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
   private int maxWriters;
 
   private final PartitionStrategy partitionStrategy;
-  private LoadingCache<String, DatasetWriter<E>> cachedWriters;
+  private LoadingCache<PartitionKey, DatasetWriter<E>> cachedWriters;
 
   public PartitionedDatasetWriter(Dataset dataset) {
     Preconditions.checkArgument(dataset.isPartitioned(), "Dataset " + dataset
@@ -33,7 +34,40 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
     this.dataset = dataset;
     this.partitionStrategy = dataset.getPartitionStrategy();
     this.maxWriters = Math.min(10, dataset.getPartitionStrategy()
-        .getAggregateCardinality());
+        .getCardinality());
+  }
+
+  class DatasetWriterCacheLoader extends CacheLoader<PartitionKey, DatasetWriter<E>> {
+    @Override
+    public DatasetWriter<E> load(PartitionKey key) throws Exception {
+      Dataset partition = dataset.getPartition(key, true);
+      DatasetWriter<E> writer = partition.getWriter();
+
+      writer.open();
+      return writer;
+    }
+  }
+
+  class DatasetWriterRemovalStrategy implements RemovalListener<PartitionKey, DatasetWriter<E>> {
+    @Override
+    public void onRemoval(
+        RemovalNotification<PartitionKey, DatasetWriter<E>> notification) {
+
+      DatasetWriter<E> writer = notification.getValue();
+
+      logger.debug("Removing writer:{} for partition:{}", writer,
+          notification.getKey());
+
+      try {
+        writer.close();
+      } catch (IOException e) {
+        logger
+            .error(
+                "Failed to close the dataset writer:{} - {} (this may cause problems)",
+                writer, e.getMessage());
+        logger.debug("Stack trace follows:", e);
+      }
+    }
   }
 
   @Override
@@ -41,54 +75,21 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
     logger.debug("Opening partitioned dataset writer w/strategy:{}",
         partitionStrategy);
 
-    /* TODO: Break out the inline anonymous classes. This is too hairy to read. */
     cachedWriters = CacheBuilder.newBuilder().maximumSize(maxWriters)
-        .removalListener(new RemovalListener<String, DatasetWriter<E>>() {
-
-          @Override
-          public void onRemoval(
-              RemovalNotification<String, DatasetWriter<E>> notification) {
-
-            DatasetWriter<E> writer = notification.getValue();
-
-            logger.debug("Removing writer:{} for partition:{}", writer,
-                notification.getKey());
-
-            try {
-              writer.close();
-            } catch (IOException e) {
-              logger
-                  .error(
-                      "Failed to close the dataset writer:{} - {} (this may cause problems)",
-                      writer, e.getMessage());
-              logger.debug("Stack trace follows:", e);
-            }
-          }
-
-        }).build(new CacheLoader<String, DatasetWriter<E>>() {
-
-          @Override
-          public DatasetWriter<E> load(String key) throws Exception {
-            Dataset partition = dataset.getPartition(key, true);
-            DatasetWriter<E> writer = partition.getWriter();
-
-            writer.open();
-            return writer;
-          }
-
-        });
+        .removalListener(new DatasetWriterRemovalStrategy())
+        .build(new DatasetWriterCacheLoader());
   }
 
   @Override
   public void write(E entity) throws IOException {
-    String name = partitionStrategy.apply(entity).toString();
+    PartitionKey key = partitionStrategy.getPartitionKey(entity);
     DatasetWriter<E> writer = null;
 
     try {
-      writer = cachedWriters.get(name);
+      writer = cachedWriters.get(key);
     } catch (ExecutionException e) {
       throw new IOException("Unable to get a writer for entity:" + entity
-          + " partitionName:" + name, e);
+          + " partition key:" + Arrays.asList(key), e);
     }
 
     writer.write(entity);

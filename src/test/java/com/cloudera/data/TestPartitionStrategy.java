@@ -2,14 +2,14 @@ package com.cloudera.data;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.partition.HashPartitionStrategy;
-import com.cloudera.data.partition.IdentityPartitionStrategy;
 import com.google.common.collect.Lists;
+
+import java.util.List;
 
 public class TestPartitionStrategy {
 
@@ -39,16 +39,21 @@ public class TestPartitionStrategy {
 
   @Test
   public void test() throws Exception {
-    // TODO: this would be expressed in JEXL notation so it can be serialized as
-    // a string
-    final PartitionStrategy p = new IdentityPartitionStrategy("month", 12,
-        new HashPartitionStrategy("userId", 7));
+    final PartitionStrategy p = new PartitionStrategy.Builder()
+        .identity("month", 12)
+        .hash("userId", 7)
+        .get();
 
-    assertEquals("month", p.getName());
-    assertEquals(12, p.getCardinality());
+    List<FieldPartitioner> fieldPartitioners = p.getFieldPartitioners();
+    Assert.assertEquals(2, fieldPartitioners.size());
 
-    assertEquals("userId", p.getPartition().getName());
-    assertEquals(7, p.getPartition().getCardinality());
+    FieldPartitioner fp0 = fieldPartitioners.get(0);
+    assertEquals("month", fp0.getName());
+    assertEquals(12, fp0.getCardinality());
+
+    FieldPartitioner fp1 = fieldPartitioners.get(1);
+    assertEquals("userId", fp1.getName());
+    assertEquals(7, fp1.getCardinality());
 
     Entity e = new Entity();
     e.setMonth(2);
@@ -56,10 +61,7 @@ public class TestPartitionStrategy {
 
     logger.debug("partitionStrategy:{}", p);
 
-    logger
-        .debug("path:{}", Lists.transform(Lists.newArrayList(e, 2, "foo"), p));
-
-    assertEquals(12 * 7, p.getAggregateCardinality()); // useful for writers
+    assertEquals(12 * 7, p.getCardinality()); // useful for writers
   }
 
 }

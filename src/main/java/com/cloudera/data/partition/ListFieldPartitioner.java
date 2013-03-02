@@ -3,18 +3,15 @@ package com.cloudera.data.partition;
 import java.util.List;
 import java.util.Set;
 
+import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.PartitionStrategy;
 
-public class ListPartitionStrategy extends PartitionStrategy {
+public class ListFieldPartitioner extends FieldPartitioner {
 
   private List<Set<?>> values;
 
-  public ListPartitionStrategy(String name, List<Set<?>> values) {
-    this(name, values, null);
-  }
-
-  public ListPartitionStrategy(String name, List<Set<?>> values, PartitionStrategy subpartition) {
-    super(name, cardinality(values), subpartition);
+  public ListFieldPartitioner(String name, List<Set<?>> values) {
+    super(name, cardinality(values));
     this.values = values;
   }
 

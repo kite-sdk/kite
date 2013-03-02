@@ -2,6 +2,8 @@ package com.cloudera.data.hdfs;
 
 import java.io.IOException;
 
+import com.cloudera.data.PartitionExpression;
+import com.cloudera.data.PartitionStrategy;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -67,12 +69,9 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     String partitionExpression = schema.getProp("cdk.partition.expression");
 
     if (partitionExpression != null) {
-      throw new UnsupportedOperationException(
-          "We don't yet support partitioning with the new partitioning code");
-      /*
-       * datasetBuilder.partitionStrategy(new PartitionExpression(
-       * partitionExpression, true));
-       */
+      logger.debug("Partition expression: {}", partitionExpression);
+      PartitionExpression expr = new PartitionExpression(partitionExpression, true);
+      datasetBuilder.partitionStrategy(expr.evaluate());
     }
 
     return datasetBuilder.get();
@@ -102,12 +101,9 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
         .dataDirectory(datasetDataPath).name(name).schema(schema);
 
     if (partitionExpression != null) {
-      throw new UnsupportedOperationException(
-          "We don't yet support partitioning with the new partitioning code");
-      /*
-       * datasetBuilder.partitionStrategy(new PartitionExpression(
-       * partitionExpression, true));
-       */
+      logger.debug("Partition expression: {}", partitionExpression);
+      PartitionExpression expr = new PartitionExpression(partitionExpression, true);
+      datasetBuilder.partitionStrategy(expr.evaluate());
     }
 
     HDFSDataset ds = datasetBuilder.get();
