@@ -1,7 +1,6 @@
 package com.cloudera.data.partition;
 
 import com.cloudera.data.FieldPartitioner;
-import com.cloudera.data.PartitionStrategy;
 
 public class IdentityFieldPartitioner extends FieldPartitioner {
 

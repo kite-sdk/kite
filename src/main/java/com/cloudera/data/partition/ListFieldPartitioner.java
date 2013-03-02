@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.cloudera.data.FieldPartitioner;
-import com.cloudera.data.PartitionStrategy;
 
 public class ListFieldPartitioner extends FieldPartitioner {
 
