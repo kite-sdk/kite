@@ -10,6 +10,7 @@ import org.apache.avro.generic.GenericRecord;
 import com.cloudera.data.partition.HashFieldPartitioner;
 import com.cloudera.data.partition.IdentityFieldPartitioner;
 import com.cloudera.data.partition.IntRangeFieldPartitioner;
+import com.cloudera.data.partition.RangeFieldPartitioner;
 import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
@@ -137,10 +138,17 @@ public class PartitionStrategy {
       return this;
     }
 
+    public Builder range(String name, Comparable<?>... upperBounds) {
+      partitionStrategy.addFieldPartitioner(new RangeFieldPartitioner(name,
+          upperBounds));
+      return this;
+    }
+
     @Override
     public PartitionStrategy get() {
       return partitionStrategy;
     }
+
   }
 
 }
