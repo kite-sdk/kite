@@ -1,17 +1,13 @@
 package com.cloudera.data;
 
-import com.cloudera.data.partition.HashFieldPartitioner;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 
-public class TestPartitionExpression {
+import org.junit.Assert;
+import org.junit.Test;
 
-  private static final Logger logger = LoggerFactory
-      .getLogger(TestPartitionExpression.class);
+import com.cloudera.data.partition.HashFieldPartitioner;
+
+public class TestPartitionExpression {
 
   @Test
   public void testPartitionStrategy() {

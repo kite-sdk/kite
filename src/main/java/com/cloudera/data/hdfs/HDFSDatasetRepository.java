@@ -2,8 +2,6 @@ package com.cloudera.data.hdfs;
 
 import java.io.IOException;
 
-import com.cloudera.data.PartitionExpression;
-import com.cloudera.data.PartitionStrategy;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -11,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetRepository;
+import com.cloudera.data.PartitionExpression;
 import com.cloudera.data.hdfs.util.Paths;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;

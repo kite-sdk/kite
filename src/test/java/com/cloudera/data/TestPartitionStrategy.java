@@ -2,14 +2,12 @@ package com.cloudera.data;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
-
-import java.util.List;
 
 public class TestPartitionStrategy {
 
