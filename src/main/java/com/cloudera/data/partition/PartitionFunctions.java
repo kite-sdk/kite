@@ -16,11 +16,12 @@ public class PartitionFunctions {
     return new IdentityFieldPartitioner(name, buckets);
   }
 
-  public static FieldPartitioner range(String name, int[] upperBounds) {
+  public static FieldPartitioner range(String name, int... upperBounds) {
     return new IntRangeFieldPartitioner(name, upperBounds);
   }
 
-  public static FieldPartitioner range(String name, Comparable<?> upperBounds) {
+  public static FieldPartitioner range(String name,
+      Comparable<?>... upperBounds) {
     return new RangeFieldPartitioner(name, upperBounds);
   }
 
