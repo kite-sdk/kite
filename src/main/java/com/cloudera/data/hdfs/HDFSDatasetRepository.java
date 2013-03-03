@@ -31,7 +31,7 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     this.rootDirectory = rootDirectory;
   }
 
-  @Override
+  @Deprecated
   public HDFSDataset create(String name, Schema schema) throws IOException {
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkArgument(schema != null, "Schema can not be null");

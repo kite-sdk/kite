@@ -51,7 +51,8 @@ public class TestHDFSDatasetRepository {
 
   @Test
   public void testCreate() throws IOException {
-    HDFSDataset dataset = repo.create("test1", testSchema);
+    HDFSDataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
+        .schema(testSchema).get());
 
     Assert.assertEquals("Dataset name is propagated", "test1",
         dataset.getName());
@@ -71,7 +72,7 @@ public class TestHDFSDatasetRepository {
   }
 
   @Test
-  public void testCreateWithDescriptor() throws IOException {
+  public void testCreatePartitioned() throws IOException {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(testSchema)
         .partitionStrategy(

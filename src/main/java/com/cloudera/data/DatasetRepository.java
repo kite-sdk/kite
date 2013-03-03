@@ -40,21 +40,21 @@ public interface DatasetRepository<DS extends Dataset> {
   DS get(String name) throws IOException;
 
   /**
-   * Create a {@link Dataset} with the supplied {@code schema}. Depending on the
-   * underlying dataset storage, some schemas types or configurations may not be
-   * supported. If an illegal schema is supplied, an exception will be thrown by
-   * the implementing class. It is illegal to create a more than one dataset
-   * with a given name. If a duplicate name is provided, an exception is thrown.
+   * Create a {@link Dataset} with the supplied {@code descriptor}. Depending on
+   * the underlying dataset storage, some schemas types or configurations may
+   * not be supported. If an illegal schema is supplied, an exception will be
+   * thrown by the implementing class. It is illegal to create a more than one
+   * dataset with a given name. If a duplicate name is provided, an exception is
+   * thrown.
    * 
    * @param name
    *          The fully qualified dataset name
-   * @param schema
-   *          A schema that describes entities of this dataset
+   * @param descriptor
+   *          A descriptor that describes the schema and other properties of the
+   *          dataset
    * @return The newly created dataset
    * @throws IOException
    */
-  DS create(String name, Schema schema) throws IOException;
-
   DS create(String name, DatasetDescriptor descriptor) throws IOException;
 
 }
