@@ -37,7 +37,15 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
         .getCardinality());
   }
 
-  class DatasetWriterCacheLoader extends CacheLoader<PartitionKey, DatasetWriter<E>> {
+  static class DatasetWriterCacheLoader<E> extends
+      CacheLoader<PartitionKey, DatasetWriter<E>> {
+
+    private Dataset dataset;
+
+    public DatasetWriterCacheLoader(Dataset dataset) {
+      this.dataset = dataset;
+    }
+
     @Override
     public DatasetWriter<E> load(PartitionKey key) throws Exception {
       Dataset partition = dataset.getPartition(key, true);
@@ -48,7 +56,8 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
     }
   }
 
-  class DatasetWriterRemovalStrategy implements RemovalListener<PartitionKey, DatasetWriter<E>> {
+  static class DatasetWriterRemovalStrategy<E> implements
+      RemovalListener<PartitionKey, DatasetWriter<E>> {
     @Override
     public void onRemoval(
         RemovalNotification<PartitionKey, DatasetWriter<E>> notification) {
@@ -76,8 +85,8 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
         partitionStrategy);
 
     cachedWriters = CacheBuilder.newBuilder().maximumSize(maxWriters)
-        .removalListener(new DatasetWriterRemovalStrategy())
-        .build(new DatasetWriterCacheLoader());
+        .removalListener(new DatasetWriterRemovalStrategy<E>())
+        .build(new DatasetWriterCacheLoader<E>(dataset));
   }
 
   @Override
