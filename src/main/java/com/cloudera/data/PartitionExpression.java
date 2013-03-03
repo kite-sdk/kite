@@ -37,16 +37,20 @@ public class PartitionExpression {
     } else if (object instanceof FieldPartitioner[]) {
       return new PartitionStrategy((FieldPartitioner[]) object);
     } else {
-      throw new IllegalArgumentException("Partition expression did not produce FieldPartitioner result (or array) for value:" + object);
+      throw new IllegalArgumentException(
+          "Partition expression did not produce FieldPartitioner result (or array) for value:"
+              + object);
     }
   }
 
   /**
-   * Convert a PartitionStrategy into a serialized expression. This can be used to set a PartitionStrategy
-   * in an Avro property if the PartitionStrategy is passed as an object.
+   * Convert a PartitionStrategy into a serialized expression. This can be used
+   * to set a PartitionStrategy in an Avro property if the PartitionStrategy is
+   * passed as an object.
    */
   public static String toExpression(PartitionStrategy partitionStrategy) {
-    List<FieldPartitioner> fieldPartitioners = partitionStrategy.getFieldPartitioners();
+    List<FieldPartitioner> fieldPartitioners = partitionStrategy
+        .getFieldPartitioners();
     if (fieldPartitioners.size() == 1) {
       return toExpression(fieldPartitioners.get(0));
     }
@@ -65,11 +69,14 @@ public class PartitionExpression {
   private static String toExpression(FieldPartitioner fieldPartitioner) {
     // TODO: add other strategies
     if (fieldPartitioner instanceof HashFieldPartitioner) {
-      return String.format("hash(\"%s\", %s)", fieldPartitioner.getName(), fieldPartitioner.getCardinality());
+      return String.format("hash(\"%s\", %s)", fieldPartitioner.getName(),
+          fieldPartitioner.getCardinality());
     } else if (fieldPartitioner instanceof IdentityFieldPartitioner) {
-      return String.format("identity(\"%s\", %s)", fieldPartitioner.getName(), fieldPartitioner.getCardinality());
+      return String.format("identity(\"%s\", %s)", fieldPartitioner.getName(),
+          fieldPartitioner.getCardinality());
     }
-    throw new IllegalArgumentException("Unrecognized PartitionStrategy: " + fieldPartitioner);
+    throw new IllegalArgumentException("Unrecognized PartitionStrategy: "
+        + fieldPartitioner);
   }
 
   @Override
