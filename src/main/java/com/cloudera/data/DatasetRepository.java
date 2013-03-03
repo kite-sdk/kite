@@ -2,8 +2,6 @@ package com.cloudera.data;
 
 import java.io.IOException;
 
-import org.apache.avro.Schema;
-
 /**
  * <p>
  * A logical repository (storage system) of {@link Dataset}s.
@@ -11,11 +9,11 @@ import org.apache.avro.Schema;
  * <p>
  * Implementations of {@code DatasetRepository} are storage systems that contain
  * zero or more {@link Dataset}s. A repository acts as a factory, as well as a
- * registry, of datasets. Users can {@link #create(String, Schema)} a new
- * {@link Dataset} with a name and schema, or retrieve a handle to an existing
- * dataset, by name, by way of the {@link #get(String)} method. While not
- * expressly forbidden, most repositories are expected to support only a single
- * concrete {@link Dataset} implementation.
+ * registry, of datasets. Users can {@link #create(String, DatasetDescriptor)} a
+ * new {@link Dataset} with a name and schema, or retrieve a handle to an
+ * existing dataset, by name, by way of the {@link #get(String)} method. While
+ * not expressly forbidden, most repositories are expected to support only a
+ * single concrete {@link Dataset} implementation.
  * </p>
  * <p>
  * No guarantees are made as to the durability, reliability, or availability of

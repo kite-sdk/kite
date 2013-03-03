@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.apache.avro.Schema;
 
-
 /**
  * A logical representation of a set of data entities.
  * 
@@ -15,6 +14,10 @@ import org.apache.avro.Schema;
  * by a repository (also implementation-specific).
  * 
  * @see DatasetRepository
+ * @see DatasetWriter
+ * @see DatasetReader
+ * @see PartitionStrategy
+ * @see Schema
  */
 public interface Dataset {
 
@@ -31,14 +34,14 @@ public interface Dataset {
    * so on). Validation of the supported schemas is performed by the managing
    * repository, not the {@code Dataset} itself.
    * 
-   * @return
+   * @return the dataset schema
    */
   Schema getSchema();
 
   /**
-   * Get the {@link PartitionStrategy}, if this dataset is partitioned.
-   * Calling this method on a non-partitioned dataset is an error. Instead, use
-   * the {@link #isPartitioned()} method prior to invocation.
+   * Get the {@link PartitionStrategy}, if this dataset is partitioned. Calling
+   * this method on a non-partitioned dataset is an error. Instead, use the
+   * {@link #isPartitioned()} method prior to invocation.
    */
   PartitionStrategy getPartitionStrategy();
 
