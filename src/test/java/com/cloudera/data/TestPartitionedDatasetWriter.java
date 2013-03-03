@@ -32,8 +32,14 @@ public class TestPartitionedDatasetWriter {
     testSchema = new Schema.Parser().parse(Resources.getResource(
         "schema/user-partitioned.avsc").openStream());
     repo = new HDFSDatasetRepository(fileSystem, testDirectory);
-    writer = new PartitionedDatasetWriter<Object>(repo.create("users",
-        new DatasetDescriptor.Builder().schema(testSchema).get()));
+    writer = new PartitionedDatasetWriter<Object>(repo.create(
+        "users",
+        new DatasetDescriptor.Builder()
+            .schema(testSchema)
+            .partitionStrategy(
+                new PartitionExpression(testSchema
+                    .getProp("cdk.partition.expression"), true).evaluate())
+            .get()));
   }
 
   @After
