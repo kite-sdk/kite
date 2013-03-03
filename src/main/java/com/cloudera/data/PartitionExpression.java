@@ -1,16 +1,16 @@
 package com.cloudera.data;
 
-import com.cloudera.data.partition.HashFieldPartitioner;
-import com.cloudera.data.partition.IdentityFieldPartitioner;
-import com.cloudera.data.partition.PartitionFunctions;
-import org.apache.commons.jexl2.Expression;
-import org.apache.commons.jexl2.JexlEngine;
-
-import com.google.common.base.Objects;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.jexl2.Expression;
+import org.apache.commons.jexl2.JexlEngine;
+
+import com.cloudera.data.partition.HashFieldPartitioner;
+import com.cloudera.data.partition.IdentityFieldPartitioner;
+import com.cloudera.data.partition.PartitionFunctions;
+import com.google.common.base.Objects;
 
 public class PartitionExpression {
 
@@ -34,7 +34,11 @@ public class PartitionExpression {
     Object object = expression.evaluate(null);
     if (object instanceof FieldPartitioner) {
       return new PartitionStrategy((FieldPartitioner) object);
-    } else if (object instanceof FieldPartitioner[]) {
+    } else if (object instanceof Object[]) {
+      /*
+       * JEXL doesn't recognize that [hash(...), range(...)] is an array of
+       * FieldPartitioner. Instead, it thinks it's Object[].
+       */
       return new PartitionStrategy((FieldPartitioner[]) object);
     } else {
       throw new IllegalArgumentException(
