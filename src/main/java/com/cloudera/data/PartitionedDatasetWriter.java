@@ -21,7 +21,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
   private static final Logger logger = LoggerFactory
       .getLogger(PartitionedDatasetWriter.class);
 
-  private final Dataset dataset;
+  private Dataset dataset;
   private int maxWriters;
 
   private final PartitionStrategy partitionStrategy;
@@ -118,10 +118,12 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
       writer.open();
       return writer;
     }
+
   }
 
   private static class DatasetWriterRemovalStrategy<E> implements
       RemovalListener<PartitionKey, DatasetWriter<E>> {
+
     @Override
     public void onRemoval(
         RemovalNotification<PartitionKey, DatasetWriter<E>> notification) {
@@ -141,6 +143,7 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
         logger.debug("Stack trace follows:", e);
       }
     }
+
   }
 
 }
