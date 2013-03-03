@@ -37,48 +37,6 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
         .getCardinality());
   }
 
-  static class DatasetWriterCacheLoader<E> extends
-      CacheLoader<PartitionKey, DatasetWriter<E>> {
-
-    private Dataset dataset;
-
-    public DatasetWriterCacheLoader(Dataset dataset) {
-      this.dataset = dataset;
-    }
-
-    @Override
-    public DatasetWriter<E> load(PartitionKey key) throws Exception {
-      Dataset partition = dataset.getPartition(key, true);
-      DatasetWriter<E> writer = partition.getWriter();
-
-      writer.open();
-      return writer;
-    }
-  }
-
-  static class DatasetWriterRemovalStrategy<E> implements
-      RemovalListener<PartitionKey, DatasetWriter<E>> {
-    @Override
-    public void onRemoval(
-        RemovalNotification<PartitionKey, DatasetWriter<E>> notification) {
-
-      DatasetWriter<E> writer = notification.getValue();
-
-      logger.debug("Removing writer:{} for partition:{}", writer,
-          notification.getKey());
-
-      try {
-        writer.close();
-      } catch (IOException e) {
-        logger
-            .error(
-                "Failed to close the dataset writer:{} - {} (this may cause problems)",
-                writer, e.getMessage());
-        logger.debug("Stack trace follows:", e);
-      }
-    }
-  }
-
   @Override
   public void open() {
     logger.debug("Opening partitioned dataset writer w/strategy:{}",
@@ -141,6 +99,48 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
         .add("partitionStrategy", partitionStrategy)
         .add("maxWriters", maxWriters).add("dataset", dataset)
         .add("cachedWriters", cachedWriters).toString();
+  }
+
+  private static class DatasetWriterCacheLoader<E> extends
+      CacheLoader<PartitionKey, DatasetWriter<E>> {
+
+    private Dataset dataset;
+
+    public DatasetWriterCacheLoader(Dataset dataset) {
+      this.dataset = dataset;
+    }
+
+    @Override
+    public DatasetWriter<E> load(PartitionKey key) throws Exception {
+      Dataset partition = dataset.getPartition(key, true);
+      DatasetWriter<E> writer = partition.getWriter();
+
+      writer.open();
+      return writer;
+    }
+  }
+
+  private static class DatasetWriterRemovalStrategy<E> implements
+      RemovalListener<PartitionKey, DatasetWriter<E>> {
+    @Override
+    public void onRemoval(
+        RemovalNotification<PartitionKey, DatasetWriter<E>> notification) {
+
+      DatasetWriter<E> writer = notification.getValue();
+
+      logger.debug("Removing writer:{} for partition:{}", writer,
+          notification.getKey());
+
+      try {
+        writer.close();
+      } catch (IOException e) {
+        logger
+            .error(
+                "Failed to close the dataset writer:{} - {} (this may cause problems)",
+                writer, e.getMessage());
+        logger.debug("Stack trace follows:", e);
+      }
+    }
   }
 
 }
