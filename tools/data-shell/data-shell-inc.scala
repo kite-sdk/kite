@@ -2,6 +2,8 @@ import java.io.File
 
 import org.apache.avro.Schema
 import org.apache.avro.Schema.{Field, Type}
+import org.apache.avro.generic.GenericData.Record
+import org.apache.avro.generic.GenericRecordBuilder
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 
@@ -10,6 +12,7 @@ import com.google.common.io.Files
 import com.google.common.io.Resources
 
 import com.cloudera.data._
+import com.cloudera.data.partition._
 import com.cloudera.data.hdfs._
 import com.cloudera.data.hdfs.util._
 
