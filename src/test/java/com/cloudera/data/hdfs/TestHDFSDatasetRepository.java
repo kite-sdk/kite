@@ -14,6 +14,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cloudera.data.DatasetDescriptor;
+import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.hdfs.util.Paths;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
@@ -63,6 +65,32 @@ public class TestHDFSDatasetRepository {
     Schema schema = dataset.getSchema();
     Schema serializedSchema = new Schema.Parser().parse(new File(Paths
         .toFile(testDirectory), "data/test1/schema.avsc"));
+
+    Assert.assertEquals("Dataset schema matches what's serialized to disk",
+        schema, serializedSchema);
+  }
+
+  @Test
+  public void testCreateWithDescriptor() throws IOException {
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(testSchema)
+        .partitionStrategy(
+            new PartitionStrategy.Builder().hash("name", 3).get()).get();
+
+    HDFSDataset dataset = repo.create("test2", descriptor);
+
+    Assert.assertEquals("Dataset name is propagated", "test2",
+        dataset.getName());
+    Assert.assertEquals("Dataset schema is propagated", testSchema,
+        dataset.getSchema());
+    Assert.assertTrue("Dataset data directory exists",
+        fileSystem.exists(new Path(testDirectory, "data/test2/data")));
+    Assert.assertTrue("Dataset metadata file exists",
+        fileSystem.exists(new Path(testDirectory, "data/test2/schema.avsc")));
+
+    Schema schema = dataset.getSchema();
+    Schema serializedSchema = new Schema.Parser().parse(new File(Paths
+        .toFile(testDirectory), "data/test2/schema.avsc"));
 
     Assert.assertEquals("Dataset schema matches what's serialized to disk",
         schema, serializedSchema);

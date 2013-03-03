@@ -55,4 +55,6 @@ public interface DatasetRepository<DS extends Dataset> {
    */
   DS create(String name, Schema schema) throws IOException;
 
+  DS create(String name, DatasetDescriptor descriptor) throws IOException;
+
 }

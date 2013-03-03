@@ -8,8 +8,10 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.PartitionExpression;
+import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.hdfs.util.Paths;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
@@ -31,20 +33,18 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
   @Override
   public HDFSDataset create(String name, Schema schema) throws IOException {
-    Preconditions.checkArgument(name != null, "Dataset name can not be null");
-    Preconditions.checkArgument(schema != null,
-        "Dataset schema can not be null");
+    Preconditions.checkArgument(name != null, "Name can not be null");
+    Preconditions.checkArgument(schema != null, "Schema can not be null");
     Preconditions.checkState(fileSystem != null,
-        "Dataset repository filesystem implementation can not be null");
+        "FileSystem implementation can not be null");
 
     Path datasetPath = pathForDataset(name);
+    Path datasetDataPath = pathForDatasetData(name);
+    Path datasetMetadataPath = pathForDatasetMetadata(name);
 
     if (fileSystem.exists(datasetPath)) {
       throw new IOException("Attempt to create an existing dataset:" + name);
     }
-
-    Path datasetDataPath = pathForDatasetData(name);
-    Path datasetMetadataPath = pathForDatasetMetadata(name);
 
     logger.debug("Creating dataset:{} schema:{} datasetPath:{}", new Object[] {
         name, schema, datasetDataPath });
@@ -54,10 +54,7 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
           + datasetDataPath);
     }
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("Serializing dataset schema:{}", schema.toString());
-    }
-
+    // TODO: Replace with MetadataProvider
     Files.write(schema.toString(), Paths.toFile(datasetMetadataPath),
         Charsets.UTF_8);
 
@@ -69,11 +66,49 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
     if (partitionExpression != null) {
       logger.debug("Partition expression: {}", partitionExpression);
-      PartitionExpression expr = new PartitionExpression(partitionExpression, true);
+      PartitionExpression expr = new PartitionExpression(partitionExpression,
+          true);
       datasetBuilder.partitionStrategy(expr.evaluate());
     }
 
     return datasetBuilder.get();
+  }
+
+  @Override
+  public HDFSDataset create(String name, DatasetDescriptor descriptor)
+      throws IOException {
+
+    Preconditions.checkArgument(name != null, "Name can not be null");
+    Preconditions.checkArgument(descriptor != null,
+        "Descriptor can not be null");
+
+    Schema schema = descriptor.getSchema();
+    PartitionStrategy partitionStrategy = descriptor.getPartitionStrategy();
+
+    Path datasetPath = pathForDataset(name);
+    Path datasetDataPath = pathForDatasetData(name);
+    Path datasetMetadataPath = pathForDatasetMetadata(name);
+
+    if (fileSystem.exists(datasetPath)) {
+      throw new IOException("Attempt to create an existing dataset:" + name);
+    }
+
+    logger.debug("Creating dataset:{} schema:{} datasetPath:{}", new Object[] {
+        name, schema, datasetDataPath });
+
+    if (!fileSystem.mkdirs(datasetDataPath)) {
+      throw new IOException("Failed to make dataset diectories:"
+          + datasetDataPath);
+    }
+
+    // TODO: Replace with MetadataProvider
+    Files.write(schema.toString(), Paths.toFile(datasetMetadataPath),
+        Charsets.UTF_8);
+
+    return new HDFSDataset.Builder().name(name).fileSystem(fileSystem)
+        .schema(schema).directory(pathForDataset(name))
+        .dataDirectory(pathForDatasetData(name))
+        .partitionStrategy(partitionStrategy).isRoot(true).get();
   }
 
   @Override
@@ -101,7 +136,8 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
     if (partitionExpression != null) {
       logger.debug("Partition expression: {}", partitionExpression);
-      PartitionExpression expr = new PartitionExpression(partitionExpression, true);
+      PartitionExpression expr = new PartitionExpression(partitionExpression,
+          true);
       datasetBuilder.partitionStrategy(expr.evaluate());
     }
 
