@@ -62,7 +62,6 @@ public interface Dataset {
    *          If true, automatically create the partition if doesn't exist,
    *          otherwise, return null.
    */
-  // TODO: this is an internal API for writers, not for end users
   Dataset getPartition(PartitionKey key, boolean autoCreate) throws IOException;
 
   /**
