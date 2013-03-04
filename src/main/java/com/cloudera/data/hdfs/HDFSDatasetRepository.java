@@ -13,7 +13,6 @@ import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.MetadataProvider;
 import com.cloudera.data.PartitionExpression;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.hdfs.util.Paths;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
@@ -123,25 +122,14 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
     Path datasetDirectory = pathForDataset(name);
     Path datasetDataPath = pathForDatasetData(name);
-    Path datasetMetadataPath = pathForDatasetMetadata(name);
 
-    Schema schema = new Schema.Parser()
-        .parse(Paths.toFile(datasetMetadataPath));
+    DatasetDescriptor descriptor = metadataProvider.load(name);
+    Schema schema = descriptor.getSchema();
+    PartitionStrategy partitionStrategy = descriptor.getPartitionStrategy();
 
-    String partitionExpression = schema.getProp("cdk.partition.expression");
-
-    HDFSDataset.Builder datasetBuilder = new HDFSDataset.Builder()
-        .fileSystem(fileSystem).directory(datasetDirectory)
-        .dataDirectory(datasetDataPath).name(name).schema(schema);
-
-    if (partitionExpression != null) {
-      logger.debug("Partition expression: {}", partitionExpression);
-      PartitionExpression expr = new PartitionExpression(partitionExpression,
-          true);
-      datasetBuilder.partitionStrategy(expr.evaluate());
-    }
-
-    HDFSDataset ds = datasetBuilder.get();
+    HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
+        .directory(datasetDirectory).dataDirectory(datasetDataPath).name(name)
+        .schema(schema).partitionStrategy(partitionStrategy).get();
 
     logger.debug("Loaded dataset:{}", ds);
 
@@ -157,10 +145,6 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
   private Path pathForDatasetData(String name) {
     return new Path(pathForDataset(name), "data");
-  }
-
-  private Path pathForDatasetMetadata(String name) {
-    return new Path(pathForDataset(name), "schema.avsc");
   }
 
   @Override
