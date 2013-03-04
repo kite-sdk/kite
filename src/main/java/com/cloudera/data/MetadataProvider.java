@@ -1,15 +1,11 @@
 package com.cloudera.data;
 
-import java.util.List;
-
-import org.apache.avro.Schema;
+import java.io.IOException;
 
 public interface MetadataProvider {
 
-  Schema getSchema(String name);
+  DatasetDescriptor load(String name) throws IOException;
 
-  void setSchema(String name, Schema schema);
-
-  List<String> getPartitionNames(String name);
+  void save(String name, DatasetDescriptor descriptor) throws IOException;
 
 }
