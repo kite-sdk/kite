@@ -34,14 +34,15 @@ public class TestPartitionedDatasetWriter {
         "schema/user-partitioned.avsc").openStream());
     repo = new FileSystemDatasetRepository(fileSystem, testDirectory,
         new FileSystemMetadataProvider(fileSystem, testDirectory));
+    PartitionStrategy partitionStrategy = new PartitionExpression(testSchema
+        .getProp("cdk.partition.expression"), true).evaluate();
     writer = new PartitionedDatasetWriter<Object>(repo.create(
         "users",
         new DatasetDescriptor.Builder()
             .schema(testSchema)
             .partitionStrategy(
-                new PartitionExpression(testSchema
-                    .getProp("cdk.partition.expression"), true).evaluate())
-            .get()));
+                partitionStrategy)
+            .get()), partitionStrategy);
   }
 
   @After

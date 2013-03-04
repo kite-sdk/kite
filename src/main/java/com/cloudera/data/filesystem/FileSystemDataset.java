@@ -1,8 +1,12 @@
 package com.cloudera.data.filesystem;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
+import com.cloudera.data.FieldPartitioner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -32,21 +36,25 @@ class FileSystemDataset implements Dataset {
   private Path dataDirectory;
   private String name;
   private Schema schema;
-  private PartitionStrategy partitionStrategy;
-  private boolean isRoot = true;
+  private PartitionStrategy partitionStrategy; // at root
+  private PartitionKey partitionKey;
 
   @Override
   public <E> DatasetWriter<E> getWriter() {
     DatasetWriter<E> writer = null;
 
-    if (isPartitioned() && isRoot) {
-      // FIXME: Why does this complain about a resource leak and not others?
-      writer = new PartitionedDatasetWriter<E>(this);
+    if (partitionStrategy != null) {
+      if (partitionKey == null || partitionKey.getLength() < partitionStrategy.getFieldPartitioners().size()) {
+        // FIXME: Why does this complain about a resource leak and not others?
+        writer = new PartitionedDatasetWriter<E>(this, partitionStrategy);
+      } else {
+        Path dataFile = new Path(toDirectoryName(dataDirectory, partitionKey),
+            uniqueFilename());
+        writer = new FileSystemDatasetWriter.Builder<E>().fileSystem(fileSystem)
+            .path(dataFile).schema(schema).get();
+      }
     } else {
-      // FIXME: This file name is not guaranteed to be truly unique.
-      Path dataFile = new Path(dataDirectory, Joiner.on('-').join(
-          System.currentTimeMillis(), Thread.currentThread().getId()));
-
+      Path dataFile = new Path(dataDirectory, uniqueFilename());
       writer = new FileSystemDatasetWriter.Builder<E>().fileSystem(fileSystem)
           .path(dataFile).schema(schema).get();
     }
@@ -54,10 +62,17 @@ class FileSystemDataset implements Dataset {
     return writer;
   }
 
+  private String uniqueFilename() {
+    // FIXME: This file name is not guaranteed to be truly unique.
+    return Joiner.on('-').join(
+        System.currentTimeMillis(), Thread.currentThread().getId());
+  }
+
   @Override
   public <E> DatasetReader<E> getReader() throws IOException {
     List<Path> paths = Lists.newArrayList();
     accumulateDatafilePaths(dataDirectory, paths);
+    pruneDatafilePaths(paths);
     return new MultiFileDatasetReader<E>(fileSystem, paths, schema);
   }
 
@@ -68,6 +83,28 @@ class FileSystemDataset implements Dataset {
         accumulateDatafilePaths(status.getPath(), paths);
       } else {
         paths.add(status.getPath());
+      }
+    }
+  }
+
+  private void pruneDatafilePaths(List<Path> paths) {
+    if (partitionKey == null) {
+      return;
+    }
+    for (Iterator<Path> it = paths.iterator(); it.hasNext(); ) {
+      Path path = it.next();
+      Path dir = path.getParent(); // directory containing leaf data file
+      // walk up the directory hierarchy
+      for (int i = partitionStrategy.getFieldPartitioners().size() - 1; i >= 0; i--) {
+        FieldPartitioner fieldPartitioner = partitionStrategy.getFieldPartitioners().get(i);
+        if (partitionKey.get(i) != null) {
+          String filterName = fieldPartitioner.getName() + "=" + partitionKey.get(i);
+          if (!filterName.equals(dir.getName())) {
+            it.remove();
+            break;
+          }
+        }
+        dir = dir.getParent();
       }
     }
   }
@@ -92,12 +129,15 @@ class FileSystemDataset implements Dataset {
 
   @Override
   public PartitionStrategy getPartitionStrategy() {
-    return partitionStrategy;
+    if (partitionKey == null) {
+      return partitionStrategy;
+    }
+    return partitionStrategy.getSubpartitionStrategy(partitionKey.getLength());
   }
 
   @Override
   public boolean isPartitioned() {
-    return partitionStrategy != null;
+    return getPartitionStrategy() != null;
   }
 
   @Override
@@ -111,13 +151,7 @@ class FileSystemDataset implements Dataset {
     logger.debug("Loading partition:{}.{} allowCreate:{}", new Object[] {
         partitionStrategy.getName(), name, allowCreate });
 
-    Path partitionDirectory = dataDirectory;
-    for (int i = 0; i < key.getValues().size(); i++) {
-      String fieldName = partitionStrategy.getFieldPartitioners().get(i)
-          .getName();
-      partitionDirectory = new Path(partitionDirectory, fieldName + "="
-          + key.getValues().get(i));
-    }
+    Path partitionDirectory = toDirectoryName(dataDirectory, key);
 
     if (allowCreate && !fileSystem.exists(partitionDirectory)) {
       fileSystem.mkdirs(partitionDirectory);
@@ -127,11 +161,31 @@ class FileSystemDataset implements Dataset {
         .name(name)
         .fileSystem(fileSystem)
         .directory(directory)
-        .dataDirectory(partitionDirectory)
+        .dataDirectory(dataDirectory)
         .schema(schema)
-        .isRoot(false)
-        .partitionStrategy(
-            partitionStrategy.getSubpartitionStrategy(key.getLength())).get();
+        .partitionStrategy(partitionStrategy)
+        .partitionKey(key).get();
+  }
+
+  private Path toDirectoryName(Path dir, PartitionKey key) {
+    Path result = dir;
+    for (int i = 0; i < key.getLength(); i++) {
+      String fieldName = partitionStrategy.getFieldPartitioners().get(i)
+          .getName();
+      result = new Path(result, fieldName + "=" + key.get(i));
+    }
+    return result;
+  }
+
+  private PartitionKey fromDirectoryName(Path dir) {
+    List<Object> values = Lists.newArrayList();
+    // walk up the directory hierarchy
+    for (int i = partitionStrategy.getFieldPartitioners().size() - 1; i >= 0; i--) {
+      String value = Iterables.get(Splitter.on('=').split(dir.getName()), 1);
+      values.add(0, value);
+      dir = dir.getParent();
+    }
+    return new PartitionKey(values.toArray());
   }
 
   @Override
@@ -145,15 +199,18 @@ class FileSystemDataset implements Dataset {
       for (Path p : partitionDirectories) {
         for (FileStatus stat : fileSystem.listStatus(p)) {
           subpaths.add(stat.getPath());
+          stat.getPath().getName();
         }
       }
       partitionDirectories = subpaths;
     }
     List<Dataset> partitions = Lists.newArrayList();
     for (Path p : partitionDirectories) {
+      PartitionKey key = fromDirectoryName(p);
       Builder builder = new FileSystemDataset.Builder().name(name)
           .fileSystem(fileSystem).directory(directory).schema(schema)
-          .isRoot(false).dataDirectory(p);
+          .dataDirectory(dataDirectory).partitionStrategy(partitionStrategy)
+          .partitionKey(key);
       partitions.add(builder.get());
     }
     return partitions;
@@ -204,8 +261,8 @@ class FileSystemDataset implements Dataset {
       return this;
     }
 
-    public Builder isRoot(boolean isRoot) {
-      dataset.isRoot = isRoot;
+    Builder partitionKey(PartitionKey partitionKey) {
+      dataset.partitionKey = partitionKey;
       return this;
     }
 

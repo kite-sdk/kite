@@ -1,5 +1,7 @@
 package com.cloudera.data;
 
+import com.google.common.base.Objects;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,8 +13,11 @@ public class PartitionKey {
     this.values = Arrays.asList(values);
   }
 
-  public List<Object> getValues() {
-    return values;
+  public Object get(int index) {
+    if (index < values.size()) {
+      return values.get(index);
+    }
+    return null;
   }
 
   @Override
@@ -37,6 +42,11 @@ public class PartitionKey {
 
   public int getLength() {
     return values.size();
+  }
+
+  @Override
+  public String toString() {
+    return Objects.toStringHelper(this).add("values", values).toString();
   }
 
 }

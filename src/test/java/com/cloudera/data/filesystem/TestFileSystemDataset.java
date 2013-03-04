@@ -132,6 +132,10 @@ public class TestFileSystemDataset {
     Assert.assertEquals(partitionStrategy, ds.getPartitionStrategy());
 
     writeTestUsers(ds, 10);
+    Assert.assertTrue("Partitioned directory 0 exists",
+        fileSystem.exists(new Path(testDirectory, "username=0")));
+    Assert.assertTrue("Partitioned directory 1 exists",
+        fileSystem.exists(new Path(testDirectory, "username=1")));
     readTestUsers(ds, 10);
     int total = readTestUsersInPartition(ds, new PartitionKey(0), null)
         + readTestUsersInPartition(ds, new PartitionKey(1), null);
@@ -170,6 +174,9 @@ public class TestFileSystemDataset {
     total = 0;
     for (int i1 = 0; i1 < 2; i1++) {
       for (int i2 = 0; i2 < 3; i2++) {
+        String part = "username=" + i1 + "/email=" + i2;
+        Assert.assertTrue("Partitioned directory " + part + " exists",
+            fileSystem.exists(new Path(testDirectory, part)));
         total += readTestUsersInPartition(ds, new PartitionKey(i1, i2), null);
       }
     }
@@ -184,6 +191,23 @@ public class TestFileSystemDataset {
     }
     Assert.assertEquals(10, total);
 
+  }
+
+  @Test
+  public void testWriteToSubpartition() throws IOException {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .hash("username", 2).hash("email", 3).get();
+
+    FileSystemDataset ds = new FileSystemDataset.Builder().fileSystem(fileSystem)
+        .directory(testDirectory).dataDirectory(testDirectory)
+        .name("partitioned-users").schema(testSchema)
+        .partitionStrategy(partitionStrategy).get();
+
+    Dataset userPartition = ds.getPartition(new PartitionKey(1), false);
+    writeTestUsers(userPartition, 1);
+    Assert.assertTrue("Partitioned directory exists",
+        fileSystem.exists(new Path(testDirectory, "username=1/email=2")));
+    Assert.assertEquals(1, readTestUsersInPartition(ds, new PartitionKey(1), "email"));
   }
 
   private int datasetSize(Dataset ds) throws IOException {
@@ -204,7 +228,7 @@ public class TestFileSystemDataset {
     return size;
   }
 
-  private void writeTestUsers(FileSystemDataset ds, int count) throws IOException {
+  private void writeTestUsers(Dataset ds, int count) throws IOException {
     DatasetWriter<Record> writer = null;
 
     try {
@@ -227,7 +251,7 @@ public class TestFileSystemDataset {
     }
   }
 
-  private void readTestUsers(FileSystemDataset ds, int count) throws IOException {
+  private void readTestUsers(Dataset ds, int count) throws IOException {
     DatasetReader<Record> reader = null;
 
     try {
@@ -257,7 +281,7 @@ public class TestFileSystemDataset {
     }
   }
 
-  private int readTestUsersInPartition(FileSystemDataset ds, PartitionKey key,
+  private int readTestUsersInPartition(Dataset ds, PartitionKey key,
       String subpartitionName) throws IOException {
     int readCount = 0;
     DatasetReader<Record> reader = null;
@@ -274,10 +298,10 @@ public class TestFileSystemDataset {
       reader.open();
       while (reader.hasNext()) {
         Record actualRecord = reader.read();
-        Assert.assertEquals(key.getValues().get(0),
+        Assert.assertEquals(actualRecord.toString(), key.get(0),
             (actualRecord.get("username").hashCode() & Integer.MAX_VALUE) % 2);
         if (key.getLength() > 1) {
-          Assert.assertEquals(key.getValues().get(1), (actualRecord
+          Assert.assertEquals(key.get(1), (actualRecord
               .get("email").hashCode() & Integer.MAX_VALUE) % 3);
         }
         readCount++;

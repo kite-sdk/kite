@@ -27,13 +27,13 @@ public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable 
   private final PartitionStrategy partitionStrategy;
   private LoadingCache<PartitionKey, DatasetWriter<E>> cachedWriters;
 
-  public PartitionedDatasetWriter(Dataset dataset) {
+  public PartitionedDatasetWriter(Dataset dataset, PartitionStrategy partitionStrategy) {
     Preconditions.checkArgument(dataset.isPartitioned(), "Dataset " + dataset
         + " is not partitioned");
 
     this.dataset = dataset;
-    this.partitionStrategy = dataset.getPartitionStrategy();
-    this.maxWriters = Math.min(10, dataset.getPartitionStrategy()
+    this.partitionStrategy = partitionStrategy;
+    this.maxWriters = Math.min(10, partitionStrategy
         .getCardinality());
   }
 
