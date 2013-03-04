@@ -140,9 +140,22 @@ class FileSystemDataset implements Dataset {
   }
 
   @Override
-  public Dataset getPartition(PartitionKey key, boolean allowCreate)
+  public <E> Dataset getPartition(E entity, boolean allowCreate)
       throws IOException {
 
+    Preconditions.checkState(isPartitioned(),
+        "Attempt to get a partition on a non-partitioned dataset (name:%s)",
+        name);
+
+    logger.debug("Loading partition:{}.{} allowCreate:{}", new Object[] {
+        partitionStrategy.getName(), name, allowCreate });
+
+    PartitionKey key = partitionStrategy.getPartitionKey(entity);
+    return getPartitionForKey(key, allowCreate);
+  }
+
+  Dataset getPartitionForKey(PartitionKey key, boolean allowCreate)
+      throws IOException {
     Preconditions.checkState(isPartitioned(),
         "Attempt to get a partition on a non-partitioned dataset (name:%s)",
         name);

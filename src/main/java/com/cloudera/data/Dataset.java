@@ -52,17 +52,16 @@ public interface Dataset {
   boolean isPartitioned();
 
   /**
-   * Get a partition by key, possibly creating the partition if it doesn't
+   * Get a partition for an entity, possibly creating the partition if it doesn't
    * already exist.
    * 
-   * @param key
-   *          The partition key, an array consisting of the value for each
-   *          partition field in the {@link PartitionStrategy}.
+   * @param entity
+   *          The entity being used to find the partition.
    * @param autoCreate
    *          If true, automatically create the partition if doesn't exist,
    *          otherwise, return null.
    */
-  Dataset getPartition(PartitionKey key, boolean autoCreate) throws IOException;
+  <E> Dataset getPartition(E entity, boolean autoCreate) throws IOException;
 
   /**
    * <p>

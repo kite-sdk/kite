@@ -2,6 +2,7 @@ package com.cloudera.data.filesystem;
 
 import java.io.IOException;
 
+import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.filesystem.PartitionExpression;
@@ -40,13 +41,14 @@ public class TestPartitionedDatasetWriter {
         new FileSystemMetadataProvider(fileSystem, testDirectory));
     PartitionStrategy partitionStrategy = new PartitionExpression(testSchema
         .getProp("cdk.partition.expression"), true).evaluate();
-    writer = new PartitionedDatasetWriter<Object>(repo.create(
+    FileSystemDataset users = (FileSystemDataset) repo.create(
         "users",
         new DatasetDescriptor.Builder()
             .schema(testSchema)
             .partitionStrategy(
                 partitionStrategy)
-            .get()), partitionStrategy);
+            .get());
+    writer = new PartitionedDatasetWriter<Object>(users, partitionStrategy);
   }
 
   @After

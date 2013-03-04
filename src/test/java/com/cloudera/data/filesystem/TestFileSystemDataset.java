@@ -203,7 +203,7 @@ public class TestFileSystemDataset {
         .name("partitioned-users").schema(testSchema)
         .partitionStrategy(partitionStrategy).get();
 
-    Dataset userPartition = ds.getPartition(new PartitionKey(1), false);
+    Dataset userPartition = ds.getPartitionForKey(new PartitionKey(1), false);
     writeTestUsers(userPartition, 1);
     Assert.assertTrue("Partitioned directory exists",
         fileSystem.exists(new Path(testDirectory, "username=1/email=2")));
@@ -281,12 +281,12 @@ public class TestFileSystemDataset {
     }
   }
 
-  private int readTestUsersInPartition(Dataset ds, PartitionKey key,
+  private int readTestUsersInPartition(FileSystemDataset ds, PartitionKey key,
       String subpartitionName) throws IOException {
     int readCount = 0;
     DatasetReader<Record> reader = null;
     try {
-      Dataset partition = ds.getPartition(key, false);
+      Dataset partition = ds.getPartitionForKey(key, false);
       if (subpartitionName != null) {
         List<FieldPartitioner> fieldPartitioners = partition
             .getPartitionStrategy().getFieldPartitioners();
