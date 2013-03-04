@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.cloudera.data.FieldPartitioner;
+import com.cloudera.data.impl.Accessor;
+import com.cloudera.data.impl.PartitionKey;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import org.apache.avro.Schema;
@@ -17,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
-import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -131,7 +132,7 @@ class FileSystemDataset implements Dataset {
     if (partitionKey == null) {
       return partitionStrategy;
     }
-    return partitionStrategy.getSubpartitionStrategy(partitionKey.getLength());
+    return Accessor.getDefault().getSubpartitionStrategy(partitionStrategy, partitionKey.getLength());
   }
 
   @Override
@@ -150,7 +151,7 @@ class FileSystemDataset implements Dataset {
     logger.debug("Loading partition for entity {}, allowCreate:{}", new Object[] {
         entity, allowCreate });
 
-    PartitionKey key = partitionStrategy.getPartitionKey(entity);
+    PartitionKey key = Accessor.getDefault().getPartitionKey(partitionStrategy, entity);
     return getPartitionForKey(key, allowCreate);
   }
 

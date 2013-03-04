@@ -2,7 +2,7 @@ package com.cloudera.data.filesystem;
 
 import java.io.IOException;
 
-import com.cloudera.data.PartitionKey;
+import com.cloudera.data.impl.PartitionKey;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;

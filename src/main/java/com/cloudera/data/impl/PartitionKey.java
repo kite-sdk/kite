@@ -1,4 +1,4 @@
-package com.cloudera.data;
+package com.cloudera.data.impl;
 
 import com.google.common.base.Objects;
 

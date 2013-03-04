@@ -68,6 +68,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${vers.maven-javadoc}</version>
+        <configuration>
+          <excludePackageNames>*.impl</excludePackageNames>
+        </configuration>
         <executions>
           <execution>
             <id>package.javadoc</id>

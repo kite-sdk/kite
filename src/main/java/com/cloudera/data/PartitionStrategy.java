@@ -5,6 +5,8 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import com.cloudera.data.impl.Accessor;
+import com.cloudera.data.impl.PartitionKey;
 import org.apache.avro.generic.GenericRecord;
 
 import com.cloudera.data.partition.HashFieldPartitioner;
@@ -18,6 +20,10 @@ import com.google.common.collect.Lists;
 public class PartitionStrategy {
 
   private List<FieldPartitioner> fieldPartitioners;
+
+  static {
+    Accessor.setDefault(new AccessorImpl());
+  }
 
   protected PartitionStrategy() {
     fieldPartitioners = Lists.newArrayList();
@@ -56,7 +62,7 @@ public class PartitionStrategy {
   /**
    * Returns a key that represents the value of the partition.
    */
-  public PartitionKey getPartitionKey(Object entity) {
+  PartitionKey getPartitionKey(Object entity) {
     Object[] values = new Object[fieldPartitioners.size()]; // TODO: reuse
     for (int i = 0; i < fieldPartitioners.size(); i++) {
       FieldPartitioner fp = fieldPartitioners.get(i);
@@ -89,7 +95,7 @@ public class PartitionStrategy {
    * Return a {@link PartitionStrategy} for subpartitions starting at the given
    * index.
    */
-  public PartitionStrategy getSubpartitionStrategy(int startIndex) {
+  PartitionStrategy getSubpartitionStrategy(int startIndex) {
     if (startIndex == 0) {
       return this;
     }

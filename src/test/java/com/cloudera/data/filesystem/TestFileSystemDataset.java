@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import com.cloudera.data.impl.PartitionKey;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -21,7 +22,6 @@ import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.FieldPartitioner;
-import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.filesystem.FileSystemDataset;
 import com.google.common.collect.Iterables;

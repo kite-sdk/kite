@@ -8,8 +8,9 @@ import java.util.concurrent.ExecutionException;
 
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetWriter;
-import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
+import com.cloudera.data.impl.Accessor;
+import com.cloudera.data.impl.PartitionKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +66,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
         "Attempt to write to a writer in state:%s", state);
 
-    PartitionKey key = partitionStrategy.getPartitionKey(entity);
+    PartitionKey key = Accessor.getDefault().getPartitionKey(partitionStrategy, entity);
     DatasetWriter<E> writer = null;
 
     try {
