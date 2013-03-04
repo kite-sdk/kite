@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.cloudera.data.FieldPartitioner;
+import com.google.common.base.Objects;
 
 public class ListFieldPartitioner extends FieldPartitioner {
 
@@ -33,4 +34,9 @@ public class ListFieldPartitioner extends FieldPartitioner {
     throw new IllegalArgumentException(value + " is not in set");
   }
 
+  @Override
+  public String toString() {
+    return Objects.toStringHelper(this).add("name", getName())
+        .add("values", values).toString();
+  }
 }

@@ -37,7 +37,8 @@ public class RangeFieldPartitioner extends FieldPartitioner {
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("upperBounds", upperBounds)
+    return Objects.toStringHelper(this).add("name", getName())
+        .add("upperBounds", upperBounds)
         .toString();
   }
 }

@@ -1,6 +1,9 @@
 package com.cloudera.data.partition;
 
 import com.cloudera.data.FieldPartitioner;
+import com.google.common.base.Objects;
+
+import java.util.Arrays;
 
 public class IntRangeFieldPartitioner extends FieldPartitioner {
 
@@ -24,4 +27,9 @@ public class IntRangeFieldPartitioner extends FieldPartitioner {
     throw new IllegalArgumentException(value + " is outside bounds");
   }
 
+  @Override
+  public String toString() {
+    return Objects.toStringHelper(this).add("name", getName())
+        .add("upperBounds", Arrays.asList(upperBounds)).toString();
+  }
 }
