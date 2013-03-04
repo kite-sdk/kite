@@ -80,6 +80,8 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkArgument(descriptor != null,
         "Descriptor can not be null");
+    Preconditions.checkState(metadataProvider != null,
+        "Metadata provider can not be null");
 
     Schema schema = descriptor.getSchema();
     PartitionStrategy partitionStrategy = descriptor.getPartitionStrategy();
@@ -109,11 +111,13 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
   @Override
   public HDFSDataset get(String name) throws IOException {
-    Preconditions.checkArgument(name != null, "Dataset name can not be null");
+    Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkState(rootDirectory != null,
-        "Dataset repository root directory can not be null");
+        "Root directory can not be null");
     Preconditions.checkState(fileSystem != null,
-        "Dataset repository filesystem implementation can not be null");
+        "FileSystem implementation can not be null");
+    Preconditions.checkState(metadataProvider != null,
+        "Metadata provider can not be null");
 
     logger.debug("Loading dataset:{}", name);
 
