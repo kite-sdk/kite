@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cloudera.data.hdfs.FileSystemMetadataProvider;
 import com.cloudera.data.hdfs.HDFSDatasetRepository;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
@@ -31,7 +32,8 @@ public class TestPartitionedDatasetWriter {
     fileSystem = FileSystem.get(new Configuration());
     testSchema = new Schema.Parser().parse(Resources.getResource(
         "schema/user-partitioned.avsc").openStream());
-    repo = new HDFSDatasetRepository(fileSystem, testDirectory);
+    repo = new HDFSDatasetRepository(fileSystem, testDirectory,
+        new FileSystemMetadataProvider(fileSystem, testDirectory));
     writer = new PartitionedDatasetWriter<Object>(repo.create(
         "users",
         new DatasetDescriptor.Builder()

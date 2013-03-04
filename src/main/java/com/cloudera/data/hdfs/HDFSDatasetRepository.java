@@ -26,9 +26,12 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
   private Path rootDirectory;
   private FileSystem fileSystem;
 
-  public HDFSDatasetRepository(FileSystem fileSystem, Path rootDirectory) {
+  public HDFSDatasetRepository(FileSystem fileSystem, Path rootDirectory,
+      MetadataProvider metadataProvider) {
+
     this.fileSystem = fileSystem;
     this.rootDirectory = rootDirectory;
+    this.metadataProvider = metadataProvider;
   }
 
   @Deprecated
