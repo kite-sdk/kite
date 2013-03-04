@@ -10,18 +10,19 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
+import com.cloudera.data.MetadataProvider;
 import com.cloudera.data.PartitionExpression;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.hdfs.util.Paths;
-import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.io.Files;
 
 public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
   private static final Logger logger = LoggerFactory
       .getLogger(HDFSDatasetRepository.class);
+
+  private MetadataProvider metadataProvider;
 
   private Path rootDirectory;
   private FileSystem fileSystem;
@@ -40,7 +41,6 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
     Path datasetPath = pathForDataset(name);
     Path datasetDataPath = pathForDatasetData(name);
-    Path datasetMetadataPath = pathForDatasetMetadata(name);
 
     if (fileSystem.exists(datasetPath)) {
       throw new IOException("Attempt to create an existing dataset:" + name);
@@ -54,9 +54,8 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
           + datasetDataPath);
     }
 
-    // TODO: Replace with MetadataProvider
-    Files.write(schema.toString(), Paths.toFile(datasetMetadataPath),
-        Charsets.UTF_8);
+    metadataProvider.save(name, new DatasetDescriptor.Builder().schema(schema)
+        .get());
 
     HDFSDataset.Builder datasetBuilder = new HDFSDataset.Builder()
         .directory(datasetPath).dataDirectory(datasetDataPath)
@@ -87,7 +86,6 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
     Path datasetPath = pathForDataset(name);
     Path datasetDataPath = pathForDatasetData(name);
-    Path datasetMetadataPath = pathForDatasetMetadata(name);
 
     if (fileSystem.exists(datasetPath)) {
       throw new IOException("Attempt to create an existing dataset:" + name);
@@ -101,9 +99,7 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
           + datasetDataPath);
     }
 
-    // TODO: Replace with MetadataProvider
-    Files.write(schema.toString(), Paths.toFile(datasetMetadataPath),
-        Charsets.UTF_8);
+    metadataProvider.save(name, descriptor);
 
     return new HDFSDataset.Builder().name(name).fileSystem(fileSystem)
         .schema(schema).directory(pathForDataset(name))
