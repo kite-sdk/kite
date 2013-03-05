@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.io.Closeables;
 
-class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
+public class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
     Closeable {
 
   private static final Logger logger = LoggerFactory
