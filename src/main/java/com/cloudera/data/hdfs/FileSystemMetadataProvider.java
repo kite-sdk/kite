@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
+import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.util.Utf8;
@@ -56,8 +56,8 @@ public class FileSystemMetadataProvider implements MetadataProvider {
     try {
       inputStream = new AvroFSInput(fileSystem.open(new Path(directory,
           "descriptor.avro")), 0);
-      reader = new DataFileReader<Record>(inputStream, GenericData.get()
-          .createDatumReader(descriptorSchema));
+      reader = new DataFileReader<Record>(inputStream,
+          new GenericDatumReader<Record>(descriptorSchema));
 
       Record record = reader.next();
 
