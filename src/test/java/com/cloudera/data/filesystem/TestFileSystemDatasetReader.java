@@ -11,10 +11,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.cloudera.data.DatasetReader;
-import com.cloudera.data.filesystem.HDFSDatasetReader;
+import com.cloudera.data.filesystem.FileSystemDatasetReader;
 import com.google.common.io.Resources;
 
-public class TestHDFSDatasetReader {
+public class TestFileSystemDatasetReader {
 
   private FileSystem fileSystem;
   private Schema testSchema;
@@ -32,7 +32,7 @@ public class TestHDFSDatasetReader {
     int records = 0;
 
     try {
-      reader = new HDFSDatasetReader<String>(fileSystem, new Path(Resources
+      reader = new FileSystemDatasetReader<String>(fileSystem, new Path(Resources
           .getResource("data/strings-100.avro").getFile()), testSchema);
 
       reader.open();

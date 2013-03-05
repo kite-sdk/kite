@@ -16,16 +16,16 @@ import org.junit.Test;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.filesystem.FileSystemMetadataProvider;
-import com.cloudera.data.filesystem.HDFSDataset;
-import com.cloudera.data.filesystem.HDFSDatasetRepository;
+import com.cloudera.data.filesystem.FileSystemDataset;
+import com.cloudera.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
-public class TestHDFSDatasetRepository {
+public class TestFileSystemDatasetRepository {
 
   private FileSystem fileSystem;
   private Path testDirectory;
-  private HDFSDatasetRepository repo;
+  private FileSystemDatasetRepository repo;
   private Schema testSchema;
 
   @Before
@@ -36,7 +36,7 @@ public class TestHDFSDatasetRepository {
 
     fileSystem = FileSystem.get(conf);
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    repo = new HDFSDatasetRepository(fileSystem, testDirectory,
+    repo = new FileSystemDatasetRepository(fileSystem, testDirectory,
         new FileSystemMetadataProvider(fileSystem, testDirectory));
 
     testSchema = Schema.createRecord("Test", "Test record schema",
@@ -52,7 +52,7 @@ public class TestHDFSDatasetRepository {
 
   @Test
   public void testCreate() throws IOException {
-    HDFSDataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
+    FileSystemDataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
         .schema(testSchema).get());
 
     Assert.assertEquals("Dataset name is propagated", "test1",
@@ -72,7 +72,7 @@ public class TestHDFSDatasetRepository {
         .partitionStrategy(
             new PartitionStrategy.Builder().hash("name", 3).get()).get();
 
-    HDFSDataset dataset = repo.create("test2", descriptor);
+    FileSystemDataset dataset = repo.create("test2", descriptor);
 
     Assert.assertEquals("Dataset name is propagated", "test2",
         dataset.getName());
@@ -89,7 +89,7 @@ public class TestHDFSDatasetRepository {
     // Just invoke the creation test so we have a dataset to test with.
     testCreate();
 
-    HDFSDataset dataset = repo.get("test1");
+    FileSystemDataset dataset = repo.get("test1");
 
     Assert.assertNotNull("Dataset is loaded and produced", dataset);
     Assert.assertEquals("Dataset name is propagated", "test1",

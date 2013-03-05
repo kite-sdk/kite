@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.cloudera.data.filesystem.FileSystemMetadataProvider;
-import com.cloudera.data.filesystem.HDFSDatasetRepository;
+import com.cloudera.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
@@ -23,7 +23,7 @@ public class TestPartitionedDatasetWriter {
   private Path testDirectory;
   private FileSystem fileSystem;
   private Schema testSchema;
-  private HDFSDatasetRepository repo;
+  private FileSystemDatasetRepository repo;
   private PartitionedDatasetWriter<Object> writer;
 
   @Before
@@ -32,7 +32,7 @@ public class TestPartitionedDatasetWriter {
     fileSystem = FileSystem.get(new Configuration());
     testSchema = new Schema.Parser().parse(Resources.getResource(
         "schema/user-partitioned.avsc").openStream());
-    repo = new HDFSDatasetRepository(fileSystem, testDirectory,
+    repo = new FileSystemDatasetRepository(fileSystem, testDirectory,
         new FileSystemMetadataProvider(fileSystem, testDirectory));
     writer = new PartitionedDatasetWriter<Object>(repo.create(
         "users",

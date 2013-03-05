@@ -16,7 +16,7 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
   private Schema schema;
 
   private Iterator<Path> filesIter;
-  private HDFSDatasetReader<E> reader;
+  private FileSystemDatasetReader<E> reader;
 
   public MultiFileDatasetReader(FileSystem fileSystem, List<Path> files,
       Schema schema) {
@@ -29,7 +29,7 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
   @Override
   public void open() throws IOException {
     if (filesIter.hasNext()) {
-      reader = new HDFSDatasetReader<E>(fileSystem, filesIter.next(), schema);
+      reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(), schema);
       reader.open();
     }
   }
@@ -44,7 +44,7 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
         reader = null;
 
         if (filesIter.hasNext()) {
-          reader = new HDFSDatasetReader<E>(fileSystem, filesIter.next(),
+          reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
               schema);
           reader.open();
         } else {

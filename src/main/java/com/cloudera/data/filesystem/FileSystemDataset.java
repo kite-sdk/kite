@@ -22,10 +22,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 
-class HDFSDataset implements Dataset {
+class FileSystemDataset implements Dataset {
 
   private static final Logger logger = LoggerFactory
-      .getLogger(HDFSDataset.class);
+      .getLogger(FileSystemDataset.class);
 
   private FileSystem fileSystem;
   private Path directory;
@@ -47,7 +47,7 @@ class HDFSDataset implements Dataset {
       Path dataFile = new Path(dataDirectory, Joiner.on('-').join(
           System.currentTimeMillis(), Thread.currentThread().getId()));
 
-      writer = new HDFSDatasetWriter.Builder<E>().fileSystem(fileSystem)
+      writer = new FileSystemDatasetWriter.Builder<E>().fileSystem(fileSystem)
           .path(dataFile).schema(schema).get();
     }
 
@@ -123,7 +123,7 @@ class HDFSDataset implements Dataset {
       fileSystem.mkdirs(partitionDirectory);
     }
 
-    return new HDFSDataset.Builder()
+    return new FileSystemDataset.Builder()
         .name(name)
         .fileSystem(fileSystem)
         .directory(directory)
@@ -151,7 +151,7 @@ class HDFSDataset implements Dataset {
     }
     List<Dataset> partitions = Lists.newArrayList();
     for (Path p : partitionDirectories) {
-      Builder builder = new HDFSDataset.Builder().name(name)
+      Builder builder = new FileSystemDataset.Builder().name(name)
           .fileSystem(fileSystem).directory(directory).schema(schema)
           .isRoot(false).dataDirectory(p);
       partitions.add(builder.get());
@@ -166,12 +166,12 @@ class HDFSDataset implements Dataset {
         .add("partitionStrategy", partitionStrategy).toString();
   }
 
-  public static class Builder implements Supplier<HDFSDataset> {
+  public static class Builder implements Supplier<FileSystemDataset> {
 
-    private HDFSDataset dataset;
+    private FileSystemDataset dataset;
 
     public Builder() {
-      dataset = new HDFSDataset();
+      dataset = new FileSystemDataset();
     }
 
     public Builder fileSystem(FileSystem fileSystem) {
@@ -210,7 +210,7 @@ class HDFSDataset implements Dataset {
     }
 
     @Override
-    public HDFSDataset get() {
+    public FileSystemDataset get() {
       Preconditions.checkState(dataset.name != null, "No dataset name defined");
       Preconditions.checkState(dataset.schema != null,
           "No dataset schema defined");
@@ -221,8 +221,8 @@ class HDFSDataset implements Dataset {
       Preconditions.checkState(dataset.fileSystem != null,
           "No filesystem defined");
 
-      HDFSDataset current = dataset;
-      dataset = new HDFSDataset();
+      FileSystemDataset current = dataset;
+      dataset = new FileSystemDataset();
 
       return current;
     }

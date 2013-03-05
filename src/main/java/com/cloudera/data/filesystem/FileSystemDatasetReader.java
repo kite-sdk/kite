@@ -16,7 +16,7 @@ import com.cloudera.data.DatasetReader;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-class HDFSDatasetReader<E> implements DatasetReader<E>, Closeable {
+class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
 
   private FileSystem fileSystem;
   private Path path;
@@ -26,9 +26,9 @@ class HDFSDatasetReader<E> implements DatasetReader<E>, Closeable {
   private DataFileReader<E> reader;
 
   private static final Logger logger = LoggerFactory
-      .getLogger(HDFSDatasetReader.class);
+      .getLogger(FileSystemDatasetReader.class);
 
-  public HDFSDatasetReader(FileSystem fileSystem, Path path, Schema schema) {
+  public FileSystemDatasetReader(FileSystem fileSystem, Path path, Schema schema) {
     this.fileSystem = fileSystem;
     this.path = path;
     this.schema = schema;

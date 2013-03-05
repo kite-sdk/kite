@@ -16,17 +16,17 @@ import com.cloudera.data.PartitionStrategy;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
+public class FileSystemDatasetRepository implements DatasetRepository<FileSystemDataset> {
 
   private static final Logger logger = LoggerFactory
-      .getLogger(HDFSDatasetRepository.class);
+      .getLogger(FileSystemDatasetRepository.class);
 
   private MetadataProvider metadataProvider;
 
   private Path rootDirectory;
   private FileSystem fileSystem;
 
-  public HDFSDatasetRepository(FileSystem fileSystem, Path rootDirectory,
+  public FileSystemDatasetRepository(FileSystem fileSystem, Path rootDirectory,
       MetadataProvider metadataProvider) {
 
     this.fileSystem = fileSystem;
@@ -35,7 +35,7 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
   }
 
   @Deprecated
-  public HDFSDataset create(String name, Schema schema) throws IOException {
+  public FileSystemDataset create(String name, Schema schema) throws IOException {
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkArgument(schema != null, "Schema can not be null");
     Preconditions.checkState(fileSystem != null,
@@ -59,7 +59,7 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     metadataProvider.save(name, new DatasetDescriptor.Builder().schema(schema)
         .get());
 
-    HDFSDataset.Builder datasetBuilder = new HDFSDataset.Builder()
+    FileSystemDataset.Builder datasetBuilder = new FileSystemDataset.Builder()
         .directory(datasetPath).dataDirectory(datasetDataPath)
         .fileSystem(fileSystem).name(name).schema(schema);
 
@@ -76,7 +76,7 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
   }
 
   @Override
-  public HDFSDataset create(String name, DatasetDescriptor descriptor)
+  public FileSystemDataset create(String name, DatasetDescriptor descriptor)
       throws IOException {
 
     Preconditions.checkArgument(name != null, "Name can not be null");
@@ -105,14 +105,14 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
 
     metadataProvider.save(name, descriptor);
 
-    return new HDFSDataset.Builder().name(name).fileSystem(fileSystem)
+    return new FileSystemDataset.Builder().name(name).fileSystem(fileSystem)
         .schema(schema).directory(pathForDataset(name))
         .dataDirectory(pathForDatasetData(name))
         .partitionStrategy(partitionStrategy).isRoot(true).get();
   }
 
   @Override
-  public HDFSDataset get(String name) throws IOException {
+  public FileSystemDataset get(String name) throws IOException {
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkState(rootDirectory != null,
         "Root directory can not be null");
@@ -130,7 +130,7 @@ public class HDFSDatasetRepository implements DatasetRepository<HDFSDataset> {
     Schema schema = descriptor.getSchema();
     PartitionStrategy partitionStrategy = descriptor.getPartitionStrategy();
 
-    HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
+    FileSystemDataset ds = new FileSystemDataset.Builder().fileSystem(fileSystem)
         .directory(datasetDirectory).dataDirectory(datasetDataPath).name(name)
         .schema(schema).partitionStrategy(partitionStrategy).get();
 

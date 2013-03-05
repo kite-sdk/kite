@@ -20,11 +20,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.io.Closeables;
 
-class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
+class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
     Closeable {
 
   private static final Logger logger = LoggerFactory
-      .getLogger(HDFSDatasetWriter.class);
+      .getLogger(FileSystemDatasetWriter.class);
 
   private Path path;
   private Schema schema;
@@ -36,7 +36,7 @@ class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   private DatumWriter<E> writer;
   private Status status;
 
-  public HDFSDatasetWriter(FileSystem fileSystem, Path path, Schema schema,
+  public FileSystemDatasetWriter(FileSystem fileSystem, Path path, Schema schema,
       boolean enableCompression) {
 
     this.fileSystem = fileSystem;
@@ -118,7 +118,7 @@ class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
     NEW, OPEN, CLOSED
   }
 
-  public static class Builder<E> implements Supplier<HDFSDatasetWriter<E>> {
+  public static class Builder<E> implements Supplier<FileSystemDatasetWriter<E>> {
 
     private FileSystem fileSystem;
     private Path path;
@@ -150,13 +150,13 @@ class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
     }
 
     @Override
-    public HDFSDatasetWriter<E> get() {
+    public FileSystemDatasetWriter<E> get() {
       Preconditions
           .checkState(fileSystem != null, "File system is not defined");
       Preconditions.checkState(path != null, "Path is not defined");
       Preconditions.checkState(schema != null, "Schema is not defined");
 
-      HDFSDatasetWriter<E> writer = new HDFSDatasetWriter<E>(fileSystem, path,
+      FileSystemDatasetWriter<E> writer = new FileSystemDatasetWriter<E>(fileSystem, path,
           schema, enableCompression);
 
       return writer;

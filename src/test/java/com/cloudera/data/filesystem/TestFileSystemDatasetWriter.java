@@ -12,10 +12,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.data.filesystem.HDFSDatasetWriter;
+import com.cloudera.data.filesystem.FileSystemDatasetWriter;
 import com.google.common.io.Files;
 
-public class TestHDFSDatasetWriter {
+public class TestFileSystemDatasetWriter {
 
   private File testDirectory;
   private FileSystem fileSystem;
@@ -37,7 +37,7 @@ public class TestHDFSDatasetWriter {
 
   @Test
   public void testWrite() throws IOException {
-    HDFSDatasetWriter<String> writer = new HDFSDatasetWriter<String>(
+    FileSystemDatasetWriter<String> writer = new FileSystemDatasetWriter<String>(
         fileSystem, new Path(testDirectory.getAbsolutePath(), "write-1.avro"),
         Schema.create(Type.STRING), true);
 

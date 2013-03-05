@@ -23,16 +23,16 @@ import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.filesystem.HDFSDataset;
+import com.cloudera.data.filesystem.FileSystemDataset;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
-public class TestHDFSDataset {
+public class TestFileSystemDataset {
 
   private static final Logger logger = LoggerFactory
-      .getLogger(TestHDFSDataset.class);
+      .getLogger(TestFileSystemDataset.class);
 
   private FileSystem fileSystem;
   private Path testDirectory;
@@ -53,7 +53,7 @@ public class TestHDFSDataset {
 
   @Test
   public void test() throws IOException {
-    HDFSDataset ds = new HDFSDataset();
+    FileSystemDataset ds = new FileSystemDataset();
 
     ds.setSchema(testSchema);
 
@@ -69,7 +69,7 @@ public class TestHDFSDataset {
 
   @Test
   public void testWriteAndRead() throws IOException {
-    HDFSDataset ds = new HDFSDataset.Builder().name("test").schema(testSchema)
+    FileSystemDataset ds = new FileSystemDataset.Builder().name("test").schema(testSchema)
         .fileSystem(FileSystem.get(new Configuration()))
         .directory(testDirectory).dataDirectory(testDirectory).get();
 
@@ -123,7 +123,7 @@ public class TestHDFSDataset {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).get();
 
-    HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
+    FileSystemDataset ds = new FileSystemDataset.Builder().fileSystem(fileSystem)
         .directory(testDirectory).dataDirectory(testDirectory)
         .name("partitioned-users").schema(testSchema)
         .partitionStrategy(partitionStrategy).get();
@@ -153,7 +153,7 @@ public class TestHDFSDataset {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", 2).hash("email", 3).get();
 
-    HDFSDataset ds = new HDFSDataset.Builder().fileSystem(fileSystem)
+    FileSystemDataset ds = new FileSystemDataset.Builder().fileSystem(fileSystem)
         .directory(testDirectory).dataDirectory(testDirectory)
         .name("partitioned-users").schema(testSchema)
         .partitionStrategy(partitionStrategy).get();
@@ -204,7 +204,7 @@ public class TestHDFSDataset {
     return size;
   }
 
-  private void writeTestUsers(HDFSDataset ds, int count) throws IOException {
+  private void writeTestUsers(FileSystemDataset ds, int count) throws IOException {
     DatasetWriter<Record> writer = null;
 
     try {
@@ -227,7 +227,7 @@ public class TestHDFSDataset {
     }
   }
 
-  private void readTestUsers(HDFSDataset ds, int count) throws IOException {
+  private void readTestUsers(FileSystemDataset ds, int count) throws IOException {
     DatasetReader<Record> reader = null;
 
     try {
@@ -257,7 +257,7 @@ public class TestHDFSDataset {
     }
   }
 
-  private int readTestUsersInPartition(HDFSDataset ds, PartitionKey key,
+  private int readTestUsersInPartition(FileSystemDataset ds, PartitionKey key,
       String subpartitionName) throws IOException {
     int readCount = 0;
     DatasetReader<Record> reader = null;
