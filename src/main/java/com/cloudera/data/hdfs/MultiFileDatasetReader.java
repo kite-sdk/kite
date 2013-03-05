@@ -10,7 +10,7 @@ import org.apache.hadoop.fs.Path;
 
 import com.cloudera.data.DatasetReader;
 
-public class MultiFileDatasetReader<E> implements DatasetReader<E> {
+class MultiFileDatasetReader<E> implements DatasetReader<E> {
 
   private FileSystem fileSystem;
   private Schema schema;
