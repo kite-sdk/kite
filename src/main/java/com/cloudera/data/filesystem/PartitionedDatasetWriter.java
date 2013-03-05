@@ -32,6 +32,8 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
   private final PartitionStrategy partitionStrategy;
   private LoadingCache<PartitionKey, DatasetWriter<E>> cachedWriters;
 
+  private ReaderWriterState state;
+
   public PartitionedDatasetWriter(FileSystemDataset dataset, PartitionStrategy partitionStrategy) {
     Preconditions.checkArgument(dataset.isPartitioned(), "Dataset " + dataset
         + " is not partitioned");
@@ -40,20 +42,29 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
     this.partitionStrategy = partitionStrategy;
     this.maxWriters = Math.min(10, partitionStrategy
         .getCardinality());
+    this.state = ReaderWriterState.NEW;
   }
 
   @Override
   public void open() {
+    Preconditions.checkState(state.equals(ReaderWriterState.NEW),
+        "Unable to open a writer from state:%s", state);
+
     logger.debug("Opening partitioned dataset writer w/strategy:{}",
         partitionStrategy);
 
     cachedWriters = CacheBuilder.newBuilder().maximumSize(maxWriters)
         .removalListener(new DatasetWriterRemovalStrategy<E>())
         .build(new DatasetWriterCacheLoader<E>(dataset));
+
+    state = ReaderWriterState.OPEN;
   }
 
   @Override
   public void write(E entity) throws IOException {
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to write to a writer in state:%s", state);
+
     PartitionKey key = partitionStrategy.getPartitionKey(entity);
     DatasetWriter<E> writer = null;
 
@@ -69,6 +80,9 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
 
   @Override
   public void flush() throws IOException {
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to write to a writer in state:%s", state);
+
     logger.debug("Flushing all cached writers for partition strategy:{}",
         partitionStrategy);
 
@@ -89,14 +103,19 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
 
   @Override
   public void close() throws IOException {
-    logger.debug("Closing all cached writers for partition strategy:{}",
+    if (state.equals(ReaderWriterState.OPEN)) {
+
+      logger.debug("Closing all cached writers for partition strategy:{}",
         partitionStrategy);
 
-    for (Map.Entry<PartitionKey, DatasetWriter<E>> entry :
-        cachedWriters.asMap().entrySet()) {
-      logger.debug("Closing partition writer:{}.{}",
-          entry.getKey(), entry.getValue());
-      entry.getValue().close();
+      for (Map.Entry<PartitionKey, DatasetWriter<E>> entry :
+          cachedWriters.asMap().entrySet()) {
+        logger.debug("Closing partition writer:{}.{}",
+            entry.getKey(), entry.getValue());
+        entry.getValue().close();
+      }
+
+      state = ReaderWriterState.CLOSED;
     }
   }
 

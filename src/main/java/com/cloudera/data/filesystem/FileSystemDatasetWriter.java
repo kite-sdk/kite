@@ -50,7 +50,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   @Override
   public void open() throws IOException {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
-        "Unable to open a writer from status:%s", state);
+        "Unable to open a writer from state:%s", state);
 
     logger.debug(
         "Opening data file with pathTmp:{} (final path will be path:{})",
@@ -76,7 +76,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   @Override
   public void write(E entity) throws IOException {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to write to a writer in status:%s", state);
+        "Attempt to write to a writer in state:%s", state);
 
     dataFileWriter.append(entity);
   }
@@ -84,7 +84,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   @Override
   public void flush() throws IOException {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to write to a writer in status:%s", state);
+        "Attempt to write to a writer in state:%s", state);
 
     dataFileWriter.flush();
   }
@@ -96,7 +96,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
 
       Closeables.close(dataFileWriter, false);
 
-      logger.debug("Commiting pathTmp:{} to path:{}", pathTmp, path);
+      logger.debug("Committing pathTmp:{} to path:{}", pathTmp, path);
 
       if (!fileSystem.rename(pathTmp, path)) {
         throw new IOException("Failed to move " + pathTmp + " to " + path);
@@ -110,7 +110,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   public String toString() {
     return Objects.toStringHelper(this).add("path", path)
         .add("pathTmp", pathTmp).add("schema", schema)
-        .add("enableCompression", enableCompression).add("status", state)
+        .add("enableCompression", enableCompression).add("state", state)
         .toString();
   }
 

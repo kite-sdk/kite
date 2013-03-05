@@ -77,4 +77,13 @@ public class TestPartitionedDatasetWriter {
     }
   }
 
+  @Test(expected = IllegalStateException.class)
+  public void testWriteToClosedWriterFails() throws IOException {
+    Record record = new GenericRecordBuilder(testSchema).set("username",
+        "test1").build();
+    writer.open();
+    writer.close();
+    writer.write(record);
+  }
+
 }
