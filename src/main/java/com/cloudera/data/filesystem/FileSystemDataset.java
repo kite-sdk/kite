@@ -147,8 +147,8 @@ class FileSystemDataset implements Dataset {
         "Attempt to get a partition on a non-partitioned dataset (name:%s)",
         name);
 
-    logger.debug("Loading partition:{}.{} allowCreate:{}", new Object[] {
-        partitionStrategy.getName(), name, allowCreate });
+    logger.debug("Loading partition for entity {}, allowCreate:{}", new Object[] {
+        entity, allowCreate });
 
     PartitionKey key = partitionStrategy.getPartitionKey(entity);
     return getPartitionForKey(key, allowCreate);
@@ -160,8 +160,8 @@ class FileSystemDataset implements Dataset {
         "Attempt to get a partition on a non-partitioned dataset (name:%s)",
         name);
 
-    logger.debug("Loading partition:{}.{} allowCreate:{}", new Object[] {
-        partitionStrategy.getName(), name, allowCreate });
+    logger.debug("Loading partition for key {}, allowCreate:{}", new Object[] {
+        key, allowCreate });
 
     Path partitionDirectory = toDirectoryName(dataDirectory, key);
     if (!fileSystem.exists(partitionDirectory)) {

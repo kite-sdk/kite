@@ -3,6 +3,7 @@ package com.cloudera.data.filesystem;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.cloudera.data.Dataset;
@@ -68,8 +69,8 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
 
   @Override
   public void flush() throws IOException {
-    logger.debug("Flushing all cached writers for partition:{}",
-        partitionStrategy.getName());
+    logger.debug("Flushing all cached writers for partition strategy:{}",
+        partitionStrategy);
 
     /*
      * There's a potential for flushing entries that are created by other
@@ -78,22 +79,24 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
      * this, but it will be difficult as Cache (ideally) uses multiple
      * partitions to prevent cached writer contention.
      */
-    for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
+    for (Map.Entry<PartitionKey, DatasetWriter<E>> entry :
+        cachedWriters.asMap().entrySet()) {
       logger.debug("Flushing partition writer:{}.{}",
-          partitionStrategy.getName(), writer);
-      writer.flush();
+          entry.getKey(), entry.getValue());
+      entry.getValue().flush();
     }
   }
 
   @Override
   public void close() throws IOException {
-    logger.debug("Closing all cached writers for partition:{}",
-        partitionStrategy.getName());
+    logger.debug("Closing all cached writers for partition strategy:{}",
+        partitionStrategy);
 
-    for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
+    for (Map.Entry<PartitionKey, DatasetWriter<E>> entry :
+        cachedWriters.asMap().entrySet()) {
       logger.debug("Closing partition writer:{}.{}",
-          partitionStrategy.getName(), writer);
-      writer.close();
+          entry.getKey(), entry.getValue());
+      entry.getValue().close();
     }
   }
 

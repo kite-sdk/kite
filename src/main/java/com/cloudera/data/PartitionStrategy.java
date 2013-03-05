@@ -45,18 +45,6 @@ public class PartitionStrategy {
     return fieldPartitioners;
   }
 
-  // TODO: replace with name of first field partitioner?
-  public String getName() {
-    StringBuilder sb = new StringBuilder();
-    for (FieldPartitioner fieldPartitioner : fieldPartitioners) {
-      if (sb.length() > 0) {
-        sb.append("/");
-      }
-      sb.append(fieldPartitioner.getName());
-    }
-    return sb.toString();
-  }
-
   public int getCardinality() {
     int cardinality = 1;
     for (FieldPartitioner fieldPartitioner : fieldPartitioners) {
@@ -70,29 +58,31 @@ public class PartitionStrategy {
    */
   public PartitionKey getPartitionKey(Object entity) {
     Object[] values = new Object[fieldPartitioners.size()]; // TODO: reuse
-    try {
-      for (int i = 0; i < fieldPartitioners.size(); i++) {
-        FieldPartitioner fp = fieldPartitioners.get(i);
-        if (entity instanceof GenericRecord) {
-          values[i] = fp.apply(((GenericRecord) entity).get(fp.getName()));
-        } else {
+    for (int i = 0; i < fieldPartitioners.size(); i++) {
+      FieldPartitioner fp = fieldPartitioners.get(i);
+      String name = fp.getName();
+      Object value;
+      if (entity instanceof GenericRecord) {
+        value = ((GenericRecord) entity).get(name);
+      } else {
+        try {
           PropertyDescriptor propertyDescriptor = new PropertyDescriptor(
-              fp.getName(), entity.getClass());
-          Object value = propertyDescriptor.getReadMethod().invoke(entity);
-          values[i] = fp.apply(value);
+              name, entity.getClass());
+          value = propertyDescriptor.getReadMethod().invoke(entity);
+        } catch (IllegalAccessException e) {
+          throw new RuntimeException("Cannot read property " + name
+              + " from " + entity, e);
+        } catch (InvocationTargetException e) {
+          throw new RuntimeException("Cannot read property " + name
+              + " from " + entity, e);
+        } catch (IntrospectionException e) {
+          throw new RuntimeException("Cannot read property " + name
+              + " from " + entity, e);
         }
       }
-      return new PartitionKey(values);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException("Cannot read property " + getName() + " from "
-          + entity, e);
-    } catch (InvocationTargetException e) {
-      throw new RuntimeException("Cannot read property " + getName() + " from "
-          + entity, e);
-    } catch (IntrospectionException e) {
-      throw new RuntimeException("Cannot read property " + getName() + " from "
-          + entity, e);
+      values[i] = fp.apply(value);
     }
+    return new PartitionKey(values);
   }
 
   /**
