@@ -46,7 +46,7 @@ public interface Dataset {
   PartitionStrategy getPartitionStrategy();
 
   /**
-   * Returns true if the dataset is partitioned (i.e. has an associated
+   * Returns true if the dataset is partitioned (that is, has an associated
    * {@link PartitionStrategy}, false otherwise.
    */
   boolean isPartitioned();

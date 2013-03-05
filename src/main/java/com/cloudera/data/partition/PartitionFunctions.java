@@ -3,7 +3,7 @@ package com.cloudera.data.partition;
 import com.cloudera.data.FieldPartitioner;
 
 /**
- * Convenience class so you can say e.g. <code>hash("username", 2)</code> in
+ * Convenience class so you can say, for example, <code>hash("username", 2)</code> in
  * JEXL.
  */
 public class PartitionFunctions {
