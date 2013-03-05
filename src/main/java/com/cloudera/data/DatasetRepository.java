@@ -20,12 +20,8 @@ import java.io.IOException;
  * the underlying storage. That is, a {@code DatasetRepository} could be on
  * disk, in memory, or some combination.
  * </p>
- * 
- * @param <DS>
- *          The concrete implementation of {@link Dataset} on which a repository
- *          operates.
  */
-public interface DatasetRepository<DS extends Dataset> {
+public interface DatasetRepository {
 
   /**
    * Get the latest version of a named {@link Dataset}. If no dataset with the
@@ -35,7 +31,7 @@ public interface DatasetRepository<DS extends Dataset> {
    *          The name of the dataset.
    * @throws IOException
    */
-  DS get(String name) throws IOException;
+  Dataset get(String name) throws IOException;
 
   /**
    * Create a {@link Dataset} with the supplied {@code descriptor}. Depending on
@@ -53,6 +49,6 @@ public interface DatasetRepository<DS extends Dataset> {
    * @return The newly created dataset
    * @throws IOException
    */
-  DS create(String name, DatasetDescriptor descriptor) throws IOException;
+  Dataset create(String name, DatasetDescriptor descriptor) throws IOException;
 
 }

@@ -13,11 +13,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.filesystem.FileSystemMetadataProvider;
-import com.cloudera.data.filesystem.FileSystemDataset;
-import com.cloudera.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -52,7 +50,7 @@ public class TestFileSystemDatasetRepository {
 
   @Test
   public void testCreate() throws IOException {
-    FileSystemDataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
+    Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
         .schema(testSchema).get());
 
     Assert.assertEquals("Dataset name is propagated", "test1",
@@ -72,7 +70,7 @@ public class TestFileSystemDatasetRepository {
         .partitionStrategy(
             new PartitionStrategy.Builder().hash("name", 3).get()).get();
 
-    FileSystemDataset dataset = repo.create("test2", descriptor);
+    Dataset dataset = repo.create("test2", descriptor);
 
     Assert.assertEquals("Dataset name is propagated", "test2",
         dataset.getName());
@@ -89,7 +87,7 @@ public class TestFileSystemDatasetRepository {
     // Just invoke the creation test so we have a dataset to test with.
     testCreate();
 
-    FileSystemDataset dataset = repo.get("test1");
+    Dataset dataset = repo.get("test1");
 
     Assert.assertNotNull("Dataset is loaded and produced", dataset);
     Assert.assertEquals("Dataset name is propagated", "test1",

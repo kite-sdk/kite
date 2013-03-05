@@ -8,6 +8,7 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.MetadataProvider;
@@ -16,7 +17,7 @@ import com.cloudera.data.PartitionStrategy;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-public class FileSystemDatasetRepository implements DatasetRepository<FileSystemDataset> {
+public class FileSystemDatasetRepository implements DatasetRepository {
 
   private static final Logger logger = LoggerFactory
       .getLogger(FileSystemDatasetRepository.class);
@@ -35,7 +36,7 @@ public class FileSystemDatasetRepository implements DatasetRepository<FileSystem
   }
 
   @Deprecated
-  public FileSystemDataset create(String name, Schema schema) throws IOException {
+  public Dataset create(String name, Schema schema) throws IOException {
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkArgument(schema != null, "Schema can not be null");
     Preconditions.checkState(fileSystem != null,
@@ -76,7 +77,7 @@ public class FileSystemDatasetRepository implements DatasetRepository<FileSystem
   }
 
   @Override
-  public FileSystemDataset create(String name, DatasetDescriptor descriptor)
+  public Dataset create(String name, DatasetDescriptor descriptor)
       throws IOException {
 
     Preconditions.checkArgument(name != null, "Name can not be null");
@@ -112,7 +113,7 @@ public class FileSystemDatasetRepository implements DatasetRepository<FileSystem
   }
 
   @Override
-  public FileSystemDataset get(String name) throws IOException {
+  public Dataset get(String name) throws IOException {
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkState(rootDirectory != null,
         "Root directory can not be null");
@@ -130,9 +131,10 @@ public class FileSystemDatasetRepository implements DatasetRepository<FileSystem
     Schema schema = descriptor.getSchema();
     PartitionStrategy partitionStrategy = descriptor.getPartitionStrategy();
 
-    FileSystemDataset ds = new FileSystemDataset.Builder().fileSystem(fileSystem)
-        .directory(datasetDirectory).dataDirectory(datasetDataPath).name(name)
-        .schema(schema).partitionStrategy(partitionStrategy).get();
+    FileSystemDataset ds = new FileSystemDataset.Builder()
+        .fileSystem(fileSystem).directory(datasetDirectory)
+        .dataDirectory(datasetDataPath).name(name).schema(schema)
+        .partitionStrategy(partitionStrategy).get();
 
     logger.debug("Loaded dataset:{}", ds);
 
