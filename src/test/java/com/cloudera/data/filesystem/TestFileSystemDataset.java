@@ -194,6 +194,19 @@ public class TestFileSystemDataset {
   }
 
   @Test
+  public void testGetPartitionReturnsNullIfNoAutoCreate() throws IOException {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .hash("username", 2).get();
+
+    FileSystemDataset ds = new FileSystemDataset.Builder().fileSystem(fileSystem)
+        .directory(testDirectory).dataDirectory(testDirectory)
+        .name("partitioned-users").schema(testSchema)
+        .partitionStrategy(partitionStrategy).get();
+
+    Assert.assertNull(ds.getPartitionForKey(new PartitionKey(1), false));
+  }
+
+  @Test
   public void testWriteToSubpartition() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", 2).hash("email", 3).get();
@@ -203,7 +216,7 @@ public class TestFileSystemDataset {
         .name("partitioned-users").schema(testSchema)
         .partitionStrategy(partitionStrategy).get();
 
-    Dataset userPartition = ds.getPartitionForKey(new PartitionKey(1), false);
+    Dataset userPartition = ds.getPartitionForKey(new PartitionKey(1), true);
     writeTestUsers(userPartition, 1);
     Assert.assertTrue("Partitioned directory exists",
         fileSystem.exists(new Path(testDirectory, "username=1/email=2")));

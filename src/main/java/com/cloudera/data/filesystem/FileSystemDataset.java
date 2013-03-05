@@ -164,9 +164,12 @@ class FileSystemDataset implements Dataset {
         partitionStrategy.getName(), name, allowCreate });
 
     Path partitionDirectory = toDirectoryName(dataDirectory, key);
-
-    if (allowCreate && !fileSystem.exists(partitionDirectory)) {
-      fileSystem.mkdirs(partitionDirectory);
+    if (!fileSystem.exists(partitionDirectory)) {
+      if (allowCreate) {
+        fileSystem.mkdirs(partitionDirectory);
+      } else {
+        return null;
+      }
     }
 
     return new FileSystemDataset.Builder()
