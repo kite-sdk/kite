@@ -1,4 +1,4 @@
-package com.cloudera.data.hdfs.util;
+package com.cloudera.data.filesystem.util;
 
 import java.io.File;
 

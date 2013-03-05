@@ -1,4 +1,4 @@
-package com.cloudera.data.hdfs;
+package com.cloudera.data.filesystem;
 
 import java.io.Closeable;
 import java.io.Flushable;

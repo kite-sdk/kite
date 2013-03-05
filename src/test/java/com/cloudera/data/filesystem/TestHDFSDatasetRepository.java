@@ -1,4 +1,4 @@
-package com.cloudera.data.hdfs;
+package com.cloudera.data.filesystem;
 
 import java.io.IOException;
 
@@ -15,6 +15,9 @@ import org.junit.Test;
 
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.PartitionStrategy;
+import com.cloudera.data.filesystem.FileSystemMetadataProvider;
+import com.cloudera.data.filesystem.HDFSDataset;
+import com.cloudera.data.filesystem.HDFSDatasetRepository;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -37,7 +40,7 @@ public class TestHDFSDatasetRepository {
         new FileSystemMetadataProvider(fileSystem, testDirectory));
 
     testSchema = Schema.createRecord("Test", "Test record schema",
-        "com.cloudera.data.hdfs", false);
+        "com.cloudera.data.filesystem", false);
     testSchema.setFields(Lists.newArrayList(new Field("name", Schema
         .create(Type.STRING), null, null)));
   }

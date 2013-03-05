@@ -1,4 +1,4 @@
-package com.cloudera.data.hdfs;
+package com.cloudera.data.filesystem;
 
 import java.io.IOException;
 
@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.MetadataProvider;
 import com.cloudera.data.PartitionExpression;
+import com.cloudera.data.filesystem.FileSystemMetadataProvider;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 

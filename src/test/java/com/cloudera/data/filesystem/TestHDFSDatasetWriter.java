@@ -1,4 +1,4 @@
-package com.cloudera.data.hdfs;
+package com.cloudera.data.filesystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.cloudera.data.filesystem.HDFSDatasetWriter;
 import com.google.common.io.Files;
 
 public class TestHDFSDatasetWriter {

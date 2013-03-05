@@ -1,4 +1,4 @@
-package com.cloudera.data.hdfs;
+package com.cloudera.data.filesystem;
 
 import java.io.IOException;
 
@@ -10,10 +10,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.data.DatasetReader;
+import com.cloudera.data.filesystem.MultiFileDatasetReader;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
-public class TestHDFSDatasetReader {
+public class TestMultiFileDatasetReader {
 
   private FileSystem fileSystem;
   private Schema testSchema;
@@ -26,29 +27,29 @@ public class TestHDFSDatasetReader {
   }
 
   @Test
-  public void testRead() throws IOException {
-    DatasetReader<String> reader = null;
+  public void test() throws IOException {
+    Path testFile = new Path(Resources.getResource("data/strings-100.avro")
+        .getFile());
+
+    MultiFileDatasetReader<String> reader = new MultiFileDatasetReader<String>(
+        fileSystem, Lists.newArrayList(testFile, testFile), testSchema);
+
     int records = 0;
 
     try {
-      reader = new HDFSDatasetReader<String>(fileSystem, new Path(Resources
-          .getResource("data/strings-100.avro").getFile()), testSchema);
-
       reader.open();
 
       while (reader.hasNext()) {
         String record = reader.read();
-
         Assert.assertNotNull(record);
+        Assert.assertEquals("test-" + records % 100, record);
         records++;
       }
     } finally {
-      if (reader != null) {
-        reader.close();
-      }
+      reader.close();
     }
 
-    Assert.assertEquals(100, records);
+    Assert.assertEquals(200, records);
   }
 
 }

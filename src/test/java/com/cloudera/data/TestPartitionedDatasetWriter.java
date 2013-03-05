@@ -12,8 +12,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.data.hdfs.FileSystemMetadataProvider;
-import com.cloudera.data.hdfs.HDFSDatasetRepository;
+import com.cloudera.data.filesystem.FileSystemMetadataProvider;
+import com.cloudera.data.filesystem.HDFSDatasetRepository;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;

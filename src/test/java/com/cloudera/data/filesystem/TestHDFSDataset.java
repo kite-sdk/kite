@@ -1,4 +1,4 @@
-package com.cloudera.data.hdfs;
+package com.cloudera.data.filesystem;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,6 +23,7 @@ import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
+import com.cloudera.data.filesystem.HDFSDataset;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;

@@ -1,10 +1,12 @@
-package com.cloudera.data.hdfs.util;
+package com.cloudera.data.filesystem.util;
 
 import java.io.File;
 
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.cloudera.data.filesystem.util.Paths;
 
 public class TestPaths {
 
