@@ -34,7 +34,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   private Path pathTmp;
   private DataFileWriter<E> dataFileWriter;
   private DatumWriter<E> writer;
-  private Status status;
+  private ReaderWriterState state;
 
   public FileSystemDatasetWriter(FileSystem fileSystem, Path path, Schema schema,
       boolean enableCompression) {
@@ -44,13 +44,13 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
     this.pathTmp = new Path(path.getParent(), path.getName() + ".tmp");
     this.schema = schema;
     this.enableCompression = enableCompression;
-    this.status = Status.NEW;
+    this.state = ReaderWriterState.NEW;
   }
 
   @Override
   public void open() throws IOException {
-    Preconditions.checkState(status.equals(Status.NEW),
-        "Unable to open a writer from status:%s", status);
+    Preconditions.checkState(state.equals(ReaderWriterState.NEW),
+        "Unable to open a writer from status:%s", state);
 
     logger.debug(
         "Opening data file with pathTmp:{} (final path will be path:{})",
@@ -70,28 +70,28 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
 
     dataFileWriter.create(schema, fileSystem.create(pathTmp, true));
 
-    status = Status.OPEN;
+    state = ReaderWriterState.OPEN;
   }
 
   @Override
   public void write(E entity) throws IOException {
-    Preconditions.checkState(status.equals(Status.OPEN),
-        "Attempt to write to a writer in status:%s", status);
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to write to a writer in status:%s", state);
 
     dataFileWriter.append(entity);
   }
 
   @Override
   public void flush() throws IOException {
-    Preconditions.checkState(status.equals(Status.OPEN),
-        "Attempt to write to a writer in status:%s", status);
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to write to a writer in status:%s", state);
 
     dataFileWriter.flush();
   }
 
   @Override
   public void close() throws IOException {
-    if (status.equals(Status.OPEN)) {
+    if (state.equals(ReaderWriterState.OPEN)) {
       logger.debug("Closing pathTmp:{}", pathTmp);
 
       Closeables.close(dataFileWriter, false);
@@ -102,7 +102,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
         throw new IOException("Failed to move " + pathTmp + " to " + path);
       }
 
-      status = Status.CLOSED;
+      state = ReaderWriterState.CLOSED;
     }
   }
 
@@ -110,12 +110,8 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   public String toString() {
     return Objects.toStringHelper(this).add("path", path)
         .add("pathTmp", pathTmp).add("schema", schema)
-        .add("enableCompression", enableCompression).add("status", status)
+        .add("enableCompression", enableCompression).add("status", state)
         .toString();
-  }
-
-  private static enum Status {
-    NEW, OPEN, CLOSED
   }
 
   public static class Builder<E> implements Supplier<FileSystemDatasetWriter<E>> {

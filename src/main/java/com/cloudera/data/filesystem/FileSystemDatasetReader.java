@@ -22,7 +22,7 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
   private Path path;
   private Schema schema;
 
-  private State state;
+  private ReaderWriterState state;
   private DataFileReader<E> reader;
 
   private static final Logger logger = LoggerFactory
@@ -33,18 +33,18 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
     this.path = path;
     this.schema = schema;
 
-    this.state = State.NEW;
+    this.state = ReaderWriterState.NEW;
   }
 
   @Override
   public void open() throws IOException {
-    Preconditions.checkState(state.equals(State.NEW),
+    Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "A reader may not be opened more than once - current state:%s", state);
 
     reader = new DataFileReader<E>(new AvroFSInput(fileSystem.open(path),
         fileSystem.getFileStatus(path).getLen()), new ReflectDatumReader<E>());
 
-    state = State.OPEN;
+    state = ReaderWriterState.OPEN;
   }
 
   @Override
@@ -54,7 +54,7 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
 
   @Override
   public E read() {
-    Preconditions.checkState(state.equals(State.OPEN),
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
         "Attempt to read from a file in state:%s", state);
 
     return reader.next();
@@ -62,24 +62,20 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
 
   @Override
   public void close() throws IOException {
-    if (!state.equals(State.OPEN)) {
+    if (!state.equals(ReaderWriterState.OPEN)) {
       return;
     }
 
     logger.debug("Closing reader on path:{}", path);
 
     reader.close();
-    state = State.CLOSED;
+    state = ReaderWriterState.CLOSED;
   }
 
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("path", path).add("state", state)
         .add("reader", reader).toString();
-  }
-
-  private static enum State {
-    NEW, OPEN, CLOSED
   }
 
 }
