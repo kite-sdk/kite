@@ -158,30 +158,30 @@ specific methods. Dataset is a factory for readers and writers, both of which
 must produce or accept types that depend on the supplied Schema. Today, this
 winds up looking like the following.
 
-    HDFSDatasetRepository repo = new HDFSDatasetRepository(
+    FileSystemDatasetRepository repo = new FileSystemDatasetRepository(
       fileSystem, new Path(...)
     );
 
-    HDFSDataset data = repo.create("events", eventSchema);
+    FileSystemDataset data = repo.create("events", eventSchema);
 
-    HDFSDatasetWriter<Event> writer = data.getWriter();
+    FileSystemDatasetWriter<Event> writer = data.getWriter();
 
     writer.write(new Event(...));
 
-Note hat HDFSDataset doesn't take a type param. Instead, getWriter() is defined
+Note hat FileSystemDataset doesn't take a type param. Instead, getWriter() is defined
 as a template method (<E> DatasetWriter<E> getWriter()). In this specific
 example, it's obvious that the user knows the proper type parameter and could
 easily supply it in the definition. However, in the case of an existing dataset,
 this is less clear.
 
-    // If HDFSDataset has a type, it could only be <?>.
-    HDFSDataset data = repo.get("events");
+    // If FileSystemDataset has a type, it could only be <?>.
+    FileSystemDataset data = repo.get("events");
 
-Once we have a handle to HDFSDataset, we could provide a method that tells us
+Once we have a handle to FileSystemDataset, we could provide a method that tells us
 what type should be expected. Of course, this doesn't help later definitions.
 
     // I don't know what type to use and reflection can't help due to erasure.
-    HDFSDatasetWriter<?> writer = data.getWriter();
+    FileSystemDatasetWriter<?> writer = data.getWriter();
 
 It seems like the only thing to do is be JDBC-ish in our treatment. That is,
 if the developer knows the table (dataset), they must have some idea how to
@@ -260,9 +260,9 @@ Date -> summary.hashCode % 53
           /hash.summary=1
             /*.avro
 
-HDFS Implementation Details
+FileSystem Implementation Details
 
-HDFSDataset implements Dataset
+FileSystemDataset implements Dataset
   name: String
   schema: Schema
   partitionStrategy: PartitionStrategy
@@ -280,7 +280,7 @@ HDFSDataset implements Dataset
 
   def addPartition(String name): Dataset = {
     if (pStrat.getAllowAddition()) {
-      val p = new HDFSDataset(fileSystem, schema)
+      val p = new FileSystemDataset(fileSystem, schema)
       p.directory = new Path(directory, name);
       p.dataDirectory = p.directory;
       fileSystem.mkdir(p.dataDirectory)
