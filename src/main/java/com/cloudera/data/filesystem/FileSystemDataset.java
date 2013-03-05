@@ -19,7 +19,6 @@ import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.PartitionedDatasetWriter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;

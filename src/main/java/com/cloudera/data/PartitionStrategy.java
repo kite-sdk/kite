@@ -68,7 +68,7 @@ public class PartitionStrategy {
   /**
    * Returns a key that represents the value of the partition.
    */
-  PartitionKey getPartitionKey(Object entity) {
+  public PartitionKey getPartitionKey(Object entity) {
     Object[] values = new Object[fieldPartitioners.size()]; // TODO: reuse
     try {
       for (int i = 0; i < fieldPartitioners.size(); i++) {

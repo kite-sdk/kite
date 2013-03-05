@@ -13,7 +13,6 @@ import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.MetadataProvider;
-import com.cloudera.data.PartitionExpression;
 import com.cloudera.data.PartitionStrategy;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;

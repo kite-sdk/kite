@@ -1,7 +1,10 @@
-package com.cloudera.data;
+package com.cloudera.data.filesystem;
 
 import java.util.List;
 
+import com.cloudera.data.FieldPartitioner;
+import com.cloudera.data.PartitionStrategy;
+import com.cloudera.data.filesystem.PartitionExpression;
 import org.junit.Assert;
 import org.junit.Test;
 

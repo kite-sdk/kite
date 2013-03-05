@@ -1,10 +1,14 @@
-package com.cloudera.data;
+package com.cloudera.data.filesystem;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
+import com.cloudera.data.Dataset;
+import com.cloudera.data.DatasetWriter;
+import com.cloudera.data.PartitionKey;
+import com.cloudera.data.PartitionStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +20,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 
-public class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
+class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
 
   private static final Logger logger = LoggerFactory
       .getLogger(PartitionedDatasetWriter.class);

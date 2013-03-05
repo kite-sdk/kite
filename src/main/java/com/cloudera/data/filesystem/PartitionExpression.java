@@ -1,9 +1,11 @@
-package com.cloudera.data;
+package com.cloudera.data.filesystem;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.cloudera.data.FieldPartitioner;
+import com.cloudera.data.PartitionStrategy;
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlEngine;
 
@@ -12,7 +14,7 @@ import com.cloudera.data.partition.IdentityFieldPartitioner;
 import com.cloudera.data.partition.PartitionFunctions;
 import com.google.common.base.Objects;
 
-public class PartitionExpression {
+class PartitionExpression {
 
   private JexlEngine engine;
   private Expression expression;

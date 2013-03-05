@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.MetadataProvider;
-import com.cloudera.data.PartitionExpression;
 import com.cloudera.data.PartitionStrategy;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;

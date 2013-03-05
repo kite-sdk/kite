@@ -1,7 +1,11 @@
-package com.cloudera.data;
+package com.cloudera.data.filesystem;
 
 import java.io.IOException;
 
+import com.cloudera.data.DatasetDescriptor;
+import com.cloudera.data.PartitionStrategy;
+import com.cloudera.data.filesystem.PartitionExpression;
+import com.cloudera.data.filesystem.PartitionedDatasetWriter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
