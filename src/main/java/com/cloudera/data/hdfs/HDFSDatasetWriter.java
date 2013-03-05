@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.io.Closeables;
 
-public class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
+class HDFSDatasetWriter<E> implements DatasetWriter<E>, Flushable,
     Closeable {
 
   private static final Logger logger = LoggerFactory

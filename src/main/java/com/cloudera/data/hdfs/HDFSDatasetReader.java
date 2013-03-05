@@ -16,7 +16,7 @@ import com.cloudera.data.DatasetReader;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-public class HDFSDatasetReader<E> implements DatasetReader<E>, Closeable {
+class HDFSDatasetReader<E> implements DatasetReader<E>, Closeable {
 
   private FileSystem fileSystem;
   private Path path;
