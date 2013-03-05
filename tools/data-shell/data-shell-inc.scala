@@ -14,7 +14,6 @@ import com.google.common.io.Resources
 import com.cloudera.data._
 import com.cloudera.data.partition._
 import com.cloudera.data.filesystem._
-import com.cloudera.data.filesystem.util._
 
 val fileSystem = FileSystem.get(new Configuration())
 
