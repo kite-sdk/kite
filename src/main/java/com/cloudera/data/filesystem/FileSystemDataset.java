@@ -22,7 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 
-public class FileSystemDataset implements Dataset {
+class FileSystemDataset implements Dataset {
 
   private static final Logger logger = LoggerFactory
       .getLogger(FileSystemDataset.class);
