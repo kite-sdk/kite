@@ -35,6 +35,7 @@
     <vers.slf4j>1.7.2</vers.slf4j>
     <vers.avro>1.7.3</vers.avro>
     <vers.guava>13.0</vers.guava>
+    <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.junit>4.8.2</vers.junit>
     <vers.hadoop>2.0.0-cdh4.1.2</vers.hadoop>
     <vers.jexl>2.1.1</vers.jexl>
@@ -99,6 +100,11 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>${vers.guava}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>${vers.findbugs.jsr305}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
