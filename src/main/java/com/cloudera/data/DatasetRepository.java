@@ -18,8 +18,12 @@ import java.io.IOException;
  * <p>
  * No guarantees are made as to the durability, reliability, or availability of
  * the underlying storage. That is, a {@code DatasetRepository} could be on
- * disk, in memory, or some combination.
+ * disk, in memory, or some combination. See the implementation class for
+ * details about the guarantees it provides.
  * </p>
+ * 
+ * @see Dataset
+ * @see DatasetDescriptor
  */
 public interface DatasetRepository {
 
