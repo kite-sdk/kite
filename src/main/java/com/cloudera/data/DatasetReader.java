@@ -79,9 +79,9 @@ public interface DatasetReader<E> {
    * Close the reader and release any system resources.
    * </p>
    * <p>
-   * No further operations of this interface (other than may be performed,
-   * however implementations may choose to permit other method calls. See
-   * implementation documentation for details.
+   * No further operations of this interface (other than additional calls of
+   * this method) may be performed, however implementations may choose to permit
+   * other method calls. See implementation documentation for details.
    * </p>
    * 
    * @throws IOException
