@@ -5,13 +5,16 @@ import java.io.IOException;
 import org.apache.avro.Schema;
 
 /**
+ * <p>
  * A logical representation of a set of data entities.
- * 
+ * </p>
+ * <p>
  * Logically, all datasets have two generic properties: a name, and a schema
  * that describes an entity of that dataset. Concrete implementations of
  * {@code Dataset} may support additional properties, mandatory or otherwise, as
  * needed. {@code Dataset}s are not normally instantiated directly, but managed
  * by a repository (also implementation-specific).
+ * </p>
  * 
  * @see DatasetRepository
  * @see DatasetWriter
@@ -52,8 +55,8 @@ public interface Dataset {
   boolean isPartitioned();
 
   /**
-   * Get a partition for an entity, possibly creating the partition if it doesn't
-   * already exist.
+   * Get a partition for an entity, possibly creating the partition if it
+   * doesn't already exist.
    * 
    * @param entity
    *          The entity being used to find the partition.
