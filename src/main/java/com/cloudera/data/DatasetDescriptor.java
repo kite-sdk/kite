@@ -1,5 +1,7 @@
 package com.cloudera.data;
 
+import javax.annotation.Nullable;
+
 import org.apache.avro.Schema;
 
 import com.google.common.base.Objects;
@@ -24,9 +26,11 @@ public class DatasetDescriptor {
 
   /**
    * Create an instance of this class with the supplied {@link Schema} and
-   * optional {@link PartitionStrategy} (nullable).
+   * optional {@link PartitionStrategy}.
    */
-  public DatasetDescriptor(Schema schema, PartitionStrategy partitionStrategy) {
+  public DatasetDescriptor(Schema schema,
+      @Nullable PartitionStrategy partitionStrategy) {
+
     this.schema = schema;
     this.partitionStrategy = partitionStrategy;
   }
@@ -35,6 +39,7 @@ public class DatasetDescriptor {
     return schema;
   }
 
+  @Nullable
   public PartitionStrategy getPartitionStrategy() {
     return partitionStrategy;
   }

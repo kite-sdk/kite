@@ -2,7 +2,6 @@ package com.cloudera.data.filesystem;
 
 import java.io.IOException;
 
-import com.cloudera.data.impl.PartitionKey;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -14,6 +13,7 @@ import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.MetadataProvider;
 import com.cloudera.data.PartitionStrategy;
+import com.cloudera.data.impl.PartitionKey;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
