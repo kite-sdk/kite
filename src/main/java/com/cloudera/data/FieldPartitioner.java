@@ -7,10 +7,12 @@ import com.google.common.base.Function;
  * Partitions values for a named field.
  * </p>
  * <p>
- * Used by a {@link PartitionStrategy} to calculate which partition an entity belongs in.
+ * Used by a {@link PartitionStrategy} to calculate which partition an entity
+ * belongs in.
  * </p>
  */
 public abstract class FieldPartitioner implements Function<Object, Object> {
+
   private String name;
   private int cardinality;
 
