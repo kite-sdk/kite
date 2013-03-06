@@ -37,7 +37,7 @@
     <vers.guava>13.0</vers.guava>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.junit>4.8.2</vers.junit>
-    <vers.hadoop>2.0.0-cdh4.1.2</vers.hadoop>
+    <vers.hadoop>2.0.0-cdh4.2.0</vers.hadoop>
     <vers.jexl>2.1.1</vers.jexl>
   </properties>
 
