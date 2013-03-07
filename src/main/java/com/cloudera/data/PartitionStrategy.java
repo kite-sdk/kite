@@ -31,6 +31,8 @@ import com.google.common.collect.Lists;
  * </p>
  * 
  * @see FieldPartitioner
+ * @see DatasetDescriptor
+ * @see Dataset
  */
 public class PartitionStrategy {
 
