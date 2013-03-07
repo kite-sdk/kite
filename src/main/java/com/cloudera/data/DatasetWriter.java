@@ -14,7 +14,7 @@ import java.io.IOException;
  * containing dataset's {@link Dataset#getWriter()} method to get an appropriate
  * implementation. Users should receive an instance of this interface from a
  * dataset, call {@link #open()} to prepare for IO operations, invoke
- * {@link #write(Object))} and {@link #flush()} as necessary, and
+ * {@link #write(Object)} and {@link #flush()} as necessary, and
  * {@link #close()} when they are done, or no more data exists.
  * </p>
  * <p>
@@ -43,7 +43,7 @@ public interface DatasetWriter<E> {
    * </p>
    * <p>
    * This method <strong>must</strong> be invoked prior to any calls of
-   * {@link #write(Object))} or {@link #flush()}.
+   * {@link #write(Object)} or {@link #flush()}.
    * </p>
    * 
    * @throws IOException
