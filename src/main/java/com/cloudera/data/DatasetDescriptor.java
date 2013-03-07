@@ -71,8 +71,7 @@ public class DatasetDescriptor {
     /**
      * Configure the dataset's partitioning strategy. Optional.
      * 
-     * @param partitionStrategy
-     * @return
+     * @return An instance of the builder for method chaining.
      */
     public Builder partitionStrategy(PartitionStrategy partitionStrategy) {
       this.partitionStrategy = partitionStrategy;
