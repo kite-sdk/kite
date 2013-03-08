@@ -73,7 +73,7 @@ public class DatasetDescriptor {
      * 
      * @return An instance of the builder for method chaining.
      */
-    public Builder partitionStrategy(PartitionStrategy partitionStrategy) {
+    public Builder partitionStrategy(@Nullable PartitionStrategy partitionStrategy) {
       this.partitionStrategy = partitionStrategy;
       return this;
     }

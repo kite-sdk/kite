@@ -49,6 +49,8 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
 
   @Override
   public boolean hasNext() {
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to read from a file in state:%s", state);
     return reader.hasNext();
   }
 

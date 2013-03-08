@@ -52,4 +52,18 @@ public class TestFileSystemDatasetReader {
     Assert.assertEquals(100, records);
   }
 
+  @Test(expected = IllegalStateException.class)
+  public void testHasNextOnNonOpenWriterFails() throws IOException {
+    DatasetReader<String> reader = null;
+    try {
+      reader = new FileSystemDatasetReader<String>(fileSystem, new Path(Resources
+          .getResource("data/strings-100.avro").getFile()), testSchema);
+      reader.hasNext();
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+  }
+
 }

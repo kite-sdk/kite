@@ -1,5 +1,7 @@
 package com.cloudera.data.partition;
 
+import javax.annotation.Nonnull;
+
 import com.cloudera.data.FieldPartitioner;
 import com.google.common.base.Objects;
 
@@ -10,7 +12,7 @@ public class HashFieldPartitioner extends FieldPartitioner {
   }
 
   @Override
-  public Object apply(Object value) {
+  public Object apply(@Nonnull Object value) {
     return (value.hashCode() & Integer.MAX_VALUE) % getCardinality();
   }
 

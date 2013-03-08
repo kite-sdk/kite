@@ -276,12 +276,12 @@ class FileSystemDataset implements Dataset {
       return this;
     }
 
-    public Builder partitionStrategy(PartitionStrategy partitionStrategy) {
+    public Builder partitionStrategy(@Nullable PartitionStrategy partitionStrategy) {
       dataset.partitionStrategy = partitionStrategy;
       return this;
     }
 
-    Builder partitionKey(PartitionKey partitionKey) {
+    Builder partitionKey(@Nullable PartitionKey partitionKey) {
       dataset.partitionKey = partitionKey;
       return this;
     }
