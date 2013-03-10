@@ -50,7 +50,7 @@ import com.google.common.base.Preconditions;
  * <p>
  * Here are some examples of API use and the resultant directory structures.
  * </p>
- * <code>
+ * <pre>
  * DatasetRepository repo = new HDFSDatasetRepository(
  *   fileSystem,
  *   new Path("/data"),
@@ -77,7 +77,7 @@ import com.google.common.base.Preconditions;
  * } finally {
  *   writer.close();
  * }
- * </code>
+ * </pre>
  * <p>
  * This example writes a single user event entity (using the Avro
  * {@code GenericRecordBuilder} to build an entity represented by the
@@ -86,14 +86,14 @@ import com.google.common.base.Preconditions;
  * {@code FileSystem} above was configured to connect to an HDFS cluster, would
  * look as follows.
  * </p>
- * <code>
+ * <pre>
  * /data/UserEvents/data/*.avro
- * </code>
+ * </pre>
  * <p>
  * If we instead create the {@code UserEvent} dataset with the following
  * {@code DatasetDescriptor}:
  * </p>
- * <code>
+ * <pre>
  * Dataset userEvents = repo.create("UserEvents",
  *   new DatasetDescriptor.Builder()
  *     .schema(userEventSchema)
@@ -104,17 +104,17 @@ import com.google.common.base.Preconditions;
  *     )
  *     .get()
  * );
- * </code>
+ * </pre>
  * <p>
  * the resultant dataset would be partitioned by the identity function applied
  * to the {@code date} attribute of the entity when it is written. The directory
  * structure will now be:
  * </p>
- * <code>
+ * <pre>
  * /data/UserEvents/data/date=20130101/*.avro
  * /data/UserEvents/data/date=20130102/*.avro
  * ...
- * </code>
+ * </pre>
  * 
  * @see DatasetRepository
  * @see Dataset
