@@ -36,12 +36,12 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   private DatumWriter<E> writer;
   private ReaderWriterState state;
 
-  public FileSystemDatasetWriter(FileSystem fileSystem, Path path, Schema schema,
-      boolean enableCompression) {
+  public FileSystemDatasetWriter(FileSystem fileSystem, Path path,
+      Schema schema, boolean enableCompression) {
 
     this.fileSystem = fileSystem;
     this.path = path;
-    this.pathTmp = new Path(path.getParent(), path.getName() + ".tmp");
+    this.pathTmp = new Path(path.getParent(), "." + path.getName() + ".tmp");
     this.schema = schema;
     this.enableCompression = enableCompression;
     this.state = ReaderWriterState.NEW;
@@ -114,7 +114,8 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
         .toString();
   }
 
-  public static class Builder<E> implements Supplier<FileSystemDatasetWriter<E>> {
+  public static class Builder<E> implements
+      Supplier<FileSystemDatasetWriter<E>> {
 
     private FileSystem fileSystem;
     private Path path;
@@ -152,8 +153,8 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
       Preconditions.checkState(path != null, "Path is not defined");
       Preconditions.checkState(schema != null, "Schema is not defined");
 
-      FileSystemDatasetWriter<E> writer = new FileSystemDatasetWriter<E>(fileSystem, path,
-          schema, enableCompression);
+      FileSystemDatasetWriter<E> writer = new FileSystemDatasetWriter<E>(
+          fileSystem, path, schema, enableCompression);
 
       return writer;
     }
