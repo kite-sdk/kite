@@ -69,7 +69,7 @@ class FileSystemDataset implements Dataset {
   private String uniqueFilename() {
     // FIXME: This file name is not guaranteed to be truly unique.
     return Joiner.on('-').join(System.currentTimeMillis(),
-        Thread.currentThread().getId());
+        Thread.currentThread().getId() + ".avro");
   }
 
   @Override
@@ -276,7 +276,8 @@ class FileSystemDataset implements Dataset {
       return this;
     }
 
-    public Builder partitionStrategy(@Nullable PartitionStrategy partitionStrategy) {
+    public Builder partitionStrategy(
+        @Nullable PartitionStrategy partitionStrategy) {
       dataset.partitionStrategy = partitionStrategy;
       return this;
     }
