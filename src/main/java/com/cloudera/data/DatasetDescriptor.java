@@ -7,6 +7,15 @@ import org.apache.avro.Schema;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
+import org.apache.avro.file.DataFileReader;
+import org.apache.avro.file.DataFileStream;
+import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.generic.GenericRecord;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 /**
  * <p>
@@ -66,6 +75,101 @@ public class DatasetDescriptor {
     public Builder schema(Schema schema) {
       this.schema = schema;
       return this;
+    }
+
+    /**
+     * Configure the dataset's schema from a {@link File}. Required.
+     *
+     * @return An instance of the builder for method chaining.
+     */
+    public Builder schema(File file) throws IOException {
+      this.schema = new Schema.Parser().parse(file);
+      return this;
+    }
+
+    /**
+     * Configure the dataset's schema from an {@link InputStream}. Required.
+     *
+     * @return An instance of the builder for method chaining.
+     */
+    public Builder schema(InputStream in) throws IOException {
+      this.schema = new Schema.Parser().parse(in);
+      return this;
+    }
+
+    /**
+     * Configure the dataset's schema from a {@link URL}. Required.
+     *
+     * @return An instance of the builder for method chaining.
+     */
+    public Builder schema(URL url) throws IOException {
+      InputStream in = null;
+      try {
+        in = url.openStream();
+        return schema(in);
+      } finally {
+        if (in != null) {
+          in.close();
+        }
+      }
+    }
+
+    /**
+     * Configure the dataset's schema from a {@link String}. Required.
+     *
+     * @return An instance of the builder for method chaining.
+     */
+    public Builder schema(String s) throws IOException {
+      this.schema = new Schema.Parser().parse(s);
+      return this;
+    }
+
+    /**
+     * Configure the dataset's schema by using the schema from an existing Avro data
+     * file.
+     *
+     * @return An instance of the builder for method chaining.
+     */
+    public Builder schemaFromAvroDataFile(File file) throws IOException {
+      GenericDatumReader<GenericRecord> datumReader =
+          new GenericDatumReader<GenericRecord>();
+      DataFileReader<GenericRecord> reader = new DataFileReader<GenericRecord>(file,
+          datumReader);
+      this.schema = reader.getSchema();
+      return this;
+    }
+
+    /**
+     * Configure the dataset's schema by using the schema from an existing Avro data
+     * file.
+     *
+     * @return An instance of the builder for method chaining.
+     */
+    public Builder schemaFromAvroDataFile(InputStream in) throws IOException {
+      GenericDatumReader<GenericRecord> datumReader =
+          new GenericDatumReader<GenericRecord>();
+      DataFileStream<GenericRecord> stream = new DataFileStream<GenericRecord>(in,
+          datumReader);
+      this.schema = stream.getSchema();
+      return this;
+    }
+
+    /**
+     * Configure the dataset's schema by using the schema from an existing Avro data
+     * file.
+     *
+     * @return An instance of the builder for method chaining.
+     */
+    public Builder schemaFromAvroDataFile(URL url) throws IOException {
+      InputStream in = null;
+      try {
+        in = url.openStream();
+        return schemaFromAvroDataFile(in);
+      } finally {
+        if (in != null) {
+          in.close();
+        }
+      }
     }
 
     /**
