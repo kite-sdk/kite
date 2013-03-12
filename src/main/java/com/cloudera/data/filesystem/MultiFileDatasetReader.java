@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.base.Preconditions;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.cloudera.data.DatasetReader;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 
 class MultiFileDatasetReader<E> implements DatasetReader<E> {
 
@@ -86,6 +87,13 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
       reader.close();
     }
     state = ReaderWriterState.CLOSED;
+  }
+
+  @Override
+  public String toString() {
+    return Objects.toStringHelper(this).add("reader", reader)
+        .add("state", state).add("filesIter", filesIter).add("schema", schema)
+        .toString();
   }
 
 }
