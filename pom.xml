@@ -39,6 +39,7 @@
     <vers.junit>4.8.2</vers.junit>
     <vers.hadoop>2.0.0-cdh4.2.0</vers.hadoop>
     <vers.jexl>2.1.1</vers.jexl>
+    <vers.rat>0.8</vers.rat>
   </properties>
 
   <repositories>
@@ -81,6 +82,34 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <version>${vers.rat}</version>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <excludes>
+            <exclude>**/*.avro</exclude>
+            <exclude>**/*.avsc</exclude>
+            <exclude>**/*.iml</exclude>
+            <exclude>**/*.md</exclude>
+            <exclude>**/.classpath</exclude>
+            <exclude>**/.project</exclude>
+            <exclude>**/.settings/**</exclude>
+            <exclude>**/target/**</exclude>
+            <exclude>.git/**</exclude>
+            <exclude>.gitignore</exclude>
+            <exclude>.idea/**</exclude>
+          </excludes>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
