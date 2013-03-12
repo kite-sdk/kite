@@ -37,21 +37,22 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
         "A reader may not be opened more than once - current state:%s", state);
 
     if (filesIter.hasNext()) {
-      reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(), schema);
+      reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
+          schema);
       reader.open();
     }
     this.state = ReaderWriterState.OPEN;
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-    value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
-    justification="Checked by Preconditions")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR", justification = "Checked by Preconditions")
   public boolean hasNext() throws IOException {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
         "Attempt to read from a file in state:%s", state);
     while (true) {
-      if (reader.hasNext()) {
+      if (reader == null) {
+        return false;
+      } else if (reader.hasNext()) {
         return true;
       } else {
         reader.close();
@@ -69,9 +70,7 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-    value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
-    justification="Checked by Preconditions")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR", justification = "Checked by Preconditions")
   public E read() throws IOException {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
         "Attempt to read from a file in state:%s", state);
