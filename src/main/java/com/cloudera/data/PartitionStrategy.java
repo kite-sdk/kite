@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.avro.generic.GenericRecord;
 
 import com.cloudera.data.impl.Accessor;
-import com.cloudera.data.impl.PartitionKey;
 import com.cloudera.data.partition.HashFieldPartitioner;
 import com.cloudera.data.partition.IdentityFieldPartitioner;
 import com.cloudera.data.partition.IntRangeFieldPartitioner;
@@ -26,11 +25,12 @@ import com.google.common.collect.Lists;
  * {@link FieldPartitioner}s upon creation. When a {@link Dataset} is configured
  * with a partition strategy, we say that data is partitioned. Any entities
  * written to a partitioned dataset are evaluated with its
- * {@code PartitionStrategy} which, in turn, produces a partition key that is
+ * {@code PartitionStrategy} which, in turn, produces a {@link PartitionKey} that is
  * used by the dataset implementation to select the proper partition.
  * </p>
  * 
  * @see FieldPartitioner
+ * @see PartitionKey
  * @see DatasetDescriptor
  * @see Dataset
  */
@@ -111,9 +111,32 @@ public class PartitionStrategy {
   }
 
   /**
-   * Returns a key that represents the value of the partition.
+   * <p>
+   * Construct a partition key with a variadic array of values corresponding to
+   * the field partitioners in this partition strategy.
+   * </p>
+   * <p>
+   * It is permitted to have fewer values than field partitioners, in which case
+   * all subpartititions in the unspecified parts of the key are matched by the key.
+   * </p>
+   * <p>
+   * Null values are not permitted.
+   * </p>
    */
-  PartitionKey getPartitionKey(Object entity) {
+  public PartitionKey partitionKey(Object... values) {
+    return new PartitionKey(values);
+  }
+
+  /**
+   * <p>
+   * Construct a partition key for the given entity.
+   * </p>
+   * <p>
+   * This is a convenient way to find the partition that a given entity would be written
+   * to, or to find a partition using objects from the entity domain.
+   * </p>
+   */
+  public PartitionKey partitionKeyForEntity(Object entity) {
     Object[] values = new Object[fieldPartitioners.size()]; // TODO: reuse
     for (int i = 0; i < fieldPartitioners.size(); i++) {
       FieldPartitioner fp = fieldPartitioners.get(i);

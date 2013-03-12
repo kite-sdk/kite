@@ -5,8 +5,6 @@ import java.io.IOException;
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.filesystem.PartitionExpression;
-import com.cloudera.data.filesystem.PartitionedDatasetWriter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -17,8 +15,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.data.filesystem.FileSystemMetadataProvider;
-import com.cloudera.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
@@ -41,7 +37,7 @@ public class TestPartitionedDatasetWriter {
         new FileSystemMetadataProvider(fileSystem, testDirectory));
     PartitionStrategy partitionStrategy = new PartitionExpression(testSchema
         .getProp("cdk.partition.expression"), true).evaluate();
-    FileSystemDataset users = (FileSystemDataset) repo.create(
+    Dataset users = repo.create(
         "users",
         new DatasetDescriptor.Builder()
             .schema(testSchema)

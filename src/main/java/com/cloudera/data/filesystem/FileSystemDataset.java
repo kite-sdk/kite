@@ -19,7 +19,7 @@ import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.impl.Accessor;
-import com.cloudera.data.impl.PartitionKey;
+import com.cloudera.data.PartitionKey;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -148,23 +148,8 @@ class FileSystemDataset implements Dataset {
   }
 
   @Override
-  public <E> Dataset getPartition(E entity, boolean allowCreate)
-      throws IOException {
-
-    Preconditions.checkState(isPartitioned(),
-        "Attempt to get a partition on a non-partitioned dataset (name:%s)",
-        name);
-
-    logger.debug("Loading partition for entity {}, allowCreate:{}",
-        new Object[] { entity, allowCreate });
-
-    PartitionKey key = Accessor.getDefault().getPartitionKey(partitionStrategy,
-        entity);
-    return getPartitionForKey(key, allowCreate);
-  }
-
   @Nullable
-  Dataset getPartitionForKey(PartitionKey key, boolean allowCreate)
+  public Dataset getPartition(PartitionKey key, boolean allowCreate)
       throws IOException {
     Preconditions.checkState(isPartitioned(),
         "Attempt to get a partition on a non-partitioned dataset (name:%s)",
@@ -205,7 +190,7 @@ class FileSystemDataset implements Dataset {
       values.add(0, value);
       dir = dir.getParent();
     }
-    return new PartitionKey(values.toArray());
+    return Accessor.getDefault().newPartitionKey(values.toArray());
   }
 
   @Override

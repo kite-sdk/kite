@@ -1,13 +1,12 @@
 package com.cloudera.data;
 
 import com.cloudera.data.impl.Accessor;
-import com.cloudera.data.impl.PartitionKey;
 
 final class AccessorImpl extends Accessor {
 
   @Override
-  public PartitionKey getPartitionKey(PartitionStrategy partitionStrategy, Object entity) {
-    return partitionStrategy.getPartitionKey(entity);
+  public PartitionKey newPartitionKey(Object... values) {
+    return new PartitionKey(values);
   }
 
   @Override

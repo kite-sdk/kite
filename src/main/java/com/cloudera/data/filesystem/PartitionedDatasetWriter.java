@@ -10,7 +10,7 @@ import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.impl.Accessor;
-import com.cloudera.data.impl.PartitionKey;
+import com.cloudera.data.PartitionKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
   private static final Logger logger = LoggerFactory
       .getLogger(PartitionedDatasetWriter.class);
 
-  private FileSystemDataset dataset;
+  private Dataset dataset;
   private int maxWriters;
 
   private final PartitionStrategy partitionStrategy;
@@ -35,7 +35,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
 
   private ReaderWriterState state;
 
-  public PartitionedDatasetWriter(FileSystemDataset dataset, PartitionStrategy partitionStrategy) {
+  public PartitionedDatasetWriter(Dataset dataset, PartitionStrategy partitionStrategy) {
     Preconditions.checkArgument(dataset.isPartitioned(), "Dataset " + dataset
         + " is not partitioned");
 
@@ -66,7 +66,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
         "Attempt to write to a writer in state:%s", state);
 
-    PartitionKey key = Accessor.getDefault().getPartitionKey(partitionStrategy, entity);
+    PartitionKey key = partitionStrategy.partitionKeyForEntity(entity);
     DatasetWriter<E> writer = null;
 
     try {
@@ -131,15 +131,15 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
   private static class DatasetWriterCacheLoader<E> extends
       CacheLoader<PartitionKey, DatasetWriter<E>> {
 
-    private FileSystemDataset dataset;
+    private Dataset dataset;
 
-    public DatasetWriterCacheLoader(FileSystemDataset dataset) {
+    public DatasetWriterCacheLoader(Dataset dataset) {
       this.dataset = dataset;
     }
 
     @Override
     public DatasetWriter<E> load(PartitionKey key) throws Exception {
-      Dataset partition = dataset.getPartitionForKey(key, true);
+      Dataset partition = dataset.getPartition(key, true);
       DatasetWriter<E> writer = partition.getWriter();
 
       writer.open();

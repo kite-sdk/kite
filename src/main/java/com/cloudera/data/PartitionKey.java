@@ -1,18 +1,37 @@
-package com.cloudera.data.impl;
+package com.cloudera.data;
 
 import com.google.common.base.Objects;
 
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * <p>
+ * A key for retrieving partitions from a {@link Dataset}.
+ * </p>
+ * <p>
+ * A {@code PartitionKey} is a ordered sequence of values corresponding to the
+ * {@link FieldPartitioner}s in a {@link PartitionStrategy}.
+ * A {@link PartitionKey} may be obtained using
+ * {@link PartitionStrategy#partitionKey(Object...)} or
+ * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
+ * </p>
+ *
+ * @see PartitionStrategy
+ * @see FieldPartitioner
+ * @see Dataset
+ */
 public class PartitionKey {
 
   private List<Object> values;
 
-  public PartitionKey(Object... values) {
+  PartitionKey(Object... values) {
     this.values = Arrays.asList(values);
   }
 
+  /**
+   * Return the value at the specified index in the key.
+   */
   public Object get(int index) {
     if (index < values.size()) {
       return values.get(index);
@@ -40,6 +59,9 @@ public class PartitionKey {
     return values != null ? values.hashCode() : 0;
   }
 
+  /**
+   * Return the number of values in the key.
+   */
   public int getLength() {
     return values.size();
   }

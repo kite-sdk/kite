@@ -1,5 +1,6 @@
 package com.cloudera.data.impl;
 
+import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 
 /**
@@ -38,7 +39,7 @@ public abstract class Accessor {
   public Accessor() {
   }
 
-  public abstract PartitionKey getPartitionKey(PartitionStrategy partitionStrategy, Object entity);
+  public abstract PartitionKey newPartitionKey(Object... values);
 
   public abstract PartitionStrategy getSubpartitionStrategy(PartitionStrategy partitionStrategy, int startIndex);
 }

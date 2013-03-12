@@ -2,6 +2,7 @@ package com.cloudera.data.filesystem;
 
 import java.io.IOException;
 
+import com.cloudera.data.impl.Accessor;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -13,7 +14,7 @@ import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.MetadataProvider;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.impl.PartitionKey;
+import com.cloudera.data.PartitionKey;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
@@ -215,7 +216,8 @@ public class FileSystemDatasetRepository implements DatasetRepository {
         .schema(schema).directory(pathForDataset(name))
         .dataDirectory(pathForDatasetData(name))
         .partitionStrategy(partitionStrategy)
-        .partitionKey(partitionStrategy == null ? null : new PartitionKey())
+        .partitionKey(partitionStrategy == null ? null :
+            Accessor.getDefault().newPartitionKey())
         .get();
   }
 

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import com.cloudera.data.impl.PartitionKey;
+import com.cloudera.data.PartitionKey;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -23,7 +23,6 @@ import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.filesystem.FileSystemDataset;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
@@ -137,8 +136,8 @@ public class TestFileSystemDataset {
     Assert.assertTrue("Partitioned directory 1 exists",
         fileSystem.exists(new Path(testDirectory, "username=1")));
     readTestUsers(ds, 10);
-    int total = readTestUsersInPartition(ds, new PartitionKey(0), null)
-        + readTestUsersInPartition(ds, new PartitionKey(1), null);
+    int total = readTestUsersInPartition(ds, partitionStrategy.partitionKey(0), null)
+        + readTestUsersInPartition(ds, partitionStrategy.partitionKey(1), null);
     Assert.assertEquals(10, total);
 
     Assert.assertEquals(2, Iterables.size(ds.getPartitions()));
@@ -167,8 +166,8 @@ public class TestFileSystemDataset {
 
     writeTestUsers(ds, 10);
     readTestUsers(ds, 10);
-    int total = readTestUsersInPartition(ds, new PartitionKey(0), "email")
-        + readTestUsersInPartition(ds, new PartitionKey(1), "email");
+    int total = readTestUsersInPartition(ds, partitionStrategy.partitionKey(0), "email")
+        + readTestUsersInPartition(ds, partitionStrategy.partitionKey(1), "email");
     Assert.assertEquals(10, total);
 
     total = 0;
@@ -177,7 +176,7 @@ public class TestFileSystemDataset {
         String part = "username=" + i1 + "/email=" + i2;
         Assert.assertTrue("Partitioned directory " + part + " exists",
             fileSystem.exists(new Path(testDirectory, part)));
-        total += readTestUsersInPartition(ds, new PartitionKey(i1, i2), null);
+        total += readTestUsersInPartition(ds, partitionStrategy.partitionKey(i1, i2), null);
       }
     }
     Assert.assertEquals(10, total);
@@ -203,7 +202,7 @@ public class TestFileSystemDataset {
         .name("partitioned-users").schema(testSchema)
         .partitionStrategy(partitionStrategy).get();
 
-    Assert.assertNull(ds.getPartitionForKey(new PartitionKey(1), false));
+    Assert.assertNull(ds.getPartition(partitionStrategy.partitionKey(1), false));
   }
 
   @Test
@@ -216,11 +215,11 @@ public class TestFileSystemDataset {
         .name("partitioned-users").schema(testSchema)
         .partitionStrategy(partitionStrategy).get();
 
-    Dataset userPartition = ds.getPartitionForKey(new PartitionKey(1), true);
+    Dataset userPartition = ds.getPartition(partitionStrategy.partitionKey(1), true);
     writeTestUsers(userPartition, 1);
     Assert.assertTrue("Partitioned directory exists",
         fileSystem.exists(new Path(testDirectory, "username=1/email=2")));
-    Assert.assertEquals(1, readTestUsersInPartition(ds, new PartitionKey(1), "email"));
+    Assert.assertEquals(1, readTestUsersInPartition(ds, partitionStrategy.partitionKey(1), "email"));
   }
 
   private int datasetSize(Dataset ds) throws IOException {
@@ -299,7 +298,7 @@ public class TestFileSystemDataset {
     int readCount = 0;
     DatasetReader<Record> reader = null;
     try {
-      Dataset partition = ds.getPartitionForKey(key, false);
+      Dataset partition = ds.getPartition(key, false);
       if (subpartitionName != null) {
         List<FieldPartitioner> fieldPartitioners = partition
             .getPartitionStrategy().getFieldPartitioners();
