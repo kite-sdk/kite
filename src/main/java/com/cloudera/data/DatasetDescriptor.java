@@ -73,8 +73,18 @@ public class DatasetDescriptor {
     return schema;
   }
 
-  @Nullable
+  /**
+   * Get the {@link PartitionStrategy}, if this dataset is partitioned. Calling
+   * this method on a non-partitioned dataset is an error. Instead, use the
+   * {@link #isPartitioned()} method prior to invocation.
+   */
   public PartitionStrategy getPartitionStrategy() {
+    Preconditions
+        .checkState(
+            isPartitioned(),
+            "Attempt to retrieve the partition strategy on a non-partitioned descriptor:%s",
+            this);
+
     return partitionStrategy;
   }
 
