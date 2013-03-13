@@ -60,6 +60,15 @@ public class DatasetDescriptor {
     this.partitionStrategy = partitionStrategy;
   }
 
+  /**
+   * Get the associated {@link Schema}. Depending on the underlying storage
+   * system, this schema may be simple (i.e. records made up of only scalar
+   * types) or complex (i.e. containing other records, lists, and so on).
+   * Validation of the supported schemas is performed by the managing
+   * repository, not the dataset or descriptor itself.
+   * 
+   * @return the schema
+   */
   public Schema getSchema() {
     return schema;
   }
