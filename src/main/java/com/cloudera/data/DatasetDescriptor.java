@@ -15,23 +15,23 @@
  */
 package com.cloudera.data;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
 import javax.annotation.Nullable;
 
-import com.google.common.io.Closeables;
 import org.apache.avro.Schema;
-
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
+import com.google.common.io.Closeables;
 
 /**
  * <p>
@@ -69,6 +69,14 @@ public class DatasetDescriptor {
     return partitionStrategy;
   }
 
+  /**
+   * Returns true if an associated dataset is partitioned (that is, has an
+   * associated {@link PartitionStrategy}, false otherwise.
+   */
+  public boolean isPartitioned() {
+    return partitionStrategy != null;
+  }
+
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("schema", schema)
@@ -84,8 +92,8 @@ public class DatasetDescriptor {
     private PartitionStrategy partitionStrategy;
 
     /**
-     * Configure the dataset's schema.
-     * A schema is required, and may be set using one of the <code>schema</code> or
+     * Configure the dataset's schema. A schema is required, and may be set
+     * using one of the <code>schema</code> or
      * <code>schemaFromAvroDataFile</code> methods.
      * 
      * @return An instance of the builder for method chaining.
@@ -96,10 +104,10 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's schema from a {@link File}.
-     * A schema is required, and may be set using one of the <code>schema</code> or
+     * Configure the dataset's schema from a {@link File}. A schema is required,
+     * and may be set using one of the <code>schema</code> or
      * <code>schemaFromAvroDataFile</code> methods.
-     *
+     * 
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(File file) throws IOException {
@@ -108,11 +116,11 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's schema from an {@link InputStream}. It is the caller's
-     * responsibility to close the {@link InputStream}.
-     * A schema is required, and may be set using one of the <code>schema</code> or
+     * Configure the dataset's schema from an {@link InputStream}. It is the
+     * caller's responsibility to close the {@link InputStream}. A schema is
+     * required, and may be set using one of the <code>schema</code> or
      * <code>schemaFromAvroDataFile</code> methods.
-     *
+     * 
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(InputStream in) throws IOException {
@@ -121,10 +129,10 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's schema from a {@link URL}.
-     * A schema is required, and may be set using one of the <code>schema</code> or
+     * Configure the dataset's schema from a {@link URL}. A schema is required,
+     * and may be set using one of the <code>schema</code> or
      * <code>schemaFromAvroDataFile</code> methods.
-     *
+     * 
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(URL url) throws IOException {
@@ -138,10 +146,10 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's schema from a {@link String}.
-     * A schema is required, and may be set using one of the <code>schema</code> or
+     * Configure the dataset's schema from a {@link String}. A schema is
+     * required, and may be set using one of the <code>schema</code> or
      * <code>schemaFromAvroDataFile</code> methods.
-     *
+     * 
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(String s) throws IOException {
@@ -150,16 +158,14 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's schema by using the schema from an existing Avro data
-     * file.
-     * A schema is required, and may be set using one of the <code>schema</code> or
-     * <code>schemaFromAvroDataFile</code> methods.
-     *
+     * Configure the dataset's schema by using the schema from an existing Avro
+     * data file. A schema is required, and may be set using one of the
+     * <code>schema</code> or <code>schemaFromAvroDataFile</code> methods.
+     * 
      * @return An instance of the builder for method chaining.
      */
     public Builder schemaFromAvroDataFile(File file) throws IOException {
-      GenericDatumReader<GenericRecord> datumReader =
-          new GenericDatumReader<GenericRecord>();
+      GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<GenericRecord>();
       DataFileReader<GenericRecord> reader = null;
       try {
         reader = new DataFileReader<GenericRecord>(file, datumReader);
@@ -171,16 +177,15 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's schema by using the schema from an existing Avro data
-     * file. It is the caller's responsibility to close the {@link InputStream}.
-     * A schema is required, and may be set using one of the <code>schema</code> or
-     * <code>schemaFromAvroDataFile</code> methods.
-     *
+     * Configure the dataset's schema by using the schema from an existing Avro
+     * data file. It is the caller's responsibility to close the
+     * {@link InputStream}. A schema is required, and may be set using one of
+     * the <code>schema</code> or <code>schemaFromAvroDataFile</code> methods.
+     * 
      * @return An instance of the builder for method chaining.
      */
     public Builder schemaFromAvroDataFile(InputStream in) throws IOException {
-      GenericDatumReader<GenericRecord> datumReader =
-          new GenericDatumReader<GenericRecord>();
+      GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<GenericRecord>();
       DataFileStream<GenericRecord> stream = null;
       try {
         stream = new DataFileStream<GenericRecord>(in, datumReader);
@@ -192,11 +197,10 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's schema by using the schema from an existing Avro data
-     * file.
-     * A schema is required, and may be set using one of the <code>schema</code> or
-     * <code>schemaFromAvroDataFile</code> methods.
-     *
+     * Configure the dataset's schema by using the schema from an existing Avro
+     * data file. A schema is required, and may be set using one of the
+     * <code>schema</code> or <code>schemaFromAvroDataFile</code> methods.
+     * 
      * @return An instance of the builder for method chaining.
      */
     public Builder schemaFromAvroDataFile(URL url) throws IOException {
@@ -214,7 +218,8 @@ public class DatasetDescriptor {
      * 
      * @return An instance of the builder for method chaining.
      */
-    public Builder partitionStrategy(@Nullable PartitionStrategy partitionStrategy) {
+    public Builder partitionStrategy(
+        @Nullable PartitionStrategy partitionStrategy) {
       this.partitionStrategy = partitionStrategy;
       return this;
     }
