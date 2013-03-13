@@ -29,12 +29,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.Dataset;
+import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.FieldPartitioner;
+import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.impl.Accessor;
-import com.cloudera.data.PartitionKey;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -52,9 +53,16 @@ class FileSystemDataset implements Dataset {
   private Path directory;
   private Path dataDirectory;
   private String name;
-  private Schema schema;
-  private PartitionStrategy partitionStrategy; // at root
+  private DatasetDescriptor descriptor;
   private PartitionKey partitionKey;
+
+  private PartitionStrategy partitionStrategy;
+  private Schema schema;
+
+  @Override
+  public DatasetDescriptor getDescriptor() {
+    return descriptor;
+  }
 
   @Override
   public <E> DatasetWriter<E> getWriter() {
@@ -131,15 +139,6 @@ class FileSystemDataset implements Dataset {
   }
 
   @Override
-  public Schema getSchema() {
-    return schema;
-  }
-
-  public void setSchema(Schema schema) {
-    this.schema = schema;
-  }
-
-  @Override
   public String getName() {
     return name;
   }
@@ -149,24 +148,10 @@ class FileSystemDataset implements Dataset {
   }
 
   @Override
-  public PartitionStrategy getPartitionStrategy() {
-    if (partitionKey == null) {
-      return partitionStrategy;
-    }
-    return Accessor.getDefault().getSubpartitionStrategy(partitionStrategy,
-        partitionKey.getLength());
-  }
-
-  @Override
-  public boolean isPartitioned() {
-    return getPartitionStrategy() != null;
-  }
-
-  @Override
   @Nullable
   public Dataset getPartition(PartitionKey key, boolean allowCreate)
       throws IOException {
-    Preconditions.checkState(isPartitioned(),
+    Preconditions.checkState(descriptor.isPartitioned(),
         "Attempt to get a partition on a non-partitioned dataset (name:%s)",
         name);
 
@@ -183,8 +168,8 @@ class FileSystemDataset implements Dataset {
     }
 
     return new FileSystemDataset.Builder().name(name).fileSystem(fileSystem)
-        .directory(directory).dataDirectory(dataDirectory).schema(schema)
-        .partitionStrategy(partitionStrategy).partitionKey(key).get();
+        .descriptor(descriptor).directory(directory)
+        .dataDirectory(dataDirectory).partitionKey(key).get();
   }
 
   private Path toDirectoryName(Path dir, PartitionKey key) {
@@ -210,7 +195,7 @@ class FileSystemDataset implements Dataset {
 
   @Override
   public Iterable<Dataset> getPartitions() throws IOException {
-    Preconditions.checkState(isPartitioned(),
+    Preconditions.checkState(descriptor.isPartitioned(),
         "Attempt to get partitions on a non-partitioned dataset (name:%s)",
         name);
     List<Path> partitionDirectories = Lists.newArrayList(dataDirectory);
@@ -228,9 +213,8 @@ class FileSystemDataset implements Dataset {
     for (Path p : partitionDirectories) {
       PartitionKey key = fromDirectoryName(p);
       Builder builder = new FileSystemDataset.Builder().name(name)
-          .fileSystem(fileSystem).directory(directory).schema(schema)
-          .dataDirectory(dataDirectory).partitionStrategy(partitionStrategy)
-          .partitionKey(key);
+          .fileSystem(fileSystem).descriptor(descriptor).directory(directory)
+          .dataDirectory(dataDirectory).partitionKey(key);
       partitions.add(builder.get());
     }
     return partitions;
@@ -238,9 +222,9 @@ class FileSystemDataset implements Dataset {
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("name", name).add("schema", schema)
-        .add("directory", directory).add("dataDirectory", dataDirectory)
-        .add("partitionStrategy", partitionStrategy).toString();
+    return Objects.toStringHelper(this).add("name", name)
+        .add("descriptor", descriptor).add("directory", directory)
+        .add("dataDirectory", dataDirectory).toString();
   }
 
   public static class Builder implements Supplier<FileSystemDataset> {
@@ -271,14 +255,8 @@ class FileSystemDataset implements Dataset {
       return this;
     }
 
-    public Builder schema(Schema schema) {
-      dataset.schema = schema;
-      return this;
-    }
-
-    public Builder partitionStrategy(
-        @Nullable PartitionStrategy partitionStrategy) {
-      dataset.partitionStrategy = partitionStrategy;
+    public Builder descriptor(DatasetDescriptor descriptor) {
+      dataset.descriptor = descriptor;
       return this;
     }
 
@@ -290,14 +268,20 @@ class FileSystemDataset implements Dataset {
     @Override
     public FileSystemDataset get() {
       Preconditions.checkState(dataset.name != null, "No dataset name defined");
-      Preconditions.checkState(dataset.schema != null,
-          "No dataset schema defined");
+      Preconditions.checkState(dataset.descriptor != null,
+          "No dataset descriptor defined");
       Preconditions.checkState(dataset.directory != null,
           "No dataset directory defined");
       Preconditions.checkState(dataset.dataDirectory != null,
           "No dataset data directory defined");
       Preconditions.checkState(dataset.fileSystem != null,
           "No filesystem defined");
+
+      dataset.schema = dataset.descriptor.getSchema();
+
+      if (dataset.descriptor.isPartitioned()) {
+        dataset.partitionStrategy = dataset.descriptor.getPartitionStrategy();
+      }
 
       FileSystemDataset current = dataset;
       dataset = new FileSystemDataset();
