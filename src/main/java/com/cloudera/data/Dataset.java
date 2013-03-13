@@ -45,33 +45,11 @@ public interface Dataset {
    */
   String getName();
 
-  /**
-   * Get the {@code Dataset}'s associated {@link Schema}. Depending on the
-   * underlying storage system, this schema may be simple (i.e. records made up
-   * of only scalar types) or complex (i.e. containing other records, lists, and
-   * so on). Validation of the supported schemas is performed by the managing
-   * repository, not the {@code Dataset} itself.
-   * 
-   * @return the dataset schema
-   */
-  Schema getSchema();
+  DatasetDescriptor getDescriptor();
 
   /**
-   * Get the {@link PartitionStrategy}, if this dataset is partitioned. Calling
-   * this method on a non-partitioned dataset is an error. Instead, use the
-   * {@link #isPartitioned()} method prior to invocation.
-   */
-  PartitionStrategy getPartitionStrategy();
-
-  /**
-   * Returns true if the dataset is partitioned (that is, has an associated
-   * {@link PartitionStrategy}, false otherwise.
-   */
-  boolean isPartitioned();
-
-  /**
-   * Get a partition for a {@link PartitionKey}, possibly creating the partition if it
-   * doesn't already exist. A {@link PartitionKey} may be obtained using
+   * Get a partition for a {@link PartitionKey}, possibly creating the partition
+   * if it doesn't already exist. A {@link PartitionKey} may be obtained using
    * {@link PartitionStrategy#partitionKey(Object...)} or
    * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
    * 
