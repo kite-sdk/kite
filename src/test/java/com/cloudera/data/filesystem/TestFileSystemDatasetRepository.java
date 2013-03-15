@@ -70,8 +70,8 @@ public class TestFileSystemDatasetRepository {
 
     Assert.assertEquals("Dataset name is propagated", "test1",
         dataset.getName());
-    Assert.assertEquals("Dataset schema is propagated", testSchema,
-        dataset.getSchema());
+    Assert.assertEquals("Dataset schema is propagated", testSchema, dataset
+        .getDescriptor().getSchema());
     Assert.assertTrue("Dataset data directory exists",
         fileSystem.exists(new Path(testDirectory, "test1/data")));
     Assert.assertTrue("Dataset metadata file exists",
@@ -89,8 +89,8 @@ public class TestFileSystemDatasetRepository {
 
     Assert.assertEquals("Dataset name is propagated", "test2",
         dataset.getName());
-    Assert.assertEquals("Dataset schema is propagated", testSchema,
-        dataset.getSchema());
+    Assert.assertEquals("Dataset schema is propagated", testSchema, dataset
+        .getDescriptor().getSchema());
     Assert.assertTrue("Dataset data directory exists",
         fileSystem.exists(new Path(testDirectory, "test2/data")));
     Assert.assertTrue("Dataset metadata file exists",
@@ -107,8 +107,8 @@ public class TestFileSystemDatasetRepository {
     Assert.assertNotNull("Dataset is loaded and produced", dataset);
     Assert.assertEquals("Dataset name is propagated", "test1",
         dataset.getName());
-    Assert.assertEquals("Dataset schema is loaded", testSchema,
-        dataset.getSchema());
+    Assert.assertEquals("Dataset schema is loaded", testSchema, dataset
+        .getDescriptor().getSchema());
   }
 
 }
