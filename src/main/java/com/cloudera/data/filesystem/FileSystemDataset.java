@@ -60,26 +60,23 @@ class FileSystemDataset implements Dataset {
   private Schema schema;
 
   @Override
+  public String getName() {
+    return name;
+  }
+
+  @Override
   public DatasetDescriptor getDescriptor() {
     return descriptor;
   }
 
   @Override
   public <E> DatasetWriter<E> getWriter() {
+    logger.debug("Getting writer to dataset:{}", this);
+
     DatasetWriter<E> writer = null;
 
-    if (partitionStrategy != null) {
-      if (partitionKey == null
-          || partitionKey.getLength() < partitionStrategy
-              .getFieldPartitioners().size()) {
-        // FIXME: Why does this complain about a resource leak and not others?
-        writer = new PartitionedDatasetWriter<E>(this, partitionStrategy);
-      } else {
-        Path dataFile = new Path(toDirectoryName(dataDirectory, partitionKey),
-            uniqueFilename());
-        writer = new FileSystemDatasetWriter.Builder<E>()
-            .fileSystem(fileSystem).path(dataFile).schema(schema).get();
-      }
+    if (descriptor.isPartitioned()) {
+      writer = new PartitionedDatasetWriter<E>(this);
     } else {
       Path dataFile = new Path(dataDirectory, uniqueFilename());
       writer = new FileSystemDatasetWriter.Builder<E>().fileSystem(fileSystem)
@@ -89,62 +86,14 @@ class FileSystemDataset implements Dataset {
     return writer;
   }
 
-  private String uniqueFilename() {
-    // FIXME: This file name is not guaranteed to be truly unique.
-    return Joiner.on('-').join(System.currentTimeMillis(),
-        Thread.currentThread().getId() + ".avro");
-  }
-
   @Override
   public <E> DatasetReader<E> getReader() throws IOException {
+    logger.debug("Getting reader for dataset:{}", this);
+
     List<Path> paths = Lists.newArrayList();
     accumulateDatafilePaths(dataDirectory, paths);
     pruneDatafilePaths(paths);
     return new MultiFileDatasetReader<E>(fileSystem, paths, schema);
-  }
-
-  private void accumulateDatafilePaths(Path directory, List<Path> paths)
-      throws IOException {
-    for (FileStatus status : fileSystem.listStatus(directory)) {
-      if (status.isDirectory()) {
-        accumulateDatafilePaths(status.getPath(), paths);
-      } else {
-        paths.add(status.getPath());
-      }
-    }
-  }
-
-  private void pruneDatafilePaths(List<Path> paths) {
-    if (partitionKey == null) {
-      return;
-    }
-    for (Iterator<Path> it = paths.iterator(); it.hasNext();) {
-      Path path = it.next();
-      Path dir = path.getParent(); // directory containing leaf data file
-      // walk up the directory hierarchy
-      for (int i = partitionStrategy.getFieldPartitioners().size() - 1; i >= 0; i--) {
-        FieldPartitioner fieldPartitioner = partitionStrategy
-            .getFieldPartitioners().get(i);
-        if (partitionKey.get(i) != null) {
-          String filterName = fieldPartitioner.getName() + "="
-              + partitionKey.get(i);
-          if (!filterName.equals(dir.getName())) {
-            it.remove();
-            break;
-          }
-        }
-        dir = dir.getParent();
-      }
-    }
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   @Override
@@ -167,30 +116,18 @@ class FileSystemDataset implements Dataset {
       }
     }
 
-    return new FileSystemDataset.Builder().name(name).fileSystem(fileSystem)
-        .descriptor(descriptor).directory(directory)
-        .dataDirectory(dataDirectory).partitionKey(key).get();
-  }
+    int partitionDepth = key.getLength();
+    PartitionStrategy subpartitionStrategy = Accessor.getDefault()
+        .getSubpartitionStrategy(partitionStrategy, partitionDepth);
 
-  private Path toDirectoryName(Path dir, PartitionKey key) {
-    Path result = dir;
-    for (int i = 0; i < key.getLength(); i++) {
-      String fieldName = partitionStrategy.getFieldPartitioners().get(i)
-          .getName();
-      result = new Path(result, fieldName + "=" + key.get(i));
-    }
-    return result;
-  }
-
-  private PartitionKey fromDirectoryName(Path dir) {
-    List<Object> values = Lists.newArrayList();
-    // walk up the directory hierarchy
-    for (int i = partitionStrategy.getFieldPartitioners().size() - 1; i >= 0; i--) {
-      String value = Iterables.get(Splitter.on('=').split(dir.getName()), 1);
-      values.add(0, value);
-      dir = dir.getParent();
-    }
-    return Accessor.getDefault().newPartitionKey(values.toArray());
+    return new FileSystemDataset.Builder()
+        .name(name)
+        .fileSystem(fileSystem)
+        .descriptor(
+            new DatasetDescriptor.Builder().schema(schema)
+                .partitionStrategy(subpartitionStrategy).get())
+        .directory(directory).dataDirectory(partitionDirectory)
+        .partitionKey(key).get();
   }
 
   @Override
@@ -224,7 +161,70 @@ class FileSystemDataset implements Dataset {
   public String toString() {
     return Objects.toStringHelper(this).add("name", name)
         .add("descriptor", descriptor).add("directory", directory)
-        .add("dataDirectory", dataDirectory).toString();
+        .add("dataDirectory", dataDirectory).add("partitionKey", partitionKey)
+        .toString();
+  }
+
+  private String uniqueFilename() {
+    // FIXME: This file name is not guaranteed to be truly unique.
+    return Joiner.on('-').join(System.currentTimeMillis(),
+        Thread.currentThread().getId() + ".avro");
+  }
+
+  private void accumulateDatafilePaths(Path directory, List<Path> paths)
+      throws IOException {
+    for (FileStatus status : fileSystem.listStatus(directory)) {
+      if (status.isDirectory()) {
+        accumulateDatafilePaths(status.getPath(), paths);
+      } else {
+        paths.add(status.getPath());
+      }
+    }
+  }
+
+  private void pruneDatafilePaths(List<Path> paths) {
+    if (!descriptor.isPartitioned()) {
+      return;
+    }
+    for (Iterator<Path> it = paths.iterator(); it.hasNext();) {
+      Path path = it.next();
+      Path dir = path.getParent(); // directory containing leaf data file
+      // walk up the directory hierarchy
+      for (int i = partitionStrategy.getFieldPartitioners().size() - 1; i >= 0; i--) {
+        FieldPartitioner fieldPartitioner = partitionStrategy
+            .getFieldPartitioners().get(i);
+        if (partitionKey.get(i) != null) {
+          String filterName = fieldPartitioner.getName() + "="
+              + partitionKey.get(i);
+          if (!filterName.equals(dir.getName())) {
+            it.remove();
+            break;
+          }
+        }
+        dir = dir.getParent();
+      }
+    }
+  }
+
+  private Path toDirectoryName(Path dir, PartitionKey key) {
+    Path result = dir;
+    for (int i = 0; i < key.getLength(); i++) {
+      String fieldName = partitionStrategy.getFieldPartitioners().get(i)
+          .getName();
+      result = new Path(result, fieldName + "=" + key.get(i));
+    }
+    return result;
+  }
+
+  private PartitionKey fromDirectoryName(Path dir) {
+    List<Object> values = Lists.newArrayList();
+    // walk up the directory hierarchy
+    for (int i = partitionStrategy.getFieldPartitioners().size() - 1; i >= 0; i--) {
+      String value = Iterables.get(Splitter.on('=').split(dir.getName()), 1);
+      values.add(0, value);
+      dir = dir.getParent();
+    }
+    return Accessor.getDefault().newPartitionKey(values.toArray());
   }
 
   public static class Builder implements Supplier<FileSystemDataset> {
