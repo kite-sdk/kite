@@ -166,7 +166,6 @@ public class FileSystemDatasetRepository implements DatasetRepository {
         "Metadata provider can not be null");
 
     Schema schema = descriptor.getSchema();
-    PartitionStrategy partitionStrategy = descriptor.getPartitionStrategy();
 
     Path datasetPath = pathForDataset(name);
     Path datasetDataPath = pathForDatasetData(name);
@@ -192,8 +191,8 @@ public class FileSystemDatasetRepository implements DatasetRepository {
         .directory(pathForDataset(name))
         .dataDirectory(pathForDatasetData(name))
         .partitionKey(
-            partitionStrategy == null ? null : Accessor.getDefault()
-                .newPartitionKey()).get();
+            descriptor.isPartitioned() ? Accessor.getDefault()
+                .newPartitionKey() : null).get();
   }
 
   @Override
