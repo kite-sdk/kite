@@ -17,7 +17,6 @@ package com.cloudera.data.filesystem;
 
 import java.io.IOException;
 
-import com.cloudera.data.impl.Accessor;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,7 +28,7 @@ import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.MetadataProvider;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.PartitionKey;
+import com.cloudera.data.impl.Accessor;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
@@ -66,6 +65,7 @@ import com.google.common.base.Preconditions;
  * <p>
  * Here are some examples of API use and the resultant directory structures.
  * </p>
+ * 
  * <pre>
  * DatasetRepository repo = new HDFSDatasetRepository(
  *   fileSystem,
@@ -102,6 +102,7 @@ import com.google.common.base.Preconditions;
  * {@code FileSystem} above was configured to connect to an HDFS cluster, would
  * look as follows.
  * </p>
+ * 
  * <pre>
  * /data/UserEvents/data/*.avro
  * </pre>
@@ -109,23 +110,21 @@ import com.google.common.base.Preconditions;
  * If we instead create the {@code UserEvent} dataset with the following
  * {@code DatasetDescriptor}:
  * </p>
+ * 
  * <pre>
- * Dataset userEvents = repo.create("UserEvents",
- *   new DatasetDescriptor.Builder()
- *     .schema(userEventSchema)
- *     .partitionStrategy(
- *       new PartitionStrategy.Builder()
- *         .identity("date", 365)
- *         .get()
- *     )
- *     .get()
- * );
+ * Dataset userEvents = repo.create(
+ *     &quot;UserEvents&quot;,
+ *     new DatasetDescriptor.Builder()
+ *         .schema(userEventSchema)
+ *         .partitionStrategy(
+ *             new PartitionStrategy.Builder().identity(&quot;date&quot;, 365).get()).get());
  * </pre>
  * <p>
  * the resultant dataset would be partitioned by the identity function applied
  * to the {@code date} attribute of the entity when it is written. The directory
  * structure will now be:
  * </p>
+ * 
  * <pre>
  * /data/UserEvents/data/date=20130101/*.avro
  * /data/UserEvents/data/date=20130102/*.avro
@@ -154,47 +153,6 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     this.fileSystem = fileSystem;
     this.rootDirectory = rootDirectory;
     this.metadataProvider = metadataProvider;
-  }
-
-  @Deprecated
-  public Dataset create(String name, Schema schema) throws IOException {
-    Preconditions.checkArgument(name != null, "Name can not be null");
-    Preconditions.checkArgument(schema != null, "Schema can not be null");
-    Preconditions.checkState(fileSystem != null,
-        "FileSystem implementation can not be null");
-
-    Path datasetPath = pathForDataset(name);
-    Path datasetDataPath = pathForDatasetData(name);
-
-    if (fileSystem.exists(datasetPath)) {
-      throw new IOException("Attempt to create an existing dataset:" + name);
-    }
-
-    logger.debug("Creating dataset:{} schema:{} datasetPath:{}", new Object[] {
-        name, schema, datasetDataPath });
-
-    if (!fileSystem.mkdirs(datasetDataPath)) {
-      throw new IOException("Failed to make dataset diectories:"
-          + datasetDataPath);
-    }
-
-    metadataProvider.save(name, new DatasetDescriptor.Builder().schema(schema)
-        .get());
-
-    FileSystemDataset.Builder datasetBuilder = new FileSystemDataset.Builder()
-        .directory(datasetPath).dataDirectory(datasetDataPath)
-        .fileSystem(fileSystem).name(name).schema(schema);
-
-    String partitionExpression = schema.getProp("cdk.partition.expression");
-
-    if (partitionExpression != null) {
-      logger.debug("Partition expression: {}", partitionExpression);
-      PartitionExpression expr = new PartitionExpression(partitionExpression,
-          true);
-      datasetBuilder.partitionStrategy(expr.evaluate());
-    }
-
-    return datasetBuilder.get();
   }
 
   @Override
@@ -227,13 +185,15 @@ public class FileSystemDatasetRepository implements DatasetRepository {
 
     metadataProvider.save(name, descriptor);
 
-    return new FileSystemDataset.Builder().name(name).fileSystem(fileSystem)
-        .schema(schema).directory(pathForDataset(name))
+    return new FileSystemDataset.Builder()
+        .name(name)
+        .fileSystem(fileSystem)
+        .descriptor(descriptor)
+        .directory(pathForDataset(name))
         .dataDirectory(pathForDatasetData(name))
-        .partitionStrategy(partitionStrategy)
-        .partitionKey(partitionStrategy == null ? null :
-            Accessor.getDefault().newPartitionKey())
-        .get();
+        .partitionKey(
+            partitionStrategy == null ? null : Accessor.getDefault()
+                .newPartitionKey()).get();
   }
 
   @Override
@@ -252,13 +212,11 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     Path datasetDataPath = pathForDatasetData(name);
 
     DatasetDescriptor descriptor = metadataProvider.load(name);
-    Schema schema = descriptor.getSchema();
-    PartitionStrategy partitionStrategy = descriptor.getPartitionStrategy();
 
     FileSystemDataset ds = new FileSystemDataset.Builder()
-        .fileSystem(fileSystem).directory(datasetDirectory)
-        .dataDirectory(datasetDataPath).name(name).schema(schema)
-        .partitionStrategy(partitionStrategy).get();
+        .fileSystem(fileSystem).descriptor(descriptor)
+        .directory(datasetDirectory).dataDirectory(datasetDataPath).name(name)
+        .get();
 
     logger.debug("Loaded dataset:{}", ds);
 
