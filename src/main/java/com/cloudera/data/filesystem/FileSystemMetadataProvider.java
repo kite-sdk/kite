@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.MetadataProvider;
-import com.cloudera.data.PartitionStrategy;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
@@ -101,9 +100,6 @@ public class FileSystemMetadataProvider implements MetadataProvider {
 
     ensureDescriptorSchema();
 
-    Schema schema = descriptor.getSchema();
-    PartitionStrategy partitionStrategy = descriptor.getPartitionStrategy();
-
     FSDataOutputStream outputStream = null;
     Path directory = pathForDataset(name);
     DataFileWriter<Record> writer = new DataFileWriter<Record>(
@@ -114,11 +110,12 @@ public class FileSystemMetadataProvider implements MetadataProvider {
       writer.create(descriptorSchema, outputStream);
 
       writer.append(new GenericRecordBuilder(descriptorSchema)
-          .set("schema", schema.toString())
+          .set("schema", descriptor.getSchema().toString())
           .set(
               "partitionExpression",
-              partitionStrategy != null ? PartitionExpression
-                  .toExpression(partitionStrategy) : null).build());
+              descriptor.isPartitioned() ? PartitionExpression
+                  .toExpression(descriptor.getPartitionStrategy()) : null)
+          .build());
 
       writer.flush();
     } finally {

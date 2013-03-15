@@ -65,7 +65,7 @@ public class TestFileSystemMetadataProvider {
 
     Assert.assertNotNull(descriptor);
     Assert.assertNotNull(descriptor.getSchema());
-    Assert.assertNull(descriptor.getPartitionStrategy());
+    Assert.assertFalse(descriptor.isPartitioned());
     Assert.assertEquals("user", descriptor.getSchema().getName());
   }
 
