@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import com.cloudera.data.PartitionKey;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -34,9 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.Dataset;
+import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.FieldPartitioner;
+import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -56,8 +57,8 @@ public class TestFileSystemDataset {
   public void setUp() throws IOException {
     fileSystem = FileSystem.get(new Configuration());
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    testSchema = new Schema.Parser().parse(Resources.getResource("schema/user.avsc")
-        .openStream());
+    testSchema = new Schema.Parser().parse(Resources.getResource(
+        "schema/user.avsc").openStream());
   }
 
   @After
@@ -67,11 +68,13 @@ public class TestFileSystemDataset {
 
   @Test
   public void test() throws IOException {
-    FileSystemDataset ds = new FileSystemDataset();
+    FileSystemDataset ds = new FileSystemDataset.Builder().name("test")
+        .fileSystem(fileSystem).directory(testDirectory)
+        .dataDirectory(testDirectory)
+        .descriptor(new DatasetDescriptor.Builder().schema(testSchema).get())
+        .get();
 
-    ds.setSchema(testSchema);
-
-    Schema schema = ds.getSchema();
+    Schema schema = ds.getDescriptor().getSchema();
     Record record = new Record(schema);
 
     logger.debug("schema:{} record:{}", schema, record);
@@ -83,13 +86,15 @@ public class TestFileSystemDataset {
 
   @Test
   public void testWriteAndRead() throws IOException {
-    FileSystemDataset ds = new FileSystemDataset.Builder().name("test").schema(testSchema)
+    FileSystemDataset ds = new FileSystemDataset.Builder().name("test")
+        .descriptor(new DatasetDescriptor.Builder().schema(testSchema).get())
         .fileSystem(FileSystem.get(new Configuration()))
         .directory(testDirectory).dataDirectory(testDirectory).get();
 
     logger.debug("Writing to dataset:{}", ds);
 
-    Assert.assertFalse("Dataset is not partition", ds.isPartitioned());
+    Assert.assertFalse("Dataset is not partition", ds.getDescriptor()
+        .isPartitioned());
 
     /*
      * Turns out ReflectDatumWriter subclasses GenericDatumWriter so this
@@ -137,13 +142,19 @@ public class TestFileSystemDataset {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).get();
 
-    FileSystemDataset ds = new FileSystemDataset.Builder().fileSystem(fileSystem)
-        .directory(testDirectory).dataDirectory(testDirectory)
-        .name("partitioned-users").schema(testSchema)
-        .partitionStrategy(partitionStrategy).get();
+    FileSystemDataset ds = new FileSystemDataset.Builder()
+        .fileSystem(fileSystem)
+        .directory(testDirectory)
+        .dataDirectory(testDirectory)
+        .name("partitioned-users")
+        .descriptor(
+            new DatasetDescriptor.Builder().schema(testSchema)
+                .partitionStrategy(partitionStrategy).get()).get();
 
-    Assert.assertTrue("Dataset is partitioned", ds.isPartitioned());
-    Assert.assertEquals(partitionStrategy, ds.getPartitionStrategy());
+    Assert.assertTrue("Dataset is partitioned", ds.getDescriptor()
+        .isPartitioned());
+    Assert.assertEquals(partitionStrategy, ds.getDescriptor()
+        .getPartitionStrategy());
 
     writeTestUsers(ds, 10);
     Assert.assertTrue("Partitioned directory 0 exists",
@@ -151,7 +162,8 @@ public class TestFileSystemDataset {
     Assert.assertTrue("Partitioned directory 1 exists",
         fileSystem.exists(new Path(testDirectory, "username=1")));
     readTestUsers(ds, 10);
-    int total = readTestUsersInPartition(ds, partitionStrategy.partitionKey(0), null)
+    int total = readTestUsersInPartition(ds, partitionStrategy.partitionKey(0),
+        null)
         + readTestUsersInPartition(ds, partitionStrategy.partitionKey(1), null);
     Assert.assertEquals(10, total);
 
@@ -159,7 +171,7 @@ public class TestFileSystemDataset {
     total = 0;
     for (Dataset dataset : ds.getPartitions()) {
       Assert.assertFalse("Partitions should not have further partitions",
-          dataset.isPartitioned());
+          dataset.getDescriptor().isPartitioned());
       total += datasetSize(dataset);
     }
     Assert.assertEquals(10, total);
@@ -171,18 +183,26 @@ public class TestFileSystemDataset {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", 2).hash("email", 3).get();
 
-    FileSystemDataset ds = new FileSystemDataset.Builder().fileSystem(fileSystem)
-        .directory(testDirectory).dataDirectory(testDirectory)
-        .name("partitioned-users").schema(testSchema)
-        .partitionStrategy(partitionStrategy).get();
+    FileSystemDataset ds = new FileSystemDataset.Builder()
+        .fileSystem(fileSystem)
+        .directory(testDirectory)
+        .dataDirectory(testDirectory)
+        .name("partitioned-users")
+        .descriptor(
+            new DatasetDescriptor.Builder().schema(testSchema)
+                .partitionStrategy(partitionStrategy).get()).get();
 
-    Assert.assertTrue("Dataset is partitioned", ds.isPartitioned());
-    Assert.assertEquals(partitionStrategy, ds.getPartitionStrategy());
+    Assert.assertTrue("Dataset is partitioned", ds.getDescriptor()
+        .isPartitioned());
+    Assert.assertEquals(partitionStrategy, ds.getDescriptor()
+        .getPartitionStrategy());
 
     writeTestUsers(ds, 10);
     readTestUsers(ds, 10);
-    int total = readTestUsersInPartition(ds, partitionStrategy.partitionKey(0), "email")
-        + readTestUsersInPartition(ds, partitionStrategy.partitionKey(1), "email");
+    int total = readTestUsersInPartition(ds, partitionStrategy.partitionKey(0),
+        "email")
+        + readTestUsersInPartition(ds, partitionStrategy.partitionKey(1),
+            "email");
     Assert.assertEquals(10, total);
 
     total = 0;
@@ -191,7 +211,8 @@ public class TestFileSystemDataset {
         String part = "username=" + i1 + "/email=" + i2;
         Assert.assertTrue("Partitioned directory " + part + " exists",
             fileSystem.exists(new Path(testDirectory, part)));
-        total += readTestUsersInPartition(ds, partitionStrategy.partitionKey(i1, i2), null);
+        total += readTestUsersInPartition(ds,
+            partitionStrategy.partitionKey(i1, i2), null);
       }
     }
     Assert.assertEquals(10, total);
@@ -200,7 +221,7 @@ public class TestFileSystemDataset {
     total = 0;
     for (Dataset dataset : ds.getPartitions()) {
       Assert.assertFalse("Partitions should not have further partitions",
-          dataset.isPartitioned());
+          dataset.getDescriptor().isPartitioned());
       total += datasetSize(dataset);
     }
     Assert.assertEquals(10, total);
@@ -209,15 +230,20 @@ public class TestFileSystemDataset {
 
   @Test
   public void testGetPartitionReturnsNullIfNoAutoCreate() throws IOException {
-    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-        .hash("username", 2).get();
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", 2).get();
 
-    FileSystemDataset ds = new FileSystemDataset.Builder().fileSystem(fileSystem)
-        .directory(testDirectory).dataDirectory(testDirectory)
-        .name("partitioned-users").schema(testSchema)
-        .partitionStrategy(partitionStrategy).get();
+    FileSystemDataset ds = new FileSystemDataset.Builder()
+        .fileSystem(fileSystem)
+        .directory(testDirectory)
+        .dataDirectory(testDirectory)
+        .name("partitioned-users")
+        .descriptor(
+            new DatasetDescriptor.Builder().schema(testSchema)
+                .partitionStrategy(partitionStrategy).get()).get();
 
-    Assert.assertNull(ds.getPartition(partitionStrategy.partitionKey(1), false));
+    Assert
+        .assertNull(ds.getPartition(partitionStrategy.partitionKey(1), false));
   }
 
   @Test
@@ -225,16 +251,25 @@ public class TestFileSystemDataset {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", 2).hash("email", 3).get();
 
-    FileSystemDataset ds = new FileSystemDataset.Builder().fileSystem(fileSystem)
-        .directory(testDirectory).dataDirectory(testDirectory)
-        .name("partitioned-users").schema(testSchema)
-        .partitionStrategy(partitionStrategy).get();
+    FileSystemDataset ds = new FileSystemDataset.Builder()
+        .fileSystem(fileSystem)
+        .directory(testDirectory)
+        .dataDirectory(testDirectory)
+        .name("partitioned-users")
+        .descriptor(
+            new DatasetDescriptor.Builder().schema(testSchema)
+                .partitionStrategy(partitionStrategy).get()).get();
 
-    Dataset userPartition = ds.getPartition(partitionStrategy.partitionKey(1), true);
+    Dataset userPartition = ds.getPartition(partitionStrategy.partitionKey(1),
+        true);
     writeTestUsers(userPartition, 1);
     Assert.assertTrue("Partitioned directory exists",
         fileSystem.exists(new Path(testDirectory, "username=1/email=2")));
-    Assert.assertEquals(1, readTestUsersInPartition(ds, partitionStrategy.partitionKey(1), "email"));
+    Assert
+        .assertEquals(
+            1,
+            readTestUsersInPartition(ds, partitionStrategy.partitionKey(1),
+                "email"));
   }
 
   private int datasetSize(Dataset ds) throws IOException {
@@ -315,7 +350,7 @@ public class TestFileSystemDataset {
     try {
       Dataset partition = ds.getPartition(key, false);
       if (subpartitionName != null) {
-        List<FieldPartitioner> fieldPartitioners = partition
+        List<FieldPartitioner> fieldPartitioners = partition.getDescriptor()
             .getPartitionStrategy().getFieldPartitioners();
         Assert.assertEquals(1, fieldPartitioners.size());
         Assert.assertEquals(subpartitionName, fieldPartitioners.get(0)
@@ -325,11 +360,11 @@ public class TestFileSystemDataset {
       reader.open();
       while (reader.hasNext()) {
         Record actualRecord = reader.read();
-        Assert.assertEquals(actualRecord.toString(), key.get(0),
-            (actualRecord.get("username").hashCode() & Integer.MAX_VALUE) % 2);
+        Assert.assertEquals(actualRecord.toString(), key.get(0), (actualRecord
+            .get("username").hashCode() & Integer.MAX_VALUE) % 2);
         if (key.getLength() > 1) {
-          Assert.assertEquals(key.get(1), (actualRecord
-              .get("email").hashCode() & Integer.MAX_VALUE) % 3);
+          Assert.assertEquals(key.get(1),
+              (actualRecord.get("email").hashCode() & Integer.MAX_VALUE) % 3);
         }
         readCount++;
       }
