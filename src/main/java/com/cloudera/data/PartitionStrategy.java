@@ -40,8 +40,8 @@ import com.google.common.collect.Lists;
  * {@link FieldPartitioner}s upon creation. When a {@link Dataset} is configured
  * with a partition strategy, we say that data is partitioned. Any entities
  * written to a partitioned dataset are evaluated with its
- * {@code PartitionStrategy} which, in turn, produces a {@link PartitionKey} that is
- * used by the dataset implementation to select the proper partition.
+ * {@code PartitionStrategy} which, in turn, produces a {@link PartitionKey}
+ * that is used by the dataset implementation to select the proper partition.
  * </p>
  * 
  * @see FieldPartitioner
@@ -132,7 +132,8 @@ public class PartitionStrategy {
    * </p>
    * <p>
    * It is permitted to have fewer values than field partitioners, in which case
-   * all subpartititions in the unspecified parts of the key are matched by the key.
+   * all subpartititions in the unspecified parts of the key are matched by the
+   * key.
    * </p>
    * <p>
    * Null values are not permitted.
@@ -147,8 +148,8 @@ public class PartitionStrategy {
    * Construct a partition key for the given entity.
    * </p>
    * <p>
-   * This is a convenient way to find the partition that a given entity would be written
-   * to, or to find a partition using objects from the entity domain.
+   * This is a convenient way to find the partition that a given entity would be
+   * written to, or to find a partition using objects from the entity domain.
    * </p>
    */
   public PartitionKey partitionKeyForEntity(Object entity) {
@@ -188,7 +189,7 @@ public class PartitionStrategy {
     if (startIndex == 0) {
       return this;
     }
-    if (startIndex == fieldPartitioners.size()) {
+    if (startIndex >= fieldPartitioners.size()) {
       return null;
     }
     return new PartitionStrategy(fieldPartitioners.subList(startIndex,
