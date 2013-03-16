@@ -198,11 +198,15 @@ class FileSystemDataset implements Dataset {
   private PartitionKey fromDirectoryName(Path dir) {
     List<Object> values = Lists.newArrayList();
     // walk up the directory hierarchy
+    Path currentDir = dir;
+
     for (int i = partitionStrategy.getFieldPartitioners().size() - 1; i >= 0; i--) {
-      String value = Iterables.get(Splitter.on('=').split(dir.getName()), 1);
+      String value = Iterables.get(
+          Splitter.on('=').split(currentDir.getName()), 1);
       values.add(0, value);
-      dir = dir.getParent();
+      currentDir = currentDir.getParent();
     }
+
     return Accessor.getDefault().newPartitionKey(values.toArray());
   }
 
