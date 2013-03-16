@@ -16,7 +16,6 @@
 package com.cloudera.data.filesystem;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -32,7 +31,6 @@ import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
-import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.impl.Accessor;
@@ -89,10 +87,8 @@ class FileSystemDataset implements Dataset {
   @Override
   public <E> DatasetReader<E> getReader() throws IOException {
     logger.debug("Getting reader for dataset:{}", this);
-
     List<Path> paths = Lists.newArrayList();
     accumulateDatafilePaths(dataDirectory, paths);
-    pruneDatafilePaths(paths);
     return new MultiFileDatasetReader<E>(fileSystem, paths, schema);
   }
 
@@ -149,9 +145,16 @@ class FileSystemDataset implements Dataset {
     List<Dataset> partitions = Lists.newArrayList();
     for (Path p : partitionDirectories) {
       PartitionKey key = fromDirectoryName(p);
-      Builder builder = new FileSystemDataset.Builder().name(name)
-          .fileSystem(fileSystem).descriptor(descriptor).directory(directory)
-          .dataDirectory(dataDirectory).partitionKey(key);
+      Builder builder = new FileSystemDataset.Builder()
+          .name(name)
+          .fileSystem(fileSystem)
+          .descriptor(
+              new DatasetDescriptor.Builder()
+                  .schema(schema)
+                  .partitionStrategy(
+                      Accessor.getDefault().getSubpartitionStrategy(
+                          partitionStrategy, 1)).get()).directory(directory)
+          .dataDirectory(p).partitionKey(key);
       partitions.add(builder.get());
     }
     return partitions;
@@ -178,30 +181,6 @@ class FileSystemDataset implements Dataset {
         accumulateDatafilePaths(status.getPath(), paths);
       } else {
         paths.add(status.getPath());
-      }
-    }
-  }
-
-  private void pruneDatafilePaths(List<Path> paths) {
-    if (!descriptor.isPartitioned()) {
-      return;
-    }
-    for (Iterator<Path> it = paths.iterator(); it.hasNext();) {
-      Path path = it.next();
-      Path dir = path.getParent(); // directory containing leaf data file
-      // walk up the directory hierarchy
-      for (int i = partitionStrategy.getFieldPartitioners().size() - 1; i >= 0; i--) {
-        FieldPartitioner fieldPartitioner = partitionStrategy
-            .getFieldPartitioners().get(i);
-        if (partitionKey.get(i) != null) {
-          String filterName = fieldPartitioner.getName() + "="
-              + partitionKey.get(i);
-          if (!filterName.equals(dir.getName())) {
-            it.remove();
-            break;
-          }
-        }
-        dir = dir.getParent();
       }
     }
   }
