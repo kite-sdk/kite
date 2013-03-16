@@ -124,6 +124,25 @@ public class FileSystemMetadataProvider implements MetadataProvider {
     }
   }
 
+  @Override
+  public boolean delete(String name) throws IOException {
+    logger.debug("Deleting dataset metadata name:{}", name);
+
+    Path directory = pathForDataset(name);
+    Path descriptorPath = new Path(directory, "descriptor.avro");
+
+    if (fileSystem.exists(descriptorPath)) {
+      if (fileSystem.delete(descriptorPath, false)) {
+        return true;
+      } else {
+        throw new IOException("Failed to delete metadata descriptor:"
+            + descriptorPath);
+      }
+    } else {
+      return false;
+    }
+  }
+
   private void ensureDescriptorSchema() throws IOException {
     if (descriptorSchema == null) {
       descriptorSchema = new Schema.Parser().parse(Resources.getResource(

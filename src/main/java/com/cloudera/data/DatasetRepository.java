@@ -70,4 +70,6 @@ public interface DatasetRepository {
    */
   Dataset create(String name, DatasetDescriptor descriptor) throws IOException;
 
+  boolean drop(String name) throws IOException;
+
 }

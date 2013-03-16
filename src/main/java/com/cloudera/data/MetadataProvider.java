@@ -52,4 +52,6 @@ public interface MetadataProvider {
    */
   void save(String name, DatasetDescriptor descriptor) throws IOException;
 
+  boolean delete(String name) throws IOException;
+
 }

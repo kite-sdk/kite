@@ -222,6 +222,34 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     return ds;
   }
 
+  @Override
+  public boolean drop(String name) throws IOException {
+    Preconditions.checkArgument(name != null, "Name can not be null");
+    Preconditions.checkState(rootDirectory != null,
+        "Root directory can not be null");
+    Preconditions.checkState(fileSystem != null,
+        "FileSystem implementation can not be null");
+    Preconditions.checkState(metadataProvider != null,
+        "Metadata provider can not be null");
+
+    logger.debug("Dropping dataset:{}", name);
+
+    Path datasetPath = pathForDataset(name);
+
+    metadataProvider.delete(name);
+
+    if (fileSystem.exists(datasetPath)) {
+      if (fileSystem.delete(datasetPath, true)) {
+        return true;
+      } else {
+        throw new IOException("Failed to delete dataset name:" + name
+            + " data path:" + datasetPath);
+      }
+    } else {
+      return false;
+    }
+  }
+
   private Path pathForDataset(String name) {
     Preconditions.checkState(rootDirectory != null,
         "Dataset repository root directory can not be null");
