@@ -236,9 +236,7 @@ public class FileSystemDatasetRepository implements DatasetRepository {
 
     Path datasetPath = pathForDataset(name);
 
-    metadataProvider.delete(name);
-
-    if (fileSystem.exists(datasetPath)) {
+    if (metadataProvider.delete(name) && fileSystem.exists(datasetPath)) {
       if (fileSystem.delete(datasetPath, true)) {
         return true;
       } else {
