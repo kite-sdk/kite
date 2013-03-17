@@ -98,7 +98,7 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("path", path).add("state", state)
-        .add("reader", reader).toString();
+        .add("reader", reader).add("schema", schema).toString();
   }
 
 }
