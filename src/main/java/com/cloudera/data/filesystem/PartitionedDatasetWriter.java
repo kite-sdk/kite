@@ -152,6 +152,11 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
   }
 
   @Override
+  public boolean isOpen() {
+    return state.equals(ReaderWriterState.OPEN);
+  }
+
+  @Override
   public String toString() {
     return Objects.toStringHelper(this)
         .add("partitionStrategy", partitionStrategy)

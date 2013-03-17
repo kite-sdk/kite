@@ -122,6 +122,11 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   }
 
   @Override
+  public boolean isOpen() {
+    return state.equals(ReaderWriterState.OPEN);
+  }
+
+  @Override
   public String toString() {
     return Objects.toStringHelper(this).add("path", path)
         .add("pathTmp", pathTmp).add("schema", schema)

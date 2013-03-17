@@ -107,4 +107,6 @@ public interface DatasetWriter<E> {
    */
   void close() throws IOException;
 
+  boolean isOpen();
+
 }
