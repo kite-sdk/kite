@@ -19,14 +19,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.cloudera.data.FieldPartitioner;
-import com.cloudera.data.PartitionStrategy;
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlEngine;
 
+import com.cloudera.data.FieldPartitioner;
+import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.partition.HashFieldPartitioner;
 import com.cloudera.data.partition.IdentityFieldPartitioner;
 import com.cloudera.data.partition.PartitionFunctions;
+import com.cloudera.data.partition.RangeFieldPartitioner;
 import com.google.common.base.Objects;
 
 class PartitionExpression {
@@ -95,7 +96,28 @@ class PartitionExpression {
     } else if (fieldPartitioner instanceof IdentityFieldPartitioner) {
       return String.format("identity(\"%s\", %s)", fieldPartitioner.getName(),
           fieldPartitioner.getCardinality());
+    } else if (fieldPartitioner instanceof RangeFieldPartitioner) {
+      List<Comparable<?>> upperBounds = ((RangeFieldPartitioner) fieldPartitioner)
+          .getUpperBounds();
+
+      StringBuilder builder = new StringBuilder();
+
+      for (Comparable<?> bound : upperBounds) {
+        if (builder.length() > 0) {
+          builder.append(", ");
+        }
+
+        if (bound instanceof String) {
+          builder.append("\"").append(bound).append("\"");
+        } else {
+          builder.append(bound);
+        }
+      }
+
+      return String.format("range(\"%s\", %s", fieldPartitioner.getName(),
+          builder.toString());
     }
+
     throw new IllegalArgumentException("Unrecognized PartitionStrategy: "
         + fieldPartitioner);
   }

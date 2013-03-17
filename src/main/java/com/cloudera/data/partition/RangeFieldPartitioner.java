@@ -26,8 +26,7 @@ public class RangeFieldPartitioner extends FieldPartitioner {
 
   private List<Comparable<?>> upperBounds;
 
-  public RangeFieldPartitioner(String name,
-      Comparable<?>... upperBounds) {
+  public RangeFieldPartitioner(String name, Comparable<?>... upperBounds) {
 
     super(name, upperBounds.length);
     this.upperBounds = Arrays.asList(upperBounds);
@@ -50,10 +49,13 @@ public class RangeFieldPartitioner extends FieldPartitioner {
     throw new IllegalArgumentException(value + " is outside bounds");
   }
 
+  public List<Comparable<?>> getUpperBounds() {
+    return upperBounds;
+  }
+
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("name", getName())
-        .add("upperBounds", upperBounds)
-        .toString();
+        .add("upperBounds", upperBounds).toString();
   }
 }
