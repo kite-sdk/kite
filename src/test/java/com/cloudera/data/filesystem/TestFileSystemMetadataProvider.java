@@ -70,6 +70,26 @@ public class TestFileSystemMetadataProvider {
   }
 
   @Test
+  public void testDelete() throws IOException {
+    MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
+        testDirectory);
+
+    provider.save(
+        "test",
+        new DatasetDescriptor.Builder().schema(
+            Resources.getResource("schema/user.avsc")).get());
+
+    Assert.assertTrue(fileSystem.exists(new Path(testDirectory,
+        "test/descriptor.avro")));
+
+    boolean result = provider.delete("test");
+    Assert.assertTrue(result);
+
+    result = provider.delete("test");
+    Assert.assertFalse(result);
+  }
+
+  @Test
   public void testPartitioned() throws IOException {
     MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
         testDirectory);
