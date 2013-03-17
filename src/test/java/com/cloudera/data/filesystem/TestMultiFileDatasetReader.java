@@ -18,6 +18,7 @@ package com.cloudera.data.filesystem;
 import java.io.IOException;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -25,7 +26,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.data.filesystem.MultiFileDatasetReader;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
@@ -37,8 +37,8 @@ public class TestMultiFileDatasetReader {
   @Before
   public void setUp() throws IOException {
     fileSystem = FileSystem.get(new Configuration());
-    testSchema = new Schema.Parser().parse(Resources.getResource("schema/string.avsc")
-        .openStream());
+    testSchema = new Schema.Parser().parse(Resources.getResource(
+        "schema/string.avsc").openStream());
   }
 
   @Test
@@ -46,7 +46,7 @@ public class TestMultiFileDatasetReader {
     Path testFile = new Path(Resources.getResource("data/strings-100.avro")
         .getFile());
 
-    MultiFileDatasetReader<String> reader = new MultiFileDatasetReader<String>(
+    MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
         fileSystem, Lists.newArrayList(testFile, testFile), testSchema);
 
     int records = 0;
@@ -55,9 +55,9 @@ public class TestMultiFileDatasetReader {
       reader.open();
 
       while (reader.hasNext()) {
-        String record = reader.read();
+        Record record = reader.read();
         Assert.assertNotNull(record);
-        Assert.assertEquals("test-" + records % 100, record);
+        Assert.assertEquals(String.valueOf(records % 100), record.get("text"));
         records++;
       }
     } finally {
