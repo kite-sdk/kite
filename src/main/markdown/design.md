@@ -25,6 +25,19 @@ the platform are the two primary objectives. In other words, this library is one
 level below Hadoop's input/output formats for MapReduce, but above the standard
 HDFS+Avro APIs.
 
+The Data APIs are primarily a set of generic interfaces and classes for storing
+and retrieving entities (i.e. records) to and from datasets (i.e. tables).
+Datasets are, in turn, grouped into dataset repositories (i.e. databases).
+Reads and writes are performed using streams that are always attached to a
+dataset. The inital implementation will be focused on large, sequential
+operations.
+
+Implementations of the generic interfaces can exist for different storage
+systems.  Today, the only implementation is built on top of Hadoop's FileSystem
+abstraction which means anything FileSystem supports, the Data APIs should
+support. The local filesystem and HDFS implementations are the primary testing
+targets.
+
 There is some logical overlap with existing systems that's worth pointing out,
 however this library is, in fact, complementary to all of these systems. This is
 discussed in the context of each system, in detail, in the section _Related Work
