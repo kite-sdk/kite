@@ -24,17 +24,19 @@ import org.apache.avro.Schema;
  * A logical representation of a set of data entities.
  * </p>
  * <p>
- * Logically, all datasets have two generic properties: a name, and a schema
- * that describes an entity of that dataset. Concrete implementations of
- * {@code Dataset} may support additional properties, mandatory or otherwise, as
- * needed. {@code Dataset}s are not normally instantiated directly, but managed
- * by a repository (also implementation-specific).
+ * Logically, all datasets have two generic properties: a name, and a descriptor
+ * that holds information such as the dataset's schema and its partitioning
+ * information. Concrete implementations of {@code Dataset} may support
+ * additional properties, mandatory or otherwise, as needed. {@code Dataset}s
+ * are not normally instantiated directly, but managed by a repository (also
+ * implementation-specific).
  * </p>
  * 
  * @see DatasetRepository
  * @see DatasetWriter
  * @see DatasetReader
  * @see PartitionStrategy
+ * @see DatasetDescriptor
  * @see Schema
  */
 public interface Dataset {
@@ -45,6 +47,9 @@ public interface Dataset {
    */
   String getName();
 
+  /**
+   * Get the {@link DatasetDescriptor} associated with this dataset.
+   */
   DatasetDescriptor getDescriptor();
 
   /**
