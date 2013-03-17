@@ -38,6 +38,21 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
 
+/**
+ * <p>
+ * A {@link MetadataProvider} that stores dataset metadata in a Hadoop
+ * {@link FileSystem}.
+ * </p>
+ * <p>
+ * When configured with a root directory, this implementation serializes the
+ * information within a {@link DatasetDescriptor} on the provided
+ * {@link FileSystem}. The descriptor is serialized as an Avro object and stored
+ * in a directory named after the dataset name. For example, if the dataset name
+ * is {@code logs}, the directory {@code rootDirectory/logs/} will be created,
+ * if it doesn't exist, and the serialized descriptor will be stored in the file
+ * {@code descriptor.avro}.
+ * </p>
+ */
 public class FileSystemMetadataProvider implements MetadataProvider {
 
   private static final Logger logger = LoggerFactory
