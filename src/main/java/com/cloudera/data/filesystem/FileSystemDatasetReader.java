@@ -90,6 +90,11 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
   }
 
   @Override
+  public boolean isOpen() {
+    return state.equals(ReaderWriterState.OPEN);
+  }
+
+  @Override
   public String toString() {
     return Objects.toStringHelper(this).add("path", path).add("state", state)
         .add("reader", reader).toString();

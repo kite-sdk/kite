@@ -103,4 +103,6 @@ public interface DatasetReader<E> {
    */
   void close() throws IOException;
 
+  boolean isOpen();
+
 }

@@ -104,6 +104,12 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
     state = ReaderWriterState.CLOSED;
   }
 
+
+  @Override
+  public boolean isOpen() {
+    return state.equals(ReaderWriterState.OPEN);
+  }
+
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("reader", reader)
