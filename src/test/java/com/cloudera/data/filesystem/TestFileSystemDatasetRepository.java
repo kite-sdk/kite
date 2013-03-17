@@ -111,4 +111,16 @@ public class TestFileSystemDatasetRepository {
         .getDescriptor().getSchema());
   }
 
+  @Test
+  public void testDrop() throws IOException {
+    // Just invoke the creation test so we have a dataset to test with.
+    testCreate();
+
+    boolean result = repo.drop("test1");
+    Assert.assertTrue("Drop dataset should return true", result);
+
+    result = repo.drop("test1");
+    Assert.assertFalse("Drop nonexistant dataset should return false", result);
+  }
+
 }
