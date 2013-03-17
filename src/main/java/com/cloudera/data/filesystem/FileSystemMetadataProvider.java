@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.MetadataProvider;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
@@ -156,6 +157,12 @@ public class FileSystemMetadataProvider implements MetadataProvider {
     } else {
       return false;
     }
+  }
+
+  @Override
+  public String toString() {
+    return Objects.toStringHelper(this).add("rootDirectory", rootDirectory)
+        .add("fileSystem", fileSystem).toString();
   }
 
   private void ensureDescriptorSchema() throws IOException {
