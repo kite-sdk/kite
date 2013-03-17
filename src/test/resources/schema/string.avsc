@@ -1,4 +1,7 @@
 {
-  "name": "text",
-  "type": "string"
+  "name": "mystring",
+  "type": "record",
+  "fields": [
+    { "name": "text", "type": "string" }
+  ]
 }
