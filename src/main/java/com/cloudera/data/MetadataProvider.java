@@ -52,6 +52,16 @@ public interface MetadataProvider {
    */
   void save(String name, DatasetDescriptor descriptor) throws IOException;
 
+  /**
+   * Delete all metadata associated with the dataset named {@code name}.
+   * 
+   * @param name
+   *          The fully qualified name of a dataset.
+   * @return True if the dataset is successfully deleted, false if the dataset
+   *         doesn't exist.
+   * @throws IOException
+   *           If the dataset metadata exists but can not be deleted.
+   */
   boolean delete(String name) throws IOException;
 
 }
