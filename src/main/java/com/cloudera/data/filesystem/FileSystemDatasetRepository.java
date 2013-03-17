@@ -262,6 +262,7 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("rootDirectory", rootDirectory)
+        .add("metadataProvider", metadataProvider)
         .add("fileSystem", fileSystem).toString();
   }
 
