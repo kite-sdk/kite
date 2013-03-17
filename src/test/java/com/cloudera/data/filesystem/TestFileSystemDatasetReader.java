@@ -111,9 +111,7 @@ public class TestFileSystemDatasetReader {
     try {
       reader.hasNext();
     } finally {
-      if (reader != null) {
-        reader.close();
-      }
+      reader.close();
     }
   }
 
