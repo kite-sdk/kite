@@ -23,7 +23,7 @@ needs to touch data in HDFS directly (i.e. not by way of MapReduce or higher
 level engines such as Impala). Accessibility and integration with the rest of
 the platform are the two primary objectives. In other words, this library is one
 level below Hadoop's input/output formats for MapReduce, but above the standard
-HDFS+Avro APIs.
+HDFS+[Avro][] APIs.
 
 The Data APIs are primarily a set of generic interfaces and classes for storing
 and retrieving entities (i.e. records) to and from datasets (i.e. tables).
@@ -43,6 +43,9 @@ however this library is, in fact, complementary to all of these systems. This is
 discussed in the context of each system, in detail, in the section _Related Work
 and Systems_.
 
+[Avro]: http://avro.apache.org/
+    (Apache Avro)
+
 ### Entities
 
 An _entity_ is a is a single record. The name "entity" is used rather than
@@ -54,28 +57,32 @@ can take one of three forms, at the user's option:
 
    When a POJO is supplied, the library uses reflection to write the object out
    to storage. While not the fastest, this is the simplest way to get up and
-   running. Users are encourage to consider Avro GenericRecords for production
-   systems, or after they become familiar with the APIs.
+   running. Users are encourage to consider Avro [GenericRecord][avro-gr]s for
+   production systems, or after they become familiar with the APIs.
 
-1. An Avro GenericRecord
+1. An [Avro][] GenericRecord
 
-   An Avro GenericRecord instance can be used to easily supply entities that
-   represent a schema. These objects are easy to create and manipulate,
-   especially in code that has no knowledge of specific object types (such as
-   libraries). Serialization of generic records is fast, but requires use of the
-   Avro APIs. This is recommended for most users.
+   An Avro [GenericRecord][avro-gr] instance can be used to easily supply
+   entities that represent a schema. These objects are easy to create and
+   manipulate, especially in code that has no knowledge of specific object types
+   (such as libraries). Serialization of generic records is fast, but requires
+   use of the Avro APIs. This is recommended for most users.
 
 1. An Avro specific type
 
-   Advanced users may choose to use Avro's code generation support to create
-   classes that implicitly know how to serialize themselves. While the fastest
-   of the options, this requires specialized knowledge of Avro, code generation,
-   and handling of custom types.
+   Advanced users may choose to use Avro's [code generation][avro-cg] support to
+   create classes that implicitly know how to serialize themselves. While the
+   fastest of the options, this requires specialized knowledge of Avro, code
+   generation, and handling of custom types.
 
 [POJO]: http://en.wikipedia.org/wiki/POJO
     (Plain Old Java Object)
 [JPA]: http://en.wikipedia.org/wiki/Java_Persistence_API
     (Java Persistance API)
+[avro-gr]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecord.html
+    (Avro - GenericRecord Interface)
+[avro-cg]: http://avro.apache.org/docs/current/gettingstartedjava.html#Serializing+and+deserializing+with+code+generation
+    (Avro - Serializing and deserializing with code generation)
 
 ### Datasets
 
