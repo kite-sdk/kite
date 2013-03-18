@@ -140,8 +140,8 @@ _The DatasetDescriptor API_
     getPartitionStrategy(): PartitionStrategy
     isPartitioned(): boolean
 
-Datasets are never instantiated directly. Instead, they are created using
-factory methods on a `DatasetRepository` (described later).
+Datasets are never instantiated by users, directly. Instead, they are created
+using factory methods on a `DatasetRepository` (described later).
 
 An instance of `Dataset` acts as a factory for both reader and writer streams.
 Each implementation is free to produce stream implementations that make sense
