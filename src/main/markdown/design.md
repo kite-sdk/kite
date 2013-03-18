@@ -48,6 +48,12 @@ and Systems_.
 
 ### Entities
 
+Summary:
+
+* An entity is a record in a dataset.
+* Entities can be POJOs, GenericRecords, or generated (specific) records.
+* When in doubt, use GenericRecords.
+
 An _entity_ is a is a single record. The name "entity" is used rather than
 "record" because the latter caries a connotation of a simple list of primitives,
 while the former evokes the notion of a [POJO][] (e.g. in [JPA][]). An entity
@@ -86,20 +92,61 @@ can take one of three forms, at the user's option:
 
 ### Datasets
 
-* Store entities
-* Made up of zero or files
-* Data stored as Snappy-compressed Avro by default
-* Options for pluggable formats such as Parquet (future)
+Summary:
 
-          Dataset
+* A dataset is a collection of entities.
+* A dataset may be partitioned by attributes of the entity (i.e. fields of the
+  record).
+* A dataset is represented by the interface `Dataset`.
+* The Hadoop FileSystem implementation of a dataset...
+    * is stored as Snappy-compressed Avro by default.
+    * may support pluggable formats such as Parquet in the future.
+    * is made up of zero or more files in a directory.
 
-          getDescriptor(): DatasetDescriptor
-          getReader(): DatasetReader<E>
-          getWriter(): DatasetWriter<E>
+A dataset is a collection of zero or more entities. All datasets have a name and
+an associated _dataset descriptor_. The dataset descriptor, as the name implies,
+describes all aspects of the dataset. Primarily, the descriptor information is
+the dataset's required _schema_ and its optional _partition strategy_. A
+descriptor must be provided at the time a dataset is created. The schema is
+defined using the Avro Schema APIs. Entities must all conform to the same
+schema, however, that schema can evolve based on a set of well-defined rules.
+The relational analog of a dataset is a table.
 
-          getPartitions(): Set<Dataset>
-          getPartitions(PartitionKey key): Set<Dataset>
-          getPartition(PartitionKey key): Dataset
+While Avro is used to define the schema, it is possible that the underlying
+storage format of the data is not Avro data files. This is because other
+constraints may apply, based on the subsystems or access patterns. The
+implementing class is expected to translate the Avro schema into whatever is
+appropriate for the underlying system. Implementations, of course, are free to
+use Avro serialization if it makes sense. The current thinking is that Avro data
+files will be the default for data in HDFS.
+
+Datasets may optionally be partitioned to facilitate piecemeal storage
+management, as well as optimized access to data under one or more predicates. A
+dataset is considered partitioned if it has an associated partition strategy
+(described later). When records are written to a partitioned dataset, they are
+automatically written to the proper partition, as expected. The semantics of a
+partition are defined by the implementation; this interface makes no guarantee
+as to the performance of reading or writing across partitions, availability of a
+partition in the face of failures, or the efficiency of partition elimination
+under one or more predicates (i.e. partition pruning in query engines). It is
+not possible to partition an existing non-partitioned dataset, nor can one write
+data into a partitioned dataset that does not land in a partition. It is
+possible to add or remove partitions from a partitioned dataset. A partitioned
+dataset can provide a list of partitions (described later).
+
+`Dataset`s are never instantiated directly. Instead, they are created using
+factory methods on a `DatasetRepository` (described later).
+
+An instance of `Dataset` acts as a factory for both reader and writer streams.
+Each implementation is free to produce stream implementations that make sense
+for the underlying storage system. The Hadoop `FileSystem` implementation, for
+example, produces streams that read from, or write to, Avro data files on a
+`FileSystem` implementation.
+
+_`Dataset` stream factory methods_
+
+    <E> getReader(): DatasetReader<E>
+    <E> getWriter(): DatasetWriter<E>
 
 Write to a dataset - Each writer produces a file in its data directory.
 
