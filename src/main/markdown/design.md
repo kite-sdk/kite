@@ -180,11 +180,71 @@ _Stream interfaces_
         flush()
 
 Upon creation of a dataset, a `PartitionStrategy` may be provided. A partition
-strategy is a list of one or more partition functions that, when applied to the
+strategy is a list of one or more partition functions that, when applied to an
 attribute of an entity, produce a value used to decide in which partition an
 entity should be written. Different partition function implementations exist,
 each of which faciliates a different form of partitioning. The initial version
 of the library includes the identity, hash, range, and value list functions.
+
+_A Partitioned Dataset Example_
+
+    /* Assume the content of userSchema is defined as follows:
+     * {
+     *   "type": "record",
+     *   "name": "User",
+     *   "fields": [
+     *     { "type": "long", "name": "userId" },
+     *     { "type": "string", "name": "username" }
+     *   ]
+     * }
+     */
+    Schema userSchema = ...;
+
+    FileSystemDatasetRepository repo = new FileSystemDatasetRepository(
+      FileSystem.get(new Configuration()),
+      new Path("/data"),
+      new FileSystemMetadataProvider(fileSystem, new Path("/data"))
+    );
+
+    DatasetDescriptor desc = new DatasetDescriptor.Builder()
+      .schema(userSchema)
+      .partitionStrategy(
+        /*
+         * Partition the users dataset using the hash code of the value of the
+         * userId attribute modulo 53.
+         */
+        new PartitionStrategy.Builder().hash("userId", 53).get()
+      ).get();
+
+    Dataset users = repo.create("users", desc);
+    DatasetWriter[Record] writer = users.getWriter();
+
+    try {
+      writer.open();
+
+      /*
+       * This writes to /data/users/data/userId=15/*.avro because
+       * (Integer.valueOf(1234).hashCode() & Integer.MAX_VALUE) % 53 = 15
+       */
+      writer.write(
+        new GenericRecordBuilder(userSchema)
+          .set("userId", 1234)
+          .set("username", "jane")
+          .build()
+      );
+
+      writer.flush();
+    } finally {
+      writer.close();
+    }
+
+This example produces a dataset that, when written to, may have up to 53
+partitions. User entities written to the dataset will be automatically written
+to the correct partition. Note that the name of the attribute used in the
+partiion strategy builder ("userId") must appear in the schema ("user.avsc").
+Multiple partition functions may be specified. The order of specific is
+extremely important as it reflects the physical storage (in the case of the
+Hadoop FileSystem implementation).
 
 ----
 
