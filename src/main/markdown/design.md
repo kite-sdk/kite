@@ -134,7 +134,13 @@ data into a partitioned dataset that does not land in a partition. It is
 possible to add or remove partitions from a partitioned dataset. A partitioned
 dataset can provide a list of partitions (described later).
 
-`Dataset`s are never instantiated directly. Instead, they are created using
+_The DatasetDescriptor API_
+
+    getSchema(): org.apache.avro.Schema
+    getPartitionStrategy(): PartitionStrategy
+    isPartitioned(): boolean
+
+Datasets are never instantiated directly. Instead, they are created using
 factory methods on a `DatasetRepository` (described later).
 
 An instance of `Dataset` acts as a factory for both reader and writer streams.
@@ -147,6 +153,31 @@ _`Dataset` stream factory methods_
 
     <E> getReader(): DatasetReader<E>
     <E> getWriter(): DatasetWriter<E>
+
+Reader and writer streams both function similarly to Java's standard IO streams,
+but are specialized. As indicated above, both interfaces are generic. The type
+parameter indicates the type of entity that they produce or consume,
+respectively.
+
+_Stream interfaces_
+
+    DatasetReader<E>
+
+        open()
+        close()
+        isOpen(): boolean
+
+        hasNext(): boolean
+        read(): E
+
+    DatasetWriter<E>
+
+        open()
+        close()
+        isOpen(): boolean
+
+        write(E)
+        flush()
 
 Write to a dataset - Each writer produces a file in its data directory.
 
