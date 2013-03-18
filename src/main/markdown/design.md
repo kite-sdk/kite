@@ -179,6 +179,18 @@ _Stream interfaces_
         write(E)
         flush()
 
+Upon creation of a dataset, a `PartitionStrategy` may be provided. A partition
+strategy is a list of one or more partition functions that, when applied to the
+attribute of an entity, produce a value used to decide in which partition an
+entity should be written. Different partition function implementations exist,
+each of which faciliates a different form of partitioning. The initial version
+of the library includes the identity, hash, range, and value list functions.
+
+----
+
+It is the responsibility of the `Dataset` to produce streams that abide by the
+dataset's partition strategy.
+
 Write to a dataset - Each writer produces a file in its data directory.
 
 Write to a partitioned dataset - Each writer produces a file in the leaf
