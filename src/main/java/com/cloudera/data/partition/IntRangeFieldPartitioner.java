@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 public class IntRangeFieldPartitioner extends FieldPartitioner {
 
-  private int[] upperBounds;
+  private final int[] upperBounds;
 
   public IntRangeFieldPartitioner(String name, int... upperBounds) {
     super(name, upperBounds.length);

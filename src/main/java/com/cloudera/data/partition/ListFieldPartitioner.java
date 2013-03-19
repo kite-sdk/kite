@@ -23,7 +23,7 @@ import com.google.common.base.Objects;
 
 public class ListFieldPartitioner extends FieldPartitioner {
 
-  private List<Set<?>> values;
+  private final List<Set<?>> values;
 
   public ListFieldPartitioner(String name, List<Set<?>> values) {
     super(name, cardinality(values));

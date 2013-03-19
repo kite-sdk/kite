@@ -16,6 +16,7 @@
 package com.cloudera.data;
 
 import com.google.common.base.Function;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * <p>
@@ -28,13 +29,17 @@ import com.google.common.base.Function;
  * example of this is a hash partitioner which always knows the number of
  * buckets produced by the function.
  * </p>
+ * <p>
+ * Implementations of {@link FieldPartitioner} are immutable.
+ * </p>
  * 
  * @see PartitionStrategy
  */
+@Immutable
 public abstract class FieldPartitioner implements Function<Object, Object> {
 
-  private String name;
-  private int cardinality;
+  private final String name;
+  private final int cardinality;
 
   protected FieldPartitioner(String name, int cardinality) {
     this.name = name;

@@ -22,6 +22,7 @@ import java.net.URL;
 
 import javax.annotation.Nullable;
 
+import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileStream;
@@ -44,10 +45,11 @@ import com.google.common.io.Closeables;
  * the inner {@link Builder} to create new instances.
  * </p>
  */
+@Immutable
 public class DatasetDescriptor {
 
-  private Schema schema;
-  private PartitionStrategy partitionStrategy;
+  private final Schema schema;
+  private final PartitionStrategy partitionStrategy;
 
   /**
    * Create an instance of this class with the supplied {@link Schema} and

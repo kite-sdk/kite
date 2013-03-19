@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import javax.annotation.concurrent.Immutable;
 import org.apache.avro.generic.GenericRecord;
 
 import com.cloudera.data.impl.Accessor;
@@ -49,40 +50,27 @@ import com.google.common.collect.Lists;
  * @see DatasetDescriptor
  * @see Dataset
  */
+@Immutable
 public class PartitionStrategy {
 
-  private List<FieldPartitioner> fieldPartitioners;
+  private final List<FieldPartitioner> fieldPartitioners;
 
   static {
     Accessor.setDefault(new AccessorImpl());
-  }
-
-  protected PartitionStrategy() {
-    fieldPartitioners = Lists.newArrayList();
   }
 
   /**
    * Construct a partition strategy with a variadic array of field partitioners.
    */
   public PartitionStrategy(FieldPartitioner... partitioners) {
-    this();
-
-    for (FieldPartitioner fieldPartitioner : partitioners) {
-      addFieldPartitioner(fieldPartitioner);
-    }
+    fieldPartitioners = Lists.newArrayList(partitioners);
   }
 
   /**
    * Construct a partition strategy with a list of field partitioners.
    */
   public PartitionStrategy(List<FieldPartitioner> partitioners) {
-    this();
-
-    fieldPartitioners.addAll(partitioners);
-  }
-
-  private void addFieldPartitioner(FieldPartitioner fieldPartitioner) {
-    fieldPartitioners.add(fieldPartitioner);
+    fieldPartitioners = Lists.newArrayList(partitioners);
   }
 
   /**
@@ -95,7 +83,7 @@ public class PartitionStrategy {
    * </p>
    */
   public List<FieldPartitioner> getFieldPartitioners() {
-    return fieldPartitioners;
+    return Lists.newArrayList(fieldPartitioners);
   }
 
   /**
@@ -207,7 +195,7 @@ public class PartitionStrategy {
    */
   public static class Builder implements Supplier<PartitionStrategy> {
 
-    private PartitionStrategy partitionStrategy = new PartitionStrategy();
+    private List<FieldPartitioner> fieldPartitioners = Lists.newArrayList();
 
     /**
      * Configure a hash partitioner with the specified number of {@code buckets}
@@ -221,8 +209,7 @@ public class PartitionStrategy {
      * @return An instance of the builder for method chaining.
      */
     public Builder hash(String name, int buckets) {
-      partitionStrategy.addFieldPartitioner(new HashFieldPartitioner(name,
-          buckets));
+      fieldPartitioners.add(new HashFieldPartitioner(name, buckets));
       return this;
     }
 
@@ -241,8 +228,7 @@ public class PartitionStrategy {
      * @see IdentityFieldPartitioner
      */
     public Builder identity(String name, int buckets) {
-      partitionStrategy.addFieldPartitioner(new IdentityFieldPartitioner(name,
-          buckets));
+      fieldPartitioners.add(new IdentityFieldPartitioner(name, buckets));
       return this;
     }
 
@@ -258,8 +244,7 @@ public class PartitionStrategy {
      * @see IntRangeFieldPartitioner
      */
     public Builder range(String name, int... upperBounds) {
-      partitionStrategy.addFieldPartitioner(new IntRangeFieldPartitioner(name,
-          upperBounds));
+      fieldPartitioners.add(new IntRangeFieldPartitioner(name, upperBounds));
       return this;
     }
 
@@ -275,8 +260,7 @@ public class PartitionStrategy {
      * @see RangeFieldPartitioner
      */
     public Builder range(String name, Comparable<?>... upperBounds) {
-      partitionStrategy.addFieldPartitioner(new RangeFieldPartitioner(name,
-          upperBounds));
+      fieldPartitioners.add(new RangeFieldPartitioner(name, upperBounds));
       return this;
     }
 
@@ -293,7 +277,7 @@ public class PartitionStrategy {
      */
     @Override
     public PartitionStrategy get() {
-      return partitionStrategy;
+      return new PartitionStrategy(fieldPartitioners);
     }
 
   }

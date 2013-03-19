@@ -142,10 +142,10 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   private static final Logger logger = LoggerFactory
       .getLogger(FileSystemDatasetRepository.class);
 
-  private MetadataProvider metadataProvider;
+  private final MetadataProvider metadataProvider;
 
-  private Path rootDirectory;
-  private FileSystem fileSystem;
+  private final Path rootDirectory;
+  private final FileSystem fileSystem;
 
   public FileSystemDatasetRepository(FileSystem fileSystem, Path rootDirectory,
       MetadataProvider metadataProvider) {

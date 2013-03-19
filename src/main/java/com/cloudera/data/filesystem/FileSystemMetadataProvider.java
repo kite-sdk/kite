@@ -64,8 +64,8 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   private static final String SCHEMA_FIELD_NAME = "schema";
   private static final String PARTITION_EXPRESSION_FIELD_NAME = "partitionExpression";
 
-  private Path rootDirectory;
-  private FileSystem fileSystem;
+  private final Path rootDirectory;
+  private final FileSystem fileSystem;
 
   private Schema descriptorSchema;
 

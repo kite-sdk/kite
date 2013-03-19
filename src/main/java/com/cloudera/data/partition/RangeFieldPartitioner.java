@@ -24,7 +24,7 @@ import com.google.common.base.Preconditions;
 
 public class RangeFieldPartitioner extends FieldPartitioner {
 
-  private List<Comparable<?>> upperBounds;
+  private final List<Comparable<?>> upperBounds;
 
   public RangeFieldPartitioner(String name, Comparable<?>... upperBounds) {
 

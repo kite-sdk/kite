@@ -16,6 +16,7 @@
 package com.cloudera.data;
 
 import java.io.IOException;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * <p>
@@ -36,10 +37,14 @@ import java.io.IOException;
  * disk, in memory, or some combination. See the implementation class for
  * details about the guarantees it provides.
  * </p>
+ * <p>
+ * Implementations of {@link DatasetRepository} are immutable.
+ * </p>
  * 
  * @see Dataset
  * @see DatasetDescriptor
  */
+@Immutable
 public interface DatasetRepository {
 
   /**

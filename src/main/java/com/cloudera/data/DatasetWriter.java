@@ -16,6 +16,7 @@
 package com.cloudera.data;
 
 import java.io.IOException;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * <p>
@@ -45,10 +46,15 @@ import java.io.IOException;
  * If any method throws an exception, the writer is no longer valid, and the
  * only method that may be subsequently called is {@code close()}.
  * </p>
+ * <p>
+ * Implementations of {@link DatasetWriter} are typically not thread-safe; that is,
+ * the behavior when accessing a single instance from multiple threads is undefined.
+ * </p>
  * 
  * @param <E>
  *          The type of entity accepted by this writer.
  */
+@NotThreadSafe
 public interface DatasetWriter<E> {
 
   /**

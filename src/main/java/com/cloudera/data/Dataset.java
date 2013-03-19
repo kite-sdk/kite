@@ -17,6 +17,7 @@ package com.cloudera.data;
 
 import java.io.IOException;
 
+import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
 
 /**
@@ -31,6 +32,9 @@ import org.apache.avro.Schema;
  * are not normally instantiated directly, but managed by a repository (also
  * implementation-specific).
  * </p>
+ * <p>
+ * Implementations of {@link Dataset} are immutable.
+ * </p>
  * 
  * @see DatasetRepository
  * @see DatasetWriter
@@ -39,6 +43,7 @@ import org.apache.avro.Schema;
  * @see DatasetDescriptor
  * @see Schema
  */
+@Immutable
 public interface Dataset {
 
   /**

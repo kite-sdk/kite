@@ -47,15 +47,28 @@ class FileSystemDataset implements Dataset {
   private static final Logger logger = LoggerFactory
       .getLogger(FileSystemDataset.class);
 
-  private FileSystem fileSystem;
-  private Path directory;
-  private Path dataDirectory;
-  private String name;
-  private DatasetDescriptor descriptor;
-  private PartitionKey partitionKey;
+  private final FileSystem fileSystem;
+  private final Path directory;
+  private final Path dataDirectory;
+  private final String name;
+  private final DatasetDescriptor descriptor;
+  private final PartitionKey partitionKey;
 
-  private PartitionStrategy partitionStrategy;
-  private Schema schema;
+  private final PartitionStrategy partitionStrategy;
+  private final Schema schema;
+
+  FileSystemDataset(FileSystem fileSystem, Path directory, Path dataDirectory,
+      String name, DatasetDescriptor descriptor, PartitionKey partitionKey,
+      PartitionStrategy partitionStrategy, Schema schema) {
+    this.fileSystem = fileSystem;
+    this.directory = directory;
+    this.dataDirectory = dataDirectory;
+    this.name = name;
+    this.descriptor = descriptor;
+    this.partitionKey = partitionKey;
+    this.partitionStrategy = partitionStrategy;
+    this.schema = schema;
+  }
 
   @Override
   public String getName() {
@@ -212,64 +225,66 @@ class FileSystemDataset implements Dataset {
 
   public static class Builder implements Supplier<FileSystemDataset> {
 
-    private FileSystemDataset dataset;
+    private FileSystem fileSystem;
+    private Path directory;
+    private Path dataDirectory;
+    private String name;
+    private DatasetDescriptor descriptor;
+    private PartitionKey partitionKey;
 
-    public Builder() {
-      dataset = new FileSystemDataset();
-    }
+    private PartitionStrategy partitionStrategy;
+    private Schema schema;
 
     public Builder fileSystem(FileSystem fileSystem) {
-      dataset.fileSystem = fileSystem;
+      this.fileSystem = fileSystem;
       return this;
     }
 
     public Builder name(String name) {
-      dataset.name = name;
+      this.name = name;
       return this;
     }
 
     public Builder directory(Path directory) {
-      dataset.directory = directory;
+      this.directory = directory;
       return this;
     }
 
     public Builder dataDirectory(Path dataDirectory) {
-      dataset.dataDirectory = dataDirectory;
+      this.dataDirectory = dataDirectory;
       return this;
     }
 
     public Builder descriptor(DatasetDescriptor descriptor) {
-      dataset.descriptor = descriptor;
+      this.descriptor = descriptor;
       return this;
     }
 
     Builder partitionKey(@Nullable PartitionKey partitionKey) {
-      dataset.partitionKey = partitionKey;
+      this.partitionKey = partitionKey;
       return this;
     }
 
     @Override
     public FileSystemDataset get() {
-      Preconditions.checkState(dataset.name != null, "No dataset name defined");
-      Preconditions.checkState(dataset.descriptor != null,
+      Preconditions.checkState(this.name != null, "No dataset name defined");
+      Preconditions.checkState(this.descriptor != null,
           "No dataset descriptor defined");
-      Preconditions.checkState(dataset.directory != null,
+      Preconditions.checkState(this.directory != null,
           "No dataset directory defined");
-      Preconditions.checkState(dataset.dataDirectory != null,
+      Preconditions.checkState(this.dataDirectory != null,
           "No dataset data directory defined");
-      Preconditions.checkState(dataset.fileSystem != null,
+      Preconditions.checkState(this.fileSystem != null,
           "No filesystem defined");
 
-      dataset.schema = dataset.descriptor.getSchema();
+      this.schema = this.descriptor.getSchema();
 
-      if (dataset.descriptor.isPartitioned()) {
-        dataset.partitionStrategy = dataset.descriptor.getPartitionStrategy();
+      if (this.descriptor.isPartitioned()) {
+        this.partitionStrategy = this.descriptor.getPartitionStrategy();
       }
 
-      FileSystemDataset current = dataset;
-      dataset = new FileSystemDataset();
-
-      return current;
+      return new FileSystemDataset(fileSystem, directory, dataDirectory, name,
+          descriptor, partitionKey, partitionStrategy, schema);
     }
   }
 

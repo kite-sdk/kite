@@ -19,6 +19,7 @@ import com.google.common.base.Objects;
 
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * <p>
@@ -36,9 +37,10 @@ import java.util.List;
  * @see FieldPartitioner
  * @see Dataset
  */
+@Immutable
 public class PartitionKey {
 
-  private List<Object> values;
+  private final List<Object> values;
 
   PartitionKey(Object... values) {
     this.values = Arrays.asList(values);
