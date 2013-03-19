@@ -411,9 +411,15 @@ to keep these examples up to date with the actual implementation.
       Resources.getResource("event.avsc").openStream()
     );
 
-    DatasetRepository<? extends Dataset> repo =
-      new HDFSDatasetRepository(fileSystem, new Path("/data"));
-    Dataset events = repo.create("events", eventSchema);
+    DatasetRepository repo = new FileSystemDatasetRepository(
+      fileSystem,
+      new Path("/data"),
+      new FileSystemMetadataProvider(fileSystem, new Path("/data"))
+    );
+    DatasetDescriptor eventDescriptor = new DatasetDescriptor.Builder()
+      .schema(eventSchema)
+      .get();
+    Dataset events = repo.create("events", eventDescriptor);
     DatasetWriter<Event> writer = events.getWriter();
 
     try {
@@ -421,8 +427,8 @@ to keep these examples up to date with the actual implementation.
 
       while (...) {
         /*
-         * Event is an Avro specific (generated) type or a POJO, in
-         * which case we use reflection.
+         * Event is an Avro specific (generated) type, a generic type, or a
+         * POJO, in which case we use reflection. Here, we use a POJO.
          */
         Event e = ...
 
@@ -438,8 +444,11 @@ to keep these examples up to date with the actual implementation.
 
     FileSystem fileSystem = FileSystem.get(new Configuration());
 
-    DatasetRepository<? extends Dataset> repo =
-      new HDFSDatasetRepository(fileSystem, new Path("/data"));
+    DatasetRepository repo = new FileSystemDatasetRepository(
+      fileSystem,
+      new Path("/data")
+      new FileSystemMetadataProvider(fileSystem, new Path("/data"))
+    );
     Dataset events = repo.get("events");
     DatasetReader<GenericData.Record> reader = events.getReader();
 
@@ -458,9 +467,7 @@ to keep these examples up to date with the actual implementation.
         );
       }
     } finally {
-      if (reader != null) {
-        reader.close();
-      }
+      reader.close();
     }
 
 ## Related Work and Systems
