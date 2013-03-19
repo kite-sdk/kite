@@ -15,18 +15,6 @@
  */
 package com.cloudera.data.filesystem;
 
-import java.io.IOException;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.apache.avro.Schema;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetReader;
@@ -39,8 +27,16 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Supplier;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.List;
+import javax.annotation.Nullable;
+import org.apache.avro.Schema;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class FileSystemDataset implements Dataset {
 
@@ -144,19 +140,11 @@ class FileSystemDataset implements Dataset {
     Preconditions.checkState(descriptor.isPartitioned(),
         "Attempt to get partitions on a non-partitioned dataset (name:%s)",
         name);
-    List<Path> partitionDirectories = Lists.newArrayList(dataDirectory);
-    for (int i = 0; i < partitionStrategy.getFieldPartitioners().size(); i++) {
-      List<Path> subpaths = Lists.newArrayList();
-      for (Path p : partitionDirectories) {
-        for (FileStatus stat : fileSystem.listStatus(p)) {
-          subpaths.add(stat.getPath());
-          stat.getPath().getName();
-        }
-      }
-      partitionDirectories = subpaths;
-    }
+
     List<Dataset> partitions = Lists.newArrayList();
-    for (Path p : partitionDirectories) {
+
+    for (FileStatus stat : fileSystem.listStatus(dataDirectory)) {
+      Path p = stat.getPath();
       PartitionKey key = fromDirectoryName(p);
       Builder builder = new FileSystemDataset.Builder()
           .name(name)
@@ -168,8 +156,10 @@ class FileSystemDataset implements Dataset {
                       Accessor.getDefault().getSubpartitionStrategy(
                           partitionStrategy, 1)).get()).directory(directory)
           .dataDirectory(p).partitionKey(key);
+
       partitions.add(builder.get());
     }
+
     return partitions;
   }
 
@@ -210,15 +200,12 @@ class FileSystemDataset implements Dataset {
 
   private PartitionKey fromDirectoryName(Path dir) {
     List<Object> values = Lists.newArrayList();
-    // walk up the directory hierarchy
-    Path currentDir = dir;
 
-    for (int i = partitionStrategy.getFieldPartitioners().size() - 1; i >= 0; i--) {
-      String value = Iterables.get(
-          Splitter.on('=').split(currentDir.getName()), 1);
-      values.add(0, value);
-      currentDir = currentDir.getParent();
+    if (partitionKey != null) {
+      values.addAll(partitionKey.getValues());
     }
+
+    values.add(Splitter.on('=').split(dir.getName()));
 
     return Accessor.getDefault().newPartitionKey(values.toArray());
   }
@@ -274,8 +261,8 @@ class FileSystemDataset implements Dataset {
           "No dataset directory defined");
       Preconditions.checkState(this.dataDirectory != null,
           "No dataset data directory defined");
-      Preconditions.checkState(this.fileSystem != null,
-          "No filesystem defined");
+      Preconditions
+          .checkState(this.fileSystem != null, "No filesystem defined");
 
       this.schema = this.descriptor.getSchema();
 

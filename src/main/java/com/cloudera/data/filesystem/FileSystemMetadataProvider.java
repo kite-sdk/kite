@@ -15,8 +15,13 @@
  */
 package com.cloudera.data.filesystem;
 
+import com.cloudera.data.DatasetDescriptor;
+import com.cloudera.data.MetadataProvider;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
+import com.google.common.io.Resources;
 import java.io.IOException;
-
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileWriter;
@@ -31,13 +36,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.MetadataProvider;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
-import com.google.common.io.Resources;
 
 /**
  * <p>

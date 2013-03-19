@@ -16,8 +16,8 @@
 package com.cloudera.data;
 
 import com.google.common.base.Objects;
-
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.concurrent.Immutable;
 
@@ -27,12 +27,12 @@ import javax.annotation.concurrent.Immutable;
  * </p>
  * <p>
  * A {@code PartitionKey} is a ordered sequence of values corresponding to the
- * {@link FieldPartitioner}s in a {@link PartitionStrategy}.
- * A {@link PartitionKey} may be obtained using
+ * {@link FieldPartitioner}s in a {@link PartitionStrategy}. A
+ * {@link PartitionKey} may be obtained using
  * {@link PartitionStrategy#partitionKey(Object...)} or
  * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
  * </p>
- *
+ * 
  * @see PartitionStrategy
  * @see FieldPartitioner
  * @see Dataset
@@ -44,6 +44,10 @@ public class PartitionKey {
 
   PartitionKey(Object... values) {
     this.values = Arrays.asList(values);
+  }
+
+  public List<Object> getValues() {
+    return Collections.unmodifiableList(values);
   }
 
   /**

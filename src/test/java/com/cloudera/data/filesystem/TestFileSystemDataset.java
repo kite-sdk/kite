@@ -217,7 +217,7 @@ public class TestFileSystemDataset {
     }
     Assert.assertEquals(10, total);
 
-    Assert.assertEquals(6, Iterables.size(ds.getPartitions()));
+    Assert.assertEquals(2, Iterables.size(ds.getPartitions()));
     total = 0;
     for (Dataset dataset : ds.getPartitions()) {
       Assert.assertTrue("Partitions should have further partitions", dataset
