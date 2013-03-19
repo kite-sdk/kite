@@ -266,87 +266,66 @@ the table using `... WHERE userIdHash = (hashCode(SOME_VALUE) % 53)`. The hope
 is that these engines learn about more complex partitioning schemes in the
 future.
 
-----
+### Dataset Repositories and Metadata Providers
 
-It is the responsibility of the `Dataset` to produce streams that abide by the
-dataset's partition strategy.
+A _dataset repository_ is a physical storage location for zero or more datasets.
+In keeping with the relational database analogy, a dataset repository is the
+equivalent of a database. An instance of a DatasetRepository acts as a factory
+for Datasets, supplying methods for creating, loading, and dropping datasets.
+Each dataset belongs to exactly one dataset repository. There's no built in
+support for moving or copying datasets bewteen repositories. MapReduce and other
+execution engines can easily provide copy functionality if it's desirable.
 
-Write to a dataset - Each writer produces a file in its data directory.
+_DatasetRepository APIs_
 
-Write to a partitioned dataset - Each writer produces a file in the leaf
-partitions data directory.
+    DatasetRepository
 
-Given partition strategy: hash(a, 2)
+        get(String): Dataset
+        create(String, DatasetDescriptor): Dataset
+        drop(String): boolean
 
-    d = partitioned dataset
-    w = d.getWriter()
-    w.write({ a = "foo", b = "bar" })
+Along with the Hadoop FileSystem `Dataset` and stream implementations, a related
+`DatasetRepository` implementation exists. This implementation requires an
+instance of a Hadoop `FileSystem`, a root directory under which datasets will be
+(or are) stored, and a metadata provider to be supplied upon instantiation. Once
+complete, users can freely interact with datasets under the supplied root
+directory. The supplied `MetadataProvider` is used to resolve dataset schemas,
+partitioning information, and any other like data.
 
-    w will write to ./data/a=hash("foo")/*.avro
+Along with the dataset repository, the _metadata provider_ is a service provider
+interface used to interact with the service that provides dataset metadata
+information. The MetadataProvider interface defines the contract metadata
+services must provide to the library, and specifically, the `DatasetRepository`.
 
-With the same configuration, but accessing a partition directly
+_MetadataProvider API_
 
-    d = partitioned dataset
-    p1 = d.getPartition(PartitionKey("foo"))
+    MetadataProvider
 
-    p1's:
-        data directory is ./data/a=hash("foo")/
-        partition key = PartitionKey("foo")
-        partition strategy = null
-        is partitioned = false
+        save(String, DatasetDescriptor)
+        load(String): DatasetDescriptor
+        delete(String): boolean
 
-    w = p1.getWriter()
-    w.write({ a = "foo", b = "bar" })
+The expectation is that MetadataProvider implementations will act as a bridge
+between this library and centralized metadata repositories. An obvious example
+of this (in the Hadoop ecosystem) is [HCatalog][hcat] and the Hive metastore. By
+providing an implementation that makes the necessary API calls to HCatalog's
+REST service, any and all datasets are immediately consumable by systems
+compatible with HCatalog, the storage system represented by the
+DatasetRepository implementation, and the format in which the data is written.
+As it turns out, that's a pretty tall order and, in keeping with the CDK's
+purpose of simplifying rather than presenting additional options, users are
+encouraged to 1. use HCatalog, 2. allow this library to default to snappy
+compressed Avro data files, and 3. use systems that also integrate with
+HCatalog. In this way, this library acts as a forth integration point to working
+with data in HDFS that is HCatalog-aware, in addition to Hive, Pig, and
+MapReduce input/output formats.
 
-    w will write to ./data/a=hash("foo")/*.avro
+At this time, an HCatalog implementation of the `MetadataProvider` interface
+does not exist. It is, however, straight forward to implement and on the
+roadmap.
 
-Given partition strategy: identity(a), identity(b)
-
-    d = partitioned dataset
-    w = d.getWriter()
-    w.write({ a = "foo", b = "bar" })
-
-    w will write to ./data/a=foo/b=bar/*.avro
-
-With the same configuration, but accessing a partition at level 1 directly
-
-    d = partitioned dataset
-    p1 = d.getPartition(PartitionKey("foo"))
-
-    p1's:
-        data directory is ./data/a=foo/
-        partition key = PartitionKey("foo")
-        partition strategy = identity(b)
-        is partitioned = true
-
-    w = p1.getWriter()
-    w.write({ a = "foo", b = "bar" })
-
-    w will write to ./data/a=foo/b=bar/*.avro
-
-#### Partitions
-
-* Datasets are optionally partitioned
-* Data in a partitioned dataset always lives in exactly one partition
-* Partitions can be hierarchical
-* Partitions are represented as directories in the filesystem
-* Implemented as recursive datasets
-
-#### Partition Keys
-
-* A list of values used to identify a partition - e.g. (1, 2)
-* Basic wildcard support to select matching partitions - e.g. (1, \*) (future)
-
-#### Partition Strategies
-
-* A list of functions that ultimately decide how data is partitioned
-* Produces a partition key from an entity or list of values
-
-    PartitionStrategy
-        partitionKey(Object entity): PartitionKey
-        partitionKey(List<Object> values): PartitionKey
-
-### Dataset Repositories
+[hcat]: http://incubator.apache.org/hcatalog/
+    (Apache HCatalog)
 
 ## Logistics
 
@@ -513,20 +492,71 @@ requirements and a different use case, we see this as a separate concern.
 
 **HCatalog**
 
-This one is trickier. At a high level view, this library appears to duplicate
-much of the functionality found in HCatalog. Both store schema information about
-data, abstract the underlying format, and aim to provide simplified APIs for
-accessing that data. When you zoom in and examine the details, it turns out that
-they solve two distinct problems.
-
-_Terminology Mapping_
-
-* An HCat database is a DatasetRepository
-* An HCat table is a Dataset
-
-_Metadata and Data Model_
-
-**TODO**
+See the _Dataset Repositories and Metadata Providers_ section for information
+about integration plans and compatibility with HCatalog.
 
 ## FAQ
+
+* What license is this library made available under?
+
+  This software is licensed under the Apache Software License 2.0. A file named
+  LICENSE.txt should have been included with the software.
+
+* Why use this library over direct interaction with HDFS?
+
+  HDFS provides byte-oriented input and output streams. Most developers prefer
+  to think in terms of higher level objects than files and directories, and
+  frequently graft concepts of "tables" or "datasets" on to data stored in HDFS.
+  This library aims to give you that, out of the box, in a pleasant format that
+  works with the rest of the ecosystem, while still giving you efficient access
+  to your data.
+
+  Further, we've found that picking from the myriad of file formats and
+  compression options is a weird place from which to start one's Hadoop journey.
+  Rather than say "it depends," and lead developers through a decision tree, we
+  decided to create a set of APIs that does what you ultimately want some high
+  percentage of the time. For the rest of the time, well, feature requests are
+  happily accepted (double karma if they come with patches)!
+
+* What format is my data stored in?
+
+  Snappy compressed, binary, Avro data files, according to Avro's [object
+  container file spec][avro-cf]. Avro meets the criteria for sane storage and
+  operation of data. Specifically, Avro:
+
+    * has a binary representation that is compact.
+    * is language agnostic.
+    * supports compression of data.
+    * is splittable by MapReduce jobs, including when compressed.
+    * is self-describing.
+    * is fast to serialize/deserialize.
+    * is well-supported within the Hadoop ecosystem.
+    * is open source under a permissive license.
+
+* Why not protocol buffers?
+
+  Protos do not define a standard for storing a set of protocol buffer encoded
+  records in a file that supports compression and is also splittable by
+  MapReduce.
+
+* Why not thrift?
+
+  See _Why not protocol buffers?_
+
+* Why not Java serialization?
+
+  See <https://github.com/eishay/jvm-serializers/wiki>. In other words, because
+  it's terrible.
+
+* Can I contribute code/docs/examples?
+
+  Absolutely! You're encouraged to read the _How to Contribute_ docs included
+  with the source code. In short, you must:
+
+    * Be able to (legally) complete, sign, and return a contributor license
+      agreement.
+    * Follow the existing style and standards.
+
+[avro-cf]: http://avro.apache.org/docs/current/spec.html#Object+Container+Files
+    (Apache Avro - Object container files)
 
