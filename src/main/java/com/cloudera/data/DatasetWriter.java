@@ -72,7 +72,8 @@ public interface DatasetWriter<E> {
    * <p>
    * Implementations may buffer entities internally (see the {@link #flush()}
    * method). All instances of {@code entity} must conform to the dataset's
-   * schema. If they don't, implementations should throw an exception.
+   * schema and partition. If they don't, implementations should throw an exception,
+   * although this is not required.
    * </p>
    * 
    * @param entity
