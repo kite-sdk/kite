@@ -59,7 +59,10 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   private static final Logger logger = LoggerFactory
       .getLogger(FileSystemMetadataProvider.class);
 
-  private static final String schemaPath = "DatasetDescriptor.avsc";
+  private static final String DESCRIPTOR_SCHEMA_FILE = "DatasetDescriptor.avsc";
+  private static final String DESCRIPTOR_FILE = "descriptor.avro";
+  private static final String SCHEMA_FIELD_NAME = "schema";
+  private static final String PARTITION_EXPRESSION_FIELD_NAME = "partitionExpression";
 
   private Path rootDirectory;
   private FileSystem fileSystem;
@@ -84,20 +87,20 @@ public class FileSystemMetadataProvider implements MetadataProvider {
 
     try {
       inputStream = new AvroFSInput(fileSystem.open(new Path(directory,
-          "descriptor.avro")), 0);
+          DESCRIPTOR_FILE)), 0);
       reader = new DataFileReader<Record>(inputStream,
           new GenericDatumReader<Record>(descriptorSchema));
 
       Record record = reader.next();
 
+      Object expr = record.get(PARTITION_EXPRESSION_FIELD_NAME);
       datasetDescriptor = new DatasetDescriptor.Builder()
           .schema(
-              new Schema.Parser().parse(((Utf8) record.get("schema"))
+              new Schema.Parser().parse(((Utf8) record.get(SCHEMA_FIELD_NAME))
                   .toString()))
-          .partitionStrategy(
-              record.get("partitionExpression") != null ? new PartitionExpression(
-                  ((Utf8) record.get("partitionExpression")).toString(), true)
-                  .evaluate() : null).get();
+          .partitionStrategy(expr != null ?
+              new PartitionExpression(((Utf8) expr).toString(), true).evaluate() : null)
+          .get();
 
       logger.debug("loaded descriptor:{}", record);
     } finally {
@@ -122,13 +125,13 @@ public class FileSystemMetadataProvider implements MetadataProvider {
         new GenericDatumWriter<Record>(descriptorSchema));
 
     try {
-      outputStream = fileSystem.create(new Path(directory, "descriptor.avro"));
+      outputStream = fileSystem.create(new Path(directory, DESCRIPTOR_FILE));
       writer.create(descriptorSchema, outputStream);
 
       writer.append(new GenericRecordBuilder(descriptorSchema)
-          .set("schema", descriptor.getSchema().toString())
+          .set(SCHEMA_FIELD_NAME, descriptor.getSchema().toString())
           .set(
-              "partitionExpression",
+              PARTITION_EXPRESSION_FIELD_NAME,
               descriptor.isPartitioned() ? PartitionExpression
                   .toExpression(descriptor.getPartitionStrategy()) : null)
           .build());
@@ -145,7 +148,7 @@ public class FileSystemMetadataProvider implements MetadataProvider {
     logger.debug("Deleting dataset metadata name:{}", name);
 
     Path directory = pathForDataset(name);
-    Path descriptorPath = new Path(directory, "descriptor.avro");
+    Path descriptorPath = new Path(directory, DESCRIPTOR_FILE);
 
     if (fileSystem.exists(descriptorPath)) {
       if (fileSystem.delete(descriptorPath, false)) {
@@ -168,7 +171,7 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   private void ensureDescriptorSchema() throws IOException {
     if (descriptorSchema == null) {
       descriptorSchema = new Schema.Parser().parse(Resources.getResource(
-          schemaPath).openStream());
+          DESCRIPTOR_SCHEMA_FILE).openStream());
     }
   }
 
