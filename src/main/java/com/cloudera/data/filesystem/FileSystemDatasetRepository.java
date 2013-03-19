@@ -256,7 +256,7 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   }
 
   private Path pathForDatasetData(String name) {
-    return new Path(pathForDataset(name), "data");
+    return pathForDataset(name);
   }
 
   @Override

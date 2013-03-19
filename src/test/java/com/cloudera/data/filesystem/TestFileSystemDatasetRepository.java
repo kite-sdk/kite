@@ -15,11 +15,17 @@
  */
 package com.cloudera.data.filesystem;
 
+import com.cloudera.data.Dataset;
+import com.cloudera.data.DatasetDescriptor;
+import com.cloudera.data.DatasetReader;
+import com.cloudera.data.PartitionStrategy;
+import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import java.io.IOException;
-
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -27,12 +33,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.cloudera.data.Dataset;
-import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.PartitionStrategy;
-import com.google.common.collect.Lists;
-import com.google.common.io.Files;
 
 public class TestFileSystemDatasetRepository {
 
@@ -73,9 +73,9 @@ public class TestFileSystemDatasetRepository {
     Assert.assertEquals("Dataset schema is propagated", testSchema, dataset
         .getDescriptor().getSchema());
     Assert.assertTrue("Dataset data directory exists",
-        fileSystem.exists(new Path(testDirectory, "test1/data")));
+        fileSystem.exists(new Path(testDirectory, "test1/")));
     Assert.assertTrue("Dataset metadata file exists",
-        fileSystem.exists(new Path(testDirectory, "test1/descriptor.avro")));
+        fileSystem.exists(new Path(testDirectory, "test1/.descriptor.avro")));
   }
 
   @Test
@@ -92,9 +92,9 @@ public class TestFileSystemDatasetRepository {
     Assert.assertEquals("Dataset schema is propagated", testSchema, dataset
         .getDescriptor().getSchema());
     Assert.assertTrue("Dataset data directory exists",
-        fileSystem.exists(new Path(testDirectory, "test2/data")));
+        fileSystem.exists(new Path(testDirectory, "test2/")));
     Assert.assertTrue("Dataset metadata file exists",
-        fileSystem.exists(new Path(testDirectory, "test2/descriptor.avro")));
+        fileSystem.exists(new Path(testDirectory, "test2/.descriptor.avro")));
   }
 
   @Test
@@ -109,6 +109,27 @@ public class TestFileSystemDatasetRepository {
         dataset.getName());
     Assert.assertEquals("Dataset schema is loaded", testSchema, dataset
         .getDescriptor().getSchema());
+
+    /*
+     * We perform a read test to make sure only data files are encountered
+     * during a read.
+     */
+    DatasetReader<Record> reader = dataset.getReader();
+    int records = 0;
+
+    try {
+      reader.open();
+
+      while (reader.hasNext()) {
+        Record record = reader.read();
+        Assert.assertNotNull(record);
+        records++;
+      }
+    } finally {
+      reader.close();
+    }
+
+    Assert.assertEquals(0, records);
   }
 
   @Test

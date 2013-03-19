@@ -143,7 +143,9 @@ class FileSystemDataset implements Dataset {
 
     List<Dataset> partitions = Lists.newArrayList();
 
-    for (FileStatus stat : fileSystem.listStatus(dataDirectory)) {
+    for (FileStatus stat : fileSystem.listStatus(dataDirectory,
+        PathFilters.notHidden())) {
+
       Path p = stat.getPath();
       PartitionKey key = fromDirectoryName(p);
       Builder builder = new FileSystemDataset.Builder()
@@ -179,7 +181,7 @@ class FileSystemDataset implements Dataset {
 
   private void accumulateDatafilePaths(Path directory, List<Path> paths)
       throws IOException {
-    for (FileStatus status : fileSystem.listStatus(directory)) {
+    for (FileStatus status : fileSystem.listStatus(directory, PathFilters.notHidden())) {
       if (status.isDirectory()) {
         accumulateDatafilePaths(status.getPath(), paths);
       } else {

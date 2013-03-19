@@ -58,7 +58,7 @@ public class FileSystemMetadataProvider implements MetadataProvider {
       .getLogger(FileSystemMetadataProvider.class);
 
   private static final String DESCRIPTOR_SCHEMA_FILE = "DatasetDescriptor.avsc";
-  private static final String DESCRIPTOR_FILE = "descriptor.avro";
+  private static final String DESCRIPTOR_FILE = ".descriptor.avro";
   private static final String SCHEMA_FIELD_NAME = "schema";
   private static final String PARTITION_EXPRESSION_FIELD_NAME = "partitionExpression";
 

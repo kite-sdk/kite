@@ -58,8 +58,8 @@ public class TestFileSystemMetadataProvider {
     provider.save("test", new DatasetDescriptor.Builder().schema(userSchema)
         .get());
 
-    Assert.assertTrue(fileSystem.exists(new Path(testDirectory,
-        "test/descriptor.avro")));
+    Assert.assertTrue("Descriptor file should exist",
+        fileSystem.exists(new Path(testDirectory, "test/.descriptor.avro")));
 
     DatasetDescriptor descriptor = provider.load("test");
 
@@ -79,8 +79,8 @@ public class TestFileSystemMetadataProvider {
         new DatasetDescriptor.Builder().schema(
             Resources.getResource("schema/user.avsc")).get());
 
-    Assert.assertTrue(fileSystem.exists(new Path(testDirectory,
-        "test/descriptor.avro")));
+    Assert.assertTrue("Descriptor file should exist",
+        fileSystem.exists(new Path(testDirectory, "test/.descriptor.avro")));
 
     boolean result = provider.delete("test");
     Assert.assertTrue(result);
@@ -106,8 +106,8 @@ public class TestFileSystemMetadataProvider {
                     .getProp("cdk.partition.expression"), true).evaluate())
             .get());
 
-    Assert.assertTrue(fileSystem.exists(new Path(testDirectory,
-        "test/descriptor.avro")));
+    Assert.assertTrue("Descriptor file should exist",
+        fileSystem.exists(new Path(testDirectory, "test/.descriptor.avro")));
   }
 
 }
