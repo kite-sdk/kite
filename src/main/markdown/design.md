@@ -246,6 +246,26 @@ Multiple partition functions may be specified. The order of specific is
 extremely important as it reflects the physical storage (in the case of the
 Hadoop FileSystem implementation).
 
+It's worth pointing out that Hive and Impala only support the identity function
+in partitioned datasets, at least at the time this is written. Users who do not
+use partitioning for subset selection may use any partition function(s) they
+choose. If, however, you wish to use the partition pruning in Hive/Impala's
+query engine, only the identity function will work. This is because both systems
+rely on the idea that the value in the path name equals the value found in each
+record. If you look closely at the earlier example, you'll see that while the
+value of the userId attribute in record is 1234, its value in the path is 15. To
+mimic more complex partitioning schemes, users often resort to adding a
+surrogate field to each record to hold the dervived value and handle proper
+setting of such a field themselves.
+
+The equivalent workaround for the hashed field example above is to add a new
+attribute to the User entity called `userIdHash`, set it to the proper value in
+user code, and use the identity function on that column instead. Note that this
+means partition pruning is no longer transparent; the user must know to query
+the table using `... WHERE userIdHash = (hashCode(SOME_VALUE) % 53)`. The hope
+is that these engines learn about more complex partitioning schemes in the
+future.
+
 ----
 
 It is the responsibility of the `Dataset` to produce streams that abide by the
