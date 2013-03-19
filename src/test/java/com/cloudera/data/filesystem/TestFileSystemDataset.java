@@ -15,10 +15,20 @@
  */
 package com.cloudera.data.filesystem;
 
+import com.cloudera.data.Dataset;
+import com.cloudera.data.DatasetDescriptor;
+import com.cloudera.data.DatasetReader;
+import com.cloudera.data.DatasetWriter;
+import com.cloudera.data.FieldPartitioner;
+import com.cloudera.data.PartitionKey;
+import com.cloudera.data.PartitionStrategy;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -31,18 +41,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.cloudera.data.Dataset;
-import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.DatasetReader;
-import com.cloudera.data.DatasetWriter;
-import com.cloudera.data.FieldPartitioner;
-import com.cloudera.data.PartitionKey;
-import com.cloudera.data.PartitionStrategy;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
-import com.google.common.io.Files;
-import com.google.common.io.Resources;
 
 public class TestFileSystemDataset {
 
@@ -70,7 +68,6 @@ public class TestFileSystemDataset {
   public void test() throws IOException {
     FileSystemDataset ds = new FileSystemDataset.Builder().name("test")
         .fileSystem(fileSystem).directory(testDirectory)
-        .dataDirectory(testDirectory)
         .descriptor(new DatasetDescriptor.Builder().schema(testSchema).get())
         .get();
 
@@ -89,7 +86,7 @@ public class TestFileSystemDataset {
     FileSystemDataset ds = new FileSystemDataset.Builder().name("test")
         .descriptor(new DatasetDescriptor.Builder().schema(testSchema).get())
         .fileSystem(FileSystem.get(new Configuration()))
-        .directory(testDirectory).dataDirectory(testDirectory).get();
+        .directory(testDirectory).get();
 
     logger.debug("Writing to dataset:{}", ds);
 
@@ -145,7 +142,6 @@ public class TestFileSystemDataset {
     FileSystemDataset ds = new FileSystemDataset.Builder()
         .fileSystem(fileSystem)
         .directory(testDirectory)
-        .dataDirectory(testDirectory)
         .name("partitioned-users")
         .descriptor(
             new DatasetDescriptor.Builder().schema(testSchema)
@@ -186,7 +182,6 @@ public class TestFileSystemDataset {
     FileSystemDataset ds = new FileSystemDataset.Builder()
         .fileSystem(fileSystem)
         .directory(testDirectory)
-        .dataDirectory(testDirectory)
         .name("partitioned-users")
         .descriptor(
             new DatasetDescriptor.Builder().schema(testSchema)
@@ -236,7 +231,6 @@ public class TestFileSystemDataset {
     FileSystemDataset ds = new FileSystemDataset.Builder()
         .fileSystem(fileSystem)
         .directory(testDirectory)
-        .dataDirectory(testDirectory)
         .name("partitioned-users")
         .descriptor(
             new DatasetDescriptor.Builder().schema(testSchema)
@@ -254,7 +248,6 @@ public class TestFileSystemDataset {
     FileSystemDataset ds = new FileSystemDataset.Builder()
         .fileSystem(fileSystem)
         .directory(testDirectory)
-        .dataDirectory(testDirectory)
         .name("partitioned-users")
         .descriptor(
             new DatasetDescriptor.Builder().schema(testSchema)

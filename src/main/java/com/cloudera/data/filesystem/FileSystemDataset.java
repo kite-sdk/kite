@@ -45,7 +45,6 @@ class FileSystemDataset implements Dataset {
 
   private final FileSystem fileSystem;
   private final Path directory;
-  private final Path dataDirectory;
   private final String name;
   private final DatasetDescriptor descriptor;
   private final PartitionKey partitionKey;
@@ -53,12 +52,12 @@ class FileSystemDataset implements Dataset {
   private final PartitionStrategy partitionStrategy;
   private final Schema schema;
 
-  FileSystemDataset(FileSystem fileSystem, Path directory, Path dataDirectory,
-      String name, DatasetDescriptor descriptor, PartitionKey partitionKey,
+  FileSystemDataset(FileSystem fileSystem, Path directory, String name,
+      DatasetDescriptor descriptor, PartitionKey partitionKey,
       PartitionStrategy partitionStrategy, Schema schema) {
+
     this.fileSystem = fileSystem;
     this.directory = directory;
-    this.dataDirectory = dataDirectory;
     this.name = name;
     this.descriptor = descriptor;
     this.partitionKey = partitionKey;
@@ -85,7 +84,7 @@ class FileSystemDataset implements Dataset {
     if (descriptor.isPartitioned()) {
       writer = new PartitionedDatasetWriter<E>(this);
     } else {
-      Path dataFile = new Path(dataDirectory, uniqueFilename());
+      Path dataFile = new Path(directory, uniqueFilename());
       writer = new FileSystemDatasetWriter.Builder<E>().fileSystem(fileSystem)
           .path(dataFile).schema(schema).get();
     }
@@ -97,7 +96,7 @@ class FileSystemDataset implements Dataset {
   public <E> DatasetReader<E> getReader() throws IOException {
     logger.debug("Getting reader for dataset:{}", this);
     List<Path> paths = Lists.newArrayList();
-    accumulateDatafilePaths(dataDirectory, paths);
+    accumulateDatafilePaths(directory, paths);
     return new MultiFileDatasetReader<E>(fileSystem, paths, schema);
   }
 
@@ -112,7 +111,7 @@ class FileSystemDataset implements Dataset {
     logger.debug("Loading partition for key {}, allowCreate:{}", new Object[] {
         key, allowCreate });
 
-    Path partitionDirectory = toDirectoryName(dataDirectory, key);
+    Path partitionDirectory = toDirectoryName(directory, key);
     if (!fileSystem.exists(partitionDirectory)) {
       if (allowCreate) {
         fileSystem.mkdirs(partitionDirectory);
@@ -131,8 +130,7 @@ class FileSystemDataset implements Dataset {
         .descriptor(
             new DatasetDescriptor.Builder().schema(schema)
                 .partitionStrategy(subpartitionStrategy).get())
-        .directory(directory).dataDirectory(partitionDirectory)
-        .partitionKey(key).get();
+        .directory(partitionDirectory).partitionKey(key).get();
   }
 
   @Override
@@ -143,7 +141,7 @@ class FileSystemDataset implements Dataset {
 
     List<Dataset> partitions = Lists.newArrayList();
 
-    for (FileStatus stat : fileSystem.listStatus(dataDirectory,
+    for (FileStatus stat : fileSystem.listStatus(directory,
         PathFilters.notHidden())) {
 
       Path p = stat.getPath();
@@ -156,8 +154,8 @@ class FileSystemDataset implements Dataset {
                   .schema(schema)
                   .partitionStrategy(
                       Accessor.getDefault().getSubpartitionStrategy(
-                          partitionStrategy, 1)).get()).directory(directory)
-          .dataDirectory(p).partitionKey(key);
+                          partitionStrategy, 1)).get()).directory(p)
+          .partitionKey(key);
 
       partitions.add(builder.get());
     }
@@ -169,7 +167,7 @@ class FileSystemDataset implements Dataset {
   public String toString() {
     return Objects.toStringHelper(this).add("name", name)
         .add("descriptor", descriptor).add("directory", directory)
-        .add("dataDirectory", dataDirectory).add("partitionKey", partitionKey)
+        .add("dataDirectory", directory).add("partitionKey", partitionKey)
         .toString();
   }
 
@@ -181,7 +179,10 @@ class FileSystemDataset implements Dataset {
 
   private void accumulateDatafilePaths(Path directory, List<Path> paths)
       throws IOException {
-    for (FileStatus status : fileSystem.listStatus(directory, PathFilters.notHidden())) {
+
+    for (FileStatus status : fileSystem.listStatus(directory,
+        PathFilters.notHidden())) {
+
       if (status.isDirectory()) {
         accumulateDatafilePaths(status.getPath(), paths);
       } else {
@@ -216,7 +217,6 @@ class FileSystemDataset implements Dataset {
 
     private FileSystem fileSystem;
     private Path directory;
-    private Path dataDirectory;
     private String name;
     private DatasetDescriptor descriptor;
     private PartitionKey partitionKey;
@@ -239,11 +239,6 @@ class FileSystemDataset implements Dataset {
       return this;
     }
 
-    public Builder dataDirectory(Path dataDirectory) {
-      this.dataDirectory = dataDirectory;
-      return this;
-    }
-
     public Builder descriptor(DatasetDescriptor descriptor) {
       this.descriptor = descriptor;
       return this;
@@ -261,8 +256,6 @@ class FileSystemDataset implements Dataset {
           "No dataset descriptor defined");
       Preconditions.checkState(this.directory != null,
           "No dataset directory defined");
-      Preconditions.checkState(this.dataDirectory != null,
-          "No dataset data directory defined");
       Preconditions
           .checkState(this.fileSystem != null, "No filesystem defined");
 
@@ -272,8 +265,8 @@ class FileSystemDataset implements Dataset {
         this.partitionStrategy = this.descriptor.getPartitionStrategy();
       }
 
-      return new FileSystemDataset(fileSystem, directory, dataDirectory, name,
-          descriptor, partitionKey, partitionStrategy, schema);
+      return new FileSystemDataset(fileSystem, directory, name, descriptor,
+          partitionKey, partitionStrategy, schema);
     }
   }
 

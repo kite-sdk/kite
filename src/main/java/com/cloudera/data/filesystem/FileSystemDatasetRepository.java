@@ -166,20 +166,17 @@ public class FileSystemDatasetRepository implements DatasetRepository {
         "Metadata provider can not be null");
 
     Schema schema = descriptor.getSchema();
-
     Path datasetPath = pathForDataset(name);
-    Path datasetDataPath = pathForDatasetData(name);
 
     if (fileSystem.exists(datasetPath)) {
       throw new IOException("Attempt to create an existing dataset:" + name);
     }
 
     logger.debug("Creating dataset:{} schema:{} datasetPath:{}", new Object[] {
-        name, schema, datasetDataPath });
+        name, schema, datasetPath });
 
-    if (!fileSystem.mkdirs(datasetDataPath)) {
-      throw new IOException("Failed to make dataset diectories:"
-          + datasetDataPath);
+    if (!fileSystem.mkdirs(datasetPath)) {
+      throw new IOException("Failed to make dataset diectories:" + datasetPath);
     }
 
     metadataProvider.save(name, descriptor);
@@ -189,7 +186,6 @@ public class FileSystemDatasetRepository implements DatasetRepository {
         .fileSystem(fileSystem)
         .descriptor(descriptor)
         .directory(pathForDataset(name))
-        .dataDirectory(pathForDatasetData(name))
         .partitionKey(
             descriptor.isPartitioned() ? Accessor.getDefault()
                 .newPartitionKey() : null).get();
@@ -208,14 +204,12 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     logger.debug("Loading dataset:{}", name);
 
     Path datasetDirectory = pathForDataset(name);
-    Path datasetDataPath = pathForDatasetData(name);
 
     DatasetDescriptor descriptor = metadataProvider.load(name);
 
     FileSystemDataset ds = new FileSystemDataset.Builder()
         .fileSystem(fileSystem).descriptor(descriptor)
-        .directory(datasetDirectory).dataDirectory(datasetDataPath).name(name)
-        .get();
+        .directory(datasetDirectory).name(name).get();
 
     logger.debug("Loaded dataset:{}", ds);
 
@@ -253,10 +247,6 @@ public class FileSystemDatasetRepository implements DatasetRepository {
         "Dataset repository root directory can not be null");
 
     return new Path(rootDirectory, name.replace('.', '/'));
-  }
-
-  private Path pathForDatasetData(String name) {
-    return pathForDataset(name);
   }
 
   @Override
