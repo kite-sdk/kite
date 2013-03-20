@@ -34,6 +34,7 @@
     <vers.maven-javadoc>2.9</vers.maven-javadoc>
     <vers.slf4j>1.7.2</vers.slf4j>
     <vers.avro>1.7.3</vers.avro>
+    <vers.crunch>0.5.0-cdh4.1.3</vers.crunch>
     <vers.guava>13.0</vers.guava>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.junit>4.8.2</vers.junit>
@@ -102,6 +103,7 @@
               <exclude>**/*.avsc</exclude>
               <exclude>**/*.iml</exclude>
               <exclude>**/*.md</exclude>
+              <exclude>**/*.txt</exclude>
               <exclude>**/.classpath</exclude>
               <exclude>**/.project</exclude>
               <exclude>**/.settings/**</exclude>
@@ -179,33 +181,21 @@
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-client</artifactId>
         <version>${vers.hadoop}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-hdfs</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-app</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-api</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-core</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
-          </exclusion>
-        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <version>${vers.hadoop}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-jexl</artifactId>
         <version>${vers.jexl}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.crunch</groupId>
+        <artifactId>crunch</artifactId>
+        <version>${vers.crunch}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
