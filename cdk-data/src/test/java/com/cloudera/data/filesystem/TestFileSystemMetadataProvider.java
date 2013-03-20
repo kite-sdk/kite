@@ -57,9 +57,9 @@ public class TestFileSystemMetadataProvider {
         .get());
 
     Assert.assertTrue("Descriptor properties file should exist", fileSystem
-        .exists(new Path(testDirectory, "test/.descriptor.properties")));
+        .exists(new Path(testDirectory, "test/.metadata/descriptor.properties")));
     Assert.assertTrue("Descriptor schema file should exist",
-        fileSystem.exists(new Path(testDirectory, "test/.schema.avsc")));
+        fileSystem.exists(new Path(testDirectory, "test/.metadata/schema.avsc")));
 
     DatasetDescriptor descriptor = provider.load("test");
 
@@ -80,9 +80,9 @@ public class TestFileSystemMetadataProvider {
             Resources.getResource("schema/user.avsc")).get());
 
     Assert.assertTrue("Descriptor properties file should exist", fileSystem
-        .exists(new Path(testDirectory, "test/.descriptor.properties")));
+        .exists(new Path(testDirectory, "test/.metadata/descriptor.properties")));
     Assert.assertTrue("Descriptor schema file should exist",
-        fileSystem.exists(new Path(testDirectory, "test/.schema.avsc")));
+        fileSystem.exists(new Path(testDirectory, "test/.metadata/schema.avsc")));
 
     boolean result = provider.delete("test");
     Assert.assertTrue(result);
@@ -109,9 +109,9 @@ public class TestFileSystemMetadataProvider {
             .get());
 
     Assert.assertTrue("Descriptor properties file should exist", fileSystem
-        .exists(new Path(testDirectory, "test/.descriptor.properties")));
+        .exists(new Path(testDirectory, "test/.metadata/descriptor.properties")));
     Assert.assertTrue("Descriptor schema file should exist",
-        fileSystem.exists(new Path(testDirectory, "test/.schema.avsc")));
+        fileSystem.exists(new Path(testDirectory, "test/.metadata/schema.avsc")));
   }
 
 }

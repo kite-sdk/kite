@@ -75,9 +75,9 @@ public class TestFileSystemDatasetRepository {
     Assert.assertTrue("Dataset data directory exists",
         fileSystem.exists(new Path(testDirectory, "test1/")));
     Assert.assertTrue("Dataset properties file exists", fileSystem
-        .exists(new Path(testDirectory, "test1/.descriptor.properties")));
+        .exists(new Path(testDirectory, "test1/.metadata/descriptor.properties")));
     Assert.assertTrue("Dataset schema file exists",
-        fileSystem.exists(new Path(testDirectory, "test1/.schema.avsc")));
+        fileSystem.exists(new Path(testDirectory, "test1/.metadata/schema.avsc")));
   }
 
   @Test
@@ -96,9 +96,9 @@ public class TestFileSystemDatasetRepository {
     Assert.assertTrue("Dataset data directory exists",
         fileSystem.exists(new Path(testDirectory, "test2/")));
     Assert.assertTrue("Dataset properties file exists", fileSystem
-        .exists(new Path(testDirectory, "test2/.descriptor.properties")));
+        .exists(new Path(testDirectory, "test2/.metadata/descriptor.properties")));
     Assert.assertTrue("Dataset schema file exists",
-        fileSystem.exists(new Path(testDirectory, "test2/.schema.avsc")));
+        fileSystem.exists(new Path(testDirectory, "test2/.metadata/schema.avsc")));
   }
 
   @Test

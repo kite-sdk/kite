@@ -52,8 +52,9 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   private static final Logger logger = LoggerFactory
       .getLogger(FileSystemMetadataProvider.class);
 
-  private static final String SCHEMA_FILE_NAME = ".schema.avsc";
-  private static final String DESCRIPTOR_FILE_NAME = ".descriptor.properties";
+  private static final String METADATA_DIRECTORY = ".metadata";
+  private static final String SCHEMA_FILE_NAME = "schema.avsc";
+  private static final String DESCRIPTOR_FILE_NAME = "descriptor.properties";
   private static final String PARTITION_EXPRESSION_FIELD_NAME = "partitionExpression";
 
   private final Path rootDirectory;
@@ -68,7 +69,7 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   public DatasetDescriptor load(String name) throws IOException {
     logger.debug("Loading dataset metadata name:{}", name);
 
-    Path directory = pathForDataset(name);
+    Path directory = new Path(pathForDataset(name), METADATA_DIRECTORY);
 
     InputStream inputStream = null;
     Properties properties = new Properties();
@@ -106,7 +107,11 @@ public class FileSystemMetadataProvider implements MetadataProvider {
         descriptor);
 
     FSDataOutputStream outputStream = null;
-    Path directory = pathForDataset(name);
+    Path directory = new Path(pathForDataset(name), METADATA_DIRECTORY);
+
+    if (!fileSystem.exists(directory)) {
+      fileSystem.mkdirs(directory);
+    }
 
     try {
       outputStream = fileSystem.create(new Path(directory, SCHEMA_FILE_NAME));
@@ -138,29 +143,17 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   public boolean delete(String name) throws IOException {
     logger.debug("Deleting dataset metadata name:{}", name);
 
-    Path directory = pathForDataset(name);
-    Path descriptorPath = new Path(directory, DESCRIPTOR_FILE_NAME);
-    Path schemaPath = new Path(directory, SCHEMA_FILE_NAME);
-    boolean result = false;
+    Path directory = new Path(pathForDataset(name), METADATA_DIRECTORY);
 
-    if (fileSystem.exists(schemaPath)) {
-      if (fileSystem.delete(schemaPath, false)) {
-        result = true;
-      } else {
-        throw new IOException("Failed to delete descriptor schema file:"
-            + schemaPath);
-      }
-    }
-
-    if (fileSystem.exists(descriptorPath)) {
-      if (fileSystem.delete(descriptorPath, false)) {
+    if (fileSystem.exists(directory)) {
+      if (fileSystem.delete(directory, true)) {
         return true;
       } else {
-        throw new IOException("Failed to delete descriptor properties file:"
-            + descriptorPath);
+        throw new IOException("Failed to delete metadata directory:"
+            + directory);
       }
     } else {
-      return false || result;
+      return false;
     }
   }
 
