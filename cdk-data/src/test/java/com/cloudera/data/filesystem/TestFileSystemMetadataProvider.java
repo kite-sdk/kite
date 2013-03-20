@@ -15,8 +15,11 @@
  */
 package com.cloudera.data.filesystem;
 
+import com.cloudera.data.DatasetDescriptor;
+import com.cloudera.data.MetadataProvider;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
 import java.io.IOException;
-
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -25,11 +28,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.MetadataProvider;
-import com.google.common.io.Files;
-import com.google.common.io.Resources;
 
 public class TestFileSystemMetadataProvider {
 
@@ -58,8 +56,10 @@ public class TestFileSystemMetadataProvider {
     provider.save("test", new DatasetDescriptor.Builder().schema(userSchema)
         .get());
 
-    Assert.assertTrue("Descriptor file should exist",
-        fileSystem.exists(new Path(testDirectory, "test/.descriptor.avro")));
+    Assert.assertTrue("Descriptor properties file should exist", fileSystem
+        .exists(new Path(testDirectory, "test/.descriptor.properties")));
+    Assert.assertTrue("Descriptor schema file should exist",
+        fileSystem.exists(new Path(testDirectory, "test/.schema.avsc")));
 
     DatasetDescriptor descriptor = provider.load("test");
 
@@ -79,8 +79,10 @@ public class TestFileSystemMetadataProvider {
         new DatasetDescriptor.Builder().schema(
             Resources.getResource("schema/user.avsc")).get());
 
-    Assert.assertTrue("Descriptor file should exist",
-        fileSystem.exists(new Path(testDirectory, "test/.descriptor.avro")));
+    Assert.assertTrue("Descriptor properties file should exist", fileSystem
+        .exists(new Path(testDirectory, "test/.descriptor.properties")));
+    Assert.assertTrue("Descriptor schema file should exist",
+        fileSystem.exists(new Path(testDirectory, "test/.schema.avsc")));
 
     boolean result = provider.delete("test");
     Assert.assertTrue(result);
@@ -106,8 +108,10 @@ public class TestFileSystemMetadataProvider {
                     .getProp("cdk.partition.expression"), true).evaluate())
             .get());
 
-    Assert.assertTrue("Descriptor file should exist",
-        fileSystem.exists(new Path(testDirectory, "test/.descriptor.avro")));
+    Assert.assertTrue("Descriptor properties file should exist", fileSystem
+        .exists(new Path(testDirectory, "test/.descriptor.properties")));
+    Assert.assertTrue("Descriptor schema file should exist",
+        fileSystem.exists(new Path(testDirectory, "test/.schema.avsc")));
   }
 
 }

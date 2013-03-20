@@ -17,20 +17,15 @@ package com.cloudera.data.filesystem;
 
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.MetadataProvider;
+import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteStreams;
 import com.google.common.io.Closeables;
-import com.google.common.io.Resources;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileReader;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericData.Record;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecordBuilder;
-import org.apache.avro.util.Utf8;
-import org.apache.hadoop.fs.AvroFSInput;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -57,15 +52,12 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   private static final Logger logger = LoggerFactory
       .getLogger(FileSystemMetadataProvider.class);
 
-  private static final String DESCRIPTOR_SCHEMA_FILE = "DatasetDescriptor.avsc";
-  private static final String DESCRIPTOR_FILE = ".descriptor.avro";
-  private static final String SCHEMA_FIELD_NAME = "schema";
+  private static final String SCHEMA_FILE_NAME = ".schema.avsc";
+  private static final String DESCRIPTOR_FILE_NAME = ".descriptor.properties";
   private static final String PARTITION_EXPRESSION_FIELD_NAME = "partitionExpression";
 
   private final Path rootDirectory;
   private final FileSystem fileSystem;
-
-  private Schema descriptorSchema;
 
   public FileSystemMetadataProvider(FileSystem fileSystem, Path rootDirectory) {
     this.fileSystem = fileSystem;
@@ -76,68 +68,69 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   public DatasetDescriptor load(String name) throws IOException {
     logger.debug("Loading dataset metadata name:{}", name);
 
-    ensureDescriptorSchema();
-
     Path directory = pathForDataset(name);
-    AvroFSInput inputStream = null;
-    DataFileReader<Record> reader = null;
-    DatasetDescriptor datasetDescriptor = null;
+
+    InputStream inputStream = null;
+    Properties properties = new Properties();
+    DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder();
 
     try {
-      inputStream = new AvroFSInput(fileSystem.open(new Path(directory,
-          DESCRIPTOR_FILE)), 0);
-      reader = new DataFileReader<Record>(inputStream,
-          new GenericDatumReader<Record>(descriptorSchema));
+      inputStream = fileSystem.open(new Path(directory, DESCRIPTOR_FILE_NAME));
+      properties.load(inputStream);
 
-      Record record = reader.next();
-
-      Object expr = record.get(PARTITION_EXPRESSION_FIELD_NAME);
-      datasetDescriptor = new DatasetDescriptor.Builder()
-          .schema(
-              new Schema.Parser().parse(((Utf8) record.get(SCHEMA_FIELD_NAME))
-                  .toString()))
-          .partitionStrategy(expr != null ?
-              new PartitionExpression(((Utf8) expr).toString(), true).evaluate() : null)
-          .get();
-
-      logger.debug("loaded descriptor:{}", record);
+      if (properties.containsKey(PARTITION_EXPRESSION_FIELD_NAME)) {
+        builder.partitionStrategy(new PartitionExpression(properties
+            .getProperty(PARTITION_EXPRESSION_FIELD_NAME), true).evaluate());
+      }
     } finally {
-      Closeables.closeQuietly(reader);
       Closeables.closeQuietly(inputStream);
     }
 
-    return datasetDescriptor;
+    try {
+      inputStream = fileSystem.open(new Path(directory, SCHEMA_FILE_NAME));
+      builder.schema(new Schema.Parser().parse(new String(ByteStreams
+          .toByteArray(inputStream), Charsets.UTF_8)));
+
+    } finally {
+      Closeables.closeQuietly(inputStream);
+    }
+
+    return builder.get();
   }
 
   @Override
   public void save(String name, DatasetDescriptor descriptor)
       throws IOException {
+
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
         descriptor);
 
-    ensureDescriptorSchema();
-
     FSDataOutputStream outputStream = null;
     Path directory = pathForDataset(name);
-    DataFileWriter<Record> writer = new DataFileWriter<Record>(
-        new GenericDatumWriter<Record>(descriptorSchema));
 
     try {
-      outputStream = fileSystem.create(new Path(directory, DESCRIPTOR_FILE));
-      writer.create(descriptorSchema, outputStream);
-
-      writer.append(new GenericRecordBuilder(descriptorSchema)
-          .set(SCHEMA_FIELD_NAME, descriptor.getSchema().toString())
-          .set(
-              PARTITION_EXPRESSION_FIELD_NAME,
-              descriptor.isPartitioned() ? PartitionExpression
-                  .toExpression(descriptor.getPartitionStrategy()) : null)
-          .build());
-
-      writer.flush();
+      outputStream = fileSystem.create(new Path(directory, SCHEMA_FILE_NAME));
+      outputStream.write(descriptor.getSchema().toString(true)
+          .getBytes(Charsets.UTF_8));
+      outputStream.flush();
     } finally {
       Closeables.closeQuietly(outputStream);
-      Closeables.closeQuietly(writer);
+    }
+
+    Properties properties = new Properties();
+
+    if (descriptor.isPartitioned()) {
+      properties.setProperty(PARTITION_EXPRESSION_FIELD_NAME,
+          PartitionExpression.toExpression(descriptor.getPartitionStrategy()));
+    }
+
+    try {
+      outputStream = fileSystem
+          .create(new Path(directory, DESCRIPTOR_FILE_NAME));
+      properties.store(outputStream, "Dataset descriptor for " + name);
+      outputStream.flush();
+    } finally {
+      Closeables.closeQuietly(outputStream);
     }
   }
 
@@ -146,17 +139,28 @@ public class FileSystemMetadataProvider implements MetadataProvider {
     logger.debug("Deleting dataset metadata name:{}", name);
 
     Path directory = pathForDataset(name);
-    Path descriptorPath = new Path(directory, DESCRIPTOR_FILE);
+    Path descriptorPath = new Path(directory, DESCRIPTOR_FILE_NAME);
+    Path schemaPath = new Path(directory, SCHEMA_FILE_NAME);
+    boolean result = false;
+
+    if (fileSystem.exists(schemaPath)) {
+      if (fileSystem.delete(schemaPath, false)) {
+        result = true;
+      } else {
+        throw new IOException("Failed to delete descriptor schema file:"
+            + schemaPath);
+      }
+    }
 
     if (fileSystem.exists(descriptorPath)) {
       if (fileSystem.delete(descriptorPath, false)) {
         return true;
       } else {
-        throw new IOException("Failed to delete metadata descriptor:"
+        throw new IOException("Failed to delete descriptor properties file:"
             + descriptorPath);
       }
     } else {
-      return false;
+      return false || result;
     }
   }
 
@@ -164,13 +168,6 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   public String toString() {
     return Objects.toStringHelper(this).add("rootDirectory", rootDirectory)
         .add("fileSystem", fileSystem).toString();
-  }
-
-  private void ensureDescriptorSchema() throws IOException {
-    if (descriptorSchema == null) {
-      descriptorSchema = new Schema.Parser().parse(Resources.getResource(
-          DESCRIPTOR_SCHEMA_FILE).openStream());
-    }
   }
 
   private Path pathForDataset(String name) {

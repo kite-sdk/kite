@@ -56,6 +56,8 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "A reader may not be opened more than once - current state:%s", state);
 
+    logger.debug("Opening reader on path:{}", path);
+
     reader = new DataFileReader<E>(new AvroFSInput(fileSystem.open(path),
         fileSystem.getFileStatus(path).getLen()), new ReflectDatumReader<E>(
         schema));
