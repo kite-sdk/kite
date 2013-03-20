@@ -241,8 +241,8 @@ _A Partitioned Dataset Example_
 This example produces a dataset that, when written to, may have up to 53
 partitions. User entities written to the dataset will be automatically written
 to the correct partition. Note that the name of the attribute used in the
-partiion strategy builder ("userId") must appear in the schema ("user.avsc").
-Multiple partition functions may be specified. The order of specific is
+partition strategy builder ("userId") must appear in the schema ("user.avsc").
+Multiple partition functions may be specified. The order of specification is
 extremely important as it reflects the physical storage (in the case of the
 Hadoop FileSystem implementation).
 
