@@ -56,6 +56,8 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   private static final String SCHEMA_FILE_NAME = "schema.avsc";
   private static final String DESCRIPTOR_FILE_NAME = "descriptor.properties";
   private static final String PARTITION_EXPRESSION_FIELD_NAME = "partitionExpression";
+  private static final String VERSION_FIELD_NAME = "version";
+  private static final String METADATA_VERSION = "1";
 
   private final Path rootDirectory;
   private final FileSystem fileSystem;
@@ -123,6 +125,7 @@ public class FileSystemMetadataProvider implements MetadataProvider {
     }
 
     Properties properties = new Properties();
+    properties.setProperty(VERSION_FIELD_NAME, METADATA_VERSION);
 
     if (descriptor.isPartitioned()) {
       properties.setProperty(PARTITION_EXPRESSION_FIELD_NAME,
