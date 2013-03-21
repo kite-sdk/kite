@@ -10,6 +10,7 @@
 
   <modules>
     <module>cdk-data</module>
+    <module>cdk-examples</module>
     <module>cdk-parent</module>
     <module>cdk-tools</module>
   </modules>
