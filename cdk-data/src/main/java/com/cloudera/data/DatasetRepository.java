@@ -75,6 +75,15 @@ public interface DatasetRepository {
    */
   Dataset create(String name, DatasetDescriptor descriptor) throws IOException;
 
+  /**
+   * Drop the named {@link Dataset}. If no dataset with the
+   * provided {@code name} exists, an {@link IOException} is thrown.
+   *
+   * @param name
+   *          The name of the dataset.
+   * @return <code>true</code> if the dataset was successfully dropped, false otherwise
+   * @throws IOException
+   */
   boolean drop(String name) throws IOException;
 
 }

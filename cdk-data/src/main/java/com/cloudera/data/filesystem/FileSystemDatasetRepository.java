@@ -147,6 +147,25 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   private final Path rootDirectory;
   private final FileSystem fileSystem;
 
+  /**
+   * Construct a {@link FileSystemDatasetRepository} on the given {@link FileSystem} and
+   * root directory, and a {@link FileSystemMetadataProvider} with the same {@link
+   * FileSystem} and root directory
+   * @param fileSystem the filesystem to store metadata and datasets in
+   * @param rootDirectory the root directory for metadata and datasets
+   */
+  public FileSystemDatasetRepository(FileSystem fileSystem, Path rootDirectory) {
+    this(fileSystem, rootDirectory,
+        new FileSystemMetadataProvider(fileSystem, rootDirectory));
+  }
+
+  /**
+   * Construct a {@link FileSystemDatasetRepository} on the given {@link FileSystem} and
+   * root directory, with the given {@link MetadataProvider} for metadata storage.
+   * @param fileSystem the filesystem to store datasets in
+   * @param rootDirectory the root directory for datasets
+   * @param metadataProvider the provider for metadata storage
+   */
   public FileSystemDatasetRepository(FileSystem fileSystem, Path rootDirectory,
       MetadataProvider metadataProvider) {
 

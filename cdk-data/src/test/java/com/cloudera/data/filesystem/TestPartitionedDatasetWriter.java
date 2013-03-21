@@ -48,8 +48,7 @@ public class TestPartitionedDatasetWriter {
     fileSystem = FileSystem.get(new Configuration());
     testSchema = new Schema.Parser().parse(Resources.getResource(
         "schema/user-partitioned.avsc").openStream());
-    repo = new FileSystemDatasetRepository(fileSystem, testDirectory,
-        new FileSystemMetadataProvider(fileSystem, testDirectory));
+    repo = new FileSystemDatasetRepository(fileSystem, testDirectory);
     PartitionStrategy partitionStrategy = new PartitionExpression(testSchema
         .getProp("cdk.partition.expression"), true).evaluate();
     Dataset users = repo.create(

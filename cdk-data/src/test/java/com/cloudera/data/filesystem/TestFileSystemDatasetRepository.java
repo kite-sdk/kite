@@ -49,8 +49,7 @@ public class TestFileSystemDatasetRepository {
 
     fileSystem = FileSystem.get(conf);
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    repo = new FileSystemDatasetRepository(fileSystem, testDirectory,
-        new FileSystemMetadataProvider(fileSystem, testDirectory));
+    repo = new FileSystemDatasetRepository(fileSystem, testDirectory);
 
     testSchema = Schema.createRecord("Test", "Test record schema",
         "com.cloudera.data.filesystem", false);
