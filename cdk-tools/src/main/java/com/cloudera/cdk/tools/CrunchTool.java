@@ -17,17 +17,9 @@ package com.cloudera.cdk.tools;
 
 import java.io.Serializable;
 import org.apache.crunch.PCollection;
-import org.apache.crunch.PTable;
 import org.apache.crunch.Pipeline;
 import org.apache.crunch.PipelineResult;
-import org.apache.crunch.Source;
-import org.apache.crunch.TableSource;
-import org.apache.crunch.Target;
-import org.apache.crunch.impl.mem.MemPipeline;
 import org.apache.crunch.impl.mr.MRPipeline;
-import org.apache.crunch.io.At;
-import org.apache.crunch.io.From;
-import org.apache.crunch.io.To;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
