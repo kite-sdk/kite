@@ -64,3 +64,24 @@ mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.ReadUserDatasetGe
 mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.ReadUserDatasetGenericOnePartition"
 mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.DropUserDataset"
 ```
+
+## Scala
+
+Run the equivalent example with:
+
+```bash
+scala -cp "$(mvn dependency:build-classpath | grep -v '^\[')" src/main/scala/createpojo.scala
+```
+
+Or for the generic example:
+
+```bash
+scala -cp "$(mvn dependency:build-classpath | grep -v '^\[')" src/main/scala/creategeneric.scala
+```
+
+The Java examples can be used to read (and drop) the dataset written from Scala:
+
+```bash
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.ReadUserDatasetGeneric"
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.DropUserDataset"
+```
