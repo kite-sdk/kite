@@ -51,3 +51,16 @@ mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.CreateUserDataset
 mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.ReadUserDatasetGeneric"
 mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.DropUserDataset"
 ```
+
+### Partitioning
+
+The API supports partitioning, so that records are written to different partition files
+according to the value of particular partition fields.
+
+```bash
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.CreateUserDatasetGenericPartitioned"
+find /tmp/data # see how partitioning affects the data layout
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.ReadUserDatasetGeneric"
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.ReadUserDatasetGenericOnePartition"
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.DropUserDataset"
+```

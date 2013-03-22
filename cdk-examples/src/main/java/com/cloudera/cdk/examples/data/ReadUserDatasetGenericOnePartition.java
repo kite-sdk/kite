@@ -1,0 +1,76 @@
+/**
+ * Copyright 2013 Cloudera Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.cloudera.cdk.examples.data;
+
+import com.cloudera.data.Dataset;
+import com.cloudera.data.DatasetReader;
+import com.cloudera.data.DatasetRepository;
+import com.cloudera.data.PartitionKey;
+import com.cloudera.data.PartitionStrategy;
+import com.cloudera.data.filesystem.FileSystemDatasetRepository;
+import java.io.IOException;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
+
+/**
+ * Read one partition of user objects from the users dataset using Avro generic records.
+ */
+public class ReadUserDatasetGenericOnePartition extends Configured implements Tool {
+
+  @Override
+  public int run(String[] args) throws IOException {
+
+    // Construct a local filesystem dataset repository rooted at /tmp/data
+    FileSystem fs = FileSystem.getLocal(new Configuration());
+    Path root = new Path("/tmp/data");
+    DatasetRepository repo = new FileSystemDatasetRepository(fs, root);
+
+    // Get the users dataset
+    Dataset users = repo.get("users");
+
+    // Get the partition strategy and use it to construct a partition key for
+    // hash(username)=0
+    PartitionStrategy partitionStrategy = users.getDescriptor().getPartitionStrategy();
+    PartitionKey partitionKey = partitionStrategy.partitionKey(0);
+
+    // Get the dataset partition for the partition key
+    Dataset partition = users.getPartition(partitionKey, false);
+
+    // Get a reader for the partition and read all the users
+    DatasetReader<GenericRecord> reader = partition.getReader();
+    try {
+      reader.open();
+      while (reader.hasNext()) {
+        GenericRecord user = reader.read();
+        System.out.println(user);
+      }
+    } finally {
+      reader.close();
+    }
+
+    return 0;
+  }
+
+  public static void main(String... args) throws Exception {
+    int rc = ToolRunner.run(new ReadUserDatasetGenericOnePartition(), args);
+    System.exit(rc);
+  }
+}
