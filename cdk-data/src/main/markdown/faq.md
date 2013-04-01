@@ -63,3 +63,6 @@
 [avro-cf]: http://avro.apache.org/docs/current/spec.html#Object+Container+Files
     (Apache Avro - Object container files)
 
+***
+
+[CDK Data Module](../../../README.md)
