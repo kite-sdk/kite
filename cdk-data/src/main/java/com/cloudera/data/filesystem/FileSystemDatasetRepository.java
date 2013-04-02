@@ -36,7 +36,6 @@ import com.google.common.base.Preconditions;
  * <p>
  * A {@link DatasetRepository} that stores data in a Hadoop {@link FileSystem}.
  * </p>
- * <h1>Overview</h1>
  * <p>
  * Given a {@link FileSystem}, a root directory, and a {@link MetadataProvider},
  * this {@link DatasetRepository} implementation can load and store
@@ -44,93 +43,13 @@ import com.google.common.base.Preconditions;
  * FileSystem (HDFS). Users may directly instantiate this class with the three
  * dependencies above and then perform dataset-related operations using any of
  * the provided methods. The primary methods of interest will be
- * {@link #create(String, DatasetDescriptor)} and {@link #get(String)} which
- * create a new dataset, or load an existing dataset, respectively. Once a
- * dataset has been created or loaded, users can invoke the appropriate
- * {@link Dataset} methods to get a reader or writer as needed.
+ * {@link #create(String, DatasetDescriptor)}, {@link #get(String)}, and
+ * {@link #drop(String)} which create a new dataset, or load an existing
+ * dataset, respectively. Once a dataset has been created or loaded, users can
+ * invoke the appropriate {@link Dataset} methods to get a reader or writer as
+ * needed.
  * </p>
- * <h1>Directory Naming and Structure</h1>
- * <p>
- * Other than the root directory, all paths and file layout is completely
- * controlled by the underlying implementation. Each dataset is represented by a
- * directory of the same name, with data files in its {@code data} directory.
- * Partitioned datasets follow the conventions of Apache Hive and Cloudera
- * Impala, with the dataset {@code data} directory containing subdirectories for
- * each partition. Partition directories use the attribute name, followed by an
- * equals sign ("="), and the value of that attribute as the directory name. For
- * example, a dataset partitioned by the {@code date} attribute of an entity has
- * the directory name {@code date=20130101} for the partition containing
- * entities whose {@code date} attribute was set to the value {@code 20130101} .
- * </p>
- * <p>
- * Here are some examples of API use and the resultant directory structures.
- * </p>
- * 
- * <pre>
- * DatasetRepository repo = new HDFSDatasetRepository(
- *   fileSystem,
- *   new Path("/data"),
- *   metadataProvider
- * );
- * 
- * Dataset userEvents = repo.create("UserEvents",
- *   new DatasetDescriptor.Builder()
- *     .schema(userEventSchema)
- *     .get()
- * );
- * 
- * DatasetWriter&gt;GenericRecord&lt; writer = userEvents.getWriter();
- * 
- * try {
- *   writer.open();
- *   writer.write(new GenericRecordBuilder(userEventSchema)
- *     .set("username", "foo")
- *     .set("...", "...")
- *     .build()
- *   );
- * 
- *   writer.flush();
- * } finally {
- *   writer.close();
- * }
- * </pre>
- * <p>
- * This example writes a single user event entity (using the Avro
- * {@code GenericRecordBuilder} to build an entity represented by the
- * {@code GenericRecord} type) to a simple (non-partitioned) dataset. The
- * resultant HDFS directory structure, assuming the instance of
- * {@code FileSystem} above was configured to connect to an HDFS cluster, would
- * look as follows.
- * </p>
- * 
- * <pre>
- * /data/UserEvents/data/*.avro
- * </pre>
- * <p>
- * If we instead create the {@code UserEvent} dataset with the following
- * {@code DatasetDescriptor}:
- * </p>
- * 
- * <pre>
- * Dataset userEvents = repo.create(
- *     &quot;UserEvents&quot;,
- *     new DatasetDescriptor.Builder()
- *         .schema(userEventSchema)
- *         .partitionStrategy(
- *             new PartitionStrategy.Builder().identity(&quot;date&quot;, 365).get()).get());
- * </pre>
- * <p>
- * the resultant dataset would be partitioned by the identity function applied
- * to the {@code date} attribute of the entity when it is written. The directory
- * structure will now be:
- * </p>
- * 
- * <pre>
- * /data/UserEvents/data/date=20130101/*.avro
- * /data/UserEvents/data/date=20130102/*.avro
- * ...
- * </pre>
- * 
+ *
  * @see DatasetRepository
  * @see Dataset
  * @see DatasetDescriptor
@@ -206,8 +125,8 @@ public class FileSystemDatasetRepository implements DatasetRepository {
         .descriptor(descriptor)
         .directory(pathForDataset(name))
         .partitionKey(
-            descriptor.isPartitioned() ? Accessor.getDefault()
-                .newPartitionKey() : null).get();
+          descriptor.isPartitioned() ? Accessor.getDefault()
+            .newPartitionKey() : null).get();
   }
 
   @Override
