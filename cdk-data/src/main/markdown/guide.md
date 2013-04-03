@@ -109,10 +109,11 @@ user's option:
 
    An Avro [GenericRecord][avro-gr] instance can be used to easily supply
    entities that represent a schema without using custom types for each kind of
-   entity. These objects are easy to create and manipulate, especially in code
-   that has no knowledge of specific object types (such as libraries).
-   Serialization of generic records is fast, but requires use of the Avro APIs.
-   This is recommended for most users, in most cases.
+   entity. These objects are easy to create and manipulate (see Avro's
+   [GenericRecordBuilder class][avro-grb]), especially in code that has no
+   knowledge of specific object types (such as libraries). Serialization of
+   generic records is fast, but requires use of the Avro APIs. This is
+   recommended for most users, in most cases.
 
 1. An Avro specific type
 
@@ -132,6 +133,7 @@ in a different serialization format.
 [POJO]: http://en.wikipedia.org/wiki/POJO "Plain Old Java Object"
 [JPA]: http://en.wikipedia.org/wiki/Java_Persistence_API "Java Persistance API"
 [avro-gr]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecord.html "Avro - GenericRecord Interface"
+[avro-grb]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecordBuilder.html "Avro - GenericRecordBuilder Class"
 [avro-cg]: http://avro.apache.org/docs/current/gettingstartedjava.html#Serializing+and+deserializing+with+code+generation "Avro - Serializing and deserializing with code generation"
 
 Entites may be complex types, representing data structures as simple as a few
@@ -166,6 +168,10 @@ _Example: User entity schema and POJO class_
       private String username;
       private String emailAddress;
       private List<Long> friendIds;
+
+      public User() {
+        friendIds = new ArrayList<Long>();
+      }
 
       public Long getId() {
         return id;
@@ -211,6 +217,27 @@ _Example: User entity schema and POJO class_
 
     }
 
+Instead of defining a POJO, we could also use Avro's `GenericRecordBuilder` to
+create a generic entity that conforms to the User schema we defined earlier.
+
+_Example: Using Avro's GenericRecordBuilder to create a generic entity_
+
+    /*
+     * Load the schema from User.avsc. Later, we'll an easier way to reference
+     * Avro schemas when working with the CDK Data APIs.
+     */
+    Schema userSchema = new Schema.Parser().parse("User.avsc");
+
+    /*
+     * The GenericRecordBuilder constructs a new record and ensures that we set
+     * all the necessary fields with values of an appropriate type.
+     */
+    GenericData.Record genericUser = new GenericRecordBuilder(userSchema)
+      .set("id", 1L)
+      .set("username", "janedoe")
+      .set("emailAddress", "jane@doe.com")
+      .set("friendIds", Collections.<Long>emptyList())
+      .build();
 
 ## Datasets
 
