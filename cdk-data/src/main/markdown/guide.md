@@ -265,7 +265,7 @@ _Sample User Avro Schema (User.avsc)_
       ]
     }
 
-_Example User Dataset Creation_
+_Example Creation of a dataset partitioned by an attribute_
 
     DatasetRepository repo = ... // Described later.
 
@@ -283,13 +283,37 @@ and C would be written to partition 1, while D and E end up in partition 2.
 
 _Example: Sample Users_
 
-    username    segment
-    --------    -------
-    A           1
-    B           1
-    C           1
-    D           2
-    E           2
+    id  username  emailAddress  segment
+    --  --------  ------------  -------
+    100 A         A@a.com       1
+    101 B         B@b.com       1
+    102 C         C@c.com       1
+    103 D         D@d.com       2
+    104 E         E@e.com       2
+
+Partitioning is not limited to a single attribute of an entity.
+
+_Example: Creation of a dataset partitioned by multiple attributes_
+
+    DatasetRepository repo = ...
+
+    Dataset users = repo.create(
+      "users",
+      new DatasetDescriptor.Builder()
+        .schema("User.avsc")
+        .partitionStrategy(
+          new PartitionStrategy.Builder()
+            .identity("segment", 1024)  // Partition first by segment
+            .hash("emailAddress", 3)    // and then by hash(email) % 3
+            .get()
+        ).get()
+
+The other in which the partition functions are defined is important. This
+controls the way the data is physically partitioned in certain implementations
+of the Data APIs. Depending on the implementation, this can drastically change
+the execution speed of data access.
+
+**Warning**
 
 It's worth pointing out that Hive and Impala only support the identity function
 in partitioned datasets, at least at the time this is written. Users who do not
