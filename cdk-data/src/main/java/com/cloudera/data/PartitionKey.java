@@ -18,9 +18,8 @@ package com.cloudera.data;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * <p>
@@ -33,12 +32,16 @@ import javax.annotation.concurrent.Immutable;
  * {@link PartitionStrategy#partitionKey(Object...)} or
  * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
  * </p>
+ * <p>
+ * Implementations of {@link PartitionKey} are typically not thread-safe; that is,
+ * the behavior when accessing a single instance from multiple threads is undefined.
+ * </p>
  * 
  * @see PartitionStrategy
  * @see FieldPartitioner
  * @see Dataset
  */
-@Immutable
+@NotThreadSafe
 public class PartitionKey {
 
   private final Object[] values;
@@ -59,6 +62,10 @@ public class PartitionKey {
       return values[index];
     }
     return null;
+  }
+
+  void set(int index, Object value) {
+    values[index] = values;
   }
 
   @Override
