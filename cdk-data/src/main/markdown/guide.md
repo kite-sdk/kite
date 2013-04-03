@@ -65,16 +65,72 @@ constituent classes.
 [spring]: http://www.springsource.org/spring-framework "Spring Framework"
 [guice]: http://code.google.com/p/google-guice/ "Google Guice"
 
-The primary actors in the Data module are *dataset repositories*, *datasets*,
-dataset *readers* and *writers*, and *metadata providers*. Most of these objects
-are interfaces, permitting multiple implementations, each with different
-functionality. Today, there exists an implementation of each of these components
-for the Hadoop FileSystem abstraction. While, in theory, this means any
-implementation of Hadoop's `FileSystem` abstract class is supported by the
+The primary actors in the Data module are *entities*, *dataset repositories*,
+*datasets*, dataset *readers* and *writers*, and *metadata providers*. Most of
+these objects are interfaces, permitting multiple implementations, each with
+different functionality. Today, there exists an implementation of each of these
+components for the Hadoop FileSystem abstraction. While, in theory, this means
+any implementation of Hadoop's `FileSystem` abstract class is supported by the
 Data module, only the local and HDFS filesystem implementations are tested and
 officially supported. For the remainder of this guide, you can assume the
 implementation of the Data module interfaces being described is the Hadoop
 `FileSystem` implementation.
+
+### Entities
+
+*Summary*
+
+* An entity is a record in a dataset.
+* Entities can be POJOs, GenericRecords, or generated (specific) records.
+* When in doubt, use GenericRecords.
+
+An _entity_ is a is a single record. The name "entity" is used rather than
+"record" because the latter caries a connotation of a simple list of primitives,
+while the former evokes the notion of a [POJO][] (e.g. in [JPA][]). That said,
+the terms are used interchangably. An entity can take one of three forms, at the
+user's option:
+
+1. A plain old Java object
+
+   When a POJO is supplied, the library uses reflection to write the object out
+   to storage. While not the fastest, this is the simplest way to get up and
+   running. Users are encouraged to consider Avro [GenericRecord][avro-gr]s for
+   production systems, or after they become familiar with the APIs.
+
+1. An [Avro][avro] GenericRecord
+
+   An Avro [GenericRecord][avro-gr] instance can be used to easily supply
+   entities that represent a schema without using custom types for each kind of
+   entity. These objects are easy to create and manipulate, especially in code
+   that has no knowledge of specific object types (such as libraries).
+   Serialization of generic records is fast, but requires use of the Avro APIs.
+   This is recommended for most users, in most cases.
+
+1. An Avro specific type
+
+   Advanced users may choose to use Avro's [code generation][avro-cg] support to
+   create classes that implicitly know how to serialize themselves. While the
+   fastest of the options, this requires specialized knowledge of Avro, code
+   generation, and handling of custom types. Keep in mind that, unlike generic
+   records, the applications that write datasets with specific types must also
+   have the same classes available to the applications that read those datasets.
+
+Note that entities aren't represented by any particular type in the Data APIs.
+In each of the above three cases, the entities described are either simple POJOs
+or are Avro objects. Remember that what has been described here is only the *in
+memory* representation of the entity; the Data module may store the data in HDFS
+in a different serialization format.
+
+[POJO]: http://en.wikipedia.org/wiki/POJO "Plain Old Java Object"
+[JPA]: http://en.wikipedia.org/wiki/Java_Persistence_API "Java Persistance API"
+[avro-gr]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecord.html "Avro - GenericRecord Interface"
+[avro-cg]: http://avro.apache.org/docs/current/gettingstartedjava.html#Serializing+and+deserializing+with+code+generation "Avro - Serializing and deserializing with code generation"
+
+### Datasets
+
+### Dataset Repositories
+
+### Dataset Readers and Writers
 
 ## Appendix
 
