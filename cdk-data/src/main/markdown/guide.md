@@ -76,7 +76,7 @@ officially supported. For the remainder of this guide, you can assume the
 implementation of the Data module interfaces being described is the Hadoop
 `FileSystem` implementation.
 
-### Entities
+## Entities
 
 *Summary*
 
@@ -126,7 +126,7 @@ in a different serialization format.
 [avro-gr]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecord.html "Avro - GenericRecord Interface"
 [avro-cg]: http://avro.apache.org/docs/current/gettingstartedjava.html#Serializing+and+deserializing+with+code+generation "Avro - Serializing and deserializing with code generation"
 
-### Datasets
+## Datasets
 
 *Summary*
 
@@ -302,8 +302,6 @@ a surrogate field to each record to hold the dervived value and handle proper
 setting of such a field themselves.
 
 ### Dataset Repositories
-
-### Dataset Readers and Writers
 
 ## Appendix
 
