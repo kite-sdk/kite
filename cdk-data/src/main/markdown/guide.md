@@ -289,9 +289,12 @@ as to the performance of reading or writing across partitions, availability of a
 partition in the face of failures, or the efficiency of partition elimination
 under one or more predicates (i.e. partition pruning in query engines). It is
 not possible to partition an existing non-partitioned dataset, nor can you write
-data into a partitioned dataset that does not land in a partition. It is
-possible to add or remove partitions from a partitioned dataset. A partitioned
-dataset can provide a list of partitions (described later).
+data into a partitioned dataset that does not land in a partition. Should you
+decide to partition an existing dataset, the best course of action is to create
+a new partitioned dataset with the same schema as the existing dataset, and use
+MapReduce to convert the dataset in batch to the new format. It is possible to
+add or remove partitions from a partitioned dataset. A partitioned dataset can
+provide a list of partitions (described later).
 
 _DatasetDescriptor Class_
 
