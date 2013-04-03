@@ -53,16 +53,16 @@ class FileSystemDataset implements Dataset {
   private final Schema schema;
 
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
-      DatasetDescriptor descriptor, PartitionKey partitionKey,
-      PartitionStrategy partitionStrategy, Schema schema) {
+      DatasetDescriptor descriptor, PartitionKey partitionKey) {
 
     this.fileSystem = fileSystem;
     this.directory = directory;
     this.name = name;
     this.descriptor = descriptor;
     this.partitionKey = partitionKey;
-    this.partitionStrategy = partitionStrategy;
-    this.schema = schema;
+    this.partitionStrategy =
+        descriptor.isPartitioned() ? descriptor.getPartitionStrategy() : null;
+    this.schema = descriptor.getSchema();
   }
 
   @Override
@@ -221,9 +221,6 @@ class FileSystemDataset implements Dataset {
     private DatasetDescriptor descriptor;
     private PartitionKey partitionKey;
 
-    private PartitionStrategy partitionStrategy;
-    private Schema schema;
-
     public Builder fileSystem(FileSystem fileSystem) {
       this.fileSystem = fileSystem;
       return this;
@@ -259,14 +256,8 @@ class FileSystemDataset implements Dataset {
       Preconditions
           .checkState(this.fileSystem != null, "No filesystem defined");
 
-      this.schema = this.descriptor.getSchema();
-
-      if (this.descriptor.isPartitioned()) {
-        this.partitionStrategy = this.descriptor.getPartitionStrategy();
-      }
-
       return new FileSystemDataset(fileSystem, directory, name, descriptor,
-          partitionKey, partitionStrategy, schema);
+          partitionKey);
     }
   }
 
