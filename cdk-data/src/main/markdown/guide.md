@@ -54,15 +54,26 @@ topics to research, such a tradeoff has been made. The Data module is designed
 to be immediately useful, obvious, and in line with what most users want, out of
 the box.
 
+These APIs are designed to easily fit in with dependency injection frameworks
+like [Spring][spring] and [Google Guice][guice]. Users can use constructor
+injection when using these kinds of systems. Alternatively, users who prefer
+not to use DI frameworks will almost certainly prefer the builder-style helper
+classes that come with many of the critical classes. By convention, these
+builders are always inner static classes named `Builder`, contained within their
+constituent classes.
+
+[spring]: http://www.springsource.org/spring-framework "Spring Framework"
+[guice]: http://code.google.com/p/google-guice/ "Google Guice"
+
 The primary actors in the Data module are *dataset repositories*, *datasets*,
 dataset *readers* and *writers*, and *metadata providers*. Most of these objects
 are interfaces, permitting multiple implementations, each with different
 functionality. Today, there exists an implementation of each of these components
 for the Hadoop FileSystem abstraction. While, in theory, this means any
 implementation of Hadoop's `FileSystem` abstract class is supported by the
-Data module, only the local and HDFS filesystem implementations are
-tested and officially supported. For the remainder of this guide, you can assume
-the implementation of the Data module interfaces being described is the Hadoop
+Data module, only the local and HDFS filesystem implementations are tested and
+officially supported. For the remainder of this guide, you can assume the
+implementation of the Data module interfaces being described is the Hadoop
 `FileSystem` implementation.
 
 ## Appendix
