@@ -78,8 +78,9 @@ implementation of the Data module interfaces being described is the Hadoop
 
 If you're not already familiar with [Avro][avro] schemas, now is a good time to
 go read a little [more about them][avro-s]. You need not concern yourself with
-The rest of this guide will assume you have a basic understanding of how to
-define a schema.
+the details of how objects are serialized, but the ability to specify the schema
+to which entities of a dataset must conform is critical. The rest of this guide
+will assume you have a basic understanding of how to define a schema.
 
 [avro-s]: http://avro.apache.org/docs/current/spec.html "Avro Specification"
 
