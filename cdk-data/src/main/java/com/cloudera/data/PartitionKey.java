@@ -51,7 +51,7 @@ public class PartitionKey {
   }
 
   public List<Object> getValues() {
-    return Lists.newArrayList(values);
+    return Arrays.asList(values);
   }
 
   /**
@@ -65,7 +65,7 @@ public class PartitionKey {
   }
 
   void set(int index, Object value) {
-    values[index] = values;
+    values[index] = value;
   }
 
   @Override
