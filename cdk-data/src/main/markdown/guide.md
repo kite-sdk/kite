@@ -128,6 +128,179 @@ in a different serialization format.
 
 ### Datasets
 
+*Summary*
+
+* A dataset is a collection of entities.
+* A dataset can be partitioned by attributes of the entity (i.e. fields of the
+  record).
+* A dataset is represented by the interface `Dataset`.
+* The Hadoop FileSystem implementation of a dataset...
+    * is stored as Snappy-compressed Avro data files by default.
+    * may support pluggable formats such as Parquet in the future.
+    * is made up of zero or more files in a directory.
+
+A dataset is a collection of zero or more entities. All datasets have a name and
+an associated _dataset descriptor_. The dataset descriptor, as the name implies,
+describes all aspects of the dataset. Primarily, the descriptor information is
+the dataset's required _schema_ and its optional _partition strategy_. A
+descriptor must be provided at the time a dataset is created. The schema is
+defined using the Avro Schema APIs. Entities must all conform to the same
+schema, however, that schema can evolve based on a set of well-defined rules.
+The relational analog of a dataset is a table.
+
+_Dataset Interface_
+
+    getName(): String
+    getDescriptor(): DatasetDescriptor
+
+    <E> getWriter(): DatasetWriter<E>
+    <E> getReader(): DatasetReader<E>
+
+    getPartition(PartitionKey, boolean): Dataset
+    getPartitions(): Iterable<Dataset>
+
+While Avro is used to define the schema, it is possible that the underlying
+storage format of the data is not Avro data files. This is because other
+constraints may apply, based on the subsystems or access patterns. The dataset
+implementation translates the Avro schema into whatever is appropriate for the
+underlying system automatically. The Hadoop FileSystem implementation does, in
+fact, store all data as Avro data files in the configured filesystem.
+
+Datasets may optionally be partitioned to facilitate piecemeal storage
+management, as well as optimized access to data under one or more predicates. A
+dataset is considered partitioned if it has an associated partition strategy
+(described later). When entities are written to a partitioned dataset, they are
+automatically written to the proper partition, as expected. The semantics of a
+partition are defined by the implementation; this interface makes no guarantee
+as to the performance of reading or writing across partitions, availability of a
+partition in the face of failures, or the efficiency of partition elimination
+under one or more predicates (i.e. partition pruning in query engines). It is
+not possible to partition an existing non-partitioned dataset, nor can you write
+data into a partitioned dataset that does not land in a partition. It is
+possible to add or remove partitions from a partitioned dataset. A partitioned
+dataset can provide a list of partitions (described later).
+
+_DatasetDescriptor Class_
+
+    getSchema(): org.apache.avro.Schema
+    getPartitionStrategy(): PartitionStrategy
+    isPartitioned(): boolean
+
+Datasets are never instantiated by users, directly. Instead, they are created
+using factory methods on a `DatasetRepository` (described later).
+
+An instance of `Dataset` acts as a factory for both reader and writer streams.
+Each implementation is free to produce stream implementations that make sense
+for the underlying storage system. The Hadoop `FileSystem` implementation, for
+example, produces streams that read from, or write to, Avro data files on a
+`FileSystem` implementation.
+
+Reader and writer streams both function similarly to Java's standard IO streams,
+but are specialized. As indicated above, both interfaces are generic. The type
+parameter indicates the type of entity that they produce or consume,
+respectively.
+
+_DatasetReader<E> Interface_
+
+    open()
+    close()
+    isOpen(): boolean
+
+    hasNext(): boolean
+    read(): E
+
+_DatasetWriter<E> Interface_
+
+    open()
+    close()
+    isOpen(): boolean
+
+    write(E)
+    flush()
+
+Both readers and writers are single-use objects with a well-defined lifecycle.
+Instances of both types (or the implementations of each, rather) must be opened
+prior to invoking any of the IO-generating methods such as DatasetReader's
+`hasNext()` or `read()`, or DatasetWriter's `write()` or `flush()`. Once a
+stream has been closed via the `close()` method, no further IO is permitted,
+nor may it be reopened.
+
+### Partitioned Datasets
+
+Upon creation of a dataset, a `PartitionStrategy` may be provided. A partition
+strategy is a list of one or more partition functions that, when applied to an
+attribute of an entity, produce a value used to decide in which partition an
+entity should be written. Different partition function implementations exist,
+each of which faciliates a different form of partitioning. The initial version
+of the library includes the identity and hash functions for use in partition
+strategies.
+
+While users are free to instantiate the `PartitionStrategy` class directly, its
+`Builder` greatly simpifies life.
+
+_PartitionStrategy.Builder API_
+
+    identity(String, int): Builder
+    hash(String, int): Builder
+
+    get(): PartitionStrategy
+
+When building a partition strategy, the attribute (i.e. field) name from which
+to take the function input is specified, along with a cardinality hint (or
+limit, in the case of the hash function). For example, given the Avro schema for
+a `User` entity with a `segment` attribute of type `long`, a partition strategy
+that uses the identity function on the `segment` attribute will effectively
+"bucket" users by their segment value.
+
+_Sample User Avro Schema (User.avsc)_
+
+    {
+      "name": "User",
+      "type": "record",
+      "fields": [
+        { "name": "id",           "type": "long"   },
+        { "name": "username",     "type": "string" },
+        { "name": "emailAddress", "type": "string" },
+        { "name": "segment",      "type": "long"   }
+      ]
+    }
+
+_Example User Dataset Creation_
+
+    DatasetRepository repo = ... // Described later.
+
+    Dataset usersDataset = repo.create(
+      "users",
+      new DatasetDescriptor.Builder()
+        .schema("User.avsc")
+        .partitionStrategy(
+          new PartitionStrategy.Builder().identity("segment", 1024).get()
+        ).get()
+    );
+
+Given the ficticious User entities shown in _Example: Sample Users_, users A, B,
+and C would be written to partition 1, while D and E end up in partition 2.
+
+_Example: Sample Users_
+
+    username    segment
+    --------    -------
+    A           1
+    B           1
+    C           1
+    D           2
+    E           2
+
+It's worth pointing out that Hive and Impala only support the identity function
+in partitioned datasets, at least at the time this is written. Users who do not
+use partitioning for subset selection may use any partition function(s) they
+choose. If, however, you wish to use the partition pruning in Hive/Impala's
+query engine, only the identity function will work. This is because both systems
+rely on the idea that the value in the path name equals the value found in each
+record. To mimic more complex partitioning schemes, users often resort to adding
+a surrogate field to each record to hold the dervived value and handle proper
+setting of such a field themselves.
+
 ### Dataset Repositories
 
 ### Dataset Readers and Writers
