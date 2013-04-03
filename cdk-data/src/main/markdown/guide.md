@@ -76,6 +76,13 @@ officially supported. For the remainder of this guide, you can assume the
 implementation of the Data module interfaces being described is the Hadoop
 `FileSystem` implementation.
 
+If you're not already familiar with [Avro][avro] schemas, now is a good time to
+go read a little [more about them][avro-s]. You need not concern yourself with
+The rest of this guide will assume you have a basic understanding of how to
+define a schema.
+
+[avro-s]: http://avro.apache.org/docs/current/spec.html "Avro Specification"
+
 ## Entities
 
 *Summary*
