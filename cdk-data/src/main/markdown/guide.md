@@ -21,10 +21,10 @@ topics (e.g. partitioning schemes, metadata management) will benefit even more.
 
 ### Version 0.1.0
 
-Version 0.1.0 is the first release of the CDK Data module. This is considered
- a *beta* release. As a sub-1.0.0 release, this version is *not* subject to
- the normal API compatibility guarantees. See the *Compatibility Statement*
- for information about API compatibility guarantees.
+Version 0.1.0 is the first release of the CDK Data module. This is considered a
+*beta* release. As a sub-1.0.0 release, this version is *not* subject to the
+normal API compatibility guarantees. See the *Compatibility Statement* for
+information about API compatibility guarantees.
 
 ## Overview of the Data Module
 
