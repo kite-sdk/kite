@@ -134,6 +134,84 @@ in a different serialization format.
 [avro-gr]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecord.html "Avro - GenericRecord Interface"
 [avro-cg]: http://avro.apache.org/docs/current/gettingstartedjava.html#Serializing+and+deserializing+with+code+generation "Avro - Serializing and deserializing with code generation"
 
+Entites may be complex types, representing data structures as simple as a few
+string attributes, or as complex as necessary. See _Example: User entity schema
+and POJO class_ for an example of a valid Avro schema, and its associated POJO.
+
+_Example: User entity schema and POJO class_
+
+    Avro schema (User.avsc)
+    -----------------------
+    {
+      "name": "User",
+      "type": "record",
+      "fields": [
+        // two required fields.
+        { "name": "id",          "type": "long" },
+        { "name": "username",    "type": "string" },
+
+        // emailAddress is optional; it's value can be a string or a null.
+        { "name": "emailAddress", "type": [ "string", "null" ] },
+
+        // friendIds is an array with elements of type long.
+        { "name": "friendIds",   "type": { "type": "array", "items": "long" } },
+      ]
+    }
+
+    User POJO (User.java)
+    ---------------------
+    public class User {
+
+      private Long id;
+      private String username;
+      private String emailAddress;
+      private List<Long> friendIds;
+
+      public Long getId() {
+        return id;
+      }
+
+      public void setId(Long id) {
+        this.id = id;
+      }
+
+      public String getUsername() {
+        return username;
+      }
+
+      public void setUsername(String username) {
+        this.username = username;
+      }
+
+      public String getEmailAddress() {
+        return emailAddress;
+      }
+
+      public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+      }
+
+      public List<Long> getFriendIds() {
+        return friendIds;
+      }
+
+      public void setFriendIds(List<Long> friendIds) {
+        this.friendIds = friendIds;
+      }
+
+      /*
+       * It's fine to have methods that the schema doesn't know about. They'll
+       * just be ignored during serialization.
+       */
+      public void addFriend(Friend friend) {
+        if (!friendIds.contains(friend.getId()) {
+          friendIds.add(friend.getId());
+        }
+      }
+
+    }
+
+
 ## Datasets
 
 *Summary*
