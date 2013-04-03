@@ -226,7 +226,7 @@ _Example: Using Avro's GenericRecordBuilder to create a generic entity_
      * Load the schema from User.avsc. Later, we'll an easier way to reference
      * Avro schemas when working with the CDK Data APIs.
      */
-    Schema userSchema = new Schema.Parser().parse("User.avsc");
+    Schema userSchema = new Schema.Parser().parse(new File("User.avsc"));
 
     /*
      * The GenericRecordBuilder constructs a new record and ensures that we set
