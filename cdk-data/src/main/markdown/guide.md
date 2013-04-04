@@ -225,163 +225,6 @@ currently configured to use. Later, when we create a dataset, we'll see the
 resultant file and directory structure created as a result of this
 configuration.
 
-## Entities
-
-*Summary*
-
-* An entity is a record in a dataset.
-* Entities can be POJOs, GenericRecords, or generated (specific) records.
-* When in doubt, use GenericRecords.
-
-An _entity_ is a is a single record. The name "entity" is used rather than
-"record" because the latter caries a connotation of a simple list of primitives,
-while the former evokes the notion of a [POJO][] (e.g. in [JPA][]). That said,
-the terms are used interchangably. An entity can take one of three forms, at the
-user's option:
-
-1. A plain old Java object
-
-   When a POJO is supplied, the library uses reflection to write the object out
-   to storage. While not the fastest, this is the simplest way to get up and
-   running. Users are encouraged to consider Avro [GenericRecord][avro-gr]s for
-   production systems, or after they become familiar with the APIs.
-
-1. An [Avro][avro] GenericRecord
-
-   An Avro [GenericRecord][avro-gr] instance can be used to easily supply
-   entities that represent a schema without using custom types for each kind of
-   entity. These objects are easy to create and manipulate (see Avro's
-   [GenericRecordBuilder class][avro-grb]), especially in code that has no
-   knowledge of specific object types (such as libraries). Serialization of
-   generic records is fast, but requires use of the Avro APIs. This is
-   recommended for most users, in most cases.
-
-1. An Avro specific type
-
-   Advanced users may choose to use Avro's [code generation][avro-cg] support to
-   create classes that implicitly know how to serialize themselves. While the
-   fastest of the options, this requires specialized knowledge of Avro, code
-   generation, and handling of custom types. Keep in mind that, unlike generic
-   records, the applications that write datasets with specific types must also
-   have the same classes available to the applications that read those datasets.
-
-Note that entities aren't represented by any particular type in the Data APIs.
-In each of the above three cases, the entities described are either simple POJOs
-or are Avro objects. Remember that what has been described here is only the *in
-memory* representation of the entity; the Data module may store the data in HDFS
-in a different serialization format.
-
-[POJO]: http://en.wikipedia.org/wiki/POJO "Plain Old Java Object"
-[JPA]: http://en.wikipedia.org/wiki/Java_Persistence_API "Java Persistance API"
-[avro-gr]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecord.html "Avro - GenericRecord Interface"
-[avro-grb]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecordBuilder.html "Avro - GenericRecordBuilder Class"
-[avro-cg]: http://avro.apache.org/docs/current/gettingstartedjava.html#Serializing+and+deserializing+with+code+generation "Avro - Serializing and deserializing with code generation"
-
-Entites may be complex types, representing data structures as simple as a few
-string attributes, or as complex as necessary. See _Example: User entity schema
-and POJO class_ for an example of a valid Avro schema, and its associated POJO.
-
-_Example: User entity schema and POJO class_
-
-    Avro schema (User.avsc)
-    -----------------------
-    {
-      "name": "User",
-      "type": "record",
-      "fields": [
-        // two required fields.
-        { "name": "id",          "type": "long" },
-        { "name": "username",    "type": "string" },
-
-        // emailAddress is optional; it's value can be a string or a null.
-        { "name": "emailAddress", "type": [ "string", "null" ] },
-
-        // friendIds is an array with elements of type long.
-        { "name": "friendIds",   "type": { "type": "array", "items": "long" } },
-      ]
-    }
-
-    User POJO (User.java)
-    ---------------------
-    public class User {
-
-      private Long id;
-      private String username;
-      private String emailAddress;
-      private List<Long> friendIds;
-
-      public User() {
-        friendIds = new ArrayList<Long>();
-      }
-
-      public Long getId() {
-        return id;
-      }
-
-      public void setId(Long id) {
-        this.id = id;
-      }
-
-      public String getUsername() {
-        return username;
-      }
-
-      public void setUsername(String username) {
-        this.username = username;
-      }
-
-      public String getEmailAddress() {
-        return emailAddress;
-      }
-
-      public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
-      }
-
-      public List<Long> getFriendIds() {
-        return friendIds;
-      }
-
-      public void setFriendIds(List<Long> friendIds) {
-        this.friendIds = friendIds;
-      }
-
-      /*
-       * It's fine to have methods that the schema doesn't know about. They'll
-       * just be ignored during serialization.
-       */
-      public void addFriend(Friend friend) {
-        if (!friendIds.contains(friend.getId()) {
-          friendIds.add(friend.getId());
-        }
-      }
-
-    }
-
-Instead of defining a POJO, we could also use Avro's `GenericRecordBuilder` to
-create a generic entity that conforms to the User schema we defined earlier.
-
-_Example: Using Avro's GenericRecordBuilder to create a generic entity_
-
-    /*
-     * Load the schema from User.avsc. Later, we'll an easier way to reference
-     * Avro schemas when working with the CDK Data APIs.
-     */
-    Schema userSchema = new Schema.Parser().parse(new File("User.avsc"));
-
-    /*
-     * The GenericRecordBuilder constructs a new record and ensures that we set
-     * all the necessary fields with values of an appropriate type.
-     */
-    GenericData.Record genericUser = new GenericRecordBuilder(userSchema)
-      .set("id", 1L)
-      .set("username", "janedoe")
-      .set("emailAddress", "jane@doe.com")
-      .set("friendIds", Collections.<Long>emptyList())
-      .build();
-
-Later, we'll see how to read and write these entities to a dataset.
-
 ## Datasets
 
 *Summary*
@@ -583,6 +426,163 @@ rely on the idea that the value in the path name equals the value found in each
 record. To mimic more complex partitioning schemes, users often resort to adding
 a surrogate field to each record to hold the dervived value and handle proper
 setting of such a field themselves.
+
+## Entities
+
+*Summary*
+
+* An entity is a record in a dataset.
+* Entities can be POJOs, GenericRecords, or generated (specific) records.
+* When in doubt, use GenericRecords.
+
+An _entity_ is a is a single record. The name "entity" is used rather than
+"record" because the latter caries a connotation of a simple list of primitives,
+while the former evokes the notion of a [POJO][] (e.g. in [JPA][]). That said,
+the terms are used interchangably. An entity can take one of three forms, at the
+user's option:
+
+1. A plain old Java object
+
+   When a POJO is supplied, the library uses reflection to write the object out
+   to storage. While not the fastest, this is the simplest way to get up and
+   running. Users are encouraged to consider Avro [GenericRecord][avro-gr]s for
+   production systems, or after they become familiar with the APIs.
+
+1. An [Avro][avro] GenericRecord
+
+   An Avro [GenericRecord][avro-gr] instance can be used to easily supply
+   entities that represent a schema without using custom types for each kind of
+   entity. These objects are easy to create and manipulate (see Avro's
+   [GenericRecordBuilder class][avro-grb]), especially in code that has no
+   knowledge of specific object types (such as libraries). Serialization of
+   generic records is fast, but requires use of the Avro APIs. This is
+   recommended for most users, in most cases.
+
+1. An Avro specific type
+
+   Advanced users may choose to use Avro's [code generation][avro-cg] support to
+   create classes that implicitly know how to serialize themselves. While the
+   fastest of the options, this requires specialized knowledge of Avro, code
+   generation, and handling of custom types. Keep in mind that, unlike generic
+   records, the applications that write datasets with specific types must also
+   have the same classes available to the applications that read those datasets.
+
+Note that entities aren't represented by any particular type in the Data APIs.
+In each of the above three cases, the entities described are either simple POJOs
+or are Avro objects. Remember that what has been described here is only the *in
+memory* representation of the entity; the Data module may store the data in HDFS
+in a different serialization format.
+
+[POJO]: http://en.wikipedia.org/wiki/POJO "Plain Old Java Object"
+[JPA]: http://en.wikipedia.org/wiki/Java_Persistence_API "Java Persistance API"
+[avro-gr]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecord.html "Avro - GenericRecord Interface"
+[avro-grb]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecordBuilder.html "Avro - GenericRecordBuilder Class"
+[avro-cg]: http://avro.apache.org/docs/current/gettingstartedjava.html#Serializing+and+deserializing+with+code+generation "Avro - Serializing and deserializing with code generation"
+
+Entites may be complex types, representing data structures as simple as a few
+string attributes, or as complex as necessary. See _Example: User entity schema
+and POJO class_ for an example of a valid Avro schema, and its associated POJO.
+
+_Example: User entity schema and POJO class_
+
+    Avro schema (User.avsc)
+    -----------------------
+    {
+      "name": "User",
+      "type": "record",
+      "fields": [
+        // two required fields.
+        { "name": "id",          "type": "long" },
+        { "name": "username",    "type": "string" },
+
+        // emailAddress is optional; it's value can be a string or a null.
+        { "name": "emailAddress", "type": [ "string", "null" ] },
+
+        // friendIds is an array with elements of type long.
+        { "name": "friendIds",   "type": { "type": "array", "items": "long" } },
+      ]
+    }
+
+    User POJO (User.java)
+    ---------------------
+    public class User {
+
+      private Long id;
+      private String username;
+      private String emailAddress;
+      private List<Long> friendIds;
+
+      public User() {
+        friendIds = new ArrayList<Long>();
+      }
+
+      public Long getId() {
+        return id;
+      }
+
+      public void setId(Long id) {
+        this.id = id;
+      }
+
+      public String getUsername() {
+        return username;
+      }
+
+      public void setUsername(String username) {
+        this.username = username;
+      }
+
+      public String getEmailAddress() {
+        return emailAddress;
+      }
+
+      public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+      }
+
+      public List<Long> getFriendIds() {
+        return friendIds;
+      }
+
+      public void setFriendIds(List<Long> friendIds) {
+        this.friendIds = friendIds;
+      }
+
+      /*
+       * It's fine to have methods that the schema doesn't know about. They'll
+       * just be ignored during serialization.
+       */
+      public void addFriend(Friend friend) {
+        if (!friendIds.contains(friend.getId()) {
+          friendIds.add(friend.getId());
+        }
+      }
+
+    }
+
+Instead of defining a POJO, we could also use Avro's `GenericRecordBuilder` to
+create a generic entity that conforms to the User schema we defined earlier.
+
+_Example: Using Avro's GenericRecordBuilder to create a generic entity_
+
+    /*
+     * Load the schema from User.avsc. Later, we'll an easier way to reference
+     * Avro schemas when working with the CDK Data APIs.
+     */
+    Schema userSchema = new Schema.Parser().parse(new File("User.avsc"));
+
+    /*
+     * The GenericRecordBuilder constructs a new record and ensures that we set
+     * all the necessary fields with values of an appropriate type.
+     */
+    GenericData.Record genericUser = new GenericRecordBuilder(userSchema)
+      .set("id", 1L)
+      .set("username", "janedoe")
+      .set("emailAddress", "jane@doe.com")
+      .set("friendIds", Collections.<Long>emptyList())
+      .build();
+
+Later, we'll see how to read and write these entities to a dataset.
 
 ## Appendix
 
