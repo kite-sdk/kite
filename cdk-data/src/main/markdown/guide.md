@@ -9,7 +9,7 @@ for customization, and implementation information where helpful and
 appropriate.
 
 From here on, this guide assumes you are already familiar with the basic
-design and functionality of HDFS, Hadoop MapReduce, and Java SE 1.6. Users
+design and functionality of HDFS, Hadoop MapReduce, and Java SE 6. Users
 who are also familiar with [Avro][avro], data serialization techniques,
 common compression algorithms (e.g. gzip, snappy), advanced Hadoop MapReduce
 topics (e.g. input split calculation), and tranditional data management
