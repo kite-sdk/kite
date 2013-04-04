@@ -390,7 +390,7 @@ _Example Creation of a dataset partitioned by an attribute_
     Dataset usersDataset = repo.create(
       "users",
       new DatasetDescriptor.Builder()
-        .schema("User.avsc")
+        .schema(new File("User.avsc"))
         .partitionStrategy(
           new PartitionStrategy.Builder().identity("segment", 1024).get()
         ).get()
@@ -418,7 +418,7 @@ _Example: Creation of a dataset partitioned by multiple attributes_
     Dataset users = repo.create(
       "users",
       new DatasetDescriptor.Builder()
-        .schema("User.avsc")
+        .schema(new File("User.avsc"))
         .partitionStrategy(
           new PartitionStrategy.Builder()
             .identity("segment", 1024)  // Partition first by segment
@@ -496,7 +496,7 @@ _Example: Using a dataset repository to create a dataset_
     Dataset users = repo.create(
       "users",
       new DatasetDescriptor.Builder()
-        .schema("User.avsc")
+        .schema(new File("User.avsc"))
         .get()
     );
 
