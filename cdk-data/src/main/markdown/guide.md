@@ -9,7 +9,7 @@ for customization, and implementation information where helpful and
 appropriate.
 
 From here on, this guide assumes you are already familiar with the basic
-design and functionality of HDFS, Hadoop MapReduce, and Java SE 1.6. Users
+design and functionality of HDFS, Hadoop MapReduce, and Java SE 6. Users
 who are also familiar with [Avro][avro], data serialization techniques,
 common compression algorithms (e.g. gzip, snappy), advanced Hadoop MapReduce
 topics (e.g. input split calculation), and tranditional data management
@@ -35,7 +35,7 @@ of datasets in storage subsystems such as the Hadoop Distributed FileSystem
 complexity of data serialization, partitioning, organization, and metadata
 system integration. These APIs do not replace or supersede any of the existing
 Hadoop APIs. Instead, the Data module acts as a targetted application of those
-APIs for its state use case. In other words, many applications will still use
+APIs for its stated use case. In other words, many applications will still use
 the HDFS or Avro APIs directly when the developer has use cases outside of
 direct dataset create, drop, read, and write operations. On the other hand, for
 users building applications or systems such as data integration services, the
