@@ -37,4 +37,11 @@
     </plugins>
   </build>
 
+  <distributionManagement>
+    <repository>
+      <id>cloudera.repo</id>
+      <url>https://repository.cloudera.com/artifactory/libs-release-local</url>
+    </repository>
+  </distributionManagement>
+
 </project>
