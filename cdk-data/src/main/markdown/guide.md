@@ -204,7 +204,8 @@ under the supplied base directory with the dataset name is created (if it
 doesn't yet exist), and the dataset descriptor information is serialized to a
 set of files in a directory named `.metadata`.
 
-_Example: Explicitly configuring `FileSystemDatasetRepository` with `FileSystemMetadataProvider`_
+_Example: Explicitly configuring `FileSystemDatasetRepository` with
+`FileSystemMetadataProvider`_
 
     FileSystem fileSystem = FileSystem.get(new Configuration());
     Path basePath = new Path("/data");
