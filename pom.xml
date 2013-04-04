@@ -21,7 +21,7 @@
   </description>
 
   <scm>
-    <developerConnection>scm:git:git://github.com:cloudera/cdk.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:cloudera/cdk.git</developerConnection>
   </scm>
 
   <build>
