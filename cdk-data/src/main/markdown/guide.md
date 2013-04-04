@@ -35,7 +35,7 @@ of datasets in storage subsystems such as the Hadoop Distributed FileSystem
 complexity of data serialization, partitioning, organization, and metadata
 system integration. These APIs do not replace or supersede any of the existing
 Hadoop APIs. Instead, the Data module acts as a targetted application of those
-APIs for its state use case. In other words, many applications will still use
+APIs for its stated use case. In other words, many applications will still use
 the HDFS or Avro APIs directly when the developer has use cases outside of
 direct dataset create, drop, read, and write operations. On the other hand, for
 users building applications or systems such as data integration services, the
@@ -83,6 +83,146 @@ to which entities of a dataset must conform is critical. The rest of this guide
 will assume you have a basic understanding of how to define a schema.
 
 [avro-s]: http://avro.apache.org/docs/current/spec.html "Avro Specification"
+
+## Dataset Repositories and Metadata Providers
+
+A _dataset repository_ is a physical storage location for datasets. In keeping
+with the relational database analogy, a dataset repository is the equivalent of
+a database of tables. Developers may organize datasets into different dataset
+repositories for reasons related to logical grouping, security and access
+control, backup policies, and so forth. A dataset repository is represented by
+instances of the `com.cloudera.data.DatasetRepository` interface in the Data
+module. An instance of a `DatasetRepository` acts as a factory for datasets,
+supplying methods for creating, loading, and dropping datasets. Each dataset
+belongs to exactly one dataset repository. There's no built in support for
+moving or copying datasets bewteen repositories. MapReduce and other execution
+engines can easily provide copy functionality, if desired.
+
+_DatasetRepository Interface_
+
+    create(String, DatasetDescriptor): Dataset
+    get(String): Dataset
+    drop(String): boolean
+
+The Data module ships with a `DatasetRepository` implementation
+`com.cloudera.data.filesystem.FileSystemDatasetRepository` built for operating
+on datasets stored in a filesystem supported by Hadoop's `FileSystem`
+abstraction. This implementation requires an instance of a Hadoop `FileSystem`,
+a root directory under which datasets will be (or are) stored, and an optional
+_metadata provider_ (described later) to be supplied upon instantiation. Once
+complete, users can freely interact with datasets while the implementation
+worries about managing files and directories in the underlying filesystem. The
+supplied metadata provider is used to resolve dataset schemas and other related
+information.
+
+Instantiating FileSystemDatasetRepository is straight forward.
+
+    DatasetRepository repo = new FileSystemDatasetRepository(
+      FileSystem.get(new Configuration()),
+      new Path("/data")
+    );
+
+This example uses the currently configured Hadoop `FileSystem` implementation,
+typically an HDFS cluster. Since Hadoop's also supports a "local" implementation
+of `FileSystem`, it's possible to use the Data APIs to interact with data
+residing on a local OS filesystem. This is especially useful during development
+and basic functional testing of your code.
+
+Once an instance of a `DatasetRepository` implementation has been created,
+new datasets can easily be created, and existing datasets can be loaded or
+dropped. Here's a more complete example of creating a dataset to store
+application event data. You'll notice a few new classes; don't worry about them
+for now. We'll cover them later.
+
+    /*
+     * Instantiate a FileSystemDatasetRepository with a Hadoop FileSystem object
+     * based on the current configuration. The FileSystem and Configuration
+     * classes come from Hadoop. The Path object tells the dataset repository
+     * under what path in the configured filesystem datasets reside.
+     */
+    DatasetRepository repo = new FileSystemDatasetRepository(
+      FileSystem.get(new Configuration()),
+      new Path("/data")
+    );
+
+    /*
+     * Create the dataset "users" with the schema defined in the file User.avsc.
+     */
+    Dataset users = repo.create(
+      "users",
+      new DatasetDescriptor.Builder()
+        .schema(new File("User.avsc"))
+        .get()
+    );
+
+Related to the dataset repository, the _metadata provider_ is a service provider
+interface used to interact with the service that provides dataset metadata
+information to the rest of the Data APIs. The
+`com.cloudera.data.MetadataProvider` interface defines the contract metadata
+services must provide to the library, and specifically, the `DatasetRepository`.
+
+_MetadataProvider Interface_
+
+    save(String, DatasetDescriptor)
+    load(String): DatasetDescriptor
+    delete(String): boolean
+
+`MetadataProvider` implementations act as a bridge between the Data module and
+centralized metadata repositories. An obvious example of this (in the Hadoop
+ecosystem) is [HCatalog][hcat] and the Hive metastore. By providing an
+implementation that makes the necessary API calls to HCatalog's REST service,
+any and all datasets are immediately consumable by systems compatible with
+HCatalog, the storage system represented by the `DatasetRepository`
+implementation, and the format in which the data is written. As it turns out,
+that's a pretty tall order and, in keeping with the CDK's purpose of simplifying
+rather than presenting additional options, users are encouraged to 1. use
+HCatalog, 2. allow this library to default to snappy compressed Avro data files,
+and 3. use systems that also integrate with HCatalog (directly or indirectly).
+In this way, this library acts as a forth integration point to working with data
+in HDFS that is HCatalog-aware, in addition to Hive, Pig, and MapReduce
+input/output formats.
+
+[hcat]: http://incubator.apache.org/hcatalog/ "Apache HCatalog"
+
+Users aren't expected to use metadata providers directly. Instead,
+`DatasetRepository` implementations accept instances of `MetadataProvider`
+plugins, and make whatever calls are needed as users interact with the Data
+APIs. If you're paying close attention, you'll see that we didn't specify a
+metadata provider when we instantiated `FileSystemDatasetRepository` earlier.
+That's because `FileSystemDatasetRepository` uses an implementation of
+`MetadataProvider` called `FileSystemMetadataProvider` by default. Developers
+are free to explicitly pass a different implementation using the three argument
+constructor `FileSystemDatasetRepository(FileSystem, Path, MetadataProvider)` if
+they want to change this behavior.
+
+The `FileSystemMetadataProvider` (also in the packge
+`com.cloudera.data.filesystem`) plugin stores dataset metadata information on
+a Hadoop `FileSystem` in a hidden directory. As with its sibling
+`FileSystemDatasetRepository`, its constructor accepts a Hadoop `FileSystem`
+object and a base directory. When metadata needs to be stored, a directory
+under the supplied base directory with the dataset name is created (if it
+doesn't yet exist), and the dataset descriptor information is serialized to a
+set of files in a directory named `.metadata`.
+
+_Example: Explicitly configuring `FileSystemDatasetRepository` with `FileSystemMetadataProvider`_
+
+    FileSystem fileSystem = FileSystem.get(new Configuration());
+    Path basePath = new Path("/data");
+
+    MetadataProvider metaProvider = new FileSystemMetadataProvider(
+      fileSystem, basePath);
+
+    DatasetRepository repo = new FileSystemDatasetRepository(
+      fileSystem, basePath, metaProvider);
+
+Note how the same base directory of `/data` is used for both the metadata
+provider as well as the dataset repository. This is perfectly legal. In fact,
+this is exactly what happens when you use the two argument form of the
+`FileSystemDatasetRepository` constructor. Configured this way, data and
+metadata will be stored together, side by side, on whatever filesystem Hadoop is
+currently configured to use. Later, when we create a dataset, we'll see the
+resultant file and directory structure created as a result of this
+configuration.
 
 ## Entities
 
@@ -442,123 +582,6 @@ rely on the idea that the value in the path name equals the value found in each
 record. To mimic more complex partitioning schemes, users often resort to adding
 a surrogate field to each record to hold the dervived value and handle proper
 setting of such a field themselves.
-
-## Dataset Repositories and Metadata Providers
-
-A _dataset repository_ is a physical storage location for datasets. In keeping
-with the relational database analogy, a dataset repository is the equivalent of
-a database of tables. Developers may organize datasets into different dataset
-repositories for reasons related to logical grouping, security and access
-control, backup policies, and so forth. A dataset repository is represented by
-instances of the `DatasetRepository` interface in the Data module. An instance
-of a `DatasetRepository` acts as a factory for `Dataset`s, supplying methods
-for creating, loading, and dropping datasets. Each dataset belongs to exactly
-one dataset repository. There's no built in support for moving or copying
-datasets bewteen repositories. MapReduce and other execution engines can easily
-provide copy functionality, if desired.
-
-_DatasetRepository Interface_
-
-    create(String, DatasetDescriptor): Dataset
-    get(String): Dataset
-    drop(String): boolean
-
-Along with the Hadoop FileSystem `Dataset` and stream implementations, a related
-`DatasetRepository` implementation exists. This implementation requires an
-instance of a Hadoop `FileSystem`, a root directory under which datasets will be
-(or are) stored, and a _metadata provider_ (described later) to be supplied upon
-instantiation. Once complete, users can freely interact with datasets under the
-supplied root directory. The supplied metadata provider is used to resolve
-dataset schemas, partitioning information, and any other related information.
-
-Earlier, we gave an example where a dataset of users was created, however, the
-details of the dataset repository were elided. In _Example: Using a dataset
-repository to create a dataset_, we show a complete example of creating a
-dataset using the FileSystemDatasetRepository implementation, which stores data
-in HDFS.
-
-_Example: Using a dataset repository to create a dataset_
-
-    /*
-     * Instantiate a FileSystemDatasetRepository with a Hadoop FileSystem object
-     * based on the current configuration. The FileSystem and Configuration
-     * classes come from Hadoop. The Path object tells the dataset repository
-     * under what path in the configured filesystem datasets reside.
-     */
-    DatasetRepository repo = new FileSystemDatasetRepository(
-      FileSystem.get(new Configuration()),
-      new Path("/data")
-    );
-
-    /*
-     * Create the dataset "users" with the schema defined in the file User.avsc.
-     */
-    Dataset users = repo.create(
-      "users",
-      new DatasetDescriptor.Builder()
-        .schema(new File("User.avsc"))
-        .get()
-    );
-
-Related to the dataset repository, the _metadata provider_ is a service provider
-interface used to interact with the service that provides dataset metadata
-information. The `MetadataProvider` interface defines the contract metadata
-services must provide to the library, and specifically, the `DatasetRepository`.
-
-_MetadataProvider Interface_
-
-    save(String, DatasetDescriptor)
-    load(String): DatasetDescriptor
-    delete(String): boolean
-
-`MetadataProvider` implementations act as a bridge between this library and
-centralized metadata repositories. An obvious example of this (in the Hadoop
-ecosystem) is [HCatalog][hcat] and the Hive metastore. By providing an
-implementation that makes the necessary API calls to HCatalog's REST service,
-any and all datasets are immediately consumable by systems compatible with
-HCatalog, the storage system represented by the DatasetRepository
-implementation, and the format in which the data is written. As it turns out,
-that's a pretty tall order and, in keeping with the CDK's purpose of simplifying
-rather than presenting additional options, users are encouraged to 1. use
-HCatalog, 2. allow this library to default to snappy compressed Avro data files,
-and 3. use systems that also integrate with HCatalog (directly or indirectly).
-In this way, this library acts as a forth integration point to working with data
-in HDFS that is HCatalog-aware, in addition to Hive, Pig, and MapReduce
-input/output formats.
-
-[hcat]: http://incubator.apache.org/hcatalog/ "Apache HCatalog"
-
-Users aren't expected to use metadata providers directly. Instead,
-`DatasetRepository` implementations accept instances of `MetadataProvider`
-plugins, and make whatever calls are needed as users interact with the Data
-APIs. If you're paying close attention, you'll see that we didn't specify a
-metadata provider when we instantiated `FileSystemDatasetRepository` in
-_Example: Using a dataset repository to create a dataset_. That's because
-`FileSystemDatasetRepository` uses an implementation of `MetadataProvider`
-called `FileSystemMetadataProvider` by default. Developers are free to
-explicitly pass a different implementation using the three argument constructor
-`FileSystemDatasetRepository(FileSystem, Path, MetadataProvider)`.
-
-The `FileSystemMetadataProvider` plugin stores dataset metadata information on
-a Hadoop `FileSystem` in a hidden directory. As with its sibling
-`FileSystemDatasetRepository`, its constructor accepts a Hadoop `FileSystem`
-object and a base directory. When metadata needs to be stored, a directory
-under the supplied base directory with the dataset name is created (if it
-doesn't yet exist), and the dataset descriptor information is serialized to a
-set of files in a directory named `.metadata`.
-
-_Example: Configuring `FileSystemMetadataProvider`_
-
-    MetadataProvider metaProvider = new FileSystemMetadataProvider(
-      FileSystem.get(new Configuration()),
-      new Path("/data")
-    );
-
-In _Example: Configuring `FileSystemMetadataProvider`, notice how the same base
-directory of `/data` was used here, as it was in _Example: Using a dataset
-repository to create a dataset_. This is perfectly legal. Configured this way,
-data and metadata will be stored together, side by side, on whatever filesystem
-Hadoop is currently configured to use.
 
 ## Appendix
 
