@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.cloudera</groupId>
     <artifactId>cdk-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
     <relativePath>../cdk-parent</relativePath>
   </parent>
 
@@ -50,7 +50,7 @@
     <dependency>
       <groupId>com.cloudera</groupId>
       <artifactId>cdk-data</artifactId>
-      <version>0.1.0</version>
+      <version>0.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
