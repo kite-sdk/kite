@@ -239,6 +239,8 @@ _Example: Using Avro's GenericRecordBuilder to create a generic entity_
       .set("friendIds", Collections.<Long>emptyList())
       .build();
 
+Later, we'll see how to read and write these entities to a dataset.
+
 ## Datasets
 
 *Summary*
@@ -441,7 +443,122 @@ record. To mimic more complex partitioning schemes, users often resort to adding
 a surrogate field to each record to hold the dervived value and handle proper
 setting of such a field themselves.
 
-### Dataset Repositories
+### Dataset Repositories and Metadata Providers
+
+A _dataset repository_ is a physical storage location for datasets. In keeping
+with the relational database analogy, a dataset repository is the equivalent of
+a database of tables. Developers may organize datasets into different dataset
+repositories for reasons related to logical grouping, security and access
+control, backup policies, and so forth. A dataset repository is represented by
+instances of the `DatasetRepository` interface in the Data module. An instance
+of a `DatasetRepository` acts as a factory for `Dataset`s, supplying methods
+for creating, loading, and dropping datasets. Each dataset belongs to exactly
+one dataset repository. There's no built in support for moving or copying
+datasets bewteen repositories. MapReduce and other execution engines can easily
+provide copy functionality, if desired.
+
+_DatasetRepository Interface_
+
+    create(String, DatasetDescriptor): Dataset
+    get(String): Dataset
+    drop(String): boolean
+
+Along with the Hadoop FileSystem `Dataset` and stream implementations, a related
+`DatasetRepository` implementation exists. This implementation requires an
+instance of a Hadoop `FileSystem`, a root directory under which datasets will be
+(or are) stored, and a _metadata provider_ (described later) to be supplied upon
+instantiation. Once complete, users can freely interact with datasets under the
+supplied root directory. The supplied metadata provider is used to resolve
+dataset schemas, partitioning information, and any other related information.
+
+Earlier, we gave an example where a dataset of users was created, however, the
+details of the dataset repository were elided. In _Example: Using a dataset
+repository to create a dataset_, we show a complete example of creating a
+dataset using the FileSystemDatasetRepository implementation, which stores data
+in HDFS.
+
+_Example: Using a dataset repository to create a dataset_
+
+    /*
+     * Instantiate a FileSystemDatasetRepository with a Hadoop FileSystem object
+     * based on the current configuration. The FileSystem and Configuration
+     * classes come from Hadoop. The Path object tells the dataset repository
+     * under what path in the configured filesystem datasets reside.
+     */
+    DatasetRepository repo = new FileSystemDatasetRepository(
+      FileSystem.get(new Configuration()),
+      new Path("/data")
+    );
+
+    /*
+     * Create the dataset "users" with the schema defined in the file User.avsc.
+     */
+    Dataset users = repo.create(
+      "users",
+      new DatasetDescriptor.Builder()
+        .schema("User.avsc")
+        .get()
+    );
+
+Related to the dataset repository, the _metadata provider_ is a service provider
+interface used to interact with the service that provides dataset metadata
+information. The `MetadataProvider` interface defines the contract metadata
+services must provide to the library, and specifically, the `DatasetRepository`.
+
+_MetadataProvider Interface_
+
+    save(String, DatasetDescriptor)
+    load(String): DatasetDescriptor
+    delete(String): boolean
+
+`MetadataProvider` implementations act as a bridge between this library and
+centralized metadata repositories. An obvious example of this (in the Hadoop
+ecosystem) is [HCatalog][hcat] and the Hive metastore. By providing an
+implementation that makes the necessary API calls to HCatalog's REST service,
+any and all datasets are immediately consumable by systems compatible with
+HCatalog, the storage system represented by the DatasetRepository
+implementation, and the format in which the data is written. As it turns out,
+that's a pretty tall order and, in keeping with the CDK's purpose of simplifying
+rather than presenting additional options, users are encouraged to 1. use
+HCatalog, 2. allow this library to default to snappy compressed Avro data files,
+and 3. use systems that also integrate with HCatalog (directly or indirectly).
+In this way, this library acts as a forth integration point to working with data
+in HDFS that is HCatalog-aware, in addition to Hive, Pig, and MapReduce
+input/output formats.
+
+[hcat]: http://incubator.apache.org/hcatalog/ "Apache HCatalog"
+
+Users aren't expected to use metadata providers directly. Instead,
+`DatasetRepository` implementations accept instances of `MetadataProvider`
+plugins, and make whatever calls are needed as users interact with the Data
+APIs. If you're paying close attention, you'll see that we didn't specify a
+metadata provider when we instantiated `FileSystemDatasetRepository` in
+_Example: Using a dataset repository to create a dataset_. That's because
+`FileSystemDatasetRepository` uses an implementation of `MetadataProvider`
+called `FileSystemMetadataProvider` by default. Developers are free to
+explicitly pass a different implementation using the three argument constructor
+`FileSystemDatasetRepository(FileSystem, Path, MetadataProvider)`.
+
+The `FileSystemMetadataProvider` plugin stores dataset metadata information on
+a Hadoop `FileSystem` in a hidden directory. As with its sibling
+`FileSystemDatasetRepository`, its constructor accepts a Hadoop `FileSystem`
+object and a base directory. When metadata needs to be stored, a directory
+under the supplied base directory with the dataset name is created (if it
+doesn't yet exist), and the dataset descriptor information is serialized to a
+set of files in a directory named `.metadata`.
+
+_Example: Configuring `FileSystemMetadataProvider`_
+
+    MetadataProvider metaProvider = new FileSystemMetadataProvider(
+      FileSystem.get(new Configuration()),
+      new Path("/data")
+    );
+
+In _Example: Configuring `FileSystemMetadataProvider`, notice how the same base
+directory of `/data` was used here, as it was in _Example: Using a dataset
+repository to create a dataset_. This is perfectly legal. Configured this way,
+data and metadata will be stored together, side by side, on whatever filesystem
+Hadoop is currently configured to use.
 
 ## Appendix
 
