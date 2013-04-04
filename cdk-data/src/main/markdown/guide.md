@@ -238,14 +238,20 @@ configuration.
     * may support pluggable formats such as Parquet in the future.
     * is made up of zero or more files in a directory.
 
-A dataset is a collection of zero or more entities. All datasets have a name and
-an associated _dataset descriptor_. The dataset descriptor, as the name implies,
-describes all aspects of the dataset. Primarily, the descriptor information is
-the dataset's required _schema_ and its optional _partition strategy_. A
-descriptor must be provided at the time a dataset is created. The schema is
-defined using the Avro Schema APIs. Entities must all conform to the same
-schema, however, that schema can evolve based on a set of well-defined rules.
-The relational analog of a dataset is a table.
+A dataset is a collection of zero or more entities (or records). All datasets
+have a name and an associated _dataset descriptor_. The dataset descriptor, as
+the name implies, describes all aspects of the dataset. Primarily, the
+descriptor information is the dataset's required _schema_ and its optional
+_partition strategy_. A descriptor must be provided at the time a dataset is
+created. The schema is defined using the Avro Schema APIs. Entities must all
+conform to the same schema, however, that schema can evolve based on a set of
+well-defined rules. The relational database analog of a dataset is a table.
+
+Datasets are represented by the `com.cloudera.data.Dataset` interface.
+Implementations of this interface decide how to physically store the entities
+within the dataset. Users do not instantiate implementations of the `Dataset`
+interface directly. Instead, implementations of the `DatasetRepository` act as
+a factory of the appropriate `Dataset` implementation.
 
 _Dataset Interface_
 
@@ -287,9 +293,6 @@ _DatasetDescriptor Class_
     getSchema(): org.apache.avro.Schema
     getPartitionStrategy(): PartitionStrategy
     isPartitioned(): boolean
-
-Datasets are never instantiated by users, directly. Instead, they are created
-using factory methods on a `DatasetRepository` (described later).
 
 An instance of `Dataset` acts as a factory for both reader and writer streams.
 Each implementation is free to produce stream implementations that make sense
