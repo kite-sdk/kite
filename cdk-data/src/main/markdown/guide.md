@@ -264,12 +264,48 @@ _Dataset Interface_
     getPartition(PartitionKey, boolean): Dataset
     getPartitions(): Iterable<Dataset>
 
-While Avro is used to define the schema, it is possible that the underlying
-storage format of the data is not Avro data files. This is because other
-constraints may apply, based on the subsystems or access patterns. The dataset
-implementation translates the Avro schema into whatever is appropriate for the
-underlying system automatically. The Hadoop FileSystem implementation does, in
-fact, store all data as Avro data files in the configured filesystem.
+The included Hadoop `FileSystemDatasetRepository` includes a `Dataset`
+implementation called `FileSystemDataset`. This dataset implementation stores
+data in the configured Hadoop `FileSystem` as Snappy-compressed Avro data files.
+Avro data files were selected because all components of CDH support them, they
+are language agnostic, support block compression, have a compact binary
+representation, and are natively splittable by Hadoop MapReduce while
+compressed. While it's not currently possible to change this behavior, this will
+suit the needs of almost all users, and should be used whenever possible.
+Support for different serialization formats is planned for future releases for
+cases where users know something special about their data.
+
+Upon creation of dataset, a name and a _dataset descriptor_ must be provided to
+the `DatasetRepository#create()` method. The descriptor, represented by the
+`com.cloudera.data.DatasetDescriptor` class, holds all metadata associated with
+the dataset, the most important of which is the schema. Schemas are always
+represented using Avro's Schema APIs, regardless of how the data is stored by
+the underlying dataset implementation. This simplifies the API for users,
+letting them focus on a single schema definition language for all datasets. In
+an effort to support different styles of schema definition, the
+`DatasetDescriptor.Builder` class supports a number of convenience methods for
+defining or attaching a schema.
+
+_DatasetDescriptor Class_
+
+    getSchema(): org.apache.avro.Schema
+    getPartitionStrategy(): PartitionStrategy
+    isPartitioned(): boolean
+
+_DatasetDescriptor.Builder Class_
+
+    Builder schema(Schema schema);
+    Builder schema(String json);
+    Builder schema(File file);
+    Builder schema(InputStream inputStream);
+    Builder schema(URL url);
+    Builder schemaFromAvroDataFile(File file);
+    Builder schemaFromAvroDataFile(InputStream inputStream);
+    Builder schemaFromAvroDataFile(URL url);
+
+    Builder partitionStrategy(PartitionStrategy partitionStrategy);
+
+    DatasetDescriptor get();
 
 Datasets may optionally be partitioned to facilitate piecemeal storage
 management, as well as optimized access to data under one or more predicates. A
@@ -287,12 +323,6 @@ a new partitioned dataset with the same schema as the existing dataset, and use
 MapReduce to convert the dataset in batch to the new format. It is possible to
 add or remove partitions from a partitioned dataset. A partitioned dataset can
 provide a list of partitions (described later).
-
-_DatasetDescriptor Class_
-
-    getSchema(): org.apache.avro.Schema
-    getPartitionStrategy(): PartitionStrategy
-    isPartitioned(): boolean
 
 An instance of `Dataset` acts as a factory for both reader and writer streams.
 Each implementation is free to produce stream implementations that make sense
