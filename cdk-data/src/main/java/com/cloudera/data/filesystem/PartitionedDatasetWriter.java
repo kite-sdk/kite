@@ -46,6 +46,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
 
   private final PartitionStrategy partitionStrategy;
   private LoadingCache<PartitionKey, DatasetWriter<E>> cachedWriters;
+  private PartitionKey key;
 
   private ReaderWriterState state;
 
@@ -97,7 +98,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
         "Attempt to write to a writer in state:%s", state);
 
-    PartitionKey key = partitionStrategy.partitionKeyForEntity(entity);
+    key = partitionStrategy.partitionKeyForEntity(entity, key);
     DatasetWriter<E> writer = null;
 
     try {

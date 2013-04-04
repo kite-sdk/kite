@@ -20,6 +20,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.generic.GenericRecord;
 
@@ -141,7 +142,23 @@ public class PartitionStrategy {
    * </p>
    */
   public PartitionKey partitionKeyForEntity(Object entity) {
-    Object[] values = new Object[fieldPartitioners.size()]; // TODO: reuse
+    return partitionKeyForEntity(entity, null);
+  }
+
+  /**
+   * <p>
+   * Construct a partition key for the given entity, reusing the supplied key if not
+   * null.
+   * </p>
+   * <p>
+   * This is a convenient way to find the partition that a given entity would be
+   * written to, or to find a partition using objects from the entity domain.
+   * </p>
+   */
+  public PartitionKey partitionKeyForEntity(Object entity,
+      @Nullable PartitionKey reuseKey) {
+    PartitionKey key = (reuseKey == null ?
+        new PartitionKey(new Object[fieldPartitioners.size()]) : reuseKey);
     for (int i = 0; i < fieldPartitioners.size(); i++) {
       FieldPartitioner fp = fieldPartitioners.get(i);
       String name = fp.getName();
@@ -164,9 +181,9 @@ public class PartitionStrategy {
               + entity, e);
         }
       }
-      values[i] = fp.apply(value);
+      key.set(i, fp.apply(value));
     }
-    return new PartitionKey(values);
+    return key;
   }
 
   /**

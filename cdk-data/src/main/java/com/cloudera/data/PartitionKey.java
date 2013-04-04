@@ -16,10 +16,10 @@
 package com.cloudera.data;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * <p>
@@ -32,32 +32,40 @@ import javax.annotation.concurrent.Immutable;
  * {@link PartitionStrategy#partitionKey(Object...)} or
  * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
  * </p>
+ * <p>
+ * Implementations of {@link PartitionKey} are typically not thread-safe; that is,
+ * the behavior when accessing a single instance from multiple threads is undefined.
+ * </p>
  * 
  * @see PartitionStrategy
  * @see FieldPartitioner
  * @see Dataset
  */
-@Immutable
+@NotThreadSafe
 public class PartitionKey {
 
-  private final List<Object> values;
+  private final Object[] values;
 
   PartitionKey(Object... values) {
-    this.values = Arrays.asList(values);
+    this.values = values;
   }
 
   public List<Object> getValues() {
-    return Collections.unmodifiableList(values);
+    return Arrays.asList(values);
   }
 
   /**
    * Return the value at the specified index in the key.
    */
   public Object get(int index) {
-    if (index < values.size()) {
-      return values.get(index);
+    if (index < values.length) {
+      return values[index];
     }
     return null;
+  }
+
+  void set(int index, Object value) {
+    values[index] = value;
   }
 
   @Override
@@ -69,27 +77,24 @@ public class PartitionKey {
 
     PartitionKey that = (PartitionKey) o;
 
-    if (!values.equals(that.values))
-      return false;
-
-    return true;
+    return Arrays.equals(values, that.values);
   }
 
   @Override
   public int hashCode() {
-    return values != null ? values.hashCode() : 0;
+    return values != null ? Arrays.hashCode(values) : 0;
   }
 
   /**
    * Return the number of values in the key.
    */
   public int getLength() {
-    return values.size();
+    return values.length;
   }
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("values", values).toString();
+    return Objects.toStringHelper(this).add("values", getValues()).toString();
   }
 
 }
