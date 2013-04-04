@@ -443,7 +443,7 @@ record. To mimic more complex partitioning schemes, users often resort to adding
 a surrogate field to each record to hold the dervived value and handle proper
 setting of such a field themselves.
 
-### Dataset Repositories and Metadata Providers
+## Dataset Repositories and Metadata Providers
 
 A _dataset repository_ is a physical storage location for datasets. In keeping
 with the relational database analogy, a dataset repository is the equivalent of
