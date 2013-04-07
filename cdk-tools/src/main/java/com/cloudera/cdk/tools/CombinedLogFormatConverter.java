@@ -18,7 +18,6 @@ package com.cloudera.cdk.tools;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.filesystem.FileSystemDatasetRepository;
-import com.cloudera.data.filesystem.FileSystemMetadataProvider;
 import com.google.common.io.Resources;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

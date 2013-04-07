@@ -265,7 +265,7 @@ public class TestFileSystemDataset {
                 "email"));
   }
 
-  private int datasetSize(Dataset ds) throws IOException {
+  private int datasetSize(Dataset ds) {
     int size = 0;
     DatasetReader<Record> reader = null;
     try {
@@ -283,7 +283,7 @@ public class TestFileSystemDataset {
     return size;
   }
 
-  private void writeTestUsers(Dataset ds, int count) throws IOException {
+  private void writeTestUsers(Dataset ds, int count) {
     DatasetWriter<Record> writer = null;
 
     try {
@@ -306,7 +306,7 @@ public class TestFileSystemDataset {
     }
   }
 
-  private void readTestUsers(Dataset ds, int count) throws IOException {
+  private void readTestUsers(Dataset ds, int count) {
     DatasetReader<Record> reader = null;
 
     try {
@@ -337,7 +337,7 @@ public class TestFileSystemDataset {
   }
 
   private int readTestUsersInPartition(FileSystemDataset ds, PartitionKey key,
-      String subpartitionName) throws IOException {
+      String subpartitionName) {
     int readCount = 0;
     DatasetReader<Record> reader = null;
     try {

@@ -47,7 +47,7 @@ public class TestFileSystemDatasetReader {
 
   @Test
   public void testRead() throws IOException {
-    DatasetReader<Record> reader = null;
+    DatasetReader<Record> reader;
     int records = 0;
 
     reader = new FileSystemDatasetReader<Record>(fileSystem, new Path(Resources
@@ -64,9 +64,7 @@ public class TestFileSystemDatasetReader {
         records++;
       }
     } finally {
-      if (reader != null) {
-        reader.close();
-      }
+      reader.close();
     }
 
     Assert.assertEquals(100, records);
@@ -104,7 +102,7 @@ public class TestFileSystemDatasetReader {
 
   @Test(expected = IllegalStateException.class)
   public void testHasNextOnNonOpenWriterFails() throws IOException {
-    DatasetReader<String> reader = null;
+    DatasetReader<String> reader;
     reader = new FileSystemDatasetReader<String>(fileSystem, new Path(Resources
         .getResource("data/strings-100.avro").getFile()), testSchema);
 

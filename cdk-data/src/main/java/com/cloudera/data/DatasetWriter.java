@@ -80,7 +80,7 @@ public interface DatasetWriter<E> {
    * although this is not required.
    * </p>
    *
-   * @param entity
+   * @param entity The entity to write
    * @throws DatasetWriterException
    */
   void write(E entity);

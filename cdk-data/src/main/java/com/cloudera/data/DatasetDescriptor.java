@@ -15,24 +15,22 @@
  */
 package com.cloudera.data;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-
-import javax.annotation.Nullable;
-
-import javax.annotation.concurrent.Immutable;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
+import com.google.common.io.Closeables;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
-import com.google.common.io.Closeables;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 /**
  * <p>
@@ -56,7 +54,7 @@ public class DatasetDescriptor {
    * optional {@link PartitionStrategy}.
    */
   public DatasetDescriptor(Schema schema,
-      @Nullable PartitionStrategy partitionStrategy) {
+    @Nullable PartitionStrategy partitionStrategy) {
 
     this.schema = schema;
     this.partitionStrategy = partitionStrategy;
@@ -68,7 +66,7 @@ public class DatasetDescriptor {
    * types) or complex (i.e. containing other records, lists, and so on).
    * Validation of the supported schemas is performed by the managing
    * repository, not the dataset or descriptor itself.
-   * 
+   *
    * @return the schema
    */
   public Schema getSchema() {
@@ -82,10 +80,10 @@ public class DatasetDescriptor {
    */
   public PartitionStrategy getPartitionStrategy() {
     Preconditions
-        .checkState(
-            isPartitioned(),
-            "Attempt to retrieve the partition strategy on a non-partitioned descriptor:%s",
-            this);
+      .checkState(
+        isPartitioned(),
+        "Attempt to retrieve the partition strategy on a non-partitioned descriptor:%s",
+        this);
 
     return partitionStrategy;
   }
@@ -101,7 +99,7 @@ public class DatasetDescriptor {
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("schema", schema)
-        .add("partitionStrategy", partitionStrategy).toString();
+      .add("partitionStrategy", partitionStrategy).toString();
   }
 
   /**
@@ -116,7 +114,7 @@ public class DatasetDescriptor {
      * Configure the dataset's schema. A schema is required, and may be set
      * using one of the <code>schema</code> or
      * <code>schemaFromAvroDataFile</code> methods.
-     * 
+     *
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(Schema schema) {
@@ -128,7 +126,7 @@ public class DatasetDescriptor {
      * Configure the dataset's schema from a {@link File}. A schema is required,
      * and may be set using one of the <code>schema</code> or
      * <code>schemaFromAvroDataFile</code> methods.
-     * 
+     *
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(File file) throws IOException {
@@ -141,7 +139,7 @@ public class DatasetDescriptor {
      * caller's responsibility to close the {@link InputStream}. A schema is
      * required, and may be set using one of the <code>schema</code> or
      * <code>schemaFromAvroDataFile</code> methods.
-     * 
+     *
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(InputStream in) throws IOException {
@@ -153,7 +151,7 @@ public class DatasetDescriptor {
      * Configure the dataset's schema from a {@link URL}. A schema is required,
      * and may be set using one of the <code>schema</code> or
      * <code>schemaFromAvroDataFile</code> methods.
-     * 
+     *
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(URL url) throws IOException {
@@ -170,10 +168,10 @@ public class DatasetDescriptor {
      * Configure the dataset's schema from a {@link String}. A schema is
      * required, and may be set using one of the <code>schema</code> or
      * <code>schemaFromAvroDataFile</code> methods.
-     * 
+     *
      * @return An instance of the builder for method chaining.
      */
-    public Builder schema(String s) throws IOException {
+    public Builder schema(String s) {
       this.schema = new Schema.Parser().parse(s);
       return this;
     }
@@ -182,7 +180,7 @@ public class DatasetDescriptor {
      * Configure the dataset's schema by using the schema from an existing Avro
      * data file. A schema is required, and may be set using one of the
      * <code>schema</code> or <code>schemaFromAvroDataFile</code> methods.
-     * 
+     *
      * @return An instance of the builder for method chaining.
      */
     public Builder schemaFromAvroDataFile(File file) throws IOException {
@@ -202,7 +200,7 @@ public class DatasetDescriptor {
      * data file. It is the caller's responsibility to close the
      * {@link InputStream}. A schema is required, and may be set using one of
      * the <code>schema</code> or <code>schemaFromAvroDataFile</code> methods.
-     * 
+     *
      * @return An instance of the builder for method chaining.
      */
     public Builder schemaFromAvroDataFile(InputStream in) throws IOException {
@@ -221,7 +219,7 @@ public class DatasetDescriptor {
      * Configure the dataset's schema by using the schema from an existing Avro
      * data file. A schema is required, and may be set using one of the
      * <code>schema</code> or <code>schemaFromAvroDataFile</code> methods.
-     * 
+     *
      * @return An instance of the builder for method chaining.
      */
     public Builder schemaFromAvroDataFile(URL url) throws IOException {
@@ -236,11 +234,11 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's partitioning strategy. Optional.
-     * 
+     *
      * @return An instance of the builder for method chaining.
      */
     public Builder partitionStrategy(
-        @Nullable PartitionStrategy partitionStrategy) {
+      @Nullable PartitionStrategy partitionStrategy) {
       this.partitionStrategy = partitionStrategy;
       return this;
     }
@@ -252,7 +250,7 @@ public class DatasetDescriptor {
     @Override
     public DatasetDescriptor get() {
       Preconditions.checkState(schema != null,
-          "Descriptor schema may not be null");
+        "Descriptor schema may not be null");
 
       return new DatasetDescriptor(schema, partitionStrategy);
     }

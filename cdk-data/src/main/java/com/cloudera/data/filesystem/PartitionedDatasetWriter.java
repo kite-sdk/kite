@@ -98,7 +98,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
       "Attempt to write to a writer in state:%s", state);
 
     key = partitionStrategy.partitionKeyForEntity(entity, key);
-    DatasetWriter<E> writer = null;
+    DatasetWriter<E> writer;
 
     try {
       writer = cachedWriters.get(key);

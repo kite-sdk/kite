@@ -16,7 +16,7 @@
 package com.cloudera.data;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
+
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.concurrent.NotThreadSafe;
