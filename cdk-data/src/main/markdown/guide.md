@@ -510,10 +510,10 @@ While users are free to instantiate the `PartitionStrategy` class directly, its
 
 _PartitionStrategy.Builder API_
 
-    identity(String, int): Builder
-    hash(String, int): Builder
+    Builder identity(String, int);
+    Builder hash(String, int);
 
-    get(): PartitionStrategy
+    PartitionStrategy get();
 
 When building a partition strategy, the attribute (i.e. field) name from which
 to take the function input is specified, along with a cardinality hint (or
@@ -537,7 +537,7 @@ _Sample User Avro Schema (User.avsc)_
 
 _Example Creation of a dataset partitioned by an attribute_
 
-    DatasetRepository repo = ... // Described later.
+    DatasetRepository repo = ...
 
     Dataset usersDataset = repo.create(
       "users",
@@ -578,10 +578,10 @@ _Example: Creation of a dataset partitioned by multiple attributes_
             .get()
         ).get()
 
-The other in which the partition functions are defined is important. This
+The order in which the partition functions are defined is important. This
 controls the way the data is physically partitioned in certain implementations
 of the Data APIs. Depending on the implementation, this can drastically change
-the execution speed of data access.
+the execution speed of data access by different methods.
 
 **Warning**
 
