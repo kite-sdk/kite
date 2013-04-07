@@ -19,7 +19,6 @@ import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.filesystem.FileSystemDatasetRepository;
-import com.cloudera.data.filesystem.FileSystemMetadataProvider;
 import com.google.common.io.Resources;
 import java.io.File;
 import junit.framework.Assert;

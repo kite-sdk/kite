@@ -15,10 +15,9 @@
  */
 package com.cloudera.data;
 
-import java.io.IOException;
+import org.apache.avro.Schema;
 
 import javax.annotation.concurrent.Immutable;
-import org.apache.avro.Schema;
 
 /**
  * <p>
@@ -35,7 +34,7 @@ import org.apache.avro.Schema;
  * <p>
  * Implementations of {@link Dataset} are immutable.
  * </p>
- * 
+ *
  * @see DatasetRepository
  * @see DatasetWriter
  * @see DatasetReader
@@ -62,14 +61,12 @@ public interface Dataset {
    * if it doesn't already exist. A {@link PartitionKey} may be obtained using
    * {@link PartitionStrategy#partitionKey(Object...)} or
    * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
-   * 
-   * @param key
-   *          The key used to look up the partition.
-   * @param autoCreate
-   *          If true, automatically create the partition if doesn't exist,
-   *          otherwise, return null.
+   *
+   * @param key        The key used to look up the partition.
+   * @param autoCreate If true, automatically create the partition if doesn't exist,
+   * @throws DatasetException
    */
-  Dataset getPartition(PartitionKey key, boolean autoCreate) throws IOException;
+  Dataset getPartition(PartitionKey key, boolean autoCreate);
 
   /**
    * <p>
@@ -83,10 +80,10 @@ public interface Dataset {
    * make any assumptions about the returned implementations. {@link Dataset}
    * implementations are free to change them at any time.
    * </p>
-   * 
-   * @throws IOException
+   *
+   * @throws DatasetException
    */
-  <E> DatasetWriter<E> getWriter() throws IOException;
+  <E> DatasetWriter<E> getWriter();
 
   /**
    * <p>
@@ -100,10 +97,10 @@ public interface Dataset {
    * make any assumptions about the returned implementations. {@code Dataset}
    * implementations are free to change them at any time.
    * </p>
-   * 
-   * @throws IOException
+   *
+   * @throws DatasetException
    */
-  <E> DatasetReader<E> getReader() throws IOException;
+  <E> DatasetReader<E> getReader();
 
   /**
    * <p>
@@ -113,10 +110,10 @@ public interface Dataset {
    * Note that, depending on the implementation, the returned iterable may hold
    * system resources until exhausted and/or finalized.
    * </p>
-   * 
+   *
    * @return an iterable over all partitions of this dataset
-   * @throws IOException
+   * @throws DatasetException
    */
-  Iterable<Dataset> getPartitions() throws IOException;
+  Iterable<Dataset> getPartitions();
 
 }
