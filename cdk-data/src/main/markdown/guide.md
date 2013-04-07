@@ -452,6 +452,8 @@ _Example: Reading from a Hadoop FileSystem_
 Dropping a dataset - an operation as equally destructive as dropping a table
 in a relational database - works as expected.
 
+_Example: Dropping an existing dataset_
+
     DatasetRepository repo = new FileSystemDatasetRepository(
       FileSystem.get(new Configuration()), new Path("/data"));
 
