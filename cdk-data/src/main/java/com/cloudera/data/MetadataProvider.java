@@ -15,8 +15,6 @@
  */
 package com.cloudera.data;
 
-import java.io.IOException;
-import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -38,37 +36,30 @@ public interface MetadataProvider {
 
   /**
    * Load the dataset descriptor for the dataset {@code name}.
-   * 
-   * @param name
-   *          The fully qualified name of an existing dataset.
+   *
+   * @param name The fully qualified name of an existing dataset.
    * @return A dataset descriptor.
-   * @throws IOException
-   *           If the dataset doesn't exist or the descriptor can not be loaded.
+   * @throws MetadataProviderException If the dataset doesn't exist or the descriptor can not be loaded.
    */
-  DatasetDescriptor load(String name) throws IOException;
+  DatasetDescriptor load(String name);
 
   /**
    * Save the dataset descriptor for the dataset {@code name}.
-   * 
-   * @param name
-   *          The fully qualified name of a dataset.
-   * @param descriptor
-   *          A dataset descriptor.
-   * @throws IOException
-   *           If the dataset descriptor can not be saved.
+   *
+   * @param name       The fully qualified name of a dataset.
+   * @param descriptor A dataset descriptor.
+   * @throws MetadataProviderException If the dataset descriptor can not be saved.
    */
-  void save(String name, DatasetDescriptor descriptor) throws IOException;
+  void save(String name, DatasetDescriptor descriptor);
 
   /**
    * Delete all metadata associated with the dataset named {@code name}.
-   * 
-   * @param name
-   *          The fully qualified name of a dataset.
+   *
+   * @param name The fully qualified name of a dataset.
    * @return True if the dataset is successfully deleted, false if the dataset
    *         doesn't exist.
-   * @throws IOException
-   *           If the dataset metadata exists but can not be deleted.
+   * @throws MetadataProviderException If the dataset metadata exists but can not be deleted.
    */
-  boolean delete(String name) throws IOException;
+  boolean delete(String name);
 
 }

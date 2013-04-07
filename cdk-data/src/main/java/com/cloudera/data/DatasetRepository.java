@@ -15,7 +15,6 @@
  */
 package com.cloudera.data;
 
-import java.io.IOException;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -40,7 +39,7 @@ import javax.annotation.concurrent.Immutable;
  * <p>
  * Implementations of {@link DatasetRepository} are immutable.
  * </p>
- * 
+ *
  * @see Dataset
  * @see DatasetDescriptor
  */
@@ -49,13 +48,12 @@ public interface DatasetRepository {
 
   /**
    * Get the latest version of a named {@link Dataset}. If no dataset with the
-   * provided {@code name} exists, an {@link IOException} is thrown.
-   * 
-   * @param name
-   *          The name of the dataset.
-   * @throws IOException
+   * provided {@code name} exists, a {@link DatasetRepositoryException} is thrown.
+   *
+   * @param name The name of the dataset.
+   * @throws DatasetRepositoryException
    */
-  Dataset get(String name) throws IOException;
+  Dataset get(String name);
 
   /**
    * Create a {@link Dataset} with the supplied {@code descriptor}. Depending on
@@ -64,26 +62,23 @@ public interface DatasetRepository {
    * thrown by the implementing class. It is illegal to create a more than one
    * dataset with a given name. If a duplicate name is provided, an exception is
    * thrown.
-   * 
-   * @param name
-   *          The fully qualified dataset name
-   * @param descriptor
-   *          A descriptor that describes the schema and other properties of the
-   *          dataset
+   *
+   * @param name       The fully qualified dataset name
+   * @param descriptor A descriptor that describes the schema and other properties of the
+   *                   dataset
    * @return The newly created dataset
-   * @throws IOException
+   * @throws DatasetRepositoryException
    */
-  Dataset create(String name, DatasetDescriptor descriptor) throws IOException;
+  Dataset create(String name, DatasetDescriptor descriptor);
 
   /**
    * Drop the named {@link Dataset}. If no dataset with the
-   * provided {@code name} exists, an {@link IOException} is thrown.
+   * provided {@code name} exists, a {@link DatasetReaderException} is thrown.
    *
-   * @param name
-   *          The name of the dataset.
+   * @param name The name of the dataset.
    * @return <code>true</code> if the dataset was successfully dropped, false otherwise
-   * @throws IOException
+   * @throws DatasetReaderException
    */
-  boolean drop(String name) throws IOException;
+  boolean drop(String name);
 
 }

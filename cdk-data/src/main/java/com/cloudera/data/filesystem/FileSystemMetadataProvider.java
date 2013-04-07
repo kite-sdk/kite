@@ -17,20 +17,22 @@ package com.cloudera.data.filesystem;
 
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.MetadataProvider;
+import com.cloudera.data.MetadataProviderException;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Closeables;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * <p>
@@ -50,7 +52,7 @@ import org.slf4j.LoggerFactory;
 public class FileSystemMetadataProvider implements MetadataProvider {
 
   private static final Logger logger = LoggerFactory
-      .getLogger(FileSystemMetadataProvider.class);
+    .getLogger(FileSystemMetadataProvider.class);
 
   private static final String METADATA_DIRECTORY = ".metadata";
   private static final String SCHEMA_FILE_NAME = "schema.avsc";
@@ -68,7 +70,7 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   }
 
   @Override
-  public DatasetDescriptor load(String name) throws IOException {
+  public DatasetDescriptor load(String name) {
     logger.debug("Loading dataset metadata name:{}", name);
 
     Path directory = new Path(pathForDataset(name), METADATA_DIRECTORY);
@@ -76,24 +78,32 @@ public class FileSystemMetadataProvider implements MetadataProvider {
     InputStream inputStream = null;
     Properties properties = new Properties();
     DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder();
+    Path descriptorPath = new Path(directory, DESCRIPTOR_FILE_NAME);
 
     try {
-      inputStream = fileSystem.open(new Path(directory, DESCRIPTOR_FILE_NAME));
+      inputStream = fileSystem.open(descriptorPath);
       properties.load(inputStream);
 
       if (properties.containsKey(PARTITION_EXPRESSION_FIELD_NAME)) {
         builder.partitionStrategy(new PartitionExpression(properties
-            .getProperty(PARTITION_EXPRESSION_FIELD_NAME), true).evaluate());
+          .getProperty(PARTITION_EXPRESSION_FIELD_NAME), true).evaluate());
       }
+    } catch (IOException e) {
+      throw new MetadataProviderException(
+        "Unable to load descriptor file:" + descriptorPath + " for dataset:" + name, e);
     } finally {
       Closeables.closeQuietly(inputStream);
     }
 
-    try {
-      inputStream = fileSystem.open(new Path(directory, SCHEMA_FILE_NAME));
-      builder.schema(new Schema.Parser().parse(new String(ByteStreams
-          .toByteArray(inputStream), Charsets.UTF_8)));
+    Path schemaPath = new Path(directory, SCHEMA_FILE_NAME);
 
+    try {
+      inputStream = fileSystem.open(schemaPath);
+      builder.schema(new Schema.Parser().parse(new String(ByteStreams
+        .toByteArray(inputStream), Charsets.UTF_8)));
+    } catch (IOException e) {
+      throw new MetadataProviderException(
+        "Unable to load schema file:" + schemaPath + " for dataset:" + name, e);
     } finally {
       Closeables.closeQuietly(inputStream);
     }
@@ -102,24 +112,32 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   }
 
   @Override
-  public void save(String name, DatasetDescriptor descriptor)
-      throws IOException {
-
+  public void save(String name, DatasetDescriptor descriptor) {
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
-        descriptor);
+      descriptor);
 
     FSDataOutputStream outputStream = null;
     Path directory = new Path(pathForDataset(name), METADATA_DIRECTORY);
 
-    if (!fileSystem.exists(directory)) {
-      fileSystem.mkdirs(directory);
+    try {
+      if (!fileSystem.exists(directory)) {
+        fileSystem.mkdirs(directory);
+      }
+    } catch (IOException e) {
+      throw new MetadataProviderException(
+        "Unable to find or create metadata directory:" + directory + " for dataset:" + name, e);
     }
 
+    Path schemaPath = new Path(directory, SCHEMA_FILE_NAME);
+
     try {
-      outputStream = fileSystem.create(new Path(directory, SCHEMA_FILE_NAME));
+      outputStream = fileSystem.create(schemaPath);
       outputStream.write(descriptor.getSchema().toString(true)
-          .getBytes(Charsets.UTF_8));
+        .getBytes(Charsets.UTF_8));
       outputStream.flush();
+    } catch (IOException e) {
+      throw new MetadataProviderException(
+        "Unable to save schema file:" + schemaPath + " for dataset:" + name, e);
     } finally {
       Closeables.closeQuietly(outputStream);
     }
@@ -129,46 +147,56 @@ public class FileSystemMetadataProvider implements MetadataProvider {
 
     if (descriptor.isPartitioned()) {
       properties.setProperty(PARTITION_EXPRESSION_FIELD_NAME,
-          PartitionExpression.toExpression(descriptor.getPartitionStrategy()));
+        PartitionExpression.toExpression(descriptor.getPartitionStrategy()));
     }
+
+    Path descriptorPath = new Path(directory, DESCRIPTOR_FILE_NAME);
 
     try {
       outputStream = fileSystem
-          .create(new Path(directory, DESCRIPTOR_FILE_NAME));
+        .create(descriptorPath);
       properties.store(outputStream, "Dataset descriptor for " + name);
       outputStream.flush();
+    } catch (IOException e) {
+      throw new MetadataProviderException(
+        "Unable to save descriptor file:" + descriptorPath + " for dataset:" + name, e);
     } finally {
       Closeables.closeQuietly(outputStream);
     }
   }
 
   @Override
-  public boolean delete(String name) throws IOException {
+  public boolean delete(String name) {
     logger.debug("Deleting dataset metadata name:{}", name);
 
     Path directory = new Path(pathForDataset(name), METADATA_DIRECTORY);
 
-    if (fileSystem.exists(directory)) {
-      if (fileSystem.delete(directory, true)) {
-        return true;
-      } else {
-        throw new IOException("Failed to delete metadata directory:"
+    try {
+      if (fileSystem.exists(directory)) {
+        if (fileSystem.delete(directory, true)) {
+          return true;
+        } else {
+          throw new IOException("Failed to delete metadata directory:"
             + directory);
+        }
+      } else {
+        return false;
       }
-    } else {
-      return false;
+    } catch (IOException e) {
+      throw new MetadataProviderException(
+        "Unable to find or delete metadata directory:" + directory + " for dataset:" + name, e);
     }
   }
 
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("rootDirectory", rootDirectory)
-        .add("fileSystem", fileSystem).toString();
+      .add("fileSystem", fileSystem).toString();
   }
 
   private Path pathForDataset(String name) {
     Preconditions.checkState(rootDirectory != null,
-        "Dataset repository root directory can not be null");
+      "Dataset repository root directory can not be null");
 
     /*
      * I'm pretty sure that HDFS doesn't use platform-specific path separators.

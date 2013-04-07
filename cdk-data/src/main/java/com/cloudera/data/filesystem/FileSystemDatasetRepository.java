@@ -15,22 +15,22 @@
  */
 package com.cloudera.data.filesystem;
 
-import java.io.IOException;
-
+import com.cloudera.data.Dataset;
+import com.cloudera.data.DatasetDescriptor;
+import com.cloudera.data.DatasetRepository;
+import com.cloudera.data.DatasetRepositoryException;
+import com.cloudera.data.MetadataProvider;
+import com.cloudera.data.PartitionStrategy;
+import com.cloudera.data.impl.Accessor;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.data.Dataset;
-import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.DatasetRepository;
-import com.cloudera.data.MetadataProvider;
-import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.impl.Accessor;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
+import java.io.IOException;
 
 /**
  * <p>
@@ -59,7 +59,7 @@ import com.google.common.base.Preconditions;
 public class FileSystemDatasetRepository implements DatasetRepository {
 
   private static final Logger logger = LoggerFactory
-      .getLogger(FileSystemDatasetRepository.class);
+    .getLogger(FileSystemDatasetRepository.class);
 
   private final MetadataProvider metadataProvider;
 
@@ -70,23 +70,25 @@ public class FileSystemDatasetRepository implements DatasetRepository {
    * Construct a {@link FileSystemDatasetRepository} on the given {@link FileSystem} and
    * root directory, and a {@link FileSystemMetadataProvider} with the same {@link
    * FileSystem} and root directory
-   * @param fileSystem the filesystem to store metadata and datasets in
+   *
+   * @param fileSystem    the filesystem to store metadata and datasets in
    * @param rootDirectory the root directory for metadata and datasets
    */
   public FileSystemDatasetRepository(FileSystem fileSystem, Path rootDirectory) {
     this(fileSystem, rootDirectory,
-        new FileSystemMetadataProvider(fileSystem, rootDirectory));
+      new FileSystemMetadataProvider(fileSystem, rootDirectory));
   }
 
   /**
    * Construct a {@link FileSystemDatasetRepository} on the given {@link FileSystem} and
    * root directory, with the given {@link MetadataProvider} for metadata storage.
-   * @param fileSystem the filesystem to store datasets in
-   * @param rootDirectory the root directory for datasets
+   *
+   * @param fileSystem       the filesystem to store datasets in
+   * @param rootDirectory    the root directory for datasets
    * @param metadataProvider the provider for metadata storage
    */
   public FileSystemDatasetRepository(FileSystem fileSystem, Path rootDirectory,
-      MetadataProvider metadataProvider) {
+    MetadataProvider metadataProvider) {
 
     this.fileSystem = fileSystem;
     this.rootDirectory = rootDirectory;
@@ -94,50 +96,57 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   }
 
   @Override
-  public Dataset create(String name, DatasetDescriptor descriptor)
-      throws IOException {
+  public Dataset create(String name, DatasetDescriptor descriptor) {
 
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkArgument(descriptor != null,
-        "Descriptor can not be null");
+      "Descriptor can not be null");
     Preconditions.checkState(metadataProvider != null,
-        "Metadata provider can not be null");
+      "Metadata provider can not be null");
 
     Schema schema = descriptor.getSchema();
     Path datasetPath = pathForDataset(name);
 
-    if (fileSystem.exists(datasetPath)) {
-      throw new IOException("Attempt to create an existing dataset:" + name);
+    try {
+      if (fileSystem.exists(datasetPath)) {
+        throw new DatasetRepositoryException("Attempt to create an existing dataset:" + name);
+      }
+    } catch (IOException e) {
+      throw new DatasetRepositoryException("Internal error while determining if dataset path already exists:" + datasetPath, e);
     }
 
     logger.debug("Creating dataset:{} schema:{} datasetPath:{}", new Object[] {
-        name, schema, datasetPath });
+      name, schema, datasetPath });
 
-    if (!fileSystem.mkdirs(datasetPath)) {
-      throw new IOException("Failed to make dataset diectories:" + datasetPath);
+    try {
+      if (!fileSystem.mkdirs(datasetPath)) {
+        throw new DatasetRepositoryException("Failed to make dataset path:" + datasetPath);
+      }
+    } catch (IOException e) {
+      throw new DatasetRepositoryException("Internal failure while creating dataset path:" + datasetPath, e);
     }
 
     metadataProvider.save(name, descriptor);
 
     return new FileSystemDataset.Builder()
-        .name(name)
-        .fileSystem(fileSystem)
-        .descriptor(descriptor)
-        .directory(pathForDataset(name))
-        .partitionKey(
-          descriptor.isPartitioned() ? Accessor.getDefault()
-            .newPartitionKey() : null).get();
+      .name(name)
+      .fileSystem(fileSystem)
+      .descriptor(descriptor)
+      .directory(pathForDataset(name))
+      .partitionKey(
+        descriptor.isPartitioned() ? Accessor.getDefault()
+          .newPartitionKey() : null).get();
   }
 
   @Override
-  public Dataset get(String name) throws IOException {
+  public Dataset get(String name) {
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkState(rootDirectory != null,
-        "Root directory can not be null");
+      "Root directory can not be null");
     Preconditions.checkState(fileSystem != null,
-        "FileSystem implementation can not be null");
+      "FileSystem implementation can not be null");
     Preconditions.checkState(metadataProvider != null,
-        "Metadata provider can not be null");
+      "Metadata provider can not be null");
 
     logger.debug("Loading dataset:{}", name);
 
@@ -146,8 +155,8 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     DatasetDescriptor descriptor = metadataProvider.load(name);
 
     FileSystemDataset ds = new FileSystemDataset.Builder()
-        .fileSystem(fileSystem).descriptor(descriptor)
-        .directory(datasetDirectory).name(name).get();
+      .fileSystem(fileSystem).descriptor(descriptor)
+      .directory(datasetDirectory).name(name).get();
 
     logger.debug("Loaded dataset:{}", ds);
 
@@ -155,34 +164,38 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   }
 
   @Override
-  public boolean drop(String name) throws IOException {
+  public boolean drop(String name) {
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkState(rootDirectory != null,
-        "Root directory can not be null");
+      "Root directory can not be null");
     Preconditions.checkState(fileSystem != null,
-        "FileSystem implementation can not be null");
+      "FileSystem implementation can not be null");
     Preconditions.checkState(metadataProvider != null,
-        "Metadata provider can not be null");
+      "Metadata provider can not be null");
 
     logger.debug("Dropping dataset:{}", name);
 
     Path datasetPath = pathForDataset(name);
 
-    if (metadataProvider.delete(name) && fileSystem.exists(datasetPath)) {
-      if (fileSystem.delete(datasetPath, true)) {
-        return true;
-      } else {
-        throw new IOException("Failed to delete dataset name:" + name
+    try {
+      if (metadataProvider.delete(name) && fileSystem.exists(datasetPath)) {
+        if (fileSystem.delete(datasetPath, true)) {
+          return true;
+        } else {
+          throw new DatasetRepositoryException("Failed to delete dataset name:" + name
             + " data path:" + datasetPath);
+        }
+      } else {
+        return false;
       }
-    } else {
-      return false;
+    } catch (IOException e) {
+      throw new DatasetRepositoryException("Internal failure to test if dataset path exists:" + datasetPath);
     }
   }
 
   private Path pathForDataset(String name) {
     Preconditions.checkState(rootDirectory != null,
-        "Dataset repository root directory can not be null");
+      "Dataset repository root directory can not be null");
 
     return new Path(rootDirectory, name.replace('.', '/'));
   }
@@ -190,8 +203,8 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("rootDirectory", rootDirectory)
-        .add("metadataProvider", metadataProvider)
-        .add("fileSystem", fileSystem).toString();
+      .add("metadataProvider", metadataProvider)
+      .add("fileSystem", fileSystem).toString();
   }
 
   public Path getRootDirectory() {
