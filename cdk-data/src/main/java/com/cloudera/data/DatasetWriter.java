@@ -15,7 +15,6 @@
  */
 package com.cloudera.data;
 
-import java.io.IOException;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -50,9 +49,8 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Implementations of {@link DatasetWriter} are typically not thread-safe; that is,
  * the behavior when accessing a single instance from multiple threads is undefined.
  * </p>
- * 
- * @param <E>
- *          The type of entity accepted by this writer.
+ *
+ * @param <E> The type of entity accepted by this writer.
  */
 @NotThreadSafe
 public interface DatasetWriter<E> {
@@ -66,10 +64,10 @@ public interface DatasetWriter<E> {
    * This method <strong>must</strong> be invoked prior to any calls of
    * {@link #write(Object)} or {@link #flush()}.
    * </p>
-   * 
-   * @throws IOException
+   *
+   * @throws DatasetWriterException
    */
-  void open() throws IOException;
+  void open();
 
   /**
    * <p>
@@ -81,11 +79,11 @@ public interface DatasetWriter<E> {
    * schema and partition. If they don't, implementations should throw an exception,
    * although this is not required.
    * </p>
-   * 
+   *
    * @param entity
-   * @throws IOException
+   * @throws DatasetWriterException
    */
-  void write(E entity) throws IOException;
+  void write(E entity);
 
   /**
    * <p>
@@ -95,10 +93,10 @@ public interface DatasetWriter<E> {
    * <p>
    * Implementations of this interface must declare their durability guarantees.
    * </p>
-   * 
-   * @throws IOException
+   *
+   * @throws DatasetWriterException
    */
-  void flush() throws IOException;
+  void flush();
 
   /**
    * <p>
@@ -109,10 +107,10 @@ public interface DatasetWriter<E> {
    * this method) may be performed, however implementations may choose to permit
    * other method calls. See implementation documentation for details.
    * </p>
-   * 
-   * @throws IOException
+   *
+   * @throws DatasetWriterException
    */
-  void close() throws IOException;
+  void close();
 
   boolean isOpen();
 

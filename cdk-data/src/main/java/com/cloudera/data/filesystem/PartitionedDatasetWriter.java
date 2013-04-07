@@ -15,17 +15,9 @@
  */
 package com.cloudera.data.filesystem;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetWriter;
+import com.cloudera.data.DatasetWriterException;
 import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 import com.google.common.base.Objects;
@@ -35,11 +27,18 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
 
   private static final Logger logger = LoggerFactory
-      .getLogger(PartitionedDatasetWriter.class);
+    .getLogger(PartitionedDatasetWriter.class);
 
   private Dataset dataset;
   private int maxWriters;
@@ -52,7 +51,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
 
   public PartitionedDatasetWriter(Dataset dataset) {
     Preconditions.checkArgument(dataset.getDescriptor().isPartitioned(),
-        "Dataset " + dataset + " is not partitioned");
+      "Dataset " + dataset + " is not partitioned");
 
     this.dataset = dataset;
     this.partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
@@ -62,15 +61,15 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
 
   @Deprecated
   public PartitionedDatasetWriter(Dataset dataset,
-      PartitionStrategy partitionStrategy) {
+    PartitionStrategy partitionStrategy) {
 
     Preconditions.checkArgument(dataset.getDescriptor().isPartitioned(),
-        "Dataset " + dataset + " is not partitioned");
+      "Dataset " + dataset + " is not partitioned");
     Preconditions
-        .checkArgument(
-            dataset.getDescriptor().getPartitionStrategy()
-                .equals(partitionStrategy),
-            "Dataset descriptor's partitions strategy doesn't match the provided partition strategy");
+      .checkArgument(
+        dataset.getDescriptor().getPartitionStrategy()
+          .equals(partitionStrategy),
+        "Dataset descriptor's partitions strategy doesn't match the provided partition strategy");
 
     this.dataset = dataset;
     this.partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
@@ -81,22 +80,22 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
   @Override
   public void open() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
-        "Unable to open a writer from state:%s", state);
+      "Unable to open a writer from state:%s", state);
 
     logger.debug("Opening partitioned dataset writer w/strategy:{}",
-        partitionStrategy);
+      partitionStrategy);
 
     cachedWriters = CacheBuilder.newBuilder().maximumSize(maxWriters)
-        .removalListener(new DatasetWriterRemovalStrategy<E>())
-        .build(new DatasetWriterCacheLoader<E>(dataset));
+      .removalListener(new DatasetWriterRemovalStrategy<E>())
+      .build(new DatasetWriterCacheLoader<E>(dataset));
 
     state = ReaderWriterState.OPEN;
   }
 
   @Override
-  public void write(E entity) throws IOException {
+  public void write(E entity) {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to write to a writer in state:%s", state);
+      "Attempt to write to a writer in state:%s", state);
 
     key = partitionStrategy.partitionKeyForEntity(entity, key);
     DatasetWriter<E> writer = null;
@@ -104,20 +103,20 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
     try {
       writer = cachedWriters.get(key);
     } catch (ExecutionException e) {
-      throw new IOException("Unable to get a writer for entity:" + entity
-          + " partition key:" + Arrays.asList(key), e);
+      throw new DatasetWriterException("Unable to get a writer for entity:" + entity
+        + " partition key:" + Arrays.asList(key), e);
     }
 
     writer.write(entity);
   }
 
   @Override
-  public void flush() throws IOException {
+  public void flush() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to write to a writer in state:%s", state);
+      "Attempt to write to a writer in state:%s", state);
 
     logger.debug("Flushing all cached writers for partition strategy:{}",
-        partitionStrategy);
+      partitionStrategy);
 
     /*
      * There's a potential for flushing entries that are created by other
@@ -127,24 +126,24 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
      * partitions to prevent cached writer contention.
      */
     for (Map.Entry<PartitionKey, DatasetWriter<E>> entry : cachedWriters
-        .asMap().entrySet()) {
+      .asMap().entrySet()) {
       logger.debug("Flushing partition writer:{}.{}", entry.getKey(),
-          entry.getValue());
+        entry.getValue());
       entry.getValue().flush();
     }
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     if (state.equals(ReaderWriterState.OPEN)) {
 
       logger.debug("Closing all cached writers for partition strategy:{}",
-          partitionStrategy);
+        partitionStrategy);
 
       for (Map.Entry<PartitionKey, DatasetWriter<E>> entry : cachedWriters
-          .asMap().entrySet()) {
+        .asMap().entrySet()) {
         logger.debug("Closing partition writer:{}.{}", entry.getKey(),
-            entry.getValue());
+          entry.getValue());
         entry.getValue().close();
       }
 
@@ -160,13 +159,13 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
   @Override
   public String toString() {
     return Objects.toStringHelper(this)
-        .add("partitionStrategy", partitionStrategy)
-        .add("maxWriters", maxWriters).add("dataset", dataset)
-        .add("cachedWriters", cachedWriters).toString();
+      .add("partitionStrategy", partitionStrategy)
+      .add("maxWriters", maxWriters).add("dataset", dataset)
+      .add("cachedWriters", cachedWriters).toString();
   }
 
   private static class DatasetWriterCacheLoader<E> extends
-      CacheLoader<PartitionKey, DatasetWriter<E>> {
+    CacheLoader<PartitionKey, DatasetWriter<E>> {
 
     private Dataset dataset;
 
@@ -186,26 +185,18 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
   }
 
   private static class DatasetWriterRemovalStrategy<E> implements
-      RemovalListener<PartitionKey, DatasetWriter<E>> {
+    RemovalListener<PartitionKey, DatasetWriter<E>> {
 
     @Override
     public void onRemoval(
-        RemovalNotification<PartitionKey, DatasetWriter<E>> notification) {
+      RemovalNotification<PartitionKey, DatasetWriter<E>> notification) {
 
       DatasetWriter<E> writer = notification.getValue();
 
       logger.debug("Removing writer:{} for partition:{}", writer,
-          notification.getKey());
+        notification.getKey());
 
-      try {
-        writer.close();
-      } catch (IOException e) {
-        logger
-            .error(
-                "Failed to close the dataset writer:{} - {} (this may cause problems)",
-                writer, e.getMessage());
-        logger.debug("Stack trace follows:", e);
-      }
+      writer.close();
     }
 
   }

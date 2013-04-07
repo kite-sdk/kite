@@ -15,10 +15,12 @@
  */
 package com.cloudera.data.filesystem;
 
-import java.io.Closeable;
-import java.io.Flushable;
-import java.io.IOException;
-
+import com.cloudera.data.DatasetWriter;
+import com.cloudera.data.DatasetWriterException;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
+import com.google.common.io.Closeables;
 import org.apache.avro.Schema;
 import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
@@ -29,17 +31,15 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.data.DatasetWriter;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
-import com.google.common.io.Closeables;
+import java.io.Closeable;
+import java.io.Flushable;
+import java.io.IOException;
 
 class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
-    Closeable {
+  Closeable {
 
   private static final Logger logger = LoggerFactory
-      .getLogger(FileSystemDatasetWriter.class);
+    .getLogger(FileSystemDatasetWriter.class);
 
   private Path path;
   private Schema schema;
@@ -52,7 +52,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   private ReaderWriterState state;
 
   public FileSystemDatasetWriter(FileSystem fileSystem, Path path,
-      Schema schema, boolean enableCompression) {
+    Schema schema, boolean enableCompression) {
 
     this.fileSystem = fileSystem;
     this.path = path;
@@ -63,13 +63,13 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   }
 
   @Override
-  public void open() throws IOException {
+  public void open() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
-        "Unable to open a writer from state:%s", state);
+      "Unable to open a writer from state:%s", state);
 
     logger.debug(
-        "Opening data file with pathTmp:{} (final path will be path:{})",
-        pathTmp, path);
+      "Opening data file with pathTmp:{} (final path will be path:{})",
+      pathTmp, path);
 
     writer = new ReflectDatumWriter<E>();
     dataFileWriter = new DataFileWriter<E>(writer);
@@ -83,38 +83,63 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
       dataFileWriter.setCodec(CodecFactory.snappyCodec());
     }
 
-    dataFileWriter.create(schema, fileSystem.create(pathTmp, true));
+    try {
+      dataFileWriter.create(schema, fileSystem.create(pathTmp, true));
+    } catch (IOException e) {
+      throw new DatasetWriterException("Unable to create writer to path:" + pathTmp, e);
+    }
 
     state = ReaderWriterState.OPEN;
   }
 
   @Override
-  public void write(E entity) throws IOException {
+  public void write(E entity) {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to write to a writer in state:%s", state);
+      "Attempt to write to a writer in state:%s", state);
 
-    dataFileWriter.append(entity);
+    try {
+      dataFileWriter.append(entity);
+    } catch (IOException e) {
+      throw new DatasetWriterException(
+        "Unable to write entity:" + entity + " with writer:" + dataFileWriter, e);
+    }
   }
 
   @Override
-  public void flush() throws IOException {
+  public void flush() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to write to a writer in state:%s", state);
+      "Attempt to write to a writer in state:%s", state);
 
-    dataFileWriter.flush();
+    try {
+      dataFileWriter.flush();
+    } catch (IOException e) {
+      throw new DatasetWriterException(
+        "Unable to flush file writer:" + dataFileWriter);
+    }
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     if (state.equals(ReaderWriterState.OPEN)) {
       logger.debug("Closing pathTmp:{}", pathTmp);
 
-      Closeables.close(dataFileWriter, false);
+      try {
+        Closeables.close(dataFileWriter, false);
+      } catch (IOException e) {
+        throw new DatasetWriterException(
+          "Unable to close writer:" + dataFileWriter + " to path:" + pathTmp);
+      }
 
       logger.debug("Committing pathTmp:{} to path:{}", pathTmp, path);
 
-      if (!fileSystem.rename(pathTmp, path)) {
-        throw new IOException("Failed to move " + pathTmp + " to " + path);
+      try {
+        if (!fileSystem.rename(pathTmp, path)) {
+          throw new DatasetWriterException(
+            "Failed to move " + pathTmp + " to " + path);
+        }
+      } catch (IOException e) {
+        throw new DatasetWriterException(
+          "Internal error while trying to commit path:" + pathTmp, e);
       }
 
       state = ReaderWriterState.CLOSED;
@@ -128,14 +153,21 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("path", path)
-        .add("pathTmp", pathTmp).add("schema", schema)
-        .add("enableCompression", enableCompression).add("state", state)
-        .toString();
+    return Objects.toStringHelper(this)
+      .add("path", path)
+      .add("schema", schema)
+      .add("fileSystem", fileSystem)
+      .add("enableCompression", enableCompression)
+      .add("pathTmp", pathTmp)
+      .add("dataFileWriter", dataFileWriter)
+      .add("writer", writer)
+      .add("state", state)
+      .omitNullValues()
+      .toString();
   }
 
   public static class Builder<E> implements
-      Supplier<FileSystemDatasetWriter<E>> {
+    Supplier<FileSystemDatasetWriter<E>> {
 
     private FileSystem fileSystem;
     private Path path;
@@ -169,14 +201,12 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
     @Override
     public FileSystemDatasetWriter<E> get() {
       Preconditions
-          .checkState(fileSystem != null, "File system is not defined");
+        .checkState(fileSystem != null, "File system is not defined");
       Preconditions.checkState(path != null, "Path is not defined");
       Preconditions.checkState(schema != null, "Schema is not defined");
 
-      FileSystemDatasetWriter<E> writer = new FileSystemDatasetWriter<E>(
-          fileSystem, path, schema, enableCompression);
-
-      return writer;
+      return new FileSystemDatasetWriter<E>(
+        fileSystem, path, schema, enableCompression);
     }
 
   }
