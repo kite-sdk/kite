@@ -230,8 +230,6 @@ configuration.
 *Summary*
 
 * A dataset is a collection of entities.
-* A dataset can be partitioned by attributes of the entity (i.e. fields of the
-  record).
 * A dataset is represented by the interface `Dataset`.
 * The Hadoop FileSystem implementation of a dataset...
     * is stored as Snappy-compressed Avro data files by default.
@@ -471,6 +469,15 @@ powerful concept allowing systems to become immediately aware of data as soon
 as it's committed to storage.
 
 ### Partitioned Datasets
+
+_Summary_
+
+* Datasets may be partitioned by attributes of the entity (i.e. fields of the
+  record).
+* Partitioning is transparent to readers and writers.
+* Partitons also conform to the `Dataset` interface.
+* A `PartitionStrategy` controls how a dataset is partitioned, and is part of
+  the `DatasetDescriptor`.
 
 Datasets may optionally be partitioned to facilitate piecemeal storage
 management, as well as optimized access to data under one or more predicates. A
