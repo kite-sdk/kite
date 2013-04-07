@@ -309,42 +309,50 @@ _Note_
 Some of the less important or specialized methods have been elided here in the
 interest of simplicity.
 
-Datasets may optionally be partitioned to facilitate piecemeal storage
-management, as well as optimized access to data under one or more predicates. A
-dataset is considered partitioned if it has an associated partition strategy
-(described later). When entities are written to a partitioned dataset, they are
-automatically written to the proper partition, as expected. The semantics of a
-partition are defined by the implementation; this interface makes no guarantee
-as to the performance of reading or writing across partitions, availability of a
-partition in the face of failures, or the efficiency of partition elimination
-under one or more predicates (i.e. partition pruning in query engines). It is
-not possible to partition an existing non-partitioned dataset, nor can you write
-data into a partitioned dataset that does not land in a partition. Should you
-decide to partition an existing dataset, the best course of action is to create
-a new partitioned dataset with the same schema as the existing dataset, and use
-MapReduce to convert the dataset in batch to the new format. It is possible to
-add or remove partitions from a partitioned dataset. A partitioned dataset can
-provide a list of partitions (described later).
+From the methods in the `DatasetDescriptor.Builder`, you can see Avro schemas
+can be defined in a few different ways. Here, for instance, is an example of
+creating a dataset with a schema defined in a file on the local filesystem.
+
+    DatasetRepository repo = ...
+    Dataset users = repo.create("users",
+      new DatasetDescriptor.Builder()
+        .schema(new File("User.avsc"))
+        .get()
+    );
+
+Just as easily, a the schema could be loaded from a Java classpath resource.
+This example uses Guava's [Resources][guava-resources-cls] to simplify
+resolution, but we could have (almost as) easily used Java's
+`java.util.ClassLoader` directly.
+
+[guava-resources-cls]: http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/io/Resources.html
+
+    DatasetRepository repo = ...
+    Dataset users = repo.create("users",
+      new DatasetDescriptor.Builder()
+        .schema(Resources.getResource("Users.avsc"))
+        .get()
+    );
 
 An instance of `Dataset` acts as a factory for both reader and writer streams.
 Each implementation is free to produce stream implementations that make sense
-for the underlying storage system. The Hadoop `FileSystem` implementation, for
+for the underlying storage system. The `FileSystemDataset` implementation, for
 example, produces streams that read from, or write to, Avro data files on a
-`FileSystem` implementation.
+Hadoop `FileSystem` implementation.
 
 Reader and writer streams both function similarly to Java's standard IO streams,
-but are specialized. As indicated above, both interfaces are generic. The type
-parameter indicates the type of entity that they produce or consume,
-respectively.
+but are specialized. As indicated in the `Dataset` interface earlier, both
+interfaces are generic. The type parameter indicates the type of entity that
+they produce or consume, respectively.
 
 _DatasetReader<E> Interface_
 
-    open()
-    close()
-    isOpen(): boolean
+    void open();
+    void close();
+    boolean isOpen();
 
-    hasNext(): boolean
-    read(): E
+    boolean hasNext();
+    E read();
 
 _DatasetWriter<E> Interface_
 
@@ -361,6 +369,71 @@ prior to invoking any of the IO-generating methods such as DatasetReader's
 `hasNext()` or `read()`, or DatasetWriter's `write()` or `flush()`. Once a
 stream has been closed via the `close()` method, no further IO is permitted,
 nor may it be reopened.
+
+Writing to a dataset always follows the same sequence of events. A user obtains
+an instance of a `Dataset` from a `DatasetRepository` either by creating a new,
+or loading an existing dataset. With a reference to a `Dataset`, you can obtain
+a writer using its `getWriter()` method, open it, write any number of entities,
+flush as necessary, and close it to release resources back to the system. The
+use of `flush()` and `close()` can dramatically affect data durability.
+Implementations of the `DatasetWriter` interface are free to define the
+semantics of data durability as appropriate for their storage subsystem. See
+the implementation javadoc on either the streams or the dataset for more
+information.
+
+_Example: Writing to a Hadoop FileSystem_
+
+    DatasetRepository repo = new FileSystemDatasetRepository(
+      FileSystem.get(new Configuration()), new Path("/data"));
+
+    Dataset integers = repo.create("integers",
+      new DatasetDescriptor.Builder()
+        .schema("MyInteger.avsc")
+        .get()
+    );
+
+    /*
+     * Getting a writer never performs IO, so it's safe to do this outside of
+     * the try block. Here we're using Avro Generic records, discussed in
+     * greater details later. See the Entities section.
+     */
+    DatasetWriter<GenericData.Record> writer = integers.getWriter();
+
+    try {
+      writer.open();
+
+      for (int i = 0; i < Integer.MAX_VALUE; i++) {
+        writer.write(new GenericDataRecord(integers.getSchema())
+          .set("i", i)
+          .build()
+        );
+
+        // Flush every 100K records.
+        if (i % 100000 == 0) {
+          writer.flush();
+        }
+      }
+    } finally {
+      // Always explicitly close writers!
+      writer.close();
+    }
+
+Datasets may optionally be partitioned to facilitate piecemeal storage
+management, as well as optimized access to data under one or more predicates. A
+dataset is considered partitioned if it has an associated partition strategy
+(described later). When entities are written to a partitioned dataset, they are
+automatically written to the proper partition, as expected. The semantics of a
+partition are defined by the implementation; this interface makes no guarantee
+as to the performance of reading or writing across partitions, availability of a
+partition in the face of failures, or the efficiency of partition elimination
+under one or more predicates (i.e. partition pruning in query engines). It is
+not possible to partition an existing non-partitioned dataset, nor can you write
+data into a partitioned dataset that does not land in a partition. Should you
+decide to partition an existing dataset, the best course of action is to create
+a new partitioned dataset with the same schema as the existing dataset, and use
+MapReduce to convert the dataset in batch to the new format. It is possible to
+add or remove partitions from a partitioned dataset. A partitioned dataset can
+provide a list of partitions (described later).
 
 ### Partitioned Datasets
 
