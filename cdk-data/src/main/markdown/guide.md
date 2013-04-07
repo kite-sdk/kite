@@ -299,13 +299,15 @@ _DatasetDescriptor.Builder Class_
     Builder schema(File file);
     Builder schema(InputStream inputStream);
     Builder schema(URL url);
-    Builder schemaFromAvroDataFile(File file);
-    Builder schemaFromAvroDataFile(InputStream inputStream);
-    Builder schemaFromAvroDataFile(URL url);
 
     Builder partitionStrategy(PartitionStrategy partitionStrategy);
 
     DatasetDescriptor get();
+
+_Note_
+
+Some of the less important or specialized methods have been elided here in the
+interest of simplicity.
 
 Datasets may optionally be partitioned to facilitate piecemeal storage
 management, as well as optimized access to data under one or more predicates. A
