@@ -22,8 +22,8 @@ topics (e.g. partitioning schemes, metadata management) will benefit even more.
 ### Version 0.1.0
 
 Version 0.1.0 is the first release of the CDK Data module. This is considered a
-*beta* release. As a sub-1.0.0 release, this version is *not* subject to the
-normal API compatibility guarantees. See the *Compatibility Statement* for
+_beta_ release. As a sub-1.0.0 release, this version is _not_ subject to the
+normal API compatibility guarantees. See the _Compatibility Statement_ for
 information about API compatibility guarantees.
 
 ## Overview of the Data Module
@@ -65,8 +65,8 @@ constituent classes.
 [spring]: http://www.springsource.org/spring-framework "Spring Framework"
 [guice]: http://code.google.com/p/google-guice/ "Google Guice"
 
-The primary actors in the Data module are *entities*, *dataset repositories*,
-*datasets*, dataset *readers* and *writers*, and *metadata providers*. Most of
+The primary actors in the Data module are _entities_, _dataset repositories_,
+_datasets_, dataset _readers_ and _writers_, and _metadata providers_. Most of
 these objects are interfaces, permitting multiple implementations, each with
 different functionality. Today, there exists an implementation of each of these
 components for the Hadoop FileSystem abstraction. While, in theory, this means
@@ -227,7 +227,7 @@ configuration.
 
 ## Datasets
 
-*Summary*
+_Summary_
 
 * A dataset is a collection of entities.
 * A dataset is represented by the interface `Dataset`.
@@ -583,7 +583,7 @@ controls the way the data is physically partitioned in certain implementations
 of the Data APIs. Depending on the implementation, this can drastically change
 the execution speed of data access by different methods.
 
-**Warning**
+__Warning__
 
 It's worth pointing out that Hive and Impala only support the identity function
 in partitioned datasets, at least at the time this is written. Users who do not
@@ -597,10 +597,11 @@ setting of such a field themselves.
 
 ## Entities
 
-*Summary*
+_Summary_
 
 * An entity is a record in a dataset.
-* Entities can be POJOs, GenericRecords, or generated (specific) records.
+* Entities can be POJOs, Avro GenericRecords, or Avro generated (specific)
+  records.
 * When in doubt, use GenericRecords.
 
 An _entity_ is a is a single record. The name "entity" is used rather than
@@ -637,8 +638,8 @@ user's option:
 
 Note that entities aren't represented by any particular type in the Data APIs.
 In each of the above three cases, the entities described are either simple POJOs
-or are Avro objects. Remember that what has been described here is only the *in
-memory* representation of the entity; the Data module may store the data in HDFS
+or are Avro objects. Remember that what has been described here is only the _in
+memory_ representation of the entity; the Data module may store the data in HDFS
 in a different serialization format.
 
 [POJO]: http://en.wikipedia.org/wiki/POJO "Plain Old Java Object"
