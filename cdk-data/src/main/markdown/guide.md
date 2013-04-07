@@ -325,7 +325,7 @@ This example uses Guava's [Resources][guava-resources-cls] to simplify
 resolution, but we could have (almost as) easily used Java's
 `java.util.ClassLoader` directly.
 
-[guava-resources-cls]: http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/io/Resources.html
+[guava-resources-cls]: http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/io/Resources.html "Google Guava Resources class"
 
     DatasetRepository repo = ...
     Dataset users = repo.create("users",
@@ -407,15 +407,16 @@ _Example: Writing to a Hadoop FileSystem_
      * the try block. Here we're using Avro Generic records, discussed in
      * greater details later. See the Entities section.
      */
-    DatasetWriter<GenericData.Record> writer = integers.getWriter();
+    DatasetWriter<GenericRecord> writer = integers.getWriter();
 
     try {
       writer.open();
 
       for (int i = 0; i < Integer.MAX_VALUE; i++) {
-        writer.write(new GenericDataRecord(integers.getDescriptor().getSchema())
-          .set("i", i)
-          .build()
+        writer.write(
+          new GenericRecordBuilder(integers.getDescriptor().getSchema())
+            .set("i", i)
+            .build()
         );
       }
     } finally {
@@ -436,7 +437,7 @@ _Example: Reading from a Hadoop FileSystem_
     // Load the integers dataset.
     Dataset integers = repo.get("integers");
 
-    DatasetReader<GenericData.Record> reader = integers.getReader();
+    DatasetReader<GenericRecord> reader = integers.getReader();
 
     try {
       reader.open();
@@ -732,7 +733,7 @@ _Example: Using Avro's GenericRecordBuilder to create a generic entity_
      * The GenericRecordBuilder constructs a new record and ensures that we set
      * all the necessary fields with values of an appropriate type.
      */
-    GenericData.Record genericUser = new GenericRecordBuilder(userSchema)
+    GenericRecord genericUser = new GenericRecordBuilder(userSchema)
       .set("id", 1L)
       .set("username", "janedoe")
       .set("emailAddress", "jane@doe.com")
