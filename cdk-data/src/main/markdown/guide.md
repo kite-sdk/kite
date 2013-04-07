@@ -423,6 +423,50 @@ _Example: Writing to a Hadoop FileSystem_
       writer.close();
     }
 
+Reading data from an existing dataset is equally straight forward. The important
+part to remember is that it is illegal to call `read()` after the reader has
+been exhausted (i.e. no more entities remain). Instead, users must use the
+`hasNext()` method to test if the reader can produce further data.
+
+_Example: Reading from a Hadoop FileSystem_
+
+    DatasetRepository repo = new FileSystemDatasetRepository(
+      FileSystem.get(new Configuration()), new Path("/data"));
+
+    // Load the integers dataset.
+    Dataset integers = repo.get("integers");
+
+    DatasetReader<GenericData.Record> reader = integers.getReader();
+
+    try {
+      reader.open();
+
+      while (reader.hasNext()) {
+        System.out.println("i: " + reader.read().get("i"));
+      }
+    } finally {
+      reader.close();
+    }
+
+Dropping a dataset - an operation as equally destructive as dropping a table
+in a relational database - works as expected.
+
+    DatasetRepository repo = new FileSystemDatasetRepository(
+      FileSystem.get(new Configuration()), new Path("/data"));
+
+    if (repo.drop("integers")) {
+      System.out.println("Dropped dataset integers");
+    }
+
+As discussed earlier, all operations performed on dataset repositories,
+datasets, and their associated readers and writers are tightly integrated with
+the dataset repository's configured metadata provider. Dropping a dataset like
+this, for example, removes both the data as well as the associated metadata.
+All applications that use the Data module APIs will automatically see changes
+made by one another if they share the same configuration. This is an incredibly
+powerful concept allowing systems to become immediately aware of data as soon
+as it's committed to storage.
+
 Datasets may optionally be partitioned to facilitate piecemeal storage
 management, as well as optimized access to data under one or more predicates. A
 dataset is considered partitioned if it has an associated partition strategy
