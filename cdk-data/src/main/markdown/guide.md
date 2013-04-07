@@ -386,6 +386,16 @@ _Example: Writing to a Hadoop FileSystem_
     DatasetRepository repo = new FileSystemDatasetRepository(
       FileSystem.get(new Configuration()), new Path("/data"));
 
+    /*
+     * Let's assume MyInteger.avsc is defined as follows:
+     * {
+     *   "type": "record",
+     *   "name": "MyInteger",
+     *   "fields": [
+     *     { "type": "integer", "name": "i" }
+     *   ]
+     * }
+     */
     Dataset integers = repo.create("integers",
       new DatasetDescriptor.Builder()
         .schema("MyInteger.avsc")
