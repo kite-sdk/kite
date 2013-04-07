@@ -15,17 +15,15 @@
  */
 package com.cloudera.data.filesystem;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-
+import com.cloudera.data.DatasetReader;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.cloudera.data.DatasetReader;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
+import java.util.Iterator;
+import java.util.List;
 
 class MultiFileDatasetReader<E> implements DatasetReader<E> {
 
@@ -38,7 +36,7 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
   private ReaderWriterState state;
 
   public MultiFileDatasetReader(FileSystem fileSystem, List<Path> files,
-      Schema schema) {
+    Schema schema) {
 
     this.fileSystem = fileSystem;
     this.schema = schema;
@@ -48,13 +46,13 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
   }
 
   @Override
-  public void open() throws IOException {
+  public void open() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
-        "A reader may not be opened more than once - current state:%s", state);
+      "A reader may not be opened more than once - current state:%s", state);
 
     if (filesIter.hasNext()) {
       reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
-          schema);
+        schema);
       reader.open();
     }
     this.state = ReaderWriterState.OPEN;
@@ -62,9 +60,10 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
 
   @Override
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR", justification = "Checked by Preconditions")
-  public boolean hasNext() throws IOException {
+  public boolean hasNext() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to read from a file in state:%s", state);
+      "Attempt to read from a file in state:%s", state);
+
     while (true) {
       if (reader == null) {
         return false;
@@ -76,7 +75,7 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
 
         if (filesIter.hasNext()) {
           reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
-              schema);
+            schema);
           reader.open();
         } else {
           return false;
@@ -87,14 +86,14 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
 
   @Override
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR", justification = "Checked by Preconditions")
-  public E read() throws IOException {
+  public E read() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to read from a file in state:%s", state);
+      "Attempt to read from a file in state:%s", state);
     return reader.read();
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     if (!state.equals(ReaderWriterState.OPEN)) {
       return;
     }
@@ -104,7 +103,6 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
     state = ReaderWriterState.CLOSED;
   }
 
-
   @Override
   public boolean isOpen() {
     return state.equals(ReaderWriterState.OPEN);
@@ -112,9 +110,13 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("reader", reader)
-        .add("state", state).add("filesIter", filesIter).add("schema", schema)
-        .toString();
+    return Objects.toStringHelper(this)
+      .add("fileSystem", fileSystem)
+      .add("schema", schema)
+      .add("filesIter", filesIter)
+      .add("reader", reader)
+      .add("state", state)
+      .toString();
   }
 
 }

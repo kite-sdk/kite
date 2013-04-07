@@ -15,9 +15,10 @@
  */
 package com.cloudera.data.filesystem;
 
-import java.io.Closeable;
-import java.io.IOException;
-
+import com.cloudera.data.DatasetReader;
+import com.cloudera.data.DatasetReaderException;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.reflect.ReflectDatumReader;
@@ -27,9 +28,8 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.data.DatasetReader;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
+import java.io.Closeable;
+import java.io.IOException;
 
 class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
 
@@ -41,7 +41,7 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
   private DataFileReader<E> reader;
 
   private static final Logger logger = LoggerFactory
-      .getLogger(FileSystemDatasetReader.class);
+    .getLogger(FileSystemDatasetReader.class);
 
   public FileSystemDatasetReader(FileSystem fileSystem, Path path, Schema schema) {
     this.fileSystem = fileSystem;
@@ -52,15 +52,19 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
   }
 
   @Override
-  public void open() throws IOException {
+  public void open() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
-        "A reader may not be opened more than once - current state:%s", state);
+      "A reader may not be opened more than once - current state:%s", state);
 
     logger.debug("Opening reader on path:{}", path);
 
-    reader = new DataFileReader<E>(new AvroFSInput(fileSystem.open(path),
+    try {
+      reader = new DataFileReader<E>(new AvroFSInput(fileSystem.open(path),
         fileSystem.getFileStatus(path).getLen()), new ReflectDatumReader<E>(
         schema));
+    } catch (IOException e) {
+      throw new DatasetReaderException("Unable to create reader path:" + path, e);
+    }
 
     state = ReaderWriterState.OPEN;
   }
@@ -68,27 +72,32 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
   @Override
   public boolean hasNext() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to read from a file in state:%s", state);
+      "Attempt to read from a file in state:%s", state);
     return reader.hasNext();
   }
 
   @Override
   public E read() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to read from a file in state:%s", state);
+      "Attempt to read from a file in state:%s", state);
 
     return reader.next();
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     if (!state.equals(ReaderWriterState.OPEN)) {
       return;
     }
 
     logger.debug("Closing reader on path:{}", path);
 
-    reader.close();
+    try {
+      reader.close();
+    } catch (IOException e) {
+      throw new DatasetReaderException("Unable to close reader path:" + path, e);
+    }
+
     state = ReaderWriterState.CLOSED;
   }
 
@@ -99,8 +108,13 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("path", path).add("state", state)
-        .add("reader", reader).add("schema", schema).toString();
+    return Objects.toStringHelper(this)
+      .add("fileSystem", fileSystem)
+      .add("path", path)
+      .add("schema", schema)
+      .add("state", state)
+      .add("reader", reader)
+      .toString();
   }
 
 }

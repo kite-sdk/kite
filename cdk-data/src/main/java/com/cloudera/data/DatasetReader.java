@@ -15,7 +15,6 @@
  */
 package com.cloudera.data;
 
-import java.io.IOException;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -51,9 +50,8 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Implementations of {@link DatasetReader} are typically not thread-safe; that is,
  * the behavior when accessing a single instance from multiple threads is undefined.
  * </p>
- * 
- * @param <E>
- *          The type of entity produced by this reader.
+ *
+ * @param <E> The type of entity produced by this reader.
  */
 @NotThreadSafe
 public interface DatasetReader<E> {
@@ -67,18 +65,18 @@ public interface DatasetReader<E> {
    * This method <strong>must</strong> be invoked prior to any calls of
    * {@link #hasNext()} or {@link #read()}.
    * </p>
-   * 
-   * @throws IOException
+   *
+   * @throws DatasetReaderException
    */
-  void open() throws IOException;
+  void open();
 
   /**
    * Tests the reader to see if additional entities can be read.
-   * 
+   *
    * @return true if additional entities exist, false otherwise.
-   * @throws IOException
+   * @throws DatasetReaderException
    */
-  boolean hasNext() throws IOException;
+  boolean hasNext();
 
   /**
    * <p>
@@ -89,11 +87,11 @@ public interface DatasetReader<E> {
    * use {@link #hasNext()} to test if a call to {@code read()} will succeed.
    * Implementations of this method may block.
    * </p>
-   * 
+   *
    * @return An entity of type {@code E}.
-   * @throws IOException
+   * @throws DatasetReaderException
    */
-  E read() throws IOException;
+  E read();
 
   /**
    * <p>
@@ -104,10 +102,10 @@ public interface DatasetReader<E> {
    * this method) may be performed, however implementations may choose to permit
    * other method calls. See implementation documentation for details.
    * </p>
-   * 
-   * @throws IOException
+   *
+   * @throws DatasetReaderException
    */
-  void close() throws IOException;
+  void close();
 
   boolean isOpen();
 
