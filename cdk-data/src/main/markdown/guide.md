@@ -417,11 +417,6 @@ _Example: Writing to a Hadoop FileSystem_
           .set("i", i)
           .build()
         );
-
-        // Flush every 100K records.
-        if (i % 100000 == 0) {
-          writer.flush();
-        }
       }
     } finally {
       // Always explicitly close writers!
