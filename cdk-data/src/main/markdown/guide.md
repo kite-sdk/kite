@@ -163,9 +163,9 @@ services must provide to the library, and specifically, the `DatasetRepository`.
 
 _MetadataProvider Interface_
 
-    save(String, DatasetDescriptor)
-    load(String): DatasetDescriptor
-    delete(String): boolean
+    void save(String, DatasetDescriptor);
+    DatasetDescriptor load(String);
+    boolean delete(String);
 
 `MetadataProvider` implementations act as a bridge between the Data module and
 centralized metadata repositories. An obvious example of this (in the Hadoop
@@ -255,14 +255,14 @@ a factory of the appropriate `Dataset` implementation.
 
 _Dataset Interface_
 
-    getName(): String
-    getDescriptor(): DatasetDescriptor
+    String getName();
+    DatasetDescriptor getDescriptor();
 
-    <E> getWriter(): DatasetWriter<E>
-    <E> getReader(): DatasetReader<E>
+    <E> DatasetWriter<E> getWriter();
+    <E> DatasetReader<E> getReader();
 
-    getPartition(PartitionKey, boolean): Dataset
-    getPartitions(): Iterable<Dataset>
+    Dataset getPartition(PartitionKey, boolean);
+    Iterable<Dataset> getPartitions();
 
 The included Hadoop `FileSystemDatasetRepository` includes a `Dataset`
 implementation called `FileSystemDataset`. This dataset implementation stores
@@ -288,9 +288,9 @@ defining or attaching a schema.
 
 _DatasetDescriptor Class_
 
-    getSchema(): org.apache.avro.Schema
-    getPartitionStrategy(): PartitionStrategy
-    isPartitioned(): boolean
+    org.apache.avro.Schema getSchema();
+    PartitionStrategy getPartitionStrategy();
+    boolean isPartitioned();
 
 _DatasetDescriptor.Builder Class_
 
@@ -356,12 +356,12 @@ _DatasetReader<E> Interface_
 
 _DatasetWriter<E> Interface_
 
-    open()
-    close()
-    isOpen(): boolean
+    void open();
+    void close();
+    boolean isOpen();
 
-    write(E)
-    flush()
+    void write(E);
+    void flush();
 
 Both readers and writers are single-use objects with a well-defined lifecycle.
 Instances of both types (or the implementations of each, rather) must be opened
