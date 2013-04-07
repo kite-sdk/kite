@@ -470,24 +470,25 @@ made by one another if they share the same configuration. This is an incredibly
 powerful concept allowing systems to become immediately aware of data as soon
 as it's committed to storage.
 
+### Partitioned Datasets
+
 Datasets may optionally be partitioned to facilitate piecemeal storage
 management, as well as optimized access to data under one or more predicates. A
 dataset is considered partitioned if it has an associated partition strategy
 (described later). When entities are written to a partitioned dataset, they are
 automatically written to the proper partition, as expected. The semantics of a
-partition are defined by the implementation; this interface makes no guarantee
-as to the performance of reading or writing across partitions, availability of a
-partition in the face of failures, or the efficiency of partition elimination
-under one or more predicates (i.e. partition pruning in query engines). It is
-not possible to partition an existing non-partitioned dataset, nor can you write
-data into a partitioned dataset that does not land in a partition. Should you
-decide to partition an existing dataset, the best course of action is to create
-a new partitioned dataset with the same schema as the existing dataset, and use
-MapReduce to convert the dataset in batch to the new format. It is possible to
-add or remove partitions from a partitioned dataset. A partitioned dataset can
+partition are defined by the implementation; no guarantees as to the performance
+of reading or writing across partitions, availability of a partition in the face
+of failures, or the efficiency of partition elimination under one or more
+predicates (i.e. partition pruning in query engines) are made by the Data module
+interfaces. It is not possible to partition an existing non-partitioned dataset,
+nor can you write data into a partitioned dataset that does not land in
+a partition. Should you decide to partition an existing dataset, the best course
+of action is to create a new partitioned dataset with the same schema as the
+existing dataset, and use MapReduce to convert the dataset in batch to the new
+format. It will be possible to remove partitions from a partitioned dataset in
+a future release, but today, they may only be added. A partitioned dataset can
 provide a list of partitions (described later).
-
-### Partitioned Datasets
 
 Upon creation of a dataset, a `PartitionStrategy` may be provided. A partition
 strategy is a list of one or more partition functions that, when applied to an
