@@ -413,7 +413,7 @@ _Example: Writing to a Hadoop FileSystem_
       writer.open();
 
       for (int i = 0; i < Integer.MAX_VALUE; i++) {
-        writer.write(new GenericDataRecord(integers.getSchema())
+        writer.write(new GenericDataRecord(integers.getDescriptor().getSchema())
           .set("i", i)
           .build()
         );
