@@ -69,9 +69,10 @@ The primary actors in the Data module are _entities_, _dataset repositories_,
 _datasets_, dataset _readers_ and _writers_, and _metadata providers_. Most of
 these objects are interfaces, permitting multiple implementations, each with
 different functionality. Today, there exists an implementation of each of these
-components for the Hadoop FileSystem abstraction. While, in theory, this means
-any implementation of Hadoop's `FileSystem` abstract class is supported by the
-Data module, only the local and HDFS filesystem implementations are tested and
+components for the Hadoop FileSystem abstraction, found in the
+`com.cloudera.data.filesystem` package. While, in theory, this means any
+implementation of Hadoop's `FileSystem` abstract class is supported by the Data
+module, only the local and HDFS filesystem implementations are tested and
 officially supported. For the remainder of this guide, you can assume the
 implementation of the Data module interfaces being described is the Hadoop
 `FileSystem` implementation.
