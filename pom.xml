@@ -34,6 +34,23 @@
           <goals>deploy</goals>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.2</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.doxia</groupId>
+            <artifactId>doxia-module-markdown</artifactId>
+            <version>1.3</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <generateReports>false</generateReports>
+          <inputEncoding>UTF-8</inputEncoding>
+          <outputEncoding>UTF-8</outputEncoding>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -42,6 +59,11 @@
       <id>cloudera.repo</id>
       <url>https://repository.cloudera.com/artifactory/libs-release-local</url>
     </repository>
+    <site>
+      <id>cdk.website</id>
+      <name>CDK documentation</name>
+      <url>http://cloudera.github.com/cdk/docs</url>
+    </site>
   </distributionManagement>
 
 </project>

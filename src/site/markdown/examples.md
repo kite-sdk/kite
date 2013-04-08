@@ -85,7 +85,3 @@ The Java examples can be used to read (and drop) the dataset written from Scala:
 mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.ReadUserDatasetGeneric"
 mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.DropUserDataset"
 ```
-
-***
-
-[CDK Data Module](../cdk-data/README.md)

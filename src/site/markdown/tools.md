@@ -24,7 +24,3 @@ Look at the output (Combined Log format converted to Avro files):
 ```bash
 java -jar /path/to/avro-tools-*.jar tojson /tmp/output/logs/*.avro | head
 ```
-
-***
-
-[CDK Data Module](../cdk-data/README.md)

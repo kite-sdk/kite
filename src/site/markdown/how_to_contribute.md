@@ -87,7 +87,3 @@ contribution is accepted.
   Watch this: <http://ecorner.stanford.edu/authorMaterialInfo.html?mid=1642>
 
   Now watch it again: <http://ecorner.stanford.edu/authorMaterialInfo.html?mid=1642>
-
-***
-
-[CDK Data Module](../../../README.md)

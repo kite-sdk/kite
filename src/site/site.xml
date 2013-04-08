@@ -1,0 +1,29 @@
+<project name="CDK">
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>1.3.0</version>
+  </skin>
+  <body>
+    <menu name="CDK">
+      <item name="About" href="index.html"/>
+    </menu>
+    <menu name="Data Module">
+      <item name="Reference Guide" href="guide.html"/>
+      <item name="Design" href="design.html"/>
+      <item name="Known Limitations" href="limitations.html"/>
+    </menu>
+    <menu name="Examples Module">
+      <item name="Usage Examples" href="examples.html"/>
+    </menu>
+    <menu name="Tools Module">
+      <item name="Tools" href="tools.html"/>
+    </menu>
+    <menu name="Project Information">
+      <item name="FAQ" href="faq.html"/>
+      <item name="How To Contribute" href="how_to_contribute.html"/>
+      <item name="JIRA" href="https://issues.cloudera.org/browse/CDK"/>
+    </menu>
+
+  </body>
+</project>

@@ -501,7 +501,3 @@ requirements and a different use case, we see this as a separate concern.
 
 See the _Dataset Repositories and Metadata Providers_ section for information
 about integration plans and compatibility with HCatalog.
-
-***
-
-[CDK Data Module](../../../README.md)

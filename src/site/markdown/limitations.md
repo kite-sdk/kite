@@ -14,7 +14,3 @@ or the indicated JIRA, if it exists.
   guaranteed to be truly unique.
 * All datasets are currently compressed using Snappy. It is not possible to disable
   compression or use a different codec.
-
-***
-
-[CDK Data Module](../../../README.md)
