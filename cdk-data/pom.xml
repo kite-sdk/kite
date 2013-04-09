@@ -8,7 +8,6 @@
     <groupId>com.cloudera</groupId>
     <artifactId>cdk-parent</artifactId>
     <version>0.1.1-SNAPSHOT</version>
-    <relativePath>../cdk-parent</relativePath>
   </parent>
 
   <name>CDK Data Module</name>
