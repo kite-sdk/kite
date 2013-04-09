@@ -101,9 +101,9 @@ engines can easily provide copy functionality, if desired.
 
 _DatasetRepository Interface_
 
-    create(String, DatasetDescriptor): Dataset
-    get(String): Dataset
-    drop(String): boolean
+    Dataset create(String, DatasetDescriptor);
+    Dataset get(String);
+    boolean drop(String);
 
 The Data module ships with a `DatasetRepository` implementation
 `com.cloudera.data.filesystem.FileSystemDatasetRepository` built for operating
@@ -344,7 +344,7 @@ but are specialized. As indicated in the `Dataset` interface earlier, both
 interfaces are generic. The type parameter indicates the type of entity that
 they produce or consume, respectively.
 
-_DatasetReader<E> Interface_
+_DatasetReader Interface_
 
     void open();
     void close();
@@ -353,7 +353,7 @@ _DatasetReader<E> Interface_
     boolean hasNext();
     E read();
 
-_DatasetWriter<E> Interface_
+_DatasetWriter Interface_
 
     void open();
     void close();
