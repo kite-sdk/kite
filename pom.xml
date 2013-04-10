@@ -13,7 +13,6 @@
     <module>cdk-data</module>
     <module>cdk-examples</module>
     <module>cdk-tools</module>
-    <module>cdk-site</module>
   </modules>
 
   <name>Cloudera Development Kit</name>
@@ -83,6 +82,16 @@
         <version>${vers.maven-release}</version>
         <configuration>
           <goals>deploy</goals>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>${vers.maven-site}</version>
+        <configuration>
+          <generateReports>false</generateReports>
+          <inputEncoding>UTF-8</inputEncoding>
+          <outputEncoding>UTF-8</outputEncoding>
         </configuration>
       </plugin>
     </plugins>
