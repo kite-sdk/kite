@@ -17,7 +17,7 @@ grant such a license, as well as other important stuff. See the
 [Cloudera ICLA][cloudera-icla] and [Cloudera CCLA][cloudera-ccla] files included
 with this software for all of the details.
 
-Completed CLAs may be emailed to [cla@cloudera.com][], faxed, or snail mailed to
+Completed CLAs may be emailed to <cla@cloudera.com>, faxed, or snail mailed to
 Cloudera.
 
 [cloudera-icla]: cloudera_icla.pdf "Cloudera ICLA"
