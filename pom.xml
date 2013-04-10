@@ -21,19 +21,53 @@
     of data-related systems.
   </description>
 
+  <inceptionYear>2013</inceptionYear>
+  <url>${url.project}</url>
+
+  <developers>
+    <developer>
+      <id>twhite</id>
+      <name>Tom White</name>
+      <organization>Cloudera</organization>
+    </developer>
+    <developer>
+      <id>esammer</id>
+      <name>Eric Sammer</name>
+      <organization>Cloudera</organization>
+    </developer>
+  </developers>
+
   <scm>
+    <connection>scm:git:git://github.com/cloudera/cdk.git</connection>
     <developerConnection>scm:git:git@github.com:cloudera/cdk.git
     </developerConnection>
     <tag>HEAD</tag>
   </scm>
 
-  <inceptionYear>2013</inceptionYear>
+  <issueManagement>
+    <system>JIRA</system>
+    <url>${url.jira}</url>
+  </issueManagement>
 
   <organization>
     <name>Cloudera</name>
-    <url>http://www.cloudera.com/</url>
+    <url>${url.cloudera}</url>
   </organization>
 
+  <mailingLists>
+    <mailingList>
+      <name>cdh-user@cloudera.org</name>
+      <post>cdh-user@cloudera.org</post>
+      <archive>http://groups.google.com/a/cloudera.org/group/cdh-user/?hl=en
+      </archive>
+      <subscribe>
+        http://groups.google.com/a/cloudera.org/group/cdh-user/subscribe?hl=en
+      </subscribe>
+      <unsubscribe>
+        http://groups.google.com/a/cloudera.org/group/cdh-user/subscribe?hl=en
+      </unsubscribe>
+    </mailingList>
+  </mailingLists>
   <licenses>
     <license>
       <name>Apache Software License v2.0</name>
@@ -59,6 +93,10 @@
     <vers.jexl>2.1.1</vers.jexl>
     <vers.rat>0.8</vers.rat>
     <vers.doxia-markdown>1.3</vers.doxia-markdown>
+
+    <url.cloudera>http://www.cloudera.com</url.cloudera>
+    <url.project>http://cloudera.github.com/cdk</url.project>
+    <url.jira>http://issues.cloudera.com/browse/CDK</url.jira>
   </properties>
 
   <repositories>
@@ -277,7 +315,7 @@
     <site>
       <id>cdk.website</id>
       <name>CDK documentation</name>
-      <url>http://cloudera.github.com/cdk/docs</url>
+      <url>${url.project}</url>
     </site>
   </distributionManagement>
 
