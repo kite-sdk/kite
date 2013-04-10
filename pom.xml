@@ -82,6 +82,7 @@
     <vers.maven-javadoc>2.9</vers.maven-javadoc>
     <vers.maven-release>2.4.1</vers.maven-release>
     <vers.maven-site>3.2</vers.maven-site>
+    <vers.maven-project-info-reports>2.6</vers.maven-project-info-reports>
     <vers.findbugs-plugin>2.5.2</vers.findbugs-plugin>
     <vers.slf4j>1.7.2</vers.slf4j>
     <vers.avro>1.7.3</vers.avro>
@@ -232,6 +233,14 @@
           <version>${vers.maven-release}</version>
           <configuration>
             <goals>deploy</goals>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>${vers.maven-project-info-reports}</version>
+          <configuration>
+            <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
           </configuration>
         </plugin>
       </plugins>
