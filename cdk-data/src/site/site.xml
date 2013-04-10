@@ -6,6 +6,7 @@
 
     <menu name="Data Module">
       <item name="Reference Guide" href="guide.html"/>
+      <item name="Javadoc" href="apidocs/index.html"/>
       <item name="Design" href="design.html"/>
       <item name="Known Limitations" href="limitations.html"/>
     </menu>
