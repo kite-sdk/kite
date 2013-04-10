@@ -28,11 +28,6 @@
     <menu ref="modules"/>
 
 <!--
-    <menu name="Data Module">
-      <item name="Reference Guide" href="guide.html"/>
-      <item name="Design" href="design.html"/>
-      <item name="Known Limitations" href="limitations.html"/>
-    </menu>
     <menu name="Examples Module">
       <item name="Usage Examples" href="examples.html"/>
     </menu>
