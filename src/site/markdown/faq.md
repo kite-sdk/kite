@@ -27,14 +27,14 @@
   container file spec][avro-cf]. Avro meets the criteria for sane storage and
   operation of data. Specifically, Avro:
 
-    * has a binary representation that is compact.
-    * is language agnostic.
-    * supports compression of data.
-    * is splittable by MapReduce jobs, including when compressed.
-    * is self-describing.
-    * is fast to serialize/deserialize.
-    * is well-supported within the Hadoop ecosystem.
-    * is open source under a permissive license.
+  * has a binary representation that is compact.
+  * is language agnostic.
+  * supports compression of data.
+  * is splittable by MapReduce jobs, including when compressed.
+  * is self-describing.
+  * is fast to serialize/deserialize.
+  * is well-supported within the Hadoop ecosystem.
+  * is open source under a permissive license.
 
 * Why not store data as protocol buffers?
 
@@ -56,9 +56,8 @@
   Absolutely! You're encouraged to read the _How to Contribute_ docs included
   with the source code. In short, you must:
 
-    * Be able to (legally) complete, sign, and return a contributor license
-      agreement.
-    * Follow the existing style and standards.
+  * Be able to (legally) complete, sign, and return a contributor license
+    agreement.
+  * Follow the existing style and standards.
 
-[avro-cf]: http://avro.apache.org/docs/current/spec.html#Object+Container+Files
-    (Apache Avro - Object container files)
+[avro-cf]: http://avro.apache.org/docs/current/spec.html#Object+Container+Files "Apache Avro - Object container files"
