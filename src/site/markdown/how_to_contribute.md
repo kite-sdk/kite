@@ -13,12 +13,15 @@ return a _Contributor License Agreement_, or CLA. Separate CLAs exist for
 individuals (an _individual contributor license agreement_, or ICLA) and
 corporations (a CCLA).  The CLA grants a copyright and patent license to
 Cloudera, and users of the software, states that you are legally entitled to
-grant such a license, as well as other important stuff. See the `icla.txt` and
-`ccla.txt` files included with this software for all of the details.
+grant such a license, as well as other important stuff. See the
+[Cloudera ICLA][cloudera-icla] and [Cloudera CCLA][cloudera-ccla] files included
+with this software for all of the details.
 
-Completed CLAs may be emailed, faxed, or snail mailed to Cloudera.
+Completed CLAs may be emailed to [cla@cloudera.com][], faxed, or snail mailed to
+Cloudera.
 
-TODO: Add proper contact info.
+[cloudera-icla]: cloudera_icla.pdf "Cloudera ICLA"
+[cloudera-ccla]: cloudera_ccla.pdf "Cloudera CCLA"
 
 ## Create a Pull Request
 
