@@ -17,19 +17,6 @@
     The CDK Data module provides simple, intuitive APIs for working with
     datasets in the Cloudera Platform.
   </description>
-  <inceptionYear>2013</inceptionYear>
-
-  <organization>
-    <name>Cloudera</name>
-    <url>http://www.cloudera.com/</url>
-  </organization>
-
-  <licenses>
-    <license>
-      <name>Apache Software License v2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
 
   <build>
     <plugins>
