@@ -27,8 +27,7 @@ accept and preferred. If this sounds like Klingon to you, Github has an
 excellent description of [using pull requests][gh-pr]. We follow the _Fork &
 Pull_ model described in the Github documentation.
 
-[gh-pr]: http://help.github.com/articles/using-pull-requests
-    (Github - Using Pull Requests)
+[gh-pr]: http://help.github.com/articles/using-pull-requests "Github - Using Pull Requests"
 
 ## Tips
 
