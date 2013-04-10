@@ -25,6 +25,7 @@
       <item name="Javadoc" href="apidocs/index.html"/>
       <item name="Design" href="design.html"/>
       <item name="Known Limitations" href="limitations.html"/>
+      <item name="FAQ" href="faq.html"/>
     </menu>
 
     <menu ref="reports" name="Reports"/>
