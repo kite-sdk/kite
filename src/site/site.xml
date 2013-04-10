@@ -17,9 +17,17 @@
   </skin>
 
   <body>
-    <menu name="CDK">
-      <item name="About" href="index.html"/>
+    <menu name="CDK" inherit="top">
+      <item name="Home" href="index.html"/>
+      <item name="FAQ" href="faq.html"/>
+      <item name="How To Contribute" href="how_to_contribute.html"/>
+      <item name="Source Repository" href="http://github.com/cloudera/cdk"/>
+      <item name="JIRA" href="https://issues.cloudera.org/browse/CDK"/>
     </menu>
+
+    <menu ref="modules"/>
+
+<!--
     <menu name="Data Module">
       <item name="Reference Guide" href="guide.html"/>
       <item name="Design" href="design.html"/>
@@ -32,11 +40,8 @@
       <item name="Tools" href="tools.html"/>
     </menu>
     <menu name="Project Information">
-      <item name="FAQ" href="faq.html"/>
-      <item name="How To Contribute" href="how_to_contribute.html"/>
-      <item name="JIRA" href="https://issues.cloudera.org/browse/CDK"/>
     </menu>
-    <menu ref="modules"/>
+-->
   </body>
 
 </project>
