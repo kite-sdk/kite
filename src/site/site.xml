@@ -44,9 +44,6 @@
     <menu ref="modules"/>
 
     <!--
-        <menu name="Examples Module">
-          <item name="Usage Examples" href="examples.html"/>
-        </menu>
         <menu name="Tools Module">
           <item name="Tools" href="tools.html"/>
         </menu>
