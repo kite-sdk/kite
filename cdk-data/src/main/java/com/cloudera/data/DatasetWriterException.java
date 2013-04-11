@@ -15,6 +15,17 @@
  */
 package com.cloudera.data;
 
+/**
+ * <p>
+ * Exception thrown for dataset writer-related failures.
+ * </p>
+ * <p>
+ * Implementations of the {@link DatasetWriter} interface throw this exception
+ * if any of their operations fail. This is a runtime (unchecked) exception.
+ * </p>
+ *
+ * @see DatasetWriter
+ */
 public class DatasetWriterException extends RuntimeException {
 
   public DatasetWriterException() {

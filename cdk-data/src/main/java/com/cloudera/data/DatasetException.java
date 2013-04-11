@@ -15,6 +15,17 @@
  */
 package com.cloudera.data;
 
+/**
+ * <p>
+ * Exception thrown for dataset-related failures.
+ * </p>
+ * <p>
+ * Implementations of the {@link Dataset} interface throw this exception if
+ * any of their operations fail. This is a runtime (unchecked) exception.
+ * </p>
+ *
+ * @see Dataset
+ */
 public class DatasetException extends RuntimeException {
 
   public DatasetException() {

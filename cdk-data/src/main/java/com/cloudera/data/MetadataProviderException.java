@@ -15,6 +15,18 @@
  */
 package com.cloudera.data;
 
+/**
+ * <p>
+ * Exception thrown for metadata provider-related failures.
+ * </p>
+ * <p>
+ * Implementations of the {@link MetadataProvider} interface throw this
+ * exception if any of their operations fail. This is a runtime (unchecked)
+ * exception.
+ * </p>
+ *
+ * @see MetadataProvider
+ */
 public class MetadataProviderException extends RuntimeException {
 
   public MetadataProviderException() {
