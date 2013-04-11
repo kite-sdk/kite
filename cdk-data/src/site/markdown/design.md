@@ -2,6 +2,15 @@
 
 This is the design draft for the CDK Data module.
 
+__WARNING WARNING WARNING__
+
+This is the original design document for the CDK data module. It is _not_ kept
+up to date with the current state of the code base. It's here to provide context
+and insight into why the decisions that were made were made, but it's not for
+most users. Instead, check out the [reference guide](guide.html).
+
+__WARNING WARNING WARNING__
+
 ## Overview
 
 Today, interacting with data "in Hadoop" means working with files and
@@ -43,8 +52,7 @@ however this library is, in fact, complementary to all of these systems. This is
 discussed in the context of each system, in detail, in the section _Related Work
 and Systems_.
 
-[Avro]: http://avro.apache.org/
-    (Apache Avro)
+[Avro]: http://avro.apache.org/ "Apache Avro"
 
 ### Entities
 
@@ -81,14 +89,10 @@ can take one of three forms, at the user's option:
    fastest of the options, this requires specialized knowledge of Avro, code
    generation, and handling of custom types.
 
-[POJO]: http://en.wikipedia.org/wiki/POJO
-    (Plain Old Java Object)
-[JPA]: http://en.wikipedia.org/wiki/Java_Persistence_API
-    (Java Persistance API)
-[avro-gr]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecord.html
-    (Avro - GenericRecord Interface)
-[avro-cg]: http://avro.apache.org/docs/current/gettingstartedjava.html#Serializing+and+deserializing+with+code+generation
-    (Avro - Serializing and deserializing with code generation)
+[POJO]: http://en.wikipedia.org/wiki/POJO "Plain Old Java Object"
+[JPA]: http://en.wikipedia.org/wiki/Java_Persistence_API "Java Persistance API"
+[avro-gr]: http://avro.apache.org/docs/current/api/java/org/apache/avro/generic/GenericRecord.html "Avro - GenericRecord Interface"
+[avro-cg]: http://avro.apache.org/docs/current/gettingstartedjava.html#Serializing+and+deserializing+with+code+generation "Avro - Serializing and deserializing with code generation"
 
 ### Datasets
 
@@ -324,8 +328,7 @@ At this time, an HCatalog implementation of the `MetadataProvider` interface
 does not exist. It is, however, straight forward to implement and on the
 roadmap.
 
-[hcat]: http://incubator.apache.org/hcatalog/
-    (Apache HCatalog)
+[hcat]: http://incubator.apache.org/hcatalog/ "Apache HCatalog"
 
 ## Logistics
 
