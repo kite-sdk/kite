@@ -35,9 +35,10 @@
   <body>
     <menu name="CDK" inherit="top">
       <item name="Home" href="index.html"/>
-      <item name="How To Contribute" href="how_to_contribute.html"/>
       <item name="Source Repository" href="http://github.com/cloudera/cdk"/>
       <item name="JIRA" href="https://issues.cloudera.org/browse/CDK"/>
+      <item name="How To Contribute" href="how_to_contribute.html"/>
+      <item name="Adding a Module" href="adding_a_module.html"/>
     </menu>
 
     <menu ref="modules"/>
