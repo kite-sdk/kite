@@ -19,9 +19,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.cloudera.data.FieldPartitioner;
+import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+@Beta
 public class RangeFieldPartitioner extends FieldPartitioner {
 
   private final List<Comparable<?>> upperBounds;

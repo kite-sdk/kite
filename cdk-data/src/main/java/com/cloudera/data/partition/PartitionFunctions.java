@@ -16,6 +16,7 @@
 package com.cloudera.data.partition;
 
 import com.cloudera.data.FieldPartitioner;
+import com.google.common.annotations.Beta;
 
 /**
  * Convenience class so you can say, for example, <code>hash("username", 2)</code> in
@@ -31,10 +32,12 @@ public class PartitionFunctions {
     return new IdentityFieldPartitioner(name, buckets);
   }
 
+  @Beta
   public static FieldPartitioner range(String name, int... upperBounds) {
     return new IntRangeFieldPartitioner(name, upperBounds);
   }
 
+  @Beta
   public static FieldPartitioner range(String name,
       Comparable<?>... upperBounds) {
     return new RangeFieldPartitioner(name, upperBounds);

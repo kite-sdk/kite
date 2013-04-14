@@ -19,8 +19,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.cloudera.data.FieldPartitioner;
+import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
+@Beta
 public class ListFieldPartitioner extends FieldPartitioner {
 
   private final List<Set<?>> values;
