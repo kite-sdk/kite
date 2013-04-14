@@ -215,4 +215,8 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     return fileSystem;
   }
 
+  public MetadataProvider getMetadataProvider() {
+    return metadataProvider;
+  }
+
 }
