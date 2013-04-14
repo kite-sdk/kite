@@ -177,10 +177,10 @@
 </ul><p>This software is licensed under the Apache Software License 2.0. A file named  LICENSE.txt should have been included with the software.</p>
 <ul>
   <li>Why use this library over direct interaction with HDFS?</li>
-</ul><p>HDFS provides byte-oriented input and output streams. Most developers prefer  to think in terms of higher level objects than files and directories, and  frequently graft concepts of tables or datasets on to data stored in HDFS.  This library aims to give you that, out of the box, in a pleasant format that  works with the rest of the ecosystem, while still giving you efficient access  to your data.</p><p>Further, weve found that picking from the myriad of file formats and  compression options is a weird place from which to start ones Hadoop journey.  Rather than say it depends, and lead developers through a decision tree, we  decided to create a set of APIs that does what you ultimately want some high  percentage of the time. For the rest of the time, well, feature requests are  happily accepted (double karma if they come with patches)!</p>
+</ul><p>HDFS provides byte-oriented input and output streams. Most developers prefer  to think in terms of higher level objects than files and directories, and  frequently graft concepts of tables or datasets on to data stored in HDFS.  This library aims to give you that, out of the box, in a pleasant format that  works with the rest of the ecosystem, while still giving you efficient access  to your data.</p><p>Further, we've found that picking from the myriad of file formats and  compression options is a weird place from which to start one's Hadoop journey.  Rather than say it depends, and lead developers through a decision tree, we  decided to create a set of APIs that does what you ultimately want some high  percentage of the time. For the rest of the time, well, feature requests are  happily accepted (double karma if they come with patches)!</p>
 <ul>
   <li>What format is my data stored in?</li>
-</ul><p>Snappy compressed, binary, Avro data files, according to Avros <a class="externalLink" href="http://avro.apache.org/docs/current/spec.html#Object+Container+Files" title="Apache Avro - Object container files">object  container file spec</a>. Avro meets the criteria for sane storage and  operation of data. Specifically, Avro:</p>
+</ul><p>Snappy compressed, binary, Avro data files, according to Avro's <a class="externalLink" href="http://avro.apache.org/docs/current/spec.html#Object+Container+Files" title="Apache Avro - Object container files">object  container file spec</a>. Avro meets the criteria for sane storage and  operation of data. Specifically, Avro:</p>
 <ul>
   <li>has a binary representation that is compact.</li>
   <li>is language agnostic.</li>
@@ -197,10 +197,10 @@
 </ul><p>See <i>Why not protocol buffers?</i></p>
 <ul>
   <li>Why not store data as Java serialization?</li>
-</ul><p>See <a class="externalLink" href="https://github.com/eishay/jvm-serializers/wiki">https://github.com/eishay/jvm-serializers/wiki</a>. In other words, because  its terrible.</p>
+</ul><p>See <a class="externalLink" href="https://github.com/eishay/jvm-serializers/wiki">https://github.com/eishay/jvm-serializers/wiki</a>. In other words, because  it's terrible.</p>
 <ul>
   <li>Can I contribute code/docs/examples?</li>
-</ul><p>Absolutely! Youre encouraged to read the <i>How to Contribute</i> docs included  with the source code. In short, you must:</p>
+</ul><p>Absolutely! You're encouraged to read the <i>How to Contribute</i> docs included  with the source code. In short, you must:</p>
 <ul>
   <li>Be able to (legally) complete, sign, and return a contributor license agreement.</li>
   <li>Follow the existing style and standards.</li>
