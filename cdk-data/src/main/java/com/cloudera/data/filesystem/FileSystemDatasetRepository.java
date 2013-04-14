@@ -108,8 +108,6 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkArgument(descriptor != null,
       "Descriptor can not be null");
-    Preconditions.checkState(metadataProvider != null,
-      "Metadata provider can not be null");
 
     Schema schema = descriptor.getSchema();
     Path datasetPath = pathForDataset(name);
@@ -148,12 +146,6 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   @Override
   public Dataset get(String name) {
     Preconditions.checkArgument(name != null, "Name can not be null");
-    Preconditions.checkState(rootDirectory != null,
-      "Root directory can not be null");
-    Preconditions.checkState(fileSystem != null,
-      "FileSystem implementation can not be null");
-    Preconditions.checkState(metadataProvider != null,
-      "Metadata provider can not be null");
 
     logger.debug("Loading dataset:{}", name);
 
@@ -173,12 +165,6 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   @Override
   public boolean drop(String name) {
     Preconditions.checkArgument(name != null, "Name can not be null");
-    Preconditions.checkState(rootDirectory != null,
-      "Root directory can not be null");
-    Preconditions.checkState(fileSystem != null,
-      "FileSystem implementation can not be null");
-    Preconditions.checkState(metadataProvider != null,
-      "Metadata provider can not be null");
 
     logger.debug("Dropping dataset:{}", name);
 
