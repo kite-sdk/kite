@@ -147,6 +147,27 @@ class FileSystemDataset implements Dataset {
   }
 
   @Override
+  public void dropPartition(PartitionKey key) {
+    Preconditions.checkState(descriptor.isPartitioned(),
+      "Attempt to drop a partition on a non-partitioned dataset (name:%s)",
+      name);
+    Preconditions.checkArgument(key != null, "Partition key may not be null");
+
+    logger.debug("Dropping partition with key:{} dataset:{}", key, name);
+
+    Path partitionDirectory = toDirectoryName(directory, key);
+
+    try {
+      if (!fileSystem.delete(partitionDirectory, true)) {
+        throw new DatasetException("Partition directory " + partitionDirectory
+          + " for key " + key + " does not exist");
+      }
+    } catch (IOException e) {
+      throw new DatasetException("Unable to locate or drop dataset partition directory " + partitionDirectory, e);
+    }
+  }
+
+  @Override
   public Iterable<Dataset> getPartitions() {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get partitions on a non-partitioned dataset (name:%s)",

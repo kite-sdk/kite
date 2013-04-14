@@ -69,6 +69,15 @@ public interface Dataset {
   Dataset getPartition(PartitionKey key, boolean autoCreate);
 
   /**
+   * Drop a partition for a {@link PartitionKey}. Dropping a partition that
+   * doesn't exist results in a {@link DatasetException} being thrown.
+   *
+   * @param key The key used to look up the partition.
+   * @throws DatasetException
+   */
+  void dropPartition(PartitionKey key);
+
+  /**
    * <p>
    * Get an appropriate {@link DatasetWriter} implementation based on the
    * underlying {@code Dataset} implementation.
