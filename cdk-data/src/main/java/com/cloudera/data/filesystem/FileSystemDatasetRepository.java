@@ -90,6 +90,13 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   public FileSystemDatasetRepository(FileSystem fileSystem, Path rootDirectory,
     MetadataProvider metadataProvider) {
 
+    Preconditions.checkArgument(fileSystem != null,
+      "FileSystem can not be null");
+    Preconditions.checkArgument(rootDirectory != null,
+      "Root directory can not be null");
+    Preconditions.checkArgument(metadataProvider != null,
+      "Metadata provider can not be null");
+
     this.fileSystem = fileSystem;
     this.rootDirectory = rootDirectory;
     this.metadataProvider = metadataProvider;
