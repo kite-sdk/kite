@@ -15,21 +15,22 @@
  */
 package com.cloudera.data;
 
-import com.cloudera.data.impl.Accessor;
+/**
+ * Contains constant definitions for the standard {@link Format} instances supported by
+ * the library. {@link #AVRO} is the default format.
+ */
+public class Formats {
+  private Formats() { }
 
-final class AccessorImpl extends Accessor {
+  /**
+   * AVRO: the
+   * <a href="http://avro.apache.org/docs/current/spec.html#Object+Container+Files">Avro
+   * row-oriented format</a>
+   */
+  public static final Format AVRO = new Format("avro");
 
-  @Override
-  public Format newFormat(String name) {
-    return new Format(name);
-  }
-  @Override
-  public PartitionKey newPartitionKey(Object... values) {
-    return new PartitionKey(values);
-  }
-
-  @Override
-  public PartitionStrategy getSubpartitionStrategy(PartitionStrategy partitionStrategy, int startIndex) {
-    return partitionStrategy.getSubpartitionStrategy(startIndex);
-  }
+  /**
+   * PARQUET: the <a href="http://parquet.io/">Parquet columnar format</a>
+   */
+  public static final Format PARQUET = new Format("parquet");
 }

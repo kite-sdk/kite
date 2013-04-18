@@ -16,6 +16,7 @@
 package com.cloudera.data.filesystem;
 
 import com.cloudera.data.DatasetDescriptor;
+import com.cloudera.data.Formats;
 import com.cloudera.data.MetadataProvider;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
@@ -65,6 +66,7 @@ public class TestFileSystemMetadataProvider {
 
     Assert.assertNotNull(descriptor);
     Assert.assertNotNull(descriptor.getSchema());
+    Assert.assertEquals(Formats.AVRO, descriptor.getFormat());
     Assert.assertFalse(descriptor.isPartitioned());
     Assert.assertEquals("user", descriptor.getSchema().getName());
   }
@@ -112,6 +114,23 @@ public class TestFileSystemMetadataProvider {
         .exists(new Path(testDirectory, "test/.metadata/descriptor.properties")));
     Assert.assertTrue("Descriptor schema file should exist",
         fileSystem.exists(new Path(testDirectory, "test/.metadata/schema.avsc")));
+  }
+
+  @Test
+  public void testNonDefaultFormat() throws IOException {
+    MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
+        testDirectory);
+
+    Schema userSchema = new Schema.Parser().parse(Resources.getResource(
+        "schema/user.avsc").openStream());
+
+    provider.save("test", new DatasetDescriptor.Builder().schema(userSchema)
+        .format(Formats.PARQUET).get());
+
+    DatasetDescriptor descriptor = provider.load("test");
+
+    Assert.assertNotNull(descriptor);
+    Assert.assertEquals(Formats.PARQUET, descriptor.getFormat());
   }
 
 }

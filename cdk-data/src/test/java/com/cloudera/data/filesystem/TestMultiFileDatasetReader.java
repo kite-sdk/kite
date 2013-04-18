@@ -15,6 +15,7 @@
  */
 package com.cloudera.data.filesystem;
 
+import com.cloudera.data.DatasetDescriptor;
 import java.io.IOException;
 
 import org.apache.avro.Schema;
@@ -46,8 +47,9 @@ public class TestMultiFileDatasetReader {
     Path testFile = new Path(Resources.getResource("data/strings-100.avro")
         .getFile());
 
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder().schema(testSchema).get();
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, Lists.newArrayList(testFile, testFile), testSchema);
+        fileSystem, Lists.newArrayList(testFile, testFile), descriptor);
 
     int records = 0;
 

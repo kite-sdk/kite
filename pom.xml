@@ -96,6 +96,7 @@
     <vers.hadoop>2.0.0-cdh4.2.1</vers.hadoop>
     <hcatalog.version>0.4.0-cdh4.2.1</hcatalog.version>
     <vers.jexl>2.1.1</vers.jexl>
+    <vers.parquet>1.0.0-SNAPSHOT</vers.parquet>
     <vers.rat>0.8</vers.rat>
     <vers.doxia-markdown>1.3</vers.doxia-markdown>
 
@@ -113,6 +114,17 @@
       </releases>
       <snapshots>
         <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <!-- Parquet -->
+      <id>sonatype-nexus-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
       </snapshots>
     </repository>
   </repositories>
@@ -288,6 +300,17 @@
         <artifactId>annotations</artifactId>
         <version>${vers.findbugs.jsr305}</version>
         <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.twitter</groupId>
+        <artifactId>parquet-avro</artifactId>
+        <version>${vers.parquet}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-core</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>junit</groupId>

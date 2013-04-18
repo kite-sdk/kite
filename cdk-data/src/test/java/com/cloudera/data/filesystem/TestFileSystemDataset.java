@@ -21,12 +21,16 @@ import com.cloudera.data.DatasetException;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
 import com.cloudera.data.FieldPartitioner;
+import com.cloudera.data.Format;
+import com.cloudera.data.Formats;
 import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
+import java.util.Arrays;
+import java.util.Collection;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -37,6 +41,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +50,26 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+@RunWith(Parameterized.class)
 public class TestFileSystemDataset {
 
   private static final Logger logger = LoggerFactory
     .getLogger(TestFileSystemDataset.class);
 
+  @Parameterized.Parameters
+  public static Collection<Object[]> data() {
+    Object[][] data = new Object[][] { /*{ Formats.AVRO }, */{ Formats.PARQUET } };
+    return Arrays.asList(data);
+  }
+
+  private Format format;
   private FileSystem fileSystem;
   private Path testDirectory;
   private Schema testSchema;
+
+  public TestFileSystemDataset(Format format) {
+    this.format = format;
+  }
 
   @Before
   public void setUp() throws IOException {
@@ -70,7 +88,8 @@ public class TestFileSystemDataset {
   public void test() throws IOException {
     FileSystemDataset ds = new FileSystemDataset.Builder().name("test")
       .fileSystem(fileSystem).directory(testDirectory)
-      .descriptor(new DatasetDescriptor.Builder().schema(testSchema).get())
+      .descriptor(new DatasetDescriptor.Builder().schema(testSchema)
+          .format(format).get())
       .get();
 
     Schema schema = ds.getDescriptor().getSchema();
@@ -86,7 +105,8 @@ public class TestFileSystemDataset {
   @Test
   public void testWriteAndRead() throws IOException {
     FileSystemDataset ds = new FileSystemDataset.Builder().name("test")
-      .descriptor(new DatasetDescriptor.Builder().schema(testSchema).get())
+      .descriptor(new DatasetDescriptor.Builder().schema(testSchema)
+          .format(format).get())
       .fileSystem(FileSystem.get(new Configuration()))
       .directory(testDirectory).get();
 
@@ -146,7 +166,7 @@ public class TestFileSystemDataset {
       .directory(testDirectory)
       .name("partitioned-users")
       .descriptor(
-        new DatasetDescriptor.Builder().schema(testSchema)
+        new DatasetDescriptor.Builder().schema(testSchema).format(format)
           .partitionStrategy(partitionStrategy).get()).get();
 
     Assert.assertTrue("Dataset is partitioned", ds.getDescriptor()
@@ -186,7 +206,7 @@ public class TestFileSystemDataset {
       .directory(testDirectory)
       .name("partitioned-users")
       .descriptor(
-        new DatasetDescriptor.Builder().schema(testSchema)
+        new DatasetDescriptor.Builder().schema(testSchema).format(format)
           .partitionStrategy(partitionStrategy).get()).get();
 
     Assert.assertTrue("Dataset is partitioned", ds.getDescriptor()
@@ -235,7 +255,7 @@ public class TestFileSystemDataset {
       .directory(testDirectory)
       .name("partitioned-users")
       .descriptor(
-        new DatasetDescriptor.Builder().schema(testSchema)
+        new DatasetDescriptor.Builder().schema(testSchema).format(format)
           .partitionStrategy(partitionStrategy).get()).get();
 
     Assert
@@ -252,7 +272,7 @@ public class TestFileSystemDataset {
       .directory(testDirectory)
       .name("partitioned-users")
       .descriptor(
-        new DatasetDescriptor.Builder().schema(testSchema)
+        new DatasetDescriptor.Builder().schema(testSchema).format(format)
           .partitionStrategy(partitionStrategy).get()).get();
 
     Dataset userPartition = ds.getPartition(partitionStrategy.partitionKey(1),
@@ -277,7 +297,7 @@ public class TestFileSystemDataset {
       .directory(testDirectory)
       .name("partitioned-users")
       .descriptor(
-        new DatasetDescriptor.Builder().schema(testSchema)
+        new DatasetDescriptor.Builder().schema(testSchema).format(format)
           .partitionStrategy(partitionStrategy).get()
       ).get();
 

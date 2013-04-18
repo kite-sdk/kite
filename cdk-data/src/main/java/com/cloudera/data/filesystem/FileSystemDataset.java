@@ -20,6 +20,7 @@ import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetException;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
+import com.cloudera.data.Formats;
 import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.impl.Accessor;
@@ -87,8 +88,12 @@ class FileSystemDataset implements Dataset {
       writer = new PartitionedDatasetWriter<E>(this);
     } else {
       Path dataFile = new Path(directory, uniqueFilename());
-      writer = new FileSystemDatasetWriter.Builder<E>().fileSystem(fileSystem)
-        .path(dataFile).schema(schema).get();
+      if (Formats.PARQUET.equals(descriptor.getFormat())) {
+        writer = new ParquetFileSystemDatasetWriter<E>(fileSystem, dataFile, schema);
+      } else {
+        writer = new FileSystemDatasetWriter.Builder<E>().fileSystem(fileSystem)
+          .path(dataFile).schema(schema).get();
+      }
     }
 
     return writer;
@@ -106,7 +111,7 @@ class FileSystemDataset implements Dataset {
       throw new DatasetException("Unable to retrieve data file list for directory " + directory, e);
     }
 
-    return new MultiFileDatasetReader<E>(fileSystem, paths, schema);
+    return new MultiFileDatasetReader<E>(fileSystem, paths, descriptor);
   }
 
   @Override
@@ -141,7 +146,7 @@ class FileSystemDataset implements Dataset {
       .name(name)
       .fileSystem(fileSystem)
       .descriptor(
-        new DatasetDescriptor.Builder().schema(schema)
+        new DatasetDescriptor.Builder().schema(schema).format(descriptor.getFormat())
           .partitionStrategy(subpartitionStrategy).get())
       .directory(partitionDirectory).partitionKey(key).get();
   }
@@ -192,7 +197,7 @@ class FileSystemDataset implements Dataset {
         .fileSystem(fileSystem)
         .descriptor(
           new DatasetDescriptor.Builder()
-            .schema(schema)
+            .schema(schema).format(descriptor.getFormat())
             .partitionStrategy(
               Accessor.getDefault().getSubpartitionStrategy(
                 partitionStrategy, 1)).get()).directory(p)
@@ -215,7 +220,7 @@ class FileSystemDataset implements Dataset {
   private String uniqueFilename() {
     // FIXME: This file name is not guaranteed to be truly unique.
     return Joiner.on('-').join(System.currentTimeMillis(),
-      Thread.currentThread().getId() + ".avro");
+      Thread.currentThread().getId() + "." + descriptor.getFormat().getExtension());
   }
 
   private void accumulateDatafilePaths(Path directory, List<Path> paths)

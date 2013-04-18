@@ -18,6 +18,7 @@ package com.cloudera.data.filesystem;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.MetadataProvider;
 import com.cloudera.data.MetadataProviderException;
+import com.cloudera.data.impl.Accessor;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -60,6 +61,7 @@ public class FileSystemMetadataProvider implements MetadataProvider {
   private static final String PARTITION_EXPRESSION_FIELD_NAME = "partitionExpression";
   private static final String VERSION_FIELD_NAME = "version";
   private static final String METADATA_VERSION = "1";
+  private static final String FORMAT_FIELD_NAME = "format";
 
   private final Path rootDirectory;
   private final FileSystem fileSystem;
@@ -86,6 +88,10 @@ public class FileSystemMetadataProvider implements MetadataProvider {
       inputStream = closer.register(fileSystem.open(descriptorPath));
       properties.load(inputStream);
 
+      if (properties.containsKey(FORMAT_FIELD_NAME)) {
+        builder.format(Accessor.getDefault().newFormat(
+            properties.getProperty(FORMAT_FIELD_NAME)));
+      }
       if (properties.containsKey(PARTITION_EXPRESSION_FIELD_NAME)) {
         builder.partitionStrategy(new PartitionExpression(properties
           .getProperty(PARTITION_EXPRESSION_FIELD_NAME), true).evaluate());
@@ -161,6 +167,7 @@ public class FileSystemMetadataProvider implements MetadataProvider {
 
     Properties properties = new Properties();
     properties.setProperty(VERSION_FIELD_NAME, METADATA_VERSION);
+    properties.setProperty(FORMAT_FIELD_NAME, descriptor.getFormat().getName());
 
     if (descriptor.isPartitioned()) {
       properties.setProperty(PARTITION_EXPRESSION_FIELD_NAME,

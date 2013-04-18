@@ -15,33 +15,41 @@
  */
 package com.cloudera.data.filesystem;
 
-import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetReader;
-import com.cloudera.data.Formats;
+import com.cloudera.data.DatasetReaderException;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import java.io.Closeable;
+import java.io.EOFException;
+import java.io.IOException;
+import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileReader;
+import org.apache.avro.reflect.ReflectDatumReader;
+import org.apache.hadoop.fs.AvroFSInput;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import parquet.avro.AvroParquetReader;
 
-import java.util.Iterator;
-import java.util.List;
+class ParquetFileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
 
-class MultiFileDatasetReader<E> implements DatasetReader<E> {
-
-  private final FileSystem fileSystem;
-  private final DatasetDescriptor descriptor;
-
-  private final Iterator<Path> filesIter;
-  private DatasetReader<E> reader;
+  private FileSystem fileSystem;
+  private Path path;
+  private Schema schema;
 
   private ReaderWriterState state;
+  private AvroParquetReader<E> reader;
 
-  public MultiFileDatasetReader(FileSystem fileSystem, List<Path> files,
-      DatasetDescriptor descriptor) {
+  private E next;
 
+  private static final Logger logger = LoggerFactory
+    .getLogger(ParquetFileSystemDatasetReader.class);
+
+  public ParquetFileSystemDatasetReader(FileSystem fileSystem, Path path, Schema schema) {
     this.fileSystem = fileSystem;
-    this.descriptor = descriptor;
-    this.filesIter = files.iterator();
+    this.path = path;
+    this.schema = schema;
 
     this.state = ReaderWriterState.NEW;
   }
@@ -51,53 +59,41 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
       "A reader may not be opened more than once - current state:%s", state);
 
-    if (filesIter.hasNext()) {
-      openNextReader();
-    }
-    this.state = ReaderWriterState.OPEN;
-  }
+    logger.debug("Opening reader on path:{}", path);
 
-  private void openNextReader() {
-    if (Formats.PARQUET.equals(descriptor.getFormat())) {
-      reader = new ParquetFileSystemDatasetReader<E>(fileSystem, filesIter.next(),
-          descriptor.getSchema());
-    } else {
-      reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
-          descriptor.getSchema());
+    try {
+      reader = new AvroParquetReader<E>(path.makeQualified(fileSystem));
+    } catch (IOException e) {
+      throw new DatasetReaderException("Unable to create reader path:" + path, e);
     }
-    reader.open();
+
+    state = ReaderWriterState.OPEN;
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR", justification = "Checked by Preconditions")
   public boolean hasNext() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to read from a file in state:%s", state);
-
-    while (true) {
-      if (reader == null) {
+    if (next == null) {
+      try {
+        next = reader.read();
+      } catch (EOFException e) {
         return false;
-      } else if (reader.hasNext()) {
-        return true;
-      } else {
-        reader.close();
-        reader = null;
-
-        if (filesIter.hasNext()) {
-          openNextReader();
-        } else {
-          return false;
-        }
+      } catch (IOException e) {
+        throw new DatasetReaderException("Unable to read next record from: " + path, e);
       }
     }
+    return next != null;
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR", justification = "Checked by Preconditions")
   public E read() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to read from a file in state:%s", state);
-    return reader.read();
+
+    E current = next;
+    next = null;
+    return current;
   }
 
   @Override
@@ -105,9 +101,15 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
     if (!state.equals(ReaderWriterState.OPEN)) {
       return;
     }
-    if (reader != null) {
+
+    logger.debug("Closing reader on path:{}", path);
+
+    try {
       reader.close();
+    } catch (IOException e) {
+      throw new DatasetReaderException("Unable to close reader path:" + path, e);
     }
+
     state = ReaderWriterState.CLOSED;
   }
 
@@ -120,10 +122,10 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
   public String toString() {
     return Objects.toStringHelper(this)
       .add("fileSystem", fileSystem)
-      .add("descriptor", descriptor)
-      .add("filesIter", filesIter)
-      .add("reader", reader)
+      .add("path", path)
+      .add("schema", schema)
       .add("state", state)
+      .add("reader", reader)
       .toString();
   }
 

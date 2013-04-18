@@ -15,6 +15,7 @@
  */
 package com.cloudera.data.impl;
 
+import com.cloudera.data.Format;
 import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 
@@ -53,6 +54,8 @@ public abstract class Accessor {
 
   public Accessor() {
   }
+
+  public abstract Format newFormat(String name);
 
   public abstract PartitionKey newPartitionKey(Object... values);
 
