@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import org.apache.avro.reflect.ReflectData;
 
 /**
  * <p>
@@ -175,6 +176,18 @@ public class DatasetDescriptor {
      */
     public Builder schema(String s) {
       this.schema = new Schema.Parser().parse(s);
+      return this;
+    }
+
+    /**
+     * Configure the dataset's schema via a Java class type. A schema is required,
+     * and may be set using one of the <code>schema</code> or
+     * <code>schemaFromAvroDataFile</code> methods.
+     *
+     * @return An instance of the builder for method chaining.
+     */
+    public <T> Builder schema(Class<T> type) {
+      this.schema = ReflectData.get().getSchema(type);
       return this;
     }
 
