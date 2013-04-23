@@ -17,11 +17,8 @@ package com.cloudera.cdk.examples.data;
 
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.filesystem.FileSystemDatasetRepository;
-import java.io.IOException;
-import org.apache.hadoop.conf.Configuration;
+import java.net.URI;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -31,12 +28,11 @@ import org.apache.hadoop.util.ToolRunner;
 public class DropUserDataset extends Configured implements Tool {
 
   @Override
-  public int run(String[] args) throws IOException {
+  public int run(String[] args) throws Exception {
 
     // Construct a local filesystem dataset repository rooted at /tmp/data
-    FileSystem fs = FileSystem.getLocal(new Configuration());
-    Path root = new Path("/tmp/data");
-    DatasetRepository repo = new FileSystemDatasetRepository(fs, root);
+    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
+        .rootDirectory(new URI("/tmp/data")).get();
 
     // Drop the users dataset
     boolean success = repo.drop("users");

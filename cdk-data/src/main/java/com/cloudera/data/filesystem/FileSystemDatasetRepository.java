@@ -24,7 +24,10 @@ import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.impl.Accessor;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
+import java.net.URI;
 import org.apache.avro.Schema;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
@@ -210,6 +213,67 @@ public class FileSystemDatasetRepository implements DatasetRepository {
 
   public MetadataProvider getMetadataProvider() {
     return metadataProvider;
+  }
+
+  public static class Builder implements Supplier<FileSystemDatasetRepository> {
+
+    private FileSystem fileSystem;
+    private Path rootDirectory;
+    private MetadataProvider metadataProvider;
+
+    /**
+     * The root directory for metadata and dataset files.
+     */
+    public Builder rootDirectory(Path path) {
+      this.rootDirectory = path;
+      return this;
+    }
+
+    /**
+     * The root directory for metadata and dataset files.
+     */
+    public Builder rootDirectory(URI uri) {
+      this.rootDirectory = new Path(uri);
+      return this;
+    }
+
+    /**
+     * The {@link FileSystem} to store metadata and dataset files in. Optional. If not
+     * specified, the default filesystem will be used.
+     */
+    public Builder fileSystem(FileSystem fileSystem) {
+      this.fileSystem = fileSystem;
+      return this;
+    }
+
+    /**
+     * The {@link MetadataProvider} for metadata storage. Optional. If not
+     * specified, a {@link FileSystemMetadataProvider} will be used.
+     */
+    public Builder metadataProvider(MetadataProvider metadataProvider) {
+      this.metadataProvider = metadataProvider;
+      return this;
+    }
+
+    @Override
+    public FileSystemDatasetRepository get() {
+      Preconditions.checkState(this.rootDirectory != null, "No root directory defined");
+
+      if (fileSystem == null) {
+        try {
+          fileSystem = FileSystem.get(new Configuration());
+        } catch (IOException e) {
+          throw new DatasetRepositoryException("Problem creating " +
+              "FileSystemDatasetRepository.", e);
+        }
+      }
+
+      if (metadataProvider == null) {
+        metadataProvider = new FileSystemMetadataProvider(fileSystem, rootDirectory);
+      }
+
+      return new FileSystemDatasetRepository(fileSystem, rootDirectory, metadataProvider);
+    }
   }
 
 }
