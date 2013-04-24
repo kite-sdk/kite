@@ -44,6 +44,42 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-jdiff-xml</id>
+            <phase>site</phase>
+            <goals>
+              <goal>javadoc</goal>
+            </goals>
+            <configuration>
+              <doclet>jdiff.JDiff</doclet>
+              <docletPath>${project.basedir}/lib/jdiff.jar</docletPath>
+              <additionalparam>
+                -XDignore.symbol.file -apiname 'CDK ${project.version}'
+              </additionalparam>
+              <useStandardDocletOptions>false</useStandardDocletOptions>
+              <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+              <destDir>jdiff</destDir>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-jdiff-site-report</id>
+            <phase>site</phase>
+            <goals>
+              <goal>javadoc</goal>
+            </goals>
+            <configuration>
+              <doclet>jdiff.JDiff</doclet>
+              <docletPath>${project.basedir}/lib/jdiff.jar:${project.basedir}/lib/xerces.jar</docletPath>
+              <additionalparam>
+                -XDignore.symbol.file -oldapi 'CDK ${previous.project.version}' -newapi 'CDK ${project.version}' -oldapidir '${project.basedir}/src/jdiff' -newapidir '${project.reporting.outputDirectory}/jdiff' -javadocnew ../../apidocs/ -d ${project.reporting.outputDirectory}/jdiff
+              </additionalparam>
+              <useStandardDocletOptions>false</useStandardDocletOptions>
+              <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+              <destDir>jdiff</destDir>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.rat</groupId>

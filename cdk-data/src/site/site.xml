@@ -23,6 +23,7 @@
     <menu name="Data Module">
       <item name="Reference Guide" href="guide.html"/>
       <item name="Javadoc" href="apidocs/index.html"/>
+      <item name="API diffs" href="jdiff/changes.html"/>
       <item name="Design" href="design.html"/>
       <item name="Known Limitations" href="limitations.html"/>
       <item name="FAQ" href="faq.html"/>
