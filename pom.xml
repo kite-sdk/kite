@@ -208,6 +208,7 @@
               <exclude>.git/**</exclude>
               <exclude>.gitignore</exclude>
               <exclude>.idea/**</exclude>
+              <exclude>*/jdiff/*.xml</exclude>
             </excludes>
           </configuration>
         </plugin>
