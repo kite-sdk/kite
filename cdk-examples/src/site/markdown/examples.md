@@ -65,6 +65,51 @@ mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.ReadUserDatasetGe
 mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.DropUserDataset"
 ```
 
+### HCatalog
+
+So far all metadata has been stored in the _.metadata_ directory on the filesystem.
+It's possible to store metadata in HCatalog so that other HCatalog-aware applications
+like Hive can make use of it.
+
+Run the following to create the dataset:
+
+```bash
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.CreateHCatalogUserDatasetGeneric"
+```
+
+Hive/HCatalog's metastore directory is set to _/tmp/user/hive/warehouse/_ (see
+_resources/hive-site.xml_), which is where the data is written to:
+
+```bash
+find /tmp/user/hive/warehouse/
+```
+
+Notice that there is no metadata stored there, since the metadata is stored in
+Hive/HCatalog's metastore:
+
+```bash
+hive -e 'describe users'
+```
+
+You can use Hive to query the data directly:
+
+```bash
+hive -e 'select * from users'
+```
+
+Alternatively, you can use the Java API to read the data:
+
+```bash
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.ReadHCatalogUserDatasetGeneric"
+```
+
+Dropping the dataset deletes the metadata from the metastore and the data from the
+filesystem:
+
+```bash
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.DropHCatalogUserDataset"
+```
+
 ## Scala
 
 Run the equivalent example with:

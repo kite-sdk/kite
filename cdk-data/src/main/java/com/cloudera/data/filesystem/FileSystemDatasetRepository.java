@@ -47,10 +47,10 @@ import java.io.IOException;
  * dependencies above and then perform dataset-related operations using any of
  * the provided methods. The primary methods of interest will be
  * {@link #create(String, DatasetDescriptor)}, {@link #get(String)}, and
- * {@link #drop(String)} which create a new dataset, or load an existing
- * dataset, respectively. Once a dataset has been created or loaded, users can
- * invoke the appropriate {@link Dataset} methods to get a reader or writer as
- * needed.
+ * {@link #drop(String)} which create a new dataset, load an existing
+ * dataset, or delete an existing dataset, respectively. Once a dataset has been created
+ * or loaded, users can invoke the appropriate {@link Dataset} methods to get a reader
+ * or writer as needed.
  * </p>
  *
  * @see DatasetRepository
@@ -189,7 +189,7 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     }
   }
 
-  private Path pathForDataset(String name) {
+  protected Path pathForDataset(String name) {
     Preconditions.checkState(rootDirectory != null,
       "Dataset repository root directory can not be null");
 

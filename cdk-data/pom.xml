@@ -200,6 +200,14 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.apache.hcatalog</groupId>
+      <artifactId>hcatalog-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-jexl</artifactId>
     </dependency>

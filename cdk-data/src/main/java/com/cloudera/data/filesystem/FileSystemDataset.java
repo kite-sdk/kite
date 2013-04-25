@@ -55,7 +55,7 @@ class FileSystemDataset implements Dataset {
   private final Schema schema;
 
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
-    DatasetDescriptor descriptor, PartitionKey partitionKey) {
+    DatasetDescriptor descriptor, @Nullable PartitionKey partitionKey) {
 
     this.fileSystem = fileSystem;
     this.directory = directory;

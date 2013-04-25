@@ -226,6 +226,22 @@ currently configured to use. Later, when we create a dataset, we'll see the
 resultant file and directory structure created as a result of this
 configuration.
 
+To use HCatalog, create an instance of `HCatalogDatasetRepository` (in the package
+`com.cloudera.data.hcatalog`). `HCatalogDatasetRepository` uses an internal
+implementation of `MetadataProvider` called `HCatalogMetadataProvider` to communicate
+with HCatalog. When using HCatalog you have two options for specifying the location of
+the data files. You can let HCatalog manage the location of the data,
+the so called "managed tables" option, in which case the data is stored in the warehouse
+directory that is configured by the Hive/HCatalog installation (see the
+`hive.metastore.warehouse.dir` setting in _hive-site.xml_). Alternatively,
+you can provide an explicit Hadoop `FileSystem` and root directory for datasets,
+just like `FileSystemDatasetRepository`. The latter option is referred to as
+"external tables" in the context of Hive/HCatalog.
+
+_Example: Creating a `HCatalogDatasetRepository` with managed tables_
+
+    DatasetRepository repo = new HCatalogDatasetRepository();
+
 ## Datasets
 
 _Summary_

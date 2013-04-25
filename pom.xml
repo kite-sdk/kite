@@ -84,6 +84,7 @@
     <vers.maven-javadoc>2.9</vers.maven-javadoc>
     <vers.maven-release>2.4.1</vers.maven-release>
     <vers.maven-site>3.2</vers.maven-site>
+    <vers.maven-surefire>2.14.1</vers.maven-surefire>
     <vers.maven-project-info-reports>2.6</vers.maven-project-info-reports>
     <vers.findbugs-plugin>2.5.2</vers.findbugs-plugin>
     <vers.slf4j>1.7.2</vers.slf4j>
@@ -93,6 +94,7 @@
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.junit>4.8.2</vers.junit>
     <vers.hadoop>2.0.0-cdh4.2.1</vers.hadoop>
+    <hcatalog.version>0.4.0-cdh4.2.1</hcatalog.version>
     <vers.jexl>2.1.1</vers.jexl>
     <vers.rat>0.8</vers.rat>
     <vers.doxia-markdown>1.3</vers.doxia-markdown>
@@ -183,6 +185,11 @@
           </configuration>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${vers.maven-surefire}</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
           <version>${vers.rat}</version>
@@ -199,11 +206,13 @@
               <exclude>**/*.avro</exclude>
               <exclude>**/*.avsc</exclude>
               <exclude>**/*.iml</exclude>
+              <exclude>**/*.log</exclude>
               <exclude>**/*.md</exclude>
               <exclude>**/*.txt</exclude>
               <exclude>**/.classpath</exclude>
               <exclude>**/.project</exclude>
               <exclude>**/.settings/**</exclude>
+              <exclude>**/metastore_db/**</exclude>
               <exclude>**/target/**</exclude>
               <exclude>.git/**</exclude>
               <exclude>.gitignore</exclude>
@@ -300,6 +309,16 @@
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-common</artifactId>
         <version>${vers.hadoop}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hcatalog</groupId>
+        <artifactId>hcatalog-core</artifactId>
+        <version>${hcatalog.version}</version>
+      </dependency>
+      <dependency> <!-- force HCatalog to use same (earlier) version of Derby as Hive -->
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+        <version>10.4.2.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
