@@ -84,6 +84,7 @@
     <vers.maven-javadoc>2.9</vers.maven-javadoc>
     <vers.maven-release>2.4.1</vers.maven-release>
     <vers.maven-site>3.2</vers.maven-site>
+    <vers.maven-source>2.2.1</vers.maven-source>
     <vers.maven-surefire>2.14.1</vers.maven-surefire>
     <vers.maven-project-info-reports>2.6</vers.maven-project-info-reports>
     <vers.findbugs-plugin>2.5.2</vers.findbugs-plugin>
@@ -195,6 +196,20 @@
             <inputEncoding>UTF-8</inputEncoding>
             <outputEncoding>UTF-8</outputEncoding>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${vers.maven-source}</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
