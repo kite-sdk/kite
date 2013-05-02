@@ -1,0 +1,15 @@
+OK: com.cloudera.data.DatasetException Class
+OK: com.cloudera.data.DatasetReaderException Class
+OK: com.cloudera.data.DatasetRepositoryException Class
+OK: com.cloudera.data.DatasetWriterException Class
+OK: com.cloudera.data.filesystem.FileSystemDatasetRepository.Builder Class
+OK: com.cloudera.data.Format Class
+OK: com.cloudera.data.Formats Class
+OK: com.cloudera.data.MetadataProviderException Class
+OK: com.cloudera.data.Dataset Method dropPartition(com.cloudera.data.PartitionKey)
+OK: com.cloudera.data.DatasetDescriptor.Builder Method format(com.cloudera.data.Format)
+OK: com.cloudera.data.DatasetDescriptor Method getFormat()
+OK: com.cloudera.data.filesystem.FileSystemDatasetRepository Method getMetadataProvider()
+OK: com.cloudera.data.filesystem.FileSystemDatasetRepository Method pathForDataset(java.lang.String)
+OK: com.cloudera.data.DatasetDescriptor.Builder Method schema(java.lang.Class<T>)
+OK: com.cloudera.data.DatasetDescriptor.Builder Method schema(java.lang.String)
