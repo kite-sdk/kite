@@ -76,7 +76,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <previous.project.version>0.1.0</previous.project.version> <!-- used by jdiff -->
+    <previous.project.version>0.2.0</previous.project.version> <!-- used by jdiff -->
 
     <vers.maven-compiler>2.5.1</vers.maven-compiler>
     <vers.maven-javadoc>2.9</vers.maven-javadoc>
