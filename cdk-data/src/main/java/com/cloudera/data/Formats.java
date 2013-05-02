@@ -16,8 +16,12 @@
 package com.cloudera.data;
 
 /**
- * Contains constant definitions for the standard {@link Format} instances supported by
- * the library. {@link #AVRO} is the default format.
+ * <p>
+ * Contains constant definitions for the standard {@link Format} instances supported
+ * by the library. {@link #AVRO} is the default format.
+ * </p>
+ *
+ * @since 0.2.0
  */
 public class Formats {
   private Formats() { }

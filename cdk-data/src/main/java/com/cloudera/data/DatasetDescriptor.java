@@ -91,6 +91,7 @@ public class DatasetDescriptor {
    * Get the associated {@link Format} that the data is stored in.
    *
    * @return the format
+   * @since 0.2.0
    */
   public Format getFormat() {
     return format;
@@ -196,6 +197,7 @@ public class DatasetDescriptor {
      * <code>schemaFromAvroDataFile</code> methods.
      *
      * @return An instance of the builder for method chaining.
+     * @since 0.2.0
      */
     public Builder schema(String s) {
       this.schema = new Schema.Parser().parse(s);
@@ -208,6 +210,7 @@ public class DatasetDescriptor {
      * <code>schemaFromAvroDataFile</code> methods.
      *
      * @return An instance of the builder for method chaining.
+     * @since 0.2.0
      */
     public <T> Builder schema(Class<T> type) {
       this.schema = ReflectData.get().getSchema(type);
@@ -282,6 +285,7 @@ public class DatasetDescriptor {
      * is used by default.
      *
      * @return An instance of the builder for method chaining.
+     * @since 0.2.0
      */
     public Builder format(Format format) {
       this.format = format;

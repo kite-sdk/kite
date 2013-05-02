@@ -26,6 +26,7 @@ package com.cloudera.data;
  * </p>
  *
  * @see MetadataProvider
+ * @since 0.2.0
  */
 public class MetadataProviderException extends RuntimeException {
 

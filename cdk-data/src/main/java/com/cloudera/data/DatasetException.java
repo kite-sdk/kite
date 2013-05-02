@@ -25,6 +25,7 @@ package com.cloudera.data;
  * </p>
  *
  * @see Dataset
+ * @since 0.2.0
  */
 public class DatasetException extends RuntimeException {
 

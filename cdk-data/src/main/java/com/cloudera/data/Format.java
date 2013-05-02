@@ -27,6 +27,8 @@ import javax.annotation.concurrent.Immutable;
  * There are a small number of formats provided, the default is {@link Formats#AVRO},
  * which will be used when no format is explicitly configured.
  * </p>
+ *
+ * @since 0.2.0
  */
 @Immutable
 public class Format {

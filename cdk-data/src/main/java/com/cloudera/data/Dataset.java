@@ -74,6 +74,7 @@ public interface Dataset {
    *
    * @param key The key used to look up the partition.
    * @throws DatasetException
+   * @since 0.2.0
    */
   void dropPartition(PartitionKey key);
 

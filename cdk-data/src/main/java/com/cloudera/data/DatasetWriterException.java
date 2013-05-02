@@ -25,6 +25,7 @@ package com.cloudera.data;
  * </p>
  *
  * @see DatasetWriter
+ * @since 0.2.0
  */
 public class DatasetWriterException extends RuntimeException {
 
