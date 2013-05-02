@@ -19,6 +19,16 @@ topics (e.g. partitioning schemes, metadata management) will benefit even more.
 
 ## What's New
 
+### Version 0.2.0
+
+Version 0.2.0 has two major additions:
+
+* Experimental support for reading and writing datasets in
+  [Parquet format](https://github.com/Parquet/parquet-format).
+* Support for storing dataset metadata in a Hive/HCatalog metastore.
+
+The examples module has example code for both of these usages.
+
 ### Version 0.1.0
 
 Version 0.1.0 is the first release of the CDK Data module. This is considered a
