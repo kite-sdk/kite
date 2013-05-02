@@ -65,6 +65,22 @@ mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.ReadUserDatasetGe
 mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.DropUserDataset"
 ```
 
+### Parquet Columar Format
+
+Parquet is a new columnar format for data. Columnar formats provide performance
+advantages over row-oriented formats like Avro data files (which is the default in CDK),
+when the number of columns is large (dozens) and the typical queries that you perform
+over the data only retrieve a small number of the columns.
+
+Note that Parquet support is still experimental in this release.
+
+```bash
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.CreateUserDatasetGenericParquet"
+find /tmp/data # see the parquet file extension
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.ReadUserDatasetGeneric"
+mvn exec:java -Dexec.mainClass="com.cloudera.cdk.examples.data.DropUserDataset"
+```
+
 ### HCatalog
 
 So far all metadata has been stored in the _.metadata_ directory on the filesystem.
