@@ -19,14 +19,15 @@ HDFS) that let users think and operate in terms of records, datasets, and
 dataset repositories. If you're looking to read or write records directly
 to/from a storage system, the data module is for you.
 
-### CDK Examples
-
-The examples module provides usage examples for the CDK.
-
 ### CDK Tools
 
 The tools module provides command-line tools and APIs for performing common tasks with
 the CDK.
+
+## Examples
+
+Example code demonstrating how to use the CDK can be found in the separate GitHub
+repository at [https://github.com/cloudera/cdk-examples](https://github.com/cloudera/cdk-examples)
 
 ## License
 
