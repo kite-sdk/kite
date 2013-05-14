@@ -204,8 +204,8 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
 
   @Test
-  public void testSplitAttachments() throws Exception {
-    morphline = createMorphline("test-morphlines/splitAttachments");    
+  public void testSeparateAttachments() throws Exception {
+    morphline = createMorphline("test-morphlines/separateAttachments");    
     Record record = new Record();
     record.put(Fields.ATTACHMENT_BODY, "a_foo");
     record.put(Fields.ATTACHMENT_BODY, "a_bar");

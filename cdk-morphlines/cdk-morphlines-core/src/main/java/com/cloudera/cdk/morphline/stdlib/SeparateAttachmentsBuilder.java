@@ -31,25 +31,25 @@ import com.typesafe.config.Config;
  * Command that emits one output record for each attachment in the input record's list of
  * attachments; The result is a list of records, each of which has at most one attachment.
  */
-public final class SplitAttachmentsBuilder implements CommandBuilder {
+public final class SeparateAttachmentsBuilder implements CommandBuilder {
 
   @Override
   public Collection<String> getNames() {
-    return Collections.singletonList("splitAttachments");
+    return Collections.singletonList("separateAttachments");
   }
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new SplitAttachments(config, parent, child, context);
+    return new SeparateAttachments(config, parent, child, context);
   }
   
   
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  private static final class SplitAttachments extends AbstractCommand {
+  private static final class SeparateAttachments extends AbstractCommand {
 
-    public SplitAttachments(Config config, Command parent, Command child, MorphlineContext context) {
+    public SeparateAttachments(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);      
     }
         
