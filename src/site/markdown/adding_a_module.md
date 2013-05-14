@@ -28,7 +28,7 @@ it's included in the build.
 
 ## Site Integration
 
-All modules will be included in the generated website. Please follow the same
+Add a link to the new module to `src/site/site.xml`. Please follow the same
 documentation standards and formats of the other other modules. At the time this
 is written, all documentation is written in Markdown (for better or worse). To
 include content in the site, create markdown documents in the
