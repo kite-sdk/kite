@@ -185,7 +185,7 @@ public class MorphlineContext {
     
     protected MorphlineContext context = create();
     private ExceptionHandler exceptionHandler = new DefaultExceptionHandler();
-    private MetricRegistry metricRegistry;
+    private MetricRegistry metricRegistry = new MetricRegistry();
     
     public Builder() {}
 
@@ -203,7 +203,6 @@ public class MorphlineContext {
 
     public MorphlineContext build() {
       context.exceptionHandler = exceptionHandler;
-      Preconditions.checkNotNull(metricRegistry, "build() requires a prior call to setMetricRegistry()");
       context.metricRegistry = metricRegistry;
       return context;
     }
