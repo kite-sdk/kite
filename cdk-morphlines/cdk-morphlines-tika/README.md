@@ -1,3 +1,3 @@
 # CDK - Morphlines Tika
 
-TODO: Core library that higher level modules such as search-mr and search-flume depend on for indexing.
+Morphline commands for auto-detecting MIME types, as well as decompressing and unpacking files. Depends on Apache Tika.
