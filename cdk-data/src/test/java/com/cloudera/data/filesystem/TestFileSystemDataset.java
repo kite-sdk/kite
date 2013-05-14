@@ -59,7 +59,7 @@ public class TestFileSystemDataset {
 
   @Parameterized.Parameters
   public static Collection<Object[]> data() {
-    Object[][] data = new Object[][] { /*{ Formats.AVRO }, */{ Formats.PARQUET } };
+    Object[][] data = new Object[][] { { Formats.AVRO }, { Formats.PARQUET } };
     return Arrays.asList(data);
   }
 
@@ -198,7 +198,6 @@ public class TestFileSystemDataset {
   }
 
   @Test
-  @Ignore // until https://issues.cloudera.org/browse/CDK-28 is fixed
   public void testPartitionedWriterDouble() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
       .hash("username", 2).hash("email", 3).get();
