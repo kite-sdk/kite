@@ -351,11 +351,13 @@
         <groupId>org.apache.hcatalog</groupId>
         <artifactId>hcatalog-core</artifactId>
         <version>${hcatalog.version}</version>
+        <optional>true</optional>
       </dependency>
       <dependency> <!-- force HCatalog to use same (earlier) version of Derby as Hive -->
         <groupId>org.apache.derby</groupId>
         <artifactId>derby</artifactId>
         <version>10.4.2.0</version>
+        <optional>true</optional>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>

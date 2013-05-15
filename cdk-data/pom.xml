@@ -207,10 +207,12 @@
     <dependency>
       <groupId>org.apache.hcatalog</groupId>
       <artifactId>hcatalog-core</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>

@@ -52,6 +52,19 @@ Add the Cloudera repository to your Maven POM:
 Then add a dependency for the Data Module using the information specified on the
 [Dependency Information page](dependency-info.html).
 
+If you are using HCatalog integration, you'll need the following dependencies too:
+
+    <dependency>
+      <groupId>org.apache.hcatalog</groupId>
+      <artifactId>hcatalog-core</artifactId>
+      <version>0.4.0-cdh4.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>10.4.2.0</version>
+    </dependency>
+
 ## Overview of the Data Module
 
 The CDK Data module is a set of APIs for interacting with datasets in the
