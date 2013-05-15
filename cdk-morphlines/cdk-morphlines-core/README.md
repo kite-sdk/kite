@@ -1,3 +1,3 @@
 # CDK - Morphlines Core
 
-Core library that higher level modules such as cdk-morphlines-avro and cdk-morphlines-tike depend on.
+Morphline runtime and standard library that higher level modules such as cdk-morphlines-avro and cdk-morphlines-tika depend on.
