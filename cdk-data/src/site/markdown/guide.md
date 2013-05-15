@@ -36,6 +36,22 @@ _beta_ release. As a sub-1.0.0 release, this version is _not_ subject to the
 normal API compatibility guarantees. See the _Compatibility Statement_ for
 information about API compatibility guarantees.
 
+## Dependency Information
+
+Add the Cloudera repository to your Maven POM:
+
+    <repository>
+      <id>cdh.repo</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+      <name>Cloudera Repositories</name>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+
+Then add a dependency for the Data Module using the information specified on the
+[Dependency Information page](dependency-info.html).
+
 ## Overview of the Data Module
 
 The CDK Data module is a set of APIs for interacting with datasets in the
