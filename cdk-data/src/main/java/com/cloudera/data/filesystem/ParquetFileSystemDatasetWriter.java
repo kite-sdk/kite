@@ -26,9 +26,12 @@ import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.compress.SnappyCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parquet.avro.AvroParquetWriter;
+import parquet.hadoop.ParquetWriter;
+import parquet.hadoop.metadata.CompressionCodecName;
 
 class ParquetFileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
     Closeable {
@@ -39,6 +42,7 @@ class ParquetFileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
   private Path path;
   private Schema schema;
   private FileSystem fileSystem;
+  private boolean enableCompression;
 
   private Path pathTmp;
   private AvroParquetWriter<E> avroParquetWriter;
@@ -46,10 +50,16 @@ class ParquetFileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
 
   public ParquetFileSystemDatasetWriter(FileSystem fileSystem, Path path,
       Schema schema) {
+    this(fileSystem, path, schema, true);
+  }
+
+  public ParquetFileSystemDatasetWriter(FileSystem fileSystem, Path path,
+      Schema schema, boolean enableCompression) {
     this.fileSystem = fileSystem;
     this.path = path;
     this.pathTmp = new Path(path.getParent(), "." + path.getName() + ".tmp");
     this.schema = schema;
+    this.enableCompression = enableCompression;
     this.state = ReaderWriterState.NEW;
   }
 
@@ -63,8 +73,18 @@ class ParquetFileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
       pathTmp, path);
 
     try {
+      CompressionCodecName codecName = CompressionCodecName.UNCOMPRESSED;
+      if (enableCompression) {
+         if (SnappyCodec.isNativeCodeLoaded()) {
+           codecName = CompressionCodecName.SNAPPY;
+         } else {
+           logger.warn("Compression enabled, but Snappy native code not loaded. " +
+               "Parquet file will not be compressed.");
+         }
+      }
       avroParquetWriter = new AvroParquetWriter<E>(pathTmp.makeQualified(fileSystem),
-          schema);
+          schema, codecName, ParquetWriter.DEFAULT_BLOCK_SIZE,
+          ParquetWriter.DEFAULT_PAGE_SIZE);
     } catch (IOException e) {
       throw new DatasetWriterException("Unable to create writer to path:" + pathTmp, e);
     }
