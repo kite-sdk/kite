@@ -306,7 +306,7 @@ public final class ClassPath {
         if (!scannedDirectories.add(directory.getCanonicalPath())) {
           return; // already been here before
         }
-      } catch (IOException e) {
+      } catch (Exception e) {
         logger.warning("Cannot determine canonical directory for " + directory);
         // IO error, just skip the directory
         return;
