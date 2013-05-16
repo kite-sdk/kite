@@ -265,6 +265,7 @@ public final class ClassPath {
     private final ImmutableSortedSet.Builder<ResourceInfo> resources =
         new ImmutableSortedSet.Builder<ResourceInfo>(Ordering.usingToString());
     private final Set<URI> scannedUris = Sets.newHashSet();
+    private final Set<String> scannedDirectories = Sets.newHashSet();
 
     ImmutableSortedSet<ResourceInfo> getResources() {
       return resources.build();
@@ -300,6 +301,17 @@ public final class ClassPath {
         // IO error, just skip the directory
         return;
       }
+      
+      try {
+        if (!scannedDirectories.add(directory.getCanonicalPath())) {
+          return; // already been here before
+        }
+      } catch (IOException e) {
+        logger.warning("Cannot determine canonical directory for " + directory);
+        // IO error, just skip the directory
+        return;
+      }
+      
       for (File f : files) {
         String name = f.getName();
         if (f.isDirectory()) {
