@@ -202,6 +202,23 @@ public class PartitionStrategy {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || !getClass().equals(o.getClass())) {
+      return false;
+    }
+    PartitionStrategy that = (PartitionStrategy) o;
+    return Objects.equal(this.fieldPartitioners, that.fieldPartitioners);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(fieldPartitioners);
+  }
+
+  @Override
   public String toString() {
     return Objects.toStringHelper(this)
         .add("fieldPartitioners", fieldPartitioners).toString();

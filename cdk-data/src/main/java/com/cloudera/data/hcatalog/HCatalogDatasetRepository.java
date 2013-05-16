@@ -18,6 +18,7 @@ package com.cloudera.data.hcatalog;
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
+import com.cloudera.data.DatasetRepositoryException;
 import com.cloudera.data.filesystem.FileSystemDatasetRepository;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -99,6 +100,11 @@ public class HCatalogDatasetRepository implements DatasetRepository {
     } else {
       return fileSystemDatasetRepository.create(name, descriptor);
     }
+  }
+
+  @Override
+  public Dataset update(String name, DatasetDescriptor descriptor) {
+    throw new DatasetRepositoryException("Descriptor updates are not supported.");
   }
 
   @Override

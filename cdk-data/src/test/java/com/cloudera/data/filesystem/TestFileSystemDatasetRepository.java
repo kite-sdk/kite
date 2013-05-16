@@ -18,6 +18,8 @@ package com.cloudera.data.filesystem;
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetReader;
+import com.cloudera.data.DatasetRepositoryException;
+import com.cloudera.data.Formats;
 import com.cloudera.data.PartitionStrategy;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
@@ -29,6 +31,9 @@ import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.TextNode;
+import org.json.JSONString;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -145,6 +150,79 @@ public class TestFileSystemDatasetRepository {
 
     result = repo.drop("test1");
     Assert.assertFalse("Drop nonexistant dataset should return false", result);
+  }
+
+  @Test
+  public void testUpdateFailsWithFormatChange() throws IOException {
+    Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
+        .schema(testSchema).format(Formats.AVRO).get());
+    try {
+      repo.update("test1", new DatasetDescriptor.Builder().schema(testSchema).format
+          (Formats.PARQUET).get());
+      Assert.fail("Should fail due to format change");
+    } catch (DatasetRepositoryException e) {
+      // expected
+    }
+    Assert.assertEquals(Formats.AVRO, repo.get("test1").getDescriptor().getFormat());
+  }
+
+  @Test
+  public void testUpdateFailsWithPartitionStrategyChange() throws IOException {
+    PartitionStrategy ps = new PartitionStrategy.Builder()
+        .hash("username", 2).get();
+    Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
+        .schema(testSchema).partitionStrategy(ps).get());
+    try {
+      repo.update("test1", new DatasetDescriptor.Builder()
+          .schema(testSchema).partitionStrategy(new PartitionStrategy.Builder()
+              .hash("username", 2).hash("email", 3).get()).get());
+      Assert.fail("Should fail due to partition strategy change");
+    } catch (DatasetRepositoryException e) {
+      // expected
+    }
+    Assert.assertEquals(ps, repo.get("test1").getDescriptor().getPartitionStrategy());
+  }
+
+  @Test
+  public void testUpdate() throws IOException {
+    Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
+        .schema(testSchema).get());
+
+    Assert.assertEquals("Dataset name is propagated", "test1",
+        dataset.getName());
+    Assert.assertEquals("Dataset schema is propagated", testSchema, dataset
+        .getDescriptor().getSchema());
+
+    Schema testSchemaV2 = Schema.createRecord("Test", "Test record schema",
+        "com.cloudera.data.filesystem", false);
+    testSchemaV2.setFields(Lists.newArrayList(
+        new Field("name", Schema.create(Type.STRING), null, null),
+        new Field("email", Schema.create(Type.STRING), null, null) // incompatible - no default
+    ));
+
+    try {
+      repo.update("test1", new DatasetDescriptor.Builder().schema(testSchemaV2).get());
+      Assert.fail("Should fail due to incompatible update");
+    } catch (DatasetRepositoryException e) {
+      // expected
+    }
+    dataset = repo.get("test1");
+    Assert.assertEquals("Dataset schema is unchanged", testSchema, dataset
+        .getDescriptor().getSchema());
+
+    Schema testSchemaV3 = Schema.createRecord("Test", "Test record schema",
+        "com.cloudera.data.filesystem", false);
+    testSchemaV3.setFields(Lists.newArrayList(
+        new Field("name", Schema.create(Type.STRING), null, null),
+        new Field("email", Schema.create(Type.STRING), null,
+            TextNode.valueOf("a@example.com"))
+    ));
+
+    Dataset datasetV3 = repo.update("test1", new DatasetDescriptor.Builder().schema
+        (testSchemaV3).get());
+
+    Assert.assertEquals("Dataset schema is updated", testSchemaV3, datasetV3
+        .getDescriptor().getSchema());
   }
 
 }

@@ -66,12 +66,12 @@ public class Format {
 
     Format that = (Format) o;
 
-    return name.equals(that.name);
+    return Objects.equal(this.name, that.name);
   }
 
   @Override
   public int hashCode() {
-    return name.hashCode();
+    return Objects.hashCode(name);
   }
 
   @Override

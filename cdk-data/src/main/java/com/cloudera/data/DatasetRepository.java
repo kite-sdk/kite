@@ -72,6 +72,22 @@ public interface DatasetRepository {
   Dataset create(String name, DatasetDescriptor descriptor);
 
   /**
+   * Update an existing {@link Dataset} to reflect the supplied {@code descriptor}. The
+   * common case is updating a dataset schema. Depending on
+   * the underlying dataset storage, some updates may not be supported,
+   * such as a change in format or partition strategy.
+   * Any attempt to make an unsupported or incompatible update will result in an
+   * exception being thrown and no change being made to the dataset.
+   *
+   * @param name       The fully qualified dataset name
+   * @param descriptor A descriptor that describes the schema and other properties of the
+   *                   dataset
+   * @return The newly created dataset
+   * @throws DatasetRepositoryException
+   */
+  Dataset update(String name, DatasetDescriptor descriptor);
+
+  /**
    * Drop the named {@link Dataset}. If no dataset with the
    * provided {@code name} exists, a {@link DatasetReaderException} is thrown.
    *

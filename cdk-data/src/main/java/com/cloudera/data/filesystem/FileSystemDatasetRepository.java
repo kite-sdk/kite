@@ -147,6 +147,45 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   }
 
   @Override
+  public Dataset update(String name, DatasetDescriptor descriptor) {
+    DatasetDescriptor oldDescriptor = metadataProvider.load(name);
+
+    if (!oldDescriptor.getFormat().equals(descriptor.getFormat())) {
+      throw new DatasetRepositoryException("Cannot change dataset format from " +
+          oldDescriptor.getFormat() + " to " + descriptor.getFormat());
+    }
+
+    if (oldDescriptor.isPartitioned() != descriptor.isPartitioned()) {
+      throw new DatasetRepositoryException("Cannot change an unpartitioned dataset to " +
+          " partitioned or vice versa.");
+    } else if (oldDescriptor.isPartitioned() && descriptor.isPartitioned() &&
+        !oldDescriptor.getPartitionStrategy().equals(descriptor.getPartitionStrategy())) {
+      throw new DatasetRepositoryException("Cannot change partition strategy from " +
+          oldDescriptor.getPartitionStrategy() + " to " + descriptor.getPartitionStrategy());
+    }
+
+    // check can read records written with old schema using new schema
+    Schema oldSchema = oldDescriptor.getSchema();
+    Schema newSchema = descriptor.getSchema();
+    if (!SchemaValidationUtil.canRead(oldSchema, newSchema)) {
+      throw new DatasetRepositoryException("New schema cannot read data written using " +
+          "old schema. New schema: " + newSchema.toString(true) + "\nOld schema: " +
+          oldSchema.toString(true));
+    }
+
+    metadataProvider.save(name, descriptor);
+
+    return new FileSystemDataset.Builder()
+        .name(name)
+        .fileSystem(fileSystem)
+        .descriptor(descriptor)
+        .directory(pathForDataset(name))
+        .partitionKey(
+            descriptor.isPartitioned() ? Accessor.getDefault()
+                .newPartitionKey() : null).get();
+  }
+
+  @Override
   public Dataset get(String name) {
     Preconditions.checkArgument(name != null, "Name can not be null");
 

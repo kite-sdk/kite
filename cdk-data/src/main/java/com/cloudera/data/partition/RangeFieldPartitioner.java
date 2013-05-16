@@ -56,6 +56,24 @@ public class RangeFieldPartitioner extends FieldPartitioner {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || !getClass().equals(o.getClass())) {
+      return false;
+    }
+    RangeFieldPartitioner that = (RangeFieldPartitioner) o;
+    return Objects.equal(this.getName(), that.getName()) &&
+        Objects.equal(this.upperBounds, that.upperBounds);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getName(), upperBounds);
+  }
+
+  @Override
   public String toString() {
     return Objects.toStringHelper(this).add("name", getName())
         .add("upperBounds", upperBounds).toString();
