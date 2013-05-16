@@ -19,6 +19,7 @@ manner.
 This enables rapid prototyping of Hadoop ETL applications, complex stream and event 
 processing in real time, flexible Log File Analysis, integration of multiple heterogeneous input 
 schemas and file formats, as well as reuse of ETL logic building blocks across Search applications.
-Cloudera ships a high performance runtime that processes all commands of a given morphline in the 
-same thread, and adds no artificial overheads. For high scalability, a large number of morphline 
-instances can be deployed on a cluster in a large number of Flume agents and MapReduce tasks. 
+Cloudera ships a high performance runtime that compiles a morphline on the fly and processes all 
+commands of a given morphline in the same thread, and adds no artificial overheads. 
+For high scalability, a large number of morphline instances can be deployed on a cluster in a 
+large number of Flume agents and MapReduce tasks. 
