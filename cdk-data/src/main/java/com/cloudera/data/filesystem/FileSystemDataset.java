@@ -30,16 +30,22 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.List;
+import javax.annotation.Nullable;
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.crunch.Target;
+import org.apache.crunch.io.ReadableSource;
+import org.apache.crunch.io.avro.AvroFileSource;
+import org.apache.crunch.io.avro.AvroFileTarget;
+import org.apache.crunch.types.avro.AvroType;
+import org.apache.crunch.types.avro.Avros;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.util.List;
 
 class FileSystemDataset implements Dataset {
 
@@ -112,6 +118,34 @@ class FileSystemDataset implements Dataset {
     }
 
     return new MultiFileDatasetReader<E>(fileSystem, paths, descriptor);
+  }
+
+  <E> ReadableSource<E> getCrunchSource(Class<E> type) {
+    List<Path> paths = Lists.newArrayList();
+
+    try {
+      accumulateDatafilePaths(directory, paths);
+    } catch (IOException e) {
+      throw new DatasetException("Unable to retrieve data file list for directory " + directory, e);
+    }
+
+    AvroType<E> avroType;
+    if (type.isAssignableFrom(GenericData.Record.class)) {
+      avroType = (AvroType<E>) Avros.generics(schema);
+    } else {
+      avroType = Avros.records(type);
+    }
+    return new AvroFileSource<E>(paths.get(0), avroType); // TODO: use all paths
+  }
+
+  Target getCrunchTarget() {
+    if (descriptor.isPartitioned()) {
+      throw new UnsupportedOperationException("Partitioned datasets are not supported.");
+    }
+    if (descriptor.getFormat() == Formats.PARQUET) {
+      throw new UnsupportedOperationException("Parquet is not supported.");
+    }
+    return new AvroFileTarget(directory);
   }
 
   @Override

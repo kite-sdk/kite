@@ -89,7 +89,7 @@
     <vers.findbugs-plugin>2.5.2</vers.findbugs-plugin>
     <vers.slf4j>1.7.2</vers.slf4j>
     <vers.avro>1.7.3</vers.avro>
-    <vers.crunch>0.5.0-cdh4.1.3</vers.crunch>
+    <vers.crunch>0.6.0-cdh4.2.0</vers.crunch>
     <vers.guava>14.0</vers.guava>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.junit>4.8.2</vers.junit>
@@ -384,7 +384,7 @@
       </dependency>
       <dependency>
         <groupId>org.apache.crunch</groupId>
-        <artifactId>crunch</artifactId>
+        <artifactId>crunch-core</artifactId>
         <version>${vers.crunch}</version>
       </dependency>
       <dependency>
