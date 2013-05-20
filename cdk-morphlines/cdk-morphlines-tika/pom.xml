@@ -15,12 +15,12 @@
   <parent>
     <groupId>com.cloudera.search</groupId>
     <artifactId>cdk-morphlines</artifactId>
-    <version>0.1.4-cdh4.2.0-SNAPSHOT</version>
+    <version>0.9.0-cdh4.3.0-SNAPSHOT</version>
   </parent>
 
   <groupId>com.cloudera.search</groupId>
   <artifactId>cdk-morphlines-tika</artifactId>
-  <version>0.1.4-cdh4.2.0-SNAPSHOT</version>
+  <version>0.9.0-cdh4.3.0-SNAPSHOT</version>
   <name>CDK Morphlines Tika</name>
 
   <dependencies>
