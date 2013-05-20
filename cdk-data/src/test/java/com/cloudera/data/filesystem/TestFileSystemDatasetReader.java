@@ -15,8 +15,10 @@
  */
 package com.cloudera.data.filesystem;
 
+import com.cloudera.data.DatasetReader;
+import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import java.io.IOException;
-
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
@@ -29,20 +31,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.data.DatasetReader;
-import com.google.common.collect.Lists;
-import com.google.common.io.Resources;
+import static com.cloudera.data.filesystem.DatasetTestUtilities.STRING_SCHEMA;
 
 public class TestFileSystemDatasetReader {
 
   private FileSystem fileSystem;
-  private Schema testSchema;
 
   @Before
   public void setUp() throws IOException {
     fileSystem = FileSystem.get(new Configuration());
-    testSchema = new Schema.Parser().parse(Resources.getResource(
-        "schema/string.avsc").openStream());
   }
 
   @Test
@@ -51,7 +48,7 @@ public class TestFileSystemDatasetReader {
     int records = 0;
 
     reader = new FileSystemDatasetReader<Record>(fileSystem, new Path(Resources
-        .getResource("data/strings-100.avro").getFile()), testSchema);
+        .getResource("data/strings-100.avro").getFile()), STRING_SCHEMA);
 
     try {
       reader.open();
@@ -104,7 +101,7 @@ public class TestFileSystemDatasetReader {
   public void testHasNextOnNonOpenWriterFails() throws IOException {
     DatasetReader<String> reader;
     reader = new FileSystemDatasetReader<String>(fileSystem, new Path(Resources
-        .getResource("data/strings-100.avro").getFile()), testSchema);
+        .getResource("data/strings-100.avro").getFile()), STRING_SCHEMA);
 
     try {
       reader.hasNext();

@@ -17,15 +17,15 @@ package com.cloudera.data.hcatalog;
 
 import com.cloudera.data.DatasetDescriptor;
 import com.google.common.io.Files;
-import com.google.common.io.Resources;
 import java.io.IOException;
-import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static com.cloudera.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
 
 public class TestHCatalogMetadataProvider {
 
@@ -42,18 +42,15 @@ public class TestHCatalogMetadataProvider {
   public void testNonPartitioned() throws IOException {
     HCatalogMetadataProvider provider = new HCatalogMetadataProvider(false);
 
-    Schema userSchema = new Schema.Parser().parse(Resources.getResource(
-        "schema/user.avsc").openStream());
-
     provider.setFileSystem(fileSystem);
     provider.setDataDirectory(testDirectory);
-    provider.save("test", new DatasetDescriptor.Builder().schema(userSchema)
+    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA)
         .get());
 
     DatasetDescriptor descriptor = provider.load("test");
 
     Assert.assertNotNull(descriptor);
-    Assert.assertEquals(userSchema, descriptor.getSchema());
+    Assert.assertEquals(USER_SCHEMA, descriptor.getSchema());
     Assert.assertFalse(descriptor.isPartitioned());
 
     boolean result = provider.delete("test");

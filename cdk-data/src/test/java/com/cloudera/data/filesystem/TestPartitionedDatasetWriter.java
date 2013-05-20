@@ -15,12 +15,12 @@
  */
 package com.cloudera.data.filesystem;
 
-import java.io.IOException;
-
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.PartitionStrategy;
-import org.apache.avro.Schema;
+import com.google.common.io.Closeables;
+import com.google.common.io.Files;
+import java.io.IOException;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
@@ -30,15 +30,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.io.Closeables;
-import com.google.common.io.Files;
-import com.google.common.io.Resources;
+import static com.cloudera.data.filesystem.DatasetTestUtilities.USER_PARTITIONED_SCHEMA;
 
 public class TestPartitionedDatasetWriter {
 
   private Path testDirectory;
   private FileSystem fileSystem;
-  private Schema testSchema;
   private FileSystemDatasetRepository repo;
   private PartitionedDatasetWriter<Object> writer;
 
@@ -46,17 +43,14 @@ public class TestPartitionedDatasetWriter {
   public void setUp() throws IOException {
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
     fileSystem = FileSystem.get(new Configuration());
-    testSchema = new Schema.Parser().parse(Resources.getResource(
-        "schema/user-partitioned.avsc").openStream());
     repo = new FileSystemDatasetRepository(fileSystem, testDirectory);
-    PartitionStrategy partitionStrategy = new PartitionExpression(testSchema
+    PartitionStrategy partitionStrategy = new PartitionExpression(USER_PARTITIONED_SCHEMA
         .getProp("cdk.partition.expression"), true).evaluate();
     Dataset users = repo.create(
         "users",
         new DatasetDescriptor.Builder()
-            .schema(testSchema)
-            .partitionStrategy(
-                partitionStrategy)
+            .schema(USER_PARTITIONED_SCHEMA)
+            .partitionStrategy(partitionStrategy)
             .get());
     writer = new PartitionedDatasetWriter<Object>(users, partitionStrategy);
   }
@@ -74,9 +68,8 @@ public class TestPartitionedDatasetWriter {
 
   @Test
   public void testWriter() throws IOException {
-    Record record = new GenericRecordBuilder(testSchema).set("username",
+    Record record = new GenericRecordBuilder(USER_PARTITIONED_SCHEMA).set("username",
         "test1").build();
-
     try {
       writer.open();
       writer.write(record);
@@ -89,7 +82,7 @@ public class TestPartitionedDatasetWriter {
 
   @Test(expected = IllegalStateException.class)
   public void testWriteToClosedWriterFails() throws IOException {
-    Record record = new GenericRecordBuilder(testSchema).set("username",
+    Record record = new GenericRecordBuilder(USER_PARTITIONED_SCHEMA).set("username",
         "test1").build();
     writer.open();
     writer.close();

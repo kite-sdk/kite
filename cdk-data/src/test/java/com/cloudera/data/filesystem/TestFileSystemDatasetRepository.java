@@ -17,7 +17,6 @@ package com.cloudera.data.filesystem;
 
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetRepositoryException;
 import com.cloudera.data.Formats;
 import com.cloudera.data.PartitionStrategy;
@@ -27,17 +26,16 @@ import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.TextNode;
-import org.json.JSONString;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static com.cloudera.data.filesystem.DatasetTestUtilities.datasetSize;
 
 public class TestFileSystemDatasetRepository {
 
@@ -48,11 +46,7 @@ public class TestFileSystemDatasetRepository {
 
   @Before
   public void setUp() throws IOException {
-    Configuration conf = new Configuration();
-
-    conf.set("fs.default.name", "file:///");
-
-    fileSystem = FileSystem.get(conf);
+    fileSystem = FileSystem.get(new Configuration());
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
     repo = new FileSystemDatasetRepository(fileSystem, testDirectory);
 
@@ -122,22 +116,7 @@ public class TestFileSystemDatasetRepository {
      * We perform a read test to make sure only data files are encountered
      * during a read.
      */
-    DatasetReader<Record> reader = dataset.getReader();
-    int records = 0;
-
-    try {
-      reader.open();
-
-      while (reader.hasNext()) {
-        Record record = reader.read();
-        Assert.assertNotNull(record);
-        records++;
-      }
-    } finally {
-      reader.close();
-    }
-
-    Assert.assertEquals(0, records);
+    Assert.assertEquals(0, datasetSize(dataset));
   }
 
   @Test
@@ -149,7 +128,7 @@ public class TestFileSystemDatasetRepository {
     Assert.assertTrue("Drop dataset should return true", result);
 
     result = repo.drop("test1");
-    Assert.assertFalse("Drop nonexistant dataset should return false", result);
+    Assert.assertFalse("Drop nonexistent dataset should return false", result);
   }
 
   @Test

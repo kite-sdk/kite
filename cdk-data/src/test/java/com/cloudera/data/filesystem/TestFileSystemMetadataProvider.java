@@ -19,9 +19,7 @@ import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.Formats;
 import com.cloudera.data.MetadataProvider;
 import com.google.common.io.Files;
-import com.google.common.io.Resources;
 import java.io.IOException;
-import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,6 +27,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static com.cloudera.data.filesystem.DatasetTestUtilities.USER_PARTITIONED_SCHEMA;
+import static com.cloudera.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
 
 public class TestFileSystemMetadataProvider {
 
@@ -51,11 +52,7 @@ public class TestFileSystemMetadataProvider {
     MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
         testDirectory);
 
-    Schema userSchema = new Schema.Parser().parse(Resources.getResource(
-        "schema/user.avsc").openStream());
-
-    provider.save("test", new DatasetDescriptor.Builder().schema(userSchema)
-        .get());
+    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
 
     Assert.assertTrue("Descriptor properties file should exist", fileSystem
         .exists(new Path(testDirectory, "test/.metadata/descriptor.properties")));
@@ -76,10 +73,7 @@ public class TestFileSystemMetadataProvider {
     MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
         testDirectory);
 
-    provider.save(
-        "test",
-        new DatasetDescriptor.Builder().schema(
-            Resources.getResource("schema/user.avsc")).get());
+    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
 
     Assert.assertTrue("Descriptor properties file should exist", fileSystem
         .exists(new Path(testDirectory, "test/.metadata/descriptor.properties")));
@@ -98,15 +92,12 @@ public class TestFileSystemMetadataProvider {
     MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
         testDirectory);
 
-    Schema userSchema = new Schema.Parser().parse(Resources.getResource(
-        "schema/user-partitioned.avsc").openStream());
-
     provider.save(
         "test",
         new DatasetDescriptor.Builder()
-            .schema(userSchema)
+            .schema(USER_PARTITIONED_SCHEMA)
             .partitionStrategy(
-                new PartitionExpression(userSchema
+                new PartitionExpression(USER_PARTITIONED_SCHEMA
                     .getProp("cdk.partition.expression"), true).evaluate())
             .get());
 
@@ -121,10 +112,7 @@ public class TestFileSystemMetadataProvider {
     MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
         testDirectory);
 
-    Schema userSchema = new Schema.Parser().parse(Resources.getResource(
-        "schema/user.avsc").openStream());
-
-    provider.save("test", new DatasetDescriptor.Builder().schema(userSchema)
+    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA)
         .format(Formats.PARQUET).get());
 
     DatasetDescriptor descriptor = provider.load("test");

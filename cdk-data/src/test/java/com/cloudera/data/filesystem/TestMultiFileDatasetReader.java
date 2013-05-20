@@ -16,9 +16,9 @@
 package com.cloudera.data.filesystem;
 
 import com.cloudera.data.DatasetDescriptor;
+import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import java.io.IOException;
-
-import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -27,19 +27,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Resources;
+import static com.cloudera.data.filesystem.DatasetTestUtilities.STRING_SCHEMA;
 
 public class TestMultiFileDatasetReader {
 
   private FileSystem fileSystem;
-  private Schema testSchema;
 
   @Before
   public void setUp() throws IOException {
     fileSystem = FileSystem.get(new Configuration());
-    testSchema = new Schema.Parser().parse(Resources.getResource(
-        "schema/string.avsc").openStream());
   }
 
   @Test
@@ -47,7 +43,7 @@ public class TestMultiFileDatasetReader {
     Path testFile = new Path(Resources.getResource("data/strings-100.avro")
         .getFile());
 
-    DatasetDescriptor descriptor = new DatasetDescriptor.Builder().schema(testSchema).get();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder().schema(STRING_SCHEMA).get();
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
         fileSystem, Lists.newArrayList(testFile, testFile), descriptor);
 

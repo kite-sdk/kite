@@ -15,15 +15,12 @@
  */
 package com.cloudera.data.filesystem;
 
-import java.util.List;
-
 import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.filesystem.PartitionExpression;
+import com.cloudera.data.partition.HashFieldPartitioner;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.cloudera.data.partition.HashFieldPartitioner;
 
 public class TestPartitionExpression {
 

@@ -15,9 +15,9 @@
  */
 package com.cloudera.data.filesystem;
 
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
@@ -27,9 +27,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.cloudera.data.filesystem.FileSystemDatasetWriter;
-import com.google.common.io.Files;
-
 public class TestFileSystemDatasetWriter {
 
   private File testDirectory;
@@ -38,11 +35,7 @@ public class TestFileSystemDatasetWriter {
   @Before
   public void setUp() throws IOException {
     testDirectory = Files.createTempDir();
-
-    Configuration conf = new Configuration();
-
-    conf.set("fs.default.name", "file:///");
-    fileSystem = FileSystem.get(conf);
+    fileSystem = FileSystem.get(new Configuration());
   }
 
   @After
