@@ -1,0 +1,38 @@
+{
+  "name": "StandardEvent",
+  "namespace": "com.cloudera.data.event",
+  "type": "record",
+  "doc": "A standard event type for logging, based on the paper 'The Unified Logging Infrastructure for Data Analytics at Twitter' by Lee et al, http://vldb.org/pvldb/vol5/p1771_georgelee_vldb2012.pdf",
+  "fields": [
+    {
+      "name": "event_initiator",
+      "type": "string",
+      "doc": "Where the event was triggered from in the format {client,server}_{user,app}, e.g. 'client_user'. Required."
+    },
+    {
+      "name": "event_name",
+      "type": "string",
+      "doc": "A hierarchical name for the event, with parts separated by ':'. Required."
+    },
+    {
+      "name": "user_id",
+      "type": "long",
+      "doc": "A unique identifier for the user. Required."
+    },
+    {
+      "name": "session_id",
+      "type": "string",
+      "doc": "A unique identifier for the session. Required."
+    },
+    {
+      "name": "ip",
+      "type": "string",
+      "doc": "The IP address of the host where the event originated. Required."
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "doc": "The point in time when the event occurred, represented as the number of milliseconds since January 1, 1970, 00:00:00 GMT. Required."
+    }
+  ]
+}

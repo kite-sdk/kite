@@ -154,6 +154,24 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro-maven-plugin</artifactId>
+          <version>${vers.avro}</version>
+          <configuration>
+            <stringType>String</stringType>
+            <createSetters>false</createSetters>
+            <fieldVisibility>private</fieldVisibility>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>schema</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${vers.maven-compiler}</version>
