@@ -184,7 +184,6 @@ public abstract class AbstractCommand implements Command {
    * into finalChild. The command will have currentParent as it's parent.
    */
   protected Command buildCommand(Config cmdConfig, Command currentParent, Command finalChild) {    
-    LOG.trace("unwrapped {}", cmdConfig.root().unwrapped());    
     Set<Map.Entry<String, Object>> entries = cmdConfig.root().unwrapped().entrySet();
     if (entries.size() != 1) {
       throw new MorphlineCompilationException("Illegal number of entries: " + entries.size(), cmdConfig);

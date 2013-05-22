@@ -74,7 +74,6 @@ public final class TryRulesBuilder implements CommandBuilder {
       
       List<? extends Config> ruleConfigs = getConfigs().getConfigList(config, "rules", Collections.EMPTY_LIST);
       for (Config ruleConfig : ruleConfigs) {
-        LOG.trace("ruleConfigUnwrapped: {}", ruleConfig.root().unwrapped());
         List<Command> commands = buildCommandChain(ruleConfig, "commands", child, true);
         if (commands.size() > 0) {
           childRules.add(commands.get(0));

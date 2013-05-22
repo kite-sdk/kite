@@ -77,7 +77,6 @@ public final class IfThenElseBuilder implements CommandBuilder {
     public IfThenElse(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
       
-      LOG.trace("ruleunwrapped {}", config.root().unwrapped());
       Command devNull = new DropRecordBuilder().build(null, this, null, context); // pipes into /dev/null
       List<Command> conditions = buildCommandChain(config, "conditions", devNull, true);
       if (conditions.size() == 0) {
