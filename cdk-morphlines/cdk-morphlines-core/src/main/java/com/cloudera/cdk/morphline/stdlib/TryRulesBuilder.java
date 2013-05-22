@@ -26,7 +26,6 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.typesafe.config.Config;
 
 /**
@@ -70,10 +69,10 @@ public final class TryRulesBuilder implements CommandBuilder {
     
     public TryRules(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
-      this.throwExceptionIfAllRulesFailed = Configs.getBoolean(config, "throwExceptionIfAllRulesFailed", true);
-      this.catchExceptions = Configs.getBoolean(config, "catchExceptions", false);
+      this.throwExceptionIfAllRulesFailed = getConfigs().getBoolean(config, "throwExceptionIfAllRulesFailed", true);
+      this.catchExceptions = getConfigs().getBoolean(config, "catchExceptions", false);
       
-      List<? extends Config> ruleConfigs = Configs.getConfigList(config, "rules", Collections.EMPTY_LIST);
+      List<? extends Config> ruleConfigs = getConfigs().getConfigList(config, "rules", Collections.EMPTY_LIST);
       for (Config ruleConfig : ruleConfigs) {
         LOG.trace("ruleConfigUnwrapped: {}", ruleConfig.root().unwrapped());
         List<Command> commands = buildCommandChain(ruleConfig, "commands", child, true);
@@ -81,6 +80,7 @@ public final class TryRulesBuilder implements CommandBuilder {
           childRules.add(commands.get(0));
         }
       }
+      validateArguments();
     }
     
     @Override

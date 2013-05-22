@@ -29,7 +29,6 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.typesafe.config.Config;
 
@@ -60,13 +59,14 @@ public final class ReadLineBuilder implements CommandBuilder {
   
     public ReadLine(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
-      this.charset = Configs.getCharset(config, "charset", null);
-      this.ignoreFirstLine = Configs.getBoolean(config, "ignoreFirstLine", false);
-      String cprefix = Configs.getString(config, "commentPrefix", "");
+      this.charset = getConfigs().getCharset(config, "charset", null);
+      this.ignoreFirstLine = getConfigs().getBoolean(config, "ignoreFirstLine", false);
+      String cprefix = getConfigs().getString(config, "commentPrefix", "");
       if (cprefix.length() > 1) {
         throw new MorphlineCompilationException("commentPrefix must be at most one character long: " + cprefix, config);
       }
       this.commentPrefix = (cprefix.length() > 0 ? cprefix : null);
+      validateArguments();
     }
   
     @Override

@@ -49,6 +49,7 @@ public final class CallParentPipeBuilder implements CommandBuilder {
 
     public CallParentPipe(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, getPipe(parent), context);
+      validateArguments();
     }
     
     @Override

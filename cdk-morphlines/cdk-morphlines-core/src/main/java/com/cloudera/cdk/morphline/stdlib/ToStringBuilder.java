@@ -24,7 +24,6 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.typesafe.config.Config;
 
 /**
@@ -53,7 +52,8 @@ public final class ToStringBuilder implements CommandBuilder {
     
     public ToString(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);      
-      this.fieldName = Configs.getString(config, "field");
+      this.fieldName = getConfigs().getString(config, "field");
+      validateArguments();
     }
         
     @Override

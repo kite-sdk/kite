@@ -27,7 +27,6 @@ import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.google.common.io.CharStreams;
 import com.typesafe.config.Config;
@@ -58,7 +57,8 @@ public final class ReadClobBuilder implements CommandBuilder {
   
     public ReadClob(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
-      this.charset = Configs.getCharset(config, "charset", null);
+      this.charset = getConfigs().getCharset(config, "charset", null);
+      validateArguments();
     }
   
     @Override

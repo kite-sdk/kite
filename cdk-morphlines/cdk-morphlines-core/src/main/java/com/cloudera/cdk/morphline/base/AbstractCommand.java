@@ -44,6 +44,7 @@ public abstract class AbstractCommand implements Command {
   private final Command parent;
   private final Command child;
   private final MorphlineContext context;
+  private final Configs configs;
   private final Counter numProcessCallsCounter;
   private final Counter numNotifyCallsCounter;
 
@@ -58,6 +59,7 @@ public abstract class AbstractCommand implements Command {
     this.parent = parent;
     this.child = child;
     this.context = context;
+    this.configs = new Configs();
     this.numProcessCallsCounter = getCounter(Metrics.NUM_PROCESS_CALLS);
     this.numNotifyCallsCounter = getCounter(Metrics.NUM_NOTIFY_CALLS);
   }
@@ -77,6 +79,10 @@ public abstract class AbstractCommand implements Command {
   
   protected MorphlineContext getContext() {
     return context;
+  }
+  
+  protected Configs getConfigs() {
+    return configs;
   }
   
   @Override
@@ -117,6 +123,10 @@ public abstract class AbstractCommand implements Command {
     return getChild().process(record);
   }
   
+  protected void validateArguments() {
+    getConfigs().validateArguments(getConfig());
+  }
+  
   protected Counter getCounter(String... names) {
     return getContext().getMetricRegistry().counter(getMetricName(names));
   }
@@ -146,7 +156,7 @@ public abstract class AbstractCommand implements Command {
    *          avoid sending a notification multiple times to finalChild, once from each branch.
    */
   protected List<Command> buildCommandChain(Config rootConfig, String configKey, Command finalChild, boolean ignoreNotifications) {    
-    List<? extends Config> commandConfigs = Configs.getConfigList(rootConfig, configKey, Collections.EMPTY_LIST);
+    List<? extends Config> commandConfigs = new Configs().getConfigList(rootConfig, configKey, Collections.EMPTY_LIST);
     List<Command> commands = new ArrayList();
     Command currentParent = this;
     Connector lastConnector = null;        

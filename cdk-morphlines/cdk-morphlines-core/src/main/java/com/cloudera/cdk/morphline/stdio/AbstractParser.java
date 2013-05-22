@@ -30,7 +30,6 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Metrics;
 import com.codahale.metrics.Counter;
@@ -50,8 +49,8 @@ public abstract class AbstractParser extends AbstractCommand {
   
   public AbstractParser(Config config, Command parent, Command child, MorphlineContext context) {
     super(config, parent, child, context);      
-    if (config.hasPath(SUPPORTED_MIME_TYPES)) {
-      List<String> mimeTypes = Configs.getStringList(config, SUPPORTED_MIME_TYPES, Collections.EMPTY_LIST);
+    List<String> mimeTypes = getConfigs().getStringList(config, SUPPORTED_MIME_TYPES, null);
+    if (mimeTypes != null) {
       for (String streamMediaType : mimeTypes) {
         addSupportedMimeType(streamMediaType);
       }

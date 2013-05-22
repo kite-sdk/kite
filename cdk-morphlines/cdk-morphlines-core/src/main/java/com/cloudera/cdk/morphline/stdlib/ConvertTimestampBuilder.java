@@ -34,7 +34,6 @@ import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.google.common.base.Joiner;
 import com.typesafe.config.Config;
@@ -75,20 +74,21 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
     public ConvertTimestamp(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
       
-      this.fieldName = Configs.getString(config, "field", Fields.TIMESTAMP);
-      TimeZone inputTimeZone = getTimeZone(Configs.getString(config, "inputTimezone", "UTC"));
-      Locale inputLocale = getLocale(Configs.getString(config, "inputLocale", ""));
-      for (String inputFormat : Configs.getStringList(config, "inputFormats", DateUtil.DEFAULT_DATE_FORMATS)) {
+      this.fieldName = getConfigs().getString(config, "field", Fields.TIMESTAMP);
+      TimeZone inputTimeZone = getTimeZone(getConfigs().getString(config, "inputTimezone", "UTC"));
+      Locale inputLocale = getLocale(getConfigs().getString(config, "inputLocale", ""));
+      for (String inputFormat : getConfigs().getStringList(config, "inputFormats", DateUtil.DEFAULT_DATE_FORMATS)) {
         SimpleDateFormat df = new SimpleDateFormat(inputFormat, inputLocale);
         df.setTimeZone(inputTimeZone);
         df.set2DigitYearStart(DateUtil.DEFAULT_TWO_DIGIT_YEAR_START);
         this.inputFormats.add(df);
       }
-      TimeZone outputTimeZone = getTimeZone(Configs.getString(config, "outputTimezone", "UTC"));
-      Locale outputLocale = getLocale(Configs.getString(config, "outputLocale", ""));
-      String outputFormatStr = Configs.getString(config, "outputFormat", NATIVE_SOLR_FORMAT);
+      TimeZone outputTimeZone = getTimeZone(getConfigs().getString(config, "outputTimezone", "UTC"));
+      Locale outputLocale = getLocale(getConfigs().getString(config, "outputLocale", ""));
+      String outputFormatStr = getConfigs().getString(config, "outputFormat", NATIVE_SOLR_FORMAT);
       this.outputFormat = new SimpleDateFormat(outputFormatStr, outputLocale);
       this.outputFormat.setTimeZone(outputTimeZone);
+      validateArguments();
       
       if (LOG.isTraceEnabled()) {
         LOG.trace("availableTimeZoneIDs: {}", Joiner.on("\n").join(TimeZone.getAvailableIDs()));

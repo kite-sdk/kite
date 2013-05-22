@@ -35,7 +35,6 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
@@ -87,7 +86,8 @@ public final class ExtractAvroTreeBuilder implements CommandBuilder {
     
     public ExtractAvroTree(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
-      this.outputFieldPrefix = Configs.getString(config, "outputFieldPrefix", "");
+      this.outputFieldPrefix = getConfigs().getString(config, "outputFieldPrefix", "");
+      validateArguments();
     }
     
     @Override

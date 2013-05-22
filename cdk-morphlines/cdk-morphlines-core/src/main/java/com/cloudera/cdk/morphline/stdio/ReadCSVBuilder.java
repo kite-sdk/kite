@@ -29,7 +29,6 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.CSVStrategy;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.reader.CSVReader;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.reader.internal.CSVReaderBuilder;
@@ -76,15 +75,16 @@ public final class ReadCSVBuilder implements CommandBuilder {
   
     public ReadCSV(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
-      String separator = Configs.getString(config, "separator", ",");
+      String separator = getConfigs().getString(config, "separator", ",");
       if (separator.length() != 1) {
         throw new MorphlineCompilationException("CSV separator must be one character only: " + separator, config);
       }
       this.separatorChar = separator.charAt(0);
-      this.columnNames = Configs.getStringList(config, "columns");
-      this.charset = Configs.getCharset(config, "charset", null);
-      this.ignoreFirstLine = Configs.getBoolean(config, "ignoreFirstLine", false);
-      this.trim = Configs.getBoolean(config, "trim", true);      
+      this.columnNames = getConfigs().getStringList(config, "columns");
+      this.charset = getConfigs().getCharset(config, "charset", null);
+      this.ignoreFirstLine = getConfigs().getBoolean(config, "ignoreFirstLine", false);
+      this.trim = getConfigs().getBoolean(config, "trim", true);      
+      validateArguments();
     }
   
     @Override

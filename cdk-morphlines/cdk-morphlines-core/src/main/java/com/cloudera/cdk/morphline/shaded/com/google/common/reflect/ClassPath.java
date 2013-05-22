@@ -304,6 +304,7 @@ public final class ClassPath {
       
       try {
         if (!scannedDirectories.add(directory.getCanonicalPath())) {
+          logger.fine("Ignoring cycle in classpath directory " + directory);
           return; // already been here before
         }
       } catch (Exception e) {

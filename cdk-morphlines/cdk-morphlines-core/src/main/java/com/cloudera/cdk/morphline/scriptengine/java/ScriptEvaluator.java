@@ -43,98 +43,109 @@ import javax.script.ScriptException;
  */
 public class ScriptEvaluator<T> {
 
-	private final FastJavaScriptEngine.JavaCompiledScript compiledScript;
-	private final String javaCodeBlock;
-	private final String parseLocation;
-	
-	private static final AtomicLong nextClassNum = new AtomicLong();
-	
-	private static final String METHOD_NAME = "eval";
+  private final FastJavaScriptEngine.JavaCompiledScript compiledScript;
+  private final String javaCodeBlock;
+  private final String parseLocation;
+  
+  private static final AtomicLong nextClassNum = new AtomicLong();
+  
+  private static final String METHOD_NAME = "eval";
 
-	public ScriptEvaluator(String javaImports, String javaCodeBlock, Class<T> returnType,
-			String[] parameterNames, Class[] parameterTypes,
-			String parseLocation) throws ScriptException {
-		
-		if (parameterNames.length != parameterTypes.length) { 
-			throw new IllegalArgumentException(
-				"Lengths of parameterNames (" + parameterNames.length
-						+ ") and parameterTypes (" + parameterTypes.length
-						+ ") do not match"); 
-		}
-		
-		this.javaCodeBlock = javaCodeBlock;
-		this.parseLocation = parseLocation;		
-		String myPackageName = getClass().getName();
-		myPackageName = myPackageName.substring(0, myPackageName.lastIndexOf('.'));
-		String className = "MyJavaClass" + nextClassNum.incrementAndGet();
-		String returnTypeName = (returnType == Void.class ? "void" : returnType.getCanonicalName());
-		
-		String script = 
-			"package " + myPackageName + ".scripts;"
-			+ "\n"
-			+ javaImports
-			+ "\n"
-			+ "\n public final class " + className + " {"		
-			+ "\n	 public static " + returnTypeName + " " + METHOD_NAME + "(";
-		
-		for (int i = 0; i < parameterNames.length; i++) {
-			if (i > 0) {
-				script += ", ";
-			}
-			script += parameterTypes[i].getCanonicalName() + " " + parameterNames[i];
-		}
-		script += ") { " + javaCodeBlock + " }";		 
-		script += "\n }";
-//		System.out.println(script);
-		
-		FastJavaScriptEngine engine = new FastJavaScriptEngine();
-		StringWriter errorWriter = new StringWriter();
-		engine.getContext().setErrorWriter(errorWriter);
-		engine.getContext().setAttribute(ScriptEngine.FILENAME, className + ".java", ScriptContext.ENGINE_SCOPE);
-		engine.getContext().setAttribute("parentLoader", getClass().getClassLoader(), ScriptContext.ENGINE_SCOPE);
-		
-		try {
-			compiledScript = (FastJavaScriptEngine.JavaCompiledScript) engine.compile(script, METHOD_NAME, parameterTypes);
-		} catch (ScriptException e) {
-			String errorMsg = errorWriter.toString();
-			if (errorMsg.length() > 0) 
-				errorMsg = ": " + errorMsg;
-			
-			throwScriptCompilationException(parseLocation, e.getMessage() + errorMsg, null);
-			throw null; // keep compiler happy
-		}
-		
-		engine.getContext().setErrorWriter(new PrintWriter(System.err, true)); // reset
-	}
-	
-	public T evaluate(Object... params) throws ScriptException {
-		// TODO: consider restricting permissions/sandboxing; also see http://worldwizards.blogspot.com/2009/08/java-scripting-api-sandbox.html
-		try {
-			return (T) compiledScript.eval(params);
-		} catch (ScriptException e) {				
-			throwScriptExecutionException(parseLocation + " near: '" + javaCodeBlock + "'", params, e);
-		}
-		return null; // keep compiler happy
-	}
+  public ScriptEvaluator(String javaImports, String javaCodeBlock, Class<T> returnType,
+      String[] parameterNames, Class[] parameterTypes,
+      String parseLocation) throws ScriptException {
+    
+    if (parameterNames.length != parameterTypes.length) { 
+      throw new IllegalArgumentException(
+        "Lengths of parameterNames (" + parameterNames.length
+            + ") and parameterTypes (" + parameterTypes.length
+            + ") do not match"); 
+    }
+    
+    this.javaCodeBlock = javaCodeBlock;
+    this.parseLocation = parseLocation;    
+    String myPackageName = getClass().getName();
+    myPackageName = myPackageName.substring(0, myPackageName.lastIndexOf('.'));
+    String className = "MyJavaClass" + nextClassNum.incrementAndGet();
+    String returnTypeName = (returnType == Void.class ? "void" : returnType.getCanonicalName());
+    
+    String script = 
+      "package " + myPackageName + ".scripts;"
+      + "\n"
+      + javaImports
+      + "\n"
+      + "\n public final class " + className + " {"    
+      + "\n   public static " + returnTypeName + " " + METHOD_NAME + "(";
+    
+    for (int i = 0; i < parameterNames.length; i++) {
+      if (i > 0) {
+        script += ", ";
+      }
+      script += parameterTypes[i].getCanonicalName() + " " + parameterNames[i];
+    }
+    script += ") { " + javaCodeBlock + " }";     
+    script += "\n }";
+//    System.out.println(script);
+    
+    FastJavaScriptEngine engine = new FastJavaScriptEngine();
+    StringWriter errorWriter = new StringWriter();
+    engine.getContext().setErrorWriter(errorWriter);
+    engine.getContext().setAttribute(ScriptEngine.FILENAME, className + ".java", ScriptContext.ENGINE_SCOPE);
+    ClassLoader[] loaders = getClassLoaders();
+    engine.getContext().setAttribute("parentLoader", loaders[0], ScriptContext.ENGINE_SCOPE);
+    try {
+      compiledScript = (FastJavaScriptEngine.JavaCompiledScript) engine.compile(script, METHOD_NAME, parameterTypes);
+    } catch (ScriptException e) {
+      String errorMsg = errorWriter.toString();
+      if (errorMsg.length() > 0) {
+        errorMsg = ": " + errorMsg;
+      }
+      throwScriptCompilationException(parseLocation, e.getMessage() + errorMsg, null);
+      throw null; // keep compiler happy
+    }    
+    engine.getContext().setErrorWriter(new PrintWriter(System.err, true)); // reset
+  }
+  
+  public T evaluate(Object... params) throws ScriptException {
+    // TODO: consider restricting permissions/sandboxing; also see http://worldwizards.blogspot.com/2009/08/java-scripting-api-sandbox.html
+    try {
+      return (T) compiledScript.eval(params);
+    } catch (ScriptException e) {        
+      throwScriptExecutionException(parseLocation + " near: '" + javaCodeBlock + "'", params, e);
+    }
+    return null; // keep compiler happy
+  }
 
-	private static void throwScriptCompilationException(String parseLocation, String msg, Throwable t) 
-	    throws ScriptException {
-	  
-		if (t == null) {
-			throw new ScriptException("Cannot compile script: " + parseLocation + " caused by " + msg);
-		} else {
-		  ScriptException se = new ScriptException("Cannot compile script: " + parseLocation + " caused by " + msg);
-		  se.initCause(t);
-			throw se;
-		}
-	}
-	
-	private static void throwScriptExecutionException(String parseLocation, Object[] params, Throwable e) 
-	    throws ScriptException {
-	  
-	  ScriptException se = new ScriptException("Cannot execute script: " + parseLocation + " for params " + Arrays.asList(params).toString());
-	  se.initCause(e);
-	  throw se;
-	}
-	
+  private ClassLoader[] getClassLoaders() {
+    ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
+    ClassLoader myLoader = getClass().getClassLoader();
+    if (contextLoader == null) {
+      return new ClassLoader[] { myLoader };
+    } else if (contextLoader == myLoader || myLoader == null) {
+      return new ClassLoader[] { contextLoader };
+    } else {
+      return new ClassLoader[] { contextLoader, myLoader };
+    }
+  }
+  
+  private static void throwScriptCompilationException(String parseLocation, String msg, Throwable t) 
+      throws ScriptException {
+    
+    if (t == null) {
+      throw new ScriptException("Cannot compile script: " + parseLocation + " caused by " + msg);
+    } else {
+      ScriptException se = new ScriptException("Cannot compile script: " + parseLocation + " caused by " + msg);
+      se.initCause(t);
+      throw se;
+    }
+  }
+  
+  private static void throwScriptExecutionException(String parseLocation, Object[] params, Throwable e) 
+      throws ScriptException {
+    
+    ScriptException se = new ScriptException("Cannot execute script: " + parseLocation + " for params " + Arrays.asList(params).toString());
+    se.initCause(e);
+    throw se;
+  }
+  
 }

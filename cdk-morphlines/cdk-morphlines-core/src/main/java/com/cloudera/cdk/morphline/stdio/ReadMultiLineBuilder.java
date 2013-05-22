@@ -30,7 +30,6 @@ import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Metrics;
 import com.cloudera.cdk.morphline.base.Validator;
@@ -42,7 +41,7 @@ import com.typesafe.config.Config;
  * "what" and "negate" configuration parameters similar to logstash.
  * 
  * For example, this can be used to parse log4j with stack traces. Also see
- * https://gist.github.com/smougenot/3182192 and http://logstash.net/docs/1.1.9/filters/multiline
+ * https://gist.github.com/smougenot/3182192 and http://logstash.net/docs/1.1.12/filters/multiline
  * 
  * The <code>regex</code> parameter should match what you believe to be an indicator that the
  * line is part of a multi-line record.
@@ -88,13 +87,14 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
   
     public ReadMultiLine(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
-      this.regex = Pattern.compile(Configs.getString(config, "regex"));
-      this.negate = Configs.getBoolean(config, "negate", false);
-      this.charset = Configs.getCharset(config, "charset", null);
+      this.regex = Pattern.compile(getConfigs().getString(config, "regex"));
+      this.negate = getConfigs().getBoolean(config, "negate", false);
+      this.charset = getConfigs().getCharset(config, "charset", null);
       this.what = new Validator<What>().validateEnum(
           config,
-          Configs.getString(config, "numRequiredMatches", What.previous.toString()),
+          getConfigs().getString(config, "what", What.previous.toString()),
           What.class);
+      validateArguments();
       this.elapsedTime = getTimer(Metrics.ELAPSED_TIME);
     }
 

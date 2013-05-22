@@ -29,10 +29,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.tika.config.ServiceLoader;
-import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
-import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeTypeException;
@@ -46,7 +44,6 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
@@ -80,16 +77,18 @@ public final class DetectMimeTypeBuilder implements CommandBuilder {
   private static final class DetectMimeType extends AbstractCommand {
 
     private final Detector detector;
+    private final boolean preserveExisting;
     private final boolean includeMetaData;
     private final boolean excludeParameters;
     
     public DetectMimeType(Config config, Command parent, Command child, MorphlineContext context) throws IOException, MimeTypeException {
       super(config, parent, child, context);
-      this.includeMetaData = Configs.getBoolean(config, "includeMetaData", false);
-      this.excludeParameters = Configs.getBoolean(config, "excludeParameters", true);
+      this.preserveExisting = getConfigs().getBoolean(config, "preserveExisting", true);      
+      this.includeMetaData = getConfigs().getBoolean(config, "includeMetaData", false);
+      this.excludeParameters = getConfigs().getBoolean(config, "excludeParameters", true);
       List<InputStream> inputStreams = new ArrayList();
       try {
-        if (Configs.getBoolean(config, "includeDefaultMimeTypes", true)) {
+        if (getConfigs().getBoolean(config, "includeDefaultMimeTypes", true)) {
           // adapted from Tika MimeTypesFactory.create(String coreFilePath, String extensionFilePath)
           String coreFilePath = "tika-mimetypes.xml"; 
           String classPrefix = MimeTypesFactory.class.getPackage().getName().replace('.', '/') + "/"; 
@@ -98,11 +97,11 @@ public final class DetectMimeTypeBuilder implements CommandBuilder {
           InputStream in = new BufferedInputStream(coreURL.openStream());
           inputStreams.add(in);
         }
-        for (String mimeTypesFile : Configs.getStringList(config, "mimeTypesFiles", Collections.EMPTY_LIST)) {
+        for (String mimeTypesFile : getConfigs().getStringList(config, "mimeTypesFiles", Collections.EMPTY_LIST)) {
           InputStream in = new BufferedInputStream(new FileInputStream(new File(mimeTypesFile)));
           inputStreams.add(in);
         }
-        String mimeTypesString = Configs.getString(config, "mimeTypesString", null);
+        String mimeTypesString = getConfigs().getString(config, "mimeTypesString", null);
         if (mimeTypesString != null) {
           InputStream in = new ByteArrayInputStream(mimeTypesString.getBytes("UTF-8"));
           inputStreams.add(in);
@@ -113,27 +112,21 @@ public final class DetectMimeTypeBuilder implements CommandBuilder {
           ServiceLoader loader = new ServiceLoader();
           this.detector = new DefaultDetector(mimeTypes, loader);
         } else {
-          // FIXME throw an Exception instead?
-          if (true) throw new MorphlineCompilationException("Missing specification for MIME type mappings", config);
-          // this was old style config via classpath: 
-          try {
-            detector = new TikaConfig().getDetector();
-          } catch (TikaException e) {
-            throw new MorphlineRuntimeException(e);
-          } catch (IOException e) {
-            throw new MorphlineRuntimeException(e);
-          }
+          throw new MorphlineCompilationException("Missing specification for MIME type mappings", config);
         }      
       } finally {
         for (InputStream in : inputStreams) {
           Closeables.closeQuietly(in);
         }
       }
+      validateArguments();
     }
     
     @Override
     protected boolean doProcess(Record record) {
-      if (record.get(Fields.ATTACHMENT_MIME_TYPE).size() == 0) {
+      if (preserveExisting && record.get(Fields.ATTACHMENT_MIME_TYPE).size() > 0) {
+        // we must preserve the existing MIME type
+      } else {
         List attachments = record.get(Fields.ATTACHMENT_BODY);
         if (attachments.size() > 0) {
           Object attachment = attachments.get(0);

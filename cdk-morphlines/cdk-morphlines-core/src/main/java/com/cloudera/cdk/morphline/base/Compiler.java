@@ -103,7 +103,7 @@ public final class Compiler {
       Preconditions.checkNotNull(morphlineConfig);
     } else {
       for (Config candidate : morphlineConfigs) {
-        if (morphlineId.equals(Configs.getString(candidate, "id", null))) {
+        if (morphlineId.equals(new Configs().getString(candidate, "id", null))) {
           morphlineConfig = candidate;
           break;
         }

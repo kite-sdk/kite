@@ -21,7 +21,6 @@ import java.util.List;
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.typesafe.config.Config;
 
 /**
@@ -35,18 +34,20 @@ final class Pipe extends AbstractCommand {
 
   public Pipe(Config config, Command parent, Command child, MorphlineContext context) {
     super(config, parent, child, context);
-    this.id = Configs.getString(config, "id");
+    this.id = getConfigs().getString(config, "id");
 
-    List<String> importCommandSpecs = Configs.getStringList(config, "importCommands", 
+    List<String> importCommandSpecs = getConfigs().getStringList(config, "importCommands", 
         Arrays.asList("com.**", "org.**", "net.**"));    
     context.importCommandBuilders(importCommandSpecs);
 
+    getConfigs().getConfigList(config, "commands", null);
     List<Command> childCommands = buildCommandChain(config, "commands", child, false);
     if (childCommands.size() > 0) {
       this.realChild = childCommands.get(0);
     } else {
       this.realChild = child;
     }
+    validateArguments();
   }
   
   @Override

@@ -149,6 +149,21 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
 
   @Test
+  public void testQuoting() throws Exception {
+    morphline = createMorphline("test-morphlines/quoting");    
+    Record record = new Record();
+    Record expected = new Record();
+    expected.put("foo", "\t");
+    expected.put("foo", "\n");
+    expected.put("foo", "\r");
+    
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    assertEquals(expected, collector.getFirstRecord());
+  }
+
+  @Test
   public void testEqualsSuccess() throws Exception {
     morphline = createMorphline("test-morphlines/equalsSuccess");    
     Record record = new Record();
@@ -509,7 +524,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }  
   
   @Test
-  public void testReadMultiLine() throws Exception {
+  public void testReadMultiLineWithWhatPrevious() throws Exception {
     morphline = createMorphline("test-morphlines/readMultiLine");   
     InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/multiline-stacktrace.log"));
     Record record = new Record();
@@ -524,6 +539,24 @@ public class MorphlineTest extends AbstractMorphlineTest {
     assertEquals(ImmutableMultimap.of(Fields.MESSAGE, multiLineEvent), iter.next().getFields());
     assertEquals(ImmutableMultimap.of(Fields.MESSAGE, "juil. 25, 2012 10:49:54 AM hudson.slaves.SlaveComputer tryReconnect"), iter.next().getFields());
     assertEquals(ImmutableMultimap.of(Fields.MESSAGE, "Infos: Attempting to reconnect CentosVagrant"), iter.next().getFields());
+    assertFalse(iter.hasNext());    
+    in.close();
+  }  
+
+  @Test
+  public void testReadMultiLineWithWhatNext() throws Exception {
+    morphline = createMorphline("test-morphlines/readMultiLineWithWhatNext");   
+    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/multiline-sessions.log"));
+    Record record = new Record();
+    record.put(Fields.ATTACHMENT_BODY, in);
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    
+    Iterator<Record> iter = collector.getRecords().iterator();
+    assertEquals(ImmutableMultimap.of(Fields.MESSAGE, "Started GET /foo" + "\n  Foo Started GET as HTML" + "\nCompleted 401 Unauthorized in 0ms" + "\n\n"), iter.next().getFields());
+    assertEquals(ImmutableMultimap.of(Fields.MESSAGE, "Started GET /bar" + "\n  Bar as HTML" + "\nCompleted 200 OK in 339ms"), iter.next().getFields());
+    assertEquals(ImmutableMultimap.of(Fields.MESSAGE, "Started GET /baz"), iter.next().getFields());
     assertFalse(iter.hasNext());    
     in.close();
   }  

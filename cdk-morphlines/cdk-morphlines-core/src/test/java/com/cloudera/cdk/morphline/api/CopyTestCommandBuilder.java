@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.typesafe.config.Config;
 
 public final class CopyTestCommandBuilder implements CommandBuilder {
@@ -45,8 +44,8 @@ public final class CopyTestCommandBuilder implements CommandBuilder {
     
     public CopyTestCommand(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
-      this.name = Configs.getString(config, "name");
-      this.count = Configs.getInt(config, "count", 2);
+      this.name = getConfigs().getString(config, "name");
+      this.count = getConfigs().getInt(config, "count", 2);
     }
     
     @Override

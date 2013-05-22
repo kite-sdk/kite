@@ -16,8 +16,11 @@
 package com.cloudera.cdk.morphline.base;
 
 import java.nio.charset.Charset;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.typesafe.config.Config;
 
 /**
@@ -25,7 +28,28 @@ import com.typesafe.config.Config;
  */
 public final class Configs {
   
-  public static String getString(Config config, String path, String defaults) {
+  private final Set<String> recognizedArguments = new LinkedHashSet();
+
+  private Set<String> getRecognizedArguments() {
+    return recognizedArguments;
+  }
+  
+  private void addRecognizedArgument(String arg) {
+    recognizedArguments.add(arg);
+  }
+  
+  public void validateArguments(Config config) {
+    Set<String> recognizedArgs = getRecognizedArguments();
+    for (String key : config.root().keySet()) {
+      if (!recognizedArgs.contains(key)) {
+        throw new MorphlineCompilationException("Unrecognized command argument: " + key + 
+            ", recognized arguments: " + recognizedArgs, config);
+      }
+    }      
+  }
+  
+  public String getString(Config config, String path, String defaults) {
+    addRecognizedArgument(path);
     if (config.hasPath(path)) {
       return config.getString(path);
     } else {
@@ -33,11 +57,13 @@ public final class Configs {
     }
   }
   
-  public static String getString(Config config, String path) {
+  public String getString(Config config, String path) {
+    addRecognizedArgument(path);
     return config.getString(path);
   }
   
-  public static List<String> getStringList(Config config, String path, List<String> defaults) {
+  public List<String> getStringList(Config config, String path, List<String> defaults) {
+    addRecognizedArgument(path);
     if (config.hasPath(path)) {
       return config.getStringList(path);
     } else {
@@ -45,11 +71,13 @@ public final class Configs {
     }
   }
   
-  public static List<String> getStringList(Config config, String path) {
+  public List<String> getStringList(Config config, String path) {
+    addRecognizedArgument(path);
     return config.getStringList(path);
   }
   
-  public static List<? extends Config> getConfigList(Config config, String path, List<? extends Config> defaults) {
+  public List<? extends Config> getConfigList(Config config, String path, List<? extends Config> defaults) {
+    addRecognizedArgument(path);
     if (config.hasPath(path)) {
       return config.getConfigList(path);
     } else {
@@ -57,11 +85,13 @@ public final class Configs {
     }
   }
 
-  public static List<? extends Config> getConfigList(Config config, String path) {
+  public List<? extends Config> getConfigList(Config config, String path) {
+    addRecognizedArgument(path);
     return config.getConfigList(path);
   }
 
-  public static Config getConfig(Config config, String path, Config defaults) {
+  public Config getConfig(Config config, String path, Config defaults) {
+    addRecognizedArgument(path);
     if (config.hasPath(path)) {
       return config.getConfig(path);
     } else {
@@ -69,11 +99,13 @@ public final class Configs {
     }
   }
 
-  public static Config getConfig(Config config, String path) {
+  public Config getConfig(Config config, String path) {
+    addRecognizedArgument(path);
     return config.getConfig(path);
   }
 
-  public static boolean getBoolean(Config config, String path, boolean defaults) {
+  public boolean getBoolean(Config config, String path, boolean defaults) {
+    addRecognizedArgument(path);
     if (config.hasPath(path)) {
       return config.getBoolean(path);
     } else {
@@ -81,11 +113,13 @@ public final class Configs {
     }
   }
   
-  public static boolean getBoolean(Config config, String path) {
+  public boolean getBoolean(Config config, String path) {
+    addRecognizedArgument(path);
     return config.getBoolean(path);
   }
   
-  public static int getInt(Config config, String path, int defaults) {
+  public int getInt(Config config, String path, int defaults) {
+    addRecognizedArgument(path);
     if (config.hasPath(path)) {
       return config.getInt(path);
     } else {
@@ -93,11 +127,13 @@ public final class Configs {
     }
   }
   
-  public static int getInt(Config config, String path) {
+  public int getInt(Config config, String path) {
+    addRecognizedArgument(path);
     return config.getInt(path);
   }  
 
-  public static long getLong(Config config, String path, long defaults) {
+  public long getLong(Config config, String path, long defaults) {
+    addRecognizedArgument(path);
     if (config.hasPath(path)) {
       return config.getLong(path);
     } else {
@@ -105,11 +141,13 @@ public final class Configs {
     }
   }
   
-  public static long getLong(Config config, String path) {
+  public long getLong(Config config, String path) {
+    addRecognizedArgument(path);
     return config.getLong(path);
   }  
 
-  public static double getDouble(Config config, String path, double defaults) {
+  public double getDouble(Config config, String path, double defaults) {
+    addRecognizedArgument(path);
     if (config.hasPath(path)) {
       return config.getDouble(path);
     } else {
@@ -117,11 +155,12 @@ public final class Configs {
     }
   }
   
-  public static double getDouble(Config config, String path) {
+  public double getDouble(Config config, String path) {
+    addRecognizedArgument(path);
     return config.getDouble(path);
   }  
 
-  public static Charset getCharset(Config config, String path, Charset defaults) {
+  public Charset getCharset(Config config, String path, Charset defaults) {
     String charsetName = getString(config, path, defaults == null ? null : defaults.name());
     Charset charset = charsetName == null ? null : Charset.forName(charsetName);
     return charset;

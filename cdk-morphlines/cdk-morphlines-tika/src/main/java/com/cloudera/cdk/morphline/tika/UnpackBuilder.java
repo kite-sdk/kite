@@ -83,6 +83,7 @@ public final class UnpackBuilder implements CommandBuilder {
         }
         addSupportedMimeType(GTAR); // apparently not already included in PackageParser.getSupportedTypes()
       }
+      validateArguments();
     }
 
     @Override

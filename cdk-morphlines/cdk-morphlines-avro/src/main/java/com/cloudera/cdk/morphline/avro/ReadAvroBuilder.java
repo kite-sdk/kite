@@ -36,7 +36,6 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.stdio.AbstractParser;
 import com.google.common.base.Preconditions;
@@ -75,11 +74,11 @@ public final class ReadAvroBuilder implements CommandBuilder {
     
     public ReadAvro(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
-      String schemaString = Configs.getString(config, "schemaString", null);
+      String schemaString = getConfigs().getString(config, "schemaString", null);
       if (schemaString != null) {
         this.externalSchema = new Parser().parse(schemaString);
       } else {        
-        String schemaFile = Configs.getString(config, "schemaFile", null);
+        String schemaFile = getConfigs().getString(config, "schemaFile", null);
         if (schemaFile != null) {
           try { 
             this.externalSchema = new Parser().parse(new File(schemaFile));
@@ -90,8 +89,9 @@ public final class ReadAvroBuilder implements CommandBuilder {
           this.externalSchema = null;
         }
       }
-      this.isJson = Configs.getBoolean(config, "isJson", false);
+      this.isJson = getConfigs().getBoolean(config, "isJson", false);
       validate();
+      validateArguments();
     }
     
     /** Override and disable check in subclasses as appropriate */

@@ -81,6 +81,7 @@ public final class DecompressBuilder implements CommandBuilder {
           addSupportedMimeType(mediaType.toString());
         }
       }
+      validateArguments();
     }
  
     @Override

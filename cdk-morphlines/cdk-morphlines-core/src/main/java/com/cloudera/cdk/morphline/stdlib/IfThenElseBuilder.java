@@ -95,6 +95,12 @@ public final class IfThenElseBuilder implements CommandBuilder {
       if (elseCommands.size() > 0) {
         this.elseChain = elseCommands.get(0);
       }
+      validateArguments();
+    }
+    
+    protected List<Command> buildCommandChain(Config rootConfig, String configKey, Command finalChild, boolean ignoreNotifications) {
+      getConfigs().getConfigList(rootConfig, configKey, null);
+      return super.buildCommandChain(rootConfig, configKey, finalChild, ignoreNotifications);
     }
     
     @Override

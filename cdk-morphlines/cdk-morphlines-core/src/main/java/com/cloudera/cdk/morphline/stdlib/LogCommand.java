@@ -25,7 +25,6 @@ import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.FieldExpression;
 import com.typesafe.config.Config;
 
@@ -39,9 +38,10 @@ abstract class LogCommand extends AbstractCommand {
   
   public LogCommand(Config config, Command parent, Command child, MorphlineContext context) {
     super(config, parent, child, context);
-    this.format = Configs.getString(config, "format");
-    List<String> argList = Configs.getStringList(config, "args", Collections.EMPTY_LIST);
+    this.format = getConfigs().getString(config, "format");
+    List<String> argList = getConfigs().getStringList(config, "args", Collections.EMPTY_LIST);
     this.args = argList.toArray(new String[argList.size()]);      
+    validateArguments();
   }
 
   @Override

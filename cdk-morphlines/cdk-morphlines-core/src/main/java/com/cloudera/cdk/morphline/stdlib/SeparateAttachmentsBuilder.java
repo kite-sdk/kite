@@ -51,6 +51,7 @@ public final class SeparateAttachmentsBuilder implements CommandBuilder {
 
     public SeparateAttachments(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);      
+      validateArguments();
     }
         
     @Override

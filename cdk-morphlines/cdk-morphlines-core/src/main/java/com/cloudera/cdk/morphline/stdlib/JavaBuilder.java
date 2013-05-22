@@ -90,8 +90,8 @@ public final class JavaBuilder implements CommandBuilder {
     public Java(Config config, Command parent, Command child, MorphlineContext context) throws ScriptException {
       super(config, parent, child, context);
       
-      String javaImports = Configs.getString(config, "imports", DEFAULT_IMPORTS);
-      String javaCodeBlock = Configs.getString(config, "code");
+      String javaImports = getConfigs().getString(config, "imports", DEFAULT_IMPORTS);
+      String javaCodeBlock = getConfigs().getString(config, "code");
       this.script = new ScriptEvaluator<Boolean>(
           javaImports, 
           javaCodeBlock, 
@@ -100,6 +100,7 @@ public final class JavaBuilder implements CommandBuilder {
           new Class[] {Record.class, Config.class, Command.class, Command.class, MorphlineContext.class, Logger.class}, 
           javaCodeBlock
           );
+      validateArguments();
     }
         
     @Override

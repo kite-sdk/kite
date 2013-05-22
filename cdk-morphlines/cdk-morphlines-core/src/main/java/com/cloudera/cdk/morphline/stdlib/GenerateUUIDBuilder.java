@@ -24,7 +24,6 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.typesafe.config.Config;
 
@@ -60,9 +59,10 @@ public final class GenerateUUIDBuilder implements CommandBuilder {
 
     public GenerateUUID(Config config, Command parent, Command child, MorphlineContext context) { 
       super(config, parent, child, context);
-      this.fieldName = Configs.getString(config, FIELD_NAME, Fields.ID);
-      this.preserveExisting = Configs.getBoolean(config, PRESERVE_EXISTING_NAME, true);
-      this.prefix = Configs.getString(config, PREFIX_NAME, "");
+      this.fieldName = getConfigs().getString(config, FIELD_NAME, Fields.ID);
+      this.preserveExisting = getConfigs().getBoolean(config, PRESERVE_EXISTING_NAME, true);
+      this.prefix = getConfigs().getString(config, PREFIX_NAME, "");
+      validateArguments();
     }
 
     @Override

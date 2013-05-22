@@ -40,7 +40,6 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
@@ -114,8 +113,8 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
     public ExtractAvroPaths(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
       ListMultimap<String, String> stepMultiMap = ArrayListMultimap.create();
-      this.flatten = Configs.getBoolean(config, "flatten", true);
-      Config paths = Configs.getConfig(config, "paths");
+      this.flatten = getConfigs().getBoolean(config, "flatten", true);
+      Config paths = getConfigs().getConfig(config, "paths");
       for (Map.Entry<String, Object> entry : paths.root().unwrapped().entrySet()) {
         String fieldName = entry.getKey();        
         String path = entry.getValue().toString().trim();
@@ -142,6 +141,7 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
       }
       this.stepMap = stepMultiMap.asMap();
       LOG.debug("stepMap: {}", stepMap);
+      validateArguments();
     }
     
     private String normalize(String step) { // for faster subsequent query performance

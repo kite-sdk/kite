@@ -35,7 +35,6 @@ import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Metrics;
 import com.cloudera.cdk.morphline.base.Validator;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.GroupInfo;
@@ -154,14 +153,14 @@ public final class GrokBuilder implements CommandBuilder {
     public Grok(Config config, Command parent, Command child, MorphlineContext context) throws IOException {
       super(config, parent, child, context);
       
-      for (String dictionaryFile : Configs.getStringList(config, "dictionaryFiles", Collections.EMPTY_LIST)) {
+      for (String dictionaryFile : getConfigs().getStringList(config, "dictionaryFiles", Collections.EMPTY_LIST)) {
         loadDictionaryFile(new File(dictionaryFile));
       }
-      String dictionaryString = Configs.getString(config, "dictionaryString", "");
+      String dictionaryString = getConfigs().getString(config, "dictionaryString", "");
       loadDictionary(new StringReader(dictionaryString));
       resolveDictionaryExpressions();
       
-      Config exprConfig = Configs.getConfig(config, "expressions", ConfigFactory.empty());
+      Config exprConfig = getConfigs().getConfig(config, "expressions", ConfigFactory.empty());
       for (Map.Entry<String, Object> entry : exprConfig.root().unwrapped().entrySet()) {
         String expr = entry.getValue().toString();
         //LOG.debug("expr before: {}", expr);
@@ -174,21 +173,22 @@ public final class GrokBuilder implements CommandBuilder {
         regexes.put(entry.getKey(), pattern);
       }
 
-      String extractStr = Configs.getString(config, "extract", "true");
+      String extractStr = getConfigs().getString(config, "extract", "true");
       this.extractInPlace = extractStr.equals("inplace");
       if (extractInPlace) {
         this.extract = true;
       } else {
-        this.extract = Configs.getBoolean(config, "extract", true);
+        this.extract = getConfigs().getBoolean(config, "extract", true);
       }
       
       this.numRequiredMatches = new Validator<NumRequiredMatches>().validateEnum(
           config,
-          Configs.getString(config, "numRequiredMatches", NumRequiredMatches.atLeastOnce.toString()),
+          getConfigs().getString(config, "numRequiredMatches", NumRequiredMatches.atLeastOnce.toString()),
           NumRequiredMatches.class);
-      this.findSubstrings = Configs.getBoolean(config, "findSubstrings", false);
-      this.addEmptyStrings = Configs.getBoolean(config, "addEmptyStrings", false);
-      this.elapsedTime = getTimer(Metrics.ELAPSED_TIME);
+      this.findSubstrings = getConfigs().getBoolean(config, "findSubstrings", false);
+      this.addEmptyStrings = getConfigs().getBoolean(config, "addEmptyStrings", false);
+      validateArguments();
+      this.elapsedTime = getTimer(Metrics.ELAPSED_TIME);      
     }
     
     @Override
