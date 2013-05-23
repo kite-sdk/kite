@@ -31,6 +31,7 @@ import org.apache.crunch.Target;
 import org.apache.crunch.io.avro.AvroFileTarget;
 import org.apache.crunch.types.avro.AvroType;
 import org.apache.crunch.types.avro.Avros;
+import org.apache.crunch.util.CrunchTool;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
