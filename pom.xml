@@ -79,26 +79,28 @@
 
     <previous.project.version>0.2.0</previous.project.version> <!-- used by jdiff -->
 
-    <vers.maven-compiler>2.5.1</vers.maven-compiler>
-    <vers.maven-javadoc>2.9</vers.maven-javadoc>
-    <vers.maven-release>2.4.1</vers.maven-release>
-    <vers.maven-site>3.2</vers.maven-site>
-    <vers.maven-source>2.2.1</vers.maven-source>
-    <vers.maven-surefire>2.14.1</vers.maven-surefire>
-    <vers.maven-project-info-reports>2.6</vers.maven-project-info-reports>
-    <vers.findbugs-plugin>2.5.2</vers.findbugs-plugin>
-    <vers.slf4j>1.7.2</vers.slf4j>
     <vers.avro>1.7.3</vers.avro>
     <vers.crunch>0.6.0-cdh4.2.0</vers.crunch>
-    <vers.guava>14.0</vers.guava>
-    <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
-    <vers.junit>4.8.2</vers.junit>
-    <vers.hadoop>2.0.0-cdh4.2.1</vers.hadoop>
-    <hcatalog.version>0.4.0-cdh4.2.1</hcatalog.version>
-    <vers.jexl>2.1.1</vers.jexl>
-    <vers.parquet>1.0.0-SNAPSHOT</vers.parquet>
-    <vers.rat>0.8</vers.rat>
     <vers.doxia-markdown>1.3</vers.doxia-markdown>
+    <vers.findbugs-plugin>2.5.2</vers.findbugs-plugin>
+    <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
+    <vers.flume>1.3.0-cdh4.2.1</vers.flume>
+    <vers.guava>14.0</vers.guava>
+    <vers.hadoop>2.0.0-cdh4.2.1</vers.hadoop>
+    <vers.hcatalog>0.4.0-cdh4.2.1</vers.hcatalog>
+    <vers.jexl>2.1.1</vers.jexl>
+    <vers.junit>4.8.2</vers.junit>
+    <vers.log4j>1.2.17</vers.log4j>
+    <vers.maven-compiler>2.5.1</vers.maven-compiler>
+    <vers.maven-javadoc>2.9</vers.maven-javadoc>
+    <vers.maven-project-info-reports>2.7</vers.maven-project-info-reports>
+    <vers.maven-release>2.4.1</vers.maven-release>
+    <vers.maven-site>3.3</vers.maven-site>
+    <vers.maven-source>2.2.1</vers.maven-source>
+    <vers.maven-surefire>2.14.1</vers.maven-surefire>
+    <vers.parquet>1.0.0-SNAPSHOT</vers.parquet>
+    <vers.rat>0.9</vers.rat>
+    <vers.slf4j>1.7.2</vers.slf4j>
 
     <url.cloudera>http://www.cloudera.com</url.cloudera>
     <url.project>http://cloudera.github.com/cdk</url.project>
@@ -368,7 +370,7 @@
       <dependency>
         <groupId>org.apache.hcatalog</groupId>
         <artifactId>hcatalog-core</artifactId>
-        <version>${hcatalog.version}</version>
+        <version>${vers.hcatalog}</version>
         <optional>true</optional>
       </dependency>
       <dependency> <!-- force HCatalog to use same (earlier) version of Derby as Hive -->
@@ -396,22 +398,22 @@
       <dependency>
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
-        <version>1.2.17</version>
+        <version>${vers.log4j}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flume</groupId>
         <artifactId>flume-ng-sdk</artifactId>
-        <version>1.3.0-cdh4.2.1</version>
+        <version>${vers.flume}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flume</groupId>
         <artifactId>flume-ng-core</artifactId>
-        <version>1.3.0-cdh4.2.1</version>
+        <version>${vers.flume}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.flume</groupId>
         <artifactId>flume-ng-configuration</artifactId>
-        <version>1.3.0-cdh4.2.1</version>
+        <version>${vers.flume}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
