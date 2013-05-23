@@ -98,6 +98,9 @@ public class HCatalogDatasetRepository implements DatasetRepository {
       }
       return fileSystemDatasetRepository.get(name);
     } else {
+      metadataProvider.setFileSystem(fileSystemDatasetRepository.getFileSystem());
+      Path dataDir = new Path(fileSystemDatasetRepository.getRootDirectory(), name);
+      metadataProvider.setDataDirectory(dataDir);
       return fileSystemDatasetRepository.create(name, descriptor);
     }
   }
