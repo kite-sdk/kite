@@ -28,10 +28,6 @@ final class Connector implements Command {
   private Command child;
   private boolean ignoreNotifications;
   
-  public Connector() {
-    this(false);
-  }
-
   public Connector(boolean ignoreNotifications) {
     this.ignoreNotifications = ignoreNotifications;
   }

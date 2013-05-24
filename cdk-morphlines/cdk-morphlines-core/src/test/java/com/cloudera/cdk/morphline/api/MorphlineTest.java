@@ -78,6 +78,17 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
 
   @Test
+  public void testLog() throws Exception {
+    morphline = createMorphline("test-morphlines/log");    
+    Record record = createBasicRecord();
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    assertEquals(Arrays.asList(record), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+
+  @Test
   public void testAddValues() throws Exception {
     morphline = createMorphline("test-morphlines/addValues");    
     Record record = new Record();
@@ -94,6 +105,19 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.put("names", "@{first_name}");
     expected.put("pids", 456);
     expected.put("pids", "hello");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+
+  @Test
+  public void testAddValuesIfAbsent() throws Exception {
+    morphline = createMorphline("test-morphlines/addValuesIfAbsent");    
+    Record record = new Record();
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put("source_type", "text/log");
     assertEquals(Arrays.asList(expected), collector.getRecords());
     assertSame(record, collector.getRecords().get(0));
   }
@@ -149,8 +173,8 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
 
   @Test
-  public void testQuoting() throws Exception {
-    morphline = createMorphline("test-morphlines/quoting");    
+  public void testCharacterEscaping() throws Exception {
+    morphline = createMorphline("test-morphlines/characterEscaping");    
     Record record = new Record();
     Record expected = new Record();
     expected.put("foo", "\t");
@@ -276,6 +300,25 @@ public class MorphlineTest extends AbstractMorphlineTest {
   @Test
   public void testTryRulesFail() throws Exception {
     morphline = createMorphline("test-morphlines/tryRulesFail");    
+    Record record = new Record();
+    record.put("first_name", "Nadja");
+    List<Record> expectedList = new ArrayList();
+    for (int i = 0; i < 2; i++) {
+      Record expected = record.copy();
+      expected.put("foo2", "bar2");
+      expected.replaceValues("iter2", i);
+      expectedList.add(expected);
+    }
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    assertEquals(expectedList, collector.getRecords());
+    assertNotSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testTryRulesCatchException() throws Exception {
+    morphline = createMorphline("test-morphlines/tryRulesCatchException");    
     Record record = new Record();
     record.put("first_name", "Nadja");
     List<Record> expectedList = new ArrayList();
