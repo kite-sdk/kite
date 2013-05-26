@@ -25,7 +25,6 @@ import java.util.Collections;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
 import org.apache.avro.generic.GenericContainer;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
@@ -129,9 +128,8 @@ public final class ReadAvroBuilder implements CommandBuilder {
       }
             
       try {
-        GenericContainer datum = new GenericData.Record(schema);
         while (true) {
-          datum = datumReader.read(datum, decoder);
+          GenericContainer datum = datumReader.read(null, decoder);
           if (!extract(datum, inputRecord)) {
             return false;
           }

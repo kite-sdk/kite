@@ -18,7 +18,9 @@ package com.cloudera.cdk.morphline.avro;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -47,6 +49,7 @@ import com.cloudera.cdk.morphline.api.AbstractMorphlineTest;
 import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
+import com.cloudera.cdk.morphline.base.Notifications;
 import com.cloudera.cdk.morphline.stdio.AbstractParser;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -373,10 +376,9 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     FileReader<GenericData.Record> reader = new DataFileReader(new ReadAvroContainerBuilder.ForwardOnlySeekableInputStream(new ByteArrayInputStream(bout.toByteArray())), new GenericDatumReader());
     Schema schema2 = reader.getSchema();
     assertEquals(schema, schema2);
-    GenericData.Record record2 = new GenericData.Record(schema2);    
     for (GenericData.Record record : records) {
       assertTrue(reader.hasNext());
-      reader.next(record2);
+      GenericData.Record record2 = reader.next();
       assertEquals(record, record2);
     }
 
@@ -386,8 +388,7 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     deleteAllDocuments();
     assertTrue(load(event));
     assertEquals(records.length, queryResultSetSize("*:*"));
-
-    
+        
     GenericDatumWriter datumWriter = new GenericDatumWriter(schema);
     bout = new ByteArrayOutputStream();
     Encoder encoder = EncoderFactory.get().binaryEncoder(bout, null);
@@ -438,6 +439,93 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     }
   }
 
+  @Test
+  public void testReadAvroTweetsContainer() throws Exception {
+    File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433-medium.avro");
+    morphline = createMorphline("test-morphlines/readAvroTweetsContainer");    
+    Record record = new Record();
+    byte[] body = Files.toByteArray(file);    
+    record.put(Fields.ATTACHMENT_BODY, body);
+    startSession();
+    Notifications.notifyBeginTransaction(morphline);
+    assertTrue(morphline.process(record));
+    assertEquals(1, collector.getNumStartEvents());
+    assertEquals(2104, collector.getRecords().size());
+    
+    FileReader<GenericData.Record> reader = new DataFileReader(file, new GenericDatumReader());
+    int i = 0;
+    while (reader.hasNext()) {
+      Record actual = collector.getRecords().get(i);
+      GenericData.Record expected = reader.next();
+      assertTweetEquals(expected, actual, i);
+      i++;
+    }    
+    assertEquals(collector.getRecords().size(), i);
+  }
+
+  @Test
+  public void testReadAvroTweetsWithExternalSchema() throws Exception {
+    File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433-medium.avro");
+    
+    // read avro records
+    FileReader<GenericData.Record> reader = new DataFileReader(file, new GenericDatumReader());
+    Schema schema = reader.getSchema();
+    List<GenericData.Record> records = new ArrayList();
+    while (reader.hasNext()) {
+      GenericData.Record record = reader.next();
+      records.add(record);
+    }
+    reader.close();
+    assertEquals(2104, records.size());
+        
+    // write avro records to a file without container and without schema
+    File tmpFile = File.createTempFile(file.getName(), "");
+    tmpFile.deleteOnExit();
+    OutputStream bout = new FileOutputStream(tmpFile);
+    GenericDatumWriter datumWriter = new GenericDatumWriter(schema);
+    Encoder encoder = EncoderFactory.get().binaryEncoder(bout, null);
+    for (GenericData.Record record : records) {
+      datumWriter.write(record, encoder);
+    }
+    encoder.flush();
+    bout.close();
+    
+    // load avro records via morphline
+    morphline = createMorphline("test-morphlines/readAvroTweetsWithExternalSchema");    
+    Record record = new Record();
+    byte[] body = Files.toByteArray(tmpFile);    
+    record.put(Fields.ATTACHMENT_BODY, body);
+    startSession();
+    Notifications.notifyBeginTransaction(morphline);
+    assertTrue(morphline.process(record));
+    assertEquals(1, collector.getNumStartEvents());
+    assertEquals(records.size(), collector.getRecords().size());
+
+    // verify
+    for (int i = 0; i < records.size(); i++) {
+      Record actual = collector.getRecords().get(i);
+      GenericData.Record expected = records.get(i);
+      assertTweetEquals(expected, actual, i);
+    }
+  }
+
+  private void assertTweetEquals(GenericData.Record expected, Record actual, int i) {
+    //  System.out.println("\n\nexpected: " + toString(avroRecord));
+    //  System.out.println("actual:   " + actual);
+    String[] fieldNames = new String[] { 
+        "id", 
+        "in_reply_to_status_id", 
+        "in_reply_to_user_id", 
+        "retweet_count",
+        "retweeted", 
+        "text", 
+        "user_description" 
+        };
+    for (String fieldName : fieldNames) {
+      assertEquals(i + " fieldName: " + fieldName, expected.get(fieldName).toString(), actual.getFirstValue(fieldName).toString());
+    }
+  }
+
   private boolean load(Record record) {
     startSession();
     return morphline.process(record);
@@ -451,4 +539,12 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     return new Utf8(str);
   }
 
+  private String toString(GenericData.Record avroRecord) {
+    Record record = new Record();
+    for (Field field : avroRecord.getSchema().getFields()) {
+      record.put(field.name(), avroRecord.get(field.pos()));
+    }
+    return record.toString(); // prints sorted by key for human readability
+  }
+  
 }

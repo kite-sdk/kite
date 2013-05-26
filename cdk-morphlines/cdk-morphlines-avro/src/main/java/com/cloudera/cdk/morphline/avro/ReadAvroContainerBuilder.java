@@ -26,7 +26,6 @@ import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;
 import org.apache.avro.generic.GenericContainer;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.io.DatumReader;
 
@@ -92,9 +91,8 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
         Schema schema = getSchema(reader.getSchema());
         Preconditions.checkNotNull(schema, "Avro schema must not be null");
         
-        GenericContainer datum = new GenericData.Record(schema);
         while (reader.hasNext()) {
-          datum = reader.next(datum);
+          GenericContainer datum = reader.next();
           if (!extract(datum, inputRecord)) {
             return false;
           }
