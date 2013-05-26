@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;
@@ -35,7 +34,6 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.avro.ReadAvroBuilder.ReadAvro;
 import com.cloudera.cdk.morphline.base.Fields;
-import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 
 
@@ -78,19 +76,11 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     }
     
     @Override
-    protected Schema getSchema(Schema dataFileReaderSchema) {
-      return dataFileReaderSchema;
-    }
-    
-    @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
-      DatumReader<GenericContainer> datumReader = new GenericDatumReader();
+      DatumReader<GenericContainer> datumReader = new GenericDatumReader(null, externalSchema);
       FileReader<GenericContainer> reader = null;
       try {
-        reader = new DataFileReader(new ForwardOnlySeekableInputStream(in), datumReader);
-        Schema schema = getSchema(reader.getSchema());
-        Preconditions.checkNotNull(schema, "Avro schema must not be null");
-        
+        reader = new DataFileReader(new ForwardOnlySeekableInputStream(in), datumReader);    
         while (reader.hasNext()) {
           GenericContainer datum = reader.next();
           if (!extract(datum, inputRecord)) {

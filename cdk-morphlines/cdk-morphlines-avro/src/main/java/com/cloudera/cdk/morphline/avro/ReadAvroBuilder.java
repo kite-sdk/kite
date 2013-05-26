@@ -68,7 +68,7 @@ public final class ReadAvroBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   static class ReadAvro extends AbstractParser {
 
-    private final Schema externalSchema;
+    protected final Schema externalSchema;
     private final boolean isJson;
     
     public ReadAvro(Config config, Command parent, Command child, MorphlineContext context) {
@@ -101,28 +101,18 @@ public final class ReadAvroBuilder implements CommandBuilder {
       }
     }
     
-    /** Returns the Avro schema to use for reading */
-    protected Schema getSchema(Schema dataFileReaderSchema) {
-      if (this.externalSchema != null) {
-        return this.externalSchema;
-      }
-      return dataFileReaderSchema;
-    }
-
     protected boolean isJSON() {
       return isJson;
     }
 
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
-      Schema schema = getSchema(null);
-      Preconditions.checkNotNull(schema, "Avro schema must not be null");
-      
-      DatumReader<GenericContainer> datumReader = new GenericDatumReader<GenericContainer>(schema);
+      Preconditions.checkNotNull(externalSchema, "External avro schema must not be null");      
+      DatumReader<GenericContainer> datumReader = new GenericDatumReader<GenericContainer>(externalSchema);
       
       Decoder decoder;
       if (isJSON()) {
-        decoder = DecoderFactory.get().jsonDecoder(schema, in);
+        decoder = DecoderFactory.get().jsonDecoder(externalSchema, in);
       } else {
         decoder = DecoderFactory.get().binaryDecoder(in, null);
       }
