@@ -522,7 +522,10 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
         "user_description" 
         };
     for (String fieldName : fieldNames) {
-      assertEquals(i + " fieldName: " + fieldName, expected.get(fieldName).toString(), actual.getFirstValue(fieldName).toString());
+      assertEquals(
+          i + " fieldName: " + fieldName, 
+          expected.get(fieldName).toString(), 
+          actual.getFirstValue(fieldName).toString());
     }
   }
 
