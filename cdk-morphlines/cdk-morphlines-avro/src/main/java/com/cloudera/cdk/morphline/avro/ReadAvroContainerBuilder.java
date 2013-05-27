@@ -16,11 +16,14 @@
 package com.cloudera.cdk.morphline.avro;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Parser;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;
@@ -30,10 +33,11 @@ import org.apache.avro.io.DatumReader;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
+import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
-import com.cloudera.cdk.morphline.avro.ReadAvroBuilder.ReadAvro;
 import com.cloudera.cdk.morphline.base.Fields;
+import com.cloudera.cdk.morphline.stdio.AbstractParser;
 import com.typesafe.config.Config;
 
 
@@ -64,15 +68,32 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  private static final class ReadAvroContainer extends ReadAvro {
+  static class ReadAvroContainer extends AbstractParser {
 
-    public ReadAvroContainer(Config config, Command parent, Command child, MorphlineContext context) {
+    protected final Schema readerSchema;
+
+    public ReadAvroContainer(Config config, Command parent, Command child, MorphlineContext context) {   
       super(config, parent, child, context);
-    }
-    
-    @Override
-    protected void validate() { 
-      // no external avro schema required
+
+      String schemaString = getConfigs().getString(config, "readerSchemaString", null);
+      if (schemaString != null) {
+        this.readerSchema = new Parser().parse(schemaString);
+      } else {        
+        String schemaFile = getConfigs().getString(config, "readerSchemaFile", null);
+        if (schemaFile != null) {
+          try { 
+            this.readerSchema = new Parser().parse(new File(schemaFile));
+          } catch (IOException e) {
+            throw new MorphlineCompilationException("Cannot parse external Avro reader schema file: " + schemaFile, config, e);
+          }
+        } else {
+          this.readerSchema = null;
+        }
+      }
+      
+      if (getClass() == ReadAvroContainer.class) {
+        validateArguments();
+      }
     }
     
     @Override
@@ -95,6 +116,16 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
       return true;
     }
     
+    protected boolean extract(GenericContainer datum, Record inputRecord) {
+      numRecordsCounter.inc();
+      Record outputRecord = inputRecord.copy();
+      removeAttachments(outputRecord);
+      outputRecord.put(Fields.ATTACHMENT_BODY, datum);
+      outputRecord.put(Fields.ATTACHMENT_MIME_TYPE, ReadAvroBuilder.AVRO_MEMORY_MIME_TYPE);
+        
+      // pass record to next command in chain:
+      return getChild().process(outputRecord);
+    }
   }
   
   

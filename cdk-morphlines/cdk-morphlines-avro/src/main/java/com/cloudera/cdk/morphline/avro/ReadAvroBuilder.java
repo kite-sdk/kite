@@ -35,8 +35,8 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
+import com.cloudera.cdk.morphline.avro.ReadAvroContainerBuilder.ReadAvroContainer;
 import com.cloudera.cdk.morphline.base.Fields;
-import com.cloudera.cdk.morphline.stdio.AbstractParser;
 import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 
@@ -67,32 +67,15 @@ public final class ReadAvroBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  static class ReadAvro extends AbstractParser {
+  final static class ReadAvro extends ReadAvroContainer {
 
-    protected final Schema readerSchema;
     protected final Schema writerSchema;
     private final boolean isJson;
     
     public ReadAvro(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
       
-      String schemaString = getConfigs().getString(config, "readerSchemaString", null);
-      if (schemaString != null) {
-        this.readerSchema = new Parser().parse(schemaString);
-      } else {        
-        String schemaFile = getConfigs().getString(config, "readerSchemaFile", null);
-        if (schemaFile != null) {
-          try { 
-            this.readerSchema = new Parser().parse(new File(schemaFile));
-          } catch (IOException e) {
-            throw new MorphlineCompilationException("Cannot parse external Avro reader schema file: " + schemaFile, config, e);
-          }
-        } else {
-          this.readerSchema = null;
-        }
-      }
-      
-      schemaString = getConfigs().getString(config, "writerSchemaString", null);
+      String schemaString = getConfigs().getString(config, "writerSchemaString", null);
       if (schemaString != null) {
         this.writerSchema = new Parser().parse(schemaString);
       } else {        
@@ -109,19 +92,19 @@ public final class ReadAvroBuilder implements CommandBuilder {
       }
       
       this.isJson = getConfigs().getBoolean(config, "isJson", false);
-      validate();
       validateArguments();
     }
     
-    /** Override and disable check in subclasses as appropriate */
-    protected void validate() {
+    @Override
+    protected void validateArguments() {
+      super.validateArguments();
       if (writerSchema == null) {
         throw new MorphlineCompilationException(
             "You must specify an external Avro writer schema because this is required to read containerless Avro", getConfig());
       }
     }
     
-    protected boolean isJSON() {
+    private boolean isJSON() {
       return isJson;
     }
 
@@ -151,17 +134,6 @@ public final class ReadAvroBuilder implements CommandBuilder {
         in.close();
       }
       return true;
-    }
-
-    protected boolean extract(GenericContainer datum, Record inputRecord) {
-      numRecordsCounter.inc();
-      Record outputRecord = inputRecord.copy();
-      removeAttachments(outputRecord);
-      outputRecord.put(Fields.ATTACHMENT_BODY, datum);
-      outputRecord.put(Fields.ATTACHMENT_MIME_TYPE, ReadAvroBuilder.AVRO_MEMORY_MIME_TYPE);
-        
-      // pass record to next command in chain:
-      return getChild().process(outputRecord);
     }
     
   }
