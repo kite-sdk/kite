@@ -77,7 +77,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
-      DatumReader<GenericContainer> datumReader = new GenericDatumReader(null, externalSchema);
+      DatumReader<GenericContainer> datumReader = new GenericDatumReader(null, readerSchema);
       FileReader<GenericContainer> reader = null;
       try {
         reader = new DataFileReader(new ForwardOnlySeekableInputStream(in), datumReader);    

@@ -68,26 +68,45 @@ public final class ReadAvroBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   static class ReadAvro extends AbstractParser {
 
-    protected final Schema externalSchema;
+    protected final Schema readerSchema;
+    protected final Schema writerSchema;
     private final boolean isJson;
     
     public ReadAvro(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
-      String schemaString = getConfigs().getString(config, "schemaString", null);
+      
+      String schemaString = getConfigs().getString(config, "readerSchemaString", null);
       if (schemaString != null) {
-        this.externalSchema = new Parser().parse(schemaString);
+        this.readerSchema = new Parser().parse(schemaString);
       } else {        
-        String schemaFile = getConfigs().getString(config, "schemaFile", null);
+        String schemaFile = getConfigs().getString(config, "readerSchemaFile", null);
         if (schemaFile != null) {
           try { 
-            this.externalSchema = new Parser().parse(new File(schemaFile));
+            this.readerSchema = new Parser().parse(new File(schemaFile));
           } catch (IOException e) {
-            throw new MorphlineCompilationException("Cannot parse external Avro schema file: " + schemaFile, config, e);
+            throw new MorphlineCompilationException("Cannot parse external Avro reader schema file: " + schemaFile, config, e);
           }
         } else {
-          this.externalSchema = null;
+          this.readerSchema = null;
         }
       }
+      
+      schemaString = getConfigs().getString(config, "writerSchemaString", null);
+      if (schemaString != null) {
+        this.writerSchema = new Parser().parse(schemaString);
+      } else {        
+        String schemaFile = getConfigs().getString(config, "writerSchemaFile", null);
+        if (schemaFile != null) {
+          try { 
+            this.writerSchema = new Parser().parse(new File(schemaFile));
+          } catch (IOException e) {
+            throw new MorphlineCompilationException("Cannot parse external Avro writer schema file: " + schemaFile, config, e);
+          }
+        } else {
+          this.writerSchema = null;
+        }
+      }
+      
       this.isJson = getConfigs().getBoolean(config, "isJson", false);
       validate();
       validateArguments();
@@ -95,9 +114,9 @@ public final class ReadAvroBuilder implements CommandBuilder {
     
     /** Override and disable check in subclasses as appropriate */
     protected void validate() {
-      if (externalSchema == null) {
+      if (writerSchema == null) {
         throw new MorphlineCompilationException(
-            "You must specify an external Avro schema because this is required to read containerless Avro", getConfig());
+            "You must specify an external Avro writer schema because this is required to read containerless Avro", getConfig());
       }
     }
     
@@ -107,12 +126,13 @@ public final class ReadAvroBuilder implements CommandBuilder {
 
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
-      Preconditions.checkNotNull(externalSchema, "External avro schema must not be null");      
-      DatumReader<GenericContainer> datumReader = new GenericDatumReader<GenericContainer>(externalSchema);
+      Preconditions.checkNotNull(writerSchema);  
+      Schema readSchema = readerSchema != null ? readerSchema : writerSchema;
+      DatumReader<GenericContainer> datumReader = new GenericDatumReader<GenericContainer>(writerSchema, readSchema);
       
       Decoder decoder;
       if (isJSON()) {
-        decoder = DecoderFactory.get().jsonDecoder(externalSchema, in);
+        decoder = DecoderFactory.get().jsonDecoder(writerSchema, in);
       } else {
         decoder = DecoderFactory.get().binaryDecoder(in, null);
       }

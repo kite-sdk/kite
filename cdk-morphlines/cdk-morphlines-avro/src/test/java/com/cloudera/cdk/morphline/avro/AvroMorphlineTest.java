@@ -435,22 +435,40 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
       fail();
     } catch (MorphlineCompilationException e) {
       assertTrue(e.getMessage().startsWith(
-          "You must specify an external Avro schema because this is required to read containerless Avro"));
+          "You must specify an external Avro writer schema because this is required to read containerless Avro"));
     }
+  }
+
+  private static final String[] TWEET_FIELD_NAMES = new String[] { 
+      "id", 
+      "in_reply_to_status_id", 
+      "in_reply_to_user_id", 
+      "retweet_count",
+      "retweeted", 
+      "text", 
+      "user_description" 
+      };
+
+  @Test
+  public void testReadAvroTweetsContainer() throws Exception {
+    runTweetContainer("test-morphlines/readAvroTweetsContainer", TWEET_FIELD_NAMES);
   }
 
   @Test
   public void testReadAvroTweetsContainerWithExternalSchema() throws Exception {
-    runTweetContainer("test-morphlines/readAvroTweetsContainerWithExternalSchema");
-    
+    runTweetContainer("test-morphlines/readAvroTweetsContainerWithExternalSchema", TWEET_FIELD_NAMES);    
   }
   
   @Test
-  public void testReadAvroTweetsContainer() throws Exception {
-    runTweetContainer("test-morphlines/readAvroTweetsContainer");
+  public void testReadAvroTweetsContainerWithExternalSubSchema() throws Exception {
+    String[] subSchemaFieldNames = new String[] { 
+        "id", 
+        "text", 
+        };
+    runTweetContainer("test-morphlines/readAvroTweetsContainerWithExternalSubSchema", subSchemaFieldNames);    
   }
-
-  private void runTweetContainer(String morphlineConfigFile) throws Exception {
+  
+  private void runTweetContainer(String morphlineConfigFile, String[] fieldNames) throws Exception {
     File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433-medium.avro");
     morphline = createMorphline(morphlineConfigFile);    
     Record record = new Record();
@@ -467,29 +485,98 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     while (reader.hasNext()) {
       Record actual = collector.getRecords().get(i);
       GenericData.Record expected = reader.next();
-      assertTweetEquals(expected, actual, i);
+      assertTweetEquals(expected, actual, fieldNames, i);
       i++;
     }    
     assertEquals(collector.getRecords().size(), i);
   }
+  
+  @Test
+  public void testReadAvroTweetsWithExternalSchema() throws Exception {
+    runTweets("test-morphlines/readAvroTweetsWithExternalSchema", TWEET_FIELD_NAMES);    
+  }
+  
+  @Test
+  public void testReadAvroTweetsWithExternalSubSchema() throws Exception {
+    String[] subSchemaFieldNames = new String[] { 
+        "id", 
+        "text", 
+        };
+    runTweets("test-morphlines/readAvroTweetsWithExternalSubSchema", subSchemaFieldNames);
+  }
+  
+  @Test
+  public void testReadAvroJsonTweetsWithExternalSchema() throws Exception {
+    runTweets("test-morphlines/readAvroJsonTweetsWithExternalSchema", TWEET_FIELD_NAMES);
+  }
+  
+  @Test
+  public void testReadAvroJsonTweetsWithExternalSubSchema() throws Exception {
+    String[] subSchemaFieldNames = new String[] { 
+        "id", 
+        "text", 
+        };
+    runTweets("test-morphlines/readAvroJsonTweetsWithExternalSubSchema", subSchemaFieldNames);
+  }
+  
+  private void runTweets(String morphlineConfigFile, String[] fieldNames) throws Exception {
+    File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433-medium.avro");
+    List<GenericData.Record> expecteds = new ArrayList();
+    FileReader<GenericData.Record> reader = new DataFileReader(file, new GenericDatumReader());
+    Schema schema = reader.getSchema();
+    while (reader.hasNext()) {
+      GenericData.Record expected = reader.next();
+      expecteds.add(expected);
+    }    
+    assertEquals(2104, expecteds.size());
 
-  private void assertTweetEquals(GenericData.Record expected, Record actual, int i) {
+    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+    Encoder encoder;
+    if (morphlineConfigFile.contains("Json")) {
+      encoder = EncoderFactory.get().jsonEncoder(schema, bout);
+    } else {
+      encoder = EncoderFactory.get().binaryEncoder(bout, null);
+    }
+    GenericDatumWriter datumWriter = new GenericDatumWriter(schema);
+    for (GenericData.Record record : expecteds) {
+      datumWriter.write(record, encoder);
+    }
+    encoder.flush();
+
+    morphline = createMorphline(morphlineConfigFile);    
+    Record record = new Record();
+    record.put(Fields.ATTACHMENT_BODY, bout.toByteArray());
+    startSession();
+    Notifications.notifyBeginTransaction(morphline);
+    assertTrue(morphline.process(record));
+    assertEquals(1, collector.getNumStartEvents());
+    assertEquals(2104, collector.getRecords().size());
+    
+    reader = new DataFileReader(file, new GenericDatumReader());
+    int i = 0;
+    while (reader.hasNext()) {
+      Record actual = collector.getRecords().get(i);
+      GenericData.Record expected = reader.next();
+      assertTweetEquals(expected, actual, fieldNames, i);
+      i++;
+    }    
+    assertEquals(collector.getRecords().size(), i);
+  }
+  
+  private void assertTweetEquals(GenericData.Record expected, Record actual, String[] fieldNames, int i) {
     //  System.out.println("\n\nexpected: " + toString(avroRecord));
     //  System.out.println("actual:   " + actual);
-    String[] fieldNames = new String[] { 
-        "id", 
-        "in_reply_to_status_id", 
-        "in_reply_to_user_id", 
-        "retweet_count",
-        "retweeted", 
-        "text", 
-        "user_description" 
-        };
     for (String fieldName : fieldNames) {
       assertEquals(
           i + " fieldName: " + fieldName, 
           expected.get(fieldName).toString(), 
           actual.getFirstValue(fieldName).toString());
+    }
+    
+    for (String fieldName : TWEET_FIELD_NAMES) {
+      if (!Arrays.asList(fieldNames).contains(fieldName)) {
+        assertFalse(actual.getFields().containsKey(fieldName));
+      }
     }
   }
 
