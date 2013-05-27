@@ -45,7 +45,8 @@ import com.typesafe.config.Config;
  * Command that parses an InputStream that contains Avro data; for each Avro datum, the command
  * emits a morphline record containing the datum as an attachment in {@link Fields#ATTACHMENT_BODY}.
  * 
- * The Avro schema for reading must be explicitly supplied.
+ * The Avro schema that was used to write the Avro data must be explicitly supplied. Optionally, the
+ * Avro schema that shall be used for reading can be supplied as well.
  */
 public final class ReadAvroBuilder implements CommandBuilder {
 

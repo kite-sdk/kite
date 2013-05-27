@@ -42,8 +42,8 @@ import com.typesafe.config.Config;
  * datum, the command emits a morphline record containing the datum as an attachment in
  * {@link Fields#ATTACHMENT_BODY}.
  * 
- * The Avro schema for reading is retrieved from the container but the schema can also be explicitly
- * specified.
+ * The Avro schema that was used to write the Avro data is retrieved from the container. Optionally, the
+ * Avro schema that shall be used for reading can be supplied as well.
  */
 public final class ReadAvroContainerBuilder implements CommandBuilder {
 
