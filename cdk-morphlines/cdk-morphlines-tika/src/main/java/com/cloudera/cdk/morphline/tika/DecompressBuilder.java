@@ -16,7 +16,6 @@
 package com.cloudera.cdk.morphline.tika;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,10 +24,8 @@ import java.util.Set;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipUtils;
 import org.apache.tika.io.CloseShieldInputStream;
-import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 
 import com.cloudera.cdk.morphline.api.Command;
@@ -129,58 +126,6 @@ public final class DecompressBuilder implements CommandBuilder {
         Closeables.closeQuietly(cis);
       }
     }
-
-    /**
-     * @return an input stream/metadata tuple to use. If appropriate, stream will be capable of
-     * decompressing concatenated compressed files.
-     */
-    private InputStreamMetadata detectCompressInputStream(InputStream inputStream, Metadata metadata) {
-      if (decompressConcatenated) {
-        String resourceName = metadata.get(Metadata.RESOURCE_NAME_KEY);
-        if (resourceName != null && GzipUtils.isCompressedFilename(resourceName)) {
-          try {
-            CompressorInputStream cis = new GzipCompressorInputStream(inputStream, true);
-            Metadata entryData = cloneMetadata(metadata);
-            String newName = GzipUtils.getUncompressedFilename(resourceName);
-            entryData.set(Metadata.RESOURCE_NAME_KEY, newName);
-            return new InputStreamMetadata(cis, entryData);
-          } catch (IOException ioe) {
-            LOG.warn("Unable to create compressed input stream able to read concatenated stream", ioe);
-          }
-        }
-      }
-      return new InputStreamMetadata(inputStream, metadata);
-    }
-
-    /**
-     * @return a clone of metadata
-     */
-    private Metadata cloneMetadata(Metadata metadata) {
-      Metadata clone = new Metadata();
-      for (String name : metadata.names()) {
-        String [] str = metadata.getValues(name);
-        for (int i = 0; i < str.length; ++i) {
-          clone.add(name, str[i]);
-        }
-      }
-      return clone;
-    }
-
-    
-    ///////////////////////////////////////////////////////////////////////////////
-    // Nested classes:
-    ///////////////////////////////////////////////////////////////////////////////
-    private static final class InputStreamMetadata {
-      
-      private InputStream inputStream;
-      private Metadata metadata;
-   
-      public InputStreamMetadata(InputStream inputStream, Metadata metadata) {
-        this.inputStream = inputStream;
-        this.metadata = metadata;
-      }
-    }
-    
   }
 
 }
