@@ -18,6 +18,7 @@ package com.cloudera.data.filesystem;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.Formats;
 import com.cloudera.data.MetadataProvider;
+import com.cloudera.data.PartitionStrategy;
 import com.google.common.io.Files;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
@@ -28,7 +29,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.cloudera.data.filesystem.DatasetTestUtilities.USER_PARTITIONED_SCHEMA;
 import static com.cloudera.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
 
 public class TestFileSystemMetadataProvider {
@@ -95,10 +95,8 @@ public class TestFileSystemMetadataProvider {
     provider.save(
         "test",
         new DatasetDescriptor.Builder()
-            .schema(USER_PARTITIONED_SCHEMA)
-            .partitionStrategy(
-                new PartitionExpression(USER_PARTITIONED_SCHEMA
-                    .getProp("cdk.partition.expression"), true).evaluate())
+            .schema(USER_SCHEMA)
+            .partitionStrategy(new PartitionStrategy.Builder().hash("username", 2).get())
             .get());
 
     Assert.assertTrue("Descriptor properties file should exist", fileSystem

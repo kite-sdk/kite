@@ -30,7 +30,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.cloudera.data.filesystem.DatasetTestUtilities.USER_PARTITIONED_SCHEMA;
+import static com.cloudera.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
 
 public class TestPartitionedDatasetWriter {
 
@@ -44,12 +44,12 @@ public class TestPartitionedDatasetWriter {
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
     fileSystem = FileSystem.get(new Configuration());
     repo = new FileSystemDatasetRepository(fileSystem, testDirectory);
-    PartitionStrategy partitionStrategy = new PartitionExpression(USER_PARTITIONED_SCHEMA
-        .getProp("cdk.partition.expression"), true).evaluate();
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .hash("username", 2).get();
     Dataset users = repo.create(
         "users",
         new DatasetDescriptor.Builder()
-            .schema(USER_PARTITIONED_SCHEMA)
+            .schema(USER_SCHEMA)
             .partitionStrategy(partitionStrategy)
             .get());
     writer = new PartitionedDatasetWriter<Object>(users, partitionStrategy);
@@ -68,8 +68,8 @@ public class TestPartitionedDatasetWriter {
 
   @Test
   public void testWriter() throws IOException {
-    Record record = new GenericRecordBuilder(USER_PARTITIONED_SCHEMA).set("username",
-        "test1").build();
+    Record record = new GenericRecordBuilder(USER_SCHEMA)
+        .set("username", "test1").set("email", "a@example.com").build();
     try {
       writer.open();
       writer.write(record);
@@ -82,8 +82,8 @@ public class TestPartitionedDatasetWriter {
 
   @Test(expected = IllegalStateException.class)
   public void testWriteToClosedWriterFails() throws IOException {
-    Record record = new GenericRecordBuilder(USER_PARTITIONED_SCHEMA).set("username",
-        "test1").build();
+    Record record = new GenericRecordBuilder(USER_SCHEMA)
+        .set("username", "test1").set("email", "a@example.com").build();
     writer.open();
     writer.close();
     writer.write(record);

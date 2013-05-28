@@ -31,8 +31,6 @@ public class DatasetTestUtilities {
 
   public final static Schema STRING_SCHEMA = loadSchema("schema/string.avsc");
   public final static Schema USER_SCHEMA = loadSchema("schema/user.avsc");
-  public final static Schema USER_PARTITIONED_SCHEMA =
-      loadSchema("schema/user-partitioned.avsc");
 
   private static Schema loadSchema(String resource) {
     try {
