@@ -29,6 +29,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Supplier;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
@@ -82,6 +83,10 @@ class FileSystemDataset implements Dataset {
   @Override
   public DatasetDescriptor getDescriptor() {
     return descriptor;
+  }
+
+  PartitionKey getPartitionKey() {
+    return partitionKey;
   }
 
   @Override
@@ -254,7 +259,7 @@ class FileSystemDataset implements Dataset {
   private String uniqueFilename() {
     // FIXME: This file name is not guaranteed to be truly unique.
     return Joiner.on('-').join(System.currentTimeMillis(),
-      Thread.currentThread().getId() + "." + descriptor.getFormat().getExtension());
+        Thread.currentThread().getId() + "." + descriptor.getFormat().getExtension());
   }
 
   private void accumulateDatafilePaths(Path directory, List<Path> paths)
@@ -288,7 +293,10 @@ class FileSystemDataset implements Dataset {
       values.addAll(partitionKey.getValues());
     }
 
-    values.add(Splitter.on('=').split(dir.getName()));
+    String stringValue = Iterables.get(Splitter.on('=').split(dir.getName()), 1);
+    Object value = partitionStrategy.getFieldPartitioners().get(0)
+        .valueFromString(stringValue);
+    values.add(value);
 
     return Accessor.getDefault().newPartitionKey(values.toArray());
   }

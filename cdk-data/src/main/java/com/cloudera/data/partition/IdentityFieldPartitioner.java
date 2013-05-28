@@ -16,8 +16,10 @@
 package com.cloudera.data.partition;
 
 import com.cloudera.data.FieldPartitioner;
+import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
+@Beta
 public class IdentityFieldPartitioner extends FieldPartitioner {
 
   public IdentityFieldPartitioner(String name, int buckets) {
@@ -27,6 +29,11 @@ public class IdentityFieldPartitioner extends FieldPartitioner {
   @Override
   public Object apply(Object value) {
     return value;
+  }
+
+  @Override
+  public Object valueFromString(String stringValue) {
+    return stringValue; // TODO: need more type information
   }
 
   @Override

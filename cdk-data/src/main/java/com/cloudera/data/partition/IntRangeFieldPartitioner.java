@@ -45,6 +45,11 @@ public class IntRangeFieldPartitioner extends FieldPartitioner {
   }
 
   @Override
+  public Object valueFromString(String stringValue) {
+    return Integer.parseInt(stringValue);
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;

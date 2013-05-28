@@ -68,12 +68,6 @@ public class TestPartitionStrategy {
     assertEquals("userId", fp1.getName());
     assertEquals(7, fp1.getCardinality());
 
-    Entity e = new Entity();
-    e.setMonth(2);
-    e.setUserId(10);
-
-    logger.debug("partitionStrategy:{}", p);
-
     assertEquals(12 * 7, p.getCardinality()); // useful for writers
   }
 

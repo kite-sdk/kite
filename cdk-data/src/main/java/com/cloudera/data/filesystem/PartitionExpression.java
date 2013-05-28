@@ -15,6 +15,12 @@
  */
 package com.cloudera.data.filesystem;
 
+import com.cloudera.data.partition.DayOfMonthFieldPartitioner;
+import com.cloudera.data.partition.HourFieldPartitioner;
+import com.cloudera.data.partition.MinuteFieldPartitioner;
+import com.cloudera.data.partition.MonthFieldPartitioner;
+import com.cloudera.data.partition.YearFieldPartitioner;
+import com.google.common.collect.Lists;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +63,11 @@ class PartitionExpression {
        * JEXL doesn't recognize that [hash(...), range(...)] is an array of
        * FieldPartitioner. Instead, it thinks it's Object[].
        */
-      return new PartitionStrategy((FieldPartitioner[]) object);
+      List<FieldPartitioner> partitioners = Lists.newArrayList();
+      for (Object o : ((Object[]) object)) {
+        partitioners.add((FieldPartitioner) o);
+      }
+      return new PartitionStrategy(partitioners);
     } else {
       throw new IllegalArgumentException(
           "Partition expression did not produce FieldPartitioner result (or array) for value:"
@@ -116,6 +126,21 @@ class PartitionExpression {
 
       return String.format("range(\"%s\", %s", fieldPartitioner.getName(),
           builder.toString());
+    } else if (fieldPartitioner instanceof YearFieldPartitioner) {
+      return String.format("year(\"%s\", \"%s\")", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName());
+    } else if (fieldPartitioner instanceof MonthFieldPartitioner) {
+      return String.format("month(\"%s\", \"%s\")", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName());
+    } else if (fieldPartitioner instanceof DayOfMonthFieldPartitioner) {
+      return String.format("day(\"%s\", \"%s\")", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName());
+    } else if (fieldPartitioner instanceof HourFieldPartitioner) {
+      return String.format("hour(\"%s\", \"%s\")", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName());
+    } else if (fieldPartitioner instanceof MinuteFieldPartitioner) {
+      return String.format("minute(\"%s\", \"%s\")", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName());
     }
 
     throw new IllegalArgumentException("Unrecognized PartitionStrategy: "

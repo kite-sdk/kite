@@ -15,11 +15,13 @@
  */
 package com.cloudera.data;
 
+import com.cloudera.data.partition.PartitionFunctions;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import java.util.Locale;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.generic.GenericRecord;
@@ -32,6 +34,8 @@ import com.cloudera.data.partition.RangeFieldPartitioner;
 import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
+
+import static java.util.Locale.ENGLISH;
 
 /**
  * <p>
@@ -161,14 +165,14 @@ public class PartitionStrategy {
         new PartitionKey(new Object[fieldPartitioners.size()]) : reuseKey);
     for (int i = 0; i < fieldPartitioners.size(); i++) {
       FieldPartitioner fp = fieldPartitioners.get(i);
-      String name = fp.getName();
+      String name = fp.getSourceName();
       Object value;
       if (entity instanceof GenericRecord) {
         value = ((GenericRecord) entity).get(name);
       } else {
         try {
           PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name,
-              entity.getClass());
+              entity.getClass(), getter(name), null /* assume read only */);
           value = propertyDescriptor.getReadMethod().invoke(entity);
         } catch (IllegalAccessException e) {
           throw new RuntimeException("Cannot read property " + name + " from "
@@ -184,6 +188,10 @@ public class PartitionStrategy {
       key.set(i, fp.apply(value));
     }
     return key;
+  }
+
+  private String getter(String name) {
+    return "get" + name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1);
   }
 
   /**
@@ -247,6 +255,11 @@ public class PartitionStrategy {
       return this;
     }
 
+    public Builder hash(String sourceName, String name, int buckets) {
+      fieldPartitioners.add(new HashFieldPartitioner(sourceName, name, buckets));
+      return this;
+    }
+
     /**
      * Configure an identity partitioner with a cardinality hint of
      * {@code buckets} size.
@@ -295,6 +308,31 @@ public class PartitionStrategy {
      */
     public Builder range(String name, Comparable<?>... upperBounds) {
       fieldPartitioners.add(new RangeFieldPartitioner(name, upperBounds));
+      return this;
+    }
+
+    public Builder year(String sourceName, String name) {
+      fieldPartitioners.add(PartitionFunctions.year(sourceName, name));
+      return this;
+    }
+
+    public Builder month(String sourceName, String name) {
+      fieldPartitioners.add(PartitionFunctions.month(sourceName, name));
+      return this;
+    }
+
+    public Builder day(String sourceName, String name) {
+      fieldPartitioners.add(PartitionFunctions.day(sourceName, name));
+      return this;
+    }
+
+    public Builder hour(String sourceName, String name) {
+      fieldPartitioners.add(PartitionFunctions.hour(sourceName, name));
+      return this;
+    }
+
+    public Builder minute(String sourceName, String name) {
+      fieldPartitioners.add(PartitionFunctions.minute(sourceName, name));
       return this;
     }
 

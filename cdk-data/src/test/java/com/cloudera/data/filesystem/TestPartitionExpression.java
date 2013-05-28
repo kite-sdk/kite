@@ -18,6 +18,8 @@ package com.cloudera.data.filesystem;
 import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.partition.HashFieldPartitioner;
+import com.cloudera.data.partition.MinuteFieldPartitioner;
+import com.cloudera.data.partition.YearFieldPartitioner;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
@@ -58,6 +60,28 @@ public class TestPartitionExpression {
     Assert.assertEquals(HashFieldPartitioner.class, fp1.getClass());
     Assert.assertEquals("username2", fp1.getName());
     Assert.assertEquals(3, fp1.getCardinality());
+
+    Assert.assertEquals(expr, PartitionExpression.toExpression(strategy));
+  }
+
+  @Test
+  public void testMixedSubpartitionStrategy() {
+    String expr = "[year(\"timestamp\", \"year\"), minute(\"timestamp\", \"minute\")]";
+    PartitionExpression expression = new PartitionExpression(expr, true);
+
+    PartitionStrategy strategy = expression.evaluate();
+    List<FieldPartitioner> fieldPartitioners = strategy.getFieldPartitioners();
+    Assert.assertEquals(2, fieldPartitioners.size());
+
+    FieldPartitioner fp0 = fieldPartitioners.get(0);
+    Assert.assertEquals(YearFieldPartitioner.class, fp0.getClass());
+    Assert.assertEquals("timestamp", fp0.getSourceName());
+    Assert.assertEquals("year", fp0.getName());
+
+    FieldPartitioner fp1 = fieldPartitioners.get(1);
+    Assert.assertEquals(MinuteFieldPartitioner.class, fp1.getClass());
+    Assert.assertEquals("timestamp", fp1.getSourceName());
+    Assert.assertEquals("minute", fp1.getName());
 
     Assert.assertEquals(expr, PartitionExpression.toExpression(strategy));
   }

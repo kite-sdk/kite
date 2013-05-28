@@ -51,6 +51,11 @@ public class RangeFieldPartitioner extends FieldPartitioner {
     throw new IllegalArgumentException(value + " is outside bounds");
   }
 
+  @Override
+  public Object valueFromString(String stringValue) {
+    return stringValue; // TODO: need more type information
+  }
+
   public List<Comparable<?>> getUpperBounds() {
     return upperBounds;
   }

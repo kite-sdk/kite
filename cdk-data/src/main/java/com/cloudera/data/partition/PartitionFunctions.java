@@ -43,4 +43,29 @@ public class PartitionFunctions {
     return new RangeFieldPartitioner(name, upperBounds);
   }
 
+  @Beta
+  public static FieldPartitioner year(String sourceName, String name) {
+    return new YearFieldPartitioner(sourceName, name);
+  }
+
+  @Beta
+  public static FieldPartitioner month(String sourceName, String name) {
+    return new MonthFieldPartitioner(sourceName, name);
+  }
+
+  @Beta
+  public static FieldPartitioner day(String sourceName, String name) {
+    return new DayOfMonthFieldPartitioner(sourceName, name);
+  }
+
+  @Beta
+  public static FieldPartitioner hour(String sourceName, String name) {
+    return new HourFieldPartitioner(sourceName, name);
+  }
+
+  @Beta
+  public static FieldPartitioner minute(String sourceName, String name) {
+    return new MinuteFieldPartitioner(sourceName, name);
+  }
+
 }

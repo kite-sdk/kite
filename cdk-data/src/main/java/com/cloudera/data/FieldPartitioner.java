@@ -24,9 +24,9 @@ import javax.annotation.concurrent.Immutable;
  * </p>
  * <p>
  * Used by a {@link PartitionStrategy} to calculate which partition an entity
- * belongs in, based on the value of a given field. A field partitioner can, in
- * some cases, provide meaningful cardinality hints to query systems. A good
- * example of this is a hash partitioner which always knows the number of
+ * belongs in, based on the value of a given field, called the source field. A field
+ * partitioner can, in some cases, provide meaningful cardinality hints to query
+ * systems. A good example of this is a hash partitioner which always knows the number of
  * buckets produced by the function.
  * </p>
  * <p>
@@ -38,16 +38,33 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public abstract class FieldPartitioner implements Function<Object, Object> {
 
+  private final String sourceName;
   private final String name;
   private final int cardinality;
 
   protected FieldPartitioner(String name, int cardinality) {
+    this(name, name, cardinality);
+  }
+
+  protected FieldPartitioner(String sourceName, String name, int cardinality) {
+    this.sourceName = sourceName;
     this.name = name;
     this.cardinality = cardinality;
   }
 
+  /**
+   * @return the name of the partition field. Note that the partition field is derived
+   * from {@link #getSourceName()} and does not appear in the dataset entity.
+   */
   public String getName() {
     return name;
+  }
+
+  /**
+   * @return the name of the field from which the partition field is derived.
+   */
+  public String getSourceName() {
+    return sourceName;
   }
 
   public int getCardinality() {
@@ -66,5 +83,12 @@ public abstract class FieldPartitioner implements Function<Object, Object> {
    */
   @Override
   public abstract Object apply(Object value);
+
+  /**
+   * <p>
+   * Retrieve the value for the field from the string representation.
+   * </p>
+   */
+  public abstract Object valueFromString(String stringValue);
 
 }

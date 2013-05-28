@@ -63,48 +63,43 @@ public class DatasetTestUtilities {
   }
 
   public static void checkTestUsers(Dataset ds, int count) {
-    DatasetReader<GenericData.Record> reader = null;
-    try {
-      reader = ds.getReader();
-      reader.open();
-
-      // record order is not guaranteed, so check that we have read all the
-      // records
-      Set<String> usernames = Sets.newHashSet();
-      for (int i = 0; i < count; i++) {
-        usernames.add("test-" + i);
-      }
-      for (int i = 0; i < count; i++) {
-        Assert.assertTrue(reader.hasNext());
-        GenericData.Record actualRecord = reader.read();
-        Assert.assertTrue(usernames.remove((String) actualRecord
-            .get("username")));
-        Assert.assertNotNull(actualRecord.get("email"));
-      }
-      Assert.assertTrue(usernames.isEmpty());
-      Assert.assertFalse(reader.hasNext());
-    } finally {
-      if (reader != null) {
-        reader.close();
-      }
-    }
+    checkTestUsers(materialize(ds), count);
   }
 
-  public static int datasetSize(Dataset ds) {
-    int size = 0;
+  public static void checkTestUsers(Set<GenericData.Record> records, int count) {
+    Assert.assertEquals("Wrong number of records", count, records.size());
+    // record order is not guaranteed, so check that we have read all the
+    // records
+    Set<String> usernames = Sets.newHashSet();
+    for (int i = 0; i < count; i++) {
+      usernames.add("test-" + i);
+    }
+    for (GenericData.Record actualRecord : records) {
+      Assert.assertTrue(usernames.remove((String) actualRecord
+          .get("username")));
+      Assert.assertNotNull(actualRecord.get("email"));
+    }
+    Assert.assertTrue(usernames.isEmpty());
+  }
+
+  public static Set<GenericData.Record> materialize(Dataset ds) {
+    Set<GenericData.Record> records = Sets.newHashSet();
     DatasetReader<GenericData.Record> reader = null;
     try {
       reader = ds.getReader();
       reader.open();
       while (reader.hasNext()) {
-        reader.read();
-        size++;
+        records.add(reader.read());
       }
     } finally {
       if (reader != null) {
         reader.close();
       }
     }
-    return size;
+    return records;
+  }
+
+  public static int datasetSize(Dataset ds) {
+    return materialize(ds).size();
   }
 }
