@@ -134,11 +134,11 @@ public class Log4jAppender extends AppenderSkeleton {
     Object message = event.getMessage();
     if (message instanceof GenericRecord) {
       GenericRecord record = (GenericRecord) message;
-      populateAvroHeaders(hdrs, record.getSchema());
+      populateAvroHeaders(hdrs, record.getSchema(), message);
       flumeEvent = EventBuilder.withBody(serialize(record, record.getSchema()), hdrs);
     } else if (message instanceof SpecificRecord || avroReflectionEnabled) {
       Schema schema = ReflectData.get().getSchema(message.getClass());
-      populateAvroHeaders(hdrs, schema);
+      populateAvroHeaders(hdrs, schema, message);
       flumeEvent = EventBuilder.withBody(serialize(message, schema), hdrs);
     } else {
       hdrs.put(Log4jAvroHeaders.MESSAGE_ENCODING.toString(), "UTF8");
@@ -160,7 +160,8 @@ public class Log4jAppender extends AppenderSkeleton {
   private DatumWriter<Object> writer;
   private BinaryEncoder encoder;
 
-  private void populateAvroHeaders(Map<String, String> hdrs, Schema schema) {
+  protected void populateAvroHeaders(Map<String, String> hdrs, Schema schema,
+      Object message) {
     if (avroSchemaUrl != null) {
       hdrs.put(Log4jAvroHeaders.AVRO_SCHEMA_URL.toString(), avroSchemaUrl);
       return;

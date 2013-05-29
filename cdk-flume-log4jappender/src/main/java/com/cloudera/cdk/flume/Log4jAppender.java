@@ -1,16 +1,27 @@
 package com.cloudera.cdk.flume;
 
+import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetRepository;
+import com.cloudera.data.FieldPartitioner;
+import com.cloudera.data.PartitionKey;
+import com.cloudera.data.PartitionStrategy;
 import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URL;
+import java.util.Map;
+import org.apache.avro.Schema;
 import org.apache.flume.FlumeException;
 
 public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jAppender {
 
+  private static final String PARTITION_PREFIX = "cdk.partition.";
+
   private String datasetRepositoryClass;
   private String datasetRepositoryUri;
   private String datasetName;
+  
+  private PartitionStrategy partitionStrategy;
+  private PartitionKey key;
 
   public Log4jAppender() {
     super();
@@ -50,7 +61,11 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
       DatasetRepository repo = (DatasetRepository)
           cons.newInstance(new URI(datasetRepositoryUri));
 
-      URL schemaUrl = repo.get(datasetName).getDescriptor().getSchemaUrl();
+      Dataset dataset = repo.get(datasetName);
+      if (dataset.getDescriptor().isPartitioned()) {
+        partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
+      }
+      URL schemaUrl = dataset.getDescriptor().getSchemaUrl();
       if (schemaUrl != null) {
         setAvroSchemaUrl(schemaUrl.toExternalForm());
       }
@@ -59,5 +74,17 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
     }
 
     super.activateOptions();
+  }
+
+  protected void populateAvroHeaders(Map<String, String> hdrs, Schema schema,
+      Object message) {
+    super.populateAvroHeaders(hdrs, schema, message);
+    if (partitionStrategy != null) {
+      key = partitionStrategy.partitionKeyForEntity(message, key);
+      int i = 0;
+      for (FieldPartitioner fp : partitionStrategy.getFieldPartitioners()) {
+        hdrs.put(PARTITION_PREFIX + fp.getName(), key.get(i++).toString());
+      }
+    }
   }
 }
