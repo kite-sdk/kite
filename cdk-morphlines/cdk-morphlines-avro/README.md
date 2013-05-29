@@ -1,3 +1,3 @@
 # CDK - Morphlines Avro
 
-Morphline commands for reading, extracting and transforming Avro files and Avro objects.
+This module contains morphline commands for reading, extracting and transforming Avro files and Avro objects.
