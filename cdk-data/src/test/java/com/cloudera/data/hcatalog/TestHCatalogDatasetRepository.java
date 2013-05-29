@@ -55,7 +55,7 @@ public class TestHCatalogDatasetRepository {
     repo = new HCatalogDatasetRepository();
 
     Dataset ds = repo.create(TABLE_NAME,
-        new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
+        new DatasetDescriptor.Builder().schema(USER_SCHEMA_URL).get());
     Assert.assertTrue("Data directory should exist after dataset creation",
         tableDir.exists());
 
@@ -75,7 +75,7 @@ public class TestHCatalogDatasetRepository {
     repo = new HCatalogDatasetRepository(fileSystem, testDirectory);
 
     Dataset ds = repo.create(TABLE_NAME,
-        new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
+        new DatasetDescriptor.Builder().schema(USER_SCHEMA_URL).get());
     Assert.assertTrue("Data directory should exist after dataset creation",
         tableDir.exists());
 

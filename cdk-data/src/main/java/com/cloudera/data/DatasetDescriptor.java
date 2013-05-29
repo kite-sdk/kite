@@ -32,6 +32,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import org.apache.avro.reflect.ReflectData;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 /**
  * <p>
@@ -48,6 +52,7 @@ import org.apache.avro.reflect.ReflectData;
 public class DatasetDescriptor {
 
   private final Schema schema;
+  private final URL schemaUrl;
   private final Format format;
   private final PartitionStrategy partitionStrategy;
 
@@ -59,17 +64,18 @@ public class DatasetDescriptor {
   public DatasetDescriptor(Schema schema, @Nullable PartitionStrategy
       partitionStrategy) {
 
-    this(schema, Formats.AVRO, partitionStrategy);
+    this(schema, null, Formats.AVRO, partitionStrategy);
   }
 
   /**
-   * Create an instance of this class with the supplied {@link Schema},
+   * Create an instance of this class with the supplied {@link Schema}, optional URL,
    * {@link Format} and optional {@link PartitionStrategy}.
    */
-  DatasetDescriptor(Schema schema, Format format,
+  DatasetDescriptor(Schema schema, @Nullable URL schemaUrl, Format format,
       @Nullable PartitionStrategy partitionStrategy) {
 
     this.schema = schema;
+    this.schemaUrl = schemaUrl;
     this.format = format;
     this.partitionStrategy = partitionStrategy;
   }
@@ -85,6 +91,19 @@ public class DatasetDescriptor {
    */
   public Schema getSchema() {
     return schema;
+  }
+
+  /**
+   * Get a URL from which the {@link Schema} may be retrieved. Optional. This method
+   * may return <code>null</code> if the schema is not stored at a persistent URL,
+   * e.g. if it was constructed from a literal string.
+   *
+   * @return a URL from which the schema may be retrieved
+   * @since 0.3.0
+   */
+  @Nullable
+  public URL getSchemaUrl() {
+    return schemaUrl;
   }
 
   /**
@@ -132,6 +151,7 @@ public class DatasetDescriptor {
   public static class Builder implements Supplier<DatasetDescriptor> {
 
     private Schema schema;
+    private URL schemaUrl;
     private Format format = Formats.AVRO;
     private PartitionStrategy partitionStrategy;
 
@@ -156,6 +176,7 @@ public class DatasetDescriptor {
      */
     public Builder schema(File file) throws IOException {
       this.schema = new Schema.Parser().parse(file);
+      this.schemaUrl = file.toURI().toURL();
       return this;
     }
 
@@ -180,15 +201,24 @@ public class DatasetDescriptor {
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(URL url) throws IOException {
+      this.schemaUrl = url;
+
       InputStream in = null;
       Closer closer = Closer.create();
 
       try {
-        in = closer.register(url.openStream());
+        in = closer.register(openStream(url));
         return schema(in);
       } finally {
         closer.close();
       }
+    }
+
+    private InputStream openStream(URL url) throws IOException {
+      if (url.getProtocol().equalsIgnoreCase("hdfs")) {
+        FileSystem.get(new Configuration()).open(new Path(url.toExternalForm()));
+      }
+      return url.openStream();
     }
 
     /**
@@ -312,7 +342,7 @@ public class DatasetDescriptor {
       Preconditions.checkState(schema != null,
         "Descriptor schema may not be null");
 
-      return new DatasetDescriptor(schema, format, partitionStrategy);
+      return new DatasetDescriptor(schema, schemaUrl, format, partitionStrategy);
     }
 
   }

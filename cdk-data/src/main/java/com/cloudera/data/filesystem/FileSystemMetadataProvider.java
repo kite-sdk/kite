@@ -107,23 +107,12 @@ public class FileSystemMetadataProvider implements MetadataProvider {
       }
     }
 
-    closer = Closer.create();
-
     Path schemaPath = new Path(directory, SCHEMA_FILE_NAME);
-
     try {
-      inputStream = closer.register(fileSystem.open(schemaPath));
-      builder.schema(new Schema.Parser().parse(new String(ByteStreams
-        .toByteArray(inputStream), Charsets.UTF_8)));
+      builder.schema(fileSystem.makeQualified(schemaPath).toUri().toURL());
     } catch (IOException e) {
       throw new MetadataProviderException(
         "Unable to load schema file:" + schemaPath + " for dataset:" + name, e);
-    } finally {
-      try {
-        closer.close();
-      } catch (IOException e) {
-        throw new MetadataProviderException(e);
-      }
     }
 
     return builder.get();

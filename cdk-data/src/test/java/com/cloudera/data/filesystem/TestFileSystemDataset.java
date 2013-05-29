@@ -79,7 +79,7 @@ public class TestFileSystemDataset {
   @Test
   public void testWriteAndRead() throws IOException {
     FileSystemDataset ds = new FileSystemDataset.Builder().name("test")
-      .descriptor(new DatasetDescriptor.Builder().schema(USER_SCHEMA)
+      .descriptor(new DatasetDescriptor.Builder().schema(USER_SCHEMA_URL)
           .format(format).get())
       .fileSystem(FileSystem.get(new Configuration()))
       .directory(testDirectory).get();

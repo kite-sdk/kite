@@ -92,24 +92,11 @@ class HCatalogMetadataProvider implements MetadataProvider {
 
   @Override
   public void save(String name, DatasetDescriptor descriptor) {
-    createHiveTable(descriptor.getSchema(), name);
-  }
-
-  @Override
-  public boolean delete(String name) {
-    if (!HCatalog.tableExists(dbName, name)) {
-      return false;
-    }
-    HCatalog.dropTable(dbName, name);
-    return true;
-  }
-
-  private void createHiveTable(Schema schema, String name) {
     if (HCatalog.tableExists(dbName, name)) {
       logger.warn("Hive table named " + name + " already exists");
       return;
     }
-    logger.info("Creating an external Hive table named: " + name);
+    logger.info("Creating a Hive table named: " + name);
     Table tbl = new Table(dbName, name);
     tbl.setTableType(managed ? TableType.MANAGED_TABLE : TableType.EXTERNAL_TABLE);
     try {
@@ -119,7 +106,11 @@ class HCatalogMetadataProvider implements MetadataProvider {
       tbl.setSerializationLib(AVRO_SERDE);
       tbl.setInputFormatClass("org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
       tbl.setOutputFormatClass("org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat");
-      tbl.setProperty("avro.schema.literal", schema.toString());
+      if (descriptor.getSchemaUrl() != null) {
+        tbl.setProperty("avro.schema.url", descriptor.getSchemaUrl().toExternalForm());
+      } else {
+        tbl.setProperty("avro.schema.literal", descriptor.getSchema().toString());
+      }
     } catch (Exception e) {
       throw new MetadataProviderException("Error configuring Hive Avro table, " +
           "table creation failed", e);
@@ -135,6 +126,15 @@ class HCatalogMetadataProvider implements MetadataProvider {
         throw new MetadataProviderException(e);
       }
     }
+  }
+
+  @Override
+  public boolean delete(String name) {
+    if (!HCatalog.tableExists(dbName, name)) {
+      return false;
+    }
+    HCatalog.dropTable(dbName, name);
+    return true;
   }
 
 }

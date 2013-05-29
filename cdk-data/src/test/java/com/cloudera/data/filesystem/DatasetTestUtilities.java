@@ -21,6 +21,7 @@ import com.cloudera.data.DatasetWriter;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -31,6 +32,7 @@ public class DatasetTestUtilities {
 
   public final static Schema STRING_SCHEMA = loadSchema("schema/string.avsc");
   public final static Schema USER_SCHEMA = loadSchema("schema/user.avsc");
+  public final static URL USER_SCHEMA_URL = Resources.getResource("schema/user.avsc");
 
   private static Schema loadSchema(String resource) {
     try {
