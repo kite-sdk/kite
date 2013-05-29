@@ -476,15 +476,15 @@ public class MorphlineTest extends AbstractMorphlineTest {
     
     ImmutableMultimap expected;
     Iterator<Record> iter = collector.getRecords().iterator();
-    expected = ImmutableMultimap.of("Year", "Year", "Description", "Description", "Model", "Model", "column4", "Price");
+    expected = ImmutableMultimap.of("Age", "Age", "Extras", "Extras", "Type", "Type", "column4", "Used");
     assertEquals(expected, iter.next().getFields());
-    expected = ImmutableMultimap.of("Year", "1997", "Description", "ac, abs, moon", "Model", "E350", "column4", "3000.00");
+    expected = ImmutableMultimap.of("Age", "2", "Extras", "GPS", "Type", "Gas, with electric", "column4", "");
     assertEquals(expected, iter.next().getFields());
-    expected = ImmutableMultimap.of("Year", "1999", "Description", "", "Model", "Venture \"Extended Edition\"", "column4", "4900.00");
+    expected = ImmutableMultimap.of("Age", "10", "Extras", "Labeled \"Vintage, 1913\"", "Type", "", "column4", "yes");
     assertEquals(expected, iter.next().getFields());
-    expected = ImmutableMultimap.of("Year", "1999", "Description", "", "Model", "Venture \"Extended Edition, Very Large\"", "column4", "5000.00");
+    expected = ImmutableMultimap.of("Age", "100", "Extras", "Labeled \"Vintage 1913\"", "Type", "yes");
     assertEquals(expected, iter.next().getFields());
-    expected = ImmutableMultimap.of("Year", "1996", "Description", "MUST SELL!\nair, moon roof, loaded", "Model", "Grand Cherokee", "column4", "4799.00");
+    expected = ImmutableMultimap.of("Age", "5", "Extras", "none", "Type", "This is a\nmulti, line text", "column4", "no");
     assertEquals(expected, iter.next().getFields());
     assertFalse(iter.hasNext());
     in.close();
@@ -492,8 +492,12 @@ public class MorphlineTest extends AbstractMorphlineTest {
 
   @Test
   public void testReadCSVDetail() throws Exception {
+    File expectedValuesFile = new File(RESOURCES_DIR + "/test-documents/csvdetails-expected-values.txt"); 
+    if (!expectedValuesFile.exists()) {
+      return;
+    }
     morphline = createMorphline("test-morphlines/readCSVDetails");    
-    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/csvdata.csv"));
+    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/csvdetails.csv"));
     Record record = new Record();
     record.put(Fields.ATTACHMENT_BODY, in);
     startSession();
@@ -501,7 +505,6 @@ public class MorphlineTest extends AbstractMorphlineTest {
     assertTrue(morphline.process(record));
     Iterator<Record> iter = collector.getRecords().iterator();
     
-    File expectedValuesFile = new File(RESOURCES_DIR + "/test-documents/csvdata-expected-values.txt"); 
     BufferedReader expectedReader = new BufferedReader(new InputStreamReader(new FileInputStream(expectedValuesFile), "UTF-8"));
     String line;
     long recNum = 0;

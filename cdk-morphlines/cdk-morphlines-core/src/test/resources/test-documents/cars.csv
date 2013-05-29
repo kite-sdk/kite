@@ -1,6 +1,6 @@
-Year,Make,Model,Description,Price
-1997,Ford,E350,"ac, abs, moon",3000.00
-1999,Chevy,"Venture ""Extended Edition""","",4900.00
-1999,Chevy,"Venture ""Extended Edition, Very Large""",,5000.00
-1996,Jeep,Grand Cherokee,"MUST SELL!
-air, moon roof, loaded",4799.00
+Age,Color,Extras,Type,Used
+2,blue,GPS,"Gas, with electric",""
+10,green,"Labeled ""Vintage, 1913""",,yes
+100,red,"Labeled ""Vintage 1913""",yes
+5,orange,none,"This is a
+multi, line text",no
