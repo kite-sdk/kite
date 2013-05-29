@@ -82,6 +82,20 @@ public class FileSystemDatasetRepository implements DatasetRepository {
       new FileSystemMetadataProvider(fileSystem, rootDirectory));
   }
 
+  public FileSystemDatasetRepository(URI uri) {
+    Preconditions.checkArgument(uri != null,
+        "URI provider can not be null");
+
+    try {
+      fileSystem = FileSystem.get(new Configuration());
+    } catch (IOException e) {
+      throw new DatasetRepositoryException("Problem creating " +
+          "FileSystemDatasetRepository.", e);
+    }
+    this.rootDirectory = new Path(uri);
+    this.metadataProvider = new FileSystemMetadataProvider(fileSystem, rootDirectory);
+  }
+
   /**
    * Construct a {@link FileSystemDatasetRepository} on the given {@link FileSystem} and
    * root directory, with the given {@link MetadataProvider} for metadata storage.

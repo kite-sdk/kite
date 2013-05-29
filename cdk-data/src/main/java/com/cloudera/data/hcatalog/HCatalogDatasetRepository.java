@@ -20,6 +20,7 @@ import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.DatasetRepositoryException;
 import com.cloudera.data.filesystem.FileSystemDatasetRepository;
+import java.net.URI;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -63,6 +64,14 @@ public class HCatalogDatasetRepository implements DatasetRepository {
   public HCatalogDatasetRepository() {
     this.managed = true;
     this.metadataProvider = new HCatalogMetadataProvider(managed);
+  }
+
+  public HCatalogDatasetRepository(URI uri) {
+    this.managed = false; // TODO depends
+    this.metadataProvider = new HCatalogMetadataProvider(managed);
+
+    this.fileSystemDatasetRepository = new FileSystemDatasetRepository.Builder()
+        .rootDirectory(uri).metadataProvider(metadataProvider).get();
   }
 
   /**
