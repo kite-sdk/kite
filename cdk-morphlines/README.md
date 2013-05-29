@@ -1,6 +1,6 @@
 # CDK - Morphlines Parent
 
-Morphlines is an open source framework that reduces the time and skills necessary to build or 
+Cloudera Morphlines is an open source framework that reduces the time and skills necessary to build or 
 change Search indexing applications. A morphline is a rich configuration file that makes it easy 
 to define an ETL transformation chain that consumes any kind of data from any kind of data source,
 processes the data and loads the results into Cloudera Search. Executing in a small embeddable 
