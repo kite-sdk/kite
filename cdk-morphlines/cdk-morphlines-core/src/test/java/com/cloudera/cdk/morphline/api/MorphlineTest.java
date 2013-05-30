@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2013 Cloudera Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -180,6 +180,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.put("foo", "\t");
     expected.put("foo", "\n");
     expected.put("foo", "\r");
+    expected.put("foo", "\\.");
     
     startSession();
     assertEquals(1, collector.getNumStartEvents());
