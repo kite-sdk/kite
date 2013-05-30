@@ -13,30 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.data.filesystem;
+package com.cloudera.data.partition;
 
-import com.cloudera.data.partition.DayOfMonthFieldPartitioner;
-import com.cloudera.data.partition.HourFieldPartitioner;
-import com.cloudera.data.partition.MinuteFieldPartitioner;
-import com.cloudera.data.partition.MonthFieldPartitioner;
-import com.cloudera.data.partition.YearFieldPartitioner;
+import com.cloudera.data.FieldPartitioner;
+import com.cloudera.data.PartitionStrategy;
+import com.google.common.annotations.Beta;
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlEngine;
 
-import com.cloudera.data.FieldPartitioner;
-import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.partition.HashFieldPartitioner;
-import com.cloudera.data.partition.IdentityFieldPartitioner;
-import com.cloudera.data.partition.PartitionFunctions;
-import com.cloudera.data.partition.RangeFieldPartitioner;
-import com.google.common.base.Objects;
-
-class PartitionExpression {
+/**
+ * Internal utility class for persisting partition strategies,
+ * not a part of the public API.
+ */
+@Beta
+public class PartitionExpression {
 
   private JexlEngine engine;
   private Expression expression;
@@ -101,8 +96,8 @@ class PartitionExpression {
   private static String toExpression(FieldPartitioner fieldPartitioner) {
     // TODO: add other strategies
     if (fieldPartitioner instanceof HashFieldPartitioner) {
-      return String.format("hash(\"%s\", %s)", fieldPartitioner.getName(),
-          fieldPartitioner.getCardinality());
+      return String.format("hash(\"%s\", \"%s\", %s)", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName(), fieldPartitioner.getCardinality());
     } else if (fieldPartitioner instanceof IdentityFieldPartitioner) {
       return String.format("identity(\"%s\", %s)", fieldPartitioner.getName(),
           fieldPartitioner.getCardinality());

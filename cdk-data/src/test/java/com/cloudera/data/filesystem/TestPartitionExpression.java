@@ -19,6 +19,7 @@ import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.partition.HashFieldPartitioner;
 import com.cloudera.data.partition.MinuteFieldPartitioner;
+import com.cloudera.data.partition.PartitionExpression;
 import com.cloudera.data.partition.YearFieldPartitioner;
 import java.util.List;
 import org.junit.Assert;
@@ -28,7 +29,7 @@ public class TestPartitionExpression {
 
   @Test
   public void testPartitionStrategy() {
-    String expr = "hash(\"username\", 2)";
+    String expr = "hash(\"username\", \"username_part\", 2)";
     PartitionExpression expression = new PartitionExpression(expr, true);
 
     PartitionStrategy strategy = expression.evaluate();
@@ -36,7 +37,8 @@ public class TestPartitionExpression {
     Assert.assertEquals(1, fieldPartitioners.size());
     FieldPartitioner fp = fieldPartitioners.get(0);
     Assert.assertEquals(HashFieldPartitioner.class, fp.getClass());
-    Assert.assertEquals("username", fp.getName());
+    Assert.assertEquals("username", fp.getSourceName());
+    Assert.assertEquals("username_part", fp.getName());
     Assert.assertEquals(2, fp.getCardinality());
 
     Assert.assertEquals(expr, PartitionExpression.toExpression(strategy));
@@ -44,7 +46,8 @@ public class TestPartitionExpression {
 
   @Test
   public void testSubpartitionStrategy() {
-    String expr = "[hash(\"username\", 2), hash(\"username2\", 3)]";
+    String expr = "[hash(\"username\", \"username_part\", 2), hash(\"username2\", " +
+        "\"username2_part\", 3)]";
     PartitionExpression expression = new PartitionExpression(expr, true);
 
     PartitionStrategy strategy = expression.evaluate();
@@ -53,12 +56,12 @@ public class TestPartitionExpression {
 
     FieldPartitioner fp0 = fieldPartitioners.get(0);
     Assert.assertEquals(HashFieldPartitioner.class, fp0.getClass());
-    Assert.assertEquals("username", fp0.getName());
+    Assert.assertEquals("username_part", fp0.getName());
     Assert.assertEquals(2, fp0.getCardinality());
 
     FieldPartitioner fp1 = fieldPartitioners.get(1);
     Assert.assertEquals(HashFieldPartitioner.class, fp1.getClass());
-    Assert.assertEquals("username2", fp1.getName());
+    Assert.assertEquals("username2_part", fp1.getName());
     Assert.assertEquals(3, fp1.getCardinality());
 
     Assert.assertEquals(expr, PartitionExpression.toExpression(strategy));

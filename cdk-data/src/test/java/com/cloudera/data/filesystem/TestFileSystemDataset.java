@@ -214,7 +214,7 @@ public class TestFileSystemDataset {
   @Test
   public void testWriteToSubpartition() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-      .hash("username", "username-part", 2).hash("email", 3).get();
+      .hash("username", "username_part", 2).hash("email", 3).get();
 
     FileSystemDataset ds = new FileSystemDataset.Builder()
       .fileSystem(fileSystem)
@@ -230,7 +230,7 @@ public class TestFileSystemDataset {
 
     writeTestUsers(userPartition, 1);
     Assert.assertTrue("Partitioned directory exists",
-      fileSystem.exists(new Path(testDirectory, "username-part=1/email=2")));
+      fileSystem.exists(new Path(testDirectory, "username_part=1/email=2")));
     Assert
       .assertEquals(
         1,

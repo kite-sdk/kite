@@ -16,6 +16,7 @@
 package com.cloudera.data.hcatalog;
 
 import com.cloudera.data.DatasetDescriptor;
+import com.cloudera.data.PartitionStrategy;
 import com.google.common.io.Files;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
@@ -44,14 +45,39 @@ public class TestHCatalogMetadataProvider {
 
     provider.setFileSystem(fileSystem);
     provider.setDataDirectory(testDirectory);
-    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA)
-        .get());
+    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
 
     DatasetDescriptor descriptor = provider.load("test");
 
     Assert.assertNotNull(descriptor);
     Assert.assertEquals(USER_SCHEMA, descriptor.getSchema());
     Assert.assertFalse(descriptor.isPartitioned());
+
+    boolean result = provider.delete("test");
+    Assert.assertTrue(result);
+
+    result = provider.delete("test");
+    Assert.assertFalse(result);
+  }
+
+  @Test
+  public void testPartitioned() throws IOException {
+    HCatalogMetadataProvider provider = new HCatalogMetadataProvider(false);
+
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", "username_part", 2).get();
+
+    provider.setFileSystem(fileSystem);
+    provider.setDataDirectory(testDirectory);
+    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA)
+        .partitionStrategy(partitionStrategy).get());
+
+    DatasetDescriptor descriptor = provider.load("test");
+
+    Assert.assertNotNull(descriptor);
+    Assert.assertEquals(USER_SCHEMA, descriptor.getSchema());
+    Assert.assertTrue(descriptor.isPartitioned());
+    Assert.assertEquals(partitionStrategy, descriptor.getPartitionStrategy());
 
     boolean result = provider.delete("test");
     Assert.assertTrue(result);

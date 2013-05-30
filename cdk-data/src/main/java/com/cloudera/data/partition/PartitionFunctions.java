@@ -22,10 +22,15 @@ import com.google.common.annotations.Beta;
  * Convenience class so you can say, for example, <code>hash("username", 2)</code> in
  * JEXL.
  */
+@Beta
 public class PartitionFunctions {
 
   public static FieldPartitioner hash(String name, int buckets) {
     return new HashFieldPartitioner(name, buckets);
+  }
+
+  public static FieldPartitioner hash(String sourceName, String name, int buckets) {
+    return new HashFieldPartitioner(sourceName, name, buckets);
   }
 
   public static FieldPartitioner identity(String name, int buckets) {
