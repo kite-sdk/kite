@@ -18,6 +18,7 @@ package com.cloudera.data.crunch;
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
+import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.filesystem.CrunchDatasets;
 import com.cloudera.data.filesystem.FileSystemDatasetRepository;
@@ -69,24 +70,27 @@ public class TestCrunchDatasets {
   }
 
   @Test
-  public void testPartitionedSource() throws IOException {
+  public void testPartitionedSourceAndTarget() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).get();
 
     Dataset inputDataset = repo.create("in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).get());
     Dataset outputDataset = repo.create("out", new DatasetDescriptor.Builder()
-        .schema(USER_SCHEMA).get());
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).get());
 
     writeTestUsers(inputDataset, 10);
 
-    Dataset part = inputDataset.getPartition(partitionStrategy.partitionKey(0), false);
+    PartitionKey key = partitionStrategy.partitionKey(0);
+    Dataset inputPart0 = inputDataset.getPartition(key, false);
+    Dataset outputPart0 = outputDataset.getPartition(key, true);
+
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
-        CrunchDatasets.asSource(part, GenericData.Record.class));
-    pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
+        CrunchDatasets.asSource(inputPart0, GenericData.Record.class));
+    pipeline.write(data, CrunchDatasets.asTarget(outputPart0), Target.WriteMode.APPEND);
     pipeline.run();
 
-    Assert.assertEquals(5, datasetSize(outputDataset));
+    Assert.assertEquals(5, datasetSize(outputPart0));
   }
 }

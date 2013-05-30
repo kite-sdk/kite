@@ -144,9 +144,6 @@ class FileSystemDataset implements Dataset {
   }
 
   Target getCrunchTarget() {
-    if (descriptor.isPartitioned()) {
-      throw new UnsupportedOperationException("Partitioned datasets are not supported.");
-    }
     if (descriptor.getFormat() == Formats.PARQUET) {
       throw new UnsupportedOperationException("Parquet is not supported.");
     }
