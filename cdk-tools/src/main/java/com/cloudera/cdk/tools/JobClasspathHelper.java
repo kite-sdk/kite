@@ -15,10 +15,8 @@
  */
 package com.cloudera.cdk.tools;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,12 +26,14 @@ import java.util.TreeMap;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
@@ -106,66 +106,76 @@ public class JobClasspathHelper {
 	public void prepareClasspath(final Configuration conf, final Path libDir, Class<?>... classesToInclude)
 			throws Exception {
 		FileSystem fs = null;
-		try {
-			List<Class<?>> classList = new ArrayList<Class<?>>(Arrays.asList(classesToInclude));
-			fs = FileSystem.get(conf);
-			Map<String, String> jarMd5Map = new TreeMap<String, String>();
-			// for each classes we use JarFinder to locate the jar in the local classpath.
-			for (Class<?> clz : classList) {
-				if (clz != null) {
-					String localJarPath = JarFinder.getJar(clz);
-					// we don't want to upload the same jar twice
-					if (!jarMd5Map.containsKey(localJarPath)) {
-						// We should not push core Hadoop classes with this tool.
-						// Should it be the responsibility of the developer or we let
-						// this fence here?
-						if (!clz.getName().startsWith("org.apache.hadoop.")) {
-							// we compute the MD5 sum of the local jar
-							HashCode hc = Files.hash(new File(localJarPath), Hashing.md5());
-							String md5sum = hc.toString();
-							jarMd5Map.put(localJarPath, md5sum);
-						} else {
-							logger.info("Ignoring {}, since it looks like it's from Hadoop's core libs", localJarPath);
-						}
-					}
-				}
-			}
-
-			for (Entry<String, String> entry : jarMd5Map.entrySet()) {
-				Path localJarPath = new Path(entry.getKey());
-				String jarFilename = localJarPath.getName();
-				String md5sum = entry.getValue();
-				logger.info("Jar {}. MD5 : [{}]", localJarPath, md5sum);
-
-				Path remoteJarPath = new Path(libDir, jarFilename);
-				Path remoteMd5Path = new Path(libDir, jarFilename + ".md5");
-
-				// If the jar file does not exist in HDFS or if the MD5 file does not exist in HDFS,
-				// we force the upload of the jar.
-				if (!fs.exists(remoteJarPath) || !fs.exists(remoteMd5Path)) {
-					copyJarToHDFS(fs, localJarPath, md5sum, remoteJarPath, remoteMd5Path);
-				} else {
-					// If the jar exist,we validate the MD5 file.
-					// If the MD5 sum is different, we upload the jar
-					String oldMd5sum = new BufferedReader(new InputStreamReader(fs.open(remoteMd5Path))).readLine();
-					if (md5sum.equals(oldMd5sum)) {
-						logger.info("Jar {} already exists [{}] and md5sum are equals", jarFilename, remoteJarPath
-								.toUri().toASCIIString());
+		List<Class<?>> classList = new ArrayList<Class<?>>(Arrays.asList(classesToInclude));
+		fs = FileSystem.get(conf);
+		Map<String, String> jarMd5Map = new TreeMap<String, String>();
+		// for each classes we use JarFinder to locate the jar in the local classpath.
+		for (Class<?> clz : classList) {
+			if (clz != null) {
+				String localJarPath = JarFinder.getJar(clz);
+				// we don't want to upload the same jar twice
+				if (!jarMd5Map.containsKey(localJarPath)) {
+					// We should not push core Hadoop classes with this tool.
+					// Should it be the responsibility of the developer or we let
+					// this fence here?
+					if (!clz.getName().startsWith("org.apache.hadoop.")) {
+						// we compute the MD5 sum of the local jar
+						HashCode hc = Files.hash(new File(localJarPath), Hashing.md5());
+						String md5sum = hc.toString();
+						jarMd5Map.put(localJarPath, md5sum);
 					} else {
-						logger.info("Jar {} already exists [{}] and md5sum are different!", jarFilename, remoteJarPath
-								.toUri().toASCIIString());
-						copyJarToHDFS(fs, localJarPath, md5sum, remoteJarPath, remoteMd5Path);
+						logger.info("Ignoring {}, since it looks like it's from Hadoop's core libs", localJarPath);
 					}
 				}
-				// In all case we want to add the jar to the DistributedCache's classpath
-				DistributedCache.addFileToClassPath(remoteJarPath, conf, fs);
 			}
-			// and we create the symlink (was necessary in earlier versions of Hadoop)
-			DistributedCache.createSymlink(conf);
-		} catch (Exception e) {
-			// Probably we should throw a Runtime exception to make the job fail fast?
-			logger.error("", e);
 		}
+
+		for (Entry<String, String> entry : jarMd5Map.entrySet()) {
+			Path localJarPath = new Path(entry.getKey());
+			String jarFilename = localJarPath.getName();
+			String localMd5sum = entry.getValue();
+			logger.info("Jar {}. MD5 : [{}]", localJarPath, localMd5sum);
+
+			Path remoteJarPath = new Path(libDir, jarFilename);
+			Path remoteMd5Path = new Path(libDir, jarFilename + ".md5");
+
+			// If the jar file does not exist in HDFS or if the MD5 file does not exist in HDFS,
+			// we force the upload of the jar.
+			if (!fs.exists(remoteJarPath) || !fs.exists(remoteMd5Path)) {
+				copyJarToHDFS(fs, localJarPath, localMd5sum, remoteJarPath, remoteMd5Path);
+			} else {
+				// If the jar exist,we validate the MD5 file.
+				// If the MD5 sum is different, we upload the jar
+				FSDataInputStream md5FileStream = null;
+
+				String remoteMd5sum = "";
+				try {
+					md5FileStream = fs.open(remoteMd5Path);
+					byte[] md5bytes = new byte[32];
+					if (32 == md5FileStream.read(md5bytes)) {
+						remoteMd5sum = new String(md5bytes, Charsets.UTF_8);
+					}
+				} finally {
+					if (md5FileStream != null) {
+						md5FileStream.close();
+					}
+				}
+
+				if (localMd5sum.equals(remoteMd5sum)) {
+					logger.info("Jar {} already exists [{}] and md5sum are equals", jarFilename, remoteJarPath.toUri()
+							.toASCIIString());
+				} else {
+					logger.info("Jar {} already exists [{}] and md5sum are different!", jarFilename, remoteJarPath
+							.toUri().toASCIIString());
+					copyJarToHDFS(fs, localJarPath, localMd5sum, remoteJarPath, remoteMd5Path);
+				}
+
+			}
+			// In all case we want to add the jar to the DistributedCache's classpath
+			DistributedCache.addFileToClassPath(remoteJarPath, conf, fs);
+		}
+		// and we create the symlink (was necessary in earlier versions of Hadoop)
+		DistributedCache.createSymlink(conf);
 	}
 
 	/**

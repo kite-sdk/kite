@@ -65,6 +65,7 @@ class JarFinder {
 					if (!start) {
 						ZipEntry dirEntry = new ZipEntry(relativePath + f.getName() + "/");
 						zos.putNextEntry(dirEntry);
+						zos.write(new byte[] {}); // to make find bugs happy.
 						zos.closeEntry();
 					}
 					String filePath = f.getPath();
@@ -73,14 +74,21 @@ class JarFinder {
 				} else {
 					ZipEntry anEntry = new ZipEntry(relativePath + f.getName());
 					zos.putNextEntry(anEntry);
-					InputStream is = new FileInputStream(f);
-					byte[] arr = new byte[4096];
-					int read = is.read(arr);
-					while (read > -1) {
-						zos.write(arr, 0, read);
-						read = is.read(arr);
+					InputStream is = null;
+					try {
+						is = new FileInputStream(f);
+						byte[] arr = new byte[4096];
+						int read = is.read(arr);
+						while (read > -1) {
+							zos.write(arr, 0, read);
+							read = is.read(arr);
+						}
+
+					} finally {
+						if (is != null) {
+							is.close();
+						}
 					}
-					is.close();
 					zos.closeEntry();
 				}
 			}
@@ -132,7 +140,9 @@ class JarFinder {
 						File testDir = new File(System.getProperty("test.build.dir", "target/test-dir"));
 						testDir = testDir.getAbsoluteFile();
 						if (!testDir.exists()) {
-							testDir.mkdirs();
+							if (!testDir.mkdirs()) {
+								throw new IOException("Unable to create directory :"+testDir.toString());
+							}
 						}
 						File tempJar = File.createTempFile(TMP_HADOOP, "", testDir);
 						tempJar = new File(tempJar.getAbsolutePath() + ".jar");
