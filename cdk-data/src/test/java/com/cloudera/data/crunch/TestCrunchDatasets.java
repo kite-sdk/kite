@@ -58,7 +58,9 @@ public class TestCrunchDatasets {
     Dataset outputDataset = repo.create("out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).get());
 
-    writeTestUsers(inputDataset, 10);
+    // write two files, each of 5 records
+    writeTestUsers(inputDataset, 5, 0);
+    writeTestUsers(inputDataset, 5, 5);
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(

@@ -58,7 +58,7 @@ public class CrunchDatasets {
       } else {
         avroType = Avros.records(type);
       }
-      return new AvroFileSource<E>(paths.get(0), avroType); // TODO: use all paths
+      return new MultiAvroFileSource<E>(paths, avroType);
     }
     return null;
   }

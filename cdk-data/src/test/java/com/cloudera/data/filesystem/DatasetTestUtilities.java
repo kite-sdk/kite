@@ -57,11 +57,15 @@ public class DatasetTestUtilities {
   }
 
   public static void writeTestUsers(Dataset ds, int count) {
+    writeTestUsers(ds, count, 0);
+  }
+
+  public static void writeTestUsers(Dataset ds, int count, int start) {
     DatasetWriter<GenericData.Record> writer = null;
     try {
       writer = ds.getWriter();
       writer.open();
-      for (int i = 0; i < count; i++) {
+      for (int i = start; i < count + start; i++) {
         GenericData.Record record = new GenericRecordBuilder(USER_SCHEMA)
             .set("username", "test-" + i)
             .set("email", "email-" + i).build();
