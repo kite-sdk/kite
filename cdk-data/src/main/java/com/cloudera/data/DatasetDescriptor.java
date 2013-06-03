@@ -216,7 +216,8 @@ public class DatasetDescriptor {
 
     private InputStream openStream(URL url) throws IOException {
       if (url.getProtocol().equalsIgnoreCase("hdfs")) {
-        FileSystem.get(new Configuration()).open(new Path(url.toExternalForm()));
+        Configuration conf = new Configuration();
+        return FileSystem.get(conf).open(new Path(url.toExternalForm()));
       }
       return url.openStream();
     }
