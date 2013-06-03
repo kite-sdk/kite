@@ -18,6 +18,9 @@ package com.cloudera.data.filesystem;
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
+import com.cloudera.data.PartitionKey;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import java.io.IOException;
@@ -101,5 +104,18 @@ public class DatasetTestUtilities {
 
   public static int datasetSize(Dataset ds) {
     return materialize(ds).size();
+  }
+
+  public static void testPartitionKeysAreEqual(Dataset ds,
+      PartitionKey... expectedKeys) {
+    Set<PartitionKey> expected = Sets.newHashSet(expectedKeys);
+    Set<PartitionKey> actual = Sets.newHashSet(Iterables.transform(ds.getPartitions(),
+        new Function<Dataset, PartitionKey>() {
+      @Override
+      public PartitionKey apply(Dataset input) {
+        return ((FileSystemDataset) input).getPartitionKey();
+      }
+    }));
+    Assert.assertEquals(expected, actual);
   }
 }

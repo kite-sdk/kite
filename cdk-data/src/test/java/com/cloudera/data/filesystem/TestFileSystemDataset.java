@@ -123,15 +123,10 @@ public class TestFileSystemDataset {
       + readTestUsersInPartition(ds, key1, null);
     Assert.assertEquals(10, total);
 
-    Iterable<Dataset> partitions = ds.getPartitions();
-    Assert.assertEquals(2, Iterables.size(partitions));
-    Assert.assertEquals(key0,
-        ((FileSystemDataset) Iterables.get(partitions, 0)).getPartitionKey());
-    Assert.assertEquals(key1,
-        ((FileSystemDataset) Iterables.get(partitions, 1)).getPartitionKey());
+    testPartitionKeysAreEqual(ds, key0, key1);
 
     Set<Record> records = Sets.newHashSet();
-    for (Dataset dataset : partitions) {
+    for (Dataset dataset : ds.getPartitions()) {
       Assert.assertFalse("Partitions should not have further partitions",
         dataset.getDescriptor().isPartitioned());
       records.addAll(materialize(ds));
@@ -177,12 +172,7 @@ public class TestFileSystemDataset {
     }
     Assert.assertEquals(10, total);
 
-    Iterable<Dataset> partitions = ds.getPartitions();
-    Assert.assertEquals(2, Iterables.size(partitions));
-    Assert.assertEquals(key0,
-        ((FileSystemDataset) Iterables.get(partitions, 0)).getPartitionKey());
-    Assert.assertEquals(key1,
-        ((FileSystemDataset) Iterables.get(partitions, 1)).getPartitionKey());
+    testPartitionKeysAreEqual(ds, key0, key1);
 
     Set<Record> records = Sets.newHashSet();
     for (Dataset dataset : ds.getPartitions()) {
