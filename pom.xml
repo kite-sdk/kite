@@ -258,6 +258,7 @@
               <exclude>**/.classpath</exclude>
               <exclude>**/.project</exclude>
               <exclude>**/.settings/**</exclude>
+              <exclude>**/build/**</exclude>
               <exclude>**/metastore_db/**</exclude>
               <exclude>**/target/**</exclude>
               <exclude>.git/**</exclude>
