@@ -19,6 +19,7 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
   private String datasetRepositoryClass;
   private String datasetRepositoryUri;
   private String datasetName;
+  private boolean initialized;
   
   private PartitionStrategy partitionStrategy;
   private PartitionKey key;
@@ -54,30 +55,31 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
   }
 
   @Override
-  public void activateOptions() throws FlumeException {
-    try {
-      Class<?> c = Class.forName(datasetRepositoryClass);
-      Constructor<?> cons = c.getConstructor(URI.class);
-      DatasetRepository repo = (DatasetRepository)
-          cons.newInstance(new URI(datasetRepositoryUri));
-
-      Dataset dataset = repo.get(datasetName);
-      if (dataset.getDescriptor().isPartitioned()) {
-        partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
-      }
-      URL schemaUrl = dataset.getDescriptor().getSchemaUrl();
-      if (schemaUrl != null) {
-        setAvroSchemaUrl(schemaUrl.toExternalForm());
-      }
-    } catch (Exception e) {
-      throw new FlumeException(e);
-    }
-
-    super.activateOptions();
-  }
-
   protected void populateAvroHeaders(Map<String, String> hdrs, Schema schema,
       Object message) {
+    if (!initialized) {
+      // initialize here rather than in activateOptions to avoid initialization
+      // cycle in Configuration and log4j
+      try {
+        Class<?> c = Class.forName(datasetRepositoryClass);
+        Constructor<?> cons = c.getConstructor(URI.class);
+        DatasetRepository repo = (DatasetRepository)
+            cons.newInstance(new URI(datasetRepositoryUri));
+
+        Dataset dataset = repo.get(datasetName);
+        if (dataset.getDescriptor().isPartitioned()) {
+          partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
+        }
+        URL schemaUrl = dataset.getDescriptor().getSchemaUrl();
+        if (schemaUrl != null) {
+          setAvroSchemaUrl(schemaUrl.toExternalForm());
+        }
+      } catch (Exception e) {
+        throw new FlumeException(e);
+      } finally {
+        initialized = true;
+      }
+    }
     super.populateAvroHeaders(hdrs, schema, message);
     if (partitionStrategy != null) {
       key = partitionStrategy.partitionKeyForEntity(message, key);
