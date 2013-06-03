@@ -24,6 +24,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Set;
 import org.apache.avro.Schema;
@@ -35,13 +37,21 @@ public class DatasetTestUtilities {
 
   public final static Schema STRING_SCHEMA = loadSchema("schema/string.avsc");
   public final static Schema USER_SCHEMA = loadSchema("schema/user.avsc");
-  public final static URL USER_SCHEMA_URL = Resources.getResource("schema/user.avsc");
+  public final static URI USER_SCHEMA_URL = findSchemaURI("schema/user.avsc");
 
   private static Schema loadSchema(String resource) {
     try {
       return new Schema.Parser().parse(Resources.getResource(
           resource).openStream());
     } catch (IOException e) {
+      throw new IllegalStateException("Cannot load " + resource);
+    }
+  }
+
+  private static URI findSchemaURI(String resource) {
+    try {
+      return Resources.getResource("schema/user.avsc").toURI();
+    } catch (URISyntaxException e) {
       throw new IllegalStateException("Cannot load " + resource);
     }
   }

@@ -19,6 +19,8 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.io.Closer;
+import java.net.MalformedURLException;
+import java.net.URI;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileStream;
@@ -32,10 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import org.apache.avro.reflect.ReflectData;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 
 /**
  * <p>
@@ -194,32 +192,34 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's schema from a {@link URL}. A schema is required,
+     * Configure the dataset's schema from a {@link URI}. A schema is required,
      * and may be set using one of the <code>schema</code> or
      * <code>schemaFromAvroDataFile</code> methods.
      *
      * @return An instance of the builder for method chaining.
      */
-    public Builder schema(URL url) throws IOException {
-      this.schemaUrl = url;
+    public Builder schema(URI uri) throws IOException {
+      this.schemaUrl = toURL(uri);
 
       InputStream in = null;
       Closer closer = Closer.create();
 
       try {
-        in = closer.register(openStream(url));
+        in = closer.register(schemaUrl.openStream());
         return schema(in);
       } finally {
         closer.close();
       }
     }
 
-    private InputStream openStream(URL url) throws IOException {
-      if (url.getProtocol().equalsIgnoreCase("hdfs")) {
-        Configuration conf = new Configuration();
-        return FileSystem.get(conf).open(new Path(url.toExternalForm()));
+    private URL toURL(URI uri) throws MalformedURLException {
+      try {
+        // try with installed URLStreamHandlers first...
+        return uri.toURL();
+      } catch (MalformedURLException e) {
+        // if that fails then try using the Hadoop protocol handler
+        return new URL(null, uri.toString(), new HadoopFileSystemURLStreamHandler());
       }
-      return url.openStream();
     }
 
     /**
@@ -299,12 +299,12 @@ public class DatasetDescriptor {
      *
      * @return An instance of the builder for method chaining.
      */
-    public Builder schemaFromAvroDataFile(URL url) throws IOException {
+    public Builder schemaFromAvroDataFile(URI uri) throws IOException {
       InputStream in = null;
       Closer closer = Closer.create();
 
       try {
-        in = closer.register(url.openStream());
+        in = closer.register(toURL(uri).openStream());
         return schemaFromAvroDataFile(in);
       } finally {
         closer.close();

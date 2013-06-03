@@ -368,6 +368,20 @@
         <version>${vers.hadoop}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <version>${vers.hadoop}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-hdfs</artifactId>
+        <version>${vers.hadoop}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
         <groupId>org.apache.hcatalog</groupId>
         <artifactId>hcatalog-core</artifactId>
         <version>${vers.hcatalog}</version>

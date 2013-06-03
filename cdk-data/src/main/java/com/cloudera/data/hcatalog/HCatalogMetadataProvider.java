@@ -23,7 +23,8 @@ import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.partition.PartitionExpression;
 import com.google.common.collect.Lists;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -77,9 +78,11 @@ class HCatalogMetadataProvider implements MetadataProvider {
     String schemaUrlString = table.getProperty(AVRO_SCHEMA_URL_PROPERTY_NAME);
     if (schemaUrlString != null) {
       try {
-        URL schemaUrl = new URL(schemaUrlString);
+        URI schemaUrl = new URI(schemaUrlString);
         return builder.schema(schemaUrl).get();
       } catch (IOException e) {
+        throw new MetadataProviderException(e);
+      } catch (URISyntaxException e) {
         throw new MetadataProviderException(e);
       }
     }

@@ -108,7 +108,7 @@ public class FileSystemMetadataProvider implements MetadataProvider {
 
     Path schemaPath = new Path(directory, SCHEMA_FILE_NAME);
     try {
-      builder.schema(fileSystem.makeQualified(schemaPath).toUri().toURL());
+      builder.schema(fileSystem.makeQualified(schemaPath).toUri());
     } catch (IOException e) {
       throw new MetadataProviderException(
         "Unable to load schema file:" + schemaPath + " for dataset:" + name, e);
