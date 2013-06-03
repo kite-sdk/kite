@@ -16,9 +16,20 @@
 package com.cloudera.data.filesystem;
 
 import com.cloudera.data.Dataset;
+import com.cloudera.data.DatasetException;
+import com.cloudera.data.Formats;
 import com.google.common.annotations.Beta;
+import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.List;
+import org.apache.avro.generic.GenericData;
 import org.apache.crunch.Target;
 import org.apache.crunch.io.ReadableSource;
+import org.apache.crunch.io.avro.AvroFileSource;
+import org.apache.crunch.io.avro.AvroFileTarget;
+import org.apache.crunch.types.avro.AvroType;
+import org.apache.crunch.types.avro.Avros;
+import org.apache.hadoop.fs.Path;
 
 /**
  * <p>
@@ -31,14 +42,34 @@ public class CrunchDatasets {
 
   public static <E> ReadableSource<E> asSource(Dataset dataset, Class<E> type) {
     if (dataset instanceof FileSystemDataset) {
-      return ((FileSystemDataset) dataset).getCrunchSource(type);
+      FileSystemDataset fsDataset = (FileSystemDataset) dataset;
+      List<Path> paths = Lists.newArrayList();
+
+      try {
+        fsDataset.accumulateDatafilePaths(fsDataset.getDirectory(), paths);
+      } catch (IOException e) {
+        throw new DatasetException("Unable to retrieve data file list for directory " +
+            fsDataset.getDirectory(), e);
+      }
+
+      AvroType<E> avroType;
+      if (type.isAssignableFrom(GenericData.Record.class)) {
+        avroType = (AvroType<E>) Avros.generics(fsDataset.getDescriptor().getSchema());
+      } else {
+        avroType = Avros.records(type);
+      }
+      return new AvroFileSource<E>(paths.get(0), avroType); // TODO: use all paths
     }
     return null;
   }
 
   public static Target asTarget(Dataset dataset) {
     if (dataset instanceof FileSystemDataset) {
-      return ((FileSystemDataset) dataset).getCrunchTarget();
+      FileSystemDataset fsDataset = (FileSystemDataset) dataset;
+      if (fsDataset.getDescriptor().getFormat() == Formats.PARQUET) {
+        throw new UnsupportedOperationException("Parquet is not supported.");
+      }
+      return new AvroFileTarget(fsDataset.getDirectory());
     }
     return null;
   }

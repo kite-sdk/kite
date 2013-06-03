@@ -35,13 +35,6 @@ import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.crunch.Target;
-import org.apache.crunch.io.ReadableSource;
-import org.apache.crunch.io.avro.AvroFileSource;
-import org.apache.crunch.io.avro.AvroFileTarget;
-import org.apache.crunch.types.avro.AvroType;
-import org.apache.crunch.types.avro.Avros;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -89,6 +82,10 @@ class FileSystemDataset implements Dataset {
     return partitionKey;
   }
 
+  Path getDirectory() {
+    return directory;
+  }
+
   @Override
   public <E> DatasetWriter<E> getWriter() {
     logger.debug("Getting writer to dataset:{}", this);
@@ -123,31 +120,6 @@ class FileSystemDataset implements Dataset {
     }
 
     return new MultiFileDatasetReader<E>(fileSystem, paths, descriptor);
-  }
-
-  <E> ReadableSource<E> getCrunchSource(Class<E> type) {
-    List<Path> paths = Lists.newArrayList();
-
-    try {
-      accumulateDatafilePaths(directory, paths);
-    } catch (IOException e) {
-      throw new DatasetException("Unable to retrieve data file list for directory " + directory, e);
-    }
-
-    AvroType<E> avroType;
-    if (type.isAssignableFrom(GenericData.Record.class)) {
-      avroType = (AvroType<E>) Avros.generics(schema);
-    } else {
-      avroType = Avros.records(type);
-    }
-    return new AvroFileSource<E>(paths.get(0), avroType); // TODO: use all paths
-  }
-
-  Target getCrunchTarget() {
-    if (descriptor.getFormat() == Formats.PARQUET) {
-      throw new UnsupportedOperationException("Parquet is not supported.");
-    }
-    return new AvroFileTarget(directory);
   }
 
   @Override
@@ -259,7 +231,7 @@ class FileSystemDataset implements Dataset {
         Thread.currentThread().getId() + "." + descriptor.getFormat().getExtension());
   }
 
-  private void accumulateDatafilePaths(Path directory, List<Path> paths)
+  void accumulateDatafilePaths(Path directory, List<Path> paths)
     throws IOException {
 
     for (FileStatus status : fileSystem.listStatus(directory,

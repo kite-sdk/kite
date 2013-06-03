@@ -228,6 +228,7 @@
     <dependency>
       <groupId>org.apache.crunch</groupId>
       <artifactId>crunch-core</artifactId>
+      <optional>true</optional>
     </dependency>
 
     <!-- needed by Crunch, but Parquet specifies 1.2 -->

@@ -52,7 +52,10 @@ Add the Cloudera repository to your Maven POM:
 Then add a dependency for the Data Module using the information specified on the
 [Dependency Information page](dependency-info.html).
 
-If you are using HCatalog integration, you'll need the following dependencies too:
+Some CDK features are optional, which means you'll need to add extra dependencies if
+you use them. These are listed below.
+
+If you are using HCatalog integration, you'll need to add the following dependencies:
 
     <dependency>
       <groupId>org.apache.hcatalog</groupId>
@@ -63,6 +66,14 @@ If you are using HCatalog integration, you'll need the following dependencies to
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
       <version>10.4.2.0</version>
+    </dependency>
+
+If you are using Crunch integration, add the following dependency:
+
+    <dependency>
+      <groupId>org.apache.crunch</groupId>
+      <artifactId>crunch-core</artifactId>
+      <version>0.6.0-cdh4.2.0</version>
     </dependency>
 
 ## Overview of the Data Module

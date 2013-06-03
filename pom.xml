@@ -388,11 +388,7 @@
         <groupId>org.apache.crunch</groupId>
         <artifactId>crunch-core</artifactId>
         <version>${vers.crunch}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven.doxia</groupId>
-        <artifactId>doxia-module-markdown</artifactId>
-        <version>${vers.doxia-markdown}</version>
+        <optional>true</optional>
       </dependency>
 
       <dependency>
