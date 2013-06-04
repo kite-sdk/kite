@@ -19,8 +19,12 @@ import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.DatasetRepositoryException;
+import com.cloudera.data.MetadataProvider;
 import com.cloudera.data.filesystem.FileSystemDatasetRepository;
+import com.google.common.base.Supplier;
+import java.io.IOException;
 import java.net.URI;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -143,6 +147,74 @@ public class HCatalogDatasetRepository implements DatasetRepository {
       return metadataProvider.delete(name);
     } else {
       return fileSystemDatasetRepository.drop(name);
+    }
+  }
+
+  /**
+   * A fluent builder to aid in the construction of {@link HCatalogDatasetRepository}
+   * instances.
+   * @since 0.3.0
+   */
+  public static class Builder implements Supplier<HCatalogDatasetRepository> {
+
+    private FileSystem fileSystem;
+    private Path rootDirectory;
+    private Configuration configuration;
+
+    /**
+     * The root directory for dataset files.
+     */
+    public Builder rootDirectory(Path path) {
+      this.rootDirectory = path;
+      return this;
+    }
+
+    /**
+     * The root directory for dataset files.
+     */
+    public Builder rootDirectory(URI uri) {
+      this.rootDirectory = new Path(uri);
+      return this;
+    }
+
+    /**
+     * The {@link FileSystem} to store dataset files in. Optional. If not
+     * specified, the default filesystem will be used.
+     */
+    public Builder fileSystem(FileSystem fileSystem) {
+      this.fileSystem = fileSystem;
+      return this;
+    }
+
+    /**
+     * The {@link Configuration} used to find the {@link FileSystem}. Optional. If not
+     * specified, the default configuration will be used.
+     */
+    public Builder configuration(Configuration configuration) {
+      this.configuration = configuration;
+      return this;
+    }
+
+    @Override
+    public HCatalogDatasetRepository get() {
+
+      if (rootDirectory == null) {
+        return new HCatalogDatasetRepository();
+      }
+
+      if (fileSystem == null) {
+        if (configuration == null) {
+          configuration = new Configuration();
+        }
+        try {
+          fileSystem = rootDirectory.getFileSystem(configuration);
+        } catch (IOException e) {
+          throw new DatasetRepositoryException("Problem creating " +
+              "HCatalogDatasetRepository.", e);
+        }
+      }
+
+      return new HCatalogDatasetRepository(fileSystem, rootDirectory);
     }
   }
 }

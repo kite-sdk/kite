@@ -86,13 +86,13 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     Preconditions.checkArgument(uri != null,
         "URI provider can not be null");
 
+    this.rootDirectory = new Path(uri);
     try {
-      fileSystem = FileSystem.get(new Configuration());
+      fileSystem = rootDirectory.getFileSystem(new Configuration());
     } catch (IOException e) {
       throw new DatasetRepositoryException("Problem creating " +
           "FileSystemDatasetRepository.", e);
     }
-    this.rootDirectory = new Path(uri);
     this.metadataProvider = new FileSystemMetadataProvider(fileSystem, rootDirectory);
   }
 
@@ -298,6 +298,7 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     private FileSystem fileSystem;
     private Path rootDirectory;
     private MetadataProvider metadataProvider;
+    private Configuration configuration;
 
     /**
      * The root directory for metadata and dataset files.
@@ -333,13 +334,25 @@ public class FileSystemDatasetRepository implements DatasetRepository {
       return this;
     }
 
+    /**
+     * The {@link Configuration} used to find the {@link FileSystem}. Optional. If not
+     * specified, the default configuration will be used.
+     */
+    public Builder configuration(Configuration configuration) {
+      this.configuration = configuration;
+      return this;
+    }
+
     @Override
     public FileSystemDatasetRepository get() {
       Preconditions.checkState(this.rootDirectory != null, "No root directory defined");
 
       if (fileSystem == null) {
+        if (configuration == null) {
+          configuration = new Configuration();
+        }
         try {
-          fileSystem = FileSystem.get(new Configuration());
+          fileSystem = rootDirectory.getFileSystem(configuration);
         } catch (IOException e) {
           throw new DatasetRepositoryException("Problem creating " +
               "FileSystemDatasetRepository.", e);
