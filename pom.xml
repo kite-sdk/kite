@@ -188,7 +188,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${vers.maven-javadoc}</version>
           <configuration>
-            <excludePackageNames>*.impl</excludePackageNames>
+            <excludePackageNames>com.cloudera.data.event,*.impl</excludePackageNames>
             <links>
               <link>http://avro.apache.org/docs/${vers.avro}/api/java/</link>
               <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
