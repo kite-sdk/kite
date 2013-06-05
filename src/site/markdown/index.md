@@ -1,8 +1,16 @@
 # Cloudera Development Kit
 
-The Cloudera Development Kit, or CDK for short, is a set of libraries, tools,
+The Cloudera Development Kit, or CDK for short, is a set of libraries, tools, examples,
 and documentation focused on making it easier to build systems on top of the
 Hadoop ecosystem.
+
+The goals of the CDK are:
+
+* Codify expert patterns and practices for building data-oriented systems and
+applications.
+* Let developers focus on business logic, not plumbing or infrastructure.
+* Provide smart defaults for platform choices.
+* Support piecemeal adoption via loosely-coupled modules.
 
 This project is organized into modules. Modules may be independent or have
 dependencies on other modules within the CDK. When possible, dependencies on
@@ -23,6 +31,17 @@ to/from a storage system, the data module is for you.
 
 The tools module provides command-line tools and APIs for performing common tasks with
 the CDK.
+
+### CDK Flume Modules
+
+The `cdk-flume-avro-event-serializer` module is a Flume extension that allows the HDFS
+sink to write Avro records.
+
+The `cdk-flume-log4jappender` module is a Log4j appender for writing Avro records to
+Flume.
+
+The [CDK logging example](https://github.com/cloudera/cdk-examples/tree/master/logging)
+has a usage example for these modules.
 
 ## Examples
 
