@@ -82,6 +82,7 @@ import com.google.common.io.Files;
  * <pre>
  * {@code
  * new JobClasspathHelper().prepareClasspath(getConf(), new Path("/lib/path"), new Class[] { TestTool.class, HashFunction.class});
+ * }
  * </pre>
  * 
  * @author tbussier (tony.bussieres@ticksmith.com)
