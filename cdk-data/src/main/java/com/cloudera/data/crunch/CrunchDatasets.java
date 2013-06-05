@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.data.filesystem;
+package com.cloudera.data.crunch;
 
 import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetException;
 import com.cloudera.data.Formats;
+import com.cloudera.data.filesystem.impl.Accessor;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -25,7 +26,6 @@ import java.util.List;
 import org.apache.avro.generic.GenericData;
 import org.apache.crunch.Target;
 import org.apache.crunch.io.ReadableSource;
-import org.apache.crunch.io.avro.AvroFileSource;
 import org.apache.crunch.io.avro.AvroFileTarget;
 import org.apache.crunch.types.avro.AvroType;
 import org.apache.crunch.types.avro.Avros;
@@ -40,21 +40,34 @@ import org.apache.hadoop.fs.Path;
 @Beta
 public class CrunchDatasets {
 
+  /**
+   * <p>
+   * Expose the given {@link Dataset} as a Crunch {@link ReadableSource}.
+   * </p>
+   * @param dataset the dataset to read from
+   * @param type    the Java type of the entities in the dataset
+   * @param <E>     the type of entity produced by the source
+   * @return the {@link ReadableSource}, or <code>null</code> if the dataset is not
+   * filesystem-based.
+   */
   public static <E> ReadableSource<E> asSource(Dataset dataset, Class<E> type) {
-    if (dataset instanceof FileSystemDataset) {
-      FileSystemDataset fsDataset = (FileSystemDataset) dataset;
-      List<Path> paths = Lists.newArrayList();
+    Path directory = Accessor.getDefault().getDirectory(dataset);
+    if (directory != null) {
+      if (dataset.getDescriptor().getFormat() == Formats.PARQUET) {
+        throw new UnsupportedOperationException("Parquet is not supported.");
+      }
 
+      List<Path> paths = Lists.newArrayList();
       try {
-        fsDataset.accumulateDatafilePaths(fsDataset.getDirectory(), paths);
+        Accessor.getDefault().accumulateDatafilePaths(dataset, directory, paths);
       } catch (IOException e) {
         throw new DatasetException("Unable to retrieve data file list for directory " +
-            fsDataset.getDirectory(), e);
+            directory, e);
       }
 
       AvroType<E> avroType;
       if (type.isAssignableFrom(GenericData.Record.class)) {
-        avroType = (AvroType<E>) Avros.generics(fsDataset.getDescriptor().getSchema());
+        avroType = (AvroType<E>) Avros.generics(dataset.getDescriptor().getSchema());
       } else {
         avroType = Avros.records(type);
       }
@@ -63,13 +76,21 @@ public class CrunchDatasets {
     return null;
   }
 
+  /**
+   * <p>
+   * Expose the given {@link Dataset} as a Crunch {@link Target}.
+   * </p>
+   * @param dataset the dataset to write to
+   * @return the {@link Target}, or <code>null</code> if the dataset is not
+   * filesystem-based.
+   */
   public static Target asTarget(Dataset dataset) {
-    if (dataset instanceof FileSystemDataset) {
-      FileSystemDataset fsDataset = (FileSystemDataset) dataset;
-      if (fsDataset.getDescriptor().getFormat() == Formats.PARQUET) {
+    Path directory = Accessor.getDefault().getDirectory(dataset);
+    if (directory != null) {
+      if (dataset.getDescriptor().getFormat() == Formats.PARQUET) {
         throw new UnsupportedOperationException("Parquet is not supported.");
       }
-      return new AvroFileTarget(fsDataset.getDirectory());
+      return new AvroFileTarget(directory);
     }
     return null;
   }

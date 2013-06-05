@@ -80,7 +80,8 @@
     <previous.project.version>0.2.0</previous.project.version> <!-- used by jdiff -->
 
     <vers.avro>1.7.3</vers.avro>
-    <vers.crunch>0.6.0-cdh4.2.0</vers.crunch>
+    <vers.crunch-base>0.6.0</vers.crunch-base>
+    <vers.crunch>${vers.crunch-base}-cdh4.2.0</vers.crunch>
     <vers.doxia-markdown>1.4</vers.doxia-markdown>
     <vers.findbugs-plugin>2.5.2</vers.findbugs-plugin>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
@@ -188,6 +189,11 @@
           <version>${vers.maven-javadoc}</version>
           <configuration>
             <excludePackageNames>*.impl</excludePackageNames>
+            <links>
+              <link>http://avro.apache.org/docs/${vers.avro}/api/java/</link>
+              <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
+              <link>http://archive.cloudera.com/cdh4/cdh/4/hadoop-${vers.hadoop}/api/</link>
+            </links>
           </configuration>
           <executions>
             <execution>

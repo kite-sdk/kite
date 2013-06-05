@@ -20,7 +20,6 @@ import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.filesystem.CrunchDatasets;
 import com.cloudera.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.io.Files;
 import java.io.IOException;

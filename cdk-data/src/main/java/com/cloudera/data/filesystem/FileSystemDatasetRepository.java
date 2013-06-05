@@ -15,13 +15,8 @@
  */
 package com.cloudera.data.filesystem;
 
-import com.cloudera.data.Dataset;
-import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.DatasetRepository;
-import com.cloudera.data.DatasetRepositoryException;
-import com.cloudera.data.MetadataProvider;
-import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.impl.Accessor;
+import com.cloudera.data.*;
+import com.cloudera.data.filesystem.impl.Accessor;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
@@ -63,6 +58,10 @@ public class FileSystemDatasetRepository implements DatasetRepository {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemDatasetRepository.class);
+
+  static {
+    Accessor.setDefault(new AccessorImpl());
+  }
 
   private final MetadataProvider metadataProvider;
 
@@ -156,7 +155,7 @@ public class FileSystemDatasetRepository implements DatasetRepository {
       .descriptor(descriptor)
       .directory(pathForDataset(name))
       .partitionKey(
-        descriptor.isPartitioned() ? Accessor.getDefault()
+        descriptor.isPartitioned() ? com.cloudera.data.impl.Accessor.getDefault()
           .newPartitionKey() : null).get();
   }
 
@@ -195,7 +194,7 @@ public class FileSystemDatasetRepository implements DatasetRepository {
         .descriptor(descriptor)
         .directory(pathForDataset(name))
         .partitionKey(
-            descriptor.isPartitioned() ? Accessor.getDefault()
+            descriptor.isPartitioned() ? com.cloudera.data.impl.Accessor.getDefault()
                 .newPartitionKey() : null).get();
   }
 
