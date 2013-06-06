@@ -33,7 +33,7 @@ has examples for all these new features. The examples use the
 [Cloudera QuickStart VM](https://ccp.cloudera.com/display/SUPPORT/Cloudera+QuickStart+VM)
 to make running the examples as simple as possible.
 
-The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&version=10244)
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10244)
 is available from JIRA.
 
 ### Version 0.2.0
@@ -46,7 +46,7 @@ Version 0.2.0 has two major additions:
 
 The examples module has example code for both of these usages.
 
-The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&version=10239)
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10239)
 is available from JIRA.
 
 ### Version 0.1.0
