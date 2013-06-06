@@ -12,6 +12,9 @@ applications.
 * Provide smart defaults for platform choices.
 * Support piecemeal adoption via loosely-coupled modules.
 
+Eric Sammer recorded a [webinar](http://www.cloudera.com/content/cloudera/en/resources/library/recordedwebinar/cloudera-development-kit-cdk-hadoop-application-development-made-easier.html)
+in which he talks about the goals of the CDK.
+
 This project is organized into modules. Modules may be independent or have
 dependencies on other modules within the CDK. When possible, dependencies on
 external projects are minimized.
