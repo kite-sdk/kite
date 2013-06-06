@@ -1,0 +1,5 @@
+com.cloudera.data
+com.cloudera.data.crunch
+com.cloudera.data.filesystem
+com.cloudera.data.hcatalog
+com.cloudera.data.partition
