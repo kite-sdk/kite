@@ -255,6 +255,20 @@ public class PartitionStrategy {
       return this;
     }
 
+    /**
+     * Configure a hash partitioner with the specified number of {@code buckets}
+     * .
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param name
+     *          The entity field name of the partition.
+     * @param buckets
+     *          The number of buckets into which data is to be partitioned.
+     * @return An instance of the builder for method chaining.
+     * @since 0.3.0
+     */
     public Builder hash(String sourceName, String name, int buckets) {
       fieldPartitioners.add(new HashFieldPartitioner(sourceName, name, buckets));
       return this;
@@ -311,26 +325,81 @@ public class PartitionStrategy {
       return this;
     }
 
+    /**
+     * Configure a partitioner for extracting the year from a timestamp field.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param name
+     *          The entity field name of the partition.
+     * @return An instance of the builder for method chaining.
+     * @since 0.3.0
+     */
     public Builder year(String sourceName, String name) {
       fieldPartitioners.add(PartitionFunctions.year(sourceName, name));
       return this;
     }
 
+    /**
+     * Configure a partitioner for extracting the month from a timestamp field.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param name
+     *          The entity field name of the partition.
+     * @return An instance of the builder for method chaining.
+     * @since 0.3.0
+     */
     public Builder month(String sourceName, String name) {
       fieldPartitioners.add(PartitionFunctions.month(sourceName, name));
       return this;
     }
 
+    /**
+     * Configure a partitioner for extracting the day from a timestamp field.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param name
+     *          The entity field name of the partition.
+     * @return An instance of the builder for method chaining.
+     * @since 0.3.0
+     */
     public Builder day(String sourceName, String name) {
       fieldPartitioners.add(PartitionFunctions.day(sourceName, name));
       return this;
     }
 
+    /**
+     * Configure a partitioner for extracting the hour from a timestamp field.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param name
+     *          The entity field name of the partition.
+     * @return An instance of the builder for method chaining.
+     * @since 0.3.0
+     */
     public Builder hour(String sourceName, String name) {
       fieldPartitioners.add(PartitionFunctions.hour(sourceName, name));
       return this;
     }
 
+    /**
+     * Configure a partitioner for extracting the minute from a timestamp field.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param name
+     *          The entity field name of the partition.
+     * @return An instance of the builder for method chaining.
+     * @since 0.3.0
+     */
     public Builder minute(String sourceName, String name) {
       fieldPartitioners.add(PartitionFunctions.minute(sourceName, name));
       return this;

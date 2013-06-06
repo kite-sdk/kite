@@ -62,11 +62,15 @@ public abstract class FieldPartitioner implements Function<Object, Object> {
 
   /**
    * @return the name of the field from which the partition field is derived.
+   * @since 0.3.0
    */
   public String getSourceName() {
     return sourceName;
   }
 
+  /**
+   * @return the number of buckets in the partition.
+   */
   public int getCardinality() {
     return cardinality;
   }
@@ -88,6 +92,7 @@ public abstract class FieldPartitioner implements Function<Object, Object> {
    * <p>
    * Retrieve the value for the field from the string representation.
    * </p>
+   * @since 0.3.0
    */
   public abstract Object valueFromString(String stringValue);
 

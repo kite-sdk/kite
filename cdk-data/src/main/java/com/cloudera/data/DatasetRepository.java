@@ -84,6 +84,7 @@ public interface DatasetRepository {
    *                   dataset
    * @return The newly created dataset
    * @throws DatasetRepositoryException
+   * @since 0.3.0
    */
   Dataset update(String name, DatasetDescriptor descriptor);
 

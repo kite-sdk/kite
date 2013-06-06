@@ -71,7 +71,7 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   /**
    * Construct a {@link FileSystemDatasetRepository} on the given {@link FileSystem} and
    * root directory, and a {@link FileSystemMetadataProvider} with the same {@link
-   * FileSystem} and root directory
+   * FileSystem} and root directory.
    *
    * @param fileSystem    the filesystem to store metadata and datasets in
    * @param rootDirectory the root directory for metadata and datasets
@@ -81,6 +81,14 @@ public class FileSystemDatasetRepository implements DatasetRepository {
       new FileSystemMetadataProvider(fileSystem, rootDirectory));
   }
 
+  /**
+   * Construct a {@link FileSystemDatasetRepository} with a root directory at the
+   * given {@link URI}, and a {@link FileSystemMetadataProvider} with the same root
+   * directory.
+   *
+   * @param uri the root directory for metadata and datasets
+   * @since 0.3.0
+   */
   public FileSystemDatasetRepository(URI uri) {
     Preconditions.checkArgument(uri != null,
         "URI provider can not be null");
@@ -336,6 +344,7 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     /**
      * The {@link Configuration} used to find the {@link FileSystem}. Optional. If not
      * specified, the default configuration will be used.
+     * @since 0.3.0
      */
     public Builder configuration(Configuration configuration) {
       this.configuration = configuration;

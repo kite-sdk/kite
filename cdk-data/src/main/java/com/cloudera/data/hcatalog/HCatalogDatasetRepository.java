@@ -70,6 +70,13 @@ public class HCatalogDatasetRepository implements DatasetRepository {
     this.metadataProvider = new HCatalogMetadataProvider(managed);
   }
 
+  /**
+   * <p>
+   * Create an HCatalog dataset repository with external tables.
+   * </p>
+   * @param uri the root directory for datasets
+   * @since 0.3.0
+   */
   public HCatalogDatasetRepository(URI uri) {
     this.managed = false; // TODO depends
     this.metadataProvider = new HCatalogMetadataProvider(managed);
