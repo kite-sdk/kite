@@ -60,4 +60,9 @@ public abstract class Accessor {
   public abstract PartitionKey newPartitionKey(Object... values);
 
   public abstract PartitionStrategy getSubpartitionStrategy(PartitionStrategy partitionStrategy, int startIndex);
+
+  public abstract String toExpression(PartitionStrategy partitionStrategy);
+
+  public abstract PartitionStrategy fromExpression(String partitionExpression);
+
 }

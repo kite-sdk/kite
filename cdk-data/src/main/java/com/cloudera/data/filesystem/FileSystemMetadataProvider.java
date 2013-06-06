@@ -19,7 +19,6 @@ import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.MetadataProvider;
 import com.cloudera.data.MetadataProviderException;
 import com.cloudera.data.impl.Accessor;
-import com.cloudera.data.partition.PartitionExpression;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -92,8 +91,8 @@ public class FileSystemMetadataProvider implements MetadataProvider {
             properties.getProperty(FORMAT_FIELD_NAME)));
       }
       if (properties.containsKey(PARTITION_EXPRESSION_FIELD_NAME)) {
-        builder.partitionStrategy(new PartitionExpression(properties
-          .getProperty(PARTITION_EXPRESSION_FIELD_NAME), true).evaluate());
+        builder.partitionStrategy(Accessor.getDefault().fromExpression(properties
+          .getProperty(PARTITION_EXPRESSION_FIELD_NAME)));
       }
     } catch (IOException e) {
       throw new MetadataProviderException(
@@ -159,7 +158,7 @@ public class FileSystemMetadataProvider implements MetadataProvider {
 
     if (descriptor.isPartitioned()) {
       properties.setProperty(PARTITION_EXPRESSION_FIELD_NAME,
-        PartitionExpression.toExpression(descriptor.getPartitionStrategy()));
+          Accessor.getDefault().toExpression(descriptor.getPartitionStrategy()));
     }
 
     Path descriptorPath = new Path(directory, DESCRIPTOR_FILE_NAME);

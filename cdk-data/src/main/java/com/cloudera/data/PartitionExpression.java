@@ -13,10 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.data.partition;
+package com.cloudera.data;
 
-import com.cloudera.data.FieldPartitioner;
-import com.cloudera.data.PartitionStrategy;
+import com.cloudera.data.partition.DayOfMonthFieldPartitioner;
+import com.cloudera.data.partition.HashFieldPartitioner;
+import com.cloudera.data.partition.HourFieldPartitioner;
+import com.cloudera.data.partition.IdentityFieldPartitioner;
+import com.cloudera.data.partition.MinuteFieldPartitioner;
+import com.cloudera.data.partition.MonthFieldPartitioner;
+import com.cloudera.data.partition.PartitionFunctions;
+import com.cloudera.data.partition.RangeFieldPartitioner;
+import com.cloudera.data.partition.YearFieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
@@ -31,7 +38,7 @@ import org.apache.commons.jexl2.JexlEngine;
  * not a part of the public API.
  */
 @Beta
-public class PartitionExpression {
+class PartitionExpression {
 
   private JexlEngine engine;
   private Expression expression;

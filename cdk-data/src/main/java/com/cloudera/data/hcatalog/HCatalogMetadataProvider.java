@@ -20,7 +20,7 @@ import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.MetadataProvider;
 import com.cloudera.data.MetadataProviderException;
 import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.partition.PartitionExpression;
+import com.cloudera.data.impl.Accessor;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
@@ -72,8 +72,8 @@ class HCatalogMetadataProvider implements MetadataProvider {
 
     DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder();
     if (table.getProperty(PARTITION_EXPRESSION_PROPERTY_NAME) != null) {
-      builder.partitionStrategy(new PartitionExpression(table.getProperty
-          (PARTITION_EXPRESSION_PROPERTY_NAME), true).evaluate());
+      builder.partitionStrategy(Accessor.getDefault().fromExpression(table.getProperty
+          (PARTITION_EXPRESSION_PROPERTY_NAME)));
     }
     String schemaUrlString = table.getProperty(AVRO_SCHEMA_URL_PROPERTY_NAME);
     if (schemaUrlString != null) {
@@ -134,7 +134,7 @@ class HCatalogMetadataProvider implements MetadataProvider {
       if (descriptor.isPartitioned()) {
         PartitionStrategy ps = descriptor.getPartitionStrategy();
         tbl.setProperty(PARTITION_EXPRESSION_PROPERTY_NAME,
-            PartitionExpression.toExpression(ps));
+            Accessor.getDefault().toExpression(ps));
         List<FieldSchema> partCols = Lists.newArrayList();
         for (FieldPartitioner fp : ps.getFieldPartitioners()) {
           // TODO: support arbitrary types

@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.data.filesystem;
+package com.cloudera.data;
 
-import com.cloudera.data.FieldPartitioner;
-import com.cloudera.data.PartitionStrategy;
 import com.cloudera.data.partition.HashFieldPartitioner;
 import com.cloudera.data.partition.MinuteFieldPartitioner;
-import com.cloudera.data.partition.PartitionExpression;
 import com.cloudera.data.partition.YearFieldPartitioner;
 import java.util.List;
 import org.junit.Assert;

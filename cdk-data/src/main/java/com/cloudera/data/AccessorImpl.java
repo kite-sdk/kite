@@ -32,4 +32,14 @@ final class AccessorImpl extends Accessor {
   public PartitionStrategy getSubpartitionStrategy(PartitionStrategy partitionStrategy, int startIndex) {
     return partitionStrategy.getSubpartitionStrategy(startIndex);
   }
+
+  @Override
+  public String toExpression(PartitionStrategy partitionStrategy) {
+    return PartitionExpression.toExpression(partitionStrategy);
+  }
+
+  @Override
+  public PartitionStrategy fromExpression(String partitionExpression) {
+    return new PartitionExpression(partitionExpression, true).evaluate();
+  }
 }
