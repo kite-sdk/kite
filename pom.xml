@@ -77,7 +77,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <previous.project.version>0.2.0</previous.project.version> <!-- used by jdiff -->
+    <previous.project.version>0.3.0</previous.project.version> <!-- used by jdiff -->
 
     <vers.avro>1.7.3</vers.avro>
     <vers.crunch-base>0.6.0</vers.crunch-base>
