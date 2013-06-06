@@ -19,6 +19,23 @@ topics (e.g. partitioning schemes, metadata management) will benefit even more.
 
 ## What's New
 
+### Version 0.3.0
+
+Version 0.3.0 has the following notable changes:
+
+* Logging to a dataset. Using log4j as the logging API and Flume as the log transport,
+it is now possible to log application events to datasets.
+* Crunch support. Datasets can be exposed as Crunch sources and targets.
+* Date partitioning. New partitioning functions for partitioning datasets by
+year/month/day/hour/minute.
+* New examples. The new [examples repository](https://github.com/cloudera/cdk-examples)
+has examples for all these new features. The examples use the
+[Cloudera QuickStart VM](https://ccp.cloudera.com/display/SUPPORT/Cloudera+QuickStart+VM)
+to make running the examples as simple as possible.
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&version=10244)
+is available from JIRA.
+
 ### Version 0.2.0
 
 Version 0.2.0 has two major additions:
@@ -28,6 +45,9 @@ Version 0.2.0 has two major additions:
 * Support for storing dataset metadata in a Hive/HCatalog metastore.
 
 The examples module has example code for both of these usages.
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&version=10239)
+is available from JIRA.
 
 ### Version 0.1.0
 
