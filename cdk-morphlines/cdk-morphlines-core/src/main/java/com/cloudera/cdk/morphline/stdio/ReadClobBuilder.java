@@ -63,7 +63,7 @@ public final class ReadClobBuilder implements CommandBuilder {
   
     @Override
     protected boolean doProcess(Record inputRecord, InputStream stream) throws IOException {
-      numRecordsCounter.inc();
+      numRecordsMeter.mark();
       Charset detectedCharset = detectCharset(inputRecord, charset);  
       Reader reader = new InputStreamReader(stream, detectedCharset);
       String clob = CharStreams.toString(reader);

@@ -66,11 +66,13 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
     private final SimpleDateFormat outputFormat;
     
     private static final String NATIVE_SOLR_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"; // e.g. 2007-04-26T08:05:04.789Z
+    private static final SimpleDateFormat UNIX_TIME_IN_MILLIS = new SimpleDateFormat("'unixTimeInMillis'");
+    private static final SimpleDateFormat UNIX_TIME_IN_SECONDS = new SimpleDateFormat("'unixTimeInSeconds'");
     
     static {
       DateUtil.DEFAULT_DATE_FORMATS.add(0, NATIVE_SOLR_FORMAT); 
     }    
-    
+
     public ConvertTimestamp(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
       
@@ -78,16 +80,23 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
       TimeZone inputTimeZone = getTimeZone(getConfigs().getString(config, "inputTimezone", "UTC"));
       Locale inputLocale = getLocale(getConfigs().getString(config, "inputLocale", ""));
       for (String inputFormat : getConfigs().getStringList(config, "inputFormats", DateUtil.DEFAULT_DATE_FORMATS)) {
-        SimpleDateFormat df = new SimpleDateFormat(inputFormat, inputLocale);
-        df.setTimeZone(inputTimeZone);
-        df.set2DigitYearStart(DateUtil.DEFAULT_TWO_DIGIT_YEAR_START);
-        this.inputFormats.add(df);
+        SimpleDateFormat dateFormat = getUnixTimeFormat(inputFormat, inputTimeZone);
+        if (dateFormat == null) {
+          dateFormat = new SimpleDateFormat(inputFormat, inputLocale);
+          dateFormat.setTimeZone(inputTimeZone);
+          dateFormat.set2DigitYearStart(DateUtil.DEFAULT_TWO_DIGIT_YEAR_START);
+        }
+        this.inputFormats.add(dateFormat);
       }
       TimeZone outputTimeZone = getTimeZone(getConfigs().getString(config, "outputTimezone", "UTC"));
       Locale outputLocale = getLocale(getConfigs().getString(config, "outputLocale", ""));
       String outputFormatStr = getConfigs().getString(config, "outputFormat", NATIVE_SOLR_FORMAT);
-      this.outputFormat = new SimpleDateFormat(outputFormatStr, outputLocale);
-      this.outputFormat.setTimeZone(outputTimeZone);
+      SimpleDateFormat dateFormat = getUnixTimeFormat(outputFormatStr, outputTimeZone);
+      if (dateFormat == null) {
+        dateFormat = new SimpleDateFormat(outputFormatStr, outputLocale);
+        dateFormat.setTimeZone(outputTimeZone);
+      }
+      this.outputFormat = dateFormat;
       validateArguments();
       
       if (LOG.isTraceEnabled()) {
@@ -104,10 +113,28 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
         String timestamp = iter.next().toString();
         boolean foundMatchingFormat = false;
         for (SimpleDateFormat inputFormat : inputFormats) {
-          pos.setIndex(0);
-          Date date = inputFormat.parse(timestamp, pos);
-          if (date != null && pos.getIndex() == timestamp.length()) {
-            String result = outputFormat.format(date);
+          Date date;
+          boolean isUnixTime;
+          if (inputFormat == UNIX_TIME_IN_MILLIS) {
+            isUnixTime = true;
+            date = parseUnixTime(timestamp, 1);
+          } else if (inputFormat == UNIX_TIME_IN_SECONDS) {
+            isUnixTime = true;
+            date = parseUnixTime(timestamp, 1000);
+          } else {
+            isUnixTime = false;
+            pos.setIndex(0);
+            date = inputFormat.parse(timestamp, pos);
+          }
+          if (date != null && (isUnixTime || pos.getIndex() == timestamp.length())) {
+            String result;
+            if (outputFormat == UNIX_TIME_IN_MILLIS) {
+              result = String.valueOf(date.getTime());
+            } else if (outputFormat == UNIX_TIME_IN_SECONDS) {
+              result = String.valueOf(date.getTime() / 1000);
+            } else {
+              result = outputFormat.format(date);
+            }
             iter.set(result);
             foundMatchingFormat = true;
             break;
@@ -119,6 +146,32 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
         }
       }
       return super.doProcess(record);
+    }
+
+    // work around the fact that SimpleDateFormat doesn't understand Unix time format
+    private SimpleDateFormat getUnixTimeFormat(String format, TimeZone timeZone) {
+      if (format.equals("unixTimeInMillis")) {
+        if (!"UTC".equals(timeZone.getID())) {
+          throw new MorphlineCompilationException("timeZone must be UTC for date format 'unixTimeInMillis'", getConfig());
+        }
+        return UNIX_TIME_IN_MILLIS;
+      } else if (format.equals("unixTimeInSeconds")) {
+        if (!"UTC".equals(timeZone.getID())) {
+          throw new MorphlineCompilationException("timeZone must be UTC for date format 'unixTimeInSeconds'", getConfig());
+        }
+        return UNIX_TIME_IN_SECONDS;
+      } else {
+        return null;
+      }
+    }
+    
+    // work around the fact that SimpleDateFormat doesn't understand Unix time format
+    private Date parseUnixTime(String timestamp, long scale) {
+      try {
+        return new Date(scale * Long.parseLong(timestamp));
+      } catch (NumberFormatException e) {
+        return null;
+      }
     }
     
     private TimeZone getTimeZone(String timeZoneID) {

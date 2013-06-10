@@ -91,7 +91,7 @@ public final class ReadLineBuilder implements CommandBuilder {
         Record outputRecord = inputRecord.copy();
         removeAttachments(outputRecord);
         outputRecord.replaceValues(Fields.MESSAGE, line);
-        numRecordsCounter.inc();
+        numRecordsMeter.mark();
         
         // pass record to next command in chain:
         if (!getChild().process(outputRecord)) {

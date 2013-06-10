@@ -17,6 +17,7 @@ package com.cloudera.cdk.morphline.stdlib;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -302,7 +303,7 @@ public final class GrokBuilder implements CommandBuilder {
         int idx = list.get(0).groupIndex();
         int group = idx > -1 ? idx + 1 : -1; // TODO cache that number (perf)?
         String value = matcher.group(group);
-        if (value.length() > 0 || addEmptyStrings) {
+        if (value != null && (value.length() > 0 || addEmptyStrings)) {
           outputRecord.put(groupName, value);
         }
       }
@@ -311,13 +312,16 @@ public final class GrokBuilder implements CommandBuilder {
     private void extractSlow(Record outputRecord, Pattern pattern, Matcher matcher) {
       for (String groupName : pattern.groupNames()) {
         String value = matcher.group(groupName);
-        if (value.length() > 0 || addEmptyStrings) {
+        if (value != null && (value.length() > 0 || addEmptyStrings)) {
           outputRecord.put(groupName, value);
         }
       }
     }
     
     private void loadDictionaryFile(File fileOrDir) throws IOException {
+      if (!fileOrDir.exists()) {
+        throw new FileNotFoundException("File not found: " + fileOrDir);
+      }
       if (!fileOrDir.canRead()) {
         throw new IOException("Insufficient permissions to read file: " + fileOrDir);
       }

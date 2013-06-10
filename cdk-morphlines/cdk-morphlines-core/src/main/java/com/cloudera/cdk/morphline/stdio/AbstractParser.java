@@ -19,7 +19,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -32,7 +31,7 @@ import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Metrics;
-import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import com.typesafe.config.Config;
@@ -42,7 +41,7 @@ import com.typesafe.config.Config;
  */
 public abstract class AbstractParser extends AbstractCommand {
 
-  protected final Counter numRecordsCounter;
+  protected final Meter numRecordsMeter;
   private Set<MediaType> supportedMimeTypes = null;
 
   public static final String SUPPORTED_MIME_TYPES = "supportedMimeTypes";
@@ -55,7 +54,7 @@ public abstract class AbstractParser extends AbstractCommand {
         addSupportedMimeType(streamMediaType);
       }
     }
-    this.numRecordsCounter = getCounter(Metrics.NUM_RECORDS);
+    this.numRecordsMeter = getMeter(Metrics.NUM_RECORDS);
   }
 
   protected void addSupportedMimeType(String mediaType) {

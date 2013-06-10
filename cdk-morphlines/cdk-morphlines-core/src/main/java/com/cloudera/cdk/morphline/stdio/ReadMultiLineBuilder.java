@@ -56,7 +56,7 @@ import com.typesafe.config.Config;
  * Example:
  * 
  * <pre>
- * regex : "(^.+Exception: .+)|(^\\s+at .+)|(^\\s+... \\d+ more)|(^\\s*Caused by:.+)"
+ * regex : "(^.+Exception: .+)|(^\\s+at .+)|(^\\s+\\.\\.\\. \\d+ more)|(^\\s*Caused by:.+)"
  * negate: false
  * what : previous
  * </pre>
@@ -151,7 +151,7 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
       removeAttachments(outputRecord);
       outputRecord.replaceValues(Fields.MESSAGE, lines);
       timerContext.stop();
-      numRecordsCounter.inc();
+      numRecordsMeter.mark();
       
       // pass record to next command in chain:
       return getChild().process(outputRecord);

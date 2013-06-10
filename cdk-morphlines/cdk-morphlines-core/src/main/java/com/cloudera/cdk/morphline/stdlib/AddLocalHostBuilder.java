@@ -15,76 +15,81 @@
  */
 package com.cloudera.cdk.morphline.stdlib;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.UUID;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
-import com.cloudera.cdk.morphline.base.Fields;
 import com.typesafe.config.Config;
 
 /**
- * A command that sets a universally unique identifier on all records that are intercepted. By
- * default this event header is named "id".
+ * A command that adds the name or IP of the local host to a given output field.
  */
-public final class GenerateUUIDBuilder implements CommandBuilder {
+public final class AddLocalHostBuilder implements CommandBuilder {
 
   public static final String FIELD_NAME = "field";
   public static final String PRESERVE_EXISTING_NAME = "preserveExisting";
-  public static final String PREFIX_NAME = "prefix";
+  public static final String USE_IP = "useIP";  
   
   @Override
   public Collection<String> getNames() {
-    return Collections.singletonList("generateUUID");
+    return Collections.singletonList("addLocalHost");
   }
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new GenerateUUID(config, parent, child, context);
+    return new AddLocalHost(config, parent, child, context);
   }
   
   
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  private static final class GenerateUUID extends AbstractCommand {
+  private static final class AddLocalHost extends AbstractCommand {
     
     private final String fieldName;
     private final boolean preserveExisting;
-    private final String prefix;
+    private final String host;
 
-    public GenerateUUID(Config config, Command parent, Command child, MorphlineContext context) { 
+    public AddLocalHost(Config config, Command parent, Command child, MorphlineContext context) { 
       super(config, parent, child, context);
-      this.fieldName = getConfigs().getString(config, FIELD_NAME, Fields.ID);
+      this.fieldName = getConfigs().getString(config, FIELD_NAME, "host");
       this.preserveExisting = getConfigs().getBoolean(config, PRESERVE_EXISTING_NAME, true);
-      this.prefix = getConfigs().getString(config, PREFIX_NAME, "");
+      boolean useIP = getConfigs().getBoolean(config, USE_IP, true);      
       validateArguments();
+      
+      InetAddress addr = null;
+      try {
+        addr = InetAddress.getLocalHost();
+      } catch (UnknownHostException e) {
+        LOG.warn("Cannot get address of local host", e);
+      }
+      
+      if (addr == null) {
+        host = null;
+      } else if (useIP) {
+        host = addr.getHostAddress();
+      } else {
+        host = addr.getCanonicalHostName();
+      }
     }
 
     @Override
     protected boolean doProcess(Record record) {      
       if (preserveExisting && record.getFields().containsKey(fieldName)) {
-        // we must preserve the existing id
-      } else if (isMatch(record)) {
-        record.replaceValues(fieldName, generateUUID());
+        // we must preserve the existing host
+      } else {
+        record.removeAll(fieldName);
+        if (host != null) {
+          record.put(fieldName, host);
+        }
       }
       return super.doProcess(record);
-    }
-
-    protected String getPrefix() {
-      return prefix;
-    }
-
-    protected String generateUUID() {
-      return getPrefix() + UUID.randomUUID().toString();
-    }
-
-    protected boolean isMatch(Record event) {
-      return true;
     }
 
   }

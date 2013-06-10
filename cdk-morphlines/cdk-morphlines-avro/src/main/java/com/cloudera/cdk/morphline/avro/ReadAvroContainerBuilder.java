@@ -117,7 +117,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     }
     
     protected boolean extract(GenericContainer datum, Record inputRecord) {
-      numRecordsCounter.inc();
+      numRecordsMeter.mark();
       Record outputRecord = inputRecord.copy();
       removeAttachments(outputRecord);
       outputRecord.put(Fields.ATTACHMENT_BODY, datum);

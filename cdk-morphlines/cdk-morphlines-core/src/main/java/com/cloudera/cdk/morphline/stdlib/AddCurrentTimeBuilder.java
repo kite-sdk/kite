@@ -17,7 +17,6 @@ package com.cloudera.cdk.morphline.stdlib;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.UUID;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
@@ -28,63 +27,50 @@ import com.cloudera.cdk.morphline.base.Fields;
 import com.typesafe.config.Config;
 
 /**
- * A command that sets a universally unique identifier on all records that are intercepted. By
- * default this event header is named "id".
+ * A command that adds the result of {@link System#currentTimeMillis()} to a given output field.
+ * 
+ * Typically, a <tt>convertTimestamp</tt> command is subsequently used to convert this timestamp to
+ * an application specific output format.
  */
-public final class GenerateUUIDBuilder implements CommandBuilder {
+public final class AddCurrentTimeBuilder implements CommandBuilder {
 
   public static final String FIELD_NAME = "field";
   public static final String PRESERVE_EXISTING_NAME = "preserveExisting";
-  public static final String PREFIX_NAME = "prefix";
   
   @Override
   public Collection<String> getNames() {
-    return Collections.singletonList("generateUUID");
+    return Collections.singletonList("addCurrentTime");
   }
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new GenerateUUID(config, parent, child, context);
+    return new AddCurrentTime(config, parent, child, context);
   }
   
   
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  private static final class GenerateUUID extends AbstractCommand {
+  private static final class AddCurrentTime extends AbstractCommand {
     
-    private final String fieldName;
-    private final boolean preserveExisting;
-    private final String prefix;
+    private String fieldName;
+    private boolean preserveExisting;
 
-    public GenerateUUID(Config config, Command parent, Command child, MorphlineContext context) { 
+    public AddCurrentTime(Config config, Command parent, Command child, MorphlineContext context) { 
       super(config, parent, child, context);
-      this.fieldName = getConfigs().getString(config, FIELD_NAME, Fields.ID);
+      this.fieldName = getConfigs().getString(config, FIELD_NAME, Fields.TIMESTAMP);
       this.preserveExisting = getConfigs().getBoolean(config, PRESERVE_EXISTING_NAME, true);
-      this.prefix = getConfigs().getString(config, PREFIX_NAME, "");
       validateArguments();
     }
 
     @Override
     protected boolean doProcess(Record record) {      
       if (preserveExisting && record.getFields().containsKey(fieldName)) {
-        // we must preserve the existing id
-      } else if (isMatch(record)) {
-        record.replaceValues(fieldName, generateUUID());
+        // we must preserve the existing timestamp
+      } else {
+        record.replaceValues(fieldName, System.currentTimeMillis());
       }
       return super.doProcess(record);
-    }
-
-    protected String getPrefix() {
-      return prefix;
-    }
-
-    protected String generateUUID() {
-      return getPrefix() + UUID.randomUUID().toString();
-    }
-
-    protected boolean isMatch(Record event) {
-      return true;
     }
 
   }

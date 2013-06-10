@@ -30,6 +30,8 @@ import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
@@ -45,8 +47,8 @@ public abstract class AbstractCommand implements Command {
   private final Command child;
   private final MorphlineContext context;
   private final Configs configs;
-  private final Counter numProcessCallsCounter;
-  private final Counter numNotifyCallsCounter;
+  private final Meter numProcessCallsMeter;
+  private final Meter numNotifyCallsMeter;
 
   protected final Logger LOG = LoggerFactory.getLogger(getClass());
       
@@ -60,8 +62,8 @@ public abstract class AbstractCommand implements Command {
     this.child = child;
     this.context = context;
     this.configs = new Configs();
-    this.numProcessCallsCounter = getCounter(Metrics.NUM_PROCESS_CALLS);
-    this.numNotifyCallsCounter = getCounter(Metrics.NUM_NOTIFY_CALLS);
+    this.numProcessCallsMeter = getMeter(Metrics.NUM_PROCESS_CALLS);
+    this.numNotifyCallsMeter = getMeter(Metrics.NUM_NOTIFY_CALLS);
   }
   
   @Override
@@ -87,7 +89,7 @@ public abstract class AbstractCommand implements Command {
   
   @Override
   public final void notify(Record notification) {
-    numNotifyCallsCounter.inc();
+    numNotifyCallsMeter.mark();
     beforeNotify(notification);
     doNotify(notification);
   }
@@ -106,7 +108,7 @@ public abstract class AbstractCommand implements Command {
   
   @Override
   public final boolean process(Record record) {
-    numProcessCallsCounter.inc();
+    numProcessCallsMeter.mark();
     beforeProcess(record);
     return doProcess(record);
   }
@@ -129,6 +131,14 @@ public abstract class AbstractCommand implements Command {
   
   protected Counter getCounter(String... names) {
     return getContext().getMetricRegistry().counter(getMetricName(names));
+  }
+  
+  protected Histogram getHistogram(String... names) {
+    return getContext().getMetricRegistry().histogram(getMetricName(names));
+  }
+  
+  protected Meter getMeter(String... names) {
+    return getContext().getMetricRegistry().meter(getMetricName(names));
   }
   
   protected Timer getTimer(String... names) {
@@ -192,7 +202,7 @@ public abstract class AbstractCommand implements Command {
     String cmdName = entry.getKey();
     
     Class cmdClass;
-    LOG.trace("cmdName: {}", cmdName);
+    LOG.trace("Building command: {}", cmdName);
     if (!cmdName.contains(".") && !cmdName.contains("/")) {
       cmdClass = getContext().getCommandBuilder(cmdName);
       if (cmdClass == null) {

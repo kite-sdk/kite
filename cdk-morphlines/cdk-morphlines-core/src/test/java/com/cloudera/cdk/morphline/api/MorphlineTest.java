@@ -20,11 +20,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -33,7 +36,7 @@ import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Metrics;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Matcher;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Pattern;
-import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.io.Files;
@@ -149,6 +152,73 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.put("pids", "hello");
     assertEquals(Arrays.asList(expected), collector.getRecords());
     assertSame(record, collector.getRecords().get(0));
+  }
+
+  @Test
+  public void testAddCurrentTime() throws Exception {
+    morphline = createMorphline("test-morphlines/addCurrentTime");  
+    Record record = new Record();
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    long now = System.currentTimeMillis();
+    assertTrue(morphline.process(record));
+    assertSame(record, collector.getFirstRecord());
+    long actual = ((Long) record.getFirstValue("ts")).longValue();
+    assertTrue(actual >= now);
+    assertTrue(actual <= now + 1000);
+    
+    // test that preserveExisting = true preserves the existing timestamp
+    collector.reset();
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    assertSame(record, collector.getFirstRecord());
+    actual = ((Long) record.getFirstValue("ts")).longValue();
+    assertEquals(now, actual);
+  }
+
+  @Test
+  public void testAddLocalHost() throws Exception {
+    morphline = createMorphline("test-morphlines/addLocalHost");  
+    InetAddress addr = null;
+    try {
+      addr = InetAddress.getLocalHost();
+    } catch (UnknownHostException e) {
+      return;
+    }
+    
+    testAddLocalHostInternal(addr.getHostAddress());
+  }
+
+  @Test
+  public void testAddLocalHostWithName() throws Exception {
+    morphline = createMorphline("test-morphlines/addLocalHost");
+    InetAddress addr = null;
+    try {
+      addr = InetAddress.getLocalHost();
+    } catch (UnknownHostException e) {
+      return;
+    }
+    
+    testAddLocalHostInternal(addr.getCanonicalHostName());
+  }
+
+  private void testAddLocalHostInternal(String name) throws Exception {
+    Record record = new Record();
+    Record expected = new Record();
+    expected.put("myhost", name);
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    assertEquals(expected, collector.getFirstRecord());
+    
+    // test that preserveExisting = true preserves the existing value
+    collector.reset();
+    record = new Record();
+    record.put("myhost", "myname");
+    expected = record.copy();
+    assertTrue(morphline.process(record));
+    assertEquals(expected, collector.getFirstRecord());    
   }
 
   @Test
@@ -561,7 +631,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     
     // verify counters
     boolean foundCounter = false;
-    for (Map.Entry<String, Counter> entry : morphContext.getMetricRegistry().getCounters().entrySet()) {
+    for (Entry<String, Meter> entry : morphContext.getMetricRegistry().getMeters().entrySet()) {
       if (entry.getKey().equals("ReadLine." + Metrics.NUM_RECORDS)) {
         assertEquals(2, entry.getValue().getCount());
         foundCounter = true;
@@ -794,6 +864,47 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testGrokSyslogNgCisco() throws Exception {
+    morphline = createMorphline("test-morphlines/grokSyslogNgCisco");
+    Record record = new Record();
+    String msg = "<179>Jun 10 04:42:51 www.foo.com Jun 10 2013 04:42:51 : %myproduct-3-mysubfacility-251010: " +
+    		"Health probe failed for server 1.2.3.4 on port 8083, connection refused by server";
+    record.put(Fields.MESSAGE, msg);
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put(Fields.MESSAGE, msg);
+    expected.put("cisco_message_code", "%myproduct-3-mysubfacility-251010");
+    expected.put("cisco_product", "myproduct");
+    expected.put("cisco_level", "3");
+    expected.put("cisco_subfacility", "mysubfacility");
+    expected.put("cisco_message_id", "251010");
+    expected.put("syslog_message", "%myproduct-3-mysubfacility-251010: Health probe failed for server 1.2.3.4 " +
+    		"on port 8083, connection refused by server");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertNotSame(record, collector.getRecords().get(0));      
+  }
+  
+  public void testGrokSyslogNgCiscoWithoutSubFacility() throws Exception {
+    morphline = createMorphline("test-morphlines/grokSyslogNgCisco");
+    Record record = new Record();
+    String msg = "<179>Jun 10 04:42:51 www.foo.com Jun 10 2013 04:42:51 : %myproduct-3-mysubfacility-251010: " +
+        "Health probe failed for server 1.2.3.4 on port 8083, connection refused by server";
+    record.put(Fields.MESSAGE, msg);
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put(Fields.MESSAGE, msg);
+    expected.put("cisco_message_code", "%myproduct-3-251010");
+    expected.put("cisco_product", "myproduct");
+    expected.put("cisco_level", "3");
+//    expected.put("cisco_subfacility", "mysubfacility");
+    expected.put("cisco_message_id", "251010");
+    expected.put("syslog_message", "%myproduct-3-mysubfacility-251010: Health probe failed for server 1.2.3.4 " +
+        "on port 8083, connection refused by server");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertNotSame(record, collector.getRecords().get(0));      
+  }
+  
+  @Test
   public void testConvertTimestamp() throws Exception {
     morphline = createMorphline("test-morphlines/convertTimestamp");    
     Record record = new Record();
@@ -861,6 +972,70 @@ public class MorphlineTest extends AbstractMorphlineTest {
     } catch (MorphlineCompilationException e) {
       assertTrue(e.getMessage().startsWith("Unknown timezone"));
     }
+  }
+  
+  @Test
+  public void testConvertTimestampWithInputFormatUnixTimeInMillis() throws Exception {
+    morphline = createMorphline("test-morphlines/convertTimestampWithInputFormatUnixTimeInMillis");    
+    Record record = new Record();
+    record.put("ts1", "0");
+    record.put("ts1", "1370636123501"); 
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put("ts1", "1970-01-01T00:00:00.000Z");
+    expected.put("ts1", "2013-06-07T20:15:23.501Z");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testConvertTimestampWithInputFormatUnixTimeInSeconds() throws Exception {
+    morphline = createMorphline("test-morphlines/convertTimestampWithInputFormatUnixTimeInSeconds");    
+    Record record = new Record();
+    record.put("ts1", "0");
+    record.put("ts1", "1370636123"); 
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put("ts1", "1970-01-01T00:00:00.000Z");
+    expected.put("ts1", "2013-06-07T20:15:23.000Z");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testConvertTimestampWithOutputFormatUnixTimeInMillis() throws Exception {
+    morphline = createMorphline("test-morphlines/convertTimestampWithOutputFormatUnixTimeInMillis");    
+    Record record = new Record();
+    record.put("ts1", "1970-01-01T00:00:00.000Z");
+    record.put("ts1", "2013-06-07T20:15:23.501Z");
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put("ts1", "0");
+    expected.put("ts1", "1370636123501"); 
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testConvertTimestampWithOutputFormatUnixTimeInSeconds() throws Exception {
+    morphline = createMorphline("test-morphlines/convertTimestampWithOutputFormatUnixTimeInSeconds");    
+    Record record = new Record();
+    record.put("ts1", "1970-01-01T00:00:00.000Z");
+    record.put("ts1", "2013-06-07T20:15:23.501Z");
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put("ts1", "0");
+    expected.put("ts1", "1370636123"); 
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
   }
   
   @Test
