@@ -192,7 +192,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
 
   @Test
   public void testAddLocalHostWithName() throws Exception {
-    morphline = createMorphline("test-morphlines/addLocalHost");
+    morphline = createMorphline("test-morphlines/addLocalHostWithName");
     InetAddress addr = null;
     try {
       addr = InetAddress.getLocalHost();
