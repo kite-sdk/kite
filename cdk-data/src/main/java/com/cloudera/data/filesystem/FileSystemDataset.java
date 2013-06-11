@@ -20,6 +20,7 @@ import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetException;
 import com.cloudera.data.DatasetReader;
 import com.cloudera.data.DatasetWriter;
+import com.cloudera.data.FieldPartitioner;
 import com.cloudera.data.Formats;
 import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
@@ -80,6 +81,10 @@ class FileSystemDataset implements Dataset {
 
   PartitionKey getPartitionKey() {
     return partitionKey;
+  }
+
+  FileSystem getFileSystem() {
+    return fileSystem;
   }
 
   Path getDirectory() {
@@ -248,9 +253,10 @@ class FileSystemDataset implements Dataset {
   private Path toDirectoryName(Path dir, PartitionKey key) {
     Path result = dir;
     for (int i = 0; i < key.getLength(); i++) {
-      String fieldName = partitionStrategy.getFieldPartitioners().get(i)
-        .getName();
-      result = new Path(result, fieldName + "=" + key.get(i));
+      FieldPartitioner fp = partitionStrategy.getFieldPartitioners().get(i);
+      String fieldName = fp.getName();
+      String fieldValue = fp.valueToString(key.get(i));
+      result = new Path(result, fieldName + "=" + fieldValue);
     }
     return result;
   }
@@ -313,7 +319,8 @@ class FileSystemDataset implements Dataset {
       Preconditions
         .checkState(this.fileSystem != null, "No filesystem defined");
 
-      return new FileSystemDataset(fileSystem, directory, name, descriptor,
+      Path absoluteDirectory = fileSystem.makeQualified(directory);
+      return new FileSystemDataset(fileSystem, absoluteDirectory, name, descriptor,
         partitionKey);
     }
   }

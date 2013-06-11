@@ -24,7 +24,6 @@ import com.cloudera.data.Format;
 import com.cloudera.data.Formats;
 import com.cloudera.data.PartitionKey;
 import com.cloudera.data.PartitionStrategy;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import java.io.IOException;
@@ -32,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -221,11 +221,7 @@ public class TestFileSystemDataset {
     writeTestUsers(userPartition, 1);
     Assert.assertTrue("Partitioned directory exists",
       fileSystem.exists(new Path(testDirectory, "username_part=1/email=2")));
-    Assert
-      .assertEquals(
-        1,
-        readTestUsersInPartition(ds, key,
-          "email"));
+    Assert.assertEquals(1, readTestUsersInPartition(ds, key, "email"));
   }
 
   @Test
@@ -269,27 +265,27 @@ public class TestFileSystemDataset {
   }
 
   private int readTestUsersInPartition(FileSystemDataset ds, PartitionKey key,
-    String subpartitionName) {
+      String subpartitionName) {
     int readCount = 0;
     DatasetReader<Record> reader = null;
     try {
       Dataset partition = ds.getPartition(key, false);
       if (subpartitionName != null) {
         List<FieldPartitioner> fieldPartitioners = partition.getDescriptor()
-          .getPartitionStrategy().getFieldPartitioners();
+            .getPartitionStrategy().getFieldPartitioners();
         Assert.assertEquals(1, fieldPartitioners.size());
         Assert.assertEquals(subpartitionName, fieldPartitioners.get(0)
-          .getName());
+            .getName());
       }
       reader = partition.getReader();
       reader.open();
       while (reader.hasNext()) {
-        Record actualRecord = reader.read();
+        GenericData.Record actualRecord = reader.read();
         Assert.assertEquals(actualRecord.toString(), key.get(0), (actualRecord
-          .get("username").hashCode() & Integer.MAX_VALUE) % 2);
+            .get("username").hashCode() & Integer.MAX_VALUE) % 2);
         if (key.getLength() > 1) {
           Assert.assertEquals(key.get(1),
-            (actualRecord.get("email").hashCode() & Integer.MAX_VALUE) % 3);
+              (actualRecord.get("email").hashCode() & Integer.MAX_VALUE) % 3);
         }
         readCount++;
       }

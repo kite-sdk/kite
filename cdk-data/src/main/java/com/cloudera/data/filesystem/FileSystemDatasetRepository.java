@@ -19,8 +19,13 @@ import com.cloudera.data.*;
 import com.cloudera.data.filesystem.impl.Accessor;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.base.Supplier;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.net.URI;
+import java.util.Iterator;
+import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -247,6 +252,68 @@ public class FileSystemDatasetRepository implements DatasetRepository {
     } catch (IOException e) {
       throw new DatasetRepositoryException("Internal failure to test if dataset path exists:" + datasetPath);
     }
+  }
+
+  /**
+   * Get a {@link PartitionKey} corresponding to a partition's filesystem path
+   * represented as a {@link URI}. If the path is not a valid partition,
+   * then {@link IllegalArgumentException} is thrown. Note that the partition does not
+   * have to exist.
+   * @param dataset the filesystem dataset
+   * @param partitionPath a directory path where the partition data is stored
+   * @return a partition key representing the partition at the given path
+   * @since 0.4.0
+   */
+  public static PartitionKey partitionKeyForPath(Dataset dataset, URI partitionPath) {
+    Preconditions.checkState(dataset.getDescriptor().isPartitioned(),
+        "Attempt to get a partition on a non-partitioned dataset (name:%s)",
+        dataset.getName());
+
+    Preconditions.checkArgument(dataset instanceof FileSystemDataset,
+        "Dataset is not a FileSystemDataset");
+    FileSystemDataset fsDataset = (FileSystemDataset) dataset;
+
+    FileSystem fs = fsDataset.getFileSystem();
+    URI partitionUri = fs.makeQualified(new Path(partitionPath)).toUri();
+    URI directoryUri = fsDataset.getDirectory().toUri();
+    URI relativizedUri = directoryUri.relativize(partitionUri);
+
+    if (relativizedUri.equals(partitionUri)) {
+      throw new IllegalArgumentException(String.format("Partition URI %s has different " +
+          "root directory to dataset (directory: %s).", partitionUri, directoryUri));
+    }
+
+    Iterable<String> parts = Splitter.on('/').split(relativizedUri.getPath());
+
+    PartitionStrategy partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
+    List<FieldPartitioner> fieldPartitioners = partitionStrategy.getFieldPartitioners();
+    if (Iterables.size(parts) > fieldPartitioners.size()) {
+      throw new IllegalArgumentException(String.format("Too many partition directories " +
+          "for %s (%s), expecting %s.", partitionUri, Iterables.size(parts),
+          fieldPartitioners.size()));
+    }
+
+    List<Object> values = Lists.newArrayList();
+    int i = 0;
+    for (String part : parts) {
+      Iterator<String> split = Splitter.on('=').split(part).iterator();
+      String fieldName = split.next();
+      FieldPartitioner fp = fieldPartitioners.get(i++);
+      if (!fieldName.equals(fp.getName())) {
+        throw new IllegalArgumentException(String.format("Unrecognized partition name " +
+            "'%s' in partition %s, expecting '%s'.", fieldName, partitionUri,
+            fp.getName()));
+      }
+      if (!split.hasNext()) {
+        throw new IllegalArgumentException(String.format("Missing partition value for " +
+            "'%s' in partition %s.", fieldName, partitionUri));
+      }
+      String stringValue = split.next();
+      Object value = fp.valueFromString(stringValue);
+      values.add(value);
+    }
+    return com.cloudera.data.impl.Accessor.getDefault().newPartitionKey(
+        values.toArray(new Object[values.size()]));
   }
 
   /**
