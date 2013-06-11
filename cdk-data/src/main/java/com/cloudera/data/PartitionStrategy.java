@@ -327,6 +327,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a partitioner for extracting the year from a timestamp field.
+     * The UTC timezone is assumed.
      *
      * @param sourceName
      *          The entity field name from which to get values to be
@@ -343,6 +344,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a partitioner for extracting the month from a timestamp field.
+     * The UTC timezone is assumed.
      *
      * @param sourceName
      *          The entity field name from which to get values to be
@@ -359,6 +361,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a partitioner for extracting the day from a timestamp field.
+     * The UTC timezone is assumed.
      *
      * @param sourceName
      *          The entity field name from which to get values to be
@@ -375,6 +378,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a partitioner for extracting the hour from a timestamp field.
+     * The UTC timezone is assumed.
      *
      * @param sourceName
      *          The entity field name from which to get values to be
@@ -391,6 +395,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a partitioner for extracting the minute from a timestamp field.
+     * The UTC timezone is assumed.
      *
      * @param sourceName
      *          The entity field name from which to get values to be

@@ -19,11 +19,13 @@ import com.cloudera.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import java.util.Calendar;
+import java.util.TimeZone;
 import javax.annotation.Nonnull;
 
 /**
  * A {@link FieldPartitioner} that extracts the value of a {@link Calendar} field,
- * such as {@link Calendar#YEAR}. See subclasses for convenient classes,
+ * such as {@link Calendar#YEAR}. The UTC timezone is assumed.
+ * See subclasses for convenience classes,
  * e.g. {@link YearFieldPartitioner}. Note that we don't use
  * {@link java.text.SimpleDateFormat} patterns since we want to keep the type information
  * (values are ints).
@@ -37,7 +39,7 @@ class CalendarFieldPartitioner extends FieldPartitioner {
   public CalendarFieldPartitioner(String sourceName, String name,
       int calendarField, int cardinality) {
     super(sourceName, name, cardinality);
-    this.cal = Calendar.getInstance();
+    this.cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     this.calendarField = calendarField;
   }
 
