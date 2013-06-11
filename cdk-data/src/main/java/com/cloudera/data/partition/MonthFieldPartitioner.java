@@ -16,13 +16,19 @@
 package com.cloudera.data.partition;
 
 import com.google.common.annotations.Beta;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import javax.annotation.Nonnull;
 
 @Beta
 public class MonthFieldPartitioner extends CalendarFieldPartitioner {
+  private final NumberFormat format;
+
   public MonthFieldPartitioner(String sourceName, String name) {
     super(sourceName, name, Calendar.MONTH, 12);
+    format = NumberFormat.getIntegerInstance();
+    format.setMinimumIntegerDigits(2);
+    format.setMaximumIntegerDigits(2);
   }
 
   @Override
@@ -30,5 +36,10 @@ public class MonthFieldPartitioner extends CalendarFieldPartitioner {
     Long timestamp = (Long) value;
     cal.setTimeInMillis(timestamp);
     return cal.get(calendarField) + 1; // Calendar month is 0-based
+  }
+
+  @Override
+  public String valueToString(Object value) {
+    return format.format(value);
   }
 }

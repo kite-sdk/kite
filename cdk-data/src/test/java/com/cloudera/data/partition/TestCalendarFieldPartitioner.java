@@ -15,23 +15,14 @@
  */
 package com.cloudera.data.partition;
 
-import com.google.common.annotations.Beta;
-import java.text.NumberFormat;
-import java.util.Calendar;
+import junit.framework.Assert;
+import org.junit.Test;
 
-@Beta
-public class MinuteFieldPartitioner extends CalendarFieldPartitioner {
-  private final NumberFormat format;
+public class TestCalendarFieldPartitioner {
 
-  public MinuteFieldPartitioner(String sourceName, String name) {
-    super(sourceName, name, Calendar.MINUTE, 60);
-    format = NumberFormat.getIntegerInstance();
-    format.setMinimumIntegerDigits(2);
-    format.setMaximumIntegerDigits(2);
-  }
-
-  @Override
-  public String valueToString(Object value) {
-    return format.format(value);
+  @Test
+  public void testValueToString() {
+    Assert.assertEquals("01",
+        new DayOfMonthFieldPartitioner("day", "dayPartition").valueToString(1));
   }
 }

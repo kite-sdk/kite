@@ -16,11 +16,22 @@
 package com.cloudera.data.partition;
 
 import com.google.common.annotations.Beta;
+import java.text.NumberFormat;
 import java.util.Calendar;
 
 @Beta
 public class DayOfMonthFieldPartitioner extends CalendarFieldPartitioner {
+  private final NumberFormat format;
+
   public DayOfMonthFieldPartitioner(String sourceName, String name) {
     super(sourceName, name, Calendar.DAY_OF_MONTH, 31);
+    format = NumberFormat.getIntegerInstance();
+    format.setMinimumIntegerDigits(2);
+    format.setMaximumIntegerDigits(2);
+  }
+
+  @Override
+  public String valueToString(Object value) {
+    return format.format(value);
   }
 }

@@ -96,4 +96,16 @@ public abstract class FieldPartitioner implements Function<Object, Object> {
    */
   public abstract Object valueFromString(String stringValue);
 
+  /**
+   * <p>
+   * Retrieve the value for the field formatted as a {@link String}. By default,
+   * this is the object's {@link Object#toString()} representation,
+   * but some {@link FieldPartitioner}s may choose to provide a different representation.
+   * </p>
+   * @since 0.4.0
+   */
+  public String valueToString(Object value) {
+    return  value.toString();
+  }
+
 }

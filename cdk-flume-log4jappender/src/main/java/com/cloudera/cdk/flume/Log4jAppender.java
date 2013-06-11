@@ -85,7 +85,7 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
       key = partitionStrategy.partitionKeyForEntity(message, key);
       int i = 0;
       for (FieldPartitioner fp : partitionStrategy.getFieldPartitioners()) {
-        hdrs.put(PARTITION_PREFIX + fp.getName(), key.get(i++).toString());
+        hdrs.put(PARTITION_PREFIX + fp.getName(), fp.valueToString(key.get(i++)));
       }
     }
   }
