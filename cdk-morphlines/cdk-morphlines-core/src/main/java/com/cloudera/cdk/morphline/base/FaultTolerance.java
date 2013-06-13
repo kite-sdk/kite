@@ -51,20 +51,23 @@ public final class FaultTolerance implements ExceptionHandler {
     this(isProductionMode, isIgnoringRecoverableExceptions, null);
   }
   
-  public FaultTolerance(boolean isProductionMode, boolean isIgnoringRecoverableExceptions, String classesStr) {
+  public FaultTolerance(boolean isProductionMode, boolean isIgnoringRecoverableExceptions, 
+      String recoverableExceptionClasses) {
+    
     this.isProductionMode = isProductionMode;
     this.isIgnoringRecoverableExceptions = isIgnoringRecoverableExceptions;
-    if (classesStr != null) {
-      classesStr = classesStr.trim();
-      if (classesStr.length() == 0) {
-        classesStr = null;
+    
+    if (recoverableExceptionClasses != null) {
+      recoverableExceptionClasses = recoverableExceptionClasses.trim();
+      if (recoverableExceptionClasses.length() == 0) {
+        recoverableExceptionClasses = null;
       }
     }
     String[] classes;
-    if (classesStr == null) {
+    if (recoverableExceptionClasses == null) {
       classes = new String[0];
     } else {
-      classes = classesStr.split(",");
+      classes = recoverableExceptionClasses.split(",");
     }
     clazzes = new Class[classes.length];
     for (int i = 0; i < classes.length; i++) {
