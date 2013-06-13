@@ -165,7 +165,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     assertSame(record, collector.getFirstRecord());
     long actual = ((Long) record.getFirstValue("ts")).longValue();
     assertTrue(actual >= now);
-    assertTrue(actual <= now + 5000);
+    assertTrue(actual <= now + 1000);
     
     // test that preserveExisting = true preserves the existing timestamp
     collector.reset();
@@ -173,8 +173,8 @@ public class MorphlineTest extends AbstractMorphlineTest {
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(record));
     assertSame(record, collector.getFirstRecord());
-    actual = ((Long) record.getFirstValue("ts")).longValue();
-    assertEquals(now, actual);
+    long actual2 = ((Long) record.getFirstValue("ts")).longValue();
+    assertEquals(actual, actual2);
   }
 
   @Test
