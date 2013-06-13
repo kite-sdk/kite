@@ -122,7 +122,7 @@ public final class Compiler {
    */
   public Command compile(Config morphlineConfig, MorphlineContext morphlineContext, Command finalChild) {
     if (finalChild == null) {
-      finalChild = new DropRecordBuilder().build(null, null,  null, morphlineContext);
+      finalChild = new DropRecordBuilder().build(null, null, null, morphlineContext);
     }
     return new PipeBuilder().build(morphlineConfig, null, finalChild, morphlineContext);
   }

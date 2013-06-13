@@ -165,7 +165,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     assertSame(record, collector.getFirstRecord());
     long actual = ((Long) record.getFirstValue("ts")).longValue();
     assertTrue(actual >= now);
-    assertTrue(actual <= now + 1000);
+    assertTrue(actual <= now + 5000);
     
     // test that preserveExisting = true preserves the existing timestamp
     collector.reset();
