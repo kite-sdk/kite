@@ -52,33 +52,13 @@ public final class FaultTolerance implements ExceptionHandler {
   }
   
   public FaultTolerance(boolean isProductionMode, boolean isIgnoringRecoverableExceptions, 
-      String recoverableExceptionClasses) {
+      String recoverableExceptionClassNames) {
     
     this.isProductionMode = isProductionMode;
-    this.isIgnoringRecoverableExceptions = isIgnoringRecoverableExceptions;
-    
-    if (recoverableExceptionClasses != null) {
-      recoverableExceptionClasses = recoverableExceptionClasses.trim();
-      if (recoverableExceptionClasses.length() == 0) {
-        recoverableExceptionClasses = null;
-      }
-    }
-    String[] classes;
-    if (recoverableExceptionClasses == null) {
-      classes = new String[0];
-    } else {
-      classes = recoverableExceptionClasses.split(",");
-    }
-    clazzes = new Class[classes.length];
-    for (int i = 0; i < classes.length; i++) {
-      try {
-        clazzes[i] = Class.forName(classes[i].trim());
-      } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
-      }
-    }
+    this.isIgnoringRecoverableExceptions = isIgnoringRecoverableExceptions;    
+    this.clazzes = parseRecoverableExceptionClassNames(recoverableExceptionClassNames);
   }
-  
+
   @Override
   public void handleException(Throwable t, Record record) {
     if (t instanceof Error) {
@@ -119,5 +99,28 @@ public final class FaultTolerance implements ExceptionHandler {
     } 
 
   }
-    
+   
+  /* Input is a list of comma separated fully qualified class names */
+  private Class[] parseRecoverableExceptionClassNames(String recoverableExceptionClassNames) {
+    if (recoverableExceptionClassNames != null) {
+      recoverableExceptionClassNames = recoverableExceptionClassNames.trim();
+      if (recoverableExceptionClassNames.length() == 0) {
+        recoverableExceptionClassNames = null;
+      }
+    }
+    if (recoverableExceptionClassNames == null) {
+      return new Class[0];
+    } 
+    String[] classNames = recoverableExceptionClassNames.split(",");
+    Class[] classes = new Class[classNames.length];
+    for (int i = 0; i < classNames.length; i++) {
+      try {
+        classes[i] = Class.forName(classNames[i].trim());
+      } catch (ClassNotFoundException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return classes;
+  }
+  
 }

@@ -193,17 +193,17 @@ public final class GrokBuilder implements CommandBuilder {
     }
     
     @Override
-    protected boolean doProcess(Record record) {
+    protected boolean doProcess(Record inputRecord) {
       Record outputRecord;
       Timer.Context timerContext = elapsedTime.time();
       try {
-        outputRecord = ((extractInPlace || !extract) ? record : record.copy());
+        outputRecord = ((extractInPlace || !extract) ? inputRecord : inputRecord.copy());
         if (extractInPlace) {
           // Ensure that we mutate the record inplace only if *all* expressions match.
           // To ensure this we potentially run doMatch() twice: the first time to check, the second
           // time to mutate
           if (regexes.size() > 1 || numRequiredMatches != NumRequiredMatches.atLeastOnce) {
-            if (!doMatch(record, outputRecord, false)) {
+            if (!doMatch(inputRecord, outputRecord, false)) {
               return false;
             }
           } else {
@@ -213,7 +213,7 @@ public final class GrokBuilder implements CommandBuilder {
             // so there's really no need to run doMatch() twice.
           }
         }
-        if (!doMatch(record, outputRecord, extract)) {
+        if (!doMatch(inputRecord, outputRecord, extract)) {
           return false;
         }
       } finally {
@@ -222,10 +222,10 @@ public final class GrokBuilder implements CommandBuilder {
       return super.doProcess(outputRecord);
     }
 
-    private boolean doMatch(Record record, Record outputRecord, boolean doExtract) {
+    private boolean doMatch(Record inputRecord, Record outputRecord, boolean doExtract) {
       for (Map.Entry<String, Pattern> regexEntry : regexes.entrySet()) {
         Pattern pattern = regexEntry.getValue();
-        List values = record.get(regexEntry.getKey());
+        List values = inputRecord.get(regexEntry.getKey());
         int todo = values.size();
         int minMatches = 1;
         int maxMatches = Integer.MAX_VALUE;

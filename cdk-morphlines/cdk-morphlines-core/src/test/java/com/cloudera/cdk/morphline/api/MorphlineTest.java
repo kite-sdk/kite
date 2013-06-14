@@ -171,6 +171,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     collector.reset();
     startSession();
     assertEquals(1, collector.getNumStartEvents());
+    Thread.sleep(1);
     assertTrue(morphline.process(record));
     assertSame(record, collector.getFirstRecord());
     long actual2 = ((Long) record.getFirstValue("ts")).longValue();
@@ -180,27 +181,27 @@ public class MorphlineTest extends AbstractMorphlineTest {
   @Test
   public void testAddLocalHost() throws Exception {
     morphline = createMorphline("test-morphlines/addLocalHost");  
-    InetAddress addr = null;
+    InetAddress localHost;
     try {
-      addr = InetAddress.getLocalHost();
+      localHost = InetAddress.getLocalHost();
     } catch (UnknownHostException e) {
       return;
     }
     
-    testAddLocalHostInternal(addr.getHostAddress());
+    testAddLocalHostInternal(localHost.getHostAddress());
   }
 
   @Test
   public void testAddLocalHostWithName() throws Exception {
     morphline = createMorphline("test-morphlines/addLocalHostWithName");
-    InetAddress addr = null;
+    InetAddress localHost;
     try {
-      addr = InetAddress.getLocalHost();
+      localHost = InetAddress.getLocalHost();
     } catch (UnknownHostException e) {
       return;
     }
     
-    testAddLocalHostInternal(addr.getCanonicalHostName());
+    testAddLocalHostInternal(localHost.getCanonicalHostName());
   }
 
   private void testAddLocalHostInternal(String name) throws Exception {
