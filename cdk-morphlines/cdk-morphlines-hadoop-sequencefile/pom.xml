@@ -24,7 +24,7 @@
   <groupId>com.cloudera.search</groupId>
   <artifactId>cdk-morphlines-hadoop-sequencefile</artifactId>
   <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
-  <name>CDK Morphlines Sequence File</name>
+  <name>CDK Morphlines Hadoop Sequence File</name>
 
   <properties>
     <hadoop.version>${cdh.mr1.version}</hadoop.version>
