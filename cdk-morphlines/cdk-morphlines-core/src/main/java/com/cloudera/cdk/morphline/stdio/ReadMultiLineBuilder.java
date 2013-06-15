@@ -151,7 +151,7 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
       removeAttachments(outputRecord);
       outputRecord.replaceValues(Fields.MESSAGE, lines);
       timerContext.stop();
-      numRecordsMeter.mark();
+      incrementNumRecords();
       
       // pass record to next command in chain:
       return getChild().process(outputRecord);

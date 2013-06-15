@@ -41,7 +41,7 @@ import com.typesafe.config.Config;
  */
 public abstract class AbstractParser extends AbstractCommand {
 
-  protected final Meter numRecordsMeter;
+  private final Meter numRecordsMeter;
   private Set<MediaType> supportedMimeTypes = null;
 
   public static final String SUPPORTED_MIME_TYPES = "supportedMimeTypes";
@@ -88,6 +88,10 @@ public abstract class AbstractParser extends AbstractCommand {
   
   protected abstract boolean doProcess(Record record, InputStream stream) throws IOException;
 
+  protected void incrementNumRecords() {
+    numRecordsMeter.mark();
+  }
+  
   private boolean isMimeTypeSupported(String mediaTypeStr, Record record) {
     if (supportedMimeTypes == null) {
       return true;

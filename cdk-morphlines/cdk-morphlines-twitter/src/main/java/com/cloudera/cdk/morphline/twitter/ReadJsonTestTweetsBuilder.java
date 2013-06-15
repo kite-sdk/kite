@@ -153,7 +153,7 @@ public final class ReadJsonTestTweetsBuilder implements CommandBuilder {
           tryAddString(doc, "user_screen_name", user.get("screen_name"));
           tryAddString(doc, "user_name", user.get("name"));
           
-          numRecordsMeter.mark();
+          incrementNumRecords();
           LOG.debug("tweetdoc: {}", doc);
           if (!getChild().process(doc)) {
             return false;
