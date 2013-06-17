@@ -43,7 +43,14 @@
 
     <dependency>
       <groupId>com.cloudera.search</groupId>
-      <artifactId>cdk-morphlines-tika</artifactId>
+      <artifactId>cdk-morphlines-tika-mime</artifactId>
+      <version>${project.parent.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.cloudera.search</groupId>
+      <artifactId>cdk-morphlines-tika-decompress</artifactId>
       <version>${project.parent.version}</version>
       <scope>test</scope>
     </dependency>

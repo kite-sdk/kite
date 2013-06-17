@@ -14,7 +14,7 @@
  limitations under the License. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
- 
+
   <parent>
     <groupId>com.cloudera.search</groupId>
     <artifactId>cdk-morphlines</artifactId>
@@ -22,9 +22,9 @@
   </parent>
 
   <groupId>com.cloudera.search</groupId>
-  <artifactId>cdk-morphlines-tika</artifactId>
+  <artifactId>cdk-morphlines-tika-decompress</artifactId>
   <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
-  <name>CDK Morphlines Tika</name>
+  <name>CDK Morphlines Tika Decompress</name>
 
   <dependencies>
     <dependency>
@@ -36,15 +36,15 @@
     <dependency> <!-- see http://tika.apache.org -->
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-core</artifactId>
-      <version>${tika.version}</version>      
+      <version>${tika.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.4.1</version>      
+      <version>1.4.1</version>
     </dependency>
-    
+
     <dependency>
       <groupId>com.cloudera.search</groupId>
       <artifactId>cdk-morphlines-core</artifactId>
@@ -84,7 +84,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>          
-    </plugins>  
+      </plugin>
+    </plugins>
   </build>
 </project>
