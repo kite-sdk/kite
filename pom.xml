@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+~ Copyright 2013 Cloudera Inc.
+~
+~ Licensed under the Apache License, Version 2.0 (the "License");
+~ you may not use this file except in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~ http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing, software
+~ distributed under the License is distributed on an "AS IS" BASIS,
+~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~ See the License for the specific language governing permissions and
+~ limitations under the License.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
@@ -25,7 +40,7 @@
 
   <developers>
     <developer>
-      <id>twhite</id>
+      <id>tomwhite</id>
       <name>Tom White</name>
       <organization>Cloudera</organization>
     </developer>
@@ -147,10 +162,51 @@
         <artifactId>maven-site-plugin</artifactId>
         <version>${vers.maven-site}</version>
         <configuration>
-          <generateReports>false</generateReports>
+          <generateReports>true</generateReports>
           <inputEncoding>UTF-8</inputEncoding>
           <outputEncoding>UTF-8</outputEncoding>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-jdiff-xml</id>
+            <phase>site</phase>
+            <goals>
+              <goal>aggregate</goal>
+            </goals>
+            <configuration>
+              <doclet>jdiff.JDiff</doclet>
+              <docletPath>${project.basedir}/lib/jdiff.jar</docletPath>
+              <additionalparam>
+                -XDignore.symbol.file -apiname 'CDK ${project.version}'
+              </additionalparam>
+              <useStandardDocletOptions>false</useStandardDocletOptions>
+              <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+              <destDir>jdiff</destDir>
+              <excludePackageNames>com.cloudera.data.event,*.impl,org.apache.*</excludePackageNames>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-jdiff-site-report</id>
+            <phase>site</phase>
+            <goals>
+              <goal>aggregate</goal>
+            </goals>
+            <configuration>
+              <doclet>jdiff.JDiff</doclet>
+              <docletPath>${project.basedir}/lib/jdiff.jar:${project.basedir}/lib/xerces.jar</docletPath>
+              <additionalparam>
+                -XDignore.symbol.file -oldapi 'CDK ${previous.project.version}' -newapi 'CDK ${project.version}' -oldapidir '${project.basedir}/src/jdiff' -newapidir '${project.reporting.outputDirectory}/jdiff' -javadocnew ../../apidocs/ -d ${project.reporting.outputDirectory}/jdiff
+              </additionalparam>
+              <useStandardDocletOptions>false</useStandardDocletOptions>
+              <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+              <destDir>jdiff</destDir>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
 
@@ -185,10 +241,15 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.4</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${vers.maven-javadoc}</version>
           <configuration>
-            <excludePackageNames>com.cloudera.data.event,*.impl</excludePackageNames>
+            <excludePackageNames>com.cloudera.data.event,*.impl,org.apache.*</excludePackageNames>
             <links>
               <link>http://avro.apache.org/docs/${vers.avro}/api/java/</link>
               <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
@@ -312,6 +373,72 @@
     </pluginManagement>
   </build>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>${vers.maven-project-info-reports}</version>
+        <configuration>
+          <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <inherited>false</inherited>
+            <reports>
+              <report>index</report>
+              <report>summary</report>
+              <report>license</report>
+              <report>project-team</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${vers.maven-javadoc}</version>
+        <configuration>
+          <excludePackageNames>com.cloudera.data.event,*.impl,org.apache.*</excludePackageNames>
+          <groups>
+            <group>
+              <title>Core</title>
+              <packages>com.cloudera.data:com.cloudera.data.filesystem:com.cloudera.data.partition</packages>
+            </group>
+            <group>
+              <title>Crunch</title>
+              <packages>com.cloudera.data.crunch</packages>
+            </group>
+            <group>
+              <title>Flume</title>
+              <packages>com.cloudera.cdk.flume</packages>
+            </group>
+            <group>
+              <title>HCatalog</title>
+              <packages>com.cloudera.data.hcatalog</packages>
+            </group>
+            <group>
+              <title>Tools</title>
+              <packages>com.cloudera.cdk.tools</packages>
+            </group>
+          </groups>
+          <links>
+            <link>http://avro.apache.org/docs/${vers.avro}/api/java/</link>
+            <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
+            <link>http://archive.cloudera.com/cdh4/cdh/4/hadoop-${vers.hadoop}/api/</link>
+          </links>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>aggregate</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -385,6 +512,12 @@
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-hdfs</artifactId>
         <version>${vers.hadoop}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-hdfs</artifactId>
+        <version>${vers.hadoop}</version>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
@@ -392,13 +525,11 @@
         <groupId>org.apache.hcatalog</groupId>
         <artifactId>hcatalog-core</artifactId>
         <version>${vers.hcatalog}</version>
-        <optional>true</optional>
       </dependency>
       <dependency> <!-- force HCatalog to use same (earlier) version of Derby as Hive -->
         <groupId>org.apache.derby</groupId>
         <artifactId>derby</artifactId>
         <version>10.4.2.0</version>
-        <optional>true</optional>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -409,7 +540,6 @@
         <groupId>org.apache.crunch</groupId>
         <artifactId>crunch-core</artifactId>
         <version>${vers.crunch}</version>
-        <optional>true</optional>
       </dependency>
 
       <dependency>

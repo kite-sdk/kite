@@ -18,16 +18,7 @@
 
   <body>
 
-    <menu name="CDK Data Module" inherit="top">
-      <item name="Home" href="index.html"/>
-      <item name="Reference Guide" href="guide.html"/>
-      <item name="Design" href="design.html"/>
-      <item name="Known Limitations" href="limitations.html"/>
-      <item name="FAQ" href="faq.html"/>
-    </menu>
-
-    <menu ref="reports" name="CDK Data Reports"/>
-    <menu ref="modules" name="CDK Data Modules"/>
+    <menu ref="reports" name="CDK Data Crunch Reports"/>
 
   </body>
 

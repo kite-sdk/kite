@@ -35,8 +35,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 
-import static java.util.Locale.ENGLISH;
-
 /**
  * <p>
  * The strategy used to determine how a dataset is partitioned.

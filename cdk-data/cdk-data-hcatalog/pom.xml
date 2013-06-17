@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2013 Cloudera Inc.
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~ http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
+~ Copyright 2013 Cloudera Inc.
+~
+~ Licensed under the Apache License, Version 2.0 (the "License");
+~ you may not use this file except in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~ http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing, software
+~ distributed under the License is distributed on an "AS IS" BASIS,
+~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~ See the License for the specific language governing permissions and
+~ limitations under the License.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>cdk-tools</artifactId>
+  <artifactId>cdk-data-hcatalog</artifactId>
 
   <parent>
     <groupId>com.cloudera</groupId>
-    <artifactId>cdk-parent</artifactId>
+    <artifactId>cdk-data</artifactId>
     <version>0.3.1-SNAPSHOT</version>
   </parent>
 
-  <name>CDK Tools Module</name>
+  <name>CDK Data HCatalog Module</name>
   <description>
-    The CDK Tools module provides command-line tools and APIs for performing
-    common tasks with CDK.
+    The CDK Data HCatalog module provides integration with HCatalog (and Hive) for CDK
+    datasets.
   </description>
 
   <build>
@@ -42,19 +42,19 @@
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <skip>true</skip> <!-- jdiff is aggregated by parent -->
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <generateReports>true</generateReports>
-        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -68,19 +68,14 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>${vers.maven-project-info-reports}</version>
-        <configuration>
-          <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-        </configuration>
         <reportSets>
           <reportSet>
+            <inherited>false</inherited>
             <reports>
               <report>index</report>
               <report>summary</report>
               <report>dependency-info</report>
               <report>dependencies</report>
-              <report>license</report>
-              <report>project-team</report>
             </reports>
           </reportSet>
         </reportSets>
@@ -88,14 +83,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${vers.maven-javadoc}</version>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>javadoc</report>
-            </reports>
-          </reportSet>
-        </reportSets>
+        <configuration>
+          <skip>true</skip> <!-- javadoc is aggregated by parent -->
+        </configuration>
       </plugin>
     </plugins>
   </reporting>
@@ -106,6 +96,15 @@
       <artifactId>cdk-data-core</artifactId>
       <version>0.3.1-SNAPSHOT</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.cloudera</groupId>
+      <artifactId>cdk-data-core</artifactId>
+      <version>0.3.1-SNAPSHOT</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
@@ -133,16 +132,43 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-hdfs</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-mapreduce-client-app</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-yarn-api</artifactId>
+        </exclusion>
+        <!-- Parquet uses MR APIs at runtime, even when not running as a MR job -->
+        <!--
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-mapreduce-client-core</artifactId>
+        </exclusion>
+        -->
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
+
     <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-common</artifactId>
+      <groupId>org.apache.hcatalog</groupId>
+      <artifactId>hcatalog-core</artifactId>
     </dependency>
+
     <dependency>
-      <groupId>org.apache.crunch</groupId>
-      <artifactId>crunch-core</artifactId>
-      <optional>true</optional>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
     </dependency>
+
   </dependencies>
 
 </project>

@@ -19,7 +19,6 @@ import com.cloudera.data.Dataset;
 import com.cloudera.data.DatasetDescriptor;
 import com.cloudera.data.DatasetRepository;
 import com.cloudera.data.DatasetRepositoryException;
-import com.cloudera.data.MetadataProvider;
 import com.cloudera.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.base.Supplier;
 import java.io.IOException;

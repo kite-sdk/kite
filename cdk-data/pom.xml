@@ -20,6 +20,13 @@
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>cdk-data</artifactId>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>cdk-data-core</module>
+    <module>cdk-data-crunch</module>
+    <module>cdk-data-hcatalog</module>
+  </modules>
 
   <parent>
     <groupId>com.cloudera</groupId>
@@ -36,100 +43,22 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.avro</groupId>
-        <artifactId>avro-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-jdiff-xml</id>
-            <phase>site</phase>
-            <goals>
-              <goal>javadoc</goal>
-            </goals>
-            <configuration>
-              <doclet>jdiff.JDiff</doclet>
-              <docletPath>${project.basedir}/lib/jdiff.jar</docletPath>
-              <additionalparam>
-                -XDignore.symbol.file -apiname 'CDK ${project.version}'
-              </additionalparam>
-              <useStandardDocletOptions>false</useStandardDocletOptions>
-              <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
-              <destDir>jdiff</destDir>
-            </configuration>
-          </execution>
-          <execution>
-            <id>generate-jdiff-site-report</id>
-            <phase>site</phase>
-            <goals>
-              <goal>javadoc</goal>
-            </goals>
-            <configuration>
-              <doclet>jdiff.JDiff</doclet>
-              <docletPath>${project.basedir}/lib/jdiff.jar:${project.basedir}/lib/xerces.jar</docletPath>
-              <additionalparam>
-                -XDignore.symbol.file -oldapi 'CDK ${previous.project.version}' -newapi 'CDK ${project.version}' -oldapidir '${project.basedir}/src/jdiff' -newapidir '${project.reporting.outputDirectory}/jdiff' -javadocnew ../../apidocs/ -d ${project.reporting.outputDirectory}/jdiff
-              </additionalparam>
-              <useStandardDocletOptions>false</useStandardDocletOptions>
-              <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
-              <destDir>jdiff</destDir>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-      <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <configuration>
-          <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <generateReports>true</generateReports>
-        </configuration>
       </plugin>
     </plugins>
   </build>
 
-  <!--
-  Seems like these reporting plugins aren't properly inherited from the parent
-  pom's pluginManagement. The docs say it's supposed to work.
-  -->
   <reporting>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>${vers.maven-project-info-reports}</version>
-        <configuration>
-          <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-        </configuration>
         <reportSets>
           <reportSet>
+            <inherited>false</inherited>
             <reports>
               <report>index</report>
-              <report>summary</report>
-              <report>dependency-info</report>
-              <report>dependencies</report>
-              <report>license</report>
-              <report>project-team</report>
             </reports>
           </reportSet>
         </reportSets>
@@ -137,130 +66,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${vers.maven-javadoc}</version>
         <configuration>
-          <excludePackageNames>com.cloudera.data.event,*.impl</excludePackageNames>
-          <links>
-            <link>http://avro.apache.org/docs/${vers.avro}/api/java/</link>
-            <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
-            <link>http://archive.cloudera.com/cdh4/cdh/4/hadoop-${vers.hadoop}/api/</link>
-          </links>
+          <skip>true</skip> <!-- javadoc is aggregated by parent -->
         </configuration>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>javadoc</report>
-            </reports>
-          </reportSet>
-        </reportSets>
       </plugin>
     </plugins>
   </reporting>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>annotations</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>parquet-avro</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-hdfs</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-app</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-yarn-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-common</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-hdfs</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hcatalog</groupId>
-      <artifactId>hcatalog-core</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-jexl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.crunch</groupId>
-      <artifactId>crunch-core</artifactId>
-      <optional>true</optional>
-    </dependency>
-
-    <!-- needed by Crunch, but Parquet specifies 1.2 -->
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.4</version>
-    </dependency>
-    <!-- missing from Hadoop, and needed for local job runner -->
-    <dependency>
-    <groupId>commons-httpclient</groupId>
-    <artifactId>commons-httpclient</artifactId>
-    <version>3.1</version>
-    <scope>test</scope>
-  </dependency>
-  </dependencies>
 
 </project>

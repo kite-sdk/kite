@@ -12,7 +12,7 @@
   <dependencies>
     <dependency>
       <groupId>com.cloudera</groupId>
-      <artifactId>cdk-data</artifactId>
+      <artifactId>cdk-data-core</artifactId>
       <version>0.3.1-SNAPSHOT</version>
     </dependency>
     <dependency>
