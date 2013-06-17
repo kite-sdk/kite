@@ -22,22 +22,21 @@
   </parent>
 
   <groupId>com.cloudera.search</groupId>
-  <artifactId>cdk-morphlines-twitter</artifactId>
+  <artifactId>cdk-morphlines-tika-core</artifactId>
   <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
-  <name>CDK Morphlines Twitter</name>
+  <name>CDK Morphlines Tika Core</name>
 
   <dependencies>
-
-    <dependency> <!-- see http://wiki.fasterxml.com/JacksonHome -->
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-
     <dependency>
       <groupId>com.cloudera.search</groupId>
       <artifactId>cdk-morphlines-core</artifactId>
       <version>${project.parent.version}</version>
+    </dependency>
+
+    <dependency> <!-- see http://tika.apache.org -->
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+      <version>${tika.version}</version>
     </dependency>
 
     <dependency>
@@ -55,13 +54,6 @@
       <version>${junit.version}</version>
     </dependency>
 
-    <dependency> <!-- see http://www.slf4j.org -->
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
 
   <build>
@@ -77,7 +69,7 @@
             <configuration>
               <target>
                 <copy todir="${project.build.directory}/test-classes">
-                  <fileset dir="${basedir}/../cdk-morphlines-solr-core/src/test/resources"/>
+                  <fileset dir="${basedir}/../cdk-morphlines-core/src/test/resources"/>
                 </copy>
               </target>
             </configuration>
@@ -87,7 +79,6 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 </project>

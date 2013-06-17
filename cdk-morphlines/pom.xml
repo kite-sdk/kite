@@ -30,12 +30,12 @@
   <modules>
     <module>cdk-morphlines-core</module>
     <module>cdk-morphlines-avro</module>
-    <module>cdk-morphlines-tika-mime</module>
+    <module>cdk-morphlines-tika-core</module>
     <module>cdk-morphlines-tika-decompress</module>
     <module>cdk-morphlines-twitter</module>
     <module>cdk-morphlines-hadoop-sequencefile</module>
-    <module>cdk-morphlines-solr</module>
-    <module>cdk-morphlines-solrcell</module>
+    <module>cdk-morphlines-solr-core</module>
+    <module>cdk-morphlines-solr-cell</module>
   </modules>
 
   <build>
