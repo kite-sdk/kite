@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CloudSolrServer;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrServer;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
@@ -95,7 +96,11 @@ public class SolrServerDocumentLoader implements DocumentLoader {
   @Override
   public UpdateResponse rollbackTransaction() throws SolrServerException, IOException {
     LOGGER.trace("rollback");
-    return server.rollback();
+    if (!(server instanceof CloudSolrServer)) {
+      return server.rollback();
+    } else {
+      return new UpdateResponse();
+    }
   }
 
   @Override
