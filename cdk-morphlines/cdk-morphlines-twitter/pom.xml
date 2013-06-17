@@ -77,7 +77,7 @@
             <configuration>
               <target>
                 <copy todir="${project.build.directory}/test-classes">
-                  <fileset dir="${basedir}/../cdk-morphlines-solr-core/src/test/resources"/>
+                  <fileset dir="${basedir}/../cdk-morphlines-core/src/test/resources"/>
                 </copy>
               </target>
             </configuration>
