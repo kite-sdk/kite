@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2013 Cloudera Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.cloudera.search</groupId>
+    <artifactId>cdk-morphlines</artifactId>
+    <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>com.cloudera.search</groupId>
+  <artifactId>cdk-morphlines-solr-core</artifactId>
+  <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
+  <name>CDK Morphlines Solr Core</name>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>com.cloudera.search</groupId>
+      <artifactId>cdk-morphlines-core</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+
+    <dependency> <!-- see http://lucene.apache.org/solr -->
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-test-framework</artifactId>
+      <version>${solr.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency> <!-- see http://lucene.apache.org/solr -->
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-core</artifactId>
+      <version>${solr.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-jdk14</artifactId> <!-- instead use slf4j on top of log4j or logback  -->
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>com.cloudera.search</groupId>
+      <artifactId>cdk-morphlines-core</artifactId>
+      <version>${project.parent.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.cloudera.search</groupId>
+      <artifactId>cdk-morphlines-avro</artifactId>
+      <version>${project.parent.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+      <version>${junit.version}</version>
+    </dependency>
+
+    <dependency> <!-- (required by solrj) see http://www.slf4j.org -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+        <configuration>
+          <argLine>-Dtests.locale=en_us</argLine>
+          <!--<forkMode>always</forkMode>-->
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          <systemPropertyVariables>
+            <solr.expected.version>${solr.expected.version}</solr.expected.version>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>${maven.antrun.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>copy-srctest-env</id>
+            <phase>compile</phase>
+            <configuration>
+              <target>
+                <!-- this sorta helps to stay in sync until we spin-off cdk-morphlines into another repo -->
+                <copy todir="${basedir}/src/test/resources">
+                  <fileset dir="${basedir}/../cdk-morphlines-core/src/test/resources"/>
+                </copy>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+
+          <execution>
+            <id>copy-test-env</id>
+            <phase>process-test-resources</phase>
+            <configuration>
+              <target>
+                <copy todir="${basedir}/../../samples/test-documents">
+                  <fileset dir="${basedir}/src/test/resources/test-documents"/>
+                </copy>
+                <copy todir="${basedir}/../../samples/solr-nrt/test-morphlines">
+                  <fileset dir="${basedir}/src/test/resources/test-morphlines"/>
+                </copy>
+                <copy todir="${basedir}/../../samples/solr-nrt/grok-dictionaries">
+                  <fileset dir="${basedir}/src/test/resources/grok-dictionaries"/>
+                </copy>
+                <copy todir="${basedir}/../../samples/solr-nrt"
+                  file="${basedir}/src/test/resources/custom-mimetypes.xml"
+                />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+</project>
