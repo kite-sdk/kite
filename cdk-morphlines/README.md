@@ -35,7 +35,7 @@ Morphlines manipulate continuous or arbitrarily large streams of records. The da
 described as follows: A record is a set of named fields where each field has an ordered list of one
 or more values. A value can be any Java Object. That is, a record is essentially a hash table where
 each hash table entry contains a String key and a list of Java Objects as values. (The
-implementation uses Guava’s ArrayListMultimap, which is a ListMultimap). Note that a field can have
+implementation uses Guava's ArrayListMultimap, which is a ListMultimap). Note that a field can have
 multiple values and any two records need not use common field names. This flexible data model
 corresponds exactly to the characteristics of the Solr/Lucene data model, meaning a record can be
 seen as a SolrInputDocument. A field with zero values is removed from the record - fields with zero
