@@ -18,6 +18,6 @@
  * and stores data in a Hadoop {@link org.apache.hadoop.fs.FileSystem}.
  */
 @ParametersAreNonnullByDefault
-package com.cloudera.data.hcatalog;
+package com.cloudera.cdk.data.hcatalog;
 
 import javax.annotation.ParametersAreNonnullByDefault;

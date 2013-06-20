@@ -434,7 +434,7 @@
             </group>
             <group>
               <title>HCatalog</title>
-              <packages>com.cloudera.data.hcatalog</packages>
+              <packages>com.cloudera.cdk.data.hcatalog</packages>
             </group>
             <group>
               <title>Tools</title>
