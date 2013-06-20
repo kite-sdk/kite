@@ -12,6 +12,7 @@
     <module>cdk-flume-avro-event-serializer</module>
     <module>cdk-flume-log4jappender</module>
     <module>cdk-tools</module>
+    <module>cdk-morphlines</module>
   </modules>
 
   <name>Cloudera Development Kit</name>
@@ -87,10 +88,11 @@
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.flume>1.3.0-cdh4.2.1</vers.flume>
     <vers.guava>14.0</vers.guava>
-    <vers.hadoop>2.0.0-cdh4.2.1</vers.hadoop>
-    <vers.hcatalog>0.4.0-cdh4.2.1</vers.hcatalog>
+    <vers.hadoop>2.0.0-cdh4.3.0</vers.hadoop>
+    <vers.hcatalog>0.5.0-cdh4.3.0</vers.hcatalog>
     <vers.jexl>2.1.1</vers.jexl>
-    <vers.junit>4.8.2</vers.junit>
+    <vers.compress>1.4.1</vers.compress>
+    <vers.junit>4.10</vers.junit>
     <vers.log4j>1.2.17</vers.log4j>
     <vers.maven-compiler>2.5.1</vers.maven-compiler>
     <vers.maven-javadoc>2.9</vers.maven-javadoc>
@@ -99,9 +101,16 @@
     <vers.maven-site>3.3</vers.maven-site>
     <vers.maven-source>2.2.1</vers.maven-source>
     <vers.maven-surefire>2.14.1</vers.maven-surefire>
+    <vers.maven-antrun>1.7</vers.maven-antrun>
+    <vers.maven-jar>2.3.1</vers.maven-jar>
     <vers.parquet>1.0.0-SNAPSHOT</vers.parquet>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.7.2</vers.slf4j>
+    <vers.codahale.metrics>3.0.0</vers.codahale.metrics>
+    <vers.typesafe.config>1.0.0</vers.typesafe.config>
+    <vers.solr>4.3.0-cdh4.3.0_search0.9.1-SNAPSHOT</vers.solr>
+    <vers.tika>1.3</vers.tika>
+    <vers.jackson>2.2.1</vers.jackson>
 
     <url.cloudera>http://www.cloudera.com</url.cloudera>
     <url.project>http://cloudera.github.com/cdk</url.project>
@@ -275,6 +284,16 @@
           </configuration>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>${vers.maven-antrun}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${vers.maven-jar}</version>
+        </plugin>
+        <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>findbugs-maven-plugin</artifactId>
           <version>${vers.findbugs-plugin}</version>
@@ -322,6 +341,11 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>
+        <version>${vers.slf4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
         <version>${vers.slf4j}</version>
       </dependency>
       <dependency>
@@ -431,6 +455,53 @@
         <groupId>org.apache.flume</groupId>
         <artifactId>flume-ng-configuration</artifactId>
         <version>${vers.flume}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.codahale.metrics</groupId>
+        <artifactId>metrics-core</artifactId>
+        <version>${vers.codahale.metrics}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.typesafe</groupId>
+        <artifactId>config</artifactId>
+        <version>${vers.typesafe.config}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-test-framework</artifactId>
+        <version>${vers.solr}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-cell</artifactId>
+        <version>${vers.solr}</version>
+      </dependency>
+      <dependency> <!-- see http://lucene.apache.org/solr -->
+        <groupId>org.apache.solr</groupId>
+        <artifactId>solr-core</artifactId>
+        <version>${vers.solr}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tika</groupId>
+        <artifactId>tika-xmp</artifactId>
+        <version>${vers.tika}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tika</groupId>
+        <artifactId>tika-core</artifactId>
+        <version>${vers.tika}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>${vers.compress}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${vers.jackson}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
