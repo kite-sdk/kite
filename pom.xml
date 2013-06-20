@@ -511,6 +511,10 @@
       <id>cloudera.repo</id>
       <url>https://repository.cloudera.com/artifactory/libs-release-local</url>
     </repository>
+    <snapshotRepository>
+      <id>cloudera.snapshots.repo</id>
+      <url>https://repository.cloudera.com/artifactory/libs-snapshot-local</url>
+    </snapshotRepository>
     <site>
       <id>cdk.website</id>
       <name>CDK documentation</name>
