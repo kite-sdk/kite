@@ -1,9 +1,0 @@
-{
-  "type": "record",
-  "name": "DatasetDescriptor",
-  "namespace": "com.cloudera.data",
-  "fields": [
-    { "type": [ "string", "null" ], "name": "partitionExpression" },
-    { "type": "string", "name": "schema" }
-  ]
-}
