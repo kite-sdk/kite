@@ -100,7 +100,7 @@ _datasets_, dataset _readers_ and _writers_, and _metadata providers_. Most of
 these objects are interfaces, permitting multiple implementations, each with
 different functionality. Today, there exists an implementation of each of these
 components for the Hadoop FileSystem abstraction, found in the
-`com.cloudera.data.filesystem` package. While, in theory, this means any
+`com.cloudera.cdk.data.filesystem` package. While, in theory, this means any
 implementation of Hadoop's `FileSystem` abstract class is supported by the Data
 module, only the local and HDFS filesystem implementations are tested and
 officially supported. For the remainder of this guide, you can assume the
@@ -122,7 +122,7 @@ with the relational database analogy, a dataset repository is the equivalent of
 a database of tables. Developers may organize datasets into different dataset
 repositories for reasons related to logical grouping, security and access
 control, backup policies, and so forth. A dataset repository is represented by
-instances of the `com.cloudera.data.DatasetRepository` interface in the Data
+instances of the `com.cloudera.cdk.data.DatasetRepository` interface in the Data
 module. An instance of a `DatasetRepository` acts as a factory for datasets,
 supplying methods for creating, loading, and dropping datasets. Each dataset
 belongs to exactly one dataset repository. There's no built in support for
@@ -136,7 +136,7 @@ _DatasetRepository Interface_
     boolean drop(String);
 
 The Data module ships with a `DatasetRepository` implementation
-`com.cloudera.data.filesystem.FileSystemDatasetRepository` built for operating
+`com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository` built for operating
 on datasets stored in a filesystem supported by Hadoop's `FileSystem`
 abstraction. This implementation requires an instance of a Hadoop `FileSystem`,
 a root directory under which datasets will be (or are) stored, and an optional
@@ -189,7 +189,7 @@ for now. We'll cover them later.
 Related to the dataset repository, the _metadata provider_ is a service provider
 interface used to interact with the service that provides dataset metadata
 information to the rest of the Data APIs. The
-`com.cloudera.data.MetadataProvider` interface defines the contract metadata
+`com.cloudera.cdk.data.MetadataProvider` interface defines the contract metadata
 services must provide to the library, and specifically, the `DatasetRepository`.
 
 _MetadataProvider Interface_
@@ -227,7 +227,7 @@ constructor `FileSystemDatasetRepository(FileSystem, Path, MetadataProvider)` if
 they want to change this behavior.
 
 The `FileSystemMetadataProvider` (also in the packge
-`com.cloudera.data.filesystem`) plugin stores dataset metadata information on
+`com.cloudera.cdk.data.filesystem`) plugin stores dataset metadata information on
 a Hadoop `FileSystem` in a hidden directory. As with its sibling
 `FileSystemDatasetRepository`, its constructor accepts a Hadoop `FileSystem`
 object and a base directory. When metadata needs to be stored, a directory
@@ -257,7 +257,7 @@ resultant file and directory structure created as a result of this
 configuration.
 
 To use HCatalog, create an instance of `HCatalogDatasetRepository` (in the package
-`com.cloudera.data.hcatalog`). `HCatalogDatasetRepository` uses an internal
+`com.cloudera.cdk.data.hcatalog`). `HCatalogDatasetRepository` uses an internal
 implementation of `MetadataProvider` called `HCatalogMetadataProvider` to communicate
 with HCatalog. When using HCatalog you have two options for specifying the location of
 the data files. You can let HCatalog manage the location of the data,
@@ -292,7 +292,7 @@ created. The schema is defined using the Avro Schema APIs. Entities must all
 conform to the same schema, however, that schema can evolve based on a set of
 well-defined rules. The relational database analog of a dataset is a table.
 
-Datasets are represented by the `com.cloudera.data.Dataset` interface.
+Datasets are represented by the `com.cloudera.cdk.data.Dataset` interface.
 Implementations of this interface decide how to physically store the entities
 within the dataset. Users do not instantiate implementations of the `Dataset`
 interface directly. Instead, implementations of the `DatasetRepository` act as
@@ -322,7 +322,7 @@ cases where users know something special about their data.
 
 Upon creation of dataset, a name and a _dataset descriptor_ must be provided to
 the `DatasetRepository#create()` method. The descriptor, represented by the
-`com.cloudera.data.DatasetDescriptor` class, holds all metadata associated with
+`com.cloudera.cdk.data.DatasetDescriptor` class, holds all metadata associated with
 the dataset, the most important of which is the schema. Schemas are always
 represented using Avro's Schema APIs, regardless of how the data is stored by
 the underlying dataset implementation. This simplifies the API for users,

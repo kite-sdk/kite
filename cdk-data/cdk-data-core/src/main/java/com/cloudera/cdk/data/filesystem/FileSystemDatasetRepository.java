@@ -23,7 +23,6 @@ import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.data.*;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;

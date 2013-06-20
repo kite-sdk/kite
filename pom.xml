@@ -195,7 +195,7 @@
               <useStandardDocletOptions>false</useStandardDocletOptions>
               <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
               <destDir>jdiff</destDir>
-              <excludePackageNames>com.cloudera.data.event,*.impl,org.apache.*</excludePackageNames>
+              <excludePackageNames>com.cloudera.cdk.data.event,*.impl,org.apache.*</excludePackageNames>
             </configuration>
           </execution>
           <execution>
@@ -258,7 +258,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${vers.maven-javadoc}</version>
           <configuration>
-            <excludePackageNames>com.cloudera.data.event,*.impl,org.apache.*</excludePackageNames>
+            <excludePackageNames>com.cloudera.cdk.data.event,*.impl,org.apache.*</excludePackageNames>
             <links>
               <link>http://avro.apache.org/docs/${vers.avro}/api/java/</link>
               <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
@@ -418,11 +418,11 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${vers.maven-javadoc}</version>
         <configuration>
-          <excludePackageNames>com.cloudera.data.event,*.impl,org.apache.*</excludePackageNames>
+          <excludePackageNames>com.cloudera.cdk.data.event,*.impl,org.apache.*</excludePackageNames>
           <groups>
             <group>
               <title>Core</title>
-              <packages>com.cloudera.data:com.cloudera.data.filesystem:com.cloudera.data.partition</packages>
+              <packages>com.cloudera.cdk.data:com.cloudera.cdk.data.filesystem:com.cloudera.cdk.data.partition</packages>
             </group>
             <group>
               <title>Crunch</title>

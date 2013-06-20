@@ -24,7 +24,7 @@ import com.cloudera.cdk.data.PartitionStrategy;
 /**
  * <p>
  * Class to enforce "friend" access to internal methods in
- * {@link com.cloudera.data} classes that are not a part of the public API.
+ * {@link com.cloudera.cdk.data} classes that are not a part of the public API.
  * </p>
  * <p>
  * This technique is described in detail in "Practical API Design" by

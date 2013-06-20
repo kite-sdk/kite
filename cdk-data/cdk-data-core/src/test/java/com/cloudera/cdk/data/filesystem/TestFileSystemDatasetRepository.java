@@ -52,7 +52,7 @@ public class TestFileSystemDatasetRepository {
     repo = new FileSystemDatasetRepository(fileSystem, testDirectory);
 
     testSchema = Schema.createRecord("Test", "Test record schema",
-        "com.cloudera.data.filesystem", false);
+        "com.cloudera.cdk.data.filesystem", false);
     testSchema.setFields(Lists.newArrayList(new Field("name", Schema
         .create(Type.STRING), null, null)));
   }
@@ -174,7 +174,7 @@ public class TestFileSystemDatasetRepository {
         .getDescriptor().getSchema());
 
     Schema testSchemaV2 = Schema.createRecord("Test", "Test record schema",
-        "com.cloudera.data.filesystem", false);
+        "com.cloudera.cdk.data.filesystem", false);
     testSchemaV2.setFields(Lists.newArrayList(
         new Field("name", Schema.create(Type.STRING), null, null),
         new Field("email", Schema.create(Type.STRING), null, null) // incompatible - no default
@@ -191,7 +191,7 @@ public class TestFileSystemDatasetRepository {
         .getDescriptor().getSchema());
 
     Schema testSchemaV3 = Schema.createRecord("Test", "Test record schema",
-        "com.cloudera.data.filesystem", false);
+        "com.cloudera.cdk.data.filesystem", false);
     testSchemaV3.setFields(Lists.newArrayList(
         new Field("name", Schema.create(Type.STRING), null, null),
         new Field("email", Schema.create(Type.STRING), null,
