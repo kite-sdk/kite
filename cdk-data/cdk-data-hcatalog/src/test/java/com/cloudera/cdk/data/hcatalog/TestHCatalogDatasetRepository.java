@@ -15,8 +15,8 @@
  */
 package com.cloudera.cdk.data.hcatalog;
 
-import com.cloudera.data.Dataset;
-import com.cloudera.data.DatasetDescriptor;
+import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetDescriptor;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.cloudera.data.filesystem.DatasetTestUtilities.*;
+import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
 
 public class TestHCatalogDatasetRepository {
 

@@ -15,11 +15,11 @@
  */
 package com.cloudera.cdk.data.hcatalog;
 
-import com.cloudera.data.Dataset;
-import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.DatasetRepository;
-import com.cloudera.data.DatasetRepositoryException;
-import com.cloudera.data.filesystem.FileSystemDatasetRepository;
+import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetRepository;
+import com.cloudera.cdk.data.DatasetRepositoryException;
+import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.base.Supplier;
 import java.io.IOException;
 import java.net.URI;

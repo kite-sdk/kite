@@ -15,9 +15,9 @@
  */
 package com.cloudera.cdk.tools;
 
-import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.DatasetRepository;
-import com.cloudera.data.filesystem.FileSystemDatasetRepository;
+import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetRepository;
+import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.io.Resources;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +40,7 @@ import org.apache.hadoop.util.ToolRunner;
 /**
  * A tool for converting files in
  * <a href="http://en.wikipedia.org/wiki/Common_Log_Format">Combined Log Format</a> to a
- * {@link com.cloudera.data.Dataset}.
+ * {@link com.cloudera.cdk.data.Dataset}.
  */
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SE_NO_SERIALVERSIONID",
     justification = "Serialization not needed between different versions of this class")

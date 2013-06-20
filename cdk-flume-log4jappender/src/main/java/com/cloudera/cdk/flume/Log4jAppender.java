@@ -1,10 +1,10 @@
 package com.cloudera.cdk.flume;
 
-import com.cloudera.data.Dataset;
-import com.cloudera.data.DatasetRepository;
-import com.cloudera.data.FieldPartitioner;
-import com.cloudera.data.PartitionKey;
-import com.cloudera.data.PartitionStrategy;
+import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetRepository;
+import com.cloudera.cdk.data.FieldPartitioner;
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.PartitionStrategy;
 import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URL;

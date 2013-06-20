@@ -15,12 +15,12 @@
  */
 package com.cloudera.cdk.data.crunch;
 
-import com.cloudera.data.Dataset;
-import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.DatasetRepository;
-import com.cloudera.data.PartitionKey;
-import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.filesystem.FileSystemDatasetRepository;
+import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetRepository;
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.io.Files;
 import java.io.IOException;
 import junit.framework.Assert;
@@ -35,7 +35,7 @@ import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.cloudera.data.filesystem.DatasetTestUtilities.*;
+import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
 
 public class TestCrunchDatasets {
 

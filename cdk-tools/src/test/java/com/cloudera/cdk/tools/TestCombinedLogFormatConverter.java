@@ -15,10 +15,10 @@
  */
 package com.cloudera.cdk.tools;
 
-import com.cloudera.data.Dataset;
-import com.cloudera.data.DatasetReader;
-import com.cloudera.data.DatasetRepository;
-import com.cloudera.data.filesystem.FileSystemDatasetRepository;
+import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetReader;
+import com.cloudera.cdk.data.DatasetRepository;
+import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.io.Resources;
 import java.io.File;
 import junit.framework.Assert;

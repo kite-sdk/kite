@@ -15,12 +15,12 @@
  */
 package com.cloudera.cdk.data.hcatalog;
 
-import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.FieldPartitioner;
-import com.cloudera.data.MetadataProvider;
-import com.cloudera.data.MetadataProviderException;
-import com.cloudera.data.PartitionStrategy;
-import com.cloudera.data.impl.Accessor;
+import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.FieldPartitioner;
+import com.cloudera.cdk.data.MetadataProvider;
+import com.cloudera.cdk.data.MetadataProviderException;
+import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.impl.Accessor;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;

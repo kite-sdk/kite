@@ -15,10 +15,10 @@
  */
 package com.cloudera.cdk.data.crunch;
 
-import com.cloudera.data.Dataset;
-import com.cloudera.data.DatasetException;
-import com.cloudera.data.Formats;
-import com.cloudera.data.filesystem.impl.Accessor;
+import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetException;
+import com.cloudera.cdk.data.Formats;
+import com.cloudera.cdk.data.filesystem.impl.Accessor;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.Lists;
 import java.io.IOException;

@@ -15,8 +15,8 @@
  */
 package com.cloudera.cdk.data.hcatalog;
 
-import com.cloudera.data.DatasetDescriptor;
-import com.cloudera.data.PartitionStrategy;
+import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.PartitionStrategy;
 import com.google.common.io.Files;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
@@ -26,7 +26,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.cloudera.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
+import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
 
 public class TestHCatalogMetadataProvider {
 
