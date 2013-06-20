@@ -52,9 +52,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <generateReports>true</generateReports>
-        </configuration>
       </plugin>
     </plugins>
   </build>

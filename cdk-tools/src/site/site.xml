@@ -18,14 +18,9 @@
 
   <body>
 
-    <menu ref="CDK"/>
-
     <menu name="Tools Module">
-      <item name="Overview" href="overview.html"/>
-      <item name="Javadoc" href="apidocs/index.html"/>
+      <item name="Home" href="index.html"/>
     </menu>
-
-    <menu ref="reports" name="Reports"/>
 
   </body>
 

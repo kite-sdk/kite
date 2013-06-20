@@ -56,46 +56,6 @@ _beta_ release. As a sub-1.0.0 release, this version is _not_ subject to the
 normal API compatibility guarantees. See the _Compatibility Statement_ for
 information about API compatibility guarantees.
 
-## Dependency Information
-
-Add the Cloudera repository to your Maven POM:
-
-    <repository>
-      <id>cdh.repo</id>
-      <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
-      <name>Cloudera Repositories</name>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-
-Then add a dependency for the Data Module using the information specified on the
-[Dependency Information page](dependency-info.html).
-
-Some CDK features are optional, which means you'll need to add extra dependencies if
-you use them. These are listed below.
-
-If you are using HCatalog integration, you'll need to add the following dependencies:
-
-    <dependency>
-      <groupId>org.apache.hcatalog</groupId>
-      <artifactId>hcatalog-core</artifactId>
-      <version>0.4.0-cdh4.2.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
-      <version>10.4.2.0</version>
-    </dependency>
-
-If you are using Crunch integration, add the following dependency:
-
-    <dependency>
-      <groupId>org.apache.crunch</groupId>
-      <artifactId>crunch-core</artifactId>
-      <version>0.6.0-cdh4.2.0</version>
-    </dependency>
-
 ## Overview of the Data Module
 
 The CDK Data module is a set of APIs for interacting with datasets in the
