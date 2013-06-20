@@ -18,26 +18,12 @@
   <parent>
     <groupId>com.cloudera.search</groupId>
     <artifactId>cdk-morphlines</artifactId>
-    <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
   </parent>
 
   <groupId>com.cloudera.search</groupId>
   <artifactId>cdk-morphlines-hadoop-sequencefile</artifactId>
-  <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
   <name>CDK Morphlines Hadoop Sequence File</name>
-
-  <properties>
-    <hadoop.version>${cdh.mr1.version}</hadoop.version>
-  </properties>
-
-  <profiles>
-    <profile>
-      <id>yarn</id>
-      <properties>
-        <hadoop.version>${cdh.hadoop.version}</hadoop.version>
-      </properties>
-    </profile>
-  </profiles>
 
   <dependencies>
     <dependency>
@@ -57,7 +43,6 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
-      <version>${hadoop.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -65,7 +50,6 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
-      <version>${junit.version}</version>
     </dependency>
   </dependencies>
 </project>

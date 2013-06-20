@@ -18,12 +18,11 @@
   <parent>
     <groupId>com.cloudera.search</groupId>
     <artifactId>cdk-morphlines</artifactId>
-    <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
   </parent>
 
   <groupId>com.cloudera.search</groupId>
   <artifactId>cdk-morphlines-tika-core</artifactId>
-  <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
   <name>CDK Morphlines Tika Core</name>
 
   <dependencies>
@@ -36,7 +35,6 @@
     <dependency> <!-- see http://tika.apache.org -->
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-core</artifactId>
-      <version>${tika.version}</version>
     </dependency>
 
     <dependency>
@@ -51,7 +49,6 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
-      <version>${junit.version}</version>
     </dependency>
 
   </dependencies>
@@ -61,7 +58,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>${maven.antrun.plugin.version}</version>
         <executions>
           <execution>
             <id>copy-test-env</id>

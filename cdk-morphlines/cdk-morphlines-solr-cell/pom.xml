@@ -18,12 +18,11 @@
   <parent>
     <groupId>com.cloudera.search</groupId>
     <artifactId>cdk-morphlines</artifactId>
-    <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
   </parent>
 
   <groupId>com.cloudera.search</groupId>
   <artifactId>cdk-morphlines-solr-cell</artifactId>
-  <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
   <name>CDK Morphlines Solr Cell</name>
 
   <dependencies>
@@ -31,7 +30,6 @@
     <dependency> <!-- see http://lucene.apache.org/solr -->
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-test-framework</artifactId>
-      <version>${solr.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -58,7 +56,6 @@
     <dependency> <!-- see http://tika.apache.org -->
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-xmp</artifactId>
-      <version>${tika.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -81,7 +78,6 @@
     <dependency> <!-- see http://lucene.apache.org/solr -->
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-cell</artifactId>
-      <version>${solr.version}</version>
       <exclusions>
         <exclusion>
           <groupId>xerces</groupId>
@@ -112,13 +108,11 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
-      <version>${junit.version}</version>
     </dependency>
 
     <dependency> <!-- see http://www.slf4j.org -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -129,7 +123,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${surefire.version}</version>
         <configuration>
           <argLine>-Dtests.locale=en_us</argLine>
           <!--<forkMode>always</forkMode>-->
@@ -143,7 +136,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>${maven.antrun.plugin.version}</version>
         <executions>
           <execution>
             <id>copy-test-env</id>

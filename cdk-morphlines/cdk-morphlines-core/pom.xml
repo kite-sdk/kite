@@ -18,51 +18,49 @@
   <parent>
     <groupId>com.cloudera.search</groupId>
     <artifactId>cdk-morphlines</artifactId>
-    <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
   </parent>
 
   <groupId>com.cloudera.search</groupId>
   <artifactId>cdk-morphlines-core</artifactId>
-  <version>0.9.1-cdh4.3.0-SNAPSHOT</version>
   <name>CDK Morphlines Core</name>
 
   <dependencies>
     <dependency> <!-- see https://code.google.com/p/guava-libraries -->
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <!--<version>${guava.version}</version>--> <!-- CDH already sets the version in dependencyManagement -->
     </dependency>    
+
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+    </dependency>
 
     <dependency> <!-- see https://github.com/typesafehub/config -->
       <groupId>com.typesafe</groupId>
       <artifactId>config</artifactId>
-      <version>${typesafe.config.version}</version>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
-      <version>${junit.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
 
     <dependency> <!-- see http://www.slf4j.org -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency> <!-- see http://metrics.codahale.com -->
       <groupId>com.codahale.metrics</groupId>
       <artifactId>metrics-core</artifactId>
-      <version>${codahale.metrics.version}</version>
     </dependency>
 
   </dependencies>
