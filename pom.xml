@@ -94,20 +94,22 @@
 
     <previous.project.version>0.3.0</previous.project.version> <!-- used by jdiff -->
 
-    <vers.avro>1.7.3</vers.avro>
+    <cdh.version>4.3.0</cdh.version>
+
+    <vers.avro>1.7.4</vers.avro>
     <vers.crunch-base>0.6.0</vers.crunch-base>
-    <vers.crunch>${vers.crunch-base}-cdh4.2.0</vers.crunch>
+    <vers.crunch>${vers.crunch-base}-cdh4.2.0</vers.crunch><!-- don't use ${cdh.version} since it's not available; this one is compatible though -->
     <vers.doxia-markdown>1.4</vers.doxia-markdown>
     <vers.findbugs-plugin>2.5.2</vers.findbugs-plugin>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
-    <vers.flume>1.3.0-cdh4.2.1</vers.flume>
+    <vers.flume>1.3.0-cdh${cdh.version}</vers.flume>
     <vers.guava>14.0</vers.guava>
-    <vers.hadoop>2.0.0-cdh4.3.0</vers.hadoop>
-    <vers.hcatalog>0.5.0-cdh4.3.0</vers.hcatalog>
+    <vers.hadoop>2.0.0-cdh${cdh.version}</vers.hadoop>
+    <vers.hcatalog>0.5.0-cdh${cdh.version}</vers.hcatalog>
     <vers.jexl>2.1.1</vers.jexl>
     <vers.compress>1.4.1</vers.compress>
     <vers.junit>4.10</vers.junit>
-    <vers.log4j>1.2.17</vers.log4j>
+    <vers.log4j>1.2.16</vers.log4j>
     <vers.maven-compiler>2.5.1</vers.maven-compiler>
     <vers.maven-javadoc>2.9</vers.maven-javadoc>
     <vers.maven-project-info-reports>2.7</vers.maven-project-info-reports>
@@ -119,7 +121,7 @@
     <vers.maven-jar>2.3.1</vers.maven-jar>
     <vers.parquet>1.0.0-SNAPSHOT</vers.parquet>
     <vers.rat>0.9</vers.rat>
-    <vers.slf4j>1.7.2</vers.slf4j>
+    <vers.slf4j>1.6.1</vers.slf4j>
     <vers.codahale.metrics>3.0.0</vers.codahale.metrics>
     <vers.typesafe.config>1.0.0</vers.typesafe.config>
     <vers.solr>4.3.0-cdh4.3.0_search0.9.1-SNAPSHOT</vers.solr>
@@ -139,7 +141,7 @@
         <enabled>true</enabled>
       </releases>
       <snapshots>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
       </snapshots>
     </repository>
     <repository>
@@ -548,11 +550,6 @@
         <groupId>org.apache.hcatalog</groupId>
         <artifactId>hcatalog-core</artifactId>
         <version>${vers.hcatalog}</version>
-      </dependency>
-      <dependency> <!-- force HCatalog to use same (earlier) version of Derby as Hive -->
-        <groupId>org.apache.derby</groupId>
-        <artifactId>derby</artifactId>
-        <version>10.4.2.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
