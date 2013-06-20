@@ -17,6 +17,6 @@
  * Provides helper classes for working with datasets using Crunch.
  */
 @ParametersAreNonnullByDefault
-package com.cloudera.data.crunch;
+package com.cloudera.cdk.data.crunch;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -426,7 +426,7 @@
             </group>
             <group>
               <title>Crunch</title>
-              <packages>com.cloudera.data.crunch</packages>
+              <packages>com.cloudera.cdk.data.crunch</packages>
             </group>
             <group>
               <title>Flume</title>
