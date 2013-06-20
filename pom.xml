@@ -25,7 +25,6 @@
   <modules>
     <module>cdk-data</module>
     <module>cdk-flume-avro-event-serializer</module>
-    <module>cdk-flume-log4jappender</module>
     <module>cdk-tools</module>
     <module>cdk-morphlines</module>
   </modules>
@@ -430,7 +429,7 @@
             </group>
             <group>
               <title>Flume</title>
-              <packages>com.cloudera.cdk.flume</packages>
+              <packages>com.cloudera.cdk.data.flume</packages>
             </group>
             <group>
               <title>HCatalog</title>

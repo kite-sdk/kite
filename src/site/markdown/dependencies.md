@@ -21,12 +21,12 @@ You can also view the transitive dependencies for each module.
 * CDK Data Crunch
  [Dependency Information](cdk-data/cdk-data-crunch/dependency-info.html),
  [Dependencies](cdk-data/cdk-data-crunch/dependencies.html)
+* CDK Data Flume
+ [Dependency Information](cdk-data/cdk-data-flume/dependency-info.html),
+ [Dependencies](cdk-data/cdk-data-flume/dependencies.html)
 * CDK Data HCatalog
  [Dependency Information](cdk-data/cdk-data-hcatalog/dependency-info.html),
  [Dependencies](cdk-data/cdk-data-hcatalog/dependencies.html)
-* CDK Flume Log4jAppender
- [Dependency Information](cdk-flume-log4jappender/dependency-info.html),
- [Dependencies](cdk-flume-log4jappender/dependencies.html)
 * CDK Tools
  [Dependency Information](cdk-tools/dependency-info.html),
  [Dependencies](cdk-tools/dependencies.html)

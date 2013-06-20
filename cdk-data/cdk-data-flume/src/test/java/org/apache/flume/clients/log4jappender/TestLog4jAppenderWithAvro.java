@@ -21,7 +21,6 @@ package org.apache.flume.clients.log4jappender;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;

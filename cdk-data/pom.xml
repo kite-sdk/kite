@@ -25,6 +25,7 @@
   <modules>
     <module>cdk-data-core</module>
     <module>cdk-data-crunch</module>
+    <module>cdk-data-flume</module>
     <module>cdk-data-hcatalog</module>
   </modules>
 

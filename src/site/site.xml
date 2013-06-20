@@ -48,7 +48,6 @@
 
     <menu name="Modules" inherit="top">
       <item name="CDK Data" href="cdk-data/index.html"/>
-      <item name="CDK Flume Log4jAppender" href="cdk-flume-log4jappender/index.html"/>
       <item name="CDK Tools" href="cdk-tools/index.html"/>
     </menu>
   </body>

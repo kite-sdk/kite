@@ -35,17 +35,6 @@ to/from a storage system, the data module is for you.
 The tools module provides command-line tools and APIs for performing common tasks with
 the CDK.
 
-### CDK Flume Modules
-
-The `cdk-flume-avro-event-serializer` module is a Flume extension that allows the HDFS
-sink to write Avro records.
-
-The `cdk-flume-log4jappender` module is a Log4j appender for writing Avro records to
-Flume.
-
-The [CDK logging example](https://github.com/cloudera/cdk-examples/tree/master/logging)
-has a usage example for these modules.
-
 ## Examples
 
 Example code demonstrating how to use the CDK can be found in the separate GitHub
