@@ -22,6 +22,9 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.cloudera.cdk.morphline.api.AbstractMorphlineTest;
@@ -29,7 +32,23 @@ import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
 
 public class ReadJsonTweetsTest extends AbstractMorphlineTest {
-  
+
+  private TimeZone defaultTimeZone = TimeZone.getDefault();
+
+  @Before
+  public void setUp() throws Exception {
+    // Test is hardcoded to assume US Pacific timezone, so change the VM timezone for the
+    // duration of the test
+    TimeZone.setDefault(TimeZone.getTimeZone("US/Pacific"));
+    super.setUp();
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    super.tearDown();
+    TimeZone.setDefault(defaultTimeZone);
+  }
+
   @Test
   public void testReadJsonTweets() throws Exception {
     morphline = createMorphline("test-morphlines/readJsonTweets");    
