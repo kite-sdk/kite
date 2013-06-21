@@ -15,8 +15,10 @@
  */
 package com.cloudera.cdk.tools;
 
-import java.io.File;
+import com.google.common.io.Closeables;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -34,9 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
-import com.google.common.hash.HashCode;
-import com.google.common.hash.Hashing;
-import com.google.common.io.Files;
 
 /**
  * <p>
@@ -121,9 +121,15 @@ public class JobClasspathHelper {
           // this fence here?
           if (!clz.getName().startsWith("org.apache.hadoop.")) {
             // we compute the MD5 sum of the local jar
-            HashCode hc = Files.hash(new File(localJarPath), Hashing.md5());
-            String md5sum = hc.toString();
-            jarMd5Map.put(localJarPath, md5sum);
+            InputStream in = new FileInputStream(localJarPath);
+            boolean threw = true;
+            try {
+              String md5sum = DigestUtils.md5Hex(in);
+              jarMd5Map.put(localJarPath, md5sum);
+              threw = false;
+            } finally {
+              Closeables.close(in, threw);
+            }
           } else {
             logger.info("Ignoring {}, since it looks like it's from Hadoop's core libs", localJarPath);
           }

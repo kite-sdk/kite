@@ -16,14 +16,13 @@
 package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
-import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.impl.Accessor;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closer;
+import com.google.common.io.Closeables;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -81,29 +80,29 @@ public class FileSystemMetadataProvider implements MetadataProvider {
     DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder();
     Path descriptorPath = new Path(directory, DESCRIPTOR_FILE_NAME);
 
-    Closer closer = Closer.create();
-
+    boolean threw = true;
     try {
-      inputStream = closer.register(fileSystem.open(descriptorPath));
+      inputStream = fileSystem.open(descriptorPath);
       properties.load(inputStream);
-
-      if (properties.containsKey(FORMAT_FIELD_NAME)) {
-        builder.format(Accessor.getDefault().newFormat(
-            properties.getProperty(FORMAT_FIELD_NAME)));
-      }
-      if (properties.containsKey(PARTITION_EXPRESSION_FIELD_NAME)) {
-        builder.partitionStrategy(Accessor.getDefault().fromExpression(properties
-          .getProperty(PARTITION_EXPRESSION_FIELD_NAME)));
-      }
+      threw = false;
     } catch (IOException e) {
       throw new MetadataProviderException(
-        "Unable to load descriptor file:" + descriptorPath + " for dataset:" + name, e);
+          "Unable to load descriptor file:" + descriptorPath + " for dataset:" + name, e);
     } finally {
       try {
-        closer.close();
+        Closeables.close(inputStream, threw);
       } catch (IOException e) {
         throw new MetadataProviderException(e);
       }
+    }
+
+    if (properties.containsKey(FORMAT_FIELD_NAME)) {
+      builder.format(Accessor.getDefault().newFormat(
+          properties.getProperty(FORMAT_FIELD_NAME)));
+    }
+    if (properties.containsKey(PARTITION_EXPRESSION_FIELD_NAME)) {
+      builder.partitionStrategy(Accessor.getDefault().fromExpression(properties
+          .getProperty(PARTITION_EXPRESSION_FIELD_NAME)));
     }
 
     Path schemaPath = new Path(directory, SCHEMA_FILE_NAME);
@@ -135,19 +134,19 @@ public class FileSystemMetadataProvider implements MetadataProvider {
     }
 
     Path schemaPath = new Path(directory, SCHEMA_FILE_NAME);
-    Closer closer = Closer.create();
-
+    boolean threw = true;
     try {
-      outputStream = closer.register(fileSystem.create(schemaPath));
+      outputStream = fileSystem.create(schemaPath);
       outputStream.write(descriptor.getSchema().toString(true)
-        .getBytes(Charsets.UTF_8));
+          .getBytes(Charsets.UTF_8));
       outputStream.flush();
+      threw = false;
     } catch (IOException e) {
       throw new MetadataProviderException(
-        "Unable to save schema file:" + schemaPath + " for dataset:" + name, e);
+          "Unable to save schema file:" + schemaPath + " for dataset:" + name, e);
     } finally {
       try {
-        closer.close();
+        Closeables.close(outputStream, threw);
       } catch (IOException e) {
         throw new MetadataProviderException(e);
       }
@@ -163,18 +162,18 @@ public class FileSystemMetadataProvider implements MetadataProvider {
     }
 
     Path descriptorPath = new Path(directory, DESCRIPTOR_FILE_NAME);
-    closer = Closer.create();
-
+    threw = true;
     try {
-      outputStream = closer.register(fileSystem.create(descriptorPath));
+      outputStream = fileSystem.create(descriptorPath);
       properties.store(outputStream, "Dataset descriptor for " + name);
       outputStream.flush();
+      threw = false;
     } catch (IOException e) {
       throw new MetadataProviderException(
-        "Unable to save descriptor file:" + descriptorPath + " for dataset:" + name, e);
+          "Unable to save descriptor file:" + descriptorPath + " for dataset:" + name, e);
     } finally {
       try {
-        closer.close();
+        Closeables.close(outputStream, threw);
       } catch (IOException e) {
         throw new MetadataProviderException(e);
       }

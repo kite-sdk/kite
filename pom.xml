@@ -97,13 +97,14 @@
     <cdh.version>4.3.0</cdh.version>
 
     <vers.avro>1.7.4</vers.avro>
+    <vers.commons-codec>1.4</vers.commons-codec>
     <vers.crunch-base>0.6.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-cdh4.2.0</vers.crunch><!-- don't use ${cdh.version} since it's not available; this one is compatible though -->
     <vers.doxia-markdown>1.4</vers.doxia-markdown>
     <vers.findbugs-plugin>2.5.2</vers.findbugs-plugin>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.flume>1.3.0-cdh${cdh.version}</vers.flume>
-    <vers.guava>14.0</vers.guava>
+    <vers.guava>11.0.2</vers.guava>
     <vers.hadoop>2.0.0-cdh${cdh.version}</vers.hadoop>
     <vers.hcatalog>0.5.0-cdh${cdh.version}</vers.hcatalog>
     <vers.jexl>2.1.1</vers.jexl>
@@ -550,6 +551,11 @@
         <groupId>org.apache.hcatalog</groupId>
         <artifactId>hcatalog-core</artifactId>
         <version>${vers.hcatalog}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${vers.commons-codec}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>

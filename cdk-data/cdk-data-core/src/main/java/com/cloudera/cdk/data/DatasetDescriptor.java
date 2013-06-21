@@ -18,7 +18,7 @@ package com.cloudera.cdk.data;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
-import com.google.common.io.Closer;
+import com.google.common.io.Closeables;
 import java.net.MalformedURLException;
 import java.net.URI;
 import org.apache.avro.Schema;
@@ -202,13 +202,13 @@ public class DatasetDescriptor {
       this.schemaUrl = toURL(uri);
 
       InputStream in = null;
-      Closer closer = Closer.create();
-
+      boolean threw = true;
       try {
-        in = closer.register(schemaUrl.openStream());
+        in = schemaUrl.openStream();
+        threw = false;
         return schema(in);
       } finally {
-        closer.close();
+        Closeables.close(in, threw);
       }
     }
 
@@ -258,15 +258,14 @@ public class DatasetDescriptor {
     public Builder schemaFromAvroDataFile(File file) throws IOException {
       GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<GenericRecord>();
       DataFileReader<GenericRecord> reader = null;
-      Closer closer = Closer.create();
-
+      boolean threw = true;
       try {
-        reader = closer.register(new DataFileReader<GenericRecord>(file, datumReader));
+        reader = new DataFileReader<GenericRecord>(file, datumReader);
         this.schema = reader.getSchema();
+        threw = false;
       } finally {
-        closer.close();
+        Closeables.close(reader, threw);
       }
-
       return this;
     }
 
@@ -281,13 +280,13 @@ public class DatasetDescriptor {
     public Builder schemaFromAvroDataFile(InputStream in) throws IOException {
       GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<GenericRecord>();
       DataFileStream<GenericRecord> stream = null;
-      Closer closer = Closer.create();
-
+      boolean threw = true;
       try {
-        stream = closer.register(new DataFileStream<GenericRecord>(in, datumReader));
+        stream = new DataFileStream<GenericRecord>(in, datumReader);
         this.schema = stream.getSchema();
+        threw = false;
       } finally {
-        closer.close();
+        Closeables.close(stream, threw);
       }
       return this;
     }
@@ -301,13 +300,13 @@ public class DatasetDescriptor {
      */
     public Builder schemaFromAvroDataFile(URI uri) throws IOException {
       InputStream in = null;
-      Closer closer = Closer.create();
-
+      boolean threw = true;
       try {
-        in = closer.register(toURL(uri).openStream());
+        in = toURL(uri).openStream();
+        threw = false;
         return schemaFromAvroDataFile(in);
       } finally {
-        closer.close();
+        Closeables.close(in, threw);
       }
     }
 

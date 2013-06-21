@@ -163,7 +163,6 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
       .add("dataFileWriter", dataFileWriter)
       .add("writer", writer)
       .add("state", state)
-      .omitNullValues()
       .toString();
   }
 

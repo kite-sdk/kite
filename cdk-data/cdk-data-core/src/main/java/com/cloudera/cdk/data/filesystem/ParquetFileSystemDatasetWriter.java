@@ -157,7 +157,6 @@ class ParquetFileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
       .add("pathTmp", pathTmp)
       .add("avroParquetWriter", avroParquetWriter)
       .add("state", state)
-      .omitNullValues()
       .toString();
   }
 
