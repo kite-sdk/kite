@@ -2,5 +2,11 @@
 .settings
 .project
 target
+build
+test-output
+.surefire-*
+.DS_Store
+cdk-data/cdk-data-hcatalog/metastore_db
+cdk-data/cdk-data-hcatalog/derby.log
 .idea
 *.iml

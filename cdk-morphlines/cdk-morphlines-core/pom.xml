@@ -31,11 +31,6 @@
       <artifactId>guava</artifactId>
     </dependency>    
 
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-    </dependency>
-
     <dependency> <!-- see https://github.com/typesafehub/config -->
       <groupId>com.typesafe</groupId>
       <artifactId>config</artifactId>
