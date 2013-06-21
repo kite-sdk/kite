@@ -17,45 +17,6 @@ topics (e.g. partitioning schemes, metadata management) will benefit even more.
 
 [avro]: http://avro.apache.org "Apache Avro"
 
-## What's New
-
-### Version 0.3.0
-
-Version 0.3.0 has the following notable changes:
-
-* Logging to a dataset. Using log4j as the logging API and Flume as the log transport,
-it is now possible to log application events to datasets.
-* Crunch support. Datasets can be exposed as Crunch sources and targets.
-* Date partitioning. New partitioning functions for partitioning datasets by
-year/month/day/hour/minute.
-* New examples. The new [examples repository](https://github.com/cloudera/cdk-examples)
-has examples for all these new features. The examples use the
-[Cloudera QuickStart VM](https://ccp.cloudera.com/display/SUPPORT/Cloudera+QuickStart+VM)
-to make running the examples as simple as possible.
-
-The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10244)
-is available from JIRA.
-
-### Version 0.2.0
-
-Version 0.2.0 has two major additions:
-
-* Experimental support for reading and writing datasets in
-  [Parquet format](https://github.com/Parquet/parquet-format).
-* Support for storing dataset metadata in a Hive/HCatalog metastore.
-
-The examples module has example code for both of these usages.
-
-The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10239)
-is available from JIRA.
-
-### Version 0.1.0
-
-Version 0.1.0 is the first release of the CDK Data module. This is considered a
-_beta_ release. As a sub-1.0.0 release, this version is _not_ subject to the
-normal API compatibility guarantees. See the _Compatibility Statement_ for
-information about API compatibility guarantees.
-
 ## Overview of the Data Module
 
 The CDK Data module is a set of APIs for interacting with datasets in the

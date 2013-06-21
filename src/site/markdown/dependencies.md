@@ -15,6 +15,8 @@ Then add a dependency for each module you want to use by referring to the
 information listed on the Dependency Information pages listed below.
 You can also view the transitive dependencies for each module.
 
+## CDK Data Modules
+
 * CDK Data Core
  [Dependency Information](cdk-data/cdk-data-core/dependency-info.html),
  [Dependencies](cdk-data/cdk-data-core/dependencies.html)
@@ -27,6 +29,36 @@ You can also view the transitive dependencies for each module.
 * CDK Data HCatalog
  [Dependency Information](cdk-data/cdk-data-hcatalog/dependency-info.html),
  [Dependencies](cdk-data/cdk-data-hcatalog/dependencies.html)
+
+## CDK Morphlines Modules
+
+* CDK Morphlines Core
+ [Dependency Information](cdk-morphlines/cdk-morphlines-core/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-core/dependencies.html)
+* CDK Morphlines Avro
+ [Dependency Information](cdk-morphlines/cdk-morphlines-avro/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-avro/dependencies.html)
+* CDK Morphlines Hadoop Sequence File
+ [Dependency Information](cdk-morphlines/cdk-morphlines-hadoop-sequencefile/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-hadoop-sequencefile/dependencies.html)
+* CDK Morphlines Solr Core
+ [Dependency Information](cdk-morphlines/cdk-morphlines-solr-core/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-solr-core/dependencies.html)
+* CDK Morphlines Solr Cell
+ [Dependency Information](cdk-morphlines/cdk-morphlines-solr-cell/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-solr-cell/dependencies.html)
+* CDK Morphlines Tika Core
+ [Dependency Information](cdk-morphlines/cdk-morphlines-tika-core/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-tika-core/dependencies.html)
+* CDK Morphlines Tika Decompress
+ [Dependency Information](cdk-morphlines/cdk-morphlines-tika-decompress/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-tika-decompress/dependencies.html)
+* CDK Morphlines Twitter
+ [Dependency Information](cdk-morphlines/cdk-morphlines-twitter/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-twitter/dependencies.html)
+
+## CDK Tools Modules
+
 * CDK Tools
  [Dependency Information](cdk-tools/dependency-info.html),
  [Dependencies](cdk-tools/dependencies.html)
