@@ -20,7 +20,7 @@
   <artifactId>cdk-data-core</artifactId>
 
   <parent>
-    <groupId>com.cloudera</groupId>
+    <groupId>com.cloudera.cdk</groupId>
     <artifactId>cdk-data</artifactId>
     <version>0.3.1-SNAPSHOT</version>
   </parent>

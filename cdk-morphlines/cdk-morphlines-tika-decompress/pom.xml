@@ -16,18 +16,18 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.cloudera.search</groupId>
+    <groupId>com.cloudera.cdk</groupId>
     <artifactId>cdk-morphlines</artifactId>
     <version>0.3.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.cloudera.search</groupId>
+  <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-morphlines-tika-decompress</artifactId>
   <name>CDK Morphlines Tika Decompress</name>
 
   <dependencies>
     <dependency>
-      <groupId>com.cloudera.search</groupId>
+      <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-core</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
@@ -43,7 +43,7 @@
     </dependency>
 
     <dependency>
-      <groupId>com.cloudera.search</groupId>
+      <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-core</artifactId>
       <version>${project.parent.version}</version>
       <type>test-jar</type>

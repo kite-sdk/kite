@@ -17,9 +17,9 @@ periodically.
 * Java package changes. The `com.cloudera.data` package and subpackages
 have been renamed to `com.cloudera.cdk.data`, and `com.cloudera.cdk.flume` has become
 `com.cloudera.cdk.data.flume`.
-* Finer-grained Maven modules. The module organization and naming has changed; please
-see the new [dependencies page](http://cloudera.github.io/cdk/docs/0.4.0/dependencies.html)
-for details.
+* Finer-grained Maven modules. The module organization and naming has changed,
+including making all group IDs `com.cloudera.cdk`. Please see the new [dependencies
+page](http://cloudera.github.io/cdk/docs/0.4.0/dependencies.html) for details.
 
 The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10253)
 is available from JIRA.

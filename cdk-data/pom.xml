@@ -30,7 +30,7 @@
   </modules>
 
   <parent>
-    <groupId>com.cloudera</groupId>
+    <groupId>com.cloudera.cdk</groupId>
     <artifactId>cdk-parent</artifactId>
     <version>0.3.1-SNAPSHOT</version>
   </parent>

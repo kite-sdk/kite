@@ -16,12 +16,12 @@
   <modelVersion>4.0.0</modelVersion>
  
   <parent>
-    <groupId>com.cloudera.search</groupId>
+    <groupId>com.cloudera.cdk</groupId>
     <artifactId>cdk-morphlines</artifactId>
     <version>0.3.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.cloudera.search</groupId>
+  <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-morphlines-core</artifactId>
   <name>CDK Morphlines Core</name>
 
