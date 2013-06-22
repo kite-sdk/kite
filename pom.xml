@@ -49,6 +49,11 @@
       <name>Eric Sammer</name>
       <organization>Cloudera</organization>
     </developer>
+    <developer>
+      <id>whoschek</id>
+      <name>Wolfgang Hoschek</name>
+      <organization>Cloudera</organization>
+    </developer>
   </developers>
 
   <scm>
@@ -120,7 +125,7 @@
     <vers.maven-source>2.2.1</vers.maven-source>
     <vers.maven-surefire>2.14.1</vers.maven-surefire>
     <vers.maven-antrun>1.7</vers.maven-antrun>
-    <vers.maven-jar>2.3.1</vers.maven-jar>
+    <vers.maven-jar>2.4</vers.maven-jar>
     <vers.parquet>1.0.0-SNAPSHOT</vers.parquet>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
@@ -260,11 +265,6 @@
             <showDeprecation>true</showDeprecation>
             <showWarnings>true</showWarnings>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>2.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

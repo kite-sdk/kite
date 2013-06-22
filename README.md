@@ -30,6 +30,12 @@ HDFS) that let users think and operate in terms of records, datasets, and
 dataset repositories. If you're looking to read or write records directly
 to/from a storage system, the data module is for you.
 
+### CDK Morphlines
+
+The Morphlines module reduces the time and skills necessary to build and change Hadoop
+ETL stream processing applications that extract, transform and load data into Apache
+Solr, Enterprise Data Warehouses, HDFS, HBase or Analytic Online Dashboards.
+
 ### CDK Tools
 
 The tools module provides command-line tools and APIs for performing common tasks with
