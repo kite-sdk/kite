@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-parent</artifactId>
-  <version>0.3.1-SNAPSHOT</version>
+  <version>0.4.0</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -60,7 +60,7 @@
     <connection>scm:git:git://github.com/cloudera/cdk.git</connection>
     <developerConnection>scm:git:git@github.com:cloudera/cdk.git
     </developerConnection>
-    <tag>HEAD</tag>
+    <tag>release-0.4.0</tag>
   </scm>
 
   <issueManagement>

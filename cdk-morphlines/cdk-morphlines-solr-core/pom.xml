@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.cloudera.cdk</groupId>
     <artifactId>cdk-morphlines</artifactId>
-    <version>0.3.1-SNAPSHOT</version>
+    <version>0.4.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -104,7 +104,7 @@
             <configuration>
               <target>
                 <copy todir="${project.build.directory}/test-classes">
-                  <fileset dir="${basedir}/../cdk-morphlines-core/src/test/resources"/>
+                  <fileset dir="${basedir}/../cdk-morphlines-core/src/test/resources" />
                 </copy>
               </target>
             </configuration>
