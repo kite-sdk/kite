@@ -1,0 +1,330 @@
+h1. Cloudera Morphlines
+
+Cloudera Morphlines is an open source framework that reduces the time and skills necessary to build and
+change Hadoop ETL stream processing applications that extract, transform and load data into Apache Solr, Enterprise Data Warehouses, HDFS, HBase or Analytic Online Dashboards.
+
+A morphline is a rich configuration file that makes it easy
+to define an ETL transformation chain that consumes any kind of data from any kind of data source,
+processes the data and loads the results into a Hadoop component such as Cloudera Search. Executing in a small embeddable Java runtime system, morphlines can be used for Near Real Time applications as well as Batch
+processing applications.
+
+Morphlines can be seen as an evolution of Unix pipelines where the data model is generalized to work with streams of generic records, including arbitrary binary payloads. Morphlines can be embedded into Hadoop components such as Search, Flume, MapReduce, Pig, Hive, and Sqoop.
+
+The framework ships with a set of frequently used high level transformation and I/O commands that can be combined in application specific ways. The plugin system allows the adding of new transformations and I/O commands and integrates existing functionality and third party systems in a straightforward manner.
+
+This integration enables rapid Hadoop ETL application prototyping, complex stream and event processing in real time, flexible log file analysis, integration of multiple heterogeneous input schemas and file formats, as well as reuse of ETL logic building blocks across Hadoop ETL applications.
+
+The CDK ships a high performance runtime that compiles a morphline on the fly. The runtime processes all commands of a given morphline in the same thread, adding no artificial overhead. For high scalability, you can deploy many morphline instances on a cluster in many Flume agents and MapReduce tasks.
+
+Currently there are three components that execute morphlines:
+* [MapReduceIndexerTool|http://tiny.cloudera.com/search-v1-user-guide]
+* [Flume Morphline Solr Sink and Flume MorphlineInterceptor|http://tiny.cloudera.com/search-v1-user-guide]
+
+Morphlines manipulate continuous or arbitrarily large streams of records. The data model can be described as follows: A _record_ is a set of named fields where each field has an ordered list of one or more values. A value can be any Java Object. That is, a record is essentially a hash table where each hash table entry contains a String key and a list of Java Objects as values. (The implementation uses Guava's {{ArrayListMultimap}}, which is a {{ListMultimap}}). Note that a field can have multiple values and any two records need not use common field names. This flexible data model corresponds exactly to the characteristics of the Solr/Lucene data model, meaning a record can be seen as a {{SolrInputDocument}}. A field with zero values is removed from the record - fields with zero values effectively do not exist.
+
+Not only structured data, but also arbitrary binary data can be passed into and processed by a morphline. By convention, a record can contain an optional field named \_attachment\_body, which can be a Java {{java.io.InputStream}} or Java byte\[\]. Optionally, such binary input data can be characterized in more detail by setting the fields named \_attachment\_mimetype (such as {{application/pdf}}) and \_attachment\_charset (such as UTF\-8) and \_attachment\_name (such as {{cars.pdf}}), which assists in detecting and parsing the data type.
+
+This generic data model is useful to support a wide range of applications.
+
+A command transforms a record into zero or more records. Commands can access all record fields. For example, commands can parse fields, set fields, remove fields, rename fields, find and replace values, split a field into multiple fields, split a field into multiple values, or drop records. Often, regular expression based pattern matching is used as part of the process of acting on fields. The output records of a command are passed to the next command in the chain. A command has a Boolean return code, indicating success or failure.
+
+For example, consider the case of a multi\-line input record: A command could take this multi\-line input record and divide the single record into multiple output records, one for each line. This output could then later be further divided using regular expression commands, splitting each single line record out into multiple fields in application specific ways.
+
+A command can extract, clean, transform, join, integrate, enrich and decorate records in many other ways. For example, a command can join records with external data sources such as relational databases, key-value stores, local files or IP Geo lookup tables. It can also perform tasks such as DNS resolution, expand shortened URLs, fetch linked metadata from social networks, perform sentiment analysis and annotate the record accordingly, continuously maintain statistics for analytics over sliding windows, compute exact or approximate distinct values and quantiles.
+
+A command can also consume records and pass them to external systems. For example, a command can load records into Solr or write them to a MapReduce Reducer, or load them into an Enterpreise Data Warehouse or a Key Value store such as HBase, or pass them into an online dashboard, or write them to HDFS.
+
+A command can contain nested commands. Thus, a morphline is a tree of commands, akin to a push-based data flow engine or operator tree in DBMS query execution engines.
+
+A morphline has no notion of persistence, durability, distributed computing, or node failover. A morphline is basically just a chain of in-memory transformations in the current thread. There is no need for a morphline to manage multiple processes, nodes, or threads because this is already addressed by host systems such as MapReduce, Flume, or Storm. However, a morphline does support passing notifications on the control plane to command subtrees. Such notifications include BEGIN\_TRANSACTION, COMMIT\_TRANSACTION, ROLLBACK\_TRANSACTION and SHUTDOWN.
+
+The morphline configuration file is implemented using the HOCON format (Human-Optimized Config Object Notation). HOCON is basically JSON slightly adjusted for the configuration file use case. HOCON syntax is defined at [HOCON github page|http://github.com/typesafehub/config/blob/master/HOCON.md] and also used by [Akka|http://www.akka.io] and [Play|http://www.playframework.org/].
+
+Cloudera Morphlines includes several maven modules that contain morphline commands for flexible log file analysis, single\-line records, multi\-line records, CSV files, Apache Avro and Apache Hadoop Sequence Files, regular expression based pattern matching and extraction, operations on record fields for assignment and comparison, operations on record fields with list and set semantics, if\-then\-else conditionals, string and timestamp conversions, scripting support for dynamic java code, a small rules engine, logging, metrics and counters, integration with Apache Solr including SolrCloud, integration with Apache SolrCell and all Apache Tika parsers, auto-detection of MIME types from binary data using Apache Tika, and decompression and unpacking of arbitrarily nested container file formats, among others. These are described in detail in the [Morphline Reference Guide|morphlinesReferenceGuide.html].
+
+
+h1. Example Morphline Syslog Usage
+
+This section provides a sample that illustrates using a morphline to index a syslog file.
+
+h3. Defining Example Input and Output
+
+A syslog file contains semi\-structured lines of the following form:
+
+{code}
+<164>Feb  4 10:46:14 syslog sshd[607]: listening on 0.0.0.0 port 22.
+{code}
+
+The program should extract the following record from the log line and load it into Solr:
+
+{code}
+syslog_pri:164
+syslog_timestamp:Feb  4 10:46:14
+syslog_hostname:syslog
+syslog_program:sshd
+syslog_pid:607
+syslog_message:listening on 0.0.0.0 port 22.
+{code}
+
+h3. Defining a Chain of Transformation Commands
+
+These rules can be expressed with morphline commands called [readLine|morphlinesReferenceGuide#readLine], [grok|morphlinesReferenceGuide#grok], [convertTimestamp|morphlinesReferenceGuide#convertTimestamp], [sanitizeUnknownSolrFields|morphlinesReferenceGuide#sanitizeUnknownSolrFields] and [loadSolr|morphlinesReferenceGuide#loadSolr], by editing a {{morphline.conf}} file to read as follows:
+{code}
+# Specify server locations in a SOLR_LOCATOR variable; used later in
+# variable substitutions:
+SOLR_LOCATOR : {
+  # Name of solr collection
+  collection : collection1
+
+  # ZooKeeper ensemble
+  zkHost : "127.0.0.1:2181/solr"
+}
+
+# Specify an array of one or more morphlines, each of which defines an ETL
+# transformation chain. A morphline consists of one or more (potentially
+# nested) commands. A morphline is a way to consume records (e.g. Flume events,
+# HDFS files or blocks), turn them into a stream of records, and pipe the stream
+# of records through a set of easily configurable transformations on the way to
+# a target application such as Solr.
+morphlines : [
+  {
+    id : morphline1
+    importCommands : ["com.cloudera.**"]
+
+    commands : [
+      {
+        readLine {
+          charset : UTF-8
+        }
+      }
+
+      {
+        grok {
+          # a grok-dictionary is a config file that contains prefabricated regular expressions
+          # that can be referred to by name.
+          # grok patterns specify such a regex name, plus an optional output field name.
+          # The syntax is %{REGEX_NAME:OUTPUT_FIELD_NAME}
+          # The input line is expected in the "message" input field.
+          dictionaryFiles : [target/test-classes/grok-dictionaries]
+          expressions : {
+            message : """<%{POSINT:syslog_pri}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}"""
+          }
+        }
+      }
+
+      # Consume the output record of the previous command and pipe another
+      # record downstream.
+      #
+      # Command that deletes record fields that are unknown to Solr
+      # schema.xml.
+      #
+      # Recall that Solr throws an exception on any attempt to load a document
+      # that contains a field that isn't specified in schema.xml.
+      {
+        sanitizeUnknownSolrFields {
+          # Location from which to fetch Solr schema
+          solrLocator : ${SOLR_LOCATOR}
+        }
+      }
+
+      # log the record at DEBUG level to SLF4J
+      { logDebug { format : "output record: {}", args : ["@{}"] } }
+
+      # load the record into a Solr server or MapReduce Reducer
+      {
+        loadSolr {
+          solrLocator : ${SOLR_LOCATOR}
+        }
+      }
+    ]
+  }
+]
+{code}
+
+h1. Example Morphline Avro Usage
+
+This section provides a sample that illustrates using a morphline to index an Avro file with a given schema.
+
+h3. Viewing Avro
+
+Let's view the content of a sample Avro file to understand the data:
+{code}
+$ wget http://archive.apache.org/dist/avro/avro-1.7.4/java/avro-tools-1.7.4.jar
+$ java -jar avro-tools-1.7.4.jar tojson /usr/share/doc/search*/examples/test-documents/sample-statuses-20120906-141433.avro
+{code}
+
+h3. Inspecting the Schema of the Avro file
+{code}
+$ java -jar avro-tools-1.7.4.jar getschema /usr/share/doc/search*/examples/test-documents/sample-statuses-20120906-141433.avro
+
+{
+  "type" : "record",
+  "name" : "Doc",
+  "doc" : "adoc",
+  "fields" : [ {
+    "name" : "id",
+    "type" : "string"
+  }, {
+    "name" : "user_statuses_count",
+    "type" : [ "int", "null" ]
+  }, {
+    "name" : "user_screen_name",
+    "type" : [ "string", "null" ]
+  }, {
+    "name" : "created_at",
+    "type" : [ "string", "null" ]
+  }, {
+    "name" : "text",
+    "type" : [ "string", "null" ]
+  }
+
+  ...
+
+  ]
+}
+{code}
+
+h3. Defining a Sample Solr Schema
+
+We want to extract the fields named {{id}}, user\_screen\_name, created\_at and {{text}} from the given Avro records, then store and index them in Solr, using the following Solr schema definition in {{schema.xml}}:
+{code}
+<fields>
+  <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+  <field name="username" type="text_en" indexed="true" stored="true" />
+  <field name="created_at" type="tdate" indexed="true" stored="true" />
+  <field name="text" type="text_en" indexed="true" stored="true" />
+
+  <field name="_version_" type="long" indexed="true" stored="true"/>
+  <dynamicField name="ignored_*" type="ignored"/>
+</fields>
+{code}
+Note that the Solr output schema omits some Avro input fields such as user\_statuses\_count. Suppose you want to rename the input field user\_screen\_name to the output field {{username}}. Also suppose that the time format for the created\_at field is yyyy-\MM\-dd'T'HH:mm:ss'Z'. Finally, suppose any unknown fields present are to be removed. Recall that Solr throws an exception on any attempt to load a document that contains a field that is not specified in {{schema.xml}}.
+
+h3. Defining a Chain of Transformation Commands
+
+These transformation rules can be expressed with morphline commands called [readAvroContainer|morphlinesReferenceGuide#readAvroContainer], [extractAvroPaths|morphlinesReferenceGuide#extractAvroPaths], [convertTimestamp|morphlinesReferenceGuide#convertTimestamp], [sanitizeUnknownSolrFields|morphlinesReferenceGuide#sanitizeUnknownSolrFields] and [loadSolr|morphlinesReferenceGuide#loadSolr], by editing a {{morphline.conf}} file to read as follows:
+{code}
+# Specify server locations in a SOLR_LOCATOR variable; used later in
+# variable substitutions:
+SOLR_LOCATOR : {
+  # Name of solr collection
+  collection : collection1
+
+  # ZooKeeper ensemble
+  zkHost : "127.0.0.1:2181/solr"
+}
+
+# Specify an array of one or more morphlines, each of which defines an ETL
+# transformation chain. A morphline consists of one or more (potentially
+# nested) commands. A morphline is a way to consume records (e.g. Flume events,
+# HDFS files or blocks), turn them into a stream of records, and pipe the stream
+# of records through a set of easily configurable transformations on the way to
+# a target application such as Solr.
+morphlines : [
+  {
+    # Name used to identify a morphline. E.g. used if there are multiple
+    # morphlines in a morphline config file
+    id : morphline1
+
+    # Import all morphline commands in these java packages and their subpackages.
+    # Other commands that may be present on the classpath are not visible to this
+    # morphline.
+    importCommands : ["com.cloudera.**", "org.apache.solr.**"]
+
+    commands : [
+      {
+        # Parse Avro container file and emit a record for each Avro object
+        readAvroContainer {
+          # Optionally, require the input to match one of these MIME types:
+          # supportedMimeTypes : [avro/binary]
+
+          # Optionally, use a custom Avro schema in JSON format inline:
+          # readerSchemaString : """<json can go here>"""
+
+          # Optionally, use a custom Avro schema file in JSON format:
+          # readerSchemaFile : /path/to/syslog.avsc
+        }
+      }
+
+      {
+        # Consume the output record of the previous command and pipe another
+        # record downstream.
+        #
+        # extractAvroPaths is a command that uses zero or more Avro path
+        # expressions to extract values from an Avro object. Each expression
+        # consists of a record output field name (on the left side of the
+        # colon ':') as well as zero or more path steps (on the right hand
+        # side), each path step separated by a '/' slash. Avro arrays are
+        # traversed with the '[]' notation.
+        #
+        # The result of a path expression is a list of objects, each of which
+        # is added to the given record output field.
+        #
+        # The path language supports all Avro concepts, including nested
+        # structures, records, arrays, maps, unions, etc, as well as a flatten
+        # option that collects the primitives in a subtree into a flat list.
+        extractAvroPaths {
+          flatten : false
+          paths : {
+            id : /id
+            username : /user_screen_name
+            created_at : /created_at
+            text : /text
+          }
+        }
+      }
+
+      # Consume the output record of the previous command and pipe another
+      # record downstream.
+      #
+      # convert timestamp field to native Solr timestamp format
+      # e.g. 2012-09-06T07:14:34Z to 2012-09-06T07:14:34.000Z
+      {
+        convertTimestamp {
+          field : created_at
+          inputFormats : ["yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd"]
+          inputTimezone : America/Los_Angeles
+          outputFormat : "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+          outputTimezone : UTC
+        }
+      }
+
+      # Consume the output record of the previous command and pipe another
+      # record downstream.
+      #
+      # Command that deletes record fields that are unknown to Solr
+      # schema.xml.
+      #
+      # Recall that Solr throws an exception on any attempt to load a document
+      # that contains a field that isn't specified in schema.xml.
+      {
+        sanitizeUnknownSolrFields {
+          # Location from which to fetch Solr schema
+          solrLocator : ${SOLR_LOCATOR}
+        }
+      }
+
+      # log the record at DEBUG level to SLF4J
+      { logDebug { format : "output record: {}", args : ["@{}"] } }
+
+      # load the record into a Solr server or MapReduce Reducer
+      {
+        loadSolr {
+          solrLocator : ${SOLR_LOCATOR}
+        }
+      }
+    ]
+  }
+]
+{code}
+
+h1. Next Steps
+
+{note}
+More example morphline configuration files can be found in the [unit tests|https://github.com/cloudera/cdk/tree/master/cdk-morphlines/cdk-morphlines-core/src/test/resources/test-morphlines].
+{note}
+
+{note}
+A detailed description of all morphline commands can be found in the [Morphlines Reference Guide|morphlinesReferenceGuide.html].
+{note}
+

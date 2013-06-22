@@ -101,6 +101,7 @@
     <vers.crunch-base>0.6.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-cdh4.2.0</vers.crunch><!-- don't use ${cdh.version} since it's not available; this one is compatible though -->
     <vers.doxia-markdown>1.4</vers.doxia-markdown>
+    <vers.doxia-confluence>1.4</vers.doxia-confluence>
     <vers.findbugs-plugin>2.5.2</vers.findbugs-plugin>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.flume>1.3.0-cdh${cdh.version}</vers.flume>
@@ -173,6 +174,13 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>${vers.maven-site}</version>
+        <dependencies>
+           <dependency>
+              <groupId>org.apache.maven.doxia</groupId>
+              <artifactId>doxia-module-confluence</artifactId>
+              <version>${vers.doxia-confluence}</version>
+           </dependency>
+        </dependencies>
         <configuration>
           <generateReports>true</generateReports>
           <inputEncoding>UTF-8</inputEncoding>
@@ -348,6 +356,7 @@
               <exclude>**/scriptengine/java/**.java</exclude> <!-- BSD -->
               <exclude>**/src/test/resources/grok-dictionaries/**</exclude> <!-- ASL 2.0 -->
               <exclude>**/src/test/resources/test-documents/**</exclude> <!-- ASL 2.0 -->
+              <exclude>**/src/site/**/*.confluence</exclude>
             </excludes>
           </configuration>
         </plugin>
