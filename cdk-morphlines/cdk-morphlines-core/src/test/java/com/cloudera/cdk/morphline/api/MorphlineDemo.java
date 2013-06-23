@@ -20,8 +20,10 @@ import com.cloudera.cdk.morphline.api.*;
 import com.cloudera.cdk.morphline.base.*;
 import com.cloudera.cdk.morphline.base.Compiler;
 
+/** Sample program that illustrates how to use the API to embed and execute a morphline in a host system */
 public class MorphlineDemo {
   
+  /** Usage: java ... <morphline.conf> <dataFile1> ... <dataFileN> */
   public static void main(String[] args) throws Exception {
     File morphlineFile = new File(args[0]);
     String morphlineId = null;
