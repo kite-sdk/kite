@@ -16,6 +16,7 @@
 package com.cloudera.cdk.morphline.api;
 
 import java.io.*;
+
 import com.cloudera.cdk.morphline.api.*;
 import com.cloudera.cdk.morphline.base.*;
 import com.cloudera.cdk.morphline.base.Compiler;
@@ -24,26 +25,32 @@ import com.cloudera.cdk.morphline.base.Compiler;
 public class MorphlineDemo {
   
   /** Usage: java ... <morphline.conf> <dataFile1> ... <dataFileN> */
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws IOException {
+    // compile morphline on the fly
     File morphlineFile = new File(args[0]);
     String morphlineId = null;
     MorphlineContext morphlineContext = new MorphlineContext.Builder().build();
-    Command morphline = new Compiler().compile(morphlineFile, morphlineId, morphlineContext, null);    
-    for (int i = 1; i < args.length; i++) {
-      Record record = new Record();
-      InputStream in = new BufferedInputStream(new FileInputStream(new File(args[i])));
-      record.put(Fields.ATTACHMENT_BODY, in);      
-      try {
+    Command morphline = new Compiler().compile(morphlineFile, morphlineId, morphlineContext, null);
+    
+    // process each input data file
+    Notifications.notifyBeginTransaction(morphline);
+    try {
+      for (int i = 1; i < args.length; i++) {
+        InputStream in = new BufferedInputStream(new FileInputStream(new File(args[i])));
+        Record record = new Record();
+        record.put(Fields.ATTACHMENT_BODY, in);      
         Notifications.notifyStartSession(morphline);
         boolean success = morphline.process(record);
         if (!success) {
           System.out.println("Morphline failed to process record: " + record);
         }
-      } catch (RuntimeException t) {
-        morphlineContext.getExceptionHandler().handleException(t, record);
-      } finally {
         in.close();
       }
+      Notifications.notifyCommitTransaction(morphline);
+    } catch (RuntimeException e) {
+      Notifications.notifyRollbackTransaction(morphline);
+      morphlineContext.getExceptionHandler().handleException(e, null);
     }
+    Notifications.notifyShutdown(morphline);
   }
 }
