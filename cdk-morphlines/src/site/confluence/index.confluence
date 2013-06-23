@@ -20,7 +20,7 @@ Currently there are three components that execute morphlines:
 * [MapReduceIndexerTool|http://tiny.cloudera.com/search-v1-user-guide]
 * [Flume Morphline Solr Sink and Flume MorphlineInterceptor|http://tiny.cloudera.com/search-v1-user-guide]
 
-Morphlines manipulate continuous or arbitrarily large streams of records. The data model can be described as follows: A _record_ is a set of named fields where each field has an ordered list of one or more values. A value can be any Java Object. That is, a record is essentially a hash table where each hash table entry contains a String key and a list of Java Objects as values. (The implementation uses Guava's {{ArrayListMultimap}}, which is a {{ListMultimap}}). Note that a field can have multiple values and any two records need not use common field names. This flexible data model corresponds exactly to the characteristics of the Solr/Lucene data model, meaning a record can be seen as a {{SolrInputDocument}}. A field with zero values is removed from the record - fields with zero values effectively do not exist.
+Morphlines manipulate continuous or arbitrarily large streams of records. The data model can be described as follows: A _record_ is a set of named fields where each field has an ordered list of one or more values. A value can be any Java Object. That is, a record is essentially a hash table where each hash table entry contains a String key and a list of Java Objects as values. (The implementation uses Guava's {{ArrayListMultimap}}, which is a {{ListMultimap}}). Note that a field can have multiple values and any two records need not use common field names. This flexible data model corresponds exactly to the characteristics of the Solr/Lucene data model, meaning a record can be seen as a {{SolrInputDocument}}. A field with zero values is removed from the record \- fields with zero values effectively do not exist.
 
 Not only structured data, but also arbitrary binary data can be passed into and processed by a morphline. By convention, a record can contain an optional field named \_attachment\_body, which can be a Java {{java.io.InputStream}} or Java byte\[\]. Optionally, such binary input data can be characterized in more detail by setting the fields named \_attachment\_mimetype (such as {{application/pdf}}) and \_attachment\_charset (such as UTF\-8) and \_attachment\_name (such as {{cars.pdf}}), which assists in detecting and parsing the data type.
 
@@ -34,14 +34,52 @@ A command can extract, clean, transform, join, integrate, enrich and decorate re
 
 A command can also consume records and pass them to external systems. For example, a command can load records into Solr or write them to a MapReduce Reducer, or load them into an Enterpreise Data Warehouse or a Key Value store such as HBase, or pass them into an online dashboard, or write them to HDFS.
 
-A command can contain nested commands. Thus, a morphline is a tree of commands, akin to a push-based data flow engine or operator tree in DBMS query execution engines.
+A command can contain nested commands. Thus, a morphline is a tree of commands, akin to a push\-based data flow engine or operator tree in DBMS query execution engines.
 
 A morphline has no notion of persistence, durability, distributed computing, or node failover. A morphline is basically just a chain of in-memory transformations in the current thread. There is no need for a morphline to manage multiple processes, nodes, or threads because this is already addressed by host systems such as MapReduce, Flume, or Storm. However, a morphline does support passing notifications on the control plane to command subtrees. Such notifications include BEGIN\_TRANSACTION, COMMIT\_TRANSACTION, ROLLBACK\_TRANSACTION and SHUTDOWN.
 
-The morphline configuration file is implemented using the HOCON format (Human-Optimized Config Object Notation). HOCON is basically JSON slightly adjusted for the configuration file use case. HOCON syntax is defined at [HOCON github page|http://github.com/typesafehub/config/blob/master/HOCON.md] and also used by [Akka|http://www.akka.io] and [Play|http://www.playframework.org/].
+The morphline configuration file is implemented using the HOCON format (Human Optimized Config Object Notation). HOCON is basically JSON slightly adjusted for the configuration file use case. HOCON syntax is defined at [HOCON github page|http://github.com/typesafehub/config/blob/master/HOCON.md] and also used by [Akka|http://www.akka.io] and [Play|http://www.playframework.org/].
 
 Cloudera Morphlines includes several maven modules that contain morphline commands for flexible log file analysis, single\-line records, multi\-line records, CSV files, Apache Avro and Apache Hadoop Sequence Files, regular expression based pattern matching and extraction, operations on record fields for assignment and comparison, operations on record fields with list and set semantics, if\-then\-else conditionals, string and timestamp conversions, scripting support for dynamic java code, a small rules engine, logging, metrics and counters, integration with Apache Solr including SolrCloud, integration with Apache SolrCell and all Apache Tika parsers, auto-detection of MIME types from binary data using Apache Tika, and decompression and unpacking of arbitrarily nested container file formats, among others. These are described in detail in the [Morphline Reference Guide|morphlinesReferenceGuide.html].
 
+h1. Example Morphline Driver Program
+
+This section provides a sample program that illustrates how to use the API to embed and execute a morphline in a host system.
+
+{code}
+import java.io.*;
+import com.cloudera.cdk.morphline.api.*;
+import com.cloudera.cdk.morphline.base.*;
+import com.cloudera.cdk.morphline.base.Compiler;
+
+public class MorphlineDemo {
+
+  /** Usage: java ... <morphline.conf> <dataFile1> ... <dataFileN> */
+  public static void main(String[] args) throws Exception {
+    File morphlineFile = new File(args[0]);
+    String morphlineId = null;
+    MorphlineContext morphlineContext = new MorphlineContext.Builder().build();
+    Command morphline = new Compiler().compile(morphlineFile, morphlineId, morphlineContext, null);
+
+    for (int i = 1; i < args.length; i++) {
+      Record record = new Record();
+      InputStream in = new BufferedInputStream(new FileInputStream(new File(args[i])));
+      record.put(Fields.ATTACHMENT_BODY, in);
+      try {
+        Notifications.notifyStartSession(morphline);
+        boolean success = morphline.process(record);
+        if (!success) {
+          System.out.println("Morphline failed to process record: " + record);
+        }
+      } catch (RuntimeException t) {
+        morphlineContext.getExceptionHandler().handleException(t, record);
+      } finally {
+        in.close();
+      }
+    }
+  }
+}
+{code}
 
 h1. Example Morphline Syslog Usage
 

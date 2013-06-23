@@ -205,7 +205,7 @@ This module contains standard transformation commands, such as commands for flex
 
 h2. addValues
 
-The [addValues|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddValuesBuilder.java] command takes a set of {{outputField : values}} pairs and performs the following steps: For each output field, adds the given values to the field. The command can fetch the values of a record field using a _field expression_, which is a string of the form {{@\{fieldname\}}}.
+The [addValues|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddValuesBuilder.java] command takes a set of {{outputField : values}} pairs and performs the following steps: For each output field, adds the given values to the field. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}.
 
 Example usage:
 {code}
@@ -311,8 +311,8 @@ The [equals|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morph
 
 Example usage:
 {code}
-# succeed if the _attachment_mimetype field contains a value "avro/binary"
-# fail otherwise
+# succeed if the _attachment_mimetype field contains the value "avro/binary"
+# and nothing else, fail otherwise
 equals { _attachment_mimetype : [avro/binary] }
 
 # succeed if the tags field contains nothing but the values "version1"
@@ -359,7 +359,7 @@ For example, the regex named "INT" is associated with the following pattern:
 \b(?:[0-9A-Za-z][0-9A-Za-z-]{0,62})(?:\.(?:[0-9A-Za-z][0-9A-Za-z-]{0,62}))*(\.?|\b)
 {code}and matches strings like "www.cloudera.com".
 
-Morphlines ships with [several standard grok dictionaries|https://github.com/cloudera/search/tree/master/samples/solr-nrt/grok-dictionaries].
+Morphlines ships with [several standard grok dictionaries|https://github.com/cloudera/cdk/tree/master/cdk-morphlines/cdk-morphlines-core/src/test/resources/grok-dictionaries].
 
 A grok command can contain zero or more grok expressions. Each grok expression refers to a record input field name and can contain zero or more grok patterns. The following is an example grok expression that refers to the input field named "message" and contains two grok patterns:
 
@@ -504,7 +504,7 @@ java {
 
 h2. logTrace, logDebug, logInfo, logWarn, logError
 
-These commands log a message to slf4j at the given log level. The command can fetch the values of a record field using a _field expression_, which is a string of the form {{@\{fieldname\}}}. The special field expression @\{\} can be used to log the entire record.
+These commands log a message to slf4j at the given log level. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}. The special field expression @\{\} can be used to log the entire record.
 
 Example usage:
 {code}
@@ -730,7 +730,7 @@ h2. extractAvroTree
 
 The [extractAvroTree|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ExtractAvroTreeBuilder.java] command converts an attached Avro datum to a morphline record by recursively walking the Avro tree and extracting all data into a single morphline record, with fields named by their path in the Avro tree.
 
-The Avro input object is expected to be contained in the field {{\_attachment_body}}, and typically placed there by an upstream {{readAvroContainer}} or {{readAvro}} command.
+The Avro input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream {{readAvroContainer}} or {{readAvro}} command.
 
 This kind of mapping is useful for simple Avro schemas, but for more complex schemas, this approach may be overly simplistic and expensive.
 
@@ -793,7 +793,7 @@ The [detectMimeType|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/c
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
-| includeDefaultMimeTypes | true | Whether to include the Tika default MIME types file that ships embedded in tika-core.jar (see [http://github.com/apache/tika/blob/trunk/tika\-core/src/main/resources/org/apache/tika/mime/tika\-mimetypes.xml]) |
+| includeDefaultMimeTypes | true | Whether to include the Tika default MIME types file that ships embedded in tika\-core.jar (see [http://github.com/apache/tika/blob/trunk/tika\-core/src/main/resources/org/apache/tika/mime/tika\-mimetypes.xml]) |
 | mimeTypesFiles | \[\] | The relative or absolute path of zero or more Tika custom\-mimetypes.xml files to include. |
 | mimeTypesString | null | The content of an optional custom\-mimetypes.xml file embedded directly inside of this morphline configuration file. |
 | preserveExisting | true | Whether to preserve the \_attachment\_mimetype field value if one is already present. |
@@ -883,7 +883,8 @@ The command provides the following configuration options:
 | solrLocator | n/a | Solr location parameters as described separately above. |
 
 Example usage:
-{code}loadSolr {
+{code}
+loadSolr {
   solrLocator : {
     # Name of solr collection
     collection : collection1
@@ -899,9 +900,9 @@ Example usage:
 
 h2. generateSolrSequenceKey
 
-The [generateSolrSequenceKey|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-core/src/main/java/com/cloudera/cdk/morphline/solr/GenerateSolrSequenceKeyBuilder.java] command assigns a record unique key that is the concatenation of the given baseIdField record field, followed by a running count of the record number within the current session. The count is reset to zero whenever a {{startSession}} notification is received.
+The [generateSolrSequenceKey|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-core/src/main/java/com/cloudera/cdk/morphline/solr/GenerateSolrSequenceKeyBuilder.java] command assigns a record unique key that is the concatenation of the given {{baseIdField}} record field, followed by a running count of the record number within the current session. The count is reset to zero whenever a {{startSession}} notification is received.
 
-For example, assume a CSV file containing multiple records but no unique ids, and the {{base_id}} field is the filesystem path of the file. Now this command can be used to assign the following record values to Solr's unique key field: {{$path#0, $path#1, ... $path#N}}.
+For example, assume a CSV file containing multiple records but no unique ids, and the base\_id field is the filesystem path of the file. Now this command can be used to assign the following record values to Solr's unique key field: {{$path#0, $path#1, ... $path#N}}.
 
 The name of the unique key field is fetched from Solr's {{schema.xml}} file, as directed by the {{solrLocator}} configuration parameter.
 
@@ -959,7 +960,7 @@ The command provides the following configuration options:
 | captureAttr | false | Whether to index attributes of the Tika XHTML elements into separate fields, named after the element. For example, when extracting from HTML, Tika can return the href attributes in {{<a>}} tags as fields named "a". |
 | xpath | null | When extracting, only return Tika XHTML content that satisfies the XPath expression. See [http://tika.apache.org/1.2/parser.html] for details on the format of Tika XHTML. See also [http://wiki.apache.org/solr/TikaExtractOnlyExampleOutput]. |
 | lowernames | false | Map all field names to lowercase with underscores. For example, Content-Type would be mapped to content_type. |
-| solrContentHandlerFactory | org.apache.solr.morphline.solrcell.TrimSolrContentHandlerFactory | A Java class to handle bridging from Tika to SolrCell. |
+| solrContentHandlerFactory | com.cloudera.cdk.morphline.morphline.solrcell.TrimSolrContentHandlerFactory | A Java class to handle bridging from Tika to SolrCell. |
 | parsers | \[\] | List of fully qualified Java class names of one or more Tika parsers. |
 
 Example usage:
