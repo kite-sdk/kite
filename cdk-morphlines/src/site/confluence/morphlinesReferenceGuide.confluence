@@ -9,6 +9,8 @@ h3. cdk\-morphlines\-core\-stdio
 - [readMultiLine|#readMultiLine]
 
 h3. cdk\-morphlines\-core\-stdlib
+- [addCurrentTime|#addCurrentTime]
+- [addLocalHost|#addLocalHost]
 - [addValues|#addValues]
 - [addValuesIfAbsent|#addValuesIfAbsent]
 - [callParentPipe|#callParentPipe]
@@ -203,6 +205,42 @@ h1. cdk\-morphlines\-core\-stdlib
 
 This module contains standard transformation commands, such as commands for flexible log file analysis, regular expression based pattern matching and extraction, operations on fields for assignment and comparison, operations on fields with list and set semantics, if\-then\-else conditionals, string and timestamp conversions, scripting support for dynamic java code, a small rules engine, logging, and metrics and counters.
 
+h2. addCurrentTime
+
+The [addCurrentTime|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddCurrentTimeBuilder.java] command adds the result of [System.currentTimeMillis()|http://docs.oracle.com/javase/7/docs/api/java/lang/System.html#currentTimeMillis()]
+as a Long integer to a given output field.
+Typically, a {{convertTimestamp}} command is subsequently used to convert this timestamp to an application specific output format.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| field | timestamp | The name of the field to set. |
+| preserveExisting | true | Whether to preserve the field value if one is already present. |
+
+Example usage:
+{code}
+addCurrentTime {}
+{code}
+
+h2. addLocalHost
+
+The [addLocalHost|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddLocalHostBuilder.java] command adds the name or IP of the local host to a given output field.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| field | host | The name of the field to set. |
+| preserveExisting | true | Whether to preserve the field value if one is already present. |
+| useIP | true | Whether to add the IP address or fully\-qualified hostname. |
+
+Example usage:
+{code}
+addLocalHost {
+  field : my_host
+  useIP : false
+}
+{code}
+
 h2. addValues
 
 The [addValues|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddValuesBuilder.java] command takes a set of {{outputField : values}} pairs and performs the following steps: For each output field, adds the given values to the field. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}.
@@ -351,13 +389,15 @@ INT (?:[+-]?(?:[0-9]+))
 HOSTNAME \b(?:[0-9A-Za-z][0-9A-Za-z-]{0,62})(?:\.(?:[0-9A-Za-z][0-9A-Za-z-]{0,62}))*(\.?|\b)
 {code}
 
-For example, the regex named "INT" is associated with the following pattern:
+For example, the regex named "INT" is associated with the following [pattern|http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html]:
 {code}
 [+-]?(?:[0-9]+)
-{code}and matches strings like "123" and the regex named "HOSTNAME" is associated with the following pattern:
+{code}
+and matches strings like "123" and the regex named "HOSTNAME" is associated with the following pattern:
 {code}
 \b(?:[0-9A-Za-z][0-9A-Za-z-]{0,62})(?:\.(?:[0-9A-Za-z][0-9A-Za-z-]{0,62}))*(\.?|\b)
-{code}and matches strings like "www.cloudera.com".
+{code}
+and matches strings like "www.cloudera.com".
 
 Morphlines ships with [several standard grok dictionaries|https://github.com/cloudera/cdk/tree/master/cdk-morphlines/cdk-morphlines-core/src/test/resources/grok-dictionaries].
 
@@ -406,30 +446,47 @@ In addition, the grok command supports the following parameters:
 
 Example usage:
 {code}
-# index syslog formatted files
+# Index syslog formatted files
+#
+# Example input line:
+#
+# <164>Feb  4 10:46:14 syslog sshd[607]: listening on 0.0.0.0 port 22.
+#
+# Expected output record fields:
+#
+# syslog_pri:164
+# syslog_timestamp:Feb  4 10:46:14
+# syslog_hostname:syslog
+# syslog_program:sshd
+# syslog_pid:607
+# syslog_message:listening on 0.0.0.0 port 22.
+#
 grok {
-  dictionaryFiles : [target/test-classes/grok-dictionaries]
-  dictionaryString : """
-    XUUID [A-Fa-f0-9]{8}-(?:[A-Fa-f0-9]{4}-){3}[A-Fa-f0-9]{12}
-  """
-
+  dictionaryFiles : [cdk-morphlines-core/src/test/resources/grok-dictionaries]
   expressions : {
     message : """<%{POSINT:syslog_pri}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}"""
 
     #message2 : "(?<queue_field>.*)"
     #message4 : "%{NUMBER:queue_field}"
   }
-  extract : true
-  numRequiredMatches : all # default is atLeastOnce
-  findSubstrings : false
-  addEmptyStrings : false
 }
 {code}
 
 More example usage:
 {code}
 # Split a line on one or more whitespace into substrings,
-# and add the substrings to the {{columns}} output field.
+# and add the substrings to the "columns" output field.
+#
+# Example input line with tabs:
+#
+# "hello\t\tworld\tfoo"
+#
+# Expected output record fields:
+#
+# columns:hello
+# columns:world
+# columns:foo
+#
 grok {
   expressions : {
     message : """(?<columns>.+?)(\s+|\z)"""
@@ -438,8 +495,37 @@ grok {
 }
 {code}
 
+Even more example usage:
+{code}
+# Index a custom variant of syslog files where subfacility is optional
+#
+# Example input line:
+#
+# <179>Jun 10 04:42:51 www.foo.com Jun 10 2013 04:42:51 : %myproduct-3-mysubfacility-123456: Health probe failed
+#
+# Expected output record fields:
+#
+# my_message_code:%myproduct-3-mysubfacility-251010
+# my_product:myproduct
+# my_level:3
+# my_subfacility:mysubfacility
+# my_message_id:123456
+# syslog_message:%myproduct-3-mysubfacility-251010: Health probe failed for server 1.2.3.4 on port 8083, connection # refused by server
+#
+grok {
+  dictionaryFiles : [cdk-morphlines-core/src/test/resources/grok-dictionaries]
+  dictionaryString : """
+    MY_CUSTOM_TIMESTAMP %{MONTH} %{MONTHDAY} %{YEAR} %{TIME}
+  """
+
+  expressions : {
+    message : """<%{POSINT}>%{SYSLOGTIMESTAMP} %{SYSLOGHOST} %{MY_CUSTOM_TIMESTAMP} : (?<syslog_message>(?<my_message_code>%%{\w+:my_product}-%{\w+:my_level}(-%{\w+:my_subfacility})?-%{\w+:my_message_id}): %{GREEDYDATA})"""
+  }
+}
+{code}
+
 {note}
-Note: An easy way to test grok out is to use the [online grok debugger|http://grokdebug.herokuapp.com/] from the logstash project.
+Note: An easy way to test grok out is to use the [online grok debugger|http://grokdebug.herokuapp.com/] from the logstash project. There is also a corresponding [YouTube video|http://www.youtube.com/watch?v=YIKm6WUgFTY].
 {note}
 
 h2. if

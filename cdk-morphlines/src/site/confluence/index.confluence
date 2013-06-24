@@ -6,9 +6,13 @@ change Hadoop ETL stream processing applications that extract, transform and loa
 A morphline is a rich configuration file that makes it easy
 to define an ETL transformation chain that consumes any kind of data from any kind of data source,
 processes the data and loads the results into a Hadoop component such as Cloudera Search. Executing in a small embeddable Java runtime system, morphlines can be used for Near Real Time applications as well as Batch
-processing applications.
+processing applications, for example as outlined in the following architectural diagram:
 
-Morphlines can be seen as an evolution of Unix pipelines where the data model is generalized to work with streams of generic records, including arbitrary binary payloads. Morphlines can be embedded into Hadoop components such as Search, Flume, MapReduce, Pig, Hive, and Sqoop.
+!images/morphlines-architecture.jpg!
+
+Morphlines can be seen as an evolution of Unix pipelines where the data model is generalized to work with streams of generic records, including arbitrary binary payloads. Morphlines can be embedded into Hadoop components such as Search, Flume, MapReduce, Pig, Hive, and Sqoop, for example as outlined in the following figure:
+
+!images/morphlines.jpg!
 
 The framework ships with a set of frequently used high level transformation and I/O commands that can be combined in application specific ways. The plugin system allows the adding of new transformations and I/O commands and integrates existing functionality and third party systems in a straightforward manner.
 
@@ -24,7 +28,7 @@ Morphlines manipulate continuous or arbitrarily large streams of records. The da
 
 Not only structured data, but also arbitrary binary data can be passed into and processed by a morphline. By convention, a record can contain an optional field named \_attachment\_body, which can be a Java {{java.io.InputStream}} or Java byte\[\]. Optionally, such binary input data can be characterized in more detail by setting the fields named \_attachment\_mimetype (such as {{application/pdf}}) and \_attachment\_charset (such as UTF\-8) and \_attachment\_name (such as {{cars.pdf}}), which assists in detecting and parsing the data type.
 
-This generic data model is useful to support a wide range of applications.
+This generic data model is useful to support a wide range of applications. For example, the Apache Flume Morphline Solr Sink fills the body of the Flume event into the \_attachment\_body field of the morphline record, as well as the headers of the Flume event. As another example, the Mappers of the MapReduceIndexerTool fill the Java {{java.io.InputStream}} referring to the currently processed HDFS file into the \_attachment\_body field of the morphline record, as well as  metadata about the HDFS file such as its name, path, file size, last modified time, etc. This way a morphline can act on all data received from Flume and HDFS.
 
 A command transforms a record into zero or more records. Commands can access all record fields. For example, commands can parse fields, set fields, remove fields, rename fields, find and replace values, split a field into multiple fields, split a field into multiple values, or drop records. Often, regular expression based pattern matching is used as part of the process of acting on fields. The output records of a command are passed to the next command in the chain. A command has a Boolean return code, indicating success or failure.
 
