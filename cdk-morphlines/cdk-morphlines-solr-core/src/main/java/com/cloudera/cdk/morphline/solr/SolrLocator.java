@@ -57,7 +57,7 @@ public class SolrLocator {
   private String zkHost;
   private String solrUrl;
   private String solrHomeDir;
-  private int batchSize = 100;
+  private int batchSize = 1000;
   
   private static final String SOLR_HOME_PROPERTY_NAME = "solr.solr.home";
 

@@ -58,8 +58,9 @@ h3. cdk\-morphlines\-hadoop\-sequencefile
 
 h1. Introduction
 
-{note}
-Note: Perhaps the most important property of the Morphlines framework is how easy it is to add new transformations and I/O commands and integrate existing functionality and third party systems. If none of the existing commands match your use case, you can easily write your own command and plug it in. Simply implement the Java interface {{Command}} or subclass {{AbstractCommand}} and add the resulting Java class to the classpath. No registration or other administrative action is required.
+Cloudera Morphlines provides a set of frequently\-used high\-level transformation and I/O commands that can be combined in application specific ways. This chapter outlines the currently available commands.
+
+Note that perhaps the most important property of the Morphlines framework is how easy it is to add new transformations and I/O commands and integrate existing functionality and third party systems. If none of the existing commands match your use case, you can easily write your own command and plug it in. Simply implement the Java interface {{Command}} or subclass {{AbstractCommand}} and add the resulting Java class to the classpath. No registration or other administrative action is required.
 Here are links to two sample command implementations:
 \\
 \\
@@ -69,7 +70,6 @@ Here are links to two sample command implementations:
 \\
 \\
 Indeed, none of the standard commands are special or intrinsically known per se. All commands are implemented like this, even including standard commands such as {{pipe}}, {{if}}, and {{tryRules}}. This means your custom commands can even replace any standard commands, if desired.
-{note}
 
 h1. cdk\-morphlines\-core\-stdio
 
@@ -389,11 +389,11 @@ INT (?:[+-]?(?:[0-9]+))
 HOSTNAME \b(?:[0-9A-Za-z][0-9A-Za-z-]{0,62})(?:\.(?:[0-9A-Za-z][0-9A-Za-z-]{0,62}))*(\.?|\b)
 {code}
 
-For example, the regex named "INT" is associated with the following [pattern|http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html]:
+For example, the regex named "INT" is associated with the following [regex pattern|http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html]:
 {code}
 [+-]?(?:[0-9]+)
 {code}
-and matches strings like "123" and the regex named "HOSTNAME" is associated with the following pattern:
+and matches strings like "123", whereas the regex named "HOSTNAME" is associated with the following regex pattern:
 {code}
 \b(?:[0-9A-Za-z][0-9A-Za-z-]{0,62})(?:\.(?:[0-9A-Za-z][0-9A-Za-z-]{0,62}))*(\.?|\b)
 {code}
