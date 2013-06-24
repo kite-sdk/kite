@@ -97,8 +97,12 @@ public abstract class AbstractSolrMorphlineZkTest extends AbstractFullDistribZkT
   }
   
   protected Command parse(String file) throws IOException {
+    return parse(file, "collection1");
+  }
+  
+  protected Command parse(String file, String collection) throws IOException {
     SolrLocator locator = new SolrLocator(createMorphlineContext());
-    locator.setCollectionName("collection1");
+    locator.setCollectionName(collection);
     locator.setZkHost(zkServer.getZkAddress());
     //locator.setServerUrl(cloudJettys.get(0).url); // TODO: download IndexSchema from solrUrl not yet implemented
     //locator.setSolrHomeDir(SOLR_HOME_DIR.getPath());
