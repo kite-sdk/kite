@@ -26,7 +26,7 @@ public class MorphlineDemo {
   
   /** Usage: java ... <morphline.conf> <dataFile1> ... <dataFileN> */
   public static void main(String[] args) throws IOException {
-    // compile morphline on the fly
+    // compile morphline.conf file on the fly
     File morphlineFile = new File(args[0]);
     String morphlineId = null;
     MorphlineContext morphlineContext = new MorphlineContext.Builder().build();

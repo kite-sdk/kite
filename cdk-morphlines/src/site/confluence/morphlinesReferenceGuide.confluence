@@ -505,12 +505,12 @@ Even more example usage:
 #
 # Expected output record fields:
 #
-# my_message_code:%myproduct-3-mysubfacility-251010
+# my_message_code:%myproduct-3-mysubfacility-123456
 # my_product:myproduct
 # my_level:3
 # my_subfacility:mysubfacility
 # my_message_id:123456
-# syslog_message:%myproduct-3-mysubfacility-251010: Health probe failed for server 1.2.3.4 on port 8083, connection # refused by server
+# syslog_message:%myproduct-3-mysubfacility-123456: Health probe failed
 #
 grok {
   dictionaryFiles : [cdk-morphlines-core/src/test/resources/grok-dictionaries]

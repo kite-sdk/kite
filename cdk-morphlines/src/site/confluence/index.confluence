@@ -60,7 +60,7 @@ public class MorphlineDemo {
 
   /** Usage: java ... <morphline.conf> <dataFile1> ... <dataFileN> */
   public static void main(String[] args) throws IOException {
-    // compile morphline on the fly
+    // compile morphline.conf file on the fly
     File morphlineFile = new File(args[0]);
     String morphlineId = null;
     MorphlineContext morphlineContext = new MorphlineContext.Builder().build();
@@ -168,12 +168,12 @@ h3. Viewing Avro
 Let's view the content of a sample Avro file to understand the data:
 {code}
 $ wget http://archive.apache.org/dist/avro/avro-1.7.4/java/avro-tools-1.7.4.jar
-$ java -jar avro-tools-1.7.4.jar tojson /usr/share/doc/search*/examples/test-documents/sample-statuses-20120906-141433.avro
+$ java -jar avro-tools-1.7.4.jar tojson cdk-morphlines/cdk-morphlines-core/src/test/resources/test-documents/sample-statuses-20120906-141433.avro
 {code}
 
 h3. Inspecting the Schema of the Avro file
 {code}
-$ java -jar avro-tools-1.7.4.jar getschema /usr/share/doc/search*/examples/test-documents/sample-statuses-20120906-141433.avro
+$ java -jar avro-tools-1.7.4.jar getschema cdk-morphlines/cdk-morphlines-core/src/test/resources/test-documents/sample-statuses-20120906-141433.avro
 
 {
   "type" : "record",
