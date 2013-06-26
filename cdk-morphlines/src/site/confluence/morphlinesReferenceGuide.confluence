@@ -403,7 +403,7 @@ The command provides the following configuration options:
 | inputField | n/a | The name of the input field that contains zero or more URI values. |
 | outputField | n/a | The field to add output values to. |
 | maxParameters | 1000000000 | The maximum number of values to append to the output field per input field. |
-| charset | "ISO\-8859\-1" | The character encoding to use, for example, UTF\-8. |
+| charset | UTF\-8 | The character encoding to use, for example, UTF\-8. |
       
 Example usage:
 {code}
