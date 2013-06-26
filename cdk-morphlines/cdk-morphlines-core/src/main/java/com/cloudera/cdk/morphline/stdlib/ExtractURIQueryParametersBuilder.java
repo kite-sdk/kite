@@ -64,7 +64,7 @@ public final class ExtractURIQueryParametersBuilder implements CommandBuilder {
       this.inputFieldName = getConfigs().getString(config, "inputField");
       this.outputFieldName = getConfigs().getString(config, "outputField");
       this.maxParameters = getConfigs().getInt(config, "maxParameters", Integer.MAX_VALUE);
-      this.charset = getConfigs().getString(config, "charset", "ISO-8859-1"); // http default
+      this.charset = getConfigs().getString(config, "charset", "UTF-8");
       Charset.forName(charset); // fail fast if charset is unsupported
       validateArguments();
     }
