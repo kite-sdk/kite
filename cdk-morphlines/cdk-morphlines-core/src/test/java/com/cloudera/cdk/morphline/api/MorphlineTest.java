@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +44,7 @@ import com.google.common.io.Files;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigUtil;
 
 public class MorphlineTest extends AbstractMorphlineTest {
   
@@ -239,6 +241,20 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.put("names", "@{first_name}");
     expected.put("pids", "456");
     expected.put("pids", "hello");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+
+  @Test
+  public void testToStringWithTrim() throws Exception {
+    morphline = createMorphline("test-morphlines/toStringWithTrim");    
+    Record record = new Record();
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put("source_type", "hello world");
+    expected.put("source_host", " hello world ");
     assertEquals(Arrays.asList(expected), collector.getRecords());
     assertSame(record, collector.getRecords().get(0));
   }
@@ -1037,6 +1053,85 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.put("ts1", "1370636123"); 
     assertEquals(Arrays.asList(expected), collector.getRecords());
     assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testExtractURIComponents() throws Exception {
+    String uriStr = "http://user-info@www.fool.com/errors.log?foo=x&foo=y&foo=z#fragment";
+    morphline = createMorphline("test-morphlines/extractURIComponents");    
+    Record record = new Record();
+    record.put("uri", uriStr);
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    URI uri = new URI(uriStr);
+    String prefix = "uri_component_";
+    expected.put("uri", uriStr);
+    expected.put(prefix + "scheme", uri.getScheme());
+    expected.put(prefix + "authority", uri.getAuthority());
+    expected.put(prefix + "path", uri.getPath());
+    expected.put(prefix + "query", uri.getQuery());
+    expected.put(prefix + "fragment", uri.getFragment());
+    expected.put(prefix + "host", uri.getHost());
+    expected.put(prefix + "port", uri.getPort());
+    expected.put(prefix + "schemeSpecificPart", uri.getSchemeSpecificPart());
+    expected.put(prefix + "userInfo", uri.getUserInfo());
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testExtractURIQueryParameters() throws Exception {
+    String host = "http://www.fool.com/errors.log";
+    internalExtractURIQueryParams("foo", host + "?foo=x&foo=y&foo=z", Arrays.asList("x", "y", "z"));
+    internalExtractURIQueryParams("foo", host + "?foo=x&foo=y&foo=z#fragment", Arrays.asList("x", "y", "z"));
+    internalExtractURIQueryParams("foo", host + "?boo=x&foo=y&boo=z", Arrays.asList("y"));
+    internalExtractURIQueryParams("foo", host + "?boo=x&bar=y&baz=z", Arrays.asList());
+
+    internalExtractURIQueryParams("foo", host + "?foo=x&foo=y&foo=z", Arrays.asList("x"), 1);
+    internalExtractURIQueryParams("foo", host + "?foo=x&foo=y&foo=z", Arrays.asList(), 0);
+
+    internalExtractURIQueryParams("foo", "", Arrays.asList());
+    internalExtractURIQueryParams("foo", "?", Arrays.asList());
+    internalExtractURIQueryParams("foo", "::", Arrays.asList()); // syntax error
+    internalExtractURIQueryParams("foo", new String(new byte[10], "ASCII"), Arrays.asList());
+    internalExtractURIQueryParams("foo", host + "", Arrays.asList());
+    internalExtractURIQueryParams("foo", host + "?", Arrays.asList());
+    
+    internalExtractURIQueryParams("foo", host + "?foo=hello%26%3D%23&bar=world", Arrays.asList("hello&=#"));
+    internalExtractURIQueryParams("foo&=#", host + "?foo%26%3D%23=hello%26%3D%23&bar=world", Arrays.asList("hello&=#"));
+    internalExtractURIQueryParams("foo&=#", host + "?foo&=#=hello%26%3D%23&bar=world", Arrays.asList());
+    internalExtractURIQueryParams("foo%26%3D%23", host + "?foo%26%3D%23=hello%26%3D%23&bar=world", Arrays.asList());
+    
+    internalExtractURIQueryParams("bar", host + "?foo=hello%26%3D%23&bar=world", Arrays.asList("world"));
+    internalExtractURIQueryParams("bar", host + "?foo%26%3D%23=hello%26%3D%23&bar=world", Arrays.asList("world"));
+    internalExtractURIQueryParams("bar", host + "?foo&===hello%26%3D%23&bar=world", Arrays.asList("world"));
+  }
+  
+  private void internalExtractURIQueryParams(String paramName, String url, List expected) throws Exception {
+    internalExtractURIQueryParams(paramName, url, expected, -1);
+  }
+  
+  private void internalExtractURIQueryParams(String paramName, String url, List expected, int maxParams) throws Exception {
+    String fileName = "test-morphlines/extractURIQueryParameters";
+    String overridesStr = "queryParam : " + ConfigUtil.quoteString(paramName);
+    if (maxParams >= 0) {
+      fileName += "WithMaxParameters";
+      overridesStr += "\nmaxParameters : " + maxParams;
+    }
+    Config override = ConfigFactory.parseString(overridesStr);
+    morphline = createMorphline(fileName, override);
+    collector.reset();
+    Record record = new Record();
+    record.put("in", url);
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expectedRecord = new Record();
+    expectedRecord.put("in", url);
+    expectedRecord.getFields().putAll("out", expected);
+    assertEquals(expectedRecord, collector.getFirstRecord());
   }
   
   @Test

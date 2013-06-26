@@ -18,6 +18,8 @@ h3. cdk\-morphlines\-core\-stdlib
 - [convertTimestamp|#convertTimestamp]
 - [dropRecord|#dropRecord]
 - [equals|#equals]
+- [extractURIComponents|#extractURIComponents]
+- [extractURIQueryParameters|#extractURIQueryParameters]
 - [generateUUID|#generateUUID]
 - [grok|#grok]
 - [if|#if]
@@ -358,6 +360,66 @@ equals { _attachment_mimetype : [avro/binary] }
 equals { tags : [version1, highPriority] }
 {code}
 
+h2. extractURIComponents
+
+The [extractURIComponents|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ExtractURIComponentsBuilder.java] command extracts subcomponents from the URIs contained in the given input field and adds them to output fields with the given prefix, namely scheme, authority, host, port, path, query, fragment, schemeSpecificPart, userInfo.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| inputField | n/a | The name of the input field that contains zero or more URIs. |
+| outputFieldPrefix | "" | A prefix to prepend to output field names. |
+
+Example usage:
+{code}
+extractURIComponents {
+  inputField : my_uri
+  outputFieldPrefix : uri_component_
+}
+{code}
+
+For example, given the input field {{myUri}} with the value {{ http://userinfo@www.bar.com/errors.log?foo=x&bar=y&foo=z#fragment}} the expected output is
+
+|| Name || Value ||
+| myUri | http://userinfo@www.bar.com/errors.log?foo=x&bar=y&foo=z#fragment |
+| uri\_component\_authority | user-info@www.bar.com |
+| uri\_component\_fragment | fragment |
+| uri\_component\_host | www.bar.com |
+| uri\_component\_path | /errors.log |
+| uri\_component\_port | -1 |
+| uri\_component\_query | foo=x&bar=y&foo=z |
+| uri\_component\_scheme | http |
+| uri\_component\_schemeSpecificPart | //user-info@www.bar.com/errors.log?foo=x&bar=y&foo=z |
+| uri\_component\_userInfo | userinfo |
+
+h2. extractURIQueryParameters
+
+The [extractURIComponents|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ExtractURIQueryParametersBuilder.java] command extracts the query parameters with a given name from the URIs contained in the given input field and appends them to the given output field.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| parameter | n/a | The name of the query parameter to find. |
+| inputField | n/a | The name of the input field that contains zero or more URI values. |
+| outputField | n/a | The field to add output values to. |
+| maxParameters | 1000000000 | The maximum number of values to append to the output field per input field. |
+| charset | "ISO\-8859\-1" | The character encoding to use, for example, UTF\-8. |
+      
+Example usage:
+{code}
+extractURIQueryParameters {
+  inputField : myUri
+  outputField : my_query_params
+}
+{code}
+
+For example, given the parameter {{foo}} and the input field {{myUri}} with the value {{http://userinfo@www.bar.com/errors.log?foo=x&bar=y&foo=z#fragment}} the expected output record is 
+
+{code}
+my_query_params:x
+my_query_params:z
+{code}
+
 h2. generateUUID
 
 The [generateUUID|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/GenerateUUIDBuilder.java] command sets a universally unique identifier on all records that are intercepted. An example UUID is b5755073\-77a9\-43c1\-8fad\-b7a586fc1b97, which represents a 128-bit value.
@@ -696,7 +758,13 @@ setValues {
 
 h2. toString
 
-The [toString|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java] command converts the Java objects in a given field using the {{Object.toString()}} method to their string representation.
+The [toString|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java] command converts the Java objects in a given field using the {{Object.toString()}} method to their string representation, and optionally also applies the {{String.trim()}} method.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| field | n/a | The name of the field to convert. |
+| trim | false | Whether or not to apply the {{String.trim()}} method. |
 
 Example usage:
 {code}

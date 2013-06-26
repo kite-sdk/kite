@@ -28,7 +28,7 @@ import com.typesafe.config.Config;
 
 /**
  * Command that converts the Java objects in a given field via <code>Object.toString()</code> to
- * their string representation.
+ * their string representation, and optionally also applies <code>String.trim()</code>.
  */
 public final class ToStringBuilder implements CommandBuilder {
 
@@ -49,10 +49,12 @@ public final class ToStringBuilder implements CommandBuilder {
   private static final class ToString extends AbstractCommand {
 
     private final String fieldName;
+    private final boolean trim;
     
     public ToString(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);      
       this.fieldName = getConfigs().getString(config, "field");
+      this.trim = getConfigs().getBoolean(config, "trim", false);
       validateArguments();
     }
         
@@ -61,6 +63,9 @@ public final class ToStringBuilder implements CommandBuilder {
       ListIterator iter = record.get(fieldName).listIterator();
       while (iter.hasNext()) {
         String str = iter.next().toString();
+        if (trim) {
+          str = str.trim();
+        }
         iter.set(str);
       }
       return super.doProcess(record);
