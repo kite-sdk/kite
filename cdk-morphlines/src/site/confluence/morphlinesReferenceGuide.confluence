@@ -441,14 +441,16 @@ The command provides the following configuration options:
 | replacement | n/a | The replacement pattern ({{isRegex}} is {{true}}) or string literal ({{isRegex}} is {{false}}). |
 | replaceFirst | false | Whether or not to skip any matches beyond the first match. |
 
-Example usage with literal string:
+Example usage with grok pattern:
 {code}
 findReplace { 
   field : message
   dictionaryFiles : [cdk-morphlines-core/src/test/resources/grok-dictionaries]                               
   pattern : """%{WORD:myGroup}"""
+  #pattern : """(\b\w+\b)"""      
   isRegex : true
   replacement : "${myGroup}!"
+  #replacement : "$1!"
   #replacement : ""
   replaceFirst : false
 }

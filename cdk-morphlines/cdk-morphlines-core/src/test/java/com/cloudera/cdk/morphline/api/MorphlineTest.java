@@ -900,6 +900,16 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testFindReplaceWithRegex() throws Exception {
+    morphline = createMorphline("test-morphlines/findReplaceWithRegex");    
+    Record record = new Record();
+    record.put("text", "hello ic world ic");
+    Record expected = new Record();
+    expected.put("text", "hello! ic! world! ic!");
+    processAndVerifySuccess(record, expected);
+  }
+  
+  @Test
   public void testFindReplaceWithGrokWithReplaceFirst() throws Exception {
     Config override = ConfigFactory.parseString("replaceFirst : true");
     morphline = createMorphline("test-morphlines/findReplaceWithGrok", override);    
