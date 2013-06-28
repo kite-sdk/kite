@@ -347,7 +347,7 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     event.getFields().put(Fields.ATTACHMENT_BODY, document0);
     morphline = createMorphline("test-morphlines/extractAvroTree");
     deleteAllDocuments();
-    System.out.println(document0);
+    //System.out.println(document0);
     assertTrue(load(event));
     assertEquals(1, queryResultSetSize("*:*"));
     Record first = collector.getFirstRecord();
