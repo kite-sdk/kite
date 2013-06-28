@@ -25,7 +25,7 @@ h3. cdk\-morphlines\-core\-stdlib
 - [grok|#grok]
 - [if|#if]
 - [java|#java]
-- [logTrace, logDebug, logInfo, logWarn, logError|#logTrace_logDebug_logInfo_logWarn_logError]
+- [logTrace, logDebug, logInfo, logWarn, logError|#logTrace]
 - [not|#not]
 - [pipe|#pipe]
 - [separateAttachments|#separateAttachments]
@@ -100,7 +100,7 @@ h2. readCSV
 
 The [readCSV|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadCSVBuilder.java] command extracts zero or more records from the input stream of the first attachment of the record, representing a Comma Separated Values (CSV) file.
 
-For the format see the wikipedia entry for [Comma-separated values|http://en.wikipedia.org/wiki/Comma-separated_values], the article on the Creativyst software website on [The Comma Separated Value (CSV) File Format|http://www.creativyst.com/Doc/Articles/CSV/CSV01.htm] and the [Ricebridge CSV Manager Demonstration|http://www.ricebridge.com/products/csvman/demo.htm]
+For the format see the wikipedia entry for [Comma-separated values|http://en.wikipedia.org/wiki/Comma-separated_values], the article on the Creativyst software website on [The Comma Separated Value (CSV) File Format|http://www.creativyst.com/Doc/Articles/CSV/CSV01.htm] and the [Ricebridge CSV Manager Demonstration|http://www.ricebridge.com/products/csvman/demo.htm].
 
 Some CSV files contain a header line that contains embedded column names. This command does not support reading and using such embedded column names as output field names because this is considered unreliable for production systems. If the first line of the CSV file is a header line, you must set the {{ignoreFirstLine}} option to true. You must explicitly define the {{columns}} configuration parameter in order to name the output fields.
 
@@ -688,9 +688,10 @@ java {
 }
 {code}
 
+{anchor:logTrace}
 h2. logTrace, logDebug, logInfo, logWarn, logError
 
-These commands log a message to slf4j at the given log level. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}. The special field expression @\{\} can be used to log the entire record.
+These commands log a message to [slf4j|http://www.slf4j.org] at the given log level. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}. The special field expression @\{\} can be used to log the entire record.
 
 Example usage:
 {code}
@@ -1145,7 +1146,7 @@ loadSolr {
     zkHost : "127.0.0.1:2181/solr"
 
     # Max number of docs to pass per RPC from morphline to Solr Server
-    # batchSize : 100
+    # batchSize : 1000
   }
 }
 {code}

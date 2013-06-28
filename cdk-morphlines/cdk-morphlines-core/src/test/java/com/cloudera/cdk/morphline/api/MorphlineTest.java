@@ -57,10 +57,10 @@ public class MorphlineTest extends AbstractMorphlineTest {
     assertSame(input, collector.getFirstRecord());    
   }
 
-  private void processAndVerifySuccess(Record inputRecord, Multimap... expectedMaps) {
+  private void processAndVerifySuccess(Record input, Multimap... expectedMaps) {
     startSession();
     assertEquals(1, collector.getNumStartEvents());
-    assertTrue(morphline.process(inputRecord));    
+    assertTrue(morphline.process(input));    
     Iterator<Record> iter = collector.getRecords().iterator();
     for (Multimap expected : expectedMaps) {
       assertTrue(iter.hasNext());
@@ -69,10 +69,10 @@ public class MorphlineTest extends AbstractMorphlineTest {
     assertFalse(iter.hasNext());
   }
 
-  private void processAndVerifyFailure(Record record) {
+  private void processAndVerifyFailure(Record input) {
     startSession();
     assertEquals(1, collector.getNumStartEvents());
-    assertFalse(morphline.process(record));
+    assertFalse(morphline.process(input));
     assertEquals(0, collector.getRecords().size());    
   }
 
@@ -502,7 +502,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     Record expected = new Record();
     expected.put(Fields.MESSAGE, msg);
     assertEquals(expected, collector.getFirstRecord());
-    assertNotSame(record, collector.getRecords().get(0));
+    assertNotSame(record, collector.getFirstRecord());
   }
   
   @Test
@@ -740,7 +740,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     if (inplace) {
       assertSame(record, collector.getFirstRecord());
     } else {
-      assertNotSame(record, collector.getRecords().get(0));      
+      assertNotSame(record, collector.getFirstRecord());      
     }
   }
   

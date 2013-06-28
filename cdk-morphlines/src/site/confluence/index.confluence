@@ -115,7 +115,9 @@ syslog_message:listening on 0.0.0.0 port 22.
 
 h3. Defining a Chain of Transformation Commands
 
-These rules can be expressed with morphline commands called [readLine|morphlinesReferenceGuide#readLine], [grok|morphlinesReferenceGuide#grok] and [logDebug|morphlinesReferenceGuide#logTrace_logDebug_logInfo_logWarn_logError] by editing a {{morphline.conf}} file to read as follows:
+These rules can be expressed with morphline commands called [readLine|morphlinesReferenceGuide#readLine],
+[grok|morphlinesReferenceGuide#grok] and [logDebug|morphlinesReferenceGuide#logTrace_logDebug_logInfo_logWarn_logError] by editing a {{morphline.conf}} file to read as follows:
+
 {code}
 # Specify an array of one or more morphlines, each of which defines an ETL
 # transformation chain. A morphline consists of one or more (potentially
@@ -220,7 +222,9 @@ Note that the Solr output schema omits some Avro input fields such as user\_stat
 
 h3. Defining a Chain of Transformation Commands
 
-These transformation rules can be expressed with morphline commands called [readAvroContainer|morphlinesReferenceGuide#readAvroContainer], [extractAvroPaths|morphlinesReferenceGuide#extractAvroPaths], [convertTimestamp|morphlinesReferenceGuide#convertTimestamp], [sanitizeUnknownSolrFields|morphlinesReferenceGuide#sanitizeUnknownSolrFields] and [loadSolr|morphlinesReferenceGuide#loadSolr], by editing a {{morphline.conf}} file to read as follows:
+These transformation rules can be expressed with morphline commands called [readAvroContainer|morphlinesReferenceGuide#readAvroContainer], 
+[extractAvroPaths|morphlinesReferenceGuide#extractAvroPaths], [convertTimestamp|morphlinesReferenceGuide#convertTimestamp], [sanitizeUnknownSolrFields|morphlinesReferenceGuide#sanitizeUnknownSolrFields] and [loadSolr|morphlinesReferenceGuide#loadSolr], by editing a {{morphline.conf}} file to read as follows:
+
 {code}
 # Specify server locations in a SOLR_LOCATOR variable; used later in
 # variable substitutions:
