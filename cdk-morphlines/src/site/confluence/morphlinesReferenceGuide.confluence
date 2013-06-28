@@ -807,8 +807,8 @@ The command provides the following configuration options:
 | isRegex | false | Whether or not to interpret the pattern as a grok pattern (true) or string literal (false). |
 | dictionaryFiles | \[\] | A list of zero or more local files or directory trees from which to load dictionaries. Only applicable if {{isRegex}} is {{true}}. See [#grok] command. |
 | dictionaryString | null | An optional inline string from which to load a dictionary. Only applicable if {{isRegex}} is {{true}}. See [#grok] command. |
-| trimResults | true | Whether or not to apply the {{String.trim()}} method on the output values to be added. |
-| omitEmptyStrings | true | Whether or not to add zero length strings to the output field. |
+| trim | true | Whether or not to apply the {{String.trim()}} method on the output values to be added. |
+| addEmptyStrings | false | Whether or not to add zero length strings to the output field. |
 | limit | \-1 | The maximum number of items to add to the output field per input field value. \-1 indicates unlimited. |
 
 Example usage with literal string:
@@ -820,8 +820,8 @@ split {
   isRegex : false      
   #separator : """\s*,\s*"""        
   #isRegex : true      
-  omitEmptyStrings : true
-  trimResults : true          
+  addEmptyStrings : false
+  trim : true          
 }
 {code}
 
@@ -847,8 +847,8 @@ split {
   separator : """%{COMMA_SURROUNDED_BY_WHITESPACE}"""        
   # separator : """\s*,\s*"""        
   isRegex : true      
-  omitEmptyStrings : false
-  trimResults : false          
+  addEmptyStrings : true
+  trim : false          
 }
 {code}
 

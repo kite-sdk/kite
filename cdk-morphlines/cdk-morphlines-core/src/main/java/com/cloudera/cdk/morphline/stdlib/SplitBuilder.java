@@ -80,11 +80,11 @@ public final class SplitBuilder implements CommandBuilder {
         currentSplitter = currentSplitter.limit(limit);
       }
       
-      if (getConfigs().getBoolean(config, "omitEmptyStrings", true)) {
+      if (getConfigs().getBoolean(config, "addEmptyStrings", false)) {
         currentSplitter = currentSplitter.omitEmptyStrings();
       }
       
-      if (getConfigs().getBoolean(config, "trimResults", true)) {
+      if (getConfigs().getBoolean(config, "trim", true)) {
         currentSplitter = currentSplitter.trimResults();
       }
       
