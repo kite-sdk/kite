@@ -49,20 +49,20 @@ import com.typesafe.config.ConfigUtil;
 
 public class MorphlineTest extends AbstractMorphlineTest {
   
-  private void processAndVerifySuccess(Record inputRecord, Record expected) {
+  private void processAndVerifySuccess(Record input, Record expected) {
     startSession();
     assertEquals(1, collector.getNumStartEvents());
-    assertTrue(morphline.process(inputRecord));
-    assertEquals(inputRecord, collector.getFirstRecord());
-    assertSame(inputRecord, collector.getFirstRecord());    
+    assertTrue(morphline.process(input));
+    assertEquals(expected, collector.getFirstRecord());
+    assertSame(input, collector.getFirstRecord());    
   }
 
-  private void processAndVerifySuccess(Record inputRecord, Multimap... maps) {
+  private void processAndVerifySuccess(Record inputRecord, Multimap... expectedMaps) {
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(inputRecord));    
     Iterator<Record> iter = collector.getRecords().iterator();
-    for (Multimap expected : maps) {
+    for (Multimap expected : expectedMaps) {
       assertTrue(iter.hasNext());
       assertEquals(expected, iter.next().getFields());
     }    
