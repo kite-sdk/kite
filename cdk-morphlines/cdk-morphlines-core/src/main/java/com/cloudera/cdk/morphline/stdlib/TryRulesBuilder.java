@@ -63,14 +63,16 @@ public final class TryRulesBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class TryRules extends AbstractCommand {
 
-    private List<Command> childRules = new ArrayList();
-    private boolean throwExceptionIfAllRulesFailed;
-    private boolean catchExceptions;
+    private final List<Command> childRules = new ArrayList();
+    private final boolean throwExceptionIfAllRulesFailed;
+    private final boolean catchExceptions;
+    private final boolean copyRecords;
     
     public TryRules(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
       this.throwExceptionIfAllRulesFailed = getConfigs().getBoolean(config, "throwExceptionIfAllRulesFailed", true);
       this.catchExceptions = getConfigs().getBoolean(config, "catchExceptions", false);
+      this.copyRecords = getConfigs().getBoolean(config, "copyRecords", true);
       
       List<? extends Config> ruleConfigs = getConfigs().getConfigList(config, "rules", Collections.EMPTY_LIST);
       for (Config ruleConfig : ruleConfigs) {
@@ -93,7 +95,7 @@ public final class TryRulesBuilder implements CommandBuilder {
     @Override
     protected boolean doProcess(Record record) {
       for (Command childRule : childRules) {
-        Record copy = record.copy();
+        Record copy = copyRecords ? record.copy() : record;
         if (!catchExceptions) {
           if (childRule.process(copy)) {
             return true; // rule was executed successfully; no need to try the other remaining rules

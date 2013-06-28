@@ -15,24 +15,14 @@
  */
 package com.cloudera.cdk.morphline.stdlib;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
-import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
@@ -42,9 +32,6 @@ import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.GroupInfo;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Matcher;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Pattern;
 import com.codahale.metrics.Timer;
-import com.google.common.base.Joiner;
-import com.google.common.io.CharStreams;
-import com.google.common.io.Closeables;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -127,11 +114,7 @@ public final class GrokBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    try {
-      return new Grok(config, parent, child, context);
-    } catch (IOException e) {
-      throw new MorphlineCompilationException("Cannot parse", config, e);
-    }
+    return new Grok(config, parent, child, context);
   }
   
   
@@ -140,7 +123,6 @@ public final class GrokBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class Grok extends AbstractCommand {
 
-    private final Map<String, String> dictionary = new HashMap();
     private final Map<String, Pattern> regexes = new HashMap();
     private final boolean extract;
     private final boolean extractInPlace;
@@ -151,27 +133,14 @@ public final class GrokBuilder implements CommandBuilder {
 
     private static final boolean ENABLE_FAST_EXTRACTION_PATH = true;
     
-    public Grok(Config config, Command parent, Command child, MorphlineContext context) throws IOException {
+    public Grok(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
       
-      for (String dictionaryFile : getConfigs().getStringList(config, "dictionaryFiles", Collections.EMPTY_LIST)) {
-        loadDictionaryFile(new File(dictionaryFile));
-      }
-      String dictionaryString = getConfigs().getString(config, "dictionaryString", "");
-      loadDictionary(new StringReader(dictionaryString));
-      resolveDictionaryExpressions();
-      
+      GrokDictionaries dict = new GrokDictionaries(config, getConfigs());
       Config exprConfig = getConfigs().getConfig(config, "expressions", ConfigFactory.empty());
       for (Map.Entry<String, Object> entry : exprConfig.root().unwrapped().entrySet()) {
         String expr = entry.getValue().toString();
-        //LOG.debug("expr before: {}", expr);
-        expr = resolveExpression(expr);     
-        //LOG.debug("expr after : {}", expr);
-        
-        // TODO extract and replace conversions (?<queue_field:int>foo)
-        
-        Pattern pattern = Pattern.compile(expr);
-        regexes.put(entry.getKey(), pattern);
+        this.regexes.put(entry.getKey(), dict.compileExpression(expr));
       }
 
       String extractStr = getConfigs().getString(config, "extract", "true");
@@ -318,119 +287,6 @@ public final class GrokBuilder implements CommandBuilder {
       }
     }
     
-    private void loadDictionaryFile(File fileOrDir) throws IOException {
-      if (!fileOrDir.exists()) {
-        throw new FileNotFoundException("File not found: " + fileOrDir);
-      }
-      if (!fileOrDir.canRead()) {
-        throw new IOException("Insufficient permissions to read file: " + fileOrDir);
-      }
-      if (fileOrDir.isDirectory()) {
-        File[] files = fileOrDir.listFiles();
-        Arrays.sort(files);
-        for (File file : files) {
-          loadDictionaryFile(file);
-        }
-      } else {
-        Reader reader = new InputStreamReader(new FileInputStream(fileOrDir), "UTF-8");
-        try {
-          loadDictionary(reader);
-        } finally {
-          Closeables.closeQuietly(reader);
-        }
-      }      
-    }
-    
-    private void loadDictionary(Reader reader) throws IOException {
-      for (String line : CharStreams.readLines(reader)) {
-        line = line.trim();
-        if (line.length() == 0) {
-          continue; // ignore empty lines
-        }
-        if (line.startsWith("#")) {
-          continue; // ignore comment lines
-        }
-        int i = line.indexOf(" ");
-        if (i < 0) {
-          throw new MorphlineCompilationException("Dictionary entry line must contain a space to separate name and value: " + line, getConfig());
-        }
-        if (i == 0) {
-          throw new MorphlineCompilationException("Dictionary entry line must contain a name: " + line, getConfig());
-        }
-        String name = line.substring(0, i);
-        String value = line.substring(i + 1, line.length()).trim();
-        if (value.length() == 0) {
-          throw new MorphlineCompilationException("Dictionary entry line must contain a value: " + line, getConfig());
-        }
-        dictionary.put(name, value);
-      }      
-    }
-    
-    private void resolveDictionaryExpressions() {
-      boolean wasModified = true;
-      while (wasModified) {
-        wasModified = false;
-        for (Map.Entry<String, String> entry : dictionary.entrySet()) {
-          String expr = entry.getValue();
-          String resolvedExpr = resolveExpression(expr);        
-          wasModified = (expr != resolvedExpr);
-          if (wasModified) {
-            entry.setValue(resolvedExpr);
-            break;
-          }
-        }
-      }
-      LOG.debug("dictionary: {}", Joiner.on("\n").join(new TreeMap(dictionary).entrySet()));
-      for (Map.Entry<String, String> entry : dictionary.entrySet()) {
-        Pattern.compile(entry.getValue()); // validate syntax
-      }
-    }
-
-    private String resolveExpression(String expr) {
-      String PATTERN_START = "%{";
-      String PATTERN_END= "}";
-      char SEPARATOR = ':';
-      while (true) {
-        int i = expr.indexOf(PATTERN_START);
-        if (i < 0) {
-          break;
-        }     
-        int j = expr.indexOf(PATTERN_END, i + PATTERN_START.length());
-        if (j < 0) {
-          break;
-        }     
-        String grokPattern = expr.substring(i + PATTERN_START.length(),  j);
-        //LOG.debug("grokPattern=" + grokPattern + ", entryValue=" + entryValue);
-        int p = grokPattern.indexOf(SEPARATOR);
-        String regexName = grokPattern;
-        String groupName = null;
-        String conversion = null; // FIXME
-        if (p >= 0) {
-          regexName = grokPattern.substring(0, p);
-          groupName = grokPattern.substring(p+1, grokPattern.length());
-          int q = groupName.indexOf(SEPARATOR);
-          if (q >= 0) {
-            conversion = groupName.substring(q+1, groupName.length());
-            groupName = groupName.substring(0, q);
-          }
-        }
-        //LOG.debug("patternName=" + patternName + ", groupName=" + groupName + ", conversion=" + conversion);
-        String refValue = dictionary.get(regexName);
-        if (refValue == null) {
-          throw new MorphlineCompilationException("Missing value for name: " + regexName, getConfig());
-        }
-        if (refValue.contains(PATTERN_START)) {
-          break; // not a literal value; defer resolution until next iteration
-        }
-        String replacement = refValue;
-        if (groupName != null) { // named capturing group
-          replacement = "(?<" + groupName + ">" + refValue + ")";
-        }
-        expr = new StringBuilder(expr).replace(i, j + PATTERN_END.length(), replacement).toString();
-      }
-      return expr;
-    }
-        
     
     ///////////////////////////////////////////////////////////////////////////////
     // Nested classes:

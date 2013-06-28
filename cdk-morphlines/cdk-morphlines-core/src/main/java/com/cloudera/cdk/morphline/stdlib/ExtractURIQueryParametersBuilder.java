@@ -31,8 +31,8 @@ import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.typesafe.config.Config;
 
 /**
- * A command that extracts some or all named query parameters from the URIs contained in the given
- * input field and appends them to the given output field.
+ * A command that extracts the query parameters with a given name from the URIs contained in the
+ * given input field and appends them to the given output field.
  */
 public final class ExtractURIQueryParametersBuilder implements CommandBuilder {
 
@@ -98,7 +98,7 @@ public final class ExtractURIQueryParametersBuilder implements CommandBuilder {
                 record.put(outputFieldName, value);
                 numParameters++;
               }              
-              break; // found separator
+              break; // found '=' separator
             }
           }
           i = j;

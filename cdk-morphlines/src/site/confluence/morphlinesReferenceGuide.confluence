@@ -20,6 +20,7 @@ h3. cdk\-morphlines\-core\-stdlib
 - [equals|#equals]
 - [extractURIComponents|#extractURIComponents]
 - [extractURIQueryParameters|#extractURIQueryParameters]
+- [findReplace|#findReplace]
 - [generateUUID|#generateUUID]
 - [grok|#grok]
 - [if|#if]
@@ -29,6 +30,7 @@ h3. cdk\-morphlines\-core\-stdlib
 - [pipe|#pipe]
 - [separateAttachments|#separateAttachments]
 - [setValues|#setValues]
+- [split|#split]
 - [toString|#toString]
 - [tryRules|#tryRules]
 
@@ -378,18 +380,18 @@ extractURIComponents {
 }
 {code}
 
-For example, given the input field {{myUri}} with the value {{ http://userinfo@www.bar.com/errors.log?foo=x&bar=y&foo=z#fragment}} the expected output is
+For example, given the input field {{myUri}} with the value {{ http://userinfo@www.bar.com:8080/errors.log?foo=x&bar=y&foo=z#fragment}} the expected output is
 
 || Name || Value ||
-| myUri | http://userinfo@www.bar.com/errors.log?foo=x&bar=y&foo=z#fragment |
-| uri\_component\_authority | user-info@www.bar.com |
+| myUri | http://userinfo@www.bar.com:8080/errors.log?foo=x&bar=y&foo=z#fragment |
+| uri\_component\_authority | user-info@www.bar.com:8080 |
 | uri\_component\_fragment | fragment |
 | uri\_component\_host | www.bar.com |
 | uri\_component\_path | /errors.log |
-| uri\_component\_port | -1 |
+| uri\_component\_port | 8080 |
 | uri\_component\_query | foo=x&bar=y&foo=z |
 | uri\_component\_scheme | http |
-| uri\_component\_schemeSpecificPart | //user-info@www.bar.com/errors.log?foo=x&bar=y&foo=z |
+| uri\_component\_schemeSpecificPart | //user-info@www.bar.com:8080/errors.log?foo=x&bar=y&foo=z |
 | uri\_component\_userInfo | userinfo |
 
 h2. extractURIQueryParameters
@@ -408,17 +410,53 @@ The command provides the following configuration options:
 Example usage:
 {code}
 extractURIQueryParameters {
+  parameter : foo
   inputField : myUri
   outputField : my_query_params
 }
 {code}
 
-For example, given the parameter {{foo}} and the input field {{myUri}} with the value {{http://userinfo@www.bar.com/errors.log?foo=x&bar=y&foo=z#fragment}} the expected output record is 
+For example, given the input field {{myUri}} with the value {{http://userinfo@www.bar.com/errors.log?foo=x&bar=y&foo=z#fragment}} the expected output record is: 
 
 {code}
 my_query_params:x
 my_query_params:z
 {code}
+
+h2. findReplace
+
+The [findReplace|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/FindReplaceBuilder.java] command examines each string value in a given field and replaces each substring of the string value that matches the given string literal or grok pattern with the given replacement.
+ 
+This command also supports grok dictionaries and regexes in the same way as the [#grok] command.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| inputField | n/a | The name of the input field. |
+| outputField | n/a | The name of the field to add output values to. |
+| pattern | n/a | The search string to match. |
+| isRegex | false | Whether or not to interpret the pattern as a grok pattern (true) or string literal (false). |
+| dictionaryFiles | \[\] | A list of zero or more local files or directory trees from which to load dictionaries. Only applicable if {{isRegex}} is {{true}}. See [#grok] command. |
+| dictionaryString | null | An optional inline string from which to load a dictionary. Only applicable if {{isRegex}} is {{true}}. See [#grok] command. |
+| replacement | n/a | The replacement pattern ({{isRegex}} is {{true}}) or string literal ({{isRegex}} is {{false}}). |
+| replaceFirst | false | Whether or not to skip any matches beyond the first match. |
+
+Example usage with literal string:
+{code}
+findReplace { 
+  field : message
+  dictionaryFiles : [cdk-morphlines-core/src/test/resources/grok-dictionaries]                               
+  pattern : """%{WORD:myGroup}"""
+  isRegex : true
+  replacement : "${myGroup}!"
+  #replacement : ""
+  replaceFirst : false
+}
+{code}
+
+Input: {{"hello world"}}
+  
+Expected output: {{"hello! world!"}}
 
 h2. generateUUID
 
@@ -753,6 +791,64 @@ setValues {
 
   # assign all values contained in the first_name field to the name field
   name : "@{first_name}"
+}
+{code}
+
+h2. split
+
+The [split|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SplitBuilder.java] command divides strings into substrings, by recognizing a _separator_ (a.k.a. "delimiter") which can be expressed as a single character, literal string, regular expression, or grok pattern. This class provides the functionality of Guava's [Splitter|http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/base/Splitter.html] class as a morphline command, plus it also supports grok dictionaries and regexes in the same way as the [#grok] command.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| inputField | n/a | The name of the input field. |
+| outputField | n/a | The name of the field to add output values to. |
+| separator | n/a | The delimiting string to search for. |
+| isRegex | false | Whether or not to interpret the pattern as a grok pattern (true) or string literal (false). |
+| dictionaryFiles | \[\] | A list of zero or more local files or directory trees from which to load dictionaries. Only applicable if {{isRegex}} is {{true}}. See [#grok] command. |
+| dictionaryString | null | An optional inline string from which to load a dictionary. Only applicable if {{isRegex}} is {{true}}. See [#grok] command. |
+| trimResults | true | Whether or not to apply the {{String.trim()}} method on the output values to be added. |
+| omitEmptyStrings | true | Whether or not to add zero length strings to the output field. |
+| limit | \-1 | The maximum number of items to add to the output field per input field value. \-1 indicates unlimited. |
+
+Example usage with literal string:
+{code}
+split { 
+  inputField : message
+  outputField : output          
+  separator : ","        
+  isRegex : false      
+  #separator : """\s*,\s*"""        
+  #isRegex : true      
+  omitEmptyStrings : true
+  trimResults : true          
+}
+{code}
+
+Input: 
+{code}
+message:"_a ,_b_ ,c__"
+{code}
+  
+Expected output:  
+{code}
+output:_a
+output:_b_
+output:c__
+{code}
+
+Example usage with grok pattern or normal regex:
+{code}
+split { 
+  inputField : message
+  outputField : output
+  # dictionaryFiles : [cdk-morphlines-core/src/test/resources/grok-dictionaries] 
+  dictionaryString : """COMMA_SURROUNDED_BY_WHITESPACE \s*,\s*"""          
+  separator : """%{COMMA_SURROUNDED_BY_WHITESPACE}"""        
+  # separator : """\s*,\s*"""        
+  isRegex : true      
+  omitEmptyStrings : false
+  trimResults : false          
 }
 {code}
 

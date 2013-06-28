@@ -940,6 +940,121 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testFindReplace() throws Exception {
+    Config override = ConfigFactory.parseString("replaceFirst : false");
+    morphline = createMorphline("test-morphlines/findReplace", override);    
+    Record record = new Record();
+    record.put("text", "hello ic world ic");
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put("text", "hello I see world I see");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testFindReplaceWithReplaceFirst() throws Exception {
+    Config override = ConfigFactory.parseString("replaceFirst : true");
+    morphline = createMorphline("test-morphlines/findReplace", override);    
+    Record record = new Record();
+    record.put("text", "hello ic world ic");
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put("text", "hello I see world ic");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testFindReplaceWithGrok() throws Exception {
+    Config override = ConfigFactory.parseString("replaceFirst : false");
+    morphline = createMorphline("test-morphlines/findReplaceWithGrok", override);    
+    Record record = new Record();
+    record.put("text", "hello ic world ic");
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put("text", "hello! ic! world! ic!");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testFindReplaceWithGrokWithReplaceFirst() throws Exception {
+    Config override = ConfigFactory.parseString("replaceFirst : true");
+    morphline = createMorphline("test-morphlines/findReplaceWithGrok", override);    
+    Record record = new Record();
+    record.put("text", "hello ic world ic");
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put("text", "hello! ic world ic");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testSplit() throws Exception {
+    morphline = createMorphline("test-morphlines/split");    
+    Record record = new Record();
+    String msg = " _a ,_b_ ,c__";
+    record.put(Fields.MESSAGE, msg);
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put(Fields.MESSAGE, msg);
+    expected.put("output", "_a");
+    expected.put("output", "_b_");
+    expected.put("output", "c__");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testSplitWithMultipleChars() throws Exception {
+    morphline = createMorphline("test-morphlines/splitWithMultipleChars");    
+    Record record = new Record();
+    String msg = " _a ,_b_ ,c__";
+    record.put(Fields.MESSAGE, msg);
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put(Fields.MESSAGE, msg);
+    expected.put("output", " _a");
+    expected.put("output", "_b_");
+    expected.put("output", "c__");
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
+  public void testSplitWithGrok() throws Exception {
+    morphline = createMorphline("test-morphlines/splitWithGrok");    
+    Record record = new Record();
+    String msg = " _a ,_b_ ,c__";
+    record.put(Fields.MESSAGE, msg);
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    expected.put(Fields.MESSAGE, msg);
+    expected.put("output", " _a");
+    expected.put("output", "_b_");
+    expected.put("output", "c__");
+    System.out.println(collector.getRecords());
+    assertEquals(Arrays.asList(expected), collector.getRecords());
+    assertSame(record, collector.getRecords().get(0));
+  }
+  
+  @Test
   public void testConvertTimestampEmpty() throws Exception {
     morphline = createMorphline("test-morphlines/convertTimestamp");
     Record record = new Record();
@@ -1057,7 +1172,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
   
   @Test
   public void testExtractURIComponents() throws Exception {
-    String uriStr = "http://user-info@www.fool.com/errors.log?foo=x&foo=y&foo=z#fragment";
+    String uriStr = "http://user-info@www.fool.com:8080/errors.log?foo=x&foo=y&foo=z#fragment";
     morphline = createMorphline("test-morphlines/extractURIComponents");    
     Record record = new Record();
     record.put("uri", uriStr);
