@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
@@ -29,6 +28,7 @@ import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.stdio.AbstractParser;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.typesafe.config.Config;
@@ -76,23 +76,27 @@ public final class ReadJsonBuilder implements CommandBuilder {
 
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
-      Iterator iter = reader.readValues(in);
-      while (iter.hasNext()) {
-        Object rootNode = iter.next();
-        incrementNumRecords();
-        LOG.debug("jsonObject: {}", rootNode);
-        
-        Record outputRecord = inputRecord.copy();
-        removeAttachments(outputRecord);
-        outputRecord.put(Fields.ATTACHMENT_BODY, rootNode);
-        outputRecord.put(Fields.ATTACHMENT_MIME_TYPE, MIME_TYPE);
-
-        // pass record to next command in chain:
-        if (!getChild().process(outputRecord)) {
-          return false;
+      MappingIterator iter = reader.readValues(in);
+      try {
+        while (iter.hasNextValue()) {
+          Object rootNode = iter.nextValue();
+          incrementNumRecords();
+          LOG.debug("jsonObject: {}", rootNode);
+          
+          Record outputRecord = inputRecord.copy();
+          removeAttachments(outputRecord);
+          outputRecord.put(Fields.ATTACHMENT_BODY, rootNode);
+          outputRecord.put(Fields.ATTACHMENT_MIME_TYPE, MIME_TYPE);
+  
+          // pass record to next command in chain:
+          if (!getChild().process(outputRecord)) {
+            return false;
+          }
         }
+        return true;
+      } finally {
+        iter.close();
       }
-      return true;
     }
   }
 }
