@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -30,6 +31,7 @@ import com.cloudera.cdk.morphline.base.Fields;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.google.common.collect.ImmutableMap;
 
 public class JsonMorphlineTest extends AbstractMorphlineTest {
 
@@ -56,6 +58,30 @@ public class JsonMorphlineTest extends AbstractMorphlineTest {
     assertEquals("bar", node.get("secondObject").asText());
     assertTrue(node.isObject());
     assertEquals(1, node.size());
+    
+    assertFalse(iter.hasNext());
+    in.close();
+  }
+  
+  @Test
+  public void testReadJsonWithMap() throws Exception {
+    morphline = createMorphline("test-morphlines/readJsonWithMap");    
+    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/stream.json"));
+    Record record = new Record();
+    record.put(Fields.ATTACHMENT_BODY, in);
+    
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));    
+    Iterator<Record> iter = collector.getRecords().iterator();
+    
+    assertTrue(iter.hasNext());
+    Map node = (Map) iter.next().getFirstValue(Fields.ATTACHMENT_BODY);
+    assertEquals(ImmutableMap.of("firstObject", "foo"), node);
+    
+    assertTrue(iter.hasNext());
+    node = (Map) iter.next().getFirstValue(Fields.ATTACHMENT_BODY);
+    assertEquals(ImmutableMap.of("secondObject", "bar"), node);
     
     assertFalse(iter.hasNext());
     in.close();

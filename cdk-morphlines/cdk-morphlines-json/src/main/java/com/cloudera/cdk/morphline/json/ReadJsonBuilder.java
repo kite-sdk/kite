@@ -23,6 +23,7 @@ import java.util.Iterator;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
+import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
@@ -58,18 +59,26 @@ public final class ReadJsonBuilder implements CommandBuilder {
   // /////////////////////////////////////////////////////////////////////////////
   private static final class ReadJson extends AbstractParser {
 
-    private final ObjectReader reader = new ObjectMapper().reader(JsonNode.class);
+    private final ObjectReader reader;
 
     public ReadJson(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
+      String className = getConfigs().getString(config, "class", JsonNode.class.getName());
+      Class clazz;
+      try {
+        clazz = Class.forName(className);
+      } catch (ClassNotFoundException e) {
+        throw new MorphlineCompilationException("Class not found", config, e);
+      }
+      reader = new ObjectMapper().reader(clazz);
       validateArguments();
     }
 
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
-      Iterator<JsonNode> iter = reader.readValues(in);
+      Iterator iter = reader.readValues(in);
       while (iter.hasNext()) {
-        JsonNode rootNode = iter.next();
+        Object rootNode = iter.next();
         incrementNumRecords();
         LOG.debug("jsonObject: {}", rootNode);
         
