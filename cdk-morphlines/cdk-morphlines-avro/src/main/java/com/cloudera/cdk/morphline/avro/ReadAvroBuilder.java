@@ -26,9 +26,10 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.io.DatumReader;
+import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.JsonDecoder;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
@@ -37,7 +38,6 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.avro.ReadAvroContainerBuilder.ReadAvroContainer;
 import com.cloudera.cdk.morphline.base.Fields;
-import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 
 
@@ -69,8 +69,10 @@ public final class ReadAvroBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   final static class ReadAvro extends ReadAvroContainer {
 
-    protected final Schema writerSchema;
+    private final Schema writerSchema;
     private final boolean isJson;
+    private BinaryDecoder binaryDecoder = null;
+    private JsonDecoder jsonDecoder = null;
     
     public ReadAvro(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
@@ -92,7 +94,7 @@ public final class ReadAvroBuilder implements CommandBuilder {
       }
       
       this.isJson = getConfigs().getBoolean(config, "isJson", false);
-      validateArguments();
+      validateArguments();      
     }
     
     @Override
@@ -110,17 +112,24 @@ public final class ReadAvroBuilder implements CommandBuilder {
 
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
-      Preconditions.checkNotNull(writerSchema);  
-      Schema readSchema = readerSchema != null ? readerSchema : writerSchema;
-      DatumReader<GenericContainer> datumReader = new GenericDatumReader<GenericContainer>(writerSchema, readSchema);
-      
       Decoder decoder;
       if (isJSON()) {
-        decoder = DecoderFactory.get().jsonDecoder(writerSchema, in);
-      } else {
-        decoder = DecoderFactory.get().binaryDecoder(in, null);
+        if (jsonDecoder == null) {
+          jsonDecoder = DecoderFactory.get().jsonDecoder(writerSchema, in);
+        } else {
+          jsonDecoder.configure(in); // reuse for performance
+        }
+        decoder = jsonDecoder;
+      } else {        
+        binaryDecoder = DecoderFactory.get().binaryDecoder(in, binaryDecoder); // reuse for performance
+        decoder = binaryDecoder;
       }
             
+      if (datumReader == null) { // reuse for performance
+        Schema readSchema = readerSchema != null ? readerSchema : writerSchema;
+        datumReader = new GenericDatumReader<GenericContainer>(writerSchema, readSchema);      
+      }
+
       try {
         while (true) {
           GenericContainer datum = datumReader.read(null, decoder);

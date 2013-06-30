@@ -71,6 +71,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
   static class ReadAvroContainer extends AbstractParser {
 
     protected final Schema readerSchema;
+    protected DatumReader<GenericContainer> datumReader;
 
     public ReadAvroContainer(Config config, Command parent, Command child, MorphlineContext context) {   
       super(config, parent, child, context);
@@ -98,7 +99,9 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
-      DatumReader<GenericContainer> datumReader = new GenericDatumReader(null, readerSchema);
+      if (datumReader == null) { // reuse for performance
+        datumReader = new GenericDatumReader(null, readerSchema);
+      }
       FileReader<GenericContainer> reader = null;
       try {
         reader = new DataFileReader(new ForwardOnlySeekableInputStream(in), datumReader);    

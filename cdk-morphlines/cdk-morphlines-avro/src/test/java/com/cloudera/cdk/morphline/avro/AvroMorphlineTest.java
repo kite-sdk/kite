@@ -472,24 +472,27 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
   private void runTweetContainer(String morphlineConfigFile, String[] fieldNames) throws Exception {
     File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433-medium.avro");
     morphline = createMorphline(morphlineConfigFile);    
-    Record record = new Record();
-    byte[] body = Files.toByteArray(file);    
-    record.put(Fields.ATTACHMENT_BODY, body);
-    startSession();
-    Notifications.notifyBeginTransaction(morphline);
-    assertTrue(morphline.process(record));
-    assertEquals(1, collector.getNumStartEvents());
-    assertEquals(2104, collector.getRecords().size());
-    
-    FileReader<GenericData.Record> reader = new DataFileReader(file, new GenericDatumReader());
-    int i = 0;
-    while (reader.hasNext()) {
-      Record actual = collector.getRecords().get(i);
-      GenericData.Record expected = reader.next();
-      assertTweetEquals(expected, actual, fieldNames, i);
-      i++;
-    }    
-    assertEquals(collector.getRecords().size(), i);
+    for (int j = 0; j < 3; j++) { // also test reuse of objects and low level avro buffers
+      Record record = new Record();
+      byte[] body = Files.toByteArray(file);    
+      record.put(Fields.ATTACHMENT_BODY, body);
+      collector.reset();
+      startSession();
+      Notifications.notifyBeginTransaction(morphline);
+      assertTrue(morphline.process(record));
+      assertEquals(1, collector.getNumStartEvents());
+      assertEquals(2104, collector.getRecords().size());
+      
+      FileReader<GenericData.Record> reader = new DataFileReader(file, new GenericDatumReader());
+      int i = 0;
+      while (reader.hasNext()) {
+        Record actual = collector.getRecords().get(i);
+        GenericData.Record expected = reader.next();
+        assertTweetEquals(expected, actual, fieldNames, i);
+        i++;
+      }    
+      assertEquals(collector.getRecords().size(), i);
+    }
   }
   
   @Test
@@ -544,24 +547,27 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     }
     encoder.flush();
 
-    morphline = createMorphline(morphlineConfigFile);    
-    Record record = new Record();
-    record.put(Fields.ATTACHMENT_BODY, bout.toByteArray());
-    startSession();
-    Notifications.notifyBeginTransaction(morphline);
-    assertTrue(morphline.process(record));
-    assertEquals(1, collector.getNumStartEvents());
-    assertEquals(2104, collector.getRecords().size());
-    
-    reader = new DataFileReader(file, new GenericDatumReader());
-    int i = 0;
-    while (reader.hasNext()) {
-      Record actual = collector.getRecords().get(i);
-      GenericData.Record expected = reader.next();
-      assertTweetEquals(expected, actual, fieldNames, i);
-      i++;
-    }    
-    assertEquals(collector.getRecords().size(), i);
+    morphline = createMorphline(morphlineConfigFile);
+    for (int j = 0; j < 3; j++) { // also test reuse of objects and low level avro buffers
+      Record record = new Record();
+      record.put(Fields.ATTACHMENT_BODY, bout.toByteArray());
+      collector.reset();
+      startSession();
+      Notifications.notifyBeginTransaction(morphline);
+      assertTrue(morphline.process(record));
+      assertEquals(1, collector.getNumStartEvents());
+      assertEquals(2104, collector.getRecords().size());
+      
+      reader = new DataFileReader(file, new GenericDatumReader());
+      int i = 0;
+      while (reader.hasNext()) {
+        Record actual = collector.getRecords().get(i);
+        GenericData.Record expected = reader.next();
+        assertTweetEquals(expected, actual, fieldNames, i);
+        i++;
+      }    
+      assertEquals(collector.getRecords().size(), i);
+      }
   }
   
   private void assertTweetEquals(GenericData.Record expected, Record actual, String[] fieldNames, int i) {

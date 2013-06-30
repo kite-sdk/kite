@@ -38,53 +38,59 @@ public class JsonMorphlineTest extends AbstractMorphlineTest {
   @Test
   public void testReadJson() throws Exception {
     morphline = createMorphline("test-morphlines/readJson");    
-    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/stream.json"));
-    Record record = new Record();
-    record.put(Fields.ATTACHMENT_BODY, in);
-    
-    startSession();
-    assertEquals(1, collector.getNumStartEvents());
-    assertTrue(morphline.process(record));    
-    Iterator<Record> iter = collector.getRecords().iterator();
-    
-    assertTrue(iter.hasNext());
-    JsonNode node = (JsonNode) iter.next().getFirstValue(Fields.ATTACHMENT_BODY);
-    assertEquals("foo", node.get("firstObject").asText());
-    assertTrue(node.isObject());
-    assertEquals(1, node.size());
-    
-    assertTrue(iter.hasNext());
-    node = (JsonNode) iter.next().getFirstValue(Fields.ATTACHMENT_BODY);
-    assertEquals("bar", node.get("secondObject").asText());
-    assertTrue(node.isObject());
-    assertEquals(1, node.size());
-    
-    assertFalse(iter.hasNext());
-    in.close();
+    for (int j = 0; j < 3; j++) { // also test reuse of objects and low level avro buffers
+      InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/stream.json"));
+      Record record = new Record();
+      record.put(Fields.ATTACHMENT_BODY, in);
+      
+      collector.reset();
+      startSession();
+      assertEquals(1, collector.getNumStartEvents());
+      assertTrue(morphline.process(record));    
+      Iterator<Record> iter = collector.getRecords().iterator();
+      
+      assertTrue(iter.hasNext());
+      JsonNode node = (JsonNode) iter.next().getFirstValue(Fields.ATTACHMENT_BODY);
+      assertEquals("foo", node.get("firstObject").asText());
+      assertTrue(node.isObject());
+      assertEquals(1, node.size());
+      
+      assertTrue(iter.hasNext());
+      node = (JsonNode) iter.next().getFirstValue(Fields.ATTACHMENT_BODY);
+      assertEquals("bar", node.get("secondObject").asText());
+      assertTrue(node.isObject());
+      assertEquals(1, node.size());
+      
+      assertFalse(iter.hasNext());
+      in.close();
+    }
   }
   
   @Test
   public void testReadJsonWithMap() throws Exception {
     morphline = createMorphline("test-morphlines/readJsonWithMap");    
-    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/stream.json"));
-    Record record = new Record();
-    record.put(Fields.ATTACHMENT_BODY, in);
-    
-    startSession();
-    assertEquals(1, collector.getNumStartEvents());
-    assertTrue(morphline.process(record));    
-    Iterator<Record> iter = collector.getRecords().iterator();
-    
-    assertTrue(iter.hasNext());
-    Map node = (Map) iter.next().getFirstValue(Fields.ATTACHMENT_BODY);
-    assertEquals(ImmutableMap.of("firstObject", "foo"), node);
-    
-    assertTrue(iter.hasNext());
-    node = (Map) iter.next().getFirstValue(Fields.ATTACHMENT_BODY);
-    assertEquals(ImmutableMap.of("secondObject", "bar"), node);
-    
-    assertFalse(iter.hasNext());
-    in.close();
+    for (int j = 0; j < 3; j++) { // also test reuse of objects and low level avro buffers
+      InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/stream.json"));
+      Record record = new Record();
+      record.put(Fields.ATTACHMENT_BODY, in);
+      
+      collector.reset();
+      startSession();
+      assertEquals(1, collector.getNumStartEvents());
+      assertTrue(morphline.process(record));    
+      Iterator<Record> iter = collector.getRecords().iterator();
+      
+      assertTrue(iter.hasNext());
+      Map node = (Map) iter.next().getFirstValue(Fields.ATTACHMENT_BODY);
+      assertEquals(ImmutableMap.of("firstObject", "foo"), node);
+      
+      assertTrue(iter.hasNext());
+      node = (Map) iter.next().getFirstValue(Fields.ATTACHMENT_BODY);
+      assertEquals(ImmutableMap.of("secondObject", "bar"), node);
+      
+      assertFalse(iter.hasNext());
+      in.close();
+    }
   }
   
   @Test
