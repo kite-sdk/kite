@@ -40,6 +40,10 @@ h3. cdk\-morphlines\-avro
 - [extractAvroTree|#extractAvroTree]
 - [extractAvroPaths|#extractAvroPaths]
 
+h3. cdk\-morphlines\-json
+- [readJson|#readJson]
+- [extractJsonPaths|#extractJsonPaths]
+
 h3. cdk\-morphlines\-tika\-core
 - [detectMimeType|#detectMimeType]
 
@@ -1011,7 +1015,7 @@ Each path expression consists of a record output field name (on the left side of
 
 The result of a path expression is a list of objects, each of which is added to the given record output field.
 
-The path language supports all Avro concepts, including such concepts as nested structures, records, arrays, maps, and unions. Path language supports a flatten option that collects the primitives in a subtree into a flat output list.
+The path language supports all Avro concepts, including such concepts as nested structures, records, arrays, maps, and unions. The path language supports a flatten option that collects the primitives in a subtree into a flat output list.
 
 The command provides the following configuration options:
 
@@ -1027,6 +1031,7 @@ extractAvroPaths {
     my_price : /price
 
     my_docId : /docId
+    my_links : /links
     my_links_backward : "/links/backward"
     my_links_forward : "/links/forward"
     my_name_language_code : "/name[]/language[]/code"
@@ -1034,6 +1039,80 @@ extractAvroPaths {
 
     /mymapField/foo/label : /mapField/foo/label/
   }
+}
+{code}
+
+h1. cdk\-morphlines\-json
+
+This module contains morphline commands for reading, extracting, and transforming JSON files and JSON objects.
+
+h2. readJson
+
+The [readJson|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ReadJsonBuilder.java] command parses an InputStream or byte array that contains JSON data. For each top level JSON object, the command emits a morphline record containing the top level object as an attachment in the field \_attachment\_body.
+
+The input stream or byte array is read from the first attachment of the input record.
+
+Example usage:
+{code}
+readJSON {}
+{code}
+
+h2. extractJsonPaths
+
+The [extractJsonPaths|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ExtractJsonPathsBuilder.java] command uses zero or more JSON path expressions to extract values from a JSON object.
+
+The JSON input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream {{readJson}} command.
+
+Each path expression consists of a record output field name (on the left side of the colon ':') as well as zero or more path steps (on the right hand side), each path step separated by a '/' slash, akin to a simple form of XPath. JSON arrays are traversed with the '\[\]' notation.
+
+The result of a path expression is a list of objects, each of which is added to the given record output field.
+
+The path language supports all JSON concepts, including such concepts as nested objects, arrays, etc. The path language supports a flatten option that collects the primitives in a subtree into a flat output list.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| flatten | true | Whether to collect the primitives in a subtree into a flat output list. |
+| paths | \[\] | Zero or more JSON path expressions. |
+
+Example usage:
+{code}
+extractJsonPaths {
+  flatten : true
+  paths : {
+    my_price : /price
+
+    my_docId : /docId
+    my_links : /links
+    my_links_backward : "/links/backward"
+    my_links_forward : "/links/forward"
+    my_name_language_code : "/name[]/language[]/code"
+    my_name_language_country : "/name[]/language[]/country"
+  }
+}
+{code}
+
+h1. cdk\-morphlines\-hadoop\-sequencefile
+
+h2. readSequenceFile
+
+The [readSequenceFile|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-sequencefile/src/main/java/com/cloudera/cdk/morphline/hadoop/sequencefile/ReadSequenceFileBuilder.java] command extracts zero or more records from the input stream of the first attachment of the record, representing an Apache Hadoop SequenceFile.
+
+For the format and documentation of SequenceFiles see [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html].
+
+The command automatically handles Record\-Compressed and Block\-Compressed SequenceFiles.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| keyField | \_attachment\_name | The name of the output field to store the SequenceFile Record key. |
+| valueField | \_attachment\_body | The name of the output field to store the SequenceFile Record value. |
+
+Example usage:
+{code}
+readSequenceFile {
+  keyField : "key"
+  valueField : "value"
 }
 {code}
 
@@ -1447,28 +1526,3 @@ morphlines : [
 {note}
 Note: More information on SolrCell can be found here: [http://wiki.apache.org/solr/ExtractingRequestHandler]
 {note}
-
-h1. cdk\-morphlines\-hadoop\-sequencefile
-
-h2. readSequenceFile
-
-The [readSequenceFile|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-sequencefile/src/main/java/com/cloudera/cdk/morphline/hadoop/sequencefile/ReadSequenceFileBuilder.java] command extracts zero or more records from the input stream of the first attachment of the record, representing an Apache Hadoop SequenceFile.
-
-For the format and documentation of SequenceFiles see [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html].
-
-The command automatically handles Record\-Compressed and Block\-Compressed SequenceFiles.
-
-The command provides the following configuration options:
-
-|| Property Name || Default || Description ||
-| keyField | \_attachment\_name | The name of the output field to store the SequenceFile Record key. |
-| valueField | \_attachment\_body | The name of the output field to store the SequenceFile Record value. |
-
-Example usage:
-{code}
-readSequenceFile {
-  keyField : "key"
-  valueField : "value"
-}
-{code}
-

@@ -1,0 +1,36 @@
+{
+  "docId": 10,
+  
+  "links": {
+    "backward": [], 
+    "forward": [20, 40, 60, true, false, 32767, 2147483647, 9223372036854775807, 1.23, 1.7976931348623157E308],
+    "bool" : true,
+    "short" : 32767,
+    "int" : 2147483647,
+    "long" : 9223372036854775807,
+    "double" : 1.7976931348623157E308
+  }, 
+  
+  "name": [
+    { 
+      "language": [
+        {"code": "en-us", "country": "us"}, 
+        {"code": "en", "country": null}
+      ], 
+      "url": "http:\/\/A"
+    }
+    ,
+     
+    {
+      "language": [], 
+      "url": "http:\/\/B"
+    }, 
+    
+    {
+      "language": [
+        {"code": "en-gb", "country": "gb"}
+      ], 
+      "url": null
+    }
+  ]    
+}

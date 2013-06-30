@@ -83,8 +83,6 @@ import com.typesafe.config.Config;
  *         }
  *       }
  * </pre>
- * 
- * STATUS: EXPERIMENTAL
  */
 @Beta
 public final class ExtractAvroPathsBuilder implements CommandBuilder {
