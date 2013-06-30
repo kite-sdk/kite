@@ -230,6 +230,10 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
       // RECORD, ENUM, ARRAY, MAP, UNION, FIXED, STRING, BYTES, INT, LONG, FLOAT,
       // DOUBLE, BOOLEAN, NULL
       switch (schema.getType()) {
+      case RECORD: {
+        record.put(fieldName, datum);
+        break;
+      }
       case ENUM: {
         GenericEnumSymbol symbol = (GenericEnumSymbol) datum;
         record.put(fieldName, symbol.toString());

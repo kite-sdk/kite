@@ -274,6 +274,7 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
       assertTrue(morphline.process(record));
       assertEquals(1, collector.getRecords().size());
       assertEquals(Arrays.asList(10), collector.getFirstRecord().get("/docId"));
+      assertEquals(Arrays.asList(20, 40, 60), collector.getFirstRecord().get("/links"));    
       assertEquals(Arrays.asList(), collector.getFirstRecord().get("/links/backward"));
       List expected = Arrays.asList(20, 40, 60);
       assertEquals(expected, collector.getFirstRecord().get("/links/forward"));
@@ -284,6 +285,8 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
       assertEquals(Arrays.asList("us", "gb"), collector.getFirstRecord().get("/name/[]/language/[]/country"));
       assertEquals(Arrays.asList("us", "gb"), collector.getFirstRecord().get("/name[]/language[]/country"));
       assertEquals(Arrays.asList(), collector.getFirstRecord().get("/unknownField"));
+      expected = Arrays.asList("en-us", "us", "en", "http://A", "http://B", "en-gb", "gb");
+      assertEquals(expected, collector.getFirstRecord().get("/name"));
     }
     
     ingestAndVerifyAvro(documentSchema, document0);
