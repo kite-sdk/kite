@@ -174,6 +174,15 @@ public abstract class AbstractParser extends AbstractCommand {
     outputRecord.removeAll(Fields.ATTACHMENT_CHARSET);
     outputRecord.removeAll(Fields.ATTACHMENT_NAME);
   }
+  
+  int getBufferSize(InputStream stream) {
+    if (stream instanceof ByteArrayInputStream) {
+      return 1024; // probably a single log line from Flume    
+    } else {
+      return 8192; // same as default for new BufferedReader()
+    }
+  }
+
 
 //public static XMediaType toGuavaMediaType(TMediaType tika) {
 //return XMediaType.create(tika.getType(), tika.getSubtype()).withParameters(Multimaps.forMap(tika.getParameters()));

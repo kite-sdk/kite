@@ -103,7 +103,7 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
       Timer.Context timerContext = elapsedTime.time();
       Charset detectedCharset = detectCharset(inputRecord, charset);  
       Reader reader = new InputStreamReader(stream, detectedCharset);
-      BufferedReader lineReader = new BufferedReader(reader);
+      BufferedReader lineReader = new BufferedReader(reader, getBufferSize(stream));
       Matcher matcher = regex.matcher("");
       StringBuilder lines = null;
       String line;

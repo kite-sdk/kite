@@ -73,7 +73,7 @@ public final class ReadLineBuilder implements CommandBuilder {
     protected boolean doProcess(Record inputRecord, InputStream stream) throws IOException {
       Charset detectedCharset = detectCharset(inputRecord, charset);  
       Reader reader = new InputStreamReader(stream, detectedCharset);
-      BufferedReader lineReader = new BufferedReader(reader);
+      BufferedReader lineReader = new BufferedReader(reader, getBufferSize(stream));
       boolean isFirst = true;
       String line;
 
@@ -102,4 +102,5 @@ public final class ReadLineBuilder implements CommandBuilder {
     }
       
   }
+  
 }
