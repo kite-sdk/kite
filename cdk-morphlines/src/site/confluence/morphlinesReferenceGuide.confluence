@@ -44,6 +44,9 @@ h3. cdk\-morphlines\-json
 - [readJson|#readJson]
 - [extractJsonPaths|#extractJsonPaths]
 
+h3. cdk\-morphlines\-hadoop\-sequencefile
+- [readSequenceFile|#readSequenceFile]
+
 h3. cdk\-morphlines\-tika\-core
 - [detectMimeType|#detectMimeType]
 
@@ -59,9 +62,6 @@ h3. cdk\-morphlines\-solr\-core
 
 h3. cdk\-morphlines\-solr\-cell
 - [solrCell|#solrCell]
-
-h3. cdk\-morphlines\-hadoop\-sequencefile
-- [readSequenceFile|#readSequenceFile]
 
 
 h1. Introduction
