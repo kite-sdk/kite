@@ -55,24 +55,15 @@ public final class ReadJsonBuilder implements CommandBuilder {
   }
 
   
-  // /////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
-  // /////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
   private static final class ReadJson extends AbstractParser {
 
     private final ObjectReader reader;
 
     public ReadJson(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
-      
-      //TODO rename to "type", also in unit tests and doc
-      String className = getConfigs().getString(config, "class", JsonNode.class.getName());
-      Class clazz;
-      try {
-        clazz = Class.forName(className);
-      } catch (ClassNotFoundException e) {
-        throw new MorphlineCompilationException("Class not found", config, e);
-      }
       
       JsonFactory jsonFactory = null;
       String jsonFactoryClassName = getConfigs().getString(config, "jsonFactory", null);
@@ -84,11 +75,11 @@ public final class ReadJsonBuilder implements CommandBuilder {
         }
       }
       
-      String mapperClassName = getConfigs().getString(config, "mapper", null);
+      String objectMapperClassName = getConfigs().getString(config, "objectMapper", null);
       ObjectMapper objectMapper = null;
-      if (mapperClassName != null) {
+      if (objectMapperClassName != null) {
         try {
-          objectMapper = (ObjectMapper) Class.forName(mapperClassName).newInstance();
+          objectMapper = (ObjectMapper) Class.forName(objectMapperClassName).newInstance();
         } catch (Exception e) {
           throw new MorphlineCompilationException("Cannot create instance", config, e);
         }
@@ -96,8 +87,15 @@ public final class ReadJsonBuilder implements CommandBuilder {
         objectMapper = new ObjectMapper(jsonFactory, null, null);
       }
       
-      // TODO somehow add option for reader(clazz).with(FormatSchema)?
-      reader = objectMapper.reader(clazz);
+      String outputClassName = getConfigs().getString(config, "outputClass", JsonNode.class.getName());
+      Class outputClass;
+      try {
+        outputClass = Class.forName(outputClassName);
+      } catch (ClassNotFoundException e) {
+        throw new MorphlineCompilationException("Class not found", config, e);
+      }
+      
+      reader = objectMapper.reader(outputClass);
       validateArguments();
     }
 

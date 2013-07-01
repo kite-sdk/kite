@@ -1056,7 +1056,7 @@ The input stream or byte array is read from the first attachment of the input re
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
-| class | [com.fasterxml.jackson.databind.JsonNode|http://wiki.fasterxml.com/JacksonTreeModel] | The fully qualified name of a Java class that [Jackson|https://github.com/FasterXML/jackson-databind] shall convert to. |
+| outputClass | [com.fasterxml.jackson.databind.JsonNode|http://wiki.fasterxml.com/JacksonTreeModel] | The fully qualified name of a Java class that [Jackson|https://github.com/FasterXML/jackson-databind] shall convert to. |
 
 Example usage:
 {code}
@@ -1066,15 +1066,15 @@ readJson {}
 Example usage with conversion from JSON to {{java.util.Map}} objects:
 {code}
 readJson {
-  class : java.util.Map
+  outputClass : java.util.Map
 }
 {code}
 
 h2. extractJsonPaths
 
-The [extractJsonPaths|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ExtractJsonPathsBuilder.java] command uses zero or more JSON path expressions to extract values from a [Jackson|https://github.com/FasterXML/jackson-databind] JSON object of class [com.fasterxml.jackson.databind.JsonNode|http://wiki.fasterxml.com/JacksonTreeModel].
+The [extractJsonPaths|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ExtractJsonPathsBuilder.java] command uses zero or more JSON path expressions to extract values from a [Jackson|https://github.com/FasterXML/jackson-databind] JSON object of outputClass [com.fasterxml.jackson.databind.JsonNode|http://wiki.fasterxml.com/JacksonTreeModel].
 
-The JSON input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream {{readJson}} command with {{class : com.fasterxml.jackson.databind.JsonNode}}.
+The JSON input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream {{readJson}} command with {{outputClass : com.fasterxml.jackson.databind.JsonNode}}.
 
 Each path expression consists of a record output field name (on the left side of the colon ':') as well as zero or more path steps (on the right hand side), each path step separated by a '/' slash, akin to a simple form of XPath. JSON arrays are traversed with the '\[\]' notation.
 
