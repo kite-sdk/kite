@@ -139,11 +139,12 @@ public final class ReadAvroBuilder implements CommandBuilder {
             
       if (datumReader == null) { // reuse for performance
         Schema readSchema = readerSchema != null ? readerSchema : writerSchema;
-        datumReader = new FastGenericDatumReader<GenericContainer>(writerSchema, readSchema);      
+        datumReader = new FastGenericDatumReader<GenericContainer>(writerSchema, readSchema);  
+        datumReader.setResolver(createResolver(writerSchema, readSchema));
       }
       return decoder;
     }
     
   }  
- 
+   
 }

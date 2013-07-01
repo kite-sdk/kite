@@ -27,6 +27,7 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.stdio.AbstractParser;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,6 +64,8 @@ public final class ReadJsonBuilder implements CommandBuilder {
 
     public ReadJson(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
+      
+      //TODO rename to "type", also in unit tests and doc
       String className = getConfigs().getString(config, "class", JsonNode.class.getName());
       Class clazz;
       try {
@@ -70,7 +73,31 @@ public final class ReadJsonBuilder implements CommandBuilder {
       } catch (ClassNotFoundException e) {
         throw new MorphlineCompilationException("Class not found", config, e);
       }
-      reader = new ObjectMapper().reader(clazz);
+      
+      JsonFactory jsonFactory = null;
+      String jsonFactoryClassName = getConfigs().getString(config, "jsonFactory", null);
+      if (jsonFactoryClassName != null) {
+        try {
+          jsonFactory = (JsonFactory) Class.forName(jsonFactoryClassName).newInstance();
+        } catch (Exception e) {
+          throw new MorphlineCompilationException("Cannot create instance", config, e);
+        }
+      }
+      
+      String mapperClassName = getConfigs().getString(config, "mapper", null);
+      ObjectMapper objectMapper = null;
+      if (mapperClassName != null) {
+        try {
+          objectMapper = (ObjectMapper) Class.forName(mapperClassName).newInstance();
+        } catch (Exception e) {
+          throw new MorphlineCompilationException("Cannot create instance", config, e);
+        }
+      } else {
+        objectMapper = new ObjectMapper(jsonFactory, null, null);
+      }
+      
+      // TODO somehow add option for reader(clazz).with(FormatSchema)?
+      reader = objectMapper.reader(clazz);
       validateArguments();
     }
 

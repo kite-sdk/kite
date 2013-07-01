@@ -19,15 +19,20 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
+import org.apache.avro.file.DataFileConstants;
 import org.apache.avro.file.DataFileReader;
-import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;
 import org.apache.avro.generic.GenericContainer;
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.ResolvingDecoder;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
@@ -36,6 +41,7 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.stdio.AbstractParser;
+import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 
 
@@ -70,6 +76,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
 
     protected final Schema readerSchema;
     protected FastGenericDatumReader<GenericContainer> datumReader;
+    private final Map<ByteArrayKey, ResolvingDecoder> resolverCache;
 
     public ReadAvroContainer(Config config, Command parent, Command child, MorphlineContext context) {   
       super(config, parent, child, context);
@@ -91,7 +98,10 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
       }
       
       if (getClass() == ReadAvroContainer.class) {
+        resolverCache = new BoundedLRUHashMap(getConfigs().getInt(config, "schemaCacheSize", 100));
         validateArguments();
+      } else {
+        resolverCache = null;
       }
     }
     
@@ -100,9 +110,22 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
       if (datumReader == null) { // reuse for performance
         datumReader = new FastGenericDatumReader(null, readerSchema);
       }
-      FileReader<GenericContainer> reader = null;
+      DataFileReader<GenericContainer> reader = null;
       try {
-        reader = new DataFileReader(new ForwardOnlySeekableInputStream(in), datumReader);    
+        // TODO: for better performance subclass DataFileReader 
+        // to eliminate expensive SchemaParser.parse() on each new file in DataFileReader.initialize(). 
+        // Instead replace the parse() with a lookup in the byte[] cache map.
+        reader = new DataFileReader(new ForwardOnlySeekableInputStream(in), datumReader);
+        
+        byte[] writerSchemaBytes = reader.getMeta(DataFileConstants.SCHEMA);
+        Preconditions.checkNotNull(writerSchemaBytes);
+        ByteArrayKey key = new ByteArrayKey(writerSchemaBytes);
+        ResolvingDecoder resolver = resolverCache.get(key); // cache for performance
+        if (resolver == null) { 
+          resolver = createResolver(datumReader.getSchema(), datumReader.getExpected());
+          resolverCache.put(key, resolver);
+          datumReader.setResolver(resolver);
+        }
         while (reader.hasNext()) {
           GenericContainer datum = reader.next();
           if (!extract(datum, inputRecord)) {
@@ -117,6 +140,11 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
       return true;
     }
     
+    protected ResolvingDecoder createResolver(Schema writerSchema, Schema readerSchema) throws IOException {
+      return DecoderFactory.get().resolvingDecoder(
+          Schema.applyAliases(writerSchema, readerSchema), readerSchema, null);
+    }
+    
     protected boolean extract(GenericContainer datum, Record inputRecord) {
       incrementNumRecords();
       Record outputRecord = inputRecord.copy();
@@ -129,7 +157,50 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     }
   }
   
- 
+  
+  ///////////////////////////////////////////////////////////////////////////////
+  // Nested classes:
+  ///////////////////////////////////////////////////////////////////////////////
+  private static class BoundedLRUHashMap extends LinkedHashMap {
+    
+    private final int capacity;
+
+    private BoundedLRUHashMap(int capacity) {
+      super(16, 0.5f, true);
+      this.capacity = capacity;
+    }
+    
+    protected boolean removeEldestEntry(Map.Entry eldest) {
+      return size() > capacity;
+    }
+      
+  } 
+
+  
+  ///////////////////////////////////////////////////////////////////////////////
+  // Nested classes:
+  ///////////////////////////////////////////////////////////////////////////////
+  private static final class ByteArrayKey {
+    
+    private byte[] bytes;
+    
+    public ByteArrayKey(byte[] bytes) {
+      this.bytes = bytes;
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+      ByteArrayKey otherKey = (ByteArrayKey) other;
+      return Arrays.equals(bytes, otherKey.bytes);
+    }
+    
+    @Override
+    public int hashCode() {
+      return Arrays.hashCode(bytes);
+    }
+  }
+
+  
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////

@@ -25,16 +25,13 @@ import org.apache.avro.io.ResolvingDecoder;
 /**
  * Performance enhancement for GenericDatumReader for our use case.
  * 
- * If the identity of the calling thread changes (like for MorphlineInterceptor), the underlying
- * GenericDatumReader.getResolver() recreates a new ResolvingDecoder for each record, which is very
- * expensive. This hack avoids that.
- * 
- * This hack wouldn't be necessary if the underlying GenericDatumReader wouldn't use a global cache,
- * which is a dubious and counter-productive hack for our use case.
+ * If the writer schema changes, or if the identity of the calling thread changes (like for
+ * MorphlineInterceptor), the underlying GenericDatumReader.getResolver() recreates a new
+ * ResolvingDecoder for each record, which is very expensive. This hack helps to avoids that.
  */
 final class FastGenericDatumReader<D> extends GenericDatumReader<D> {
   
-  private ResolvingDecoder cachedResolver;
+  private ResolvingDecoder resolver;
   
   /** Construct where the writer's and reader's schemas are the same. */
   public FastGenericDatumReader(Schema schema) {
@@ -46,13 +43,14 @@ final class FastGenericDatumReader<D> extends GenericDatumReader<D> {
     super(writer, reader);
   }
   
+  /** Call this whenever appropriate */
+  public void setResolver(ResolvingDecoder resolver) {
+    this.resolver = resolver;
+  }
+  
   // method getResolver(getSchema(), getExpected()) is final so instead we override read()
   @Override
   public D read(D reuse, Decoder in) throws IOException {    
-    if (cachedResolver == null) {
-      cachedResolver = getResolver(getSchema(), getExpected());
-    }        
-    ResolvingDecoder resolver = cachedResolver;
     resolver.configure(in);
     D result = (D) read(reuse, getExpected(), resolver);
     resolver.drain();
