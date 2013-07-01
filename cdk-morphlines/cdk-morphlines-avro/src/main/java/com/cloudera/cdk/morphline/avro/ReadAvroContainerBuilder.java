@@ -28,8 +28,6 @@ import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;
 import org.apache.avro.generic.GenericContainer;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.io.DatumReader;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
@@ -71,7 +69,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
   static class ReadAvroContainer extends AbstractParser {
 
     protected final Schema readerSchema;
-    protected DatumReader<GenericContainer> datumReader;
+    protected FastGenericDatumReader<GenericContainer> datumReader;
 
     public ReadAvroContainer(Config config, Command parent, Command child, MorphlineContext context) {   
       super(config, parent, child, context);
@@ -100,7 +98,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
       if (datumReader == null) { // reuse for performance
-        datumReader = new GenericDatumReader(null, readerSchema);
+        datumReader = new FastGenericDatumReader(null, readerSchema);
       }
       FileReader<GenericContainer> reader = null;
       try {
@@ -131,7 +129,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     }
   }
   
-  
+ 
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////

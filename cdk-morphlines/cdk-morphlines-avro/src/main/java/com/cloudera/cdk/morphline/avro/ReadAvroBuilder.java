@@ -25,7 +25,6 @@ import java.util.Collections;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
 import org.apache.avro.generic.GenericContainer;
-import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
@@ -127,7 +126,7 @@ public final class ReadAvroBuilder implements CommandBuilder {
             
       if (datumReader == null) { // reuse for performance
         Schema readSchema = readerSchema != null ? readerSchema : writerSchema;
-        datumReader = new GenericDatumReader<GenericContainer>(writerSchema, readSchema);      
+        datumReader = new FastGenericDatumReader<GenericContainer>(writerSchema, readSchema);      
       }
 
       try {
@@ -145,6 +144,6 @@ public final class ReadAvroBuilder implements CommandBuilder {
       return true;
     }
     
-  }
-  
+  }  
+ 
 }
