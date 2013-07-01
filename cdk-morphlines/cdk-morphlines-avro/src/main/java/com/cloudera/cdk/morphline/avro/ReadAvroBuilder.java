@@ -105,14 +105,27 @@ public final class ReadAvroBuilder implements CommandBuilder {
       }
     }
     
-    private boolean isJSON() {
-      return isJson;
-    }
-
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
+      Decoder decoder = prepare(in);
+      try {
+        while (true) {
+          GenericContainer datum = datumReader.read(null, decoder);
+          if (!extract(datum, inputRecord)) {
+            return false;
+          }
+        }
+      } catch (EOFException e) { 
+        ; // ignore
+      } finally {
+        in.close();
+      }
+      return true;
+    }
+
+    private Decoder prepare(InputStream in) throws IOException {
       Decoder decoder;
-      if (isJSON()) {
+      if (isJson) {
         if (jsonDecoder == null) {
           jsonDecoder = DecoderFactory.get().jsonDecoder(writerSchema, in);
         } else {
@@ -128,20 +141,7 @@ public final class ReadAvroBuilder implements CommandBuilder {
         Schema readSchema = readerSchema != null ? readerSchema : writerSchema;
         datumReader = new FastGenericDatumReader<GenericContainer>(writerSchema, readSchema);      
       }
-
-      try {
-        while (true) {
-          GenericContainer datum = datumReader.read(null, decoder);
-          if (!extract(datum, inputRecord)) {
-            return false;
-          }
-        }
-      } catch (EOFException e) { 
-        ; // ignore
-      } finally {
-        in.close();
-      }
-      return true;
+      return decoder;
     }
     
   }  
