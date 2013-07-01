@@ -41,6 +41,7 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.util.Utf8;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.cloudera.cdk.morphline.api.AbstractMorphlineTest;
@@ -586,6 +587,63 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
       }
     }
   }
+
+  @Test
+  @Ignore
+  public void benchmarkAvro() throws Exception {
+    benchmarkAvro("test-morphlines/readAvroTweetsWithExternalSchema");
+    benchmarkAvro("test-morphlines/readAvroJsonTweetsWithExternalSchema");
+    benchmarkAvro("test-morphlines/readAvroTweetsContainer");
+  }
+  
+  private void benchmarkAvro(String morphlineConfigFile) throws Exception {
+    System.out.println("Now benchmarking " + morphlineConfigFile + " ...");
+    long durationSecs = 10;
+    File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433.avro");
+    morphline = createMorphline(morphlineConfigFile);    
+    byte[] bytes;
+    if (morphlineConfigFile.contains("Container")) {
+      bytes = Files.toByteArray(file);
+    } else {    
+      List<GenericData.Record> expecteds = new ArrayList();
+      FileReader<GenericData.Record> reader = new DataFileReader(file, new GenericDatumReader());
+      Schema schema = reader.getSchema();
+      while (reader.hasNext()) {
+        GenericData.Record expected = reader.next();
+        expecteds.add(expected);
+      }    
+      assertEquals(2, expecteds.size());
+  
+      ByteArrayOutputStream bout = new ByteArrayOutputStream();
+      Encoder encoder;
+      if (morphlineConfigFile.contains("Json")) {
+        encoder = EncoderFactory.get().jsonEncoder(schema, bout);
+      } else {
+        encoder = EncoderFactory.get().binaryEncoder(bout, null);
+      }
+      GenericDatumWriter datumWriter = new GenericDatumWriter(schema);
+      for (GenericData.Record record : expecteds) {
+        datumWriter.write(record, encoder);
+      }
+      encoder.flush();
+      bytes = bout.toByteArray();
+    }
+
+    long start = System.currentTimeMillis();
+    long duration = durationSecs * 1000;
+    int iters = 0; 
+    while (System.currentTimeMillis() < start + duration) {
+      Record record = new Record();
+      record.put(Fields.ATTACHMENT_BODY, bytes);      
+      collector.reset();
+      startSession();
+      assertEquals(1, collector.getNumStartEvents());
+      assertTrue(morphline.process(record));
+      iters++;
+    }
+    float secs = (System.currentTimeMillis() - start) / 1000.0f;
+    System.out.println("Results: iters=" + iters + ", took[secs]=" + secs + ", iters/secs=" + (iters/secs));
+  }  
 
   private boolean load(Record record) {
     startSession();

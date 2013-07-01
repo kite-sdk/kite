@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.cloudera.cdk.morphline.api.AbstractMorphlineTest;
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Files;
 
 public class JsonMorphlineTest extends AbstractMorphlineTest {
 
@@ -215,5 +217,31 @@ public class JsonMorphlineTest extends AbstractMorphlineTest {
 
     in.close();
   }
+
+  @Test
+  @Ignore
+  public void benchmarkJson() throws Exception {
+    String morphlineConfigFile = "test-morphlines/readJson";
+    long durationSecs = 10;
+    //File file = new File(RESOURCES_DIR + "/test-documents/stream.json");
+    File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433.json");
+    System.out.println("Now benchmarking " + morphlineConfigFile + " ...");
+    morphline = createMorphline(morphlineConfigFile);    
+    byte[] bytes = Files.toByteArray(file);
+    long start = System.currentTimeMillis();
+    long duration = durationSecs * 1000;
+    int iters = 0; 
+    while (System.currentTimeMillis() < start + duration) {
+      Record record = new Record();
+      record.put(Fields.ATTACHMENT_BODY, bytes);      
+      collector.reset();
+      startSession();
+      assertEquals(1, collector.getNumStartEvents());
+      assertTrue(morphline.process(record));    
+      iters++;
+    }
+    float secs = (System.currentTimeMillis() - start) / 1000.0f;
+    System.out.println("Results: iters=" + iters + ", took[secs]=" + secs + ", iters/secs=" + (iters/secs));
+  }  
 
 }
