@@ -98,7 +98,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
       }
       
       if (getClass() == ReadAvroContainer.class) {
-        resolverCache = new BoundedLRUHashMap(getConfigs().getInt(config, "schemaCacheSize", 100));
+        resolverCache = new BoundedLRUHashMap(getConfigs().getInt(config, "schemaCacheCapacity", 100));
         validateArguments();
       } else {
         resolverCache = null;
@@ -119,11 +119,11 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
         
         byte[] writerSchemaBytes = reader.getMeta(DataFileConstants.SCHEMA);
         Preconditions.checkNotNull(writerSchemaBytes);
-        ByteArrayKey key = new ByteArrayKey(writerSchemaBytes);
-        ResolvingDecoder resolver = resolverCache.get(key); // cache for performance
+        ByteArrayKey writerSchemaKey = new ByteArrayKey(writerSchemaBytes);
+        ResolvingDecoder resolver = resolverCache.get(writerSchemaKey); // cache for performance
         if (resolver == null) { 
           resolver = createResolver(datumReader.getSchema(), datumReader.getExpected());
-          resolverCache.put(key, resolver);
+          resolverCache.put(writerSchemaKey, resolver);
           datumReader.setResolver(resolver);
         }
         while (reader.hasNext()) {
@@ -161,7 +161,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  private static class BoundedLRUHashMap extends LinkedHashMap {
+  private static final class BoundedLRUHashMap extends LinkedHashMap {
     
     private final int capacity;
 
