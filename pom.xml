@@ -118,7 +118,7 @@
     <vers.junit>4.10</vers.junit>
     <vers.log4j>1.2.16</vers.log4j>
     <vers.maven-compiler>2.5.1</vers.maven-compiler>
-    <vers.maven-javadoc>2.9</vers.maven-javadoc>
+    <vers.maven-javadoc>2.9.1</vers.maven-javadoc>
     <vers.maven-project-info-reports>2.7</vers.maven-project-info-reports>
     <vers.maven-release>2.4.1</vers.maven-release>
     <vers.maven-site>3.3</vers.maven-site>
