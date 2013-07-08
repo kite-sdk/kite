@@ -138,8 +138,30 @@ public class DatasetDescriptor {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || !getClass().equals(o.getClass())) {
+      return false;
+    }
+
+    DatasetDescriptor that = (DatasetDescriptor) o;
+
+    return Objects.equal(this.schema, that.schema) &&
+        Objects.equal(this.format, that.format) &&
+        Objects.equal(this.partitionStrategy, that.partitionStrategy);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(schema, format, partitionStrategy);
+  }
+
+  @Override
   public String toString() {
     return Objects.toStringHelper(this).add("schema", schema)
+      .add("format", format)
       .add("partitionStrategy", partitionStrategy).toString();
   }
 

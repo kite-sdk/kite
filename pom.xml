@@ -117,15 +117,19 @@
     <vers.compress>1.4.1</vers.compress>
     <vers.junit>4.10</vers.junit>
     <vers.log4j>1.2.16</vers.log4j>
+    <vers.maven-build-helper>1.8</vers.maven-build-helper>
     <vers.maven-compiler>2.5.1</vers.maven-compiler>
     <vers.maven-javadoc>2.9.1</vers.maven-javadoc>
     <vers.maven-project-info-reports>2.7</vers.maven-project-info-reports>
     <vers.maven-release>2.4.1</vers.maven-release>
+    <vers.maven-shade>2.0</vers.maven-shade>
     <vers.maven-site>3.3</vers.maven-site>
     <vers.maven-source>2.2.1</vers.maven-source>
     <vers.maven-surefire>2.14.1</vers.maven-surefire>
     <vers.maven-antrun>1.7</vers.maven-antrun>
     <vers.maven-jar>2.4</vers.maven-jar>
+    <vers.maven-really-executable-jar>1.1.0</vers.maven-really-executable-jar>
+    <vers.mockito>1.9.5</vers.mockito>
     <vers.parquet>1.0.0-SNAPSHOT</vers.parquet>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
@@ -135,6 +139,7 @@
     <solr.expected.version>4.3.0-cdh</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
     <vers.tika>1.3</vers.tika>
     <vers.jackson>2.2.1</vers.jackson>
+    <vers.jcommander>1.30</vers.jcommander>
 
     <url.cloudera>http://www.cloudera.com</url.cloudera>
     <url.project>http://cloudera.github.com/cdk</url.project>
@@ -390,6 +395,11 @@
           </executions>
         </plugin>
         <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>${vers.maven-build-helper}</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
           <version>${vers.maven-release}</version>
@@ -397,6 +407,11 @@
             <goals>deploy</goals>
             <tagNameFormat>release-@{project.version}</tagNameFormat>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>${vers.maven-shade}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -413,6 +428,11 @@
           <configuration>
             <downloadSources>true</downloadSources>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.skife.maven</groupId>
+          <artifactId>really-executable-jar-maven-plugin</artifactId>
+          <version>${vers.maven-really-executable-jar}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -595,7 +615,11 @@
         <artifactId>crunch-core</artifactId>
         <version>${vers.crunch}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>${vers.mockito}</version>
+      </dependency>
       <dependency>
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
@@ -662,6 +686,11 @@
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>${vers.jackson}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.beust</groupId>
+        <artifactId>jcommander</artifactId>
+        <version>${vers.jcommander}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
