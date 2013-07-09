@@ -18,7 +18,7 @@ package com.cloudera.cdk.morphline.solr;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.solr.schema.IndexSchema;
@@ -78,15 +78,16 @@ public final class SanitizeUnknownSolrFieldsBuilder implements CommandBuilder {
     
     @Override
     protected boolean doProcess(Record record) {
-      Collection<String> keys = new ArrayList<String>(record.getFields().keySet());
-      for (String key : keys) {
+      Collection<Map.Entry> entries = new ArrayList<Map.Entry>(record.getFields().asMap().entrySet());
+      for (Map.Entry<String, Collection<Object>> entry : entries) {
+        String key = entry.getKey();
         if (schema.getFieldOrNull(key) == null) {
           LOG.debug("Sanitizing unknown Solr field: {}", key);
+          Collection values = entry.getValue();
           if (renameToPrefix != null) {
-            List values = record.getFields().get(key);
             record.getFields().putAll(renameToPrefix + key, values);
           }
-          record.removeAll(key);
+          values.clear(); // implicitly removes key from record
         }
       }
       return super.doProcess(record);
