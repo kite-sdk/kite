@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.SolrInputField;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
@@ -130,9 +129,7 @@ public final class LoadSolrBuilder implements CommandBuilder {
     private SolrInputDocument convert(Record record) {
       SolrInputDocument doc = new SolrInputDocument();
       for (Map.Entry<String, Collection<Object>> entry : record.getFields().asMap().entrySet()) {
-        SolrInputField solrField = new SolrInputField(entry.getKey());
-        solrField.setValue(entry.getValue(), 1.0f);
-        doc.put(entry.getKey(), solrField);
+        doc.setField(entry.getKey(), entry.getValue());
       }
       return doc;
     }
