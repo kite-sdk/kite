@@ -25,7 +25,8 @@ import com.cloudera.cdk.morphline.shaded.org.apache.commons.codec.binary.binary.
 import com.typesafe.config.Config;
 
 /**
- * Command that converts base64 encoded strings to byte[] per RFC 2045.
+ * Command that converts a Base64 encoded String to a byte[] per Section <cite>6.8. Base64
+ * Content-Transfer-Encoding</cite> of <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>.
  */
 public final class DecodeBase64Builder implements CommandBuilder {
 

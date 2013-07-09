@@ -16,6 +16,7 @@ h3. cdk\-morphlines\-core\-stdlib
 - [callParentPipe|#callParentPipe]
 - [contains|#contains]
 - [convertTimestamp|#convertTimestamp]
+- [decodeBase64|#decodeBase64]
 - [dropRecord|#dropRecord]
 - [equals|#equals]
 - [extractURIComponents|#extractURIComponents]
@@ -342,6 +343,22 @@ convertTimestamp {
 }
 {code}
 
+h2. decodeBase64
+
+The [decodeBase64|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/DecodeBase64Builder.java] command converts a Base64 encoded String to a byte\[\] per Section 6.8. "Base64 Content\-Transfer\-Encoding" of [RFC 2045|http://www.ietf.org/rfc/rfc2045.txt]. The command converts each value in the given field and replaces it with the decoded value.
+ 
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| field | n/a | The name of the field to modify. |
+
+Example usage:
+{code}
+decodeBase64 { 
+  field : screenshot_base64
+}
+{code}
+
 h2. dropRecord
 
 The [dropRecord|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/DropRecordBuilder.java] command silently consumes records without ever emitting any record. This is much like piping to {{/dev/null}}.
@@ -436,14 +453,13 @@ This command also supports grok dictionaries and regexes in the same way as the 
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
-| inputField | n/a | The name of the input field. |
-| outputField | n/a | The name of the field to add output values to. |
+| field | n/a | The name of the field to modify. |
 | pattern | n/a | The search string to match. |
 | isRegex | false | Whether or not to interpret the pattern as a grok pattern (true) or string literal (false). |
 | dictionaryFiles | \[\] | A list of zero or more local files or directory trees from which to load dictionaries. Only applicable if {{isRegex}} is {{true}}. See [#grok] command. |
 | dictionaryString | null | An optional inline string from which to load a dictionary. Only applicable if {{isRegex}} is {{true}}. See [#grok] command. |
 | replacement | n/a | The replacement pattern ({{isRegex}} is {{true}}) or string literal ({{isRegex}} is {{false}}). |
-| replaceFirst | false | Whether or not to skip any matches beyond the first match. |
+| replaceFirst | false | For each field value, whether or not to skip any matches beyond the first match. |
 
 Example usage with grok pattern:
 {code}
