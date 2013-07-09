@@ -22,7 +22,6 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Random;
 import java.util.zip.GZIPInputStream;
@@ -35,7 +34,9 @@ import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.stdio.AbstractParser;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.typesafe.config.Config;
 
 /**
@@ -69,7 +70,7 @@ public final class ReadJsonTestTweetsBuilder implements CommandBuilder {
     
     private final boolean isLengthDelimited;
     private String idPrefix;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectReader reader = new ObjectMapper().reader(JsonNode.class);
 
     // Fri May 14 02:52:55 +0000 2010
     private SimpleDateFormat formatterFrom = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US);
@@ -95,26 +96,26 @@ public final class ReadJsonTestTweetsBuilder implements CommandBuilder {
         in = new GZIPInputStream(in, 64 * 1024);
       }
       long numRecords = 0;
-      BufferedReader reader = null;
-      Iterator<JsonNode> iter = null;
+      BufferedReader bufferedReader = null;
+      MappingIterator<JsonNode> iter = null;
       if (isLengthDelimited) {
-        reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));        
+        bufferedReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));        
       } else {
-        iter = mapper.reader(JsonNode.class).readValues(in);
+        iter = reader.readValues(in);
       }
       
       try {
         while (true) {
           JsonNode rootNode;
           if (isLengthDelimited) {
-            String json = nextLine(reader);
+            String json = nextLine(bufferedReader);
             if (json == null) {
               break;
             }
       
             try {
               // src can be a File, URL, InputStream, etc
-              rootNode = mapper.readValue(json, JsonNode.class); 
+              rootNode = reader.readValue(json); 
             } catch (JsonParseException e) {
               LOG.info("json parse exception after " + numRecords + " records");
               LOG.debug("json parse exception after " + numRecords + " records", e);
@@ -161,6 +162,9 @@ public final class ReadJsonTestTweetsBuilder implements CommandBuilder {
           numRecords++;
         }
       } finally {
+        if (iter != null) {
+          iter.close();
+        }
         LOG.debug("processed {} records", numRecords);
       }
       return true;
