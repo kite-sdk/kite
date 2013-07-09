@@ -867,6 +867,19 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testDecodeBase64() throws Exception {
+    morphline = createMorphline("test-morphlines/decodeBase64");    
+    Record record = new Record();
+    record.put("data", "SGVsbG8gV29ybGQ=");
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    byte[] actual = (byte[]) collector.getFirstRecord().getFirstValue("data");
+    assertArrayEquals("Hello World".getBytes(Charsets.UTF_8), actual);
+    assertSame(record, collector.getFirstRecord());    
+  }
+  
+  @Test
   public void testFindReplace() throws Exception {
     Config override = ConfigFactory.parseString("replaceFirst : false");
     morphline = createMorphline("test-morphlines/findReplace", override);    
