@@ -18,6 +18,7 @@ package com.cloudera.cdk.morphline.solr;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServerException;
@@ -127,8 +128,9 @@ public final class LoadSolrBuilder implements CommandBuilder {
     }
     
     private SolrInputDocument convert(Record record) {
-      SolrInputDocument doc = new SolrInputDocument();
-      for (Map.Entry<String, Collection<Object>> entry : record.getFields().asMap().entrySet()) {
+      Map<String, Collection<Object>> map = record.getFields().asMap();
+      SolrInputDocument doc = new SolrInputDocument(new HashMap(2 * map.size()));
+      for (Map.Entry<String, Collection<Object>> entry : map.entrySet()) {
         doc.setField(entry.getKey(), entry.getValue());
       }
       return doc;
