@@ -338,7 +338,7 @@ convertTimestamp {
   field : timestamp
   inputFormats : ["yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd"]
   inputTimezone : America/Los_Angeles
-  outputFormat : "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+  outputFormat : "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
   outputTimezone : UTC
 }
 {code}

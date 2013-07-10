@@ -148,7 +148,7 @@ morphlines : [
           field : timestamp
           inputFormats : ["yyyy-MM-dd'T'HH:mm:ss'Z'", ""MMM d HH:mm:ss"]
           inputTimezone : America/Los_Angeles
-          outputFormat : "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+          outputFormat : "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
           outputTimezone : UTC
         }
       }
@@ -380,7 +380,7 @@ morphlines : [
           field : created_at
           inputFormats : ["yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd"]
           inputTimezone : America/Los_Angeles
-          outputFormat : "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+          outputFormat : "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
           outputTimezone : UTC
         }
       }
