@@ -26,7 +26,7 @@ final class Connector implements Command {
   
   private Command parent;
   private Command child;
-  private boolean ignoreNotifications;
+  private final boolean ignoreNotifications;
   
   public Connector(boolean ignoreNotifications) {
     this.ignoreNotifications = ignoreNotifications;
@@ -47,6 +47,7 @@ final class Connector implements Command {
 
   @Override
   public void notify(Record notification) {
+    Preconditions.checkNotNull(notification);
     Preconditions.checkNotNull(parent);
     Preconditions.checkNotNull(child);
     if (!ignoreNotifications) {
