@@ -68,8 +68,8 @@ public final class GenerateUUIDBuilder implements CommandBuilder {
     @Override
     protected boolean doProcess(Record record) {      
       if (preserveExisting && record.getFields().containsKey(fieldName)) {
-        // we must preserve the existing id
-      } else if (isMatch(record)) {
+        ; // we must preserve the existing id
+      } else {
         record.replaceValues(fieldName, generateUUID());
       }
       return super.doProcess(record);
@@ -81,10 +81,6 @@ public final class GenerateUUIDBuilder implements CommandBuilder {
 
     protected String generateUUID() {
       return getPrefix() + UUID.randomUUID().toString();
-    }
-
-    protected boolean isMatch(Record event) {
-      return true;
     }
 
   }
