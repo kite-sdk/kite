@@ -10,7 +10,7 @@ Version 0.4.1 has the following notable changes:
 ##### Morphlines Library 
 * Expanded documentation and examples
 * Made `SolrLocator` and `ZooKeeperDownloader` collection alias aware
-* Added commands `readJson` and `extractJsonPaths` commands for reading, extracting, and transforming JSON files and JSON objects, in the same style as Avro support
+* Added commands `readJson` and `extractJsonPaths` for reading, extracting, and transforming JSON files and JSON objects, in the same style as Avro support
 * Added commands `split`, `findReplace`, `extractURIComponents`, `extractURIQueryParameters`, `decodeBase64` 
 * Fixed `extractAvroPaths` exception with flatten = true if path represents a non-leaf node of type Record
 * Added several performance enhancements
