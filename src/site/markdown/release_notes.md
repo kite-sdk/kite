@@ -15,9 +15,6 @@ Version 0.4.1 has the following notable changes:
 * Fixed `extractAvroPaths` exception with flatten = true if path represents a non-leaf node of type Record
 * Added several performance enhancements
 
-TODO: The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10253)
-is available from JIRA.
-
 ## Version 0.4.0
 
 Version 0.4.0 has the following notable changes:
