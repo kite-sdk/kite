@@ -30,7 +30,7 @@ msg : listening on 0.0.0.0 port 22.
 message : <164>Feb  4 10:46:14 syslog sshd[607]: listening on 0.0.0.0 port 22.
 {code}
 
-These rules can be expressed with morphline commands by editing a {{morphline.conf}} configuration file, as shown below.
+These rules can be expressed with morphline commands by editing a {{morphlines.conf}} configuration file, as shown below.
 
 h1. Processing Model
 
@@ -99,7 +99,7 @@ msg : listening on 0.0.0.0 port 22.
 message : <164>Feb  4 10:46:14 syslog sshd[607]: listening on 0.0.0.0 port 22.
 {code}
 
-These rules can be expressed with morphline commands called [readLine|morphlinesReferenceGuide#readLine], [grok|morphlinesReferenceGuide#grok], [convertTimestamp|morphlinesReferenceGuide#convertTimestamp], [sanitizeUnknownSolrFields|morphlinesReferenceGuide#sanitizeUnknownSolrFields], [logInfo|morphlinesReferenceGuide#logTrace] and [loadSolr|morphlinesReferenceGuide#loadSolr], by editing a {{morphline.conf}} file to read as follows:
+These rules can be expressed with morphline commands called [readLine|morphlinesReferenceGuide#readLine], [grok|morphlinesReferenceGuide#grok], [convertTimestamp|morphlinesReferenceGuide#convertTimestamp], [sanitizeUnknownSolrFields|morphlinesReferenceGuide#sanitizeUnknownSolrFields], [logInfo|morphlinesReferenceGuide#logTrace] and [loadSolr|morphlinesReferenceGuide#loadSolr], by editing a {{morphlines.conf}} file to read as follows:
 
 {code}
 morphlines : [
@@ -192,9 +192,9 @@ h1. Example Driver Program
 This section provides a simple sample Java program that illustrates how to use the API to embed and execute a morphline in a host system ([full source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/test/java/com/cloudera/cdk/morphline/api/MorphlineDemo.java]).
 
 {code}
-/** Usage: java ... <morphline.conf> <dataFile1> ... <dataFileN> */
+/** Usage: java ... <morphlines.conf> <dataFile1> ... <dataFileN> */
 public static void main(String[] args) {
-  // compile morphline.conf file on the fly
+  // compile morphlines.conf file on the fly
   File configFile = new File(args[0]);
   MorphlineContext context = new MorphlineContext.Builder().build();
   Command morphline = new Compiler().compile(configFile, null, context, null);
@@ -297,7 +297,7 @@ Note that the Solr output schema omits some Avro input fields such as user\_stat
 h3. Defining a Chain of Transformation Commands
 
 These transformation rules can be expressed with morphline commands called [readAvroContainer|morphlinesReferenceGuide#readAvroContainer], 
-[extractAvroPaths|morphlinesReferenceGuide#extractAvroPaths], [convertTimestamp|morphlinesReferenceGuide#convertTimestamp], [sanitizeUnknownSolrFields|morphlinesReferenceGuide#sanitizeUnknownSolrFields] and [loadSolr|morphlinesReferenceGuide#loadSolr], by editing a {{morphline.conf}} file to read as follows:
+[extractAvroPaths|morphlinesReferenceGuide#extractAvroPaths], [convertTimestamp|morphlinesReferenceGuide#convertTimestamp], [sanitizeUnknownSolrFields|morphlinesReferenceGuide#sanitizeUnknownSolrFields] and [loadSolr|morphlinesReferenceGuide#loadSolr], by editing a {{morphlines.conf}} file to read as follows:
 
 {code}
 # Specify server locations in a SOLR_LOCATOR variable; used later in
