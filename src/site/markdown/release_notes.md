@@ -3,6 +3,21 @@
 All past CDK releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version 0.4.1
+
+Version 0.4.1 has the following notable changes:
+
+##### Morphlines Library 
+* Expanded documentation and examples
+* Made `SolrLocator` and `ZooKeeperDownloader` collection alias aware
+* Added commands `readJson` and `extractJsonPaths` commands for reading, extracting, and transforming JSON files and JSON objects, in the same style as Avro support
+* Added commands `split`, `findReplace`, `extractURIComponents`, `extractURIQueryParameters`, `decodeBase64` 
+* Fixed `extractAvroPaths` exception with flatten = true if path represents a non-leaf node of type Record
+* Added several performance enhancements
+
+TODO: The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10253)
+is available from JIRA.
+
 ## Version 0.4.0
 
 Version 0.4.0 has the following notable changes:
