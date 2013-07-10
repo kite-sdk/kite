@@ -333,7 +333,7 @@ public final class SolrCellBuilder implements CommandBuilder {
     private Record toRecord(SolrInputDocument doc) {
       Record record = new Record();
       for (Entry<String, SolrInputField> entry : doc.entrySet()) {
-        record.getFields().replaceValues(entry.getKey(), entry.getValue().getValues());        
+        record.getFields().putAll(entry.getKey(), entry.getValue().getValues());        
       }
       return record;
     }
