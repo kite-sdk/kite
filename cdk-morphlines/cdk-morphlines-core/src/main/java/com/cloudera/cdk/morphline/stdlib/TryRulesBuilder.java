@@ -26,6 +26,7 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
+import com.codahale.metrics.Meter;
 import com.typesafe.config.Config;
 
 /**
@@ -67,6 +68,7 @@ public final class TryRulesBuilder implements CommandBuilder {
     private final boolean throwExceptionIfAllRulesFailed;
     private final boolean catchExceptions;
     private final boolean copyRecords;
+    private final Meter numExceptionsCaught;
     
     public TryRules(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
@@ -82,6 +84,7 @@ public final class TryRulesBuilder implements CommandBuilder {
         }
       }
       validateArguments();
+      numExceptionsCaught = getMeter("numExceptionsCaught");
     }
     
     @Override
@@ -106,6 +109,7 @@ public final class TryRulesBuilder implements CommandBuilder {
               return true; // rule was executed successfully; no need to try the other remaining rules
             }
           } catch (RuntimeException e) {
+            numExceptionsCaught.mark();
             LOG.warn("tryRules command caught rule exception. Continuing to try other remaining rules", e);
             // continue and try the other remaining rules
           }
