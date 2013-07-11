@@ -173,6 +173,7 @@
         <version>${vers.maven-release}</version>
         <configuration>
           <goals>deploy</goals>
+          <tagNameFormat>release-@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
       <plugin>
@@ -394,6 +395,7 @@
           <version>${vers.maven-release}</version>
           <configuration>
             <goals>deploy</goals>
+            <tagNameFormat>release-@{project.version}</tagNameFormat>
           </configuration>
         </plugin>
         <plugin>
