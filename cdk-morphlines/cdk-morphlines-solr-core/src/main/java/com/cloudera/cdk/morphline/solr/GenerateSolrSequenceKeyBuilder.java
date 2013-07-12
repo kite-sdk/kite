@@ -104,7 +104,7 @@ public final class GenerateSolrSequenceKeyBuilder implements CommandBuilder {
       long num = recordCounter++;
       // LOG.debug("record #{} id before sanitizing doc: {}", num, doc);
       if (uniqueKeyName == null || (preserveExisting && doc.getFields().containsKey(uniqueKeyName))) {
-        // we must preserve the existing id
+        ; // we must preserve the existing id
       } else {
         Object baseId = doc.getFirstValue(baseIdFieldName);
         if (baseId == null) {
