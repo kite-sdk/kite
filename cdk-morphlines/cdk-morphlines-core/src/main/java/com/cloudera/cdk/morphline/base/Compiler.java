@@ -25,7 +25,6 @@ import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.stdlib.DropRecordBuilder;
 import com.cloudera.cdk.morphline.stdlib.PipeBuilder;
-import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -33,7 +32,6 @@ import com.typesafe.config.ConfigFactory;
 /**
  * Tool to parse and compile a morphline file or morphline config.
  */
-@Beta
 public final class Compiler {
 
   private static final Object LOCK = new Object();
