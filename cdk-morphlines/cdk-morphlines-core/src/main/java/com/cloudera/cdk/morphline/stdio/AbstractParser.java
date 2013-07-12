@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -48,11 +49,9 @@ public abstract class AbstractParser extends AbstractCommand {
   
   public AbstractParser(Config config, Command parent, Command child, MorphlineContext context) {
     super(config, parent, child, context);      
-    List<String> mimeTypes = getConfigs().getStringList(config, SUPPORTED_MIME_TYPES, null);
-    if (mimeTypes != null) {
-      for (String streamMediaType : mimeTypes) {
-        addSupportedMimeType(streamMediaType);
-      }
+    List<String> mimeTypes = getConfigs().getStringList(config, SUPPORTED_MIME_TYPES, Collections.EMPTY_LIST);
+    for (String mimeType : mimeTypes) {
+      addSupportedMimeType(mimeType);
     }
     this.numRecordsMeter = getMeter(Metrics.NUM_RECORDS);
   }
