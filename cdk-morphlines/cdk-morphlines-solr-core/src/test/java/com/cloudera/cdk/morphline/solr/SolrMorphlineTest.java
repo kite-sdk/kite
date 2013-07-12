@@ -46,4 +46,20 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
     Notifications.notifyShutdown(morphline);
   }
     
+  @Test
+  public void testAnalyzeText() throws Exception {
+    morphline = createMorphline("test-morphlines/analyzeText");    
+    Record record = new Record();
+    record.put(Fields.MESSAGE, "Hello World!");
+    record.put(Fields.MESSAGE, "\nFoo@Bar.com #%()123");
+    Record expected = record.copy();
+    expected.getFields().putAll("tokens", Arrays.asList("hello", "world", "foo", "bar.com", "123"));
+    startSession();
+    Notifications.notifyBeginTransaction(morphline);
+    assertTrue(morphline.process(record));
+    assertEquals(1, collector.getNumStartEvents());
+    Notifications.notifyCommitTransaction(morphline);
+    assertEquals(expected, collector.getFirstRecord());
+  }
+    
 }

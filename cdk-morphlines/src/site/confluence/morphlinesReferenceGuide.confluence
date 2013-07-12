@@ -60,6 +60,7 @@ h3. cdk\-morphlines\-solr\-core
 - [loadSolr|#loadSolr]
 - [generateSolrSequenceKey|#generateSolrSequenceKey]
 - [sanitizeUnknownSolrFields|#sanitizeUnknownSolrFields]
+- [analyzeText|#analyzeText]
 
 h3. cdk\-morphlines\-solr\-cell
 - [solrCell|#solrCell]
@@ -1304,6 +1305,67 @@ sanitizeUnknownSolrFields {
 }
 {code}
 
+
+h2. analyzeText
+
+The [analyzeText|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-core/src/main/java/com/cloudera/cdk/morphline/solr/AnalyzeTextBuilder.java] command uses the embedded Solr/Lucene Analyzer library to generate tokens from a text string, without sending data to a Solr server.
+
+This is useful for prototyping and debugging Solr applications. It is also useful for standalone usage outside of Solr, e.g. for extracting text features from documents for use with recommendation systems, clustering and classification applications.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| solrLocator | n/a | Solr location parameters as described separately above. |
+| inputField | n/a | The name of the input field. |
+| outputField | n/a | The name of the field to add output values to. |
+| solrFieldType | n/a | The name of the Solr field type in {{schema.xml}} to use for text analysis and tokenization. This parameter specifies the algorithmic extraction rules. Example: "text\_en" |
+
+Example usage:
+{code}
+analyzeText {
+  inputField : message
+  outputField : tokens
+  solrFieldType : text_en
+  solrLocator : {
+    # Name of solr collection
+    collection : collection1
+
+    # ZooKeeper ensemble
+    zkHost : "127.0.0.1:2181/solr"
+    
+    # solrHomeDir : "example/solr/collection1"    
+  }
+}
+{code}
+
+For example, given the input field {{message}} with the value {{Hello World!\nFoo@Bar.com #%()123}} the expected output record is: 
+
+{code}
+tokens:hello
+tokens:world
+tokens:foo
+tokens:bar.com
+tokens:123
+{code}
+
+This example assumes the Solr field type named "text\_en" is defined in {{schema.xml}} as shown in the following snippet:
+{code}
+...
+<fieldType name="text_en" class="solr.TextField" positionIncrementGap="100">
+  <analyzer type="index">
+    <tokenizer class="solr.StandardTokenizerFactory"/>
+    <filter class="solr.StopFilterFactory"
+       ignoreCase="true"
+       words="lang/stopwords_en.txt"
+       enablePositionIncrements="true"
+    />
+    <filter class="solr.LowerCaseFilterFactory"/>
+    <filter class="solr.EnglishPossessiveFilterFactory"/>
+    <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+    <filter class="solr.PorterStemFilterFactory"/>
+  </analyzer>
+</fieldType>
+{code}
 
 h1. cdk\-morphlines\-solr\-cell
 
