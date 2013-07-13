@@ -71,6 +71,16 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
   }  
 
   @Test
+  public void testSolrCellXML() throws Exception {
+    morphline = createMorphline("test-morphlines/solrCellXML");    
+    String path = RESOURCES_DIR + "/test-documents";
+    String[] files = new String[] {
+        path + "/testXML2.xml",
+    };
+    testDocumentTypesInternal(files, expectedRecords);
+  }  
+
+  @Test
   public void testSolrCellDocumentTypes() throws Exception {
     morphline = createMorphline("test-morphlines/solrCellDocumentTypes");    
     String path = RESOURCES_DIR + "/test-documents";
