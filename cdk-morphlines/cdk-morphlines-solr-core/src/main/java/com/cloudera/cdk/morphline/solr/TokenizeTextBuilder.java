@@ -40,23 +40,23 @@ import com.typesafe.config.Config;
  * A command that uses the embedded Solr/Lucene Analyzer library to generate tokens from a text
  * string, without sending data to a Solr server.
  */
-public final class AnalyzeTextBuilder implements CommandBuilder {
+public final class TokenizeTextBuilder implements CommandBuilder {
 
   @Override
   public Collection<String> getNames() {
-    return Collections.singletonList("analyzeText");
+    return Collections.singletonList("tokenizeText");
   }
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new AnalyzeText(config, parent, child, context);
+    return new TokenizeText(config, parent, child, context);
   }
   
   
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  private static final class AnalyzeText extends AbstractCommand {
+  private static final class TokenizeText extends AbstractCommand {
     
     private final String inputFieldName;
     private final String outputFieldName;
@@ -64,7 +64,7 @@ public final class AnalyzeTextBuilder implements CommandBuilder {
     private final CharTermAttribute token; // cached
     private final ReusableStringReader reader = new ReusableStringReader(); // cached
     
-    public AnalyzeText(Config config, Command parent, Command child, MorphlineContext context) {
+    public TokenizeText(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
       this.inputFieldName = getConfigs().getString(config, "inputField");
       this.outputFieldName = getConfigs().getString(config, "outputField");      

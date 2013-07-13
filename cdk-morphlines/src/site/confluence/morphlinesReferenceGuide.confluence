@@ -60,7 +60,7 @@ h3. cdk\-morphlines\-solr\-core
 - [loadSolr|#loadSolr]
 - [generateSolrSequenceKey|#generateSolrSequenceKey]
 - [sanitizeUnknownSolrFields|#sanitizeUnknownSolrFields]
-- [analyzeText|#analyzeText]
+- [tokenizeText|#tokenizeText]
 
 h3. cdk\-morphlines\-solr\-cell
 - [solrCell|#solrCell]
@@ -1306,9 +1306,9 @@ sanitizeUnknownSolrFields {
 {code}
 
 
-h2. analyzeText
+h2. tokenizeText
 
-The [analyzeText|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-core/src/main/java/com/cloudera/cdk/morphline/solr/AnalyzeTextBuilder.java] command uses the embedded Solr/Lucene Analyzer library to generate tokens from a text string, without sending data to a Solr server.
+The [tokenizeText|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-core/src/main/java/com/cloudera/cdk/morphline/solr/TokenizeTextBuilder.java] command uses the embedded Solr/Lucene Analyzer library to generate tokens from a text string, without sending data to a Solr server.
 
 This is useful for prototyping and debugging Solr applications. It is also useful for standalone usage outside of Solr, e.g. for extracting text features from documents for use with recommendation systems, clustering and classification applications.
 
@@ -1322,7 +1322,7 @@ The command provides the following configuration options:
 
 Example usage:
 {code}
-analyzeText {
+tokenizeText {
   inputField : message
   outputField : tokens
   solrFieldType : text_en

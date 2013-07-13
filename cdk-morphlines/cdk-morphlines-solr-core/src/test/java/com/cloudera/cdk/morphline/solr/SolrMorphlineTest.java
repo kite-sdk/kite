@@ -47,8 +47,8 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
   }
     
   @Test
-  public void testAnalyzeText() throws Exception {
-    morphline = createMorphline("test-morphlines/analyzeText");    
+  public void testTokenizeText() throws Exception {
+    morphline = createMorphline("test-morphlines/tokenizeText");    
     Record record = new Record();
     record.put(Fields.MESSAGE, "Hello World!");
     record.put(Fields.MESSAGE, "\nFoo@Bar.com #%()123");
