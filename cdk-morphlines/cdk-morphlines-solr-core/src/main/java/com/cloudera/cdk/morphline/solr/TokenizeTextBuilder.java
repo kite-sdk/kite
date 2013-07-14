@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -91,6 +92,7 @@ public final class TokenizeTextBuilder implements CommandBuilder {
     @Override
     protected boolean doProcess(Record record) {
       try {
+        List outputValues = record.get(outputFieldName);
         for (Object value : record.get(inputFieldName)) {
           reader.setValue(value.toString());
           TokenStream tokenStream = analyzer.tokenStream("content", reader);
@@ -98,7 +100,7 @@ public final class TokenizeTextBuilder implements CommandBuilder {
           while (tokenStream.incrementToken()) {
             if (token.length() > 0) { // incrementToken() updates the token!
               String tokenStr = new String(token.buffer(), 0, token.length());
-              record.put(outputFieldName, tokenStr);
+              outputValues.add(tokenStr);
             }
           }
         }
