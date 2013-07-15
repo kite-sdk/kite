@@ -37,6 +37,8 @@ import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Metrics;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Matcher;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Pattern;
+import com.cloudera.cdk.morphline.shaded.com.google.common.reflect.ClassPath;
+import com.cloudera.cdk.morphline.shaded.com.google.common.reflect.ClassPath.ResourceInfo;
 import com.codahale.metrics.Meter;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMultimap;
@@ -50,6 +52,7 @@ import com.typesafe.config.ConfigUtil;
 public class MorphlineTest extends AbstractMorphlineTest {
   
   private void processAndVerifySuccess(Record input, Record expected) {
+    collector.reset();
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(input));
@@ -58,6 +61,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
 
   private void processAndVerifySuccess(Record input, Multimap... expectedMaps) {
+    collector.reset();
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(input));    
@@ -70,6 +74,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
 
   private void processAndVerifyFailure(Record input) {
+    collector.reset();
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertFalse(morphline.process(input));
@@ -222,7 +227,6 @@ public class MorphlineTest extends AbstractMorphlineTest {
     processAndVerifySuccess(record, expected);
     
     // test that preserveExisting = true preserves the existing value
-    collector.reset();
     record = new Record();
     record.put("myhost", "myname");
     expected = record.copy();
@@ -421,12 +425,10 @@ public class MorphlineTest extends AbstractMorphlineTest {
     record.put("isTooYoung", "true");
     processAndVerifySuccess(record, record);
     
-    collector.reset();
     System.setProperty("MY_VARIABLE", "false");
     morphline = createMorphline("test-morphlines/isTrue");
     processAndVerifyFailure(createBasicRecord());
     
-    collector.reset();
     System.clearProperty("MY_VARIABLE");
     try {
       morphline = createMorphline("test-morphlines/isTrue");
@@ -976,6 +978,33 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testTranslate() throws Exception {
+    morphline = createMorphline("test-morphlines/translate");    
+    Record record = new Record();
+    Record expected = new Record();
+    
+    record.replaceValues("level", "0");
+    expected.replaceValues("level", "Emergency");
+    processAndVerifySuccess(record, expected);
+    
+    record.replaceValues("level", 0);
+    expected.replaceValues("level", "Emergency");
+    processAndVerifySuccess(record, expected);
+    
+    record.replaceValues("level", 999);
+    expected.replaceValues("level", "unknown");
+    processAndVerifySuccess(record, expected);
+  }
+    
+  @Test
+  public void testTranslateFailure() throws Exception {
+    morphline = createMorphline("test-morphlines/translateFailure");    
+    Record record = new Record();
+    record.replaceValues("level", 999);
+    processAndVerifyFailure(record);
+  }
+    
+  @Test
   public void testConvertTimestampEmpty() throws Exception {
     morphline = createMorphline("test-morphlines/convertTimestamp");
     Record record = new Record();
@@ -1129,7 +1158,6 @@ public class MorphlineTest extends AbstractMorphlineTest {
     }
     Config override = ConfigFactory.parseString(overridesStr);
     morphline = createMorphline(fileName, override);
-    collector.reset();
     Record record = new Record();
     record.put("in", url);
     Record expectedRecord = new Record();
@@ -1156,6 +1184,24 @@ public class MorphlineTest extends AbstractMorphlineTest {
     }
     float secs = (System.currentTimeMillis() - start) / 1000.0f;
     System.out.println("secs=" + secs);
+  }
+  
+  @Test
+  @Ignore
+  public void testFindResources() throws Exception {    
+    // TODO maybe expose as Resources.copyClassPathFilesToCWD("test-morphlines/");
+    // or importClassPathFiles(...)
+    for (ResourceInfo info : ClassPath.from(getClass().getClassLoader()).getResources()) {
+      if (info.getResourceName().startsWith("test-morphlines/")) {
+        System.out.println("info=" + info.url());        
+//        ByteStreams.toByteArray(info.url().openStream());
+      }
+    }
+    //  Enumeration<URL> iter = getClass().getClassLoader().getResources("test-morphlines");
+    //  while (iter.hasMoreElements()) {
+    //    URL url = iter.nextElement();
+    //    System.out.println("url=" + url);
+    //  }
   }
   
   private Record createBasicRecord() {
