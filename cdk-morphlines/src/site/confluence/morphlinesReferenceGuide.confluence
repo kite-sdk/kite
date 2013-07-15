@@ -33,6 +33,7 @@ h3. cdk\-morphlines\-core\-stdlib
 - [setValues|#setValues]
 - [split|#split]
 - [toString|#toString]
+- [translate|#translate]
 - [tryRules|#tryRules]
 
 h3. cdk\-morphlines\-avro
@@ -890,6 +891,43 @@ Example usage:
 {code}
 toString { field : source_type }
 {code}
+
+h2. translate
+
+The [translate|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/TranslateBuilder.java] command examines each value in a given field and replaces it with the replacement value defined in a given dictionary aka lookup hash table.
+ 
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| field | n/a | The name of the field to modify. |
+| dictionary | n/a | The lookup hash table to use for finding matches and replacement values |
+| fallback | null | The fallback value to use as replacement if no match is found. If no fallback is defined and no match is found then the command fails. |
+
+Example usage to translate [Syslog severity level|http://en.wikipedia.org/wiki/Syslog#Severity_levels] numeric codes to string labels:
+{code}
+translate {
+  field : level
+  dictionary : {
+     0 : Emergency
+     1 : Alert
+     2 : Critical
+     3 : Error
+     4 : Warning
+     5 : Notice
+     6 : Informational
+     7 : Debug
+  }
+  fallback : Unknown # if no fallback is defined and no match is found then the command fails
+}
+{code}
+
+Input: {{level:0}}
+  
+Expected output: {{level:Emergency}}
+
+Input: {{level:999}}
+  
+Expected output: {{level:Unknown}}
 
 h2. tryRules
 
