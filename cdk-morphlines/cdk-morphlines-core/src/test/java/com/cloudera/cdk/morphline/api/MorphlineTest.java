@@ -991,6 +991,14 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.replaceValues("level", "Emergency");
     processAndVerifySuccess(record, expected);
     
+    record.replaceValues("level", "1");
+    expected.replaceValues("level", "Alert");
+    processAndVerifySuccess(record, expected);
+    
+    record.replaceValues("level", 1);
+    expected.replaceValues("level", "Alert");
+    processAndVerifySuccess(record, expected);
+    
     record.replaceValues("level", 999);
     expected.replaceValues("level", "unknown");
     processAndVerifySuccess(record, expected);
