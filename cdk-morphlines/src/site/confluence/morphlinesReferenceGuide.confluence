@@ -981,7 +981,7 @@ The [readAvroContainer|https://github.com/cloudera/cdk/blob/master/cdk-morphline
 The Avro schema that was used to write the Avro data is retrieved from the Avro container. Optionally, the Avro schema that shall be used for reading can be supplied with a configuration option; otherwise it is assumed to be the same as the writer schema.
 
 {note}
-Note: Avro uses [Schema Resolution|http://avro.apache.org/docs/current/spec.html#Schema+Resolution] if the two schemas are different, e.g. if the reader schema is a subset of the writer schema.
+Note: Avro uses [Schema Resolution|http://avro.apache.org/docs/current/spec.html#Schema+Resolution] if the two schemas are different, e.g. if the reader schema is a subset of the writer schema for the purpose of efficient column projection.
 {note}
 
 The input stream or byte array is read from the first attachment of the input record.
@@ -1015,7 +1015,7 @@ The [readAvro|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-mor
 Optionally, the Avro schema that shall be used for reading can be supplied with a configuration option; otherwise it is assumed to be the same as the writer schema.
 
 {note}
-Note: Avro uses [Schema Resolution|http://avro.apache.org/docs/current/spec.html#Schema+Resolution] if the two schemas are different, e.g. if the reader schema is a subset of the writer schema.
+Note: Avro uses [Schema Resolution|http://avro.apache.org/docs/current/spec.html#Schema+Resolution] if the two schemas are different, e.g. if the reader schema is a subset of the writer schema for the purpose of efficient column projection.
 {note}
 
 The command provides the following configuration options:

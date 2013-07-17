@@ -31,6 +31,7 @@
     <module>cdk-morphlines-core</module>
     <module>cdk-morphlines-avro</module>
     <module>cdk-morphlines-json</module>
+    <module>cdk-morphlines-saxon</module>
     <module>cdk-morphlines-tika-core</module>
     <module>cdk-morphlines-tika-decompress</module>
     <module>cdk-morphlines-twitter</module>

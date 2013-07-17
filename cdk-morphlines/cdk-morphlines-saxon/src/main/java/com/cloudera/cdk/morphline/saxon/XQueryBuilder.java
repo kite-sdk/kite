@@ -1,0 +1,203 @@
+/*
+ * Copyright 2013 Cloudera Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.cloudera.cdk.morphline.saxon;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import net.sf.saxon.s9api.Axis;
+import net.sf.saxon.s9api.BuildingStreamWriterImpl;
+import net.sf.saxon.s9api.QName;
+import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.XQueryCompiler;
+import net.sf.saxon.s9api.XQueryEvaluator;
+import net.sf.saxon.s9api.XQueryExecutable;
+import net.sf.saxon.s9api.XdmItem;
+import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.s9api.XdmNodeKind;
+import net.sf.saxon.s9api.XdmSequenceIterator;
+import net.sf.saxon.s9api.XdmValue;
+import net.sf.saxon.trace.XQueryTraceListener;
+import net.sf.saxon.value.UntypedAtomicValue;
+
+import com.cloudera.cdk.morphline.api.Command;
+import com.cloudera.cdk.morphline.api.CommandBuilder;
+import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
+import com.cloudera.cdk.morphline.api.MorphlineContext;
+import com.cloudera.cdk.morphline.api.Record;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
+/**
+ * Command that parses an InputStream that contains an XML document and runs the given XQuery over
+ * the XML document. For each item in the query result sequence, the command emits a morphline record
+ * containing the item's name-value pairs.
+ * 
+ * TODO: Add support for streaming via fragmentPath.
+ */
+public final class XQueryBuilder implements CommandBuilder {
+
+  @Override
+  public Collection<String> getNames() {
+    return Collections.singletonList("xquery");
+  }
+
+  @Override
+  public Command build(Config config, Command parent, Command child, MorphlineContext context) {
+    try {
+      return new XQuery(config, parent, child, context);
+    } catch (SaxonApiException e) {
+      throw new MorphlineCompilationException("Cannot compile", config, e);
+    } catch (IOException e) {
+      throw new MorphlineCompilationException("Cannot compile", config, e);
+    }
+  }
+  
+  
+  ///////////////////////////////////////////////////////////////////////////////
+  // Nested classes:
+  ///////////////////////////////////////////////////////////////////////////////
+  private static final class XQuery extends SaxonCommand {
+    
+    private final List<Fragment> fragments = new ArrayList();
+  
+    public XQuery(Config config, Command parent, Command child, MorphlineContext context) throws SaxonApiException, IOException {
+      super(config, parent, child, context);
+      
+      List<? extends Config> fragmentConfigs = getConfigs().getConfigList(config, "fragments");
+      if (fragmentConfigs.size() == 0) {
+        throw new MorphlineCompilationException("At least one fragment must be defined", config);
+      }
+      if (fragmentConfigs.size() > 1) {
+        throw new MorphlineCompilationException("More than one fragment is not yet supported", config);
+      }
+      for (Config fragment : fragmentConfigs) {
+        String fragmentPath = getConfigs().getString(fragment, "fragmentPath");
+        if (!fragmentPath.equals("/")) {
+          throw new MorphlineCompilationException("Non-root fragment paths are not yet supported", config);
+        }  
+        
+        XQueryCompiler compiler = processor.newXQueryCompiler();
+        compiler.setErrorListener(new DefaultErrorListener());
+        compiler.setCompileWithTracing(isTracing);
+        compiler.setLanguageVersion(getConfigs().getString(config, "languageVersion", "1.0"));
+        
+        XQueryExecutable executable = null;
+        String query = getConfigs().getString(fragment, "queryString", null);
+        if (query != null) {
+          executable = compiler.compile(query);     
+        }
+        String queryFile = getConfigs().getString(fragment, "queryFile", null);
+        if (queryFile != null) {
+          executable = compiler.compile(new File(queryFile));
+        }
+        if (query == null && queryFile == null) {
+          throw new MorphlineCompilationException("Either query or queryFile must be defined", config);
+        }
+        if (query != null && queryFile != null) {
+          throw new MorphlineCompilationException("Must not define both query and queryFile at the same time", config);
+        }
+        
+        XQueryEvaluator evaluator = executable.load();
+        Config variables = getConfigs().getConfig(config, "externalVariables", ConfigFactory.empty());
+        for (Map.Entry<String, Object> entry : variables.root().unwrapped().entrySet()) {
+          XdmValue xdmValue = XdmNode.wrap(new UntypedAtomicValue(entry.getValue().toString()));
+          evaluator.setExternalVariable(new QName(entry.getKey()), xdmValue);
+        }
+        if (isTracing) {
+          evaluator.setTraceListener(new XQueryTraceListener()); // TODO redirect from stderr to SLF4J
+        }
+
+        fragments.add(new Fragment(fragmentPath, evaluator));
+      }  
+      validateArguments();
+    }
+  
+    @Override
+    protected boolean doProcess2(Record inputRecord, InputStream stream) throws SaxonApiException, XMLStreamException {
+      incrementNumRecords();
+      XMLStreamReader reader = inputFactory.createXMLStreamReader(null, stream);
+      BuildingStreamWriterImpl writer = documentBuilder.newBuildingStreamWriter();      
+      new XMLStreamCopier(reader, writer).copy(false); // push XML into Saxon and build TinyTree
+      
+      for (Fragment fragment : fragments) {
+        Record template = inputRecord.copy();
+        removeAttachments(template);
+        XQueryEvaluator evaluator = fragment.xQueryEvaluator;
+        XdmNode document = writer.getDocumentNode();
+        evaluator.setContextItem(document);
+        for (XdmItem item : evaluator) {
+          //LOG.trace("result sequence item: {}", item);
+          if (item.isAtomicValue()) {
+            LOG.debug("Ignoring atomic value in result sequence: {}", item);
+            continue;
+          }
+          XdmNode node = (XdmNode) item;
+          Record outputRecord = template.copy();
+          boolean isNonEmpty = addRecordValues(node, Axis.SELF, XdmNodeKind.ATTRIBUTE, outputRecord);
+          isNonEmpty = addRecordValues(node, Axis.ATTRIBUTE, XdmNodeKind.ATTRIBUTE, outputRecord) || isNonEmpty;
+          isNonEmpty = addRecordValues(node, Axis.CHILD, XdmNodeKind.ELEMENT, outputRecord) || isNonEmpty;
+          if (isNonEmpty) { // pass record to next command in chain   
+            if (!getChild().process(outputRecord)) { 
+              return false;
+            }
+          }
+        }
+      }      
+      return true;
+    }
+
+    // extract fields from query result sequence
+    protected boolean addRecordValues(XdmNode node, Axis axis, XdmNodeKind nodeTest, Record record) {
+      boolean isEmpty = true;
+      XdmSequenceIterator iter = node.axisIterator(axis); 
+      while (iter.hasNext()) {
+        XdmNode child = (XdmNode) iter.next();
+        if (child.getNodeKind() == nodeTest) { 
+          record.put(child.getNodeName().getLocalName(), child.getStringValue());
+          isEmpty = false;
+        }
+      }
+      return !isEmpty;
+    }
+    
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Nested classes:
+    ///////////////////////////////////////////////////////////////////////////////    
+    private static final class Fragment {
+      
+      private final String fragmentPath;     
+      private final XQueryEvaluator xQueryEvaluator;     
+      
+      public Fragment(String fragmentPath, XQueryEvaluator xQueryEvaluator) {
+        this.fragmentPath = fragmentPath;
+        this.xQueryEvaluator = xQueryEvaluator;
+      }
+    }
+    
+  }  
+  
+}
