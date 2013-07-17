@@ -22,6 +22,7 @@ return
   {$tweet/user/@screen_name} 
   {$tweet/user/@followers_count} 
   {$tweet/user/@statuses_count}
+  <emptyElem></emptyElem>
 </user>
 
       

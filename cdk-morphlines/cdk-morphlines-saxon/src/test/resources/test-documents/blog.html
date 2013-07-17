@@ -1,0 +1,1153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en-US">
+<head>
+<title>Introducing Morphlines: The Easy Way to Build and Integrate ETL Apps for Hadoop | Apache Hadoop for the Enterprise | Cloudera</title>
+
+<meta name="keywords" content="hadoop, hadoop training, cloudera, hadoop tutorial, hadoop certification, apache hadoop, hadoop download, big data, open source" />
+<meta name="description" content="Cloudera offers enterprises a powerful new data platform built on the popular Apache Hadoop open-source software package." />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="msvalidate.01" content="8857B9071A02F989DE3F8BEE557BB584" />
+
+<link rel="search" type="application/opensearchdescription+xml" href="/assets/opensearch.xml" title="Cloudera" />
+
+<meta property="og:title" content="Introducing Morphlines: The Easy Way to Build and Integrate ETL Apps for Hadoop"/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="http://blog.cloudera.com/blog/2013/07/morphlines-the-easy-way-to-build-and-integrate-etl-apps-for-apache-hadoop/"/>
+<meta property="og:site_name" content="Cloudera"/>
+
+<link rel="icon" href="/wp-content/themes/solutionset/assets/favicon.ico" type="image/x-icon" /> 
+<link rel="stylesheet" media="all" type="text/css" href="/wp-content/themes/solutionset/assets/css/960.css?070910" />
+<link rel="stylesheet" media="all" type="text/css" href="/wp-content/themes/solutionset/assets/css/reset.css?070910" />
+<link rel="stylesheet" media="all" type="text/css" href="/wp-content/themes/solutionset/assets/css/all.css?20120620" />
+<link rel="stylesheet" media="all" type="text/css" href="/wp-content/themes/solutionset/assets/css/wp.css?20120620" /> 
+
+<!--[if lt IE 7]><link rel="stylesheet" type="text/css" href="http://blog.cloudera.com/wp-content/themes/solutionset/assets/css/ie6.css?20120605" media="screen"/><![endif]-->
+<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="http://blog.cloudera.com/wp-content/themes/solutionset/assets/css/ie6-7.css?20120605" media="screen"/><![endif]-->
+<!--[if lt IE 9]><link rel="stylesheet" type="text/css" href="http://blog.cloudera.com/wp-content/themes/solutionset/assets/css/ie.css?20120605" media="screen"/><![endif]-->
+
+<script type="text/javascript" src="/wp-content/themes/solutionset/assets/js/modernizr-2.6.1.min.js"></script>
+<script type="text/javascript" src="/wp-content/themes/solutionset/assets/js/mootools-1.2.4-yui.js"></script>
+<script type="text/javascript" src="/wp-content/themes/solutionset/assets/js/mootools-1.2.4.4-more-yui.js"></script>
+<script type="text/javascript" src="/wp-content/themes/solutionset/assets/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript"> jQuery.noConflict(); </script>
+<script type="text/javascript" src="/wp-content/themes/solutionset/assets/js/jquery.colorbox-min.js"></script>
+<script type="text/javascript" src="/wp-content/themes/solutionset/assets/js/global.js?20120605"></script>
+
+<link rel="pingback" href="http://blog.cloudera.com/xmlrpc.php" />
+<link rel="alternate" type="application/rss+xml" title="Cloudera Blog &raquo; Feed" href="http://blog.cloudera.com/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Cloudera Blog &raquo; Comments Feed" href="http://blog.cloudera.com/comments/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Cloudera Blog &raquo; Introducing Morphlines: The Easy Way to Build and Integrate ETL Apps for Hadoop Comments Feed" href="http://blog.cloudera.com/blog/2013/07/morphlines-the-easy-way-to-build-and-integrate-etl-apps-for-apache-hadoop/feed/" />
+<link rel='stylesheet' id='cptchStylesheet-css'  href='http://blog.cloudera.com/wp-content/plugins/captcha/css/style.css?ver=3.3.2' type='text/css' media='all' />
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://blog.cloudera.com/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://blog.cloudera.com/wp-includes/wlwmanifest.xml" /> 
+<link rel='prev' title='Where to Find Cloudera Tech Talks Through September 2013' href='http://blog.cloudera.com/blog/2013/07/where-to-find-cloudera-tech-talks-through-september-2013/' />
+<link rel='next' title='How Does Cloudera Manager Work?' href='http://blog.cloudera.com/blog/2013/07/how-does-cloudera-manager-work/' />
+<meta name="generator" content="WordPress 3.3.2" />
+<link rel='canonical' href='http://blog.cloudera.com/blog/2013/07/morphlines-the-easy-way-to-build-and-integrate-etl-apps-for-apache-hadoop/' />
+<link rel='shortlink' href='http://blog.cloudera.com/?p=22463' />
+	<link type="text/css" rel="stylesheet" href="http://blog.cloudera.com/wp-content/plugins/syntaxhighlighter-plus/syntaxhighlighter/styles/shCore.css"></link>
+	<link type="text/css" rel="stylesheet" href="http://blog.cloudera.com/wp-content/plugins/syntaxhighlighter-plus/syntaxhighlighter/styles/shThemeDefault.css"></link>
+
+
+<script type="text/javascript">
+ var _gaq = _gaq || [];
+ _gaq.push(['_setAccount', 'UA-2275969-16']);
+ _gaq.push(['_trackPageview']);
+
+ (function() {
+   var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+   ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+ })();
+</script>
+
+
+</head>
+<body class="single single-post postid-22463 single-format-standard devcenter">
+			
+		
+			
+	<header id="site-head">
+	    <nav class="properties">
+	        <div class="container">
+	            <ul>
+	                <li><a href="http://www.cloudera.com">Cloudera.com</a></li>
+	                <li><a href="http://university.cloudera.com/">Cloudera University</a></li>
+	                <li><a href="https://ccp.cloudera.com/display/DOC/Documentation">Documentation</a></li>
+	                <li><a href="http://www.cloudera.com/content/cloudera/en/developer-community.html">Developer Community</a></li>
+	            </ul>
+	            <ul class="user">
+	                <li><a href="https://ccp.cloudera.com/um/login.action?os_destination=%2F&stay=true">Sign In</a></li>
+	                <li><a href="https://ccp.cloudera.com/um/signup.action">Register</a></li>
+	                <li><a href="http://www.cloudera.com/content/cloudera/en/about/contact-us.html">Contact Us</a></li>
+	                <li class="hilight"><a href="https://ccp.cloudera.com/display/SUPPORT/Downloads">Downloads</a></li>
+	            </ul>
+	        </div>
+	        <div class="bg-fix"></div>
+	    </nav>
+	        <div class="wrapper">
+		        <div class="bg-fix"></div>
+		        <h1 class="logo">
+		            <a href="http://www.cloudera.com">Cloudera</a>
+		        </h1>
+		        <nav class="site">
+		                <ul>
+		                    <li>
+		                        <a href="http://www.cloudera.com/content/cloudera/en/why-cloudera.html">Why Cloudera</a>
+		                        <nav class="subnav super cols-4">
+		                            <ul class="menu-items">
+		                                <li><a href="http://www.cloudera.com/content/cloudera/en/why-cloudera/hadoop-and-big-data.html"><h3>Hadoop &amp; Big Data</h3>
+		                                <p>Doug Cutting, Cloudera's Chief Architect, wrote Apache Hadoop in 2006. Learn about Hadoop and its impact on Big Data.</p>
+		                                </a></li>
+		                                <li><a href="http://www.cloudera.com/content/cloudera/en/why-cloudera/our-customers.html"><h3>Our Customers</h3>
+		                                <p>See a selection of Cloudera customers and how they use Cloudera to ask bigger questions of all their data.</p>
+		                                </a></li>
+		                                <li><a href="http://www.cloudera.com/content/cloudera/en/why-cloudera/faqs.html"><h3>FAQs</h3>
+		                                <p>We answer some of your most popular questions about Cloudera and our technology.</p>
+		                                </a></li>
+		                                <li><a href="/blog"><h3>Blog</h3>
+		                                <p>Explore thought, technical, and community leadership from Cloudera.</p>
+		                                </a></li>
+		                            </ul>
+		                        </nav>
+		                    </li>
+			                <li>
+			                    <a href="http://www.cloudera.com/content/cloudera/en/products.html">Products</a>
+			                    <nav class="subnav super cols-5">
+			                        <ul class="menu-items">
+			                            <li>
+			                                <a href="http://www.cloudera.com/content/cloudera/en/products/cloudera-enterprise-core.html">
+			                                    <h3>Cloudera Enterprise Core</h3>
+			                                    <p>Discover our single Hadoop storage and management platform that natively combines storage, processing and exploration — and offers real-time query with Cloudera Enterprise RTQ powered by Cloudera Impala.</p>
+			                                </a>
+			                            </li>
+			                            <li>
+			                                <a href="http://www.cloudera.com/content/cloudera/en/products/cloudera-enterprise-free.html">
+			                                    <h3>Cloudera Enterprise Free</h3>
+			                                    <p>Read how Cloudera Enterprise Free offers you all the essentials to evaluate Apache Hadoop.</p>
+			                                </a>
+			                            </li>
+			                            <li>
+			                                <a href="http://www.cloudera.com/content/cloudera/en/products/cloudera-support.html">
+			                                    <h3>Cloudera Support</h3>
+			                                    <p>The industry’s highest quality technical support for Hadoop.</p>
+			                                </a>
+			                            </li>
+			                            <li>
+			                                <a href="http://www.cloudera.com/content/cloudera/en/products/cloudera-manager.html">
+			                                    <h3>Cloudera Manager</h3>
+			                                    <p>Explore the leading end-to-end management application for Hadoop.</p>
+			                                </a>
+			                            </li>
+			                            <li>
+			                                <a href="http://www.cloudera.com/content/cloudera/en/products/cdh.html">
+			                                    <h3>CDH</h3>
+			                                    <p>Get details about our 100% open source distribution of Hadoop and other projects, designed for enterprise demands.</p>
+			                                </a>
+			                            </li>
+			                        </ul>
+			                        <ul class="featured-items">
+			                            <li class="list">
+			                                <ul>
+			                                    <li><a href="http://www.cloudera.com/content/cloudera/en/products/latest-releases.html">Latest Releases</a></li>
+			                                    <li><a href="https://ccp.cloudera.com/display/SUPPORT/Downloads" class="more">Downloads &amp; Installation</a></li>
+			                                    <li><a href="http://www.cloudera.com/content/cloudera/en/products/professional-services.html" class="more">Professional Services</a></li>
+			                                    <li><a href="http://www.cloudera.com/content/cloudera/en/products/cdh.html" class="more">Training</a></li>
+			                                </ul>
+			                            </li>
+			                            <li class="promo">
+			                                <br>
+			                                <br>
+			                                <h3 align="center">Work at the speed of thought with Cloudera Enterprise RTQ powered by Cloudera Impala.<p><br>
+			                                <a href="http://www.cloudera.com/content/cloudera/en/products/cloudera-enterprise-core/cloudera-enterprise-RTQ.html">Learn More<i class="icon-right-open"></i></a></p>
+			                                </h3>
+			                            </li>
+			                        </ul>
+			                    </nav>
+			                </li>
+		                    <li>
+		                        <a href="http://www.cloudera.com/content/cloudera/en/solutions.html">Solutions</a>
+		                        <nav class="subnav super cols-3">
+		                            <ul class="menu-items">
+		                                <li><a href="http://www.cloudera.com/content/cloudera/en/solutions/industries.html"><h3>Industries</h3>
+		                                <p>Learn about Cloudera use cases across several major industries.</p>
+		                                </a></li>
+		                                <li><a href="http://www.cloudera.com/content/cloudera/en/solutions/applications.html"><h3>Applications</h3>
+		                                <p>Explore the leading end-to-end management application for Hadoop.</p>
+		                                </a></li>
+		                                <li><a href="http://www.cloudera.com/content/cloudera/en/solutions/partner.html"><h3>Partner Solutions</h3>
+		                                <p>See our list of the best complementary solutions for Cloudera Enterprise available.</p>
+		                                </a></li>
+		                            </ul>
+		                        </nav>
+		                    </li>
+		                    <li>
+		                        <a href="http://www.cloudera.com/content/cloudera/en/partners.html">Partners</a>
+		                        <nav class="subnav super cols-3">
+		                            <ul class="menu-items">
+		                                <li><a href="http://www.cloudera.com/content/cloudera/en/partners/partners-listing.html"><h3>Partner Listing</h3>
+		                                <p>Explore the largest partner ecosystem developing, integrating and deploying technology on Hadoop.</p>
+		                                </a></li>
+		                                <li><a href="http://www.cloudera.com/content/cloudera/en/partners/certified-technology.html"><h3>Cloudera Certified Technology</h3>
+		                                <p>Let this program, unique in the Big Data industry, help guide you toward the right technology choices for your business.</p>
+		                                </a></li>
+		                                <li><a href="https://ccp.cloudera.com/display/PARTNERS/Cloudera+Connect+Partner+Portal"><h3>Partner Program</h3>
+		                                <p>Please login to access your Cloudera Connect Partner benefits, exclusive content, tools, training and more</p>
+		                                </a></li>
+		                            </ul>
+		                        </nav>
+		                    </li>
+		                    <li>
+		                        <a href="http://www.cloudera.com/content/cloudera/en/resources.html">Resources</a>
+		                    </li>
+		                    <li>
+		                        <a href="https://ccp.cloudera.com/display/SUPPORT/Get+Support">Support</a>
+		                    </li>
+		                    <li>
+		                        <a href="http://www.cloudera.com/content/cloudera/en/about.html">About</a>
+		                        <nav class="subnav menu"> 
+		                            <nav>
+		                                <ul>
+		                                    <li><a href="http://www.cloudera.com/content/cloudera/en/about/management.html">Management Team</a></li>
+		                                    <li><a href="http://www.cloudera.com/content/cloudera/en/about/board.html">Board</a></li>
+		                                    <li><a href="http://www.cloudera.com/content/cloudera/en/about/investors.html">Investors</a></li>
+		                                    <li><a href="http://www.cloudera.com/content/cloudera/en/about/events.html">Events</a></li>
+		                                    <li><a href="http://www.cloudera.com/content/cloudera/en/about/awards.html">Awards</a></li>
+		                                    <li><a href="http://www.cloudera.com/content/cloudera/en/about/press-center.html">Press Center</a></li>
+		                                    <li><a href="http://www.cloudera.com/content/cloudera/en/about/careers.html">Careers</a></li>
+		                                    <li><a href="http://www.cloudera.com/content/cloudera/en/about/contact-us.html">Contact Us</a></li>
+		                                </ul>
+		                            </nav> 
+		                        </nav>
+		                    </li>
+		                </ul>
+		        </nav>
+				<form action="http://www.cloudera.com/content/cloudera/en/search.html" id="site-search" method="get" novalidate=""> 
+			        <label for="q" class="visuallyhidden">Search</label> 
+			        <input type="search" name="q" id="q" placeholder="search"><i class="icon-search"></i> 
+			    </form>
+		    </div>
+	</header>
+				
+	<div role="main" class="main">
+		<div class="wrapper">
+			<section class="two-col">
+
+	
+<aside class="left-col">
+
+				<nav>
+			<ul class="">
+			
+								
+							<li class="">
+				<a
+					href="http://www.cloudera.com/content/cloudera/en/why-cloudera/hadoop-and-big-data.html"
+					title="Hadoop &amp; Big Data"
+					class=""
+					target="_blank"				>
+					Hadoop &amp; Big Data				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="http://www.cloudera.com/content/cloudera/en/why-cloudera/our-customers.html"
+					title="Our Customers"
+					class=""
+					target="_blank"				>
+					Our Customers				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="http://www.cloudera.com/content/cloudera/en/why-cloudera/faqs.html"
+					title="FAQs"
+					class=""
+					target="_blank"				>
+					FAQs				</a>
+
+							</li>
+			
+					<li class="current">
+				<a
+					href="/blog/"
+					title="Blog"
+					class="blog"
+									>
+					Blog				</a>
+
+									<ul>
+									<li class="">
+				<a
+					href="/blog/category/avro/"
+					title="Avro (16)"
+					class=""
+									>
+					Avro (16)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/bigtop/"
+					title="Bigtop (5)"
+					class=""
+									>
+					Bigtop (5)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/books/"
+					title="Books (5)"
+					class=""
+									>
+					Books (5)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/careers/"
+					title="Careers (14)"
+					class=""
+									>
+					Careers (14)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/cdh/"
+					title="CDH (100)"
+					class=""
+									>
+					CDH (100)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/cdk/"
+					title="CDK (3)"
+					class=""
+									>
+					CDK (3)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/cloud-2/"
+					title="Cloud (5)"
+					class=""
+									>
+					Cloud (5)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/cloudera-life/"
+					title="Cloudera Life (1)"
+					class=""
+									>
+					Cloudera Life (1)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/cloudera-manager/"
+					title="Cloudera Manager (46)"
+					class=""
+									>
+					Cloudera Manager (46)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/clouderas-service-and-configuration-manager/"
+					title="Cloudera&#039;s Service And Configuration Manager (9)"
+					class=""
+									>
+					Cloudera's Service And Configuration Manager (9)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/community/"
+					title="Community (144)"
+					class=""
+									>
+					Community (144)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/connector/"
+					title="Connector (6)"
+					class=""
+									>
+					Connector (6)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/data-collection/"
+					title="Data Collection (16)"
+					class=""
+									>
+					Data Collection (16)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/data-science/"
+					title="Data Science (17)"
+					class=""
+									>
+					Data Science (17)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/devops-2/"
+					title="DevOps (10)"
+					class=""
+									>
+					DevOps (10)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/distribution/"
+					title="Distribution (36)"
+					class=""
+									>
+					Distribution (36)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/events/"
+					title="Events (15)"
+					class=""
+									>
+					Events (15)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/flume/"
+					title="Flume (17)"
+					class=""
+									>
+					Flume (17)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/general/"
+					title="General (304)"
+					class=""
+									>
+					General (304)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/guest/"
+					title="Guest (59)"
+					class=""
+									>
+					Guest (59)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/hadoop/"
+					title="Hadoop (236)"
+					class=""
+									>
+					Hadoop (236)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/hbase/"
+					title="HBase (97)"
+					class=""
+									>
+					HBase (97)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/hdfs/"
+					title="HDFS (41)"
+					class=""
+									>
+					HDFS (41)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/hive/"
+					title="Hive (48)"
+					class=""
+									>
+					Hive (48)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/how-to/"
+					title="How-to (30)"
+					class=""
+									>
+					How-to (30)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/hue/"
+					title="Hue (17)"
+					class=""
+									>
+					Hue (17)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/impala/"
+					title="Impala (38)"
+					class=""
+									>
+					Impala (38)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/mahout-2/"
+					title="Mahout (5)"
+					class=""
+									>
+					Mahout (5)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/mapreduce/"
+					title="MapReduce (61)"
+					class=""
+									>
+					MapReduce (61)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/meet-the-engineer/"
+					title="Meet The Engineer (14)"
+					class=""
+									>
+					Meet The Engineer (14)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/oozie/"
+					title="Oozie (21)"
+					class=""
+									>
+					Oozie (21)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/pig/"
+					title="Pig (32)"
+					class=""
+									>
+					Pig (32)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/search/"
+					title="Search (9)"
+					class=""
+									>
+					Search (9)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/security-2/"
+					title="Security (8)"
+					class=""
+									>
+					Security (8)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/sqoop/"
+					title="Sqoop (17)"
+					class=""
+									>
+					Sqoop (17)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/support/"
+					title="Support (3)"
+					class=""
+									>
+					Support (3)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/testing/"
+					title="Testing (7)"
+					class=""
+									>
+					Testing (7)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/tools/"
+					title="Tools (5)"
+					class=""
+									>
+					Tools (5)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/training-2/"
+					title="Training (34)"
+					class=""
+									>
+					Training (34)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/use-case/"
+					title="Use Case (40)"
+					class=""
+									>
+					Use Case (40)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/whirr/"
+					title="Whirr (5)"
+					class=""
+									>
+					Whirr (5)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/yarn/"
+					title="YARN (4)"
+					class=""
+									>
+					YARN (4)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/blog/category/zookeeper/"
+					title="ZooKeeper (21)"
+					class=""
+									>
+					ZooKeeper (21)				</a>
+
+							</li>
+			
+					<li class="">
+				<a
+					href="/archive/"
+					title="Archives by Month"
+					class=""
+									>
+					Archives by Month				</a>
+
+							</li>
+			
+							</ul>
+							</li>
+			
+						
+			    
+			
+				<div style="clear:both"></div>
+			</ul>
+			</nav>
+			<div class="menu-special">
+				<ul>
+							
+				
+				
+		
+				
+		
+				
+				
+				
+				
+
+		
+					</ul>
+			</div>
+			
+</aside>
+
+
+<section>
+			<h1 class="heading ">Introducing Morphlines: The Easy Way to Build and Integrate ETL Apps for Hadoop</h1>
+			
+			<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+			
+			<ul class="post-info">
+				<li>by Wolfgang Hoschek</li>
+				<li>July 11, 2013</li>
+				<li class="comment"><a href="#comments">no comments</a></li>
+				<li>
+					<div style="height:20px;width:87px;overflow:visible;margin-top:2px;">
+						<a href="http://twitter.com/share?text=Introducing Morphlines: The Easy Way to Build and Integrate ETL Apps for Hadoop" class="twitter-share-button" data-count="horizontal" data-via="cloudera">Tweet</a>
+					</div>
+				</li>
+				<li>
+					<iframe src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fblog.cloudera.com%2Fblog%2F2013%2F07%2Fmorphlines-the-easy-way-to-build-and-integrate-etl-apps-for-apache-hadoop%2F&amp;send=false&amp;layout=standard&amp;width=55&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;height=25" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:55px; height:25px;" allowTransparency="true"></iframe>
+				</li>
+			</ul>
+			
+			<div class="text-block">
+				<p><em>This post is the first in a series of blog posts about Cloudera Morphlines, a new command-based framework that simplifies data preparation for Apache Hadoop workloads. To check it out or help contribute, you can find the code <a href="https://github.com/cloudera/cdk">here</a>.</em></p>
+<p>Cloudera Morphlines is a new open source framework that reduces the time and skills necessary to integrate, build, and change Hadoop processing applications that extract, transform, and load data into Apache Solr, Apache HBase, HDFS, enterprise data warehouses, or analytic online dashboards. If you want to integrate, build, or facilitate transformation pipelines without programming and without substantial MapReduce skills, and get the job done with a minimum amount of fuss and support costs, this post gets you started.</p>
+<p>A &#8220;morphline&#8221; is a rich configuration file that makes it easy to define a transformation chain that consumes any kind of data from any kind of data source, processes the data, and loads the results into a Hadoop component. It replaces Java programming with simple configuration steps, and correspondingly reduces the cost and integration effort associated with developing, maintaining, or integrating custom ETL projects.</p>
+<p>Morphlines is a library, embeddable in any Java codebase. A <em>morphline</em> is an in-memory container of transformation commands. Commands are plugins to a morphline that perform tasks such as loading, parsing, transforming, or otherwise processing a single record. A <em>record</em> is an in-memory data structure of name-value pairs with optional blob attachments or POJO attachments. The framework is extensible and integrates existing functionality and third-party systems in a simple and straightforward manner.</p>
+<table style="width: 120px; margin: 6px; padding: 0px 0px 0px 0px;" align="right">
+<tbody>
+<tr>
+<td>
+<h3>Morphlines replaces Java programming with simple configuration steps, reducing the cost and effort of doing custom ETL.</h3>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The Morphlines library was developed as part of <a href="http://tiny.cloudera.com/search-v1-docs-landing">Cloudera Search</a>. It powers a variety of ETL data flows from Apache Flume and MapReduce into Solr. Flume covers the real time case, whereas MapReduce covers the batch processing case.</p>
+<p>Since the launch of Cloudera Search, Morphlines development has graduated into the <a href="http://blog.cloudera.com/blog/2013/05/cloudera-development-kit-cdk/">Cloudera Development Kit</a> (CDK) in order to make the technology accessible to a wider range of users, contributors, integrators, and products beyond Search. The CDK is a set of libraries, tools, examples, and documentation focused on making it easier to build systems on top of the Hadoop ecosystem (and hence a perfect home for Morphlines). The CDK is hosted on <a href="https://github.com/cloudera/cdk">GitHub</a> and encourages involvement by the community.</p>
+<p>Currently, Morphlines works with multiple indexing workloads, but could easily be embedded into Crunch, HBase, Impala, Pig, Hive, or Sqoop. Your feedback is not only welcome but crucial, so please let us know where you see more opportunities for integration going forward! </p>
+<p>Later in this post, we&#8217;ll examine a simple example use case in which we collect syslog output and make it available for searching. Before we go into the details of the problem and solution, though, let&#8217;s take a look at the Morphlines data model and processing model.</p>
+<h2>Processing Model</h2>
+<p>Morphlines can be seen as an evolution of Unix pipelines where the data model is generalized to work with streams of generic records, including arbitrary binary payloads. A morphline is an efficient way to consume records (e.g. Flume events, HDFS files,  RDBMS tables, or Apache Avro objects), turn them into a stream of records, and pipe the stream of records through a set of easily configurable transformations on the way to a target application such as Solr, for example as outlined in the following figure:</p>
+<p align="center"><img title="wolf1" src="http://blog.cloudera.com/wp-content/uploads/2013/07/wolf1.png" alt="" width="595" height="117" /></p>
+<p>In this figure, a Flume Source receives syslog events and sends them to a Flume Morphline Sink, which converts each Flume event to a record and pipes it into a <code>readLine</code> command. The <code>readLine</code> command extracts the log line and pipes it into a <code>grok</code> command. The <code>grok</code> command uses regular expression pattern matching to extract some substrings of the line. It pipes the resulting structured record into the <code>loadSolr</code> command. Finally, the <code>loadSolr</code> command loads the record into Solr, typically a SolrCloud. In the process, raw data or semi-structured data is transformed into structured data according to application modelling requirements.</p>
+<p>The Morphlines framework ships with a set of frequently used high-level transformation and I/O commands that can be combined in application specific ways. The plugin system allows the adding of new transformations and I/O commands and integrates existing functionality and third-party systems in a straightforward manner.</p>
+<p>This integration enables rapid Hadoop ETL application prototyping, complex stream and event processing in real time, flexible log file analysis, integration of multiple heterogeneous input schemas and file formats, as well as reuse of ETL logic building blocks across Hadoop ETL applications.</p>
+<p>The CDK ships an efficient runtime that compiles a morphline on the fly. The runtime executes all commands of a given morphline in the same thread. Piping a record from one command to another implies just a cheap Java method call. In particular, there are no queues, no handoffs among threads, no context switches, and no serialization between commands, which minimizes performance overhead.</p>
+<h2>Data Model</h2>
+<p>Morphlines manipulate continuous or arbitrarily large streams of records. A command transforms a record into zero or more records. The data model can be described as follows: A record is a set of named fields where each field has an ordered list of one or more values. A value can be any Java Object. That is, a record is essentially a hash table where each hash table entry contains a String key and a list of Java Objects as values. Note that a field can have multiple values and any two records need not use common field names. This flexible data model corresponds exactly to the characteristics of the Solr/Lucene data model.</p>
+<p>Not only structured data, but also binary data, can be passed into and processed by a morphline. By convention, a record can contain an optional field named _attachment_body, which can be a Java java.io.InputStream or Java byte[]. Optionally, such binary input data can be characterized in more detail by setting the fields named _attachment_mimetype (such as “application/pdf”) and _attachment_charset (such as “UTF-8”) and _attachment_name (such as “cars.pdf”), which assists in detecting and parsing the data type. (This is similar to the way email works.)</p>
+<p>This generic data model is useful to support a wide range of applications. For example, the <a href="http://flume.apache.org/FlumeUserGuide.html#morphlinesolrsink">Apache Flume Morphline Solr Sink</a> embeds the morphline library and executes a morphline to convert flume events into morphline records and load them into Solr. This sink fills the body of the Flume event into the _attachment_body field of the morphline record, as well as copies the headers of the Flume event into record fields of the same name. As another example, the Mappers of the <a href="https://github.com/cloudera/search/tree/master/search-mr">MapReduceIndexerTool</a> fill the Java java.io.InputStream referring to the currently processed HDFS file into the _attachment_body field of the morphline record. The Mappers of the MapReduceIndexerTool also fill metadata about the HDFS file into record fields, such as the file&#8217;s name, path, size, last modified time, etc. This way a morphline can act on all data received from Flume and HDFS.</p>
+<h2>Use Cases</h2>
+<p>Commands can access all record fields. For example, commands can parse fields, add fields, remove fields, rename fields, find and replace values of existing fields, split a field into multiple fields, split a field into multiple values, or drop records. Often, regular expression-based pattern matching is used as part of the process of acting on fields. The output records of a command are passed to the next command in the chain. A command has a Boolean return code, indicating success or failure.</p>
+<p>For example, consider the case of a multi-line input record: A command could take this multi-line input record and divide the single record into multiple output records, one for each line. This output could then later be further divided using regular expression commands, splitting each single line record out into multiple fields in application specific ways.</p>
+<p>A command can extract, clean, transform, join, integrate, enrich and decorate records in many other ways. For example, a command might join records with external data sources such as relational databases, key-value stores, local files or IP Geo lookup tables. It might also perform tasks such as DNS resolution, expand shortened URLs, fetch linked metadata from social networks, perform sentiment analysis and annotate the record accordingly, continuously maintain statistics for analytics over sliding windows, or compute exact or approximate distinct values and quantiles.</p>
+<p>A command can also consume records and pass them to external systems. For example, a command might load records into Apache Solr or write them to a MapReduce Reducer, or load them into an Enterprise Data Warehouse or a Key Value store such as HBase, or pass them into an online dashboard, or write them to HDFS.</p>
+<h2>Embedding into a Host System</h2>
+<p>A morphline has no notion of persistence, durability, distributed computing, or node failover &#8212; it&#8217;s basically just a chain of in-memory transformations in the current thread. There is no need for a morphline to manage multiple processes, nodes, or threads because this is already addressed by host systems such as MapReduce, Flume, or Storm. However, a morphline does support passing notifications on the control plane to command subtrees. Such notifications include BEGIN_TRANSACTION, COMMIT_TRANSACTION, ROLLBACK_TRANSACTION, and SHUTDOWN.</p>
+<h2>Syntax</h2>
+<p>The morphline configuration file is implemented using the HOCON format (Human Optimized Config Object Notation) developed by typesafe.com. HOCON is basically JSON slightly adjusted for the configuration file use case. HOCON syntax is defined at the <a href="http://github.com/typesafehub/config/blob/master/HOCON.md">HOCON github page</a>.</p>
+<h2>Currently Available Commands</h2>
+<p>The CDK includes several maven modules that contain morphline commands for flexible log file analysis, single-line records, multi-line records, CSV files, JSON, commonly used HDFS file formats Avro and Hadoop Sequence Files, regular expression based pattern matching and extraction, operations on record fields for assignment and comparison, operations on record fields with list and set semantics, if-then-else conditionals, string and timestamp conversions, scripting support for dynamic java code, a small rules engine, logging, metrics and counters, integration with Solr including SolrCloud, integration and access to the large set of file formats supported by the Apache Tika parser library, auto-detection of MIME types from binary data using Tika, and decompression and unpacking of arbitrarily nested container file formats, among others. These are described in detail in the <em><a href="http://cloudera.github.io/cdk/docs/0.4.1/cdk-morphlines/morphlinesReferenceGuide.html">Cloudera Morphlines Reference Guide</a></em>.</p>
+<h2>Syslog Use Case</h2>
+<p>Now we&#8217;ll review a concrete example use case: We want to extract information from a syslog file and index it into Solr in order to make it available for Search queries. The corresponding program should be able to run standalone, or embedded inside a Flume Sink or embedded in a MapReduce job.</p>
+<p>A syslog file contains semi-structured lines of the following form:</p>
+<pre class="code" style="padding-left: 10px;">Feb  4 10:46:14 syslog sshd[607]: listening on 0.0.0.0 port 22.
+</pre>
+<p>&nbsp;</p>
+<p>The program should extract the following record from the log line, convert the timestamp, and load the record into Solr:</p>
+<pre class="code" style="padding-left: 10px;">priority : 164
+timestamp : Feb  4 10:46:14
+hostname : syslog
+program : sshd
+pid : 607
+msg : listening on 0.0.0.0 port 22.
+message : Feb  4 10:46:14 syslog sshd[607]: listening on 0.0.0.0 port 22.
+</pre>
+<p>&nbsp;</p>
+<p>These rules can be expressed with the Morphline commands <a href="http://cloudera.github.io/cdk/docs/0.4.1/cdk-morphlines/morphlinesReferenceGuide.html#readLine"><code>readLine</code></a>, <a href="http://cloudera.github.io/cdk/docs/0.4.1/cdk-morphlines/morphlinesReferenceGuide.html#grok"><code>grok</code></a>, <a href="http://cloudera.github.io/cdk/docs/0.4.1/cdk-morphlines/morphlinesReferenceGuide.html#convertTimestamp"><code>convertTimestamp</code></a>, <a href="http://cloudera.github.io/cdk/docs/0.4.1/cdk-morphlines/morphlinesReferenceGuide.html#sanitizeUnknownSolrFields"><code>sanitizeUnknownSolrFields</code></a>, <a href="http://cloudera.github.io/cdk/docs/0.4.1/cdk-morphlines/morphlinesReferenceGuide.html#logTrace_logDebug_logInfo_logWarn_logError"><code>logInfo</code></a> and <a href="http://cloudera.github.io/cdk/docs/0.4.1/cdk-morphlines/morphlinesReferenceGuide.html#loadSolr"><code>loadSolr</code></a>, by editing a morphline.conf file to read as follows:</p>
+<pre class="code" style="padding-left: 10px;">morphlines : [
+  {
+    # Name used to identify a morphline. E.g. used if there are multiple
+    # morphlines in a morphline config file
+    id : morphline1
+
+    # Import all morphline commands in these java packages and their
+    # subpackages. Other commands that may be present on the classpath are
+    # not visible to this morphline.
+    importCommands : ["com.cloudera.**", "org.apache.solr.**"]
+
+    commands : [
+      {
+        # Parse input attachment and emit a record for each input line               
+        readLine {
+          charset : UTF-8
+        }
+      }
+
+      {
+        grok {
+          # Consume the output record of the previous command and pipe another
+          # record downstream.
+          #
+          # A grok-dictionary is a config file that contains prefabricated
+          # regular expressions that can be referred to by name. grok patterns
+          # specify such a regex name, plus an optional output field name.
+          # The syntax is %{REGEX_NAME:OUTPUT_FIELD_NAME}
+          # The input line is expected in the "message" input field.
+          dictionaryFiles : [src/test/resources/grok-dictionaries]
+          expressions : {
+            message : """%{SYSLOGTIMESTAMP:timestamp} %{SYSLOGHOST:hostname} %{DATA:program}(?:\[%{POSINT:pid}\])?: %{GREEDYDATA:msg}"""
+          }
+        }
+      }
+
+      # Consume the output record of the previous command, convert
+      # the timestamp, and pipe another record downstream.
+      #
+      # convert timestamp field to native Solr timestamp format
+      # e.g. 2012-09-06T07:14:34Z to 2012-09-06T07:14:34.000Z
+      {
+        convertTimestamp {
+          field : timestamp
+          inputFormats : ["yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", ""MMM d HH:mm:ss"]
+          inputTimezone : America/Los_Angeles
+          outputFormat : "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+          outputTimezone : UTC
+        }
+      }
+
+      # Consume the output record of the previous command, transform it
+      # and pipe the record downstream.
+      #
+      # This command deletes record fields that are unknown to Solr
+      # schema.xml. Recall that Solr throws an exception on any attempt to
+      # load a document that contains a field that isn't specified in
+      # schema.xml.
+      {
+        sanitizeUnknownSolrFields {
+          # Location from which to fetch Solr schema
+          solrLocator : {           
+            collection : collection1       # Name of solr collection
+            zkHost : "127.0.0.1:2181/solr" # ZooKeeper ensemble
+          }
+        }
+      }
+
+      # log the record at INFO level to SLF4J
+      { logInfo { format : "output record: {}", args : ["@{}"] } }
+
+      # load the record into a Solr server or MapReduce Reducer
+      {
+        loadSolr {
+          solrLocator : {           
+            collection : collection1       # Name of solr collection
+            zkHost : "127.0.0.1:2181/solr" # ZooKeeper ensemble
+          }
+        }
+      }
+    ]
+  }
+]
+</pre>
+<p>&nbsp;</p>
+<h2>Example Driver Program</h2>
+<p>This section provides a simple sample Java program that illustrates how to use the API to embed and execute a morphline in a host system (<a href="https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/test/java/com/cloudera/cdk/morphline/api/MorphlineDemo.java">full source code</a>).</p>
+<pre class="code" style="padding-left: 10px;">/** Usage: java ... &lt;morphline.conf&gt; &lt;dataFile1&gt; ... &lt;dataFileN&gt; */
+public static void main(String[] args) {
+  // compile morphline.conf file on the fly
+  File configFile = new File(args[0]);
+  MorphlineContext context = new MorphlineContext.Builder().build();
+  Command morphline = new Compiler().compile(configFile, null, context, null);
+
+  // process each input data file
+  Notifications.notifyBeginTransaction(morphline);
+  for (int i = 1; i < args.length; i++) {
+    InputStream in = new FileInputStream(new File(args[i]));
+    Record record = new Record();
+    record.put(Fields.ATTACHMENT_BODY, in);
+    morphline.process(record);
+    in.close();
+  }
+  Notifications.notifyCommitTransaction(morphline);
+}
+</pre>
+<p>&nbsp;</p>
+<p>You can use this program to rapidly prototype ETL logic and try it with sample files.</p>
+<p>This code is, in essence, what production tools like <a href="https://github.com/cloudera/search/tree/master/search-mr">MapReduceIndexerTool</a>, <a href="http://flume.apache.org/FlumeUserGuide.html#morphlinesolrsink">Apache Flume Morphline Solr Sink</a>, and <a href="http://flume.apache.org/FlumeUserGuide.html#morphline-interceptor">Apache Flume MorphlineInterceptor</a> are running as part of their operation.</p>
+<p>To print diagnostic information such as the content of records as they pass through the morphline commands, consider enabling TRACE log level -- for example, by adding the following line to your log4j.properties file:</p>
+<pre class="code" style="padding-left: 10px;">log4j.logger.com.cloudera.cdk.morphline=TRACE
+</pre>
+<p>&nbsp;</p>
+<h2>Any Questions?</h2>
+<p>If you’ve got any questions, please do ask us. The best place is over on the <a href="https://groups.google.com/a/cloudera.org/forum/?#!forum/cdk-dev">mailing list</a>. Alternatively, if you are trying out Cloudera Search, post your questions <a href="https://groups.google.com/a/cloudera.org/forum/?#!forum/search-user">here</a>.</p>
+<p>A detailed description of all morphline commands can be found in the <a href="http://cloudera.github.io/cdk/docs/0.4.1/cdk-morphlines/morphlinesReferenceGuide.html"><em>Cloudera Morphlines Reference Guide</em></a>.</p>
+<p>The CDK lives on <a href="https://github.com/cloudera/cdk">GitHub</a> where users can freely browse, download, fork, and contribute back to the source. Community contributions are not only welcome but strongly encouraged. Since most Java developers use tools such as Maven (or tools that are compatible with Maven repositories), artifacts are also available from the <a href="http://www.cloudera.com/content/cloudera-content/cloudera-docs/CDH4/4.2.0/CDH4-Installation-Guide/cdh4ig_topic_31.html">Cloudera Maven Repository</a> for easy project integration.</p>
+<p><em>Wolfgang Hoschek is a Software Engineer on the Platform team and the lead developer on Morphlines.</em></p>
+
+				<div class="social-buttons">
+					<span style="margin-top:-3px">
+						<a href="http://twitter.com/share?text=Introducing Morphlines: The Easy Way to Build and Integrate ETL Apps for Hadoop" class="twitter-share-button" data-count="horizontal" data-via="cloudera">Tweet</a>
+					</span>
+					
+					<iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fblog.cloudera.com%2Fblog%2F2013%2F07%2Fmorphlines-the-easy-way-to-build-and-integrate-etl-apps-for-apache-hadoop%2F&amp;layout=standard&amp;show_faces=false&amp;width=450&amp;action=like&amp;colorscheme=light&amp;height=25" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:450px; height:25px;" allowTransparency="true"></iframe>
+				</div>
+			</div>
+
+			<div class="grid_2" style="margin:0">
+  <div class="comments comments-2">
+    <div class="field-under">
+      <h4>Filed under</h4>
+      <ul class="post-categories">
+	<li><a href="http://blog.cloudera.com/blog/category/cdk/" title="View all posts in CDK" rel="category tag">CDK</a></li>
+	<li><a href="http://blog.cloudera.com/blog/category/hadoop/" title="View all posts in Hadoop" rel="category tag">Hadoop</a></li>
+	<li><a href="http://blog.cloudera.com/blog/category/search/" title="View all posts in Search" rel="category tag">Search</a></li></ul>  	</div>
+  	<script type="text/javascript" src="http://w.sharethis.com/button/sharethis.js#publisher=939da37b-927c-4208-9818-9ed9dba8c077&type=website&button=false&onmouseover=false"></script>
+  	<div class="share">
+  	  <h4>Share this post</h4>
+  	  <ul>
+  	    <li class="twitter-item"><a target="_blank" href="http://twitter.com/home?status=Introducing Morphlines: The Easy Way to Build and Integrate ETL Apps for Hadoop http://blog.cloudera.com/blog/2013/07/morphlines-the-easy-way-to-build-and-integrate-etl-apps-for-apache-hadoop/">Twitter</a></li>
+  	    <li class="facebook-item"><a target="_blank" href="http://www.facebook.com/sharer.php?u=http%3A%2F%2Fblog.cloudera.com%2Fblog%2F2013%2F07%2Fmorphlines-the-easy-way-to-build-and-integrate-etl-apps-for-apache-hadoop%2F">Facebook</a></li>
+  	    <li class="digg-item"><a target="_blank" href="http://digg.com/submit?url=http%3A%2F%2Fblog.cloudera.com%2Fblog%2F2013%2F07%2Fmorphlines-the-easy-way-to-build-and-integrate-etl-apps-for-apache-hadoop%2F">Digg</a></li>
+  	    <li class="email-item"><a id="share3" href="javascript:;">Email</a></li>
+  	    <li><a id="share4" href="javascript:;">more...</a></li>
+  	  </ul>
+  	</div>
+  	<script type="text/javascript">
+  	  var stobj = SHARETHIS.addEntry({
+  	    title:"Introducing+Morphlines%3A+The+Easy+Way+to+Build+and+Integrate+ETL+Apps+for+Hadoop",
+  	    url:"Introducing Morphlines: The Easy Way to Build and Integrate ETL Apps for Hadoop",
+  	    published: "2013-07-11"
+  	  });
+  	  stobj.attachButton(document.getElementById('share3'));
+  	  stobj.attachButton(document.getElementById('share4'));
+  	</script>
+  </div>
+  <a name="comments"></a>
+  <div class="comments-head">
+    <strong>No Responses</strong>
+    <span class="leave-comment"><a href="#leave-comment">leave a comment...</a></span>
+  </div>
+  <ul class="comments-list">
+    </ul>
+  <a name="leave-comment"></a>
+  <form action="/wp-comments-post.php" method="POST">
+  	<div class="comment-form">
+  		<h4>Leave a comment</h4>
+  		<div class="row">
+  			<input type="text" value="" class="txt" name="author"/>
+  			<label>Name <span>required</span></label>
+  		</div>
+  		<div class="row">
+  			<input type="text" value="" class="txt" name="email"/>
+  			<label class="published">Email <span>required</span> <em>(will not be published)</em></label>
+  		</div>
+  		<div class="row">
+  			<input type="text" value="" class="txt" name="url"/>
+  			<label>Website</label>
+  		</div>
+  		<div class="row">
+  			<textarea rows="10" cols="30" class="area" name="comment"></textarea>
+  			<label>Comment</label>
+  		</div>
+  		<fieldset>
+  			<input type="button" value="Leave Comment" class="btn cta"/>
+  		</fieldset>
+  	</div>
+  	<input type='hidden' name='comment_post_ID' value='22463' id='comment_post_ID' />
+<input type='hidden' name='comment_parent' id='comment_parent' value='0' />
+  	<p class="cptch_block"><br />	<input type="hidden" name="cptch_result" value="X7Rq" /><input type="hidden" value="Version: 2.4" />
+	eight &#43; 8 =  <input type="text" autocomplete="off" name="cptch_number" value="" maxlength="2" size="2" style="width:20px;margin-bottom:0;display:inline;font-size: 12px;width: 30px;" /></p>  </form>
+</div></section>
+
+
+
+
+<!-- Google Code for New Remarketing Pixel -->
+<!-- Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. For instructions on adding this tag and more information on the above requirements, read the setup guide: google.com/ads/remarketingsetup -->
+<script type="text/javascript">
+/* <![CDATA[ */
+var google_conversion_id = 1035979479;
+var google_conversion_label = "xel9CJ-P0QMQ15X_7QM";
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+/* ]]> */
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+  <div style="display:inline;">
+    <img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/1035979479/?value=0&label=xel9CJ-P0QMQ15X_7QM&guid=ON&script=0"/>
+  </div>
+</noscript>
+
+</section>
+<span class="bg-fix"></span>
+</div>
+</div>
+
+
+<footer id="global-footer">
+    <div class="wrapper">
+        <div class="bg-fix"></div>
+        <nav>
+            <ul>
+                <li class="section"><a href="http://www.cloudera.com/content/cloudera/en/why-cloudera.html">Why Cloudera?</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/why-cloudera/hadoop-and-big-data.html">Hadoop &amp; Big Data</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/why-cloudera/cloudera-and-hadoop.html">Cloudera &amp; Hadoop</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/why-cloudera/our-customers.html">Our Customers</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/why-cloudera/faqs.html">FAQs</a></li>
+                <li><a href="/blog">Blog</a></li>
+            </ul>
+            <ul>
+                <li class="section"><a href="http://www.cloudera.com/content/cloudera/en/products.html">Products</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/products/cloudera-enterprise-core.html">Cloudera Enterprise Core</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/products/cloudera-enterprise-free.html">Cloudera Enterprise Free</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/products/cloudera-manager.html">Cloudera Manager</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/products/cdh.html">CDH</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/products/latest-releases.html">Latest Releases</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/products/all-downloads.html">All Downloads</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/products/professional-services.html">Professional Services</a></li>
+                <li><a href="#">Training</a></li>
+            </ul>
+            <ul>
+                <li class="section"><a href="http://www.cloudera.com/content/cloudera/en/solutions.html">Solutions</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/solutions/industries.html">For Your Industry</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/solutions/applications.html">For Your Use Case</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/solutions/partner.html">Partner Solutions</a></li>
+            </ul>
+            <ul>
+                <li class="section"><a href="http://www.cloudera.com/content/cloudera/en/partners.html">Partners</a></li>
+                <li class="section"><a href="http://www.cloudera.com/content/cloudera/en/resources/library.html">Resource Library</a></li>
+                <li class="section"><a href="http://www.cloudera.com/content/cloudera/en/support.html">Support</a></li>
+            </ul>
+            <ul>
+                <li class="section"><a href="http://www.cloudera.com/content/cloudera/en/about.html">About</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/about/board.html">Team</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/about/events.html">Events</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/about/awards.html">Awards</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/about/press-center.html">Press Center</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/about/careers.html">Careers</a></li>
+                <li><a href="http://www.cloudera.com/content/cloudera/en/about/contact-us.html">Contact Us</a></li>
+            </ul>
+            <div class="locale-and-social">
+                <div class="social">
+                    <span class="follow">Follow us:</span><span class="share">Share: <i class="icon-share"></i></span>
+                    <ul>
+                        <li><a href="http://www.linkedin.com/company/cloudera" target="_blank" class="linkedIn">LinkedIn</a></li>
+                        <li><a href="http://twitter.com/cloudera" target="_blank" class="twitter">Twitter</a></li>
+                        <li><a href="http://www.facebook.com/cloudera" target="_blank" class="facebook">Facebook</a></li>
+                        <li><a href="http://www.youtube.com/user/clouderahadoop" target="_blank" class="youtube">YouTube</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <nav class="global-footer">
+            <span class="logo"><a href="">Cloudera</a></span>
+            <address>
+                <span>Cloudera, Inc.</span>
+                <span><a href="http://www.google.com/maps?q=220+Portage+Ave,+Palo+Alto,+CA+94306" target="_blank">220 Portage Avenue</a></span>
+                <span>Palo Alto, CA 94306</span>
+            </address>
+            <address>
+                <span>
+                    <a href="/">www.cloudera.com</a>
+                </span>
+                <span>US: 1-888-789-1488</span>
+                <span>Intl: 1-650-362-0488</span>
+            </address>
+            <div class="copyright">
+              <span><span class="piped">&copy;2012 Cloudera, Inc. All rights reserved</span><span class="piped"><a href="http://www.cloudera.com/terms-conditions/">Terms &amp; Conditions</a></span><a href="http://www.cloudera.com/site-map/">Site Map</a></span>
+              <span>Hadoop and the Hadoop elephant logo are trademarks of the <a href="http://www.apache.org/" target="_blank">Apache Software Foundation</a>.</span>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+			
+
+<!-- SyntaxHighlighter Stuff -->
+<script type="text/javascript" src="http://blog.cloudera.com/wp-content/plugins/syntaxhighlighter-plus/syntaxhighlighter/src/shCore.js"></script>
+<script type="text/javascript">
+	SyntaxHighlighter.all();
+</script>
+
+
+<div class="modal" style="display:none">
+  <div id="password-required">
+    <div class="inner">
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" class="tooltip" style="display:none"></div>
+
+<script type="text/javascript" src="http://dnn506yrbagrg.cloudfront.net/pages/scripts/0011/2160.js"> </script>
+<script type="text/javascript">document.write(unescape("%3Cscript src='http://cdn.optimizely.com/js/731002.js' type='text/javascript'%3E%3C/script%3E"));</script>
+<script type="text/javascript" src="http://munchkin.marketo.net/munchkin.js"></script><script type="text/javascript">mktoMunchkin("296-GLA-137");</script>
+
+<script type="text/javascript">var _kiq = _kiq || [];</script>
+<script type="text/javascript" src="http://s3.amazonaws.com/ki.js/14646/2Sr.js" async="true"></script>
+
+</body>
+</html>
+

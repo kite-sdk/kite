@@ -148,6 +148,7 @@ public final class XSLTBuilder implements CommandBuilder {
         XsltTransformer evaluator = fragment.transformer;
         XdmNode document = writer.getDocumentNode();
         evaluator.setInitialContextNode(document);
+        LOG.trace("XSLT input document: {}", document);
         Record outputRecord = inputRecord.copy();
         removeAttachments(outputRecord);   
         XMLStreamWriter morphlineWriter = new MorphlineXMLStreamWriter(getChild(), outputRecord);

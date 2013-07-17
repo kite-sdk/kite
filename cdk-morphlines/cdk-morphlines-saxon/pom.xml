@@ -51,13 +51,18 @@
       </exclusions>
     </dependency>
 
-    <!--    
+    <dependency>
+      <groupId>org.ccil.cowan.tagsoup</groupId>
+      <artifactId>tagsoup</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+
     <dependency>
       <groupId>org.codehaus.woodstox</groupId>
       <artifactId>woodstox-core-asl</artifactId>
       <version>4.2.0</version>
+      <scope>test</scope>
     </dependency>
-    -->
     <!--<version>3.2.7</version>-->
 
     <dependency>

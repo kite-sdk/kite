@@ -148,8 +148,15 @@ public final class XQueryBuilder implements CommandBuilder {
         XQueryEvaluator evaluator = fragment.xQueryEvaluator;
         XdmNode document = writer.getDocumentNode();
         evaluator.setContextItem(document);
+        LOG.trace("XQuery input document: {}", document);
+        
+        int i = 0;
         for (XdmItem item : evaluator) {
-          //LOG.trace("result sequence item: {}", item);
+          i++;
+          if (LOG.isTraceEnabled()) {
+            LOG.trace("XQuery result sequence item #{} is of class: {} with value: {}", new Object[] { i,
+                item.getUnderlyingValue().getClass().getName(), item });
+          }
           if (item.isAtomicValue()) {
             LOG.debug("Ignoring atomic value in result sequence: {}", item);
             continue;
@@ -176,7 +183,10 @@ public final class XQueryBuilder implements CommandBuilder {
       while (iter.hasNext()) {
         XdmNode child = (XdmNode) iter.next();
         if (child.getNodeKind() == nodeTest) { 
-          record.put(child.getNodeName().getLocalName(), child.getStringValue());
+          String strValue = child.getStringValue();
+          if (strValue.length() > 0) {
+            record.put(child.getNodeName().getLocalName(), strValue);
+          }
           isEmpty = false;
         }
       }

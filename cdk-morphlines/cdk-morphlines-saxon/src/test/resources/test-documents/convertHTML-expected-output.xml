@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<html attr="foo"><body>
+ignore
+</body><head><title>title1</title></head><body>
+ignore
+<a href="http://www.foo.com/" target="_foo">Visit Foo!</a>
+</body><body>
+  bar
+  <p>Paragraph1</p>
+  <p>Paragraph2</p>
+  <a href="http://www.bar.com/">Visit Bar!</a>
+</body><body>
+ignore
+<EMPTY_ELEMENT></EMPTY_ELEMENT>
+</body></html>
