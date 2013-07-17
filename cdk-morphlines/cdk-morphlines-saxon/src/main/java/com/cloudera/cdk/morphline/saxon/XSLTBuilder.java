@@ -150,7 +150,8 @@ public final class XSLTBuilder implements CommandBuilder {
         evaluator.setInitialContextNode(document);
         Record outputRecord = inputRecord.copy();
         removeAttachments(outputRecord);   
-        evaluator.setDestination(new XMLStreamWriterDestination(new RecordXMLStreamWriter(getChild(), outputRecord)));
+        XMLStreamWriter morphlineWriter = new MorphlineXMLStreamWriter(getChild(), outputRecord);
+        evaluator.setDestination(new XMLStreamWriterDestination(morphlineWriter));
         evaluator.transform(); //  run the query and push into child via RecordXMLStreamWriter
       }      
       return true;
@@ -175,7 +176,7 @@ public final class XSLTBuilder implements CommandBuilder {
     ///////////////////////////////////////////////////////////////////////////////
     // Nested classes:
     ///////////////////////////////////////////////////////////////////////////////    
-    private static final class RecordXMLStreamWriter implements XMLStreamWriter {
+    private static final class MorphlineXMLStreamWriter implements XMLStreamWriter {
       
       private final Command child;      
       private final Record template;
@@ -189,7 +190,7 @@ public final class XSLTBuilder implements CommandBuilder {
       private NamespaceContext rootContext;
       private final Map properties = null; // new HashMap();      
 
-      public RecordXMLStreamWriter(Command child, Record template) {
+      public MorphlineXMLStreamWriter(Command child, Record template) {
         this.child = child;
         this.template = template;
         this.record = template.copy();
