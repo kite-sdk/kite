@@ -227,7 +227,7 @@ public final class XSLTBuilder implements CommandBuilder {
        @Override
       public void writeEndElement() throws XMLStreamException {
         if (inPrologOrEpilog()) {
-          throw new IllegalArgumentException(
+          throw new XMLStreamException(
             "Imbalanced element tags; attempted to write an end tag for a nonexistent start tag");
         }
         depth--;
