@@ -1265,9 +1265,9 @@ This module contains morphline commands for reading, extracting and transforming
 
 h2. convertHTML
 
-The [convertHTML|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-saxon/src/main/java/com/cloudera/cdk/morphline/saxon/ConvertHTMLBuilder.java] command converts any HTML to XHTML using the [TagSoup|http://ccil.org/~cowan/XML/tagsoup] Java library. 
+The [convertHTML|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-saxon/src/main/java/com/cloudera/cdk/morphline/saxon/ConvertHTMLBuilder.java] command converts any HTML to XHTML, using the [TagSoup|http://ccil.org/~cowan/XML/tagsoup] Java library. 
 
-Instead of parsing well-formed or valid XML, this command parses HTML as it is found in the wild: poor, nasty and brutish, though quite often far from short. TagSoup (and hence this command) is designed for people who have to process this stuff using some semblance of a rational application design. By providing this converter, it allows standard XML tools to be applied to even the worst malformed HTML.
+Instead of parsing well\-formed or valid XML, this command parses HTML as it is found in the wild: poor, nasty and brutish, though quite often far from short. TagSoup (and hence this command) is designed for people who have to process this stuff using some semblance of a rational application design. By providing this converter, it allows standard XML tools to be applied to even the worst malformed HTML.
 
 The command reads an InputStream or byte array from the first attachment (field \_attachment\_body) of the input record, parses it as HTML and replaces the field with UTF\-8 encoded XHTML. 
 
@@ -1276,10 +1276,15 @@ The command provides the following configuration options:
 || Property Name || Default || Description ||
 | supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
 | charset | null | The character encoding to use for parsing input, for example, UTF\-8. If none is specified the charset specified in the \_attachment\_charset input field is used instead. |
-| noNamespaces | true | A value of {{false}} indicates namespace URIs and unprefixed local
-  names for element and attribute names will be available |
-
-{{TODO}}
+| noNamespaces | true | A value of {{false}} indicates namespace URIs and unprefixed local names for element and attribute names will be available. |
+| noCDATA | false | A value of {{true}} indicates that the parser will treat CDATA elements specially. |
+| noBogons | false | A value of {{true}} indicates that the parser will ignore unknown elements. |
+| emptyBogons | false | A value of {{true}} indicates that the parser will give unknown elements a content model of EMPTY; a value of {{false}}, a content model of ANY. |
+| noRootBogons | false | A value of {{true}} indicates that the parser will allow unknown elements to be the root element. |
+| noDefaultAttributes | false | A value of {{true}} indicates that the parser will return default attribute values for missing attributes that have default values. |
+| noColons | false | A value of {{true}} indicates that the parser will translate colons into underscores in names. | 
+| noRestart | false | A value of {{true}} indicates that the parser will attempt to restart the restartable elements. |
+| suppressIgnorableWhitespace | true | A value of {{false}} indicates that the parser will transmit whitespace in element\-only content via the SAX ignorableWhitespace callback. |
 
 Example usage:
 {code}

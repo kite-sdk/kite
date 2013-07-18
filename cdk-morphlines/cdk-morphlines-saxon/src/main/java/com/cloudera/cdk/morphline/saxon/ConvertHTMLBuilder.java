@@ -94,13 +94,13 @@ public final class ConvertHTMLBuilder implements CommandBuilder {
       xmlReader.setFeature(Parser.ignoreBogonsFeature, getConfigs().getBoolean(config, "noBogons", false)); // also see TIKA-599
       xmlReader.setFeature(Parser.bogonsEmptyFeature, getConfigs().getBoolean(config, "emptyBogons", false));
       xmlReader.setFeature(Parser.rootBogonsFeature, getConfigs().getBoolean(config, "noRootBogons", false));
-      xmlReader.setFeature(Parser.defaultAttributesFeature, getConfigs().getBoolean(config, "noDefaults", false));
+      xmlReader.setFeature(Parser.defaultAttributesFeature, getConfigs().getBoolean(config, "noDefaultAttributes", false));
       xmlReader.setFeature(Parser.translateColonsFeature, getConfigs().getBoolean(config, "noColons", false));
       xmlReader.setFeature(Parser.restartElementsFeature, getConfigs().getBoolean(config, "noRestart", false));
-      xmlReader.setFeature(Parser.ignorableWhitespaceFeature, !getConfigs().getBoolean(config, "supressIgnorableWhitespace", true));
+      xmlReader.setFeature(Parser.ignorableWhitespaceFeature, !getConfigs().getBoolean(config, "suppressIgnorableWhitespace", true));
       validateArguments();
     }
-  
+
     @Override
     protected boolean doProcess(Record inputRecord, InputStream stream) throws IOException {
       try {
