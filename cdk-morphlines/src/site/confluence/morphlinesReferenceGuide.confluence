@@ -408,7 +408,7 @@ extractURIComponents {
 }
 {code}
 
-For example, given the input field {{myUri}} with the value {{ http://userinfo@www.bar.com:8080/errors.log?foo=x&bar=y&foo=z#fragment}} the expected output is
+For example, given the input field {{myUri}} with the value {{ http://userinfo@www.bar.com:8080/errors.log?foo=x&bar=y&foo=z#fragment}} the expected output is as follows:
 
 || Name || Value ||
 | myUri | http://userinfo@www.bar.com:8080/errors.log?foo=x&bar=y&foo=z#fragment |
@@ -1362,7 +1362,7 @@ greeting:hello world
 
 More examples can be found in the [unit tests|https://github.com/cloudera/cdk/tree/master/cdk-morphlines/cdk-morphlines-saxon/src/test/resources/test-morphlines].
 
-For more background, see resources such as the [XQuery Primer|http://www.stylusstudio.com/xquery_primer.html] and [XQuery: A Guided Tour|http://www.datadirect.com/resources/dis/xquery-guided-tour/index.html] and [Wikipedia|http://en.wikipedia.org/wiki/XQuery].
+For more background, see resources such as the [XQuery Primer|http://www.stylusstudio.com/xquery_primer_new.html] and [XQuery: A Guided Tour|http://www.datadirect.com/resources/dis/xquery-guided-tour/index.html] and [Wikipedia|http://en.wikipedia.org/wiki/XQuery].
 
 h2. xslt
 
