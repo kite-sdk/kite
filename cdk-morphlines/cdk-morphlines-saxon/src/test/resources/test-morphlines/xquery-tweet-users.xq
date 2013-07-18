@@ -15,6 +15,8 @@
 
 (: Example test xquery :)
 
+declare variable $myVariable as xs:string external;
+
 for $tweet in /tweets/tweet
 return 
 <user>
@@ -22,6 +24,7 @@ return
   {$tweet/user/@screen_name} 
   {$tweet/user/@followers_count} 
   {$tweet/user/@statuses_count}
+  <greeting>{$myVariable}</greeting>
   <emptyElem></emptyElem>
 </user>
 

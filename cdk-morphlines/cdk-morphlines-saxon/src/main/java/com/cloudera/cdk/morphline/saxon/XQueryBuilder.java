@@ -121,7 +121,7 @@ public final class XQueryBuilder implements CommandBuilder {
         }
         
         XQueryEvaluator evaluator = executable.load();
-        Config variables = getConfigs().getConfig(config, "externalVariables", ConfigFactory.empty());
+        Config variables = getConfigs().getConfig(fragment, "externalVariables", ConfigFactory.empty());
         for (Map.Entry<String, Object> entry : variables.root().unwrapped().entrySet()) {
           XdmValue xdmValue = XdmNode.wrap(new UntypedAtomicValue(entry.getValue().toString()));
           evaluator.setExternalVariable(new QName(entry.getKey()), xdmValue);

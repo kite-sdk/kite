@@ -104,7 +104,10 @@ public final class XSLTBuilder implements CommandBuilder {
         XsltCompiler compiler = processor.newXsltCompiler();
         compiler.setErrorListener(new DefaultErrorListener());
         compiler.setCompileWithTracing(isTracing);
-        compiler.setXsltLanguageVersion(getConfigs().getString(config, "languageVersion", "2.0"));
+        String version = getConfigs().getString(config, "languageVersion", null);
+        if (version != null) {
+          compiler.setXsltLanguageVersion(version);
+        }
         
         XsltExecutable executable = null;
         String query = getConfigs().getString(fragment, "queryString", null);
@@ -123,7 +126,7 @@ public final class XSLTBuilder implements CommandBuilder {
         }
         
         XsltTransformer evaluator = executable.load();
-        Config variables = getConfigs().getConfig(config, "parameters", ConfigFactory.empty());
+        Config variables = getConfigs().getConfig(fragment, "parameters", ConfigFactory.empty());
         for (Map.Entry<String, Object> entry : variables.root().unwrapped().entrySet()) {
           XdmValue xdmValue = XdmNode.wrap(new UntypedAtomicValue(entry.getValue().toString()));
           evaluator.setParameter(new QName(entry.getKey()), xdmValue);
