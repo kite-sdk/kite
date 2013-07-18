@@ -16,6 +16,7 @@
 package com.cloudera.cdk.morphline.saxon;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -27,11 +28,9 @@ import java.util.Map;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.stream.StreamSource;
 
-import net.sf.saxon.s9api.BuildingStreamWriterImpl;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmNode;
@@ -74,6 +73,8 @@ public final class XSLTBuilder implements CommandBuilder {
       throw new MorphlineCompilationException("Cannot compile", config, e);
     } catch (IOException e) {
       throw new MorphlineCompilationException("Cannot compile", config, e);
+    } catch (XMLStreamException e) {
+      throw new MorphlineCompilationException("Cannot compile", config, e);
     }
   }
   
@@ -85,7 +86,7 @@ public final class XSLTBuilder implements CommandBuilder {
     
     private final List<Fragment> fragments = new ArrayList();
   
-    public XSLT(Config config, Command parent, Command child, MorphlineContext context) throws SaxonApiException, IOException {
+    public XSLT(Config config, Command parent, Command child, MorphlineContext context) throws SaxonApiException, IOException, XMLStreamException {
       super(config, parent, child, context);
       
       List<? extends Config> fragmentConfigs = getConfigs().getConfigList(config, "fragments");
@@ -131,6 +132,12 @@ public final class XSLTBuilder implements CommandBuilder {
           XdmValue xdmValue = XdmNode.wrap(new UntypedAtomicValue(entry.getValue().toString()));
           evaluator.setParameter(new QName(entry.getKey()), xdmValue);
         }
+        Config fileVariables = getConfigs().getConfig(fragment, "fileParameters", ConfigFactory.empty());
+        for (Map.Entry<String, Object> entry : fileVariables.root().unwrapped().entrySet()) {
+          File file = new File(entry.getValue().toString());
+          XdmValue xdmValue = parseXmlDocument(new FileInputStream(file));
+          evaluator.setParameter(new QName(entry.getKey()), xdmValue);
+        }
         if (isTracing) {
           evaluator.setTraceListener(new XQueryTraceListener()); // TODO redirect from stderr to SLF4J
         }
@@ -141,19 +148,15 @@ public final class XSLTBuilder implements CommandBuilder {
     }
   
     @Override
-    protected boolean doProcess2(Record inputRecord, InputStream stream) throws SaxonApiException, XMLStreamException {
-      incrementNumRecords();
-      XMLStreamReader reader = inputFactory.createXMLStreamReader(null, stream);
-      BuildingStreamWriterImpl writer = documentBuilder.newBuildingStreamWriter();      
-      new XMLStreamCopier(reader, writer).copy(false); // push XML into Saxon and build TinyTree
-      
+    protected boolean doProcess2(Record inputRecord, InputStream stream) throws SaxonApiException, XMLStreamException, IOException {
+      incrementNumRecords();      
       for (Fragment fragment : fragments) {
-        XsltTransformer evaluator = fragment.transformer;
-        XdmNode document = writer.getDocumentNode();
-        evaluator.setInitialContextNode(document);
-        LOG.trace("XSLT input document: {}", document);
         Record outputRecord = inputRecord.copy();
         removeAttachments(outputRecord);   
+        XdmNode document = parseXmlDocument(stream);
+        LOG.trace("XSLT input document: {}", document);
+        XsltTransformer evaluator = fragment.transformer;
+        evaluator.setInitialContextNode(document);
         XMLStreamWriter morphlineWriter = new MorphlineXMLStreamWriter(getChild(), outputRecord);
         evaluator.setDestination(new XMLStreamWriterDestination(morphlineWriter));
         evaluator.transform(); //  run the query and push into child via RecordXMLStreamWriter

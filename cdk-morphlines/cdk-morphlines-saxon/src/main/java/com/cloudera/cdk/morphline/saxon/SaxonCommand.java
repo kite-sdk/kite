@@ -21,12 +21,15 @@ import java.util.Map;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
 
+import net.sf.saxon.s9api.BuildingStreamWriterImpl;
 import net.sf.saxon.s9api.DocumentBuilder;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.XdmNode;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
@@ -69,7 +72,19 @@ abstract class SaxonCommand extends AbstractParser {
     }
   }
   
-  abstract protected boolean doProcess2(Record inputRecord, InputStream stream) throws SaxonApiException, XMLStreamException;
+  abstract protected boolean doProcess2(Record inputRecord, InputStream stream) throws IOException, SaxonApiException, XMLStreamException;
+  
+  protected XdmNode parseXmlDocument(InputStream stream) throws XMLStreamException, SaxonApiException, IOException {
+    try {
+      XMLStreamReader reader = inputFactory.createXMLStreamReader(null, stream);
+      BuildingStreamWriterImpl writer = documentBuilder.newBuildingStreamWriter();      
+      new XMLStreamCopier(reader, writer).copy(false); // push XML into Saxon and build TinyTree
+      XdmNode document = writer.getDocumentNode();
+      return document;
+    } finally {
+      stream.close();
+    }
+  }
   
   
   ///////////////////////////////////////////////////////////////////////////////

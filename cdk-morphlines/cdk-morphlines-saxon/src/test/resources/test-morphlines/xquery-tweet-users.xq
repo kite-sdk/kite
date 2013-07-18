@@ -16,6 +16,7 @@
 (: Example test xquery :)
 
 declare variable $myVariable as xs:string external;
+declare variable $myDoc as document-node() external;
 
 for $tweet in /tweets/tweet
 return 
@@ -23,8 +24,8 @@ return
   {$tweet/@id} 
   {$tweet/user/@screen_name} 
   {$tweet/user/@followers_count} 
-  {$tweet/user/@statuses_count}
   <greeting>{$myVariable}</greeting>
+  <annotation>{$myDoc/helloworld/description}</annotation>
   <emptyElem></emptyElem>
 </user>
 

@@ -16,6 +16,7 @@
 package com.cloudera.cdk.morphline.saxon;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -25,10 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 import net.sf.saxon.s9api.Axis;
-import net.sf.saxon.s9api.BuildingStreamWriterImpl;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XQueryCompiler;
@@ -72,6 +71,8 @@ public final class XQueryBuilder implements CommandBuilder {
       throw new MorphlineCompilationException("Cannot compile", config, e);
     } catch (IOException e) {
       throw new MorphlineCompilationException("Cannot compile", config, e);
+    } catch (XMLStreamException e) {
+      throw new MorphlineCompilationException("Cannot compile", config, e);
     }
   }
   
@@ -83,7 +84,7 @@ public final class XQueryBuilder implements CommandBuilder {
     
     private final List<Fragment> fragments = new ArrayList();
   
-    public XQuery(Config config, Command parent, Command child, MorphlineContext context) throws SaxonApiException, IOException {
+    public XQuery(Config config, Command parent, Command child, MorphlineContext context) throws SaxonApiException, IOException, XMLStreamException {
       super(config, parent, child, context);
       
       List<? extends Config> fragmentConfigs = getConfigs().getConfigList(config, "fragments");
@@ -126,6 +127,12 @@ public final class XQueryBuilder implements CommandBuilder {
           XdmValue xdmValue = XdmNode.wrap(new UntypedAtomicValue(entry.getValue().toString()));
           evaluator.setExternalVariable(new QName(entry.getKey()), xdmValue);
         }
+        Config fileVariables = getConfigs().getConfig(fragment, "externalFileVariables", ConfigFactory.empty());
+        for (Map.Entry<String, Object> entry : fileVariables.root().unwrapped().entrySet()) {
+          File file = new File(entry.getValue().toString());
+          XdmValue xdmValue = parseXmlDocument(new FileInputStream(file));
+          evaluator.setExternalVariable(new QName(entry.getKey()), xdmValue);
+        }
         if (isTracing) {
           evaluator.setTraceListener(new XQueryTraceListener()); // TODO redirect from stderr to SLF4J
         }
@@ -136,19 +143,15 @@ public final class XQueryBuilder implements CommandBuilder {
     }
   
     @Override
-    protected boolean doProcess2(Record inputRecord, InputStream stream) throws SaxonApiException, XMLStreamException {
-      incrementNumRecords();
-      XMLStreamReader reader = inputFactory.createXMLStreamReader(null, stream);
-      BuildingStreamWriterImpl writer = documentBuilder.newBuildingStreamWriter();      
-      new XMLStreamCopier(reader, writer).copy(false); // push XML into Saxon and build TinyTree
-      
+    protected boolean doProcess2(Record inputRecord, InputStream stream) throws SaxonApiException, XMLStreamException, IOException {
+      incrementNumRecords();      
       for (Fragment fragment : fragments) {
         Record template = inputRecord.copy();
         removeAttachments(template);
-        XQueryEvaluator evaluator = fragment.xQueryEvaluator;
-        XdmNode document = writer.getDocumentNode();
-        evaluator.setContextItem(document);
+        XdmNode document = parseXmlDocument(stream);
         LOG.trace("XQuery input document: {}", document);
+        XQueryEvaluator evaluator = fragment.xQueryEvaluator;
+        evaluator.setContextItem(document);
         
         int i = 0;
         for (XdmItem item : evaluator) {

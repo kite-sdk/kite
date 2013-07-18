@@ -1313,6 +1313,7 @@ Each fragment provides the following configuration options:
 
 | fragmentPath | n/a | Currently must be {{"/"}} |
 | externalVariables | null | An optional JSON object containing zero or more name\-value pairs that are bound and passed in as [external variables|http://bit.ly/13Q82Ro] to the query. Example: {{myVar : "hello world"}} |
+| externalFileVariables | null | An optional JSON object containing zero or more name\-path pairs that refer to XML files on the local file system, and are bound and passed in as [external variables|http://bit.ly/13Q82Ro] to the query. These files are loaded once on program startup and subsequently remain memory resident across queries. This can be used for efficient joins where the join table is static and fits into main memory. Example: {{myDoc : src/test/resources/test-documents/helloworld.xml}} |
 | queryFile | null | A relative or absolute path of a local file from which to load the query. |
 | queryString | null | An inline string from which to load the query. One of {{queryFile}} or {{queryString}} must be present, but not both. Example: {{"""/tweets/tweet"""}} |
 
@@ -1383,6 +1384,7 @@ Each fragment provides the following configuration options:
 
 | fragmentPath | n/a | Currently must be {{"/"}} |
 | parameters | null | An optional JSON object containing zero or more name\-value pairs that are bound and passed in as [XSLT parameters|http://www.w3schools.com/xsl/el_param.asp] to the query. Example: {{myVar : "hello world"}} |
+| fileParameters | null | An optional JSON object containing zero or more name\-path pairs that refer to XML files on the local file system, and are bound and passed in as [external variables|http://bit.ly/13Q82Ro] to the query. These files are loaded once on program startup and subsequently remain memory resident across queries. This can be used for efficient joins where the join table is static and fits into main memory. Example: {{myDoc : src/test/resources/test-documents/helloworld.xml}} |
 | queryFile | null | A relative or absolute path of a local file from which to load the query. |
 | queryString | null | An inline string from which to load the query. One of {{queryFile}} or {{queryString}} must be present, but not both. |
 

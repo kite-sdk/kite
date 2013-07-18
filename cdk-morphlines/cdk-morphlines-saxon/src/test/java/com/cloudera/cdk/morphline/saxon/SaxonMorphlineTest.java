@@ -53,8 +53,8 @@ public class SaxonMorphlineTest extends AbstractMorphlineTest {
     Record record = new Record();
     record.put(Fields.ATTACHMENT_BODY, in);
     processAndVerifySuccess(record, 
-        ImmutableMultimap.of("followers_count", "111", "id", "11111112", "screen_name", "fake_user1", "statuses_count", "11111", "greeting", "hello world"),
-        ImmutableMultimap.of("followers_count", "222", "id", "222223", "screen_name", "fake_user2", "statuses_count", "22222", "greeting", "hello world")
+        ImmutableMultimap.of("followers_count", "111", "id", "11111112", "screen_name", "fake_user1", "greeting", "hello world", "annotation", "An XSLT Morphline"),
+        ImmutableMultimap.of("followers_count", "222", "id", "222223", "screen_name", "fake_user2", "greeting", "hello world", "annotation", "An XSLT Morphline")
         );    
     in.close();
   }  
