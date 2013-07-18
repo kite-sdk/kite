@@ -74,7 +74,7 @@ public class TagsoupMorphlineTest extends AbstractMorphlineTest {
 
   @Test
   public void testConvertHTMLAndExtractLinks() throws Exception {
-    morphline = createMorphline("test-morphlines/convertHTMLAndExtractLinks");    
+    morphline = createMorphline("test-morphlines/convertHTMLandExtractLinks");    
     InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/helloworld.html"));
     Record record = new Record();
     record.put("id", "123");
