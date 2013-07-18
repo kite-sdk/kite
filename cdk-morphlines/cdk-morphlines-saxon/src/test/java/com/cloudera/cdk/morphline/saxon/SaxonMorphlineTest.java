@@ -142,9 +142,11 @@ public class SaxonMorphlineTest extends AbstractMorphlineTest {
   public void benchmarkSaxon() throws Exception {
     String morphlineConfigFile = "test-morphlines/xquery-tweet-texts";
     //String morphlineConfigFile = "test-morphlines/xslt-helloworld";
+    //String morphlineConfigFile = "test-morphlines/convertHTML";
     long durationSecs = 20;
     File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433.xml");
     //File file = new File(RESOURCES_DIR + "/test-documents/helloworld.xml");
+    //File file = new File(RESOURCES_DIR + "/test-documents/blog.html");
     System.out.println("Now benchmarking " + morphlineConfigFile + " ...");
     morphline = createMorphline(morphlineConfigFile);    
     byte[] bytes = Files.toByteArray(file);

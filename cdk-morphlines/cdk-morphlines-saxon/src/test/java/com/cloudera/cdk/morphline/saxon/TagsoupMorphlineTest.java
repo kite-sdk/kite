@@ -63,12 +63,13 @@ public class TagsoupMorphlineTest extends AbstractMorphlineTest {
   @Test
   public void testConvertHTMLBlogThenRunXSQLT() throws Exception {
     morphline = createMorphline("test-morphlines/convertHTMLBlogThenRunXSLT");    
-    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/blog.html"));
+    byte[] bytes = Files.toByteArray(new File(RESOURCES_DIR + "/test-documents/blog.html"));
     Record record = new Record();
     record.put("id", "123");
-    record.put(Fields.ATTACHMENT_BODY, in);
-    assertTrue(morphline.process(record)); // TODO check details
-    in.close();
+    record.put(Fields.ATTACHMENT_BODY, bytes);
+    for (int i = 0; i < 3; i++) {
+      assertTrue(morphline.process(record.copy())); // TODO check details
+    }
   }  
 
   @Test
