@@ -56,6 +56,11 @@ h3. cdk\-morphlines\-tika\-decompress
 - [decompress|#decompress]
 - [unpack|#unpack]
 
+h3. cdk\-morphlines\-saxon
+- [convertHTML|#convertHTML]
+- [xquery|#xquery]
+- [xslt|#xslt]
+
 h3. cdk\-morphlines\-solr\-core
 - [solrLocator|#solrLocator]
 - [loadSolr|#loadSolr]
@@ -555,7 +560,7 @@ If all expressions of the grok command match the input record, then the command 
 {note}
 Note: The morphline configuration file is implemented using the HOCON format (Human Optimized Config
 Object Notation). HOCON is basically JSON slightly adjusted for the configuration file use case.
-HOCON syntax is defined at [HOCON github page|http://github.com/typesafehub/config/blob/master/HOCON.md] and as such, multi\-line strings are similar to Python or Scala, using triple quotes. If the three-character sequence {{"""}} appears, then all Unicode characters until a closing {{"""}} sequence are used unmodified to create a string value.
+HOCON syntax is defined at [HOCON github page|http://github.com/typesafehub/config/blob/master/HOCON.md] and as such, multi\-line strings are similar to Python or Scala, using triple quotes. If the three\-character sequence {{"""}} appears, then all Unicode characters until a closing {{"""}} sequence are used unmodified to create a string value.
 {note}
 
 In addition, the grok command supports the following parameters:
@@ -768,7 +773,7 @@ The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | id | n/a | An identifier for this pipe. |
-| importCommands | \[\] | A list of zero or more import specifications, each of which makes all morphline commands that match the specification visible to the morphline. A specification can import all commands in an entire Java package tree (specification ends with ".\*\*"), all commands in a Java package (specification ends with ".*"), or the command of a specific fully qualified Java class (all other specifications). Other commands present on the classpath are not visible to this morphline. |
+| importCommands | \[\] | A list of zero or more import specifications, each of which makes all morphline commands that match the specification visible to the morphline. A specification can import all commands in an entire Java package tree (specification ends with ".\*\*"), all commands in a Java package (specification ends with ".\*"), or the command of a specific fully qualified Java class (all other specifications). Other commands present on the Java classpath are not visible to this morphline. |
 | commands | \[\] | A list of zero or more commands. |
 
 Example usage demonstrating a pipe with two commands, namely {{addValues}} and {{logDebug}}:
@@ -777,7 +782,7 @@ pipe {
   id : my_pipe
 
   # Import all commands in these java packages, subpackages and classes.
-  # Other commands on the classpath are not visible to this morphline.
+  # Other commands on the Java classpath are not visible to this morphline.
   importCommands : [
     "com.cloudera.**",   # package and all subpackages
     "org.apache.solr.**", # package and all subpackages
@@ -1253,6 +1258,165 @@ Example usage:
 {code}
 unpack {}
 {code}
+
+h1. cdk\-morphlines\-saxon
+
+This module contains morphline commands for reading, extracting and transforming XML and HTML with XPath, XQuery and XSLT.
+
+h2. convertHTML
+
+The [convertHTML|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-saxon/src/main/java/com/cloudera/cdk/morphline/saxon/ConvertHTMLBuilder.java] command converts any HTML to XHTML using the [TagSoup|http://ccil.org/~cowan/XML/tagsoup] Java library. 
+
+Instead of parsing well-formed or valid XML, this command parses HTML as it is found in the wild: poor, nasty and brutish, though quite often far from short. TagSoup (and hence this command) is designed for people who have to process this stuff using some semblance of a rational application design. By providing this converter, it allows standard XML tools to be applied to even the worst malformed HTML.
+
+The command reads an InputStream or byte array from the first attachment (field \_attachment\_body) of the input record, parses it as HTML and replaces the field with UTF\-8 encoded XHTML. 
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
+| charset | null | The character encoding to use for parsing input, for example, UTF\-8. If none is specified the charset specified in the \_attachment\_charset input field is used instead. |
+| noNamespaces | true | A value of {{false}} indicates namespace URIs and unprefixed local
+  names for element and attribute names will be available |
+
+{{TODO}}
+
+Example usage:
+{code}
+convertHTML {
+  charset : UTF-8
+}
+{code}
+
+h2. xquery
+
+The [xquery|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-saxon/src/main/java/com/cloudera/cdk/morphline/saxon/XQueryBuilder.java] command parses an InputStream that contains an XML document and runs the given [W3C XQuery|http://www.w3.org/TR/xquery] over the XML document, using the [Saxon|http://www.saxonica.com] Java library. For each item in the query result sequence, the command emits a corresponding morphline record.
+ 
+The command reads an InputStream or byte array from the first attachment (field \_attachment\_body) of the input record. 
+
+An XQuery result sequence contains zero or more items such as element nodes, attribute nodes, text nodes, atomic values, etc. For each item in the query result sequence, the morphline command converts the item to a record and pipes that record to the next morphline command. For an attribute node the attribute's [XPath string value|http://www.w3.org/TR/xquery-operators/#func-string] is filled into the record field named after the attribute name. For an element node the attributes and children of the element are treated as follows: The XPath string value of the attribute or child is filled into the record field named after the child's name.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
+| languageVersion | "1.0" | Must be {{"1.0"}} for XQuery 1.0 or {{"3.0"}} for XQuery 3.0. |
+| features | null | An optional JSON object containing zero or more name\-value pairs that represent configuration properties for [Saxon features|http://www.saxonica.com/html/documentation/javadoc/net/sf/saxon/lib/FeatureKeys.html]. |
+| fragments | n/a | An array containing exactly one _fragment_ JSON object, as described below. |
+
+Each fragment provides the following configuration options:
+
+| fragmentPath | n/a | Currently must be {{"/"}} |
+| externalVariables | null | An optional JSON object containing zero or more name\-value pairs that are bound and passed in as [external variables|http://bit.ly/13Q82Ro] to the query. Example: {{myVar : "hello world"}} |
+| queryFile | null | A relative or absolute path of a local file from which to load the query. |
+| queryString | null | An inline string from which to load the query. One of {{queryFile}} or {{queryString}} must be present, but not both. Example: {{"""/tweets/tweet"""}} |
+
+{note}
+Note: The morphline configuration file is implemented using the HOCON format (Human Optimized Config
+Object Notation). HOCON is basically JSON slightly adjusted for the configuration file use case.
+HOCON syntax is defined at [HOCON github page|http://github.com/typesafehub/config/blob/master/HOCON.md] and as such, multi\-line strings are similar to Python or Scala, using triple quotes. If the three\-character sequence {{"""}} appears, then all Unicode characters until a closing {{"""}} sequence are used unmodified to create a string value.
+{note}
+
+Example usage:
+{code}
+xquery {
+  fragments : [
+    {
+      fragmentPath : "/"
+      externalVariables : {
+        myVariable : "hello world"
+      }            
+      queryString : """
+        (: Example test xquery :)        
+        
+        declare variable $myVariable as xs:string external;
+        
+        for $tweet in /tweets/tweet
+        return 
+        <user>
+          {$tweet/@id} 
+          {$tweet/user/@screen_name} 
+          <myStatusCounts>{string($tweet/user/@statuses_count)}</myStatusCounts>
+          <text>{$tweet/text}</text>
+          <greeting>{$myVariable}</greeting>
+        </user>
+      """
+    }
+  ]
+}
+{code}
+
+Here is an example output record for the query above:
+{code}
+id:11111112
+screen_name:fake_user1
+myStatusCounts:11111
+text:Come, see new hot tub under Redwood Tree!
+greeting:hello world
+{code}
+
+More examples can be found in the [unit tests|https://github.com/cloudera/cdk/tree/master/cdk-morphlines/cdk-morphlines-saxon/src/test/resources/test-morphlines].
+
+For more background, see resources such as the [XQuery Primer|http://www.stylusstudio.com/xquery_primer.html] and [XQuery: A Guided Tour|http://www.datadirect.com/resources/dis/xquery-guided-tour/index.html] and [Wikipedia|http://en.wikipedia.org/wiki/XQuery].
+
+h2. xslt
+
+The [xslt|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-saxon/src/main/java/com/cloudera/cdk/morphline/saxon/XSLTBuilder.java] command parses an InputStream that contains an XML document and runs the given [W3C XSL Transform|http://www.w3.org/TR/xslt20] over the XML document, using the [Saxon|http://www.saxonica.com] Java library. For each item in the query result sequence, the command emits a corresponding morphline record.
+ 
+The command reads an InputStream or byte array from the first attachment (field \_attachment\_body) of the input record. 
+
+An XSLT result sequence contains zero or more items such as element nodes, attribute nodes, text nodes, atomic values, etc. For each item in the query result sequence, the morphline command converts the item to a record and pipes that record to the next morphline command. For an attribute node the attribute's [XPath string value|http://www.w3.org/TR/xquery-operators/#func-string] is filled into the record field named after the attribute name. For an element node the attributes and children of the element are treated as follows: The XPath string value of the attribute or child is filled into the record field named after the child's name.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
+| features | null | An optional JSON object containing zero or more name\-value pairs that represent configuration properties for [Saxon features|http://www.saxonica.com/html/documentation/javadoc/net/sf/saxon/lib/FeatureKeys.html]. |
+| fragments | n/a | An array containing exactly one _fragment_ JSON object, as described below. |
+
+Each fragment provides the following configuration options:
+
+| fragmentPath | n/a | Currently must be {{"/"}} |
+| parameters | null | An optional JSON object containing zero or more name\-value pairs that are bound and passed in as [XSLT parameters|http://www.w3schools.com/xsl/el_param.asp] to the query. Example: {{myVar : "hello world"}} |
+| queryFile | null | A relative or absolute path of a local file from which to load the query. |
+| queryString | null | An inline string from which to load the query. One of {{queryFile}} or {{queryString}} must be present, but not both. |
+
+{note}
+Note: The morphline configuration file is implemented using the HOCON format (Human Optimized Config
+Object Notation). HOCON is basically JSON slightly adjusted for the configuration file use case.
+HOCON syntax is defined at [HOCON github page|http://github.com/typesafehub/config/blob/master/HOCON.md] and as such, multi\-line strings are similar to Python or Scala, using triple quotes. If the three\-character sequence {{"""}} appears, then all Unicode characters until a closing {{"""}} sequence are used unmodified to create a string value.
+{note}
+
+Example usage:
+{code}
+xslt {
+  fragments : [
+    {
+      fragmentPath : "/"
+      parameters : {
+        myVariable : "hello world"
+      }            
+      queryString : """
+        <!-- Example XSLT identity transformation -->
+        <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+        
+        <xsl:template match="@*|node()">
+          <xsl:copy>
+            <xsl:apply-templates select="@*|node()"/>
+          </xsl:copy>
+        </xsl:template>
+        
+        </xsl:stylesheet>
+      """
+    }
+  ]
+}
+{code}
+
+More examples can be found in the [unit tests|https://github.com/cloudera/cdk/tree/master/cdk-morphlines/cdk-morphlines-saxon/src/test/resources/test-morphlines].
+
+For more background, see resources such as the [XSLT Tutorial|http://www.w3schools.com/xsl/] and [Wikipedia|http://en.wikipedia.org/wiki/XSLT].
+
 
 h1. cdk\-morphlines\-solr\-core
 
