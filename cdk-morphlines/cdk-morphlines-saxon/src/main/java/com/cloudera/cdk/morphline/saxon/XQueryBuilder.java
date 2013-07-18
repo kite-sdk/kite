@@ -16,7 +16,6 @@
 package com.cloudera.cdk.morphline.saxon;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -130,8 +129,8 @@ public final class XQueryBuilder implements CommandBuilder {
         Config fileVariables = getConfigs().getConfig(fragment, "externalFileVariables", ConfigFactory.empty());
         for (Map.Entry<String, Object> entry : fileVariables.root().unwrapped().entrySet()) {
           File file = new File(entry.getValue().toString());
-          XdmValue xdmValue = parseXmlDocument(new FileInputStream(file));
-          evaluator.setExternalVariable(new QName(entry.getKey()), xdmValue);
+          XdmValue doc = parseXmlDocument(file);
+          evaluator.setExternalVariable(new QName(entry.getKey()), doc);
         }
         if (isTracing) {
           evaluator.setTraceListener(new XQueryTraceListener()); // TODO redirect from stderr to SLF4J
@@ -143,7 +142,7 @@ public final class XQueryBuilder implements CommandBuilder {
     }
   
     @Override
-    protected boolean doProcess2(Record inputRecord, InputStream stream) throws SaxonApiException, XMLStreamException, IOException {
+    protected boolean doProcess2(Record inputRecord, InputStream stream) throws SaxonApiException, XMLStreamException {
       incrementNumRecords();      
       for (Fragment fragment : fragments) {
         Record template = inputRecord.copy();

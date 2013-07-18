@@ -15,9 +15,12 @@
  */
 package com.cloudera.cdk.morphline.saxon;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -47,7 +50,7 @@ abstract class SaxonCommand extends AbstractParser {
   protected final Processor processor;
   protected final boolean isTracing;
 
-  public SaxonCommand(Config config, Command parent, Command child, MorphlineContext context) throws SaxonApiException, IOException {
+  public SaxonCommand(Config config, Command parent, Command child, MorphlineContext context) {
     super(config, parent, child, context);
     
     this.isTracing = getConfigs().getBoolean(config, "isTracing", false);
@@ -74,16 +77,24 @@ abstract class SaxonCommand extends AbstractParser {
   
   abstract protected boolean doProcess2(Record inputRecord, InputStream stream) throws IOException, SaxonApiException, XMLStreamException;
   
-  protected XdmNode parseXmlDocument(InputStream stream) throws XMLStreamException, SaxonApiException, IOException {
+  protected XdmNode parseXmlDocument(File file) throws XMLStreamException, SaxonApiException, IOException {
+    InputStream stream = new FileInputStream(file);
     try {
-      XMLStreamReader reader = inputFactory.createXMLStreamReader(null, stream);
-      BuildingStreamWriterImpl writer = documentBuilder.newBuildingStreamWriter();      
-      new XMLStreamCopier(reader, writer).copy(false); // push XML into Saxon and build TinyTree
-      XdmNode document = writer.getDocumentNode();
-      return document;
+      if (file.getName().endsWith(".gz")) {
+        stream = new GZIPInputStream(stream);
+      }
+      return parseXmlDocument(stream);
     } finally {
       stream.close();
     }
+  }
+  
+  protected XdmNode parseXmlDocument(InputStream stream) throws XMLStreamException, SaxonApiException {
+    XMLStreamReader reader = inputFactory.createXMLStreamReader(null, stream);
+    BuildingStreamWriterImpl writer = documentBuilder.newBuildingStreamWriter();      
+    new XMLStreamCopier(reader, writer).copy(false); // push XML into Saxon and build TinyTree
+    XdmNode document = writer.getDocumentNode();
+    return document;
   }
   
   
