@@ -91,7 +91,7 @@ public final class ConvertHTMLBuilder implements CommandBuilder {
       xmlReader.setProperty(Parser.schemaProperty, htmlSchema);
       xmlReader.setFeature(Parser.CDATAElementsFeature, getConfigs().getBoolean(config, "noCDATA", false));
       xmlReader.setFeature(Parser.namespacesFeature, !getConfigs().getBoolean(config, "noNamespaces", true));
-      xmlReader.setFeature(Parser.ignoreBogonsFeature, getConfigs().getBoolean(config, "noBogons", false));
+      xmlReader.setFeature(Parser.ignoreBogonsFeature, getConfigs().getBoolean(config, "noBogons", false)); // also see TIKA-599
       xmlReader.setFeature(Parser.bogonsEmptyFeature, getConfigs().getBoolean(config, "emptyBogons", false));
       xmlReader.setFeature(Parser.rootBogonsFeature, getConfigs().getBoolean(config, "noRootBogons", false));
       xmlReader.setFeature(Parser.defaultAttributesFeature, getConfigs().getBoolean(config, "noDefaults", false));
