@@ -88,6 +88,7 @@ final class XMLInputFactoryCreator {
 	private static final String[] StAX_FACTORIES = {
 		"com.ctc.wstx.stax.WstxInputFactory", // Woodstox (Codehaus, Apache license)
 		"com.sun.xml.internal.stream.XMLInputFactoryImpl", // (Sun/Oracle)
+//    "com.fasterxml.aalto.stax.InputFactoryImpl", // Aalto
 //		"com.sun.xml.stream.ZephyrParserFactory", // sjsxp (Sun)
 //		"oracle.xml.stream.OracleXMLInputFactory", // Oracle
 //		"com.bea.xml.stream.MXParserFactory", // BEA
