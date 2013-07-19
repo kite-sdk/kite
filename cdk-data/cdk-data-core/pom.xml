@@ -32,6 +32,11 @@
   </description>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/avro</directory>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.avro</groupId>
