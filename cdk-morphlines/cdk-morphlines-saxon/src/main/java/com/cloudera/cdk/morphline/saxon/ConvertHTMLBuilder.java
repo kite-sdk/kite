@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.morphline.saxon;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -116,7 +117,7 @@ public final class ConvertHTMLBuilder implements CommandBuilder {
     
     private boolean doProcess2(Record inputRecord, InputStream stream) throws IOException, SAXException {      
       ByteArrayOutputStream out = new ByteArrayOutputStream();
-      XMLWriter xmlWriter = new XMLWriter(new OutputStreamWriter(out, Charsets.UTF_8));
+      XMLWriter xmlWriter = new XMLWriter(new BufferedWriter(new OutputStreamWriter(out, Charsets.UTF_8)));
       xmlWriter.setOutputProperty(XMLWriter.ENCODING, "UTF-8");
       if (omitXMLDeclaration) {
         xmlWriter.setOutputProperty(XMLWriter.OMIT_XML_DECLARATION, "yes");
