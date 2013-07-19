@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import javax.annotation.Nullable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -47,24 +48,34 @@ class HCatalogMetadataProvider implements MetadataProvider {
   private static final String AVRO_SCHEMA_LITERAL_PROPERTY_NAME = "avro.schema.literal";
 
   private final boolean managed;
+  private final Configuration conf;
+  private final HCatalog hcat;
   private final String dbName = "default";
   private FileSystem fileSystem;
   private Path dataDirectory;
 
   public HCatalogMetadataProvider(boolean managed) {
     this.managed = managed;
+    this.conf = new Configuration();
+    hcat = new HCatalog();
+  }
+
+  public HCatalogMetadataProvider(boolean managed, Configuration conf) {
+    this.managed = managed;
+    this.conf = conf;
+    hcat = new HCatalog(conf);
   }
 
   @Override
   public DatasetDescriptor load(String name) {
-    Table table = HCatalog.getTable(dbName, name);
+    Table table = hcat.getTable(dbName, name);
     String serializationLib = table.getSerializationLib();
     if (!AVRO_SERDE.equals(serializationLib)) {
       throw new MetadataProviderException("Only tables using AvroSerDe are supported.");
     }
 
     try {
-      fileSystem = FileSystem.get(new Configuration());
+      fileSystem = FileSystem.get(conf);
       dataDirectory = fileSystem.makeQualified(new Path(table.getDataLocation()));
     } catch (IOException e) {
       throw new MetadataProviderException(e);
@@ -112,7 +123,7 @@ class HCatalogMetadataProvider implements MetadataProvider {
 
   @Override
   public void save(String name, DatasetDescriptor descriptor) {
-    if (HCatalog.tableExists(dbName, name)) {
+    if (hcat.tableExists(dbName, name)) {
       logger.warn("Hive table named " + name + " already exists");
       return;
     }
@@ -148,12 +159,12 @@ class HCatalogMetadataProvider implements MetadataProvider {
       throw new MetadataProviderException("Error configuring Hive Avro table, " +
           "table creation failed", e);
     }
-    HCatalog.createTable(tbl);
+    hcat.createTable(tbl);
 
     if (dataDirectory == null) { // re-read to find the data directory
-      Table table = HCatalog.getTable(dbName, name);
+      Table table = hcat.getTable(dbName, name);
       try {
-        fileSystem = FileSystem.get(new Configuration());
+        fileSystem = FileSystem.get(conf);
         dataDirectory = fileSystem.makeQualified(new Path(table.getDataLocation()));
       } catch (IOException e) {
         throw new MetadataProviderException(e);
@@ -163,10 +174,10 @@ class HCatalogMetadataProvider implements MetadataProvider {
 
   @Override
   public boolean delete(String name) {
-    if (!HCatalog.tableExists(dbName, name)) {
+    if (!hcat.tableExists(dbName, name)) {
       return false;
     }
-    HCatalog.dropTable(dbName, name);
+    hcat.dropTable(dbName, name);
     return true;
   }
 

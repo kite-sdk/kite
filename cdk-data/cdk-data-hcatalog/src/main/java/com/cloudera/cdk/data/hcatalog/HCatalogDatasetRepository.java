@@ -92,9 +92,13 @@ public class HCatalogDatasetRepository implements DatasetRepository {
    * @param rootDirectory the root directory for datasets
    */
   public HCatalogDatasetRepository(FileSystem fileSystem, Path rootDirectory) {
-    this.managed = false;
-    this.metadataProvider = new HCatalogMetadataProvider(managed);
+    this(fileSystem, rootDirectory, fileSystem.getConf());
+  }
 
+  HCatalogDatasetRepository(FileSystem fileSystem, Path rootDirectory,
+      Configuration conf) {
+    this.managed = false;
+    this.metadataProvider = new HCatalogMetadataProvider(managed, conf);
     this.fileSystemDatasetRepository = new FileSystemDatasetRepository(fileSystem,
         rootDirectory, metadataProvider);
   }
@@ -220,7 +224,10 @@ public class HCatalogDatasetRepository implements DatasetRepository {
         }
       }
 
-      return new HCatalogDatasetRepository(fileSystem, rootDirectory);
+      if (configuration == null) {
+        return new HCatalogDatasetRepository(fileSystem, rootDirectory);
+      }
+      return new HCatalogDatasetRepository(fileSystem, rootDirectory, configuration);
     }
   }
 }

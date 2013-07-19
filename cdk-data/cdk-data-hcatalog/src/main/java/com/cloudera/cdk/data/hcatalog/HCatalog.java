@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hcatalog;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.ql.metadata.Table;
@@ -22,21 +23,25 @@ import org.apache.hcatalog.common.HCatUtil;
 
 final class HCatalog {
 
-  private static HiveMetaStoreClient CLIENT_INSTANCE = null;
-  
-  private static synchronized HiveMetaStoreClient getClientInstance() {
-    if (CLIENT_INSTANCE == null) {
-      try {
-        CLIENT_INSTANCE = HCatUtil.getHiveClient(new HiveConf());
-      } catch (Exception e) {
-        throw new RuntimeException("Could not connect to Hive", e);
-      }
+  private HiveMetaStoreClient client;
+
+  public HCatalog() {
+    try {
+      client = HCatUtil.getHiveClient(new HiveConf());
+    } catch (Exception e) {
+      throw new RuntimeException("Hive metastore exception", e);
     }
-    return CLIENT_INSTANCE;
   }
-  
-  public static Table getTable(String dbName, String tableName) {
-    HiveMetaStoreClient client = getClientInstance();
+
+  public HCatalog(Configuration conf) {
+    try {
+      client = HCatUtil.getHiveClient(new HiveConf(conf, HiveConf.class));
+    } catch (Exception e) {
+      throw new RuntimeException("Hive metastore exception", e);
+    }
+  }
+
+  public Table getTable(String dbName, String tableName) {
     Table table;
     try {
       table = HCatUtil.getTable(client, dbName, tableName);
@@ -50,8 +55,7 @@ final class HCatalog {
     return table;
   }
   
-  public static boolean tableExists(String dbName, String tableName) {
-    HiveMetaStoreClient client = getClientInstance();
+  public boolean tableExists(String dbName, String tableName) {
     try {
       return client.tableExists(dbName, tableName);
     } catch (Exception e) {
@@ -59,8 +63,7 @@ final class HCatalog {
     }
   }
   
-  public static void createTable(Table tbl) {
-    HiveMetaStoreClient client = getClientInstance();
+  public void createTable(Table tbl) {
     try {
       client.createTable(tbl.getTTable());
     } catch (Exception e) {
@@ -68,8 +71,7 @@ final class HCatalog {
     }
   }
   
-  public static void dropTable(String dbName, String tableName) {
-    HiveMetaStoreClient client = getClientInstance();
+  public void dropTable(String dbName, String tableName) {
     try {
       client.dropTable(dbName, tableName, true /* deleteData */,
           true /* ignoreUnknownTable */);
@@ -77,6 +79,4 @@ final class HCatalog {
       throw new RuntimeException("Hive metastore exception", e);
     }
   }
-
-  private HCatalog() { }
 }
