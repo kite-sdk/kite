@@ -93,6 +93,8 @@ abstract class SaxonCommand extends AbstractParser {
     XMLStreamReader reader = inputFactory.createXMLStreamReader(null, stream);
     BuildingStreamWriterImpl writer = documentBuilder.newBuildingStreamWriter();      
     new XMLStreamCopier(reader, writer).copy(false); // push XML into Saxon and build TinyTree
+    reader.close();
+    writer.close();
     XdmNode document = writer.getDocumentNode();
     return document;
   }
