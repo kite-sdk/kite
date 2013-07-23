@@ -55,14 +55,6 @@ import com.typesafe.config.ConfigFactory;
  */
 public final class XQueryBuilder implements CommandBuilder {
 
-  /*
-   * TODO: Add option to support streaming via fragmentPath.
-   * 
-   * TODO: Add option to support serializing each item in the result sequence according to the XML
-   * Output Method of the <a target="_blank" href="http://www.w3.org/TR/xslt-xquery-serialization-30/">
-   * W3C XQuery/XSLT2 Serialization Spec</a>, with sequence normalization as defined therein.
-   */
-  
   @Override
   public Collection<String> getNames() {
     return Collections.singletonList("xquery");
@@ -86,6 +78,14 @@ public final class XQueryBuilder implements CommandBuilder {
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
   private static final class XQuery extends SaxonCommand {
+    
+    /*
+     * TODO: Add option to support streaming via fragmentPath.
+     * 
+     * TODO: Add option to support serializing each item in the result sequence according to the XML
+     * Output Method of the <a target="_blank" href="http://www.w3.org/TR/xslt-xquery-serialization-30/">
+     * W3C XQuery/XSLT2 Serialization Spec</a>, with sequence normalization as defined therein.
+     */
     
     private final List<Fragment> fragments = new ArrayList();
   
@@ -194,8 +194,8 @@ public final class XQueryBuilder implements CommandBuilder {
           String strValue = child.getStringValue();
           if (strValue.length() > 0) {
             record.put(child.getNodeName().getLocalName(), strValue);
+            isEmpty = false;
           }
-          isEmpty = false;
         }
       }
       return !isEmpty;
