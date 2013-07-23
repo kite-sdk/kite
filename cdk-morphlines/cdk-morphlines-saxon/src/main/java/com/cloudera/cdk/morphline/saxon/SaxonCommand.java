@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.morphline.saxon;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -81,7 +82,7 @@ abstract class SaxonCommand extends AbstractParser {
     InputStream stream = new FileInputStream(file);
     try {
       if (file.getName().endsWith(".gz")) {
-        stream = new GZIPInputStream(stream);
+        stream = new GZIPInputStream(new BufferedInputStream(stream));
       }
       return parseXmlDocument(stream);
     } finally {
