@@ -737,6 +737,12 @@ logInfo {
 }
 {code}
 
+To automatically print diagnostic information such as the content of records as they pass through the morphline commands, consider enabling TRACE log level, for example by adding the following line to your log4j.properties file:
+
+{code}
+log4j.logger.com.cloudera.cdk.morphline=TRACE
+{code}
+
 h2. not
 
 The [not|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/NotBuilder.java] command consists of one nested command, the Boolean return value of which is inverted.

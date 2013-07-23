@@ -82,7 +82,7 @@ public final class AddLocalHostBuilder implements CommandBuilder {
     @Override
     protected boolean doProcess(Record record) {      
       if (preserveExisting && record.getFields().containsKey(fieldName)) {
-        // we must preserve the existing host
+        ; // we must preserve the existing host
       } else {
         record.removeAll(fieldName);
         if (host != null) {
