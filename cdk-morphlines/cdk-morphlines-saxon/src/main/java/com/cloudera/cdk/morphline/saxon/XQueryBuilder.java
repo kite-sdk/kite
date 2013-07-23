@@ -52,11 +52,17 @@ import com.typesafe.config.ConfigFactory;
  * Command that parses an InputStream that contains an XML document and runs the given XQuery over
  * the XML document. For each item in the query result sequence, the command emits a morphline record
  * containing the item's name-value pairs.
- * 
- * TODO: Add support for streaming via fragmentPath.
  */
 public final class XQueryBuilder implements CommandBuilder {
 
+  /*
+   * TODO: Add option to support streaming via fragmentPath.
+   * 
+   * TODO: Add option to support serializing each item in the result sequence according to the XML
+   * Output Method of the <a target="_blank" href="http://www.w3.org/TR/xslt-xquery-serialization-30/">
+   * W3C XQuery/XSLT2 Serialization Spec</a>, with sequence normalization as defined therein.
+   */
+  
   @Override
   public Collection<String> getNames() {
     return Collections.singletonList("xquery");
