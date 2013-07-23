@@ -25,6 +25,7 @@
   <modules>
     <module>cdk-data</module>
     <module>cdk-flume-avro-event-serializer</module>
+    <module>cdk-maven-plugin</module>
     <module>cdk-tools</module>
     <module>cdk-morphlines</module>
   </modules>
@@ -104,6 +105,7 @@
     <!-- Library versions -->
     <vers.avro>1.7.4</vers.avro>
     <vers.commons-codec>1.4</vers.commons-codec>
+    <vers.commons-io>2.1</vers.commons-io>
     <vers.crunch-base>0.6.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-cdh4.2.0</vers.crunch><!-- don't use ${cdh.version} since it's not available; this one is compatible though -->
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
@@ -115,8 +117,12 @@
     <vers.compress>1.4.1</vers.compress>
     <vers.junit>4.10</vers.junit>
     <vers.log4j>1.2.16</vers.log4j>
+    <vers.maven>2.0.6</vers.maven>
     <vers.mockito>1.9.5</vers.mockito>
+    <vers.mojo-executor>1.5</vers.mojo-executor>
+    <vers.oozie>3.3.2-cdh${cdh.version}</vers.oozie>
     <vers.parquet>1.0.0-SNAPSHOT</vers.parquet>
+    <vers.plexus-utils>3.0</vers.plexus-utils>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
     <vers.codahale.metrics>3.0.1</vers.codahale.metrics>
@@ -134,6 +140,7 @@
     <vers.findbugs-maven-plugin>2.5.2</vers.findbugs-maven-plugin>
     <vers.maven-compiler-plugin>2.5.1</vers.maven-compiler-plugin>
     <vers.maven-javadoc-plugin>2.9.1</vers.maven-javadoc-plugin>
+    <vers.maven-plugin-plugin>3.1</vers.maven-plugin-plugin>
     <vers.maven-project-info-reports-plugin>2.7</vers.maven-project-info-reports-plugin>
     <vers.maven-release-plugin>2.4.1</vers.maven-release-plugin>
     <vers.maven-shade-plugin>2.1</vers.maven-shade-plugin>
@@ -293,6 +300,22 @@
               <phase>package</phase>
               <goals>
                 <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-plugin-plugin</artifactId>
+          <version>${vers.maven-plugin-plugin}</version>
+          <configuration>
+            <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+          </configuration>
+          <executions>
+            <execution>
+              <id>generate-descriptor</id>
+              <goals>
+                <goal>descriptor</goal>
               </goals>
             </execution>
           </executions>
@@ -612,6 +635,11 @@
         <version>${vers.commons-codec}</version>
       </dependency>
       <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${vers.commons-io}</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-jexl</artifactId>
         <version>${vers.jexl}</version>
@@ -645,6 +673,11 @@
         <groupId>org.apache.flume</groupId>
         <artifactId>flume-ng-configuration</artifactId>
         <version>${vers.flume}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.oozie</groupId>
+        <artifactId>oozie-client</artifactId>
+        <version>${vers.oozie}</version>
       </dependency>
       <dependency>
         <groupId>com.codahale.metrics</groupId>
@@ -697,6 +730,38 @@
         <groupId>com.beust</groupId>
         <artifactId>jcommander</artifactId>
         <version>${vers.jcommander}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-project</artifactId>
+        <version>${vers.maven}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-plugin-api</artifactId>
+        <version>${vers.maven}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.guava</groupId> <!-- use version from Hadoop -->
+            <artifactId>guava</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven.plugin-tools</groupId>
+        <artifactId>maven-plugin-annotations</artifactId>
+        <version>${vers.maven-plugin-plugin}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-utils</artifactId>
+        <version>${vers.plexus-utils}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.twdata.maven</groupId>
+        <artifactId>mojo-executor</artifactId>
+        <version>${vers.mojo-executor}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

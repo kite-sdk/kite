@@ -30,6 +30,11 @@ HDFS) that let users think and operate in terms of records, datasets, and
 dataset repositories. If you're looking to read or write records directly
 to/from a storage system, the data module is for you.
 
+### CDK Maven Plugin
+
+The CDK Maven Plugin provides Maven goals for packaging, deploying, and running
+distributed applications.
+
 ### CDK Morphlines
 
 The Morphlines module reduces the time and skills necessary to build and change Hadoop
