@@ -84,7 +84,7 @@ public final class ReadJsonBuilder implements CommandBuilder {
           throw new MorphlineCompilationException("Cannot create instance", config, e);
         }
       } else {
-        objectMapper = new ObjectMapper(jsonFactory, null, null);
+        objectMapper = new ObjectMapper(jsonFactory);
       }
       
       String outputClassName = getConfigs().getString(config, "outputClass", JsonNode.class.getName());
