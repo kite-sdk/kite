@@ -1307,7 +1307,7 @@ The [xquery|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morph
  
 The command reads an InputStream or byte array from the first attachment (field \_attachment\_body) of the input record. 
 
-Per the W3C specs, every valid XPath (e.g. {{//tweets/tweet[@color='blue']}}) is also a valid XQuery. If you are comfortable with XPath you are already almost there.
+Per the W3C specs, every valid XPath (e.g. //tweets/tweet\[@color='blue'\]) is also a valid XQuery. If you are comfortable with XPath you are already almost there.
 
 An XQuery result sequence contains zero or more items such as element nodes, attribute nodes, text nodes, atomic values, etc. For each item in the query result sequence, the morphline command converts the item to a record and pipes that record to the next morphline command. For an attribute node the attribute's [XPath string value|http://www.w3.org/TR/xquery-operators/#func-string] is filled into the record field named after the attribute name. For an element node the attributes and children of the element are treated as follows: The XPath string value of the attribute or child is filled into the record field named after the child's name.
 
