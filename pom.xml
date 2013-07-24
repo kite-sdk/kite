@@ -119,7 +119,7 @@
     <vers.parquet>1.0.0-SNAPSHOT</vers.parquet>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
-    <vers.codahale.metrics>3.0.0</vers.codahale.metrics>
+    <vers.codahale.metrics>3.0.1</vers.codahale.metrics>
     <vers.typesafe.config>1.0.2</vers.typesafe.config>
     <vers.solr>4.3.0-cdh${cdh.version}_search0.9.1-SNAPSHOT</vers.solr>
     <solr.expected.version>4.3.0-cdh</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
