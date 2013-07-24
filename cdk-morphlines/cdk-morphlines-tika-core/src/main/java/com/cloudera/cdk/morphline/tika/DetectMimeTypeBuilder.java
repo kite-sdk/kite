@@ -124,8 +124,8 @@ public final class DetectMimeTypeBuilder implements CommandBuilder {
     
     @Override
     protected boolean doProcess(Record record) {
-      if (preserveExisting && record.get(Fields.ATTACHMENT_MIME_TYPE).size() > 0) {
-        // we must preserve the existing MIME type
+      if (preserveExisting && record.getFields().containsKey(Fields.ATTACHMENT_MIME_TYPE)) {
+        ; // we must preserve the existing MIME type
       } else {
         List attachments = record.get(Fields.ATTACHMENT_BODY);
         if (attachments.size() > 0) {
