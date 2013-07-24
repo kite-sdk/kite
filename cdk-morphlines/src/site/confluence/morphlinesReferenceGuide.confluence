@@ -426,7 +426,7 @@ For example, given the input field {{myUri}} with the value {{ http://userinfo@w
 
 h2. extractURIQueryParameters
 
-The [extractURIComponents|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ExtractURIQueryParametersBuilder.java] command extracts the query parameters with a given name from the URIs contained in the given input field and appends them to the given output field.
+The [extractURIQueryParameters|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ExtractURIQueryParametersBuilder.java] command extracts the query parameters with a given name from the URIs contained in the given input field and appends them to the given output field.
 
 The command provides the following configuration options:
 
