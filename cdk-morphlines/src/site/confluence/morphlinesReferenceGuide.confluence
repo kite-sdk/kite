@@ -116,10 +116,15 @@ For the format see the wikipedia entry for [Comma-separated values|http://en.wik
 
 Some CSV files contain a header line that contains embedded column names. This command does not support reading and using such embedded column names as output field names because this is considered unreliable for production systems. If the first line of the CSV file is a header line, you must set the {{ignoreFirstLine}} option to true. You must explicitly define the {{columns}} configuration parameter in order to name the output fields.
 
-Note that a quoted field can span multiple lines in the input stream, as shown in the following example CSV input containing three columns:
+Note that a quoted field can span multiple lines in the input stream, as shown in the following example CSV input containing a single record with three columns:
 {code}
 column0,"Look, new hot tub under redwood tree!
 All bubbly!",column2
+{code}
+
+Also note that lines starting with a {{#}} hash character are ignored as comments. Example:
+{code}
+#This is a comment line. It is ignored.
 {code}
 
 The command provides the following configuration options:
