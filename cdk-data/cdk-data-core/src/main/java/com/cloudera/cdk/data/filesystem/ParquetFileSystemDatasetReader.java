@@ -24,6 +24,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
+import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.reflect.ReflectDatumReader;
 import org.apache.hadoop.fs.AvroFSInput;
 import org.apache.hadoop.fs.FileSystem;
@@ -32,7 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parquet.avro.AvroParquetReader;
 
-class ParquetFileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
+class ParquetFileSystemDatasetReader<E extends IndexedRecord> implements DatasetReader<E>,
+    Closeable {
 
   private FileSystem fileSystem;
   private Path path;

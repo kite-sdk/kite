@@ -109,7 +109,7 @@ class FileSystemDataset implements Dataset {
     } else {
       Path dataFile = new Path(directory, uniqueFilename());
       if (Formats.PARQUET.equals(descriptor.getFormat())) {
-        writer = new ParquetFileSystemDatasetWriter<E>(fileSystem, dataFile, schema);
+        writer = new ParquetFileSystemDatasetWriter(fileSystem, dataFile, schema);
       } else {
         writer = new FileSystemDatasetWriter.Builder<E>().fileSystem(fileSystem)
           .path(dataFile).schema(schema).get();

@@ -60,7 +60,7 @@ class MultiFileDatasetReader<E> implements DatasetReader<E> {
 
   private void openNextReader() {
     if (Formats.PARQUET.equals(descriptor.getFormat())) {
-      reader = new ParquetFileSystemDatasetReader<E>(fileSystem, filesIter.next(),
+      reader = new ParquetFileSystemDatasetReader(fileSystem, filesIter.next(),
           descriptor.getSchema());
     } else {
       reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),

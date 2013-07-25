@@ -26,6 +26,7 @@ import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 import org.apache.avro.Schema;
+import org.apache.avro.generic.IndexedRecord;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.SnappyCodec;
@@ -35,7 +36,7 @@ import parquet.avro.AvroParquetWriter;
 import parquet.hadoop.ParquetWriter;
 import parquet.hadoop.metadata.CompressionCodecName;
 
-class ParquetFileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
+class ParquetFileSystemDatasetWriter<E extends IndexedRecord> implements DatasetWriter<E>, Flushable,
     Closeable {
 
   private static final Logger logger = LoggerFactory
