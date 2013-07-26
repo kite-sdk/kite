@@ -85,7 +85,7 @@ public final class ReadCSVBuilder implements CommandBuilder {
         throw new MorphlineCompilationException(
             "Quote character must not have a length of more than one character: " + quoteChar, config);
       }
-      if (quoteChar.equals(separatorChar)) {
+      if (quoteChar.equals(String.valueOf(separatorChar))) {
         throw new MorphlineCompilationException(
             "Quote character must not be the same as separator: " + quoteChar, config);
       }
