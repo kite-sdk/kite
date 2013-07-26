@@ -128,7 +128,7 @@ The command provides the following configuration options:
 | quoteChar | {{"}} | Must be a string of length zero or one. If this parameter is a String containing a single character then a quoted field can span multiple lines in the input stream. To disable quoting and multi-line fields set this parameter to the empty string {{""}}. |
 | commentPrefix | "#" | Must be a string of length zero or one. If this parameter is a String containing a single character then lines starting with that character are ignored as comments. To disable the comment line feature set this parameter to the empty string {{""}}. |
 
-If the parameter {{quoteChar}} is String containing a single character then a quoted field can span multiple lines in the input stream, as shown in the following example CSV input containing a single record with three columns:
+If the parameter {{quoteChar}} is a String containing a single character then a quoted field can span multiple lines in the input stream, as shown in the following example CSV input containing a single record with three columns:
 {code}
 column0,"Look, new hot tub under redwood tree!
 All bubbly!",column2
