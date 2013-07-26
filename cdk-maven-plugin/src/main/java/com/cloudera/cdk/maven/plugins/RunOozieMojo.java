@@ -30,7 +30,7 @@ import org.apache.oozie.client.OozieClientException;
 public class RunOozieMojo extends AbstractOozieMojo {
 
   /**
-   * The URL of the Oozie service to submit to.
+   * The URL of the Oozie service to use.
    */
   @Parameter(property = "cdk.oozieUrl", required = true)
   private String oozieUrl;

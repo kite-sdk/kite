@@ -43,14 +43,15 @@ public class DeployOozieMojo extends AbstractOozieMojo {
 
   /**
    * The Hadoop fileystem used to deploy the Oozie application. The filesystem must be
-   * accessible by the client deploying the application. For this reason, WebHDFS or
-   * HttpFS are common choices (both use the webhdfs:// protocol).
+   * accessible by the client deploying the application.
    */
   @Parameter(property = "cdk.deployFileSystem", required = true)
   private String deployFileSystem;
 
   /**
    * Whether to automatically undeploy applications that already exist when deploying.
+   * If <code>false</code>, and this application has already been deployed,
+   * then an error will be reported.
    */
   @Parameter(property = "cdk.updateApplication", defaultValue = "false")
   private boolean updateApplication;

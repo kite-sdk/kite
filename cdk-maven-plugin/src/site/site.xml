@@ -20,7 +20,8 @@
 
     <menu name="CDK Maven Plugin" inherit="top">
       <item name="Home" href="index.html"/>
-      <item name="Goals and Usage" href="plugin-info.html"/>
+      <item name="Goals" href="plugin-info.html"/>
+      <item name="Usage" href="usage.html"/>
     </menu>
 
   </body>

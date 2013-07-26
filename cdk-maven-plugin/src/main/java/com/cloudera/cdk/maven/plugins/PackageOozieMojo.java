@@ -40,8 +40,8 @@ import static org.twdata.maven.mojoexecutor.MojoExecutor.*;
 public class PackageOozieMojo extends AbstractOozieMojo {
 
   /**
-   * The tool class to run. The specified class must have a standard <code>main</code>
-   * method.
+   * The tool class to run. The specified class must have a standard Java
+   * <code>main</code> method.
    */
   @Parameter(property = "cdk.toolClass", required = true)
   private String toolClass;
@@ -54,8 +54,9 @@ public class PackageOozieMojo extends AbstractOozieMojo {
   private String[] args;
 
   /**
-   * Whether to add dependencies to Hadoop's distributed cache so that they are added
-   * to the classpath for MapReduce tasks (via <code>-libjars</code>).
+   * Whether to add dependencies in the <i>runtime</i> classpath to Hadoop's distributed
+   * cache so that they are added to the classpath for MapReduce tasks
+   * (via <code>-libjars</code>).
    */
   @Parameter(property = "cdk.addDependenciesToDistributedCache",
       defaultValue = "true")
@@ -79,8 +80,8 @@ public class PackageOozieMojo extends AbstractOozieMojo {
   /**
    * Whether the workflow.xml should be generated or not.
    */
-  @Parameter(defaultValue = "true")
-  private Boolean generateWorkflowXml = Boolean.TRUE;
+  @Parameter(property = "cdk.generateWorkflowXml", defaultValue = "true")
+  private boolean generateWorkflowXml = true;
 
   /**
    * Character encoding for the auto-generated workflow file.

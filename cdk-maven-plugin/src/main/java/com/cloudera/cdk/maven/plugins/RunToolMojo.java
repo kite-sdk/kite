@@ -38,8 +38,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 public class RunToolMojo extends AbstractHadoopMojo {
 
   /**
-   * The tool class to run. The specified class must have a standard <code>main</code>
-   * method.
+   * The tool class to run. The specified class must have a standard Java
+   * <code>main</code> method.
    */
   @Parameter(property = "cdk.toolClass", required = true)
   private String toolClass;
@@ -50,9 +50,11 @@ public class RunToolMojo extends AbstractHadoopMojo {
    */
   @Parameter(property = "cdk.args")
   private String[] args;
+
   /**
-   * Whether to add dependencies to Hadoop's distributed cache so that they are added
-   * to the classpath for MapReduce tasks (via <code>-libjars</code>).
+   * Whether to add dependencies in the <i>runtime</i> classpath to Hadoop's distributed
+   * cache so that they are added to the classpath for MapReduce tasks
+   * (via <code>-libjars</code>).
    */
   @Parameter(property = "cdk.addDependenciesToDistributedCache",
       defaultValue = "true")
@@ -75,10 +77,16 @@ public class RunToolMojo extends AbstractHadoopMojo {
     }
     libJars.add(mainArtifactFile.toString());
     classpath.add(toURL(mainArtifactFile));
-    for (Object artifact : mavenProject.getTestArtifacts()) {
-      File file = ((Artifact) artifact).getFile();
-      libJars.add(file.toString());
-      classpath.add(toURL(file));
+    // Make local classpath a combination of compile and runtime classpaths
+    for (Object a : mavenProject.getTestArtifacts()) {
+      Artifact artifact = (Artifact) a;
+      if (!Artifact.SCOPE_TEST.equals(artifact.getScope())) {
+        classpath.add(toURL(artifact.getFile()));
+      }
+    }
+    // Libjars uses the runtime classpath
+    for (Object a : mavenProject.getRuntimeArtifacts()) {
+      libJars.add(((Artifact) a).getFile().toString());
     }
 
     final List<String> commandArgs = new ArrayList<String>();

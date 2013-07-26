@@ -1,0 +1,173 @@
+#set($h1 = '#')
+#set($h2 = '##')
+#set($h3 = '###')
+#set($h4 = '####')
+
+$h1 Usage
+
+$h2 Launching jobs locally with cdk:run-tool
+
+This goal is used to run a Hadoop Tool. The Tool's `run()` method is executed in the same
+local VM as Maven, however it is common for the Tool to launch distributed processes,
+such as MapReduce jobs which run on a cluster.
+
+```
+<project>
+  ...
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.cloudera.cdk</groupId>
+        <artifactId>cdk-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <configuration>
+          <toolClass>org.example.ToolImplementation</toolClass>
+          <!-- optional -->
+          <args>
+            <arg>arg1</arg>
+            <arg>arg2</arg>
+          </args>
+          <hadoopConfiguration>
+            <property>
+              <name>fs.default.name</name>
+              <value>hdfs://localhost</value>
+            </property>
+            <property>
+              <name>mapred.job.tracker</name>
+              <value>localhost:8021</value>
+            </property>
+          </hadoopConfiguration>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+   ...
+</project>
+```
+
+Run the tool using:
+
+```
+mvn cdk:run-tool
+```
+
+$h3 Understanding the classpath
+
+The classpath for the local VM is made up of the _compile_ classpath plus the _runtime_
+classpath. In other words it consists of all dependencies in the
+_compile_, _runtime_, _provided_ and _system_ scopes.
+
+The classpath for distributed processes is made up of the _runtime_ classpath (all
+dependencies in the _compile_ and _runtime_ scopes), unless
+`cdk.addDependenciesToDistributedCache` is set to `false` (the default is `true`),
+in which case no dependencies are included in the distributed classpath.
+
+This makes it very convenient to run distributed jobs, since all non-test dependencies
+are automatically included in the Tool classpath, and all runtime dependencies are
+included in the MapReduce task classpath.
+
+To run a job using MR1 declare the `org.apache.hadoop:hadoop-client` dependency as
+`provided` so that it is present in the local VM (to support job submission),
+but not added to the distributed cache (since the Hadoop libraries are automatically
+available to tasks running on the cluster).
+
+```
+<project>
+  ...
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <version>2.0.0-mr1-cdh4.3.0</version>
+      <scope>provided</scope>
+    </dependency>
+    ...
+  </dependencies>
+  ...
+</project>
+```
+
+If running jobs on YARN, then simply change the version number:
+
+```
+<project>
+  ...
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <version>2.0.0-cdh4.3.0</version>
+      <scope>provided</scope>
+    </dependency>
+    ...
+  </dependencies>
+  ...
+</project>
+```
+
+$h2 Launching jobs from the cluster
+
+There are three goals for building and running jobs on the cluster:
+
+* `cdk:package-app` builds a packaged application locally (in the Oozie package format)
+* `cdk:deploy-app` deploys the packaged application to the cluster
+* `cdk:run-job` runs the deployed application as an Oozie job
+
+A packaged application includes an Oozie workflow file, an Oozie coordinator file
+(optional), and the dependencies on the _runtime_ classpath. The workflow file may be
+generated from the plugin configuration. The following example shows how to run the
+previous example from the cluster, by adding properties for `deployFileSystem`
+and `oozieUrl`, and a `executions` section to bind `cdk-package` to the `package` phase
+of the Maven lifecycle.
+
+```
+<project>
+  ...
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.cloudera.cdk</groupId>
+        <artifactId>cdk-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <configuration>
+          <toolClass>org.example.ToolImplementation</toolClass>
+          <deployFileSystem>hdfs://localhost/</deployFileSystem>
+          <oozieUrl>http://localhost:11000/oozie</oozieUrl>
+          <!-- optional -->
+          <args>
+            <arg>arg1</arg>
+            <arg>arg2</arg>
+          </args>
+          <hadoopConfiguration>
+            <property>
+              <name>fs.default.name</name>
+              <value>hdfs://localhost</value>
+            </property>
+            <property>
+              <name>mapred.job.tracker</name>
+              <value>localhost:8021</value>
+            </property>
+          </hadoopConfiguration>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-app</id>
+            <phase>package</phase>
+            <goals>
+              <goal>package-app</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+   ...
+</project>
+```
+
+Build and run with:
+
+```
+mvn package cdk:deploy-app
+mvn cdk:run-job
+```
