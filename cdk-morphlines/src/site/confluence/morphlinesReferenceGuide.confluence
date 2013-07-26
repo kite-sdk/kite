@@ -167,6 +167,19 @@ readCSV {
 }
 {code}
 
+Example usage for Apache Hive (Values separated by non-printable CTRL\-A character):
+{code}
+readCSV {
+  separator : "\u0001"
+  columns : [Age,"",Extras,Type]
+  ignoreFirstLine : false
+  quoteChar : ""
+  commentPrefix : ""
+  trim : false
+  charset : UTF-8
+}
+{code}
+
 If the parameter {{quoteChar}} is String containing a single character then a quoted field can span multiple lines in the input stream, as shown in the following example CSV input containing a single record with three columns:
 {code}
 column0,"Look, new hot tub under redwood tree!
