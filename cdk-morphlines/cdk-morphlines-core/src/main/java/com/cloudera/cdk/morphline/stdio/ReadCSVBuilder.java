@@ -39,12 +39,11 @@ import com.typesafe.config.Config;
  * Command that extracts zero or more records from the input stream of the first attachment, 
  * representing a Comma Separated Values (CSV) file.
  * 
- * For the format see http://en.wikipedia.org/wiki/Comma-separated_values and
- * http://www.creativyst.com/Doc/Articles/CSV/CSV01.htm and
- * http://ostermiller.org/utils/CSV.html and
- * http://www.ricebridge.com/products/csvman/demo.htm
+ * For the format see http://www.creativyst.com/Doc/Articles/CSV/CSV01.htm.
  * 
  * Note that a quoted field can span multiple lines in the input stream.
+ * 
+ * Also note that lines starting with a # hash character are ignored as comments. 
  */
 public final class ReadCSVBuilder implements CommandBuilder {
 
