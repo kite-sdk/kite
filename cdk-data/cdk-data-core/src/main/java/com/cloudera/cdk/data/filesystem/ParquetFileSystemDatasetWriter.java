@@ -41,6 +41,7 @@ class ParquetFileSystemDatasetWriter<E extends IndexedRecord> implements Dataset
 
   private static final Logger logger = LoggerFactory
     .getLogger(ParquetFileSystemDatasetWriter.class);
+  private static final int DEFAULT_BLOCK_SIZE = 50 * 1024 * 1024;
 
   private Path path;
   private Schema schema;
@@ -86,7 +87,7 @@ class ParquetFileSystemDatasetWriter<E extends IndexedRecord> implements Dataset
          }
       }
       avroParquetWriter = new AvroParquetWriter<E>(pathTmp.makeQualified(fileSystem),
-          schema, codecName, ParquetWriter.DEFAULT_BLOCK_SIZE,
+          schema, codecName, DEFAULT_BLOCK_SIZE,
           ParquetWriter.DEFAULT_PAGE_SIZE);
     } catch (IOException e) {
       throw new DatasetWriterException("Unable to create writer to path:" + pathTmp, e);
