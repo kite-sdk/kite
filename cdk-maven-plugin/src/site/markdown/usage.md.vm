@@ -5,6 +5,61 @@
 
 $h1 Usage
 
+$h2 Working with datasets
+
+The `cdk:create-dataset` and `cdk:drop-dataset` goals are for creating and dropping
+datasets. Configure the Hadoop settings by declaring the plugin in your POM:
+
+```
+<project>
+  ...
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.cloudera.cdk</groupId>
+        <artifactId>cdk-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <configuration>
+          <hadoopConfiguration>
+            <property>
+              <name>fs.default.name</name>
+              <value>hdfs://localhost</value>
+            </property>
+            <property>
+              <name>hive.metastore.uris</name>
+              <value>thrift://localhost:9083</value>
+            </property>
+          </hadoopConfiguration>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+   ...
+</project>
+```
+
+If you are using the default settings (local file system and local Hive metastore) then
+you can omit the `configuration` element.
+
+To create a new dataset, run:
+
+```bash
+mvn cdk:create-dataset \
+  -Dcdk.rootDirectory=/tmp/data \
+  -Dcdk.datasetName=mydataset \
+  -Dcdk.avroSchemaFile=myschema.avsc
+```
+
+The `avroSchemaFile` property specifies a local file.
+
+To drop a dataset, run:
+
+```bash
+mvn cdk:drop-dataset \
+  -Dcdk.rootDirectory=/tmp/data \
+  -Dcdk.datasetName=mydataset
+```
+
 $h2 Launching jobs locally with cdk:run-tool
 
 This goal is used to run a Hadoop Tool. The Tool's `run()` method is executed in the same
@@ -47,7 +102,7 @@ such as MapReduce jobs which run on a cluster.
 
 Run the tool using:
 
-```
+```bash
 mvn cdk:run-tool
 ```
 
@@ -127,7 +182,7 @@ of the Maven lifecycle.
 
 Build and run with:
 
-```
+```bash
 mvn package cdk:deploy-app
 mvn cdk:run-job
 ```
