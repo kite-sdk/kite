@@ -122,7 +122,9 @@ public class CSVReaderImpl<E> implements CSVReader<E> {
 	}
 
 	private boolean isCommentLine(String line) {
-		return line.startsWith(String.valueOf(strategy.getCommentIndicator()));
+	  String commentIndicator = strategy.getCommentIndicator();
+	  return commentIndicator.length() > 0 && line.startsWith(commentIndicator);
+//		return line.startsWith(String.valueOf(strategy.getCommentIndicator()));
 	}
 
 	/**

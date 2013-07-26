@@ -33,6 +33,7 @@ import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.CSVStrategy;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.reader.CSVReader;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.reader.internal.CSVReaderBuilder;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.reader.internal.DefaultCSVEntryParser;
+import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.reader.internal.SimpleCSVTokenizer;
 import com.typesafe.config.Config;
 
 /**
@@ -40,10 +41,6 @@ import com.typesafe.config.Config;
  * representing a Comma Separated Values (CSV) file.
  * 
  * For the format see http://www.creativyst.com/Doc/Articles/CSV/CSV01.htm.
- * 
- * Note that a quoted field can span multiple lines in the input stream.
- * 
- * Also note that lines starting with a # hash character are ignored as comments. 
  */
 public final class ReadCSVBuilder implements CommandBuilder {
 
@@ -68,8 +65,8 @@ public final class ReadCSVBuilder implements CommandBuilder {
     private final Charset charset;
     private final boolean ignoreFirstLine;
     private final boolean trim;
-    private final char commentChar = '#';
-    private final char quoteChar = '"';
+    private final String commentPrefix;
+    private final String quoteChar;
     private final boolean ignoreEmptyLines = true;
   
     public ReadCSV(Config config, Command parent, Command child, MorphlineContext context) {
@@ -83,6 +80,20 @@ public final class ReadCSVBuilder implements CommandBuilder {
       this.charset = getConfigs().getCharset(config, "charset", null);
       this.ignoreFirstLine = getConfigs().getBoolean(config, "ignoreFirstLine", false);
       this.trim = getConfigs().getBoolean(config, "trim", true);      
+      this.quoteChar = getConfigs().getString(config, "quoteChar", Character.toString('"'));
+      if (quoteChar.length() > 1) {
+        throw new MorphlineCompilationException(
+            "Quote character must not have a length of more than one character: " + quoteChar, config);
+      }
+      if (quoteChar.equals(separatorChar)) {
+        throw new MorphlineCompilationException(
+            "Quote character must not be the same as separator: " + quoteChar, config);
+      }
+      this.commentPrefix = getConfigs().getString(config, "commentPrefix", "#");
+      if (commentPrefix.length() > 1) {
+        throw new MorphlineCompilationException(
+            "Comment prefix must not have a length of more than one character: " + commentPrefix, config);
+      }
       validateArguments();
     }
   
@@ -126,10 +137,18 @@ public final class ReadCSVBuilder implements CommandBuilder {
     // TODO: consider replacing impl with http://github.com/FasterXML/jackson-dataformat-csv
     // or http://supercsv.sourceforge.net/release_notes.html
     private CSVReader createCSVReader(Reader reader) {
+      char myQuoteChar = '"';
+      if (quoteChar.length() > 0) {
+        myQuoteChar = quoteChar.charAt(0);
+      }
       CSVStrategy strategy = 
-          new CSVStrategy(separatorChar, quoteChar, commentChar, ignoreFirstLine, ignoreEmptyLines);
+          new CSVStrategy(separatorChar, myQuoteChar, commentPrefix, ignoreFirstLine, ignoreEmptyLines);
       
-      return new CSVReaderBuilder(reader).strategy(strategy).entryParser(new DefaultCSVEntryParser()).build();
+      CSVReaderBuilder builder = new CSVReaderBuilder(reader).strategy(strategy);
+      if (quoteChar.length() == 0) {
+        builder = builder.tokenizer(new SimpleCSVTokenizer());
+      }
+      return builder.entryParser(new DefaultCSVEntryParser()).build();
     }
   
   }

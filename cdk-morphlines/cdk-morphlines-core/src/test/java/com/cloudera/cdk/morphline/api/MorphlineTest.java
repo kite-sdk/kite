@@ -529,6 +529,28 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }  
 
   @Test
+  public void testReadCSVWithoutQuoting() throws Exception {
+    morphline = createMorphline("test-morphlines/readCSVWithoutQuoting");    
+    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/cars.csv"));
+    Record record = new Record();
+    record.put(Fields.ATTACHMENT_BODY, in);
+    processAndVerifySuccess(record, 
+        ImmutableMultimap.of("Age", "Age", "Extras", "Extras", "Type", "Type", "column4", "Used"),
+
+        ImmutableMultimap.of("Age", "2", "Extras", "GPS", "Type", "\"Gas", "column4", "with electric\"", "column5", "\"\""),
+        
+        ImmutableMultimap.of("Age", "10", "Extras", "\"Labeled \"\"Vintage", "Type", "1913\"\"\"", "column4", "", "column5", "yes"),
+        
+        ImmutableMultimap.of("Age", "100", "Extras", "\"Labeled \"\"Vintage 1913\"\"\"", "Type", "yes"),
+        
+        ImmutableMultimap.of("Age", "5", "Extras", "none", "Type", "\"This is a"),
+
+        ImmutableMultimap.of("Age", "multi", "Extras", "no")
+        );
+    in.close();
+  }  
+ 
+  @Test
   public void testReadCSVDetail() throws Exception {
     File expectedValuesFile = new File(RESOURCES_DIR + "/test-documents/csvdetails-expected-values.txt"); 
     if (!expectedValuesFile.exists()) {

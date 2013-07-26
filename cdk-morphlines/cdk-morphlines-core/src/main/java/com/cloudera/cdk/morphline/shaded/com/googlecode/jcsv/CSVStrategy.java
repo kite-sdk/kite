@@ -25,7 +25,7 @@ public class CSVStrategy {
 	 * - do not skip header
 	 * - ignore empty lines 
 	 */
-	public static final CSVStrategy DEFAULT = new CSVStrategy(';', '"', '#', false, true);
+	public static final CSVStrategy DEFAULT = new CSVStrategy(';', '"', "#", false, true);
 
 	/**
 	 * The USA/UK csv standard.
@@ -35,11 +35,11 @@ public class CSVStrategy {
 	 * - do not skip header
 	 * - ignore empty lines
 	 */
-	public static final CSVStrategy UK_DEFAULT = new CSVStrategy(',', '"', '#', false, true);
+	public static final CSVStrategy UK_DEFAULT = new CSVStrategy(',', '"', "#", false, true);
 
 	private final char delimiter;
 	private final char quoteCharacter;
-	private final char commentIndicator;
+	private final String commentIndicator;
 	private final boolean skipHeader;
 	private final boolean ignoreEmptyLines;
 
@@ -52,7 +52,7 @@ public class CSVStrategy {
 	 * @param skipHeader
 	 * @param ignoreEmptyLines
 	 */
-	public CSVStrategy(char delimiter, char quoteCharacter, char commentIndicator, boolean skipHeader,
+	public CSVStrategy(char delimiter, char quoteCharacter, String commentIndicator, boolean skipHeader,
 			boolean ignoreEmptyLines) {
 		this.delimiter = delimiter;
 		this.quoteCharacter = quoteCharacter;
@@ -78,7 +78,7 @@ public class CSVStrategy {
 	/**
 	 * Returns the comment indicator.
 	 */
-	public char getCommentIndicator() {
+	public String getCommentIndicator() {
 		return commentIndicator;
 	}
 
