@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.avro.generic.GenericData;
 import org.apache.crunch.Target;
 import org.apache.crunch.io.ReadableSource;
+import org.apache.crunch.io.avro.AvroFileSource;
 import org.apache.crunch.io.avro.AvroFileTarget;
 import org.apache.crunch.types.avro.AvroType;
 import org.apache.crunch.types.avro.Avros;
@@ -71,7 +72,7 @@ public class CrunchDatasets {
       } else {
         avroType = Avros.records(type);
       }
-      return new MultiAvroFileSource<E>(paths, avroType);
+      return new AvroFileSource<E>(paths, avroType);
     }
     return null;
   }

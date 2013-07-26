@@ -106,8 +106,8 @@
     <vers.avro>1.7.4</vers.avro>
     <vers.commons-codec>1.4</vers.commons-codec>
     <vers.commons-io>2.1</vers.commons-io>
-    <vers.crunch-base>0.6.0</vers.crunch-base>
-    <vers.crunch>${vers.crunch-base}-cdh4.2.0</vers.crunch><!-- don't use ${cdh.version} since it's not available; this one is compatible though -->
+    <vers.crunch-base>0.7.0</vers.crunch-base>
+    <vers.crunch>${vers.crunch-base}-hadoop2</vers.crunch>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.flume>1.3.0-cdh${cdh.version}</vers.flume>
     <vers.guava>11.0.2</vers.guava>
