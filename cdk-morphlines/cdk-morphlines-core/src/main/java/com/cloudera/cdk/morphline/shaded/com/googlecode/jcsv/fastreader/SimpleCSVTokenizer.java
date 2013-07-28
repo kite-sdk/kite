@@ -24,7 +24,7 @@ import java.util.List;
  * will serve your purposes.
  *
  */
-public class SimpleCSVTokenizer implements CSVTokenizer {
+public final class SimpleCSVTokenizer implements CSVTokenizer {
 
 	/**
 	 * Performs a split() on the input string. Uses the delimiter specified in the csv strategy.

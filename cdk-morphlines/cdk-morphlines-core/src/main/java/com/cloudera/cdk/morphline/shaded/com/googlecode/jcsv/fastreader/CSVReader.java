@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.List;
 
 
-public class CSVReader {
+public final class CSVReader {
   
 	private final CSVStrategy strategy;
 	private final CSVTokenizer tokenizer;

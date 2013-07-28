@@ -29,7 +29,7 @@ import java.util.List;
  * but performant CSVTokenizer.
  *
  */
-public class CSVTokenizerImpl implements CSVTokenizer {
+public final class CSVTokenizerImpl implements CSVTokenizer {
 	private enum State {
 		NORMAL, QUOTED
 	}
