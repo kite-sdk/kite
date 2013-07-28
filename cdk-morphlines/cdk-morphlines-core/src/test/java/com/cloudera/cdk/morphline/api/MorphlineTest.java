@@ -511,41 +511,45 @@ public class MorphlineTest extends AbstractMorphlineTest {
   @Test
   public void testReadCSV() throws Exception {
     morphline = createMorphline("test-morphlines/readCSV");    
-    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/cars2.csv"));
-    Record record = new Record();
-    record.put(Fields.ATTACHMENT_BODY, in);
-    processAndVerifySuccess(record, 
-        ImmutableMultimap.of("Age", "Age", "Extras", "Extras", "Type", "Type", "column4", "Used"),
-
-        ImmutableMultimap.of("Age", "2", "Extras", "GPS", "Type", "Gas, with electric", "column4", ""),
-        
-        ImmutableMultimap.of("Age", "10", "Extras", "Labeled \"Vintage, 1913\"", "Type", "", "column4", "yes"),
-        
-        ImmutableMultimap.of("Age", "100", "Extras", "Labeled \"Vintage 1913\"", "Type", "yes"),
-        
-        ImmutableMultimap.of("Age", "5", "Extras", "none", "Type", "This is a\nmulti, line text", "column4", "no")
-        );
-    in.close();
+    for (int i = 0; i < 3; i++) {
+      InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/cars2.csv"));
+      Record record = new Record();
+      record.put(Fields.ATTACHMENT_BODY, in);
+      processAndVerifySuccess(record, 
+          ImmutableMultimap.of("Age", "Age", "Extras", "Extras", "Type", "Type", "column4", "Used"),
+  
+          ImmutableMultimap.of("Age", "2", "Extras", "GPS", "Type", "Gas, with electric", "column4", ""),
+          
+          ImmutableMultimap.of("Age", "10", "Extras", "Labeled \"Vintage, 1913\"", "Type", "", "column4", "yes"),
+          
+          ImmutableMultimap.of("Age", "100", "Extras", "Labeled \"Vintage 1913\"", "Type", "yes"),
+          
+          ImmutableMultimap.of("Age", "5", "Extras", "none", "Type", "This is a\nmulti, line text", "column4", "no")
+          );
+      in.close();
+    }
   }  
 
   @Test
   public void testReadCSVWithoutQuoting() throws Exception {
     morphline = createMorphline("test-morphlines/readCSVWithoutQuoting");    
-    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/cars.csv"));
-    Record record = new Record();
-    record.put(Fields.ATTACHMENT_BODY, in);
-    processAndVerifySuccess(record, 
-        ImmutableMultimap.of("Age", "2", "Extras", "GPS", "Type", "\"Gas", "column4", " with electric\"", "column5", "\"\""),
-        
-        ImmutableMultimap.of("Age", "10", "Extras", "\"Labeled \"\"Vintage", "Type", " 1913\"\"\"", "column4", "", "column5", "yes"),
-        
-        ImmutableMultimap.of("Age", "100", "Extras", "\"Labeled \"\"Vintage 1913\"\"\"", "Type", "yes"),
-        
-        ImmutableMultimap.of("Age", "5", "Extras", "none", "Type", "\"This is a"),
-
-        ImmutableMultimap.of("Age", "multi", "Extras", "no")
-        );
-    in.close();
+    for (int i = 0; i < 3; i++) {
+      InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/cars.csv"));
+      Record record = new Record();
+      record.put(Fields.ATTACHMENT_BODY, in);
+      processAndVerifySuccess(record, 
+          ImmutableMultimap.of("Age", "2", "Extras", "GPS", "Type", "\"Gas", "column4", " with electric\"", "column5", "\"\""),
+          
+          ImmutableMultimap.of("Age", "10", "Extras", "\"Labeled \"\"Vintage", "Type", " 1913\"\"\"", "column4", "", "column5", "yes"),
+          
+          ImmutableMultimap.of("Age", "100", "Extras", "\"Labeled \"\"Vintage 1913\"\"\"", "Type", "yes"),
+          
+          ImmutableMultimap.of("Age", "5", "Extras", "none", "Type", "\"This is a"),
+  
+          ImmutableMultimap.of("Age", "multi", "Extras", "no")
+          );
+      in.close();
+    }
   }  
  
   @Test
