@@ -35,7 +35,7 @@ public final class SimpleCSVTokenizer implements CSVTokenizer {
 	 */
 	@Override
 	public void tokenizeLine(String line, CSVStrategy strategy, BufferedReader reader, List<String> columns) throws IOException {
-	  if (counter++ % 1000 == 0) {
+	  if (counter++ % 1024 == 0) {
 	    buf = new StringBuilder(); // periodically gc memory from large outlier columns
 	  }
 	  buf.setLength(0);

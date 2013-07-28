@@ -33,7 +33,7 @@ import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.CSVReader;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.CSVStrategy;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.CSVTokenizer;
-import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.CSVTokenizerImpl;
+import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.QuotedCSVTokenizer;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.SimpleCSVTokenizer;
 import com.typesafe.config.Config;
 
@@ -151,7 +151,7 @@ public final class ReadCSVBuilder implements CommandBuilder {
       CSVStrategy strategy = 
           new CSVStrategy(separatorChar, myQuoteChar, commentPrefix, ignoreFirstLine, ignoreEmptyLines);
       
-      CSVTokenizer tokenizer = quoteChar.length() == 0 ? new SimpleCSVTokenizer() : new CSVTokenizerImpl();
+      CSVTokenizer tokenizer = quoteChar.length() == 0 ? new SimpleCSVTokenizer() : new QuotedCSVTokenizer();
       return new CSVReader(strategy, tokenizer);
     }
   

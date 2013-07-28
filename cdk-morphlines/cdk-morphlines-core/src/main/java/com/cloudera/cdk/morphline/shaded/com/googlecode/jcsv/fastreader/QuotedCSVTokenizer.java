@@ -19,8 +19,6 @@ import java.util.List;
 
 
 /**
- * This is the default implementation of the CSVTokenizer.
- *
  * This implementation follows the csv formatting standard, described in:
  * http://en.wikipedia.org/wiki/Comma-separated_values
  *
@@ -29,7 +27,7 @@ import java.util.List;
  * but performant CSVTokenizer.
  *
  */
-public final class CSVTokenizerImpl implements CSVTokenizer {
+public final class QuotedCSVTokenizer implements CSVTokenizer {
 	private enum State {
 		NORMAL, QUOTED
 	}
