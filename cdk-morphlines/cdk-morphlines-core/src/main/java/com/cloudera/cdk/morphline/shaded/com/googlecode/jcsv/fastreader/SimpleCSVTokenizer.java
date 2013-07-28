@@ -25,6 +25,9 @@ import java.util.List;
  *
  */
 public final class SimpleCSVTokenizer implements CSVTokenizer {
+  
+  private StringBuilder buf;
+  private int counter = 0;
 
 	/**
 	 * Performs a split() on the input string. Uses the delimiter specified in the csv strategy.
@@ -32,55 +35,22 @@ public final class SimpleCSVTokenizer implements CSVTokenizer {
 	 */
 	@Override
 	public void tokenizeLine(String line, CSVStrategy strategy, BufferedReader reader, List<String> columns) throws IOException {
-		// split the line and preserve all tokens
-		split(line, strategy.getDelimiter(), true, columns);
+	  if (counter++ % 1000 == 0) {
+	    buf = new StringBuilder(); // periodically gc memory from large outlier columns
+	  }
+	  buf.setLength(0);
+	  char separatorChar = strategy.getDelimiter();
+	  int len = line.length();
+	  for (int i = 0; i < len; i++) {
+	    char c = line.charAt(i);
+	    if (c == separatorChar) {
+	      columns.add(buf.toString());
+	      buf.setLength(0);
+	    } else {
+	      buf.append(c);
+	    }
+	  }
+    columns.add(buf.toString());
 	}
 	
-	 /**
-   * Splits the provided text into an array, separator specified, preserving
-   * all tokens, including empty tokens created by adjacent separators.
-   *
-   * CSVUtil.split(null, *, true) = null
-   * CSVUtil.split("", *, , true) = []
-   * CSVUtil.split("a.b.c", '.', true) = ["a", "b", "c"]
-   * CSVUtil.split("a...c", '.', true) = ["a", "", "", "c"]
-   * CSVUtil.split("a...c", '.', false) = ["a", "c"]
-   *
-   * @param str
-   *            the string to parse
-   * @param separatorChar
-   *            the seperator char
-   * @param preserveAllTokens
-   *            if true, adjacent separators are treated as empty token
-   *            separators
-   * @return the splitted string
-   */
-  private static void split(String str, char separatorChar, boolean preserveAllTokens, List<String> list) {
-    int len = str.length();
-    if (len == 0) {
-      return;
-    }
-    int i = 0, start = 0;
-    boolean match = false;
-    boolean lastMatch = false;
-    while (i < len) {
-      if (str.charAt(i) == separatorChar) {
-        if (match || preserveAllTokens) {
-          list.add(str.substring(start, i));
-          match = false;
-          lastMatch = true;
-        }
-        start = ++i;
-        continue;
-      }
-      lastMatch = false;
-      match = true;
-      i++;
-    }
-    if (match || preserveAllTokens && lastMatch) {
-      list.add(str.substring(start, i));
-    }
-    return;
-  }
-
 }

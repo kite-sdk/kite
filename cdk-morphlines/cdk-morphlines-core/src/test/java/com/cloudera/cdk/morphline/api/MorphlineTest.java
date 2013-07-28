@@ -535,8 +535,6 @@ public class MorphlineTest extends AbstractMorphlineTest {
     Record record = new Record();
     record.put(Fields.ATTACHMENT_BODY, in);
     processAndVerifySuccess(record, 
-        ImmutableMultimap.of("Age", "Age", "Extras", "Extras", "Type", "Type", "column4", "Used"),
-
         ImmutableMultimap.of("Age", "2", "Extras", "GPS", "Type", "\"Gas", "column4", "with electric\"", "column5", "\"\""),
         
         ImmutableMultimap.of("Age", "10", "Extras", "\"Labeled \"\"Vintage", "Type", "1913\"\"\"", "column4", "", "column5", "yes"),
