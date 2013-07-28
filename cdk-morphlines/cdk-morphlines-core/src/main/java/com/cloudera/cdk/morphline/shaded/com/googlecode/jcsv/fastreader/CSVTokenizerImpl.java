@@ -11,15 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.reader.internal;
+package com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.CSVStrategy;
-import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.reader.CSVTokenizer;
 
 /**
  * This is the default implementation of the CSVTokenizer.
@@ -38,13 +35,12 @@ public class CSVTokenizerImpl implements CSVTokenizer {
 	}
 
 	@Override
-	public List<String> tokenizeLine(String line, CSVStrategy strategy, BufferedReader reader) throws IOException {
+	public void tokenizeLine(String line, CSVStrategy strategy, BufferedReader reader, List<String> tokens) throws IOException {
 		final char DELIMITER = strategy.getDelimiter();
 		final char QUOTE = strategy.getQuoteCharacter();
 		final char NEW_LINE = '\n';
 
 		final StringBuilder sb = new StringBuilder(30);
-		final List<String> token = new ArrayList<String>();
 
 		line += NEW_LINE;
 		State state = State.NORMAL;
@@ -56,13 +52,13 @@ public class CSVTokenizerImpl implements CSVTokenizer {
 			switch (state) {
 				case NORMAL:
 					if (c == DELIMITER) {
-						token.add(sb.toString());
+						tokens.add(sb.toString());
 						sb.delete(0, sb.length());
 					} else if (c == NEW_LINE) {
-						if (!(token.size() == 0 && sb.length() == 0)) {
-							token.add(sb.toString());
+						if (!(tokens.size() == 0 && sb.length() == 0)) {
+							tokens.add(sb.toString());
 						}
-						return token;
+						return;
 					} else if (c == QUOTE) {
 						if (sb.length() == 0) {
 							state = State.QUOTED;

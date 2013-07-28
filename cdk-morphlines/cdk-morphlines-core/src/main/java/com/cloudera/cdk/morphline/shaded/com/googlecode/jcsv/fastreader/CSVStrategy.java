@@ -11,9 +11,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv;
+package com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader;
 
-import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.CSVStrategy;
 
 public class CSVStrategy {
 
