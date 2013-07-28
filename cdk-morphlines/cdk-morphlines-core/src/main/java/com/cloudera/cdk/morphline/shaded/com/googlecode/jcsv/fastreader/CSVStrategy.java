@@ -14,7 +14,7 @@
 package com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader;
 
 
-public class CSVStrategy {
+public final class CSVStrategy {
 
 	/**
 	 * The default CSV strategy.
