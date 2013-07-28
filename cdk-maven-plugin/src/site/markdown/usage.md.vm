@@ -53,57 +53,17 @@ mvn cdk:run-tool
 
 $h3 Understanding the classpath
 
-The classpath for the local VM is made up of the _compile_ classpath plus the _runtime_
-classpath. In other words it consists of all dependencies in the
-_compile_, _runtime_, _provided_ and _system_ scopes.
+The classpath for the local VM is made up of the _runtime_ classpath (all dependencies
+in the _compile_ and _runtime_ scopes). Hadoop libraries are provided by the plugin,
+so there is no need to include Hadoop in the _compile_ and _runtime_ scopes (and indeed
+doing so may cause undefined behaviour).
 
-The classpath for distributed processes is made up of the _runtime_ classpath (all
-dependencies in the _compile_ and _runtime_ scopes), unless
+The classpath for distributed processes is made up of the _runtime_ classpath , unless
 `cdk.addDependenciesToDistributedCache` is set to `false` (the default is `true`),
 in which case no dependencies are included in the distributed classpath.
 
-This makes it very convenient to run distributed jobs, since all non-test dependencies
-are automatically included in the Tool classpath, and all runtime dependencies are
-included in the MapReduce task classpath.
-
-To run a job using MR1 declare the `org.apache.hadoop:hadoop-client` dependency as
-`provided` so that it is present in the local VM (to support job submission),
-but not added to the distributed cache (since the Hadoop libraries are automatically
-available to tasks running on the cluster).
-
-```
-<project>
-  ...
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
-      <version>2.0.0-mr1-cdh4.3.0</version>
-      <scope>provided</scope>
-    </dependency>
-    ...
-  </dependencies>
-  ...
-</project>
-```
-
-If running jobs on YARN, then simply change the version number:
-
-```
-<project>
-  ...
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
-      <version>2.0.0-cdh4.3.0</version>
-      <scope>provided</scope>
-    </dependency>
-    ...
-  </dependencies>
-  ...
-</project>
-```
+This makes it very convenient to run distributed jobs, since all runtime dependencies
+are automatically included in the Tool classpath and the MapReduce task classpath.
 
 $h2 Launching jobs from the cluster
 

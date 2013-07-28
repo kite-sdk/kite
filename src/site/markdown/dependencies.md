@@ -15,6 +15,33 @@ Then add a dependency for each module you want to use by referring to the
 information listed on the Dependency Information pages listed below.
 You can also view the transitive dependencies for each module.
 
+## Hadoop Component Dependencies
+
+As a general rule, CDK modules mark Hadoop component dependencies as having `provided`
+[scope](http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Transitive_Dependencies),
+since in many cases the dependencies are provided by the container that the code is
+running in.
+
+For example,
+
+* CDK Data has a `provided` dependency on the core Hadoop libraries
+* CDK Crunch has a `provided` dependency on Crunch and the core Hadoop libraries
+* CDK HCatalog has a `provided` dependency on HCatalog
+
+The following containers provide the dependencies listed:
+
+* The CDK Maven Plugin goal `cdk:run-tool` provides the Hadoop and HCatalog dependencies.
+* The CDK Maven Plugin goal `cdk:run-job` provides the Hadoop dependencies. HCatalog
+should be added as a `runtime` dependency ([example](https://github.com/cloudera/cdk-examples/tree/master/demo/demo-oozie)).
+* The `hadoop jar` command provides the Hadoop dependencies.
+
+However, there are some cases where you may have to provide the relevant Hadoop component
+dependencies yourself:
+
+* Crunch programs (even those running in the containers listed above) ([example](https://github.com/cloudera/cdk-examples/tree/master/demo/demo-crunch))
+* Standalone Java programs, not run using `cdk:run-tool` or `hadoop jar` ([example](https://github.com/cloudera/cdk-examples/tree/master/dataset))
+* Web apps ([example](https://github.com/cloudera/cdk-examples/tree/master/logging-webapp))
+
 ## CDK Data Modules
 
 * CDK Data Core

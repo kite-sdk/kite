@@ -36,7 +36,7 @@ import static org.twdata.maven.mojoexecutor.MojoExecutor.*;
  * Package an Oozie application on the local filesystem.
  */
 @Mojo(name = "package-app", defaultPhase = LifecyclePhase.PACKAGE,
-    requiresDependencyResolution = ResolutionScope.TEST)
+    requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class PackageOozieMojo extends AbstractOozieMojo {
 
   /**

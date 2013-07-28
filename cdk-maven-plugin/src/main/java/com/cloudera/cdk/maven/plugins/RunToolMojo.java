@@ -34,7 +34,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 /**
  * Run a Hadoop tool on the local machine.
  */
-@Mojo(name = "run-tool", requiresDependencyResolution = ResolutionScope.TEST)
+@Mojo(name = "run-tool", requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class RunToolMojo extends AbstractHadoopMojo {
 
   /**
@@ -77,16 +77,10 @@ public class RunToolMojo extends AbstractHadoopMojo {
     }
     libJars.add(mainArtifactFile.toString());
     classpath.add(toURL(mainArtifactFile));
-    // Make local classpath a combination of compile and runtime classpaths
-    for (Object a : mavenProject.getTestArtifacts()) {
-      Artifact artifact = (Artifact) a;
-      if (!Artifact.SCOPE_TEST.equals(artifact.getScope())) {
-        classpath.add(toURL(artifact.getFile()));
-      }
-    }
-    // Libjars uses the runtime classpath
     for (Object a : mavenProject.getRuntimeArtifacts()) {
-      libJars.add(((Artifact) a).getFile().toString());
+      File file = ((Artifact) a).getFile();
+      classpath.add(toURL(file));
+      libJars.add(file.toString());
     }
 
     final List<String> commandArgs = new ArrayList<String>();
@@ -121,8 +115,9 @@ public class RunToolMojo extends AbstractHadoopMojo {
         }
       }
     };
+    ClassLoader parentClassLoader = getClass().getClassLoader(); // use Maven's classloader, not the system one
     ClassLoader classLoader = new URLClassLoader(
-        classpath.toArray(new URL[classpath.size()]));
+        classpath.toArray(new URL[classpath.size()]), parentClassLoader);
     executionThread.setContextClassLoader(classLoader);
     executionThread.start();
     try {
