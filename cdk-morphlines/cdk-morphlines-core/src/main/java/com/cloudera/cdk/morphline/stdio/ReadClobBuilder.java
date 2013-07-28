@@ -28,7 +28,6 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
-import com.google.common.io.CharStreams;
 import com.typesafe.config.Config;
 
 /**
@@ -66,10 +65,15 @@ public final class ReadClobBuilder implements CommandBuilder {
       incrementNumRecords();
       Charset detectedCharset = detectCharset(inputRecord, charset);  
       Reader reader = new InputStreamReader(stream, detectedCharset);
-      String clob = CharStreams.toString(reader);
+      char[] buffer = new char[getBufferSize(stream)];
+      int len = 0;
+      StringBuilder clob = new StringBuilder(buffer.length);
+      while ((len = reader.read(buffer)) >= 0) {
+        clob.append(buffer, 0, len);
+      }
       Record outputRecord = inputRecord.copy();
       removeAttachments(outputRecord);
-      outputRecord.replaceValues(Fields.MESSAGE, clob);
+      outputRecord.replaceValues(Fields.MESSAGE, clob.toString());
         
       // pass record to next command in chain:
       return getChild().process(outputRecord);
