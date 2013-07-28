@@ -35,7 +35,7 @@ public final class CSVReader {
 				return false;
 			}
 
-			if (line.trim().length() == 0 && strategy.isIgnoreEmptyLines()) {
+			if (strategy.isIgnoreEmptyLines() && line.trim().length() == 0) {
 				continue;
 			}
 
