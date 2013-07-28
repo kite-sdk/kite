@@ -70,7 +70,6 @@ public final class ReadCSVBuilder implements CommandBuilder {
     private final String quoteChar;
     private final boolean ignoreEmptyLines = true;
     private final CSVReader csvReader;      
-    private final List<String> columnValues = new ArrayList();
   
     public ReadCSV(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
@@ -109,13 +108,10 @@ public final class ReadCSVBuilder implements CommandBuilder {
       BufferedReader reader = new BufferedReader(new InputStreamReader(stream, detectedCharset));
       if (ignoreFirstLine) {
         reader.readLine();
-      }
-      
-      while (true) {
-        columnValues.clear();
-        if (!csvReader.readNext(reader, columnValues)) {
-          return true; // EOS
-        }
+      }      
+      List<String> columnValues = new ArrayList();
+
+      while (csvReader.readNext(reader, columnValues)) {
         incrementNumRecords();
         Record outputRecord = template.copy();
         for (int i = 0; i < columnValues.size(); i++) {
@@ -129,12 +125,14 @@ public final class ReadCSVBuilder implements CommandBuilder {
             outputRecord.replaceValues(columnName, trim(columnValues.get(i)));
           }
         }        
+        columnValues.clear();
         
         // pass record to next command in chain:
         if (!getChild().process(outputRecord)) {
           return false;
         }
       }
+      return true;
     }
 
     private String trim(String str) {
