@@ -53,7 +53,7 @@ public final class CSVTokenizerImpl implements CSVTokenizer {
 				case NORMAL:
 					if (c == DELIMITER) {
 						tokens.add(sb.toString());
-						sb.delete(0, sb.length());
+						sb.setLength(0);
 					} else if (c == NEW_LINE) {
 						if (!(tokens.size() == 0 && sb.length() == 0)) {
 							tokens.add(sb.toString());
@@ -62,10 +62,10 @@ public final class CSVTokenizerImpl implements CSVTokenizer {
 					} else if (c == QUOTE) {
 						if (sb.length() == 0) {
 							state = State.QUOTED;
-						} else if (line.charAt(pointer + 1) == QUOTE && sb.length() > 0) {
+						} else if (line.charAt(pointer + 1) == QUOTE) {
 							sb.append(c);
 							pointer++;
-						} else if (line.charAt(pointer + 1) != QUOTE) {
+						} else {
 							state = State.QUOTED;
 						}
 					} else {

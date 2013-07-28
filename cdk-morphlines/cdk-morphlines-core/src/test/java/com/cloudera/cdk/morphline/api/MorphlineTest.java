@@ -511,7 +511,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
   @Test
   public void testReadCSV() throws Exception {
     morphline = createMorphline("test-morphlines/readCSV");    
-    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/cars.csv"));
+    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/cars2.csv"));
     Record record = new Record();
     record.put(Fields.ATTACHMENT_BODY, in);
     processAndVerifySuccess(record, 
@@ -535,9 +535,9 @@ public class MorphlineTest extends AbstractMorphlineTest {
     Record record = new Record();
     record.put(Fields.ATTACHMENT_BODY, in);
     processAndVerifySuccess(record, 
-        ImmutableMultimap.of("Age", "2", "Extras", "GPS", "Type", "\"Gas", "column4", "with electric\"", "column5", "\"\""),
+        ImmutableMultimap.of("Age", "2", "Extras", "GPS", "Type", "\"Gas", "column4", " with electric\"", "column5", "\"\""),
         
-        ImmutableMultimap.of("Age", "10", "Extras", "\"Labeled \"\"Vintage", "Type", "1913\"\"\"", "column4", "", "column5", "yes"),
+        ImmutableMultimap.of("Age", "10", "Extras", "\"Labeled \"\"Vintage", "Type", " 1913\"\"\"", "column4", "", "column5", "yes"),
         
         ImmutableMultimap.of("Age", "100", "Extras", "\"Labeled \"\"Vintage 1913\"\"\"", "Type", "yes"),
         
