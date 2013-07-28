@@ -200,7 +200,7 @@ The command provides the following configuration options:
 || Property Name || Default || Description ||
 | supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
 | ignoreFirstLine | false | Whether to ignore the first line. This flag can be used for CSV files that contain a header line. |
-| commentPrefix | "" | A character that indicates to ignore this line as a comment --- for example, "#". |
+| commentPrefix | "" | A character that indicates to ignore this line as a comment --- for example, "#". To disable the comment line feature set this parameter to the empty string {{""}}. |
 | charset | null | The character encoding to use, for example, UTF\-8. If none is specified the charset specified in the \_attachment\_charset input field is used instead. |
 
 Example usage:
