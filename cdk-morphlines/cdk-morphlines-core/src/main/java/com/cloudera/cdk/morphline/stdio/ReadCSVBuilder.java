@@ -82,7 +82,7 @@ public final class ReadCSVBuilder implements CommandBuilder {
       this.charset = getConfigs().getCharset(config, "charset", null);
       this.ignoreFirstLine = getConfigs().getBoolean(config, "ignoreFirstLine", false);
       this.trim = getConfigs().getBoolean(config, "trim", true);      
-      this.quoteChar = getConfigs().getString(config, "quoteChar", Character.toString('"'));
+      this.quoteChar = getConfigs().getString(config, "quoteChar", "");
       if (quoteChar.length() > 1) {
         throw new MorphlineCompilationException(
             "Quote character must not have a length of more than one character: " + quoteChar, config);
@@ -91,7 +91,7 @@ public final class ReadCSVBuilder implements CommandBuilder {
         throw new MorphlineCompilationException(
             "Quote character must not be the same as separator: " + quoteChar, config);
       }
-      this.commentPrefix = getConfigs().getString(config, "commentPrefix", "#");
+      this.commentPrefix = getConfigs().getString(config, "commentPrefix", "");
       if (commentPrefix.length() > 1) {
         throw new MorphlineCompilationException(
             "Comment prefix must not have a length of more than one character: " + commentPrefix, config);

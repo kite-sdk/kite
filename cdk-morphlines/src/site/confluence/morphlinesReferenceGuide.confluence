@@ -125,13 +125,20 @@ The command provides the following configuration options:
 | ignoreFirstLine | false | Whether to ignore the first line. This flag can be used for CSV files that contain a header line. |
 | trim | true | Whether leading and trailing whitespace shall be removed from the output fields. |
 | charset | null | The character encoding to use, for example, UTF\-8. If none is specified the charset specified in the \_attachment\_charset input field is used instead. |
-| quoteChar | {{"}} | Must be a string of length zero or one. If this parameter is a String containing a single character then a quoted field can span multiple lines in the input stream. To disable quoting and multi-line fields set this parameter to the empty string {{""}}. |
-| commentPrefix | "#" | Must be a string of length zero or one. If this parameter is a String containing a single character then lines starting with that character are ignored as comments. To disable the comment line feature set this parameter to the empty string {{""}}. |
+| quoteChar | "" | Must be a string of length zero or one. If this parameter is a String containing a single character then a quoted field can span multiple lines in the input stream. To disable quoting and multi-line fields set this parameter to the empty string {{""}}. |
+| commentPrefix | "" | Must be a string of length zero or one, for example "#". If this parameter is a String containing a single character then lines starting with that character are ignored as comments. To disable the comment line feature set this parameter to the empty string {{""}}. |
 
-If the parameter {{quoteChar}} is a String containing a single character then a quoted field can span multiple lines in the input stream, as shown in the following example CSV input containing a single record with three columns:
+If the parameter {{quoteChar}} is a String containing a single character then a quoted field can span multiple lines in the input stream, for example as shown in the following example CSV input containing a single record with three columns:
 {code}
 column0,"Look, new hot tub under redwood tree!
 All bubbly!",column2
+{code}
+
+The above example can be parsed by specifying a double\-quote character for the parameter {{quoteChar}}, using backslash syntax per the [JSON specification|http://www.json.org], as follows:
+{code}
+readCSV {
+  ...
+  quoteChar : "\""
 {code}
 
 If the parameter {{commentPrefix}} is a String containing a single character then lines starting with that character are ignored as comments. Example:
