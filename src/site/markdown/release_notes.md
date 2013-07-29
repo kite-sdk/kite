@@ -3,14 +3,16 @@
 All past CDK releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
-## Version x.y.z
+## Version 0.5.0
 
-Version x.y.z has the following notable changes:
+Version 0.5.0 has the following notable changes:
 
 ##### Morphlines Library
 * Added commands `xquery`, `xslt`, `convertHTML` for reading, extracting and transforming XML and HTML with XPath, XQuery and XSLT
 * Added `tokenizeText` command that uses the embedded Solr/Lucene Analyzer library to generate tokens from a text string, without sending data to a Solr server
 * Added `translate` command that examines each value in a given field and replaces it with the replacement value defined in a given dictionary aka lookup hash table
+* By default, disable quoting and multi-line fields feature and comment line feature for the `readCSV` morphline command.
+* Added several performance enhancements
 
 ## Version 0.4.1
 
