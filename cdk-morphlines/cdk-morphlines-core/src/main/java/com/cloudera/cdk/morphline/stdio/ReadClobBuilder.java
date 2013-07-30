@@ -53,6 +53,9 @@ public final class ReadClobBuilder implements CommandBuilder {
   private static final class ReadClob extends AbstractParser {
 
     private final Charset charset;
+    private final char[] buffer = new char[8192];
+    private StringBuilder clob; 
+    private int counter = 0;
   
     public ReadClob(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
@@ -62,12 +65,14 @@ public final class ReadClobBuilder implements CommandBuilder {
   
     @Override
     protected boolean doProcess(Record inputRecord, InputStream stream) throws IOException {
+      if (counter++ % 8192 == 0) {
+        clob = new StringBuilder(); // periodically gc memory from large outlier strings
+      }
       incrementNumRecords();
       Charset detectedCharset = detectCharset(inputRecord, charset);  
       Reader reader = new InputStreamReader(stream, detectedCharset);
-      char[] buffer = new char[getBufferSize(stream)];
+      clob.setLength(0);
       int len = 0;
-      StringBuilder clob = new StringBuilder(buffer.length);
       while ((len = reader.read(buffer)) >= 0) {
         clob.append(buffer, 0, len);
       }

@@ -496,16 +496,19 @@ public class MorphlineTest extends AbstractMorphlineTest {
   @Test
   public void testReadClob() throws Exception {
     morphline = createMorphline("test-morphlines/readClob");    
-    Record record = new Record();
-    String msg = "foo";
-    record.put(Fields.ATTACHMENT_BODY, msg.getBytes("UTF-8"));
-    startSession();
-    assertEquals(1, collector.getNumStartEvents());
-    assertTrue(morphline.process(record));
-    Record expected = new Record();
-    expected.put(Fields.MESSAGE, msg);
-    assertEquals(expected, collector.getFirstRecord());
-    assertNotSame(record, collector.getFirstRecord());
+    for (int i = 0; i < 3; i++) {
+      Record record = new Record();
+      String msg = "foo";
+      record.put(Fields.ATTACHMENT_BODY, msg.getBytes("UTF-8"));
+      collector.reset();
+      startSession();
+      assertEquals(1, collector.getNumStartEvents());
+      assertTrue(morphline.process(record));
+      Record expected = new Record();
+      expected.put(Fields.MESSAGE, msg);
+      assertEquals(expected, collector.getFirstRecord());
+      assertNotSame(record, collector.getFirstRecord());
+    }
   }
   
   @Test
