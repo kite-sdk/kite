@@ -72,7 +72,7 @@ public final class ReadClobBuilder implements CommandBuilder {
       Charset detectedCharset = detectCharset(inputRecord, charset);  
       Reader reader = new InputStreamReader(stream, detectedCharset);
       clob.setLength(0);
-      int len = 0;
+      int len;
       while ((len = reader.read(buffer)) >= 0) {
         clob.append(buffer, 0, len);
       }
