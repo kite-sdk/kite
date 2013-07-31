@@ -87,8 +87,8 @@ class WorkflowXmlWriter {
     writer.addAttribute("name", "java-node");
 
     writer.startElement("java");
-    doWriteElement(writer, "job-tracker", "${" + AbstractOozieMojo.JOBTRACKER_PROPERTY + "}");
-    doWriteElement(writer, "name-node", "${" + AbstractOozieMojo.NAMENODE_PROPERTY + "}");
+    doWriteElement(writer, "job-tracker", "${" + AbstractAppMojo.JOBTRACKER_PROPERTY + "}");
+    doWriteElement(writer, "name-node", "${" + AbstractAppMojo.NAMENODE_PROPERTY + "}");
     doWriteElement(writer, "main-class", workflow.getToolClass());
     for (String key : hadoopConfiguration.stringPropertyNames()) {
       String value = hadoopConfiguration.getProperty(key);

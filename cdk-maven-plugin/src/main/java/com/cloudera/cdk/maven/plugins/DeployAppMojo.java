@@ -29,20 +29,20 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 /**
- * Deploy a packaged Oozie application to a Hadoop filesystem, such as HDFS.
+ * Deploy a packaged application to a Hadoop filesystem, such as HDFS.
  */
 @Mojo(name = "deploy-app")
-public class DeployOozieMojo extends AbstractOozieMojo {
+public class DeployAppMojo extends AbstractAppMojo {
 
   /**
-   * The local directory of the Oozie application to deploy.
+   * The local directory of the application to deploy.
    */
   @Parameter(property = "cdk.localApplicationFile",
-      defaultValue = "${project.build.directory}/${project.build.finalName}-oozie-app")
+      defaultValue = "${project.build.directory}/${project.build.finalName}-app")
   private File localApplicationFile;
 
   /**
-   * The Hadoop fileystem used to deploy the Oozie application. The filesystem must be
+   * The Hadoop fileystem used to deploy the application. The filesystem must be
    * accessible by the client deploying the application.
    */
   @Parameter(property = "cdk.deployFileSystem", required = true)
@@ -65,13 +65,13 @@ public class DeployOozieMojo extends AbstractOozieMojo {
       FileSystem destFileSystem = FileSystem.get(new URI(deployFileSystem), conf);
       if (destFileSystem.exists(appPath)) {
         if (!updateApplication) {
-          throw new MojoExecutionException("Oozie application already exists at " +
+          throw new MojoExecutionException("Application already exists at " +
               appPath + ". Use 'updateApplication' option to force deployment.");
         }
         boolean success = destFileSystem.delete(appPath, true);
         if (!success) {
-          throw new MojoExecutionException("Error deleting existing Oozie application " +
-              "at " + appPath);
+          throw new MojoExecutionException("Error deleting existing application at " +
+              appPath);
         }
       }
       boolean success = FileUtil.copy(localApplicationFile, destFileSystem, appPath, false, conf);
@@ -83,7 +83,7 @@ public class DeployOozieMojo extends AbstractOozieMojo {
       throw new MojoExecutionException("Syntax error in 'deployFileSystem': "
           + deployFileSystem, e);
     } catch (IOException e) {
-      throw new MojoExecutionException("Error deploying Oozie application", e);
+      throw new MojoExecutionException("Error deploying application", e);
     }
   }
 }

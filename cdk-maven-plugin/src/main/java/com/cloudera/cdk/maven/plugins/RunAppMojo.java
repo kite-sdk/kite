@@ -24,10 +24,10 @@ import org.apache.oozie.client.OozieClient;
 import org.apache.oozie.client.OozieClientException;
 
 /**
- * Run an Oozie job on a cluster.
+ * Run an app as a job on a cluster.
  */
-@Mojo(name = "run-job")
-public class RunOozieMojo extends AbstractOozieMojo {
+@Mojo(name = "run-app")
+public class RunAppMojo extends AbstractAppMojo {
 
   /**
    * The URL of the Oozie service to use.
@@ -51,7 +51,7 @@ public class RunOozieMojo extends AbstractOozieMojo {
   private String applicationType;
 
   /**
-   * Job configuration properties for the Oozie application. This provides a means
+   * Job configuration properties for the application. This provides a means
    * to specify values for parameterized properties in Oozie applications.
    */
   @Parameter(property = "cdk.jobProperties")

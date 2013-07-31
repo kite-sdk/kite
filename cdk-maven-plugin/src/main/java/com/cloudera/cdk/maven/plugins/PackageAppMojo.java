@@ -33,11 +33,11 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import static org.twdata.maven.mojoexecutor.MojoExecutor.*;
 
 /**
- * Package an Oozie application on the local filesystem.
+ * Package an application on the local filesystem.
  */
 @Mojo(name = "package-app", defaultPhase = LifecyclePhase.PACKAGE,
     requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class PackageOozieMojo extends AbstractOozieMojo {
+public class PackageAppMojo extends AbstractAppMojo {
 
   /**
    * The tool class to run. The specified class must have a standard Java

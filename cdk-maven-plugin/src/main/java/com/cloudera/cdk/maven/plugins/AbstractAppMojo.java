@@ -18,7 +18,7 @@ package com.cloudera.cdk.maven.plugins;
 import org.apache.hadoop.fs.Path;
 import org.apache.maven.plugins.annotations.Parameter;
 
-abstract class AbstractOozieMojo extends AbstractHadoopMojo {
+abstract class AbstractAppMojo extends AbstractHadoopMojo {
 
   // TODO: namespace?
   public static final String NAMENODE_PROPERTY = "nameNode";
@@ -26,7 +26,7 @@ abstract class AbstractOozieMojo extends AbstractHadoopMojo {
   public static final String APP_PATH_PROPERTY = "appPath";
 
   /**
-   * The base directory in the Hadoop filesystem (typically HDFS) where Oozie
+   * The base directory in the Hadoop filesystem (typically HDFS) where
    * applications are stored.
    */
   @Parameter(property = "cdk.applicationsDirectory",
@@ -37,7 +37,7 @@ abstract class AbstractOozieMojo extends AbstractHadoopMojo {
    * The name of the application.
    */
   @Parameter(property = "cdk.applicationName",
-      defaultValue = "${project.build.finalName}-oozie-app")
+      defaultValue = "${project.build.finalName}-app")
   protected String applicationName;
 
   protected Path getAppPath() {

@@ -126,7 +126,7 @@ There are three goals for building and running jobs on the cluster:
 
 * `cdk:package-app` builds a packaged application locally (in the Oozie package format)
 * `cdk:deploy-app` deploys the packaged application to the cluster
-* `cdk:run-job` runs the deployed application as an Oozie job
+* `cdk:run-app` runs the deployed application as an Oozie job
 
 A packaged application includes an Oozie workflow file, an Oozie coordinator file
 (optional), and the dependencies on the _runtime_ classpath. The workflow file may be
@@ -184,5 +184,5 @@ Build and run with:
 
 ```bash
 mvn package cdk:deploy-app
-mvn cdk:run-job
+mvn cdk:run-app
 ```
