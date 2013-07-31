@@ -17,8 +17,6 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.DatasetWriterException;
-import com.cloudera.cdk.data.DatasetWriter;
-import com.cloudera.cdk.data.DatasetWriterException;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
@@ -86,7 +84,7 @@ class ParquetFileSystemDatasetWriter<E extends IndexedRecord> implements Dataset
                "Parquet file will not be compressed.");
          }
       }
-      avroParquetWriter = new AvroParquetWriter<E>(pathTmp.makeQualified(fileSystem),
+      avroParquetWriter = new AvroParquetWriter<E>(fileSystem.makeQualified(pathTmp),
           schema, codecName, DEFAULT_BLOCK_SIZE,
           ParquetWriter.DEFAULT_PAGE_SIZE);
     } catch (IOException e) {

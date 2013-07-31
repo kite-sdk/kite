@@ -18,7 +18,6 @@ package com.cloudera.cdk.data.filesystem;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.filesystem.FileSystemDataset;
 import com.google.common.io.Files;
 import java.io.IOException;
 import java.net.URI;
@@ -59,7 +58,7 @@ public class TestFileSystemDatasetPartitionKeyForPath {
 
   @After
   public void tearDown() throws IOException {
-    fileSystem.delete(testDirectory);
+    fileSystem.delete(testDirectory, true);
   }
 
   @Test(expected = IllegalArgumentException.class)

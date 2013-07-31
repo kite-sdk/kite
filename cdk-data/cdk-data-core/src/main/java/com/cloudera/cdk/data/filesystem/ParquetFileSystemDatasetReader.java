@@ -23,10 +23,7 @@ import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
 import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileReader;
 import org.apache.avro.generic.IndexedRecord;
-import org.apache.avro.reflect.ReflectDatumReader;
-import org.apache.hadoop.fs.AvroFSInput;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
@@ -64,7 +61,7 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> implements Dataset
     logger.debug("Opening reader on path:{}", path);
 
     try {
-      reader = new AvroParquetReader<E>(path.makeQualified(fileSystem));
+      reader = new AvroParquetReader<E>(fileSystem.makeQualified(path));
     } catch (IOException e) {
       throw new DatasetReaderException("Unable to create reader path:" + path, e);
     }

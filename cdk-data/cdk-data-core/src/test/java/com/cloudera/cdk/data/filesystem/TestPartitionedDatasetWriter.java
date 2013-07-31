@@ -18,8 +18,6 @@ package com.cloudera.cdk.data.filesystem;
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
-import com.cloudera.cdk.data.filesystem.PartitionedDatasetWriter;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import java.io.IOException;
@@ -54,7 +52,7 @@ public class TestPartitionedDatasetWriter {
             .schema(USER_SCHEMA)
             .partitionStrategy(partitionStrategy)
             .get());
-    writer = new PartitionedDatasetWriter<Object>(users, partitionStrategy);
+    writer = new PartitionedDatasetWriter<Object>(users);
   }
 
   @After

@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data;
 
-import com.cloudera.cdk.data.DatasetDescriptor;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URI;
@@ -42,7 +41,7 @@ public class TestDatasetDescriptor {
       FileSystem fs = cluster.getFileSystem();
 
       // copy a schema to HDFS
-      Path schemaPath = new Path("schema.avsc").makeQualified(fs);
+      Path schemaPath = fs.makeQualified(new Path("schema.avsc"));
       FSDataOutputStream out = fs.create(schemaPath);
       IOUtils.copyBytes(USER_SCHEMA_URL.toURL().openStream(), out, fs.getConf());
       out.close();
