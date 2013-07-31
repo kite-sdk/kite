@@ -122,7 +122,7 @@
     <vers.mockito>1.9.5</vers.mockito>
     <vers.mojo-executor>1.5</vers.mojo-executor>
     <vers.oozie>3.3.2-cdh${cdh.version}</vers.oozie>
-    <vers.parquet>1.0.0-SNAPSHOT</vers.parquet>
+    <vers.parquet>1.0.0</vers.parquet>
     <vers.plexus-utils>3.0</vers.plexus-utils>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
@@ -163,17 +163,6 @@
       <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
       <releases>
         <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <!-- Parquet -->
-      <id>sonatype-nexus-snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      <releases>
-        <enabled>false</enabled>
       </releases>
       <snapshots>
         <enabled>true</enabled>
