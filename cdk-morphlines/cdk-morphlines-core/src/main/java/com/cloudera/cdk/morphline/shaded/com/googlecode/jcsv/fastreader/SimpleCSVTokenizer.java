@@ -26,31 +26,21 @@ import java.util.List;
  */
 public final class SimpleCSVTokenizer implements CSVTokenizer {
   
-  private StringBuilder buf;
-  private int counter = 0;
-
 	/**
 	 * Performs a split() on the input string. Uses the delimiter specified in the csv strategy.
-	 *
 	 */
 	@Override
 	public void tokenizeLine(String line, CSVStrategy strategy, BufferedReader reader, List<String> columns) throws IOException {
-	  if (counter++ % 1024 == 0) {
-	    buf = new StringBuilder(); // periodically gc memory from large outlier columns
-	  }
-	  buf.setLength(0);
 	  char separatorChar = strategy.getDelimiter();
+    int start = 0; 
 	  int len = line.length();
 	  for (int i = 0; i < len; i++) {
-	    char c = line.charAt(i);
-	    if (c == separatorChar) {
-	      columns.add(buf.toString());
-	      buf.setLength(0);
-	    } else {
-	      buf.append(c);
+	    if (line.charAt(i) == separatorChar) {
+	      columns.add(line.substring(start, i));
+	      start = i+1;
 	    }
 	  }
-    columns.add(buf.toString());
+    columns.add(line.substring(start, len));
 	}
 	
 }
