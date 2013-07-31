@@ -213,7 +213,6 @@
     <dependency>
       <groupId>org.apache.crunch</groupId>
       <artifactId>crunch-core</artifactId>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>com.beust</groupId>
@@ -222,6 +221,14 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
+    </dependency>
+
+    <!-- missing from Hadoop, and needed for local job runner -->
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>3.1</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
