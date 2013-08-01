@@ -174,7 +174,7 @@ public class DatasetDescriptor {
      */
     public Builder schema(File file) throws IOException {
       this.schema = new Schema.Parser().parse(file);
-      this.schemaUrl = file.toURI().toURL();
+      // don't set schema URL since it is a local file not on a DFS
       return this;
     }
 
