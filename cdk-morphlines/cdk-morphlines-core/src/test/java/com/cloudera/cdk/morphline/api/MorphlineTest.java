@@ -775,6 +775,29 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testGenerateUUID() throws Exception {
+    testGenerateUUID("");
+  }
+
+  @Test
+  public void testGenerateUUIDSecure() throws Exception {
+    testGenerateUUID("Secure");
+  }
+
+  private void testGenerateUUID(String suffix) throws Exception {
+    morphline = createMorphline("test-morphlines/generateUUID" + suffix);    
+    Record record = new Record();
+    collector.reset();
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    Record actual = collector.getFirstRecord();
+    assertEquals(1, actual.get("id").size());
+    String uuid = (String) actual.getFirstValue("id");
+    assertEquals(36, uuid.length());
+  }
+  
+  @Test
   public void testGrokFindSubstrings() throws Exception {
     testGrokFindSubstringsInternal(false, false);
   }

@@ -532,6 +532,7 @@ The command provides the following configuration options:
 | field | id | The name of the field to set. |
 | preserveExisting | true | Whether to preserve the field value if one is already present. |
 | prefix | "" | The prefix string constant to prepend to each generated UUID. |
+| type | secure | This parameter must be one of "secure" or "nonSecure" and indicates the algorithm used for UUID generation. Unfortunately, the "secure" algorithm can be comparatively slow - if it uses /dev/random on Linux, it can block waiting for sufficient entropy to build up. In contrast, the "nonSecure" algorithm never blocks and is much faster. The "nonSecure" algorithm uses a secure random seed but is otherwise deterministic, though it is one of the [strongest uniform pseudo-random number generators known so far|http://commons.apache.org/proper/commons-math/javadocs/api-3.2/org/apache/commons/math3/random/Well19937c.html]. |
 
 Example usage:
 {code}

@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.morphline.stdlib;
 
+import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
@@ -25,6 +26,9 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Fields;
+import com.cloudera.cdk.morphline.base.Validator;
+import com.cloudera.cdk.morphline.shaded.org.apache.commons.math3.random.RandomGenerator;
+import com.cloudera.cdk.morphline.shaded.org.apache.commons.math3.random.Well19937c;
 import com.typesafe.config.Config;
 
 /**
@@ -56,12 +60,22 @@ public final class GenerateUUIDBuilder implements CommandBuilder {
     private final String fieldName;
     private final boolean preserveExisting;
     private final String prefix;
+    private final RandomGenerator prng;
 
     public GenerateUUID(Config config, Command parent, Command child, MorphlineContext context) { 
       super(config, parent, child, context);
       this.fieldName = getConfigs().getString(config, FIELD_NAME, Fields.ID);
       this.preserveExisting = getConfigs().getBoolean(config, PRESERVE_EXISTING_NAME, true);
       this.prefix = getConfigs().getString(config, PREFIX_NAME, "");
+      Type type = new Validator<Type>().validateEnum(
+          config,
+          getConfigs().getString(config, "type", Type.secure.toString()),
+          Type.class);
+      if (type == Type.secure) {
+        prng = null; // secure & slow
+      } else {
+        prng = new Well19937c(new SecureRandom().nextLong()); // non-secure & fast
+      }
       validateArguments();
     }
 
@@ -80,9 +94,23 @@ public final class GenerateUUIDBuilder implements CommandBuilder {
     }
 
     protected String generateUUID() {
-      return getPrefix() + UUID.randomUUID().toString();
+      UUID uuid;
+      if (prng == null) {
+        uuid = UUID.randomUUID(); // secure & slow
+      } else {
+        uuid = new UUID(prng.nextLong(), prng.nextLong()); // non-secure & fast
+      }
+      return getPrefix() + uuid.toString();
     }
 
   }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // Nested classes:
+  ///////////////////////////////////////////////////////////////////////////////
+  private static enum Type {
+    secure,
+    nonSecure
+  }     
 
 }
