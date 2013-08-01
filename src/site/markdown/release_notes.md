@@ -5,28 +5,47 @@ All past CDK releases are documented on this page. Upcoming release dates can be
 
 ## Version 0.5.0
 
+Release date: Aug 1, 2013
+
 Version 0.5.0 has the following notable changes:
 
-##### Morphlines Library
-* Added commands `xquery`, `xslt`, `convertHTML` for reading, extracting and transforming XML and HTML with XPath, XQuery and XSLT
-* Added `tokenizeText` command that uses the embedded Solr/Lucene Analyzer library to generate tokens from a text string, without sending data to a Solr server
-* Added `translate` command that examines each value in a given field and replaces it with the replacement value defined in a given dictionary aka lookup hash table
-* By default, disable quoting and multi-line fields feature and comment line feature for the `readCSV` morphline command.
-* Added several performance enhancements
+* Examples. All examples can be run from the user's host machine,
+  as an alternative to running from within the QuickStart VM guest.
+* CDK Maven Plugin. A new
+  [plugin](http://cloudera.github.io/cdk/docs/0.5.0/cdk-maven-plugin/index.html) with
+  goals for manipulating datasets, and packaging, deploying,
+  and running distributed applications.
+* Dependency management. Hadoop components are now marked as provided to give users
+  more control. See the
+  [dependencies page](http://cloudera.github.io/cdk/docs/0.5.0/dependencies.html).
+* Upgrade to Parquet 1.0.0 and Crunch 0.7.0.
+* Morphlines Library
+    * Added commands `xquery`, `xslt`, `convertHTML` for reading, extracting and transforming XML and HTML with XPath, XQuery and XSLT
+    * Added `tokenizeText` command that uses the embedded Solr/Lucene Analyzer library to generate tokens from a text string, without sending data to a Solr server
+    * Added `translate` command that examines each value in a given field and replaces it with the replacement value defined in a given dictionary aka lookup hash table
+    * By default, disable quoting and multi-line fields feature and comment line feature for the `readCSV` morphline command.
+    * Added several performance enhancements
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10256)
+is available from JIRA.
 
 ## Version 0.4.1
 
+Release date: July 11, 2013
+
 Version 0.4.1 has the following notable changes:
 
-##### Morphlines Library 
-* Expanded documentation and examples
-* Made `SolrLocator` and `ZooKeeperDownloader` collection alias aware
-* Added commands `readJson` and `extractJsonPaths` for reading, extracting, and transforming JSON files and JSON objects, in the same style as Avro support
-* Added commands `split`, `findReplace`, `extractURIComponents`, `extractURIQueryParameters`, `decodeBase64` 
-* Fixed `extractAvroPaths` exception with flatten = true if path represents a non-leaf node of type Record
-* Added several performance enhancements
+* Morphlines Library
+    * Expanded documentation and examples
+    * Made `SolrLocator` and `ZooKeeperDownloader` collection alias aware
+    * Added commands `readJson` and `extractJsonPaths` for reading, extracting, and transforming JSON files and JSON objects, in the same style as Avro support
+    * Added commands `split`, `findReplace`, `extractURIComponents`, `extractURIQueryParameters`, `decodeBase64`
+    * Fixed `extractAvroPaths` exception with flatten = true if path represents a non-leaf node of type Record
+    * Added several performance enhancements
 
 ## Version 0.4.0
+
+Release date: June 22, 2013
 
 Version 0.4.0 has the following notable changes:
 
