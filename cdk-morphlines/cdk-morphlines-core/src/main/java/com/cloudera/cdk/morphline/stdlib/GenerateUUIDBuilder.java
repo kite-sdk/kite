@@ -18,6 +18,7 @@ package com.cloudera.cdk.morphline.stdlib;
 import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Random;
 import java.util.UUID;
 
 import com.cloudera.cdk.morphline.api.Command;
@@ -74,7 +75,12 @@ public final class GenerateUUIDBuilder implements CommandBuilder {
       if (type == Type.secure) {
         prng = null; // secure & slow
       } else {
-        prng = new Well19937c(new SecureRandom().nextLong()); // non-secure & fast
+        Random rand = new SecureRandom();
+        int[] seed = new int[624];
+        for (int i = 0; i < seed.length; i++) {
+          seed[i] = rand.nextInt();
+        }
+        prng = new Well19937c(seed); // non-secure & fast
       }
       validateArguments();
     }
