@@ -12,7 +12,7 @@ Version 0.5.0 has the following notable changes:
 * Examples. All examples can be run from the user's host machine,
   as an alternative to running from within the QuickStart VM guest.
 * CDK Maven Plugin. A new
-  [plugin](http://cloudera.github.io/cdk/docs/0.5.0/cdk-maven-plugin/index.html) with
+  [plugin](http://cloudera.github.io/cdk/docs/0.5.0/cdk-maven-plugin/usage.html) with
   goals for manipulating datasets, and packaging, deploying,
   and running distributed applications.
 * Dependency management. Hadoop components are now marked as provided to give users
