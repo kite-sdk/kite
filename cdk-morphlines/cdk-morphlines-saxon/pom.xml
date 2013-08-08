@@ -68,13 +68,11 @@
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-core</artifactId>
-      <version>${project.parent.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-core</artifactId>
-      <version>${project.parent.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

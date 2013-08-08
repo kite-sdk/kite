@@ -36,20 +36,17 @@
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-solr-core</artifactId>
-      <version>${project.parent.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-tika-core</artifactId>
-      <version>${project.parent.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-tika-decompress</artifactId>
-      <version>${project.parent.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -62,7 +59,6 @@
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-core</artifactId>
-      <version>${project.parent.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -70,7 +66,6 @@
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-solr-core</artifactId>
-      <version>${project.parent.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -93,14 +88,12 @@
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-avro</artifactId>
-      <version>${project.parent.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-twitter</artifactId>
-      <version>${project.parent.version}</version>
       <scope>test</scope>
     </dependency>
 
