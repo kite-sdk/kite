@@ -181,7 +181,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
     metadata.set(fieldName, getFoobarWithNonChars());
     StripNonCharSolrContentHandlerFactory contentHandlerFactory =
       new StripNonCharSolrContentHandlerFactory(DateUtil.DEFAULT_DATE_FORMATS);
-    IndexSchema schema = h.getCore().getSchema();
+    IndexSchema schema = h.getCore().getLatestSchema();
     SolrContentHandler contentHandler =
       contentHandlerFactory.createSolrContentHandler(metadata, new MapSolrParams(new HashMap()), schema);
     SolrInputDocument doc = contentHandler.newDocument();
