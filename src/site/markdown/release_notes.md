@@ -3,6 +3,15 @@
 All past CDK releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version 0.6.0
+
+Release date: Aug 16, 2013
+
+Version 0.6.0 has the following notable changes:
+
+* Dependency management. Solr and Lucene dependencies have been upgrade to 4.4.
+* Build system. The version of the Maven Javadoc plugin has been upgraded.
+
 ## Version 0.5.0
 
 Release date: Aug 1, 2013
