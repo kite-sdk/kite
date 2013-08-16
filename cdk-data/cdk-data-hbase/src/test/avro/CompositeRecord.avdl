@@ -1,0 +1,14 @@
+@namespace("com.cloudera.cdk.data.hbase.avro.entities.protocol")
+protocol CompositeRecordProtocol {
+
+  import schema "SubRecord1.avsc";
+  import schema "SubRecord2.avsc";
+
+  @namespace("com.cloudera.cdk.data.hbase.avro.entities")
+  record CompositeRecord {
+
+    union { null, SubRecord1 } subRecord1 = null;
+    union { null, SubRecord2 } subRecord2 = null;
+  }
+  
+}

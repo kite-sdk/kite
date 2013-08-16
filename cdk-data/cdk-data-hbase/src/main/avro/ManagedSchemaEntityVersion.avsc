@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "ManagedSchemaEntityVersion",
+  "namespace": "com.cloudera.cdk.data.hbase.avro",
+  "fields": [
+
+    { "name": "schemaVersion", "type": { "type": "map", "values": "int" },
+      "mapping": { "type": "keyAsColumn", "value": "_s:", "prefix": "sv_" } }
+      
+  ]
+}

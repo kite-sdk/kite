@@ -1,0 +1,9 @@
+{
+    "name": "ManagedSchemaKey",
+    "namespace": "com.cloudera.cdk.data.hbase.avro",
+    "type": "record",
+    "fields": [
+        { "name": "table", "type": "string" },
+        { "name": "name", "type": "string" }
+    ]
+}

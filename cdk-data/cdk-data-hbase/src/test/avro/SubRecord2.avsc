@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "SubRecord2",
+  "namespace": "com.cloudera.cdk.data.hbase.avro.entities",
+  "fields": [
+
+    { "name": "field1", "type": "string", "mapping": 
+      { "type": "column", "value": "meta:subrecord2_1" }
+    },
+
+    { "name": "field2", "type": "string", "mapping":
+      { "type": "column", "value": "meta:subrecord2_2" }
+    }
+  ]
+}

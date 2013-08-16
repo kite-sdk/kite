@@ -1,0 +1,98 @@
+package com.cloudera.cdk.data.hbase;
+
+import java.io.IOException;
+
+import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.client.HTablePool;
+
+public class BaseEntityBatch<K, E> implements EntityBatch<K, E> {
+  private final HTableInterface table;
+  private final EntityMapper<K, E> entityMapper;
+  private final HBaseClientTemplate clientTemplate;
+
+  /**
+   * Checks an HTable out of the HTablePool and modifies it to take advantage of
+   * batch puts. This is very useful when performing many consecutive puts.
+   *
+   * @param clientTemplate
+   *          The client template to use
+   * @param entityMapper
+   *          The EntityMapper to use for mapping
+   * @param pool
+   *          The HBase table pool
+   * @param tableName
+   *          The name of the HBase table
+   * @param writeBufferSize
+   *          The batch buffer size in bytes.
+   */
+  public BaseEntityBatch(HBaseClientTemplate clientTemplate,
+      EntityMapper<K, E> entityMapper, HTablePool pool, String tableName,
+      long writeBufferSize) {
+    this.table = pool.getTable(tableName);
+    this.table.setAutoFlush(false);
+    this.clientTemplate = clientTemplate;
+    this.entityMapper = entityMapper;
+
+    /**
+     * If the writeBufferSize is less than the currentBufferSize, then the
+     * buffer will get flushed automatically by HBase. This should never happen,
+     * since we're getting a fresh table out of the pool, and the writeBuffer
+     * should be empty.
+     */
+    try {
+      table.setWriteBufferSize(writeBufferSize);
+    } catch (IOException e) {
+      throw new HBaseClientException("Error flushing commits for table ["
+          + table + "]", e);
+    }
+  }
+
+  /**
+   * Checks an HTable out of the HTablePool and modifies it to take advantage of
+   * batch puts using the default writeBufferSize (2MB). This is very useful
+   * when performing many consecutive puts.
+   *
+   * @param clientTemplate
+   *          The client template to use
+   * @param entityMapper
+   *          The EntityMapper to use for mapping
+   * @param pool
+   *          The HBase table pool
+   * @param tableName
+   *          The name of the HBase table
+   */
+  public BaseEntityBatch(HBaseClientTemplate clientTemplate,
+      EntityMapper<K, E> entityMapper, HTablePool pool, String tableName) {
+    this.table = pool.getTable(tableName);
+    this.table.setAutoFlush(false);
+    this.clientTemplate = clientTemplate;
+    this.entityMapper = entityMapper;
+  }
+
+  @Override
+  public void put(K key, E entity) {
+    PutAction putAction = entityMapper.mapFromEntity(key, entity);
+    clientTemplate.put(putAction, table);
+  }
+
+  @Override
+  public void flush() {
+    try {
+      table.flushCommits();
+    } catch (IOException e) {
+      throw new HBaseClientException("Error flushing commits for table ["
+          + table + "]", e);
+    }
+  }
+
+  @Override
+  public void close() {
+    try {
+      table.flushCommits();
+      table.setAutoFlush(true);
+      table.close();
+    } catch (IOException e) {
+      throw new HBaseClientException("Error closing table [" + table + "]", e);
+    }
+  }
+}

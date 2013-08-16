@@ -1,0 +1,359 @@
+// (c) Copyright 2011-2013 Cloudera, Inc.
+package com.cloudera.cdk.data.hbase.avro;
+
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.avro.Schema;
+import org.apache.avro.specific.SpecificRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.hbase.client.HTablePool;
+
+import com.cloudera.cdk.data.hbase.BaseDao;
+import com.cloudera.cdk.data.hbase.BaseEntityMapper;
+import com.cloudera.cdk.data.hbase.CompositeBaseDao;
+import com.cloudera.cdk.data.hbase.Dao;
+import com.cloudera.cdk.data.hbase.EntityMapper;
+import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
+import com.cloudera.cdk.data.hbase.HBaseCommonException;
+import com.cloudera.cdk.data.hbase.SchemaNotFoundException;
+import com.cloudera.cdk.data.hbase.SchemaValidationException;
+import com.cloudera.cdk.data.hbase.transactions.TransactionManager;
+
+/**
+ * A Dao for Avro's SpecificRecords. In this Dao implementation, both the
+ * underlying key record type, and the entity type are SpecificRecords. This Dao
+ * allows us to persist and fetch these SpecificRecords to and from HBase.
+ * 
+ * @param <K>
+ *          The Key's underlying record type.
+ * @param <E>
+ *          The entity type.
+ */
+public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
+    extends BaseDao<K, E> {
+
+  private static Log LOG = LogFactory.getLog(SpecificAvroDao.class);
+
+  private static final AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
+
+  /**
+   * Construct the SpecificAvroDao.
+   * 
+   * @param transactionManager
+   *          The TransactionManager that will manage transactional entities.
+   * @param tablePool
+   *          An HTablePool instance to use for connecting to HBase.
+   * @param tableName
+   *          The name of the table this Dao will read from and write to.
+   * @param keySchemaString
+   *          The Avro schema string that represents the Key structure for row
+   *          keys in this table.
+   * @param entitySchemaString
+   *          The json string representing the special avro record schema, that
+   *          contains metadata in annotations of the Avro record fields. See
+   *          {@link AvroEntityMapper} for details.
+   * @param keyClass
+   *          The class of the SpecificRecord this DAO will use as a key
+   * @param entityClass
+   *          The class of the SpecificRecord this DAO will persist and fetch.
+   */
+  public SpecificAvroDao(TransactionManager transactionManager,
+      HTablePool tablePool, String tableName, String keySchemaString,
+      String entitySchemaString, Class<K> keyClass, Class<E> entityClass) {
+
+    super(transactionManager, tablePool, tableName, buildEntityMapper(
+        entitySchemaString, entitySchemaString, keySchemaString, keyClass,
+        entityClass));
+  }
+
+  /**
+   * Construct the SpecificAvroDao.
+   * 
+   * @param transactionManager
+   *          The TransactionManager that will manage transactional entities.
+   * @param tablePool
+   *          An HTablePool instance to use for connecting to HBase.
+   * @param tableName
+   *          The name of the table this Dao will read from and write to.
+   * @param keySchemaStream
+   *          The json stream representing the avro schema for the key.
+   * @param entitySchemaStream
+   *          The json stream representing the special avro record schema, that
+   *          contains metadata in annotations of the Avro record fields. See
+   *          {@link AvroEntityMapper} for details.
+   * @param keyClass
+   *          The class of the SpecificRecord this DAO will use as a key
+   * @param entityClass
+   *          The class of the SpecificRecord this DAO will persist and fetch.
+   */
+  public SpecificAvroDao(TransactionManager transactionManager,
+      HTablePool tablePool, String tableName, InputStream keySchemaStream,
+      InputStream entitySchemaStream, Class<K> keyClass, Class<E> entityClass) {
+
+    this(transactionManager, tablePool, tableName, AvroUtils
+        .inputStreamToString(keySchemaStream), AvroUtils
+        .inputStreamToString(entitySchemaStream), keyClass, entityClass);
+  }
+
+  /**
+   * Construct the SpecificAvroDao with an EntityManager, which will provide the
+   * entity mapper to this Dao that knows how to map the different entity schema
+   * versions defined by the managed schema.
+   * 
+   * @param transactionManager
+   *          The TransactionManager that will manage transactional entities.
+   * @param tablePool
+   *          An HTabePool instance to use for connecting to HBase.
+   * @param tableName
+   *          The table name of the managed schema.
+   * @param entityName
+   *          The entity name of the managed schema.
+   * @param entityManager
+   *          The EntityManager which will create the entity mapper that will
+   *          power this dao.
+   */
+  public SpecificAvroDao(TransactionManager transactionManager,
+      HTablePool tablePool, String tableName, String entityName,
+      SpecificAvroEntityManager entityManager) {
+
+    super(transactionManager, tablePool, tableName, entityManager
+        .<K, E> createEntityMapper(tableName, entityName));
+  }
+
+  /**
+   * Create a CompositeDao, which will return SpecificRecord instances
+   * represented by the entitySchemaString avro schema. This avro schema must be
+   * a composition of the schemas in the subEntitySchemaStrings list.
+   * 
+   * @param transactionManager
+   *          The TransactionManager that will manage transactional entities.
+   * @param tablePool
+   *          An HTablePool instance to use for connecting to HBase
+   * @param tableName
+   *          The table name this dao will read from and write to
+   * @param keySchemaString
+   *          The Avro schema string that represents the Key structure for row
+   *          keys in this table.
+   * @param subEntitySchemaStrings
+   *          The list of entities that make up the composite. This list must be
+   *          in the same order as the fields defined in the entitySchemaString.
+   * @param keyClass
+   *          The class of the SpecificRecord representing the Key of rows this
+   *          dao will fetch.
+   * @param entityClass
+   *          The class of the SpecificRecord this DAO will persist and fetch.
+   * @return The CompositeDao instance.
+   * @throws SchemaNotFoundException
+   * @throws SchemaValidationException
+   */
+  @SuppressWarnings("unchecked")
+  public static <K extends SpecificRecord, E extends SpecificRecord, S extends SpecificRecord> Dao<K, E> buildCompositeDao(
+      TransactionManager transactionManager, HTablePool tablePool,
+      String tableName, String keySchemaString,
+      List<String> subEntitySchemaStrings, Class<K> keyClass,
+      Class<E> entityClass) {
+
+    List<EntityMapper<K, S>> entityMappers = new ArrayList<EntityMapper<K, S>>();
+    for (String subEntitySchemaString : subEntitySchemaStrings) {
+      AvroEntitySchema subEntitySchema = parser
+          .parseEntity(subEntitySchemaString);
+      Class<S> subEntityClass;
+      try {
+        subEntityClass = (Class<S>) Class.forName(subEntitySchema
+            .getAvroSchema().getFullName());
+      } catch (ClassNotFoundException e) {
+        throw new RuntimeException(e);
+      }
+      entityMappers.add(SpecificAvroDao.<K, S> buildEntityMapper(
+          subEntitySchemaString, subEntitySchemaString, keySchemaString,
+          keyClass, subEntityClass));
+    }
+
+    return new SpecificCompositeAvroDao<K, E, S>(transactionManager, tablePool,
+        tableName, entityMappers, entityClass);
+  }
+
+  /**
+   * Create a CompositeDao, which will return SpecificRecord instances
+   * represented by the entitySchemaString avro schema. This avro schema must be
+   * a composition of the schemas in the subEntitySchemaStrings list.
+   * 
+   * @param transactionManager
+   *          The TransactionManager that will manage transactional entities.
+   * @param tablePool
+   *          An HTablePool instance to use for connecting to HBase
+   * @param tableName
+   *          The table name this dao will read from and write to
+   * @param keySchemaStream
+   *          The Avro schema input stream that represents the Key structure for
+   *          row keys in this table.
+   * @param subEntitySchemaStreams
+   *          The list of entities that make up the composite. This list must be
+   *          in the same order as the fields defined in the entitySchemaString.
+   * @param keyClass
+   *          The class of the SpecificRecord representing the Key of rows this
+   *          dao will fetch.
+   * @param entityClass
+   *          The class of the SpecificRecord this DAO will persist and fetch.
+   * @return The CompositeDao instance.
+   * @throws SchemaNotFoundException
+   * @throws SchemaValidationException
+   */
+  public static <K extends SpecificRecord, E extends SpecificRecord, S extends SpecificRecord> Dao<K, E> buildCompositeDaoWithInputStream(
+      TransactionManager transactionManager, HTablePool tablePool,
+      String tableName, InputStream keySchemaStream,
+      List<InputStream> subEntitySchemaStreams, Class<K> keyClass,
+      Class<E> entityClass) {
+
+    List<String> subEntitySchemaStrings = new ArrayList<String>();
+    for (InputStream subEntitySchemaStream : subEntitySchemaStreams) {
+      subEntitySchemaStrings.add(AvroUtils
+          .inputStreamToString(subEntitySchemaStream));
+    }
+    return buildCompositeDao(transactionManager, tablePool, tableName,
+        AvroUtils.inputStreamToString(keySchemaStream), subEntitySchemaStrings,
+        keyClass, entityClass);
+  }
+
+  /**
+   * Create a CompositeDao, which will return SpecificRecord instances
+   * represented by the entitySchemaString avro schema. This avro schema must be
+   * a composition of the schemas in the subEntitySchemaStrings list.
+   * 
+   * @param transactionManager
+   *          The TransactionManager that will manage transactional entities.
+   * @param tablePool
+   *          An HTabePool instance to use for connecting to HBase.
+   * @param tableName
+   *          The table name of the managed schema.
+   * @param entityClass
+   *          The class that is the composite record, which is made up of fields
+   *          referencing the sub records.
+   * @param entityManager
+   *          The EntityManager which will create the entity mapper that will
+   *          power this dao.
+   * @return The CompositeDao instance.
+   * @throws SchemaNotFoundException
+   */
+  public static <K extends SpecificRecord, E extends SpecificRecord, S extends SpecificRecord> Dao<K, E> buildCompositeDaoWithEntityManager(
+      TransactionManager transactionManager, HTablePool tablePool,
+      String tableName, Class<E> entityClass,
+      SpecificAvroEntityManager entityManager) {
+
+    Schema entitySchema;
+    try {
+      entitySchema = (Schema) entityClass.getDeclaredField("SCHEMA$").get(null);
+    } catch (Throwable e) {
+      LOG.error(
+          "Error getting schema from entity of type: " + entityClass.getName(),
+          e);
+      throw new HBaseCommonException(e);
+    }
+
+    List<EntityMapper<K, S>> entityMappers = new ArrayList<EntityMapper<K, S>>();
+    for (Schema.Field field : entitySchema.getFields()) {
+      entityMappers.add(entityManager.<K, S> createEntityMapper(tableName,
+          field.schema().getName()));
+    }
+
+    return new SpecificCompositeAvroDao<K, E, S>(transactionManager, tablePool,
+        tableName, entityMappers, entityClass);
+  }
+
+  /**
+   * CompositeBaseDao implementation for Specific avro records.
+   * 
+   * @param <K>
+   *          The key type this dao fetches and persists
+   * @param <E>
+   *          The entity type this dao fetches and persists
+   */
+  private static class SpecificCompositeAvroDao<K extends SpecificRecord, E extends SpecificRecord, S extends SpecificRecord>
+      extends CompositeBaseDao<K, E, S> {
+
+    private final Class<E> entityClass;
+    private final Constructor<E> entityConstructor;
+    private final Schema entitySchema;
+
+    public SpecificCompositeAvroDao(TransactionManager transactionManager,
+        HTablePool tablePool, String tableName,
+        List<EntityMapper<K, S>> entityMappers, Class<E> entityClass) {
+
+      super(transactionManager, tablePool, tableName, entityMappers);
+      this.entityClass = entityClass;
+      try {
+        entityConstructor = entityClass.getConstructor();
+        entitySchema = (Schema) entityClass.getDeclaredField("SCHEMA$").get(
+            null);
+      } catch (Throwable e) {
+        LOG.error(
+            "Error getting constructor or schema field for entity of type: "
+                + entityClass.getName(), e);
+        throw new HBaseCommonException(e);
+      }
+    }
+
+    @Override
+    public KeyEntity<K, E> compose(List<KeyEntity<K, S>> keyEntities) {
+      K key = null;
+      E entity;
+      try {
+        entity = entityConstructor.newInstance();
+      } catch (Throwable e) {
+        LOG.error(
+            "Error trying to construct entity of type: "
+                + entityClass.getName(), e);
+        throw new HBaseCommonException(e);
+      }
+
+      int cnt = 0;
+      for (KeyEntity<K, S> keyEntity : keyEntities) {
+        if (keyEntity != null) {
+          if (key == null) {
+            key = keyEntity.getKey();
+          }
+          entity.put(cnt, keyEntity.getEntity());
+        }
+        cnt++;
+      }
+      return new KeyEntity<K, E>(key, entity);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<S> decompose(E entity) {
+      List<S> subEntityList = new ArrayList<S>();
+      for (int i = 0; i < entitySchema.getFields().size(); i++) {
+        subEntityList.add((S) entity.get(i));
+      }
+      return subEntityList;
+    }
+  }
+
+  private static <K extends SpecificRecord, E extends SpecificRecord> BaseEntityMapper<K, E> buildEntityMapper(
+      String readerSchemaStr, String writtenSchemaStr, String keySchemaStr,
+      Class<K> keyClass, Class<E> entityClass) {
+
+    AvroEntitySchema readerSchema = parser.parseEntity(readerSchemaStr);
+    // The specific class may have been compiled with a setting that adds the string
+    // type to the string fields, but aren't in the local or managed schemas.
+    readerSchema = AvroUtils.mergeSpecificStringTypes(entityClass, readerSchema);
+    AvroEntitySchema writtenSchema = parser.parseEntity(writtenSchemaStr);
+    AvroEntityComposer<E> entityComposer = new AvroEntityComposer<E>(
+        readerSchema, true);
+    AvroEntitySerDe<E> entitySerDe = new AvroEntitySerDe<E>(
+        entityComposer, readerSchema, writtenSchema, true);
+
+    AvroKeySchema keySchema = parser.parseKey(keySchemaStr);
+    // Same as above. The key schema passed may have a different String type. 
+    keySchema = AvroUtils.mergeSpecificStringTypes(keyClass, keySchema);
+    AvroKeySerDe<K> keySerDe = new AvroKeySerDe<K>(keySchema.getAvroSchema(), true);
+
+    return new BaseEntityMapper<K, E>(keySchema, readerSchema,
+        keySerDe, entitySerDe);
+  }
+}
