@@ -1,15 +1,14 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
 package com.cloudera.cdk.data.hbase.avro;
 
-import com.cloudera.cdk.data.hbase.Dao;
-import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
-import com.cloudera.cdk.data.hbase.EntityScanner;
-import com.cloudera.cdk.data.hbase.transactions.TransactionManager;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.hbase.client.HTablePool;
+
+import com.cloudera.cdk.data.hbase.Dao;
+import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
+import com.cloudera.cdk.data.hbase.EntityScanner;
 
 /**
  * AvroManagedSchemaDao implementation backed by an HBase table. All of the
@@ -48,22 +47,19 @@ public class AvroManagedSchemaHBaseDao implements AvroManagedSchemaDao {
    * Constructor which uses the default managed schema table name, which is
    * managed_schemas.
    * 
-   * @param transactionManager
-   *          The TransactionManager that will manage transactional entities.
    * @param tablePool
    *          The pool of HBase tables
    */
-  public AvroManagedSchemaHBaseDao(TransactionManager transactionManager,
-      HTablePool tablePool) {
-    this(transactionManager, tablePool, DEFAULT_MANAGED_SCHEMA_TABLE);
+  public AvroManagedSchemaHBaseDao(HTablePool tablePool) {
+    this(tablePool, DEFAULT_MANAGED_SCHEMA_TABLE);
   }
 
-  public AvroManagedSchemaHBaseDao(TransactionManager transactionManager,
-      HTablePool tablePool, String managedSchemaTable) {
+  public AvroManagedSchemaHBaseDao(HTablePool tablePool,
+      String managedSchemaTable) {
     managedSchemaDao = new SpecificAvroDao<ManagedSchemaKey, ManagedSchema>(
-        transactionManager, tablePool, managedSchemaTable,
-        managedSchemaKey.getRawSchema(), managedSchemaEntity.getRawSchema(),
-        ManagedSchemaKey.class, ManagedSchema.class);
+        tablePool, managedSchemaTable, managedSchemaKey.getRawSchema(),
+        managedSchemaEntity.getRawSchema(), ManagedSchemaKey.class,
+        ManagedSchema.class);
   }
 
   @Override

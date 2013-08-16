@@ -51,7 +51,7 @@ public class CompositeDaoTest {
         Bytes.toBytes("_s") };
     HBaseTestUtils.util.createTable(tableNameBytes, cfNames);
   }
-  
+
   @AfterClass
   public static void afterClass() throws Exception {
     HBaseTestUtils.util.deleteTable(Bytes.toBytes(tableName));
@@ -71,29 +71,33 @@ public class CompositeDaoTest {
   public void testSpecific() throws Exception {
     // Construct Dao
     Dao<TestKey, CompositeRecord> dao = SpecificAvroDao.buildCompositeDao(
-        null, tablePool, tableName, keyString,
+        tablePool, tableName, keyString,
         Arrays.asList(subRecord1String, subRecord2String), TestKey.class,
         CompositeRecord.class);
 
     // Construct records and keys
     TestKey testKey = TestKey.newBuilder().setPart1("1").setPart2("1").build();
 
-    SubRecord1 subRecord1 = SubRecord1.newBuilder().setField1("field1_1").setField2("field1_2").build();
-    SubRecord2 subRecord2 = SubRecord2.newBuilder().setField1("field2_1").setField2("field2_2").build();;
+    SubRecord1 subRecord1 = SubRecord1.newBuilder().setField1("field1_1")
+        .setField2("field1_2").build();
+    SubRecord2 subRecord2 = SubRecord2.newBuilder().setField1("field2_1")
+        .setField2("field2_2").build();
+    ;
 
-    CompositeRecord compositeRecord = CompositeRecord.newBuilder().setSubRecord1(subRecord1).setSubRecord2(subRecord2).build();
+    CompositeRecord compositeRecord = CompositeRecord.newBuilder()
+        .setSubRecord1(subRecord1).setSubRecord2(subRecord2).build();
 
     // Test put and get
     dao.put(testKey, compositeRecord);
     CompositeRecord returnedCompositeRecord = dao.get(testKey);
-    assertEquals("field1_1",
-        returnedCompositeRecord.getSubRecord1().getField1());
-    assertEquals("field1_2",
-        returnedCompositeRecord.getSubRecord1().getField2());
-    assertEquals("field2_1",
-        returnedCompositeRecord.getSubRecord2().getField1());
-    assertEquals("field2_2",
-        returnedCompositeRecord.getSubRecord2().getField2());
+    assertEquals("field1_1", returnedCompositeRecord.getSubRecord1()
+        .getField1());
+    assertEquals("field1_2", returnedCompositeRecord.getSubRecord1()
+        .getField2());
+    assertEquals("field2_1", returnedCompositeRecord.getSubRecord2()
+        .getField1());
+    assertEquals("field2_2", returnedCompositeRecord.getSubRecord2()
+        .getField2());
 
     // Test OCC
     assertFalse(dao.put(testKey, compositeRecord));
@@ -101,7 +105,8 @@ public class CompositeDaoTest {
 
     // Test null field
     testKey = TestKey.newBuilder().setPart1("1").setPart2("2").build();
-    compositeRecord = CompositeRecord.newBuilder().setSubRecord1(subRecord1).build();
+    compositeRecord = CompositeRecord.newBuilder().setSubRecord1(subRecord1)
+        .build();
     dao.put(testKey, compositeRecord);
     compositeRecord = dao.get(testKey);
     assertEquals(null, compositeRecord.getSubRecord2());

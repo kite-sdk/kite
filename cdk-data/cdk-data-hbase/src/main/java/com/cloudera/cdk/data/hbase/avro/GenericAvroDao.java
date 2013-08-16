@@ -8,7 +8,6 @@ import org.apache.hadoop.hbase.client.HTablePool;
 
 import com.cloudera.cdk.data.hbase.BaseDao;
 import com.cloudera.cdk.data.hbase.BaseEntityMapper;
-import com.cloudera.cdk.data.hbase.transactions.TransactionManager;
 
 /**
  * A Dao for Avro's GenericRecords. In this Dao implementation, both the
@@ -22,8 +21,6 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
   /**
    * Construct a GenericAvroDao.
    * 
-   * @param transactionManager
-   *          The TransactionManager that will manage transactional entities.
    * @param tablePool
    *          An HTablePool instance to use for connecting to HBase.
    * @param tableName
@@ -37,18 +34,15 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
    *          contains metadata in annotations of the Avro record fields. See
    *          {@link AvroEntityMapper} for details.
    */
-  public GenericAvroDao(TransactionManager transactionManager,
-      HTablePool tablePool, String tableName, String keySchemaStr,
-      String entitySchemaString) {
-    super(transactionManager, tablePool, tableName, buildEntityMapper(
-        entitySchemaString, keySchemaStr));
+  public GenericAvroDao(HTablePool tablePool, String tableName,
+      String keySchemaStr, String entitySchemaString) {
+    super(tablePool, tableName, buildEntityMapper(entitySchemaString,
+        keySchemaStr));
   }
 
   /**
    * Construct a GenericAvroDao.
    * 
-   * @param transactionManager
-   *          The TransactionManager that will manage transactional entities.
    * @param tablePool
    *          An HTablePool instance to use for connecting to HBase.
    * @param tableName
@@ -63,11 +57,10 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
    *          of the Avro record fields. See {@link AvroEntityMapper} for
    *          details.
    */
-  public GenericAvroDao(TransactionManager transactionManager,
-      HTablePool tablePool, String tableName, String keySchemaStr,
-      InputStream entitySchemaStream) {
+  public GenericAvroDao(HTablePool tablePool, String tableName,
+      String keySchemaStr, InputStream entitySchemaStream) {
 
-    super(transactionManager, tablePool, tableName, buildEntityMapper(
+    super(tablePool, tableName, buildEntityMapper(
         AvroUtils.inputStreamToString(entitySchemaStream), keySchemaStr));
   }
 
@@ -77,8 +70,6 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
    * versions defined by the managed schema. The entitySchemaString parameter
    * represents the schema to use for writes.
    * 
-   * @param transactionManager
-   *          The TransactionManager that will manage transactional entities.
    * @param tablePool
    *          An HTabePool instance to use for connecting to HBase.
    * @param tableName
@@ -92,11 +83,11 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
    *          The schema as a string representing the schema version that this
    *          DAO should use for writes.
    */
-  public GenericAvroDao(TransactionManager transactionManager,
-      HTablePool tablePool, String tableName, String entityName,
-      GenericAvroEntityManager entityManager, String entitySchemaString) {
+  public GenericAvroDao(HTablePool tablePool, String tableName,
+      String entityName, GenericAvroEntityManager entityManager,
+      String entitySchemaString) {
 
-    super(transactionManager, tablePool, tableName, entityManager
+    super(tablePool, tableName, entityManager
         .registerEntitySchema(tableName, entityName,
             parser.parseEntity(entitySchemaString)).createEntityMapper(
             tableName, entityName));
@@ -108,8 +99,6 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
    * versions defined by the managed schema. The newest schema version available
    * at the time of this dao's creation will be used for writes.
    * 
-   * @param transactionManager
-   *          The TransactionManager that will manage transactional entities.
    * @param tablePool
    *          An HTabePool instance to use for connecting to HBase.
    * @param tableName
@@ -120,13 +109,11 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
    *          The EntityManager which will create the entity mapper that will
    *          power this dao.
    */
-  public GenericAvroDao(TransactionManager transactionManager,
-      HTablePool tablePool, String tableName, String entityName,
-      GenericAvroEntityManager entityManager) {
+  public GenericAvroDao(HTablePool tablePool, String tableName,
+      String entityName, GenericAvroEntityManager entityManager) {
 
-    super(transactionManager, tablePool, tableName, entityManager
-        .registerEntitySchema(tableName, entityName,
-            entityManager.getEntitySchema(tableName, entityName))
+    super(tablePool, tableName, entityManager.registerEntitySchema(tableName,
+        entityName, entityManager.getEntitySchema(tableName, entityName))
         .createEntityMapper(tableName, entityName));
   }
 

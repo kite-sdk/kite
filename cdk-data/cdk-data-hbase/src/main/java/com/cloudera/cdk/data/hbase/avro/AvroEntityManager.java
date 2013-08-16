@@ -37,7 +37,6 @@ import com.cloudera.cdk.data.hbase.PutAction;
 import com.cloudera.cdk.data.hbase.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.SchemaValidationException;
 import com.cloudera.cdk.data.hbase.avro.AvroManagedSchemaDao.ManagedKeySchemaPair;
-import com.cloudera.cdk.data.hbase.transactions.TransactionManager;
 
 /**
  * An EntityManager implementation for Avro entities. The Avro schemas are
@@ -83,20 +82,15 @@ public abstract class AvroEntityManager implements
    * Constructor which uses the default managed schema table name, which is
    * managed_schemas.
    * 
-   * @param transactionManager
-   *          The TransactionManager that will manage transactional entities.
    * @param tablePool
    *          The pool of HBase tables
    */
-  public AvroEntityManager(TransactionManager transactionManager,
-      HTablePool tablePool) {
-    this(new AvroManagedSchemaHBaseDao(transactionManager, tablePool));
+  public AvroEntityManager(HTablePool tablePool) {
+    this(new AvroManagedSchemaHBaseDao(tablePool));
   }
 
-  public AvroEntityManager(TransactionManager transactionManager,
-      HTablePool tablePool, String managedSchemaTable) {
-    this(new AvroManagedSchemaHBaseDao(transactionManager, tablePool,
-        managedSchemaTable));
+  public AvroEntityManager(HTablePool tablePool, String managedSchemaTable) {
+    this(new AvroManagedSchemaHBaseDao(tablePool, managedSchemaTable));
   }
 
   public AvroEntityManager(AvroManagedSchemaDao managedSchemaDao) {
@@ -240,8 +234,8 @@ public abstract class AvroEntityManager implements
       String entityName, Class keyClass, Class entityClass) {
     int version = this.getEntityVersion(tableName, entityName,
         this.getEntitySchema(tableName, entityName));
-    return internalCreateEntityMapper(tableName, entityName, keyClass, entityClass,
-        version);
+    return internalCreateEntityMapper(tableName, entityName, keyClass,
+        entityClass, version);
   }
 
   /**
@@ -266,7 +260,8 @@ public abstract class AvroEntityManager implements
   @SuppressWarnings({ "rawtypes", "unchecked" })
   protected EntityMapper internalCreateEntityMapper(String tableName,
       String entityName, Class keyClass, Class entityClass, int version) {
-    return new ManagedEntityMapper(tableName, entityName, keyClass, entityClass, version);
+    return new ManagedEntityMapper(tableName, entityName, keyClass,
+        entityClass, version);
   }
 
   @SuppressWarnings({ "rawtypes" })

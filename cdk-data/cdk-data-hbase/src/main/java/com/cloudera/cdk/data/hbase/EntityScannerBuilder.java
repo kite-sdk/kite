@@ -12,7 +12,6 @@ import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import com.cloudera.cdk.data.hbase.filters.EntityFilter;
 import com.cloudera.cdk.data.hbase.filters.RegexEntityFilter;
 import com.cloudera.cdk.data.hbase.filters.SingleFieldEntityFilter;
-import com.cloudera.cdk.data.hbase.transactions.TransactionManager;
 
 /**
  * An abstract class that EntityScanner implementations should extend to offer a
@@ -27,8 +26,6 @@ public abstract class EntityScannerBuilder<K, E> {
 
   private HTablePool tablePool;
   private String tableName;
-  private TransactionManager transactionManager;
-  private boolean transactional;
   private K startKey;
   private PartialKey<K> partialStartKey;
   private K stopKey;
@@ -52,23 +49,10 @@ public abstract class EntityScannerBuilder<K, E> {
    * @param <E>
    *          The entity type this scanner scans.
    */
-  public EntityScannerBuilder(TransactionManager transactionManager,
-      HTablePool tablePool, String tableName, EntityMapper<K, E> entityMapper,
-      boolean transactional) {
-    this.transactionManager = transactionManager;
+  public EntityScannerBuilder(HTablePool tablePool, String tableName, EntityMapper<K, E> entityMapper) {
     this.tablePool = tablePool;
     this.tableName = tableName;
     this.entityMapper = entityMapper;
-    this.transactional = transactional;
-  }
-
-  /**
-   * Get The Transaction Manager
-   * 
-   * @return transactionManager
-   */
-  TransactionManager getTransactionManager() {
-    return transactionManager;
   }
 
   /**
@@ -96,15 +80,6 @@ public abstract class EntityScannerBuilder<K, E> {
    */
   EntityMapper<K, E> getEntityMapper() {
     return entityMapper;
-  }
-
-  /**
-   * Check If For Transaction Support
-   * 
-   * @return
-   */
-  boolean getTransactional() {
-    return transactional;
   }
 
   /**

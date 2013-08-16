@@ -10,7 +10,6 @@ import com.cloudera.cdk.data.hbase.BaseEntityMapper;
 import com.cloudera.cdk.data.hbase.EntityMapper;
 import com.cloudera.cdk.data.hbase.HBaseCommonException;
 import com.cloudera.cdk.data.hbase.KeySerDe;
-import com.cloudera.cdk.data.hbase.transactions.TransactionManager;
 
 /**
  * An AvroEntityManager implementation that can create entity mappers which will
@@ -22,14 +21,12 @@ public class SpecificAvroEntityManager extends AvroEntityManager {
 
   private static final AvroKeyEntitySchemaParser schemaParser = new AvroKeyEntitySchemaParser();
 
-  public SpecificAvroEntityManager(TransactionManager transactionManager,
-      HTablePool tablePool) {
-    super(transactionManager, tablePool);
+  public SpecificAvroEntityManager(HTablePool tablePool) {
+    super(tablePool);
   }
 
-  public SpecificAvroEntityManager(TransactionManager transactionManager,
-      HTablePool tablePool, String managedSchemaTable) {
-    super(transactionManager, tablePool, managedSchemaTable);
+  public SpecificAvroEntityManager(HTablePool tablePool, String managedSchemaTable) {
+    super(tablePool, managedSchemaTable);
   }
 
   @Override

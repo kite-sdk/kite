@@ -105,7 +105,7 @@ public class ManagedDaoTest {
   public void before() throws Exception {
     tablePool = new HTablePool(HBaseTestUtils.getConf(), 10);
     SchemaTool tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
-        new SpecificAvroEntityManager(null, tablePool));
+        new SpecificAvroEntityManager(tablePool));
     tool.createOrMigrateSchema(tableName, keyString, testRecord, true);
     tool.createOrMigrateSchema(tableName, keyString, testRecordv2, true);
   }
@@ -216,10 +216,12 @@ public class ManagedDaoTest {
     assertEquals("field1_" + iStr, record.get(0).toString());
     assertEquals("field2_" + iStr, record.get(1).toString());
     assertEquals(TestEnum.ENUM3.toString(), record.get(2).toString());
-    assertEquals("field3_value_1_" + iStr,
+    assertEquals(
+        "field3_value_1_" + iStr,
         ((Map<CharSequence, CharSequence>) record.get(3)).get(
             "field3_key_1_" + iStr).toString());
-    assertEquals("field3_value_2_" + iStr,
+    assertEquals(
+        "field3_value_2_" + iStr,
         ((Map<CharSequence, CharSequence>) record.get(3)).get(
             "field3_key_2_" + iStr).toString());
     assertEquals("embedded1", ((IndexedRecord) record.get(4)).get(0).toString());
@@ -240,9 +242,8 @@ public class ManagedDaoTest {
 
   @Test
   public void testGeneric() throws Exception {
-    GenericAvroEntityManager manager = new GenericAvroEntityManager(null,
-        tablePool);
-    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(null, tablePool,
+    GenericAvroEntityManager manager = new GenericAvroEntityManager(tablePool);
+    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(tablePool,
         tableName, "TestRecord", manager, testRecord);
 
     // Create the new entities
@@ -274,10 +275,9 @@ public class ManagedDaoTest {
 
   @Test
   public void testSpecific() throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(null,
-        tablePool);
+    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        null, tablePool, tableName, "TestRecord", manager);
+        tablePool, tableName, "TestRecord", manager);
 
     // Create the new entities
     for (int i = 0; i < 10; ++i) {
@@ -307,15 +307,14 @@ public class ManagedDaoTest {
 
   @Test
   public void testMigrateEntities() throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(null,
-        tablePool);
+    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        null, tablePool, tableName, "TestRecord", manager);
+        tablePool, tableName, "TestRecord", manager);
 
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
 
     Dao<TestKey, TestRecord> afterDao = new SpecificAvroDao<TestKey, TestRecord>(
-        null, tablePool, tableName, "TestRecord", manager);
+        tablePool, tableName, "TestRecord", manager);
 
     // Create the new entities
     for (int i = 0; i < 10; ++i) {
@@ -333,18 +332,16 @@ public class ManagedDaoTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testMigrateAndPut() throws Exception {
-    GenericAvroEntityManager manager = new GenericAvroEntityManager(null,
-        tablePool);
-    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(null, tablePool,
+    GenericAvroEntityManager manager = new GenericAvroEntityManager(tablePool);
+    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(tablePool,
         tableName, "TestRecord", manager, testRecord);
 
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
 
-    GenericAvroEntityManager afterManager = new GenericAvroEntityManager(null,
+    GenericAvroEntityManager afterManager = new GenericAvroEntityManager(
         tablePool);
-    Dao<GenericRecord, GenericRecord> afterDao = new GenericAvroDao(null,
-        tablePool, tableName, "TestRecord", afterManager,
-        goodMigrationRecordAddField);
+    Dao<GenericRecord, GenericRecord> afterDao = new GenericAvroDao(tablePool,
+        tableName, "TestRecord", afterManager, goodMigrationRecordAddField);
 
     // Create the new entities
     for (int i = 0; i < 10; ++i) {
@@ -397,17 +394,16 @@ public class ManagedDaoTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testDynamicGenericDao() throws Exception {
-    GenericAvroEntityManager manager = new GenericAvroEntityManager(null,
-        tablePool);
-    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(null, tablePool,
+    GenericAvroEntityManager manager = new GenericAvroEntityManager(tablePool);
+    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(tablePool,
         tableName, "TestRecord", manager);
 
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
 
-    GenericAvroEntityManager afterManager = new GenericAvroEntityManager(null,
+    GenericAvroEntityManager afterManager = new GenericAvroEntityManager(
         tablePool);
-    Dao<GenericRecord, GenericRecord> afterDao = new GenericAvroDao(null,
-        tablePool, tableName, "TestRecord", afterManager);
+    Dao<GenericRecord, GenericRecord> afterDao = new GenericAvroDao(tablePool,
+        tableName, "TestRecord", afterManager);
 
     // Create an entity with each dao.
     GenericRecord key1 = createGenericKey(1);
@@ -448,10 +444,9 @@ public class ManagedDaoTest {
 
   @Test
   public void testIncrement() {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(null,
-        tablePool);
+    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        null, tablePool, tableName, "TestRecord", manager);
+        tablePool, tableName, "TestRecord", manager);
 
     TestKey keyRecord = createSpecificKey(0);
     TestRecord entity = createSpecificEntity(0);
@@ -486,16 +481,14 @@ public class ManagedDaoTest {
 
   @Test(expected = IncompatibleSchemaException.class)
   public void testBadMigrationIntToLong() throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(null,
-        tablePool);
+    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
     manager.migrateSchema(tableName, "TestRecord", badMigrationRecordIntToLong);
   }
 
   @Test
   public void testGoodMigrations() throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(null,
-        tablePool);
+    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
     manager.migrateSchema(tableName, "TestRecord",
         goodMigrationRecordRemoveField);
@@ -509,13 +502,12 @@ public class ManagedDaoTest {
         .setName("test").setTable(tableName).build();
 
     Dao<ManagedSchemaKey, ManagedSchema> managedDao = new SpecificAvroDao<ManagedSchemaKey, ManagedSchema>(
-        null, tablePool, "managed_schemas", managedKeyString,
-        managedRecordString, ManagedSchemaKey.class, ManagedSchema.class);
+        tablePool, "managed_schemas", managedKeyString, managedRecordString,
+        ManagedSchemaKey.class, ManagedSchema.class);
 
     managedDao.delete(managedSchemaKey);
 
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(null,
-        tablePool);
+    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
     try {
       manager.getEntityVersion(tableName, "test",
           parser.parseEntity(testRecord));
@@ -532,15 +524,13 @@ public class ManagedDaoTest {
 
   @Test(expected = IncompatibleSchemaException.class)
   public void testCannotCreateExisting() throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(null,
-        tablePool);
+    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
     manager.createSchema(tableName, "TestRecord", keyString,
         goodMigrationRecordAddField);
   }
 
   private void badMigration(String badMigration) throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(null,
-        tablePool);
+    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
     manager.migrateSchema(tableName, "TestRecord", badMigration);
   }
 }

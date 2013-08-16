@@ -16,22 +16,18 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
-import com.cloudera.cdk.data.hbase.transactions.Transaction;
-import com.cloudera.cdk.data.hbase.transactions.TransactionManager;
-import com.cloudera.cdk.data.hbase.transactions.TransactionType;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
  * This class simplifies the use of HBase client, and helps to avoid common
  * errors by managing its own cleanup of resources.
- *
+ * 
  * This class uses the Template Method pattern to allow users to implement
  * callbacks for things like entity mapping, and get and put modification
  * (modify Get and Put before sending them off to HBase).
  */
 public class HBaseClientTemplate {
 
-  private final TransactionManager transactionManager;
   private final HTablePool pool;
   private final String tableName;
 
@@ -43,30 +39,25 @@ public class HBaseClientTemplate {
   /**
    * Construct an HBaseClientTemplate. Requires an HTablePool to acquire HBase
    * connections from, and the name of the table to interact with.
-   *
-   * @param transactionManager
-   *          The TransactionManager that will manage transactional entities.
+   * 
    * @param pool
    *          The pool of HBase connections.
    * @param tableName
    *          The name of the table to interact with.
    */
-  public HBaseClientTemplate(TransactionManager transactionManager,
-      HTablePool pool, String tableName) {
-    this.transactionManager = transactionManager;
+  public HBaseClientTemplate(HTablePool pool, String tableName) {
     this.pool = pool;
     this.tableName = tableName;
   }
 
   /**
    * Creates a client template that is a copy of an existing client template.
-   *
+   * 
    * @param clientTemplate
    */
   public HBaseClientTemplate(HBaseClientTemplate clientTemplate) {
     this.pool = clientTemplate.pool;
     this.tableName = clientTemplate.tableName;
-    this.transactionManager = clientTemplate.transactionManager;
 
     this.getModifiers.addAll(clientTemplate.getModifiers);
     this.putActionModifiers.addAll(clientTemplate.putActionModifiers);
@@ -80,7 +71,7 @@ public class HBaseClientTemplate {
    * times. GetModifiers will be called in the order they are added to the
    * template, so if any modifier is destructive, it must be added in the right
    * order.
-   *
+   * 
    * @param getModifier
    *          The GetModifier to register.
    */
@@ -94,27 +85,28 @@ public class HBaseClientTemplate {
    * function multiple times. PutActionModifiers will be called in the order
    * they are added to the template, so if any modifier is destructive, it must
    * be added in the right order.
-   *
+   * 
    * @param putActionModifier
    *          The PutActionModifier to register.
    */
   public void registerPutActionModifier(PutActionModifier putActionModifier) {
     putActionModifiers.add(putActionModifier);
   }
-  
+
   /**
-   * Registers a PutActionModifier to be called before every Put, if the given modifier
-   * is not already registered. This allows the user to prevent adding the same modifier
-   * multiple times.
+   * Registers a PutActionModifier to be called before every Put, if the given
+   * modifier is not already registered. This allows the user to prevent adding
+   * the same modifier multiple times.
    * 
    * @param putActionModifier
    */
-  public void registerUniquePutActionModifier(PutActionModifier putActionModifier) {
+  public void registerUniquePutActionModifier(
+      PutActionModifier putActionModifier) {
     if (!putActionModifiers.contains(putActionModifier)) {
       registerPutActionModifier(putActionModifier);
     }
   }
-  
+
   @VisibleForTesting
   public int countPutActionModifiers() {
     return putActionModifiers.size();
@@ -126,7 +118,7 @@ public class HBaseClientTemplate {
    * invoking this function multiple times. DeleteActionModifiers will be called
    * in the order they are added to the template, so if any modifier is
    * destructive, it must be added in the right order.
-   *
+   * 
    * @param deleteActionModifier
    *          The DeleteActionModifier to register.
    */
@@ -140,7 +132,7 @@ public class HBaseClientTemplate {
    * multiple times. ScanModifiers will be called in the order they are added to
    * the template, so if any modifier is destructive, it must be added in the
    * right order.
-   *
+   * 
    * @param scanModifier
    *          The ScanModifier to register.
    */
@@ -189,7 +181,7 @@ public class HBaseClientTemplate {
 
   /**
    * Returns the table name
-   *
+   * 
    * @return The table name
    */
   public String getTableName() {
@@ -198,43 +190,24 @@ public class HBaseClientTemplate {
 
   /**
    * Execute a Get on HBase.
-   *
+   * 
    * Any GetModifers registered with registerGetModifier will be invoked before
    * the Get is executed.
-   *
+   * 
    * @param get
    *          The Get to execute
-   * @param transactional
-   *          true if this is a transactional get.
    * @return Result returned from the Get.
    */
-  public Result get(Get get, boolean transactional) {
+  public Result get(Get get) {
     HTableInterface table = pool.getTable(tableName);
     try {
       for (GetModifier getModifier : getModifiers) {
         get = getModifier.modifyGet(get);
       }
-      if (transactional) {
-        Transaction tx = transactionManager
-            .getTransaction(TransactionType.SINGLE_ROW);
-        Result result;
-        try {
-          result = tx.get(table, get);
-        } catch (RuntimeException e) {
-          transactionManager.rollback(tx);
-          throw e;
-        } catch (Error e) {
-          transactionManager.rollback(tx);
-          throw e;
-        }
-        transactionManager.commit(tx);
-        return result;
-      } else {
-        try {
-          return table.get(get);
-        } catch (IOException e) {
-          throw new HBaseClientException("Error performing get", e);
-        }
+      try {
+        return table.get(get);
+      } catch (IOException e) {
+        throw new HBaseClientException("Error performing get", e);
       }
     } finally {
       if (table != null) {
@@ -251,60 +224,55 @@ public class HBaseClientTemplate {
   /**
    * Execute the get on HBase, invoking the getModifier before executing the get
    * if getModifier is not null.
-   *
+   * 
    * Any GetModifers registered with registerGetModifier will be invoked before
    * the Get is executed, and after the getModifier passed to this function are
    * called.
-   *
+   * 
    * @param get
    *          The Get to execute.
    * @param getModifier
    *          Invoked before the Get to give callers a chance to modify the Get
    *          before it is executed.
-   * @param transactional
-   *          Specifies whether this get should participate in a transaction.
    * @return Result returned from the Get.
    */
-  public Result get(Get get, GetModifier getModifier, boolean transactional) {
+  public Result get(Get get, GetModifier getModifier) {
     if (getModifier != null) {
       get = getModifier.modifyGet(get);
     }
-    return get(get, transactional);
+    return get(get);
   }
 
   /**
    * Execute a Get on HBase, creating the Get from the key's toByteArray method.
    * The returned Result of the Get will be mapped to an entity with the
    * entityMapper, and that entity will be returned.
-   *
+   * 
    * Any GetModifers registered with registerGetModifier will be invoked before
    * the Get is executed.
-   *
+   * 
    * @param key
    *          The Key to create a Get from.
    * @param entityMapper
    *          The EntityMapper to use to map the Result to an entity to return.
-   * @param transactional
-   *          Specifies whether this get should participate in a transaction.
    * @return The entity created by the entityMapper.
    */
-  public <K, E> E get(K key, EntityMapper<K, E> entityMapper,
-      boolean transactional) {
-    return get(key, null, entityMapper, transactional);
+  public <K, E> E get(K key, EntityMapper<K, E> entityMapper) {
+    return get(key, null, entityMapper);
   }
 
   /**
    * Execute a Get on HBase, creating the Get from the key's toByteArray method.
    * The returned Result of the Get will be mapped to an entity with the
    * entityMapper, and that entity will be returned.
-   *
+   * 
    * If the getModifier is not null, it will be invoked before the created Get
    * is executed.
-   *
+   * 
    * Any GetModifers registered with registerGetModifier will be invoked after
    * the getModifier passed to this method is invoked, and before the Get is
    * executed.
-   *
+   * 
    * @param key
    *          The Key to create a Get from.
    * @param getModifier
@@ -312,16 +280,14 @@ public class HBaseClientTemplate {
    *          before it is executed.
    * @param entityMapper
    *          The EntityMapper to use to map the Result to an entity to return.
-   * @param transactional
-   *          Specifies whether this get should participate in a transaction.
    * @return The entity created by the entityMapper.
    */
   public <K, E> E get(K key, GetModifier getModifier,
-      EntityMapper<K, E> entityMapper, boolean transactional) {
+      EntityMapper<K, E> entityMapper) {
     byte[] keyBytes = entityMapper.getKeySerDe().serialize(key);
     Get get = new Get(keyBytes);
     HBaseUtils.addColumnsToGet(entityMapper.getRequiredColumns(), get);
-    Result result = get(get, getModifier, transactional);
+    Result result = get(get, getModifier);
     if (result.isEmpty()) {
       return null;
     } else {
@@ -332,28 +298,19 @@ public class HBaseClientTemplate {
 
   /**
    * Execute a Put on HBase.
-   *
+   * 
    * Any PutModifers registered with registerPutModifier will be invoked before
    * the Put is executed.
-   *
+   * 
    * @param putAction
    *          The put to execute on HBase.
-   * @param transactional
-   *          Specifies whether this put should participate in a transaction.
    * @return True if the put succeeded, False if the put failed due to update
    *         conflict
    */
-  public boolean put(PutAction putAction, boolean transactional) {
+  public boolean put(PutAction putAction) {
     HTableInterface table = pool.getTable(tableName);
     try {
-      for (PutActionModifier putActionModifier : putActionModifiers) {
-        putAction = putActionModifier.modifyPutAction(putAction);
-      }
-      if (transactional) {
-        return putTransactional(table, putAction);
-      } else {
-        return putNonTransactional(table, putAction);
-      }
+      return put(putAction, table);
     } finally {
       if (table != null) {
         try {
@@ -368,10 +325,10 @@ public class HBaseClientTemplate {
 
   /**
    * Execute a Put on HBase using a pre-define HTableInterface
-   *
+   * 
    * Any PutModifers registered with registerPutModifier will be invoked before
    * the Put is executed.
-   *
+   * 
    * @param putAction
    *          The put to execute on HBase.
    * @param table
@@ -383,50 +340,6 @@ public class HBaseClientTemplate {
     for (PutActionModifier putActionModifier : putActionModifiers) {
       putAction = putActionModifier.modifyPutAction(putAction);
     }
-    return putNonTransactional(table, putAction);
-  }
-
-  /**
-   * Execute a put on HBase within a transaction.
-   *
-   * @param table
-   *          The table to put to
-   * @param putAction
-   *          The put to execute on HBase.
-   * @return True if the put succeeded, False if the put failed due to update
-   *         conflict
-   */
-  private boolean putTransactional(HTableInterface table, PutAction putAction) {
-    Transaction tx = transactionManager
-        .getTransaction(TransactionType.SINGLE_ROW);
-    Put put = putAction.getPut();
-    try {
-      if (putAction.getVersionCheckAction() != null) {
-        tx.put(table, put, putAction.getVersionCheckAction().getVersion());
-      } else {
-        tx.put(table, put);
-      }
-    } catch (RuntimeException e) {
-      transactionManager.rollback(tx);
-      throw e;
-    } catch (Error e) {
-      transactionManager.rollback(tx);
-      throw e;
-    }
-    return transactionManager.commit(tx);
-  }
-
-  /**
-   * Execute a put on HBase.
-   *
-   * @param table
-   *          The table to put to
-   * @param putAction
-   *          The put to execute on HBase.
-   * @return True if the put succeeded, False if the put failed due to update
-   *         conflict
-   */
-  private boolean putNonTransactional(HTableInterface table, PutAction putAction) {
     Put put = putAction.getPut();
     if (putAction.getVersionCheckAction() != null) {
       byte[] versionBytes = null;
@@ -454,61 +367,55 @@ public class HBaseClientTemplate {
   /**
    * Execute the put on HBase, invoking the putModifier before executing the put
    * if putModifier is not null.
-   *
+   * 
    * Any PutModifers registered with registerPutModifier will be invoked after
    * the putModifier passed to this method is invoked, and before the Put is
    * executed.
-   *
+   * 
    * @param putAction
    *          The PutAction to execute on HBase.
    * @param putActionModifier
    *          Invoked before the Put to give callers a chance to modify the Put
    *          before it is executed.
-   * @param transactional
-   *          Specifies whether this put should participate in a transaction.
    * @return True if the put succeeded, False if the put failed due to update
    *         conflict
    */
-  public boolean put(PutAction putAction, PutActionModifier putActionModifier,
-      boolean transactional) {
+  public boolean put(PutAction putAction, PutActionModifier putActionModifier) {
     if (putActionModifier != null) {
       putAction = putActionModifier.modifyPutAction(putAction);
     }
-    return put(putAction, transactional);
+    return put(putAction);
   }
 
   /**
    * Execute a Put on HBase, creating the Put by mapping the key and entity to a
    * Put with the entityMapper.
-   *
+   * 
    * Any PutModifers registered with registerPutModifier will be invoked before
    * the Put is executed.
-   *
+   * 
    * @param key
    *          The Key to map to a Put with the entityMapper.
    * @param entity
    *          The entity to map to a Put with the entityMapper.
    * @param entityMapper
    *          The EntityMapper to map the key and entity to a put.
-   * @param transactional
-   *          Specifies whether this put should participate in a transaction.
    * @return True if the put succeeded, False if the put failed due to update
    *         conflict
    */
-  public <K, E> boolean put(K key, E entity, EntityMapper<K, E> entityMapper,
-      boolean transactional) {
-    return put(key, entity, null, entityMapper, transactional);
+  public <K, E> boolean put(K key, E entity, EntityMapper<K, E> entityMapper) {
+    return put(key, entity, null, entityMapper);
   }
 
   /**
    * Execute a Put on HBase, creating the Put by mapping the key and entity to a
    * Put with the entityMapper. putModifier will be invoked on this created Put
    * before the Put is executed.
-   *
+   * 
    * Any PutModifers registered with registerPutModifier will be invoked after
    * the putModifier passed to this method is invoked, and before the Put is
    * executed.
-   *
+   * 
    * @param key
    *          The Key to map to a Put with the entityMapper.
    * @param entity
@@ -518,16 +425,13 @@ public class HBaseClientTemplate {
    *          before it is executed.
    * @param entityMapper
    *          The EntityMapper to map the key and entity to a put.
-   * @param transactional
-   *          Specifies whether this put should participate in a transaction.
    * @return True if the put succeeded, False if the put failed due to update
    *         conflict
    */
   public <K, E> boolean put(K key, E entity,
-      PutActionModifier putActionModifier, EntityMapper<K, E> entityMapper,
-      boolean transactional) {
+      PutActionModifier putActionModifier, EntityMapper<K, E> entityMapper) {
     PutAction putAction = entityMapper.mapFromEntity(key, entity);
-    return put(putAction, putActionModifier, transactional);
+    return put(putAction, putActionModifier);
   }
 
   /**
@@ -561,27 +465,40 @@ public class HBaseClientTemplate {
 
   /**
    * Execute a Delete on HBase.
-   *
+   * 
    * Any DeleteActionModifers registered with registerDeleteModifier will be
    * invoked before the Delete is executed.
-   *
+   * 
    * @param deleteAction
    *          The delete to execute on HBase.
-   * @param transactional
-   *          Specifies whether this delete should participate in a transaction
    * @return True if the delete succeeded, False if the put failed due to update
    *         conflict
    */
-  public boolean delete(DeleteAction deleteAction, boolean transactional) {
+  public boolean delete(DeleteAction deleteAction) {
     HTableInterface table = pool.getTable(tableName);
     try {
       for (DeleteActionModifier deleteActionModifier : deleteActionModifiers) {
         deleteAction = deleteActionModifier.modifyDeleteAction(deleteAction);
       }
-      if (transactional) {
-        return deleteTransactional(table, deleteAction);
+      Delete delete = deleteAction.getDelete();
+      if (deleteAction.getVersionCheckAction() != null) {
+        byte[] versionBytes = Bytes.toBytes(deleteAction
+            .getVersionCheckAction().getVersion());
+        try {
+          return table.checkAndDelete(delete.getRow(),
+              Constants.SYS_COL_FAMILY, Constants.VERSION_CHECK_COL_QUALIFIER,
+              versionBytes, delete);
+        } catch (IOException e) {
+          throw new HBaseClientException(
+              "Error deleteing row from table with checkAndDelete", e);
+        }
       } else {
-        return deleteNonTransactional(table, deleteAction);
+        try {
+          table.delete(delete);
+          return true;
+        } catch (IOException e) {
+          throw new HBaseClientException("Error deleteing row from table", e);
+        }
       }
     } finally {
       if (table != null) {
@@ -595,84 +512,37 @@ public class HBaseClientTemplate {
     }
   }
 
-  private boolean deleteTransactional(HTableInterface table,
-      DeleteAction deleteAction) {
-    Delete delete = deleteAction.getDelete();
-    Transaction tx = transactionManager
-        .getTransaction(TransactionType.SINGLE_ROW);
-    try {
-      if (deleteAction.getVersionCheckAction() != null) {
-        tx.delete(table, delete, deleteAction.getVersionCheckAction()
-            .getVersion());
-      } else {
-        tx.delete(table, delete);
-      }
-    } catch (RuntimeException e) {
-      transactionManager.rollback(tx);
-      throw e;
-    } catch (Error e) {
-      transactionManager.rollback(tx);
-      throw e;
-    }
-    return transactionManager.commit(tx);
-  }
-
-  private boolean deleteNonTransactional(HTableInterface table,
-      DeleteAction deleteAction) {
-    Delete delete = deleteAction.getDelete();
-    if (deleteAction.getVersionCheckAction() != null) {
-      byte[] versionBytes = Bytes.toBytes(deleteAction.getVersionCheckAction()
-          .getVersion());
-      try {
-        return table.checkAndDelete(delete.getRow(), Constants.SYS_COL_FAMILY,
-            Constants.VERSION_CHECK_COL_QUALIFIER, versionBytes, delete);
-      } catch (IOException e) {
-        throw new HBaseClientException(
-            "Error deleteing row from table with checkAndDelete", e);
-      }
-    } else {
-      try {
-        table.delete(delete);
-        return true;
-      } catch (IOException e) {
-        throw new HBaseClientException("Error deleteing row from table", e);
-      }
-    }
-  }
-
   /**
    * Execute the delete on HBase, invoking the deleteModifier before executing
    * the delete if deleteModifier is not null.
-   *
+   * 
    * Any DeleteActionModifers registered with registerDeleteModifier will be
    * invoked after the deleteActionModifier passed to this method is invoked,
    * and before the Delete is executed.
-   *
+   * 
    * @param deleteAction
    *          The Delete to execute.
    * @param deleteActionModifier
    *          Invoked before the Delete to give callers a chance to modify the
    *          Delete before it is executed.
-   * @param transactional
-   *          Specifies whether this delete should participate in a transaction.
    * @return True if the delete succeeded, False if the put failed due to update
    *         conflict
    */
   public boolean delete(DeleteAction deleteAction,
-      DeleteActionModifier deleteActionModifier, boolean transactional) {
+      DeleteActionModifier deleteActionModifier) {
     if (deleteActionModifier != null) {
       deleteAction = deleteActionModifier.modifyDeleteAction(deleteAction);
     }
-    return delete(deleteAction, transactional);
+    return delete(deleteAction);
   }
 
   /**
    * Execute a Delete on HBase, creating the Delete from the key, and the set of
    * columns. Only the columns specified in this set will be deleted in the row.
-   *
+   * 
    * Any DeleteActionModifers registered with registerDeleteModifier will be
    * invoked before the Delete is executed.
-   *
+   * 
    * @param key
    *          The Key to map to a Put with the entityMapper.
    * @param columns
@@ -680,15 +550,12 @@ public class HBaseClientTemplate {
    * @param checkAction
    *          A VersionCheckAction that will force this delete to do a
    *          checkAndDelete against a version count in the row
-   * @param transactional
-   *          Specifies whether this delete should participate in a transaction.
    * @return True if the delete succeeded, False if the put failed due to update
    *         conflict
    */
   public <K> boolean delete(K key, Set<String> columns,
-      VersionCheckAction checkAction, KeySerDe<K> keySerDe,
-      boolean transactional) {
-    return delete(key, columns, checkAction, null, keySerDe, transactional);
+      VersionCheckAction checkAction, KeySerDe<K> keySerDe) {
+    return delete(key, columns, checkAction, null, keySerDe);
   }
 
   /**
@@ -696,11 +563,11 @@ public class HBaseClientTemplate {
    * columns. Only the columns specified in this set will be deleted in the row.
    * deleteModifier will be invoked on this created Delete before the Delete is
    * executed.
-   *
+   * 
    * Any DeleteActionModifers registered with registerDeleteActionModifier will
    * be invoked after the deleteActionModifier passed to this method is invoked,
    * and before the Delete is executed.
-   *
+   * 
    * @param key
    *          The Key to map to a Put with the entityMapper.
    * @param columns
@@ -711,15 +578,12 @@ public class HBaseClientTemplate {
    * @param deleteActionModifier
    *          Invoked before the Delete to give callers a chance to modify the
    *          Delete before it is executed.
-   * @param transactional
-   *          Specifies whether this delete should participate in a transaction.
    * @return True if the delete succeeded, False if the put failed due to update
    *         conflict
    */
   public <K> boolean delete(K key, Set<String> columns,
       VersionCheckAction checkAction,
-      DeleteActionModifier deleteActionModifier, KeySerDe<K> keySerDe,
-      boolean transactional) {
+      DeleteActionModifier deleteActionModifier, KeySerDe<K> keySerDe) {
     byte[] keyBytes = keySerDe.serialize(key);
     Delete delete = new Delete(keyBytes);
     for (String requiredColumn : columns) {
@@ -731,25 +595,21 @@ public class HBaseClientTemplate {
             Bytes.toBytes(familyAndColumn[1]));
       }
     }
-    return delete(new DeleteAction(delete, checkAction), deleteActionModifier,
-        transactional);
+    return delete(new DeleteAction(delete, checkAction), deleteActionModifier);
   }
 
   /**
-   * Refactored the key subsystem by removing the "Key" wrapper type,
-   * Get an EntityScannerBuilder that the client can use to build an
-   * EntityScanner.
+   * Refactored the key subsystem by removing the "Key" wrapper type, Get an
+   * EntityScannerBuilder that the client can use to build an EntityScanner.
    * 
    * @param entityMapper
    *          The EntityMapper to use to map rows to entities.
-   * @param transactional
-   *          Specifies whether this scan should participate in a transaction.
    * @return The EntityScannerBuilder
    */
   public <K, E> EntityScannerBuilder<K, E> getScannerBuilder(
-      EntityMapper<K, E> entityMapper, boolean transactional) {
+      EntityMapper<K, E> entityMapper) {
     EntityScannerBuilder<K, E> builder = new BaseEntityScanner.Builder<K, E>(
-        transactionManager, pool, tableName, entityMapper, transactional);
+        pool, tableName, entityMapper);
     for (ScanModifier scanModifier : scanModifiers) {
       builder.addScanModifier(scanModifier);
     }

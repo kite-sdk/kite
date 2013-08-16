@@ -10,7 +10,6 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import com.cloudera.cdk.data.hbase.BaseEntityMapper;
 import com.cloudera.cdk.data.hbase.EntityMapper;
 import com.cloudera.cdk.data.hbase.SchemaNotFoundException;
-import com.cloudera.cdk.data.hbase.transactions.TransactionManager;
 
 /**
  * An AvroEntityManager implementation that can create entity mappers which will
@@ -20,14 +19,13 @@ public class GenericAvroEntityManager extends AvroEntityManager {
 
   private final Map<TableEntityPair, AvroEntitySchema> entitySchemaMap = new HashMap<TableEntityPair, AvroEntitySchema>();
 
-  public GenericAvroEntityManager(TransactionManager transactionManager,
-      HTablePool tablePool) {
-    super(transactionManager, tablePool);
+  public GenericAvroEntityManager(HTablePool tablePool) {
+    super(tablePool);
   }
 
-  public GenericAvroEntityManager(TransactionManager transactionManager,
-      HTablePool tablePool, String managedSchemaTable) {
-    super(transactionManager, tablePool, managedSchemaTable);
+  public GenericAvroEntityManager(HTablePool tablePool,
+      String managedSchemaTable) {
+    super(tablePool, managedSchemaTable);
   }
 
   /**

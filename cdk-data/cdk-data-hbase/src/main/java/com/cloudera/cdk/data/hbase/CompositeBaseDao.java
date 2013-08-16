@@ -11,12 +11,11 @@ import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
 
 import com.cloudera.cdk.data.hbase.EntitySchema.FieldMapping;
-import com.cloudera.cdk.data.hbase.transactions.TransactionManager;
 
 /**
  * Base implementation of the CompositeDao interface. Internally managed
  * multiple EntityMappers that each handle their respective sub types.
- *
+ * 
  * @param <K>
  *          The type of the key
  * @param <E>
@@ -121,7 +120,7 @@ public abstract class CompositeBaseDao<K, E, S> implements
       return new EntitySchema<Object>(tables, null, fieldMappings,
           transactional);
     }
-    
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public KeySerDe getKeySerDe() {
@@ -138,9 +137,7 @@ public abstract class CompositeBaseDao<K, E, S> implements
   /**
    * Constructor that will internally create an HBaseClientTemplate from the
    * tablePool and the tableName.
-   *
-   * @param transactionManager
-   *          The TransactionManager that will manage transactional entities.
+   * 
    * @param tablePool
    *          A pool of HBase Tables.
    * @param tableName
@@ -149,10 +146,9 @@ public abstract class CompositeBaseDao<K, E, S> implements
    *          Maps between entities and the HBase operations for their
    *          respective sub entities.
    */
-  public CompositeBaseDao(TransactionManager transactionManager,
-      HTablePool tablePool, String tableName,
+  public CompositeBaseDao(HTablePool tablePool, String tableName,
       List<EntityMapper<K, S>> entityMappers) {
-    baseDao = new BaseDao<K, E>(transactionManager, tablePool, tableName,
+    baseDao = new BaseDao<K, E>(tablePool, tableName,
         new CompositeEntityMapper(entityMappers));
   }
 
@@ -165,7 +161,7 @@ public abstract class CompositeBaseDao<K, E, S> implements
   public boolean put(K key, E entity) {
     return baseDao.put(key, entity);
   }
-  
+
   @Override
   public long increment(K key, String fieldName, long amount) {
     throw new UnsupportedOperationException(
@@ -176,7 +172,7 @@ public abstract class CompositeBaseDao<K, E, S> implements
   public void delete(K key) {
     baseDao.delete(key);
   }
-  
+
   @Override
   public boolean delete(K key, E entity) {
     return baseDao.delete(key, entity);
@@ -191,7 +187,7 @@ public abstract class CompositeBaseDao<K, E, S> implements
   public EntityScanner<K, E> getScanner(K startKey, K stopKey) {
     return baseDao.getScanner(startKey, stopKey);
   }
-  
+
   @Override
   public EntityScanner<K, E> getScanner(PartialKey<K> startKey,
       PartialKey<K> stopKey) {
@@ -209,7 +205,7 @@ public abstract class CompositeBaseDao<K, E, S> implements
       PartialKey<K> stopKey, ScanModifier scanModifier) {
     return baseDao.getScanner(startKey, stopKey, scanModifier);
   }
-  
+
   @Override
   public EntityScannerBuilder<K, E> getScannerBuilder() {
     return baseDao.getScannerBuilder();
@@ -224,12 +220,12 @@ public abstract class CompositeBaseDao<K, E, S> implements
   public EntitySchema<?> getEntitySchema() {
     return baseDao.getEntitySchema();
   }
-  
+
   @Override
   public KeySerDe<K> getKeySerDe() {
     return baseDao.getKeySerDe();
   }
-  
+
   @Override
   public EntitySerDe<E> getEntitySerDe() {
     return baseDao.getEntitySerDe();

@@ -83,7 +83,7 @@ public class AvroDaoTest {
 
   @Test
   public void testGeneric() throws Exception {
-    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(null, tablePool,
+    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(tablePool,
         tableName, keyString, recordString);
 
     for (int i = 0; i < 10; ++i) {
@@ -158,7 +158,7 @@ public class AvroDaoTest {
   @Test
   public void testSpecific() throws Exception {
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        null, tablePool, new String(tableName), keyString, recordString,
+        tablePool, new String(tableName), keyString, recordString,
         TestKey.class, TestRecord.class);
 
     int cnt = 0;
@@ -236,7 +236,7 @@ public class AvroDaoTest {
   @Test(expected = KeyBuildException.class)
   public void testInvalidPartialScan() {
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        null, tablePool, new String(tableName), keyString, recordString,
+        tablePool, new String(tableName), keyString, recordString,
         TestKey.class, TestRecord.class);
 
     // Test partial key scan with second part of key built
@@ -250,7 +250,7 @@ public class AvroDaoTest {
   @Test
   public void testIncrement() {
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        null, tablePool, new String(tableName), keyString, recordString,
+        tablePool, new String(tableName), keyString, recordString,
         TestKey.class, TestRecord.class);
 
     TestKey keyRecord = TestKey.newBuilder().setPart1("part1")
@@ -278,7 +278,7 @@ public class AvroDaoTest {
   @Test
   public void testConflict() throws Exception {
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        null, tablePool, new String(tableName), keyString, recordString,
+        tablePool, new String(tableName), keyString, recordString,
         TestKey.class, TestRecord.class);
 
     // create key and entity, and do a put
@@ -312,7 +312,7 @@ public class AvroDaoTest {
   @Test
   public void testEmptyCollections() throws Exception {
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        null, tablePool, new String(tableName), keyString, recordString,
+        tablePool, new String(tableName), keyString, recordString,
         TestKey.class, TestRecord.class);
 
     TestKey keyRecord = TestKey.newBuilder().setPart1("part1")
@@ -348,7 +348,7 @@ public class AvroDaoTest {
   @Test
   public void testDeleteAfterMultiplePuts() throws Exception {
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        null, tablePool, new String(tableName), keyString, recordString,
+        tablePool, new String(tableName), keyString, recordString,
         TestKey.class, TestRecord.class);
 
     for (int i = 0; i < 10; ++i) {
@@ -374,7 +374,7 @@ public class AvroDaoTest {
   @Test
   public void testBatchPutOperation() throws Exception {
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        null, tablePool, tableName, keyString, recordString, TestKey.class,
+        tablePool, tableName, keyString, recordString, TestKey.class,
         TestRecord.class);
 
     EntityBatch<TestKey, TestRecord> batch = dao.newBatch();

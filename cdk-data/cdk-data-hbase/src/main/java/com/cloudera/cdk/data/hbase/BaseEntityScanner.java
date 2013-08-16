@@ -12,9 +12,6 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.FilterList;
 
 import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
-import com.cloudera.cdk.data.hbase.transactions.Transaction;
-import com.cloudera.cdk.data.hbase.transactions.TransactionManager;
-import com.cloudera.cdk.data.hbase.transactions.TransactionType;
 
 /**
  * Base EntityScanner implementation. This EntityScanner will use an
@@ -31,8 +28,6 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
   private final EntityMapper<K, E> entityMapper;
   private final HTablePool tablePool;
   private final String tableName;
-  private final TransactionManager transactionManager;
-  private final boolean transactional;
   private Scan scan;
   private ResultScanner resultScanner;
 
@@ -50,15 +45,12 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
    * @param transactional
    *          true if this is a transactional scan.
    */
-  public BaseEntityScanner(Scan scan, TransactionManager transactionManager,
-      HTablePool tablePool, String tableName, EntityMapper<K, E> entityMapper,
-      boolean transactional) {
+  public BaseEntityScanner(Scan scan, HTablePool tablePool, String tableName,
+      EntityMapper<K, E> entityMapper) {
     this.scan = scan;
     this.entityMapper = entityMapper;
     this.tablePool = tablePool;
     this.tableName = tableName;
-    this.transactionManager = transactionManager;
-    this.transactional = transactional;
   }
 
   /**
@@ -71,23 +63,25 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
     this.entityMapper = scanBuilder.getEntityMapper();
     this.tablePool = scanBuilder.getTablePool();
     this.tableName = scanBuilder.getTableName();
-    this.transactionManager = scanBuilder.getTransactionManager();
-    this.transactional = scanBuilder.getTransactional();
     this.scan = new Scan();
 
     if (scanBuilder.getStartKey() != null) {
-      byte[] keyBytes = entityMapper.getKeySerDe().serialize(scanBuilder.getStartKey());
+      byte[] keyBytes = entityMapper.getKeySerDe().serialize(
+          scanBuilder.getStartKey());
       this.scan.setStartRow(keyBytes);
-    } else if(scanBuilder.getPartialStartKey() != null) { 
-      byte[] keyBytes = entityMapper.getKeySerDe().serializePartial(scanBuilder.getPartialStartKey());
+    } else if (scanBuilder.getPartialStartKey() != null) {
+      byte[] keyBytes = entityMapper.getKeySerDe().serializePartial(
+          scanBuilder.getPartialStartKey());
       this.scan.setStartRow(keyBytes);
     }
 
     if (scanBuilder.getStopKey() != null) {
-      byte[] keyBytes = entityMapper.getKeySerDe().serialize(scanBuilder.getStopKey());
+      byte[] keyBytes = entityMapper.getKeySerDe().serialize(
+          scanBuilder.getStopKey());
       this.scan.setStopRow(keyBytes);
     } else if (scanBuilder.getPartialStopKey() != null) {
-      byte[] keyBytes = entityMapper.getKeySerDe().serializePartial(scanBuilder.getPartialStopKey());
+      byte[] keyBytes = entityMapper.getKeySerDe().serializePartial(
+          scanBuilder.getPartialStopKey());
       this.scan.setStopRow(keyBytes);
     }
 
@@ -112,7 +106,7 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
         this.scan.setFilter(filterList);
       }
     }
-    
+
     for (ScanModifier scanModifier : scanBuilder.getScanModifiers()) {
       this.scan = scanModifier.modifyScan(this.scan);
     }
@@ -146,25 +140,10 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
     HTableInterface table = null;
     try {
       table = tablePool.getTable(tableName);
-      if (transactional) {
-        Transaction tx = transactionManager
-            .getTransaction(TransactionType.SINGLE_ROW);
-        try {
-          resultScanner = tx.getScanner(table, scan);
-        } catch (RuntimeException e) {
-          transactionManager.rollback(tx);
-          throw e;
-        } catch (Error e) {
-          transactionManager.rollback(tx);
-          throw e;
-        }
-        transactionManager.commit(tx);
-      } else {
-        try {
-          resultScanner = table.getScanner(scan);
-        } catch (IOException e) {
-          throw new HBaseClientException("Failed to fetch scanner", e);
-        }
+      try {
+        resultScanner = table.getScanner(scan);
+      } catch (IOException e) {
+        throw new HBaseClientException("Failed to fetch scanner", e);
       }
     } finally {
       if (table != null) {
@@ -191,10 +170,9 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
    */
   public static class Builder<K, E> extends EntityScannerBuilder<K, E> {
 
-    public Builder(TransactionManager transactionManager, HTablePool tablePool,
-        String tableName, EntityMapper<K, E> entityMapper, boolean transactional) {
-      super(transactionManager, tablePool, tableName, entityMapper,
-          transactional);
+    public Builder(HTablePool tablePool, String tableName,
+        EntityMapper<K, E> entityMapper) {
+      super(tablePool, tableName, entityMapper);
     }
 
     @Override

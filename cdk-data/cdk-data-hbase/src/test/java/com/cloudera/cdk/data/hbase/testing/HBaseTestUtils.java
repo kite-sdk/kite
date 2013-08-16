@@ -18,7 +18,6 @@ import com.cloudera.cdk.data.hbase.avro.AvroEntityManager;
 import com.cloudera.cdk.data.hbase.avro.GenericAvroEntityManager;
 import com.cloudera.cdk.data.hbase.avro.SpecificAvroEntityManager;
 import com.cloudera.cdk.data.hbase.avro.tool.SchemaTool;
-import com.cloudera.cdk.data.hbase.transactions.TransactionManager;
 
 public class HBaseTestUtils {
 
@@ -98,19 +97,17 @@ public class HBaseTestUtils {
   }
 
   public static SpecificAvroEntityManager initializeSpecificAvroEntityManager(
-      TransactionManager txManager, HTablePool tablePool, String directory)
-      throws Exception {
+      HTablePool tablePool, String directory) throws Exception {
     SpecificAvroEntityManager entityManager = new SpecificAvroEntityManager(
-        txManager, tablePool);
+        tablePool);
     initializeAvroEntityManager(entityManager, directory);
     return entityManager;
   }
 
   public static GenericAvroEntityManager initializeGenericAvroEntityManager(
-      TransactionManager txManager, HTablePool tablePool, String directory)
-      throws IOException {
+      HTablePool tablePool, String directory) throws IOException {
     GenericAvroEntityManager entityManager = new GenericAvroEntityManager(
-        txManager, tablePool);
+        tablePool);
     initializeAvroEntityManager(entityManager, directory);
     return entityManager;
   }
