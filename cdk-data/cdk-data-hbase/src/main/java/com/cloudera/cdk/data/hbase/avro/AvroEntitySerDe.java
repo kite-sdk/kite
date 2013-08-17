@@ -22,14 +22,15 @@ import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
+import org.apache.avro.util.Utf8;
 
-import com.cloudera.cdk.data.hbase.avro.io.ColumnDecoder;
-import com.cloudera.cdk.data.hbase.avro.io.ColumnEncoder;
 import com.cloudera.cdk.data.hbase.EntityComposer;
 import com.cloudera.cdk.data.hbase.EntitySchema.FieldMapping;
 import com.cloudera.cdk.data.hbase.EntitySerDe;
 import com.cloudera.cdk.data.hbase.MappingType;
 import com.cloudera.cdk.data.hbase.SchemaValidationException;
+import com.cloudera.cdk.data.hbase.avro.io.ColumnDecoder;
+import com.cloudera.cdk.data.hbase.avro.io.ColumnEncoder;
 
 /**
  * An EntitySerDe implementation that serializes and deserializes Avro records.
@@ -154,8 +155,8 @@ public class AvroEntitySerDe<E extends IndexedRecord> extends EntitySerDe<E> {
   }
 
   @Override
-  public byte[] serializeKeyAsColumnValueToBytes(String fieldName, String key,
-      Object columnValue) {
+  public byte[] serializeKeyAsColumnValueToBytes(String fieldName,
+      CharSequence columnKey, Object columnValue) {
     Field field = avroSchema.getAvroSchema().getField(fieldName);
     if (field == null) {
       throw new SchemaValidationException("Invalid field name " + fieldName
@@ -175,16 +176,29 @@ public class AvroEntitySerDe<E extends IndexedRecord> extends EntitySerDe<E> {
         throw new SchemaValidationException("Invalid field name " + fieldName
             + " for schema " + avroSchema.toString());
       }
-      if (!kacRecordDatumWriters.get(fieldName).containsKey(key)) {
+      if (!kacRecordDatumWriters.get(fieldName).containsKey(
+          columnKey.toString())) {
         throw new SchemaValidationException("Invalid key in record: "
-            + fieldName + "." + key);
+            + fieldName + "." + columnKey);
       }
       DatumWriter<Object> datumWriter = kacRecordDatumWriters.get(fieldName)
-          .get(key);
+          .get(columnKey.toString());
       return AvroUtils.writeAvroEntity(columnValue, datumWriter);
     } else {
       throw new SchemaValidationException("Unsupported type for keyAsColumn: "
           + schemaType);
+    }
+  }
+
+  @Override
+  public byte[] serializeKeyAsColumnKeyToBytes(String fieldName,
+      CharSequence columnKey) {
+    if (columnKey.getClass().isAssignableFrom(String.class)) {
+      return ((String)columnKey).getBytes();
+    } else if (columnKey.getClass().isAssignableFrom(Utf8.class)) {
+      return ((Utf8)columnKey).getBytes();
+    } else {
+      return columnKey.toString().getBytes();
     }
   }
 
@@ -208,7 +222,7 @@ public class AvroEntitySerDe<E extends IndexedRecord> extends EntitySerDe<E> {
 
   @Override
   public Object deserializeKeyAsColumnValueFromBytes(String fieldName,
-      String key, byte[] bytes) {
+      byte[] columnKeyBytes, byte[] columnValueBytes) {
     Field field = avroSchema.getAvroSchema().getField(fieldName);
     if (field == null) {
       throw new SchemaValidationException("Invalid field name " + fieldName
@@ -222,19 +236,45 @@ public class AvroEntitySerDe<E extends IndexedRecord> extends EntitySerDe<E> {
         throw new SchemaValidationException("No datum reader for field name: "
             + fieldName);
       }
-      return AvroUtils.readAvroEntity(bytes, datumReader);
+      return AvroUtils.readAvroEntity(columnValueBytes, datumReader);
     } else if (schemaType == Schema.Type.RECORD) {
       if (!kacRecordDatumReaders.containsKey(fieldName)) {
         throw new SchemaValidationException("Invalid field name " + fieldName
             + " for schema " + avroSchema.toString());
       }
-      if (!kacRecordDatumReaders.get(fieldName).containsKey(key)) {
+      String columnKey = new String(columnKeyBytes);
+      if (!kacRecordDatumReaders.get(fieldName).containsKey(columnKey)) {
         throw new SchemaValidationException("Invalid key in record: "
-            + fieldName + "." + key);
+            + fieldName + "." + columnKey);
       }
       DatumReader<Object> datumReader = kacRecordDatumReaders.get(fieldName)
-          .get(key);
-      return AvroUtils.readAvroEntity(bytes, datumReader);
+          .get(columnKey);
+      return AvroUtils.readAvroEntity(columnValueBytes, datumReader);
+    } else {
+      throw new SchemaValidationException("Unsupported type for keyAsColumn: "
+          + schemaType);
+    }
+  }
+
+  @Override
+  public CharSequence deserializeKeyAsColumnKeyFromBytes(String fieldName,
+      byte[] columnKeyBytes) {
+    Field field = avroSchema.getAvroSchema().getField(fieldName);
+    if (field == null) {
+      throw new SchemaValidationException("Invalid field name " + fieldName
+          + " for schema " + avroSchema.toString());
+    }
+
+    Schema.Type schemaType = field.schema().getType();
+    if (schemaType == Schema.Type.MAP) {
+      String stringProp = field.schema().getProp("avro.java.string");
+      if (stringProp != null && stringProp.equals("String")) {
+        return new String(columnKeyBytes);
+      } else {
+        return new Utf8(columnKeyBytes);
+      }
+    } else if (schemaType == Schema.Type.RECORD) {
+      return new String(columnKeyBytes);
     } else {
       throw new SchemaValidationException("Unsupported type for keyAsColumn: "
           + schemaType);

@@ -118,9 +118,9 @@ public class AvroEntityMapperTest {
     @SuppressWarnings("unchecked")
     Map<CharSequence, Utf8> field3 = (Map<CharSequence, Utf8>) entity
         .get("field3");
-    assertEquals("string_value1", field3.get("1").toString());
-    assertEquals("string_value2", field3.get("2").toString());
-    assertEquals("string_value3", field3.get("3").toString());
+    assertEquals("string_value1", field3.get(new Utf8("1")).toString());
+    assertEquals("string_value2", field3.get(new Utf8("2")).toString());
+    assertEquals("string_value3", field3.get(new Utf8("3")).toString());
 
     GenericRecord field4 = (GenericRecord) entity.get("field4");
     assertEquals(-1, ((Integer) field4.get("sub_field1")).intValue());

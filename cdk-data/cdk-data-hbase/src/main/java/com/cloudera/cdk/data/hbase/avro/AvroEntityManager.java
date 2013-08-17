@@ -310,6 +310,7 @@ public abstract class AvroEntityManager implements
       }
       AvroEntitySchema avroEntitySchema = schemaParser
           .parseEntity(managedSchemaEntityVersionSchema);
+      avroEntitySchema = AvroUtils.mergeSpecificStringTypes(ManagedSchemaEntityVersion.class, avroEntitySchema);
       AvroEntityComposer<ManagedSchemaEntityVersion> entityComposer = new AvroEntityComposer<ManagedSchemaEntityVersion>(
           avroEntitySchema, true);
       AvroEntitySerDe<ManagedSchemaEntityVersion> entitySerDe = new AvroEntitySerDe<ManagedSchemaEntityVersion>(

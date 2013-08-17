@@ -140,7 +140,7 @@ public class AvroEntityComposer<E extends IndexedRecord> implements
 
   @Override
   public Object buildKeyAsColumnField(String fieldName,
-      Map<String, Object> keyAsColumnValues) {
+      Map<CharSequence, Object> keyAsColumnValues) {
     Schema schema = avroSchema.getAvroSchema();
     Field field = schema.getField(fieldName);
     if (field == null) {
@@ -151,16 +151,17 @@ public class AvroEntityComposer<E extends IndexedRecord> implements
     Schema.Type fieldType = field.schema().getType();
     if (fieldType == Schema.Type.MAP) {
       Map<CharSequence, Object> retMap = new HashMap<CharSequence, Object>();
-      for (Entry<String, Object> entry : keyAsColumnValues.entrySet()) {
+      for (Entry<CharSequence, Object> entry : keyAsColumnValues.entrySet()) {
         retMap.put(entry.getKey(), entry.getValue());
       }
       return retMap;
     } else if (fieldType == Schema.Type.RECORD) {
       AvroRecordBuilder<E> builder = kacRecordBuilderFactories.get(fieldName)
           .getBuilder();
-      for (Entry<String, Object> keyAsColumnEntry : keyAsColumnValues
+      for (Entry<CharSequence, Object> keyAsColumnEntry : keyAsColumnValues
           .entrySet()) {
-        builder.put(keyAsColumnEntry.getKey(), keyAsColumnEntry.getValue());
+        builder.put(keyAsColumnEntry.getKey().toString(),
+            keyAsColumnEntry.getValue());
       }
       return builder.build();
     } else {

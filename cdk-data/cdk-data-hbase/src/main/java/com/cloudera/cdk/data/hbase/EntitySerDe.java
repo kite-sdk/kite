@@ -106,14 +106,26 @@ public abstract class EntitySerDe<E> {
    * 
    * @param fieldName
    *          The name of the entity's keyAsColumn field
-   * @param key
+   * @param columnKey
    *          The key of the keyAsColumn field
    * @param keyAsColumnFieldValue
    *          The value pointed to by this key.
    * @return The serialized bytes
    */
   public abstract byte[] serializeKeyAsColumnValueToBytes(String fieldName,
-      String key, Object keyAsColumnFieldValue);
+      CharSequence columnKey, Object keyAsColumnFieldValue);
+
+  /**
+   * Serialize the keyAsColumn key to bytes.
+   * 
+   * @param fieldName
+   *          The name of the entity's keyAsColumn field
+   * @param columnKey
+   *          The column key to serialize to bytes
+   * @return The serialized bytes.
+   */
+  public abstract byte[] serializeKeyAsColumnKeyToBytes(String fieldName,
+      CharSequence columnKey);
 
   /**
    * Deserialize a column mapped entity field's bytes to its type.
@@ -133,14 +145,26 @@ public abstract class EntitySerDe<E> {
    * 
    * @param fieldName
    *          The name of the entity's keyAsColumn field
-   * @param key
-   *          The key of the keyAsColumn field
-   * @param columnBytes
-   *          The bytes to deserialize
+   * @param columnKeyBytes
+   *          The key bytes of the keyAsColumn field
+   * @param columnValueBytes
+   *          The value bytes to deserialize
    * @return The keyAsColumn value pointed to by key.
    */
   public abstract Object deserializeKeyAsColumnValueFromBytes(String fieldName,
-      String key, byte[] columnBytes);
+      byte[] columKeyBytes, byte[] columnValueBytes);
+
+  /**
+   * Deserialize the keyAsColumn key from the qualifier.
+   * 
+   * @param fieldName
+   *          The name of the keyAsColumn field
+   * @param columnKeyBytes
+   *          The bytes of the qualifier
+   * @return The deserialized CharSequence
+   */
+  public abstract CharSequence deserializeKeyAsColumnKeyFromBytes(
+      String fieldName, byte[] columnKeyBytes);
 
   /**
    * Get the EntityComposer this EntitySerDe uses to compose entity fields.
@@ -195,18 +219,24 @@ public abstract class EntitySerDe<E> {
     Map<CharSequence, Object> keyAsColumnValues = entityComposer
         .extractKeyAsColumnValues(fieldName, fieldValue);
     for (Entry<CharSequence, Object> entry : keyAsColumnValues.entrySet()) {
-      String qualifier;
-      // if the field mapping has a prefix, prepend this to the column
-      // qualifier
+      CharSequence qualifier = entry.getKey();
+      byte[] qualifierBytes;
+      byte[] columnKeyBytes = serializeKeyAsColumnKeyToBytes(fieldName,
+          qualifier);
       if (prefix != null) {
-        qualifier = prefix + entry.getKey().toString();
+        byte[] prefixBytes = prefix.getBytes();
+        qualifierBytes = new byte[prefixBytes.length + columnKeyBytes.length];
+        System.arraycopy(prefixBytes, 0, qualifierBytes, 0, prefixBytes.length);
+        System.arraycopy(columnKeyBytes, 0, qualifierBytes, prefixBytes.length,
+            columnKeyBytes.length);
       } else {
-        qualifier = entry.getKey().toString();
+        qualifierBytes = columnKeyBytes;
       }
+
       // serialize the value, and add it to the put.
       byte[] bytes = serializeKeyAsColumnValueToBytes(fieldName, qualifier,
           entry.getValue());
-      put.add(family, qualifier.getBytes(), bytes);
+      put.add(family, qualifierBytes, bytes);
     }
   }
 
@@ -270,7 +300,7 @@ public abstract class EntitySerDe<E> {
     // Construct a map of keyAsColumn field values. From this we'll be able
     // to use the entityComposer to construct the entity field value.
     byte[] prefixBytes = prefix != null ? prefix.getBytes() : null;
-    Map<String, Object> fieldValueAsMap = new HashMap<String, Object>();
+    Map<CharSequence, Object> fieldValueAsMap = new HashMap<CharSequence, Object>();
     Map<byte[], byte[]> familyMap = result.getFamilyMap(family);
     for (Map.Entry<byte[], byte[]> entry : familyMap.entrySet()) {
       byte[] qualifier = entry.getKey();
@@ -283,11 +313,12 @@ public abstract class EntitySerDe<E> {
         qualifier = Arrays.copyOfRange(qualifier, prefixBytes.length,
             qualifier.length);
       }
-      String qualifierString = new String(qualifier);
       byte[] columnBytes = entry.getValue();
+      CharSequence keyAsColumnKey = deserializeKeyAsColumnKeyFromBytes(
+          fieldName, qualifier);
       Object keyAsColumnValue = deserializeKeyAsColumnValueFromBytes(fieldName,
-          qualifierString, columnBytes);
-      fieldValueAsMap.put(qualifierString, keyAsColumnValue);
+          qualifier, columnBytes);
+      fieldValueAsMap.put(keyAsColumnKey, keyAsColumnValue);
     }
     // Now build the entity field from the fieldValueAsMap.
     return entityComposer.buildKeyAsColumnField(fieldName, fieldValueAsMap);

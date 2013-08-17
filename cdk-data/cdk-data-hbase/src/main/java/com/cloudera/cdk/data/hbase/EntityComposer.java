@@ -60,7 +60,7 @@ public interface EntityComposer<E> {
    * @return The field value
    */
   public Object buildKeyAsColumnField(String fieldName,
-      Map<String, Object> keyAsColumnValues);
+      Map<CharSequence, Object> keyAsColumnValues);
 
   /**
    * An interface for entity builders.

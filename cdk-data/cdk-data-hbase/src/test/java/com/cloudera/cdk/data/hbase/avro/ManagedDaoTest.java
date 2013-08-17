@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +14,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
+import org.apache.avro.util.Utf8;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -28,7 +28,6 @@ import com.cloudera.cdk.data.hbase.Dao;
 import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
 import com.cloudera.cdk.data.hbase.EntityScanner;
 import com.cloudera.cdk.data.hbase.IncompatibleSchemaException;
-import com.cloudera.cdk.data.hbase.KeyBuildException;
 import com.cloudera.cdk.data.hbase.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
@@ -210,34 +209,63 @@ public class ManagedDaoTest {
   }
 
   @SuppressWarnings("unchecked")
-  private void compareEntities(long uniqueIdx, IndexedRecord record)
-      throws IOException, KeyBuildException {
+  private void compareEntitiesWithString(long uniqueIdx, IndexedRecord record) {
     String iStr = Long.toString(uniqueIdx);
-    assertEquals("field1_" + iStr, record.get(0).toString());
-    assertEquals("field2_" + iStr, record.get(1).toString());
+    assertEquals("field1_" + iStr, record.get(0));
+    assertEquals("field2_" + iStr, record.get(1));
     assertEquals(TestEnum.ENUM3.toString(), record.get(2).toString());
     assertEquals(
         "field3_value_1_" + iStr,
-        ((Map<CharSequence, CharSequence>) record.get(3)).get(
-            "field3_key_1_" + iStr).toString());
+        ((Map<CharSequence, CharSequence>) record.get(3)).get("field3_key_1_"
+            + iStr));
     assertEquals(
         "field3_value_2_" + iStr,
-        ((Map<CharSequence, CharSequence>) record.get(3)).get(
-            "field3_key_2_" + iStr).toString());
-    assertEquals("embedded1", ((IndexedRecord) record.get(4)).get(0).toString());
+        ((Map<CharSequence, CharSequence>) record.get(3)).get("field3_key_2_"
+            + iStr));
+    assertEquals("embedded1", ((IndexedRecord) record.get(4)).get(0));
     assertEquals(2L, ((IndexedRecord) record.get(4)).get(1));
 
     assertEquals(2, ((List<?>) record.get(5)).size());
     assertEquals("subfield1",
-        ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(0).toString());
+        ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(0));
     assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(1));
     assertEquals("subfield3",
-        ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(2).toString());
+        ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(2));
     assertEquals("subfield4",
-        ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(0).toString());
+        ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(0));
     assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(1));
     assertEquals("subfield6",
-        ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(2).toString());
+        ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(2));
+  }
+
+  @SuppressWarnings("unchecked")
+  private void compareEntitiesWithUtf8(long uniqueIdx, IndexedRecord record) {
+    String iStr = Long.toString(uniqueIdx);
+    assertEquals(new Utf8("field1_" + iStr), record.get(0));
+    assertEquals(new Utf8("field2_" + iStr), record.get(1));
+    assertEquals(TestEnum.ENUM3.toString(), record.get(2).toString());
+    assertEquals(
+        new Utf8("field3_value_1_" + iStr),
+        ((Map<CharSequence, CharSequence>) record.get(3)).get(new Utf8("field3_key_1_"
+            + iStr)));
+    assertEquals(
+        new Utf8("field3_value_2_" + iStr),
+        ((Map<CharSequence, CharSequence>) record.get(3)).get(new Utf8("field3_key_2_"
+            + iStr)));
+    assertEquals(new Utf8("embedded1"), ((IndexedRecord) record.get(4)).get(0));
+    assertEquals(2L, ((IndexedRecord) record.get(4)).get(1));
+
+    assertEquals(2, ((List<?>) record.get(5)).size());
+    assertEquals(new Utf8("subfield1"),
+        ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(0));
+    assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(1));
+    assertEquals(new Utf8("subfield3"),
+        ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(2));
+    assertEquals(new Utf8("subfield4"),
+        ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(0));
+    assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(1));
+    assertEquals(new Utf8("subfield6"),
+        ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(2));
   }
 
   @Test
@@ -255,7 +283,7 @@ public class ManagedDaoTest {
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
-      compareEntities(i, dao.get(createGenericKey(i)));
+      compareEntitiesWithUtf8(i, dao.get(createGenericKey(i)));
     }
 
     // ensure the new entities are what we expect with scan operations
@@ -264,7 +292,7 @@ public class ManagedDaoTest {
         .getScanner();
     try {
       for (KeyEntity<GenericRecord, GenericRecord> keyEntity : entityScanner) {
-        compareEntities(cnt, keyEntity.getEntity());
+        compareEntitiesWithUtf8(cnt, keyEntity.getEntity());
         cnt++;
       }
       assertEquals(10, cnt);
@@ -288,7 +316,7 @@ public class ManagedDaoTest {
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
-      compareEntities(i, dao.get(createSpecificKey(i)));
+      compareEntitiesWithString(i, dao.get(createSpecificKey(i)));
     }
 
     // ensure the new entities are what we expect with scan operations
@@ -296,7 +324,7 @@ public class ManagedDaoTest {
     EntityScanner<TestKey, TestRecord> entityScanner = dao.getScanner();
     try {
       for (KeyEntity<TestKey, TestRecord> keyEntity : entityScanner) {
-        compareEntities(cnt, keyEntity.getEntity());
+        compareEntitiesWithString(cnt, keyEntity.getEntity());
         cnt++;
       }
       assertEquals(10, cnt);
@@ -325,7 +353,7 @@ public class ManagedDaoTest {
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
-      compareEntities(i, dao.get(createSpecificKey(i)));
+      compareEntitiesWithString(i, dao.get(createSpecificKey(i)));
     }
   }
 
@@ -359,12 +387,12 @@ public class ManagedDaoTest {
     for (int i = 0; i < 10; ++i) {
       // When getting with old dao, expect no values for fieldToAdd
       GenericRecord rec = dao.get(createGenericKey(i));
-      compareEntities(i, rec);
+      compareEntitiesWithUtf8(i, rec);
       assertEquals(null, rec.get("fieldToAdd1"));
       assertEquals(null, rec.get("fieldToAdd2"));
 
       rec = afterDao.get(createGenericKey(i));
-      compareEntities(i, rec);
+      compareEntitiesWithUtf8(i, rec);
       assertEquals(i, rec.get("fieldToAdd1"));
       assertEquals(i, rec.get("fieldToAdd2"));
       for (GenericRecord innerRec : (List<GenericRecord>) rec.get("field5")) {
@@ -378,7 +406,7 @@ public class ManagedDaoTest {
         .getScanner();
     try {
       for (KeyEntity<GenericRecord, GenericRecord> keyEntity : entityScanner) {
-        compareEntities(cnt, keyEntity.getEntity());
+        compareEntitiesWithUtf8(cnt, keyEntity.getEntity());
         cnt++;
       }
       assertEquals(10, cnt);
@@ -409,7 +437,7 @@ public class ManagedDaoTest {
     GenericRecord key1 = createGenericKey(1);
     GenericRecord entity1 = createGenericEntity(1, testRecordv2);
     for (GenericRecord rec : (List<GenericRecord>) entity1.get("field5")) {
-      rec.put("subfield4", String.valueOf(2));
+      rec.put("subfield4", new Utf8(String.valueOf(2)));
     }
     dao.put(key1, entity1);
     GenericRecord key2 = createGenericKey(2);
@@ -417,27 +445,27 @@ public class ManagedDaoTest {
     entity2.put("fieldToAdd1", 2);
     entity2.put("fieldToAdd2", 2);
     for (GenericRecord rec : (List<GenericRecord>) entity2.get("field5")) {
-      rec.put("subfield4", String.valueOf(2));
+      rec.put("subfield4", new Utf8(String.valueOf(2)));
     }
     afterDao.put(key2, entity2);
 
     // ensure the new entities are what we expect with get operations
     GenericRecord entity1After = dao.get(key1);
-    compareEntities(1, entity1After);
+    compareEntitiesWithUtf8(1, entity1After);
     assertNull(entity1After.get("fieldToAdd1"));
     assertNull(entity1After.get("fieldToAdd2"));
     GenericRecord entity2After = dao.get(key2);
-    compareEntities(2, entity2After);
+    compareEntitiesWithUtf8(2, entity2After);
     assertNull(entity2After.get("fieldToAdd1"));
     assertNull(entity2After.get("fieldToAdd2"));
 
     entity1After = afterDao.get(key1);
-    compareEntities(1, entity1After);
+    compareEntitiesWithUtf8(1, entity1After);
     // These should have gotten default values this time.
     assertNotNull(entity1After.get("fieldToAdd1"));
     assertNotNull(entity1After.get("fieldToAdd2"));
     entity2After = afterDao.get(key2);
-    compareEntities(2, entity2After);
+    compareEntitiesWithUtf8(2, entity2After);
     assertEquals(2, entity2After.get("fieldToAdd1"));
     assertEquals(2, entity2After.get("fieldToAdd2"));
   }
