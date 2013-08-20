@@ -457,6 +457,7 @@
             <excludes>
               <exclude>**/*.avro</exclude>
               <exclude>**/*.avsc</exclude>
+              <exclude>**/*.avdl</exclude>
               <exclude>**/*.iml</exclude>
               <exclude>**/*.log</exclude>
               <exclude>**/*.md</exclude>
@@ -478,6 +479,7 @@
               <exclude>**/cdk/morphline/saxon/XMLInputFactoryCreator.java</exclude> <!-- BSD -->
               <exclude>**/src/test/resources/grok-dictionaries/**</exclude> <!-- ASL 2.0 -->
               <exclude>**/src/test/resources/test-documents/**</exclude> <!-- ASL 2.0 -->
+              <exclude>**/cdk/data/hbase/**</exclude> <!-- TODO: Remove this. Temporary exclude while migrating HBC -->
               <exclude>**/src/site/**/*.confluence</exclude>
             </excludes>
           </configuration>
