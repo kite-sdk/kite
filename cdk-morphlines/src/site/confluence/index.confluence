@@ -220,7 +220,7 @@ To print diagnostic information such as the content of records as they pass thro
 log4j.logger.com.cloudera.cdk.morphline=TRACE
 {code}
 
-This code is, in essence, what production tools like [MapReduceIndexerTool|https://github.com/cloudera/search/tree/master/search-mr], [Apache Flume Morphline Solr Sink|http://flume.apache.org/FlumeUserGuide.html#morphlinesolrsink] and [Apache Flume MorphlineInterceptor|http://flume.apache.org/FlumeUserGuide.html#morphline-interceptor] are running as part of their operation, as outlined in the following figure:
+This code is, in essence, what production tools like [MapReduceIndexerTool|https://github.com/cloudera/search/tree/master/search-mr], [Apache Flume Morphline Solr Sink|http://flume.apache.org/FlumeUserGuide.html#morphlinesolrsink] and [Apache Flume MorphlineInterceptor|http://flume.apache.org/FlumeUserGuide.html#morphline-interceptor] and [Morphline Lily HBase Indexer|http://ngdata.github.io/hbase-indexer] are running as part of their operation, as outlined in the following figure:
 
 !images/morphlines-architecture.jpg!
 
