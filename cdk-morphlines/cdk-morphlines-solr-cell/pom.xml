@@ -53,7 +53,6 @@
     <dependency> <!-- see http://tika.apache.org -->
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-xmp</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
