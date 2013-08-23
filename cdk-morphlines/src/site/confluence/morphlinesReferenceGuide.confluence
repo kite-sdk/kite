@@ -547,14 +547,14 @@ The {{grok}} command ([source code|https://github.com/cloudera/cdk/blob/master/c
 
 This is well suited for syslog logs, apache, and other webserver logs, mysql logs, and in general, any log format that is generally written for humans and not computer consumption.
 
-A grok command can load zero or more dictionaries. A dictionary is a file or string that contains zero or more REGEX_NAME to REGEX mappings, one per line, separated by space, for example:
+A grok command can load zero or more dictionaries. A dictionary is a file or string that contains zero or more REGEX_NAME to REGEX mappings, one per line, separated by space. Here is an example dictionary:
 
 {code}
 INT (?:[+-]?(?:[0-9]+))
 HOSTNAME \b(?:[0-9A-Za-z][0-9A-Za-z-]{0,62})(?:\.(?:[0-9A-Za-z][0-9A-Za-z-]{0,62}))*(\.?|\b)
 {code}
 
-For example, the regex named "INT" is associated with the following [regex pattern|http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html]:
+In this example, the regex named "INT" is associated with the following [regex pattern|http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html]:
 {code}
 [+-]?(?:[0-9]+)
 {code}
@@ -728,7 +728,7 @@ if {
     { equals { id : [] } }
   ]
   then : [
-    { logDebug { format : "Ignoring record because it has no id: {}", args : ["@{}"] }
+    { logTrace { format : "Ignoring record because it has no id: {}", args : ["@{}"] }
     { dropRecord {} }    
   ]
 }
@@ -1029,6 +1029,15 @@ tryRules {
         { contains { _attachment_mimetype : [text/csv] } }
         ... handle CSV data here
         { logDebug { format : "output record: {}", args : ["@{}"] } }
+      ]
+    }
+    
+    # if desired, the last rule can serve as a fallback mechanism 
+    # for records that don't match any rule:
+    {
+      commands : [
+        { logWarn { format : "Ignoring record with unsupported input format: {}", args : ["@{}"] }
+        { dropRecord {} }    
       ]
     }
   ]
