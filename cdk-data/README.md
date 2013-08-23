@@ -7,5 +7,5 @@ This project is part of the Cloudera Development Kit (CDK), an open source
 set of APIs that helps developers build robust systems and applications
 with CDH and Cloudera Manager.
 
-See the [online documentation](http://cloudera.github.io/cdk/docs/0.6.0/) for
+See the [online documentation](http://cloudera.github.io/cdk/docs/current/) for
 more information.
