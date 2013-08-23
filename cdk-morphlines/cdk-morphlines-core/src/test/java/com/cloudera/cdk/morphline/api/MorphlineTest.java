@@ -906,6 +906,30 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testGrokEmail() throws Exception {
+    morphline = createMorphline("test-morphlines/grokEmail");
+    Record record = new Record();
+    byte[] bytes = Files.toByteArray(new File(RESOURCES_DIR + "/test-documents/email.txt"));
+    record.put(Fields.ATTACHMENT_BODY, bytes);
+    assertTrue(morphline.process(record));
+    Record expected = new Record();
+    String msg = new String(bytes, "UTF-8"); //.replaceAll("(\r)?\n", "\n");
+    expected.put(Fields.MESSAGE, msg);
+    expected.put("message_id", "12345.6789.JavaMail.foo@bar");
+    expected.put("date", "Wed, 6 Feb 2012 06:06:05 -0800");
+    expected.put("from", "foo@bar.com");
+    expected.put("to", "baz@bazoo.com");
+    expected.put("subject", "WEDNESDAY WEATHER HEADLINES");
+    expected.put("from_names", "Foo Bar <foo@bar.com>@xxx");
+    expected.put("to_names", "'Weather News Distribution' <wfoo@bar.com>");    
+    expected.put("text", 
+        "Average 1 to 3- degrees above normal: Mid-Atlantic, Southern Plains.." +
+    		"\nAverage 4 to 6-degrees above normal: Ohio Valley, Rockies, Central Plains");
+    assertEquals(expected, collector.getFirstRecord());
+    assertNotSame(record, collector.getFirstRecord());      
+  }
+  
+  @Test
   public void testConvertTimestamp() throws Exception {
     morphline = createMorphline("test-morphlines/convertTimestamp");    
     Record record = new Record();
