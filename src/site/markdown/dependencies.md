@@ -65,9 +65,15 @@ dependencies yourself:
 * CDK Morphlines Avro
  [Dependency Information](cdk-morphlines/cdk-morphlines-avro/dependency-info.html),
  [Dependencies](cdk-morphlines/cdk-morphlines-avro/dependencies.html)
+* CDK Morphlines JSON
+ [Dependency Information](cdk-morphlines/cdk-morphlines-json/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-json/dependencies.html)
 * CDK Morphlines Hadoop Sequence File
  [Dependency Information](cdk-morphlines/cdk-morphlines-hadoop-sequencefile/dependency-info.html),
  [Dependencies](cdk-morphlines/cdk-morphlines-hadoop-sequencefile/dependencies.html)
+* CDK Morphlines Saxon
+ [Dependency Information](cdk-morphlines/cdk-morphlines-saxon/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-saxon/dependencies.html)
 * CDK Morphlines Solr Core
  [Dependency Information](cdk-morphlines/cdk-morphlines-solr-core/dependency-info.html),
  [Dependencies](cdk-morphlines/cdk-morphlines-solr-core/dependencies.html)
