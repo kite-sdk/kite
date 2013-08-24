@@ -32,6 +32,7 @@ h3. cdk\-morphlines\-core\-stdlib
 - [separateAttachments|#separateAttachments]
 - [setValues|#setValues]
 - [split|#split]
+- [toByteArray|#toByteArray]
 - [toString|#toString]
 - [translate|#translate]
 - [tryRules|#tryRules]
