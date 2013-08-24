@@ -1,6 +1,3 @@
 JAVACLASS (?:[a-zA-Z0-9-]+\.)+[A-Za-z0-9$]+
 JAVAFILE (?:[A-Za-z0-9_.-]+)
 JAVASTACKTRACEPART at %{JAVACLASS:class}\.%{WORD:method}\(%{JAVAFILE:file}:%{NUMBER:line}\)
-BASE10NUM (?<![0-9.+-])(?>[+-]?(?:(?:[0-9]+(?:\.[0-9]+)?)|(?:\.[0-9]+)))
-NUMBER (?:%{BASE10NUM})
-WORD \b\w+\b
