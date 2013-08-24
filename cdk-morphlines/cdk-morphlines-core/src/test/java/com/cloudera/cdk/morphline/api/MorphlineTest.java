@@ -1068,6 +1068,19 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testSplitWithCSV() throws Exception {
+    morphline = createMorphline("test-morphlines/splitWithCSV");    
+    Record record = new Record();
+    String msg = " _a ,_b_ , ,c__,d";
+    record.put(Fields.MESSAGE, msg);
+    Record expected = new Record();
+    expected.put(Fields.MESSAGE, msg);
+    expected.put("col0", "_a");
+    expected.put("col2", "c__");
+    processAndVerifySuccess(record, expected);
+  }
+  
+  @Test
   public void testTranslate() throws Exception {
     morphline = createMorphline("test-morphlines/translate");    
     Record record = new Record();

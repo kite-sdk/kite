@@ -887,13 +887,13 @@ setValues {
 
 h2. split
 
-The {{split}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SplitBuilder.java]) divides strings into substrings, by recognizing a _separator_ (a.k.a. "delimiter") which can be expressed as a single character, literal string, regular expression, or grok pattern. This class provides the functionality of Guava's [Splitter|http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/base/Splitter.html] class as a morphline command, plus it also supports grok dictionaries and regexes in the same way as the [#grok] command.
+The {{split}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SplitBuilder.java]) divides strings into substrings, by recognizing a _separator_ (a.k.a. "delimiter") which can be expressed as a single character, literal string, regular expression, or grok pattern. This class provides the functionality of Guava's [Splitter|http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/base/Splitter.html] class as a morphline command, plus it also supports grok dictionaries and regexes in the same way as the [#grok] command, except it doesn't support the grok extraction features.
 
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | inputField | n/a | The name of the input field. |
-| outputField | n/a | The name of the field to add output values to. |
+| outputField | n/a | The names of the fields to add output values to. This parameter can be a single string (e.g. {{tokens}}) or a list of strings (e.g. \[firstName, lastName, "", age\]). An empty string in a list indicates omit this column in the output. |
 | separator | n/a | The delimiting string to search for. |
 | isRegex | false | Whether or not to interpret the separator as a grok pattern (true) or string literal (false). |
 | dictionaryFiles | \[\] | A list of zero or more local files or directory trees from which to load dictionaries. Only applicable if {{isRegex}} is {{true}}. See [#grok] command. |
@@ -902,11 +902,11 @@ The command provides the following configuration options:
 | addEmptyStrings | false | Whether or not to add zero length strings to the output field. |
 | limit | \-1 | The maximum number of items to add to the output field per input field value. \-1 indicates unlimited. |
 
-Example usage with literal string:
+h4. Example usage with column names and literal string as separator:
 {code}
 split { 
   inputField : message
-  outputField : output          
+  outputField : [first_name, last_name, "", age]          
   separator : ","        
   isRegex : false      
   #separator : """\s*,\s*"""        
@@ -916,23 +916,50 @@ split {
 }
 {code}
 
-Input: 
+Input record:
+{code}
+message:"Nadja,Redwood,female,8"
+{code}
+  
+Expected output:
+{code}
+first_name:Nadja
+last_name:Redwood
+age:8
+{code}
+
+
+h4. More example usage with one output field and literal string as separator:
+{code}
+split { 
+  inputField : message
+  outputField : substrings          
+  separator : ","        
+  isRegex : false      
+  #separator : """\s*,\s*"""        
+  #isRegex : true      
+  addEmptyStrings : false
+  trim : true          
+}
+{code}
+
+Input record: 
 {code}
 message:"_a ,_b_ ,c__"
 {code}
   
-Expected output:  
+Expected output contains a "substrings" field with three values:  
 {code}
-output:_a
-output:_b_
-output:c__
+substrings:_a
+substrings:_b_
+substrings:c__
 {code}
 
-Example usage with grok pattern or normal regex:
+h4. More example usage with grok pattern or normal regex:
 {code}
 split { 
   inputField : message
-  outputField : output
+  outputField : substrings
   # dictionaryFiles : [cdk-morphlines-core/src/test/resources/grok-dictionaries] 
   dictionaryString : """COMMA_SURROUNDED_BY_WHITESPACE \s*,\s*"""          
   separator : """%{COMMA_SURROUNDED_BY_WHITESPACE}"""        

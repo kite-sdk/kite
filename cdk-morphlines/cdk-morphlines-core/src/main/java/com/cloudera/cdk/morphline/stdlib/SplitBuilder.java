@@ -17,6 +17,8 @@ package com.cloudera.cdk.morphline.stdlib;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
@@ -26,6 +28,7 @@ import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigException;
 
 /**
  * Command that divides strings into substrings, by recognizing a <i>separator</i> (a.k.a.
@@ -55,13 +58,23 @@ public final class SplitBuilder implements CommandBuilder {
 
     private final String inputFieldName;
     private final String outputFieldName;
+    private final List<String> outputFieldNames;
+    private final boolean addEmptyStrings;
     private final Splitter splitter;
     
     public Split(Config config, Command parent, Command child, MorphlineContext context) {
       // TODO: also add separate command for withKeyValueSeparator?
       super(config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");
-      this.outputFieldName = getConfigs().getString(config, "outputField");
+      List<String> _outputFieldNames = null;
+      String _outputFieldName = null;
+      try {
+        _outputFieldNames = getConfigs().getStringList(config, "outputField");
+      } catch (ConfigException.WrongType e) {
+        _outputFieldName = getConfigs().getString(config, "outputField");
+      }
+      this.outputFieldName = _outputFieldName;
+      this.outputFieldNames = _outputFieldNames;
       
       String separator = getConfigs().getString(config, "separator");
       boolean isRegex = getConfigs().getBoolean(config, "isRegex", false);
@@ -80,7 +93,8 @@ public final class SplitBuilder implements CommandBuilder {
         currentSplitter = currentSplitter.limit(limit);
       }
       
-      if (getConfigs().getBoolean(config, "addEmptyStrings", false)) {
+      this.addEmptyStrings = getConfigs().getBoolean(config, "addEmptyStrings", false);      
+      if (outputFieldNames == null && !addEmptyStrings) {
         currentSplitter = currentSplitter.omitEmptyStrings();
       }
       
@@ -94,10 +108,28 @@ public final class SplitBuilder implements CommandBuilder {
         
     @Override
     protected boolean doProcess(Record record) {
-      for (Object value : record.get(inputFieldName)) {      
-        record.getFields().putAll(outputFieldName, splitter.split(value.toString()));
+      for (Object value : record.get(inputFieldName)) {
+        Iterable<String> columns = splitter.split(value.toString());
+        if (outputFieldNames == null) {
+          record.getFields().putAll(outputFieldName, columns);
+        } else {
+          extractColumns(record, columns);
+        }
       }
       return super.doProcess(record);
+    }
+
+    private void extractColumns(Record record, Iterable<String> columns) {
+      Iterator<String> iter = columns.iterator();
+      for (int i = 0; i < outputFieldNames.size() && iter.hasNext(); i++) {
+        String columnValue = iter.next();
+        String columnName = outputFieldNames.get(i);
+        if (columnName.length() > 0) { // empty column name indicates omit this field on output
+          if (columnValue.length() > 0 || addEmptyStrings) {
+            record.put(columnName, columnValue);
+          }
+        }
+      }
     }
     
   }
