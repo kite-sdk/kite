@@ -942,6 +942,21 @@ split {
 }
 {code}
 
+h2. toByteArray
+
+The {{toByteArray}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToByteArrayBuilder.java]) converts the Java objects in a given field via {{Object.toString()}} to their string representation, and then via {{String.getBytes(Charset)}} to their byte array representation. If the input Java objects are already byte arrays the command does nothing.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| field | n/a | The name of the field to convert. |
+| charset | UTF\-8 | The character encoding to use. |
+
+Example usage:
+{code}
+toByteArray { field : _attachment_body }
+{code}
+
 h2. toString
 
 The {{toString}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java]) converts the Java objects in a given field using the {{Object.toString()}} method to their string representation, and optionally also applies the {{String.trim()}} method.
@@ -998,7 +1013,7 @@ h2. tryRules
 
 The {{tryRules}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/TryRulesBuilder.java]) consists of zero or more rules. A rule consists of zero or more commands.
 
-The rules of a {{tryRules}} command are processed in top-down order. If one of the commands in a rule fails, the {{tryRules}} command stops processing this rule, backtracks and tries the next rule, and so on, until a rule is found that runs all its commands to completion without failure (the rule _succeeds_). If a rule succeeds, the remaining rules of the current {{tryRules}} command are skipped. If no rule succeeds the record remains unchanged, but a warning may be issued or an exception may be thrown.
+The rules of a {{tryRules}} command are processed in top\-down order. If one of the commands in a rule fails, the {{tryRules}} command stops processing this rule, backtracks and tries the next rule, and so on, until a rule is found that runs all its commands to completion without failure (the rule _succeeds_). If a rule succeeds, the remaining rules of the current {{tryRules}} command are skipped. If no rule succeeds the record remains unchanged, but a warning may be issued or an exception may be thrown.
 
 Because a {{tryRules}} command is itself a command, a {{tryRules}} command can contain arbitrarily nested {{tryRules}} commands. By the same logic, a {{pipe}} command can contain arbitrarily nested {{tryRules}} commands and a {{tryRules}} command can contain arbitrarily nested {{pipe}} commands. This helps to implement complex functionality for advanced usage.
 

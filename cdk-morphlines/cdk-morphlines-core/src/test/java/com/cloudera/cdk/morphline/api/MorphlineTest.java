@@ -234,6 +234,21 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
 
   @Test
+  public void testToByteArray() throws Exception {
+    morphline = createMorphline("test-morphlines/toByteArray");    
+    Record record = new Record();
+    record.put("first_name", "Nadja");    
+    collector.reset();
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    assertEquals(1, collector.getFirstRecord().getFields().size());
+    byte[] expected = "Nadja".getBytes("UTF-8");
+    assertArrayEquals(expected, (byte[]) collector.getFirstRecord().getFirstValue("first_name"));
+    assertSame(record, collector.getFirstRecord());    
+  }
+
+  @Test
   public void testToString() throws Exception {
     morphline = createMorphline("test-morphlines/toString");    
     Record record = new Record();
