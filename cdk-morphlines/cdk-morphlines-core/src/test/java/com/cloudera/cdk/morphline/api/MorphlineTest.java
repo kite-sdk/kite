@@ -1054,6 +1054,23 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testSplitWithEdgeCases() throws Exception {
+    morphline = createMorphline("test-morphlines/splitWithEdgeCases");    
+    Record record = new Record();
+    String msg = ",, _a ,_b_ ,,";
+    record.put(Fields.MESSAGE, msg);
+    Record expected = new Record();
+    expected.put(Fields.MESSAGE, msg);
+    expected.put("output", "");
+    expected.put("output", "");
+    expected.put("output", "_a");
+    expected.put("output", "_b_");
+    expected.put("output", "");
+    expected.put("output", "");
+    processAndVerifySuccess(record, expected);
+  }
+  
+  @Test
   public void testSplitWithGrok() throws Exception {
     morphline = createMorphline("test-morphlines/splitWithGrok");    
     Record record = new Record();
@@ -1079,7 +1096,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.put("col2", "c__");
     processAndVerifySuccess(record, expected);
   }
-  
+    
   @Test
   public void testTranslate() throws Exception {
     morphline = createMorphline("test-morphlines/translate");    
