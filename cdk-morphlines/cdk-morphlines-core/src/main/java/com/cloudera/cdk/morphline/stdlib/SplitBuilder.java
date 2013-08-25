@@ -70,10 +70,10 @@ public final class SplitBuilder implements CommandBuilder {
       this.outputFieldName = getConfigs().getString(config, "outputField", null);
       this.outputFieldNames = getConfigs().getStringList(config, "outputFields", null);
       if (outputFieldName == null && outputFieldNames == null) {
-        throw new MorphlineCompilationException("Either outputFieldName or outputFieldNames must be defined", config);
+        throw new MorphlineCompilationException("Either outputField or outputFields must be defined", config);
       }
       if (outputFieldName != null && outputFieldNames != null) {
-        throw new MorphlineCompilationException("Must not define both outputFieldName and outputFieldNames at the same time", config);
+        throw new MorphlineCompilationException("Must not define both outputField and outputFields at the same time", config);
       }
       
       String separator = getConfigs().getString(config, "separator");
