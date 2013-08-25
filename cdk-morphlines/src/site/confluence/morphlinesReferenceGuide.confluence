@@ -902,6 +902,9 @@ setValues {
   # assign the integer 123 to the pid field
   pid : [123]
 
+  # remove the url field
+  url : []
+
   # assign all values contained in the first_name field to the name field
   name : "@{first_name}"
 }
