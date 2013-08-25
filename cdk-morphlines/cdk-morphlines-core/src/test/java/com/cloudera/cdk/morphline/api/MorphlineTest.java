@@ -1085,8 +1085,8 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
-  public void testSplitWithCSV() throws Exception {
-    morphline = createMorphline("test-morphlines/splitWithCSV");    
+  public void testSplitWithOutputFields() throws Exception {
+    morphline = createMorphline("test-morphlines/splitWithOutputFields");    
     Record record = new Record();
     String msg = " _a ,_b_ , ,c__,d";
     record.put(Fields.MESSAGE, msg);

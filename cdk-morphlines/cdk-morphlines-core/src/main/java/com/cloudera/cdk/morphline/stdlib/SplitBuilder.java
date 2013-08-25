@@ -22,6 +22,7 @@ import java.util.List;
 
 import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
+import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
@@ -66,15 +67,15 @@ public final class SplitBuilder implements CommandBuilder {
       // TODO: also add separate command for withKeyValueSeparator?
       super(config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");
-      List<String> _outputFieldNames = null;
-      String _outputFieldName = null;
-      try {
-        _outputFieldNames = getConfigs().getStringList(config, "outputField");
-      } catch (ConfigException.WrongType e) {
-        _outputFieldName = getConfigs().getString(config, "outputField");
+      
+      this.outputFieldName = getConfigs().getString(config, "outputField", null);
+      this.outputFieldNames = getConfigs().getStringList(config, "outputFields", null);
+      if (outputFieldName == null && outputFieldNames == null) {
+        throw new MorphlineCompilationException("Either outputFieldName or outputFieldNames must be defined", config);
       }
-      this.outputFieldName = _outputFieldName;
-      this.outputFieldNames = _outputFieldNames;
+      if (outputFieldName != null && outputFieldNames != null) {
+        throw new MorphlineCompilationException("Must not define both outputFieldName and outputFieldNames at the same time", config);
+      }
       
       String separator = getConfigs().getString(config, "separator");
       boolean isRegex = getConfigs().getBoolean(config, "isRegex", false);
