@@ -33,6 +33,7 @@ h3. cdk\-morphlines\-core\-stdlib
 - [separateAttachments|#separateAttachments]
 - [setValues|#setValues]
 - [split|#split]
+- [splitKeyValue|#splitKeyValue]
 - [toByteArray|#toByteArray]
 - [toString|#toString]
 - [translate|#translate]
@@ -990,6 +991,42 @@ split {
   addEmptyStrings : true
   trim : false          
 }
+{code}
+
+h2. splitKeyValue
+
+The {{splitKeyValue}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SplitKeyValueBuilder.java]) iterates over the items in a given record input field, interprets each item as a key\-value pair where the key and value are separated by the given separator character, and adds the pair's value to the record field named after the pair's key. Typically, the input field items have been placed there by an upstream [#split] command with a single output field.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| inputField | n/a | The name of the input field. |
+| outputFieldPrefix | "" | A string to be prepended to each output field name. |
+| separator | "=" | The character separating the key from the value. |
+| trim | true | Whether or not to apply the {{String.trim()}} method on the output keys and values to be added. |
+| addEmptyStrings | false | Whether or not to add zero length strings to the output field. |
+
+Example usage:
+{code}
+splitKeyValue { 
+  inputField : params
+  outputFieldPrefix : "/"
+}
+{code}
+
+Input record:
+{code}
+params:foo=x
+params: foo = y 
+params:foo 
+params:fragment=z
+{code}
+  
+Expected output:
+{code}
+/foo:x
+/foo:y
+/fragment:z
 {code}
 
 h2. toByteArray

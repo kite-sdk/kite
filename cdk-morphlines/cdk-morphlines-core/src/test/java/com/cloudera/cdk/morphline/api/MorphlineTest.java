@@ -1097,7 +1097,23 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.put("col2", "c__");
     processAndVerifySuccess(record, expected);
   }
-    
+  
+  @Test
+  public void testSplitKeyValue() throws Exception {
+    morphline = createMorphline("test-morphlines/splitKeyValue");    
+    Record record = new Record();
+    record.put("params", "foo=x");
+    record.put("params", " foo = y ");
+    record.put("params", "foo ");
+    record.put("params", "fragment=z");
+    Record expected = new Record();
+    expected.getFields().putAll("params", record.get("params"));
+    expected.put("/foo", "x");
+    expected.put("/foo", "y");
+    expected.put("/fragment", "z");
+    processAndVerifySuccess(record, expected);
+  }
+  
   @Test
   public void testTranslate() throws Exception {
     morphline = createMorphline("test-morphlines/translate");    

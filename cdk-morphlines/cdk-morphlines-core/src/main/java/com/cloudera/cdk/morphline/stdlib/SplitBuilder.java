@@ -29,7 +29,6 @@ import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigException;
 
 /**
  * Command that divides strings into substrings, by recognizing a <i>separator</i> (a.k.a.
