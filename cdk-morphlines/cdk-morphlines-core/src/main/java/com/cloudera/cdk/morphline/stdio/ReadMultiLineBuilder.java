@@ -42,24 +42,6 @@ import com.typesafe.config.Config;
  * 
  * For example, this can be used to parse log4j with stack traces. Also see
  * https://gist.github.com/smougenot/3182192 and http://logstash.net/docs/1.1.12/filters/multiline
- * 
- * The <code>regex</code> parameter should match what you believe to be an indicator that the
- * line is part of a multi-line record.
- * 
- * The <code>what</code> parameter must be one of "previous" or "next" and indicates
- * the relation of the regex to the multi-line record.
- * 
- * The <code>negate</code> parameter can be true or false (defaults false). If true, a line not
- * matching the regex will constitute a match of the multiline filter and the previous/next action
- * will be applied. (vice-versa is also true)
- * 
- * Example:
- * 
- * <pre>
- * regex : "(^.+Exception: .+)|(^\\s+at .+)|(^\\s+\\.\\.\\. \\d+ more)|(^\\s*Caused by:.+)"
- * negate: false
- * what : previous
- * </pre>
  */
 public final class ReadMultiLineBuilder implements CommandBuilder {
 

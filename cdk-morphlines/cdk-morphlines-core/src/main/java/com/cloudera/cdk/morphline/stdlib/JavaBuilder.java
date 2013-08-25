@@ -38,19 +38,7 @@ import com.typesafe.config.Config;
 /**
  * The "java" command compiles the given Java code block, wrapped into a Java method with a boolean
  * return type and several parameters, along with a Java class definition that contains the given
- * import statements.
- * <p>
- * The parameters passed to the code block are "record", "config", "parent", "child", "context",
- * "logger" and are of types Record.class, Config.class, Command.class, Command.class,
- * MorphlineContext.class, Logger.class, respectively.
- * <p>
- * Compilation is done in main memory, i.e. without writing to the filesystem.
- * <p>
- * The result is an object that can be executed (and reused) any number of times. This is a high
- * performance implementation, using an optimized variant of https://scripting.dev.java.net/" (JSR
- * 223 Java Scripting). Calling {@link #evaluate(Object...)} just means calling
- * {@link Method#invoke(Object, Object...)} and as such has the same minimal runtime cost, i.e.
- * O(100M calls/sec/core).
+ * import statements. The code block can then be executed many times.
  */
 public final class JavaBuilder implements CommandBuilder {
 

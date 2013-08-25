@@ -42,10 +42,7 @@ import com.typesafe.config.Config;
 /**
  * JSON parser that extracts search documents from twitter tweets obtained from the twitter 1% sample firehose with the delimited=length option.
  * For background see https://dev.twitter.com/docs/api/1.1/get/statuses/sample.
- * Example to download data from the twitter 1% sample firehose:
- * <pre>
- * while [ 1 ]; do echo `date`; curl https://stream.twitter.com/1/statuses/sample.json?delimited=length -u$userName:$password > sample-statuses-$(date +%Y%m%d-%H%M%S); sleep 10; done
- * </pre>
+ * 
  * The JSON input format is documented at https://dev.twitter.com/docs/platform-objects/tweets
  */
 public final class ReadJsonTestTweetsBuilder implements CommandBuilder {

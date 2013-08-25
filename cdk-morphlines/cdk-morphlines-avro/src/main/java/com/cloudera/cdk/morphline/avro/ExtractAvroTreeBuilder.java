@@ -36,7 +36,6 @@ import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Fields;
-import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 
@@ -50,20 +49,7 @@ import com.typesafe.config.Config;
  * 
  * This kind of mapping is useful for simple Avro schemas, but a rather simplistic (and perhaps
  * expensive) approach for complex Avro schemas.
- * 
- * Example output:
- * 
- * <pre>
-    assertEquals(Arrays.asList("us", "gb"), record.get("/name/language/country"));
-    assertEquals(Arrays.asList("en-us", "en", "en-gb"), record.get("/name/language/code"));
-    assertEquals(Arrays.asList(20, 40, 60), record.get("/links/forward"));
-    assertEquals(Arrays.asList("http://A", "http://B"), record.get("/name/url"));
-    assertEquals(Arrays.asList(10), record.get("/docId"));
- * </pre>
- * 
- * STATUS: EXPERIMENTAL
  */
-@Beta
 public final class ExtractAvroTreeBuilder implements CommandBuilder {
   
   @Override

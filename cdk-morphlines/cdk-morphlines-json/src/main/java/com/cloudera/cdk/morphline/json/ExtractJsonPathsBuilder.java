@@ -29,7 +29,6 @@ import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -51,7 +50,6 @@ import com.typesafe.config.Config;
  * The path language supports all JSON concepts, including nested structures, records, arrays, etc,
  * as well as a flatten option that collects the primitives in a subtree into a flat list.
  */
-@Beta
 public final class ExtractJsonPathsBuilder implements CommandBuilder {
   
   @Override

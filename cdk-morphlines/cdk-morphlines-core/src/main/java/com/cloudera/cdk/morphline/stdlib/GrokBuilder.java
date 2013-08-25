@@ -41,64 +41,6 @@ import com.typesafe.config.ConfigFactory;
  * <p>
  * It is perfect for syslog logs, apache and other webserver logs, mysql logs, and in general, any
  * log format that is generally written for humans and not computer consumption.
- * <p>
- * A grok command can load zero or more dictionaries. A dictionary is a file or string that contains
- * zero or more REGEX_NAME to REGEX mappings, one per line, separated by space, for example:
- * 
- * <pre>
- * INT (?:[+-]?(?:[0-9]+))
- * HOSTNAME \b(?:[0-9A-Za-z][0-9A-Za-z-]{0,62})(?:\.(?:[0-9A-Za-z][0-9A-Za-z-]{0,62}))*(\.?|\b)
- * </pre>
- * 
- * For example, the regex named "INT" is associated with the pattern <code>[+-]?(?:[0-9]+)</code>
- * and matches strings like "123" and the regex named "HOSTNAME" is associated with the pattern
- * <code>\b(?:[0-9A-Za-z][0-9A-Za-z-]{0,62})(?:\.(?:[0-9A-Za-z][0-9A-Za-z-]{0,62}))*(\.?|\b)</code>
- * and matches strings like "www.google.com".
- * <p>
- * A grok command can contain zero or more grok expressions. Each grok expression refers to a record
- * input field name and can contain zero or more grok patterns. Here is an example grok expression
- * that refers to the input field named "message" and contains two grok patterns:
- * 
- * <pre>
- * expressions : {
- *   message : """\s+%{INT:pid} %{HOSTNAME:my_name_servers}"""
- * }
- * </pre>
- * 
- * The syntax for a grok pattern is %{REGEX_NAME:GROUP_NAME}, for example %{INT:pid} or
- * %{HOSTNAME:my_name_servers}
- * <p>
- * The REGEX_NAME is the name of a regex within a loaded dictionary.
- * <p>
- * The GROUP_NAME is the name of an output field.
- * <p>
- * If <b>all</b> expressions of the grok command match the input record, then the command succeeds
- * and the content of the named capturing group will be added to this output field of the output
- * record. Otherwise, the record remains unchanged and the grok command fails (which causes
- * backtracking of the command chain).
- * <p>
- * In addition, the grok command supports the following parameters:
- * <p>
- * <ul>
- * <li>dictionaryFiles (String[]): A list of zero or more local files or directory trees from which
- * to load dictionaries. Defaults to the empty list.</li>
- * 
- * <li>dictionaryString (String): An optional inline string from which to load a dictionary.</li>
- * 
- * <li>extract (String): Can be "false", "true" or "inplace". Add the content of named capturing
- * groups to the input record ("inplace"), or to a copy of the input record ("true") or to no record
- * ("false").</li>
- * 
- * <li>numRequiredMatches (String): indicates the minimum and maximum number of field values that
- * must match a given grok expression, for each input field name. Can be "atLeastOnce" (default) or
- * "once" or "all".</li>
- * 
- * <li>findSubstrings (boolean): indicates whether the grok expression must match the entire input
- * field value, or merely a substring within. Defaults to false.</li>
- * 
- * <li>addEmptyStrings (boolean): indicates whether zero length strings stemming from empty (but
- * matching) capturing groups shall be added to the output record. Defaults to false.</li>
- * </ul>
  */
 public final class GrokBuilder implements CommandBuilder {
 

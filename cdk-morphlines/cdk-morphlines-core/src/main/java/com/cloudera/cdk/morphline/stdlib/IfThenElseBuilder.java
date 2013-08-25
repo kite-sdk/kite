@@ -35,22 +35,6 @@ import com.typesafe.config.Config;
  * 
  * If one of the commands in the "then" chain or "else" chain fails then the entire "if" command
  * fails (and the remaining commands in the "then" or "else" branch are skipped).
- * 
- * Example:
- * 
- * <pre>
- *         if { 
- *           conditions : [
- * #            { fail {} }
- *           ]
- *           then : [
- *             { logInfo { format : "processing then..." } }
- *           ]
- *           else : [
- *             { logInfo { format : "processing else..." } }
- *           ]
- *         }
- * </pre>
  */
 public final class IfThenElseBuilder implements CommandBuilder {
 

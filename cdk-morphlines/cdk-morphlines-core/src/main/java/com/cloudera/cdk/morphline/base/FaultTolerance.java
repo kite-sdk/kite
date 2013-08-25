@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.cdk.morphline.api.ExceptionHandler;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
-import com.google.common.annotations.Beta;
 
 /**
  * Mission critical, large-scale online production systems need to make progress without downtime
@@ -34,7 +33,6 @@ import com.google.common.annotations.Beta;
  * The isIgnoringRecoverableExceptions should only be enabled if an exception misclassification bug
  * has been identified.
  */
-@Beta
 public final class FaultTolerance implements ExceptionHandler {
     
   private final boolean isProductionMode; 

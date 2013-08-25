@@ -41,7 +41,6 @@ import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Fields;
-import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -63,28 +62,7 @@ import com.typesafe.config.Config;
  * The path language supports all Avro concepts, including nested structures, records, arrays, maps,
  * unions, etc, as well as a flatten option that collects the primitives in a subtree into a flat
  * list.
- * 
- * Example:
- * 
- * <pre>
- *       { extractAvroPaths {
- *           flatten : true
- *           paths : { 
- *             my_price : /price
- *             
- *             my_docId : /docId
- *             my_links_backward : "/links/backward"
- *             my_links_forward : "/links/forward"
- *             my_name_language_code : "/name[]/language[]/code"
- *             my_name_language_country : "/name[]/language[]/country"
- *   
- *             /mymapField/foo/label : /mapField/foo/label/
- *           } 
- *         }
- *       }
- * </pre>
  */
-@Beta
 public final class ExtractAvroPathsBuilder implements CommandBuilder {
   
   @Override
