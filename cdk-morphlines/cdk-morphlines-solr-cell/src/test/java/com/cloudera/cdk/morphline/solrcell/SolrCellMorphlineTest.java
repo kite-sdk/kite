@@ -117,8 +117,8 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
         path + "/testEXCEL.xlsx",
         path + "/testEXCEL.xls", 
         path + "/testPages.pages", 
-        path + "/testNumbers.numbers", 
-        path + "/testKeynote.key",
+        //path + "/testNumbers.numbers", 
+        //path + "/testKeynote.key",
         
         path + "/testRTFVarious.rtf", 
         path + "/complex.mbox", 

@@ -168,8 +168,8 @@ public class DetectMimeTypesTest extends AbstractMorphlineTest {
         path + "/testEXCEL.xlsx", "application/x-tika-ooxml", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         path + "/testEXCEL.xls", "application/vnd.ms-excel", "application/vnd.ms-excel",
         path + "/testPages.pages",  "application/zip", "application/vnd.apple.pages",
-        path + "/testNumbers.numbers", "application/zip", "application/vnd.apple.numbers",
-        path + "/testKeynote.key", "application/zip", "application/vnd.apple.keynote",
+//        path + "/testNumbers.numbers", "application/zip", "application/vnd.apple.numbers",
+//        path + "/testKeynote.key", "application/zip", "application/vnd.apple.keynote",
         
         path + "/testRTFVarious.rtf", "application/rtf", "application/rtf",
         path + "/complex.mbox", "text/plain", "application/mbox",        
