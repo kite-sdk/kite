@@ -1393,4 +1393,29 @@ public class MorphlineTest extends AbstractMorphlineTest {
     return record;
   }
 
+  @Test
+  @Ignore
+  public void benchmark() throws Exception {
+    String morphlineConfigFile = "test-morphlines/grokEmail";
+    long durationSecs = 20;
+    File file = new File(RESOURCES_DIR + "/test-documents/email.txt");
+    System.out.println("Now benchmarking " + morphlineConfigFile + " ...");
+    morphline = createMorphline(morphlineConfigFile);    
+    byte[] bytes = Files.toByteArray(file);
+    long start = System.currentTimeMillis();
+    long duration = durationSecs * 1000;
+    int iters = 0; 
+    while (System.currentTimeMillis() < start + duration) {
+      Record record = new Record();
+      record.put(Fields.ATTACHMENT_BODY, bytes);      
+      collector.reset();
+      startSession();
+      assertEquals(1, collector.getNumStartEvents());
+      assertTrue(morphline.process(record));    
+      iters++;
+    }
+    float secs = (System.currentTimeMillis() - start) / 1000.0f;
+    System.out.println("Results: iters=" + iters + ", took[secs]=" + secs + ", iters/secs=" + (iters/secs));
+  }  
+
 }
