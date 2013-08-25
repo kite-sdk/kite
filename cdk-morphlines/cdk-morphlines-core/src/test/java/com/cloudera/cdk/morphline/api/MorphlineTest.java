@@ -41,6 +41,7 @@ import com.cloudera.cdk.morphline.shaded.com.google.common.reflect.ClassPath;
 import com.cloudera.cdk.morphline.shaded.com.google.common.reflect.ClassPath.ResourceInfo;
 import com.codahale.metrics.Meter;
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
@@ -1242,6 +1243,40 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.put(prefix + "schemeSpecificPart", uri.getSchemeSpecificPart());
     expected.put(prefix + "userInfo", uri.getUserInfo());
     
+    processAndVerifySuccess(record, expected);
+  }
+  
+  @Test
+  public void testExtractURIComponent() throws Exception {
+    String uriStr = "http://user-info@www.fool.com:8080/errors.log?foo=x&foo=y&foo=z#fragment";
+    URI uri = new URI(uriStr);
+    testExtractURIComponent2(uriStr, "scheme", uri.getScheme());
+    testExtractURIComponent2(uriStr, "authority", uri.getAuthority());
+    testExtractURIComponent2(uriStr, "path", uri.getPath());
+    testExtractURIComponent2(uriStr, "query", uri.getQuery());
+    testExtractURIComponent2(uriStr, "fragment", uri.getFragment());
+    testExtractURIComponent2(uriStr, "host", uri.getHost());
+    testExtractURIComponent2(uriStr, "port", uri.getPort());
+    testExtractURIComponent2(uriStr, "schemeSpecificPart", uri.getSchemeSpecificPart());
+    testExtractURIComponent2(uriStr, "userInfo", uri.getUserInfo());
+    try {
+      testExtractURIComponent2(uriStr, "illegalType", uri.getUserInfo());
+      fail();
+    } catch (MorphlineCompilationException e) {
+      ; // expected
+    }
+  }
+  
+  private void testExtractURIComponent2(String uriStr, String component, Object expectedComponent) throws Exception {
+    morphline = createMorphline(
+        "test-morphlines/extractURIComponent", 
+        ConfigFactory.parseMap(ImmutableMap.of("component", component)));
+    
+    Record record = new Record();
+    record.put("uri", uriStr);        
+    Record expected = new Record();
+    expected.put("uri", uriStr);
+    expected.put("output", expectedComponent);
     processAndVerifySuccess(record, expected);
   }
   

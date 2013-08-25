@@ -20,6 +20,7 @@ h3. cdk\-morphlines\-core\-stdlib
 - [dropRecord|#dropRecord]
 - [equals|#equals]
 - [extractURIComponents|#extractURIComponents]
+- [extractURIComponent|#extractURIComponent]
 - [extractURIQueryParameters|#extractURIQueryParameters]
 - [findReplace|#findReplace]
 - [generateUUID|#generateUUID]
@@ -457,6 +458,26 @@ For example, given the input field {{myUri}} with the value {{ http://userinfo@w
 | uri\_component\_scheme | http |
 | uri\_component\_schemeSpecificPart | //user-info@www.bar.com:8080/errors.log?foo=x&bar=y&foo=z |
 | uri\_component\_userInfo | userinfo |
+
+h2. extractURIComponent
+
+The {{extractURIComponent}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ExtractURIComponentBuilder.java]) extracts a subcomponent from the URIs contained in the given input field and adds it to the given output field. This is the same as the [#extractURIComponents] command, except that only one component is extracted.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| inputField | n/a | The name of the input field that contains zero or more URIs. |
+| outputField | n/a | The field to add output values to. |
+| component | n/a | The type of information to extract. Can be one of {{scheme}}, {{authority}}, {{host}}, {{port}}, {{path}}, {{query}}, {{fragment}}, {{schemeSpecificPart}}, {{userInfo}} |
+
+Example usage:
+{code}
+extractURIComponent {
+  inputField : my_uri
+  outputField : my_scheme
+  component : scheme
+}
+{code}
 
 h2. extractURIQueryParameters
 
