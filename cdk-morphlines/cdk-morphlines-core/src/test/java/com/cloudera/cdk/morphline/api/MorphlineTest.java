@@ -1396,9 +1396,12 @@ public class MorphlineTest extends AbstractMorphlineTest {
   @Test
   @Ignore
   public void benchmark() throws Exception {
-    String morphlineConfigFile = "test-morphlines/grokEmail";
+    //String morphlineConfigFile = "test-morphlines/grokEmail";
+    String morphlineConfigFile = "test-morphlines/grokSyslogNgCisco";
     long durationSecs = 20;
     File file = new File(RESOURCES_DIR + "/test-documents/email.txt");
+    String msg = "<179>Jun 10 04:42:51 www.foo.com Jun 10 2013 04:42:51 : %myproduct-3-mysubfacility-251010: " +
+        "Health probe failed for server 1.2.3.4 on port 8083, connection refused by server";
     System.out.println("Now benchmarking " + morphlineConfigFile + " ...");
     morphline = createMorphline(morphlineConfigFile);    
     byte[] bytes = Files.toByteArray(file);
@@ -1407,7 +1410,8 @@ public class MorphlineTest extends AbstractMorphlineTest {
     int iters = 0; 
     while (System.currentTimeMillis() < start + duration) {
       Record record = new Record();
-      record.put(Fields.ATTACHMENT_BODY, bytes);      
+      //record.put(Fields.ATTACHMENT_BODY, bytes);      
+      record.put(Fields.MESSAGE, msg);      
       collector.reset();
       startSession();
       assertEquals(1, collector.getNumStartEvents());
