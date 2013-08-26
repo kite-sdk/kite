@@ -71,6 +71,9 @@ public final class ReadLineBuilder implements CommandBuilder {
   
     @Override
     protected boolean doProcess(Record inputRecord, InputStream stream) throws IOException {
+      Record template = inputRecord.copy();
+      removeAttachments(template);
+      template.removeAll(Fields.MESSAGE);
       Charset detectedCharset = detectCharset(inputRecord, charset);  
       Reader reader = new InputStreamReader(stream, detectedCharset);
       BufferedReader lineReader = new BufferedReader(reader, getBufferSize(stream));
@@ -88,9 +91,8 @@ public final class ReadLineBuilder implements CommandBuilder {
         if (commentPrefix != null && line.startsWith(commentPrefix)) {
           continue; // ignore comments
         }
-        Record outputRecord = inputRecord.copy();
-        removeAttachments(outputRecord);
-        outputRecord.replaceValues(Fields.MESSAGE, line);
+        Record outputRecord = template.copy();
+        outputRecord.put(Fields.MESSAGE, line);
         incrementNumRecords();
         
         // pass record to next command in chain:
