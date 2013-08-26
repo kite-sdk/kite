@@ -751,7 +751,7 @@ if {
     { equals { id : [] } }
   ]
   then : [
-    { logTrace { format : "Ignoring record because it has no id: {}", args : ["@{}"] }
+    { logTrace { format : "Ignoring record because it has no id: {}", args : ["@{}"] } }
     { dropRecord {} }    
   ]
 }
