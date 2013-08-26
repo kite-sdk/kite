@@ -82,6 +82,9 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
 
     @Override
     protected boolean doProcess(Record inputRecord, InputStream stream) throws IOException {
+      Record template = inputRecord.copy();
+      removeAttachments(template);
+      template.removeAll(Fields.MESSAGE);
       Timer.Context timerContext = elapsedTime.time();
       Charset detectedCharset = detectCharset(inputRecord, charset);  
       Reader reader = new InputStreamReader(stream, detectedCharset);
@@ -113,7 +116,7 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
             lines.append('\n');
             lines.append(line);
           } else {          // do next
-            if (lines.length() > 0 && !flushRecord(inputRecord, lines.toString(), timerContext)) {
+            if (lines.length() > 0 && !flushRecord(template.copy(), lines.toString(), timerContext)) {
               return false;
             }
             timerContext = elapsedTime.time();
@@ -123,15 +126,13 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
         }          
       }
       if (lines != null && lines.length() > 0) {
-        return flushRecord(inputRecord, lines.toString(), timerContext);
+        return flushRecord(template.copy(), lines.toString(), timerContext);
       }
       return true;
     }
 
-    private boolean flushRecord(Record inputRecord, String lines, Timer.Context timerContext) {
-      Record outputRecord = inputRecord.copy();
-      removeAttachments(outputRecord);
-      outputRecord.replaceValues(Fields.MESSAGE, lines);
+    private boolean flushRecord(Record outputRecord, String lines, Timer.Context timerContext) {
+      outputRecord.put(Fields.MESSAGE, lines);
       timerContext.stop();
       incrementNumRecords();
       
