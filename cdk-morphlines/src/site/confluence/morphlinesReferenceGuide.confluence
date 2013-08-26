@@ -1060,7 +1060,7 @@ h4. Example usage that extracts data from iptables log file:
   }
 }
 
-# split each key value pair on '=' char and extract it's value into record fields named after the key
+# split each key value pair on '=' char and extract its value into record fields named after the key
 { 
   splitKeyValue { 
     inputField : key_value_array
