@@ -31,9 +31,7 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
-import com.cloudera.cdk.morphline.base.Metrics;
 import com.cloudera.cdk.morphline.base.Validator;
-import com.codahale.metrics.Timer;
 import com.typesafe.config.Config;
 
 /**
@@ -65,7 +63,6 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
     private final boolean negate;
     private final What what;
     private final Charset charset;
-    private final Timer elapsedTime;    
   
     public ReadMultiLine(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
@@ -77,12 +74,10 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
           getConfigs().getString(config, "what", What.previous.toString()),
           What.class);
       validateArguments();
-      this.elapsedTime = getTimer(Metrics.ELAPSED_TIME);
     }
 
     @Override
     protected boolean doProcess(Record inputRecord, InputStream stream) throws IOException {
-      Timer.Context timerContext = elapsedTime.time();
       Record template = inputRecord.copy();
       removeAttachments(template);
       template.removeAll(Fields.MESSAGE);
@@ -116,24 +111,22 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
             lines.append('\n');
             lines.append(line);
           } else {          // do next
-            if (lines.length() > 0 && !flushRecord(template.copy(), lines.toString(), timerContext)) {
+            if (lines.length() > 0 && !flushRecord(template.copy(), lines.toString())) {
               return false;
             }
-            timerContext = elapsedTime.time();
             lines.setLength(0);
             lines.append(line);              
           }
         }          
       }
       if (lines != null && lines.length() > 0) {
-        return flushRecord(template.copy(), lines.toString(), timerContext);
+        return flushRecord(template.copy(), lines.toString());
       }
       return true;
     }
 
-    private boolean flushRecord(Record outputRecord, String lines, Timer.Context timerContext) {
+    private boolean flushRecord(Record outputRecord, String lines) {
       outputRecord.put(Fields.MESSAGE, lines);
-      timerContext.stop();
       incrementNumRecords();
       
       // pass record to next command in chain:
