@@ -157,7 +157,6 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
         
 //        path + "/testKML.kml", 
 //        path + "/testRDF.rdf", 
-        path + "/testTrueType.ttf", 
         path + "/testVISIO.vsd",
 //        path + "/testWAR.war", 
 //        path + "/testWindows-x86-32.exe",

@@ -208,7 +208,6 @@ public class DetectMimeTypesTest extends AbstractMorphlineTest {
         
         path + "/testKML.kml",  "application/vnd.google-earth.kml+xml", "application/vnd.google-earth.kml+xml",
         path + "/testRDF.rdf",  "application/rdf+xml", "application/rdf+xml",
-        path + "/testTrueType.ttf",  "application/x-font-ttf", "application/x-font-ttf",
         path + "/testVISIO.vsd",  "application/x-tika-msoffice", "application/vnd.visio",
         path + "/testWAR.war",  "application/zip", "application/x-tika-java-web-archive",
         path + "/testWindows-x86-32.exe",  "application/x-msdownload; format=pe32", "application/x-msdownload; format=pe32",
