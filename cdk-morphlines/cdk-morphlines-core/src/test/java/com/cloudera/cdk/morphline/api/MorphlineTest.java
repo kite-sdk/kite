@@ -53,12 +53,20 @@ import com.typesafe.config.ConfigUtil;
 public class MorphlineTest extends AbstractMorphlineTest {
   
   private void processAndVerifySuccess(Record input, Record expected) {
+    processAndVerifySuccess(input, expected, true);
+  }
+
+  private void processAndVerifySuccess(Record input, Record expected, boolean isSame) {
     collector.reset();
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(input));
     assertEquals(expected, collector.getFirstRecord());
-    assertSame(input, collector.getFirstRecord());    
+    if (isSame) {
+      assertSame(input, collector.getFirstRecord());    
+    } else {
+      assertNotSame(input, collector.getFirstRecord());    
+    }
   }
 
   private void processAndVerifySuccess(Record input, Multimap... expectedMaps) {
@@ -1112,6 +1120,23 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.put("/foo", "y");
     expected.put("/fragment", "z");
     processAndVerifySuccess(record, expected);
+  }
+  
+  @Test
+  public void testSplitKeyValueWithIPTables() throws Exception {
+    morphline = createMorphline("test-morphlines/splitKeyValueWithIPTables");    
+    Record record = new Record();
+    String msg = "Feb  6 12:04:42 IN=eth1 OUT=eth0 SRC=1.2.3.4 DST=6.7.8.9 ACK DF WINDOW=0";
+    record.put(Fields.ATTACHMENT_BODY, msg.getBytes("UTF-8"));
+    Record expected = new Record();
+    expected.put(Fields.MESSAGE, msg);
+    expected.put("timestamp", "Feb  6 12:04:42");
+    expected.put("IN", "eth1");
+    expected.put("OUT", "eth0");
+    expected.put("SRC", "1.2.3.4");
+    expected.put("DST", "6.7.8.9");
+    expected.put("WINDOW", "0");
+    processAndVerifySuccess(record, expected, false);
   }
   
   @Test

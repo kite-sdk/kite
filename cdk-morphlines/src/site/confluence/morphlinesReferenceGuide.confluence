@@ -1009,7 +1009,7 @@ The command provides the following configuration options:
 | trim | true | Whether or not to apply the {{String.trim()}} method on the output keys and values to be added. |
 | addEmptyStrings | false | Whether or not to add zero length strings to the output field. |
 
-Example usage:
+h4. Example usage:
 {code}
 splitKeyValue { 
   inputField : params
@@ -1030,6 +1030,69 @@ Expected output:
 /foo:x
 /foo:y
 /fragment:z
+{code}
+
+h4. Example usage that extracts data from iptables log file:
+{code}
+# read each line in the file
+{ 
+  readLine {
+    charset : UTF-8
+  }
+} 
+                
+# extract timestamp and key value pair string
+{ 
+  grok { 
+    dictionaryFiles : [target/test-classes/grok-dictionaries/grok-patterns]
+    expressions : { 
+      message : """%{SYSLOGTIMESTAMP:timestamp} %{GREEDYDATA:key_value_pairs_string}"""
+    }
+  }
+}
+
+# split key value pair string on blanks into an array of key value pairs
+{ 
+  split { 
+    inputField : key_value_pairs_string
+    outputField : key_value_array          
+    separator : " "        
+  }
+}
+
+# split each key value pair on '=' char and extract it's value into record fields named after the key
+{ 
+  splitKeyValue { 
+    inputField : key_value_array
+    outputFieldPrefix : ""          
+    separator : "="        
+    addEmptyStrings : false
+    trim : true          
+  }
+}
+
+# remove temporary work fields
+{ 
+  setValues {
+    key_value_pairs_string : []
+    key_value_array : []
+  }
+}
+{code}
+
+Input file:
+{code}
+Feb  6 12:04:42 IN=eth1 OUT=eth0 SRC=1.2.3.4 DST=6.7.8.9 ACK DF WINDOW=0
+{code}
+  
+Expected output record:
+{code}
+timestamp:Feb  6 12:04:42
+IN:eth1
+OUT:eth0
+SRC:1.2.3.4
+DST:6.7.8.9
+WINDOW:0
 {code}
 
 h2. toByteArray
