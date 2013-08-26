@@ -82,10 +82,10 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
 
     @Override
     protected boolean doProcess(Record inputRecord, InputStream stream) throws IOException {
+      Timer.Context timerContext = elapsedTime.time();
       Record template = inputRecord.copy();
       removeAttachments(template);
       template.removeAll(Fields.MESSAGE);
-      Timer.Context timerContext = elapsedTime.time();
       Charset detectedCharset = detectCharset(inputRecord, charset);  
       Reader reader = new InputStreamReader(stream, detectedCharset);
       BufferedReader lineReader = new BufferedReader(reader, getBufferSize(stream));
