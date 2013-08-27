@@ -19,7 +19,6 @@ import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.PartitionKey;
-import com.cloudera.cdk.data.filesystem.FileSystemDataset;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -105,8 +104,8 @@ public class DatasetTestUtilities {
     try {
       reader = ds.getReader();
       reader.open();
-      while (reader.hasNext()) {
-        records.add(reader.read());
+      for (GenericData.Record record : reader) {
+        records.add(record);
       }
     } finally {
       if (reader != null) {

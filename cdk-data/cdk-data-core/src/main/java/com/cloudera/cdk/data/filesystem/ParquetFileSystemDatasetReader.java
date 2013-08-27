@@ -15,11 +15,10 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
-import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetReaderException;
+import com.cloudera.cdk.data.spi.AbstractDatasetReader;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
 import org.apache.avro.Schema;
@@ -30,8 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parquet.avro.AvroParquetReader;
 
-class ParquetFileSystemDatasetReader<E extends IndexedRecord> implements DatasetReader<E>,
-    Closeable {
+class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDatasetReader<E> {
 
   private FileSystem fileSystem;
   private Path path;
@@ -86,7 +84,7 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> implements Dataset
   }
 
   @Override
-  public E read() {
+  public E next() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to read from a file in state:%s", state);
 

@@ -16,7 +16,6 @@
 package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
-import com.cloudera.cdk.data.filesystem.MultiFileDatasetReader;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import java.io.IOException;
@@ -53,8 +52,7 @@ public class TestMultiFileDatasetReader {
     try {
       reader.open();
 
-      while (reader.hasNext()) {
-        Record record = reader.read();
+      for (Record record : reader) {
         Assert.assertNotNull(record);
         Assert.assertEquals(String.valueOf(records % 100), record.get("text"));
         records++;
