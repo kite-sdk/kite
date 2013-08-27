@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
-import com.cloudera.cdk.data.DatasetWriterException;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.DatasetWriterException;
 import com.google.common.base.Objects;
@@ -32,12 +31,9 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
-import java.io.Flushable;
 import java.io.IOException;
 
-class FileSystemDatasetWriter<E> implements DatasetWriter<E>, Flushable,
-  Closeable {
+class FileSystemDatasetWriter<E> implements DatasetWriter<E> {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemDatasetWriter.class);

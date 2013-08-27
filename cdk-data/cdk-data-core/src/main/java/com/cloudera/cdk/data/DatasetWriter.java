@@ -15,6 +15,8 @@
  */
 package com.cloudera.cdk.data;
 
+import java.io.Closeable;
+import java.io.Flushable;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -53,7 +55,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  * @param <E> The type of entity accepted by this writer.
  */
 @NotThreadSafe
-public interface DatasetWriter<E> {
+public interface DatasetWriter<E> extends Flushable, Closeable {
 
   /**
    * <p>
@@ -89,13 +91,13 @@ public interface DatasetWriter<E> {
    * <p>
    * Force or commit any outstanding data to storage.
    * </p>
-   * </p>
    * <p>
    * Implementations of this interface must declare their durability guarantees.
    * </p>
    *
    * @throws DatasetWriterException
    */
+  @Override
   void flush();
 
   /**
@@ -110,6 +112,7 @@ public interface DatasetWriter<E> {
    *
    * @throws DatasetWriterException
    */
+  @Override
   void close();
 
   boolean isOpen();

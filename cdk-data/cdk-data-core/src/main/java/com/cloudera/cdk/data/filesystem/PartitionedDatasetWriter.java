@@ -30,12 +30,11 @@ import com.google.common.cache.RemovalNotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-class PartitionedDatasetWriter<E> implements DatasetWriter<E>, Closeable {
+class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
 
   private static final Logger logger = LoggerFactory
     .getLogger(PartitionedDatasetWriter.class);

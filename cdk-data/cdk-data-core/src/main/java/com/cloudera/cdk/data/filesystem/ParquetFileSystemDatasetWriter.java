@@ -20,8 +20,6 @@ import com.cloudera.cdk.data.DatasetWriterException;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
-import java.io.Closeable;
-import java.io.Flushable;
 import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
@@ -34,8 +32,7 @@ import parquet.avro.AvroParquetWriter;
 import parquet.hadoop.ParquetWriter;
 import parquet.hadoop.metadata.CompressionCodecName;
 
-class ParquetFileSystemDatasetWriter<E extends IndexedRecord> implements DatasetWriter<E>, Flushable,
-    Closeable {
+class ParquetFileSystemDatasetWriter<E extends IndexedRecord> implements DatasetWriter<E> {
 
   private static final Logger logger = LoggerFactory
     .getLogger(ParquetFileSystemDatasetWriter.class);
