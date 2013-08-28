@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,12 +46,12 @@ public class TestHCatalogDatasetRepository {
   @Before
   public void setUp() throws IOException {
     fileSystem = FileSystem.get(new Configuration());
-    testDirectory = new Path(Files.createTempDir().getAbsolutePath());
   }
 
   @Test
   public void testManagedTable() throws IOException {
     File tableDir = new File("/tmp/test/user/hive/warehouse/" + TABLE_NAME);
+    FileUtil.fullyDelete(tableDir); // clear out possible previous failed runs
     Assert.assertFalse("Data directory should not exist before test", tableDir.exists());
     repo = new HCatalogDatasetRepository();
 
@@ -70,6 +71,7 @@ public class TestHCatalogDatasetRepository {
 
   @Test
   public void testExternalTable() throws IOException {
+    Path testDirectory = new Path(Files.createTempDir().getAbsolutePath());
     File tableDir = new File(testDirectory.toString(), TABLE_NAME);
     Assert.assertFalse("Data directory should not exist before test", tableDir.exists());
     repo = new HCatalogDatasetRepository(fileSystem, testDirectory);
