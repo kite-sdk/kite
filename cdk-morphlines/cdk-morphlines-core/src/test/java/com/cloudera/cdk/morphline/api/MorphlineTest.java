@@ -296,6 +296,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.put("foo", "\r");
     expected.put("foo", "\\.");    
     expected.put("foo", String.valueOf((char)1));    
+    expected.put("foo", "byte[]");    
     processAndVerifySuccess(record, expected);
   }
 
