@@ -1,3 +1,5 @@
+.jbundler
+Jarfile*
 .classpath
 .settings
 .project
