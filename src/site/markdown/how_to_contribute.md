@@ -6,6 +6,11 @@ includes, but is not limited to: code, build system enhancements, documentation,
 examples, and supporting tools. There are, however, a few guidelines, as well as
 even fewer hard rules we ask you to follow.
 
+## Join the cdk-dev group
+
+Join the [cdk-dev](https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev)
+group for discussion of CDK development.
+
 ## Complete a Contributor License Agreement
 
 In order to accept _any_ contribution, the contributor _must_ complete and
