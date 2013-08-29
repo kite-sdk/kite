@@ -56,7 +56,8 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
   private final boolean managed;
 
   private final HCatalogMetadataProvider metadataProvider;
-  private FileSystemDatasetRepository fileSystemDatasetRepository;
+  private final FileSystemDatasetRepository fileSystemDatasetRepository;
+  private final FileSystemDatasetRepository externalDatasetRepository;
 
   /**
    * <p>
@@ -69,6 +70,8 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
   public HCatalogDatasetRepository() {
     this.managed = true;
     this.metadataProvider = new HCatalogMetadataProvider(managed);
+    this.externalDatasetRepository = new ExternalFileSystemDatasetRepository();
+    this.fileSystemDatasetRepository = null;
   }
 
   /**
@@ -84,6 +87,10 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
 
     this.fileSystemDatasetRepository = new FileSystemDatasetRepository.Builder()
         .rootDirectory(uri).metadataProvider(metadataProvider).get();
+
+    // use the FileSystemDatasetRepository to get a FileSystem from the URI
+    metadataProvider.setFileSystem(fileSystemDatasetRepository.getFileSystem());
+    this.externalDatasetRepository = new ExternalFileSystemDatasetRepository();
   }
 
   /**
@@ -101,31 +108,32 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
       Configuration conf) {
     this.managed = false;
     this.metadataProvider = new HCatalogMetadataProvider(managed, conf);
+
     this.fileSystemDatasetRepository = new FileSystemDatasetRepository(fileSystem,
         rootDirectory, metadataProvider);
+
+    metadataProvider.setFileSystem(fileSystem);
+    this.externalDatasetRepository = new ExternalFileSystemDatasetRepository();
   }
 
   @Override
   public Dataset create(String name, DatasetDescriptor descriptor) {
     if (managed) {
       // HCatalog handles data directory creation
-      metadataProvider.save(name, descriptor);
-      if (fileSystemDatasetRepository == null) {
-        fileSystemDatasetRepository = new FileSystemDatasetRepository(
-            metadataProvider.getFileSystem(),
-            /* unused */ metadataProvider.getDataDirectory().getParent(),
-            metadataProvider) {
-          @Override
-          protected Path pathForDataset(String name) {
-            return metadataProvider.getDataDirectory();
-          }
-        };
-      }
-      return fileSystemDatasetRepository.load(name);
+      metadataProvider.create(name, descriptor);
+      return externalDatasetRepository.get(name);
     } else {
-      metadataProvider.setFileSystem(fileSystemDatasetRepository.getFileSystem());
+      // TODO: what happens when this is deleted without going through this lib?
+      // That may leave a stale external table in Hive?
+
+      // TODO: This should not assume it knows where the dataset will be stored!
+      // The problem is that to save properly, the metadataProvider needs to
+      // know the dataDirectory, but save is called inside of create, which
+      // doesn't know to set it. The metadataProvdier should either always know
+      // where the data lives, or never know where the data lives.
       Path dataDir = new Path(fileSystemDatasetRepository.getRootDirectory(), name);
       metadataProvider.setDataDirectory(dataDir);
+      // use create so the descriptor info is stored with the data too
       return fileSystemDatasetRepository.create(name, descriptor);
     }
   }
@@ -137,28 +145,51 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public Dataset load(String name) {
-    if (managed && fileSystemDatasetRepository == null) {
-      metadataProvider.load(name);
-      fileSystemDatasetRepository = new FileSystemDatasetRepository(
-          metadataProvider.getFileSystem(),
-            /* unused */ metadataProvider.getDataDirectory().getParent(),
-          metadataProvider) {
-        @Override
-        protected Path pathForDataset(String name) {
-          return metadataProvider.getDataDirectory();
-        }
-      };
-    }
-    return fileSystemDatasetRepository.load(name);
+    metadataProvider.load(name);
+    // always use the external repository because there is no guarantee the set
+    // being loaded is in the root where this repository would create it.
+    return externalDatasetRepository.get(name);
   }
 
   @Override
   public boolean delete(String name) {
     if (managed) {
-      // HCatalog handles data directory deletion
+      // Hive metastore handles data directory deletion
       return metadataProvider.delete(name);
     } else {
-      return fileSystemDatasetRepository.delete(name);
+      // the data set must be loaded so that it's internal path is set for drop
+      metadataProvider.load(name);
+      // the repository calls metadataProvider.delete
+      // always use the external repository because there is no guarantee the
+      // set being deleted is in the root where this repository would create it
+      return externalDatasetRepository.delete(name);
+    }
+  }
+
+  /**
+   * This is a special FileSystemDatasetRepository that opens the last data set
+   * that was loaded or created by the metadataProvider. This is used when the
+   * Hive metastore manages the data because tables are not in the directory
+   * structure expected by a normal FileSystemDatasetRepository. It is used to
+   * open any loaded Dataset and for create/delete operations on managed tables.
+   *
+   * Otherwise, when a {@link Dataset} is not managed by Hive, a regular
+   * {@link FileSystemDatasetRepository} is used, and the
+   * {@link HCatalogMetadataProvider} updates the metastore entries when data
+   * sets are created or deleted.
+   */
+  private class ExternalFileSystemDatasetRepository
+      extends FileSystemDatasetRepository {
+
+    public ExternalFileSystemDatasetRepository() {
+      super(metadataProvider.getFileSystem(),
+          /* unused */ metadataProvider.getDataDirectory().getParent(),
+          metadataProvider);
+    }
+
+    @Override
+    protected Path pathForDataset(String name) {
+      return metadataProvider.getDataDirectory();
     }
   }
 
