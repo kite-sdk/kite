@@ -79,6 +79,8 @@ public final class ExtractURIComponentsBuilder implements CommandBuilder {
         addValue(record, "schemeSpecificPart", uri.getSchemeSpecificPart());
         addValue(record, "userInfo", uri.getUserInfo());
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
     

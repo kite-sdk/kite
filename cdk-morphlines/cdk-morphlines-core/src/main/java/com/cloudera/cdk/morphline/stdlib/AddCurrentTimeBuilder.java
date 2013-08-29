@@ -70,6 +70,8 @@ public final class AddCurrentTimeBuilder implements CommandBuilder {
       } else {
         record.replaceValues(fieldName, System.currentTimeMillis());
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
 

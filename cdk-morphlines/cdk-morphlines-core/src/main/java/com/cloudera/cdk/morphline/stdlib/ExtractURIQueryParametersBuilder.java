@@ -105,6 +105,8 @@ public final class ExtractURIQueryParametersBuilder implements CommandBuilder {
           i++;
         }
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
 

@@ -116,6 +116,8 @@ public final class SplitBuilder implements CommandBuilder {
           extractColumns(record, columns);
         }
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
 

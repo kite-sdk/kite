@@ -117,6 +117,8 @@ public final class ExtractURIComponentBuilder implements CommandBuilder {
           }
         }
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
     

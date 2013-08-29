@@ -89,6 +89,8 @@ public final class AddLocalHostBuilder implements CommandBuilder {
           record.put(fieldName, host);
         }
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
 

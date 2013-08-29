@@ -85,6 +85,8 @@ public final class SplitKeyValueBuilder implements CommandBuilder {
           record.put(outputFieldPrefix + trim(key), value);
         }
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
 
