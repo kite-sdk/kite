@@ -59,13 +59,23 @@ class HCatalogMetadataProvider extends AbstractMetadataProvider {
   public HCatalogMetadataProvider(boolean managed) {
     this.managed = managed;
     this.conf = new Configuration();
-    hcat = new HCatalog();
+    try {
+      this.fileSystem = FileSystem.get(conf);
+    } catch (IOException ex) {
+      throw new MetadataProviderException("Could not open a FileSystem", ex);
+    }
+    this.hcat = new HCatalog();
   }
 
   public HCatalogMetadataProvider(boolean managed, Configuration conf) {
     this.managed = managed;
     this.conf = conf;
-    hcat = new HCatalog(conf);
+    try {
+      this.fileSystem = FileSystem.get(conf);
+    } catch (IOException ex) {
+      throw new MetadataProviderException("Could not open a FileSystem", ex);
+    }
+    this.hcat = new HCatalog(conf);
   }
 
   @Override
@@ -74,15 +84,11 @@ class HCatalogMetadataProvider extends AbstractMetadataProvider {
 
     String serializationLib = table.getSerializationLib();
     if (!AVRO_SERDE.equals(serializationLib)) {
+      // should this be here? the multi-file reader throws Unknown... in open
       throw new MetadataProviderException("Only tables using AvroSerDe are supported.");
     }
 
-    try {
-      fileSystem = FileSystem.get(conf);
-      dataDirectory = fileSystem.makeQualified(new Path(table.getDataLocation()));
-    } catch (IOException e) {
-      throw new MetadataProviderException(e);
-    }
+    dataDirectory = fileSystem.makeQualified(new Path(table.getDataLocation()));
 
     DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder();
     if (table.getProperty(PARTITION_EXPRESSION_PROPERTY_NAME) != null) {
@@ -95,16 +101,17 @@ class HCatalogMetadataProvider extends AbstractMetadataProvider {
         URI schemaUrl = new URI(schemaUrlString);
         return builder.schema(schemaUrl).get();
       } catch (IOException e) {
-        throw new MetadataProviderException(e);
+        throw new MetadataProviderException("Could not read schema", e);
       } catch (URISyntaxException e) {
-        throw new MetadataProviderException(e);
+        // this library sets the URI, so it should always be valid
+        throw new MetadataProviderException("[BUG] Invalid schema URI", e);
       }
     }
     String schemaLiteral = table.getProperty(AVRO_SCHEMA_LITERAL_PROPERTY_NAME);
     if (schemaLiteral != null) {
       return builder.schema(schemaLiteral).get();
     }
-    throw new MetadataProviderException("Can't find schema.");
+    throw new MetadataProviderException("Cannot find schema: missing metadata");
 
   }
 
@@ -139,12 +146,11 @@ class HCatalogMetadataProvider extends AbstractMetadataProvider {
     }
 
     logger.info("Creating a Hive table named: " + name);
-    Table tbl = new Table(dbName, name);
+
+    // this object will be the table metadata
+    final Table tbl = new Table(dbName, name);
     tbl.setTableType(managed ? TableType.MANAGED_TABLE : TableType.EXTERNAL_TABLE);
     try {
-      if (dataDirectory != null) {
-        tbl.setDataLocation(fileSystem.makeQualified(dataDirectory).toUri());
-      }
       tbl.setSerializationLib(AVRO_SERDE);
       tbl.setInputFormatClass("org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
       tbl.setOutputFormatClass("org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat");
@@ -170,16 +176,18 @@ class HCatalogMetadataProvider extends AbstractMetadataProvider {
       throw new MetadataProviderException("Error configuring Hive Avro table, " +
           "table creation failed", e);
     }
-    hcat.createTable(tbl);
 
-    if (dataDirectory == null) { // re-read to find the data directory
-      Table table = hcat.getTable(dbName, name);
-      try {
-        fileSystem = FileSystem.get(conf);
-        dataDirectory = fileSystem.makeQualified(new Path(table.getDataLocation()));
-      } catch (IOException e) {
-        throw new MetadataProviderException(e);
-      }
+    if (managed) {
+      // create the table, then load it to get the location
+      hcat.createTable(tbl);
+      final Table table = hcat.getTable(dbName, name);
+      this.dataDirectory = fileSystem.makeQualified(new Path(table.getDataLocation()));
+
+    } else {
+      // set the location of the the table
+      tbl.setDataLocation(fileSystem.makeQualified(dataDirectory).toUri());
+      hcat.createTable(tbl);
+      this.dataDirectory = null;
     }
 
     return descriptor;
