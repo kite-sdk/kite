@@ -20,7 +20,6 @@ import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.Formats;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import java.io.IOException;
@@ -105,7 +104,7 @@ public class TestFileSystemDatasetRepository {
     // Just invoke the creation test so we have a dataset to test with.
     testCreate();
 
-    Dataset dataset = repo.get("test1");
+    Dataset dataset = repo.load("test1");
 
     Assert.assertNotNull("Dataset is loaded and produced", dataset);
     Assert.assertEquals("Dataset name is propagated", "test1",
@@ -121,15 +120,15 @@ public class TestFileSystemDatasetRepository {
   }
 
   @Test
-  public void testDrop() throws IOException {
+  public void testDelete() throws IOException {
     // Just invoke the creation test so we have a dataset to test with.
     testCreate();
 
-    boolean result = repo.drop("test1");
-    Assert.assertTrue("Drop dataset should return true", result);
+    boolean result = repo.delete("test1");
+    Assert.assertTrue("Delete dataset should return true", result);
 
-    result = repo.drop("test1");
-    Assert.assertFalse("Drop nonexistent dataset should return false", result);
+    result = repo.delete("test1");
+    Assert.assertFalse("Delete nonexistent dataset should return false", result);
   }
 
   @Test
@@ -143,7 +142,7 @@ public class TestFileSystemDatasetRepository {
     } catch (DatasetRepositoryException e) {
       // expected
     }
-    Assert.assertEquals(Formats.AVRO, repo.get("test1").getDescriptor().getFormat());
+    Assert.assertEquals(Formats.AVRO, repo.load("test1").getDescriptor().getFormat());
   }
 
   @Test
@@ -160,7 +159,7 @@ public class TestFileSystemDatasetRepository {
     } catch (DatasetRepositoryException e) {
       // expected
     }
-    Assert.assertEquals(ps, repo.get("test1").getDescriptor().getPartitionStrategy());
+    Assert.assertEquals(ps, repo.load("test1").getDescriptor().getPartitionStrategy());
   }
 
   @Test
@@ -186,7 +185,7 @@ public class TestFileSystemDatasetRepository {
     } catch (DatasetRepositoryException e) {
       // expected
     }
-    dataset = repo.get("test1");
+    dataset = repo.load("test1");
     Assert.assertEquals("Dataset schema is unchanged", testSchema, dataset
         .getDescriptor().getSchema());
 
