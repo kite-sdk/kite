@@ -17,13 +17,6 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
-import com.cloudera.cdk.data.DatasetReader;
-import com.cloudera.cdk.data.DatasetWriter;
-import com.cloudera.cdk.data.FieldPartitioner;
-import com.cloudera.cdk.data.Formats;
-import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetException;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;

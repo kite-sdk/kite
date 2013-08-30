@@ -70,6 +70,7 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    * {@link #hasNext()} or {@link #read()}.
    * </p>
    *
+   * @throws UnknownFormatException
    * @throws DatasetReaderException
    */
   void open();
