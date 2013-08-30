@@ -80,6 +80,8 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    *
    * @return true if additional entities exist, false otherwise.
    * @throws DatasetReaderException
+   *
+   * @since 0.7.0
    */
   @Override
   boolean hasNext();
