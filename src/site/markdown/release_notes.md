@@ -11,7 +11,7 @@ Version TBD has the following notable changes:
 
 * Morphlines Library
     * Added commands `splitKeyValue`, `extractURIComponent` and `toByteArray`
-    * Added `outputFields` parameter to the `split` command to support a list of column names similar to `readCSV` 
+    * Added `outputFields` parameter to the `split` command to support a list of column names similar to the `readCSV` command
     * Added tika-xmp maven module as a dependency to cdk-morphline-solr-cell module
     * Added several performance enhancements
 
