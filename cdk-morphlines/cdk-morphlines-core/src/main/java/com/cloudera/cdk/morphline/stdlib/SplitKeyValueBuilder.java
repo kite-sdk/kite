@@ -82,7 +82,7 @@ public final class SplitKeyValueBuilder implements CommandBuilder {
         }
         value = trim(value);        
         if (value.length() > 0 || addEmptyStrings) {
-          record.put(outputFieldPrefix + trim(key), value);
+          record.put(concat(outputFieldPrefix, trim(key)), value);
         }
       }
       
@@ -92,6 +92,10 @@ public final class SplitKeyValueBuilder implements CommandBuilder {
 
     private String trim(String str) {
       return trim ? str.trim() : str;
+    }
+    
+    private String concat(String x, String y) {
+      return x.length() == 0 ? y : x + y;
     }
     
   }
