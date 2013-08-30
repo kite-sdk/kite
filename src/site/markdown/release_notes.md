@@ -3,6 +3,18 @@
 All past CDK releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version TBD
+
+Release date: TBD
+
+Version TBD has the following notable changes:
+
+* Morphlines Library
+    * Added commands `splitKeyValue`, `extractURIComponent` and `toByteArray`
+    * Added `outputFields` parameter to the `split` command to support a list of column names similar to `readCSV` 
+    * Added tika-xmp maven module as a dependency to cdk-morphline-solr-cell module
+    * Added several performance enhancements
+
 ## Version 0.6.0
 
 Release date: Aug 16, 2013
