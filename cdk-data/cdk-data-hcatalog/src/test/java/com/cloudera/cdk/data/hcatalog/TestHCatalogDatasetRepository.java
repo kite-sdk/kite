@@ -64,7 +64,7 @@ public class TestHCatalogDatasetRepository {
     checkTestUsers(ds, 10);
     Assert.assertTrue("Data directory should exist after writing", tableDir.exists());
 
-    repo.drop(TABLE_NAME);
+    repo.delete(TABLE_NAME);
     Assert.assertFalse("Data directory should not exist after dropping",
         tableDir.exists());
   }
@@ -85,7 +85,7 @@ public class TestHCatalogDatasetRepository {
     checkTestUsers(ds, 10);
     Assert.assertTrue("Data directory should exist after writing", tableDir.exists());
 
-    repo.drop(TABLE_NAME);
+    repo.delete(TABLE_NAME);
     Assert.assertFalse("Data directory should not exist after dropping",
         tableDir.exists());
   }
