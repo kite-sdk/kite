@@ -44,12 +44,46 @@ public interface MetadataProvider {
   DatasetDescriptor load(String name);
 
   /**
-   * Save the dataset descriptor for the dataset {@code name}.
+   * Create a {@code DatasetDescriptor} for the dataset named {@code name}.
+   *
+   * The descriptor will be stored for the named data set in this provider's
+   * metadata store. It is illegal to create more than one descriptor for a
+   * named data set, and an exception will be thrown.
    *
    * @param name       The fully qualified name of a dataset.
    * @param descriptor A dataset descriptor.
+   * @return The descriptor as persisted to the Metadata store.
    * @throws MetadataProviderException If the dataset descriptor can not be saved.
    */
+  DatasetDescriptor create(String name, DatasetDescriptor descriptor);
+
+  /**
+   * Update a {@code DatasetDescriptor} for the dataset named {@code name}.
+   *
+   * The new descriptor will be stored for the named data set in this provider's
+   * metadata store, replacing the previous descriptor. The named dataset must
+   * already exist or an error will be thrown.
+   *
+   * This method is optional.
+   *
+   * @param name       The fully qualified name of a dataset.
+   * @param descriptor A dataset descriptor.
+   * @return The descriptor as persisted to the Metadata store.
+   *
+   * @throws UnsupportedOperationException If descriptor updates are not
+   *                                       supported by the implementation.
+   * @throws MetadataProviderException     If the dataset descriptor can not be
+   *                                       updated.
+   */
+  DatasetDescriptor update(String name, DatasetDescriptor descriptor);
+
+  /**
+   * Deprecated method to save a descriptor. Instead, use {@link create} and
+   * {@link #update}.
+   *
+   * @deprecated will be removed in 0.8.x
+   */
+  @Deprecated
   void save(String name, DatasetDescriptor descriptor);
 
   /**

@@ -19,6 +19,7 @@ import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.impl.Accessor;
+import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -48,7 +49,7 @@ import java.util.Properties;
  * {@code descriptor.avro}.
  * </p>
  */
-public class FileSystemMetadataProvider implements MetadataProvider {
+public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemMetadataProvider.class);

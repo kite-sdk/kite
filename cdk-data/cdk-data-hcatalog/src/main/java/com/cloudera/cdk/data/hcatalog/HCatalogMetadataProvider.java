@@ -17,16 +17,15 @@ package com.cloudera.cdk.data.hcatalog;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.FieldPartitioner;
-import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.impl.Accessor;
+import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import javax.annotation.Nullable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -37,7 +36,7 @@ import org.apache.hadoop.hive.serde.serdeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class HCatalogMetadataProvider implements MetadataProvider {
+class HCatalogMetadataProvider extends AbstractMetadataProvider {
 
   private static final Logger logger = LoggerFactory
       .getLogger(HCatalogMetadataProvider.class);
@@ -68,7 +67,15 @@ class HCatalogMetadataProvider implements MetadataProvider {
 
   @Override
   public DatasetDescriptor load(String name) {
-    Table table = hcat.getTable(dbName, name);
+    Table table;
+    try {
+      table = hcat.getTable(dbName, name);
+    } catch (RuntimeException ex) {
+      // according to the API, this should throw a MetadataProviderException
+      // when the table can't be found. TODO: make a specific "can't find"
+      // Exception to differentiate this case.
+      throw new MetadataProviderException(ex);
+    }
     String serializationLib = table.getSerializationLib();
     if (!AVRO_SERDE.equals(serializationLib)) {
       throw new MetadataProviderException("Only tables using AvroSerDe are supported.");
@@ -122,11 +129,7 @@ class HCatalogMetadataProvider implements MetadataProvider {
   }
 
   @Override
-  public void save(String name, DatasetDescriptor descriptor) {
-    if (hcat.tableExists(dbName, name)) {
-      logger.warn("Hive table named " + name + " already exists");
-      return;
-    }
+  public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
     logger.info("Creating a Hive table named: " + name);
     Table tbl = new Table(dbName, name);
     tbl.setTableType(managed ? TableType.MANAGED_TABLE : TableType.EXTERNAL_TABLE);
@@ -170,6 +173,13 @@ class HCatalogMetadataProvider implements MetadataProvider {
         throw new MetadataProviderException(e);
       }
     }
+
+    return descriptor;
+  }
+
+  @Override
+  public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
+    throw new UnsupportedOperationException("Not supported.");
   }
 
   @Override
