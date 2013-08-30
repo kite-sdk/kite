@@ -45,7 +45,7 @@ public class TestHCatalogMetadataProvider {
 
     provider.setFileSystem(fileSystem);
     provider.setDataDirectory(testDirectory);
-    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
+    provider.create("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
 
     DatasetDescriptor descriptor = provider.load("test");
 
@@ -69,7 +69,7 @@ public class TestHCatalogMetadataProvider {
 
     provider.setFileSystem(fileSystem);
     provider.setDataDirectory(testDirectory);
-    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA)
+    provider.create("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA)
         .partitionStrategy(partitionStrategy).get());
 
     DatasetDescriptor descriptor = provider.load("test");
