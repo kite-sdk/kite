@@ -31,7 +31,7 @@ Cloudera.
 ## Create a Pull Request
 
 This project uses Github. Pull requests are the easiest form of contribution to
-accept and preferred. If this sounds like Klingon to you, Github has an
+accept and are preferred. If this sounds like Klingon to you, Github has an
 excellent description of [using pull requests][gh-pr]. We follow the _Fork &
 Pull_ model described in the Github documentation.
 
