@@ -15,8 +15,8 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
-import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetReaderException;
+import com.cloudera.cdk.data.spi.AbstractDatasetReader;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import org.apache.avro.Schema;
@@ -28,10 +28,9 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
 import java.io.IOException;
 
-class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
+class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
 
   private FileSystem fileSystem;
   private Path path;
@@ -77,7 +76,7 @@ class FileSystemDatasetReader<E> implements DatasetReader<E>, Closeable {
   }
 
   @Override
-  public E read() {
+  public E next() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to read from a file in state:%s", state);
 

@@ -16,7 +16,6 @@
 package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.DatasetReader;
-import com.cloudera.cdk.data.filesystem.FileSystemDatasetReader;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import java.io.IOException;
