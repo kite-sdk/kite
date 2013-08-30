@@ -120,7 +120,7 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
           }
         };
       }
-      return fileSystemDatasetRepository.get(name);
+      return fileSystemDatasetRepository.load(name);
     } else {
       metadataProvider.setFileSystem(fileSystemDatasetRepository.getFileSystem());
       Path dataDir = new Path(fileSystemDatasetRepository.getRootDirectory(), name);
@@ -148,7 +148,7 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
         }
       };
     }
-    return fileSystemDatasetRepository.get(name);
+    return fileSystemDatasetRepository.load(name);
   }
 
   @Override
@@ -157,7 +157,7 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
       // HCatalog handles data directory deletion
       return metadataProvider.delete(name);
     } else {
-      return fileSystemDatasetRepository.drop(name);
+      return fileSystemDatasetRepository.delete(name);
     }
   }
 
