@@ -20,6 +20,7 @@ import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
+import com.cloudera.cdk.data.spi.AbstractDatasetRepository;
 import com.google.common.base.Supplier;
 import java.io.IOException;
 import java.net.URI;
@@ -49,7 +50,7 @@ import org.apache.hadoop.fs.Path;
  * @see DatasetRepository
  * @see Dataset
  */
-public class HCatalogDatasetRepository implements DatasetRepository {
+public class HCatalogDatasetRepository extends AbstractDatasetRepository {
 
   private final boolean managed;
 
@@ -134,7 +135,7 @@ public class HCatalogDatasetRepository implements DatasetRepository {
   }
 
   @Override
-  public Dataset get(String name) {
+  public Dataset load(String name) {
     if (managed && fileSystemDatasetRepository == null) {
       metadataProvider.load(name);
       fileSystemDatasetRepository = new FileSystemDatasetRepository(
@@ -151,7 +152,7 @@ public class HCatalogDatasetRepository implements DatasetRepository {
   }
 
   @Override
-  public boolean drop(String name) {
+  public boolean delete(String name) {
     if (managed) {
       // HCatalog handles data directory deletion
       return metadataProvider.delete(name);

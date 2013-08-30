@@ -24,6 +24,7 @@ import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
+import com.cloudera.cdk.data.spi.AbstractDatasetRepository;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -66,7 +67,7 @@ import java.io.IOException;
  * @see com.cloudera.cdk.data.PartitionStrategy
  * @see com.cloudera.cdk.data.MetadataProvider
  */
-public class FileSystemDatasetRepository implements DatasetRepository {
+public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemDatasetRepository.class);
@@ -219,7 +220,7 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   }
 
   @Override
-  public Dataset get(String name) {
+  public Dataset load(String name) {
     Preconditions.checkArgument(name != null, "Name can not be null");
 
     logger.debug("Loading dataset:{}", name);
@@ -238,7 +239,7 @@ public class FileSystemDatasetRepository implements DatasetRepository {
   }
 
   @Override
-  public boolean drop(String name) {
+  public boolean delete(String name) {
     Preconditions.checkArgument(name != null, "Name can not be null");
 
     logger.debug("Dropping dataset:{}", name);

@@ -52,7 +52,17 @@ public interface DatasetRepository {
    *
    * @param name The name of the dataset.
    * @throws DatasetRepositoryException
+   *
+   * @since 0.7.0
    */
+  Dataset load(String name);
+
+  /**
+   * Deprecated synonym for {@link #load()}.
+   *
+   * @deprecated will be removed in 0.8.x
+   */
+  @Deprecated
   Dataset get(String name);
 
   /**
@@ -95,7 +105,17 @@ public interface DatasetRepository {
    * @param name The name of the dataset.
    * @return <code>true</code> if the dataset was successfully dropped, false otherwise
    * @throws DatasetReaderException
+   *
+   * @since 0.7.0
    */
+  boolean delete(String name);
+
+  /**
+   * Deprecated synonym for {@link #delete()}.
+   *
+   * @deprecated will be removed in 0.8.x
+   */
+  @Deprecated
   boolean drop(String name);
 
 }
