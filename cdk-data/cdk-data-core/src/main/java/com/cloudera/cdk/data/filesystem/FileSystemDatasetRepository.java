@@ -21,6 +21,8 @@ import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.MetadataProvider;
+import com.cloudera.cdk.data.MetadataProviderException;
+import com.cloudera.cdk.data.NoSuchDatasetException;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
@@ -168,7 +170,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
       throw new DatasetRepositoryException("Internal failure while creating dataset path:" + datasetPath, e);
     }
 
-    metadataProvider.save(name, descriptor);
+    metadataProvider.create(name, descriptor);
 
     return new FileSystemDataset.Builder()
       .name(name)
@@ -207,7 +209,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
           oldSchema.toString(true));
     }
 
-    metadataProvider.save(name, descriptor);
+    metadataProvider.update(name, descriptor);
 
     return new FileSystemDataset.Builder()
         .name(name)
@@ -226,6 +228,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     logger.debug("Loading dataset:{}", name);
 
     Path datasetDirectory = pathForDataset(name);
+    checkExists(fileSystem, datasetDirectory);
 
     DatasetDescriptor descriptor = metadataProvider.load(name);
 
@@ -247,7 +250,16 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     Path datasetPath = pathForDataset(name);
 
     try {
-      if (metadataProvider.delete(name) && fileSystem.exists(datasetPath)) {
+      // don't care about the return value here -- if it already doesn't exist
+      // we still need to delete the data directory
+      metadataProvider.delete(name);
+    } catch (MetadataProviderException ex) {
+      throw new DatasetRepositoryException(
+          "Failed to delete descriptor for name:" + name, ex);
+    }
+
+    try {
+      if (fileSystem.exists(datasetPath)) {
         if (fileSystem.delete(datasetPath, true)) {
           return true;
         } else {
@@ -338,7 +350,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     Preconditions.checkState(rootDirectory != null,
       "Dataset repository root directory can not be null");
 
-    return new Path(rootDirectory, name.replace('.', '/'));
+    return pathForDataset(rootDirectory, name);
   }
 
   @Override
@@ -368,6 +380,38 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    */
   public MetadataProvider getMetadataProvider() {
     return metadataProvider;
+  }
+
+  /**
+   * Returns the correct dataset path for the given name and root directory.
+   *
+   * @param root A Path
+   * @param name A String dataset name
+   * @return the correct dataset Path
+   */
+  protected static Path pathForDataset(Path root, String name) {
+    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
+
+    // Why replace '.' here? Is this a namespacing hack?
+    return new Path(root, name.replace('.', Path.SEPARATOR_CHAR));
+  }
+
+  /**
+   * Precondition-style static validation that a dataset exists
+   *
+   * @param fs        A FileSystem where the data should be stored
+   * @param location  The Path where the data should be stored
+   * @throws NoSuchDatasetException     if the data location is missing
+   * @throws DatasetRepositoryException if any IOException is thrown
+   */
+  protected static void checkExists(FileSystem fs, Path location) {
+    try {
+      if (!fs.exists(location)) {
+        throw new NoSuchDatasetException("Data location is missing");
+      }
+    } catch (IOException ex) {
+      throw new DatasetRepositoryException("Cannot access data location", ex);
+    }
   }
 
   /**

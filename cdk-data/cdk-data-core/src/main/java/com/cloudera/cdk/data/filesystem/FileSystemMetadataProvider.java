@@ -18,6 +18,7 @@ package com.cloudera.cdk.data.filesystem;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MetadataProviderException;
+import com.cloudera.cdk.data.NoSuchDatasetException;
 import com.cloudera.cdk.data.impl.Accessor;
 import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
 import com.google.common.base.Charsets;
@@ -74,7 +75,11 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   public DatasetDescriptor load(String name) {
     logger.debug("Loading dataset metadata name:{}", name);
 
-    Path directory = new Path(pathForDataset(name), METADATA_DIRECTORY);
+    final Path datasetPath = pathForDataset(name);
+    FileSystemDatasetRepository.checkExists(fileSystem, datasetPath);
+
+    final Path directory = pathForMetadata(datasetPath);
+    checkExists(fileSystem, directory);
 
     InputStream inputStream = null;
     Properties properties = new Properties();
@@ -118,74 +123,46 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public void save(String name, DatasetDescriptor descriptor) {
+  public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
       descriptor);
 
-    FSDataOutputStream outputStream = null;
-    Path directory = new Path(pathForDataset(name), METADATA_DIRECTORY);
+    final Path directory = pathForMetadata(pathForDataset(name));
 
     try {
-      if (!fileSystem.exists(directory)) {
-        fileSystem.mkdirs(directory);
+      if (fileSystem.exists(directory)) {
+        // TODO: Change this to a better Exception class
+        throw new MetadataProviderException(
+            "Descriptor directory:" + directory + "already exists");
       }
+      // create the directory so that update can do the rest of the work
+      fileSystem.mkdirs(directory);
     } catch (IOException e) {
       throw new MetadataProviderException(
-        "Unable to find or create metadata directory:" + directory + " for dataset:" + name, e);
+        "Unable to create metadata directory:" + directory + " for dataset:" + name, e);
     }
 
-    Path schemaPath = new Path(directory, SCHEMA_FILE_NAME);
-    boolean threw = true;
-    try {
-      outputStream = fileSystem.create(schemaPath);
-      outputStream.write(descriptor.getSchema().toString(true)
-          .getBytes(Charsets.UTF_8));
-      outputStream.flush();
-      threw = false;
-    } catch (IOException e) {
-      throw new MetadataProviderException(
-          "Unable to save schema file:" + schemaPath + " for dataset:" + name, e);
-    } finally {
-      try {
-        Closeables.close(outputStream, threw);
-      } catch (IOException e) {
-        throw new MetadataProviderException(e);
-      }
-    }
+    writeDescriptor(fileSystem, directory, name, descriptor);
 
-    Properties properties = new Properties();
-    properties.setProperty(VERSION_FIELD_NAME, METADATA_VERSION);
-    properties.setProperty(FORMAT_FIELD_NAME, descriptor.getFormat().getName());
+    return descriptor;
+  }
 
-    if (descriptor.isPartitioned()) {
-      properties.setProperty(PARTITION_EXPRESSION_FIELD_NAME,
-          Accessor.getDefault().toExpression(descriptor.getPartitionStrategy()));
-    }
+  @Override
+  public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
+    logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
+      descriptor);
 
-    Path descriptorPath = new Path(directory, DESCRIPTOR_FILE_NAME);
-    threw = true;
-    try {
-      outputStream = fileSystem.create(descriptorPath);
-      properties.store(outputStream, "Dataset descriptor for " + name);
-      outputStream.flush();
-      threw = false;
-    } catch (IOException e) {
-      throw new MetadataProviderException(
-          "Unable to save descriptor file:" + descriptorPath + " for dataset:" + name, e);
-    } finally {
-      try {
-        Closeables.close(outputStream, threw);
-      } catch (IOException e) {
-        throw new MetadataProviderException(e);
-      }
-    }
+    writeDescriptor(
+        fileSystem, pathForMetadata(pathForDataset(name)), name, descriptor);
+
+    return descriptor;
   }
 
   @Override
   public boolean delete(String name) {
     logger.debug("Deleting dataset metadata name:{}", name);
 
-    Path directory = new Path(pathForDataset(name), METADATA_DIRECTORY);
+    final Path directory = pathForMetadata(pathForDataset(name));
 
     try {
       if (fileSystem.exists(directory)) {
@@ -214,11 +191,99 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     Preconditions.checkState(rootDirectory != null,
       "Dataset repository root directory can not be null");
 
-    /*
-     * I'm pretty sure that HDFS doesn't use platform-specific path separators.
-     * What does it use on Windows?
-     */
-    return new Path(rootDirectory, name.replace('.', '/'));
+    // delegate to the FileSystemDatasetRepository implementation
+    return FileSystemDatasetRepository.pathForDataset(rootDirectory, name);
+  }
+
+  /**
+   * Writes the contents of a {@code Descriptor} to files.
+   *
+   * @param fs          The {@link FileSystem} where data will be stored
+   * @param location    The directory {@link Path} where files will be located
+   * @param name        The {@link Dataset} name
+   * @param descriptor  The {@code Descriptor} contents to write
+   *
+   * @throws MetadataProviderException If the location does not exist or if any
+   *                                   IOExceptions need to be propagated.
+   */
+  private static void writeDescriptor(
+      FileSystem fs, Path location, String name, DatasetDescriptor descriptor) {
+
+    checkExists(fs, location);
+
+    FSDataOutputStream outputStream = null;
+    final Path schemaPath = new Path(location, SCHEMA_FILE_NAME);
+    boolean threw = true;
+    try {
+      outputStream = fs.create(schemaPath, true /* overwrite */ );
+      outputStream.write(descriptor.getSchema().toString(true)
+          .getBytes(Charsets.UTF_8));
+      outputStream.flush();
+      threw = false;
+    } catch (IOException e) {
+      throw new MetadataProviderException(
+          "Unable to save schema file:" + schemaPath + " for dataset:" + name, e);
+    } finally {
+      try {
+        Closeables.close(outputStream, threw);
+      } catch (IOException e) {
+        throw new MetadataProviderException(e);
+      }
+    }
+
+    Properties properties = new Properties();
+    properties.setProperty(VERSION_FIELD_NAME, METADATA_VERSION);
+    properties.setProperty(FORMAT_FIELD_NAME, descriptor.getFormat().getName());
+
+    if (descriptor.isPartitioned()) {
+      properties.setProperty(PARTITION_EXPRESSION_FIELD_NAME,
+          Accessor.getDefault().toExpression(descriptor.getPartitionStrategy()));
+    }
+
+    final Path descriptorPath = new Path(location, DESCRIPTOR_FILE_NAME);
+    threw = true;
+    try {
+      outputStream = fs.create(descriptorPath, true /* overwrite */ );
+      properties.store(outputStream, "Dataset descriptor for " + name);
+      outputStream.flush();
+      threw = false;
+    } catch (IOException e) {
+      throw new MetadataProviderException(
+          "Unable to save descriptor file:" + descriptorPath + " for dataset:" + name, e);
+    } finally {
+      try {
+        Closeables.close(outputStream, threw);
+      } catch (IOException e) {
+        throw new MetadataProviderException(e);
+      }
+    }
+  }
+
+  /**
+   * Returns the correct metadata path for the given dataset.
+   * @param datasetPath the Dataset Path
+   * @return the metadata Path
+   */
+  private static Path pathForMetadata(Path datasetPath) {
+    return new Path(datasetPath, METADATA_DIRECTORY);
+  }
+
+  /**
+   * Precondition-style static validation that a dataset exists
+   *
+   * @param fs        A FileSystem where the metadata should be stored
+   * @param location  The Path where the metadata should be stored
+   * @throws NoSuchDatasetException     if the descriptor location is missing
+   * @throws MetadataProviderException  if any IOException is thrown
+   */
+  protected static void checkExists(FileSystem fs, Path location) {
+    try {
+      if (!fs.exists(location)) {
+        throw new NoSuchDatasetException("Descriptor location is missing");
+      }
+    } catch (IOException ex) {
+      throw new MetadataProviderException("Cannot access descriptor location", ex);
+    }
   }
 
 }
