@@ -67,15 +67,8 @@ class HCatalogMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor load(String name) {
-    Table table;
-    try {
-      table = hcat.getTable(dbName, name);
-    } catch (RuntimeException ex) {
-      // according to the API, this should throw a MetadataProviderException
-      // when the table can't be found. TODO: make a specific "can't find"
-      // Exception to differentiate this case.
-      throw new MetadataProviderException(ex);
-    }
+    final Table table = hcat.getTable(dbName, name);
+
     String serializationLib = table.getSerializationLib();
     if (!AVRO_SERDE.equals(serializationLib)) {
       throw new MetadataProviderException("Only tables using AvroSerDe are supported.");

@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hcatalog;
 
+import com.cloudera.cdk.data.NoSuchDatasetException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
@@ -46,11 +47,11 @@ final class HCatalog {
     try {
       table = HCatUtil.getTable(client, dbName, tableName);
     } catch (Exception e) {
-      throw new RuntimeException("Hive table lookup exception", e);
+      throw new NoSuchDatasetException("Hive table lookup exception", e);
     }
     
     if (table == null) {
-      throw new IllegalStateException("Could not find info for table: " + tableName);
+      throw new NoSuchDatasetException("Could not find info for table: " + tableName);
     }
     return table;
   }

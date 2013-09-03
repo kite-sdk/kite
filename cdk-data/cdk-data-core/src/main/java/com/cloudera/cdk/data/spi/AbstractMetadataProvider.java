@@ -17,7 +17,7 @@ package com.cloudera.cdk.data.spi;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.MetadataProvider;
-import com.cloudera.cdk.data.MetadataProviderException;
+import com.cloudera.cdk.data.NoSuchDatasetException;
 
 /**
  * A common DatasetRepository base class to simplify implementation.
@@ -61,7 +61,7 @@ public abstract class AbstractMetadataProvider implements MetadataProvider {
       try {
         DatasetDescriptor oldDescriptor = load(name);
         exists = (oldDescriptor != null);
-      } catch (MetadataProviderException ex) {
+      } catch (NoSuchDatasetException ex) {
         exists = false;
       }
 

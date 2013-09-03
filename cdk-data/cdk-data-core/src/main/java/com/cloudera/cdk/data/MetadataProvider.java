@@ -39,6 +39,7 @@ public interface MetadataProvider {
    *
    * @param name The fully qualified name of an existing dataset.
    * @return A dataset descriptor.
+   * @throws NoSuchDatasetException    If there is no descriptor for {@code name}
    * @throws MetadataProviderException If the dataset doesn't exist or the descriptor can not be loaded.
    */
   DatasetDescriptor load(String name);
@@ -70,6 +71,8 @@ public interface MetadataProvider {
    * @param descriptor A dataset descriptor.
    * @return The descriptor as persisted to the Metadata store.
    *
+   * @throws NoSuchDatasetException        If there is no descriptor for
+   *                                       {@code name}
    * @throws UnsupportedOperationException If descriptor updates are not
    *                                       supported by the implementation.
    * @throws MetadataProviderException     If the dataset descriptor can not be
@@ -92,7 +95,8 @@ public interface MetadataProvider {
    * @param name The fully qualified name of a dataset.
    * @return True if the dataset is successfully deleted, false if the dataset
    *         doesn't exist.
-   * @throws MetadataProviderException If the dataset metadata exists but can not be deleted.
+   * @throws MetadataProviderException If the dataset metadata exists but can
+   *                                   not be deleted.
    */
   boolean delete(String name);
 

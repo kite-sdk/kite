@@ -48,9 +48,10 @@ public interface DatasetRepository {
 
   /**
    * Get the latest version of a named {@link Dataset}. If no dataset with the
-   * provided {@code name} exists, a {@link DatasetRepositoryException} is thrown.
+   * provided {@code name} exists, a {@link NoSuchDatasetException} is thrown.
    *
    * @param name The name of the dataset.
+   * @throws NoSuchDatasetException If there is no data set named {@code name}
    * @throws DatasetRepositoryException
    *
    * @since 0.7.0
@@ -92,19 +93,25 @@ public interface DatasetRepository {
    * @param name       The fully qualified dataset name
    * @param descriptor A descriptor that describes the schema and other properties of the
    *                   dataset
-   * @return The newly created dataset
+   * @return The updated dataset
+   * @throws NoSuchDatasetException        If there is no data set named
+   *                                       {@code name}
+   * @throws UnsupportedOperationException If descriptor updates are not
+   *                                       supported by the implementation.
    * @throws DatasetRepositoryException
+   *
    * @since 0.3.0
    */
   Dataset update(String name, DatasetDescriptor descriptor);
 
   /**
-   * Drop the named {@link Dataset}. If no dataset with the
-   * provided {@code name} exists, a {@link DatasetReaderException} is thrown.
+   * Delete the named {@link Dataset}. If no dataset with the
+   * provided {@code name} exists, a {@link NoSuchDatasetException} is thrown.
    *
    * @param name The name of the dataset.
-   * @return <code>true</code> if the dataset was successfully dropped, false otherwise
-   * @throws DatasetReaderException
+   * @return {@code true} if the dataset was successfully deleted, false if the
+   *         dataset does not exist.
+   * @throws DatasetRepositoryException
    *
    * @since 0.7.0
    */
