@@ -16,36 +16,42 @@
 
 <project name="CDK">
 
-  <custom>
-    <fluidoSkin>
-      <gitHub>
-        <projectId>cloudera/cdk</projectId>
-        <ribbonOrientation>right</ribbonOrientation>
-        <ribbonColor>black</ribbonColor>
-      </gitHub>
-    </fluidoSkin>
-  </custom>
+  <publishDate position="bottom" format="yyyy-MM-dd" />
+  <version position="bottom" />
 
   <skin>
-    <groupId>org.apache.maven.skins</groupId>
-    <artifactId>maven-fluido-skin</artifactId>
-    <version>1.3.0</version>
+    <groupId>lt.velykis.maven.skins</groupId>
+    <artifactId>reflow-maven-skin</artifactId>
+    <version>1.0.0</version>
   </skin>
+  <custom>
+    <reflowSkin>
+      <smoothScroll>true</smoothScroll>
+      <theme>default</theme>
+      <highlightJs>true</highlightJs>
+      <highlightJsTheme>github</highlightJsTheme>
+      <brand>
+        <!-- Brand text in top-left part of the site -->
+        <name>Cloudera Development Kit</name>
+      </brand>
+
+      <!-- Split menus in the bottom navigation -->
+      <bottomNav>
+        <column>Main</column>
+        <column>Modules|CDK.*</column>
+        <column>Contribute</column>
+      </bottomNav>
+    </reflowSkin>
+  </custom>
 
   <body>
-    <menu name="CDK" inherit="top">
+    <menu name="Main" inherit="top">
       <item name="Home" href="index.html"/>
       <item name="Release Notes" href="release_notes.html"/>
       <item name="Javadoc" href="apidocs/index.html"/>
       <item name="API Diffs" href="jdiff/changes.html"/>
       <item name="Dependency Information" href="dependencies.html"/>
       <item name="Examples" href="http://github.com/cloudera/cdk-examples"/>
-      <item name="Source Repository" href="http://github.com/cloudera/cdk"/>
-      <item name="JIRA" href="https://issues.cloudera.org/browse/CDK"/>
-      <item name="Mailing List" href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"/>
-      <item name="How To Contribute" href="how_to_contribute.html"/>
-      <item name="Adding a Module" href="adding_a_module.html"/>
-      <item name="Project Information" href="project-info.html"/>
     </menu>
 
     <menu name="Modules" inherit="top">
@@ -54,6 +60,16 @@
       <item name="CDK Morphlines" href="cdk-morphlines/index.html"/>
       <item name="CDK Tools" href="cdk-tools/index.html"/>
     </menu>
+
+    <menu name="Contribute" inherit="bottom">
+      <item name="Source Repository" href="http://github.com/cloudera/cdk"/>
+      <item name="JIRA" href="https://issues.cloudera.org/browse/CDK"/>
+      <item name="Mailing List" href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"/>
+      <item name="How To Contribute" href="how_to_contribute.html"/>
+      <item name="Adding a Module" href="adding_a_module.html"/>
+      <item name="Project Information" href="project-info.html"/>
+    </menu>
+
   </body>
 
 </project>
