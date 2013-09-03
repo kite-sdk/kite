@@ -19,7 +19,6 @@ import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.Formats;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider;
 import com.google.common.io.Files;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
@@ -53,7 +52,7 @@ public class TestFileSystemMetadataProvider {
     MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
         testDirectory);
 
-    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
+    provider.create("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
 
     Assert.assertTrue("Descriptor properties file should exist", fileSystem
         .exists(new Path(testDirectory, "test/.metadata/descriptor.properties")));
@@ -74,7 +73,7 @@ public class TestFileSystemMetadataProvider {
     MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
         testDirectory);
 
-    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
+    provider.create("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
 
     Assert.assertTrue("Descriptor properties file should exist", fileSystem
         .exists(new Path(testDirectory, "test/.metadata/descriptor.properties")));
@@ -93,7 +92,7 @@ public class TestFileSystemMetadataProvider {
     MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
         testDirectory);
 
-    provider.save(
+    provider.create(
         "test",
         new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
@@ -111,7 +110,7 @@ public class TestFileSystemMetadataProvider {
     MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
         testDirectory);
 
-    provider.save("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA)
+    provider.create("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA)
         .format(Formats.PARQUET).get());
 
     DatasetDescriptor descriptor = provider.load("test");
