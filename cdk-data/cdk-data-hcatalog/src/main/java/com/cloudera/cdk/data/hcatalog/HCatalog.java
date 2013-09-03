@@ -15,7 +15,9 @@
  */
 package com.cloudera.cdk.data.hcatalog;
 
+import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.NoSuchDatasetException;
+import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
@@ -78,6 +80,22 @@ final class HCatalog {
           true /* ignoreUnknownTable */);
     } catch (Exception e) {
       throw new RuntimeException("Hive metastore exception", e);
+    }
+  }
+
+  public boolean exists(String dbName, String tableName) {
+    try {
+      return client.tableExists(dbName, tableName);
+    } catch (Exception e) {
+      throw new MetadataProviderException("Hive metastore exception", e);
+    }
+  }
+
+  public List<String> getAllTables(String dbName) {
+    try {
+      return client.getAllTables(dbName);
+    } catch (Exception e) {
+      throw new MetadataProviderException("Hive metastore exception", e);
     }
   }
 }

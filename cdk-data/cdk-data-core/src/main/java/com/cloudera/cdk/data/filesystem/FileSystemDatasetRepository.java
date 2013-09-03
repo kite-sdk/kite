@@ -44,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collection;
+import org.apache.hadoop.fs.FileStatus;
 
 /**
  * <p>
@@ -272,6 +274,40 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     } catch (IOException e) {
       throw new DatasetRepositoryException("Internal failure to test if dataset path exists:" + datasetPath);
     }
+  }
+
+  @Override
+  public boolean exists(String name) {
+    final Path potentialPath = pathForDataset(name);
+    try {
+      return (
+          fileSystem.exists(potentialPath) &&
+          fileSystem.isDirectory(rootDirectory));
+    } catch (IOException ex) {
+      throw new DatasetRepositoryException(
+          "Could not check data path:" + potentialPath, ex);
+    }
+  }
+
+  @Override
+  public Collection<String> list() {
+    List<String> datasets = Lists.newArrayList();
+    try {
+      FileStatus[] entries = fileSystem.listStatus(rootDirectory,
+          PathFilters.notHidden());
+      for (FileStatus entry : entries) {
+        // assumes that all unhidden directories under the root are data sets
+        if (entry.isDirectory()) {
+          // may want to add a check: !RESERVED_NAMES.contains(name)
+          datasets.add(entry.getPath().getName());
+        } else {
+          continue;
+        }
+      }
+    } catch (IOException ex) {
+      throw new DatasetRepositoryException("Could not list data sets", ex);
+    }
+    return datasets;
   }
 
   /**

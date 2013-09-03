@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data;
 
+import java.util.Collection;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -124,5 +125,24 @@ public interface DatasetRepository {
    */
   @Deprecated
   boolean drop(String name);
+
+  /**
+   * Checks if there is a {@link Dataset} in this repository named {@code name}.
+   *
+   * @param name a {@code Dataset} name to check the existence of
+   * @return true if a Dataset named {@code name} exists, false otherwise
+   * @throws DatasetRepositoryException
+   */
+  boolean exists(String name);
+
+  /**
+   * List the names of the {@link Dataset}s in this {@code DatasetRepository}.
+   * If there is not at least one {@code Dataset} in this repository, an empty
+   * list will be returned.
+   *
+   * @return a {@link Collection} of Dataset names ({@link String}s)
+   * @throws DatasetRepositoryException
+   */
+  Collection<String> list();
 
 }

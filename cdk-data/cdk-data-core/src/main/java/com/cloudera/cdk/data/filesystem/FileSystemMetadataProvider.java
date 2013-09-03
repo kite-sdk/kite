@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
+import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MetadataProviderException;
@@ -178,6 +179,17 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     } catch (IOException e) {
       throw new MetadataProviderException(
         "Unable to find or delete metadata directory:" + directory + " for dataset:" + name, e);
+    }
+  }
+
+  @Override
+  public boolean exists(String name) {
+    final Path potentialPath = pathForMetadata(pathForDataset(name));
+    try {
+      return fileSystem.exists(potentialPath);
+    } catch (IOException ex) {
+      throw new MetadataProviderException(
+          "Could not check metadata path:" + potentialPath, ex);
     }
   }
 

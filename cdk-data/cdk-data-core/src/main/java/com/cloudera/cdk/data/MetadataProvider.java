@@ -100,4 +100,13 @@ public interface MetadataProvider {
    */
   boolean delete(String name);
 
+  /**
+   * Checks if there is a {@link DatasetDescriptor} for the dataset named
+   * {@code name}.
+   *
+   * @param name a {@code Dataset} name to check the existence of
+   * @return true if {@code name} exists, false otherwise
+   * @throws MetadataProviderException
+   */
+  boolean exists(String name);
 }

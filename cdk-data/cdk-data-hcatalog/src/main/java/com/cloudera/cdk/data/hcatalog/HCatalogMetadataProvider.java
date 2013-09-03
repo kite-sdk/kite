@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -184,4 +185,12 @@ class HCatalogMetadataProvider extends AbstractMetadataProvider {
     return true;
   }
 
+  @Override
+  public boolean exists(String name) {
+    return hcat.exists(dbName, name);
+  }
+
+  protected Collection<String> list() {
+    return hcat.getAllTables(dbName);
+  }
 }

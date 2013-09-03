@@ -24,6 +24,7 @@ import com.cloudera.cdk.data.spi.AbstractDatasetRepository;
 import com.google.common.base.Supplier;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -159,6 +160,16 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
     } else {
       return fileSystemDatasetRepository.delete(name);
     }
+  }
+
+  @Override
+  public boolean exists(String name) {
+    return metadataProvider.exists(name);
+  }
+
+  @Override
+  public Collection<String> list() {
+    return metadataProvider.list();
   }
 
   /**
