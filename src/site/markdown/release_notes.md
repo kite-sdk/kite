@@ -14,6 +14,7 @@ Version TBD has the following notable changes:
     * Added `outputFields` parameter to the `split` command to support a list of column names similar to the `readCSV` command
     * Added tika-xmp maven module as a dependency to cdk-morphline-solr-cell module
     * Added several performance enhancements
+    * Upgraded cdk-morphlines-saxon module from saxon-HE-9.5.1-1 to saxon-HE-9.5.1-2
 
 ## Version 0.6.0
 
