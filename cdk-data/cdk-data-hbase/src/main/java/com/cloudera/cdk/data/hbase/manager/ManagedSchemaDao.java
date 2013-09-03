@@ -1,5 +1,5 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
-package com.cloudera.cdk.data.hbase.avro;
+package com.cloudera.cdk.data.hbase.manager;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  * 
  * ManagedSchemaKey is effectively a table name, entity name pair.
  */
-public interface AvroManagedSchemaDao {
+public interface ManagedSchemaDao {
 
   /**
    * Encapsulates a ManagedSchemaKey, and ManagedSchema. This is returned from

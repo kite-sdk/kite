@@ -1,5 +1,5 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
-package com.cloudera.cdk.data.hbase.avro;
+package com.cloudera.cdk.data.hbase.manager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +9,18 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import com.cloudera.cdk.data.hbase.Dao;
 import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
 import com.cloudera.cdk.data.hbase.EntityScanner;
+import com.cloudera.cdk.data.hbase.avro.AvroEntitySchema;
+import com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser;
+import com.cloudera.cdk.data.hbase.avro.AvroKeySchema;
+import com.cloudera.cdk.data.hbase.avro.AvroUtils;
+import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
 
 /**
- * AvroManagedSchemaDao implementation backed by an HBase table. All of the
- * managed schemas are persisted to a table called "managed_schemas" unless
- * otherwise specified in the constructor.
+ * ManagedSchemaDao implementation backed by an HBase table. All of the managed
+ * schemas are persisted to a table called "managed_schemas" unless otherwise
+ * specified in the constructor.
  */
-public class AvroManagedSchemaHBaseDao implements AvroManagedSchemaDao {
+public class ManagedSchemaHBaseDao implements ManagedSchemaDao {
 
   /**
    * The Default HBase table where this schema metadata is stored.
@@ -31,10 +36,10 @@ public class AvroManagedSchemaHBaseDao implements AvroManagedSchemaDao {
   private static final AvroKeySchema managedSchemaKey;
   static {
     managedSchemaEntity = schemaParser.parseEntity(AvroUtils
-        .inputStreamToString(AvroEntityManager.class
+        .inputStreamToString(ManagedSchemaHBaseDao.class
             .getResourceAsStream("/ManagedSchema.avsc")));
     managedSchemaKey = schemaParser.parseKey(AvroUtils
-        .inputStreamToString(AvroEntityManager.class
+        .inputStreamToString(ManagedSchemaHBaseDao.class
             .getResourceAsStream("/ManagedSchemaKey.avsc")));
   }
 
@@ -50,12 +55,11 @@ public class AvroManagedSchemaHBaseDao implements AvroManagedSchemaDao {
    * @param tablePool
    *          The pool of HBase tables
    */
-  public AvroManagedSchemaHBaseDao(HTablePool tablePool) {
+  public ManagedSchemaHBaseDao(HTablePool tablePool) {
     this(tablePool, DEFAULT_MANAGED_SCHEMA_TABLE);
   }
 
-  public AvroManagedSchemaHBaseDao(HTablePool tablePool,
-      String managedSchemaTable) {
+  public ManagedSchemaHBaseDao(HTablePool tablePool, String managedSchemaTable) {
     managedSchemaDao = new SpecificAvroDao<ManagedSchemaKey, ManagedSchema>(
         tablePool, managedSchemaTable, managedSchemaKey.getRawSchema(),
         managedSchemaEntity.getRawSchema(), ManagedSchemaKey.class,

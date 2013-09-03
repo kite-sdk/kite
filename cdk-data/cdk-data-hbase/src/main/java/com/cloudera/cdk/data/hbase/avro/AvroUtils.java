@@ -24,6 +24,7 @@ import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.specific.SpecificRecord;
 
 import com.cloudera.cdk.data.hbase.HBaseCommonException;
 import com.cloudera.cdk.data.hbase.SerializationException;
@@ -180,9 +181,9 @@ public class AvroUtils {
     }
     return defaultValueMap;
   }
-  
+
   public static AvroKeySchema mergeSpecificStringTypes(
-      Class<?> specificClass, AvroKeySchema keySchema) {
+      Class<? extends SpecificRecord> specificClass, AvroKeySchema keySchema) {
     Schema schemaField;
     try {
       schemaField = (Schema) specificClass.getField("SCHEMA$").get(null);
@@ -199,7 +200,8 @@ public class AvroUtils {
   }
 
   public static AvroEntitySchema mergeSpecificStringTypes(
-      Class<?> specificClass, AvroEntitySchema entitySchema) {
+      Class<? extends SpecificRecord> specificClass,
+      AvroEntitySchema entitySchema) {
     Schema schemaField;
     try {
       schemaField = (Schema) specificClass.getField("SCHEMA$").get(null);

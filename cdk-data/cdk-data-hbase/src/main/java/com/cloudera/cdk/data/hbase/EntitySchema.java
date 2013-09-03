@@ -12,17 +12,13 @@ import java.util.Set;
 /**
  * An EntitySchema is the parsed schema that contains the properties of an HBase
  * Common entity schema.
- * 
- * @param <RAW_SCHEMA>
- *          The type of the RAW_SCHEMA that is parsed by the SchemaParser to
- *          generate EntitySchema instances.
  */
-public class EntitySchema<RAW_SCHEMA> {
+public class EntitySchema {
 
   private final boolean isTransactional;
   private final Collection<String> tables;
   private final Map<String, FieldMapping> fieldMappings = new HashMap<String, FieldMapping>();
-  private final RAW_SCHEMA rawSchema;
+  private final String rawSchema;
 
   /**
    * Constructs the EntitySchema
@@ -37,7 +33,7 @@ public class EntitySchema<RAW_SCHEMA> {
    * @param isTransactional
    *          Specifies whether this entity participates in transactions
    */
-  public EntitySchema(Collection<String> tables, RAW_SCHEMA rawSchema,
+  public EntitySchema(Collection<String> tables, String rawSchema,
       Collection<FieldMapping> fieldMappings, boolean isTransactional) {
     this.tables = tables;
     this.rawSchema = rawSchema;
@@ -91,7 +87,7 @@ public class EntitySchema<RAW_SCHEMA> {
    * 
    * @return The raw scheam.
    */
-  public RAW_SCHEMA getRawSchema() {
+  public String getRawSchema() {
     return rawSchema;
   }
 
@@ -129,6 +125,27 @@ public class EntitySchema<RAW_SCHEMA> {
       set.add(column.split(":")[0]);
     }
     return set;
+  }
+
+  /**
+   * Method meant to determine if two EntitySchemas are compatible with each
+   * other for schema migration purposes. Classes that inherit EntitySchema
+   * should override this implementation, since this implemetnation isn't able
+   * to make that determination.
+   * 
+   * TODO: Figure out a base set of properties that all entity schema
+   * implementations should share in their implementation of determining
+   * compatibility and execute that here.
+   * 
+   * @param entitySchema
+   *          The other EntitySchema to determine compatible with
+   * @return
+   */
+  public boolean compatible(EntitySchema entitySchema) {
+    // throw an exception if anyone calls this directly, as this should be
+    // overridden in derived classes.
+    throw new UnsupportedOperationException(
+        "EntityScheam class can't determine if two entity schemas are compatible.");
   }
 
   /**

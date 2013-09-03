@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "ManagedSchemaEntityVersion",
-  "namespace": "com.cloudera.cdk.data.hbase.avro",
+  "namespace": "com.cloudera.cdk.data.hbase.manager",
   "fields": [
 
     { "name": "schemaVersion", "type": { "type": "map", "values": "int" },

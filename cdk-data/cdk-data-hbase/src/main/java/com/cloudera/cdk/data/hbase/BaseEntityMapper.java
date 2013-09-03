@@ -20,12 +20,12 @@ import com.cloudera.cdk.data.hbase.EntitySchema.FieldMapping;
  */
 public class BaseEntityMapper<K, E> implements EntityMapper<K, E> {
 
-  private final KeySchema<?> keySchema;
-  private final EntitySchema<?> entitySchema;
+  private final KeySchema keySchema;
+  private final EntitySchema entitySchema;
   private final KeySerDe<K> keySerDe;
   private final EntitySerDe<E> entitySerDe;
 
-  public BaseEntityMapper(KeySchema<?> keySchema, EntitySchema<?> entitySchema,
+  public BaseEntityMapper(KeySchema keySchema, EntitySchema entitySchema,
       KeySerDe<K> keySerDe, EntitySerDe<E> entitySerDe) {
     this.keySchema = keySchema;
     this.entitySchema = entitySchema;
@@ -126,12 +126,12 @@ public class BaseEntityMapper<K, E> implements EntityMapper<K, E> {
   }
 
   @Override
-  public KeySchema<?> getKeySchema() {
+  public KeySchema getKeySchema() {
     return keySchema;
   }
 
   @Override
-  public EntitySchema<?> getEntitySchema() {
+  public EntitySchema getEntitySchema() {
     return entitySchema;
   }
   

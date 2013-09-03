@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "ManagedSchema",
-  "namespace": "com.cloudera.cdk.data.hbase.avro",
+  "namespace": "com.cloudera.cdk.data.hbase.manager",
   "fields": [
 
     { "name": "name", "type": "string",
@@ -9,6 +9,15 @@
 
     { "name": "table", "type": "string",
       "mapping": { "type": "column", "value": "meta:table" } },
+      
+	{ "name": "schemaType", "type": "string",
+      "mapping": { "type": "column", "value": "meta:schema_type" } },
+      
+    { "name": "keySerDeType", "type": "string",
+      "mapping": { "type": "column", "value": "meta:key_ser_de_type" } },
+      
+    { "name": "entitySerDeType", "type": "string",
+      "mapping": { "type": "column", "value": "meta:entity_ser_de_type" } },
 
     { "name": "keySchema", "type": "string",
       "mapping": { "type": "column", "value": "meta:key_schema" } },
@@ -16,7 +25,7 @@
     { "name": "entitySchemas", "type": { "type": "map", "values": "string" },
       "mapping": { "type": "keyAsColumn", "value": "schema:" } },
 
-    { "name": "conflict_check", "type": "long", "default": 0,
+    { "name": "conflictCheck", "type": "long", "default": 0,
       "mapping": { "type": "occVersion" }
     }
   ]

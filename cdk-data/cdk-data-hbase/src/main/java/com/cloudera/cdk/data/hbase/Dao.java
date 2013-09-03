@@ -174,14 +174,14 @@ public interface Dao<K, E> {
    *
    * @return The HBaseCommonKeySchema instance.
    */
-  public KeySchema<?> getKeySchema();
+  public KeySchema getKeySchema();
 
   /**
    * Gets the entity schema instance for this DAO.
    *
    * @return The HBaseCommonEntitySchema instance.
    */
-  public EntitySchema<?> getEntitySchema();
+  public EntitySchema getEntitySchema();
   
   /**
    * Gets the key serde for this DAO

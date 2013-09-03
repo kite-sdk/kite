@@ -134,12 +134,12 @@ public class BaseDao<K, E> implements Dao<K, E> {
   }
 
   @Override
-  public KeySchema<?> getKeySchema() {
+  public KeySchema getKeySchema() {
     return entityMapper.getKeySchema();
   }
 
   @Override
-  public EntitySchema<?> getEntitySchema() {
+  public EntitySchema getEntitySchema() {
     return entityMapper.getEntitySchema();
   }
 
@@ -157,5 +157,4 @@ public class BaseDao<K, E> implements Dao<K, E> {
   public EntityMapper<K, E> getEntityMapper() {
     return this.entityMapper;
   }
-
 }

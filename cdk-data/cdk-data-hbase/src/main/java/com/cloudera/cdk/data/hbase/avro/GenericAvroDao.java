@@ -8,6 +8,7 @@ import org.apache.hadoop.hbase.client.HTablePool;
 
 import com.cloudera.cdk.data.hbase.BaseDao;
 import com.cloudera.cdk.data.hbase.BaseEntityMapper;
+import com.cloudera.cdk.data.hbase.manager.SchemaManager;
 
 /**
  * A Dao for Avro's GenericRecords. In this Dao implementation, both the
@@ -76,7 +77,7 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
    *          The table name of the managed schema.
    * @param entityName
    *          The entity name of the managed schema.
-   * @param entityManager
+   * @param schemaManager
    *          The EntityManager which will create the entity mapper that will
    *          power this dao.
    * @param entitySchemaString
@@ -84,13 +85,12 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
    *          DAO should use for writes.
    */
   public GenericAvroDao(HTablePool tablePool, String tableName,
-      String entityName, GenericAvroEntityManager entityManager,
-      String entitySchemaString) {
-
-    super(tablePool, tableName, entityManager
-        .registerEntitySchema(tableName, entityName,
-            parser.parseEntity(entitySchemaString)).createEntityMapper(
-            tableName, entityName));
+      String entityName, SchemaManager schemaManager, String entitySchemaString) {
+    super(tablePool, tableName, new VersionedAvroEntityMapper.Builder()
+        .setSchemaManager(schemaManager).setTableName(tableName)
+        .setEntityName(entityName).setSpecific(false)
+        .setGenericSchemaString(entitySchemaString)
+        .<GenericRecord, GenericRecord> build());
   }
 
   /**
@@ -105,16 +105,17 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
    *          The table name of the managed schema.
    * @param entityName
    *          The entity name of the managed schema.
-   * @param entityManager
-   *          The EntityManager which will create the entity mapper that will
+   * @param schemaManager
+   *          The SchemaManager which will create the entity mapper that will
    *          power this dao.
    */
   public GenericAvroDao(HTablePool tablePool, String tableName,
-      String entityName, GenericAvroEntityManager entityManager) {
+      String entityName, SchemaManager schemaManager) {
 
-    super(tablePool, tableName, entityManager.registerEntitySchema(tableName,
-        entityName, entityManager.getEntitySchema(tableName, entityName))
-        .createEntityMapper(tableName, entityName));
+    super(tablePool, tableName, new VersionedAvroEntityMapper.Builder()
+        .setSchemaManager(schemaManager).setTableName(tableName)
+        .setEntityName(entityName).setSpecific(false)
+        .<GenericRecord, GenericRecord> build());
   }
 
   private static BaseEntityMapper<GenericRecord, GenericRecord> buildEntityMapper(

@@ -26,7 +26,7 @@ public class RegexEntityFilter implements EntityFilter {
         fieldName, regex, isEqual);
   }
 
-  public RegexEntityFilter(EntitySchema<?> entitySchema,
+  public RegexEntityFilter(EntitySchema entitySchema,
       EntitySerDe<?> entitySerDe, String fieldName, String regex,
       boolean isEqual) {
     FieldMapping fieldMapping = entitySchema.getFieldMapping(fieldName);
@@ -44,7 +44,7 @@ public class RegexEntityFilter implements EntityFilter {
             regex));
   }
 
-  public RegexEntityFilter(EntitySchema<?> entitySchema,
+  public RegexEntityFilter(EntitySchema entitySchema,
       EntitySerDe<?> entitySerDe, String fieldName, String regex) {
     this(entitySchema, entitySerDe, fieldName, regex, true);
   }

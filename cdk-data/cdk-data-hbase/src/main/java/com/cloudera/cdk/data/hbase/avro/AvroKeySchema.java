@@ -8,7 +8,7 @@ import com.cloudera.cdk.data.hbase.KeySchema;
 /**
  * A KeySchema implementation powered by Avro.
  */
-public class AvroKeySchema extends KeySchema<String> {
+public class AvroKeySchema extends KeySchema {
 
   private final Schema schema;
 

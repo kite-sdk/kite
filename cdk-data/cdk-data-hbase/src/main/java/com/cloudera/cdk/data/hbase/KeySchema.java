@@ -3,19 +3,16 @@ package com.cloudera.cdk.data.hbase;
 
 /**
  * The KeySchema type.
- * 
- * @param <RAW_SCHEMA>
- *          The type that gets parsed by the KeyEntitySchemaParser
  */
-public class KeySchema<RAW_SCHEMA> {
+public class KeySchema {
 
-  private final RAW_SCHEMA rawSchema;
+  private final String rawSchema;
 
   /**
    * @param rawSchema
    *          The raw schema
    */
-  public KeySchema(RAW_SCHEMA rawSchema) {
+  public KeySchema(String rawSchema) {
     this.rawSchema = rawSchema;
   }
 
@@ -24,7 +21,7 @@ public class KeySchema<RAW_SCHEMA> {
    * 
    * @return The raw schema.
    */
-  public RAW_SCHEMA getRawSchema() {
+  public String getRawSchema() {
     return rawSchema;
   }
 }

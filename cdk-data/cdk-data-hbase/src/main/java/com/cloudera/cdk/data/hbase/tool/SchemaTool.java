@@ -1,5 +1,5 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
-package com.cloudera.cdk.data.hbase.avro.tool;
+package com.cloudera.cdk.data.hbase.tool;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,12 +37,13 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import com.cloudera.cdk.data.hbase.Constants;
 import com.cloudera.cdk.data.hbase.HBaseCommonException;
+import com.cloudera.cdk.data.hbase.KeySchema;
 import com.cloudera.cdk.data.hbase.SchemaValidationException;
-import com.cloudera.cdk.data.hbase.avro.AvroEntityManager;
 import com.cloudera.cdk.data.hbase.avro.AvroEntitySchema;
 import com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.avro.AvroKeySchema;
 import com.cloudera.cdk.data.hbase.avro.AvroUtils;
+import com.cloudera.cdk.data.hbase.manager.SchemaManager;
 
 /**
  * Utility class for managing Managed Schemas in HBase Common.
@@ -59,13 +60,13 @@ public class SchemaTool {
 
   private static final JsonFactory factory = mapper.getJsonFactory();
 
-  private final AvroEntityManager entityManager;
+  private final SchemaManager schemaManager;
 
   private final HBaseAdmin hbaseAdmin;
 
-  public SchemaTool(HBaseAdmin hbaseAdmin, AvroEntityManager entityManager) {
+  public SchemaTool(HBaseAdmin hbaseAdmin, SchemaManager entityManager) {
     this.hbaseAdmin = hbaseAdmin;
-    this.entityManager = entityManager;
+    this.schemaManager = entityManager;
   }
 
   /**
@@ -218,8 +219,8 @@ public class SchemaTool {
     String entityName = getEntityNameFromSchemaString(entitySchemaString);
     AvroEntitySchema entitySchema = parser.parseEntity(entitySchemaString);
     AvroKeySchema keySchema = parser.parseKey(keySchemaString);
-    if (entityManager.hasManagedSchema(tableName, entityName)) {
-      AvroKeySchema currentKeySchema = entityManager.getKeySchema(tableName,
+    if (schemaManager.hasManagedSchema(tableName, entityName)) {
+      KeySchema currentKeySchema = schemaManager.getKeySchema(tableName,
           entityName);
       if (!keySchema.equals(currentKeySchema)) {
         String msg = "Migrating schema with different keys. Current: "
@@ -228,9 +229,9 @@ public class SchemaTool {
         LOG.error(msg);
         throw new SchemaValidationException(msg);
       }
-      if (entityManager.getEntityVersion(tableName, entityName, entitySchema) == -1) {
+      if (schemaManager.getEntityVersion(tableName, entityName, entitySchema) == -1) {
         LOG.info("Migrating Schema: (" + tableName + ", " + entityName + ")");
-        entityManager.migrateSchema(tableName, entityName, entitySchemaString);
+        schemaManager.migrateSchema(tableName, entityName, entitySchemaString);
       } else {
         createTableAndFamilies = false;
         LOG.info("Schema hasn't changed, not migrating: (" + tableName + ", "
@@ -239,8 +240,11 @@ public class SchemaTool {
     } else {
       LOG.info("Creating Schema: (" + tableName + ", " + entityName + ")");
       parser.parseEntity(entitySchemaString).getRequiredColumnFamilies();
-      entityManager.createSchema(tableName, entityName, keySchemaString,
-          entitySchemaString);
+      schemaManager.createSchema(tableName, entityName, keySchemaString,
+          entitySchemaString,
+          "com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser",
+          "com.cloudera.cdk.data.hbase.avro.AvroKeySerDe",
+          "com.cloudera.cdk.data.hbase.avro.AvroEntitySerDe");
     }
 
     if (createTableAndFamilies) {

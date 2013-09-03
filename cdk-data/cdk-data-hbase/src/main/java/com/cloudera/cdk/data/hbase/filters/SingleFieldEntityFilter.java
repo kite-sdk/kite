@@ -32,13 +32,13 @@ public class SingleFieldEntityFilter implements EntityFilter {
         fieldName, filterValue, equalityOperator);
   }
 
-  public SingleFieldEntityFilter(EntitySchema<?> entitySchema,
+  public SingleFieldEntityFilter(EntitySchema entitySchema,
       EntitySerDe<?> entitySerDe, String fieldName, Object filterValue) {
     this(entitySchema, entitySerDe, fieldName, filterValue,
         CompareFilter.CompareOp.EQUAL);
   }
 
-  public SingleFieldEntityFilter(EntitySchema<?> entitySchema,
+  public SingleFieldEntityFilter(EntitySchema entitySchema,
       EntitySerDe<?> entitySerDe, String fieldName, Object filterValue,
       CompareFilter.CompareOp equalityOperator) {
     FieldMapping fieldMapping = entitySchema.getFieldMapping(fieldName);

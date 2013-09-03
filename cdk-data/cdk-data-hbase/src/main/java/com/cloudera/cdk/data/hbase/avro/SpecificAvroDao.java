@@ -21,6 +21,7 @@ import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
 import com.cloudera.cdk.data.hbase.HBaseCommonException;
 import com.cloudera.cdk.data.hbase.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.SchemaValidationException;
+import com.cloudera.cdk.data.hbase.manager.SchemaManager;
 
 /**
  * A Dao for Avro's SpecificRecords. In this Dao implementation, both the
@@ -104,15 +105,15 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    *          The table name of the managed schema.
    * @param entityName
    *          The entity name of the managed schema.
-   * @param entityManager
-   *          The EntityManager which will create the entity mapper that will
-   *          power this dao.
+   * @param schemaManager
+   *          The SchemaManager which will be used to query schema information
+   *          from the meta store.
    */
   public SpecificAvroDao(HTablePool tablePool, String tableName,
-      String entityName, SpecificAvroEntityManager entityManager) {
-
-    super(tablePool, tableName, entityManager.<K, E> createEntityMapper(
-        tableName, entityName));
+      String entityName, SchemaManager schemaManager) {
+    super(tablePool, tableName, new VersionedAvroEntityMapper.Builder()
+        .setSchemaManager(schemaManager).setTableName(tableName)
+        .setEntityName(entityName).setSpecific(true).<K, E> build());
   }
 
   /**
@@ -216,15 +217,15 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    * @param entityClass
    *          The class that is the composite record, which is made up of fields
    *          referencing the sub records.
-   * @param entityManager
-   *          The EntityManager which will create the entity mapper that will
+   * @param schemaManager
+   *          The SchemaManager which will use to create the entity mapper that will
    *          power this dao.
    * @return The CompositeDao instance.
    * @throws SchemaNotFoundException
    */
   public static <K extends SpecificRecord, E extends SpecificRecord, S extends SpecificRecord> Dao<K, E> buildCompositeDaoWithEntityManager(
       HTablePool tablePool, String tableName, Class<E> entityClass,
-      SpecificAvroEntityManager entityManager) {
+      SchemaManager schemaManager) {
 
     Schema entitySchema;
     try {
@@ -238,8 +239,10 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
 
     List<EntityMapper<K, S>> entityMappers = new ArrayList<EntityMapper<K, S>>();
     for (Schema.Field field : entitySchema.getFields()) {
-      entityMappers.add(entityManager.<K, S> createEntityMapper(tableName,
-          field.schema().getName()));
+      entityMappers.add(new VersionedAvroEntityMapper.Builder()
+          .setSchemaManager(schemaManager).setTableName(tableName)
+          .setEntityName(field.schema().getName()).setSpecific(true)
+          .<K, S> build());
     }
 
     return new SpecificCompositeAvroDao<K, E, S>(tablePool, tableName,

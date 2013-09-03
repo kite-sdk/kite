@@ -74,7 +74,7 @@ import com.cloudera.cdk.data.hbase.SchemaValidationException;
  * transactions.
  */
 public class AvroKeyEntitySchemaParser implements
-    KeyEntitySchemaParser<String, KeySchema<String>, EntitySchema<String>> {
+    KeyEntitySchemaParser<KeySchema, EntitySchema> {
 
   @SuppressWarnings("deprecation")
   @Override

@@ -14,10 +14,9 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import com.cloudera.cdk.data.hbase.avro.AvroEntityManager;
-import com.cloudera.cdk.data.hbase.avro.GenericAvroEntityManager;
-import com.cloudera.cdk.data.hbase.avro.SpecificAvroEntityManager;
-import com.cloudera.cdk.data.hbase.avro.tool.SchemaTool;
+import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
+import com.cloudera.cdk.data.hbase.manager.SchemaManager;
+import com.cloudera.cdk.data.hbase.tool.SchemaTool;
 
 public class HBaseTestUtils {
 
@@ -96,27 +95,14 @@ public class HBaseTestUtils {
     return new HTablePool(getConf(), 10);
   }
 
-  public static SpecificAvroEntityManager initializeSpecificAvroEntityManager(
+  public static SchemaManager initializeSchemaManager(
       HTablePool tablePool, String directory) throws Exception {
-    SpecificAvroEntityManager entityManager = new SpecificAvroEntityManager(
+    SchemaManager entityManager = new DefaultSchemaManager(
         tablePool);
-    initializeAvroEntityManager(entityManager, directory);
-    return entityManager;
-  }
-
-  public static GenericAvroEntityManager initializeGenericAvroEntityManager(
-      HTablePool tablePool, String directory) throws IOException {
-    GenericAvroEntityManager entityManager = new GenericAvroEntityManager(
-        tablePool);
-    initializeAvroEntityManager(entityManager, directory);
-    return entityManager;
-  }
-
-  private static void initializeAvroEntityManager(
-      AvroEntityManager entityManager, String directory) throws IOException {
     SchemaTool schemaTool = new SchemaTool(new HBaseAdmin(getConf()),
         entityManager);
     schemaTool.createOrMigrateSchemaDirectory(directory, true);
+    return entityManager;
   }
 
   public static void truncateTables(Collection<String> tableNames)

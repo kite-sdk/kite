@@ -34,8 +34,12 @@ import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
 import com.cloudera.cdk.data.hbase.avro.entities.TestKey;
 import com.cloudera.cdk.data.hbase.avro.entities.TestRecord;
-import com.cloudera.cdk.data.hbase.avro.tool.SchemaTool;
+import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
+import com.cloudera.cdk.data.hbase.manager.ManagedSchema;
+import com.cloudera.cdk.data.hbase.manager.ManagedSchemaKey;
+import com.cloudera.cdk.data.hbase.manager.SchemaManager;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
+import com.cloudera.cdk.data.hbase.tool.SchemaTool;
 
 public class ManagedDaoTest {
 
@@ -104,7 +108,7 @@ public class ManagedDaoTest {
   public void before() throws Exception {
     tablePool = new HTablePool(HBaseTestUtils.getConf(), 10);
     SchemaTool tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
-        new SpecificAvroEntityManager(tablePool));
+        new DefaultSchemaManager(tablePool));
     tool.createOrMigrateSchema(tableName, keyString, testRecord, true);
     tool.createOrMigrateSchema(tableName, keyString, testRecordv2, true);
   }
@@ -244,14 +248,12 @@ public class ManagedDaoTest {
     assertEquals(new Utf8("field1_" + iStr), record.get(0));
     assertEquals(new Utf8("field2_" + iStr), record.get(1));
     assertEquals(TestEnum.ENUM3.toString(), record.get(2).toString());
-    assertEquals(
-        new Utf8("field3_value_1_" + iStr),
-        ((Map<CharSequence, CharSequence>) record.get(3)).get(new Utf8("field3_key_1_"
-            + iStr)));
-    assertEquals(
-        new Utf8("field3_value_2_" + iStr),
-        ((Map<CharSequence, CharSequence>) record.get(3)).get(new Utf8("field3_key_2_"
-            + iStr)));
+    assertEquals(new Utf8("field3_value_1_" + iStr),
+        ((Map<CharSequence, CharSequence>) record.get(3)).get(new Utf8(
+            "field3_key_1_" + iStr)));
+    assertEquals(new Utf8("field3_value_2_" + iStr),
+        ((Map<CharSequence, CharSequence>) record.get(3)).get(new Utf8(
+            "field3_key_2_" + iStr)));
     assertEquals(new Utf8("embedded1"), ((IndexedRecord) record.get(4)).get(0));
     assertEquals(2L, ((IndexedRecord) record.get(4)).get(1));
 
@@ -270,7 +272,7 @@ public class ManagedDaoTest {
 
   @Test
   public void testGeneric() throws Exception {
-    GenericAvroEntityManager manager = new GenericAvroEntityManager(tablePool);
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(tablePool,
         tableName, "TestRecord", manager, testRecord);
 
@@ -303,7 +305,7 @@ public class ManagedDaoTest {
 
   @Test
   public void testSpecific() throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
         tablePool, tableName, "TestRecord", manager);
 
@@ -335,7 +337,7 @@ public class ManagedDaoTest {
 
   @Test
   public void testMigrateEntities() throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
         tablePool, tableName, "TestRecord", manager);
 
@@ -360,14 +362,13 @@ public class ManagedDaoTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testMigrateAndPut() throws Exception {
-    GenericAvroEntityManager manager = new GenericAvroEntityManager(tablePool);
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(tablePool,
         tableName, "TestRecord", manager, testRecord);
 
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
 
-    GenericAvroEntityManager afterManager = new GenericAvroEntityManager(
-        tablePool);
+    SchemaManager afterManager = new DefaultSchemaManager(tablePool);
     Dao<GenericRecord, GenericRecord> afterDao = new GenericAvroDao(tablePool,
         tableName, "TestRecord", afterManager, goodMigrationRecordAddField);
 
@@ -422,14 +423,13 @@ public class ManagedDaoTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testDynamicGenericDao() throws Exception {
-    GenericAvroEntityManager manager = new GenericAvroEntityManager(tablePool);
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(tablePool,
         tableName, "TestRecord", manager);
 
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
 
-    GenericAvroEntityManager afterManager = new GenericAvroEntityManager(
-        tablePool);
+    SchemaManager afterManager = new DefaultSchemaManager(tablePool);
     Dao<GenericRecord, GenericRecord> afterDao = new GenericAvroDao(tablePool,
         tableName, "TestRecord", afterManager);
 
@@ -472,7 +472,7 @@ public class ManagedDaoTest {
 
   @Test
   public void testIncrement() {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
         tablePool, tableName, "TestRecord", manager);
 
@@ -509,14 +509,14 @@ public class ManagedDaoTest {
 
   @Test(expected = IncompatibleSchemaException.class)
   public void testBadMigrationIntToLong() throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
     manager.migrateSchema(tableName, "TestRecord", badMigrationRecordIntToLong);
   }
 
   @Test
   public void testGoodMigrations() throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
     manager.migrateSchema(tableName, "TestRecord",
         goodMigrationRecordRemoveField);
@@ -535,7 +535,7 @@ public class ManagedDaoTest {
 
     managedDao.delete(managedSchemaKey);
 
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
     try {
       manager.getEntityVersion(tableName, "test",
           parser.parseEntity(testRecord));
@@ -543,7 +543,10 @@ public class ManagedDaoTest {
     } catch (SchemaNotFoundException e) {
       // This is what we expect
     }
-    manager.createSchema(tableName, "test", keyString, testRecord);
+    manager.createSchema(tableName, "test", keyString, testRecord,
+        "com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser",
+        "com.cloudera.cdk.data.hbase.avro.AvroKeySerDe",
+        "com.cloudera.cdk.data.hbase.avro.AvroEntitySerDe");
     assertEquals(
         0,
         manager.getEntityVersion(tableName, "test",
@@ -552,13 +555,16 @@ public class ManagedDaoTest {
 
   @Test(expected = IncompatibleSchemaException.class)
   public void testCannotCreateExisting() throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
     manager.createSchema(tableName, "TestRecord", keyString,
-        goodMigrationRecordAddField);
+        goodMigrationRecordAddField,
+        "com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser",
+        "com.cloudera.cdk.data.hbase.avro.AvroKeySerDe",
+        "com.cloudera.cdk.data.hbase.avro.AvroEntitySerDe");
   }
 
   private void badMigration(String badMigration) throws Exception {
-    SpecificAvroEntityManager manager = new SpecificAvroEntityManager(tablePool);
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
     manager.migrateSchema(tableName, "TestRecord", badMigration);
   }
 }

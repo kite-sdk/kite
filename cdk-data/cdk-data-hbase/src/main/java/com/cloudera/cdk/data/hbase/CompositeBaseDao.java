@@ -103,12 +103,12 @@ public abstract class CompositeBaseDao<K, E, S> implements
     }
 
     @Override
-    public KeySchema<?> getKeySchema() {
+    public KeySchema getKeySchema() {
       return entityMappers.get(0).getKeySchema();
     }
 
     @Override
-    public EntitySchema<?> getEntitySchema() {
+    public EntitySchema getEntitySchema() {
       boolean transactional = entityMappers.get(0).getEntitySchema()
           .isTransactional();
       List<String> tables = new ArrayList<String>();
@@ -117,7 +117,7 @@ public abstract class CompositeBaseDao<K, E, S> implements
         tables.addAll(entityMapper.getEntitySchema().getTables());
         fieldMappings.addAll(entityMapper.getEntitySchema().getFieldMappings());
       }
-      return new EntitySchema<Object>(tables, null, fieldMappings,
+      return new EntitySchema(tables, null, fieldMappings,
           transactional);
     }
 
@@ -212,12 +212,12 @@ public abstract class CompositeBaseDao<K, E, S> implements
   }
 
   @Override
-  public KeySchema<?> getKeySchema() {
+  public KeySchema getKeySchema() {
     return baseDao.getKeySchema();
   }
 
   @Override
-  public EntitySchema<?> getEntitySchema() {
+  public EntitySchema getEntitySchema() {
     return baseDao.getEntitySchema();
   }
 
