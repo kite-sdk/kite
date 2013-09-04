@@ -93,8 +93,11 @@ engines can easily provide copy functionality, if desired.
 _DatasetRepository Interface_
 
     Dataset create(String, DatasetDescriptor);
-    Dataset get(String);
-    boolean drop(String);
+    Dataset load(String);
+    Dataset update(String);
+    boolean delete(String);
+    boolean exists(String);
+    Collection<String> list();
 
 The Data module ships with a `DatasetRepository` implementation
 `com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository` built for operating
@@ -109,16 +112,20 @@ information.
 
 Instantiating FileSystemDatasetRepository is straight forward.
 
-    DatasetRepository repo = new FileSystemDatasetRepository(
-      FileSystem.get(new Configuration()),
-      new Path("/data")
-    );
+    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
+      .rootDirectory(new Path("/data"))
+      .get();
 
 This example uses the currently configured Hadoop `FileSystem` implementation,
 typically an HDFS cluster. Since Hadoop's also supports a "local" implementation
 of `FileSystem`, it's possible to use the Data APIs to interact with data
 residing on a local OS filesystem. This is especially useful during development
 and basic functional testing of your code.
+
+    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
+      .fileSystem(FileSystem.getLocal(new Configuration()))
+      .rootDirectory(new Path("/tmp/test-data"))
+      .get();
 
 Once an instance of a `DatasetRepository` implementation has been created,
 new datasets can easily be created, and existing datasets can be loaded or
@@ -132,10 +139,10 @@ for now. We'll cover them later.
      * classes come from Hadoop. The Path object tells the dataset repository
      * under what path in the configured filesystem datasets reside.
      */
-    DatasetRepository repo = new FileSystemDatasetRepository(
-      FileSystem.get(new Configuration()),
-      new Path("/data")
-    );
+    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
+      .fileSystem(FileSystem.get(new Configuration()))
+      .rootDirectory(new Path("/data"))
+      .get();
 
     /*
      * Create the dataset "users" with the schema defined in the file User.avsc.
@@ -155,9 +162,11 @@ services must provide to the library, and specifically, the `DatasetRepository`.
 
 _MetadataProvider Interface_
 
-    void save(String, DatasetDescriptor);
+    DatasetDescriptor create(String, DatasetDescriptor);
     DatasetDescriptor load(String);
+    DatasetDescriptor update(String, DatasetDescriptor);
     boolean delete(String);
+    boolean exists(String);
 
 `MetadataProvider` implementations act as a bridge between the Data module and
 centralized metadata repositories. An obvious example of this (in the Hadoop
@@ -205,8 +214,11 @@ _Example: Explicitly configuring `FileSystemDatasetRepository` with
     MetadataProvider metaProvider = new FileSystemMetadataProvider(
       fileSystem, basePath);
 
-    DatasetRepository repo = new FileSystemDatasetRepository(
-      fileSystem, basePath, metaProvider);
+    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
+      .fileSystem(fileSystem)
+      .rootDirectory(basePath)
+      .metadataProvider(metaProvider)
+      .get();
 
 Note how the same base directory of `/data` is used for both the metadata
 provider as well as the dataset repository. This is perfectly legal. In fact,
@@ -358,7 +370,7 @@ _DatasetReader Interface_
     boolean isOpen();
 
     boolean hasNext();
-    E read();
+    E next();
 
 _DatasetWriter Interface_
 
@@ -372,7 +384,7 @@ _DatasetWriter Interface_
 Both readers and writers are single-use objects with a well-defined lifecycle.
 Instances of both types (or the implementations of each, rather) must be opened
 prior to invoking any of the IO-generating methods such as DatasetReader's
-`hasNext()` or `read()`, or DatasetWriter's `write()` or `flush()`. Once a
+`hasNext()` or `next()`, or DatasetWriter's `write()` or `flush()`. Once a
 stream has been closed via the `close()` method, no further IO is permitted,
 nor may it be reopened.
 
@@ -389,8 +401,9 @@ information.
 
 _Example: Writing to a Hadoop FileSystem_
 
-    DatasetRepository repo = new FileSystemDatasetRepository(
-      FileSystem.get(new Configuration()), new Path("/data"));
+    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
+      .rootDirectory(new Path("/data"))
+      .get();
 
     /*
      * Let's assume MyInteger.avsc is defined as follows:
@@ -430,10 +443,17 @@ _Example: Writing to a Hadoop FileSystem_
       writer.close();
     }
 
-Reading data from an existing dataset is equally straight forward. The important
-part to remember is that it is illegal to call `read()` after the reader has
-been exhausted (i.e. no more entities remain). Instead, users must use the
-`hasNext()` method to test if the reader can produce further data.
+Reading data from an existing dataset is equally straight forward.
+DatasetReaders implement the standard [Iterator][ator-doc] and
+[Iterable][able-doc] interfaces, so java's for-each syntax works and is the
+easiest way to get entites from a reader. If calling `next()` without using
+for-each syntax, keep in mind that it is incorrect to call `next()` after the
+reader has been exhausted (i.e.  no more entities remain) and an exception will
+be thrown.  Instead, users must use the `hasNext()` method to test if the
+reader can produce further data.
+
+[ator-doc]: http://docs.oracle.com/javase/7/docs/api/java/util/Iterator.html
+[able-doc]: http://docs.oracle.com/javase/7/docs/api/java/util/Iterable.html
 
 _Example: Reading from a Hadoop FileSystem_
 
@@ -448,8 +468,8 @@ _Example: Reading from a Hadoop FileSystem_
     try {
       reader.open();
 
-      while (reader.hasNext()) {
-        System.out.println("i: " + reader.read().get("i"));
+      for (GenericRecord record : reader) {
+        System.out.println("i: " + record.get("i"));
       }
     } finally {
       reader.close();
@@ -460,8 +480,9 @@ in a relational database - works as expected.
 
 _Example: Dropping an existing dataset_
 
-    DatasetRepository repo = new FileSystemDatasetRepository(
-      FileSystem.get(new Configuration()), new Path("/data"));
+    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
+      .rootDirectory(new Path("/data"))
+      .get();
 
     if (repo.drop("integers")) {
       System.out.println("Dropped dataset integers");

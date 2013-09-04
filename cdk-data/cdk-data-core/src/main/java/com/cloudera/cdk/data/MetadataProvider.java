@@ -81,7 +81,7 @@ public interface MetadataProvider {
   DatasetDescriptor update(String name, DatasetDescriptor descriptor);
 
   /**
-   * Deprecated method to save a descriptor. Instead, use {@link create} and
+   * Deprecated method to save a descriptor. Instead, use {@link #create} and
    * {@link #update}.
    *
    * @deprecated will be removed in 0.8.x

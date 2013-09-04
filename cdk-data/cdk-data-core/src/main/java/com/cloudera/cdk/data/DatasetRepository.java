@@ -60,7 +60,7 @@ public interface DatasetRepository {
   Dataset load(String name);
 
   /**
-   * Deprecated synonym for {@link #load()}.
+   * Deprecated synonym for {@link #load}.
    *
    * @deprecated will be removed in 0.8.x
    */
@@ -119,7 +119,7 @@ public interface DatasetRepository {
   boolean delete(String name);
 
   /**
-   * Deprecated synonym for {@link #delete()}.
+   * Deprecated synonym for {@link #delete}.
    *
    * @deprecated will be removed in 0.8.x
    */

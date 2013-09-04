@@ -157,12 +157,11 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Returns a Builder that will produce copies of {@code descriptor}, if it
-     * is not modified. This is intended to help callers copy and update
-     * descriptors even though they are {@link Immutable}.
+     * Creates a Builder configured to copy {@code descriptor}, if it is not
+     * modified. This is intended to help callers copy and update descriptors
+     * even though they are {@link Immutable}.
      *
      * @param descriptor A {@link DatasetDescriptor} to copy settings from
-     * @return A {@code Builder} configured to copy {@code descriptor}
      */
     public Builder(DatasetDescriptor descriptor) {
       this.schema = descriptor.getSchema();

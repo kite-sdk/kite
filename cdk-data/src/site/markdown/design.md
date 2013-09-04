@@ -172,7 +172,7 @@ _Stream interfaces_
         isOpen(): boolean
 
         hasNext(): boolean
-        read(): E
+        next(): E
 
     DatasetWriter<E>
 
@@ -284,9 +284,10 @@ _DatasetRepository APIs_
 
     DatasetRepository
 
-        get(String): Dataset
+        load(String): Dataset
         create(String, DatasetDescriptor): Dataset
-        drop(String): boolean
+        update(String, DatasetDescriptor): Dataset
+        delete(String): boolean
 
 Along with the Hadoop FileSystem `Dataset` and stream implementations, a related
 `DatasetRepository` implementation exists. This implementation requires an
@@ -305,8 +306,9 @@ _MetadataProvider API_
 
     MetadataProvider
 
-        save(String, DatasetDescriptor)
         load(String): DatasetDescriptor
+        create(String, DatasetDescriptor): DatasetDescriptor
+        update(String, DatasetDescriptor): DatasetDescriptor
         delete(String): boolean
 
 The expectation is that MetadataProvider implementations will act as a bridge
@@ -380,7 +382,7 @@ guarantees:
 
 1. The patch version is incremented if only backward-compatible bug fixes are
    introduced.
-1. The minor version is incremented when backward-compaatible features are added
+1. The minor version is incremented when backward-compatible features are added
    to the public API, parts of the public API are deprecated, or when changes
    are made to private code. Patch level changes may also be included.
 1. The major version is incremented when backward-incompatible changes are made.
@@ -458,10 +460,8 @@ to keep these examples up to date with the actual implementation.
     try {
       reader.open();
 
-      while (reader.hasNext()) {
-        // We can also use Avro Generic records.
-        GenericData.Record record = reader.read();
-
+      // We can also use Avro Generic records.
+      for (GenericData.Record record : reader) {
         System.out.println(new StringBuilder("event - timestamp:")
           .append(record.get("timestamp"))
           .append(" eventId:", record.get("eventId"))
