@@ -80,8 +80,6 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    *
    * @return true if additional entities exist, false otherwise.
    * @throws DatasetReaderException
-   *
-   * @since 0.7.0
    */
   @Override
   boolean hasNext();
@@ -108,6 +106,8 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    * @return An entity of type {@code E}.
    * @throws DatasetReaderException
    * @throws NoSuchElementException
+   *
+   * @since 0.7.0
    */
   @SuppressWarnings(value="IT_NO_SUCH_ELEMENT",
       justification="Implementations should throw NoSuchElementException")
@@ -122,6 +122,8 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    * This has the same semantics as {@link Iterator#remove()}, but is unlikely
    * to be implemented.
    * </p>
+   *
+   * @since 0.7.0
    */
   @Override
   void remove();

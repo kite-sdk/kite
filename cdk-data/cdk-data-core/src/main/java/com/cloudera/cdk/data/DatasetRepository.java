@@ -132,6 +132,8 @@ public interface DatasetRepository {
    * @param name a {@code Dataset} name to check the existence of
    * @return true if a Dataset named {@code name} exists, false otherwise
    * @throws DatasetRepositoryException
+   *
+   * @since 0.7.0
    */
   boolean exists(String name);
 
@@ -142,6 +144,8 @@ public interface DatasetRepository {
    *
    * @return a {@link Collection} of Dataset names ({@link String}s)
    * @throws DatasetRepositoryException
+   *
+   * @since 0.7.0
    */
   Collection<String> list();
 

@@ -55,6 +55,8 @@ public interface MetadataProvider {
    * @param descriptor A dataset descriptor.
    * @return The descriptor as persisted to the Metadata store.
    * @throws MetadataProviderException If the dataset descriptor can not be saved.
+   *
+   * @since 0.7.0
    */
   DatasetDescriptor create(String name, DatasetDescriptor descriptor);
 
@@ -77,6 +79,8 @@ public interface MetadataProvider {
    *                                       supported by the implementation.
    * @throws MetadataProviderException     If the dataset descriptor can not be
    *                                       updated.
+   *
+   * @since 0.7.0
    */
   DatasetDescriptor update(String name, DatasetDescriptor descriptor);
 
@@ -107,6 +111,8 @@ public interface MetadataProvider {
    * @param name a {@code Dataset} name to check the existence of
    * @return true if {@code name} exists, false otherwise
    * @throws MetadataProviderException
+   *
+   * @since 0.7.0
    */
   boolean exists(String name);
 }
