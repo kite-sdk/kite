@@ -68,6 +68,8 @@ public final class ToStringBuilder implements CommandBuilder {
         }
         iter.set(str);
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
     

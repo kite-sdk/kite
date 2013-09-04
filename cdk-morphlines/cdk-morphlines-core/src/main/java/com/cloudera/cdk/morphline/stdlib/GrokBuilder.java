@@ -134,6 +134,8 @@ public final class GrokBuilder implements CommandBuilder {
       if (!doMatch(inputRecord, outputRecord, extract)) {
         return false;
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(outputRecord);
     }
 
