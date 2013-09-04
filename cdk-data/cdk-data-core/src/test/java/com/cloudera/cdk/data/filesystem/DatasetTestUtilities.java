@@ -49,7 +49,7 @@ public class DatasetTestUtilities {
 
   private static URI findSchemaURI(String resource) {
     try {
-      return Resources.getResource("schema/user.avsc").toURI();
+      return Resources.getResource(resource).toURI();
     } catch (URISyntaxException e) {
       throw new IllegalStateException("Cannot load " + resource);
     }
