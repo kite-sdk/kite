@@ -69,9 +69,11 @@ public final class ToByteArrayBuilder implements CommandBuilder {
         if (!(value instanceof byte[])) {
           String str = value.toString();
           value = str.getBytes(charset);
+          iter.set(value);
         }
-        iter.set(value);
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
     
