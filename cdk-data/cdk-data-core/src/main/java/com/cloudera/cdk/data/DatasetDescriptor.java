@@ -131,7 +131,7 @@ public class DatasetDescriptor {
 
   /**
    * Returns true if an associated dataset is partitioned (that is, has an
-   * associated {@link PartitionStrategy}, false otherwise.
+   * associated {@link PartitionStrategy}), false otherwise.
    */
   public boolean isPartitioned() {
     return partitionStrategy != null;
@@ -152,6 +152,24 @@ public class DatasetDescriptor {
     private URL schemaUrl;
     private Format format = Formats.AVRO;
     private PartitionStrategy partitionStrategy;
+
+    public Builder() {
+    }
+
+    /**
+     * Returns a Builder that will produce copies of {@code descriptor}, if it
+     * is not modified. This is intended to help callers copy and update
+     * descriptors even though they are {@link Immutable}.
+     *
+     * @param descriptor A {@link DatasetDescriptor} to copy settings from
+     * @return A {@code Builder} configured to copy {@code descriptor}
+     */
+    public Builder(DatasetDescriptor descriptor) {
+      this.schema = descriptor.getSchema();
+      this.schemaUrl = descriptor.getSchemaUrl();
+      this.format = descriptor.getFormat();
+      this.partitionStrategy = descriptor.getPartitionStrategy();
+    }
 
     /**
      * Configure the dataset's schema. A schema is required, and may be set
