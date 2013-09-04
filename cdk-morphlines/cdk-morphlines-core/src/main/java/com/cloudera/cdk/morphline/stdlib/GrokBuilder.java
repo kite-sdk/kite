@@ -69,9 +69,8 @@ public final class GrokBuilder implements CommandBuilder {
     private final NumRequiredMatches numRequiredMatches;
     private final boolean findSubstrings;
     private final boolean addEmptyStrings;
+    private final String firstKey; // cached value
 
-    private static final boolean ENABLE_FAST_EXTRACTION_PATH = true;
-    
     public Grok(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
       
@@ -81,6 +80,7 @@ public final class GrokBuilder implements CommandBuilder {
         String expr = entry.getValue().toString();
         this.regexes.put(entry.getKey(), dict.compileExpression(expr));
       }
+      this.firstKey = (regexes.size() == 0 ? null : regexes.entrySet().iterator().next().getKey());
 
       String extractStr = getConfigs().getString(config, "extract", "true");
       this.extractInPlace = extractStr.equals("inplace");
@@ -107,13 +107,26 @@ public final class GrokBuilder implements CommandBuilder {
         // Ensure that we mutate the record inplace only if *all* expressions match.
         // To ensure this we potentially run doMatch() twice: the first time to check, the second
         // time to mutate
-        if (regexes.size() > 1 || numRequiredMatches != NumRequiredMatches.atLeastOnce) {
+        boolean isFast;
+        if (regexes.size() == 0) {
+          isFast = true;
+        } else if (regexes.size() > 1) {
+          isFast = false;
+        } else if (numRequiredMatches == NumRequiredMatches.atLeastOnce) {
+          isFast = true;
+        } else { // all or once
+          assert regexes.size() == 1;
+          assert firstKey != null;
+          isFast = (inputRecord.get(firstKey).size() <= 1);
+        }
+        
+        if (!isFast) {
           if (!doMatch(inputRecord, outputRecord, false)) {
             return false;
           }
         } else {
           ; // no need to do anything
-          // This is a performance enhancement for "atLeastOnce" case with a single expression:
+          // This is a performance enhancement for some cases with a single expression:
           // By the time we find a regex match we know that the whole command will succeed,
           // so there's really no need to run doMatch() twice.
         }
@@ -190,11 +203,7 @@ public final class GrokBuilder implements CommandBuilder {
 
     private void extract(Record outputRecord, Pattern pattern, Matcher matcher, boolean doExtract) {
       if (doExtract) {
-        if (ENABLE_FAST_EXTRACTION_PATH) {
-          extractFast(outputRecord, pattern, matcher);
-        } else {
-          extractSlow(outputRecord, pattern, matcher); // same semantics but less efficient
-        }
+        extractFast(outputRecord, pattern, matcher);
       }
     }
 
@@ -211,15 +220,6 @@ public final class GrokBuilder implements CommandBuilder {
       }
     }
 
-    private void extractSlow(Record outputRecord, Pattern pattern, Matcher matcher) {
-      for (String groupName : pattern.groupNames()) {
-        String value = matcher.group(groupName);
-        if (value != null && (value.length() > 0 || addEmptyStrings)) {
-          outputRecord.put(groupName, value);
-        }
-      }
-    }
-    
     
     ///////////////////////////////////////////////////////////////////////////////
     // Nested classes:

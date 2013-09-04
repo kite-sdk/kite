@@ -757,68 +757,79 @@ public class MorphlineTest extends AbstractMorphlineTest {
   
   @Test
   public void testGrokSyslogMatchInplaceTwoExpressions() throws Exception {
-    testGrokSyslogMatchInternal(true, true);
+    testGrokSyslogMatchInternal(true, true, "atLeastOnce");
   }
   
-  private void testGrokSyslogMatchInternal(boolean inplace, boolean twoExpressions) throws Exception {
-    // match
-    morphline = createMorphline(
-        "test-morphlines/grokSyslogMatch" 
-        + (inplace ? "Inplace" : "")
-        + (twoExpressions ? "TwoExpressions" : "") 
-        + "");
-    Record record = new Record();
-    String msg = "<164>Feb  4 10:46:14 syslog sshd[607]: Server listening on 0.0.0.0 port 22.";
-    record.put(Fields.MESSAGE, msg);
-    String id = "myid";
-    record.put(Fields.ID, id);
-    startSession();
-    assertEquals(1, collector.getNumStartEvents());
-    assertTrue(morphline.process(record));
-    Record expected = new Record();
-    expected.put(Fields.MESSAGE, msg);
-    expected.put(Fields.ID, id);
-    expected.put("syslog_pri", "164");
-    expected.put("syslog_timestamp", "Feb  4 10:46:14");
-    expected.put("syslog_hostname", "syslog");
-    expected.put("syslog_program", "sshd");
-    expected.put("syslog_pid", "607");
-    expected.put("syslog_message", "Server listening on 0.0.0.0 port 22.");
-    assertEquals(expected, collector.getFirstRecord());
-    if (inplace) {
-      assertSame(record, collector.getFirstRecord());
-    } else {
-      assertNotSame(record, collector.getFirstRecord());      
+  private void testGrokSyslogMatchInternal(boolean inplace, boolean twoExpressions, String... numRequiredMatchesParams) throws Exception {
+    if (numRequiredMatchesParams.length == 0) {
+      numRequiredMatchesParams = new String[] {"atLeastOnce", "all", "once"};
     }
-    
-    // mismatch
-    collector.reset();
-    record = new Record();
-    record.put(Fields.MESSAGE, "foo" + msg);
-    startSession();
-    assertEquals(1, collector.getNumStartEvents());
-    assertFalse(morphline.process(record));
-    assertEquals(Arrays.asList(), collector.getRecords());
-    
-    // double match
-    collector.reset();
-    record = new Record();
-    record.put(Fields.MESSAGE, msg);
-    record.put(Fields.MESSAGE, msg);
-    record.put(Fields.ID, id);
-    record.put(Fields.ID, id);
-    startSession();
-    assertEquals(1, collector.getNumStartEvents());
-    assertTrue(morphline.process(record));
-    Record tmp = expected.copy();
-    for (Map.Entry<String, Object> entry : tmp.getFields().entries()) {
-      expected.put(entry.getKey(), entry.getValue());
-    }        
-    assertEquals(expected, collector.getFirstRecord());
-    if (inplace) {
-      assertSame(record, collector.getFirstRecord());
-    } else {
-      assertNotSame(record, collector.getFirstRecord());      
+    for (String numRequiredMatches : numRequiredMatchesParams) {
+      morphline = createMorphline(
+          "test-morphlines/grokSyslogMatch" 
+          + (inplace ? "Inplace" : "")
+          + (twoExpressions ? "TwoExpressions" : "") 
+          + "", 
+          ConfigFactory.parseMap(ImmutableMap.of("numRequiredMatches", numRequiredMatches)));
+      
+      Record record = new Record();
+      String msg = "<164>Feb  4 10:46:14 syslog sshd[607]: Server listening on 0.0.0.0 port 22.";
+      record.put(Fields.MESSAGE, msg);
+      String id = "myid";
+      record.put(Fields.ID, id);
+      collector.reset();
+      startSession();
+      assertEquals(1, collector.getNumStartEvents());
+      assertTrue(morphline.process(record));
+      Record expected = new Record();
+      expected.put(Fields.MESSAGE, msg);
+      expected.put(Fields.ID, id);
+      expected.put("syslog_pri", "164");
+      expected.put("syslog_timestamp", "Feb  4 10:46:14");
+      expected.put("syslog_hostname", "syslog");
+      expected.put("syslog_program", "sshd");
+      expected.put("syslog_pid", "607");
+      expected.put("syslog_message", "Server listening on 0.0.0.0 port 22.");
+      assertEquals(expected, collector.getFirstRecord());
+      if (inplace) {
+        assertSame(record, collector.getFirstRecord());
+      } else {
+        assertNotSame(record, collector.getFirstRecord());      
+      }
+      
+      // mismatch
+      collector.reset();
+      record = new Record();
+      record.put(Fields.MESSAGE, "foo" + msg);
+      startSession();
+      assertEquals(1, collector.getNumStartEvents());
+      assertFalse(morphline.process(record));
+      assertEquals(Arrays.asList(), collector.getRecords());
+      
+      // double match
+      collector.reset();
+      record = new Record();
+      record.put(Fields.MESSAGE, msg);
+      record.put(Fields.MESSAGE, msg);
+      record.put(Fields.ID, id);
+      record.put(Fields.ID, id);
+      startSession();
+      assertEquals(1, collector.getNumStartEvents());
+      if ("once".equals(numRequiredMatches)) {
+        assertFalse(morphline.process(record));
+      } else {
+        assertTrue(morphline.process(record));
+        Record tmp = expected.copy();
+        for (Map.Entry<String, Object> entry : tmp.getFields().entries()) {
+          expected.put(entry.getKey(), entry.getValue());
+        }        
+        assertEquals(expected, collector.getFirstRecord());
+        if (inplace) {
+          assertSame(record, collector.getFirstRecord());
+        } else {
+          assertNotSame(record, collector.getFirstRecord());      
+        }
+      }
     }
   }
   
