@@ -98,7 +98,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <previous.project.version>0.5.0</previous.project.version> <!-- used by jdiff -->
+    <previous.project.version>0.7.0</previous.project.version> <!-- used by jdiff -->
 
     <cdh.version>4.3.0</cdh.version>
 
