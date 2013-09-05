@@ -22,9 +22,9 @@ import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.Format;
 import com.cloudera.cdk.data.Formats;
+import com.cloudera.cdk.data.MiniDFSTest;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.filesystem.FileSystemDataset;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import java.io.IOException;
@@ -49,14 +49,18 @@ import org.slf4j.LoggerFactory;
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
 
 @RunWith(Parameterized.class)
-public class TestFileSystemDataset {
+public class TestFileSystemDataset extends MiniDFSTest {
 
   private static final Logger logger = LoggerFactory
     .getLogger(TestFileSystemDataset.class);
 
   @Parameterized.Parameters
   public static Collection<Object[]> data() {
-    Object[][] data = new Object[][] { { Formats.AVRO }, { Formats.PARQUET } };
+    Object[][] data = new Object[][] {
+        { Formats.AVRO, getDFS() },
+        { Formats.AVRO, getFS() },
+        { Formats.PARQUET, getDFS() },
+        { Formats.PARQUET, getFS() } };
     return Arrays.asList(data);
   }
 
@@ -64,8 +68,9 @@ public class TestFileSystemDataset {
   private FileSystem fileSystem;
   private Path testDirectory;
 
-  public TestFileSystemDataset(Format format) {
+  public TestFileSystemDataset(Format format, FileSystem fs) {
     this.format = format;
+    this.fileSystem = fs;
   }
 
   @Before
