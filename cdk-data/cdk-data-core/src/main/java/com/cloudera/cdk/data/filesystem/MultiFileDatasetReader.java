@@ -23,6 +23,7 @@ import com.cloudera.cdk.data.UnknownFormatException;
 import com.cloudera.cdk.data.spi.AbstractDatasetReader;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -42,10 +43,19 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
 
   public MultiFileDatasetReader(FileSystem fileSystem, List<Path> files,
       DatasetDescriptor descriptor) {
+    Preconditions.checkArgument(fileSystem != null, "FileSystem cannot be null");
+    Preconditions.checkArgument(descriptor != null, "Descriptor cannot be null");
+    Preconditions.checkArgument(files != null, "Descriptor cannot be null");
 
     this.fileSystem = fileSystem;
     this.descriptor = descriptor;
-    this.filesIter = files.iterator();
+
+    // verify there are no null files
+    try {
+      this.filesIter = ImmutableList.copyOf(files).iterator();
+    } catch (NullPointerException ex) {
+      throw new IllegalArgumentException("File list cannot contain null Paths");
+    }
 
     this.state = ReaderWriterState.NEW;
   }
@@ -60,9 +70,6 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
       throw new UnknownFormatException("Cannot open format:" + format.getName());
     }
 
-    if (filesIter.hasNext()) {
-      openNextReader();
-    }
     this.state = ReaderWriterState.OPEN;
   }
 
@@ -84,17 +91,17 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
 
     while (true) {
       if (reader == null) {
-        return false;
-      } else if (reader.hasNext()) {
-        return true;
-      } else {
-        reader.close();
-        reader = null;
-
         if (filesIter.hasNext()) {
           openNextReader();
         } else {
           return false;
+        }
+      } else {
+        if (reader.hasNext()) {
+          return true;
+        } else {
+          reader.close();
+          reader = null;
         }
       }
     }
@@ -104,17 +111,26 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   public E next() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to read from a file in state:%s", state);
-    if (reader == null) {
-      // no reader means hasNext would return false
+    if (hasNext()) {
+      // if hasNext => true, then reader is guaranteed to be non-null
+      return reader.next();
+    } else {
       throw new NoSuchElementException();
     }
-    return reader.next();
   }
 
   @Override
   public void remove() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
         "Attempt to remove from a file in state:%s", state);
+    if (reader == null) {
+      // If next succeeds, then reader cannot be null. If the reader is null,
+      // then next did not succeed or hasNext has been used and the reader is
+      // gone. We could keep track of the last reader that next returned a value
+      // from, but it probably isn't worth it.
+      throw new IllegalStateException(
+          "Remove can only be called after next() returns a value and before calling hasNext()");
+    }
     reader.remove();
   }
 

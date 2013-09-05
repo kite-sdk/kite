@@ -26,6 +26,7 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -79,7 +80,21 @@ public class DatasetTestUtilities {
   }
 
   public static void checkTestUsers(Dataset ds, int count) {
-    checkTestUsers(materialize(ds), count);
+    final Set<String> usernames = Sets.newHashSet();
+    for (int i = 0; i < count; i++) {
+      usernames.add("test-" + i);
+    }
+
+    checkReaderBehavior(ds.<GenericData.Record>getReader(), count,
+        new RecordValidator<GenericData.Record>() {
+      @Override
+      public void validate(GenericData.Record record, int recordNum) {
+        Assert.assertTrue(usernames.remove((String) record.get("username")));
+        Assert.assertNotNull(record.get("email"));
+      }
+    });
+
+    Assert.assertTrue(usernames.isEmpty());
   }
 
   public static void checkTestUsers(Set<GenericData.Record> records, int count) {
@@ -131,4 +146,62 @@ public class DatasetTestUtilities {
     }));
     Assert.assertEquals(expected, actual);
   }
+
+  public static interface RecordValidator<R> {
+    void validate(R record, int recordNum);
+  }
+
+  public static <R> void checkReaderBehavior(
+      DatasetReader<R> reader, int totalRecords, RecordValidator<R> validator) {
+    Assert.assertFalse("Reader is open before open()", reader.isOpen());
+
+    try {
+      reader.open();
+
+      Assert.assertTrue("Reader is not open after open()", reader.isOpen());
+
+      checkReaderIteration(reader, totalRecords, validator);
+
+    } finally {
+      reader.close();
+    }
+
+    Assert.assertFalse("Reader is open after close()", reader.isOpen());
+  }
+
+  public static <R> void checkReaderIteration(DatasetReader<R> reader,
+      int expectedRecordCount, RecordValidator<R> validator) {
+    int recordCount = 0;
+
+    Assert.assertTrue("Reader is not open", reader.isOpen());
+    Assert.assertTrue("Reader has no records, expected " + expectedRecordCount,
+        (expectedRecordCount == 0) || reader.hasNext());
+
+    for (R record : reader) {
+      // add calls to hasNext, which should not affect the iteration
+      reader.hasNext();
+      Assert.assertNotNull(record);
+      validator.validate(record, recordCount);
+      recordCount++;
+    }
+
+    Assert.assertFalse("Reader is empty, but hasNext is true",
+        reader.hasNext());
+
+    // verify that NoSuchElementException is thrown when hasNext returns false
+    try {
+      reader.next();
+      Assert.fail("Reader did not throw NoSuchElementException");
+    } catch (NoSuchElementException ex) {
+      // this is the correct behavior
+    }
+
+    Assert.assertTrue("Reader is empty, but should be open", reader.isOpen());
+
+    // verify the correct number of records were produced
+    // if hasNext advances the reader, then this will be wrong
+    Assert.assertEquals("Incorrect number of records",
+        expectedRecordCount, recordCount);
+  }
+
 }

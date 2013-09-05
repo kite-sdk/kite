@@ -16,6 +16,7 @@
 package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.DatasetReader;
+import com.cloudera.cdk.data.DatasetReaderException;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import java.io.IOException;
@@ -31,7 +32,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.STRING_SCHEMA;
+import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
 
 public class TestFileSystemDatasetReader {
 
@@ -39,32 +40,7 @@ public class TestFileSystemDatasetReader {
 
   @Before
   public void setUp() throws IOException {
-    fileSystem = FileSystem.get(new Configuration());
-  }
-
-  @Test
-  public void testRead() throws IOException {
-    DatasetReader<Record> reader;
-    int records = 0;
-
-    reader = new FileSystemDatasetReader<Record>(fileSystem, new Path(Resources
-        .getResource("data/strings-100.avro").getFile()), STRING_SCHEMA);
-
-    try {
-      reader.open();
-
-      while (reader.hasNext()) {
-        Record record = reader.read();
-
-        Assert.assertNotNull(record);
-        Assert.assertEquals(String.valueOf(records), record.get("text"));
-        records++;
-      }
-    } finally {
-      reader.close();
-    }
-
-    Assert.assertEquals(100, records);
+    fileSystem = FileSystem.getLocal(new Configuration());
   }
 
   @Test
@@ -78,36 +54,58 @@ public class TestFileSystemDatasetReader {
     FileSystemDatasetReader<Record> reader = new FileSystemDatasetReader<Record>(
         fileSystem, new Path(Resources.getResource("data/strings-100.avro")
             .getFile()), schema);
-    int records = 0;
 
-    try {
-      reader.open();
-
-      while (reader.hasNext()) {
-        Record record = reader.read();
-
-        Assert.assertEquals(String.valueOf(records), record.get("text"));
+    checkReaderBehavior(reader, 100, new RecordValidator<Record>() {
+      @Override
+      public void validate(Record record, int recordNum) {
+        Assert.assertEquals(String.valueOf(recordNum), record.get("text"));
         Assert.assertEquals("N/A", record.get("text2"));
-        records++;
       }
-    } finally {
-      reader.close();
-    }
-
-    Assert.assertEquals(100, records);
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
-  public void testHasNextOnNonOpenWriterFails() throws IOException {
-    DatasetReader<String> reader;
-    reader = new FileSystemDatasetReader<String>(fileSystem, new Path(Resources
-        .getResource("data/strings-100.avro").getFile()), STRING_SCHEMA);
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullFileSystem() {
+    DatasetReader<String> reader = new FileSystemDatasetReader<String>(
+        null, new Path("/tmp/does-not-exist.avro"), STRING_SCHEMA);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullFile() {
+    DatasetReader<String> reader = new FileSystemDatasetReader<String>(
+        fileSystem, null, STRING_SCHEMA);
+  }
+
+  @Test(expected = DatasetReaderException.class)
+  public void testMissingFile() {
+    DatasetReader<String> reader = new FileSystemDatasetReader<String>(
+        fileSystem, new Path("/tmp/does-not-exist.avro"), STRING_SCHEMA);
+
+    // the reader should not fail until open()
+    Assert.assertNotNull(reader);
+
+    reader.open();
+  }
+
+  @Test(expected = DatasetReaderException.class)
+  public void testEmptyFile() throws IOException {
+    final Path emptyFile = new Path("/tmp/empty-file.avro");
+
+    // outside the try block; if this fails then it isn't correct to remove it
+    Assert.assertTrue("Failed to create a new empty file",
+        fileSystem.createNewFile(emptyFile));
 
     try {
-      reader.hasNext();
+      DatasetReader<String> reader = new FileSystemDatasetReader<String>(
+          fileSystem, emptyFile, STRING_SCHEMA);
+
+      // the reader should not fail until open()
+      Assert.assertNotNull(reader);
+
+      reader.open();
     } finally {
-      reader.close();
+      Assert.assertTrue("Failed to clean up empty file",
+          fileSystem.delete(emptyFile, true));
     }
   }
-
 }

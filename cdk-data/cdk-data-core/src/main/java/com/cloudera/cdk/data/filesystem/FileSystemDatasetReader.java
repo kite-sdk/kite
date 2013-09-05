@@ -32,9 +32,9 @@ import java.io.IOException;
 
 class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
 
-  private FileSystem fileSystem;
-  private Path path;
-  private Schema schema;
+  private final FileSystem fileSystem;
+  private final Path path;
+  private final Schema schema;
 
   private ReaderWriterState state;
   private DataFileReader<E> reader;
@@ -43,6 +43,9 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
     .getLogger(FileSystemDatasetReader.class);
 
   public FileSystemDatasetReader(FileSystem fileSystem, Path path, Schema schema) {
+    Preconditions.checkArgument(fileSystem != null, "FileSystem cannot be null");
+    Preconditions.checkArgument(path != null, "Path cannot be null");
+
     this.fileSystem = fileSystem;
     this.path = path;
     this.schema = schema;
