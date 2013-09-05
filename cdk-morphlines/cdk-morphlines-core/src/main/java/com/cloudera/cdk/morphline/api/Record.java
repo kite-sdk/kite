@@ -17,6 +17,7 @@ package com.cloudera.cdk.morphline.api;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import com.google.common.base.Preconditions;
@@ -34,20 +35,25 @@ import com.google.common.collect.ListMultimap;
  */
 public final class Record {
   
-  private ListMultimap<String, Object> fields;
+  private ArrayListMultimap<String, Object> fields;
 
   public Record() {
     this(create());
   }
   
-  private Record(ListMultimap<String, Object> fields) {
+  private Record(ArrayListMultimap<String, Object> fields) {
     Preconditions.checkNotNull(fields);
     this.fields = fields;
   }
 
   /** Returns a shallow copy of this record */
   public Record copy() {
-    return new Record(ArrayListMultimap.create(getFields()));
+    //return new Record(ArrayListMultimap.create(getFields())); // adding fields later causes (slow) rehashing
+    ArrayListMultimap copy = ArrayListMultimap.create(fields.size() + 10, 10);
+    for (Map.Entry<String, Object> entry : fields.entries()) {
+      copy.put(entry.getKey(), entry.getValue());
+    }
+    return new Record(copy);
   }
   
   public ListMultimap<String, Object> getFields() {
@@ -99,7 +105,7 @@ public final class Record {
     return new TreeMap(fields.asMap()).toString();
   }
 
-  private static ListMultimap<String, Object> create() {
+  private static ArrayListMultimap<String, Object> create() {
     return ArrayListMultimap.create();
   }
   
