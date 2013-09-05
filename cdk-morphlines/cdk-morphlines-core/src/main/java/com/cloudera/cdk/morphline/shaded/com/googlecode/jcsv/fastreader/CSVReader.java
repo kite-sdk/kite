@@ -20,33 +20,46 @@ import java.util.List;
 
 public final class CSVReader {
   
-	private final CSVStrategy strategy;
-	private final CSVTokenizer tokenizer;
+  private final CSVStrategy strategy;
+  private final CSVTokenizer tokenizer;
 
-	public CSVReader(CSVStrategy strategy, CSVTokenizer tokenizer) {
-		this.strategy = strategy;
-		this.tokenizer = tokenizer;
-	}
+  public CSVReader(CSVStrategy strategy, CSVTokenizer tokenizer) {
+    this.strategy = strategy;
+    this.tokenizer = tokenizer;
+  }
 
-	public boolean readNext(BufferedReader reader, List<String> columns) throws IOException {
-		while (true) {
-			String line = reader.readLine();
-			if (line == null) {
-				return false;
-			}
+  public boolean readNext(BufferedReader reader, List<String> columns) throws IOException {
+    while (true) {
+      String line = reader.readLine();
+      if (line == null) {
+        return false;
+      }
 
-			if (strategy.isIgnoreEmptyLines() && line.trim().length() == 0) {
-				continue;
-			}
+      if (strategy.isIgnoreEmptyLines() && isTrimmedLineEmpty(line)) {
+        continue;
+      }
 
-			String commentIndicator = strategy.getCommentIndicator();
-	    if (commentIndicator.length() > 0 && line.startsWith(commentIndicator)) {
-				continue;
-			}
+      String commentIndicator = strategy.getCommentIndicator();
+      if (commentIndicator.length() > 0 && line.startsWith(commentIndicator)) {
+        continue;
+      }
 
       tokenizer.tokenizeLine(line, strategy, reader, columns);
-			return true;
-		}
-	}
+      return true;
+    }
+  }
+  
+  private boolean isTrimmedLineEmpty(String line) {
+//    return line.trim().length() == 0; // slow in Java7 because of String.substring() malloc + memcpy
+    int j = line.length();
+    int i = 0;
+    while ((i < j) && (line.charAt(i) <= ' ')) {
+      i++;
+    }
+    while ((i < j) && (line.charAt(j - 1) <= ' ')) {
+      j--;
+    }
+    return i == j;
+  }
 
 }
