@@ -469,7 +469,7 @@
           <groups>
             <group>
               <title>Data Core</title>
-              <packages>com.cloudera.cdk.data:com.cloudera.cdk.data.filesystem:com.cloudera.cdk.data.partition</packages>
+              <packages>com.cloudera.cdk.data:com.cloudera.cdk.data.filesystem:com.cloudera.cdk.data.partition:com.cloudera.cdk.data.spi</packages>
             </group>
             <group>
               <title>Data Crunch</title>
