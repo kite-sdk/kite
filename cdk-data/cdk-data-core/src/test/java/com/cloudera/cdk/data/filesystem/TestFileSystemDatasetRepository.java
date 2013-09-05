@@ -21,6 +21,7 @@ import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.Formats;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.io.Files;
 import java.io.IOException;
 import org.apache.avro.Schema;
@@ -76,6 +77,51 @@ public class TestFileSystemDatasetRepository {
         .exists(new Path(testDirectory, "test1/.metadata/descriptor.properties")));
     Assert.assertTrue("Dataset schema file exists",
         fileSystem.exists(new Path(testDirectory, "test1/.metadata/schema.avsc")));
+  }
+
+  @Test
+  public void testList() {
+    Assert.assertEquals(ImmutableMultiset.of(),
+        ImmutableMultiset.copyOf(repo.list()));
+
+    repo.create("test1", new DatasetDescriptor.Builder()
+        .schema(testSchema).get());
+    Assert.assertEquals(ImmutableMultiset.of("test1"),
+        ImmutableMultiset.copyOf(repo.list()));
+
+    repo.create("test2", new DatasetDescriptor.Builder()
+        .schema(testSchema).get());
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test2"),
+        ImmutableMultiset.copyOf(repo.list()));
+
+    repo.create("test3", new DatasetDescriptor.Builder()
+        .schema(testSchema).get());
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test2", "test3"),
+        ImmutableMultiset.copyOf(repo.list()));
+
+    repo.delete("test2");
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test3"),
+        ImmutableMultiset.copyOf(repo.list()));
+
+    repo.delete("test3");
+    Assert.assertEquals(ImmutableMultiset.of("test1"),
+        ImmutableMultiset.copyOf(repo.list()));
+
+    repo.delete("test1");
+    Assert.assertEquals(ImmutableMultiset.of(),
+        ImmutableMultiset.copyOf(repo.list()));
+  }
+
+  @Test
+  public void testExists() {
+    Assert.assertFalse(repo.exists("test1"));
+
+    repo.create("test1", new DatasetDescriptor.Builder()
+        .schema(testSchema).get());
+    Assert.assertTrue(repo.exists("test1"));
+
+    repo.delete("test1");
+    Assert.assertFalse(repo.exists("test1"));
   }
 
   @Test
