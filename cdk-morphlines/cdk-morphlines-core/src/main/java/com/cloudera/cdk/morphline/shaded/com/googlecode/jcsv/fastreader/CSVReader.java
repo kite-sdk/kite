@@ -51,15 +51,13 @@ public final class CSVReader {
   
   private boolean isTrimmedLineEmpty(String line) {
 //    return line.trim().length() == 0; // slow in Java7 because of String.substring() malloc + memcpy
-    int j = line.length();
-    int i = 0;
-    while ((i < j) && (line.charAt(i) <= ' ')) {
-      i++;
+    int len = line.length();
+    for (int i = 0; i < len; i++) {
+      if (line.charAt(i) > ' ') {
+        return false;
+      }
     }
-    while ((i < j) && (line.charAt(j - 1) <= ' ')) {
-      j--;
-    }
-    return i == j;
+    return true;
   }
 
 }
