@@ -20,43 +20,31 @@ import java.io.IOException;
 import java.net.URI;
 import junit.framework.Assert;
 import org.apache.avro.Schema;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.Test;
 
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
 
-public class TestDatasetDescriptor {
+public class TestDatasetDescriptor extends MiniDFSTest {
 
   @Test
   public void testSchemaFromHdfs() throws IOException {
-    MiniDFSCluster cluster = null;
-    try {
-      // start HDFS cluster
-      cluster = new MiniDFSCluster.Builder(new Configuration()).build();
-      FileSystem fs = cluster.getFileSystem();
+    FileSystem fs = getDFS();
 
-      // copy a schema to HDFS
-      Path schemaPath = fs.makeQualified(new Path("schema.avsc"));
-      FSDataOutputStream out = fs.create(schemaPath);
-      IOUtils.copyBytes(USER_SCHEMA_URL.toURL().openStream(), out, fs.getConf());
-      out.close();
+    // copy a schema to HDFS
+    Path schemaPath = fs.makeQualified(new Path("schema.avsc"));
+    FSDataOutputStream out = fs.create(schemaPath);
+    IOUtils.copyBytes(USER_SCHEMA_URL.toURL().openStream(), out, fs.getConf());
+    out.close();
 
-      // build a schema using the HDFS path and check it's the same
-      Schema schema = new DatasetDescriptor.Builder().schema(schemaPath.toUri()).get()
-          .getSchema();
+    // build a schema using the HDFS path and check it's the same
+    Schema schema = new DatasetDescriptor.Builder().schema(schemaPath.toUri()).get()
+        .getSchema();
 
-      Assert.assertEquals(USER_SCHEMA, schema);
-
-    } finally {
-      if (cluster != null) {
-        cluster.shutdown();
-      }
-    }
+    Assert.assertEquals(USER_SCHEMA, schema);
   }
 
   @Test
