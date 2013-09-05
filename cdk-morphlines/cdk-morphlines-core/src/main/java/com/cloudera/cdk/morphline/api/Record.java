@@ -45,6 +45,7 @@ public final class Record {
     this.fields = fields;
   }
 
+  /** Returns a shallow copy of this record */
   public Record copy() {
     return new Record(ArrayListMultimap.create(getFields()));
   }
