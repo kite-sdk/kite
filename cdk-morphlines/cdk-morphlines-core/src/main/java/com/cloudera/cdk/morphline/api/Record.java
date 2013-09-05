@@ -48,7 +48,7 @@ public final class Record {
 
   /** Returns a shallow copy of this record */
   public Record copy() {
-    //return new Record(ArrayListMultimap.create(getFields())); // adding fields later causes (slow) rehashing
+    //return new Record(ArrayListMultimap.create(fields)); // adding fields later causes (slow) rehashing
     ArrayListMultimap copy = ArrayListMultimap.create(fields.size() + 10, 10);
     for (Map.Entry<String, Object> entry : fields.entries()) {
       copy.put(entry.getKey(), entry.getValue());
