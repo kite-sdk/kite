@@ -29,7 +29,6 @@ import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Validator;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.GroupInfo;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Matcher;
-import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Pattern;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -63,7 +62,7 @@ public final class GrokBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class Grok extends AbstractCommand {
 
-    private final Map<String, Pattern> regexes = new HashMap();
+    private final Map<String, Matcher> regexes = new HashMap();
     private final boolean extract;
     private final boolean extractInPlace;
     private final NumRequiredMatches numRequiredMatches;
@@ -78,7 +77,7 @@ public final class GrokBuilder implements CommandBuilder {
       Config exprConfig = getConfigs().getConfig(config, "expressions", ConfigFactory.empty());
       for (Map.Entry<String, Object> entry : exprConfig.root().unwrapped().entrySet()) {
         String expr = entry.getValue().toString();
-        this.regexes.put(entry.getKey(), dict.compileExpression(expr));
+        this.regexes.put(entry.getKey(), dict.compileExpression(expr).matcher(""));
       }
       this.firstKey = (regexes.size() == 0 ? null : regexes.entrySet().iterator().next().getKey());
 
@@ -140,8 +139,8 @@ public final class GrokBuilder implements CommandBuilder {
     }
 
     private boolean doMatch(Record inputRecord, Record outputRecord, boolean doExtract) {
-      for (Map.Entry<String, Pattern> regexEntry : regexes.entrySet()) {
-        Pattern pattern = regexEntry.getValue();
+      for (Map.Entry<String, Matcher> regexEntry : regexes.entrySet()) {
+        Matcher matcher = regexEntry.getValue();
         List values = inputRecord.get(regexEntry.getKey());
         int todo = values.size();
         int minMatches = 1;
@@ -160,21 +159,15 @@ public final class GrokBuilder implements CommandBuilder {
           }
         }        
         int numMatches = 0;
-        Matcher matcher = null;
         for (Object value : values) {
-          String strValue = value.toString();
-          if (matcher == null) {
-            matcher = pattern.matcher(strValue); // TODO cache that object more permanently (perf)?
-          } else {
-            matcher.reset(strValue);
-          }
+          matcher.reset(value.toString());
           if (!findSubstrings) {
             if (matcher.matches()) {
               numMatches++;
               if (numMatches > maxMatches) {
                 return false;
               }
-              extract(outputRecord, pattern, matcher, doExtract);
+              extract(outputRecord, matcher, doExtract);
             }
           } else {
             int previousNumMatches = numMatches;
@@ -188,7 +181,7 @@ public final class GrokBuilder implements CommandBuilder {
                   break; // fast path
                 }
               }
-              extract(outputRecord, pattern, matcher, doExtract);
+              extract(outputRecord, matcher, doExtract);
             }
           }
           todo--;
@@ -203,14 +196,14 @@ public final class GrokBuilder implements CommandBuilder {
       return true;
     }
 
-    private void extract(Record outputRecord, Pattern pattern, Matcher matcher, boolean doExtract) {
+    private void extract(Record outputRecord, Matcher matcher, boolean doExtract) {
       if (doExtract) {
-        extractFast(outputRecord, pattern, matcher);
+        extractFast(outputRecord, matcher);
       }
     }
 
-    private void extractFast(Record outputRecord, Pattern pattern, Matcher matcher) {
-      for (Map.Entry<String, List<GroupInfo>> entry : pattern.groupInfo().entrySet()) {
+    private void extractFast(Record outputRecord, Matcher matcher) {
+      for (Map.Entry<String, List<GroupInfo>> entry : matcher.namedPattern().groupInfo().entrySet()) {
         String groupName = entry.getKey();
         List<GroupInfo> list = entry.getValue();
         int idx = list.get(0).groupIndex();
