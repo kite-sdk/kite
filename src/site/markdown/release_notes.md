@@ -3,18 +3,25 @@
 All past CDK releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
-## Version TBD
+## Version 0.7.0
 
-Release date: TBD
+Release date: Sept 5, 2013
 
-Version TBD has the following notable changes:
+Version 0.7.0 has the following notable changes:
 
+* Dataset API. Changes to make the API more consistent and better integrated with
+  standard Java APIs like Iterator, Iterable, Flushable, and Closeable.
+* Java 7. CDK now works with Java 7.
+* Upgrade to Avro 1.7.5.
 * Morphlines Library
     * Added commands `splitKeyValue`, `extractURIComponent` and `toByteArray`
     * Added `outputFields` parameter to the `split` command to support a list of column names similar to the `readCSV` command
     * Added tika-xmp maven module as a dependency to cdk-morphline-solr-cell module
     * Added several performance enhancements
     * Upgraded cdk-morphlines-saxon module from saxon-HE-9.5.1-1 to saxon-HE-9.5.1-2
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10264)
+is available from JIRA.
 
 ## Version 0.6.0
 
