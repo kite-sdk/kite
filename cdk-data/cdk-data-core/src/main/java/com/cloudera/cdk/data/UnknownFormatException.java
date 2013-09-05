@@ -17,6 +17,7 @@ package com.cloudera.cdk.data;
 
 /**
  * Un-checked Exception thrown when a Dataset is in an unknown format.
+ * @since 0.7.0
  */
 public class UnknownFormatException extends DatasetReaderException {
 

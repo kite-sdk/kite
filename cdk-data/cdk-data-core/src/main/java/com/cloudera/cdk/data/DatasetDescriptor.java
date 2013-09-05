@@ -162,6 +162,7 @@ public class DatasetDescriptor {
      * even though they are {@link Immutable}.
      *
      * @param descriptor A {@link DatasetDescriptor} to copy settings from
+     * @since 0.7.0
      */
     public Builder(DatasetDescriptor descriptor) {
       this.schema = descriptor.getSchema();

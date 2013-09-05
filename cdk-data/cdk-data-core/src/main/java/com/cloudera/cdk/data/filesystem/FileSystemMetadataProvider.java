@@ -287,6 +287,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
    * @param location  The Path where the metadata should be stored
    * @throws NoSuchDatasetException     if the descriptor location is missing
    * @throws MetadataProviderException  if any IOException is thrown
+   * @since 0.7.0
    */
   protected static void checkExists(FileSystem fs, Path location) {
     try {

@@ -424,6 +424,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    * @param root A Path
    * @param name A String dataset name
    * @return the correct dataset Path
+   * @since 0.7.0
    */
   protected static Path pathForDataset(Path root, String name) {
     Preconditions.checkArgument(name != null, "Dataset name cannot be null");
@@ -439,6 +440,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    * @param location  The Path where the data should be stored
    * @throws NoSuchDatasetException     if the data location is missing
    * @throws DatasetRepositoryException if any IOException is thrown
+   * @since 0.7.0
    */
   protected static void checkExists(FileSystem fs, Path location) {
     try {
