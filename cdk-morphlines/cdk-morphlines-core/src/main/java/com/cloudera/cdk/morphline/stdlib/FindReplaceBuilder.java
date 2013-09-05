@@ -22,7 +22,6 @@ import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Matcher;
-import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Pattern;
 import com.typesafe.config.Config;
 
 /**
@@ -49,7 +48,7 @@ public final class FindReplaceBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class FindReplace extends AbstractFieldTransformCommand {
 
-    private final Pattern regexPattern;
+    private final Matcher matcher;
     private final String literalPattern;
     private final String replacement;
     private final boolean replaceFirst;
@@ -59,10 +58,10 @@ public final class FindReplaceBuilder implements CommandBuilder {
       GrokDictionaries dict = new GrokDictionaries(config, getConfigs());
       String pattern = getConfigs().getString(config, "pattern");
       if (getConfigs().getBoolean(config, "isRegex", false)) {
-        this.regexPattern = dict.compileExpression(pattern);
+        this.matcher = dict.compileExpression(pattern).matcher("");
         this.literalPattern = null;
       } else {
-        this.regexPattern = null;
+        this.matcher = null;
         this.literalPattern = pattern;
       }
       this.replacement = getConfigs().getString(config, "replacement");
@@ -78,7 +77,7 @@ public final class FindReplaceBuilder implements CommandBuilder {
         int max = replaceFirst ? 1 : -1;
         result = StringUtils.replace(str, literalPattern, replacement, max);
       } else {
-        Matcher matcher = regexPattern.matcher(str);
+        matcher.reset(str);
         if (replaceFirst) {
           result = matcher.replaceFirst(replacement);
         } else {
