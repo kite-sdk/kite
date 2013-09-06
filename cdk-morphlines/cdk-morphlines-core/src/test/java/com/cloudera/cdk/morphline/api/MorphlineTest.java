@@ -1435,11 +1435,13 @@ public class MorphlineTest extends AbstractMorphlineTest {
   // Before running this disable debug logging 
   // via log4j.logger.com.cloudera.cdk.morphline=INFO in log4j.properties
   public void benchmark() throws Exception {
-    String morphlineConfigFile = "test-morphlines/grokEmail";
+    String morphlineConfigFile = "test-morphlines/readCSVWithoutQuoting";
+    //String morphlineConfigFile = "test-morphlines/grokEmail";
     //String morphlineConfigFile = "test-morphlines/grokSyslogNgCisco";
     long durationSecs = 20;
     //File file = new File(RESOURCES_DIR + "/test-documents/email.txt");
-    File file = new File(RESOURCES_DIR + "/test-documents/emails.txt");
+    //File file = new File(RESOURCES_DIR + "/test-documents/emails.txt");
+    File file = new File(RESOURCES_DIR + "/test-documents/cars3.csv");
     String msg = "<179>Jun 10 04:42:51 www.foo.com Jun 10 2013 04:42:51 : %myproduct-3-mysubfacility-251010: " +
         "Health probe failed for server 1.2.3.4 on port 8083, connection refused by server";
     System.out.println("Now benchmarking " + morphlineConfigFile + " ...");

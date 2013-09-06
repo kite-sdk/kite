@@ -105,7 +105,8 @@ public final class ReadCSVBuilder implements CommandBuilder {
       Record template = inputRecord.copy();
       removeAttachments(template);
       Charset detectedCharset = detectCharset(inputRecord, charset);  
-      BufferedReader reader = new BufferedReader(new InputStreamReader(stream, detectedCharset));
+      BufferedReader reader = new BufferedReader(
+          new InputStreamReader(stream, detectedCharset), getBufferSize(stream));
       if (ignoreFirstLine) {
         reader.readLine();
       }      
@@ -119,10 +120,8 @@ public final class ReadCSVBuilder implements CommandBuilder {
             columnNames.add("column" + i);
           }
           String columnName = columnNames.get(i);
-          if (columnName.length() == 0) { // empty column name indicates omit this field on output
-            outputRecord.removeAll(columnName);
-          } else { 
-            outputRecord.replaceValues(columnName, trim(columnValues.get(i)));
+          if (columnName.length() != 0) { // empty column name indicates omit this field on output
+            outputRecord.put(columnName, trim(columnValues.get(i)));
           }
         }        
         columnValues.clear();

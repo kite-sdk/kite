@@ -71,7 +71,10 @@ public final class Record {
   }
   
   public void replaceValues(String key, Object value) {
-    fields.replaceValues(key, Collections.singletonList(value)); // TODO optimize?
+//    fields.replaceValues(key, Collections.singletonList(value)); // unnecessarily slow
+    List list = fields.get(key);
+    list.clear(); 
+    list.add(value);
   }
   
   public void removeAll(String key) {
