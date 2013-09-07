@@ -41,3 +41,28 @@ Eclipse, and junit works and passes from within Eclipse as well.
 then run Menu `Eclipse/Refresh Project`. No need to disable the Maven "Nature" again and again.
 * To run junit tests from within eclipse click on the project (e.g. `cdk-morphlines-core`)
 in the eclipse project explorer, right click, `Run As/JUnit Test`.
+
+## Using a Release
+
+* Releases can be downloaded from github or referenced as a maven dependency.
+* Add the following repository to your <repositories> section of your pom.xml:
+<pre>
+<repository>
+  <id>cdh.repo</id>
+  <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+  <name>Cloudera Repositories</name>
+  <snapshots>
+    <enabled>false</enabled>
+  </snapshots>
+</repository>
+</pre>
+
+* Also add the following dependency to your <dependencies> section of your pom.xml:
+<pre>
+<dependency>
+  <groupId>com.cloudera.cdk</groupId>
+  <artifactId>cdk-morphlines-all</artifactId>
+  <version>0.7.0</version> <!-- or whatever the latest version is -->
+  <type>pom</type>
+</dependency>
+</pre>
