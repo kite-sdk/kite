@@ -224,6 +224,34 @@ This code is, in essence, what production tools like [MapReduceIndexerTool|https
 
 !images/morphlines-architecture.jpg!
 
+h1. Using a Release with Maven
+
+Releases can be downloaded from github or referenced as a maven dependency.
+
+To use a release with Maven, add the following repository to your {{<repositories>}} section of your pom.xml:
+
+{code}
+<repository>
+  <id>cdh.repo</id>
+  <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+  <name>Cloudera Repositories</name>
+  <snapshots>
+    <enabled>false</enabled>
+  </snapshots>
+</repository>
+{code}
+
+Also add the following dependency to your {{<dependencies>}} section of your pom.xml:
+
+{code}
+<dependency>
+  <groupId>com.cloudera.cdk</groupId>
+  <artifactId>cdk-morphlines-all</artifactId>
+  <version>0.7.0</version> <!-- or whatever the latest version is -->
+  <type>pom</type>
+</dependency>
+{code}
+
 h1. Any Questions?
 
 If you’ve got any questions, please do ask us. The best place is over on our [mailing list|https://groups.google.com/a/cloudera.org/forum/?#!forum/cdk-dev].
