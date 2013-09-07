@@ -11,21 +11,21 @@ See [Online Documentation](https://github.com/cloudera/cdk).
 
 This step builds the software from source.
 
-<pre>
+```bash
 git clone git@github.com:cloudera/cdk.git
 cd cdk
 #git checkout master
 mvn clean package
-</pre>
+```
 
 ## Integrating with Eclipse
 
 * This section describes how to integrate the codeline with Eclipse.
 * Build the software as described above. Then create Eclipse projects like this:
-<pre>
+```bash
 cd cdk
 mvn eclipse:eclipse
-</pre>
+```
 * `mvn eclipse:eclipse` creates several Eclipse projects, one for each maven submodule.
 It will also download and attach the jars of all transitive dependencies and their source code to the eclipse
 projects, so you can readily browse around the source of the entire call stack.
@@ -46,7 +46,7 @@ in the eclipse project explorer, right click, `Run As/JUnit Test`.
 
 * Releases can be downloaded from github or referenced as a maven dependency.
 * Add the following repository to your <repositories> section of your pom.xml:
-<pre>
+```bash
 <repository>
   <id>cdh.repo</id>
   <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
@@ -55,14 +55,14 @@ in the eclipse project explorer, right click, `Run As/JUnit Test`.
     <enabled>false</enabled>
   </snapshots>
 </repository>
-</pre>
+```
 
 * Also add the following dependency to your <dependencies> section of your pom.xml:
-<pre>
+```bash
 <dependency>
   <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-morphlines-all</artifactId>
   <version>0.7.0</version> <!-- or whatever the latest version is -->
   <type>pom</type>
 </dependency>
-</pre>
+```
