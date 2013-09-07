@@ -22,10 +22,12 @@ mvn clean package
 
 * This section describes how to integrate the codeline with Eclipse.
 * Build the software as described above. Then create Eclipse projects like this:
+
 ```
 cd cdk
 mvn eclipse:eclipse
 ```
+
 * `mvn eclipse:eclipse` creates several Eclipse projects, one for each maven submodule.
 It will also download and attach the jars of all transitive dependencies and their source code to the eclipse
 projects, so you can readily browse around the source of the entire call stack.
@@ -46,6 +48,7 @@ in the eclipse project explorer, right click, `Run As/JUnit Test`.
 
 * Releases can be downloaded from github or referenced as a maven dependency.
 * Add the following repository to your <repositories> section of your pom.xml:
+
 ```
 <repository>
   <id>cdh.repo</id>
@@ -58,6 +61,7 @@ in the eclipse project explorer, right click, `Run As/JUnit Test`.
 ```
 
 * Also add the following dependency to your <dependencies> section of your pom.xml:
+
 ```
 <dependency>
   <groupId>com.cloudera.cdk</groupId>
