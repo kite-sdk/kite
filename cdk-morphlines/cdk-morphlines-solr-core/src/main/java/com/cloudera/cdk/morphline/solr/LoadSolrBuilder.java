@@ -34,6 +34,7 @@ import com.cloudera.cdk.morphline.base.Metrics;
 import com.cloudera.cdk.morphline.base.Notifications;
 import com.codahale.metrics.Timer;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 /**
  * A command that loads a record into a SolrServer or MapReduce SolrOutputFormat.
@@ -57,6 +58,7 @@ public final class LoadSolrBuilder implements CommandBuilder {
   private static final class LoadSolr extends AbstractCommand {
     
     private final DocumentLoader loader;
+    private final Map<String, Float> boosts = new HashMap();
     private final Timer elapsedTime;    
     
     public LoadSolr(Config config, Command parent, Command child, MorphlineContext context) {
@@ -65,6 +67,12 @@ public final class LoadSolrBuilder implements CommandBuilder {
       SolrLocator locator = new SolrLocator(solrLocatorConfig, context);
       LOG.debug("solrLocator: {}", locator);
       this.loader = locator.getLoader();
+      Config paths = getConfigs().getConfig(config, "boosts", ConfigFactory.empty());
+      for (Map.Entry<String, Object> entry : paths.root().unwrapped().entrySet()) {
+        String fieldName = entry.getKey();        
+        float boost = Float.parseFloat(entry.getValue().toString().trim());
+        boosts.put(fieldName, boost);
+      }
       validateArguments();
       this.elapsedTime = getTimer(Metrics.ELAPSED_TIME);
     }
@@ -131,7 +139,9 @@ public final class LoadSolrBuilder implements CommandBuilder {
       Map<String, Collection<Object>> map = record.getFields().asMap();
       SolrInputDocument doc = new SolrInputDocument(new HashMap(2 * map.size()));
       for (Map.Entry<String, Collection<Object>> entry : map.entrySet()) {
-        doc.setField(entry.getKey(), entry.getValue());
+        Float boostObj = boosts.get(entry.getKey());
+        float boost = (boostObj == null ? 1.0f : boostObj.floatValue());
+        doc.setField(entry.getKey(), entry.getValue(), boost);
       }
       return doc;
     }

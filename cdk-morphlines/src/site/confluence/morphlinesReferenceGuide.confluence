@@ -1694,6 +1694,7 @@ The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | solrLocator | n/a | Solr location parameters as described separately above. |
+| boosts | \[\] | An optional JSON object containing zero or more fieldName\-boostValue mappings where the fieldName is a String and the boostValue is a float. The default boost is {{1.0}}. |
 
 Example usage:
 {code}
@@ -1707,6 +1708,9 @@ loadSolr {
 
     # Max number of docs to pass per RPC from morphline to Solr Server
     # batchSize : 1000
+  }
+  boosts : {
+    id : 2.0 # assign to the id field a boost value 2.0
   }
 }
 {code}
