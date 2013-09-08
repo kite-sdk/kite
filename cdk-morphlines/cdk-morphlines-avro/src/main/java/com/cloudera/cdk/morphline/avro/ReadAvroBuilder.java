@@ -107,11 +107,14 @@ public final class ReadAvroBuilder implements CommandBuilder {
     
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
+      Record template = inputRecord.copy();
+      removeAttachments(template);
+      template.put(Fields.ATTACHMENT_MIME_TYPE, ReadAvroBuilder.AVRO_MEMORY_MIME_TYPE);
       Decoder decoder = prepare(in);
       try {
         while (true) {
           GenericContainer datum = datumReader.read(null, decoder);
-          if (!extract(datum, inputRecord)) {
+          if (!extract(datum, template)) {
             return false;
           }
         }

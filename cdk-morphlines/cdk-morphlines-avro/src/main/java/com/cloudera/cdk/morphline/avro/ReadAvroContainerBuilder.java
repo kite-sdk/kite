@@ -126,9 +126,12 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
           resolverCache.put(writerSchemaKey, resolver);
           datumReader.setResolver(resolver);
         }
+        Record template = inputRecord.copy();
+        removeAttachments(template);
+        template.put(Fields.ATTACHMENT_MIME_TYPE, ReadAvroBuilder.AVRO_MEMORY_MIME_TYPE);
         while (reader.hasNext()) {
           GenericContainer datum = reader.next();
-          if (!extract(datum, inputRecord)) {
+          if (!extract(datum, template)) {
             return false;
           }
         }
@@ -148,9 +151,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     protected boolean extract(GenericContainer datum, Record inputRecord) {
       incrementNumRecords();
       Record outputRecord = inputRecord.copy();
-      removeAttachments(outputRecord);
       outputRecord.put(Fields.ATTACHMENT_BODY, datum);
-      outputRecord.put(Fields.ATTACHMENT_MIME_TYPE, ReadAvroBuilder.AVRO_MEMORY_MIME_TYPE);
         
       // pass record to next command in chain:
       return getChild().process(outputRecord);
