@@ -3,6 +3,16 @@
 All past CDK releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version TBD
+
+Release date: TBD
+
+Version TBD has the following notable changes:
+
+* Morphlines Library
+    * Added option to specify boost values to `loadSolr` command
+    * Added several performance enhancements
+
 ## Version 0.7.0
 
 Release date: Sept 5, 2013
