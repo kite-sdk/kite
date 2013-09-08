@@ -59,14 +59,14 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class ReadMultiLine extends AbstractParser {
 
-    private final Pattern regex;
+    private final Matcher regex;
     private final boolean negate;
     private final What what;
     private final Charset charset;
   
     public ReadMultiLine(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
-      this.regex = Pattern.compile(getConfigs().getString(config, "regex"));
+      this.regex = Pattern.compile(getConfigs().getString(config, "regex")).matcher("");
       this.negate = getConfigs().getBoolean(config, "negate", false);
       this.charset = getConfigs().getCharset(config, "charset", null);
       this.what = new Validator<What>().validateEnum(
@@ -84,7 +84,6 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
       Charset detectedCharset = detectCharset(inputRecord, charset);  
       Reader reader = new InputStreamReader(stream, detectedCharset);
       BufferedReader lineReader = new BufferedReader(reader, getBufferSize(stream));
-      Matcher matcher = regex.matcher("");
       StringBuilder lines = null;
       String line;
       
@@ -92,7 +91,7 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
         if (lines == null) {
           lines = new StringBuilder(line);
         } else {
-          boolean isMatch = matcher.reset(line).matches();
+          boolean isMatch = regex.reset(line).matches();
           if (negate) {
             isMatch = !isMatch;
           }
