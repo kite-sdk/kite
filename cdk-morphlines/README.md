@@ -47,7 +47,7 @@ in the eclipse project explorer, right click, `Run As/JUnit Test`.
 ## Using a Release
 
 * Releases can be downloaded from github or referenced as a maven dependency.
-* Add the following repository to your <repositories> section of your pom.xml:
+* Add the following repository to your `<repositories>` section of your pom.xml:
 
 ```
 <repository>
@@ -60,7 +60,7 @@ in the eclipse project explorer, right click, `Run As/JUnit Test`.
 </repository>
 ```
 
-* Also add the following dependency to your <dependencies> section of your pom.xml:
+* Also add the following dependency to your `<dependencies>` section of your pom.xml:
 
 ```
 <dependency>
