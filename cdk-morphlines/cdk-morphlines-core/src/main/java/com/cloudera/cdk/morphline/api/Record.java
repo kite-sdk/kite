@@ -48,7 +48,7 @@ public final class Record {
   /** Returns a shallow copy of this record */
   public Record copy() {
     //return new Record(ArrayListMultimap.create(fields)); // adding fields later causes (slow) rehashing
-    ArrayListMultimap copy = ArrayListMultimap.create(fields.size() + 10, 10);
+    ArrayListMultimap copy = ArrayListMultimap.create(fields.size() + 16, 10);
     copy.putAll(fields);
     return new Record(copy);
   }
@@ -78,7 +78,8 @@ public final class Record {
   }
   
   public void removeAll(String key) {
-    fields.removeAll(key);
+    //fields.removeAll(key); // unnecessarily slow
+    fields.get(key).clear();
   }
   
   public void putIfAbsent(String key, Object value) {

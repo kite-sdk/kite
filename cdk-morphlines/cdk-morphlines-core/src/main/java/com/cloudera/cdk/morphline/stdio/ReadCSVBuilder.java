@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -30,8 +29,6 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
-import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.CSVReader;
-import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.CSVStrategy;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.CSVTokenizer;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.QuotedCSVTokenizer;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.SimpleCSVTokenizer;
@@ -69,7 +66,7 @@ public final class ReadCSVBuilder implements CommandBuilder {
     private final String commentPrefix;
     private final String quoteChar;
     private final boolean ignoreEmptyLines = true;
-    private final CSVReader csvReader;      
+    private final CSVTokenizer tokenizer;
   
     public ReadCSV(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);
@@ -96,7 +93,9 @@ public final class ReadCSVBuilder implements CommandBuilder {
         throw new MorphlineCompilationException(
             "Comment prefix must not have a length of more than one character: " + commentPrefix, config);
       }
-      csvReader = createCSVReader();
+      this.tokenizer = quoteChar.length() == 0 ? 
+          new SimpleCSVTokenizer(separatorChar, trim, columnNames) : 
+          new QuotedCSVTokenizer(separatorChar, trim, columnNames, quoteChar.charAt(0));          
       validateArguments();
     }
   
@@ -110,21 +109,13 @@ public final class ReadCSVBuilder implements CommandBuilder {
       if (ignoreFirstLine) {
         reader.readLine();
       }      
-      List<String> columnValues = new ArrayList();
 
-      while (csvReader.readNext(reader, columnValues)) {
-        incrementNumRecords();
+      while (true) {
         Record outputRecord = template.copy();
-        for (int i = 0; i < columnValues.size(); i++) {
-          if (i >= columnNames.size()) {
-            columnNames.add("column" + i);
-          }
-          String columnName = columnNames.get(i);
-          if (columnName.length() != 0) { // empty column name indicates omit this field on output
-            outputRecord.put(columnName, trim(columnValues.get(i)));
-          }
-        }        
-        columnValues.clear();
+        if (!readNext(reader, outputRecord)) {
+          break;
+        }
+        incrementNumRecords();
         
         // pass record to next command in chain:
         if (!getChild().process(outputRecord)) {
@@ -134,25 +125,36 @@ public final class ReadCSVBuilder implements CommandBuilder {
       return true;
     }
 
-    private String trim(String str) {
-      return trim ? str.trim() : str;
-    }
-  
-    // Uses a shaded version of jcsv-1.4.0 (https://code.google.com/p/jcsv/) 
-    // to reduce the potential for dependency conflicts.
-    // TODO: consider replacing impl with http://github.com/FasterXML/jackson-dataformat-csv
-    // or http://supercsv.sourceforge.net/release_notes.html
-    private CSVReader createCSVReader() {
-      char myQuoteChar = '"';
-      if (quoteChar.length() > 0) {
-        myQuoteChar = quoteChar.charAt(0);
+    private boolean readNext(BufferedReader reader, Record record) throws IOException {
+      while (true) {
+        String line = reader.readLine();
+        if (line == null) {
+          return false;
+        }
+
+        if (ignoreEmptyLines && isTrimmedLineEmpty(line)) {
+          continue;
+        }
+
+        if (commentPrefix.length() > 0 && line.startsWith(commentPrefix)) {
+          continue;
+        }
+
+        tokenizer.tokenizeLine(line, reader, record);
+        return true;
       }
-      CSVStrategy strategy = 
-          new CSVStrategy(separatorChar, myQuoteChar, commentPrefix, ignoreFirstLine, ignoreEmptyLines);
-      
-      CSVTokenizer tokenizer = quoteChar.length() == 0 ? new SimpleCSVTokenizer() : new QuotedCSVTokenizer();
-      return new CSVReader(strategy, tokenizer);
     }
-  
+    
+    private boolean isTrimmedLineEmpty(String line) {
+//      return line.trim().length() == 0; // slow
+      int len = line.length();
+      for (int i = 0; i < len; i++) {
+        if (line.charAt(i) > ' ') {
+          return false;
+        }
+      }
+      return true;
+    }
+    
   }
 }

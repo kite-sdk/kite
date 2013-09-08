@@ -23,7 +23,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.CSVStrategy;
 import com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader.SimpleCSVTokenizer;
 
 public class CSVTokenizerTest extends Assert {
@@ -38,9 +37,13 @@ public class CSVTokenizerTest extends Assert {
   }
   
   private List<String> split(String line, char separator) throws IOException {
-    List<String> columns = new ArrayList();
-    CSVStrategy strategy = new CSVStrategy(separator, '"', "#", false, false);
-    new SimpleCSVTokenizer().tokenizeLine(line, strategy, null, columns);
-    return columns;
+    Record record = new Record();
+    new SimpleCSVTokenizer(separator, false, new ArrayList()).tokenizeLine(line, null, record);
+    List results = new ArrayList();
+    for (int i = 0; i < record.getFields().asMap().size(); i++) {
+      assertEquals(1, record.get("column" + i).size());
+      results.add(record.getFirstValue("column" + i));
+    }
+    return results;
   }
 }

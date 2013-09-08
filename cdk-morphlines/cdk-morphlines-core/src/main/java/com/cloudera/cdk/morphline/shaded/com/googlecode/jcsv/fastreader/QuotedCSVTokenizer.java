@@ -17,6 +17,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 
+import com.cloudera.cdk.morphline.api.Record;
+
 
 /**
  * This implementation follows the csv formatting standard, described in:
@@ -28,73 +30,103 @@ import java.util.List;
  *
  */
 public final class QuotedCSVTokenizer implements CSVTokenizer {
-	private enum State {
-		NORMAL, QUOTED
-	}
+  
+  private final char separatorChar;
+  private final boolean trim;
+  private final List<String> columnNames;
+  private final char quoteChar;
+  
+  public QuotedCSVTokenizer(char separatorChar, boolean trim, List<String> columnNames, char quoteChar) {
+    this.separatorChar = separatorChar;
+    this.trim = trim;
+    this.columnNames = columnNames;
+    this.quoteChar = quoteChar;
+  }
+  
+  private enum State {
+    NORMAL, QUOTED
+  }
 
-	@Override
-	public void tokenizeLine(String line, CSVStrategy strategy, BufferedReader reader, List<String> tokens) throws IOException {
-		final char DELIMITER = strategy.getDelimiter();
-		final char QUOTE = strategy.getQuoteCharacter();
-		final char NEW_LINE = '\n';
+  /** Splits the given input line into parts, using the given delimiter. */
+  @Override
+  public void tokenizeLine(String line, BufferedReader reader, Record record) throws IOException {
+    final char DELIMITER = separatorChar;
+    final char QUOTE = quoteChar;
+    final char NEW_LINE = '\n';
 
-		final StringBuilder sb = new StringBuilder(30);
+    final StringBuilder sb = new StringBuilder(30);
 
-		line += NEW_LINE;
-		State state = State.NORMAL;
+    line += NEW_LINE;
+    State state = State.NORMAL;
 
-		int pointer = 0;
-		while (true) {
-			final char c = line.charAt(pointer);
+    int pointer = 0;
+    int j = 0;
+    while (true) {
+      final char c = line.charAt(pointer);
 
-			switch (state) {
-				case NORMAL:
-					if (c == DELIMITER) {
-						tokens.add(sb.toString());
-						sb.setLength(0);
-					} else if (c == NEW_LINE) {
-						if (!(tokens.size() == 0 && sb.length() == 0)) {
-							tokens.add(sb.toString());
-						}
-						return;
-					} else if (c == QUOTE) {
-						if (sb.length() == 0) {
-							state = State.QUOTED;
-						} else if (line.charAt(pointer + 1) == QUOTE) {
-							sb.append(c);
-							pointer++;
-						} else {
-							state = State.QUOTED;
-						}
-					} else {
-						sb.append(c);
-					}
-					break;
+      switch (state) {
+        case NORMAL:
+          if (c == DELIMITER) {
+            put(sb, j, record);
+            j++;
+            sb.setLength(0);
+          } else if (c == NEW_LINE) {
+            if (!(j == 0 && sb.length() == 0)) {
+              put(sb, j, record);
+              j++;
+            }
+            return;
+          } else if (c == QUOTE) {
+            if (sb.length() == 0) {
+              state = State.QUOTED;
+            } else if (line.charAt(pointer + 1) == QUOTE) {
+              sb.append(c);
+              pointer++;
+            } else {
+              state = State.QUOTED;
+            }
+          } else {
+            sb.append(c);
+          }
+          break;
 
-				case QUOTED:
-					if (c == NEW_LINE) {
-						sb.append(NEW_LINE);
-						pointer = -1;
-						line = reader.readLine();
-						if (line == null) {
-							throw new IllegalStateException("unexpected end of file, unclosed quotation");
-						}
-						line += NEW_LINE;
-					} else if (c == QUOTE) {
-						if (line.charAt(pointer + 1) == QUOTE) {
-							sb.append(c);
-							pointer++;
-							break;
-						} else {
-							state = State.NORMAL;
-						}
-					} else {
-						sb.append(c);
-					}
-					break;
-			}
+        case QUOTED:
+          if (c == NEW_LINE) {
+            sb.append(NEW_LINE);
+            pointer = -1;
+            line = reader.readLine();
+            if (line == null) {
+              throw new IllegalStateException("unexpected end of file, unclosed quotation");
+            }
+            line += NEW_LINE;
+          } else if (c == QUOTE) {
+            if (line.charAt(pointer + 1) == QUOTE) {
+              sb.append(c);
+              pointer++;
+              break;
+            } else {
+              state = State.NORMAL;
+            }
+          } else {
+            sb.append(c);
+          }
+          break;
+      }
 
-			pointer++;
-		}
-	}
+      pointer++;
+    }
+  }
+  
+  private void put(StringBuilder sb, int j, Record record) {
+    if (j >= columnNames.size()) {
+      columnNames.add("column" + j);
+    }
+    String columnName = columnNames.get(j);
+    if (columnName.length() != 0) { // empty column name indicates omit this field on output
+      String col = sb.toString();
+      col = trim ? col.trim() : col;
+      record.put(columnName, col);
+    }
+  }
+
 }

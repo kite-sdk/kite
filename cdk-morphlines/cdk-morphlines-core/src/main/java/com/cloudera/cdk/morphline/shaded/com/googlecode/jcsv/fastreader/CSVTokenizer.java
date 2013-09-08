@@ -15,20 +15,21 @@ package com.cloudera.cdk.morphline.shaded.com.googlecode.jcsv.fastreader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.List;
+
+import com.cloudera.cdk.morphline.api.Record;
 
 
 
 /**
- * The CSVTokenizer specifies the behaviour how the CSVReaderImpl parses each line into a List of Strings.
+ * The CSVTokenizer specifies the behaviour how to parse each line into a List of Strings.
  */
 public interface CSVTokenizer {
-	/**
-	 * Splits the line into tokens, using the CSVStrategy, passed by the CSVReaderImpl.
-	 *
-	 * @param line the current line
-	 * @param reader the reader may be used to read further lines if the line ends with an open quotation
-	 * @return the tokens
-	 */
-	public void tokenizeLine(String line, CSVStrategy strategy, BufferedReader reader, List<String> columns) throws IOException;
+  /**
+   * Splits the line into tokens.
+   *
+   * @param line the current line
+   * @param reader the reader may be used to read further lines if the line ends with an open quotation
+   * @return the tokens
+   */
+  public void tokenizeLine(String line, BufferedReader reader, Record record) throws IOException;
 }
