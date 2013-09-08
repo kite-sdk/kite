@@ -228,7 +228,7 @@ h1. Using a Release with Maven
 
 Releases can be downloaded from github or referenced as a maven dependency.
 
-To use a release with Maven, add the following repository to your {{<repositories>}} section of your pom.xml:
+To use a release with Maven, add the following repository to the {{<repositories>}} section of your pom.xml:
 
 {code}
 <repository>
@@ -241,7 +241,7 @@ To use a release with Maven, add the following repository to your {{<repositorie
 </repository>
 {code}
 
-Also add the following dependency to your {{<dependencies>}} section of your pom.xml:
+Also add the following dependency to the {{<dependencies>}} section of your pom.xml:
 
 {code}
 <dependency>
