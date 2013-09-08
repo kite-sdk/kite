@@ -36,10 +36,9 @@
       <artifactId>config</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
+    <dependency> <!-- see http://metrics.codahale.com -->
+      <groupId>com.codahale.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
     </dependency>
 
     <dependency>
@@ -53,9 +52,10 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency> <!-- see http://metrics.codahale.com -->
-      <groupId>com.codahale.metrics</groupId>
-      <artifactId>metrics-core</artifactId>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

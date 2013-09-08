@@ -30,10 +30,6 @@
   <dependencies>
       <dependency>
         <groupId>com.cloudera.cdk</groupId>
-        <artifactId>cdk-morphlines-solr-cell</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>com.cloudera.cdk</groupId>
         <artifactId>cdk-morphlines-core</artifactId>
       </dependency>
       <dependency>
@@ -43,6 +39,14 @@
       <dependency>
         <groupId>com.cloudera.cdk</groupId>
         <artifactId>cdk-morphlines-json</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>com.cloudera.cdk</groupId>
+        <artifactId>cdk-morphlines-saxon</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>com.cloudera.cdk</groupId>
+        <artifactId>cdk-morphlines-hadoop-sequencefile</artifactId>
       </dependency>
       <dependency>
         <groupId>com.cloudera.cdk</groupId>
@@ -58,15 +62,11 @@
       </dependency>
       <dependency>
         <groupId>com.cloudera.cdk</groupId>
+        <artifactId>cdk-morphlines-solr-cell</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>com.cloudera.cdk</groupId>
         <artifactId>cdk-morphlines-twitter</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>com.cloudera.cdk</groupId>
-        <artifactId>cdk-morphlines-hadoop-sequencefile</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>com.cloudera.cdk</groupId>
-        <artifactId>cdk-morphlines-saxon</artifactId>
       </dependency>
   </dependencies>
 </project>
