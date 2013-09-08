@@ -67,8 +67,8 @@ public final class LoadSolrBuilder implements CommandBuilder {
       SolrLocator locator = new SolrLocator(solrLocatorConfig, context);
       LOG.debug("solrLocator: {}", locator);
       this.loader = locator.getLoader();
-      Config paths = getConfigs().getConfig(config, "boosts", ConfigFactory.empty());
-      for (Map.Entry<String, Object> entry : paths.root().unwrapped().entrySet()) {
+      Config boostsConfig = getConfigs().getConfig(config, "boosts", ConfigFactory.empty());
+      for (Map.Entry<String, Object> entry : boostsConfig.root().unwrapped().entrySet()) {
         String fieldName = entry.getKey();        
         float boost = Float.parseFloat(entry.getValue().toString().trim());
         boosts.put(fieldName, boost);
