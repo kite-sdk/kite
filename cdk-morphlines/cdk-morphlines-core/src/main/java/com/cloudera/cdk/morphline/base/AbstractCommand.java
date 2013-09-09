@@ -92,7 +92,7 @@ public abstract class AbstractCommand implements Command {
   
   @Override
   public final void notify(Record notification) {
-    if (IS_MEASURING_METRICS) {
+    if (isMeasuringMetrics()) {
       numNotifyCallsMeter.mark();
     }
     beforeNotify(notification);
@@ -113,7 +113,7 @@ public abstract class AbstractCommand implements Command {
   
   @Override
   public final boolean process(Record record) {
-    if (IS_MEASURING_METRICS) {
+    if (isMeasuringMetrics()) {
       numProcessCallsMeter.mark();
     }
     beforeProcess(record);
@@ -163,7 +163,7 @@ public abstract class AbstractCommand implements Command {
     return className.substring(1 + Math.max(i, j));
   }
   
-  protected static boolean isMeasuringMetrics() {
+  protected final boolean isMeasuringMetrics() {
     return IS_MEASURING_METRICS;
   }
   
