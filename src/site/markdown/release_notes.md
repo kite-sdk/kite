@@ -10,8 +10,9 @@ Release date: TBD
 Version TBD has the following notable changes:
 
 * Morphlines Library
-    * Added option to specify boost values to `loadSolr` command
-    * Added several performance enhancements
+    * Added `cdk-morphlines-hadoop-core` maven module with new `downloadHdfsFile` command for transferring HDFS files, e.g. to help with centralized configuration file management.
+    * Added option to specify boost values to `loadSolr` command.
+    * Added several performance enhancements.
 
 ## Version 0.7.0
 

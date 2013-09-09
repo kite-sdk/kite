@@ -68,6 +68,9 @@ dependencies yourself:
 * CDK Morphlines JSON
  [Dependency Information](cdk-morphlines/cdk-morphlines-json/dependency-info.html),
  [Dependencies](cdk-morphlines/cdk-morphlines-json/dependencies.html)
+* CDK Morphlines Hadoop Core
+ [Dependency Information](cdk-morphlines/cdk-morphlines-hadoop-core/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-hadoop-core/dependencies.html)
 * CDK Morphlines Hadoop Sequence File
  [Dependency Information](cdk-morphlines/cdk-morphlines-hadoop-sequencefile/dependency-info.html),
  [Dependencies](cdk-morphlines/cdk-morphlines-hadoop-sequencefile/dependencies.html)
