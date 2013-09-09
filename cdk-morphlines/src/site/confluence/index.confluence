@@ -241,7 +241,18 @@ To use a release with Maven, add the following repository to the {{<repositories
 </repository>
 {code}
 
-Also add the following dependency to the {{<dependencies>}} section of your pom.xml:
+Also, to pull in the minimum set of dependencies add the following dependency to the {{<dependencies>}} section of your pom.xml:
+
+{code}
+<dependency>
+  <groupId>com.cloudera.cdk</groupId>
+  <artifactId>cdk-morphlines-core</artifactId>
+  <version>0.7.0</version> <!-- or whatever the latest version is -->
+  <type>pom</type>
+</dependency>
+{code}
+
+Also, to pull in the maximum set of dependencies (i.e. all available commands) add the following dependency to the {{<dependencies>}} section of your pom.xml:
 
 {code}
 <dependency>

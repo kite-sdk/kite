@@ -60,7 +60,18 @@ in the eclipse project explorer, right click, `Run As/JUnit Test`.
 </repository>
 ```
 
-* Also add the following dependency to the `<dependencies>` section of your pom.xml:
+* Also, to pull in the minimum set of dependencies add the following dependency to the `<dependencies>` section of your pom.xml:
+
+```
+<dependency>
+  <groupId>com.cloudera.cdk</groupId>
+  <artifactId>cdk-morphlines-core</artifactId>
+  <version>0.7.0</version> <!-- or whatever the latest version is -->
+  <type>pom</type>
+</dependency>
+```
+
+* Also, to pull in the maximum set of dependencies (i.e. all available commands) add the following dependency to the `<dependencies>` section of your pom.xml:
 
 ```
 <dependency>
