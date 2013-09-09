@@ -132,6 +132,8 @@ public final class LoadSolrBuilder implements CommandBuilder {
       } finally {
         timerContext.stop();
       }
+      
+      // pass record to next command in chain:      
       return super.doProcess(record);
     }
     
@@ -139,8 +141,13 @@ public final class LoadSolrBuilder implements CommandBuilder {
       Map<String, Collection<Object>> map = record.getFields().asMap();
       SolrInputDocument doc = new SolrInputDocument(new HashMap(2 * map.size()));
       for (Map.Entry<String, Collection<Object>> entry : map.entrySet()) {
-        Float boostObj = boosts.get(entry.getKey());
-        float boost = (boostObj == null ? 1.0f : boostObj.floatValue());
+        float boost = 1.0f;
+        if (boosts.size() > 0) {
+          Float boostObj = boosts.get(entry.getKey());
+          if (boostObj != null) {
+            boost = boostObj.floatValue();
+          }
+        }
         doc.setField(entry.getKey(), entry.getValue(), boost);
       }
       return doc;
