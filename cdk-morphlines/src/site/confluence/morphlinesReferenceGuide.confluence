@@ -1410,13 +1410,17 @@ h1. cdk\-morphlines\-hadoop\-core
 
 h2. downloadHdfsFile
 
-The {{downloadHdfsFile}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-core/src/main/java/com/cloudera/cdk/morphline/hadoop/core/DownloadHdfsFileBuilder.java]) downloads, on startup, zero or more files or directory trees from HDFS to the local file system. These files are typically static configuration files that are required by downstream morphline commands, e.g. Avro schema files, XML join tables, grok dictionaries, etc. Storing such configuration files in HDFS can help with consistent centralized configuration management across a set of cluster nodes. The destination directory on the local file system defaults to the current working directory of the current process.
+The {{downloadHdfsFile}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-core/src/main/java/com/cloudera/cdk/morphline/hadoop/core/DownloadHdfsFileBuilder.java]) downloads, on startup, zero or more files or directory trees from HDFS to the local file system. These files are typically static configuration files that are required by downstream morphline commands, e.g. Avro schema files, XML join tables, grok dictionaries, etc. Storing such configuration files in HDFS can help with consistent centralized configuration management across a set of cluster nodes. 
+
+The output directory on the local file system defaults to the current working directory of the current process. 
+
+If the output file or directory already exists it will be deleted and overwritten. 
 
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | inputFiles | [] | The HDFS files or directories to download, in the form of a list of HSFS URIs. |
-| outputDir | "." | The relative or absolute path of the destination directory on the local file system. Parent directories of that directory will be created automatically. If that directory already exists it will be completely deleted first. Defaults to the current working directory of the current process. |
+| outputDir | "." | The relative or absolute path of the destination directory on the local file system. Parent directories of that directory will be created automatically. Defaults to the current working directory of the current process. |
 
 Example usage:
 {code}
