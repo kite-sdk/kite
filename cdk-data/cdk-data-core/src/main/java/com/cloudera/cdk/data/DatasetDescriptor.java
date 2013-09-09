@@ -168,7 +168,10 @@ public class DatasetDescriptor {
       this.schema = descriptor.getSchema();
       this.schemaUrl = descriptor.getSchemaUrl();
       this.format = descriptor.getFormat();
-      this.partitionStrategy = descriptor.getPartitionStrategy();
+
+      if (descriptor.isPartitioned()) {
+        this.partitionStrategy = descriptor.getPartitionStrategy();
+      }
     }
 
     /**
