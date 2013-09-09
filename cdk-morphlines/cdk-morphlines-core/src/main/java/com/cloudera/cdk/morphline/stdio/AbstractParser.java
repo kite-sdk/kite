@@ -46,7 +46,7 @@ public abstract class AbstractParser extends AbstractCommand {
   private Set<MediaType> supportedMimeTypes = null;
 
   public static final String SUPPORTED_MIME_TYPES = "supportedMimeTypes";
-  
+
   public AbstractParser(Config config, Command parent, Command child, MorphlineContext context) {
     super(config, parent, child, context);      
     List<String> mimeTypes = getConfigs().getStringList(config, SUPPORTED_MIME_TYPES, Collections.EMPTY_LIST);
@@ -88,7 +88,9 @@ public abstract class AbstractParser extends AbstractCommand {
   protected abstract boolean doProcess(Record record, InputStream stream) throws IOException;
 
   protected void incrementNumRecords() {
-    numRecordsMeter.mark();
+    if (isMeasuringMetrics()) {
+      numRecordsMeter.mark();
+    }
   }
   
   private boolean isMimeTypeSupported(String mediaTypeStr, Record record) {

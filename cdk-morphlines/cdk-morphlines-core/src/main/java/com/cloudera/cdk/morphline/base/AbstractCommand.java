@@ -49,6 +49,9 @@ public abstract class AbstractCommand implements Command {
   private final Configs configs;
   private final Meter numProcessCallsMeter;
   private final Meter numNotifyCallsMeter;
+  
+  private static final boolean IS_MEASURING_METRICS = 
+      "true".equals(System.getProperty("isMeasuringMetrics", "true"));
 
   protected final Logger LOG = LoggerFactory.getLogger(getClass());
       
@@ -89,7 +92,9 @@ public abstract class AbstractCommand implements Command {
   
   @Override
   public final void notify(Record notification) {
-    numNotifyCallsMeter.mark();
+    if (IS_MEASURING_METRICS) {
+      numNotifyCallsMeter.mark();
+    }
     beforeNotify(notification);
     doNotify(notification);
   }
@@ -108,7 +113,9 @@ public abstract class AbstractCommand implements Command {
   
   @Override
   public final boolean process(Record record) {
-    numProcessCallsMeter.mark();
+    if (IS_MEASURING_METRICS) {
+      numProcessCallsMeter.mark();
+    }
     beforeProcess(record);
     return doProcess(record);
   }
@@ -154,6 +161,10 @@ public abstract class AbstractCommand implements Command {
     int i = className.lastIndexOf('.'); // regular class
     int j = className.lastIndexOf('$'); // inner class
     return className.substring(1 + Math.max(i, j));
+  }
+  
+  protected static boolean isMeasuringMetrics() {
+    return IS_MEASURING_METRICS;
   }
   
   /**
