@@ -1416,7 +1416,7 @@ The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | inputFiles | [] | The HDFS files or directories to download, in the form of a list of HSFS URIs. |
-| outputDir | "." | The relative or absolute path of the destination directory on the local file system. Parent directories of that directory will be created automatically. Defaults to the current working directory of the current process. |
+| outputDir | "." | The relative or absolute path of the destination directory on the local file system. Parent directories of that directory will be created automatically. If that directory already exists it will be completely deleted first. Defaults to the current working directory of the current process. |
 
 Example usage:
 {code}
