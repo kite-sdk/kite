@@ -37,9 +37,9 @@ import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.typesafe.config.Config;
 
 /**
- * Command for transferring HDFS files, for example to help with centralized configuration file management.
- * On startup, the command downloads zero or more files or directory trees from HDFS to the local
- * file system.
+ * Command for transferring HDFS files, for example to help with centralized configuration file
+ * management. On startup, the command downloads zero or more files or directory trees from HDFS to
+ * the local file system.
  */
 public final class DownloadHdfsFileBuilder implements CommandBuilder {
 

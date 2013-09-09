@@ -67,7 +67,6 @@ in the eclipse project explorer, right click, `Run As/JUnit Test`.
   <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-morphlines-core</artifactId>
   <version>0.7.0</version> <!-- or whatever the latest version is -->
-  <type>pom</type>
 </dependency>
 ```
 

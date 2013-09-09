@@ -248,7 +248,6 @@ Also, to pull in the minimum set of dependencies add the following dependency to
   <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-morphlines-core</artifactId>
   <version>0.7.0</version> <!-- or whatever the latest version is -->
-  <type>pom</type>
 </dependency>
 {code}
 
