@@ -10,7 +10,7 @@ $h2 Working with datasets
 The `cdk:create-dataset` and `cdk:drop-dataset` goals are for creating and dropping
 datasets. Configure the Hadoop settings by declaring the plugin in your POM:
 
-```
+```xml
 <project>
   ...
   <build>
@@ -66,7 +66,7 @@ This goal is used to run a Hadoop Tool. The Tool's `run()` method is executed in
 local VM as Maven, however it is common for the Tool to launch distributed processes,
 such as MapReduce jobs which run on a cluster.
 
-```
+```xml
 <project>
   ...
   <build>
@@ -135,7 +135,7 @@ previous example from the cluster, by adding properties for `deployFileSystem`
 and `oozieUrl`, and a `executions` section to bind `cdk-package` to the `package` phase
 of the Maven lifecycle.
 
-```
+```xml
 <project>
   ...
   <build>
