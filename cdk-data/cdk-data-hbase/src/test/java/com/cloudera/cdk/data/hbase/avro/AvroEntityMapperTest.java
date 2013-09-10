@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import com.cloudera.cdk.data.hbase.BaseEntityMapper;
 import com.cloudera.cdk.data.hbase.EntityMapper;
-import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
+import com.cloudera.cdk.data.hbase.KeyEntity;
 
 public class AvroEntityMapperTest {
 

@@ -1,6 +1,7 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
 package com.cloudera.cdk.data.hbase.avro;
 
+import com.cloudera.cdk.data.hbase.KeyEntity;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;

@@ -22,33 +22,6 @@ import org.apache.hadoop.hbase.client.Result;
 public interface EntityMapper<K, E> {
 
   /**
-   * A class that encapsulates a Key and an Entity which is returned from the
-   * EntityMapper mapToEntity function.
-   * 
-   * @param <K>
-   *          The underlying key record type
-   * @param <E>
-   *          The entity type
-   */
-  public static class KeyEntity<K, E> {
-    private final K key;
-    private final E entity;
-
-    public KeyEntity(K key, E entity) {
-      this.key = key;
-      this.entity = entity;
-    }
-
-    public K getKey() {
-      return key;
-    }
-
-    public E getEntity() {
-      return entity;
-    }
-  }
-
-  /**
    * Map an HBase Result instance to an Entity of type T. Retrieve the Key from
    * the result instance as well, and wraps both in an KeyEntity instance. This
    * KeyEntity instance is returned.

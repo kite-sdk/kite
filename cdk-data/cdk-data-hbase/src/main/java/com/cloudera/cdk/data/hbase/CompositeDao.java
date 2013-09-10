@@ -3,8 +3,6 @@ package com.cloudera.cdk.data.hbase;
 
 import java.util.List;
 
-import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
-
 /**
  * The CompositeDao provides an interface for fetching from tables that may have
  * multiple entities stored per row.

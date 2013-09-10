@@ -25,7 +25,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.cloudera.cdk.data.hbase.Dao;
-import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
+import com.cloudera.cdk.data.hbase.KeyEntity;
 import com.cloudera.cdk.data.hbase.EntityScanner;
 import com.cloudera.cdk.data.hbase.IncompatibleSchemaException;
 import com.cloudera.cdk.data.hbase.SchemaNotFoundException;

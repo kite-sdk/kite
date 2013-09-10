@@ -11,8 +11,6 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.FilterList;
 
-import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
-
 /**
  * Base EntityScanner implementation. This EntityScanner will use an
  * EntityMapper while scanning rows in HBase, and will map each row to KeyEntity

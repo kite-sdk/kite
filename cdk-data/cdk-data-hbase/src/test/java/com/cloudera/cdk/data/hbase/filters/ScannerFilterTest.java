@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import com.cloudera.cdk.data.hbase.BaseDao;
 import com.cloudera.cdk.data.hbase.Dao;
-import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
+import com.cloudera.cdk.data.hbase.KeyEntity;
 import com.cloudera.cdk.data.hbase.EntityScanner;
 import com.cloudera.cdk.data.hbase.EntityScannerBuilder;
 import com.cloudera.cdk.data.hbase.avro.AvroDaoTest;

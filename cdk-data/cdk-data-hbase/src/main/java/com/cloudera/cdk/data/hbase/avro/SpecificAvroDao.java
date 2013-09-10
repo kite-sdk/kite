@@ -17,7 +17,7 @@ import com.cloudera.cdk.data.hbase.BaseEntityMapper;
 import com.cloudera.cdk.data.hbase.CompositeBaseDao;
 import com.cloudera.cdk.data.hbase.Dao;
 import com.cloudera.cdk.data.hbase.EntityMapper;
-import com.cloudera.cdk.data.hbase.EntityMapper.KeyEntity;
+import com.cloudera.cdk.data.hbase.KeyEntity;
 import com.cloudera.cdk.data.hbase.HBaseCommonException;
 import com.cloudera.cdk.data.hbase.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.SchemaValidationException;
