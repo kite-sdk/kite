@@ -571,7 +571,7 @@
           <groups>
             <group>
               <title>Data Core</title>
-              <packages>com.cloudera.cdk.data:com.cloudera.cdk.data.filesystem:com.cloudera.cdk.data.partition:com.cloudera.cdk.data.spi</packages>
+              <packages>com.cloudera.cdk.data:com.cloudera.cdk.data.dao:cdk.data.filesystem:com.cloudera.cdk.data.partition:com.cloudera.cdk.data.spi</packages>
             </group>
             <group>
               <title>Data Crunch</title>
@@ -580,6 +580,10 @@
             <group>
               <title>Data Flume</title>
               <packages>com.cloudera.cdk.data.flume</packages>
+            </group>
+            <group>
+              <title>Data HBase</title>
+              <packages>com.cloudera.cdk.data.hbase.avro:com.cloudera.cdk.data.hbase.manager:com.cloudera.cdk.data.hbase.tool</packages>
             </group>
             <group>
               <title>Data HCatalog</title>
