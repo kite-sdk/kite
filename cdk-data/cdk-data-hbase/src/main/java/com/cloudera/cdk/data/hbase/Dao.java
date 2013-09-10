@@ -117,13 +117,6 @@ public interface Dao<K, E> {
   public EntityScanner<K, E> getScanner(K startKey, K stopKey);
 
   /**
-   * Gets the ScannerBuilder for this DAO.
-   * 
-   * @return ScannerBuilder
-   */
-  public EntityScannerBuilder<K, E> getScannerBuilder();
-
-  /**
    * Gets the key schema instance for this DAO.
    *
    * @return The HBaseCommonKeySchema instance.

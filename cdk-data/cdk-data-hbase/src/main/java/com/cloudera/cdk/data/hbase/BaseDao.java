@@ -93,7 +93,6 @@ public class BaseDao<K, E> implements Dao<K, E> {
         .setPartialStartKey(startKey).setPartialStopKey(stopKey).build();
   }
 
-  @Override
   public EntityScannerBuilder<K, E> getScannerBuilder() {
     return clientTemplate.getScannerBuilder(entityMapper);
   }

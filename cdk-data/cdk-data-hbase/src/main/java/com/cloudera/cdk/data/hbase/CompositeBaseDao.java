@@ -195,11 +195,6 @@ public abstract class CompositeBaseDao<K, E, S> implements
   }
 
   @Override
-  public EntityScannerBuilder<K, E> getScannerBuilder() {
-    return baseDao.getScannerBuilder();
-  }
-
-  @Override
   public KeySchema getKeySchema() {
     return baseDao.getKeySchema();
   }
