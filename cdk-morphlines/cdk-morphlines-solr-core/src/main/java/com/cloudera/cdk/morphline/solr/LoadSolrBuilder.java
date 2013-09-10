@@ -148,14 +148,13 @@ public final class LoadSolrBuilder implements CommandBuilder {
     }
 
     private float getBoost(String key) {
-      float boost = 1.0f;
       if (boosts.size() > 0) {
         Float boostObj = boosts.get(key);
         if (boostObj != null) {
-          boost = boostObj.floatValue();
+          return boostObj.floatValue();
         }
       }
-      return boost;
+      return 1.0f;
     }
     
   }
