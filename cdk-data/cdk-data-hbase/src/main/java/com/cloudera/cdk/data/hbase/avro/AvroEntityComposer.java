@@ -10,10 +10,10 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.IndexedRecord;
 
 import com.cloudera.cdk.data.hbase.EntityComposer;
-import com.cloudera.cdk.data.hbase.EntitySchema.FieldMapping;
-import com.cloudera.cdk.data.hbase.HBaseCommonException;
-import com.cloudera.cdk.data.hbase.MappingType;
-import com.cloudera.cdk.data.hbase.SchemaValidationException;
+import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
+import com.cloudera.cdk.data.dao.MappingType;
+import com.cloudera.cdk.data.dao.SchemaValidationException;
 
 /**
  * An EntityComposer implementation for Avro records. It will handle both

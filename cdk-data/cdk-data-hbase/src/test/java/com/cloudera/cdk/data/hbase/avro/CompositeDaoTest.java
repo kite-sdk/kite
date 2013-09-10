@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.cloudera.cdk.data.hbase.Dao;
+import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.hbase.avro.entities.CompositeRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.SubRecord1;
 import com.cloudera.cdk.data.hbase.avro.entities.SubRecord2;

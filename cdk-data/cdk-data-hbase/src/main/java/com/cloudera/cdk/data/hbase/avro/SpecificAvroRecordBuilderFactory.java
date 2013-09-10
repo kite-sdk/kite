@@ -7,7 +7,7 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.cloudera.cdk.data.hbase.HBaseCommonException;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
 
 /**
  * An AvroRecordBuilderFactory instance that can construct AvroRecordBuilders

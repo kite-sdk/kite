@@ -1,6 +1,9 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.dao.EntityScanner;
+import com.cloudera.cdk.data.dao.HBaseClientException;
+import com.cloudera.cdk.data.dao.KeyEntity;
 import java.io.IOException;
 import java.util.Iterator;
 

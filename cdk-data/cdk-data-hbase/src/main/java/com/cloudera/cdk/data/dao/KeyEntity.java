@@ -1,4 +1,4 @@
-package com.cloudera.cdk.data.hbase;
+package com.cloudera.cdk.data.dao;
 
 /**
  * A class that encapsulates a Key and an Entity which is returned from the

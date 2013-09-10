@@ -1,6 +1,9 @@
 // (c) Copyright 2011-2012 Cloudera, Inc.
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.dao.EntitySchema;
+import com.cloudera.cdk.data.dao.KeyEntity;
+import com.cloudera.cdk.data.dao.KeySchema;
 import java.util.Set;
 
 import org.apache.hadoop.hbase.client.Increment;

@@ -1,5 +1,7 @@
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.dao.EntityBatch;
+import com.cloudera.cdk.data.dao.HBaseClientException;
 import java.io.IOException;
 
 import org.apache.hadoop.hbase.client.HTableInterface;

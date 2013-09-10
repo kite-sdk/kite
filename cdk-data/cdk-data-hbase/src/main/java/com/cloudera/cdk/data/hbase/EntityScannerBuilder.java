@@ -1,6 +1,8 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.dao.EntityScanner;
+import com.cloudera.cdk.data.dao.PartialKey;
 import java.util.ArrayList;
 import java.util.List;
 

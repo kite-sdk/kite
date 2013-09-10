@@ -11,9 +11,9 @@ import org.apache.avro.io.parsing.Symbol;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.cloudera.cdk.data.hbase.EntitySchema;
-import com.cloudera.cdk.data.hbase.HBaseCommonException;
-import com.cloudera.cdk.data.hbase.SchemaValidationException;
+import com.cloudera.cdk.data.dao.EntitySchema;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
+import com.cloudera.cdk.data.dao.SchemaValidationException;
 
 /**
  * An EntitySchema implementation powered by Avro.

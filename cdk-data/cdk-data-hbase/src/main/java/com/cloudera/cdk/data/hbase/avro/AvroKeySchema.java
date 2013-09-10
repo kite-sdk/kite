@@ -3,7 +3,7 @@ package com.cloudera.cdk.data.hbase.avro;
 
 import org.apache.avro.Schema;
 
-import com.cloudera.cdk.data.hbase.KeySchema;
+import com.cloudera.cdk.data.dao.KeySchema;
 
 /**
  * A KeySchema implementation powered by Avro.

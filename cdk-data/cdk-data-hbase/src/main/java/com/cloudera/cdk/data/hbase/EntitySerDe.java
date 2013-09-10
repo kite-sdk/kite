@@ -1,6 +1,9 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.dao.Constants;
+import com.cloudera.cdk.data.dao.MappingType;
+import com.cloudera.cdk.data.dao.SchemaValidationException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +13,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import com.cloudera.cdk.data.hbase.EntitySchema.FieldMapping;
+import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
 
 /**
  * This class handles entity serialization and deserialization. It's able to

@@ -1,14 +1,7 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
-package com.cloudera.cdk.data.hbase.manager;
+package com.cloudera.cdk.data.dao;
 
 import java.util.Map;
-
-import com.cloudera.cdk.data.hbase.ConcurrentSchemaModificationException;
-import com.cloudera.cdk.data.hbase.EntitySchema;
-import com.cloudera.cdk.data.hbase.IncompatibleSchemaException;
-import com.cloudera.cdk.data.hbase.KeySchema;
-import com.cloudera.cdk.data.hbase.SchemaNotFoundException;
-import com.cloudera.cdk.data.hbase.SchemaValidationException;
 
 /**
  * Interface for managing schemas with a meta store. This interface provides

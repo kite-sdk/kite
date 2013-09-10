@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.apache.hadoop.hbase.client.HTablePool;
 
-import com.cloudera.cdk.data.hbase.Dao;
-import com.cloudera.cdk.data.hbase.KeyEntity;
-import com.cloudera.cdk.data.hbase.EntityScanner;
+import com.cloudera.cdk.data.dao.Dao;
+import com.cloudera.cdk.data.dao.KeyEntity;
+import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.hbase.avro.AvroEntitySchema;
 import com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.avro.AvroKeySchema;

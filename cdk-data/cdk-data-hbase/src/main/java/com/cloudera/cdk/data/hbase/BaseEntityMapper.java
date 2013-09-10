@@ -1,6 +1,10 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.dao.EntitySchema;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
+import com.cloudera.cdk.data.dao.KeyEntity;
+import com.cloudera.cdk.data.dao.KeySchema;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -8,7 +12,7 @@ import java.util.Set;
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
 
-import com.cloudera.cdk.data.hbase.EntitySchema.FieldMapping;
+import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
 
 /**
  * A base implementation of EntityMapper, that uses the provided

@@ -22,12 +22,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.cloudera.cdk.data.hbase.Dao;
-import com.cloudera.cdk.data.hbase.EntityBatch;
-import com.cloudera.cdk.data.hbase.KeyEntity;
-import com.cloudera.cdk.data.hbase.EntityScanner;
-import com.cloudera.cdk.data.hbase.KeyBuildException;
-import com.cloudera.cdk.data.hbase.PartialKey;
+import com.cloudera.cdk.data.dao.Dao;
+import com.cloudera.cdk.data.dao.EntityBatch;
+import com.cloudera.cdk.data.dao.KeyEntity;
+import com.cloudera.cdk.data.dao.EntityScanner;
+import com.cloudera.cdk.data.dao.KeyBuildException;
+import com.cloudera.cdk.data.dao.PartialKey;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;

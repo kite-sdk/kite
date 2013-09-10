@@ -1,7 +1,7 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
 package com.cloudera.cdk.data.hbase.avro;
 
-import com.cloudera.cdk.data.hbase.KeyEntity;
+import com.cloudera.cdk.data.dao.KeyEntity;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -17,16 +17,16 @@ import org.apache.hadoop.hbase.client.Result;
 
 import com.cloudera.cdk.data.hbase.BaseEntityMapper;
 import com.cloudera.cdk.data.hbase.EntityMapper;
-import com.cloudera.cdk.data.hbase.EntitySchema;
+import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.hbase.EntitySerDe;
-import com.cloudera.cdk.data.hbase.HBaseCommonException;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.hbase.HBaseUtils;
-import com.cloudera.cdk.data.hbase.KeySchema;
+import com.cloudera.cdk.data.dao.KeySchema;
 import com.cloudera.cdk.data.hbase.KeySerDe;
 import com.cloudera.cdk.data.hbase.PutAction;
-import com.cloudera.cdk.data.hbase.SchemaNotFoundException;
+import com.cloudera.cdk.data.dao.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.manager.ManagedSchemaEntityVersion;
-import com.cloudera.cdk.data.hbase.manager.SchemaManager;
+import com.cloudera.cdk.data.dao.SchemaManager;
 
 /**
  * An entity mapper that is able to support multiple Avro schema versions in a

@@ -1,6 +1,9 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.dao.EntitySchema;
+import com.cloudera.cdk.data.dao.KeySchema;
+
 /**
  * Interface for the HBase Common Key and Entity parser.
  *

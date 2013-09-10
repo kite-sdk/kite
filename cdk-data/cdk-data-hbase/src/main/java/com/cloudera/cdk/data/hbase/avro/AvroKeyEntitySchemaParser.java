@@ -11,12 +11,12 @@ import org.apache.avro.Schema;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.cloudera.cdk.data.hbase.EntitySchema;
-import com.cloudera.cdk.data.hbase.EntitySchema.FieldMapping;
+import com.cloudera.cdk.data.dao.EntitySchema;
+import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
 import com.cloudera.cdk.data.hbase.KeyEntitySchemaParser;
-import com.cloudera.cdk.data.hbase.KeySchema;
-import com.cloudera.cdk.data.hbase.MappingType;
-import com.cloudera.cdk.data.hbase.SchemaValidationException;
+import com.cloudera.cdk.data.dao.KeySchema;
+import com.cloudera.cdk.data.dao.MappingType;
+import com.cloudera.cdk.data.dao.SchemaValidationException;
 
 /**
  * This implementation parses Avro schemas for both the key and entities. The

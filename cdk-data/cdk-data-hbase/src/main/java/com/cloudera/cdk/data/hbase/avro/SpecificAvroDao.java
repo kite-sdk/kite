@@ -15,13 +15,13 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import com.cloudera.cdk.data.hbase.BaseDao;
 import com.cloudera.cdk.data.hbase.BaseEntityMapper;
 import com.cloudera.cdk.data.hbase.CompositeBaseDao;
-import com.cloudera.cdk.data.hbase.Dao;
+import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.hbase.EntityMapper;
-import com.cloudera.cdk.data.hbase.KeyEntity;
-import com.cloudera.cdk.data.hbase.HBaseCommonException;
-import com.cloudera.cdk.data.hbase.SchemaNotFoundException;
-import com.cloudera.cdk.data.hbase.SchemaValidationException;
-import com.cloudera.cdk.data.hbase.manager.SchemaManager;
+import com.cloudera.cdk.data.dao.KeyEntity;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
+import com.cloudera.cdk.data.dao.SchemaNotFoundException;
+import com.cloudera.cdk.data.dao.SchemaValidationException;
+import com.cloudera.cdk.data.dao.SchemaManager;
 
 /**
  * A Dao for Avro's SpecificRecords. In this Dao implementation, both the

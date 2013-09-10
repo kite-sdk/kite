@@ -1,4 +1,4 @@
-package com.cloudera.cdk.data.hbase;
+package com.cloudera.cdk.data.dao;
 
 public interface EntityBatch<K, E> {
 

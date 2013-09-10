@@ -1,5 +1,5 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
-package com.cloudera.cdk.data.hbase;
+package com.cloudera.cdk.data.dao;
 
 import org.apache.hadoop.hbase.util.Bytes;
 
