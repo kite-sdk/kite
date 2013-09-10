@@ -143,17 +143,29 @@ public class BaseDao<K, E> implements Dao<K, E> {
     return entityMapper.getEntitySchema();
   }
 
-  @Override
+  /**
+   * Gets the key serde for this DAO
+   *
+   * @return The KeySerDe
+   */
   public KeySerDe<K> getKeySerDe() {
     return entityMapper.getKeySerDe();
   }
 
-  @Override
+  /**
+   * Gets the entity serde for this DAO
+   *
+   * @return The EntitySerDe
+   */
   public EntitySerDe<E> getEntitySerDe() {
     return entityMapper.getEntitySerDe();
   }
 
-  @Override
+  /**
+   * Gets the EntityMapper for this DAO.
+   *
+   * @return EntityMapper
+   */
   public EntityMapper<K, E> getEntityMapper() {
     return this.entityMapper;
   }

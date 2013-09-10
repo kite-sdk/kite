@@ -182,27 +182,6 @@ public interface Dao<K, E> {
    * @return The HBaseCommonEntitySchema instance.
    */
   public EntitySchema getEntitySchema();
-  
-  /**
-   * Gets the key serde for this DAO
-   * 
-   * @return The KeySerDe
-   */
-  public KeySerDe<K> getKeySerDe();
-
-  /**
-   * Gets the entity serde for this DAO
-   * 
-   * @return The EntitySerDe
-   */  
-  public EntitySerDe<E> getEntitySerDe();
-
-  /**
-   * Gets the EntityMapper for this DAO.
-   *
-   * @return EntityMapper
-   */
-  public EntityMapper<K, E> getEntityMapper();
 
   /**
    * Create an EntityBatch with a specified buffer size in bytes

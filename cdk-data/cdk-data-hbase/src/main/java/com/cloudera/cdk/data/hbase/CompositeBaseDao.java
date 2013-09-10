@@ -222,16 +222,6 @@ public abstract class CompositeBaseDao<K, E, S> implements
   }
 
   @Override
-  public KeySerDe<K> getKeySerDe() {
-    return baseDao.getKeySerDe();
-  }
-
-  @Override
-  public EntitySerDe<E> getEntitySerDe() {
-    return baseDao.getEntitySerDe();
-  }
-
-  @Override
   public EntityBatch<K, E> newBatch(long writeBufferSize) {
     return baseDao.newBatch(writeBufferSize);
   }
@@ -241,7 +231,4 @@ public abstract class CompositeBaseDao<K, E, S> implements
     return baseDao.newBatch();
   }
 
-  public EntityMapper<K, E> getEntityMapper() {
-    return baseDao.getEntityMapper();
-  }
 }

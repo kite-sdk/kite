@@ -20,12 +20,6 @@ public class RegexEntityFilter implements EntityFilter {
 
   private final Filter filter;
 
-  public RegexEntityFilter(Dao<?, ?> dao, String fieldName, String regex,
-      boolean isEqual) {
-    this(dao.getEntitySchema(), dao.getEntityMapper().getEntitySerDe(),
-        fieldName, regex, isEqual);
-  }
-
   public RegexEntityFilter(EntitySchema entitySchema,
       EntitySerDe<?> entitySerDe, String fieldName, String regex,
       boolean isEqual) {

@@ -20,18 +20,6 @@ public class SingleFieldEntityFilter implements EntityFilter {
 
   private final org.apache.hadoop.hbase.filter.Filter filter;
 
-  public SingleFieldEntityFilter(Dao<?, ?> dao, String fieldName,
-      Object filterValue) {
-    this(dao.getEntitySchema(), dao.getEntityMapper().getEntitySerDe(),
-        fieldName, filterValue, CompareFilter.CompareOp.EQUAL);
-  }
-
-  public SingleFieldEntityFilter(Dao<?, ?> dao, String fieldName,
-      Object filterValue, CompareFilter.CompareOp equalityOperator) {
-    this(dao.getEntitySchema(), dao.getEntityMapper().getEntitySerDe(),
-        fieldName, filterValue, equalityOperator);
-  }
-
   public SingleFieldEntityFilter(EntitySchema entitySchema,
       EntitySerDe<?> entitySerDe, String fieldName, Object filterValue) {
     this(entitySchema, entitySerDe, fieldName, filterValue,
