@@ -17,6 +17,7 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.FieldPartitioner;
@@ -155,7 +156,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
     try {
       if (fileSystem.exists(datasetPath)) {
-        throw new DatasetRepositoryException("Attempt to create an existing dataset:" + name);
+        throw new DatasetExistsException(
+            "Attempt to create an existing dataset:" + name);
       }
     } catch (IOException e) {
       throw new DatasetRepositoryException("Internal error while determining if dataset path already exists:" + datasetPath, e);

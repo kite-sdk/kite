@@ -79,6 +79,8 @@ public interface DatasetRepository {
    * @param descriptor A descriptor that describes the schema and other properties of the
    *                   dataset
    * @return The newly created dataset
+   * @throws DatasetExistsException     If a {@code Dataset} named {@code name}
+   *                                    already exists.
    * @throws DatasetRepositoryException
    */
   Dataset create(String name, DatasetDescriptor descriptor);

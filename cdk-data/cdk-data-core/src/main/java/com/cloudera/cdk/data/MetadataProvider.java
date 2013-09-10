@@ -54,7 +54,10 @@ public interface MetadataProvider {
    * @param name       The fully qualified name of a dataset.
    * @param descriptor A dataset descriptor.
    * @return The descriptor as persisted to the Metadata store.
-   * @throws MetadataProviderException If the dataset descriptor can not be saved.
+   * @throws DatasetExistsException     If a {@code DatasetDescriptor} already
+   *                                    exists for {@code name}
+   * @throws MetadataProviderException  If the {@code DatasetDescriptor} can not
+   *                                    be saved
    *
    * @since 0.7.0
    */

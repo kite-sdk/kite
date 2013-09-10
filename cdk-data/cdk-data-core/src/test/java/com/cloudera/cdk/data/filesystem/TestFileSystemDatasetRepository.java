@@ -17,6 +17,7 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.Formats;
 import com.cloudera.cdk.data.PartitionStrategy;
@@ -77,6 +78,22 @@ public class TestFileSystemDatasetRepository {
         .exists(new Path(testDirectory, "test1/.metadata/descriptor.properties")));
     Assert.assertTrue("Dataset schema file exists",
         fileSystem.exists(new Path(testDirectory, "test1/.metadata/schema.avsc")));
+  }
+
+  @Test(expected = DatasetExistsException.class)
+  public void testAlreadyExists() {
+    // TODO: move this into a TestDatasetRepositoryCommon class
+    try {
+      Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
+          .schema(testSchema).get());
+      // the first one should succeed
+    } catch (DatasetExistsException ex) {
+      Assert.fail("Initial creation failed");
+    }
+
+    // create the same dataset again, this time it should fail
+    Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
+        .schema(testSchema).get());
   }
 
   @Test

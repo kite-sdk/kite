@@ -16,11 +16,13 @@
 package com.cloudera.cdk.data.hcatalog;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.impl.Accessor;
 import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
@@ -124,6 +126,18 @@ class HCatalogMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
+    if (!managed) {
+      // this table is external and the data directory must be set
+      Preconditions.checkArgument(
+          dataDirectory != null,
+          "Cannot create an external table: dataDirectory is null");
+    }
+
+    if (hcat.tableExists(dbName, name)) {
+      throw new DatasetExistsException(
+          "Metadata already exists for dataset:" + name);
+    }
+
     logger.info("Creating a Hive table named: " + name);
     Table tbl = new Table(dbName, name);
     tbl.setTableType(managed ? TableType.MANAGED_TABLE : TableType.EXTERNAL_TABLE);
