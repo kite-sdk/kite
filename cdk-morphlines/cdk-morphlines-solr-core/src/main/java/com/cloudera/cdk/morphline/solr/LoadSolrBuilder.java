@@ -141,16 +141,21 @@ public final class LoadSolrBuilder implements CommandBuilder {
       Map<String, Collection<Object>> map = record.getFields().asMap();
       SolrInputDocument doc = new SolrInputDocument(new HashMap(2 * map.size()));
       for (Map.Entry<String, Collection<Object>> entry : map.entrySet()) {
-        float boost = 1.0f;
-        if (boosts.size() > 0) {
-          Float boostObj = boosts.get(entry.getKey());
-          if (boostObj != null) {
-            boost = boostObj.floatValue();
-          }
-        }
-        doc.setField(entry.getKey(), entry.getValue(), boost);
+        String key = entry.getKey();
+        doc.setField(key, entry.getValue(), getBoost(key));
       }
       return doc;
+    }
+
+    private float getBoost(String key) {
+      float boost = 1.0f;
+      if (boosts.size() > 0) {
+        Float boostObj = boosts.get(key);
+        if (boostObj != null) {
+          boost = boostObj.floatValue();
+        }
+      }
+      return boost;
     }
     
   }
