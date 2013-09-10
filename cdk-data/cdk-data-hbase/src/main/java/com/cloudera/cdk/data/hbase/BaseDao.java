@@ -87,25 +87,10 @@ public class BaseDao<K, E> implements Dao<K, E> {
   }
 
   @Override
-  public EntityScanner<K, E> getScanner(K startKey, K stopKey,
-      ScanModifier scanModifier) {
-    return clientTemplate.getScannerBuilder(entityMapper).setStartKey(startKey)
-        .setStopKey(stopKey).addScanModifier(scanModifier).build();
-  }
-
-  @Override
   public EntityScanner<K, E> getScanner(PartialKey<K> startKey,
       PartialKey<K> stopKey) {
     return clientTemplate.getScannerBuilder(entityMapper)
         .setPartialStartKey(startKey).setPartialStopKey(stopKey).build();
-  }
-
-  @Override
-  public EntityScanner<K, E> getScanner(PartialKey<K> startKey,
-      PartialKey<K> stopKey, ScanModifier scanModifier) {
-    return clientTemplate.getScannerBuilder(entityMapper)
-        .setPartialStartKey(startKey).setPartialStopKey(stopKey)
-        .addScanModifier(scanModifier).build();
   }
 
   @Override

@@ -117,52 +117,6 @@ public interface Dao<K, E> {
   public EntityScanner<K, E> getScanner(K startKey, K stopKey);
 
   /**
-   * Get a scanner to scan the HBase table this DAO reads from. The scanner is
-   * opened starting at the first row greater than or equal to startKey. It will
-   * stop at the first row it sees greater than or equal to stopKey. Scan will
-   * be modified using given scan modifier.
-   *
-   * If startKey is null, it will start at the first row in the table. If
-   * stopKey is null, it will stop at the last row in the table.
-   *
-   * @param startKey
-   *          The start key of the scan
-   * @param stopKey
-   *          The stop key of the scan. The scanner will scan up to, but not
-   *          including the row of the stopKey.
-   * @param scanModifier
-   *          A scan modifier which can modify the HBase Scan instance before
-   *          sending it to HBase
-   * @return An EntityScanner instance that can be used to iterate through
-   *         entities in the table.
-   */
-  public EntityScanner<K, E> getScanner(PartialKey<K> startKey, PartialKey<K> stopKey,
-      ScanModifier scanModifier);
-
-  /**
-   * Get a scanner to scan the HBase table this dao reads from. The scanner is
-   * opened starting at the first row greater than or equal to startKey. It will
-   * stop at the first row it sees greater than or equal to stopKey.Scan will be
-   * modified using given scan modifier.
-   *
-   * If startKey is null, it will start at the first row in the table. If
-   * stopKey is null, it will stop at the last row in the table.
-   *
-   * @param startKey
-   *          The start key of the scan
-   * @param stopKey
-   *          The stop key of the scan. The scanner will scan up to, but not
-   *          including the row of the stopKey.
-   * @param scanModifier
-   *          A scan modifier which can modify the HBase Scan instance before
-   *          sending it to HBase
-   * @return An EntityScanner instance that can be used to iterate through
-   *         entities in the table.
-   */
-  public EntityScanner<K, E> getScanner(K startKey, K stopKey,
-      ScanModifier scanModifier);
-
-  /**
    * Gets the ScannerBuilder for this DAO.
    * 
    * @return ScannerBuilder
