@@ -16,8 +16,6 @@
 package com.cloudera.cdk.data;
 
 import com.cloudera.cdk.data.partition.PartitionFunctions;
-import com.cloudera.cdk.data.partition.RangeFieldPartitioner;
-import com.cloudera.cdk.data.partition.PartitionFunctions;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
@@ -343,6 +341,20 @@ public class PartitionStrategy {
     }
 
     /**
+     * Configure a partitioner for extracting the year from a timestamp field.
+     * The UTC timezone is assumed. The partition entity name will be "year".
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @return An instance of the builder for method chaining.
+     * @since 0.8.0
+     */
+    public Builder year(String sourceName) {
+      return year(sourceName, "year");
+    }
+
+    /**
      * Configure a partitioner for extracting the month from a timestamp field.
      * The UTC timezone is assumed.
      *
@@ -357,6 +369,20 @@ public class PartitionStrategy {
     public Builder month(String sourceName, String name) {
       fieldPartitioners.add(PartitionFunctions.month(sourceName, name));
       return this;
+    }
+
+    /**
+     * Configure a partitioner for extracting the month from a timestamp field.
+     * The UTC timezone is assumed. The partition entity name will be "month".
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @return An instance of the builder for method chaining.
+     * @since 0.8.0
+     */
+    public Builder month(String sourceName) {
+      return this.month(sourceName, "month");
     }
 
     /**
@@ -377,6 +403,20 @@ public class PartitionStrategy {
     }
 
     /**
+     * Configure a partitioner for extracting the day from a timestamp field.
+     * The UTC timezone is assumed. The partition entity name will be "day".
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @return An instance of the builder for method chaining.
+     * @since 0.8.0
+     */
+    public Builder day(String sourceName) {
+      return this.day(sourceName, "day");
+    }
+
+    /**
      * Configure a partitioner for extracting the hour from a timestamp field.
      * The UTC timezone is assumed.
      *
@@ -394,6 +434,20 @@ public class PartitionStrategy {
     }
 
     /**
+     * Configure a partitioner for extracting the hour from a timestamp field.
+     * The UTC timezone is assumed. The partition entity name will be "hour".
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @return An instance of the builder for method chaining.
+     * @since 0.8.0
+     */
+    public Builder hour(String sourceName) {
+      return this.hour(sourceName, "hour");
+    }
+
+    /**
      * Configure a partitioner for extracting the minute from a timestamp field.
      * The UTC timezone is assumed.
      *
@@ -408,6 +462,20 @@ public class PartitionStrategy {
     public Builder minute(String sourceName, String name) {
       fieldPartitioners.add(PartitionFunctions.minute(sourceName, name));
       return this;
+    }
+
+    /**
+     * Configure a partitioner for extracting the minute from a timestamp field.
+     * The UTC timezone is assumed. The partition entity name will be "minute".
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @return An instance of the builder for method chaining.
+     * @since 0.8.0
+     */
+    public Builder minute(String sourceName) {
+      return minute(sourceName, "minute");
     }
 
     /**
