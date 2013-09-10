@@ -24,7 +24,7 @@ import com.cloudera.cdk.data.dao.KeyEntity;
 import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.hbase.EntityScannerBuilder;
 import com.cloudera.cdk.data.hbase.avro.AvroDaoTest;
-import com.cloudera.cdk.data.hbase.avro.AvroUtils;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.avro.GenericAvroDao;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
 

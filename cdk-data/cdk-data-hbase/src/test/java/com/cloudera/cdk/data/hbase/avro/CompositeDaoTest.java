@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import java.util.Arrays;
 
 import org.apache.hadoop.hbase.client.HTablePool;

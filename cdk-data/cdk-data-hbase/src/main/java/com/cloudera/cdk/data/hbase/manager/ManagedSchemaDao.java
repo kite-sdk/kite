@@ -11,7 +11,7 @@ import java.util.List;
  * 
  * ManagedSchemaKey is effectively a table name, entity name pair.
  */
-public interface ManagedSchemaDao {
+interface ManagedSchemaDao {
 
   /**
    * Encapsulates a ManagedSchemaKey, and ManagedSchema. This is returned from

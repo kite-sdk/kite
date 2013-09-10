@@ -1,5 +1,5 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
-package com.cloudera.cdk.data.hbase.avro;
+package com.cloudera.cdk.data.hbase.avro.impl;
 
 /**
  * An builder interface used to construct Avro records. The Avro entity mapper

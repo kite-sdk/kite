@@ -9,10 +9,10 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.dao.KeyEntity;
 import com.cloudera.cdk.data.dao.EntityScanner;
-import com.cloudera.cdk.data.hbase.avro.AvroEntitySchema;
-import com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser;
-import com.cloudera.cdk.data.hbase.avro.AvroKeySchema;
-import com.cloudera.cdk.data.hbase.avro.AvroUtils;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySchema;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
 
 /**
@@ -20,7 +20,7 @@ import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
  * schemas are persisted to a table called "managed_schemas" unless otherwise
  * specified in the constructor.
  */
-public class ManagedSchemaHBaseDao implements ManagedSchemaDao {
+class ManagedSchemaHBaseDao implements ManagedSchemaDao {
 
   /**
    * The Default HBase table where this schema metadata is stored.

@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -544,9 +546,9 @@ public class ManagedDaoTest {
       // This is what we expect
     }
     manager.createSchema(tableName, "test", keyString, testRecord,
-        "com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser",
-        "com.cloudera.cdk.data.hbase.avro.AvroKeySerDe",
-        "com.cloudera.cdk.data.hbase.avro.AvroEntitySerDe");
+        "com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser",
+        "com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe",
+        "com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe");
     assertEquals(
         0,
         manager.getEntityVersion(tableName, "test",
@@ -558,9 +560,9 @@ public class ManagedDaoTest {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
     manager.createSchema(tableName, "TestRecord", keyString,
         goodMigrationRecordAddField,
-        "com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser",
-        "com.cloudera.cdk.data.hbase.avro.AvroKeySerDe",
-        "com.cloudera.cdk.data.hbase.avro.AvroEntitySerDe");
+        "com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser",
+        "com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe",
+        "com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe");
   }
 
   private void badMigration(String badMigration) throws Exception {

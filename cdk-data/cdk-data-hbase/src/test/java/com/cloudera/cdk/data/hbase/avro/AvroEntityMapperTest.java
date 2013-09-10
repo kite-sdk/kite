@@ -4,6 +4,13 @@ package com.cloudera.cdk.data.hbase.avro;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import com.cloudera.cdk.data.hbase.avro.impl.AvroEntityComposer;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySchema;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;

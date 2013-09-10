@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
