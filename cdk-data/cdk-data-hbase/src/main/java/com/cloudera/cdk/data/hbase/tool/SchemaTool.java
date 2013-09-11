@@ -24,8 +24,6 @@ import java.util.jar.JarFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
@@ -34,23 +32,25 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudera.cdk.data.dao.Constants;
 import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.KeySchema;
+import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.dao.SchemaValidationException;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySchema;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
-import com.cloudera.cdk.data.dao.SchemaManager;
 
 /**
  * Utility class for managing Managed Schemas in HBase Common.
  */
 public class SchemaTool {
 
-  private static final Log LOG = LogFactory.getLog(SchemaTool.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SchemaTool.class);
 
   private static final String CLASSPATH_PREFIX = "classpath:";
 

@@ -4,8 +4,8 @@ package com.cloudera.cdk.data.hbase.avro.impl;
 import java.lang.reflect.Constructor;
 
 import org.apache.avro.specific.SpecificRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudera.cdk.data.dao.HBaseCommonException;
 
@@ -19,8 +19,8 @@ import com.cloudera.cdk.data.dao.HBaseCommonException;
 public class SpecificAvroRecordBuilderFactory<T extends SpecificRecord>
     implements AvroRecordBuilderFactory<T> {
 
-  private static final Log LOG = LogFactory
-      .getLog(SpecificAvroRecordBuilderFactory.class);
+  private static final Logger LOG = LoggerFactory
+      .getLogger(SpecificAvroRecordBuilderFactory.class);
 
   private final Class<T> recordClass;
   private final Constructor<T> recordClassConstructor;

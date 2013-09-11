@@ -9,10 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.HBaseCommonException;
@@ -40,7 +40,7 @@ import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchemaEntityVersion;
 public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends IndexedRecord>
     implements EntityMapper<KEY, ENTITY> {
 
-  private static Log LOG = LogFactory.getLog(VersionedAvroEntityMapper.class);
+  private static Logger LOG = LoggerFactory.getLogger(VersionedAvroEntityMapper.class);
 
   /**
    * The schema parser we'll use to parse managed schemas.

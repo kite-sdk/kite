@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.HTablePool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudera.cdk.data.dao.ConcurrentSchemaModificationException;
 import com.cloudera.cdk.data.dao.EntitySchema;
@@ -29,7 +29,7 @@ import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchemaKey;
  */
 public class DefaultSchemaManager implements SchemaManager {
 
-  private static Log LOG = LogFactory.getLog(DefaultSchemaManager.class);
+  private static Logger LOG = LoggerFactory.getLogger(DefaultSchemaManager.class);
 
   /**
    * A mapping of managed schema row keys to the managed schema entities.

@@ -1,6 +1,27 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
 package com.cloudera.cdk.data.hbase.avro;
 
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.avro.Schema;
+import org.apache.avro.specific.SpecificRecord;
+import org.apache.hadoop.hbase.client.HTablePool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cloudera.cdk.data.dao.Dao;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
+import com.cloudera.cdk.data.dao.KeyEntity;
+import com.cloudera.cdk.data.dao.SchemaManager;
+import com.cloudera.cdk.data.dao.SchemaNotFoundException;
+import com.cloudera.cdk.data.dao.SchemaValidationException;
+import com.cloudera.cdk.data.hbase.BaseDao;
+import com.cloudera.cdk.data.hbase.BaseEntityMapper;
+import com.cloudera.cdk.data.hbase.CompositeBaseDao;
+import com.cloudera.cdk.data.hbase.EntityMapper;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroEntityComposer;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe;
@@ -9,27 +30,6 @@ import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySchema;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.avro.impl.VersionedAvroEntityMapper;
-import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.avro.Schema;
-import org.apache.avro.specific.SpecificRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.hbase.client.HTablePool;
-
-import com.cloudera.cdk.data.hbase.BaseDao;
-import com.cloudera.cdk.data.hbase.BaseEntityMapper;
-import com.cloudera.cdk.data.hbase.CompositeBaseDao;
-import com.cloudera.cdk.data.dao.Dao;
-import com.cloudera.cdk.data.hbase.EntityMapper;
-import com.cloudera.cdk.data.dao.KeyEntity;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
-import com.cloudera.cdk.data.dao.SchemaNotFoundException;
-import com.cloudera.cdk.data.dao.SchemaValidationException;
-import com.cloudera.cdk.data.dao.SchemaManager;
 
 /**
  * A Dao for Avro's SpecificRecords. In this Dao implementation, both the
@@ -44,7 +44,7 @@ import com.cloudera.cdk.data.dao.SchemaManager;
 public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
     extends BaseDao<K, E> {
 
-  private static Log LOG = LogFactory.getLog(SpecificAvroDao.class);
+  private static Logger LOG = LoggerFactory.getLogger(SpecificAvroDao.class);
 
   private static final AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
 
