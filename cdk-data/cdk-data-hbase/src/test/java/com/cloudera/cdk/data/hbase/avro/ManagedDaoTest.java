@@ -53,6 +53,7 @@ public class ManagedDaoTest {
   private static final String badMigrationRecordModifiedMapping;
   private static final String badMigrationRecordIntToLong;
   private static final String goodMigrationRecordAddField;
+  private static final String goodMigrationRecordAddSubField;
   private static final String goodMigrationRecordRemoveField;
   private static final String managedKeyString;
   private static final String managedRecordString;
@@ -84,6 +85,9 @@ public class ManagedDaoTest {
       goodMigrationRecordAddField = AvroUtils
           .inputStreamToString(AvroDaoTest.class
               .getResourceAsStream("/GoodMigrationRecordAddField.avsc"));
+      goodMigrationRecordAddSubField = AvroUtils
+          .inputStreamToString(AvroDaoTest.class
+              .getResourceAsStream("/GoodMigrationRecordAddSubField.avsc"));
       goodMigrationRecordRemoveField = AvroUtils
           .inputStreamToString(AvroDaoTest.class
               .getResourceAsStream("/GoodMigrationRecordRemoveField.avsc"));
@@ -522,6 +526,7 @@ public class ManagedDaoTest {
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
     manager.migrateSchema(tableName, "TestRecord",
         goodMigrationRecordRemoveField);
+    manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddSubField);
   }
 
   @Test

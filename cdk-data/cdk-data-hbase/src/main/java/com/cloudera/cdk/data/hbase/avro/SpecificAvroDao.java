@@ -226,8 +226,8 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    *          The class that is the composite record, which is made up of fields
    *          referencing the sub records.
    * @param schemaManager
-   *          The SchemaManager which will use to create the entity mapper that will
-   *          power this dao.
+   *          The SchemaManager which will use to create the entity mapper that
+   *          will power this dao.
    * @return The CompositeDao instance.
    * @throws SchemaNotFoundException
    */

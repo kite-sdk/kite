@@ -106,7 +106,7 @@ public class AvroEntitySchema extends EntitySchema {
     }
     return true;
   }
-  
+
   /**
    * Ensure that the field mappings haven't changed between the oldSchemaString
    * and the newSchemaString.
@@ -205,8 +205,8 @@ public class AvroEntitySchema extends EntitySchema {
     if (!field1.name().equals(field2.name())) {
       return false;
     }
-    // if schema types aren't equal, return false
-    if (field1.schema().getType() != field2.schema().getType()) {
+    // if schemas aren't equal, return false
+    if (!avroSchemasEqual(field1.schema(), field2.schema())) {
       return false;
     }
     // if field mappings aren't equal, return false
@@ -226,5 +226,58 @@ public class AvroEntitySchema extends EntitySchema {
     }
     // Fields are equal, return true
     return true;
+  }
+
+  private static boolean avroSchemasEqual(Schema schema1, Schema schema2) {
+    if (schema1.getType() != schema2.getType()) {
+      // if the types aren't equal, no need to go further. Return false
+      return false;
+    }
+
+    if (schema1.getType() == Schema.Type.ENUM
+        || schema1.getType() == Schema.Type.FIXED) {
+      // Enum and Fixed types schemas should be equal using the Schema.equals
+      // method.
+      return schema1.equals(schema2);
+    }
+    if (schema1.getType() == Schema.Type.ARRAY) {
+      // Avro element schemas should be equal, which is tested by recursively
+      // calling this method.
+      return avroSchemasEqual(schema1.getElementType(),
+          schema2.getElementType());
+    } else if (schema1.getType() == Schema.Type.MAP) {
+      // Map type values schemas should be equal, which is tested by recursively
+      // calling this method.
+      return avroSchemasEqual(schema1.getValueType(), schema2.getValueType());
+    } else if (schema1.getType() == Schema.Type.UNION) {
+      // Compare Union fields in the same position by comparing their schemas
+      // recursively calling this method.
+      if (schema1.getTypes().size() != schema2.getTypes().size()) {
+        return false;
+      }
+      for (int i = 0; i < schema1.getTypes().size(); i++) {
+        if (!avroSchemasEqual(schema1.getTypes().get(i), schema2.getTypes()
+            .get(i))) {
+          return false;
+        }
+      }
+      return true;
+    } else if (schema1.getType() == Schema.Type.RECORD) {
+      // Compare record fields that match in name by comparing their schemas
+      // recursively calling this method.
+      for (Field field1 : schema1.getFields()) {
+        Field field2 = schema2.getField(field1.name());
+        if (field2 == null) {
+          return false;
+        }
+        if (!avroSchemasEqual(field1.schema(), field2.schema())) {
+          return false;
+        }
+      }
+      return true;
+    } else {
+      // All other types are primitive, so them matching in type is enough.
+      return true;
+    }
   }
 }
