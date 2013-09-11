@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.cloudera.cdk</groupId>
     <artifactId>cdk-data</artifactId>
-    <version>0.7.0-SNAPSHOT</version>
+    <version>0.7.1-SNAPSHOT</version>
   </parent>
 
   <name>CDK Data HBase Module</name>
@@ -138,7 +138,7 @@
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-data-core</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
+      <version>0.7.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
