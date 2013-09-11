@@ -149,9 +149,9 @@ public final class LoadSolrBuilder implements CommandBuilder {
 
     private float getBoost(String key) {
       if (boosts.size() > 0) {
-        Float boostObj = boosts.get(key);
-        if (boostObj != null) {
-          return boostObj.floatValue();
+        Float boost = boosts.get(key);
+        if (boost != null) {
+          return boost.floatValue();
         }
       }
       return 1.0f;
