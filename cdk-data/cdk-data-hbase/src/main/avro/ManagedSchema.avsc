@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "ManagedSchema",
-  "namespace": "com.cloudera.cdk.data.hbase.manager",
+  "namespace": "com.cloudera.cdk.data.hbase.manager.generated",
   "fields": [
 
     { "name": "name", "type": "string",

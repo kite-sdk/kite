@@ -1,7 +1,6 @@
 // (c) Copyright 2011-2013 Cloudera, Inc.
 package com.cloudera.cdk.data.hbase.manager;
 
-import com.cloudera.cdk.data.dao.SchemaManager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,10 +14,13 @@ import com.cloudera.cdk.data.dao.ConcurrentSchemaModificationException;
 import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.IncompatibleSchemaException;
-import com.cloudera.cdk.data.hbase.KeyEntitySchemaParser;
 import com.cloudera.cdk.data.dao.KeySchema;
+import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.dao.SchemaNotFoundException;
+import com.cloudera.cdk.data.hbase.KeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.manager.ManagedSchemaDao.ManagedKeySchemaPair;
+import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
+import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchemaKey;
 
 /**
  * The Default SchemaManager implementation. It uses a ManagedSchemaDao

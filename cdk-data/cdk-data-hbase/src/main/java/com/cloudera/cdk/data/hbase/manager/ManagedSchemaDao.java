@@ -3,6 +3,9 @@ package com.cloudera.cdk.data.hbase.manager;
 
 import java.util.List;
 
+import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
+import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchemaKey;
+
 /**
  * Interface for fetching managed schemas from a persistence store. Managed
  * schemas are defined by the ManagedSchema avro record. Dao implementations

@@ -5,8 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,19 +25,21 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.cloudera.cdk.data.dao.Dao;
-import com.cloudera.cdk.data.dao.KeyEntity;
 import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.dao.IncompatibleSchemaException;
+import com.cloudera.cdk.data.dao.KeyEntity;
+import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.dao.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
 import com.cloudera.cdk.data.hbase.avro.entities.TestKey;
 import com.cloudera.cdk.data.hbase.avro.entities.TestRecord;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
-import com.cloudera.cdk.data.hbase.manager.ManagedSchema;
-import com.cloudera.cdk.data.hbase.manager.ManagedSchemaKey;
-import com.cloudera.cdk.data.dao.SchemaManager;
+import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
+import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchemaKey;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
 import com.cloudera.cdk.data.hbase.tool.SchemaTool;
 
