@@ -12,7 +12,7 @@ See [Online Documentation](https://github.com/cloudera/cdk).
 * Releases can be downloaded from github or referenced as a maven dependency.
 * Add the following repository to the `<repositories>` section of your pom.xml:
 
-```
+```xml
 <repository>
   <id>cdh.repo</id>
   <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
@@ -48,7 +48,7 @@ See [Online Documentation](https://github.com/cloudera/cdk).
 
 This step builds the software from source.
 
-```xml
+```bash
 git clone git@github.com:cloudera/cdk.git
 cd cdk
 #git checkout master
@@ -60,7 +60,7 @@ mvn clean package
 * This section describes how to integrate the codeline with Eclipse.
 * Build the software as described above. Then create Eclipse projects like this:
 
-```
+```bash
 cd cdk
 mvn eclipse:eclipse
 ```
