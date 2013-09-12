@@ -52,6 +52,8 @@ abstract class AbstractAddValuesCommand extends AbstractCommand {
       }
       putAll(record, fieldName, results);
     }
+    
+    // pass record to next command in chain:
     return super.doProcess(record);
   }
   
