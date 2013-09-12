@@ -5,7 +5,7 @@ change Hadoop ETL stream processing applications that extract, transform and loa
 
 ## Documentation
 
-See [Online Documentation](https://github.com/cloudera/cdk).
+See [Online Documentation](http://cloudera.github.io/cdk/docs/current/cdk-morphlines/index.html).
 
 ## Using a Release
 
