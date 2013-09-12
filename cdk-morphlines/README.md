@@ -7,10 +7,9 @@ change Hadoop ETL stream processing applications that extract, transform and loa
 
 See [Online Documentation](http://cloudera.github.io/cdk/docs/current/cdk-morphlines/index.html).
 
-## Using a Release
+## Usage in your Maven Project 
 
-* Releases can be downloaded from github or referenced as a maven dependency.
-* Add the following repository to the `<repositories>` section of your pom.xml:
+* To use Cloudera Morphlines in your Maven project, add the following repository to the `<repositories>` section of your pom.xml:
 
 ```xml
 <repository>
@@ -33,7 +32,7 @@ See [Online Documentation](http://cloudera.github.io/cdk/docs/current/cdk-morphl
 </dependency>
 ```
 
-* Also, to pull in the maximum set of dependencies (i.e. all available commands) add the following dependency to the `<dependencies>` section of your pom.xml:
+* Alternatively, to pull in the maximum set of dependencies (i.e. all available commands) add the following dependency to the `<dependencies>` section of your pom.xml:
 
 ```xml
 <dependency>

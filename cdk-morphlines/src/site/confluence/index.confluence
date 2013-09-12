@@ -8,6 +8,42 @@ Morphlines is a library, embeddable in any Java codebase. A morphline is an in\-
 
 The morphlines library was developed as part of [Cloudera Search|http://tiny.cloudera.com/search-v1-docs-landing]. It powers ETL data flows from Flume and MapReduce into Apache Solr. Flume covers the real time case, whereas MapReduce covers the batch processing case. Since the launch of Cloudera Search morphline development graduated into the [Cloudera Development Kit|http://blog.cloudera.com/blog/2013/05/cloudera-development-kit-cdk] (CDK) in order to make the technology accessible to a wider range of users and products, beyond Search. The CDK is a set of libraries, tools, examples, and documentation focused on making it easier to build systems on top of the Hadoop ecosystem. The CDK is hosted on GitHub and encourages involvement by the community. For example, morphlines could be embedded into Crunch, HBase, Impala, Pig, Hive, or Sqoop. Let us know where you want to take it!
 
+h1. Usage in your Maven Project 
+
+To use Cloudera Morphlines in your Maven project, add the following repository to the {{<repositories>}} section of your pom.xml:
+
+{code}
+<repository>
+  <id>cdh.repo</id>
+  <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+  <name>Cloudera Repositories</name>
+  <snapshots>
+    <enabled>false</enabled>
+  </snapshots>
+</repository>
+{code}
+
+Also, to pull in the minimum set of dependencies add the following dependency to the {{<dependencies>}} section of your pom.xml:
+
+{code}
+<dependency>
+  <groupId>com.cloudera.cdk</groupId>
+  <artifactId>cdk-morphlines-core</artifactId>
+  <version>0.7.0</version> <!-- or whatever the latest version is -->
+</dependency>
+{code}
+
+Alternatively, to pull in the maximum set of dependencies (i.e. all available commands) add the following dependency to the {{<dependencies>}} section of your pom.xml:
+
+{code}
+<dependency>
+  <groupId>com.cloudera.cdk</groupId>
+  <artifactId>cdk-morphlines-all</artifactId>
+  <version>0.7.0</version> <!-- or whatever the latest version is -->
+  <type>pom</type>
+</dependency>
+{code}
+
 h1. Syslog Use Case \- Requirements
 
 Let’s start with a concrete example use case: We want to extract information from a syslog file and index it into Apache Solr in order to make it available for Search queries. The corresponding program should be able to run standalone, or embedded inside a Flume Sink or embedded in a MapReduce job. 
@@ -223,44 +259,6 @@ log4j.logger.com.cloudera.cdk.morphline=TRACE
 This code is, in essence, what production tools like [MapReduceIndexerTool|https://github.com/cloudera/search/tree/master/search-mr], [Apache Flume Morphline Solr Sink|http://flume.apache.org/FlumeUserGuide.html#morphlinesolrsink] and [Apache Flume MorphlineInterceptor|http://flume.apache.org/FlumeUserGuide.html#morphline-interceptor] and [Morphline Lily HBase Indexer|http://ngdata.github.io/hbase-indexer] are running as part of their operation, as outlined in the following figure:
 
 !images/morphlines-architecture.jpg!
-
-h1. Using a Release with Maven
-
-Releases can be downloaded from github or referenced as a maven dependency.
-
-To use a release with Maven, add the following repository to the {{<repositories>}} section of your pom.xml:
-
-{code}
-<repository>
-  <id>cdh.repo</id>
-  <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
-  <name>Cloudera Repositories</name>
-  <snapshots>
-    <enabled>false</enabled>
-  </snapshots>
-</repository>
-{code}
-
-Also, to pull in the minimum set of dependencies add the following dependency to the {{<dependencies>}} section of your pom.xml:
-
-{code}
-<dependency>
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-morphlines-core</artifactId>
-  <version>0.7.0</version> <!-- or whatever the latest version is -->
-</dependency>
-{code}
-
-Also, to pull in the maximum set of dependencies (i.e. all available commands) add the following dependency to the {{<dependencies>}} section of your pom.xml:
-
-{code}
-<dependency>
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-morphlines-all</artifactId>
-  <version>0.7.0</version> <!-- or whatever the latest version is -->
-  <type>pom</type>
-</dependency>
-{code}
 
 h1. Any Questions?
 
