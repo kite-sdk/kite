@@ -25,7 +25,7 @@ See [Online Documentation](https://github.com/cloudera/cdk).
 
 * Also, to pull in the minimum set of dependencies add the following dependency to the `<dependencies>` section of your pom.xml:
 
-```
+```xml
 <dependency>
   <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-morphlines-core</artifactId>
@@ -35,7 +35,7 @@ See [Online Documentation](https://github.com/cloudera/cdk).
 
 * Also, to pull in the maximum set of dependencies (i.e. all available commands) add the following dependency to the `<dependencies>` section of your pom.xml:
 
-```
+```xml
 <dependency>
   <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-morphlines-all</artifactId>
@@ -48,7 +48,7 @@ See [Online Documentation](https://github.com/cloudera/cdk).
 
 This step builds the software from source.
 
-```
+```xml
 git clone git@github.com:cloudera/cdk.git
 cd cdk
 #git checkout master
