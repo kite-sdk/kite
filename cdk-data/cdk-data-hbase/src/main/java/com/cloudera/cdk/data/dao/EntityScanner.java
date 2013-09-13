@@ -15,6 +15,8 @@
  */
 package com.cloudera.cdk.data.dao;
 
+import java.io.Closeable;
+
 /**
  * A Scanner interface that represents an Iterable that allows us to iterate
  * over entities in an HBase table, returning them as KeyEntity instances.
@@ -24,7 +26,7 @@ package com.cloudera.cdk.data.dao;
  * @param <E>
  *          The type of the entity to return
  */
-public interface EntityScanner<K, E> extends Iterable<KeyEntity<K, E>> {
+public interface EntityScanner<K, E> extends Iterable<KeyEntity<K, E>>, Closeable {
 
   /**
    * Opens the scanner over the table, with scan parameters.
@@ -34,5 +36,6 @@ public interface EntityScanner<K, E> extends Iterable<KeyEntity<K, E>> {
   /**
    * Closes the entity scanner, and cleans up any underlying resources.
    */
+  @Override
   public void close();
 }
