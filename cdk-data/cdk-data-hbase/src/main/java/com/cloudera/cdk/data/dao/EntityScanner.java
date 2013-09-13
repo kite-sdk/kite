@@ -16,6 +16,7 @@
 package com.cloudera.cdk.data.dao;
 
 import java.io.Closeable;
+import java.util.Iterator;
 
 /**
  * A Scanner interface that represents an Iterable that allows us to iterate
@@ -26,7 +27,7 @@ import java.io.Closeable;
  * @param <E>
  *          The type of the entity to return
  */
-public interface EntityScanner<E> extends Iterable<E>, Closeable {
+public interface EntityScanner<E> extends Iterator<E>, Iterable<E>, Closeable {
 
   /**
    * Opens the scanner over the table, with scan parameters.

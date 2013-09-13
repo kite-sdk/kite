@@ -45,6 +45,7 @@ public class BaseEntityScanner<E> implements EntityScanner<E> {
   private final String tableName;
   private Scan scan;
   private ResultScanner resultScanner;
+  private Iterator<Result> iterator;
 
   /**
    * @param scan
@@ -162,12 +163,32 @@ public class BaseEntityScanner<E> implements EntityScanner<E> {
         }
       }
     }
+    iterator = resultScanner.iterator();
   }
+
+
 
   @Override
   public void close() {
     resultScanner.close();
   }
+
+  @Override
+  public boolean hasNext() {
+    return iterator.hasNext();
+  }
+
+  @Override
+  public E next() {
+    Result result = iterator.next();
+    return entityMapper.mapToEntity(result);
+  }
+
+  @Override
+  public void remove() {
+    iterator.remove();
+  }
+
 
   /**
    * Scanner builder for BaseEntityScanner
