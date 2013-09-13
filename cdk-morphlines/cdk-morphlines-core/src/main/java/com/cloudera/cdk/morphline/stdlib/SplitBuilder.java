@@ -63,7 +63,6 @@ public final class SplitBuilder implements CommandBuilder {
     private final Splitter splitter;
     
     public Split(Config config, Command parent, Command child, MorphlineContext context) {
-      // TODO: also add separate command for withKeyValueSeparator?
       super(config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");
       
