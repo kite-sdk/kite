@@ -114,6 +114,7 @@
     <vers.hadoop>2.0.0-cdh${cdh.version}</vers.hadoop>
     <vers.hadoop-mr1>2.0.0-mr1-cdh${cdh.version}</vers.hadoop-mr1>
     <vers.hcatalog>0.5.0-cdh${cdh.version}</vers.hcatalog>
+    <vers.hive>0.10.0-cdh${cdh.version}</vers.hive>
     <vers.jexl>2.1.1</vers.jexl>
     <vers.compress>1.4.1</vers.compress>
     <vers.junit>4.10</vers.junit>
@@ -121,7 +122,7 @@
     <vers.maven>2.0.6</vers.maven>
     <vers.mojo-executor>1.5</vers.mojo-executor>
     <vers.oozie>3.3.2-cdh${cdh.version}</vers.oozie>
-    <vers.parquet>1.0.0</vers.parquet>
+    <vers.parquet>1.2.0</vers.parquet>
     <vers.plexus-utils>3.0</vers.plexus-utils>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
@@ -568,6 +569,11 @@
       </dependency>
       <dependency>
         <groupId>com.twitter</groupId>
+        <artifactId>parquet-hive</artifactId>
+        <version>${vers.parquet}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.twitter</groupId>
         <artifactId>parquet-avro</artifactId>
         <version>${vers.parquet}</version>
         <exclusions>
@@ -618,6 +624,11 @@
         <groupId>org.apache.hcatalog</groupId>
         <artifactId>hcatalog-core</artifactId>
         <version>${vers.hcatalog}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-metastore</artifactId>
+        <version>${vers.hive}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>

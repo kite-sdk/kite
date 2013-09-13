@@ -1,0 +1,65 @@
+/*
+ * Copyright 2013 Cloudera.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.cloudera.cdk.data.hcatalog;
+
+import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.MetadataProvider;
+import com.cloudera.cdk.data.TestMetadataProviders;
+import com.google.common.io.Files;
+import junit.framework.Assert;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.junit.After;
+import org.junit.Test;
+
+public class TestExternalHCatalogMetadataProvider extends TestMetadataProviders {
+
+  private Path testDirectory;
+
+  public TestExternalHCatalogMetadataProvider(String mode) {
+    super(mode);
+  }
+
+  @Override
+  public MetadataProvider newProvider(Configuration conf) {
+    this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
+    return new HCatalogExternalMetadataProvider(conf, testDirectory);
+  }
+
+  @After
+  public void cleanHCatalog() {
+    // ensures all tables are removed
+    HCatalog hcat = new HCatalog();
+    for (String tableName : hcat.getAllTables("default")) {
+      hcat.dropTable("default", tableName);
+    }
+  }
+
+  @Test
+  public void testCreateAssignsCorrectLocation() {
+    ensureCreated();
+
+    DatasetDescriptor loaded = provider.load(NAME);
+    Path assignedPath = new Path(loaded.getLocation().getPath());
+    Assert.assertEquals("Path should be in the test directory",
+        new Path(testDirectory, NAME), assignedPath);
+  }
+
+  // TODO:
+  // * check table metadata for Avro/Parquet and compatibility
+
+}

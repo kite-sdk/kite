@@ -25,10 +25,9 @@
     <version>0.7.1-SNAPSHOT</version>
   </parent>
 
-  <name>CDK Data HCatalog Module</name>
+  <name>CDK Data Hive Module</name>
   <description>
-    The CDK Data HCatalog module provides integration with HCatalog (and Hive) for CDK
-    datasets.
+    The CDK Data Hive module provides integration with Hive for CDK datasets.
   </description>
 
   <build>
@@ -98,14 +97,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-data-core</artifactId>
-      <version>${project.parent.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
@@ -119,11 +110,6 @@
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>annotations</artifactId>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.avro</groupId>
@@ -141,6 +127,37 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- TEST DEPENDENCIES -->
+    <dependency>
+      <groupId>com.cloudera.cdk</groupId>
+      <artifactId>cdk-data-core</artifactId>
+      <version>${project.parent.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-common</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-hdfs</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-hdfs</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 </project>
