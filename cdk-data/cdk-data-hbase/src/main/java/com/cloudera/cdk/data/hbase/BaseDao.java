@@ -34,6 +34,7 @@ import org.apache.hadoop.hbase.client.HTablePool;
  */
 public class BaseDao<K, E> implements Dao<K, E> {
 
+  private final String tableName;
   private final EntityMapper<K, E> entityMapper;
   private final HBaseClientTemplate clientTemplate;
 
@@ -52,6 +53,7 @@ public class BaseDao<K, E> implements Dao<K, E> {
    */
   public BaseDao(HTablePool tablePool, String tableName,
       EntityMapper<K, E> entityMapper) {
+    this.tableName = tableName;
     this.entityMapper = entityMapper;
     this.clientTemplate = new HBaseClientTemplate(tablePool, tableName);
   }
@@ -63,6 +65,7 @@ public class BaseDao<K, E> implements Dao<K, E> {
    *          Dao to copy.
    */
   public BaseDao(BaseDao<K, E> dao) {
+    this.tableName = dao.tableName;
     this.clientTemplate = new HBaseClientTemplate(dao.clientTemplate);
     this.entityMapper = dao.entityMapper;
   }
@@ -173,4 +176,9 @@ public class BaseDao<K, E> implements Dao<K, E> {
   public EntityMapper<K, E> getEntityMapper() {
     return this.entityMapper;
   }
+
+  public String getTableName() {
+    return tableName;
+  }
+
 }
