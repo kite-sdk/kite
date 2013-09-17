@@ -1,0 +1,17 @@
+{
+  "type": "record",
+  "name": "UserProfileKey",
+  "namespace": "com.cloudera.cdk.data.hbase.avro.example",
+  "tables": ["cdk_example_user_profiles"],
+  "fields": [
+    { 
+      "name": "lastName", 
+      "type": "string"
+    },
+      
+    { 
+      "name": "firstName", 
+      "type": "string"
+    }
+  ]
+}

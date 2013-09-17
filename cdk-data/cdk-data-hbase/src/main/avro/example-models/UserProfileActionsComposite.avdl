@@ -1,0 +1,13 @@
+@namespace("com.cloudera.cdk.data.hbase.avro.example.protocol")
+protocol UserProfileActionsProtocol {
+
+  import schema "UserProfileModel.avsc";
+  import schema "UserActionsModel.avsc";
+
+  @namespace("com.cloudera.cdk.data.hbase.avro.example")
+  record UserProfileActionsModel {
+
+	com.cloudera.cdk.data.hbase.avro.example.UserProfileModel userProfileModel;
+    com.cloudera.cdk.data.hbase.avro.example.UserActionsModel userActionsModel;
+  }
+}

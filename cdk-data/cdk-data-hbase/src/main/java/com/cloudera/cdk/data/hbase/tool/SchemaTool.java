@@ -247,7 +247,8 @@ public class SchemaTool {
         LOG.info("Migrating Schema: (" + tableName + ", " + entityName + ")");
         schemaManager.migrateSchema(tableName, entityName, entitySchemaString);
       } else {
-        createTableAndFamilies = false;
+        // don't set createTableAndFamilies to false, becasue we may still need
+        // to update the table to support what exists in the meta store.
         LOG.info("Schema hasn't changed, not migrating: (" + tableName + ", "
             + entityName + ")");
       }
