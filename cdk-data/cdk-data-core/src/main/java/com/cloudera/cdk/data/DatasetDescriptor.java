@@ -36,6 +36,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import org.apache.avro.reflect.ReflectData;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  * <p>
@@ -55,6 +56,7 @@ public class DatasetDescriptor {
   private final URL schemaUrl;
   private final Format format;
   private final URI location;
+  private final Configuration conf;
   private final PartitionStrategy partitionStrategy;
 
   /**
@@ -65,7 +67,7 @@ public class DatasetDescriptor {
   public DatasetDescriptor(Schema schema, @Nullable PartitionStrategy
       partitionStrategy) {
 
-    this(schema, null, Formats.AVRO, null, partitionStrategy);
+    this(schema, null, Formats.AVRO, null, null, partitionStrategy);
   }
 
   /**
@@ -74,12 +76,14 @@ public class DatasetDescriptor {
    * {@link PartitionStrategy}.
    */
   DatasetDescriptor(Schema schema, @Nullable URL schemaUrl, Format format,
-      @Nullable URI location, @Nullable PartitionStrategy partitionStrategy) {
+      @Nullable URI location, @Nullable Configuration conf,
+      @Nullable PartitionStrategy partitionStrategy) {
 
     this.schema = schema;
     this.schemaUrl = schemaUrl;
     this.format = format;
     this.location = location;
+    this.conf = conf;
     this.partitionStrategy = partitionStrategy;
   }
 
@@ -133,6 +137,18 @@ public class DatasetDescriptor {
   }
 
   /**
+   * Get the {@code Configuration} used by this {@link Dataset} (optional).
+   *
+   * @return a Configuration object or null if one is not set
+   *
+   * @since 0.8.0
+   */
+  @Nullable
+  public Configuration getConfiguration() {
+    return conf;
+  }
+
+  /**
    * Get the {@link PartitionStrategy}, if this dataset is partitioned. Calling
    * this method on a non-partitioned dataset is an error. Instead, use the
    * {@link #isPartitioned()} method prior to invocation.
@@ -157,8 +173,11 @@ public class DatasetDescriptor {
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("schema", schema)
-      .add("partitionStrategy", partitionStrategy).toString();
+    return Objects.toStringHelper(this)
+        .add("format", format)
+        .add("schema", schema)
+        .add("location", location)
+        .add("partitionStrategy", partitionStrategy).toString();
   }
 
   /**
@@ -170,6 +189,7 @@ public class DatasetDescriptor {
     private URL schemaUrl;
     private Format format = Formats.AVRO;
     private URI location;
+    private Configuration conf;
     private PartitionStrategy partitionStrategy;
 
     public Builder() {
@@ -188,6 +208,7 @@ public class DatasetDescriptor {
       this.schemaUrl = descriptor.getSchemaUrl();
       this.format = descriptor.getFormat();
       this.location = descriptor.getLocation();
+      this.conf = descriptor.getConfiguration();
 
       if (descriptor.isPartitioned()) {
         this.partitionStrategy = descriptor.getPartitionStrategy();
@@ -425,6 +446,17 @@ public class DatasetDescriptor {
     }
 
     /**
+     * Configure the {@link Configuration} used to resolve the {@code location}.
+     *
+     * @param conf a {@code Configuration}
+     * @return An instance of the builder for method chaining.
+     */
+    public Builder configuration(Configuration conf) {
+      this.conf = conf;
+      return this;
+    }
+
+    /**
      * Configure the dataset's partitioning strategy (optional).
      *
      * @return An instance of the builder for method chaining.
@@ -444,7 +476,7 @@ public class DatasetDescriptor {
       Preconditions.checkState(schema != null,
         "Descriptor schema may not be null");
 
-      return new DatasetDescriptor(schema, schemaUrl, format, location, partitionStrategy);
+      return new DatasetDescriptor(schema, schemaUrl, format, location, conf, partitionStrategy);
     }
 
   }
