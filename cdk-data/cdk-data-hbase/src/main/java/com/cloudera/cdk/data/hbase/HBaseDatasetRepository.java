@@ -4,6 +4,7 @@ import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.hbase.avro.GenericAvroDao;
+import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
 import com.cloudera.cdk.data.spi.AbstractDatasetRepository;
 import java.util.Collection;
@@ -42,8 +43,22 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
 
   private Dataset newDataset(String name, DatasetDescriptor descriptor) {
     // TODO: use descriptor.getFormat() to decide type of DAO (Avro vs. other)
-    GenericAvroDao dao = new GenericAvroDao(tablePool, name, HBaseMetadataProvider.ENTITY_NAME, schemaManager);
-    return new GenericAvroDaoDataset(dao, descriptor);
+    if (isSpecific(descriptor)) {
+      SpecificAvroDao dao = new SpecificAvroDao(tablePool, name, HBaseMetadataProvider.ENTITY_NAME, schemaManager);
+      return new SpecificAvroDaoDataset(dao, descriptor);
+    } else {
+      GenericAvroDao dao = new GenericAvroDao(tablePool, name, HBaseMetadataProvider.ENTITY_NAME, schemaManager);
+      return new GenericAvroDaoDataset(dao, descriptor);
+    }
+  }
+
+  private boolean isSpecific(DatasetDescriptor descriptor) {
+    try {
+      Class.forName(descriptor.getSchema().getFullName());
+      return true;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
   }
 
   @Override

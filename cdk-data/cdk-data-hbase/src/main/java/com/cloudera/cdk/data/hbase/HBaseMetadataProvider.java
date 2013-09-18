@@ -122,7 +122,7 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
    */
   static Schema getKeySchema(DatasetDescriptor descriptor) {
     Schema avroRecordSchema = descriptor.getSchema();
-    Schema keySchema = Schema.createRecord(avroRecordSchema.getName() + "Key",
+    Schema keySchema = Schema.createRecord(avroRecordSchema.getName(),
         "Key part of " + avroRecordSchema.getName(),
         avroRecordSchema.getNamespace(), false);
     List<Schema.Field> keyFields = Lists.newArrayList();

@@ -9,20 +9,20 @@ import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.dao.KeyEntity;
-import com.cloudera.cdk.data.hbase.avro.GenericAvroDao;
+import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
 import com.cloudera.cdk.data.spi.AbstractDatasetReader;
 import java.util.Iterator;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 
-class GenericAvroDaoDataset implements Dataset {
-
-  private final GenericAvroDao dao;
+class SpecificAvroDaoDataset implements Dataset {
+  private SpecificAvroDao dao;
   private DatasetDescriptor descriptor;
   private Schema keySchema;
 
-  public GenericAvroDaoDataset(GenericAvroDao dao, DatasetDescriptor descriptor) {
+
+  public SpecificAvroDaoDataset(SpecificAvroDao dao, DatasetDescriptor descriptor) {
     this.dao = dao;
     this.descriptor = descriptor;
     this.keySchema = HBaseMetadataProvider.getKeySchema(descriptor);
@@ -55,7 +55,7 @@ class GenericAvroDaoDataset implements Dataset {
 
   @Override
   public <E> DatasetReader<E> getReader() {
-    return new GenericAvroDaoDatasetReader(dao.getScanner());
+    return new SpecificAvroDaoDatasetReader(dao.getScanner());
   }
 
   @Override
@@ -79,19 +79,19 @@ class GenericAvroDaoDataset implements Dataset {
 
       @Override
       public boolean put(E e) {
-        // the entity contains the key fields so we can use the same GenericRecord
+        // the entity contains the key fields so we can use the same Specific
         // instance as a key
-        return dao.put((GenericRecord) e, (GenericRecord) e);
+        return dao.put(e, e);
       }
     };
   }
 
-  private class GenericAvroDaoDatasetReader extends AbstractDatasetReader {
+  private class SpecificAvroDaoDatasetReader<K, E> extends AbstractDatasetReader {
 
-    private EntityScanner<GenericRecord, GenericRecord> scanner;
-    private Iterator<KeyEntity<GenericRecord, GenericRecord>> iterator;
+    private EntityScanner<K, E> scanner;
+    private Iterator<KeyEntity<K, E>> iterator;
 
-    public GenericAvroDaoDatasetReader(EntityScanner<GenericRecord, GenericRecord> scanner) {
+    public SpecificAvroDaoDatasetReader(EntityScanner<K, E> scanner) {
       this.scanner = scanner;
     }
 
@@ -107,7 +107,7 @@ class GenericAvroDaoDataset implements Dataset {
     }
 
     @Override
-    public GenericRecord next() {
+    public E next() {
       return iterator.next().getEntity();
     }
 
