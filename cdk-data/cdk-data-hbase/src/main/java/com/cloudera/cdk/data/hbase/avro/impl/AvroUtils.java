@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase.avro.impl;
 
+import com.google.common.collect.Lists;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,6 +43,7 @@ import org.apache.avro.specific.SpecificRecord;
 
 import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.SerializationException;
+import org.codehaus.jackson.JsonNode;
 
 /**
  * Utility functions for Avro instances.
@@ -210,7 +212,25 @@ public class AvroUtils {
     } catch (NoSuchFieldException e) {
       throw new HBaseCommonException(e);
     }
-    return new AvroKeySchema(schemaField, keySchema.getRawSchema());
+    // Ensure schema is limited to keySchema's fields. The class may have more fields
+    // in the case that the entity is being used as a key.
+    List<Field> fields = Lists.newArrayList();
+    for (Schema.Field field : keySchema.getAvroSchema().getFields()) {
+      fields.add(copy(schemaField.getField(field.name())));
+    }
+    Schema schema = Schema.createRecord(schemaField.getName(), schemaField.getDoc(),
+        schemaField.getNamespace(), schemaField.isError());
+    schema.setFields(fields);
+    return new AvroKeySchema(schema, keySchema.getRawSchema());
+  }
+
+  private static Schema.Field copy(Schema.Field f) {
+    Schema.Field copy = AvroUtils.cloneField(f);
+    // retain mapping properties
+    for (Map.Entry<String,JsonNode> prop : f.getJsonProps().entrySet()) {
+      copy.addProp(prop.getKey(), prop.getValue());
+    }
+    return copy;
   }
 
   public static AvroEntitySchema mergeSpecificStringTypes(
