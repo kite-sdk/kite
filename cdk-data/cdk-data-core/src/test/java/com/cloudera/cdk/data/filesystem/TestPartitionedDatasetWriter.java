@@ -17,6 +17,7 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
@@ -34,16 +35,20 @@ import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
 
 public class TestPartitionedDatasetWriter {
 
-  private Path testDirectory;
+  private Configuration conf;
   private FileSystem fileSystem;
+  private Path testDirectory;
+  private MetadataProvider testProvider;
   private FileSystemDatasetRepository repo;
   private PartitionedDatasetWriter<Object> writer;
 
   @Before
   public void setUp() throws IOException {
-    testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    fileSystem = FileSystem.get(new Configuration());
-    repo = new FileSystemDatasetRepository(fileSystem, testDirectory);
+    this.conf = new Configuration();
+    this.fileSystem = FileSystem.get(conf);
+    this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
+    this.testProvider = new FileSystemMetadataProvider(conf, testDirectory);
+    this.repo = new FileSystemDatasetRepository(testProvider);
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", 2).get();
     Dataset users = repo.create(

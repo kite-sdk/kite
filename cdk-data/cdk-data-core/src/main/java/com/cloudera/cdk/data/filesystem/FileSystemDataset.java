@@ -153,15 +153,16 @@ class FileSystemDataset implements Dataset {
 
     int partitionDepth = key.getLength();
     PartitionStrategy subpartitionStrategy = Accessor.getDefault()
-      .getSubpartitionStrategy(partitionStrategy, partitionDepth);
+        .getSubpartitionStrategy(partitionStrategy, partitionDepth);
 
     return new FileSystemDataset.Builder()
-      .name(name)
-      .fileSystem(fileSystem)
-      .descriptor(
-        new DatasetDescriptor.Builder().schema(schema).format(descriptor.getFormat())
-          .partitionStrategy(subpartitionStrategy).get())
-      .directory(partitionDirectory).partitionKey(key).get();
+        .name(name)
+        .descriptor(new DatasetDescriptor.Builder(descriptor)
+            .location(partitionDirectory.toUri())
+            .partitionStrategy(subpartitionStrategy)
+            .get())
+        .partitionKey(key)
+        .get();
   }
 
   @Override
@@ -205,16 +206,15 @@ class FileSystemDataset implements Dataset {
     for (FileStatus stat : fileStatuses) {
       Path p = stat.getPath();
       PartitionKey key = fromDirectoryName(p);
+      PartitionStrategy subPartitionStrategy = Accessor.getDefault()
+          .getSubpartitionStrategy(partitionStrategy, 1);
       Builder builder = new FileSystemDataset.Builder()
-        .name(name)
-        .fileSystem(fileSystem)
-        .descriptor(
-          new DatasetDescriptor.Builder()
-            .schema(schema).format(descriptor.getFormat())
-            .partitionStrategy(
-              Accessor.getDefault().getSubpartitionStrategy(
-                partitionStrategy, 1)).get()).directory(p)
-        .partitionKey(key);
+          .name(name)
+          .descriptor(new DatasetDescriptor.Builder(descriptor)
+              .location(p.toUri())
+              .partitionStrategy(subPartitionStrategy)
+              .get())
+          .partitionKey(key);
 
       partitions.add(builder.get());
     }
@@ -284,23 +284,23 @@ class FileSystemDataset implements Dataset {
     private DatasetDescriptor descriptor;
     private PartitionKey partitionKey;
 
-    public Builder fileSystem(FileSystem fileSystem) {
-      this.fileSystem = fileSystem;
-      return this;
-    }
-
     public Builder name(String name) {
       this.name = name;
       return this;
     }
 
-    public Builder directory(Path directory) {
-      this.directory = directory;
-      return this;
-    }
-
     public Builder descriptor(DatasetDescriptor descriptor) {
+      Preconditions.checkArgument(descriptor.getLocation() != null,
+          "Dataset location cannot be null");
+      Preconditions.checkArgument(descriptor.getConfiguration() != null,
+          "Configuration cannot be null");
       this.descriptor = descriptor;
+      this.directory = new Path(descriptor.getLocation());
+      try {
+        this.fileSystem = directory.getFileSystem(descriptor.getConfiguration());
+      } catch (IOException ex) {
+        throw new DatasetException("Cannot access FileSystem", ex);
+      }
       return this;
     }
 

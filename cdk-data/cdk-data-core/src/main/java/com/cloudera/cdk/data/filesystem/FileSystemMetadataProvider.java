@@ -17,6 +17,7 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.NoSuchDatasetException;
@@ -25,6 +26,7 @@ import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -34,7 +36,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Properties;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 
 /**
  * <p>
@@ -63,13 +70,26 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   private static final String VERSION_FIELD_NAME = "version";
   private static final String METADATA_VERSION = "1";
   private static final String FORMAT_FIELD_NAME = "format";
+  private static final String LOCATION_FIELD_NAME = "location";
 
+  private final Configuration conf;
   private final Path rootDirectory;
-  private final FileSystem fileSystem;
 
-  public FileSystemMetadataProvider(FileSystem fileSystem, Path rootDirectory) {
-    this.fileSystem = fileSystem;
-    this.rootDirectory = rootDirectory;
+  // cache the rootDirectory's FileSystem to avoid multiple lookups
+  private transient final FileSystem rootFileSystem;
+
+  public FileSystemMetadataProvider(Configuration conf, Path rootDirectory) {
+    Preconditions.checkArgument(conf != null, "Configuration cannot be null");
+    Preconditions.checkArgument(rootDirectory != null, "Root cannot be null");
+
+    this.conf = conf;
+    try {
+      this.rootFileSystem = rootDirectory.getFileSystem(conf);
+      this.rootDirectory = rootFileSystem.makeQualified(rootDirectory);
+    } catch (IOException ex) {
+      throw new MetadataProviderException(
+          "Cannot get FileSystem for root path", ex);
+    }
   }
 
   @Override
@@ -77,19 +97,17 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     logger.debug("Loading dataset metadata name:{}", name);
 
     final Path datasetPath = pathForDataset(name);
-    FileSystemDatasetRepository.checkExists(fileSystem, datasetPath);
-
-    final Path directory = pathForMetadata(datasetPath);
-    checkExists(fileSystem, directory);
+    final Path metadataPath = pathForMetadata(datasetPath);
+    checkExists(rootFileSystem, metadataPath);
 
     InputStream inputStream = null;
     Properties properties = new Properties();
     DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder();
-    Path descriptorPath = new Path(directory, DESCRIPTOR_FILE_NAME);
+    Path descriptorPath = new Path(metadataPath, DESCRIPTOR_FILE_NAME);
 
     boolean threw = true;
     try {
-      inputStream = fileSystem.open(descriptorPath);
+      inputStream = rootFileSystem.open(descriptorPath);
       properties.load(inputStream);
       threw = false;
     } catch (IOException e) {
@@ -111,13 +129,23 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       builder.partitionStrategy(Accessor.getDefault().fromExpression(properties
           .getProperty(PARTITION_EXPRESSION_FIELD_NAME)));
     }
-
-    Path schemaPath = new Path(directory, SCHEMA_FILE_NAME);
+    Path schemaPath = new Path(metadataPath, SCHEMA_FILE_NAME);
     try {
-      builder.schema(fileSystem.makeQualified(schemaPath).toUri());
+      builder.schema(rootFileSystem.makeQualified(schemaPath).toUri());
     } catch (IOException e) {
       throw new MetadataProviderException(
         "Unable to load schema file:" + schemaPath + " for dataset:" + name, e);
+    }
+
+    if (properties.containsKey(LOCATION_FIELD_NAME)) {
+      // the location should always be written by this library and validated
+      // when the descriptor is first created.
+      try {
+        builder.location(properties.getProperty(LOCATION_FIELD_NAME));
+      } catch (URISyntaxException ex) {
+        throw new MetadataProviderException("[BUG] Cannot parse location URI", ex);
+      }
+      builder.configuration(conf);
     }
 
     return builder.get();
@@ -128,24 +156,42 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
       descriptor);
 
-    final Path directory = pathForMetadata(pathForDataset(name));
+    final Path dataLocation;
 
-    try {
-      if (fileSystem.exists(directory)) {
-        // TODO: Change this to a better Exception class
-        throw new MetadataProviderException(
-            "Descriptor directory:" + directory + "already exists");
-      }
-      // create the directory so that update can do the rest of the work
-      fileSystem.mkdirs(directory);
-    } catch (IOException e) {
-      throw new MetadataProviderException(
-        "Unable to create metadata directory:" + directory + " for dataset:" + name, e);
+    // If the descriptor has a location, use it.
+    if (descriptor.getLocation() != null) {
+      dataLocation = new Path(descriptor.getLocation());
+      Preconditions.checkArgument(
+          rootFileSystem.equals(fsForPath(dataLocation)),
+          "FileSystem does not match root directory");
+    } else {
+      dataLocation = pathForDataset(name);
     }
 
-    writeDescriptor(fileSystem, directory, name, descriptor);
+    final Path metadataLocation = pathForMetadata(dataLocation);
 
-    return descriptor;
+    // get a DatasetDescriptor with the location set
+    DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder(descriptor)
+        .location(dataLocation.toUri())
+        .configuration(conf)
+        .get();
+
+    try {
+      if (rootFileSystem.exists(metadataLocation)) {
+        throw new DatasetExistsException(
+            "Descriptor directory:" + metadataLocation + " already exists");
+      }
+      // create the directory so that update can do the rest of the work
+      rootFileSystem.mkdirs(metadataLocation);
+    } catch (IOException e) {
+      throw new MetadataProviderException(
+          "Unable to create metadata directory:" + metadataLocation +
+          " for dataset:" + name, e);
+    }
+
+    writeDescriptor(rootFileSystem, metadataLocation, name, newDescriptor);
+
+    return newDescriptor;
   }
 
   @Override
@@ -153,8 +199,20 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
       descriptor);
 
+    final Path dataLocation;
+
+    // If the descriptor has a location, use it.
+    if (descriptor.getLocation() != null) {
+      dataLocation = new Path(descriptor.getLocation());
+      Preconditions.checkArgument(
+          rootFileSystem.equals(fsForPath(dataLocation)),
+          "FileSystem does not match root directory");
+    } else {
+      dataLocation = pathForDataset(name);
+    }
+
     writeDescriptor(
-        fileSystem, pathForMetadata(pathForDataset(name)), name, descriptor);
+        rootFileSystem, pathForMetadata(dataLocation), name, descriptor);
 
     return descriptor;
   }
@@ -166,8 +224,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     final Path directory = pathForMetadata(pathForDataset(name));
 
     try {
-      if (fileSystem.exists(directory)) {
-        if (fileSystem.delete(directory, true)) {
+      if (rootFileSystem.exists(directory)) {
+        if (rootFileSystem.delete(directory, true)) {
           return true;
         } else {
           throw new IOException("Failed to delete metadata directory:"
@@ -186,7 +244,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   public boolean exists(String name) {
     final Path potentialPath = pathForMetadata(pathForDataset(name));
     try {
-      return fileSystem.exists(potentialPath);
+      return rootFileSystem.exists(potentialPath);
     } catch (IOException ex) {
       throw new MetadataProviderException(
           "Could not check metadata path:" + potentialPath, ex);
@@ -194,37 +252,70 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
+  public List<String> list() {
+    List<String> datasets = Lists.newArrayList();
+    try {
+      FileStatus[] entries = rootFileSystem.listStatus(rootDirectory,
+          PathFilters.notHidden());
+      for (FileStatus entry : entries) {
+        // assumes that all unhidden directories under the root are data sets
+        if (entry.isDirectory()) {
+          // may want to add a check: !RESERVED_NAMES.contains(name)
+          datasets.add(entry.getPath().getName());
+        } else {
+          continue;
+        }
+      }
+    } catch (IOException ex) {
+      throw new MetadataProviderException("Could not list data sets", ex);
+    }
+    return datasets;
+  }
+
+  @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("rootDirectory", rootDirectory)
-      .add("fileSystem", fileSystem).toString();
+    return Objects.toStringHelper(this)
+        .add("rootDirectory", rootDirectory)
+        .add("conf", conf).toString();
   }
 
   private Path pathForDataset(String name) {
     Preconditions.checkState(rootDirectory != null,
       "Dataset repository root directory can not be null");
 
-    // delegate to the FileSystemDatasetRepository implementation
-    return FileSystemDatasetRepository.pathForDataset(rootDirectory, name);
+    return pathForDataset(rootDirectory, name);
+  }
+
+  private FileSystem fsForPath(Path path) {
+    try {
+      return path.getFileSystem(conf);
+    } catch (IOException ex) {
+      throw new MetadataProviderException(
+          "Cannot access FileSystem for uri:" + path, ex);
+    }
   }
 
   /**
    * Writes the contents of a {@code Descriptor} to files.
    *
-   * @param fs          The {@link FileSystem} where data will be stored
-   * @param location    The directory {@link Path} where files will be located
-   * @param name        The {@link Dataset} name
-   * @param descriptor  The {@code Descriptor} contents to write
+   * @param fs                The {@link FileSystem} where data will be stored
+   * @param metadataLocation  The directory {@link Path} where metadata files
+   *                          will be located
+   * @param name              The {@link Dataset} name
+   * @param descriptor        The {@code Descriptor} contents to write
    *
-   * @throws MetadataProviderException If the location does not exist or if any
-   *                                   IOExceptions need to be propagated.
+   * @throws MetadataProviderException  If the {@code metadataLocation} does not
+   *                                    exist or if any IOExceptions need to be
+   *                                    propagated.
    */
   private static void writeDescriptor(
-      FileSystem fs, Path location, String name, DatasetDescriptor descriptor) {
+      FileSystem fs, Path metadataLocation, String name,
+      DatasetDescriptor descriptor) {
 
-    checkExists(fs, location);
+    checkExists(fs, metadataLocation);
 
     FSDataOutputStream outputStream = null;
-    final Path schemaPath = new Path(location, SCHEMA_FILE_NAME);
+    final Path schemaPath = new Path(metadataLocation, SCHEMA_FILE_NAME);
     boolean threw = true;
     try {
       outputStream = fs.create(schemaPath, true /* overwrite */ );
@@ -247,12 +338,17 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     properties.setProperty(VERSION_FIELD_NAME, METADATA_VERSION);
     properties.setProperty(FORMAT_FIELD_NAME, descriptor.getFormat().getName());
 
+    final URI dataLocation = descriptor.getLocation();
+    if (dataLocation != null) {
+      properties.setProperty(LOCATION_FIELD_NAME, dataLocation.toString());
+    }
+
     if (descriptor.isPartitioned()) {
       properties.setProperty(PARTITION_EXPRESSION_FIELD_NAME,
           Accessor.getDefault().toExpression(descriptor.getPartitionStrategy()));
     }
 
-    final Path descriptorPath = new Path(location, DESCRIPTOR_FILE_NAME);
+    final Path descriptorPath = new Path(metadataLocation, DESCRIPTOR_FILE_NAME);
     threw = true;
     try {
       outputStream = fs.create(descriptorPath, true /* overwrite */ );
@@ -281,15 +377,28 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   }
 
   /**
+   * Returns the correct dataset path for the given name and root directory.
+   *
+   * @param root A Path
+   * @param name A String dataset name
+   * @return the correct dataset Path
+   */
+  private static Path pathForDataset(Path root, String name) {
+    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
+
+    // Why replace '.' here? Is this a namespacing hack?
+    return new Path(root, name.replace('.', Path.SEPARATOR_CHAR));
+  }
+
+  /**
    * Precondition-style static validation that a dataset exists
    *
    * @param fs        A FileSystem where the metadata should be stored
    * @param location  The Path where the metadata should be stored
    * @throws NoSuchDatasetException     if the descriptor location is missing
    * @throws MetadataProviderException  if any IOException is thrown
-   * @since 0.7.0
    */
-  protected static void checkExists(FileSystem fs, Path location) {
+  private static void checkExists(FileSystem fs, Path location) {
     try {
       if (!fs.exists(location)) {
         throw new NoSuchDatasetException("Descriptor location is missing");

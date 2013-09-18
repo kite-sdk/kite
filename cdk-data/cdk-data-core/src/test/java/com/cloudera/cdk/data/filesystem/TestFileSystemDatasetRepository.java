@@ -20,6 +20,7 @@ import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.Formats;
+import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableMultiset;
@@ -41,16 +42,20 @@ import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.datasetSize;
 
 public class TestFileSystemDatasetRepository {
 
+  private Configuration conf;
   private FileSystem fileSystem;
   private Path testDirectory;
+  private MetadataProvider testProvider;
   private FileSystemDatasetRepository repo;
   private Schema testSchema;
 
   @Before
   public void setUp() throws IOException {
-    fileSystem = FileSystem.get(new Configuration());
-    testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    repo = new FileSystemDatasetRepository(fileSystem, testDirectory);
+    this.conf = new Configuration();
+    this.fileSystem = FileSystem.get(conf);
+    this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
+    this.testProvider = new FileSystemMetadataProvider(conf, testDirectory);
+    repo = new FileSystemDatasetRepository(testProvider);
 
     testSchema = Schema.createRecord("Test", "Test record schema",
         "com.cloudera.cdk.data.filesystem", false);
@@ -260,8 +265,10 @@ public class TestFileSystemDatasetRepository {
             TextNode.valueOf("a@example.com"))
     ));
 
-    Dataset datasetV3 = repo.update("test1", new DatasetDescriptor.Builder().schema
-        (testSchemaV3).get());
+    Dataset datasetV3 = repo.update("test1",
+        new DatasetDescriptor.Builder(dataset.getDescriptor())
+            .schema(testSchemaV3)
+            .get());
 
     Assert.assertEquals("Dataset schema is updated", testSchemaV3, datasetV3
         .getDescriptor().getSchema());

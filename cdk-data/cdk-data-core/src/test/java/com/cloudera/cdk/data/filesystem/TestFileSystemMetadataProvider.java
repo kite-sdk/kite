@@ -33,13 +33,15 @@ import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
 
 public class TestFileSystemMetadataProvider {
 
+  private Configuration conf;
   private FileSystem fileSystem;
   private Path testDirectory;
 
   @Before
   public void setUp() throws IOException {
-    fileSystem = FileSystem.get(new Configuration());
-    testDirectory = new Path(Files.createTempDir().getAbsolutePath());
+    this.conf = new Configuration();
+    this.fileSystem = FileSystem.get(conf);
+    this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
   }
 
   @After
@@ -49,8 +51,8 @@ public class TestFileSystemMetadataProvider {
 
   @Test
   public void testNonPartitioned() throws IOException {
-    MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
-        testDirectory);
+    MetadataProvider provider = new FileSystemMetadataProvider(
+        conf, testDirectory);
 
     provider.create("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
 
@@ -70,8 +72,8 @@ public class TestFileSystemMetadataProvider {
 
   @Test
   public void testDelete() throws IOException {
-    MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
-        testDirectory);
+    MetadataProvider provider = new FileSystemMetadataProvider(
+        conf, testDirectory);
 
     provider.create("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA).get());
 
@@ -89,8 +91,8 @@ public class TestFileSystemMetadataProvider {
 
   @Test
   public void testPartitioned() throws IOException {
-    MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
-        testDirectory);
+    MetadataProvider provider = new FileSystemMetadataProvider(
+        conf, testDirectory);
 
     provider.create(
         "test",
@@ -107,8 +109,8 @@ public class TestFileSystemMetadataProvider {
 
   @Test
   public void testNonDefaultFormat() throws IOException {
-    MetadataProvider provider = new FileSystemMetadataProvider(fileSystem,
-        testDirectory);
+    MetadataProvider provider = new FileSystemMetadataProvider(
+        conf, testDirectory);
 
     provider.create("test", new DatasetDescriptor.Builder().schema(USER_SCHEMA)
         .format(Formats.PARQUET).get());

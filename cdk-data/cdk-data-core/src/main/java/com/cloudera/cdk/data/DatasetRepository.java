@@ -79,6 +79,8 @@ public interface DatasetRepository {
    * @param descriptor A descriptor that describes the schema and other properties of the
    *                   dataset
    * @return The newly created dataset
+   * @throws IllegalArgumentException If {@code name} or {@code descriptor} is
+   *                                  {@code null}
    * @throws DatasetExistsException     If a {@code Dataset} named {@code name}
    *                                    already exists.
    * @throws DatasetRepositoryException
@@ -114,6 +116,8 @@ public interface DatasetRepository {
    * @param name The name of the dataset.
    * @return {@code true} if the dataset was successfully deleted, false if the
    *         dataset does not exist.
+   * @throws NoSuchDatasetException If the {@code Dataset} location cannot be
+   *                                determined because no metadata exists.
    * @throws DatasetRepositoryException
    *
    * @since 0.7.0

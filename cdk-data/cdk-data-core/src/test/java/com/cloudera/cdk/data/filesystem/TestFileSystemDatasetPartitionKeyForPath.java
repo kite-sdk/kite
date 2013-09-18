@@ -48,12 +48,14 @@ public class TestFileSystemDatasetPartitionKeyForPath {
         .hash("username", "username_part", 2).hash("email", 3).get();
 
     dataset = new FileSystemDataset.Builder()
-        .fileSystem(fileSystem)
-        .directory(testDirectory)
         .name("partitioned-users")
-        .descriptor(
-            new DatasetDescriptor.Builder().schema(USER_SCHEMA)
-                .partitionStrategy(partitionStrategy).get()).get();
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(USER_SCHEMA)
+            .configuration(new Configuration())
+            .location(testDirectory.toUri())
+            .partitionStrategy(partitionStrategy)
+            .get())
+        .get();
   }
 
   @After
