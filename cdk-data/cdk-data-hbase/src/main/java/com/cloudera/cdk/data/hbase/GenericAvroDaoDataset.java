@@ -21,14 +21,11 @@ public class GenericAvroDaoDataset implements Dataset {
   private final GenericAvroDao dao;
   private DatasetDescriptor descriptor;
   private Schema keySchema;
-  private Schema entitySchema;
 
   public GenericAvroDaoDataset(GenericAvroDao dao, DatasetDescriptor descriptor) {
     this.dao = dao;
     this.descriptor = descriptor;
-    Schema[] keyAndEntitySchemas = HBaseMetadataProvider.getKeyAndEntitySchemas(descriptor);
-    this.keySchema = keyAndEntitySchemas[0];
-    this.entitySchema = keyAndEntitySchemas[1];
+    this.keySchema = HBaseMetadataProvider.getKeySchema(descriptor);
   }
 
   @Override
@@ -71,44 +68,22 @@ public class GenericAvroDaoDataset implements Dataset {
     return new DatasetAccessor<E>() {
       @Override
       public E get(PartitionKey key) {
+        // turn a PartitionKey into a GenericRecord
         GenericRecord keyRecord = new GenericData.Record(keySchema);
         int i = 0;
         for (FieldPartitioner fp : descriptor.getPartitionStrategy().getFieldPartitioners()) {
           keyRecord.put(fp.getName(), key.get(i++));
         }
-        GenericRecord entityRecord = dao.get(keyRecord);
-        return merge(keyRecord, entityRecord);
+        return (E) dao.get(keyRecord);
       }
 
       @Override
       public boolean put(E e) {
-        GenericRecord record = (GenericRecord) e;
-        // split into key and entity records
-        GenericRecord key = new GenericData.Record(keySchema);
-        for (Schema.Field f : keySchema.getFields()) {
-          key.put(f.name(), record.get(f.name()));
-        }
-        GenericRecord entity = new GenericData.Record(entitySchema);
-        for (Schema.Field f : entitySchema.getFields()) {
-          entity.put(f.name(), record.get(f.name()));
-        }
-        return dao.put(key, entity);
+        // the entity contains the key fields so we can use the same GenericRecord
+        // instance as a key
+        return dao.put((GenericRecord) e, (GenericRecord) e);
       }
     };
-  }
-
-  private <E> E merge(GenericRecord keyRecord, GenericRecord entityRecord) {
-    if (entityRecord == null) {
-      return null;
-    }
-    GenericRecord mergedEntity = new GenericData.Record(descriptor.getSchema());
-    for (Schema.Field f : keySchema.getFields()) {
-      mergedEntity.put(f.name(), keyRecord.get(f.name()));
-    }
-    for (Schema.Field f : entitySchema.getFields()) {
-      mergedEntity.put(f.name(), entityRecord.get(f.name()));
-    }
-    return (E) mergedEntity;
   }
 
   private class GenericAvroDaoDatasetReader extends AbstractDatasetReader {
@@ -133,8 +108,7 @@ public class GenericAvroDaoDataset implements Dataset {
 
     @Override
     public GenericRecord next() {
-      KeyEntity<GenericRecord, GenericRecord> next = iterator.next();
-      return merge(next.getKey(), next.getEntity());
+      return iterator.next().getEntity();
     }
 
     @Override

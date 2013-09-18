@@ -4,9 +4,12 @@
   "namespace": "com.cloudera.cdk.data.hbase.avro.entities",
   "fields": [
 
-    { "name": "part1", "type": "string" },
-    { "name": "part2", "type": "string" },
-
+    { "name": "part1", "type": "string", "mapping":
+      { "type": "column", "value": "key:part1" }
+    },
+    { "name": "part2", "type": "string", "mapping":
+      { "type": "column", "value": "key:part2" }
+    },
 
     { "name": "field1", "type": "string", "mapping":
       { "type": "column", "value": "meta:field1" }

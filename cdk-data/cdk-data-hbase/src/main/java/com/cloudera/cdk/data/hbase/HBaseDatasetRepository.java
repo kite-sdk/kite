@@ -24,20 +24,24 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public Dataset create(String name, DatasetDescriptor descriptor) {
-    metadataProvider.create(name, descriptor);
-    // TODO: use descriptor.getFormat() to decide type of DAO (Avro vs. other)
-    GenericAvroDao dao = new GenericAvroDao(tablePool, name, HBaseMetadataProvider.ENTITY_NAME, schemaManager);
-    return new GenericAvroDaoDataset(dao, descriptor);
+    DatasetDescriptor newDescriptor = metadataProvider.create(name, descriptor);
+    return newDataset(name, newDescriptor);
   }
 
   @Override
   public Dataset update(String name, DatasetDescriptor descriptor) {
-    throw new UnsupportedOperationException();
+    DatasetDescriptor newDescriptor = metadataProvider.update(name, descriptor);
+    return newDataset(name, newDescriptor);
   }
 
   @Override
   public Dataset load(String name) {
     DatasetDescriptor descriptor = metadataProvider.load(name);
+    return newDataset(name, descriptor);
+  }
+
+  private Dataset newDataset(String name, DatasetDescriptor descriptor) {
+    // TODO: use descriptor.getFormat() to decide type of DAO (Avro vs. other)
     GenericAvroDao dao = new GenericAvroDao(tablePool, name, HBaseMetadataProvider.ENTITY_NAME, schemaManager);
     return new GenericAvroDaoDataset(dao, descriptor);
   }
@@ -49,7 +53,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public boolean exists(String name) {
-    throw new UnsupportedOperationException();
+    return metadataProvider.exists(name);
   }
 
   @Override

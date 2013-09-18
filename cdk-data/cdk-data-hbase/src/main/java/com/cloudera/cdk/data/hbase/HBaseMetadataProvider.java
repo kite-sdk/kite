@@ -2,6 +2,7 @@ package com.cloudera.cdk.data.hbase;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.FieldPartitioner;
+import com.cloudera.cdk.data.NoSuchDatasetException;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.dao.Constants;
 import com.cloudera.cdk.data.dao.HBaseCommonException;
@@ -37,9 +38,8 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
   @Override
   public DatasetDescriptor create(String tableName, DatasetDescriptor descriptor) {
 
-    Schema[] keyAndEntitySchemas = getKeyAndEntitySchemas(descriptor);
-    String keySchemaString = keyAndEntitySchemas[0].toString(true);
-    String entitySchemaString = keyAndEntitySchemas[1].toString(true);
+    String keySchemaString = getKeySchema(descriptor).toString(true);
+    String entitySchemaString = descriptor.getSchema().toString(true);
 
     AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
     AvroEntitySchema entitySchema = parser.parseEntity(entitySchemaString);
@@ -91,14 +91,17 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
-    throw new UnsupportedOperationException();
+    schemaManager.migrateSchema(name, ENTITY_NAME, descriptor.getSchema().toString());
+    return descriptor;
   }
 
   @Override
   public DatasetDescriptor load(String name) {
-    // TODO: check for existence
+    if (!exists(name)) {
+      throw new NoSuchDatasetException("No such dataset: " + name);
+    }
 
-    return mergeKeyAndEntitySchemas(
+    return getDatasetDescriptor(
         schemaManager.getKeySchema(name, ENTITY_NAME).getRawSchema(),
         schemaManager.getEntitySchema(name, ENTITY_NAME).getRawSchema());
   }
@@ -110,23 +113,19 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean exists(String name) {
-    throw new UnsupportedOperationException();
+    return schemaManager.hasManagedSchema(name, ENTITY_NAME);
   }
 
   /*
    * Use the partition strategy to extract the key fields so that we can create a key
-   * schema and an entity schema.
+   * schema.
    */
-  static Schema[] getKeyAndEntitySchemas(DatasetDescriptor descriptor) {
+  static Schema getKeySchema(DatasetDescriptor descriptor) {
     Schema avroRecordSchema = descriptor.getSchema();
     Schema keySchema = Schema.createRecord(avroRecordSchema.getName() + "Key",
         "Key part of " + avroRecordSchema.getName(),
         avroRecordSchema.getNamespace(), false);
-    Schema entitySchema = Schema.createRecord(avroRecordSchema.getName(),
-        avroRecordSchema.getDoc(),
-        avroRecordSchema.getNamespace(), false);
     List<Schema.Field> keyFields = Lists.newArrayList();
-    List<Schema.Field> entityFields = Lists.newArrayList();
     List<String> keyFieldNames = Lists.newArrayList();
     for (FieldPartitioner fp : descriptor.getPartitionStrategy().getFieldPartitioners()) {
       keyFieldNames.add(fp.getName());
@@ -134,13 +133,10 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     for (Schema.Field f : avroRecordSchema.getFields()) {
       if (keyFieldNames.contains(f.name())) {
         keyFields.add(copy(f));
-      } else {
-        entityFields.add(copy(f));
       }
     }
     keySchema.setFields(keyFields);
-    entitySchema.setFields(entityFields);
-    return new Schema[] { keySchema, entitySchema };
+    return keySchema;
   }
 
   private static Schema.Field copy(Schema.Field f) {
@@ -152,25 +148,15 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     return copy;
   }
 
-  private static DatasetDescriptor mergeKeyAndEntitySchemas(String keySchemaString,
+  private static DatasetDescriptor getDatasetDescriptor(String keySchemaString,
       String entitySchemaString) {
     Schema keySchema = new Schema.Parser().parse(keySchemaString);
-    Schema entitySchema = new Schema.Parser().parse(entitySchemaString);
-    Schema schema = Schema.createRecord(entitySchema.getName(),
-        entitySchema.getNamespace(),
-        entitySchema.getDoc(), false);
     PartitionStrategy.Builder partitionStrategyBuilder = new PartitionStrategy.Builder();
-    List<Schema.Field> mergedFields = Lists.newArrayList();
     for (Schema.Field f : keySchema.getFields()) {
-      mergedFields.add(copy(f));
       partitionStrategyBuilder.identity(f.name(), 1); // each key field is a partition field
     }
-    for (Schema.Field f : entitySchema.getFields()) {
-      mergedFields.add(copy(f));
-    }
-    schema.setFields(mergedFields);
     return new DatasetDescriptor.Builder()
-        .schema(schema)
+        .schema(entitySchemaString)
         .partitionStrategy(partitionStrategyBuilder.get())
         .get();
   }
