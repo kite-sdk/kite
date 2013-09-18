@@ -75,12 +75,12 @@ public interface DatasetRepository {
    * dataset with a given name. If a duplicate name is provided, an exception is
    * thrown.
    *
-   * @param name       The fully qualified dataset name
-   * @param descriptor A descriptor that describes the schema and other properties of the
-   *                   dataset
+   * @param name        The fully qualified dataset name
+   * @param descriptor  A descriptor that describes the schema and other
+   *                    properties of the dataset
    * @return The newly created dataset
-   * @throws IllegalArgumentException If {@code name} or {@code descriptor} is
-   *                                  {@code null}
+   * @throws IllegalArgumentException   If {@code name} or {@code descriptor}
+   *                                    is {@code null}
    * @throws DatasetExistsException     If a {@code Dataset} named {@code name}
    *                                    already exists.
    * @throws DatasetRepositoryException
@@ -99,6 +99,7 @@ public interface DatasetRepository {
    * @param descriptor A descriptor that describes the schema and other properties of the
    *                   dataset
    * @return The updated dataset
+   * @throws IllegalArgumentException      If {@code name} is null
    * @throws NoSuchDatasetException        If there is no data set named
    *                                       {@code name}
    * @throws UnsupportedOperationException If descriptor updates are not
@@ -116,8 +117,9 @@ public interface DatasetRepository {
    * @param name The name of the dataset.
    * @return {@code true} if the dataset was successfully deleted, false if the
    *         dataset does not exist.
-   * @throws NoSuchDatasetException If the {@code Dataset} location cannot be
-   *                                determined because no metadata exists.
+   * @throws IllegalArgumentException If {@code name} is null
+   * @throws NoSuchDatasetException   If the {@code Dataset} location cannot be
+   *                                  determined because no metadata exists.
    * @throws DatasetRepositoryException
    *
    * @since 0.7.0
@@ -137,6 +139,7 @@ public interface DatasetRepository {
    *
    * @param name a {@code Dataset} name to check the existence of
    * @return true if a Dataset named {@code name} exists, false otherwise
+   * @throws IllegalArgumentException If {@code name} is null
    * @throws DatasetRepositoryException
    *
    * @since 0.7.0

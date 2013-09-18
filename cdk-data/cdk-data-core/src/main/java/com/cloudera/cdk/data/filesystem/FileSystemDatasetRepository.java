@@ -33,7 +33,10 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.avro.Schema;
@@ -43,9 +46,6 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collection;
 
 /**
  * <p>
@@ -132,6 +132,10 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public Dataset update(String name, DatasetDescriptor descriptor) {
+    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
+    Preconditions.checkArgument(descriptor != null,
+        "DatasetDescriptro cannot be null");
+
     DatasetDescriptor oldDescriptor = metadataProvider.load(name);
 
     // oldDescriptor is valid if load didn't throw NoSuchDatasetException
@@ -247,6 +251,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public boolean exists(String name) {
+    Preconditions.checkArgument(name != null, "Name can not be null");
     return metadataProvider.exists(name);
   }
 
