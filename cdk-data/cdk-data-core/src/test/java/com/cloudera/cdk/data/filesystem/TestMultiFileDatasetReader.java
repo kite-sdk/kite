@@ -15,7 +15,9 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
+import com.cloudera.cdk.data.TestDatasetReaders;
 import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetReaderException;
 import com.cloudera.cdk.data.UnknownFormatException;
 import com.google.common.collect.Lists;
@@ -31,8 +33,9 @@ import org.junit.Test;
 
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
 import com.cloudera.cdk.data.impl.Accessor;
+import org.apache.avro.generic.GenericData;
 
-public class TestMultiFileDatasetReader {
+public class TestMultiFileDatasetReader extends TestDatasetReaders {
 
   public static final Path TEST_FILE = new Path(
       Resources.getResource("data/strings-100.avro").getFile());
@@ -46,6 +49,24 @@ public class TestMultiFileDatasetReader {
     };
   public static final DatasetDescriptor DESCRIPTOR = new DatasetDescriptor
       .Builder().schema(STRING_SCHEMA).get();
+
+  @Override
+  public DatasetReader newReader() throws IOException {
+    return new MultiFileDatasetReader<GenericData.Record>(
+        FileSystem.get(new Configuration()),
+        Lists.newArrayList(TEST_FILE, TEST_FILE),
+        DESCRIPTOR);
+  }
+
+  @Override
+  public int getTotalRecords() {
+    return 200;
+  }
+
+  @Override
+  public DatasetTestUtilities.RecordValidator getValidator() {
+    return VALIDATOR;
+  }
 
   private FileSystem fileSystem;
   @Before

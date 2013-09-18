@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.data.filesystem;
+package com.cloudera.cdk.data;
 
-import com.cloudera.cdk.data.DatasetReader;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +32,7 @@ import org.junit.Assert;
  *
  * @param <R> The type of entities returned by the reader.
  */
-public abstract class TestDatasetReaderCommon<R> {
+public abstract class TestDatasetReaders<R> {
   abstract public DatasetReader<R> newReader() throws IOException ;
   abstract public int getTotalRecords();
   abstract public RecordValidator<R> getValidator();

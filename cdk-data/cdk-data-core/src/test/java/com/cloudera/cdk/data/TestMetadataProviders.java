@@ -18,15 +18,11 @@ package com.cloudera.cdk.data;
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
 import com.google.common.collect.ImmutableMultiset;
 
-import com.google.common.io.Files;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,15 +31,12 @@ public abstract class TestMetadataProviders {
 
   protected static final String NAME = "provider_test1";
 
-  private Configuration conf;
-
+  protected Configuration conf;
   protected DatasetDescriptor testDescriptor;
   protected DatasetDescriptor anotherDescriptor;
-  protected FileSystem fileSystem;
-  protected Path testDirectory;
 
   protected MetadataProvider provider;
-  abstract MetadataProvider newProvider(Configuration conf);
+  abstract public MetadataProvider newProvider(Configuration conf);
 
   @Before
   public void setUp() throws IOException {
@@ -65,15 +58,8 @@ public abstract class TestMetadataProviders {
             .hash("some_field", 20000)
             .get())
         .get();
-    this.fileSystem = FileSystem.get(conf);
-    this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
 
     this.provider = newProvider(conf);
-  }
-
-  @After
-  public void tearDown() throws IOException {
-    fileSystem.delete(testDirectory, true);
   }
 
   @Test
@@ -86,8 +72,6 @@ public abstract class TestMetadataProviders {
     Assert.assertTrue("Descriptor should exist", provider.exists(NAME));
     Assert.assertEquals("Schema should match",
         testDescriptor.getSchema(), created.getSchema());
-    Assert.assertEquals("Schema URL should match",
-        testDescriptor.getSchemaUrl(), created.getSchemaUrl());
     Assert.assertEquals("PartitionStrategy should match",
         testDescriptor.getPartitionStrategy(), created.getPartitionStrategy());
     Assert.assertEquals("Format should match",
@@ -151,8 +135,6 @@ public abstract class TestMetadataProviders {
     Assert.assertNotNull("DatasetDescriptor should be returned", loaded);
     Assert.assertEquals("Schema should match",
         testDescriptor.getSchema(), loaded.getSchema());
-    Assert.assertEquals("Schema URL should match",
-        testDescriptor.getSchemaUrl(), loaded.getSchemaUrl());
     Assert.assertEquals("PartitionStrategy should match",
         testDescriptor.getPartitionStrategy(), loaded.getPartitionStrategy());
     Assert.assertEquals("Format should match",
@@ -189,7 +171,6 @@ public abstract class TestMetadataProviders {
     }
 
     Assert.assertNotNull("Updated Descriptor should be returned", saved);
-    Assert.assertNull("Schema URI should match update", saved.getSchemaUrl());
     Assert.assertEquals("Schema should match update",
         anotherDescriptor.getSchema(), saved.getSchema());
     Assert.assertEquals("PartitionStrategy should match update",
