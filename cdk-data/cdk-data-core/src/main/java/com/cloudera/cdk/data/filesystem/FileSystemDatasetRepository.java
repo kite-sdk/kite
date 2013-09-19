@@ -219,10 +219,11 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
       return false;
     }
 
+    boolean changed;
     try {
       // don't care about the return value here -- if it already doesn't exist
       // we still need to delete the data directory
-      metadataProvider.delete(name);
+      changed = metadataProvider.delete(name);
     } catch (MetadataProviderException ex) {
       throw new DatasetRepositoryException(
           "Failed to delete descriptor for name:" + name, ex);
@@ -234,19 +235,19 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     try {
       if (fs.exists(dataLocation)) {
         if (fs.delete(dataLocation, true)) {
-          return true;
+          changed = true;
         } else {
           throw new DatasetRepositoryException(
               "Failed to delete dataset name:" + name +
               " location:" + dataLocation);
         }
-      } else {
-        return false;
       }
     } catch (IOException e) {
       throw new DatasetRepositoryException(
           "Internal failure when removing location:" + dataLocation);
     }
+
+    return changed;
   }
 
   @Override

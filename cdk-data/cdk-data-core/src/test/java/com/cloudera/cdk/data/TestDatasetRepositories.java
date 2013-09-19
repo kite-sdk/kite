@@ -63,6 +63,16 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
 
   abstract public DatasetRepository newRepo(MetadataProvider provider);
 
+  public MetadataProvider newProvider(Configuration conf) {
+    return new MemoryMetadataProvider(conf) {
+      @Override
+      protected URI newLocation(String name) {
+        // not used, but make sure its in the testDirectory to keep clean
+        return new Path(testDirectory, name).toUri();
+      }
+    };
+  }
+
   public TestDatasetRepositories(String mode) {
     this.distributed = mode.equals("distributed");
   }
@@ -83,14 +93,8 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
     this.testDescriptor = new DatasetDescriptor.Builder()
         .schema(testSchema)
         .get();
-    this.testProvider = new MemoryMetadataProvider(conf) {
-      @Override
-      protected URI newLocation(String name) {
-        // not used, but make sure its in the testDirectory to keep clean
-        return new Path(testDirectory, name).toUri();
-      }
-    };
 
+    this.testProvider = newProvider(conf);
     this.repo = newRepo(testProvider);
   }
 

@@ -172,6 +172,27 @@ public class DatasetDescriptor {
   }
 
   @Override
+  public int hashCode() {
+    return Objects.hashCode(schema, format, location, partitionStrategy);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final DatasetDescriptor other = (DatasetDescriptor) obj;
+    return (
+        Objects.equal(schema, other.schema) &&
+        Objects.equal(format, other.format) &&
+        Objects.equal(location, other.location) &&
+        Objects.equal(partitionStrategy, other.partitionStrategy));
+  }
+
+  @Override
   public String toString() {
     return Objects.toStringHelper(this)
         .add("format", format)
