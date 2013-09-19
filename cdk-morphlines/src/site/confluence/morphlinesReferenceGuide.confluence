@@ -194,7 +194,7 @@ readCSV {
 Example usage for Apache Hive (Values separated by non\-printable CTRL\-A character):
 {code}
 readCSV {
-  separator : "\u0001"
+  separator : "\u0001" # non-printable CTRL-A character
   columns : [Age,"",Extras,Type]
   ignoreFirstLine : false
   quoteChar : ""
@@ -227,9 +227,11 @@ readLine {
 
 h2. readMultiLine
 
-The {{readMultiLine}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadMultiLineBuilder.java]) is a multiline log parser that collapse multiline messages into a single record. It supports {{regex}}, {{what}}, and {{negate}} configuration parameters similar to logstash. The line is put as a string into the {{message}} output field.
+The {{readMultiLine}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadMultiLineBuilder.java]) is a multiline log parser that collapses multiline messages into a single record. It supports {{regex}}, {{what}}, and {{negate}} configuration parameters similar to logstash. The line is put as a string into the {{message}} output field.
 
 For example, this can be used to parse log4j with stack traces. Also see [https://gist.github.com/smougenot/3182192] and [http://logstash.net/docs/1.1.13/filters/multiline].
+
+The input stream or byte array is read from the first attachment of the input record.
 
 The command provides the following configuration options:
 
@@ -377,7 +379,7 @@ The command provides the following configuration options:
 | outputTimezone | UTC | The time zone to assume for the output timestamp. |
 | outputLocale | "" | The Java Locale to assume for the output timestamp. |
 
-Example usage:
+h4. Example usage with plain SimpleDateFormat
 {code}
 # convert the timestamp field to "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 # The input may match one of "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
@@ -388,6 +390,30 @@ convertTimestamp {
   inputTimezone : America/Los_Angeles
   outputFormat : "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
   outputTimezone : UTC
+}
+{code}
+
+h4. Example usage with Solr date rounding
+
+A SimpleDateFormat can also contain a literal string for [Solr date rounding|http://java.dzone.com/articles/solr-date-math-now-and-filter] down to, say, the current hour, minute or second. For example: {{'/MINUTE'}}. This kind of rounding improves the performance of Solr several ways:
+* it uses less memory for many functions, e.g. sorting by time,
+restricting by date ranges etc.
+* it improves speed of range queries based on time, e.g. "restrict
+documents to those from the last 7 days"
+* In the rare case of faceting by the values in the field will improve
+both memory requirements and speed.
+
+For these reasons, it's advisable to store dates in the coarsest granularity that's appropriate for your application.
+
+Example usage with Solr date rounding: 
+{code}
+# convert the timestamp field to "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+# and indicate to Solr that it shall round the time down to the current minute
+# per http://lucene.apache.org/solr/4_4_0/solr-core/org/apache/solr/util/DateMathParser.html
+convertTimestamp {
+  ...
+  outputFormat : "yyyy-MM-dd'T'HH:mm:ss.SSS'Z/MINUTE'"
+  ...
 }
 {code}
 
