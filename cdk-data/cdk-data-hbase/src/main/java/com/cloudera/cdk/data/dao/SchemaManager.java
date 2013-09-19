@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.dao;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -155,4 +156,13 @@ public interface SchemaManager {
    */
   public void migrateSchema(String tableName, String entityName,
       String newSchema);
+
+  /**
+   * Returns the entity names for a table. If no such table exists then an empty list
+   * will be returned.
+   * @param tableName
+   *          The table name of the managed schema
+   * @return The entity names for the table.
+   */
+  public List<String> getEntityNames(String tableName);
 }

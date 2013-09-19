@@ -15,7 +15,9 @@
  */
 package com.cloudera.cdk.data.hbase.manager;
 
+import com.google.common.collect.Lists;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -289,6 +291,17 @@ public class DefaultSchemaManager implements SchemaManager {
       getManagedSchemaMap().put(keyEntity.getKey(),
           keyEntity.getManagedSchema());
     }
+  }
+
+  @Override
+  public List<String> getEntityNames(String tableName) {
+    List<String> names = Lists.newArrayList();
+    for (ManagedSchemaKey key : managedSchemaMap.keySet()) {
+      if (key.getTable().equals(tableName)) {
+        names.add(key.getName());
+      }
+    }
+    return names;
   }
 
   /**
