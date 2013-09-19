@@ -36,6 +36,10 @@ import org.junit.Test;
 
 public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
+  public TestFileSystemDatasetRepository(String mode) {
+    super(mode);
+  }
+
   @Override
   public DatasetRepository newRepo(MetadataProvider provider) {
     return new FileSystemDatasetRepository.Builder()

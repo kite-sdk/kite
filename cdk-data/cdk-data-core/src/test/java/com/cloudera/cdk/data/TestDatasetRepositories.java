@@ -30,10 +30,26 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-public abstract class TestDatasetRepositories {
+@RunWith(Parameterized.class)
+public abstract class TestDatasetRepositories extends MiniDFSTest {
 
   protected static final String NAME = "test1";
+
+  @Parameterized.Parameters
+  public static Collection<Object[]> data() {
+    Object[][] data = new Object[][] {
+        { "local" },          // default to local FS
+        { "distributed" } };  // default to distributed FS
+    return Arrays.asList(data);
+  }
+
+  // whether this should use the DFS provided by MiniDFSTest
+  private boolean distributed;
 
   protected Configuration conf;
   protected FileSystem fileSystem;
@@ -47,6 +63,10 @@ public abstract class TestDatasetRepositories {
 
   abstract public DatasetRepository newRepo(MetadataProvider provider);
 
+  public TestDatasetRepositories(String mode) {
+    this.distributed = mode.equals("distributed");
+  }
+
   @Before
   public void setUp() throws IOException {
     this.testSchema = Schema.createRecord("Test", "Test record schema",
@@ -54,7 +74,10 @@ public abstract class TestDatasetRepositories {
     this.testSchema.setFields(Lists.newArrayList(new Field("name", Schema
         .create(Type.STRING), null, null)));
 
-    this.conf = new Configuration();
+    this.conf = (distributed ?
+        MiniDFSTest.getConfiguration() :
+        new Configuration());
+
     this.fileSystem = FileSystem.get(conf);
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
     this.testDescriptor = new DatasetDescriptor.Builder()
