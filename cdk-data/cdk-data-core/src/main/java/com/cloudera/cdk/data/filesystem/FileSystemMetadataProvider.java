@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
-import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.MetadataProvider;
@@ -94,6 +93,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor load(String name) {
+    Preconditions.checkArgument(name != null, "Name cannot be null");
+
     logger.debug("Loading dataset metadata name:{}", name);
 
     final Path datasetPath = pathForDataset(name);
@@ -153,6 +154,10 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
+    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Preconditions.checkArgument(descriptor != null,
+        "Descriptor cannot be null");
+
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
       descriptor);
 
@@ -196,6 +201,10 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
+    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Preconditions.checkArgument(descriptor != null,
+        "Descriptor cannot be null");
+
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
       descriptor);
 
@@ -219,29 +228,37 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean delete(String name) {
+    Preconditions.checkArgument(name != null, "Name cannot be null");
+
     logger.debug("Deleting dataset metadata name:{}", name);
 
-    final Path directory = pathForMetadata(pathForDataset(name));
+    final Path namedDirectory = pathForDataset(name);
+    final Path metadataDirectory = pathForMetadata(namedDirectory);
 
     try {
-      if (rootFileSystem.exists(directory)) {
-        if (rootFileSystem.delete(directory, true)) {
+      if (rootFileSystem.exists(metadataDirectory)) {
+        if (rootFileSystem.delete(metadataDirectory, true)) {
+          // try to delete the named directory, but only if it is empty
+          rootFileSystem.delete(namedDirectory, false);
           return true;
         } else {
           throw new IOException("Failed to delete metadata directory:"
-            + directory);
+            + metadataDirectory);
         }
       } else {
         return false;
       }
     } catch (IOException e) {
       throw new MetadataProviderException(
-        "Unable to find or delete metadata directory:" + directory + " for dataset:" + name, e);
+          "Unable to find or delete metadata directory:" + metadataDirectory +
+          " for dataset:" + name, e);
     }
   }
 
   @Override
   public boolean exists(String name) {
+    Preconditions.checkArgument(name != null, "Name cannot be null");
+
     final Path potentialPath = pathForMetadata(pathForDataset(name));
     try {
       return rootFileSystem.exists(potentialPath);
@@ -259,7 +276,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
           PathFilters.notHidden());
       for (FileStatus entry : entries) {
         // assumes that all unhidden directories under the root are data sets
-        if (entry.isDirectory()) {
+        if (entry.isDirectory() &&
+            rootFileSystem.exists(new Path(entry.getPath(), ".metadata"))) {
           // may want to add a check: !RESERVED_NAMES.contains(name)
           datasets.add(entry.getPath().getName());
         } else {

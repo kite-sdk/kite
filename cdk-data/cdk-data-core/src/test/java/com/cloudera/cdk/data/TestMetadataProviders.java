@@ -191,12 +191,22 @@ public abstract class TestMetadataProviders {
 
   @Test(expected=IllegalArgumentException.class)
   public void testUpdateFailsNullName() {
-    provider.update(null, testDescriptor);
+    try {
+      provider.update(null, testDescriptor);
+    } catch (UnsupportedOperationException ex) {
+      // this is okay, too
+      throw new IllegalArgumentException(ex);
+    }
   }
 
   @Test(expected=IllegalArgumentException.class)
   public void testUpdateFailsNullDescriptor() {
-    provider.update(NAME, null);
+    try {
+      provider.update(NAME, null);
+    } catch (UnsupportedOperationException ex) {
+      // this is okay, too
+      throw new IllegalArgumentException(ex);
+    }
   }
 
   public void testDelete() {
