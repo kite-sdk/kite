@@ -21,15 +21,31 @@ import com.google.common.collect.ImmutableMultiset;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collection;
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-public abstract class TestMetadataProviders {
+@RunWith(Parameterized.class)
+public abstract class TestMetadataProviders extends MiniDFSTest {
 
   protected static final String NAME = "provider_test1";
+
+  @Parameterized.Parameters
+  public static Collection<Object[]> data() {
+    Object[][] data = new Object[][] {
+        { "local" },          // default to local FS
+        { "distributed" } };  // default to distributed FS
+    return Arrays.asList(data);
+  }
+
+  // whether this should use the DFS provided by MiniDFSTest
+  private boolean distributed;
 
   protected Configuration conf;
   protected DatasetDescriptor testDescriptor;
@@ -38,9 +54,15 @@ public abstract class TestMetadataProviders {
   protected MetadataProvider provider;
   abstract public MetadataProvider newProvider(Configuration conf);
 
+  public TestMetadataProviders(String mode) {
+    this.distributed = mode.equals("distributed");
+  }
+
   @Before
   public void setUp() throws IOException {
-    this.conf = new Configuration();
+    this.conf = (distributed ?
+        MiniDFSTest.getConfiguration() :
+        new Configuration());
     this.testDescriptor = new DatasetDescriptor.Builder()
         .format(Formats.AVRO)
         .schema(USER_SCHEMA_URL)

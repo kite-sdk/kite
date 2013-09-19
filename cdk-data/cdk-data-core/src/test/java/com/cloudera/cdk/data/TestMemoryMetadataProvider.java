@@ -21,6 +21,10 @@ import org.junit.Test;
 
 public class TestMemoryMetadataProvider extends TestMetadataProviders {
 
+  public TestMemoryMetadataProvider(String mode) {
+    super(mode);
+  }
+
   @Override
   public MetadataProvider newProvider(Configuration conf) {
     return new MemoryMetadataProvider(conf);

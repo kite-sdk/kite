@@ -33,6 +33,10 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
   private FileSystem fileSystem;
   private Path testDirectory;
 
+  public TestFileSystemMetadataProvider(String mode) {
+    super(mode);
+  }
+
   @Override
   public MetadataProvider newProvider(Configuration conf) {
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
