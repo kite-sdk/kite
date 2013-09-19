@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.morphline.stdlib;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 

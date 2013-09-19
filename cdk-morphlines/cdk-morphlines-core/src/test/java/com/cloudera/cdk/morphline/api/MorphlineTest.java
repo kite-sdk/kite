@@ -1435,9 +1435,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
   // Before running this disable debug logging 
   // via log4j.logger.com.cloudera.cdk.morphline=INFO in log4j.properties
   public void benchmark() throws Exception {
-    System.out.println("java.version=" + System.getProperty("java.version"));
-    String morphlineConfigFile = "test-morphlines/readLine";
-    //String morphlineConfigFile = "test-morphlines/readCSVWithoutQuoting";
+    String morphlineConfigFile = "test-morphlines/readCSVWithoutQuoting";
     //String morphlineConfigFile = "test-morphlines/grokEmail";
     //String morphlineConfigFile = "test-morphlines/grokSyslogNgCisco";
     long durationSecs = 20;

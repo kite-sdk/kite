@@ -591,16 +591,15 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
   @Test
   @Ignore
   public void benchmarkAvro() throws Exception {
-//    benchmarkAvro("test-morphlines/readAvroTweetsWithExternalSchema");
-//    benchmarkAvro("test-morphlines/readAvroJsonTweetsWithExternalSchema");
-//    benchmarkAvro("test-morphlines/readAvroTweetsContainer");
-    benchmarkAvro("test-morphlines/readAvroTweetsContainerWithExternalSubSchema");
+    benchmarkAvro("test-morphlines/readAvroTweetsWithExternalSchema");
+    benchmarkAvro("test-morphlines/readAvroJsonTweetsWithExternalSchema");
+    benchmarkAvro("test-morphlines/readAvroTweetsContainer");
   }
   
   private void benchmarkAvro(String morphlineConfigFile) throws Exception {
     System.out.println("Now benchmarking " + morphlineConfigFile + " ...");
-    long durationSecs = 20;
-    File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433-medium.avro");
+    long durationSecs = 10;
+    File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433.avro");
     morphline = createMorphline(morphlineConfigFile);    
     byte[] bytes;
     if (morphlineConfigFile.contains("Container")) {
@@ -613,7 +612,7 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
         GenericData.Record expected = reader.next();
         expecteds.add(expected);
       }    
-//      assertEquals(2, expecteds.size());
+      assertEquals(2, expecteds.size());
   
       ByteArrayOutputStream bout = new ByteArrayOutputStream();
       Encoder encoder;
