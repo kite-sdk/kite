@@ -22,6 +22,9 @@ import static org.junit.Assert.assertTrue;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import java.util.Arrays;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.avro.specific.SpecificRecord;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
@@ -125,5 +128,49 @@ public class CompositeDaoTest {
     dao.put(testKey, compositeRecord);
     compositeRecord = dao.get(testKey);
     assertEquals(null, compositeRecord.getSubRecord2());
+  }
+
+  @Test
+  public void testSpecificMap() throws Exception {
+    // Construct Dao
+    Dao<TestKey, Map<String, SpecificRecord>> dao = SpecificAvroDao.buildCompositeDao(
+        tablePool, tableName, keyString,
+        Arrays.asList(subRecord1String, subRecord2String), TestKey.class);
+
+    // Construct records and keys
+    TestKey testKey = TestKey.newBuilder().setPart1("1").setPart2("1").build();
+
+    SubRecord1 subRecord1 = SubRecord1.newBuilder().setField1("field1_1")
+        .setField2("field1_2").build();
+    SubRecord2 subRecord2 = SubRecord2.newBuilder().setField1("field2_1")
+        .setField2("field2_2").build();
+
+    Map<String, SpecificRecord> compositeRecord = new HashMap<String, SpecificRecord>();
+    compositeRecord.put("SubRecord1", subRecord1);
+    compositeRecord.put("SubRecord2", subRecord2);
+
+    // Test put and get
+    dao.put(testKey, compositeRecord);
+    Map<String, SpecificRecord> returnedCompositeRecord = dao.get(testKey);
+    assertEquals("field1_1", ((SubRecord1) returnedCompositeRecord.get("SubRecord1"))
+        .getField1());
+    assertEquals("field1_2", ((SubRecord1) returnedCompositeRecord.get("SubRecord1"))
+        .getField2());
+    assertEquals("field2_1", ((SubRecord2) returnedCompositeRecord.get("SubRecord2"))
+        .getField1());
+    assertEquals("field2_2", ((SubRecord2) returnedCompositeRecord.get("SubRecord2"))
+        .getField2());
+
+    // Test OCC
+    assertFalse(dao.put(testKey, compositeRecord));
+    assertTrue(dao.put(testKey, returnedCompositeRecord));
+
+    // Test null field
+    testKey = TestKey.newBuilder().setPart1("1").setPart2("2").build();
+    compositeRecord = new HashMap<String, SpecificRecord>();
+    compositeRecord.put("SubRecord1", subRecord1);
+    dao.put(testKey, compositeRecord);
+    compositeRecord = dao.get(testKey);
+    assertEquals(null, compositeRecord.get("SubRecord2"));
   }
 }
