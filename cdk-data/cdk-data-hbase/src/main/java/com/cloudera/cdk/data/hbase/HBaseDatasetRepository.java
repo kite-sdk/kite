@@ -43,11 +43,12 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
 
   private Dataset newDataset(String name, DatasetDescriptor descriptor) {
     // TODO: use descriptor.getFormat() to decide type of DAO (Avro vs. other)
+    String entityName = HBaseMetadataProvider.getEntityName(descriptor);
     if (isSpecific(descriptor)) {
-      SpecificAvroDao dao = new SpecificAvroDao(tablePool, name, HBaseMetadataProvider.ENTITY_NAME, schemaManager);
+      SpecificAvroDao dao = new SpecificAvroDao(tablePool, name, entityName, schemaManager);
       return new SpecificAvroDaoDataset(dao, descriptor);
     } else {
-      GenericAvroDao dao = new GenericAvroDao(tablePool, name, HBaseMetadataProvider.ENTITY_NAME, schemaManager);
+      GenericAvroDao dao = new GenericAvroDao(tablePool, name, entityName, schemaManager);
       return new GenericAvroDaoDataset(dao, descriptor);
     }
   }
