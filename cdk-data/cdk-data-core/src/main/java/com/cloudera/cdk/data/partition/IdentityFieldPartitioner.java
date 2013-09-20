@@ -16,25 +16,35 @@
 package com.cloudera.cdk.data.partition;
 
 import com.cloudera.cdk.data.FieldPartitioner;
-import com.cloudera.cdk.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
 @Beta
-public class IdentityFieldPartitioner extends FieldPartitioner {
+public class IdentityFieldPartitioner<S> extends FieldPartitioner<S, S> {
 
-  public IdentityFieldPartitioner(String name, int buckets) {
-    super(name, buckets);
+  public IdentityFieldPartitioner(String name, Class<S> type, int buckets) {
+    super(name, type, buckets);
+    if (!(type.equals(Integer.class) || type.equals(Long.class) ||
+        type.equals(String.class))) {
+      throw new IllegalArgumentException("Type not supported " + type);
+    }
   }
 
   @Override
-  public Object apply(Object value) {
+  public S apply(S value) {
     return value;
   }
 
   @Override
-  public Object valueFromString(String stringValue) {
-    return stringValue; // TODO: need more type information
+  public S valueFromString(String stringValue) {
+    if (getType() == Integer.class) {
+      return (S) Integer.valueOf(stringValue);
+    } else if (getType() == Long.class) {
+      return (S) Long.valueOf(stringValue);
+    } else if (getType() == String.class) {
+      return (S) stringValue;
+    }
+    throw new IllegalArgumentException("Cannot convert string to type " + getType());
   }
 
   @Override

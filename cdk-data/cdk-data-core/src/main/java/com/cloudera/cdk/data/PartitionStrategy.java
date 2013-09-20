@@ -273,7 +273,7 @@ public class PartitionStrategy {
     }
 
     /**
-     * Configure an identity partitioner with a cardinality hint of
+     * Configure an identity partitioner for strings with a cardinality hint of
      * {@code buckets} size.
      * 
      * @param name
@@ -285,9 +285,32 @@ public class PartitionStrategy {
      *          data).
      * @return An instance of the builder for method chaining.
      * @see IdentityFieldPartitioner
+     * @deprecated Use {@link #identity(String, Class, int)}.
      */
+    @Deprecated
     public Builder identity(String name, int buckets) {
-      fieldPartitioners.add(new IdentityFieldPartitioner(name, buckets));
+      fieldPartitioners.add(new IdentityFieldPartitioner(name, String.class, buckets));
+      return this;
+    }
+
+    /**
+     * Configure an identity partitioner for a given type with a cardinality hint of
+     * {@code buckets} size.
+     *
+     * @param name
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param type
+     *          The type of the field. This must match the schema.
+     * @param buckets
+     *          A hint as to the number of partitions that will be created (i.e.
+     *          the number of discrete values for the field {@code name} in the
+     *          data).
+     * @return An instance of the builder for method chaining.
+     * @see IdentityFieldPartitioner
+     */
+    public <S> Builder identity(String name, Class<S> type, int buckets) {
+      fieldPartitioners.add(new IdentityFieldPartitioner(name, type, buckets));
       return this;
     }
 
@@ -308,7 +331,7 @@ public class PartitionStrategy {
     }
 
     /**
-     * Configure a range partitioner with a set of {@code upperBounds}.
+     * Configure a range partitioner for strings with a set of {@code upperBounds}.
      * 
      * @param name
      *          The entity field name from which to get values to be
@@ -318,7 +341,7 @@ public class PartitionStrategy {
      * @return An instance of the builder for method chaining.
      * @see com.cloudera.cdk.data.partition.RangeFieldPartitioner
      */
-    public Builder range(String name, Comparable<?>... upperBounds) {
+    public Builder range(String name, String... upperBounds) {
       fieldPartitioners.add(new RangeFieldPartitioner(name, upperBounds));
       return this;
     }

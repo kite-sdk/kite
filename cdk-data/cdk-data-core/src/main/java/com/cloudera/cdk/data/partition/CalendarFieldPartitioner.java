@@ -16,9 +16,9 @@
 package com.cloudera.cdk.data.partition;
 
 import com.cloudera.cdk.data.FieldPartitioner;
-import com.cloudera.cdk.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import java.util.Calendar;
 import java.util.TimeZone;
 import javax.annotation.Nonnull;
@@ -32,27 +32,28 @@ import javax.annotation.Nonnull;
  * (values are ints).
  */
 @Beta
-class CalendarFieldPartitioner extends FieldPartitioner {
+@SuppressWarnings(value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+    justification="False positive due to generics.")
+class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
 
   protected Calendar cal;
   protected int calendarField;
 
   public CalendarFieldPartitioner(String sourceName, String name,
       int calendarField, int cardinality) {
-    super(sourceName, name, cardinality);
+    super(sourceName, name, Integer.class, cardinality);
     this.cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     this.calendarField = calendarField;
   }
 
   @Override
-  public Object apply(@Nonnull Object value) {
-    Long timestamp = (Long) value;
+  public Integer apply(@Nonnull Long timestamp) {
     cal.setTimeInMillis(timestamp);
     return cal.get(calendarField);
   }
 
   @Override
-  public Object valueFromString(String stringValue) {
+  public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
   }
 

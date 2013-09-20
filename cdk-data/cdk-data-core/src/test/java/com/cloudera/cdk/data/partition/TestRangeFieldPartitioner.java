@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data.partition;
 
-import com.cloudera.cdk.data.partition.RangeFieldPartitioner;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,7 +23,7 @@ public class TestRangeFieldPartitioner {
   @Test
   public void test() {
     RangeFieldPartitioner partitioner = new RangeFieldPartitioner("username",
-        new Comparable<?>[] { "barry", "susan", "zippy" });
+        new String[] { "barry", "susan", "zippy" });
 
     Assert.assertEquals(3, partitioner.getCardinality());
     Assert.assertEquals("barry", partitioner.apply("adam"));

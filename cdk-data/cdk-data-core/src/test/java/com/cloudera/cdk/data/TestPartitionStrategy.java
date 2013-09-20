@@ -55,7 +55,7 @@ public class TestPartitionStrategy {
   @Test
   public void test() throws Exception {
     final PartitionStrategy p = new PartitionStrategy.Builder()
-        .identity("month", 12)
+        .identity("month", Integer.class, 12)
         .hash("userId", 7)
         .get();
 

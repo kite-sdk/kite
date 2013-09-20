@@ -16,11 +16,14 @@
 package com.cloudera.cdk.data.partition;
 
 import com.google.common.annotations.Beta;
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import javax.annotation.Nonnull;
 
 @Beta
+@SuppressWarnings(value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+    justification="False positive due to generics.")
 public class MonthFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 
@@ -32,14 +35,13 @@ public class MonthFieldPartitioner extends CalendarFieldPartitioner {
   }
 
   @Override
-  public Object apply(@Nonnull Object value) {
-    Long timestamp = (Long) value;
+  public Integer apply(@Nonnull Long timestamp) {
     cal.setTimeInMillis(timestamp);
     return cal.get(calendarField) + 1; // Calendar month is 0-based
   }
 
   @Override
-  public String valueToString(Object value) {
+  public String valueToString(Integer value) {
     return format.format(value);
   }
 }

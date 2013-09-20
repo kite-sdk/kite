@@ -24,25 +24,25 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
 @Beta
-public class ListFieldPartitioner extends FieldPartitioner {
+public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
 
-  private final List<Set<?>> values;
+  private final List<Set<S>> values;
 
-  public ListFieldPartitioner(String name, List<Set<?>> values) {
-    super(name, cardinality(values));
+  public ListFieldPartitioner(String name, List<Set<S>> values) {
+    super(name, Integer.class, cardinality(values));
     this.values = values;
   }
 
-  private static int cardinality(List<Set<?>> values) {
+  private static <S> int cardinality(List<Set<S>> values) {
     int c = 0;
-    for (Set<?> set : values) {
+    for (Set<S> set : values) {
       c += set.size();
     }
     return c;
   }
 
   @Override
-  public Object apply(Object value) {
+  public Integer apply(S value) {
     for (int i = 0; i < values.size(); i++) {
       if (values.get(i).contains(value)) {
         return i;
@@ -53,7 +53,7 @@ public class ListFieldPartitioner extends FieldPartitioner {
   }
 
   @Override
-  public Object valueFromString(String stringValue) {
+  public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
   }
 

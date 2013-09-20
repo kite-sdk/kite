@@ -15,48 +15,42 @@
  */
 package com.cloudera.cdk.data.partition;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import java.util.Arrays;
 import java.util.List;
 
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 
 @Beta
-public class RangeFieldPartitioner extends FieldPartitioner {
+@SuppressWarnings(value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+    justification="False positive due to generics.")
+public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
 
-  private final List<Comparable<?>> upperBounds;
+  private final List<String> upperBounds;
 
-  public RangeFieldPartitioner(String name, Comparable<?>... upperBounds) {
-
-    super(name, upperBounds.length);
+  public RangeFieldPartitioner(String name, String... upperBounds) {
+    super(name, String.class, upperBounds.length);
     this.upperBounds = Arrays.asList(upperBounds);
   }
 
   @Override
-  public Object apply(Object value) {
-    Preconditions.checkArgument(value instanceof Comparable<?>,
-        "Unable to range partition a value that isn't comparable:%s", value);
-
-    @SuppressWarnings("unchecked")
-    Comparable<? super Object> val = (Comparable<? super Object>) value;
-
-    for (Comparable<?> comparable : upperBounds) {
-      if (val.compareTo(comparable) <= 0) {
-        return comparable;
+  public String apply(String value) {
+    for (String upper : upperBounds) {
+      if (value.compareTo(upper) <= 0) {
+        return upper;
       }
     }
-
     throw new IllegalArgumentException(value + " is outside bounds");
   }
 
   @Override
-  public Object valueFromString(String stringValue) {
-    return stringValue; // TODO: need more type information
+  public String valueFromString(String stringValue) {
+    return stringValue;
   }
 
-  public List<Comparable<?>> getUpperBounds() {
+  public List<String> getUpperBounds() {
     return upperBounds;
   }
 

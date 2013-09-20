@@ -25,51 +25,59 @@ import com.google.common.annotations.Beta;
 @Beta
 public class PartitionFunctions {
 
-  public static FieldPartitioner hash(String name, int buckets) {
+  public static <S> FieldPartitioner<S, Integer> hash(String name, int buckets) {
     return new HashFieldPartitioner(name, buckets);
   }
 
-  public static FieldPartitioner hash(String sourceName, String name, int buckets) {
+  public static <S> FieldPartitioner<S, Integer> hash(String sourceName, String name, int buckets) {
     return new HashFieldPartitioner(sourceName, name, buckets);
   }
 
+  /**
+   * @deprecated Use {@link #identity(String, Class, int)}.
+   */
+  @Deprecated
   public static FieldPartitioner identity(String name, int buckets) {
-    return new IdentityFieldPartitioner(name, buckets);
+    return new IdentityFieldPartitioner(name, String.class, buckets);
+  }
+
+  public static <S> FieldPartitioner<S, S> identity(String name, Class<S> type,
+      int buckets) {
+    return new IdentityFieldPartitioner(name, type, buckets);
   }
 
   @Beta
-  public static FieldPartitioner range(String name, int... upperBounds) {
+  public static FieldPartitioner<Integer, Integer> range(String name, int... upperBounds) {
     return new IntRangeFieldPartitioner(name, upperBounds);
   }
 
   @Beta
-  public static FieldPartitioner range(String name,
-      Comparable<?>... upperBounds) {
+  public static FieldPartitioner<String, String> range(String name, String... upperBounds) {
     return new RangeFieldPartitioner(name, upperBounds);
   }
 
   @Beta
-  public static FieldPartitioner year(String sourceName, String name) {
+  public static FieldPartitioner<Long, Integer> year(String sourceName, String name) {
     return new YearFieldPartitioner(sourceName, name);
   }
 
   @Beta
-  public static FieldPartitioner month(String sourceName, String name) {
+  public static FieldPartitioner<Long, Integer> month(String sourceName, String name) {
     return new MonthFieldPartitioner(sourceName, name);
   }
 
   @Beta
-  public static FieldPartitioner day(String sourceName, String name) {
+  public static FieldPartitioner<Long, Integer> day(String sourceName, String name) {
     return new DayOfMonthFieldPartitioner(sourceName, name);
   }
 
   @Beta
-  public static FieldPartitioner hour(String sourceName, String name) {
+  public static FieldPartitioner<Long, Integer> hour(String sourceName, String name) {
     return new HourFieldPartitioner(sourceName, name);
   }
 
   @Beta
-  public static FieldPartitioner minute(String sourceName, String name) {
+  public static FieldPartitioner<Long, Integer> minute(String sourceName, String name) {
     return new MinuteFieldPartitioner(sourceName, name);
   }
 

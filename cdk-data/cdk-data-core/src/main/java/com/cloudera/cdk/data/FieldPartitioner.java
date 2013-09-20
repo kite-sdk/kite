@@ -32,23 +32,30 @@ import javax.annotation.concurrent.Immutable;
  * <p>
  * Implementations of {@link FieldPartitioner} are immutable.
  * </p>
- * 
+ *
+ * @param <S> The type of the source field in the entity. The partition function must
+ *           accept values of this type.
+ * @param <T> The type of the target field, which is the type of the return value of the
+ *           partition function.
  * @see PartitionStrategy
  */
 @Immutable
-public abstract class FieldPartitioner implements Function<Object, Object> {
+public abstract class FieldPartitioner<S, T> implements Function<S, T> {
 
   private final String sourceName;
   private final String name;
+  private final Class<T> type;
   private final int cardinality;
 
-  protected FieldPartitioner(String name, int cardinality) {
-    this(name, name, cardinality);
+  protected FieldPartitioner(String name, Class<T> type, int cardinality) {
+    this(name, name, type, cardinality);
   }
 
-  protected FieldPartitioner(String sourceName, String name, int cardinality) {
+  protected FieldPartitioner(String sourceName, String name, Class<T> type,
+      int cardinality) {
     this.sourceName = sourceName;
     this.name = name;
+    this.type = type;
     this.cardinality = cardinality;
   }
 
@@ -86,7 +93,7 @@ public abstract class FieldPartitioner implements Function<Object, Object> {
    * </p>
    */
   @Override
-  public abstract Object apply(Object value);
+  public abstract T apply(S value);
 
   /**
    * <p>
@@ -94,7 +101,7 @@ public abstract class FieldPartitioner implements Function<Object, Object> {
    * </p>
    * @since 0.3.0
    */
-  public abstract Object valueFromString(String stringValue);
+  public abstract T valueFromString(String stringValue);
 
   /**
    * <p>
@@ -104,8 +111,18 @@ public abstract class FieldPartitioner implements Function<Object, Object> {
    * </p>
    * @since 0.4.0
    */
-  public String valueToString(Object value) {
-    return  value.toString();
+  public String valueToString(T value) {
+    return value.toString();
   }
 
+  /**
+   * <p>
+   * The type of the target field, which is the type of the return value of the
+   * partition function.
+   * </p>
+   * @since 0.8.0
+   */
+  public Class<T> getType() {
+    return type;
+  }
 }

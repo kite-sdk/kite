@@ -16,28 +16,30 @@
 package com.cloudera.cdk.data.partition;
 
 import com.cloudera.cdk.data.FieldPartitioner;
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import javax.annotation.Nonnull;
 
-import com.cloudera.cdk.data.FieldPartitioner;
 import com.google.common.base.Objects;
 
-public class HashFieldPartitioner extends FieldPartitioner {
+@SuppressWarnings(value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+    justification="False positive due to generics.")
+public class HashFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
 
   public HashFieldPartitioner(String name, int buckets) {
-    super(name, buckets);
+    super(name, Integer.class, buckets);
   }
 
   public HashFieldPartitioner(String sourceName, String name, int buckets) {
-    super(sourceName, name, buckets);
+    super(sourceName, name, Integer.class, buckets);
   }
 
   @Override
-  public Object apply(@Nonnull Object value) {
+  public Integer apply(@Nonnull S value) {
     return (value.hashCode() & Integer.MAX_VALUE) % getCardinality();
   }
 
   @Override
-  public Object valueFromString(String stringValue) {
+  public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
   }
 

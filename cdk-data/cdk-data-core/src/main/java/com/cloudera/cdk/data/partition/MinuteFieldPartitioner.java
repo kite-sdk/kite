@@ -31,7 +31,7 @@ public class MinuteFieldPartitioner extends CalendarFieldPartitioner {
   }
 
   @Override
-  public String valueToString(Object value) {
+  public String valueToString(Integer value) {
     return format.format(value);
   }
 }

@@ -115,21 +115,16 @@ class PartitionExpression {
       return String.format("identity(\"%s\", %s)", fieldPartitioner.getName(),
           fieldPartitioner.getCardinality());
     } else if (fieldPartitioner instanceof RangeFieldPartitioner) {
-      List<Comparable<?>> upperBounds = ((RangeFieldPartitioner) fieldPartitioner)
+      List<String> upperBounds = ((RangeFieldPartitioner) fieldPartitioner)
           .getUpperBounds();
 
       StringBuilder builder = new StringBuilder();
 
-      for (Comparable<?> bound : upperBounds) {
+      for (String bound : upperBounds) {
         if (builder.length() > 0) {
           builder.append(", ");
         }
-
-        if (bound instanceof String) {
-          builder.append("\"").append(bound).append("\"");
-        } else {
-          builder.append(bound);
-        }
+        builder.append("\"").append(bound).append("\"");
       }
 
       return String.format("range(\"%s\", %s", fieldPartitioner.getName(),

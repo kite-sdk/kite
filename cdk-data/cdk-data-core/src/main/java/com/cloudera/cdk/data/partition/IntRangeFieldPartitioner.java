@@ -23,21 +23,19 @@ import com.google.common.base.Objects;
 import java.util.Arrays;
 
 @Beta
-public class IntRangeFieldPartitioner extends FieldPartitioner {
+public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer> {
 
   private final int[] upperBounds;
 
   public IntRangeFieldPartitioner(String name, int... upperBounds) {
-    super(name, upperBounds.length);
+    super(name, Integer.class, upperBounds.length);
     this.upperBounds = upperBounds;
   }
 
   @Override
-  public Object apply(Object value) {
-    Integer val = (Integer) value;
-
+  public Integer apply(Integer value) {
     for (int i = 0; i < upperBounds.length; i++) {
-      if (val <= upperBounds[i]) {
+      if (value <= upperBounds[i]) {
         return i;
       }
     }
@@ -46,7 +44,7 @@ public class IntRangeFieldPartitioner extends FieldPartitioner {
   }
 
   @Override
-  public Object valueFromString(String stringValue) {
+  public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
   }
 
