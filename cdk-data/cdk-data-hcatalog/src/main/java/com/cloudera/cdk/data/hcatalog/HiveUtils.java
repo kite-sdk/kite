@@ -32,6 +32,7 @@ import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
@@ -45,6 +46,7 @@ import org.apache.hadoop.hive.serde.serdeConstants;
 
 class HiveUtils {
   static final String DEFAULT_DB = "default";
+  static final String HDFS_SCHEME = "hdfs";
 
   private static final String PARTITION_EXPRESSION_PROPERTY_NAME = "cdk.partition.expression";
   private static final String AVRO_SCHEMA_URL_PROPERTY_NAME = "avro.schema.url";
@@ -150,14 +152,23 @@ class HiveUtils {
     }
 
     // copy schema info
-    if (descriptor.getSchemaUrl() != null) {
-      table.setProperty(
-          AVRO_SCHEMA_URL_PROPERTY_NAME,
-          descriptor.getSchemaUrl().toExternalForm());
-    } else {
+    boolean useLiteral = false;
+    final URL schemaURL = descriptor.getSchemaUrl();
+    try {
+      useLiteral = (schemaURL == null) ||
+          !HDFS_SCHEME.equals(schemaURL.toURI().getScheme());
+    } catch (URISyntaxException ex) {
+      useLiteral = true;
+    }
+
+    if (useLiteral) {
       table.setProperty(
           AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
           descriptor.getSchema().toString());
+    } else {
+      table.setProperty(
+          AVRO_SCHEMA_URL_PROPERTY_NAME,
+          schemaURL.toExternalForm());
     }
 
     // copy partitioning info
