@@ -207,7 +207,7 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
       // DOUBLE, BOOLEAN, NULL
       switch (schema.getType()) {
       case RECORD: {
-        record.put(fieldName, normalizeUtf8(datum));
+        record.put(fieldName, datum);
         break;
       }
       case ENUM: {
@@ -216,11 +216,11 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
         break;
       }
       case ARRAY: {        
-        record.put(fieldName, normalizeUtf8(datum));
+        record.put(fieldName, datum);
         break;
       }
       case MAP: {
-        record.put(fieldName, normalizeUtf8(datum));
+        record.put(fieldName, datum);
         break;
       }
       case UNION: {
