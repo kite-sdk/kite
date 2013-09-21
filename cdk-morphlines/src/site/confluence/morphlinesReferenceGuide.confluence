@@ -395,13 +395,10 @@ convertTimestamp {
 
 h4. Example usage with Solr date rounding
 
-A SimpleDateFormat can also contain a literal string for [Solr date rounding|http://java.dzone.com/articles/solr-date-math-now-and-filter] down to, say, the current hour, minute or second. For example: {{'/MINUTE'}}. This kind of rounding improves the performance of Solr several ways:
-* it uses less memory for many functions, e.g. sorting by time,
-restricting by date ranges etc.
-* it improves speed of range queries based on time, e.g. "restrict
-documents to those from the last 7 days"
-* In the rare case of faceting by the values in the field will improve
-both memory requirements and speed.
+A SimpleDateFormat can also contain a literal string for [Solr date rounding|http://java.dzone.com/articles/solr-date-math-now-and-filter] down to, say, the current hour, minute or second. For example: {{'/MINUTE'}} to round to the current minute. This kind of rounding improves the performance of Solr several ways:
+* it uses less memory for many functions, e.g. sorting by time, restricting by date ranges etc.
+* it improves speed of range queries based on time, e.g. "restrict documents to those from the last 7 days"
+* In the case of faceting by the values in the field it will improve both memory requirements and speed.
 
 For these reasons, it's advisable to store dates in the coarsest granularity that's appropriate for your application.
 
