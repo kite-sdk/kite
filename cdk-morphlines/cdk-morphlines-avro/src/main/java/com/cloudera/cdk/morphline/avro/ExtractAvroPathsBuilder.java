@@ -207,7 +207,7 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
       // DOUBLE, BOOLEAN, NULL
       switch (schema.getType()) {
       case RECORD: {
-        record.put(fieldName, datum);
+        record.put(fieldName, normalizeUtf8(datum));
         break;
       }
       case ENUM: {
@@ -216,15 +216,15 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
         break;
       }
       case ARRAY: {        
-        record.put(fieldName, datum);
+        record.put(fieldName, normalizeUtf8(datum));
         break;
       }
       case MAP: {
-        record.put(fieldName, datum);
+        record.put(fieldName, normalizeUtf8(datum));
         break;
       }
       case UNION: {
-        record.put(fieldName, datum);
+        record.put(fieldName, normalizeUtf8(datum));
         break;
       }
       case FIXED: {
@@ -270,6 +270,14 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
       }
       default:
         throw new MorphlineRuntimeException("Unknown Avro schema type: " + schema.getType());
+      }
+    }
+    
+    private Object normalizeUtf8(Object datum) {
+      if (datum instanceof Utf8) {
+        return ((Utf8) datum).toString();
+      } else {
+        return datum;
       }
     }
 

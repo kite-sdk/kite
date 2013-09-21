@@ -435,7 +435,7 @@ decodeBase64 {
 
 h2. dropRecord
 
-The {{dropRecord}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/DropRecordBuilder.java]) silently consumes records without ever emitting any record. This is much like piping to {{/dev/null}}.
+The {{dropRecord}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/DropRecordBuilder.java]) silently consumes records without ever emitting any record. This is much like piping to {{/dev/null}} in Unix.
 
 Example usage:
 {code}
