@@ -7,6 +7,7 @@ import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.dao.EntityBatch;
 import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.dao.KeyEntity;
 import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
@@ -50,7 +51,7 @@ class SpecificAvroDaoDataset implements Dataset {
 
   @Override
   public <E> DatasetWriter<E> getWriter() {
-    throw new UnsupportedOperationException();
+    return new SpecificAvroDaoDatasetWriter(dao.newBatch());
   }
 
   @Override
@@ -73,8 +74,6 @@ class SpecificAvroDaoDataset implements Dataset {
 
       @Override
       public boolean put(E e) {
-        // the entity contains the key fields so we can use the same Specific
-        // instance as a key
         return dao.put(e);
       }
 
@@ -124,6 +123,40 @@ class SpecificAvroDaoDataset implements Dataset {
     @Override
     public void close() {
       scanner.close();
+    }
+
+    @Override
+    public boolean isOpen() {
+      return true; // TODO
+    }
+  }
+
+  private class SpecificAvroDaoDatasetWriter<E> implements DatasetWriter<E> {
+
+    private EntityBatch batch;
+
+    public SpecificAvroDaoDatasetWriter(EntityBatch batch) {
+      this.batch = batch;
+    }
+
+    @Override
+    public void open() {
+      // noop
+    }
+
+    @Override
+    public void write(E e) {
+      batch.put(e);
+    }
+
+    @Override
+    public void flush() {
+      batch.flush();
+    }
+
+    @Override
+    public void close() {
+      batch.close();
     }
 
     @Override

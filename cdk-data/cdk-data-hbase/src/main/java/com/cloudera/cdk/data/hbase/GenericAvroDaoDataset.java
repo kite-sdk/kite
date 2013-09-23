@@ -7,6 +7,7 @@ import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.dao.EntityBatch;
 import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.dao.KeyEntity;
 import com.cloudera.cdk.data.hbase.avro.GenericAvroDao;
@@ -50,7 +51,7 @@ class GenericAvroDaoDataset implements Dataset {
 
   @Override
   public <E> DatasetWriter<E> getWriter() {
-    throw new UnsupportedOperationException();
+    return new GenericAvroDaoDatasetWriter(dao.newBatch());
   }
 
   @Override
@@ -131,4 +132,39 @@ class GenericAvroDaoDataset implements Dataset {
       return true; // TODO
     }
   }
+
+  private class GenericAvroDaoDatasetWriter<E> implements DatasetWriter<E> {
+
+    private EntityBatch<GenericRecord> batch;
+
+    public GenericAvroDaoDatasetWriter(EntityBatch<GenericRecord> batch) {
+      this.batch = batch;
+    }
+
+    @Override
+    public void open() {
+      // noop
+    }
+
+    @Override
+    public void write(E e) {
+      batch.put((GenericRecord) e);
+    }
+
+    @Override
+    public void flush() {
+      batch.flush();
+    }
+
+    @Override
+    public void close() {
+      batch.close();
+    }
+
+    @Override
+    public boolean isOpen() {
+      return true; // TODO
+    }
+  }
+
 }

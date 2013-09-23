@@ -4,6 +4,7 @@ import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
+import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
@@ -34,6 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 public class HBaseDatasetRepositoryTest {
@@ -95,9 +97,18 @@ public class HBaseDatasetRepositoryTest {
     DatasetAccessor<GenericRecord> accessor = ds.newAccessor();
 
     // Create the new entities
-    for (int i = 0; i < 10; ++i) {
-      GenericRecord entity = createGenericEntity(i);
-      accessor.put(entity);
+    accessor.put(createGenericEntity(0));
+    accessor.put(createGenericEntity(1));
+
+    DatasetWriter<GenericRecord> writer = ds.getWriter();
+    writer.open();
+    try {
+      for (int i = 2; i < 10; ++i) {
+        GenericRecord entity = createGenericEntity(i);
+        writer.write(entity);
+      }
+    } finally {
+      writer.close();
     }
 
     // reload
@@ -155,9 +166,18 @@ public class HBaseDatasetRepositoryTest {
     DatasetAccessor<TestEntity> accessor = ds.newAccessor();
 
     // Create the new entities
-    for (int i = 0; i < 10; ++i) {
-      TestEntity entity = createSpecificEntity(i);
-      accessor.put(entity);
+    accessor.put(createSpecificEntity(0));
+    accessor.put(createSpecificEntity(1));
+
+    DatasetWriter<TestEntity> writer = ds.getWriter();
+    writer.open();
+    try {
+      for (int i = 2; i < 10; ++i) {
+        TestEntity entity = createSpecificEntity(i);
+        writer.write(entity);
+      }
+    } finally {
+      writer.close();
     }
 
     // ensure the new entities are what we expect with get operations
