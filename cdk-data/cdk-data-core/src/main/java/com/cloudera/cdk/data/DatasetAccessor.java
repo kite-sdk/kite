@@ -21,6 +21,8 @@ public interface DatasetAccessor<E> {
 
   public boolean put(E entity);
 
+  public long increment(PartitionKey key, String fieldName, long amount);
+
   public void delete(PartitionKey key);
 
   public boolean delete(PartitionKey key, E entity);

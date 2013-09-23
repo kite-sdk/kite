@@ -79,6 +79,11 @@ class GenericAvroDaoDataset implements Dataset {
       }
 
       @Override
+      public long increment(PartitionKey key, String fieldName, long amount) {
+        return dao.increment(key, fieldName, amount);
+      }
+
+      @Override
       public void delete(PartitionKey key) {
         dao.delete(key);
       }

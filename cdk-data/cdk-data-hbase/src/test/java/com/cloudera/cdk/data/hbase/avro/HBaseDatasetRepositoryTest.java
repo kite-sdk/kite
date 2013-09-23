@@ -125,11 +125,18 @@ public class HBaseDatasetRepositoryTest {
       reader.close();
     }
 
-    // test delete
     PartitionKey key = partitionStrategy.partitionKey("part1_5", "part2_5");
+
+    // test increment
+    long incrementResult = accessor.increment(key, "increment", 5);
+    assertEquals(15L, incrementResult);
+    assertEquals(15L, ((Long) accessor.get(key).get("increment")).longValue());
+
+    // test delete
     accessor.delete(key);
     GenericRecord deletedRecord = accessor.get(key);
     assertNull(deletedRecord);
+
   }
 
   @Test
@@ -174,8 +181,14 @@ public class HBaseDatasetRepositoryTest {
       reader.close();
     }
 
-    // test delete
     PartitionKey key = partitionStrategy.partitionKey("part1_5", "part2_5");
+
+    // test increment
+    long incrementResult = accessor.increment(key, "increment", 5);
+    assertEquals(15L, incrementResult);
+    assertEquals(15L, accessor.get(key).getIncrement().longValue());
+
+    // test delete
     accessor.delete(key);
     TestEntity deletedRecord = accessor.get(key);
     assertNull(deletedRecord);
@@ -235,6 +248,8 @@ public class HBaseDatasetRepositoryTest {
     arrayRecordList.add(subRecord);
 
     entity.put("field5", arrayRecordList);
+
+    entity.put("increment", 10L);
     return entity;
   }
 
