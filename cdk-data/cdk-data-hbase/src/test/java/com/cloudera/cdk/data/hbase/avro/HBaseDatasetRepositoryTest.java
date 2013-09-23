@@ -34,6 +34,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class HBaseDatasetRepositoryTest {
 
@@ -123,6 +124,12 @@ public class HBaseDatasetRepositoryTest {
     } finally {
       reader.close();
     }
+
+    // test delete
+    PartitionKey key = partitionStrategy.partitionKey("part1_5", "part2_5");
+    accessor.delete(key);
+    GenericRecord deletedRecord = accessor.get(key);
+    assertNull(deletedRecord);
   }
 
   @Test
@@ -166,6 +173,12 @@ public class HBaseDatasetRepositoryTest {
     } finally {
       reader.close();
     }
+
+    // test delete
+    PartitionKey key = partitionStrategy.partitionKey("part1_5", "part2_5");
+    accessor.delete(key);
+    TestEntity deletedRecord = accessor.get(key);
+    assertNull(deletedRecord);
   }
 
   // TODO: remove duplication from ManagedDaoTest

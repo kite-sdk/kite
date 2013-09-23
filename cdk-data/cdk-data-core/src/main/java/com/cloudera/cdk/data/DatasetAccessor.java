@@ -21,4 +21,8 @@ public interface DatasetAccessor<E> {
 
   public boolean put(E entity);
 
+  public void delete(PartitionKey key);
+
+  public boolean delete(PartitionKey key, E entity);
+
 }

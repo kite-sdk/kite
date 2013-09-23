@@ -77,6 +77,17 @@ class SpecificAvroDaoDataset implements Dataset {
         // instance as a key
         return dao.put(e);
       }
+
+      @Override
+      public void delete(PartitionKey key) {
+        dao.delete(key);
+      }
+
+      @Override
+      public boolean delete(PartitionKey key, E entity) {
+        return dao.delete(key, entity);
+      }
+
     };
   }
 
