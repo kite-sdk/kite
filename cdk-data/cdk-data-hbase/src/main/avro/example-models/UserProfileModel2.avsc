@@ -1,0 +1,39 @@
+{
+  "type": "record",
+  "name": "UserProfileModel2",
+  "namespace": "com.cloudera.cdk.data.hbase.avro.example",
+  "tables": ["cdk_example_user_profiles"],
+  "fields": [
+    { 
+      "name": "firstName", 
+      "type": "string",
+      "mapping": { "type": "column", "value": "meta:firstName" }
+    },
+      
+    { 
+      "name": "lastName", 
+      "type": "string",
+      "mapping": { "type": "column", "value": "meta:lastName" } 
+    },
+    
+    {
+      "name": "married",
+      "type": "boolean",
+      "mapping": { "type": "column", "value": "meta:married" }
+    },
+      
+    { 
+      "name": "created",
+      "type": "long",
+      "mapping": { "type": "column", "value": "meta:created" }
+    },
+
+    { 
+      "name": "conflict_check",
+      "type": "long",
+      "default": 0,
+      "mapping": { "type": "occVersion" }
+    }
+  ]
+}
+

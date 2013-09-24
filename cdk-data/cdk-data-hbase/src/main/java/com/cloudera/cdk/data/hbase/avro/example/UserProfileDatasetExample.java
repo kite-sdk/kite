@@ -1,0 +1,320 @@
+/**
+ * Copyright 2013 Cloudera Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.cloudera.cdk.data.hbase.avro.example;
+
+import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetAccessor;
+import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetReader;
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
+import com.google.common.collect.Lists;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.avro.Schema;
+import org.apache.avro.specific.SpecificRecord;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.client.HTablePool;
+
+/**
+ * This is an example that demonstrates basic CDK HBase functionality. It uses a
+ * fictional "user profile" use case that needs basic user profile data (first
+ * name, last name, etc...) and user action log data (login, profile changed,
+ * etc...) persisted in a wide user table.
+ * 
+ * By using a wide user table, we are able to atomically fetch user profile and
+ * action data with a single HBase request, as well as atomically update both
+ * profile and action log data.
+ * 
+ * The basic CDK HBase functionality demonstrated includes basic scanning,
+ * putting, composite datasets, and optimistic concurrency control (OCC).
+ */
+public class UserProfileDatasetExample {
+
+  /**
+   * The partition strategy to define the keyspace.
+   */
+  private final PartitionStrategy partitionStrategy;
+
+  /**
+   * The user profile dataset
+   */
+  private final Dataset userProfileDataset;
+
+  /**
+   * The user actions dataset. User actions are stored in the same table along side
+   * the user profiles.
+   */
+  private final Dataset userActionsDataset;
+
+  /**
+   * A composite dataset that encapsulates the two entity types that can be stored
+   * in the user_profile table (UserProfileModel and UserActionsModel).
+   * UserProfileActionsModel is the composite type this dao returns.
+   */
+  private final Dataset userProfileActionsDataset;
+
+  /**
+   * The constructor will start by registering the schemas with the meta store
+   * table in HBase, and create the required tables to run.
+   */
+  public UserProfileDatasetExample() throws Exception {
+    Configuration conf = HBaseConfiguration.create();
+    HTablePool pool = new HTablePool(conf, 10);
+    HBaseAdmin admin = new HBaseAdmin(conf);
+
+    // Delete the table if it exists so we start fresh.
+    if (admin.tableExists("cdk_example_user_profiles")) {
+      admin.disableTable("cdk_example_user_profiles");
+      admin.deleteTable("cdk_example_user_profiles");
+    }
+
+    HBaseDatasetRepository repo = new HBaseDatasetRepository(admin, pool);
+
+    partitionStrategy = new PartitionStrategy.Builder()
+        .identity("firstName", 1).identity("lastName", 2).get();
+
+    DatasetDescriptor userProfileDatasetDescriptor =
+        new DatasetDescriptor.Builder().schema(UserProfileModel2.SCHEMA$)
+            .partitionStrategy(partitionStrategy).get();
+    userProfileDataset = repo.create("cdk_example_user_profiles",
+        userProfileDatasetDescriptor);
+
+    DatasetDescriptor userActionsDatasetDescriptor =
+        new DatasetDescriptor.Builder().schema(UserActionsModel2.SCHEMA$)
+            .partitionStrategy(partitionStrategy).get();
+    userActionsDataset = repo.create("cdk_example_user_profiles",
+        userActionsDatasetDescriptor);
+
+    Schema compositeSchema = Schema.createRecord("UserProfileActions", null, null, false);
+    compositeSchema.setFields(Lists.newArrayList(
+        new Schema.Field("UserProfileModel", UserProfileModel2.SCHEMA$, null, null),
+        new Schema.Field("UserActionsModel", UserActionsModel2.SCHEMA$, null, null)
+    ));
+    DatasetDescriptor userProfileActionsDatasetDescriptor =
+        new DatasetDescriptor.Builder().schema(compositeSchema)
+            .partitionStrategy(partitionStrategy).get();
+    userProfileActionsDataset = repo.create("cdk_example_user_profiles",
+        userProfileActionsDatasetDescriptor);
+
+  }
+
+  /**
+   * Print all user profiles.
+   * 
+   * This method demonstrates how to open a reader that will read the entire
+   * table. It has no start or stop keys specified.
+   */
+  public void printUserProfies() {
+    DatasetReader<UserProfileModel2> reader = userProfileDataset.getReader();
+    reader.open();
+    try {
+      for (UserProfileModel2 userProfile : reader) {
+        System.out.println(userProfile.toString());
+      }
+    } finally {
+      // readers need to be closed.
+      reader.close();
+    }
+  }
+
+  /**
+   * Print the user profiles and actions for all users with the provided last
+   * name
+   * 
+   * This method demonstrates how to open a scanner with a start key. It's using
+   * the composite dao, so the records it returns will be a composite of both
+   * the profile model and actions model.
+   * 
+   * @param lastName
+   *          The last name of users to scan.
+   */
+  public void printUserProfileActionsForLastName(String lastName) {
+    // TODO: use a reader with a start key
+    DatasetReader<Map<String, SpecificRecord>> reader = userProfileActionsDataset.getReader();
+    reader.open();
+    try {
+      for (Map<String, SpecificRecord> entity : reader) {
+        UserProfileModel2 userProfile = (UserProfileModel2) entity.get("UserProfileModel");
+        if (userProfile.getLastName().equals(lastName)) {
+          System.out.println(entity.toString());
+        }
+      }
+    } finally {
+      // readers need to be closed.
+      reader.close();
+    }
+  }
+
+  /**
+   * Create a fresh new user record.
+   * 
+   * This method demonstrates creating both a UserProfileModel and a
+   * UserActionsModel atomically in a single row. When creating a user profile,
+   * we add the "created" action to the actions map. This shows how we can use
+   * the CompositeDao to accomplish this.
+   * 
+   * @param firstName
+   *          The first name of the user we are creating
+   * @param lastName
+   *          The last name of the user we are creating
+   * @param married
+   *          True if this person is married. Otherwise false.
+   */
+  public void create(String firstName, String lastName, boolean married) {
+    long ts = System.currentTimeMillis();
+
+    UserProfileModel2 profileModel = UserProfileModel2.newBuilder()
+        .setFirstName(firstName).setLastName(lastName).setMarried(married)
+        .setCreated(ts).build();
+    UserActionsModel2 actionsModel = UserActionsModel2.newBuilder()
+        .setFirstName(firstName).setLastName(lastName)
+        .setActions(new HashMap<String, String>()).build();
+    actionsModel.getActions().put("profile_created", Long.toString(ts));
+
+    Map<String, SpecificRecord> profileActionsModel = new HashMap<String, SpecificRecord>();
+    profileActionsModel.put("UserProfileModel", profileModel);
+    profileActionsModel.put("UserActionsModel", actionsModel);
+
+    DatasetAccessor<Map<String, SpecificRecord>> accessor = userProfileActionsDataset.newAccessor();
+    if (!accessor.put(profileActionsModel)) {
+      // If put returns false, a user already existed at this row
+      System.out
+          .println("Creating a new user profile failed due to a write conflict.");
+    }
+  }
+
+  /**
+   * Update the married status of a new user record.
+   * 
+   * This method demonstrates updating both a UserProfileModel and a
+   * UserActionsModel with a single HBase request using the composite dataset. It
+   * performs a get/update/put operation, which is protected by the
+   * check_conflict field on UserProfileModel from colliding with another
+   * get/update/put operation.
+   * 
+   * @param firstName
+   *          The first name of the user we are updating
+   * @param lastName
+   *          The last name of the user we are updating
+   * @param married
+   *          True if this person is married. Otherwise false.
+   */
+  public void updateUserProfile(String firstName, String lastName,
+      boolean married) {
+    // Get the timestamp we'll use to set the value of the profile_updated
+    // action.
+    long ts = System.currentTimeMillis();
+
+    // Construct the key we'll use to fetch the user.
+    PartitionKey key = partitionStrategy.partitionKey(firstName, lastName);
+
+    // Get the profile and actions entity from the composite dao.
+    DatasetAccessor<Map<String, SpecificRecord>> accessor = userProfileActionsDataset.newAccessor();
+    Map<String, SpecificRecord> profileActionsModel = accessor.get(key);
+
+    // Updating the married status is hairy since our avro compiler isn't setup
+    // to compile setters for fields. We have to construct a clone through the
+    // builder.
+    profileActionsModel.put("UserProfileModel",
+        UserProfileModel
+            .newBuilder((UserProfileModel) profileActionsModel.get("UserProfileModel"))
+            .setMarried(married).build());
+    // Since maps are mutable, we can update the actions map without having to
+    // go through the builder like above.
+    ((UserActionsModel) profileActionsModel.get("UserActionsModel")).getActions()
+        .put("profile_updated", Long.toString(ts));
+
+    if (!accessor.put(profileActionsModel)) {
+      // If put returns false, a write conflict occurred where someone else
+      // updated the row between the times we did the get and put.
+      System.out
+          .println("Updating the user profile failed due to a write conflict");
+    }
+  }
+
+  /**
+   * Add an action to the user profile.
+   * 
+   * This method demonstrates how we can use a keyAsColumn map field (the
+   * actions field of the UserActionsModel) to add values to the map without
+   * having to do a get/update/put operation. When doing the put, it won't
+   * remove columns that exist in the row that aren't in the new map we are
+   * putting. It will just add the additional columns we are now putting to the
+   * row.
+   * 
+   * @param firstName
+   *          The first name of the user we are updating
+   * @param lastName
+   *          The last name of the user we are updating
+   * @param actionType
+   *          A string representing the action type which is the key of the map
+   * @param actionValue
+   *          A string representing the action value.
+   */
+  public void addAction(String firstName, String lastName, String actionType,
+      String actionValue) {
+    // Create a new UserActionsModel, and add a new actions map to it with a
+    // single action value. Even if one exists in this row, since it has a lone
+    // keyAsColumn field, it won't remove any actions that already exist in the
+    // actions column family.
+    UserActionsModel2 actionsModel = UserActionsModel2.newBuilder()
+        .setFirstName(firstName).setLastName(lastName) // key part
+        .setActions(new HashMap<String, String>()).build();
+    actionsModel.getActions().put(actionType, actionValue);
+
+    // Perform the put.
+    DatasetAccessor<UserActionsModel2> accessor = userActionsDataset.newAccessor();
+    accessor.put(actionsModel);
+  }
+
+  /**
+   * The main driver method. Doesn't require any arguments.
+   * 
+   * @param args
+   */
+  public static void main(String[] args) throws Exception {
+    UserProfileDatasetExample example = new UserProfileDatasetExample();
+
+    // Let's create some user profiles
+    example.create("John", "Doe", true);
+    example.create("Jane", "Doe", false);
+    example.create("Foo", "Bar", false);
+
+    // Now print those user profiles. This doesn't include actions
+    example.printUserProfies();
+
+    // Now we'll add some user actions to each user
+    example.addAction("Jane", "Doe", "last_login", "2013-07-30 00:00:00");
+    example.addAction("Jane", "Doe", "ad_click", "example.com_ad_id");
+    example.addAction("Foo", "Bar", "last_login", "2013-07-30 00:00:00");
+
+    // Print the user profiles and actions for the Does. This will include the
+    // above actions, as well as a profile_created action set when creating the
+    // user profiles.
+    example.printUserProfileActionsForLastName("Doe");
+
+    // Update Jane to a married status.
+    example.updateUserProfile("Jane", "Doe", true);
+
+    // Reprint the user profiles and actions. Jane should now have married true,
+    // as well as a new profile_updated timestamp.
+    example.printUserProfileActionsForLastName("Doe");
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "type": "record",
+  "name": "UserActionsModel2",
+  "namespace": "com.cloudera.cdk.data.hbase.avro.example",
+  "tables": ["cdk_example_user_profiles"],
+  "fields": [
+    {
+      "name": "firstName",
+      "type": "string",
+      "mapping": { "type": "column", "value": "meta:firstName" }
+    },
+
+    {
+      "name": "lastName",
+      "type": "string",
+      "mapping": { "type": "column", "value": "meta:lastName" }
+    },
+
+    { 
+      "name": "actions",
+      "type": { "type": "map", "values": "string" },
+      "mapping": { "type": "keyAsColumn", "value": "actions:" }
+    }
+  ]
+}
