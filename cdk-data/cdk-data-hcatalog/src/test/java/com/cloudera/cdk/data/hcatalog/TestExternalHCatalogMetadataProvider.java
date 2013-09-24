@@ -30,8 +30,8 @@ public class TestExternalHCatalogMetadataProvider extends TestMetadataProviders 
 
   private Path testDirectory;
 
-  public TestExternalHCatalogMetadataProvider(String mode) {
-    super(mode);
+  public TestExternalHCatalogMetadataProvider(boolean distributed) {
+    super(distributed);
   }
 
   @Override

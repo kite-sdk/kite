@@ -36,8 +36,8 @@ import org.junit.Test;
 
 public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
-  public TestFileSystemDatasetRepository(String mode) {
-    super(mode);
+  public TestFileSystemDatasetRepository(boolean distributed) {
+    super(distributed);
   }
 
   @Override

@@ -33,8 +33,8 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
   private FileSystem fileSystem;
   private Path testDirectory;
 
-  public TestFileSystemMetadataProvider(String mode) {
-    super(mode);
+  public TestFileSystemMetadataProvider(boolean distributed) {
+    super(distributed);
   }
 
   @Override

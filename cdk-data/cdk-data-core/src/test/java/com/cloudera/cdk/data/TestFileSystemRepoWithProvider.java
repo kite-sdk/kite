@@ -22,8 +22,8 @@ import org.apache.hadoop.conf.Configuration;
 
 public class TestFileSystemRepoWithProvider extends TestFileSystemDatasetRepository {
 
-  public TestFileSystemRepoWithProvider(String mode) {
-    super(mode);
+  public TestFileSystemRepoWithProvider(boolean distributed) {
+    super(distributed);
   }
 
   @Override

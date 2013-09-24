@@ -29,8 +29,8 @@ import org.junit.Test;
 
 public class TestExternalHCatalogDatasetRepository extends TestFileSystemDatasetRepository {
 
-  public TestExternalHCatalogDatasetRepository(String mode) {
-    super(mode);
+  public TestExternalHCatalogDatasetRepository(boolean distributed) {
+    super(distributed);
   }
 
   @Override

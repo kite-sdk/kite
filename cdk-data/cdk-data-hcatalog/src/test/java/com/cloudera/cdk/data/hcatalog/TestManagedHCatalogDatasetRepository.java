@@ -31,8 +31,8 @@ import org.junit.Test;
 
 public class TestManagedHCatalogDatasetRepository extends TestFileSystemDatasetRepository {
 
-  public TestManagedHCatalogDatasetRepository(String mode) {
-    super(mode);
+  public TestManagedHCatalogDatasetRepository(boolean distributed) {
+    super(distributed);
   }
 
   @Override

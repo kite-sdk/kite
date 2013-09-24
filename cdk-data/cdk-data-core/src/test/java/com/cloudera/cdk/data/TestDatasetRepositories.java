@@ -43,8 +43,8 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
   @Parameterized.Parameters
   public static Collection<Object[]> data() {
     Object[][] data = new Object[][] {
-        { "local" },          // default to local FS
-        { "distributed" } };  // default to distributed FS
+        { false },  // default to local FS
+        { true } }; // default to distributed FS
     return Arrays.asList(data);
   }
 
@@ -73,8 +73,8 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
     };
   }
 
-  public TestDatasetRepositories(String mode) {
-    this.distributed = mode.equals("distributed");
+  public TestDatasetRepositories(boolean distributed) {
+    this.distributed = distributed;
   }
 
   @Before

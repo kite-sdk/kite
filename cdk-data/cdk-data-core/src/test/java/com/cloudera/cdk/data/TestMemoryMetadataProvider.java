@@ -21,8 +21,8 @@ import org.junit.Test;
 
 public class TestMemoryMetadataProvider extends TestMetadataProviders {
 
-  public TestMemoryMetadataProvider(String mode) {
-    super(mode);
+  public TestMemoryMetadataProvider(boolean distributed) {
+    super(distributed);
   }
 
   @Override

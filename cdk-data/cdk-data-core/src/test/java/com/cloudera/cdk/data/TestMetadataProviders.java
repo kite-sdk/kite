@@ -39,8 +39,8 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
   @Parameterized.Parameters
   public static Collection<Object[]> data() {
     Object[][] data = new Object[][] {
-        { "local" },          // default to local FS
-        { "distributed" } };  // default to distributed FS
+        { false },  // default to local FS
+        { true } }; // default to distributed FS
     return Arrays.asList(data);
   }
 
@@ -54,8 +54,8 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
   protected MetadataProvider provider;
   abstract public MetadataProvider newProvider(Configuration conf);
 
-  public TestMetadataProviders(String mode) {
-    this.distributed = mode.equals("distributed");
+  public TestMetadataProviders(boolean distributed) {
+    this.distributed = distributed;
   }
 
   @Before

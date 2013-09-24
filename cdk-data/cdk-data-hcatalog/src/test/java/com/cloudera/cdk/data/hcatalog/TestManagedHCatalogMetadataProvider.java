@@ -23,8 +23,8 @@ import org.junit.After;
 
 public class TestManagedHCatalogMetadataProvider extends TestMetadataProviders {
 
-  public TestManagedHCatalogMetadataProvider(String mode) {
-    super(mode);
+  public TestManagedHCatalogMetadataProvider(boolean distributed) {
+    super(distributed);
   }
 
   @Override
