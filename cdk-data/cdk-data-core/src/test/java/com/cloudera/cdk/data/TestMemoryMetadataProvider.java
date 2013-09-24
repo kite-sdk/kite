@@ -17,7 +17,6 @@
 package com.cloudera.cdk.data;
 
 import org.apache.hadoop.conf.Configuration;
-import org.junit.Test;
 
 public class TestMemoryMetadataProvider extends TestMetadataProviders {
 
@@ -28,10 +27,5 @@ public class TestMemoryMetadataProvider extends TestMetadataProviders {
   @Override
   public MetadataProvider newProvider(Configuration conf) {
     return new MemoryMetadataProvider(conf);
-  }
-
-  @Test(expected=IllegalArgumentException.class)
-  public void testConstructorFailsNullConfiguration() {
-    new MemoryMetadataProvider(null);
   }
 }

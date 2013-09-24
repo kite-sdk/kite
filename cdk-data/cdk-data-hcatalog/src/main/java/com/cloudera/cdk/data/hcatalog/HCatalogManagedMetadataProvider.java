@@ -19,7 +19,9 @@ import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.MetadataProviderException;
 import com.google.common.base.Preconditions;
+import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.ql.metadata.Table;
@@ -71,9 +73,20 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
     // load the created table to get the data location
     final Table newTable = hcat.getTable(HiveUtils.DEFAULT_DB, name);
 
+    final FileSystem fs;
+    try {
+      fs = new Path(newTable.getDataLocation())
+          .getFileSystem(conf);
+    } catch (IOException ex) {
+      throw new MetadataProviderException(
+          "Could not get FileSystem for new table:" + name, ex);
+    }
+
     return new DatasetDescriptor.Builder(descriptor)
-        .configuration(conf)
-        .location(new Path(newTable.getDataLocation()).toUri())
+        .location(newTable.getDataLocation())
+        .property(
+            HiveUtils.FILE_SYSTEM_URI_PROPERTY_NAME,
+            fs.getUri().toString())
         .get();
   }
 }

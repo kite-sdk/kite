@@ -45,16 +45,19 @@ public class MiniDFSTest {
 
   @BeforeClass
   public static void setupFS() throws IOException {
-    cluster = new MiniDFSCluster.Builder(new Configuration()).build();
-    dfs = cluster.getFileSystem();
-    conf = new Configuration(dfs.getConf());
-    lfs = FileSystem.getLocal(conf);
+    if (cluster == null) {
+      cluster = new MiniDFSCluster.Builder(new Configuration()).build();
+      dfs = cluster.getFileSystem();
+      conf = new Configuration(dfs.getConf());
+      lfs = FileSystem.getLocal(conf);
+    }
   }
 
   @AfterClass
   public static void teardownFS() throws IOException {
     dfs = null;
     lfs = null;
+    conf = null;
     if (cluster != null) {
       cluster.shutdown();
       cluster = null;

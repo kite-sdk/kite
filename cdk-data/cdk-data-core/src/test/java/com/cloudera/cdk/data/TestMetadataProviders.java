@@ -59,7 +59,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
   }
 
   @Before
-  public void setUp() throws IOException {
+  public void setUp() throws IOException, URISyntaxException {
     this.conf = (distributed ?
         MiniDFSTest.getConfiguration() :
         new Configuration());
@@ -133,9 +133,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
   @Test(expected=DatasetExistsException.class)
   public void testCreateAlreadyExists() {
     ensureCreated();
-    provider.create(NAME, new DatasetDescriptor.Builder()
-        .schema(USER_SCHEMA)
-        .get());
+    provider.create(NAME, anotherDescriptor);
   }
 
   @Test(expected=IllegalArgumentException.class)

@@ -59,9 +59,9 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
   /**
    * Create an HCatalog dataset repository with managed tables.
    */
-  HCatalogDatasetRepository(MetadataProvider provider) {
+  HCatalogDatasetRepository(Configuration conf, MetadataProvider provider) {
     this.metadataProvider = provider;
-    this.fsRepository = new FileSystemDatasetRepository(metadataProvider);
+    this.fsRepository = new FileSystemDatasetRepository(conf, metadataProvider);
   }
 
   @Override
@@ -158,12 +158,12 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
         // external
         HCatalogMetadataProvider metadataProvider =
             new HCatalogExternalMetadataProvider(configuration, rootDirectory);
-        return new FileSystemDatasetRepository(metadataProvider);
+        return new FileSystemDatasetRepository(configuration, metadataProvider);
       } else {
         // managed
         HCatalogMetadataProvider metadataProvider =
             new HCatalogManagedMetadataProvider(configuration);
-        return new HCatalogDatasetRepository(metadataProvider);
+        return new HCatalogDatasetRepository(configuration, metadataProvider);
       }
     }
   }

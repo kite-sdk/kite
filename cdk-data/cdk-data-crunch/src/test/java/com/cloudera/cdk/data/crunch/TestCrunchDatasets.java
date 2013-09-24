@@ -29,11 +29,11 @@ import org.apache.crunch.PCollection;
 import org.apache.crunch.Pipeline;
 import org.apache.crunch.Target;
 import org.apache.crunch.impl.mr.MRPipeline;
-import org.apache.hadoop.conf.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
+import org.apache.hadoop.conf.Configuration;
 
 public class TestCrunchDatasets {
 
@@ -43,7 +43,8 @@ public class TestCrunchDatasets {
   @Before
   public void setUp() throws IOException {
     this.conf = new Configuration();
-    repo = new FileSystemDatasetRepository(new MemoryMetadataProvider(conf));
+    this.repo =
+        new FileSystemDatasetRepository(conf, new MemoryMetadataProvider(conf));
   }
 
   @Test

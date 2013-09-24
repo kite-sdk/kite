@@ -81,7 +81,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   }
 
   private final MetadataProvider metadataProvider;
-
+  private final Configuration conf;
 
   /**
    * Construct a {@link FileSystemDatasetRepository} for the given
@@ -89,10 +89,13 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    *
    * @param metadataProvider the provider for metadata storage
    */
-  public FileSystemDatasetRepository(MetadataProvider metadataProvider) {
+  public FileSystemDatasetRepository(
+      Configuration conf, MetadataProvider metadataProvider) {
+    Preconditions.checkArgument(conf != null, "Configuration cannot be null");
     Preconditions.checkArgument(metadataProvider != null,
       "Metadata provider can not be null");
 
+    this.conf = conf;
     this.metadataProvider = metadataProvider;
   }
 
@@ -116,13 +119,14 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
           name);
     }
 
-    ensureExists(newDescriptor);
+    ensureExists(conf, newDescriptor);
 
     logger.debug("Created dataset:{} schema:{} datasetPath:{}", new Object[] {
         name, newDescriptor.getSchema(), location.toString() });
 
     return new FileSystemDataset.Builder()
         .name(name)
+        .configuration(conf)
         .descriptor(newDescriptor)
         .partitionKey(newDescriptor.isPartitioned() ?
             com.cloudera.cdk.data.impl.Accessor.getDefault().newPartitionKey() :
@@ -178,6 +182,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
     return new FileSystemDataset.Builder()
         .name(name)
+        .configuration(conf)
         .descriptor(updatedDescriptor)
         .partitionKey(updatedDescriptor.isPartitioned() ?
             com.cloudera.cdk.data.impl.Accessor.getDefault().newPartitionKey() :
@@ -195,6 +200,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
     FileSystemDataset ds = new FileSystemDataset.Builder()
         .name(name)
+        .configuration(conf)
         .descriptor(descriptor)
         .partitionKey(descriptor.isPartitioned() ?
             com.cloudera.cdk.data.impl.Accessor.getDefault().newPartitionKey() :
@@ -229,7 +235,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
           "Failed to delete descriptor for name:" + name, ex);
     }
 
-    final FileSystem fs = fsForDescriptor(descriptor);
+    final FileSystem fs = fsForDescriptor(conf, descriptor);
     final Path dataLocation = new Path(descriptor.getLocation());
 
     try {
@@ -339,18 +345,18 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   }
 
   /**
-   * Creates, if necessary, the given {@code location} in the given {@code fs}.
+   * Creates, if necessary, the given the location for {@code descriptor}.
    *
-   * @param fs A FileSystem
-   * @param location A Path
-   * @return true if created, false if already exists
+   * @param conf A Configuration
+   * @param descriptor A DatasetDescriptor
    */
-  private static void ensureExists(DatasetDescriptor descriptor) {
+  private static void ensureExists(
+      Configuration conf, DatasetDescriptor descriptor) {
     Preconditions.checkArgument(descriptor.getLocation() != null,
         "Cannot get FileSystem for a descriptor with no location");
     final Path dataPath = new Path(descriptor.getLocation());
 
-    final FileSystem fs = fsForDescriptor(descriptor, dataPath);
+    final FileSystem fs = fsForDescriptor(conf, descriptor, dataPath);
 
     try {
       if (!fs.exists(dataPath)) {
@@ -361,21 +367,30 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
   }
 
-  private static FileSystem fsForDescriptor(DatasetDescriptor descriptor) {
+  private static FileSystem fsForDescriptor(
+      Configuration conf, DatasetDescriptor descriptor) {
     Preconditions.checkArgument(descriptor.getLocation() != null,
         "Cannot get FileSystem for a descriptor with no location");
     final Path dataPath = new Path(descriptor.getLocation());
 
-    return fsForDescriptor(descriptor, dataPath);
+    return fsForDescriptor(conf, descriptor, dataPath);
   }
 
-  private static FileSystem fsForDescriptor(DatasetDescriptor descriptor, Path dataPath) {
-    final Configuration conf = descriptor.getConfiguration();
-    Preconditions.checkArgument(conf != null,
-        "Cannot get FileSystem for a descriptor with no configuration");
+  private static FileSystem fsForDescriptor(
+      Configuration conf, DatasetDescriptor descriptor, Path dataPath) {
+    final String fsUriString = descriptor.getProperty(
+        FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY);
+
     try {
-      return dataPath.getFileSystem(conf);
+      if (fsUriString == null) {
+        return dataPath.getFileSystem(conf);
+      } else {
+        return FileSystem.get(new URI(fsUriString), conf);
+      }
     } catch (IOException ex) {
+      throw new DatasetRepositoryException(
+          "Cannot get FileSystem for descriptor", ex);
+    } catch (URISyntaxException ex) {
       throw new DatasetRepositoryException(
           "Cannot get FileSystem for descriptor", ex);
     }
@@ -448,15 +463,19 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
     @Override
     public FileSystemDatasetRepository get() {
+      if (configuration == null) {
+        this.configuration = new Configuration();
+      }
+
       if (metadataProvider == null) {
         Preconditions.checkState(this.rootDirectory != null,
             "No root directory defined");
 
-        metadataProvider = new FileSystemMetadataProvider(
+        this.metadataProvider = new FileSystemMetadataProvider(
             configuration, rootDirectory);
       }
 
-      return new FileSystemDatasetRepository(metadataProvider);
+      return new FileSystemDatasetRepository(configuration, metadataProvider);
     }
   }
 

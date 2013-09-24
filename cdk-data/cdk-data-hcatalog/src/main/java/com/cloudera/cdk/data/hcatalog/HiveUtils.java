@@ -47,6 +47,7 @@ import org.apache.hadoop.hive.serde.serdeConstants;
 class HiveUtils {
   static final String DEFAULT_DB = "default";
   static final String HDFS_SCHEME = "hdfs";
+  static final String FILE_SYSTEM_URI_PROPERTY_NAME = "cdk.filesystem.uri";
 
   private static final String PARTITION_EXPRESSION_PROPERTY_NAME = "cdk.partition.expression";
   private static final String AVRO_SCHEMA_URL_PROPERTY_NAME = "avro.schema.url";
@@ -69,7 +70,6 @@ class HiveUtils {
 
   static DatasetDescriptor descriptorForTable(Configuration conf, Table table) {
     final DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder();
-    builder.configuration(conf);
 
     final String serializationLib = table.getSerializationLib();
     if (SERDE_TO_FORMAT.containsKey(serializationLib)) {
@@ -82,8 +82,18 @@ class HiveUtils {
 
     final Path dataLocation = new Path(table.getDataLocation());
 
-    builder.location(
-        fsForPath(conf, dataLocation).makeQualified(dataLocation).toUri());
+    final FileSystem dataFS;
+    final String fsUri;
+    if (table.getProperty(FILE_SYSTEM_URI_PROPERTY_NAME) == null) {
+      dataFS = fsForPath(conf, dataLocation);
+      fsUri = dataFS.getUri().toString();
+    } else {
+      fsUri = table.getProperty(FILE_SYSTEM_URI_PROPERTY_NAME);
+      dataFS = fsForPath(conf, fsUri, dataLocation);
+    }
+
+    builder.location(dataFS.makeQualified(dataLocation).toUri());
+    builder.property(FILE_SYSTEM_URI_PROPERTY_NAME, fsUri);
 
     if (table.getProperty(PARTITION_EXPRESSION_PROPERTY_NAME) != null) {
       builder.partitionStrategy(
@@ -125,6 +135,12 @@ class HiveUtils {
       // but it doesn't work without some additional magic:
       table.getParameters().put("EXTERNAL", "TRUE");
       table.setDataLocation(descriptor.getLocation());
+
+      final String fsUri =
+          descriptor.getProperty(FILE_SYSTEM_URI_PROPERTY_NAME);
+      if (fsUri != null) {
+        table.setProperty(FILE_SYSTEM_URI_PROPERTY_NAME, fsUri);
+      }
     } else {
       table.setTableType(TableType.MANAGED_TABLE);
     }
@@ -152,7 +168,7 @@ class HiveUtils {
     }
 
     // copy schema info
-    boolean useLiteral = false;
+    boolean useLiteral;
     final URL schemaURL = descriptor.getSchemaUrl();
     try {
       useLiteral = (schemaURL == null) ||
@@ -195,6 +211,22 @@ class HiveUtils {
     } catch (IOException ex) {
       throw new MetadataProviderException(
           "Cannot access FileSystem for uri:" + path, ex);
+    }
+  }
+
+  static FileSystem fsForPath(Configuration conf, String fsUri, Path path) {
+    try {
+      if (fsUri == null) {
+        return path.getFileSystem(conf);
+      } else {
+        return FileSystem.get(new URI(fsUri), conf);
+      }
+    } catch (IOException ex) {
+      throw new MetadataProviderException(
+          "Cannot access FileSystem for path:" + path, ex);
+    } catch (URISyntaxException ex) {
+      throw new MetadataProviderException(
+          "Cannot access FileSystem for uri:" + fsUri, ex);
     }
   }
 

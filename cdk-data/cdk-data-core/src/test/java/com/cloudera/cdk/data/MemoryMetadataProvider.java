@@ -20,6 +20,7 @@ import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
@@ -69,9 +70,18 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
 
     final DatasetDescriptor newDescriptor;
     if (descriptor.getLocation() == null) {
+      final Path location = new Path(newLocation(name));
+      final String fsUri;
+      try {
+        fsUri = location.getFileSystem(conf).getUri().toString();
+      } catch (IOException ex) {
+        throw new MetadataProviderException(
+            "Cannot get FS for location" + location);
+      }
+
       newDescriptor = new DatasetDescriptor.Builder(descriptor)
-          .configuration(conf)
-          .location(newLocation(name))
+          .location(location)
+          .property("cdk.filesystem.uri", fsUri)
           .get();
     } else {
       // don't need to modify it

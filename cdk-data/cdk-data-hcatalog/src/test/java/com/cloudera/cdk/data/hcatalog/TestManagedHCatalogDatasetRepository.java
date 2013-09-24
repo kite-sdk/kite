@@ -37,7 +37,7 @@ public class TestManagedHCatalogDatasetRepository extends TestFileSystemDatasetR
 
   @Override
   public DatasetRepository newRepo(MetadataProvider provider) {
-    return new HCatalogDatasetRepository(provider);
+    return new HCatalogDatasetRepository(conf, provider);
   }
 
   @Override

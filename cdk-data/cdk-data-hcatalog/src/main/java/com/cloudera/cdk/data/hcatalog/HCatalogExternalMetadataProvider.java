@@ -33,6 +33,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
   private static final Logger logger = LoggerFactory
       .getLogger(HCatalogExternalMetadataProvider.class);
   private final Path rootDirectory;
+  private final String fsUri;
 
   public HCatalogExternalMetadataProvider(Configuration conf, Path rootDirectory) {
     super(conf);
@@ -40,6 +41,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
 
     try {
       FileSystem rootFileSystem = rootDirectory.getFileSystem(conf);
+      this.fsUri = rootFileSystem.getUri().toString();
       this.rootDirectory = rootFileSystem.makeQualified(rootDirectory);
     } catch (IOException ex) {
       throw new MetadataProviderException(
@@ -77,8 +79,8 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
     // create a new descriptor with the dataset's location
     final DatasetDescriptor newDescriptor =
         new DatasetDescriptor.Builder(descriptor)
-        .configuration(conf)
         .location(pathForDataset(name).toUri())
+        .property(HiveUtils.FILE_SYSTEM_URI_PROPERTY_NAME, fsUri)
         .get();
 
     // this object will be the table metadata

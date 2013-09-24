@@ -55,6 +55,28 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
   }
 
   @Test
+  public void testLoadSetsURIs() throws IOException {
+    ensureCreated();
+
+    DatasetDescriptor loaded = provider.load(NAME);
+    Assert.assertNotNull("Loaded descriptor should have a location",
+        loaded.getLocation());
+    Assert.assertNotNull("Loaded descriptor should have a FS URI",
+        loaded.getProperty(
+            FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY));
+  }
+
+  @Test
+  public void testCreateSetsURIs() throws IOException {
+    DatasetDescriptor created = provider.create(NAME, testDescriptor);
+    Assert.assertNotNull("Created descriptor should have a location",
+        created.getLocation());
+    Assert.assertNotNull("Created descriptor should have a FS URI",
+        created.getProperty(
+            FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY));
+  }
+
+  @Test
   public void testCreateMetadataFiles() throws IOException {
     ensureCreated();
 

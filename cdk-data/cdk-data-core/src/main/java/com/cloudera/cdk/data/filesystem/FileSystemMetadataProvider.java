@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
-import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.MetadataProvider;
@@ -38,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
@@ -72,6 +70,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   private static final String METADATA_VERSION = "1";
   private static final String FORMAT_FIELD_NAME = "format";
   private static final String LOCATION_FIELD_NAME = "location";
+
+  static final String FILE_SYSTEM_URI_PROPERTY = "cdk.filesystem.uri";
 
   private final Configuration conf;
   private final Path rootDirectory;
@@ -140,15 +140,23 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
         "Unable to load schema file:" + schemaPath + " for dataset:" + name, e);
     }
 
+    final Path location;
     if (properties.containsKey(LOCATION_FIELD_NAME)) {
       // the location should always be written by this library and validated
       // when the descriptor is first created.
-      try {
-        builder.location(properties.getProperty(LOCATION_FIELD_NAME));
-      } catch (URISyntaxException ex) {
-        throw new MetadataProviderException("[BUG] Cannot parse location URI", ex);
-      }
-      builder.configuration(conf);
+      location = new Path(properties.getProperty(LOCATION_FIELD_NAME));
+    } else {
+      // backwards-compatibility: older versions didn't write this property
+      location = datasetPath;
+    }
+    builder.location(location);
+
+    if (properties.containsKey(FILE_SYSTEM_URI_PROPERTY)) {
+      builder.property(FILE_SYSTEM_URI_PROPERTY, properties.getProperty(name));
+    } else {
+      // backwards-compatibility: older versions didn't write this property
+      builder.property(
+          FILE_SYSTEM_URI_PROPERTY, fsForPath(location).getUri().toString());
     }
 
     return builder.get();
@@ -168,6 +176,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     // If the descriptor has a location, use it.
     if (descriptor.getLocation() != null) {
       dataLocation = new Path(descriptor.getLocation());
+      // only the root file system is supported
       Preconditions.checkArgument(
           rootFileSystem.equals(fsForPath(dataLocation)),
           "FileSystem does not match root directory");
@@ -180,7 +189,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     // get a DatasetDescriptor with the location set
     DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder(descriptor)
         .location(dataLocation.toUri())
-        .configuration(conf)
+        .property(FILE_SYSTEM_URI_PROPERTY, rootFileSystem.getUri().toString())
         .get();
 
     try {
@@ -215,6 +224,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     // If the descriptor has a location, use it.
     if (descriptor.getLocation() != null) {
       dataLocation = new Path(descriptor.getLocation());
+      // only the root file system is supported
       Preconditions.checkArgument(
           rootFileSystem.equals(fsForPath(dataLocation)),
           "FileSystem does not match root directory");

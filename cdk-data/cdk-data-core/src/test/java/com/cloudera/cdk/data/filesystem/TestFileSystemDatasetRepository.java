@@ -42,6 +42,8 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
   @Override
   public DatasetRepository newRepo(MetadataProvider provider) {
+    // this purposely does not set the Configuration to test that the code
+    // relies on filesystem URIs set in the DatasetDescriptor.
     return new FileSystemDatasetRepository.Builder()
         .metadataProvider(provider)
         .get();
@@ -54,9 +56,6 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     Assert.assertNotNull(
         "FileSystemDatasetRepository requires descriptor locations",
         created.getDescriptor().getLocation());
-    Assert.assertNotNull(
-        "FileSystemDatasetRepository requires descriptor locations",
-        created.getDescriptor().getConfiguration());
     Assert.assertTrue("Dataset data directory exists",
         fileSystem.exists(new Path(created.getDescriptor().getLocation())));
   }

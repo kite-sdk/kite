@@ -33,9 +33,12 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.apache.avro.Schema;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -157,6 +160,7 @@ class FileSystemDataset implements Dataset {
 
     return new FileSystemDataset.Builder()
         .name(name)
+        .fileSystem(fileSystem)
         .descriptor(new DatasetDescriptor.Builder(descriptor)
             .location(partitionDirectory.toUri())
             .partitionStrategy(subpartitionStrategy)
@@ -210,6 +214,7 @@ class FileSystemDataset implements Dataset {
           .getSubpartitionStrategy(partitionStrategy, 1);
       Builder builder = new FileSystemDataset.Builder()
           .name(name)
+          .fileSystem(fileSystem)
           .descriptor(new DatasetDescriptor.Builder(descriptor)
               .location(p.toUri())
               .partitionStrategy(subPartitionStrategy)
@@ -278,6 +283,7 @@ class FileSystemDataset implements Dataset {
 
   public static class Builder implements Supplier<FileSystemDataset> {
 
+    private Configuration conf;
     private FileSystem fileSystem;
     private Path directory;
     private String name;
@@ -289,18 +295,22 @@ class FileSystemDataset implements Dataset {
       return this;
     }
 
+    protected Builder fileSystem(FileSystem fs) {
+      this.fileSystem = fs;
+      return this;
+    }
+
+    public Builder configuration(Configuration conf) {
+      this.conf = conf;
+      return this;
+    }
+
     public Builder descriptor(DatasetDescriptor descriptor) {
       Preconditions.checkArgument(descriptor.getLocation() != null,
           "Dataset location cannot be null");
-      Preconditions.checkArgument(descriptor.getConfiguration() != null,
-          "Configuration cannot be null");
+
       this.descriptor = descriptor;
-      this.directory = new Path(descriptor.getLocation());
-      try {
-        this.fileSystem = directory.getFileSystem(descriptor.getConfiguration());
-      } catch (IOException ex) {
-        throw new DatasetException("Cannot access FileSystem", ex);
-      }
+
       return this;
     }
 
@@ -314,14 +324,30 @@ class FileSystemDataset implements Dataset {
       Preconditions.checkState(this.name != null, "No dataset name defined");
       Preconditions.checkState(this.descriptor != null,
         "No dataset descriptor defined");
-      Preconditions.checkState(this.directory != null,
-        "No dataset directory defined");
-      Preconditions
-        .checkState(this.fileSystem != null, "No filesystem defined");
+      Preconditions.checkState((conf != null) || (fileSystem != null),
+          "Configuration or FileSystem must be set");
+
+      this.directory = new Path(descriptor.getLocation());
+
+      if (fileSystem == null) {
+        final String fsUri = descriptor.getProperty(
+            FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY);
+        try {
+          if (fsUri == null) {
+            this.fileSystem = directory.getFileSystem(conf);
+          } else {
+            this.fileSystem = FileSystem.get(new URI(fsUri), conf);
+          }
+        } catch (IOException ex) {
+          throw new DatasetException("Cannot access FileSystem", ex);
+        } catch (URISyntaxException ex) {
+          throw new DatasetException("Cannot access FileSystem", ex);
+        }
+      }
 
       Path absoluteDirectory = fileSystem.makeQualified(directory);
-      return new FileSystemDataset(fileSystem, absoluteDirectory, name, descriptor,
-        partitionKey);
+      return new FileSystemDataset(
+          fileSystem, absoluteDirectory, name, descriptor, partitionKey);
     }
   }
 
