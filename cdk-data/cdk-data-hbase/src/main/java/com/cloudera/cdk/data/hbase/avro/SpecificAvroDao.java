@@ -303,12 +303,27 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
     for (Schema.Field field : entitySchema.getFields()) {
       entityMappers.add(new VersionedAvroEntityMapper.Builder()
           .setSchemaManager(schemaManager).setTableName(tableName)
-          .setEntityName(field.schema().getName()).setSpecific(true)
+          .setEntityName(getSchemaName(field.schema())).setSpecific(true)
           .<K, S> build());
     }
 
     return new SpecificCompositeAvroDao<K, E, S>(tablePool, tableName,
         entityMappers, entityClass);
+  }
+
+  private static String getSchemaName(Schema schema) {
+    if (schema.getType() == Schema.Type.UNION) {
+      List<Schema> types = schema.getTypes();
+      if (types.size() == 2) {
+        if (types.get(0).getType() == Schema.Type.NULL) {
+          return types.get(1).getName();
+        } else if (types.get(1).getType() == Schema.Type.NULL) {
+          return types.get(0).getName();
+        }
+      }
+      throw new IllegalArgumentException("Unsupported union schema: " + schema);
+    }
+    return schema.getName();
   }
 
   /**
