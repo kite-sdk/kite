@@ -57,6 +57,7 @@ import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
+import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.solr.SolrLocator;
 import com.cloudera.cdk.morphline.stdio.AbstractParser;
@@ -128,7 +129,7 @@ public final class SolrCellBuilder implements CommandBuilder {
       }
       Config fmapConfig = getConfigs().getConfig(config, "fmap", null);
       if (fmapConfig != null) {
-        for (Map.Entry<String, Object> entry : fmapConfig.root().unwrapped().entrySet()) {
+        for (Map.Entry<String, Object> entry : new Configs().getEntrySet(fmapConfig)) {
           cellParams.put(ExtractingParams.MAP_PREFIX + entry.getKey(), entry.getValue().toString());
         }
       }

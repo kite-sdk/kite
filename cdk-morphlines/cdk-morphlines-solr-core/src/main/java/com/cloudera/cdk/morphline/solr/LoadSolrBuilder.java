@@ -30,6 +30,7 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
+import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Metrics;
 import com.cloudera.cdk.morphline.base.Notifications;
 import com.codahale.metrics.Timer;
@@ -68,7 +69,7 @@ public final class LoadSolrBuilder implements CommandBuilder {
       LOG.debug("solrLocator: {}", locator);
       this.loader = locator.getLoader();
       Config boostsConfig = getConfigs().getConfig(config, "boosts", ConfigFactory.empty());
-      for (Map.Entry<String, Object> entry : boostsConfig.root().unwrapped().entrySet()) {
+      for (Map.Entry<String, Object> entry : new Configs().getEntrySet(boostsConfig)) {
         String fieldName = entry.getKey();        
         float boost = Float.parseFloat(entry.getValue().toString().trim());
         boosts.put(fieldName, boost);

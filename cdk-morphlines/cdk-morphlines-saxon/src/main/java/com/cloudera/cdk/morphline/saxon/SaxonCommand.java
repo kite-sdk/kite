@@ -39,6 +39,7 @@ import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
+import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.stdio.AbstractParser;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -60,7 +61,7 @@ abstract class SaxonCommand extends AbstractParser {
     this.documentBuilder = processor.newDocumentBuilder();
     
     Config features = getConfigs().getConfig(config, "features", ConfigFactory.empty());
-    for (Map.Entry<String, Object> entry : features.root().unwrapped().entrySet()) {
+    for (Map.Entry<String, Object> entry : new Configs().getEntrySet(features)) {
       processor.setConfigurationProperty(entry.getKey().toString(), entry.getValue());
     }
   }

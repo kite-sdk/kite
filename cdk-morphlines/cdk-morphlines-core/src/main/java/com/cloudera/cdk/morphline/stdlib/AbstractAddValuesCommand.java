@@ -23,6 +23,7 @@ import com.cloudera.cdk.morphline.api.Command;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
+import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.FieldExpression;
 import com.typesafe.config.Config;
 
@@ -35,7 +36,7 @@ abstract class AbstractAddValuesCommand extends AbstractCommand {
   
   public AbstractAddValuesCommand(Config config, Command parent, Command child, MorphlineContext context) {
     super(config, parent, child, context);      
-    entrySet = config.root().unwrapped().entrySet();
+    entrySet = new Configs().getEntrySet(config);
   }
       
   @Override

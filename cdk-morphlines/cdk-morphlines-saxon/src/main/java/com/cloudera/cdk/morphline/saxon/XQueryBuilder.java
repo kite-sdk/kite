@@ -45,6 +45,7 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
+import com.cloudera.cdk.morphline.base.Configs;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -128,12 +129,12 @@ public final class XQueryBuilder implements CommandBuilder {
         
         XQueryEvaluator evaluator = executable.load();
         Config variables = getConfigs().getConfig(fragment, "externalVariables", ConfigFactory.empty());
-        for (Map.Entry<String, Object> entry : variables.root().unwrapped().entrySet()) {
+        for (Map.Entry<String, Object> entry : new Configs().getEntrySet(variables)) {
           XdmValue xdmValue = XdmNode.wrap(new UntypedAtomicValue(entry.getValue().toString()));
           evaluator.setExternalVariable(new QName(entry.getKey()), xdmValue);
         }
         Config fileVariables = getConfigs().getConfig(fragment, "externalFileVariables", ConfigFactory.empty());
-        for (Map.Entry<String, Object> entry : fileVariables.root().unwrapped().entrySet()) {
+        for (Map.Entry<String, Object> entry : new Configs().getEntrySet(fileVariables)) {
           File file = new File(entry.getValue().toString());
           XdmValue doc = parseXmlDocument(file);
           evaluator.setExternalVariable(new QName(entry.getKey()), doc);

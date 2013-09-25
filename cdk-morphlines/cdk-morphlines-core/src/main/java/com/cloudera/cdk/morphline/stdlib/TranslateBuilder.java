@@ -26,6 +26,7 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
+import com.cloudera.cdk.morphline.base.Configs;
 import com.typesafe.config.Config;
 
 /**
@@ -58,7 +59,7 @@ public final class TranslateBuilder implements CommandBuilder {
       super(config, parent, child, context);      
       this.fieldName = getConfigs().getString(config, "field");
       Config dict = getConfigs().getConfig(config, "dictionary");
-      for (Map.Entry<String, Object> entry : dict.root().unwrapped().entrySet()) {
+      for (Map.Entry<String, Object> entry : new Configs().getEntrySet(dict)) {
         dictionary.put(entry.getKey().toString(), entry.getValue());
       }
       this.fallback = getConfigs().getString(config, "fallback", null);

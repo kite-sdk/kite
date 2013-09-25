@@ -10,9 +10,15 @@ Release date: TBD
 Version TBD has the following notable changes:
 
 * Morphlines Library
-    * Added `cdk-morphlines-hadoop-core` maven module with new `downloadHdfsFile` command for transferring HDFS files, e.g. to help with centralized configuration file management.
+    * Added morphline commands to publish the metrics of all morphline commands to JMX, SLF4J and CSV files. 
+      The new commands are: `startReportingMetricsToJMX`, `startReportingMetricsToSLF4J` and `startReportingMetricsToCSV`.
+    * Added `cdk-morphlines-hadoop-core` maven module with new `downloadHdfsFile` command for transferring HDFS files, e.g. 
+      to help with centralized configuration file management.
     * Added option to specify boost values to `loadSolr` command.
-    * Added several performance enhancements.
+    * Added several performance enhancements. 
+    * Ensured morphline commands can refer to record field names containing arbitrary characters. 
+      Previously some commands could not refer to record field names containing the '.' dot character. 
+      This limitation has been removed.
 
 ## Version 0.7.0
 

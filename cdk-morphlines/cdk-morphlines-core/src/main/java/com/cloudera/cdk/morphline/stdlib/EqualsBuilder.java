@@ -26,6 +26,7 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
+import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.FieldExpression;
 import com.typesafe.config.Config;
 
@@ -55,7 +56,7 @@ public final class EqualsBuilder implements CommandBuilder {
     
     public Equals(Config config, Command parent, Command child, MorphlineContext context) {
       super(config, parent, child, context);      
-      entrySet = config.root().unwrapped().entrySet();
+      entrySet = new Configs().getEntrySet(config);
     }
         
     @Override

@@ -1210,6 +1210,7 @@ h4. Example startReportingMetricsToJMX usage
 {code}
 startReportingMetricsToJMX {
   domain : myMetrics
+  period : "10 seconds"
 }
 {code}
 
@@ -1217,6 +1218,7 @@ h4. More example startReportingMetricsToJMX usage
 {code}
 startReportingMetricsToJMX {
   domain : myMetrics
+  period : "10 seconds"
   durationUnits : {
     myMetrics.myTimer : minutes
   }

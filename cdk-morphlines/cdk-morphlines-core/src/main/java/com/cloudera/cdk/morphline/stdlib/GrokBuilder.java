@@ -26,6 +26,7 @@ import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
+import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Validator;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.GroupInfo;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Matcher;
@@ -75,7 +76,7 @@ public final class GrokBuilder implements CommandBuilder {
       
       GrokDictionaries dict = new GrokDictionaries(config, getConfigs());
       Config exprConfig = getConfigs().getConfig(config, "expressions", ConfigFactory.empty());
-      for (Map.Entry<String, Object> entry : exprConfig.root().unwrapped().entrySet()) {
+      for (Map.Entry<String, Object> entry : new Configs().getEntrySet(exprConfig)) {
         String expr = entry.getValue().toString();
         this.regexes.put(entry.getKey(), dict.compileExpression(expr).matcher(""));
       }

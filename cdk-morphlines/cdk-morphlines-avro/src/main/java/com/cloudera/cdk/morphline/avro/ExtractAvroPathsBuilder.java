@@ -40,6 +40,7 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
+import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
@@ -91,7 +92,7 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
       ListMultimap<String, String> stepMultiMap = ArrayListMultimap.create();
       this.flatten = getConfigs().getBoolean(config, "flatten", true);
       Config paths = getConfigs().getConfig(config, "paths");
-      for (Map.Entry<String, Object> entry : paths.root().unwrapped().entrySet()) {
+      for (Map.Entry<String, Object> entry : new Configs().getEntrySet(paths)) {
         String fieldName = entry.getKey();        
         String path = entry.getValue().toString().trim();
         if (path.contains("//")) {

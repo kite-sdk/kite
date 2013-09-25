@@ -71,6 +71,23 @@ public class ConfigsTest extends Assert {
   }
   
   @Test
+  public void testValidateArgumentsWithoutQuotes() throws Exception {
+    Config config = ConfigFactory.parseString("{ foo : bar }");
+    Configs configs = new Configs();
+    assertEquals("bar", configs.getString(config, "foo"));
+    configs.validateArguments(config);    
+  }
+  
+  @Test
+  public void testValidateArgumentsWithQuotes() throws Exception {
+    Config config = ConfigFactory.parseString("{ foo : bar, \"see\" : \"you\" }");
+    Configs configs = new Configs();
+    assertEquals("bar", configs.getString(config, "foo"));
+    assertEquals("you", configs.getString(config, "see"));
+    configs.validateArguments(config);    
+  }
+  
+  @Test
   public void testQuotingInHashes() throws Exception {
     String q = String.valueOf('"');
     testQuotingInHashesInternal("foo", "bar");
@@ -114,5 +131,5 @@ public class ConfigsTest extends Assert {
       return str;
     }
   }
-
+  
 }
