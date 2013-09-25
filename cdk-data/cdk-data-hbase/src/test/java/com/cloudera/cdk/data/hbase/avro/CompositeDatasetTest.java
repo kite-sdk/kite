@@ -21,15 +21,11 @@ import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
+import com.cloudera.cdk.data.hbase.avro.entities.CompositeEntity;
 import com.cloudera.cdk.data.hbase.avro.entities.SubEntity1;
 import com.cloudera.cdk.data.hbase.avro.entities.SubEntity2;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import java.util.Map;
-import org.apache.avro.Schema;
-import org.apache.avro.specific.SpecificRecord;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -92,12 +88,6 @@ public class CompositeDatasetTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .identity("part1", 1).identity("part2", 2).get();
 
-    Schema compositeSchema = Schema.createRecord("CompositeSchema", null, null, false);
-    compositeSchema.setFields(Lists.newArrayList(
-        new Schema.Field("SubEntity1", SubEntity1.SCHEMA$, null, null),
-        new Schema.Field("SubEntity2", SubEntity2.SCHEMA$, null, null)
-    ));
-
     // create constituent datasets
     repo.create(tableName, new DatasetDescriptor.Builder()
         .schema(SubEntity1.SCHEMA$)
@@ -110,11 +100,11 @@ public class CompositeDatasetTest {
 
     // create composite dataset
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
-        .schema(compositeSchema)
+        .schema(CompositeEntity.SCHEMA$)
         .partitionStrategy(partitionStrategy)
         .get();
     Dataset ds = repo.create(tableName, descriptor);
-    DatasetAccessor<Map> accessor = ds.newAccessor();
+    DatasetAccessor<CompositeEntity> accessor = ds.newAccessor();
 
     // Construct entities
     SubEntity1 subEntity1 = SubEntity1.newBuilder().setPart1("1").setPart2("1")
@@ -122,24 +112,19 @@ public class CompositeDatasetTest {
     SubEntity2 subEntity2 = SubEntity2.newBuilder().setPart1("1").setPart2("1")
         .setField1("field2_1").setField2("field2_2").build();
 
-    Map<String, SpecificRecord> compositeEntity = Maps.newHashMap();
-    compositeEntity.put("SubEntity1", subEntity1);
-    compositeEntity.put("SubEntity2", subEntity2);
+    CompositeEntity compositeEntity = CompositeEntity.newBuilder()
+        .setSubEntity1(subEntity1).setSubEntity2(subEntity2).build();
 
     // Test put and get
     accessor.put(compositeEntity);
 
     PartitionKey key = partitionStrategy.partitionKey("1", "1");
-    Map<String, SpecificRecord> returnedCompositeEntity = accessor.get(key);
+    CompositeEntity returnedCompositeEntity = accessor.get(key);
     assertNotNull("found entity", returnedCompositeEntity);
-    assertEquals("field1_1", ((SubEntity1) returnedCompositeEntity.get("SubEntity1"))
-        .getField1());
-    assertEquals("field1_2", ((SubEntity1) returnedCompositeEntity.get("SubEntity1"))
-        .getField2());
-    assertEquals("field2_1", ((SubEntity2) returnedCompositeEntity.get("SubEntity2"))
-        .getField1());
-    assertEquals("field2_2", ((SubEntity2) returnedCompositeEntity.get("SubEntity2"))
-        .getField2());
+    assertEquals("field1_1", returnedCompositeEntity.getSubEntity1().getField1());
+    assertEquals("field1_2", returnedCompositeEntity.getSubEntity1().getField2());
+    assertEquals("field2_1", returnedCompositeEntity.getSubEntity2().getField1());
+    assertEquals("field2_2", returnedCompositeEntity.getSubEntity2().getField2());
 
     // Test OCC
     assertFalse(accessor.put(compositeEntity));
@@ -147,14 +132,13 @@ public class CompositeDatasetTest {
 
     // Test null field
     subEntity1 = SubEntity1.newBuilder(subEntity1).setPart2("2").build(); // different key
-    compositeEntity.clear();
-    compositeEntity.put("SubEntity1", subEntity1);
+    compositeEntity = CompositeEntity.newBuilder().setSubEntity1(subEntity1).build();
     accessor.put(compositeEntity);
     returnedCompositeEntity = accessor.get(partitionStrategy.partitionKey("1", "2"));
     // unlike using the Dao directly, the returned entity is not null since it contains
     // the key, but its non-key fields are null
-    assertNotNull(returnedCompositeEntity.get("SubEntity2"));
-    assertNull(((SubEntity2) returnedCompositeEntity.get("SubEntity2")).getField1());
-    assertNull(((SubEntity2) returnedCompositeEntity.get("SubEntity2")).getField2());
+    assertNotNull(returnedCompositeEntity.getSubEntity2());
+    assertNull(returnedCompositeEntity.getSubEntity2().getField1());
+    assertNull(returnedCompositeEntity.getSubEntity2().getField2());
   }
 }

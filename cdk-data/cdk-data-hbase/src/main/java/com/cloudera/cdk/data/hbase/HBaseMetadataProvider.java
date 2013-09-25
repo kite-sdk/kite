@@ -135,6 +135,18 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     if (HBaseDatasetRepository.isComposite(descriptor)) {
       // use first field schema for composite schemas
       avroRecordSchema = descriptor.getSchema().getFields().get(0).schema();
+      if (avroRecordSchema.getType() == Schema.Type.UNION) {
+        List<Schema> types = avroRecordSchema.getTypes();
+        if (types.size() == 2) {
+          if (types.get(0).getType() == Schema.Type.NULL) {
+            avroRecordSchema = types.get(1);
+          } else if (types.get(1).getType() == Schema.Type.NULL) {
+            avroRecordSchema = types.get(0);
+          }
+        } else {
+          throw new IllegalArgumentException("Unsupported union schema: " + avroRecordSchema);
+        }
+      }
     } else {
       avroRecordSchema = descriptor.getSchema();
     }

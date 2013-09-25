@@ -22,11 +22,7 @@ import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
-import com.google.common.collect.Lists;
 import java.util.HashMap;
-import java.util.Map;
-import org.apache.avro.Schema;
-import org.apache.avro.specific.SpecificRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
@@ -102,13 +98,8 @@ public class UserProfileDatasetExample {
     userActionsDataset = repo.create("cdk_example_user_profiles",
         userActionsDatasetDescriptor);
 
-    Schema compositeSchema = Schema.createRecord("UserProfileActions", null, null, false);
-    compositeSchema.setFields(Lists.newArrayList(
-        new Schema.Field("UserProfileModel", UserProfileModel2.SCHEMA$, null, null),
-        new Schema.Field("UserActionsModel", UserActionsModel2.SCHEMA$, null, null)
-    ));
     DatasetDescriptor userProfileActionsDatasetDescriptor =
-        new DatasetDescriptor.Builder().schema(compositeSchema)
+        new DatasetDescriptor.Builder().schema(UserProfileActionsModel2.SCHEMA$)
             .partitionStrategy(partitionStrategy).get();
     userProfileActionsDataset = repo.create("cdk_example_user_profiles",
         userProfileActionsDatasetDescriptor);
@@ -147,11 +138,11 @@ public class UserProfileDatasetExample {
    */
   public void printUserProfileActionsForLastName(String lastName) {
     // TODO: use a reader with a start key
-    DatasetReader<Map<String, SpecificRecord>> reader = userProfileActionsDataset.getReader();
+    DatasetReader<UserProfileActionsModel2> reader = userProfileActionsDataset.getReader();
     reader.open();
     try {
-      for (Map<String, SpecificRecord> entity : reader) {
-        UserProfileModel2 userProfile = (UserProfileModel2) entity.get("UserProfileModel");
+      for (UserProfileActionsModel2 entity : reader) {
+        UserProfileModel2 userProfile = entity.getUserProfileModel();
         if (userProfile.getLastName().equals(lastName)) {
           System.out.println(entity.toString());
         }
@@ -188,11 +179,11 @@ public class UserProfileDatasetExample {
         .setActions(new HashMap<String, String>()).build();
     actionsModel.getActions().put("profile_created", Long.toString(ts));
 
-    Map<String, SpecificRecord> profileActionsModel = new HashMap<String, SpecificRecord>();
-    profileActionsModel.put("UserProfileModel", profileModel);
-    profileActionsModel.put("UserActionsModel", actionsModel);
+    UserProfileActionsModel2 profileActionsModel = UserProfileActionsModel2
+        .newBuilder().setUserProfileModel(profileModel)
+        .setUserActionsModel(actionsModel).build();
 
-    DatasetAccessor<Map<String, SpecificRecord>> accessor = userProfileActionsDataset.newAccessor();
+    DatasetAccessor<UserProfileActionsModel2> accessor = userProfileActionsDataset.newAccessor();
     if (!accessor.put(profileActionsModel)) {
       // If put returns false, a user already existed at this row
       System.out
@@ -226,19 +217,21 @@ public class UserProfileDatasetExample {
     PartitionKey key = partitionStrategy.partitionKey(firstName, lastName);
 
     // Get the profile and actions entity from the composite dao.
-    DatasetAccessor<Map<String, SpecificRecord>> accessor = userProfileActionsDataset.newAccessor();
-    Map<String, SpecificRecord> profileActionsModel = accessor.get(key);
+    DatasetAccessor<UserProfileActionsModel2> accessor = userProfileActionsDataset.newAccessor();
+    UserProfileActionsModel2 profileActionsModel = accessor.get(key);
 
     // Updating the married status is hairy since our avro compiler isn't setup
     // to compile setters for fields. We have to construct a clone through the
     // builder.
-    profileActionsModel.put("UserProfileModel",
-        UserProfileModel
-            .newBuilder((UserProfileModel) profileActionsModel.get("UserProfileModel"))
-            .setMarried(married).build());
+    UserProfileActionsModel2 updatedProfileActionsModel = UserProfileActionsModel2
+        .newBuilder(profileActionsModel)
+        .setUserProfileModel(
+            UserProfileModel2
+                .newBuilder(profileActionsModel.getUserProfileModel())
+                .setMarried(married).build()).build();
     // Since maps are mutable, we can update the actions map without having to
     // go through the builder like above.
-    ((UserActionsModel) profileActionsModel.get("UserActionsModel")).getActions()
+    updatedProfileActionsModel.getUserActionsModel().getActions()
         .put("profile_updated", Long.toString(ts));
 
     if (!accessor.put(profileActionsModel)) {

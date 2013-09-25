@@ -13,18 +13,16 @@ import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.dao.KeyEntity;
 import com.cloudera.cdk.data.spi.AbstractDatasetReader;
 import java.util.Iterator;
-import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.specific.SpecificRecord;
 
 class CompositeAvroDaoDataset implements Dataset {
-  private Dao<Map<String, SpecificRecord>> dao;
+  private Dao<SpecificRecord> dao;
   private DatasetDescriptor descriptor;
   private Schema keySchema;
 
-
-  public CompositeAvroDaoDataset(Dao<Map<String, SpecificRecord>> dao, DatasetDescriptor descriptor) {
+  public CompositeAvroDaoDataset(Dao<SpecificRecord> dao, DatasetDescriptor descriptor) {
     this.dao = dao;
     this.descriptor = descriptor;
     this.keySchema = HBaseMetadataProvider.getKeySchema(descriptor);
@@ -78,7 +76,7 @@ class CompositeAvroDaoDataset implements Dataset {
 
       @Override
       public boolean put(E e) {
-        return dao.put((Map<String, SpecificRecord>) e);
+        return dao.put((SpecificRecord) e);
       }
 
       @Override
@@ -94,15 +92,6 @@ class CompositeAvroDaoDataset implements Dataset {
       @Override
       public boolean delete(PartitionKey key, E entity) {
         throw new UnsupportedOperationException();
-      }
-
-      private SpecificRecord toSpecificRecord(PartitionKey key) {
-        SpecificGenericRecord keyRecord = new SpecificGenericRecord(keySchema);
-        int i = 0;
-        for (FieldPartitioner fp : descriptor.getPartitionStrategy().getFieldPartitioners()) {
-          keyRecord.put(fp.getName(), key.get(i++));
-        }
-        return keyRecord;
       }
     };
   }
