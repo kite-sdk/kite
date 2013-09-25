@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase.avro.impl;
 
+import com.google.common.base.Objects;
 import java.io.IOException;
 import java.util.Collection;
 
@@ -224,7 +225,7 @@ public class AvroEntitySchema extends EntitySchema {
       return false;
     }
     // if field mappings aren't equal, return false
-    if (!field1Mapping.equals(field2Mapping)) {
+    if (!Objects.equal(field1Mapping, field2Mapping)) {
       return false;
     }
     // if one default value is null and the other isn't, return false
