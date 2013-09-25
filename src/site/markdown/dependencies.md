@@ -93,6 +93,9 @@ dependencies yourself:
 * CDK Morphlines Twitter
  [Dependency Information](cdk-morphlines/cdk-morphlines-twitter/dependency-info.html),
  [Dependencies](cdk-morphlines/cdk-morphlines-twitter/dependencies.html)
+* CDK Morphlines All
+ [Dependency Information](cdk-morphlines/cdk-morphlines-all/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-all/dependencies.html)
 
 ## CDK Tools Modules
 
