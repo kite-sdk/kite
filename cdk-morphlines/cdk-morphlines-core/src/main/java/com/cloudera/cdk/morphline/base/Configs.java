@@ -250,7 +250,7 @@ public final class Configs {
     }
   }  
 
-  public Set<Map.Entry<String, Object>> entrySet(Config config) {
+  public Set<Map.Entry<String, Object>> getEntrySet(Config config) {
     Map<String, Object> map = new HashMap();
     for (Map.Entry<String, ConfigValue> entry : config.entrySet()) {
       map.put(trimQuote(entry.getKey()), entry.getValue().unwrapped());

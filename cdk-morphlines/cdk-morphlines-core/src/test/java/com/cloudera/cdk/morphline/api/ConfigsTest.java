@@ -90,7 +90,7 @@ public class ConfigsTest extends Assert {
   }
   
   private void assertNameValueEquals(String key, String value, Config config) {
-    for (Map.Entry<String, Object> entry : new Configs().entrySet(config)) {
+    for (Map.Entry<String, Object> entry : new Configs().getEntrySet(config)) {
       assertEquals(key, entry.getKey());
       assertEquals(value, entry.getValue());
     }

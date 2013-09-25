@@ -68,13 +68,13 @@ final class PatternMetricFilter implements MetricFilter {
     if (includesConfig == null) {
       includes.add(new ExpressionPair(new MatchAllExpression(), new MatchAllExpression()));
     } else {
-      for (Map.Entry<String, Object> entry : new Configs().entrySet(includesConfig)) {
+      for (Map.Entry<String, Object> entry : new Configs().getEntrySet(includesConfig)) {
         includes.add(parseExpressionPair(entry.getKey(), entry.getValue().toString(), includesConfig));
       }
     }
     Config excludesConfig = configs.getConfig(config, "excludes", null);
     if (excludesConfig != null) {
-      for (Map.Entry<String, Object> entry : new Configs().entrySet(excludesConfig)) {
+      for (Map.Entry<String, Object> entry : new Configs().getEntrySet(excludesConfig)) {
         excludes.add(parseExpressionPair(entry.getKey(), entry.getValue().toString(), excludesConfig));
       }
     }

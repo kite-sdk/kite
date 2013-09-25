@@ -70,13 +70,13 @@ public final class StartReportingMetricsToJMXBuilder implements CommandBuilder {
       
       Map<String, TimeUnit> durationUnits = new HashMap();
       Config durationUnitsConfig = getConfigs().getConfig(config, "durationUnits", ConfigFactory.empty());
-      for (Map.Entry<String, Object> entry : new Configs().entrySet(durationUnitsConfig)) {
+      for (Map.Entry<String, Object> entry : new Configs().getEntrySet(durationUnitsConfig)) {
         TimeUnit unit = new Configs().getTimeUnit(entry.getValue().toString());
         durationUnits.put(entry.getKey(), unit);
       }      
       Map<String, TimeUnit> rateUnits = new HashMap();
       Config rateUnitsConfig = getConfigs().getConfig(config, "rateUnits", ConfigFactory.empty());
-      for (Map.Entry<String, Object> entry : new Configs().entrySet(rateUnitsConfig)) {
+      for (Map.Entry<String, Object> entry : new Configs().getEntrySet(rateUnitsConfig)) {
         TimeUnit unit = new Configs().getTimeUnit(entry.getValue().toString());
         rateUnits.put(entry.getKey(), unit);
       }            
