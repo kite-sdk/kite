@@ -72,18 +72,19 @@ public class ConfigsTest extends Assert {
   
   @Test
   public void testValidateArgumentsWithoutQuotes() throws Exception {
-    Config config = ConfigFactory.parseString("{ foo : bar }");
+    Config config = ConfigFactory.parseString("{ foo : bar, see : you.there.soon }");
     Configs configs = new Configs();
     assertEquals("bar", configs.getString(config, "foo"));
+    assertEquals("you.there.soon", configs.getString(config, "see"));
     configs.validateArguments(config);    
   }
   
   @Test
   public void testValidateArgumentsWithQuotes() throws Exception {
-    Config config = ConfigFactory.parseString("{ foo : bar, \"see\" : \"you\" }");
+    Config config = ConfigFactory.parseString("{ foo : bar, \"see\" : \"you.there.soon\" }");
     Configs configs = new Configs();
     assertEquals("bar", configs.getString(config, "foo"));
-    assertEquals("you", configs.getString(config, "see"));
+    assertEquals("you.there.soon", configs.getString(config, "see"));
     configs.validateArguments(config);    
   }
   
