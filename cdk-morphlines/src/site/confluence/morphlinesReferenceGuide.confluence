@@ -34,6 +34,9 @@ h3. cdk\-morphlines\-core\-stdlib
 - [setValues|#setValues]
 - [split|#split]
 - [splitKeyValue|#splitKeyValue]
+- [startReportingMetricsToCSV|#startReportingMetricsToCSV]
+- [startReportingMetricsToJMX|#startReportingMetricsToJMX]
+- [startReportingMetricsToSLF4J|#startReportingMetricsToSLF4J]
 - [toByteArray|#toByteArray]
 - [toString|#toString]
 - [translate|#translate]
@@ -810,12 +813,22 @@ Example usage:
 java {
   imports : "import java.util.*;"
   code: """
+    // Update some custom metrics - see http://metrics.codahale.com/getting-started/
+    context.getMetricRegistry().counter("myMetrics.myCounter").inc(1);
+    context.getMetricRegistry().meter("myMetrics.myMeter").mark(1);
+    context.getMetricRegistry().histogram("myMetrics.myHistogram").update(100);
+    com.codahale.metrics.Timer.Context timerContext = context.getMetricRegistry().timer("myMetrics.myTimer").time();
+                
+    // manipulate the contents of a record field
     List tags = record.get("tags");
     if (!tags.contains("hello")) {
       return false;
     }
     tags.add("world");
-    return child.process(record);
+    
+    logger.debug("tags: {} for record: {}", tags, record); // log to SLF4J
+    timerContext.stop(); // measure how much time the code block took
+    return child.process(record); // pass record to next command in chain
         """
 }
 {code}
@@ -823,7 +836,7 @@ java {
 {anchor:logTrace}
 h2. logTrace, logDebug, logInfo, logWarn, logError
 
-These commands log a message to [slf4j|http://www.slf4j.org] at the given log level. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}. The special field expression @\{\} can be used to log the entire record.
+These commands log a message to [SLF4J|http://www.slf4j.org] at the given log level. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}. The special field expression @\{\} can be used to log the entire record.
 
 Example usage:
 {code}
@@ -1119,6 +1132,156 @@ OUT:eth0
 SRC:1.2.3.4
 DST:6.7.8.9
 WINDOW:0
+{code}
+
+h2. startReportingMetricsToCSV
+
+The {{startReportingMetricsToCSV}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/StartReportingMetricsToCSVBuilder.java]) starts periodically appending the metrics of all morphline commands to a set of CSV files. The CSV files are named after the metrics.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| dir | n/a | The relative or absolute path of the output directory on the local file system. The directory and it's parent directories will be created automatically if they don't yet exist. |
+| period | "10 seconds" | The amount of time between reports to the output file, given in [HOCON duration format|https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format]. |
+| locale | JVM default Locale | Format numbers for the given Java Locale. Example: "en\_US" |
+| defaultDurationUnit | milliseconds | Report output durations in the given time unit. One of {{nanoseconds}},  {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. |
+| defaultRateUnit | seconds | Report output rates in the given time unit. One of {{nanoseconds}}, {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. Example output: events/second |
+| metricFilter | null | Only report metrics which match the given (optional) filter, as described in more detail below. If the filter is absent all metrics match. |
+
+h4. metricFilter
+
+A metricFilter uses pattern matching with include/exclude specifications to determine if a given metric shall be reported to the output destination.
+
+A metric consists of a metric name and a metric class name. A metric matches the filter if the metric matches at least one include specification, but matches none of the exclude specifications. An include/exclude specification consists of zero or more expression pairs. Each expression pair consists of an expression for the metric name, as well as an expression for the metric's class name. Each expression can be a regex pattern (e.g. "regex:foo.\*") or glob pattern (e.g. "glob:foo\*") or literal pattern (e.g. "literal:foo") or "\*" which is equivalent to "glob:\*". Each expression pair defines one expression for the metric name and another expression for the metric class name.
+ 
+If the include specification is absent it defaults to MATCH ALL. If the exclude specification is absent it defaults to MATCH NONE.
+
+h4. Example startReportingMetricsToCSV usage
+{code}
+startReportingMetricsToCSV {
+  dir : "mytest/metricsLogs"
+  period : "10 seconds"
+  locale : en_US
+}
+{code}
+
+h4. More example startReportingMetricsToCSV usage
+{code}
+startReportingMetricsToCSV {
+  dir : "mytest/metricsLogs"
+  period : "10 seconds"
+  locale : en_US
+  defaultDurationUnit : milliseconds
+  defaultRateUnit : seconds
+  metricFilter : {
+    includes : { # if absent defaults to match all
+      "literal:foo" : "glob:foo*"
+      "regex:.*" : "glob:*"
+    }
+    excludes : { # if absent defaults to match none
+      "literal:foo.bar" : "*"
+    }
+  }          
+}
+{code}
+
+h4. Example output log file
+{code}
+t,count,mean_rate,m1_rate,m5_rate,m15_rate,rate_unit
+1380054913,2,409.752100,0.000000,0.000000,0.000000,events/second
+1380055913,2,258.131131,0.000000,0.000000,0.000000,events/second
+{code}
+
+h2. startReportingMetricsToJMX
+
+The {{startReportingMetricsToJMX}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/StartReportingMetricsToJMXBuilder.java]) starts publishing the metrics of all morphline commands to [JMX|http://en.wikipedia.org/wiki/Java_Management_Extensions].
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| domain | metrics | The name of the JMX domain (aka category) to publish to. |
+| durationUnits | null | Report output durations of the given metrics in the given time units. This optional parameter is a JSON object where the key is the metric name and the value is a time unit. The time unit can be one of {{nanoseconds}},  {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. |
+| defaultDurationUnit | milliseconds | Report all other output durations in the given time unit. One of {{nanoseconds}},  {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. |
+| rateUnits | null | Report output rates of the given metrics in the given time units. This optional parameter is a JSON object where the key is the metric name and the value is a time unit. The time unit can be one of {{nanoseconds}},  {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. |
+| defaultRateUnit | seconds | Report all other output rates in the given time unit. One of {{nanoseconds}}, {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. Example output: events/second |
+| metricFilter | null | Only report metrics which match the given (optional) filter, as described in more detail [above|#metricFilter]. If the filter is absent all metrics match. |
+
+h4. Example startReportingMetricsToJMX usage
+{code}
+startReportingMetricsToJMX {
+  domain : myMetrics
+}
+{code}
+
+h4. More example startReportingMetricsToJMX usage
+{code}
+startReportingMetricsToJMX {
+  domain : myMetrics
+  durationUnits : {
+    myMetrics.myTimer : minutes
+  }
+  defaultDurationUnit : milliseconds
+  rateUnits : {
+    myMetrics.myTimer : milliseconds
+    LogDebug.numProcessCalls : milliseconds
+  }
+  defaultRateUnit : seconds
+  metricFilter : {
+    includes : { # if absent defaults to match all
+      "literal:foo" : "glob:foo*"
+      "regex:.*" : "glob:*"
+    }
+    excludes : { # if absent defaults to match none
+      "literal:foo.bar" : "*"
+    }
+  }          
+}
+{code}
+
+h2. startReportingMetricsToSLF4J
+
+The {{startReportingMetricsToSLF4J}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/StartReportingMetricsToSLF4JBuilder.java]) starts periodically logging the metrics of all morphline commands to [SLF4J|http://www.slf4j.org].
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| logger | metrics | The name of the SLF4J logger to write to. |
+| marker | null | The optional name of the SLF4J marker object to associate with each logging request. |
+| period | "10 seconds" | The amount of time between reports to the output file, given in [HOCON duration format|https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format]. |
+| defaultDurationUnit | milliseconds | Report output durations in the given time unit. One of {{nanoseconds}},  {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. |
+| defaultRateUnit | seconds | Report output rates in the given time unit. One of {{nanoseconds}}, {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. Example output: events/second |
+| metricFilter | null | Only report metrics which match the given (optional) filter, as described in more detail [above|#metricFilter]. If the filter is absent all metrics match. |
+
+h4. Example startReportingMetricsToSLF4J usage
+{code}
+startReportingMetricsToSLF4J {
+  logger : "com.cloudera.cdk.morphline.domain1"
+  period : "10 seconds"
+}
+{code}
+
+h4. More example startReportingMetricsToSLF4J usage
+{code}
+startReportingMetricsToSLF4J {
+  logger : "com.cloudera.cdk.morphline.domain1"
+  period : "10 seconds"
+  defaultDurationUnit : milliseconds
+  defaultRateUnit : seconds
+  metricFilter : {
+    includes : { # if absent defaults to match all
+      "literal:foo" : "glob:foo*"
+      "regex:.*" : "glob:*"
+    }
+    excludes : { # if absent defaults to match none
+      "literal:foo.bar" : "*"
+    }
+  }          
+}
+{code}
+
+h4. Example output log line
+{code}
+457  [metrics-logger-reporter-thread-1] INFO  com.cloudera.cdk.morphline.domain1  - type=METER, name=LogDebug.numProcessCalls, count=2, mean_rate=144.3001443001443, m1=0.0, m5=0.0, m15=0.0, rate_unit=events/second
 {code}
 
 h2. toByteArray

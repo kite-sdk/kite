@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -30,11 +31,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Metrics;
+import com.cloudera.cdk.morphline.base.Notifications;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Matcher;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Pattern;
 import com.cloudera.cdk.morphline.shaded.com.google.common.reflect.ClassPath;
@@ -51,7 +61,7 @@ import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigUtil;
 
 public class MorphlineTest extends AbstractMorphlineTest {
-  
+
   private void processAndVerifySuccess(Record input, Record expected) {
     processAndVerifySuccess(input, expected, true);
   }
@@ -1152,6 +1162,149 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testStartReportingMetricsToCSV() throws Exception {
+    File testMetricsOutput1 = new File("target/testMetricsOutput1/LogDebug.numProcessCalls.csv");
+    File testMetricsOutput2 = new File("target/testMetricsOutput2/LogDebug.numProcessCalls.csv");
+    FileUtils.deleteDirectory(testMetricsOutput1.getParentFile());
+    FileUtils.deleteDirectory(testMetricsOutput2.getParentFile());
+    assertFalse(testMetricsOutput1.getParentFile().exists());
+    assertFalse(testMetricsOutput2.getParentFile().exists());
+    morphline = createMorphline("test-morphlines/startReportingMetricsToCSV");    
+    try {
+      Record record = new Record();
+      String msg = "foo";
+      record.put(Fields.MESSAGE, msg);
+      Record expected = new Record();
+      expected.put(Fields.MESSAGE, msg);
+      processAndVerifySuccess(record, expected);
+      
+      // verify reporter is active, i.e. verify reporter is writing to file
+      waitForFileLengthGreaterThan(testMetricsOutput1, 0);
+      waitForFileLengthGreaterThan(testMetricsOutput2, 0);
+      assertTrue(testMetricsOutput1.isFile());
+      assertTrue(testMetricsOutput2.isFile());
+      long len1 = testMetricsOutput1.length();
+      long len2 = testMetricsOutput2.length();      
+      assertTrue(len1 > 0);
+      assertTrue(len2 > 0);
+      for (int i = 0; i < 2; i++) {
+        waitForFileLengthGreaterThan(testMetricsOutput1, len1);
+        waitForFileLengthGreaterThan(testMetricsOutput2, len2);
+        long len1b = testMetricsOutput1.length();
+        long len2b = testMetricsOutput2.length();      
+        assertTrue(len1b > len1);
+        assertTrue(len2b > len2);
+        len1 = len1b;
+        len2 = len2b;
+      }
+      Notifications.notifyShutdown(morphline);
+      
+      // verify reporter is shutdown, i.e. verify reporter isn't writing to file anymore
+      len1 = testMetricsOutput1.length();
+      len2 = testMetricsOutput2.length();      
+      for (int i = 0; i < 2; i++) { 
+        Thread.sleep(200);
+        assertEquals(len1, testMetricsOutput1.length());
+        assertEquals(len2, testMetricsOutput2.length());
+        Notifications.notifyShutdown(morphline);
+      }
+    } finally {
+      Notifications.notifyShutdown(morphline);
+    }
+  }
+
+  private void waitForFileLengthGreaterThan(File file, long minLength) throws InterruptedException {
+    long timeout = System.currentTimeMillis() + 1000;
+    while (file.length() <= minLength && System.currentTimeMillis() <= timeout) {
+      Thread.sleep(10);
+    }
+  }
+
+  @Test
+  public void testStartReportingMetricsToJMX() throws Exception {
+    MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+    ObjectName obj1Name = new ObjectName("domain1", "name", "LogDebug.numProcessCalls");
+    ObjectName obj2Name = new ObjectName("domain2", "name", "LogDebug.numProcessCalls");
+    ObjectName timerName = new ObjectName("domain1", "name", "myMetrics.myTimer");
+    ObjectName timer2Name = new ObjectName("domain1", "name", "myMetrics.myTimer2");
+    assertMBeanInstanceNotFound(obj1Name, mBeanServer);
+    assertMBeanInstanceNotFound(obj2Name, mBeanServer);
+    assertMBeanInstanceNotFound(timerName, mBeanServer);
+    assertMBeanInstanceNotFound(timer2Name, mBeanServer);
+    morphline = createMorphline("test-morphlines/startReportingMetricsToJMX");    
+    
+    assertEquals(0L, mBeanServer.getAttribute(obj1Name, "Count"));
+    mBeanServer.getMBeanInfo(obj1Name);
+    assertEquals(0L, mBeanServer.getAttribute(obj2Name, "Count"));
+    mBeanServer.getMBeanInfo(obj2Name);
+    assertMBeanInstanceNotFound(timerName, mBeanServer);
+    assertMBeanInstanceNotFound(timer2Name, mBeanServer);
+    
+    Record record = new Record();
+    String msg = "foo";
+    record.put(Fields.MESSAGE, msg);
+    Record expected = new Record();
+    expected.put(Fields.MESSAGE, msg);
+    processAndVerifySuccess(record, expected);
+    
+    // verify reporter is active
+    assertEquals(2L, mBeanServer.getAttribute(obj1Name, "Count"));
+    assertEquals("events/second", mBeanServer.getAttribute(obj1Name, "RateUnit"));
+    mBeanServer.getMBeanInfo(obj1Name);
+    assertEquals(2L, mBeanServer.getAttribute(obj2Name, "Count"));
+    assertEquals("events/second", mBeanServer.getAttribute(obj2Name, "RateUnit"));
+    mBeanServer.getMBeanInfo(obj2Name);    
+    assertEquals(1L, mBeanServer.getAttribute(timerName, "Count"));
+    assertEquals("milliseconds", mBeanServer.getAttribute(timerName, "DurationUnit"));
+    assertEquals("events/millisecond", mBeanServer.getAttribute(timerName, "RateUnit"));
+    mBeanServer.getMBeanInfo(timerName);    
+    assertEquals(1L, mBeanServer.getAttribute(timer2Name, "Count"));
+    assertEquals("milliseconds", mBeanServer.getAttribute(timer2Name, "DurationUnit"));
+    assertEquals("events/minute", mBeanServer.getAttribute(timer2Name, "RateUnit"));
+    mBeanServer.getMBeanInfo(timerName);    
+    
+    // verify reporter is shutdown
+    for (int i = 0; i < 2; i++) {
+      Notifications.notifyShutdown(morphline);
+      assertMBeanInstanceNotFound(obj1Name, mBeanServer);
+      assertMBeanInstanceNotFound(obj2Name, mBeanServer);
+      assertMBeanInstanceNotFound(timerName, mBeanServer);
+      assertMBeanInstanceNotFound(timer2Name, mBeanServer);
+    }
+  }
+  
+  @Test
+  public void testStartReportingMetricsToSLF4J() throws Exception {
+    morphline = createMorphline("test-morphlines/startReportingMetricsToSLF4J");    
+    Record record = new Record();
+    String msg = "foo";
+    record.put(Fields.MESSAGE, msg);
+    Record expected = new Record();
+    expected.put(Fields.MESSAGE, msg);
+    processAndVerifySuccess(record, expected);
+    Notifications.notifyShutdown(morphline);
+    Notifications.notifyShutdown(morphline);
+  }
+
+  private void assertMBeanInstanceNotFound(ObjectName objName, MBeanServer mBeanServer) 
+      throws IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
+    
+    try {
+      mBeanServer.getMBeanInfo(objName);
+      fail();
+    } catch (InstanceNotFoundException e) {
+      ; // expected
+    }
+    
+    try {
+      mBeanServer.getAttribute(objName, "Count");
+      fail();
+    } catch (InstanceNotFoundException e) {
+      ; // expected
+    }
+  }
+  
+  @Test
   public void testTranslate() throws Exception {
     morphline = createMorphline("test-morphlines/translate");    
     Record record = new Record();
@@ -1185,7 +1338,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     record.replaceValues("level", 999);
     processAndVerifyFailure(record);
   }
-    
+
   @Test
   public void testConvertTimestampEmpty() throws Exception {
     morphline = createMorphline("test-morphlines/convertTimestamp");

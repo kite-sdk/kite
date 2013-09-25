@@ -16,12 +16,19 @@
 package com.cloudera.cdk.morphline.base;
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValue;
 
 /**
  * Helpers to traverse and read parts of a HOCON data structure.
@@ -165,5 +172,98 @@ public final class Configs {
     Charset charset = charsetName == null ? null : Charset.forName(charsetName);
     return charset;
   }  
+
+  public long getNanoseconds(Config config, String path, long defaults) {    
+    addRecognizedArgument(path);
+    if (config.hasPath(path)) {
+      return getNanoseconds(config, path);
+    } else {
+      return defaults;
+    }
+  }
+  
+  public long getNanoseconds(Config config, String path) {
+    addRecognizedArgument(path);
+    return config.getNanoseconds(path);
+  }  
+
+  public TimeUnit getTimeUnit(Config config, String path, TimeUnit defaults) {    
+    addRecognizedArgument(path);
+    if (config.hasPath(path)) {
+      return getTimeUnit(config, path);
+    } else {
+      return defaults;
+    }
+  }
+  
+  public TimeUnit getTimeUnit(Config config, String path) {
+    addRecognizedArgument(path);
+    return getTimeUnit(config.getString(path));
+  }
+
+  public TimeUnit getTimeUnit(String str) {
+    if (!str.endsWith("s")) {
+      if (str.length() > 2) {
+        str = str + "s"; // normalize to plural
+      }
+    }
+    if (str.equals("d") || str.equals("days")) {
+      return TimeUnit.DAYS;
+    } else if (str.equals("h") || str.equals("hours")) {
+      return TimeUnit.HOURS;
+    } else if (str.equals("m") || str.equals("minutes")) {
+      return TimeUnit.MINUTES;
+    } else if (str.equals("s") || str.equals("seconds")) {
+      return TimeUnit.SECONDS;
+    } else if (str.equals("ms") || str.equals("milliseconds")) {
+      return TimeUnit.MILLISECONDS;
+    } else if (str.equals("us") || str.equals("microseconds")) {
+      return TimeUnit.MICROSECONDS;
+    } else if (str.equals("ns") || str.equals("nanoseconds")) {
+      return TimeUnit.NANOSECONDS;
+    } else {
+      throw new IllegalArgumentException("Illegal time unit: " + str);
+    }
+  }
+
+  public Locale getLocale(Config config, String path, Locale defaults) {    
+    addRecognizedArgument(path);
+    if (config.hasPath(path)) {
+      return getLocale(config, path);
+    } else {
+      return defaults;
+    }
+  }
+  
+  public Locale getLocale(Config config, String path) {
+    addRecognizedArgument(path);
+    String str = config.getString(path);
+    String[] parts = Iterables.toArray(Splitter.on('_').split(str), String.class);
+    if (parts.length == 1) {
+      return new Locale(parts[0]);
+    } else if (parts.length == 2) {
+      return new Locale(parts[0], parts[1]);
+    } else if (parts.length == 3) {
+      return new Locale(parts[0], parts[1], parts[2]);
+    } else {
+      throw new MorphlineCompilationException("Illegal locale: " + str, config);
+    }
+  }  
+
+  public Set<Map.Entry<String, Object>> entrySet(Config config) {
+    Map<String, Object> map = new HashMap();
+    for (Map.Entry<String, ConfigValue> entry : config.entrySet()) {
+      map.put(trimQuote(entry.getKey()), entry.getValue().unwrapped());
+    }
+    return map.entrySet();
+  }
+  
+  private String trimQuote(String str) {
+    if (str.length() > 1 && str.startsWith("\"") && str.endsWith("\"")) {
+      return str.substring(1, str.length() - 1);
+    } else {
+      return str;
+    }
+  }
 
 }
