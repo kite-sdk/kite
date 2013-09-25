@@ -17,6 +17,7 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.NoSuchDatasetException;
@@ -126,14 +127,13 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   @Override
   public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
-      descriptor);
+        descriptor);
 
     final Path directory = pathForMetadata(pathForDataset(name));
 
     try {
       if (fileSystem.exists(directory)) {
-        // TODO: Change this to a better Exception class
-        throw new MetadataProviderException(
+        throw new DatasetExistsException(
             "Descriptor directory:" + directory + "already exists");
       }
       // create the directory so that update can do the rest of the work
