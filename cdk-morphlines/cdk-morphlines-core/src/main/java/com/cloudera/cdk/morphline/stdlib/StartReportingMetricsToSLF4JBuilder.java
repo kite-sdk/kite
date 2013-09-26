@@ -38,8 +38,10 @@ import com.codahale.metrics.Slf4jReporter.Builder;
 import com.typesafe.config.Config;
 
 /**
- * Command that starts periodically logging the metrics of the {@link MetricRegistry} of the
- * morphline context to SLF4j, configured via a {@link Slf4jReporter.Builder}.
+ * Command that starts periodically logging the metrics of the
+ * {@code com.codahale.metrics.MetricRegistry} of the
+ * morphline context to SLF4j, configured via a
+ * {@code com.codahale.metrics.Slf4jReporter.Builder}.
  */
 public final class StartReportingMetricsToSLF4JBuilder implements CommandBuilder {
 

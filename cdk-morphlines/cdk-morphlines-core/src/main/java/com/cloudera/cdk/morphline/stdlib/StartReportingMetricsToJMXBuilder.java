@@ -37,8 +37,9 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 /**
- * Command that starts publishing the metrics of the {@link MetricRegistry} of the morphline context
- * to JMX, configured via a {@link JmxReporter.Builder}.
+ * Command that starts publishing the metrics of the
+ * {@code com.codahale.metrics.MetricRegistry} of the morphline context
+ * to JMX, configured via a {@code com.codahale.metrics.JmxReporter.Builder}.
  */
 public final class StartReportingMetricsToJMXBuilder implements CommandBuilder {
 

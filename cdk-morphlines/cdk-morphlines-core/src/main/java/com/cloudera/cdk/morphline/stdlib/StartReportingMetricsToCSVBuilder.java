@@ -39,8 +39,10 @@ import com.google.common.base.Joiner;
 import com.typesafe.config.Config;
 
 /**
- * Command that starts periodically appending the metrics of the {@link MetricRegistry} of the
- * morphline context to a set of CSV files, configured via a {@link CsvReporter.Builder}. The CSV
+ * Command that starts periodically appending the metrics of the
+ * {@code com.codahale.metrics.MetricRegistry} of the
+ * morphline context to a set of CSV files, configured via a
+ * {@code com.codahale.metrics.CsvReporter.Builder}. The CSV
  * files are named after the metrics.
  */
 public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
