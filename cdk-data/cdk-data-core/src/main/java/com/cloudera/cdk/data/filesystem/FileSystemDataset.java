@@ -92,6 +92,7 @@ class FileSystemDataset implements Dataset {
   }
 
   @Override
+  @SuppressWarnings("unchecked") // See https://github.com/Parquet/parquet-mr/issues/106
   public <E> DatasetWriter<E> getWriter() {
     logger.debug("Getting writer to dataset:{}", this);
 

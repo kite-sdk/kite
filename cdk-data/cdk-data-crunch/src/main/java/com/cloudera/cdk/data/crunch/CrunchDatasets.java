@@ -51,6 +51,7 @@ public class CrunchDatasets {
    * @return the {@link ReadableSource}, or <code>null</code> if the dataset is not
    * filesystem-based.
    */
+  @SuppressWarnings("unchecked")
   public static <E> ReadableSource<E> asSource(Dataset dataset, Class<E> type) {
     Path directory = Accessor.getDefault().getDirectory(dataset);
     if (directory != null) {

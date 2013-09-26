@@ -73,6 +73,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
     this.state = ReaderWriterState.OPEN;
   }
 
+  @SuppressWarnings("unchecked") // See https://github.com/Parquet/parquet-mr/issues/106
   private void openNextReader() {
     if (Formats.PARQUET.equals(descriptor.getFormat())) {
       reader = new ParquetFileSystemDatasetReader(fileSystem, filesIter.next(),

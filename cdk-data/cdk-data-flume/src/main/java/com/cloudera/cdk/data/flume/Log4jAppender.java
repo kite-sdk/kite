@@ -81,7 +81,7 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
         DatasetRepository repo = (DatasetRepository)
             cons.newInstance(new URI(datasetRepositoryUri));
 
-        Dataset dataset = repo.get(datasetName);
+        Dataset dataset = repo.load(datasetName);
         if (dataset.getDescriptor().isPartitioned()) {
           partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
         }
