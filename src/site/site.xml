@@ -41,6 +41,19 @@
         <column>Modules|CDK.*</column>
         <column>Contribute</column>
       </bottomNav>
+
+      <pages>
+          <index project="cdk-parent">
+            <titleTemplate>Cloudera Development Kit</titleTemplate>
+            <breadcrumbs>false</breadcrumbs>
+            <toc>false</toc>
+            <markPageHeader>false</markPageHeader>
+            <sections>
+              <body/>
+              <columns>2</columns>
+            </sections>
+          </index>
+      </pages>
     </reflowSkin>
   </custom>
 
