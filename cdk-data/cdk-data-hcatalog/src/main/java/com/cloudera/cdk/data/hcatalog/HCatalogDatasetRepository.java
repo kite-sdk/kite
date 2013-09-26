@@ -109,7 +109,7 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
   public Dataset create(String name, DatasetDescriptor descriptor) {
     if (managed) {
       // HCatalog handles data directory creation
-      metadataProvider.save(name, descriptor);
+      metadataProvider.create(name, descriptor);
       if (fileSystemDatasetRepository == null) {
         fileSystemDatasetRepository = new FileSystemDatasetRepository(
             metadataProvider.getFileSystem(),

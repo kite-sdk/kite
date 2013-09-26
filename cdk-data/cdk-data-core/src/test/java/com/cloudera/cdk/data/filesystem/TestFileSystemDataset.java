@@ -285,8 +285,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
       }
       reader = partition.getReader();
       reader.open();
-      while (reader.hasNext()) {
-        GenericData.Record actualRecord = reader.read();
+      for (GenericData.Record actualRecord : reader) {
         Assert.assertEquals(actualRecord.toString(), key.get(0), (actualRecord
             .get("username").hashCode() & Integer.MAX_VALUE) % 2);
         if (key.getLength() > 1) {

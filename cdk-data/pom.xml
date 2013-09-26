@@ -48,6 +48,17 @@
         <artifactId>apache-rat-plugin</artifactId>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <compilerArgument>-Werror</compilerArgument> <!-- fail on warnings -->
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <reporting>
