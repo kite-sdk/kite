@@ -86,22 +86,24 @@ public class UserProfileDatasetExample {
     partitionStrategy = new PartitionStrategy.Builder()
         .identity("firstName", 1).identity("lastName", 2).get();
 
+    // TODO: change to use namespace (CDK-140)
+
     DatasetDescriptor userProfileDatasetDescriptor =
         new DatasetDescriptor.Builder().schema(UserProfileModel2.SCHEMA$)
             .partitionStrategy(partitionStrategy).get();
-    userProfileDataset = repo.create("cdk_example_user_profiles",
+    userProfileDataset = repo.create("cdk_example_user_profiles.UserProfileModel2",
         userProfileDatasetDescriptor);
 
     DatasetDescriptor userActionsDatasetDescriptor =
         new DatasetDescriptor.Builder().schema(UserActionsModel2.SCHEMA$)
             .partitionStrategy(partitionStrategy).get();
-    userActionsDataset = repo.create("cdk_example_user_profiles",
+    userActionsDataset = repo.create("cdk_example_user_profiles.UserActionsModel2",
         userActionsDatasetDescriptor);
 
     DatasetDescriptor userProfileActionsDatasetDescriptor =
         new DatasetDescriptor.Builder().schema(UserProfileActionsModel2.SCHEMA$)
             .partitionStrategy(partitionStrategy).get();
-    userProfileActionsDataset = repo.create("cdk_example_user_profiles",
+    userProfileActionsDataset = repo.create("cdk_example_user_profiles.UserProfileActionsProtocol2",
         userProfileActionsDatasetDescriptor);
 
   }

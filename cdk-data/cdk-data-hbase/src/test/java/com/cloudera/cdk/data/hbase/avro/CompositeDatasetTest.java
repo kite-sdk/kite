@@ -89,11 +89,11 @@ public class CompositeDatasetTest {
         .identity("part1", 1).identity("part2", 2).get();
 
     // create constituent datasets
-    repo.create(tableName, new DatasetDescriptor.Builder()
+    repo.create(tableName + ".SubEntity1", new DatasetDescriptor.Builder()
         .schema(SubEntity1.SCHEMA$)
         .partitionStrategy(partitionStrategy)
         .get());
-    repo.create(tableName, new DatasetDescriptor.Builder()
+    repo.create(tableName + ".SubEntity2", new DatasetDescriptor.Builder()
         .schema(SubEntity2.SCHEMA$)
         .partitionStrategy(partitionStrategy)
         .get());
@@ -103,7 +103,7 @@ public class CompositeDatasetTest {
         .schema(CompositeEntity.SCHEMA$)
         .partitionStrategy(partitionStrategy)
         .get();
-    Dataset ds = repo.create(tableName, descriptor);
+    Dataset ds = repo.create(tableName + ".CompositeEntity", descriptor);
     DatasetAccessor<CompositeEntity> accessor = ds.newAccessor();
 
     // Construct entities

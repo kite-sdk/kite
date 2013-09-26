@@ -13,6 +13,7 @@ import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
 import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
@@ -36,19 +37,22 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public DatasetDescriptor create(String tableName, DatasetDescriptor descriptor) {
+  public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
 
     String entitySchemaString = descriptor.getSchema().toString(true);
 
     AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
     AvroEntitySchema entitySchema = parser.parseEntitySchema(entitySchemaString);
 
-    schemaManager.createSchema(tableName, getEntityName(descriptor),
+    String tableName = getTableName(name);
+    String entityName = getEntityName(name);
+
+    schemaManager.refreshManagedSchemaCache(tableName, entityName);
+    schemaManager.createSchema(tableName, entityName,
         entitySchemaString,
         "com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser",
         "com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe",
         "com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe");
-
 
     try {
       if (!hbaseAdmin.tableExists(tableName)) {
@@ -90,7 +94,11 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
-    schemaManager.migrateSchema(name, getEntityName(descriptor), descriptor.getSchema().toString());
+    String tableName = getTableName(name);
+    String entityName = getEntityName(name);
+    schemaManager.refreshManagedSchemaCache(tableName, entityName);
+    schemaManager.migrateSchema(tableName, entityName,
+        descriptor.getSchema().toString());
     return descriptor;
   }
 
@@ -99,17 +107,11 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     if (!exists(name)) {
       throw new NoSuchDatasetException("No such dataset: " + name);
     }
-
-    List<String> entityNames = schemaManager.getEntityNames(name);
-    if (entityNames.size() > 1) {
-      throw new DatasetRepositoryException("Only one entity per table is supported.");
-    }
-
-    String entityName = entityNames.get(0);
-
+    String tableName = getTableName(name);
+    String entityName = getEntityName(name);
     return getDatasetDescriptor(
-        schemaManager.getKeySchema(name, entityName).getRawSchema(),
-        schemaManager.getEntitySchema(name, entityName).getRawSchema());
+        schemaManager.getKeySchema(tableName, entityName).getRawSchema(),
+        schemaManager.getEntitySchema(tableName, entityName).getRawSchema());
   }
 
   @Override
@@ -119,11 +121,22 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean exists(String name) {
-    return !schemaManager.getEntityNames(name).isEmpty();
+    String tableName = getTableName(name);
+    String entityName = getEntityName(name);
+    schemaManager.refreshManagedSchemaCache(tableName, entityName);
+    return schemaManager.hasManagedSchema(tableName, entityName);
   }
 
-  static String getEntityName(DatasetDescriptor descriptor) {
-    return descriptor.getSchema().getName();
+  static String getTableName(String name) {
+    // TODO: change to use namespace (CDK-140)
+    if (name.contains(".")) {
+      return name.substring(0, name.indexOf('.'));
+    }
+    return name;
+  }
+
+  static String getEntityName(String name) {
+    return name.substring(name.indexOf('.') + 1);
   }
 
   /*
