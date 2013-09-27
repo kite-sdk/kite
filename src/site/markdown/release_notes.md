@@ -29,7 +29,7 @@ Version 0.7.0 has the following notable changes:
 
 * Dataset API. Changes to make the API more consistent and better integrated with
   standard Java APIs like Iterator, Iterable, Flushable, and Closeable.
-* Java 7. CDK now works with Java 7.
+* Java 7. CDK now also works with Java 7.
 * Upgrade to Avro 1.7.5.
 * Morphlines Library
     * Added commands `splitKeyValue`, `extractURIComponent` and `toByteArray`
