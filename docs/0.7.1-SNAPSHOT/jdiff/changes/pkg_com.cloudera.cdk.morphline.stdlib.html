@@ -18,7 +18,7 @@ com.cloudera.cdk.morphline.stdlib
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0-SNAPSHOT</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.1-SNAPSHOT</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -30,7 +30,7 @@ com.cloudera.cdk.morphline.stdlib
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="pkg_com.cloudera.cdk.data.html"><B>PREV PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.cloudera.cdk.morphline.base.html"><B>PREV PACKAGE</B></A>
 &nbsp;<B>NEXT PACKAGE</B>&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
@@ -55,29 +55,32 @@ Package <A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/package-summary
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="ExtractURIComponentBuilder"></A>
-  <nobr><A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/ExtractURIComponentBuilder.html" target="_top"><tt>ExtractURIComponentBuilder</tt></A></nobr>
+  <A NAME="StartReportingMetricsToCSVBuilder"></A>
+  <nobr><A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/StartReportingMetricsToCSVBuilder.html" target="_top"><tt>StartReportingMetricsToCSVBuilder</tt></A></nobr>
   </TD>
-  <TD VALIGN="TOP">A command that extracts a subcomponent from the URIs contained in the given input field and
- appends it to the given output fields.</TD>
+  <TD VALIGN="TOP">Command that starts periodically appending the metrics of the
+ {@code com.codahale.metrics.MetricRegistry} of the
+ morphline context to a set of CSV files, configured via a
+ {@code com.codahale.metrics.CsvReporter.Builder}.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="SplitKeyValueBuilder"></A>
-  <nobr><A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/SplitKeyValueBuilder.html" target="_top"><tt>SplitKeyValueBuilder</tt></A></nobr>
+  <A NAME="StartReportingMetricsToJMXBuilder"></A>
+  <nobr><A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/StartReportingMetricsToJMXBuilder.html" target="_top"><tt>StartReportingMetricsToJMXBuilder</tt></A></nobr>
   </TD>
-  <TD VALIGN="TOP">Command that iterates over the items in a given record input field, interprets each item as a key-value
- pair where the key and value are separated by the given separator character, and adds the pair's
- value to the record field named after the pair's key.</TD>
+  <TD VALIGN="TOP">Command that starts publishing the metrics of the
+ {@code com.codahale.metrics.MetricRegistry} of the morphline context
+ to JMX, configured via a {@code com.codahale.metrics.JmxReporter.Builder}.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="ToByteArrayBuilder"></A>
-  <nobr><A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/ToByteArrayBuilder.html" target="_top"><tt>ToByteArrayBuilder</tt></A></nobr>
+  <A NAME="StartReportingMetricsToSLF4JBuilder"></A>
+  <nobr><A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/StartReportingMetricsToSLF4JBuilder.html" target="_top"><tt>StartReportingMetricsToSLF4JBuilder</tt></A></nobr>
   </TD>
-  <TD VALIGN="TOP">Command that converts the Java objects in a given field via <code>Object.toString()</code> to
- their string representation, and then via <code>String.getBytes(Charset)</code> to their byte
- array representation.</TD>
+  <TD VALIGN="TOP">Command that starts periodically logging the metrics of the
+ {@code com.codahale.metrics.MetricRegistry} of the
+ morphline context to SLF4j, configured via a
+ {@code com.codahale.metrics.Slf4jReporter.Builder}.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -88,7 +91,7 @@ Package <A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/package-summary
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0-SNAPSHOT</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.1-SNAPSHOT</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -100,7 +103,7 @@ Package <A HREF="../../apidocs/com/cloudera/cdk/morphline/stdlib/package-summary
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="pkg_com.cloudera.cdk.data.html"><B>PREV PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.cloudera.cdk.morphline.base.html"><B>PREV PACKAGE</B></A>
 &nbsp;<B>NEXT PACKAGE</B>&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
