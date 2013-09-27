@@ -81,10 +81,10 @@ public class ConfigsTest extends Assert {
   
   @Test
   public void testValidateArgumentsWithQuotes() throws Exception {
-    Config config = ConfigFactory.parseString("{ foo : bar, \"see\" : \"you.there.soon\" }");
+    Config config = ConfigFactory.parseString("{ foo : bar, \"see\" : \"you.there.soon.~!@#$%^&*()_+=-\" }");
     Configs configs = new Configs();
     assertEquals("bar", configs.getString(config, "foo"));
-    assertEquals("you.there.soon", configs.getString(config, "see"));
+    assertEquals("you.there.soon.~!@#$%^&*()_+=-", configs.getString(config, "see"));
     configs.validateArguments(config);    
   }
   
@@ -99,6 +99,7 @@ public class ConfigsTest extends Assert {
     testQuotingInHashesInternal(q + "foo.bar.baz" + q, "get.there.soon");
     testQuotingInHashesInternal(q + "foo.bar.baz" + q, q + "get.there.soon" + q);
     testQuotingInHashesInternal(q + "foo~!@#$%^&*()_+=-" + q, q + "bar~!@#$%^&*()_+=-" + q);
+    testQuotingInHashesInternal(q + "foo.~!@#$%^&*()_+=-" + q, q + "bar.~!@#$%^&*()_+=-" + q);
   }
   
   private void testQuotingInHashesInternal(String key, String value) throws Exception {
