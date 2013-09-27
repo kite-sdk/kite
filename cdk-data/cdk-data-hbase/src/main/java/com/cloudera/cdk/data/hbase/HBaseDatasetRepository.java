@@ -28,7 +28,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   public HBaseDatasetRepository(HBaseAdmin hBaseAdmin, HTablePool tablePool) {
     this.tablePool = tablePool;
     this.schemaManager = new DefaultSchemaManager(tablePool);
-    this.metadataProvider = new HBaseMetadataProvider(hBaseAdmin, tablePool);
+    this.metadataProvider = new HBaseMetadataProvider(hBaseAdmin, schemaManager);
   }
 
   @Override

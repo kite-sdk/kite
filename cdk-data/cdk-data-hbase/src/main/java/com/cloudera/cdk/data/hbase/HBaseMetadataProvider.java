@@ -32,12 +32,29 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
   private SchemaManager schemaManager;
 
   public HBaseMetadataProvider(HBaseAdmin hbaseAdmin, HTablePool tablePool) {
+    this(hbaseAdmin, new DefaultSchemaManager(tablePool));
+  }
+
+  public HBaseMetadataProvider(HBaseAdmin hbaseAdmin, SchemaManager schemaManager) {
     this.hbaseAdmin = hbaseAdmin;
-    this.schemaManager = new DefaultSchemaManager(tablePool);
+    this.schemaManager = schemaManager;
   }
 
   @Override
   public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
+
+    try {
+      String managedSchemaName = "managed_schemas"; // TODO: allow table to be specified
+      if (!hbaseAdmin.tableExists(managedSchemaName)) {
+        HTableDescriptor table = new HTableDescriptor(managedSchemaName);
+        table.addFamily(new HColumnDescriptor("meta"));
+        table.addFamily(new HColumnDescriptor("schema"));
+        table.addFamily(new HColumnDescriptor("_s"));
+        hbaseAdmin.createTable(table);
+      }
+    } catch (IOException e) {
+      throw new HBaseCommonException(e);
+    }
 
     String entitySchemaString = descriptor.getSchema().toString(true);
 

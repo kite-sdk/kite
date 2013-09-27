@@ -61,6 +61,8 @@ public class HBaseDatasetRepositoryTest {
   @BeforeClass
   public static void beforeClass() throws Exception {
     HBaseTestUtils.getMiniCluster();
+    // managed table should be created by HBaseDatasetRepository
+    HBaseTestUtils.util.deleteTable(Bytes.toBytes(managedTableName));
   }
 
   @AfterClass
