@@ -15,7 +15,8 @@ Version TBD has the following notable changes:
     * Added `cdk-morphlines-hadoop-core` maven module with new `downloadHdfsFile` command for transferring HDFS files, e.g. 
       to help with centralized configuration file management.
     * Added option to specify boost values to `loadSolr` command.
-    * Added several performance enhancements. 
+    * Added several performance enhancements.
+    * Upgraded `cdk-morphlines-solr-cell` maven module from tika-1.3 to tika-1.4 to pick up some bug fixes.
     * Ensured morphline commands can refer to record field names containing arbitrary characters. 
       Previously some commands could not refer to record field names containing the '.' dot character. 
       This limitation has been removed.
