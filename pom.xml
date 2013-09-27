@@ -129,7 +129,7 @@
     <vers.typesafe.config>1.0.2</vers.typesafe.config>
     <vers.solr>4.4.0</vers.solr>
     <solr.expected.version>4.4.0</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
-    <vers.tika>1.3</vers.tika>
+    <vers.tika>1.4</vers.tika>
     <vers.jackson>2.2.1</vers.jackson>
 
     <!-- Plugin versions -->
