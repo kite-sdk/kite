@@ -657,7 +657,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     // verify counters
     boolean foundCounter = false;
     for (Entry<String, Meter> entry : morphContext.getMetricRegistry().getMeters().entrySet()) {
-      if (entry.getKey().equals("readLine." + Metrics.NUM_RECORDS)) {
+      if (entry.getKey().equals("ReadLine." + Metrics.NUM_RECORDS)) {
         assertEquals(2, entry.getValue().getCount());
         foundCounter = true;
       }
@@ -1163,8 +1163,8 @@ public class MorphlineTest extends AbstractMorphlineTest {
   
   @Test
   public void testStartReportingMetricsToCSV() throws Exception {
-    File testMetricsOutput1 = new File("target/testMetricsOutput1/logDebug.numProcessCalls.csv");
-    File testMetricsOutput2 = new File("target/testMetricsOutput2/logDebug.numProcessCalls.csv");
+    File testMetricsOutput1 = new File("target/testMetricsOutput1/LogDebug.numProcessCalls.csv");
+    File testMetricsOutput2 = new File("target/testMetricsOutput2/LogDebug.numProcessCalls.csv");
     FileUtils.deleteDirectory(testMetricsOutput1.getParentFile());
     FileUtils.deleteDirectory(testMetricsOutput2.getParentFile());
     assertFalse(testMetricsOutput1.getParentFile().exists());
@@ -1223,8 +1223,8 @@ public class MorphlineTest extends AbstractMorphlineTest {
   @Test
   public void testStartReportingMetricsToJMX() throws Exception {
     MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-    ObjectName obj1Name = new ObjectName("domain1", "name", "logDebug.numProcessCalls");
-    ObjectName obj2Name = new ObjectName("domain2", "name", "logDebug.numProcessCalls");
+    ObjectName obj1Name = new ObjectName("domain1", "name", "LogDebug.numProcessCalls");
+    ObjectName obj2Name = new ObjectName("domain2", "name", "LogDebug.numProcessCalls");
     ObjectName timerName = new ObjectName("domain1", "name", "myMetrics.myTimer");
     ObjectName timer2Name = new ObjectName("domain1", "name", "myMetrics.myTimer2");
     assertMBeanInstanceNotFound(obj1Name, mBeanServer);

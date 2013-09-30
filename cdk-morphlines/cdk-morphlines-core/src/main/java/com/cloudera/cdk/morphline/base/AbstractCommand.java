@@ -47,7 +47,6 @@ public abstract class AbstractCommand implements Command {
   private final Command parent;
   private final Command child;
   private final MorphlineContext context;
-  private final String name;
   private final Configs configs;
   private final Meter numProcessCallsMeter;
   private final Meter numNotifyCallsMeter;
@@ -68,14 +67,15 @@ public abstract class AbstractCommand implements Command {
     this.parent = parent;
     this.child = child;
     this.context = context;
-    Preconditions.checkArgument(builder.getNames().size() > 0);
-    this.name = builder.getNames().iterator().next();
-    Preconditions.checkNotNull(name);
     this.configs = new Configs();
     this.numProcessCallsMeter = getMeter(Metrics.NUM_PROCESS_CALLS);
     this.numNotifyCallsMeter = getMeter(Metrics.NUM_NOTIFY_CALLS);
   }
     
+  private CommandBuilder getBuilder() {
+    return builder;
+  }
+  
   @Override
   public Command getParent() {
     return parent;
@@ -160,7 +160,14 @@ public abstract class AbstractCommand implements Command {
   }
   
   private String getMetricName(String... names) {
-    return MetricRegistry.name(name, names);
+    return MetricRegistry.name(getShortClassName(getClass()), names);
+  }
+  
+  private String getShortClassName(Class clazz) {
+    String className = clazz.getName();
+    int i = className.lastIndexOf('.'); // regular class
+    int j = className.lastIndexOf('$'); // inner class
+    return className.substring(1 + Math.max(i, j));
   }
   
   protected final boolean isMeasuringMetrics() {
