@@ -18,6 +18,7 @@ package com.cloudera.cdk.data.spi;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
@@ -161,6 +162,13 @@ public class URIPattern {
    */
   public Map<String, String> getLastMatch() {
     return lastMatch;
+  }
+
+  @Override
+  public String toString() {
+    return Objects.toStringHelper(URIPattern.class)
+        .add("pattern", pattern)
+        .toString();
   }
 
   private boolean addMatch(

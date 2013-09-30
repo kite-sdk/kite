@@ -15,9 +15,13 @@
  */
 package com.cloudera.cdk.data;
 
+import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
+import com.cloudera.cdk.data.spi.Loadable;
 import com.cloudera.cdk.data.spi.OptionBuilder;
 import com.cloudera.cdk.data.spi.URIPattern;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +56,17 @@ public class DatasetRepositories {
   }
 
   static {
-    // load DatasetRepository implementations, which will register themselves
-    ServiceLoader.load(DatasetRepository.class);
+    // load implementations, which will register themselves
+    ServiceLoader<Loadable> impls =
+        ServiceLoader.load(Loadable.class);
+    for (Loadable loader : impls) {
+      // the ServiceLoader is lazy, so this iteration forces service loading
+      logger.debug("Loading: " + loader.getClass().getName());
+      loader.load();
+    }
     logger.debug(
-        "Registered repository implementations: " + REGISTRY.toString());
+        "Registered repository URIs: " +
+        Joiner.on(", ").join(REGISTRY.keySet()));
   }
 
   /**

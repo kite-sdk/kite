@@ -31,6 +31,7 @@ import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.spi.URIPattern;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
 import com.cloudera.cdk.data.spi.AbstractDatasetRepository;
+import com.cloudera.cdk.data.spi.Loadable;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -85,32 +86,6 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
   static {
     Accessor.setDefault(new AccessorImpl());
-
-    // get a default Configuration to configure defaults (so it's okay!)
-    final Configuration conf = new Configuration();
-    final OptionBuilder<DatasetRepository> builder = new URIBuilder(conf);
-
-    DatasetRepositories.register(
-        new URIPattern(URI.create("file:*path")), builder);
-    DatasetRepositories.register(
-        new URIPattern(URI.create("file:/*path?absolute=true")), builder);
-
-    String hdfsAuthority;
-    try {
-      // Use a HDFS URI with no authority and the environment's configuration
-      // to find the default HDFS information
-      final URI hdfs = FileSystem.get(URI.create("hdfs:/"), conf).getUri();
-      hdfsAuthority = hdfs.getAuthority();
-    } catch (IOException ex) {
-      logger.warn(
-          "Could not locate HDFS, host and port will not be set by default.");
-      hdfsAuthority = "";
-    }
-
-    DatasetRepositories.register(
-        new URIPattern(URI.create(
-            "hdfs://" + hdfsAuthority + "/*path?absolute=true")),
-        builder);
   }
 
   private final MetadataProvider metadataProvider;
@@ -623,6 +598,40 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
       } catch (URISyntaxException ex) {
         throw new DatasetRepositoryException("Could not build FS URI", ex);
       }
+    }
+  }
+
+  /**
+   * A Loader implementation to register URIs for FileSystemDatasetRepositories.
+   */
+  public static class Loader implements Loadable {
+    @Override
+    public void load() {
+      // get a default Configuration to configure defaults (so it's okay!)
+      final Configuration conf = new Configuration();
+      final OptionBuilder<DatasetRepository> builder = new URIBuilder(conf);
+
+      DatasetRepositories.register(
+          new URIPattern(URI.create("file:*path")), builder);
+      DatasetRepositories.register(
+          new URIPattern(URI.create("file:/*path?absolute=true")), builder);
+
+      String hdfsAuthority;
+      try {
+        // Use a HDFS URI with no authority and the environment's configuration
+        // to find the default HDFS information
+        final URI hdfs = FileSystem.get(URI.create("hdfs:/"), conf).getUri();
+        hdfsAuthority = hdfs.getAuthority();
+      } catch (IOException ex) {
+        logger.warn(
+            "Could not locate HDFS, host and port will not be set by default.");
+        hdfsAuthority = "";
+      }
+
+      DatasetRepositories.register(
+          new URIPattern(URI.create(
+              "hdfs://" + hdfsAuthority + "/*path?absolute=true")),
+          builder);
     }
   }
 }

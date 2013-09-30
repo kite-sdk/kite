@@ -19,8 +19,6 @@ import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.MiniDFSTest;
-import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
-import com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
@@ -29,13 +27,13 @@ import org.junit.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.junit.Before;
+import org.junit.BeforeClass;
 
 public class TestFileSystemURIs extends MiniDFSTest {
 
-  @Before
-  public void loadImpls() throws Exception {
-    Class.forName(FileSystemDatasetRepository.class.getName());
+  @BeforeClass
+  public static void loadImpl() {
+    new FileSystemDatasetRepository.Loader().load();
   }
 
   @Test
