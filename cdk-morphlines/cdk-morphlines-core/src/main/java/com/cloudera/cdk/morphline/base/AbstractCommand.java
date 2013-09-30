@@ -42,7 +42,6 @@ import com.typesafe.config.Config;
  */
 public abstract class AbstractCommand implements Command {
   
-  private final CommandBuilder builder;
   private final Config config;
   private final Command parent;
   private final Command child;
@@ -56,14 +55,13 @@ public abstract class AbstractCommand implements Command {
       "true".equals(System.getProperty("isMeasuringMetrics", "true"));
 
   protected final Logger LOG = LoggerFactory.getLogger(getClass());
-      
+    
   protected AbstractCommand(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
     Preconditions.checkNotNull(builder);
     Preconditions.checkNotNull(config);
     Preconditions.checkNotNull(parent);
     Preconditions.checkNotNull(child);
     Preconditions.checkNotNull(context);
-    this.builder = builder;
     this.config = config;
     this.parent = parent;
     this.child = child;
@@ -76,6 +74,22 @@ public abstract class AbstractCommand implements Command {
     this.numNotifyCallsMeter = getMeter(Metrics.NUM_NOTIFY_CALLS);
   }
     
+  @Deprecated
+  protected AbstractCommand(Config config, Command parent, Command child, MorphlineContext context) {
+    Preconditions.checkNotNull(config);
+    Preconditions.checkNotNull(parent);
+    Preconditions.checkNotNull(child);
+    Preconditions.checkNotNull(context);
+    this.config = config;
+    this.parent = parent;
+    this.child = child;
+    this.context = context;
+    this.name = getShortClassName(getClass());
+    this.configs = new Configs();
+    this.numProcessCallsMeter = getMeter(Metrics.NUM_PROCESS_CALLS);
+    this.numNotifyCallsMeter = getMeter(Metrics.NUM_NOTIFY_CALLS);    
+  }
+  
   @Override
   public Command getParent() {
     return parent;
@@ -167,6 +181,13 @@ public abstract class AbstractCommand implements Command {
     return IS_MEASURING_METRICS;
   }
   
+  private String getShortClassName(Class clazz) {
+    String className = clazz.getName();
+    int i = className.lastIndexOf('.'); // regular class
+    int j = className.lastIndexOf('$'); // inner class
+    return className.substring(1 + Math.max(i, j));
+  }
+
   /**
    * Factory method to create the chain of commands rooted at the given rootConfig. The last command
    * in the chain will feed records into finalChild.

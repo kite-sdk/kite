@@ -31,8 +31,14 @@ public abstract class AbstractFieldTransformCommand extends AbstractCommand {
 
   private final String fieldName;
   
-  public AbstractFieldTransformCommand(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+  protected AbstractFieldTransformCommand(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
     super(builder, config, parent, child, context);      
+    this.fieldName = getConfigs().getString(config, "field");
+  }
+      
+  @Deprecated
+  protected AbstractFieldTransformCommand(Config config, Command parent, Command child, MorphlineContext context) {
+    super(config, parent, child, context);      
     this.fieldName = getConfigs().getString(config, "field");
   }
       
