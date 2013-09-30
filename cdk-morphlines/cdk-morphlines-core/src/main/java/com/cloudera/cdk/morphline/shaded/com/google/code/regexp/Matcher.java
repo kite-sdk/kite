@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 The named-regexp Authors
+ * Copyright (C) 2012-2013 The named-regexp Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ public class Matcher implements MatchResult {
 
     private java.util.regex.Matcher matcher;
     private Pattern parentPattern;
-
-    protected Matcher() {}
 
     Matcher(Pattern parentPattern, java.util.regex.MatchResult matcher) {
         this.parentPattern = parentPattern;
@@ -256,9 +254,14 @@ public class Matcher implements MatchResult {
      *
      * @param groupName name of the capture group
      * @return the subsequence
+     * @throws IndexOutOfBoundsException if group name not found
      */
     public String group(String groupName) {
-        return group(groupIndex(groupName));
+        int idx = groupIndex(groupName);
+        if (idx < 0) {
+          throw new IndexOutOfBoundsException("No group \"" + groupName + "\"");
+        }
+        return group(idx);
     }
 
     /**

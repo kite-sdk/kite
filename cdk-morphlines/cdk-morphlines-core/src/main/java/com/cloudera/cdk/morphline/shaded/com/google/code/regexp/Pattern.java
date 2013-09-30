@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 The named-regexp Authors
+ * Copyright (C) 2012-2013 The named-regexp Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,17 @@ import java.util.regex.PatternSyntaxException;
  */
 public class Pattern {
 
+    /** Pattern to match group names */
+    private static final String NAME_PATTERN = "[^!=].*?";
+
     /** Pattern to match named capture groups in a pattern string */
-    private static final java.util.regex.Pattern NAMED_GROUP_PATTERN = java.util.regex.Pattern.compile("\\(\\?<(\\w+)>");
+    private static final java.util.regex.Pattern NAMED_GROUP_PATTERN = java.util.regex.Pattern.compile("\\(\\?<(" + NAME_PATTERN + ")>", java.util.regex.Pattern.DOTALL);
 
     /** Pattern to match back references for named capture groups */
-    private static final java.util.regex.Pattern BACKREF_NAMED_GROUP_PATTERN = java.util.regex.Pattern.compile("\\\\k<(\\w+)>");
+    private static final java.util.regex.Pattern BACKREF_NAMED_GROUP_PATTERN = java.util.regex.Pattern.compile("\\\\k<(" + NAME_PATTERN + ")>", java.util.regex.Pattern.DOTALL);
 
     /** Pattern to match properties for named capture groups in a replacement string */
-    private static final java.util.regex.Pattern PROPERTY_PATTERN = java.util.regex.Pattern.compile("\\$\\{(\\w+)\\}");
+    private static final java.util.regex.Pattern PROPERTY_PATTERN = java.util.regex.Pattern.compile("\\$\\{(" + NAME_PATTERN + ")\\}", java.util.regex.Pattern.DOTALL);
 
     /** index of group within patterns above where group name is captured */
     private static final int INDEX_GROUP_NAME = 1;
@@ -48,13 +51,21 @@ public class Pattern {
     private List<String> groupNames;
     private Map<String,List<GroupInfo> > groupInfo;
 
-    protected Pattern() {}
-
     /**
      * Constructs a named pattern with the given regular expression and flags
      *
      * @param regex the expression to be compiled
-     * @param flags Match flags, a bit mask that may include CASE_INSENSITIVE, MULTILINE, DOTALL, UNICODE_CASE, CANON_EQ, UNIX_LINES, LITERAL and COMMENTS
+     * @param flags Match flags, a bit mask that may include:
+     * <ul>
+     *   <li>{@link java.util.regex.Pattern#CASE_INSENSITIVE}</li>
+     *   <li>{@link java.util.regex.Pattern#MULTILINE}</li>
+     *   <li>{@link java.util.regex.Pattern#DOTALL}</li>
+     *   <li>{@link java.util.regex.Pattern#UNICODE_CASE}</li>
+     *   <li>{@link java.util.regex.Pattern#CANON_EQ}</li>
+     *   <li>{@link java.util.regex.Pattern#UNIX_LINES}</li>
+     *   <li>{@link java.util.regex.Pattern#LITERAL}</li>
+     *   <li>{@link java.util.regex.Pattern#COMMENTS}</li>
+     * </ul>
      */
     protected Pattern(String regex, int flags) {
         namedPattern = regex;
@@ -80,7 +91,17 @@ public class Pattern {
      * Compiles the given regular expression into a pattern with the given flags
      *
      * @param regex the expression to be compiled
-     * @param flags Match flags, a bit mask that may include CASE_INSENSITIVE, MULTILINE, DOTALL, UNICODE_CASE, CANON_EQ, UNIX_LINES, LITERAL and COMMENTS
+     * @param flags Match flags, a bit mask that may include:
+     * <ul>
+     *   <li>{@link java.util.regex.Pattern#CASE_INSENSITIVE}</li>
+     *   <li>{@link java.util.regex.Pattern#MULTILINE}</li>
+     *   <li>{@link java.util.regex.Pattern#DOTALL}</li>
+     *   <li>{@link java.util.regex.Pattern#UNICODE_CASE}</li>
+     *   <li>{@link java.util.regex.Pattern#CANON_EQ}</li>
+     *   <li>{@link java.util.regex.Pattern#UNIX_LINES}</li>
+     *   <li>{@link java.util.regex.Pattern#LITERAL}</li>
+     *   <li>{@link java.util.regex.Pattern#COMMENTS}</li>
+     * </ul>
      * @return the pattern
      */
     public static Pattern compile(String regex, int flags) {
@@ -185,10 +206,11 @@ public class Pattern {
     }
 
     /**
-     * Replaces group-name properties (e.g., ${named}) in a replacement pattern with
-     * the equivalent reference that uses the corresponding group index (e.g., $2).
-     * If the string contains literal "$", it must be escaped with slash or else this
-     * call will attempt to parse it as a group-name property.
+     * Replaces group-name properties (e.g., <b><code>${named}</code></b>) in
+     * a replacement pattern with the equivalent reference that uses the
+     * corresponding group index (e.g., <b><code>$2</code></b>). If the string
+     * contains literal "$", it must be escaped with slash or else this call
+     * will attempt to parse it as a group-name property.
      *
      * This is meant to be used to transform the parameter for:
      *  <ul>
@@ -243,7 +265,8 @@ public class Pattern {
      * Splits the given input sequence around matches of this pattern.
      *
      * @param input The character sequence to be split
-     * @return The array of strings computed by splitting the input around matches of this pattern
+     * @return The array of strings computed by splitting the input around
+     * matches of this pattern
      */
     public String[] split(CharSequence input) {
         return pattern.split(input);
@@ -260,13 +283,25 @@ public class Pattern {
 
     /**
      * Determines if the character at the specified position
-     * of a string is escaped with a backslash
+     * of a string is escaped
      *
      * @param s string to evaluate
      * @param pos the position of the character to evaluate
      * @return true if the character is escaped; otherwise false
      */
     static private boolean isEscapedChar(String s, int pos) {
+        return isSlashEscapedChar(s, pos) || isQuoteEscapedChar(s, pos);
+    }
+
+    /**
+     * Determines if the character at the specified position
+     * of a string is escaped with a backslash
+     *
+     * @param s string to evaluate
+     * @param pos the position of the character to evaluate
+     * @return true if the character is escaped; otherwise false
+     */
+    static private boolean isSlashEscapedChar(String s, int pos) {
 
         // Count the backslashes preceding this position. If it's
         // even, there is no escape and the slashes are just literals.
@@ -278,6 +313,78 @@ public class Pattern {
             numSlashes++;
         }
         return numSlashes % 2 != 0;
+    }
+
+    /**
+     * Determines if the character at the specified position
+     * of a string is quote-escaped (between \\Q and \\E)
+     *
+     * @param s string to evaluate
+     * @param pos the position of the character to evaluate
+     * @return true if the character is quote-escaped; otherwise false
+     */
+    static private boolean isQuoteEscapedChar(String s, int pos) {
+
+        boolean openQuoteFound = false;
+        boolean closeQuoteFound = false;
+
+        // find last non-escaped open-quote
+        String s2 = s.substring(0, pos);
+        int posOpen = pos;
+        while ((posOpen = s2.lastIndexOf("\\Q", posOpen - 1)) != -1) {
+            if (!isSlashEscapedChar(s2, posOpen)) {
+                openQuoteFound = true;
+                break;
+            }
+        }
+
+        if (openQuoteFound) {
+            // search remainder of string (after open-quote) for a close-quote;
+            // no need to check that it's slash-escaped because it can't be
+            // (the escape character itself is part of the literal when quoted)
+            if (s2.indexOf("\\E", posOpen) != -1) {
+                closeQuoteFound = true;
+            }
+        }
+
+        return openQuoteFound && !closeQuoteFound;
+    }
+
+    /**
+     * Determines if a string's character is within a regex character class
+     *
+     * @param s string to evaluate
+     * @param pos the position of the character to evaluate
+     * @return true if the character is inside a character class; otherwise false
+     */
+    static private boolean isInsideCharClass(String s, int pos) {
+
+        boolean openBracketFound = false;
+        boolean closeBracketFound = false;
+
+        // find last non-escaped open-bracket
+        String s2 = s.substring(0, pos);
+        int posOpen = pos;
+        while ((posOpen = s2.lastIndexOf('[', posOpen - 1)) != -1) {
+            if (!isEscapedChar(s2, posOpen)) {
+                openBracketFound = true;
+                break;
+            }
+        }
+
+        if (openBracketFound) {
+            // search remainder of string (after open-bracket) for a close-bracket
+            String s3 = s.substring(posOpen, pos);
+            int posClose = -1;
+            while ((posClose = s3.indexOf(']', posClose + 1)) != -1) {
+                if (!isEscapedChar(s3, posClose)) {
+                    closeBracketFound = true;
+                    break;
+                }
+            }
+        }
+
+        return openBracketFound && !closeBracketFound;
     }
 
     /**
@@ -294,6 +401,7 @@ public class Pattern {
      * @return true if the parenthesis is non-capturing; otherwise false
      */
     static private boolean isNoncapturingParen(String s, int pos) {
+
         //int len = s.length();
         boolean isLookbehind = false;
 
@@ -316,7 +424,8 @@ public class Pattern {
      * excluding escaped parentheses
      *
      * @param s string to evaluate
-     * @param pos ending position of string
+     * @param pos ending position of string; characters to the left
+     * of this position are evaluated
      * @return number of open parentheses
      */
     static private int countOpenParens(String s, int pos) {
@@ -326,6 +435,12 @@ public class Pattern {
         int numParens = 0;
 
         while (m.find()) {
+            // ignore parentheses inside character classes: [0-9()a-f]
+            // which are just literals
+            if (isInsideCharClass(s, m.start())) {
+                continue;
+            }
+
             // ignore escaped parens
             if (isEscapedChar(s, m.start())) continue;
 
@@ -394,7 +509,8 @@ public class Pattern {
 
     /**
      * Replaces referenced group names with the reference to the corresponding group
-     * index (e.g., {@code \k<named>} to {@code \k2}; {@code ${named} to $2})).
+     * index (e.g., <b><code>\k&lt;named></code></b>} to <b><code>\k2</code></b>};
+     * <b><code>${named}</code></b> to <b><code>$2</code></b>}).
      * This assumes the group names have already been parsed from the pattern.
      *
      * @param input the string to evaluate
@@ -427,11 +543,22 @@ public class Pattern {
     }
 
     /**
-     * Constructs a named pattern with the given regular expression and flags
+     * Builds a {@code java.util.regex.Pattern} from a given regular expression
+     * pattern (which may contain named groups) and flags
      *
      * @param namedPattern the expression to be compiled
-     * @param flags Match flags, a bit mask that may include CASE_INSENSITIVE, MULTILINE, DOTALL, UNICODE_CASE, CANON_EQ, UNIX_LINES, LITERAL and COMMENTS
-     * @return
+     * @param flags Match flags, a bit mask that may include:
+     * <ul>
+     *   <li>{@link java.util.regex.Pattern#CASE_INSENSITIVE}</li>
+     *   <li>{@link java.util.regex.Pattern#MULTILINE}</li>
+     *   <li>{@link java.util.regex.Pattern#DOTALL}</li>
+     *   <li>{@link java.util.regex.Pattern#UNICODE_CASE}</li>
+     *   <li>{@link java.util.regex.Pattern#CANON_EQ}</li>
+     *   <li>{@link java.util.regex.Pattern#UNIX_LINES}</li>
+     *   <li>{@link java.util.regex.Pattern#LITERAL}</li>
+     *   <li>{@link java.util.regex.Pattern#COMMENTS}</li>
+     * </ul>
+     * @return the standard {@code java.util.regex.Pattern}
      */
     private java.util.regex.Pattern buildStandardPattern(String namedPattern, Integer flags) {
         // replace the named-group construct with left-paren but

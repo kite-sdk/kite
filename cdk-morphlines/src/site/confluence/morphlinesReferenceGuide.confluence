@@ -1225,7 +1225,7 @@ startReportingMetricsToJMX {
   defaultDurationUnit : milliseconds
   rateUnits : {
     myMetrics.myTimer : milliseconds
-    LogDebug.numProcessCalls : milliseconds
+    logDebug.numProcessCalls : milliseconds
   }
   defaultRateUnit : seconds
   metricFilter : {
@@ -1283,7 +1283,7 @@ startReportingMetricsToSLF4J {
 
 h4. Example output log line
 {code}
-457  [metrics-logger-reporter-thread-1] INFO  com.cloudera.cdk.morphline.domain1  - type=METER, name=LogDebug.numProcessCalls, count=2, mean_rate=144.3001443001443, m1=0.0, m5=0.0, m15=0.0, rate_unit=events/second
+457  [metrics-logger-reporter-thread-1] INFO  com.cloudera.cdk.morphline.domain1  - type=METER, name=logDebug.numProcessCalls, count=2, mean_rate=144.3001443001443, m1=0.0, m5=0.0, m15=0.0, rate_unit=events/second
 {code}
 
 h2. toByteArray
