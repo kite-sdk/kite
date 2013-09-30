@@ -25,6 +25,9 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Creates and compiles the given Java code block, wrapped into a Java method with the given return
@@ -51,6 +54,8 @@ public class ScriptEvaluator<T> {
   
   private static final String METHOD_NAME = "eval";
 
+  private static final Logger LOG = LoggerFactory.getLogger(ScriptEvaluator.class);
+  
   public ScriptEvaluator(String javaImports, String javaCodeBlock, Class<T> returnType,
       String[] parameterNames, Class[] parameterTypes,
       String parseLocation) throws ScriptException {
@@ -85,7 +90,7 @@ public class ScriptEvaluator<T> {
     }
     script += ") { " + javaCodeBlock + " }";     
     script += "\n }";
-//    System.out.println(script);
+    LOG.trace("Compiling script: {}", script);    
     
     FastJavaScriptEngine engine = new FastJavaScriptEngine();
     StringWriter errorWriter = new StringWriter();
