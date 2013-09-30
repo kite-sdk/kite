@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.cdk.data;
+package com.cloudera.cdk.data.spi;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;

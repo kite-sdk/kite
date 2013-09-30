@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.cloudera.cdk.data;
+package com.cloudera.cdk.data.spi;
 
+import com.cloudera.cdk.data.spi.URIPattern;
 import com.google.common.collect.Maps;
 import java.net.URISyntaxException;
 import java.util.Map;

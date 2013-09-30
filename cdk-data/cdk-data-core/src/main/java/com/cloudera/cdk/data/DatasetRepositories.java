@@ -15,6 +15,8 @@
  */
 package com.cloudera.cdk.data;
 
+import com.cloudera.cdk.data.spi.OptionBuilder;
+import com.cloudera.cdk.data.spi.URIPattern;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;

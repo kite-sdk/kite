@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.cdk.data;
+package com.cloudera.cdk.data.spi;
 
 import java.util.Map;
 
