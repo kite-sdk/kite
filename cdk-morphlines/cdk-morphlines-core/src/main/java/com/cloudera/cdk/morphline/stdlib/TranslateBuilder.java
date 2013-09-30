@@ -42,7 +42,7 @@ public final class TranslateBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new Translate(config, parent, child, context);
+    return new Translate(this, config, parent, child, context);
   }
   
   
@@ -55,8 +55,8 @@ public final class TranslateBuilder implements CommandBuilder {
     private final Map<String, Object> dictionary = new HashMap();
     private final Object fallback;
     
-    public Translate(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public Translate(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       this.fieldName = getConfigs().getString(config, "field");
       Config dict = getConfigs().getConfig(config, "dictionary");
       for (Map.Entry<String, Object> entry : new Configs().getEntrySet(dict)) {

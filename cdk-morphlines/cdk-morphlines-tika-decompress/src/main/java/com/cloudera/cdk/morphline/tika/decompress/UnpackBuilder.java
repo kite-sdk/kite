@@ -53,7 +53,7 @@ public final class UnpackBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new Unpack(config, parent, child, context);
+    return new Unpack(this, config, parent, child, context);
   }
   
   
@@ -74,8 +74,8 @@ public final class UnpackBuilder implements CommandBuilder {
     private static final Set<MediaType> SUPPORTED_TYPES =
             MediaType.set(ZIP, JAR, AR, CPIO, DUMP, TAR);
     
-    public Unpack(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public Unpack(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       if (!config.hasPath(SUPPORTED_MIME_TYPES)) {
 //        for (MediaType mediaType : new PackageParser().getSupportedTypes(new ParseContext())) {
         for (MediaType mediaType : SUPPORTED_TYPES) {

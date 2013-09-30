@@ -50,7 +50,7 @@ public final class StartReportingMetricsToJMXBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new StartReportingMetricsToJMX(config, parent, child, context);
+    return new StartReportingMetricsToJMX(this, config, parent, child, context);
   }
   
   
@@ -62,8 +62,8 @@ public final class StartReportingMetricsToJMXBuilder implements CommandBuilder {
     private final String domain;
     private static final Map<MetricRegistry, Map<String, JmxReporter>> REGISTRIES = new IdentityHashMap();
     
-    public StartReportingMetricsToJMX(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public StartReportingMetricsToJMX(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       
       MetricFilter filter = PatternMetricFilter.parse(getConfigs(), config);
       TimeUnit defaultDurationUnit = getConfigs().getTimeUnit(config, "defaultDurationUnit", TimeUnit.MILLISECONDS);
@@ -93,7 +93,7 @@ public final class StartReportingMetricsToJMXBuilder implements CommandBuilder {
         }
         JmxReporter reporter = reporters.get(domain);
         if (reporter == null) {
-          Builder builder = JmxReporter.forRegistry(registry)
+          Builder reporterBuilder = JmxReporter.forRegistry(registry)
               .filter(filter)
               .convertDurationsTo(defaultDurationUnit)
               .convertRatesTo(defaultRateUnit)
@@ -101,7 +101,7 @@ public final class StartReportingMetricsToJMXBuilder implements CommandBuilder {
               .specificRateUnits(rateUnits)
               .inDomain(domain);
           
-          reporter = builder.build();
+          reporter = reporterBuilder.build();
           reporter.start();
           reporters.put(domain, reporter);
         }

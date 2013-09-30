@@ -66,7 +66,7 @@ public final class ConvertHTMLBuilder implements CommandBuilder {
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
     try {
-      return new ConvertHTML(config, parent, child, context);
+      return new ConvertHTML(this, config, parent, child, context);
     } catch (SAXNotRecognizedException e) {
       throw new MorphlineCompilationException("Cannot compile", config, e);
     } catch (SAXNotSupportedException e) {
@@ -85,8 +85,8 @@ public final class ConvertHTMLBuilder implements CommandBuilder {
     private final XMLReader xmlReader;
     private final HTMLSchema htmlSchema = new HTMLSchema();
   
-    public ConvertHTML(Config config, Command parent, Command child, MorphlineContext context) throws SAXNotRecognizedException, SAXNotSupportedException {
-      super(config, parent, child, context);
+    public ConvertHTML(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) throws SAXNotRecognizedException, SAXNotSupportedException {
+      super(builder, config, parent, child, context);
       this.charset = getConfigs().getCharset(config, "charset", null);
       this.omitXMLDeclaration = getConfigs().getBoolean(config, "omitXMLDeclaration", false);      
       this.xmlReader = new Parser(); // no reuse?

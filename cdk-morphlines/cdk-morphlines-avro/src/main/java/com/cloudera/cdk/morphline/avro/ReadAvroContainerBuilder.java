@@ -65,7 +65,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ReadAvroContainer(config, parent, child, context);
+    return new ReadAvroContainer(this, config, parent, child, context);
   }
   
   
@@ -78,8 +78,8 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     protected FastGenericDatumReader<GenericContainer> datumReader;
     private final Map<ByteArrayKey, ResolvingDecoder> resolverCache;
 
-    public ReadAvroContainer(Config config, Command parent, Command child, MorphlineContext context) {   
-      super(config, parent, child, context);
+    public ReadAvroContainer(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {   
+      super(builder, config, parent, child, context);
 
       String schemaString = getConfigs().getString(config, "readerSchemaString", null);
       if (schemaString != null) {

@@ -44,7 +44,7 @@ public final class ReadLineBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ReadLine(config, parent, child, context);
+    return new ReadLine(this, config, parent, child, context);
   }
   
   
@@ -57,8 +57,8 @@ public final class ReadLineBuilder implements CommandBuilder {
     private final boolean ignoreFirstLine;
     private final String commentPrefix;
   
-    public ReadLine(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ReadLine(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       this.charset = getConfigs().getCharset(config, "charset", null);
       this.ignoreFirstLine = getConfigs().getBoolean(config, "ignoreFirstLine", false);
       String cprefix = getConfigs().getString(config, "commentPrefix", "");

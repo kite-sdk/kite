@@ -36,6 +36,7 @@ import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmNode;
 
 import com.cloudera.cdk.morphline.api.Command;
+import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
@@ -52,8 +53,8 @@ abstract class SaxonCommand extends AbstractParser {
   protected final Processor processor;
   protected final boolean isTracing;
 
-  public SaxonCommand(Config config, Command parent, Command child, MorphlineContext context) {
-    super(config, parent, child, context);
+  public SaxonCommand(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+    super(builder, config, parent, child, context);
     
     this.isTracing = getConfigs().getBoolean(config, "isTracing", false);
     boolean licensedSaxonEdition = getConfigs().getBoolean(config, "licensedSaxonEdition", false);

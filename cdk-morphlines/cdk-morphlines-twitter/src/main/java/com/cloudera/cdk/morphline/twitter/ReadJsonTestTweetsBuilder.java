@@ -56,7 +56,7 @@ public final class ReadJsonTestTweetsBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ReadJsonTestTweets(config, parent, child, context);
+    return new ReadJsonTestTweets(this, config, parent, child, context);
   }
   
   
@@ -73,8 +73,8 @@ public final class ReadJsonTestTweetsBuilder implements CommandBuilder {
     private SimpleDateFormat formatterFrom = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.US);
     private SimpleDateFormat formatterTo = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
 
-    public ReadJsonTestTweets(Config config, Command parent, Command child, MorphlineContext context) { 
-      super(config, parent, child, context);
+    public ReadJsonTestTweets(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) { 
+      super(builder, config, parent, child, context);
       
       this.isLengthDelimited = getConfigs().getBoolean(config, "isLengthDelimited", true);
       this.idPrefix = getConfigs().getString(config, "idPrefix", null);

@@ -55,7 +55,7 @@ public final class TryRulesBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new TryRules(config, parent, child, context);
+    return new TryRules(this, config, parent, child, context);
   }
   
   
@@ -70,8 +70,8 @@ public final class TryRulesBuilder implements CommandBuilder {
     private final boolean copyRecords;
     private final Meter numExceptionsCaught;
     
-    public TryRules(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public TryRules(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       this.throwExceptionIfAllRulesFailed = getConfigs().getBoolean(config, "throwExceptionIfAllRulesFailed", true);
       this.catchExceptions = getConfigs().getBoolean(config, "catchExceptions", false);
       this.copyRecords = getConfigs().getBoolean(config, "copyRecords", true);

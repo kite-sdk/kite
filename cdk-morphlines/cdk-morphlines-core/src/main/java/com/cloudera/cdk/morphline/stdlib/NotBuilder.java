@@ -37,7 +37,7 @@ public final class NotBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new Not(config, parent, child, context);
+    return new Not(this, config, parent, child, context);
   }
   
   
@@ -48,8 +48,8 @@ public final class NotBuilder implements CommandBuilder {
 
     private Command realChild;
     
-    public Not(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public Not(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       realChild = buildCommand(config, this, child);
     }
 

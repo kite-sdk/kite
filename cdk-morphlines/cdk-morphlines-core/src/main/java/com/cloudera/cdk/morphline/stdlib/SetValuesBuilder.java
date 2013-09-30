@@ -38,7 +38,7 @@ public final class SetValuesBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new SetValues(config, parent, child, context);
+    return new SetValues(this, config, parent, child, context);
   }
   
   
@@ -47,8 +47,8 @@ public final class SetValuesBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class SetValues extends AbstractAddValuesCommand {
 
-    public SetValues(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public SetValues(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
     }
 
     @Override

@@ -37,7 +37,7 @@ public final class AddValuesIfAbsentBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new AddValuesIfAbsent(config, parent, child, context);
+    return new AddValuesIfAbsent(this, config, parent, child, context);
   }
   
   
@@ -46,8 +46,8 @@ public final class AddValuesIfAbsentBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class AddValuesIfAbsent extends AbstractAddValuesCommand {
 
-    public AddValuesIfAbsent(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public AddValuesIfAbsent(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
     }
     
     @Override

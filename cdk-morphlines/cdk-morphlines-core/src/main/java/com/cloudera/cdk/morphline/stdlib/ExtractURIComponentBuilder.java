@@ -41,7 +41,7 @@ public final class ExtractURIComponentBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ExtractURIComponent(config, parent, child, context);
+    return new ExtractURIComponent(this, config, parent, child, context);
   }
   
   
@@ -54,8 +54,8 @@ public final class ExtractURIComponentBuilder implements CommandBuilder {
     private final String outputFieldName;
     private final Component component;
     
-    public ExtractURIComponent(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public ExtractURIComponent(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");
       this.outputFieldName = getConfigs().getString(config, "outputField");
       this.component = new Validator<Component>().validateEnum(

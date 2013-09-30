@@ -41,7 +41,7 @@ public final class ExtractURIComponentsBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ExtractURIComponents(config, parent, child, context);
+    return new ExtractURIComponents(this, config, parent, child, context);
   }
   
   
@@ -53,8 +53,8 @@ public final class ExtractURIComponentsBuilder implements CommandBuilder {
     private final String inputFieldName;
     private final String outputFieldPrefix;
     
-    public ExtractURIComponents(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public ExtractURIComponents(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");
       this.outputFieldPrefix = getConfigs().getString(config, "outputFieldPrefix", "");
       validateArguments();

@@ -40,7 +40,7 @@ public final class SplitKeyValueBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new SplitKeyValue(config, parent, child, context);
+    return new SplitKeyValue(this, config, parent, child, context);
   }
   
   
@@ -55,8 +55,8 @@ public final class SplitKeyValueBuilder implements CommandBuilder {
     private final boolean addEmptyStrings;
     private final boolean trim;
     
-    public SplitKeyValue(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public SplitKeyValue(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");      
       this.outputFieldPrefix = getConfigs().getString(config, "outputFieldPrefix", "");
       String separator = getConfigs().getString(config, "separator", "=");

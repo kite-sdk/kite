@@ -68,7 +68,7 @@ public final class XSLTBuilder implements CommandBuilder {
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
     try {
-      return new XSLT(config, parent, child, context);
+      return new XSLT(this, config, parent, child, context);
     } catch (SaxonApiException e) {
       throw new MorphlineCompilationException("Cannot compile", config, e);
     } catch (IOException e) {
@@ -86,8 +86,8 @@ public final class XSLTBuilder implements CommandBuilder {
     
     private final List<Fragment> fragments = new ArrayList();
   
-    public XSLT(Config config, Command parent, Command child, MorphlineContext context) throws SaxonApiException, IOException, XMLStreamException {
-      super(config, parent, child, context);
+    public XSLT(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) throws SaxonApiException, IOException, XMLStreamException {
+      super(builder, config, parent, child, context);
       
       List<? extends Config> fragmentConfigs = getConfigs().getConfigList(config, "fragments");
       if (fragmentConfigs.size() == 0) {

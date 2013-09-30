@@ -54,7 +54,7 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new StartReportingMetricsToCSV(config, parent, child, context);
+    return new StartReportingMetricsToCSV(this, config, parent, child, context);
   }
   
   
@@ -66,8 +66,8 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
     private final File dir;
     private static final Map<MetricRegistry, Map<File, CsvReporter>> REGISTRIES = new IdentityHashMap();
     
-    public StartReportingMetricsToCSV(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public StartReportingMetricsToCSV(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       
       MetricFilter filter = PatternMetricFilter.parse(getConfigs(), config);
       TimeUnit defaultDurationUnit = getConfigs().getTimeUnit(config, "defaultDurationUnit", TimeUnit.MILLISECONDS);
@@ -89,13 +89,13 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
         }
         CsvReporter reporter = reporters.get(dir);
         if (reporter == null) {
-          Builder builder = CsvReporter.forRegistry(registry)
+          Builder reporterBuilder = CsvReporter.forRegistry(registry)
               .filter(filter)
               .convertDurationsTo(defaultDurationUnit)
               .convertRatesTo(defaultRateUnit)
               .formatFor(locale);
               
-          reporter = builder.build(dir);
+          reporter = reporterBuilder.build(dir);
           dir.mkdirs();
           if (!dir.isDirectory()) {
             throw new MorphlineCompilationException("Directory not found: " + dir, config);

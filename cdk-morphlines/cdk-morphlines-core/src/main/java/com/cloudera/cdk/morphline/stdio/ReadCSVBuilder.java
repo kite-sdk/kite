@@ -49,7 +49,7 @@ public final class ReadCSVBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ReadCSV(config, parent, child, context);
+    return new ReadCSV(this, config, parent, child, context);
   }
   
   
@@ -68,8 +68,8 @@ public final class ReadCSVBuilder implements CommandBuilder {
     private final boolean ignoreEmptyLines = true;
     private final CSVTokenizer tokenizer;
   
-    public ReadCSV(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ReadCSV(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       String separator = getConfigs().getString(config, "separator", ",");
       if (separator.length() != 1) {
         throw new MorphlineCompilationException("CSV separator must be one character only: " + separator, config);

@@ -50,7 +50,7 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ReadMultiLine(config, parent, child, context);
+    return new ReadMultiLine(this, config, parent, child, context);
   }
   
   
@@ -64,8 +64,8 @@ public final class ReadMultiLineBuilder implements CommandBuilder {
     private final What what;
     private final Charset charset;
   
-    public ReadMultiLine(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ReadMultiLine(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       this.regex = Pattern.compile(getConfigs().getString(config, "regex")).matcher("");
       this.negate = getConfigs().getBoolean(config, "negate", false);
       this.charset = getConfigs().getCharset(config, "charset", null);

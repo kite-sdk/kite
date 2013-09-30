@@ -44,7 +44,7 @@ public final class ContainsBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new Contains(config, parent, child, context);
+    return new Contains(this, config, parent, child, context);
   }
   
   
@@ -55,8 +55,8 @@ public final class ContainsBuilder implements CommandBuilder {
 
     private final Set<Map.Entry<String, Object>> entrySet;
     
-    public Contains(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public Contains(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       entrySet = new Configs().getEntrySet(config);
     }
         

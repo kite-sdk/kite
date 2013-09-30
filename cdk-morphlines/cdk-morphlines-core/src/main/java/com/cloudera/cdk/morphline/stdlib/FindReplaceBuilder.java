@@ -39,7 +39,7 @@ public final class FindReplaceBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new FindReplace(config, parent, child, context);
+    return new FindReplace(this, config, parent, child, context);
   }
   
   
@@ -53,8 +53,8 @@ public final class FindReplaceBuilder implements CommandBuilder {
     private final String replacement;
     private final boolean replaceFirst;
     
-    public FindReplace(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public FindReplace(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       GrokDictionaries dict = new GrokDictionaries(config, getConfigs());
       String pattern = getConfigs().getString(config, "pattern");
       if (getConfigs().getBoolean(config, "isRegex", false)) {

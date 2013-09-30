@@ -50,7 +50,7 @@ public final class DecompressBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new Decompress(config, parent, child, context);
+    return new Decompress(this, config, parent, child, context);
   }
   
   
@@ -70,8 +70,8 @@ public final class DecompressBuilder implements CommandBuilder {
     private static final Set<MediaType> SUPPORTED_TYPES =
             MediaType.set(BZIP, BZIP2, GZIP, XZ, PACK);
 
-    public Decompress(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public Decompress(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       if (!config.hasPath(SUPPORTED_MIME_TYPES)) {
 //        for (MediaType mediaType : new CompressorParser().getSupportedTypes(new ParseContext())) {
         for (MediaType mediaType : SUPPORTED_TYPES) {

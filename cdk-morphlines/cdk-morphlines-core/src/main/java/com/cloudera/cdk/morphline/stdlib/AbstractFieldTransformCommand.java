@@ -18,6 +18,7 @@ package com.cloudera.cdk.morphline.stdlib;
 import java.util.ListIterator;
 
 import com.cloudera.cdk.morphline.api.Command;
+import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
@@ -30,8 +31,8 @@ public abstract class AbstractFieldTransformCommand extends AbstractCommand {
 
   private final String fieldName;
   
-  public AbstractFieldTransformCommand(Config config, Command parent, Command child, MorphlineContext context) {
-    super(config, parent, child, context);      
+  public AbstractFieldTransformCommand(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+    super(builder, config, parent, child, context);      
     this.fieldName = getConfigs().getString(config, "field");
   }
       

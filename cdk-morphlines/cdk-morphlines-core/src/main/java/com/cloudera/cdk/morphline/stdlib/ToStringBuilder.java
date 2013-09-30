@@ -39,7 +39,7 @@ public final class ToStringBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ToString(config, parent, child, context);
+    return new ToString(this, config, parent, child, context);
   }
   
   
@@ -51,8 +51,8 @@ public final class ToStringBuilder implements CommandBuilder {
     private final String fieldName;
     private final boolean trim;
     
-    public ToString(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public ToString(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       this.fieldName = getConfigs().getString(config, "field");
       this.trim = getConfigs().getBoolean(config, "trim", false);
       validateArguments();

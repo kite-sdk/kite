@@ -52,7 +52,7 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ConvertTimestamp(config, parent, child, context);
+    return new ConvertTimestamp(this, config, parent, child, context);
   }
   
   
@@ -73,8 +73,8 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
       DateUtil.DEFAULT_DATE_FORMATS.add(0, NATIVE_SOLR_FORMAT); 
     }    
 
-    public ConvertTimestamp(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ConvertTimestamp(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       
       this.fieldName = getConfigs().getString(config, "field", Fields.TIMESTAMP);
       TimeZone inputTimeZone = getTimeZone(getConfigs().getString(config, "inputTimezone", "UTC"));

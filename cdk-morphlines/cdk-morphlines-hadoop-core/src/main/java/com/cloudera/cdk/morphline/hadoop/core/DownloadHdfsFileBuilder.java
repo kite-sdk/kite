@@ -51,7 +51,7 @@ public final class DownloadHdfsFileBuilder implements CommandBuilder {
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
     try {
-      return new DownloadHdfsFile(config, parent, child, context);
+      return new DownloadHdfsFile(this, config, parent, child, context);
     } catch (IOException e) {
       throw new MorphlineCompilationException("Cannot compile", config, e);
     }
@@ -66,10 +66,10 @@ public final class DownloadHdfsFileBuilder implements CommandBuilder {
     // global lock; contains successfully copied file paths
     private static final Set<String> DONE = new HashSet(); 
 
-    public DownloadHdfsFile(Config config, Command parent, Command child, MorphlineContext context) 
+    public DownloadHdfsFile(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) 
         throws IOException {
       
-      super(config, parent, child, context);
+      super(builder, config, parent, child, context);
       List<String> uris = getConfigs().getStringList(config, "inputFiles", Collections.EMPTY_LIST); 
       File dstRootDir = new File(getConfigs().getString(config, "outputDir", "."));
       Configuration conf = new Configuration();

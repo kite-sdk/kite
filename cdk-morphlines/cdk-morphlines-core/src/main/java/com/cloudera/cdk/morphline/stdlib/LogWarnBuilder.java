@@ -36,7 +36,7 @@ public final class LogWarnBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new LogWarn(config, parent, child, context);
+    return new LogWarn(this, config, parent, child, context);
   }
   
   
@@ -44,8 +44,9 @@ public final class LogWarnBuilder implements CommandBuilder {
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
   private static final class LogWarn extends LogCommand {
-    public LogWarn(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    
+    public LogWarn(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
     }
     
     @Override

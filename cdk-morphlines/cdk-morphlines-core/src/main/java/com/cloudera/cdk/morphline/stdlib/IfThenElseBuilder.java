@@ -45,7 +45,7 @@ public final class IfThenElseBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new IfThenElse(config, parent, child, context);
+    return new IfThenElse(this, config, parent, child, context);
   }
   
   
@@ -58,8 +58,8 @@ public final class IfThenElseBuilder implements CommandBuilder {
     private Command thenChain;
     private Command elseChain;
     
-    public IfThenElse(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public IfThenElse(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       
       Command devNull = new DropRecordBuilder().build(null, this, null, context); // pipes into /dev/null
       List<Command> conditions = buildCommandChain(config, "conditions", devNull, true);

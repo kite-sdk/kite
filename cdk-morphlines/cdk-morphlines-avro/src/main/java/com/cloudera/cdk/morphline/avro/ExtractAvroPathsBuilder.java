@@ -73,7 +73,7 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ExtractAvroPaths(config, parent, child, context);
+    return new ExtractAvroPaths(this, config, parent, child, context);
   }
   
   
@@ -87,8 +87,8 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
     
     private static final String ARRAY_TOKEN = "[]";
 
-    public ExtractAvroPaths(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ExtractAvroPaths(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       ListMultimap<String, String> stepMultiMap = ArrayListMultimap.create();
       this.flatten = getConfigs().getBoolean(config, "flatten", true);
       Config paths = getConfigs().getConfig(config, "paths");

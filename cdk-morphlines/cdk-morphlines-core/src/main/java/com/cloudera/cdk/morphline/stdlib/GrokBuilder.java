@@ -54,7 +54,7 @@ public final class GrokBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new Grok(config, parent, child, context);
+    return new Grok(this, config, parent, child, context);
   }
   
   
@@ -71,8 +71,8 @@ public final class GrokBuilder implements CommandBuilder {
     private final boolean addEmptyStrings;
     private final String firstKey; // cached value
 
-    public Grok(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public Grok(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       
       GrokDictionaries dict = new GrokDictionaries(config, getConfigs());
       Config exprConfig = getConfigs().getConfig(config, "expressions", ConfigFactory.empty());

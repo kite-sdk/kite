@@ -37,7 +37,7 @@ public final class DecodeBase64Builder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new Base64Decode(config, parent, child, context);
+    return new Base64Decode(this, config, parent, child, context);
   }
   
   
@@ -48,8 +48,8 @@ public final class DecodeBase64Builder implements CommandBuilder {
 
     private final Base64 base64 = new Base64();
     
-    public Base64Decode(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public Base64Decode(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       validateArguments();
     }
         

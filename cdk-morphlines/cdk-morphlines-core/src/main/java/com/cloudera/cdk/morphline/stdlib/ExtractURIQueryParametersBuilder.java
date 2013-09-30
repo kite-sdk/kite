@@ -43,7 +43,7 @@ public final class ExtractURIQueryParametersBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ExtractURIQueryParameters(config, parent, child, context);
+    return new ExtractURIQueryParameters(this, config, parent, child, context);
   }
   
   
@@ -58,8 +58,8 @@ public final class ExtractURIQueryParametersBuilder implements CommandBuilder {
     private final int maxParameters;
     private final String charset;
     
-    public ExtractURIQueryParameters(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public ExtractURIQueryParameters(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       this.parameterName = getConfigs().getString(config, "parameter");
       this.inputFieldName = getConfigs().getString(config, "inputField");
       this.outputFieldName = getConfigs().getString(config, "outputField");

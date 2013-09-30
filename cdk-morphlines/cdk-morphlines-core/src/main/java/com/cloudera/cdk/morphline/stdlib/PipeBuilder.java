@@ -36,7 +36,7 @@ public final class PipeBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new Pipe(config, (parent != null ? parent : new RootCommand()), child, context);
+    return new Pipe(this, config, (parent != null ? parent : new RootCommand()), child, context);
   }
 
   

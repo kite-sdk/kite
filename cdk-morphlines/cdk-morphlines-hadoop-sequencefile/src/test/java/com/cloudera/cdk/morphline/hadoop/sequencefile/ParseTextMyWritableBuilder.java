@@ -45,15 +45,15 @@ public final class ParseTextMyWritableBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ParseTextMyWritable(config, parent, child, context);
+    return new ParseTextMyWritable(this, config, parent, child, context);
   }
 
   private static final class ParseTextMyWritable extends AbstractCommand {
     private final String keyField;
     private final String valueField;
 
-    public ParseTextMyWritable(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ParseTextMyWritable(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       this.keyField = getConfigs().getString(config, ReadSequenceFileBuilder.CONFIG_KEY_FIELD, Fields.ATTACHMENT_BODY);
       this.valueField = getConfigs().getString(config, ReadSequenceFileBuilder.CONFIG_VALUE_FIELD, Fields.ATTACHMENT_BODY);
     }

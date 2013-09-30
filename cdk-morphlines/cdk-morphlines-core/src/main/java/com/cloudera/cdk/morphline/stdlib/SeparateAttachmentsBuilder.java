@@ -40,7 +40,7 @@ public final class SeparateAttachmentsBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new SeparateAttachments(config, parent, child, context);
+    return new SeparateAttachments(this, config, parent, child, context);
   }
   
   
@@ -49,8 +49,8 @@ public final class SeparateAttachmentsBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class SeparateAttachments extends AbstractCommand {
 
-    public SeparateAttachments(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public SeparateAttachments(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       validateArguments();
     }
         

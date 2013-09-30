@@ -51,7 +51,7 @@ public final class ReadJsonBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ReadJson(config, parent, child, context);
+    return new ReadJson(this, config, parent, child, context);
   }
 
   
@@ -62,8 +62,8 @@ public final class ReadJsonBuilder implements CommandBuilder {
 
     private final ObjectReader reader;
 
-    public ReadJson(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ReadJson(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       
       JsonFactory jsonFactory = null;
       String jsonFactoryClassName = getConfigs().getString(config, "jsonFactory", null);

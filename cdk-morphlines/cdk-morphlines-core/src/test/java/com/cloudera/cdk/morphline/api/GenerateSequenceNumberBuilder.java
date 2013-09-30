@@ -30,7 +30,7 @@ public final class GenerateSequenceNumberBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new GenerateSequenceNumber(config, parent, child, context);
+    return new GenerateSequenceNumber(this, config, parent, child, context);
   }
   
   
@@ -43,8 +43,8 @@ public final class GenerateSequenceNumberBuilder implements CommandBuilder {
     private final boolean preserveExisting;
     private long seqNum = 0;
     
-    public GenerateSequenceNumber(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public GenerateSequenceNumber(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       this.fieldName = getConfigs().getString(config, "field");
       this.preserveExisting = getConfigs().getBoolean(config, "preserveExisting", true);      
       validateArguments();

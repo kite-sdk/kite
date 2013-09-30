@@ -30,7 +30,7 @@ public final class CopyTestCommandBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new CopyTestCommand(config, parent, child, context);
+    return new CopyTestCommand(this, config, parent, child, context);
   }
   
   
@@ -42,8 +42,8 @@ public final class CopyTestCommandBuilder implements CommandBuilder {
     private String name;
     private int count;
     
-    public CopyTestCommand(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public CopyTestCommand(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       this.name = getConfigs().getString(config, "name");
       this.count = getConfigs().getInt(config, "count", 2);
     }

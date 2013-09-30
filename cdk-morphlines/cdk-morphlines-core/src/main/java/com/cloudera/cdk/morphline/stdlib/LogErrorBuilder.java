@@ -36,7 +36,7 @@ public final class LogErrorBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new LogError(config, parent, child, context);
+    return new LogError(this, config, parent, child, context);
   }
   
   
@@ -44,8 +44,9 @@ public final class LogErrorBuilder implements CommandBuilder {
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
   private static final class LogError extends LogCommand {
-    public LogError(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    
+    public LogError(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
     }
 
     @Override

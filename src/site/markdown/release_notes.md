@@ -17,6 +17,7 @@ Version TBD has the following notable changes:
     * Added option to specify boost values to `loadSolr` command.
     * Added several performance enhancements.
     * Upgraded `cdk-morphlines-solr-cell` maven module from tika-1.3 to tika-1.4 to pick up some bug fixes.
+    * The constructor of AbstractCommand now has an additional parameter that refers to the CommandBuilder. 
     * Ensured morphline commands can refer to record field names containing arbitrary characters. 
       Previously some commands could not refer to record field names containing the '.' dot character. 
       This limitation has been removed.

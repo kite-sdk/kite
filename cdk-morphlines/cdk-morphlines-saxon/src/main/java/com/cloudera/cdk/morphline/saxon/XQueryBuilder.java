@@ -64,7 +64,7 @@ public final class XQueryBuilder implements CommandBuilder {
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
     try {
-      return new XQuery(config, parent, child, context);
+      return new XQuery(this, config, parent, child, context);
     } catch (SaxonApiException e) {
       throw new MorphlineCompilationException("Cannot compile", config, e);
     } catch (IOException e) {
@@ -90,8 +90,8 @@ public final class XQueryBuilder implements CommandBuilder {
     
     private final List<Fragment> fragments = new ArrayList();
   
-    public XQuery(Config config, Command parent, Command child, MorphlineContext context) throws SaxonApiException, IOException, XMLStreamException {
-      super(config, parent, child, context);
+    public XQuery(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) throws SaxonApiException, IOException, XMLStreamException {
+      super(builder, config, parent, child, context);
       
       List<? extends Config> fragmentConfigs = getConfigs().getConfigList(config, "fragments");
       if (fragmentConfigs.size() == 0) {

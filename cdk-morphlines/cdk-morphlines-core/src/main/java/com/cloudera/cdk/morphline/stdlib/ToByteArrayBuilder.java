@@ -42,7 +42,7 @@ public final class ToByteArrayBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ToByteArray(config, parent, child, context);
+    return new ToByteArray(this, config, parent, child, context);
   }
   
   
@@ -54,8 +54,8 @@ public final class ToByteArrayBuilder implements CommandBuilder {
     private final String fieldName;
     private final Charset charset;
     
-    public ToByteArray(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public ToByteArray(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       this.fieldName = getConfigs().getString(config, "field");
       this.charset = getConfigs().getCharset(config, "charset", Charsets.UTF_8);
       validateArguments();

@@ -60,7 +60,7 @@ public final class ExtractJsonPathsBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ExtractJsonPaths(config, parent, child, context);
+    return new ExtractJsonPaths(this, config, parent, child, context);
   }
   
   
@@ -74,8 +74,8 @@ public final class ExtractJsonPathsBuilder implements CommandBuilder {
     
     private static final String ARRAY_TOKEN = "[]";
 
-    public ExtractJsonPaths(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ExtractJsonPaths(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       ListMultimap<String, String> stepMultiMap = ArrayListMultimap.create();
       this.flatten = getConfigs().getBoolean(config, "flatten", true);
       Config paths = getConfigs().getConfig(config, "paths");

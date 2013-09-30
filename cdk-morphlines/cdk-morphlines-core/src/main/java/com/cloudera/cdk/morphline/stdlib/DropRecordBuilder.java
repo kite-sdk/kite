@@ -41,7 +41,7 @@ public final class DropRecordBuilder implements CommandBuilder {
     if (config == null) {
       return new DevNull(parent);
     } else {
-      return new DropRecord(config, parent, child, context);
+      return new DropRecord(this, config, parent, child, context);
     }
   }
   
@@ -81,8 +81,8 @@ public final class DropRecordBuilder implements CommandBuilder {
   /** Implementation that does logging and metrics */
   private static final class DropRecord extends AbstractCommand {
     
-    public DropRecord(Config config, Command parent, Command child, MorphlineContext context) {
-      super(ConfigFactory.empty(), parent, new DummyCommand(), context);
+    public DropRecord(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, ConfigFactory.empty(), parent, new DummyCommand(), context);
     }
 
     @Override

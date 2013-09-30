@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.cloudera.cdk.morphline.api.Command;
+import com.cloudera.cdk.morphline.api.CommandBuilder;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
@@ -34,8 +35,8 @@ abstract class AbstractAddValuesCommand extends AbstractCommand {
   
   private final Set<Map.Entry<String, Object>> entrySet;
   
-  public AbstractAddValuesCommand(Config config, Command parent, Command child, MorphlineContext context) {
-    super(config, parent, child, context);      
+  public AbstractAddValuesCommand(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+    super(builder, config, parent, child, context);      
     entrySet = new Configs().getEntrySet(config);
   }
       

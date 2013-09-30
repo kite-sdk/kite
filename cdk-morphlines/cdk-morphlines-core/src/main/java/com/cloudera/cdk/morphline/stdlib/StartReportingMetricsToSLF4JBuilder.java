@@ -52,7 +52,7 @@ public final class StartReportingMetricsToSLF4JBuilder implements CommandBuilder
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new StartReportingMetricsToSLF4J(config, parent, child, context);
+    return new StartReportingMetricsToSLF4J(this, config, parent, child, context);
   }
   
   
@@ -64,8 +64,8 @@ public final class StartReportingMetricsToSLF4JBuilder implements CommandBuilder
     private final String logger;
     private static final Map<MetricRegistry, Map<String, Slf4jReporter>> REGISTRIES = new IdentityHashMap();
     
-    public StartReportingMetricsToSLF4J(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public StartReportingMetricsToSLF4J(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       
       MetricFilter filter = PatternMetricFilter.parse(getConfigs(), config);
       TimeUnit defaultDurationUnit = getConfigs().getTimeUnit(config, "defaultDurationUnit", TimeUnit.MILLISECONDS);
@@ -84,17 +84,17 @@ public final class StartReportingMetricsToSLF4JBuilder implements CommandBuilder
         }
         Slf4jReporter reporter = reporters.get(logger);
         if (reporter == null) {
-          Builder builder = Slf4jReporter.forRegistry(registry)
+          Builder reporterBuilder = Slf4jReporter.forRegistry(registry)
               .filter(filter)
               .convertDurationsTo(defaultDurationUnit)
               .convertRatesTo(defaultRateUnit)
               .outputTo(LoggerFactory.getLogger(logger));
           
           if (marker != null) {
-            builder = builder.markWith(new BasicMarkerFactory().getMarker(marker));
+            reporterBuilder = reporterBuilder.markWith(new BasicMarkerFactory().getMarker(marker));
           }
               
-          reporter = builder.build();
+          reporter = reporterBuilder.build();
           reporter.start(period, TimeUnit.NANOSECONDS);
           reporters.put(logger, reporter);
         }

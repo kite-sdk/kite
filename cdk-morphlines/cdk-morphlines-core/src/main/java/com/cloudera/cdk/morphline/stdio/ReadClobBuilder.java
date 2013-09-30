@@ -43,7 +43,7 @@ public final class ReadClobBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ReadClob(config, parent, child, context);
+    return new ReadClob(this, config, parent, child, context);
   }
   
   
@@ -57,8 +57,8 @@ public final class ReadClobBuilder implements CommandBuilder {
     private StringBuilder clob; 
     private int counter = 0;
   
-    public ReadClob(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ReadClob(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       this.charset = getConfigs().getCharset(config, "charset", null);
       validateArguments();
     }

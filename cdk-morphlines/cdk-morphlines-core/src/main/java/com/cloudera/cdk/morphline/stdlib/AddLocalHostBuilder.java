@@ -43,7 +43,7 @@ public final class AddLocalHostBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new AddLocalHost(config, parent, child, context);
+    return new AddLocalHost(this, config, parent, child, context);
   }
   
   
@@ -56,8 +56,8 @@ public final class AddLocalHostBuilder implements CommandBuilder {
     private final boolean preserveExisting;
     private final String host;
 
-    public AddLocalHost(Config config, Command parent, Command child, MorphlineContext context) { 
-      super(config, parent, child, context);
+    public AddLocalHost(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) { 
+      super(builder, config, parent, child, context);
       this.fieldName = getConfigs().getString(config, FIELD_NAME, "host");
       this.preserveExisting = getConfigs().getBoolean(config, PRESERVE_EXISTING_NAME, true);
       boolean useIP = getConfigs().getBoolean(config, USE_IP, true);      

@@ -44,7 +44,7 @@ public final class AddCurrentTimeBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new AddCurrentTime(config, parent, child, context);
+    return new AddCurrentTime(this, config, parent, child, context);
   }
   
   
@@ -56,8 +56,8 @@ public final class AddCurrentTimeBuilder implements CommandBuilder {
     private String fieldName;
     private boolean preserveExisting;
 
-    public AddCurrentTime(Config config, Command parent, Command child, MorphlineContext context) { 
-      super(config, parent, child, context);
+    public AddCurrentTime(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) { 
+      super(builder, config, parent, child, context);
       this.fieldName = getConfigs().getString(config, FIELD_NAME, Fields.TIMESTAMP);
       this.preserveExisting = getConfigs().getBoolean(config, PRESERVE_EXISTING_NAME, true);
       validateArguments();

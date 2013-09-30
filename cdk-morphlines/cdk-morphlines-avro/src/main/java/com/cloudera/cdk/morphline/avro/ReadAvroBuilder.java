@@ -59,7 +59,7 @@ public final class ReadAvroBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ReadAvro(config, parent, child, context);
+    return new ReadAvro(this, config, parent, child, context);
   }
   
   
@@ -73,8 +73,8 @@ public final class ReadAvroBuilder implements CommandBuilder {
     private BinaryDecoder binaryDecoder = null;
     private JsonDecoder jsonDecoder = null;
     
-    public ReadAvro(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ReadAvro(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       
       String schemaString = getConfigs().getString(config, "writerSchemaString", null);
       if (schemaString != null) {

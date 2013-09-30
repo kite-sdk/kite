@@ -49,7 +49,7 @@ public final class GenerateUUIDBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new GenerateUUID(config, parent, child, context);
+    return new GenerateUUID(this, config, parent, child, context);
   }
   
   
@@ -63,8 +63,8 @@ public final class GenerateUUIDBuilder implements CommandBuilder {
     private final String prefix;
     private final RandomGenerator prng;
 
-    public GenerateUUID(Config config, Command parent, Command child, MorphlineContext context) { 
-      super(config, parent, child, context);
+    public GenerateUUID(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) { 
+      super(builder, config, parent, child, context);
       this.fieldName = getConfigs().getString(config, FIELD_NAME, Fields.ID);
       this.preserveExisting = getConfigs().getBoolean(config, PRESERVE_EXISTING_NAME, true);
       this.prefix = getConfigs().getString(config, PREFIX_NAME, "");

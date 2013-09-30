@@ -59,7 +59,7 @@ public final class GenerateSolrSequenceKeyBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new GenerateSolrSequenceKey(config, parent, child, context);
+    return new GenerateSolrSequenceKey(this, config, parent, child, context);
   }
   
   
@@ -76,8 +76,8 @@ public final class GenerateSolrSequenceKeyBuilder implements CommandBuilder {
     private final String idPrefix; // for load testing only; enables adding same document many times with a different unique key
     private final Random randomIdPrefix; // for load testing only; enables adding same document many times with a different unique key
 
-    public GenerateSolrSequenceKey(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public GenerateSolrSequenceKey(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       this.baseIdFieldName = getConfigs().getString(config, "baseIdField", Fields.BASE_ID);
       this.preserveExisting = getConfigs().getBoolean(config, "preserveExisting", true);      
       

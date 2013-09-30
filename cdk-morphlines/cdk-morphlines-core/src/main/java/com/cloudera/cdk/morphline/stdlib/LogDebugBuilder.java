@@ -36,7 +36,7 @@ public final class LogDebugBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new LogDebug(config, parent, child, context);
+    return new LogDebug(this, config, parent, child, context);
   }
   
   
@@ -44,8 +44,9 @@ public final class LogDebugBuilder implements CommandBuilder {
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
   private static final class LogDebug extends LogCommand {
-    public LogDebug(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    
+    public LogDebug(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
     }
     
     @Override

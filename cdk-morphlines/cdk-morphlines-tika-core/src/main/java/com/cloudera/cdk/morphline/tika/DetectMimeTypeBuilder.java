@@ -62,7 +62,7 @@ public final class DetectMimeTypeBuilder implements CommandBuilder {
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
     try {
-      return new DetectMimeType(config, parent, child, context);
+      return new DetectMimeType(this, config, parent, child, context);
     } catch (IOException e) {
       throw new MorphlineCompilationException("Cannot instantiate command", config, e, this);
     } catch (MimeTypeException e) {
@@ -81,8 +81,8 @@ public final class DetectMimeTypeBuilder implements CommandBuilder {
     private final boolean includeMetaData;
     private final boolean excludeParameters;
     
-    public DetectMimeType(Config config, Command parent, Command child, MorphlineContext context) throws IOException, MimeTypeException {
-      super(config, parent, child, context);
+    public DetectMimeType(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) throws IOException, MimeTypeException {
+      super(builder, config, parent, child, context);
       this.preserveExisting = getConfigs().getBoolean(config, "preserveExisting", true);      
       this.includeMetaData = getConfigs().getBoolean(config, "includeMetaData", false);
       this.excludeParameters = getConfigs().getBoolean(config, "excludeParameters", true);

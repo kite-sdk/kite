@@ -47,7 +47,7 @@ public final class SplitBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new Split(config, parent, child, context);
+    return new Split(this, config, parent, child, context);
   }
   
   
@@ -62,8 +62,8 @@ public final class SplitBuilder implements CommandBuilder {
     private final boolean addEmptyStrings;
     private final Splitter splitter;
     
-    public Split(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public Split(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");
       
       this.outputFieldName = getConfigs().getString(config, "outputField", null);

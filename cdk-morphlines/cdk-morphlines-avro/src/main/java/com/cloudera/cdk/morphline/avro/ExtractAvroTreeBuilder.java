@@ -59,7 +59,7 @@ public final class ExtractAvroTreeBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ExtractAvroTree(config, parent, child, context);
+    return new ExtractAvroTree(this, config, parent, child, context);
   }
   
   
@@ -70,8 +70,8 @@ public final class ExtractAvroTreeBuilder implements CommandBuilder {
 
     private final String outputFieldPrefix;
     
-    public ExtractAvroTree(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ExtractAvroTree(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       this.outputFieldPrefix = getConfigs().getString(config, "outputFieldPrefix", "");
       validateArguments();
     }

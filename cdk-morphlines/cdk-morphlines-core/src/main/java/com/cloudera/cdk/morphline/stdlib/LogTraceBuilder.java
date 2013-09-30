@@ -36,7 +36,7 @@ public final class LogTraceBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new LogTrace(config, parent, child, context);
+    return new LogTrace(this, config, parent, child, context);
   }
   
   
@@ -44,8 +44,9 @@ public final class LogTraceBuilder implements CommandBuilder {
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
   private static final class LogTrace extends LogCommand {
-    public LogTrace(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    
+    public LogTrace(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
     }
     
     @Override

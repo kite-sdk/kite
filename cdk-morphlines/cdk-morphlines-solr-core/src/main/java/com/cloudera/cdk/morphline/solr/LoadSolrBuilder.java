@@ -49,7 +49,7 @@ public final class LoadSolrBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new LoadSolr(config, parent, child, context);
+    return new LoadSolr(this, config, parent, child, context);
   }
   
   
@@ -62,8 +62,8 @@ public final class LoadSolrBuilder implements CommandBuilder {
     private final Map<String, Float> boosts = new HashMap();
     private final Timer elapsedTime;    
     
-    public LoadSolr(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public LoadSolr(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       Config solrLocatorConfig = getConfigs().getConfig(config, "solrLocator");
       SolrLocator locator = new SolrLocator(solrLocatorConfig, context);
       LOG.debug("solrLocator: {}", locator);

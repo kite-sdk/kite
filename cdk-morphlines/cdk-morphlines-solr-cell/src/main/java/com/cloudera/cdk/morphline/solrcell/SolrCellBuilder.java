@@ -87,7 +87,7 @@ public final class SolrCellBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new SolrCell(config, parent, child, context);
+    return new SolrCell(this, config, parent, child, context);
   }
   
   
@@ -109,8 +109,8 @@ public final class SolrCellBuilder implements CommandBuilder {
         
     public static final String ADDITIONAL_SUPPORTED_MIME_TYPES = "additionalSupportedMimeTypes";
     
-    public SolrCell(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public SolrCell(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       
       Config solrLocatorConfig = getConfigs().getConfig(config, "solrLocator");
       SolrLocator locator = new SolrLocator(solrLocatorConfig, context);

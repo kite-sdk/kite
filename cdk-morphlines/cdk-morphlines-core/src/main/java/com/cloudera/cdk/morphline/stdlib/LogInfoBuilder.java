@@ -36,7 +36,7 @@ public final class LogInfoBuilder implements CommandBuilder {
   
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new LogInfo(config, parent, child, context);
+    return new LogInfo(this, config, parent, child, context);
   }
   
   
@@ -44,8 +44,9 @@ public final class LogInfoBuilder implements CommandBuilder {
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
   private static final class LogInfo extends LogCommand {
-    public LogInfo(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    
+    public LogInfo(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
     }
     
     @Override

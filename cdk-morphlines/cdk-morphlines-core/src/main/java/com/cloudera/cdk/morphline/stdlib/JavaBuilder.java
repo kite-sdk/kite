@@ -49,7 +49,7 @@ public final class JavaBuilder implements CommandBuilder {
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
     try {
-      return new Java(config, parent, child, context);
+      return new Java(this, config, parent, child, context);
     } catch (ScriptException e) {
       throw new MorphlineCompilationException("Cannot compile script", config, e);
     }
@@ -74,8 +74,8 @@ public final class JavaBuilder implements CommandBuilder {
         "import " + Configs.class.getName() + ";\n" +
         "";
     
-    public Java(Config config, Command parent, Command child, MorphlineContext context) throws ScriptException {
-      super(config, parent, child, context);
+    public Java(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) throws ScriptException {
+      super(builder, config, parent, child, context);
       
       String javaImports = getConfigs().getString(config, "imports", DEFAULT_IMPORTS);
       String javaCodeBlock = getConfigs().getString(config, "code");

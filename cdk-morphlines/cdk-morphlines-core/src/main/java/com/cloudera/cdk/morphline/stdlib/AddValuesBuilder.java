@@ -35,7 +35,7 @@ public final class AddValuesBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new AddValues(config, parent, child, context);
+    return new AddValues(this, config, parent, child, context);
   }
   
   
@@ -44,8 +44,8 @@ public final class AddValuesBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class AddValues extends AbstractAddValuesCommand {
 
-    public AddValues(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);      
+    public AddValues(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);      
     }
         
   }

@@ -38,7 +38,7 @@ public final class CallParentPipeBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new CallParentPipe(config, parent, child, context);
+    return new CallParentPipe(this, config, parent, child, context);
   }
   
   
@@ -47,8 +47,8 @@ public final class CallParentPipeBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class CallParentPipe extends AbstractCommand {
 
-    public CallParentPipe(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, getPipe(parent), context);
+    public CallParentPipe(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, getPipe(parent), context);
       validateArguments();
     }
     

@@ -57,7 +57,7 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
 
   @Override
   public Command build(Config config, Command parent, Command child, MorphlineContext context) {
-    return new ReadSequenceFile(config, parent, child, context);
+    return new ReadSequenceFile(this, config, parent, child, context);
   }
   
   
@@ -70,8 +70,8 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
     private final String keyField;
     private final String valueField;
   
-    public ReadSequenceFile(Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+    public ReadSequenceFile(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+      super(builder, config, parent, child, context);
       this.includeMetaData = getConfigs().getBoolean(config, "includeMetaData", false);
       this.keyField = getConfigs().getString(config, CONFIG_KEY_FIELD, Fields.ATTACHMENT_NAME);
       this.valueField = getConfigs().getString(config, CONFIG_VALUE_FIELD, Fields.ATTACHMENT_BODY);
