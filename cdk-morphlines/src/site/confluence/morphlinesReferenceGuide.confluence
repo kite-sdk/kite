@@ -1142,7 +1142,7 @@ The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | dir | n/a | The relative or absolute path of the output directory on the local file system. The directory and it's parent directories will be created automatically if they don't yet exist. |
-| period | "10 seconds" | The amount of time between reports to the output file, given in [HOCON duration format|https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format]. |
+| frequency | "10 seconds" | The amount of time between reports to the output file, given in [HOCON duration format|https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format]. |
 | locale | JVM default Locale | Format numbers for the given Java Locale. Example: "en\_US" |
 | defaultDurationUnit | milliseconds | Report output durations in the given time unit. One of {{nanoseconds}},  {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. |
 | defaultRateUnit | seconds | Report output rates in the given time unit. One of {{nanoseconds}}, {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. Example output: events/second |
@@ -1160,7 +1160,7 @@ h4. Example startReportingMetricsToCSV usage
 {code}
 startReportingMetricsToCSV {
   dir : "mytest/metricsLogs"
-  period : "10 seconds"
+  frequency : "10 seconds"
   locale : en_US
 }
 {code}
@@ -1169,7 +1169,7 @@ h4. More example startReportingMetricsToCSV usage
 {code}
 startReportingMetricsToCSV {
   dir : "mytest/metricsLogs"
-  period : "10 seconds"
+  frequency : "10 seconds"
   locale : en_US
   defaultDurationUnit : milliseconds
   defaultRateUnit : seconds
@@ -1210,7 +1210,7 @@ h4. Example startReportingMetricsToJMX usage
 {code}
 startReportingMetricsToJMX {
   domain : myMetrics
-  period : "10 seconds"
+  frequency : "10 seconds"
 }
 {code}
 
@@ -1218,7 +1218,7 @@ h4. More example startReportingMetricsToJMX usage
 {code}
 startReportingMetricsToJMX {
   domain : myMetrics
-  period : "10 seconds"
+  frequency : "10 seconds"
   durationUnits : {
     myMetrics.myTimer : minutes
   }
@@ -1249,7 +1249,7 @@ The command provides the following configuration options:
 || Property Name || Default || Description ||
 | logger | metrics | The name of the SLF4J logger to write to. |
 | marker | null | The optional name of the SLF4J marker object to associate with each logging request. |
-| period | "10 seconds" | The amount of time between reports to the output file, given in [HOCON duration format|https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format]. |
+| frequency | "10 seconds" | The amount of time between reports to the output file, given in [HOCON duration format|https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format]. |
 | defaultDurationUnit | milliseconds | Report output durations in the given time unit. One of {{nanoseconds}},  {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. |
 | defaultRateUnit | seconds | Report output rates in the given time unit. One of {{nanoseconds}}, {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. Example output: events/second |
 | metricFilter | null | Only report metrics which match the given (optional) filter, as described in more detail [above|#metricFilter]. If the filter is absent all metrics match. |
@@ -1258,7 +1258,7 @@ h4. Example startReportingMetricsToSLF4J usage
 {code}
 startReportingMetricsToSLF4J {
   logger : "com.cloudera.cdk.morphline.domain1"
-  period : "10 seconds"
+  frequency : "10 seconds"
 }
 {code}
 
@@ -1266,7 +1266,7 @@ h4. More example startReportingMetricsToSLF4J usage
 {code}
 startReportingMetricsToSLF4J {
   logger : "com.cloudera.cdk.morphline.domain1"
-  period : "10 seconds"
+  frequency : "10 seconds"
   defaultDurationUnit : milliseconds
   defaultRateUnit : seconds
   metricFilter : {

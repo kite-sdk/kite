@@ -70,7 +70,7 @@ public final class StartReportingMetricsToSLF4JBuilder implements CommandBuilder
       MetricFilter filter = PatternMetricFilter.parse(getConfigs(), config);
       TimeUnit defaultDurationUnit = getConfigs().getTimeUnit(config, "defaultDurationUnit", TimeUnit.MILLISECONDS);
       TimeUnit defaultRateUnit = getConfigs().getTimeUnit(config, "defaultRateUnit", TimeUnit.SECONDS); 
-      long period = getConfigs().getNanoseconds(config, "period", 10 * 1000L * 1000 * 1000); // 10 secs, also see https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format
+      long frequency = getConfigs().getNanoseconds(config, "frequency", 10 * 1000L * 1000 * 1000); // 10 secs, also see https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format
       this.logger = getConfigs().getString(config, "logger", "metrics");
       String marker = getConfigs().getString(config, "marker", null);      
       validateArguments();
@@ -95,7 +95,7 @@ public final class StartReportingMetricsToSLF4JBuilder implements CommandBuilder
           }
               
           reporter = reporterBuilder.build();
-          reporter.start(period, TimeUnit.NANOSECONDS);
+          reporter.start(frequency, TimeUnit.NANOSECONDS);
           reporters.put(logger, reporter);
         }
       }

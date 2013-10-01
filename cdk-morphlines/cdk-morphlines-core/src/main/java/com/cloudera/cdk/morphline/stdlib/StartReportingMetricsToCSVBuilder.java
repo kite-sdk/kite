@@ -72,7 +72,7 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
       MetricFilter filter = PatternMetricFilter.parse(getConfigs(), config);
       TimeUnit defaultDurationUnit = getConfigs().getTimeUnit(config, "defaultDurationUnit", TimeUnit.MILLISECONDS);
       TimeUnit defaultRateUnit = getConfigs().getTimeUnit(config, "defaultRateUnit", TimeUnit.SECONDS); 
-      long period = getConfigs().getNanoseconds(config, "period", 10 * 1000L * 1000 * 1000); // 10 seconds
+      long frequency = getConfigs().getNanoseconds(config, "frequency", 10 * 1000L * 1000 * 1000); // 10 seconds
       if (LOG.isTraceEnabled()) {
         LOG.trace("availableLocales: {}", Joiner.on("\n").join(Locale.getAvailableLocales()));
       }
@@ -103,7 +103,7 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
           if (!dir.canWrite()) {
             throw new MorphlineCompilationException("Directory not writeable: " + dir, config);
           }
-          reporter.start(period, TimeUnit.NANOSECONDS);
+          reporter.start(frequency, TimeUnit.NANOSECONDS);
           reporters.put(dir, reporter);
         }
       }
