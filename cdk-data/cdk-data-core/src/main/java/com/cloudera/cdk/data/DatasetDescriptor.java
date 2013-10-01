@@ -37,8 +37,10 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import org.apache.avro.reflect.ReflectData;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
 /**
@@ -170,6 +172,17 @@ public class DatasetDescriptor {
    */
   public boolean hasProperty(String name) {
     return properties.containsKey(name);
+  }
+
+  /**
+   * List the names of all custom properties set.
+   *
+   * @return a Collection of String property names.
+   *
+   * @since 0.8.0
+   */
+  public Collection<String> listProperties() {
+    return properties.keySet();
   }
 
   /**

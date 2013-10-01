@@ -17,6 +17,7 @@ package com.cloudera.cdk.data;
 
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
 import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.Sets;
 
 import java.io.IOException;
 import java.net.URI;
@@ -291,5 +292,33 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     provider.delete("test1");
     Assert.assertEquals(ImmutableMultiset.of(),
         ImmutableMultiset.copyOf(provider.list()));
+  }
+
+  @Test
+  public void testCustomProperties() {
+    final String propName = "my.custom.property";
+    final String propValue = "string";
+    DatasetDescriptor descriptorWithProp =
+        new DatasetDescriptor.Builder(testDescriptor)
+        .property(propName, propValue)
+        .get();
+
+    DatasetDescriptor created = provider.create(NAME, descriptorWithProp);
+    junit.framework.Assert.assertTrue("Should have custom property",
+        created.hasProperty(propName));
+    junit.framework.Assert.assertEquals(
+        "Should have correct custom property value",
+        propValue, created.getProperty(propName));
+    junit.framework.Assert.assertEquals("Should correctly list property names",
+        Sets.newHashSet(propName), created.listProperties());
+
+    DatasetDescriptor loaded = provider.load(NAME);
+    junit.framework.Assert.assertTrue("Should have custom property",
+        loaded.hasProperty(propName));
+    junit.framework.Assert.assertEquals(
+        "Should have correct custom property value",
+        propValue, loaded.getProperty(propName));
+    junit.framework.Assert.assertEquals("Should correctly list property names",
+        Sets.newHashSet(propName), loaded.listProperties());
   }
 }

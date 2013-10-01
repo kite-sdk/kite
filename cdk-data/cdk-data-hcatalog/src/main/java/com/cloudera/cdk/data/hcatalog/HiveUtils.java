@@ -24,12 +24,13 @@ import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.UnknownFormatException;
 import com.cloudera.cdk.data.impl.Accessor;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,7 +38,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -51,9 +51,13 @@ class HiveUtils {
   static final String DEFAULT_DB = "default";
   static final String HDFS_SCHEME = "hdfs";
 
+  private static final String CUSTOM_PROPERTIES_PROPERTY_NAME = "cdk.custom.property.names";
   private static final String PARTITION_EXPRESSION_PROPERTY_NAME = "cdk.partition.expression";
   private static final String AVRO_SCHEMA_URL_PROPERTY_NAME = "avro.schema.url";
   private static final String AVRO_SCHEMA_LITERAL_PROPERTY_NAME = "avro.schema.literal";
+
+  private static final Splitter NAME_SPLITTER = Splitter.on(',');
+  private static final Joiner NAME_JOINER = Joiner.on(',');
 
   private static final BiMap<Format, String> FORMAT_TO_SERDE = HashBiMap.create(2);
   private static final BiMap<String, Format> SERDE_TO_FORMAT = FORMAT_TO_SERDE.inverse();
@@ -86,6 +90,15 @@ class HiveUtils {
     final FileSystem fs = fsForPath(conf, dataLocation);
 
     builder.location(fs.makeQualified(dataLocation));
+
+    // custom properties
+    Properties props = table.getMetadata();
+    String namesProperty = props.getProperty(CUSTOM_PROPERTIES_PROPERTY_NAME);
+    if (namesProperty != null) {
+      for (String property : NAME_SPLITTER.split(namesProperty)) {
+        builder.property(property, props.getProperty(property));
+      }
+    }
 
     if (table.getProperty(PARTITION_EXPRESSION_PROPERTY_NAME) != null) {
       builder.partitionStrategy(
@@ -129,6 +142,17 @@ class HiveUtils {
       table.setDataLocation(descriptor.getLocation());
     } else {
       table.setTableType(TableType.MANAGED_TABLE);
+    }
+
+    // copy custom properties to the table
+    if (!descriptor.listProperties().isEmpty()) {
+      for (String property : descriptor.listProperties()) {
+        // no need to check the reserved list, those are not set on descriptors
+        table.setProperty(property, descriptor.getProperty(property));
+      }
+      // set which properties are custom and should be set on descriptors
+      table.setProperty(CUSTOM_PROPERTIES_PROPERTY_NAME,
+          NAME_JOINER.join(descriptor.listProperties()));
     }
 
     // translate from Format to SerDe

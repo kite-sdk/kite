@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
+import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.MetadataProvider;
@@ -26,6 +27,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import java.io.FileNotFoundException;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -39,6 +41,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 
@@ -70,6 +73,10 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   private static final String METADATA_VERSION = "1";
   private static final String FORMAT_FIELD_NAME = "format";
   private static final String LOCATION_FIELD_NAME = "location";
+
+  private static final Set<String> RESERVED_PROPERTIES = Sets.newHashSet(
+      PARTITION_EXPRESSION_FIELD_NAME, VERSION_FIELD_NAME, FORMAT_FIELD_NAME,
+      LOCATION_FIELD_NAME);
 
   private final Configuration conf;
   private final Path rootDirectory;
@@ -152,6 +159,13 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       location = pathForDataset(name);
     }
     builder.location(location);
+
+    // custom properties
+    for (String property : properties.stringPropertyNames()) {
+      if (!RESERVED_PROPERTIES.contains(property)) {
+        builder.property(property, properties.getProperty(property));
+      }
+    }
 
     return builder.get();
   }
@@ -354,6 +368,12 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     if (descriptor.isPartitioned()) {
       properties.setProperty(PARTITION_EXPRESSION_FIELD_NAME,
           Accessor.getDefault().toExpression(descriptor.getPartitionStrategy()));
+    }
+
+    // copy custom properties to the table
+    for (String property : descriptor.listProperties()) {
+      // no need to check the reserved list, those are not set on descriptors
+      properties.setProperty(property, descriptor.getProperty(property));
     }
 
     final Path descriptorPath = new Path(metadataLocation, DESCRIPTOR_FILE_NAME);
