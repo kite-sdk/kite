@@ -168,6 +168,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    * {@link MetadataProvider} for metadata storage.
    *
    * @param metadataProvider the provider for metadata storage
+   *
+   * @since 0.8.0
    */
   public FileSystemDatasetRepository(
       Configuration conf, MetadataProvider metadataProvider) {

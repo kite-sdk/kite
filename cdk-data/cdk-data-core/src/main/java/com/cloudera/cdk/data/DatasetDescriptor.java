@@ -518,6 +518,8 @@ public class DatasetDescriptor {
      * @param formatName a String format name
      * @return An instance of the builder for method chaining.
      * @throws UnknownFormatException if the format name is not recognized.
+     *
+     * @since 0.8.0
      */
     public Builder format(String formatName) {
       boolean found = false;
