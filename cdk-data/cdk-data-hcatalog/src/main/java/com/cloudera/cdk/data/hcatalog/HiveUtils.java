@@ -29,12 +29,15 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -47,7 +50,6 @@ import org.apache.hadoop.hive.serde.serdeConstants;
 class HiveUtils {
   static final String DEFAULT_DB = "default";
   static final String HDFS_SCHEME = "hdfs";
-  static final String FILE_SYSTEM_URI_PROPERTY_NAME = "cdk.filesystem.uri";
 
   private static final String PARTITION_EXPRESSION_PROPERTY_NAME = "cdk.partition.expression";
   private static final String AVRO_SCHEMA_URL_PROPERTY_NAME = "avro.schema.url";
@@ -81,19 +83,9 @@ class HiveUtils {
     }
 
     final Path dataLocation = new Path(table.getDataLocation());
+    final FileSystem fs = fsForPath(conf, dataLocation);
 
-    final FileSystem dataFS;
-    final String fsUri;
-    if (table.getProperty(FILE_SYSTEM_URI_PROPERTY_NAME) == null) {
-      dataFS = fsForPath(conf, dataLocation);
-      fsUri = dataFS.getUri().toString();
-    } else {
-      fsUri = table.getProperty(FILE_SYSTEM_URI_PROPERTY_NAME);
-      dataFS = fsForPath(conf, fsUri, dataLocation);
-    }
-
-    builder.location(dataFS.makeQualified(dataLocation).toUri());
-    builder.property(FILE_SYSTEM_URI_PROPERTY_NAME, fsUri);
+    builder.location(fs.makeQualified(dataLocation));
 
     if (table.getProperty(PARTITION_EXPRESSION_PROPERTY_NAME) != null) {
       builder.partitionStrategy(
@@ -135,12 +127,6 @@ class HiveUtils {
       // but it doesn't work without some additional magic:
       table.getParameters().put("EXTERNAL", "TRUE");
       table.setDataLocation(descriptor.getLocation());
-
-      final String fsUri =
-          descriptor.getProperty(FILE_SYSTEM_URI_PROPERTY_NAME);
-      if (fsUri != null) {
-        table.setProperty(FILE_SYSTEM_URI_PROPERTY_NAME, fsUri);
-      }
     } else {
       table.setTableType(TableType.MANAGED_TABLE);
     }

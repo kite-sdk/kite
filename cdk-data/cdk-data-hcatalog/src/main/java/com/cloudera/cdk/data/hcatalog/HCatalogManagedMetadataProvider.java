@@ -73,20 +73,8 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
     // load the created table to get the data location
     final Table newTable = hcat.getTable(HiveUtils.DEFAULT_DB, name);
 
-    final FileSystem fs;
-    try {
-      fs = new Path(newTable.getDataLocation())
-          .getFileSystem(conf);
-    } catch (IOException ex) {
-      throw new MetadataProviderException(
-          "Could not get FileSystem for new table:" + name, ex);
-    }
-
     return new DatasetDescriptor.Builder(descriptor)
         .location(newTable.getDataLocation())
-        .property(
-            HiveUtils.FILE_SYSTEM_URI_PROPERTY_NAME,
-            fs.getUri().toString())
         .get();
   }
 }

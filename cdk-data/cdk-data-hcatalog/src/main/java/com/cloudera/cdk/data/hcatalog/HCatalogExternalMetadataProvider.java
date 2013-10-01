@@ -33,15 +33,14 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
   private static final Logger logger = LoggerFactory
       .getLogger(HCatalogExternalMetadataProvider.class);
   private final Path rootDirectory;
-  private final String fsUri;
+  private final FileSystem rootFileSystem;
 
   public HCatalogExternalMetadataProvider(Configuration conf, Path rootDirectory) {
     super(conf);
     Preconditions.checkArgument(rootDirectory != null, "Root cannot be null");
 
     try {
-      FileSystem rootFileSystem = rootDirectory.getFileSystem(conf);
-      this.fsUri = rootFileSystem.getUri().toString();
+      this.rootFileSystem = rootDirectory.getFileSystem(conf);
       this.rootDirectory = rootFileSystem.makeQualified(rootDirectory);
     } catch (IOException ex) {
       throw new MetadataProviderException(
@@ -79,8 +78,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
     // create a new descriptor with the dataset's location
     final DatasetDescriptor newDescriptor =
         new DatasetDescriptor.Builder(descriptor)
-        .location(pathForDataset(name).toUri())
-        .property(HiveUtils.FILE_SYSTEM_URI_PROPERTY_NAME, fsUri)
+        .location(pathForDataset(name))
         .get();
 
     // this object will be the table metadata
@@ -97,6 +95,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
     Preconditions.checkState(rootDirectory != null,
       "Dataset repository root directory can not be null");
 
-    return HiveUtils.pathForDataset(rootDirectory, name);
+    return rootFileSystem.makeQualified(
+        HiveUtils.pathForDataset(rootDirectory, name));
   }
 }
