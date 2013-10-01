@@ -25,17 +25,24 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 public class MemoryMetadataProvider extends AbstractMetadataProvider {
 
   private final Map<String, DatasetDescriptor> descriptors = Maps.newHashMap();
   private final Configuration conf;
+  private transient final FileSystem fs;
 
   public MemoryMetadataProvider(Configuration conf) {
     Preconditions.checkArgument(conf != null, "Configuration cannot be null");
 
     this.conf = conf;
+    try {
+      this.fs = FileSystem.get(conf);
+    } catch (IOException ex) {
+      throw new MetadataProviderException("Could not get default FileSystem");
+    }
   }
 
   public void clear() {
@@ -70,7 +77,7 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
 
     final DatasetDescriptor newDescriptor;
     if (descriptor.getLocation() == null) {
-      final Path location = new Path(newLocation(name));
+      final Path location = fs.makeQualified(new Path(newLocation(name)));
       final String fsUri;
       try {
         fsUri = location.getFileSystem(conf).getUri().toString();
@@ -81,7 +88,6 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
 
       newDescriptor = new DatasetDescriptor.Builder(descriptor)
           .location(location)
-          .property("cdk.filesystem.uri", fsUri)
           .get();
     } else {
       // don't need to modify it

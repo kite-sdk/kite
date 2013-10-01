@@ -53,11 +53,12 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   public void testCreatePath() throws IOException {
     Dataset created = repo.create(NAME, testDescriptor);
 
+    URI location = created.getDescriptor().getLocation();
     Assert.assertNotNull(
-        "FileSystemDatasetRepository requires descriptor locations",
-        created.getDescriptor().getLocation());
-    Assert.assertTrue("Dataset data directory exists",
-        fileSystem.exists(new Path(created.getDescriptor().getLocation())));
+        "FileSystemDatasetRepository should return descriptor locations",
+        location);
+    Assert.assertTrue("Dataset data directory:" + location + " should exist",
+        fileSystem.exists(new Path(location)));
   }
 
   @Test

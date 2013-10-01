@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.cloudera.cdk.data;
+package com.cloudera.cdk.data.filesystem;
 
-import com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider;
-import com.cloudera.cdk.data.filesystem.TestFileSystemDatasetRepository;
+import com.cloudera.cdk.data.MetadataProvider;
 import org.apache.hadoop.conf.Configuration;
 
 public class TestFileSystemRepoWithProvider extends TestFileSystemDatasetRepository {

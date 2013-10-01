@@ -43,7 +43,8 @@ public class TestFileSystemDatasetPartitionKeyForPath {
   @Before
   public void setUp() throws IOException {
     fileSystem = FileSystem.get(new Configuration());
-    testDirectory = new Path(Files.createTempDir().getAbsolutePath());
+    testDirectory = fileSystem.makeQualified(
+        new Path(Files.createTempDir().getAbsolutePath()));
     partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", "username_part", 2).hash("email", 3).get();
 
@@ -52,7 +53,7 @@ public class TestFileSystemDatasetPartitionKeyForPath {
         .configuration(new Configuration())
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
-            .location(testDirectory.toUri())
+            .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .get())
         .get();

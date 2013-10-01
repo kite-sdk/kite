@@ -119,7 +119,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
           name);
     }
 
-    ensureExists(conf, newDescriptor);
+    ensureExists(newDescriptor, conf);
 
     logger.debug("Created dataset:{} schema:{} datasetPath:{}", new Object[] {
         name, newDescriptor.getSchema(), location.toString() });
@@ -235,8 +235,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
           "Failed to delete descriptor for name:" + name, ex);
     }
 
-    final FileSystem fs = fsForDescriptor(conf, descriptor);
     final Path dataLocation = new Path(descriptor.getLocation());
+    final FileSystem fs = fsForPath(dataLocation, conf);
 
     try {
       if (fs.exists(dataLocation)) {
@@ -351,12 +351,12 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    * @param descriptor A DatasetDescriptor
    */
   private static void ensureExists(
-      Configuration conf, DatasetDescriptor descriptor) {
+      DatasetDescriptor descriptor, Configuration conf) {
     Preconditions.checkArgument(descriptor.getLocation() != null,
         "Cannot get FileSystem for a descriptor with no location");
     final Path dataPath = new Path(descriptor.getLocation());
 
-    final FileSystem fs = fsForDescriptor(conf, descriptor, dataPath);
+    final FileSystem fs = fsForPath(dataPath, conf);
 
     try {
       if (!fs.exists(dataPath)) {
@@ -367,30 +367,10 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
   }
 
-  private static FileSystem fsForDescriptor(
-      Configuration conf, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(descriptor.getLocation() != null,
-        "Cannot get FileSystem for a descriptor with no location");
-    final Path dataPath = new Path(descriptor.getLocation());
-
-    return fsForDescriptor(conf, descriptor, dataPath);
-  }
-
-  private static FileSystem fsForDescriptor(
-      Configuration conf, DatasetDescriptor descriptor, Path dataPath) {
-    final String fsUriString = descriptor.getProperty(
-        FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY);
-
+  private static FileSystem fsForPath(Path dataPath, Configuration conf) {
     try {
-      if (fsUriString == null) {
-        return dataPath.getFileSystem(conf);
-      } else {
-        return FileSystem.get(new URI(fsUriString), conf);
-      }
+      return dataPath.getFileSystem(conf);
     } catch (IOException ex) {
-      throw new DatasetRepositoryException(
-          "Cannot get FileSystem for descriptor", ex);
-    } catch (URISyntaxException ex) {
       throw new DatasetRepositoryException(
           "Cannot get FileSystem for descriptor", ex);
     }

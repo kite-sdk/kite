@@ -45,7 +45,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
   }
 
   // whether this should use the DFS provided by MiniDFSTest
-  private boolean distributed;
+  protected boolean distributed;
 
   protected Configuration conf;
   protected DatasetDescriptor testDescriptor;
@@ -98,7 +98,10 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
         testDescriptor.getPartitionStrategy(), created.getPartitionStrategy());
     Assert.assertEquals("Format should match",
         testDescriptor.getFormat(), created.getFormat());
-    // Location and Configuration are allowed to be set by the provider.
+    Assert.assertNotNull("Location URI should be set",
+        created.getLocation());
+    Assert.assertNotNull("Location URI should have a scheme",
+        created.getLocation().getScheme());
   }
 
   public void testCreateWithLocation() throws URISyntaxException {

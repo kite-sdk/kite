@@ -71,13 +71,16 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   private static final String FORMAT_FIELD_NAME = "format";
   private static final String LOCATION_FIELD_NAME = "location";
 
-  static final String FILE_SYSTEM_URI_PROPERTY = "cdk.filesystem.uri";
-
   private final Configuration conf;
   private final Path rootDirectory;
 
   // cache the rootDirectory's FileSystem to avoid multiple lookups
   private transient final FileSystem rootFileSystem;
+
+  /*
+   * All metadata is stored under rootDirectory. Data may also be stored under
+   * rootDirectory if no location is set on incoming descriptors.
+   */
 
   public FileSystemMetadataProvider(Configuration conf, Path rootDirectory) {
     Preconditions.checkArgument(conf != null, "Configuration cannot be null");
@@ -99,8 +102,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
     logger.debug("Loading dataset metadata name:{}", name);
 
-    final Path datasetPath = pathForDataset(name);
-    final Path metadataPath = pathForMetadata(datasetPath);
+    final Path metadataPath = pathForMetadata(name);
     checkExists(rootFileSystem, metadataPath);
 
     InputStream inputStream = null;
@@ -147,17 +149,9 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       location = new Path(properties.getProperty(LOCATION_FIELD_NAME));
     } else {
       // backwards-compatibility: older versions didn't write this property
-      location = datasetPath;
+      location = pathForDataset(name);
     }
     builder.location(location);
-
-    if (properties.containsKey(FILE_SYSTEM_URI_PROPERTY)) {
-      builder.property(FILE_SYSTEM_URI_PROPERTY, properties.getProperty(name));
-    } else {
-      // backwards-compatibility: older versions didn't write this property
-      builder.property(
-          FILE_SYSTEM_URI_PROPERTY, fsForPath(location).getUri().toString());
-    }
 
     return builder.get();
   }
@@ -176,20 +170,15 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     // If the descriptor has a location, use it.
     if (descriptor.getLocation() != null) {
       dataLocation = new Path(descriptor.getLocation());
-      // only the root file system is supported
-      Preconditions.checkArgument(
-          rootFileSystem.equals(fsForPath(dataLocation)),
-          "FileSystem does not match root directory");
     } else {
       dataLocation = pathForDataset(name);
     }
 
-    final Path metadataLocation = pathForMetadata(dataLocation);
+    final Path metadataLocation = pathForMetadata(name);
 
     // get a DatasetDescriptor with the location set
     DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder(descriptor)
-        .location(dataLocation.toUri())
-        .property(FILE_SYSTEM_URI_PROPERTY, rootFileSystem.getUri().toString())
+        .location(dataLocation)
         .get();
 
     try {
@@ -219,21 +208,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
       descriptor);
 
-    final Path dataLocation;
-
-    // If the descriptor has a location, use it.
-    if (descriptor.getLocation() != null) {
-      dataLocation = new Path(descriptor.getLocation());
-      // only the root file system is supported
-      Preconditions.checkArgument(
-          rootFileSystem.equals(fsForPath(dataLocation)),
-          "FileSystem does not match root directory");
-    } else {
-      dataLocation = pathForDataset(name);
-    }
-
     writeDescriptor(
-        rootFileSystem, pathForMetadata(dataLocation), name, descriptor);
+        rootFileSystem, pathForMetadata(name), name, descriptor);
 
     return descriptor;
   }
@@ -245,12 +221,13 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     logger.debug("Deleting dataset metadata name:{}", name);
 
     final Path namedDirectory = pathForDataset(name);
-    final Path metadataDirectory = pathForMetadata(namedDirectory);
+    final Path metadataDirectory = pathForMetadata(name);
 
     try {
       if (rootFileSystem.exists(metadataDirectory)) {
         if (rootFileSystem.delete(metadataDirectory, true)) {
-          // try to delete the named directory, but only if it is empty
+          // try to delete the named directory, but only if it is empty; the
+          // data may be stored there
           rootFileSystem.delete(namedDirectory, false);
           return true;
         } else {
@@ -271,7 +248,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   public boolean exists(String name) {
     Preconditions.checkArgument(name != null, "Name cannot be null");
 
-    final Path potentialPath = pathForMetadata(pathForDataset(name));
+    final Path potentialPath = pathForMetadata(name);
     try {
       return rootFileSystem.exists(potentialPath);
     } catch (IOException ex) {
@@ -316,16 +293,14 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     Preconditions.checkState(rootDirectory != null,
       "Dataset repository root directory can not be null");
 
-    return pathForDataset(rootDirectory, name);
+    return rootFileSystem.makeQualified(pathForDataset(rootDirectory, name));
   }
 
-  private FileSystem fsForPath(Path path) {
-    try {
-      return path.getFileSystem(conf);
-    } catch (IOException ex) {
-      throw new MetadataProviderException(
-          "Cannot access FileSystem for uri:" + path, ex);
-    }
+  private Path pathForMetadata(String name) {
+    Preconditions.checkState(rootDirectory != null,
+      "Dataset repository root directory can not be null");
+
+    return pathForMetadata(rootDirectory, name);
   }
 
   /**
@@ -405,8 +380,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
    * @param datasetPath the Dataset Path
    * @return the metadata Path
    */
-  private static Path pathForMetadata(Path datasetPath) {
-    return new Path(datasetPath, METADATA_DIRECTORY);
+  private static Path pathForMetadata(Path root, String name) {
+    return new Path(pathForDataset(root, name), METADATA_DIRECTORY);
   }
 
   /**

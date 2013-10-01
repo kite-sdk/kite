@@ -61,9 +61,29 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
     DatasetDescriptor loaded = provider.load(NAME);
     Assert.assertNotNull("Loaded descriptor should have a location",
         loaded.getLocation());
-    Assert.assertNotNull("Loaded descriptor should have a FS URI",
-        loaded.getProperty(
-            FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY));
+    if (distributed) {
+      // purposely call new Configuration() to test that the URI has HDFS info
+      Assert.assertEquals(
+          getDFS(),
+          FileSystem.get(loaded.getLocation(), new Configuration()));
+      Assert.assertEquals(
+          "hdfs",
+          loaded.getLocation().getScheme());
+      Assert.assertEquals(
+          getDFS().getUri().getAuthority(),
+          loaded.getLocation().getAuthority());
+    } else {
+      // purposely call new Configuration() to test that the URI has FS info
+      Assert.assertEquals(
+          getFS(),
+          FileSystem.get(loaded.getLocation(), new Configuration()));
+      Assert.assertEquals(
+          "file",
+          loaded.getLocation().getScheme());
+      Assert.assertEquals(
+          getFS().getUri().getAuthority(),
+          loaded.getLocation().getAuthority());
+    }
   }
 
   @Test
@@ -71,9 +91,21 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
     DatasetDescriptor created = provider.create(NAME, testDescriptor);
     Assert.assertNotNull("Created descriptor should have a location",
         created.getLocation());
-    Assert.assertNotNull("Created descriptor should have a FS URI",
-        created.getProperty(
-            FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY));
+    if (distributed) {
+      Assert.assertEquals(
+          "hdfs",
+          created.getLocation().getScheme());
+      Assert.assertEquals(
+          getDFS().getUri().getAuthority(),
+          created.getLocation().getAuthority());
+    } else {
+      Assert.assertEquals(
+          "file",
+          created.getLocation().getScheme());
+      Assert.assertEquals(
+          getFS().getUri().getAuthority(),
+          created.getLocation().getAuthority());
+    }
   }
 
   @Test

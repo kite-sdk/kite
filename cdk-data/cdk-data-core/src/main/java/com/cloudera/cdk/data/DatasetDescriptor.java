@@ -39,7 +39,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
 import org.apache.avro.reflect.ReflectData;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
 /**
@@ -82,6 +81,10 @@ public class DatasetDescriptor {
   DatasetDescriptor(Schema schema, @Nullable URL schemaUrl, Format format,
       @Nullable URI location, @Nullable Map<String, String> properties,
       @Nullable PartitionStrategy partitionStrategy) {
+    // URI can be null if the descriptor is configuring a new Dataset
+    Preconditions.checkArgument(
+        (location == null) || (location.getScheme() != null),
+        "Location URIs must be fully-qualified and have a FS scheme.");
 
     this.schema = schema;
     this.schemaUrl = schemaUrl;
@@ -528,6 +531,9 @@ public class DatasetDescriptor {
      * @since 0.8.0
      */
     public Builder location(URI uri) {
+      // URI can be null if the descriptor is configuring a new Dataset
+      Preconditions.checkArgument((uri == null) || (uri.getScheme() != null),
+          "Location URIs must be fully-qualified and have a FS scheme.");
       this.location = uri;
       return this;
     }

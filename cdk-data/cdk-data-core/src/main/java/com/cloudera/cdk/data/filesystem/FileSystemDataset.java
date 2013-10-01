@@ -33,8 +33,6 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.apache.avro.Schema;
@@ -140,7 +138,8 @@ class FileSystemDataset implements Dataset {
     logger.debug("Loading partition for key {}, allowCreate:{}", new Object[] {
       key, allowCreate });
 
-    Path partitionDirectory = toDirectoryName(directory, key);
+    Path partitionDirectory = fileSystem.makeQualified(
+        toDirectoryName(directory, key));
 
     try {
       if (!fileSystem.exists(partitionDirectory)) {
@@ -162,7 +161,7 @@ class FileSystemDataset implements Dataset {
         .name(name)
         .fileSystem(fileSystem)
         .descriptor(new DatasetDescriptor.Builder(descriptor)
-            .location(partitionDirectory.toUri())
+            .location(partitionDirectory)
             .partitionStrategy(subpartitionStrategy)
             .get())
         .partitionKey(key)
@@ -208,7 +207,7 @@ class FileSystemDataset implements Dataset {
     }
 
     for (FileStatus stat : fileStatuses) {
-      Path p = stat.getPath();
+      Path p = fileSystem.makeQualified(stat.getPath());
       PartitionKey key = fromDirectoryName(p);
       PartitionStrategy subPartitionStrategy = Accessor.getDefault()
           .getSubpartitionStrategy(partitionStrategy, 1);
@@ -216,7 +215,7 @@ class FileSystemDataset implements Dataset {
           .name(name)
           .fileSystem(fileSystem)
           .descriptor(new DatasetDescriptor.Builder(descriptor)
-              .location(p.toUri())
+              .location(p)
               .partitionStrategy(subPartitionStrategy)
               .get())
           .partitionKey(key);
@@ -305,7 +304,7 @@ class FileSystemDataset implements Dataset {
       return this;
     }
 
-    public Builder descriptor(DatasetDescriptor descriptor) {
+     public Builder descriptor(DatasetDescriptor descriptor) {
       Preconditions.checkArgument(descriptor.getLocation() != null,
           "Dataset location cannot be null");
 
@@ -330,17 +329,9 @@ class FileSystemDataset implements Dataset {
       this.directory = new Path(descriptor.getLocation());
 
       if (fileSystem == null) {
-        final String fsUri = descriptor.getProperty(
-            FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY);
         try {
-          if (fsUri == null) {
-            this.fileSystem = directory.getFileSystem(conf);
-          } else {
-            this.fileSystem = FileSystem.get(new URI(fsUri), conf);
-          }
+          this.fileSystem = directory.getFileSystem(conf);
         } catch (IOException ex) {
-          throw new DatasetException("Cannot access FileSystem", ex);
-        } catch (URISyntaxException ex) {
           throw new DatasetException("Cannot access FileSystem", ex);
         }
       }

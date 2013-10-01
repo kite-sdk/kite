@@ -89,7 +89,8 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
         new Configuration());
 
     this.fileSystem = FileSystem.get(conf);
-    this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
+    this.testDirectory = fileSystem.makeQualified(
+        new Path(Files.createTempDir().getAbsolutePath()));
     this.testDescriptor = new DatasetDescriptor.Builder()
         .schema(testSchema)
         .get();
@@ -120,6 +121,10 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
         NAME, dataset.getName());
     Assert.assertEquals("Dataset schema is propagated",
         testDescriptor.getSchema(), saved.getSchema());
+    Assert.assertNotNull("Dataset should have a URI location",
+        saved.getLocation());
+    Assert.assertNotNull("Dataset location should have a scheme",
+        saved.getLocation().getScheme());
   }
 
   public void ensureCreated() {

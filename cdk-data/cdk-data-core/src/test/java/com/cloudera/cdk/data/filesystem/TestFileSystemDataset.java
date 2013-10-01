@@ -78,7 +78,8 @@ public class TestFileSystemDataset extends MiniDFSTest {
 
   @Before
   public void setUp() throws IOException {
-    testDirectory = new Path(Files.createTempDir().getAbsolutePath());
+    testDirectory = fileSystem.makeQualified(
+        new Path(Files.createTempDir().getAbsolutePath()));
   }
 
   @After
@@ -94,10 +95,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA_URL)
             .format(format)
-            .location(testDirectory.toUri())
-            .property(
-                FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY,
-                fileSystem.getUri().toString())
+            .location(testDirectory)
             .get())
         .get();
 
@@ -119,11 +117,8 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
-            .location(testDirectory.toUri())
+            .location(testDirectory)
             .partitionStrategy(partitionStrategy)
-            .property(
-                FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY,
-                fileSystem.getUri().toString())
             .get())
         .get();
 
@@ -166,10 +161,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
-            .location(testDirectory.toUri())
-            .property(
-                FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY,
-                fileSystem.getUri().toString())
+            .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .get())
         .get();
@@ -222,10 +214,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
-            .location(testDirectory.toUri())
-            .property(
-                FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY,
-                fileSystem.getUri().toString())
+            .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .get())
         .get();
@@ -245,10 +234,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
-            .location(testDirectory.toUri())
-            .property(
-                FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY,
-                fileSystem.getUri().toString())
+            .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .get())
         .get();
@@ -274,10 +260,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
-            .location(testDirectory.toUri())
-            .property(
-                FileSystemMetadataProvider.FILE_SYSTEM_URI_PROPERTY,
-                fileSystem.getUri().toString())
+            .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .get())
         .get();
