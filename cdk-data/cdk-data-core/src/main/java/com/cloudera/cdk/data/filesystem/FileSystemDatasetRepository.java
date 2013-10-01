@@ -494,6 +494,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   public static class Builder implements Supplier<FileSystemDatasetRepository> {
 
     private Path rootDirectory;
+    private FileSystem fileSystem;
     private MetadataProvider metadataProvider;
     private Configuration configuration;
 
@@ -533,6 +534,17 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
 
     /**
+     * The {@link FileSystem} to store metadata and dataset files in (optional).
+     *
+     * The FileSystem for the root directory is used if this FileSystem is not
+     * set.
+     */
+    public Builder fileSystem(FileSystem fileSystem) {
+      this.fileSystem = fileSystem;
+      return this;
+    }
+
+    /**
      * The {@link MetadataProvider} for metadata storage (optional). If not
      * specified, a {@link FileSystemMetadataProvider} will be used.
      */
@@ -561,8 +573,21 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         Preconditions.checkState(this.rootDirectory != null,
             "No root directory defined");
 
-        this.metadataProvider = new FileSystemMetadataProvider(
-            configuration, rootDirectory);
+        // the rootDirectory can have a scheme/authority that overrides
+
+        if (fileSystem != null) {
+          // if the FS doesn't match, this will throw IllegalArgumentException
+          this.metadataProvider = new FileSystemMetadataProvider(
+              configuration, fileSystem.makeQualified(rootDirectory));
+        } else {
+          this.metadataProvider = new FileSystemMetadataProvider(
+              configuration, rootDirectory);
+        }
+      } else {
+        Preconditions.checkState(rootDirectory == null,
+            "Root directory is ignored when a MetadataProvider is set");
+        Preconditions.checkState(fileSystem == null,
+            "File system is ignored when a MetadataProvider is set");
       }
 
       return new FileSystemDatasetRepository(configuration, metadataProvider);
