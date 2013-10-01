@@ -419,6 +419,34 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   }
 
   /**
+   * @return the root directory in the filesystem where datasets are stored.
+   *
+   * @deprecated will be removed in 0.9.0
+   */
+  @Deprecated
+  public Path getRootDirectory() {
+    if (metadataProvider instanceof FileSystemMetadataProvider) {
+      return ((FileSystemMetadataProvider) metadataProvider).getRootDirectory();
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * @return the {@link FileSystem} on which datasets are stored.
+   *
+   * @deprecated will be removed in 0.9.0
+   */
+  @Deprecated
+  public FileSystem getFileSystem() {
+    if (metadataProvider instanceof FileSystemMetadataProvider) {
+      return ((FileSystemMetadataProvider) metadataProvider).getFileSytem();
+    } else {
+      return null;
+    }
+  }
+
+  /**
    * @return the {@link MetadataProvider} being used by this repository.
    * @since 0.2.0
    */

@@ -87,8 +87,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   /*
    * All metadata is stored under rootDirectory. Data may also be stored under
    * rootDirectory if no location is set on incoming descriptors.
-   */
-  /**
+   *
    * @deprecated will be removed in 0.9.0
    */
   @Deprecated
@@ -315,6 +314,28 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       throw new MetadataProviderException("Could not list data sets", ex);
     }
     return datasets;
+  }
+
+  /**
+   * Returns the root directory where metadata is stored.
+   *
+   * @return a Path where {@link DatasetDescriptors} are stored
+   *
+   * @since 0.8.0
+   */
+  Path getRootDirectory() {
+    return rootDirectory;
+  }
+
+  /**
+   * Returns the file system where metadata is stored.
+   *
+   * @return a FileSystem
+   *
+   * @since 0.8.0
+   */
+  FileSystem getFileSytem() {
+    return rootFileSystem;
   }
 
   @Override
