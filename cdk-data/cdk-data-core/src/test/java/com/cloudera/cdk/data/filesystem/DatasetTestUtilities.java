@@ -63,7 +63,7 @@ public class DatasetTestUtilities {
   public static void writeTestUsers(Dataset ds, int count, int start) {
     DatasetWriter<GenericData.Record> writer = null;
     try {
-      writer = ds.getWriter();
+      writer = ds.newWriter();
       writer.open();
       for (int i = start; i < count + start; i++) {
         GenericData.Record record = new GenericRecordBuilder(USER_SCHEMA)
@@ -85,7 +85,7 @@ public class DatasetTestUtilities {
       usernames.add("test-" + i);
     }
 
-    checkReaderBehavior(ds.<GenericData.Record>getReader(), count,
+    checkReaderBehavior(ds.<GenericData.Record>newReader(), count,
         new RecordValidator<GenericData.Record>() {
       @Override
       public void validate(GenericData.Record record, int recordNum) {
@@ -117,7 +117,7 @@ public class DatasetTestUtilities {
     Set<GenericData.Record> records = Sets.newHashSet();
     DatasetReader<GenericData.Record> reader = null;
     try {
-      reader = ds.getReader();
+      reader = ds.newReader();
       reader.open();
       for (GenericData.Record record : reader) {
         records.add(record);

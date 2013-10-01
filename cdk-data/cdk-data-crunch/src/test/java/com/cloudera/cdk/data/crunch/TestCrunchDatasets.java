@@ -18,6 +18,7 @@ package com.cloudera.cdk.data.crunch;
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepository;
+import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.MemoryMetadataProvider;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
@@ -79,7 +80,7 @@ public class TestCrunchDatasets {
 
     writeTestUsers(inputDataset, 10);
 
-    PartitionKey key = partitionStrategy.partitionKey(0);
+    PartitionKey key = partitionStrategy.keyFor(new Marker.Builder("username", 0).get());
     Dataset inputPart0 = inputDataset.getPartition(key, false);
     Dataset outputPart0 = outputDataset.getPartition(key, true);
 

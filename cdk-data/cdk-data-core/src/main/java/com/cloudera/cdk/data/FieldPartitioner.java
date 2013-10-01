@@ -16,6 +16,7 @@
 package com.cloudera.cdk.data;
 
 import com.google.common.base.Function;
+import java.util.Comparator;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -40,21 +41,28 @@ import javax.annotation.concurrent.Immutable;
  * @see PartitionStrategy
  */
 @Immutable
-public abstract class FieldPartitioner<S, T> implements Function<S, T> {
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+    value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+    justification="Implement if we intend to use in Serializable objects "
+        + " (e.g., TreeMaps) and use java serialization.")
+public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparator<T> {
 
   private final String sourceName;
   private final String name;
+  private final Class<S> sourceType;
   private final Class<T> type;
   private final int cardinality;
 
-  protected FieldPartitioner(String name, Class<T> type, int cardinality) {
-    this(name, name, type, cardinality);
+  protected FieldPartitioner(String name, Class<S> sourceType, Class<T> type,
+      int cardinality) {
+    this(name, name, sourceType, type, cardinality);
   }
 
-  protected FieldPartitioner(String sourceName, String name, Class<T> type,
-      int cardinality) {
+  protected FieldPartitioner(String sourceName, String name,
+      Class<S> sourceType, Class<T> type, int cardinality) {
     this.sourceName = sourceName;
     this.name = name;
+    this.sourceType = sourceType;
     this.type = type;
     this.cardinality = cardinality;
   }
@@ -113,6 +121,17 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T> {
    */
   public String valueToString(T value) {
     return value.toString();
+  }
+
+  /**
+   * <p>
+   * The type of the source field, which is the type of the type expected by
+   * the apply function.
+   * </p>
+   * @since 0.8.0
+   */
+  public Class<S> getSourceType() {
+    return sourceType;
   }
 
   /**

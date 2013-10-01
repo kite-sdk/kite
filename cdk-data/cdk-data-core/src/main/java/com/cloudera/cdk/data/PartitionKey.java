@@ -50,6 +50,10 @@ public class PartitionKey {
     this.values = values;
   }
 
+  PartitionKey(int size) {
+    this.values = new Object[size];
+  }
+
   public List<Object> getValues() {
     return Arrays.asList(values);
   }

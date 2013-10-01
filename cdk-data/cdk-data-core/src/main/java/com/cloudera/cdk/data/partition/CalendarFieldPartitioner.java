@@ -18,7 +18,6 @@ package com.cloudera.cdk.data.partition;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import java.util.Calendar;
 import java.util.TimeZone;
 import javax.annotation.Nonnull;
@@ -32,7 +31,9 @@ import javax.annotation.Nonnull;
  * (values are ints).
  */
 @Beta
-@SuppressWarnings(value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
+        "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+        "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
     justification="False positive due to generics.")
 class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
 
@@ -41,7 +42,7 @@ class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
 
   public CalendarFieldPartitioner(String sourceName, String name,
       int calendarField, int cardinality) {
-    super(sourceName, name, Integer.class, cardinality);
+    super(sourceName, name, Long.class, Integer.class, cardinality);
     this.cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     this.calendarField = calendarField;
   }
@@ -69,6 +70,11 @@ class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
     return Objects.equal(this.getSourceName(), that.getSourceName()) &&
         Objects.equal(this.getName(), that.getName()) &&
         Objects.equal(this.getCardinality(), that.getCardinality());
+  }
+
+  @Override
+  public int compare(Integer o1, Integer o2) {
+    return o1.compareTo(o2);
   }
 
   @Override

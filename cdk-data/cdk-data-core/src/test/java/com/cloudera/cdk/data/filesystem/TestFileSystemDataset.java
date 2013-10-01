@@ -22,6 +22,7 @@ import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.Format;
 import com.cloudera.cdk.data.Formats;
+import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.MiniDFSTest;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
@@ -46,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
+import com.cloudera.cdk.data.impl.Accessor;
 
 @RunWith(Parameterized.class)
 public class TestFileSystemDataset extends MiniDFSTest {
@@ -70,10 +72,14 @@ public class TestFileSystemDataset extends MiniDFSTest {
   private Format format;
   private FileSystem fileSystem;
   private Path testDirectory;
+  private Marker username0;
+  private Marker username1;
 
   public TestFileSystemDataset(Format format, FileSystem fs) {
     this.format = format;
     this.fileSystem = fs;
+    this.username0 = new Marker.Builder("username", 0).get();
+    this.username1 = new Marker.Builder("username", 1).get();
   }
 
   @Before
@@ -133,8 +139,8 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertTrue("Partitioned directory 1 exists",
       fileSystem.exists(new Path(testDirectory, "username=1")));
     checkTestUsers(ds, 10);
-    PartitionKey key0 = partitionStrategy.partitionKey(0);
-    PartitionKey key1 = partitionStrategy.partitionKey(1);
+    PartitionKey key0 = partitionStrategy.keyFor(username0);
+    PartitionKey key1 = partitionStrategy.keyFor(username1);
     int total = readTestUsersInPartition(ds, key0, null)
       + readTestUsersInPartition(ds, key1, null);
     Assert.assertEquals(10, total);
@@ -173,8 +179,8 @@ public class TestFileSystemDataset extends MiniDFSTest {
 
     writeTestUsers(ds, 10);
     checkTestUsers(ds, 10);
-    PartitionKey key0 = partitionStrategy.partitionKey(0);
-    PartitionKey key1 = partitionStrategy.partitionKey(1);
+    PartitionKey key0 = Accessor.getDefault().newPartitionKey(0);
+    PartitionKey key1 = Accessor.getDefault().newPartitionKey(1);
     int total = readTestUsersInPartition(ds, key0, "email")
       + readTestUsersInPartition(ds, key0, "email");
     Assert.assertEquals(10, total);
@@ -185,8 +191,12 @@ public class TestFileSystemDataset extends MiniDFSTest {
         String part = "username=" + i1 + "/email=" + i2;
         Assert.assertTrue("Partitioned directory " + part + " exists",
           fileSystem.exists(new Path(testDirectory, part)));
+        Marker current = new Marker.Builder()
+            .add("username", i1)
+            .add("email", i2)
+            .get();
         total += readTestUsersInPartition(ds,
-          partitionStrategy.partitionKey(i1, i2), null);
+          partitionStrategy.keyFor(current), null);
       }
     }
     Assert.assertEquals(10, total);
@@ -220,7 +230,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .get();
 
     Assert
-      .assertNull(ds.getPartition(partitionStrategy.partitionKey(1), false));
+      .assertNull(ds.getPartition(partitionStrategy.keyFor(username1), false));
   }
 
   @Test
@@ -239,7 +249,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .get())
         .get();
 
-    PartitionKey key = partitionStrategy.partitionKey(1);
+    PartitionKey key = Accessor.getDefault().newPartitionKey(1);
     FileSystemDataset userPartition = (FileSystemDataset) ds.getPartition(key, true);
     Assert.assertEquals(key, userPartition.getPartitionKey());
 
@@ -272,18 +282,18 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertTrue(
       fileSystem.isDirectory(new Path(testDirectory, "username=1")));
 
-    ds.dropPartition(partitionStrategy.partitionKey(0));
+    ds.dropPartition(partitionStrategy.keyFor(username0));
     Assert.assertFalse(
       fileSystem.isDirectory(new Path(testDirectory, "username=0")));
 
-    ds.dropPartition(partitionStrategy.partitionKey(1));
+    ds.dropPartition(partitionStrategy.keyFor(username1));
     Assert.assertFalse(
       fileSystem.isDirectory(new Path(testDirectory, "username=1")));
 
     DatasetException caught = null;
 
     try {
-      ds.dropPartition(partitionStrategy.partitionKey(0));
+      ds.dropPartition(partitionStrategy.keyFor(username0));
     } catch (DatasetException e) {
       caught = e;
     }
@@ -304,7 +314,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         Assert.assertEquals(subpartitionName, fieldPartitioners.get(0)
             .getName());
       }
-      reader = partition.getReader();
+      reader = partition.newReader();
       reader.open();
       for (GenericData.Record actualRecord : reader) {
         Assert.assertEquals(actualRecord.toString(), key.get(0), (actualRecord

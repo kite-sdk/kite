@@ -98,7 +98,7 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
     }
     super.populateAvroHeaders(hdrs, schema, message);
     if (partitionStrategy != null) {
-      key = partitionStrategy.partitionKeyForEntity(message, key);
+      key = partitionStrategy.keyFor(message, key);
       int i = 0;
       for (FieldPartitioner fp : partitionStrategy.getFieldPartitioners()) {
         hdrs.put(PARTITION_PREFIX + fp.getName(), fp.valueToString(key.get(i++)));

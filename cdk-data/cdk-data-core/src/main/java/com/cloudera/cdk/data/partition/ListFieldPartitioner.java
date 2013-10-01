@@ -23,12 +23,16 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
 @Beta
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+    value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+    justification="Implement if we intend to use in Serializable objects "
+        + " (e.g., TreeMaps) and use java serialization.")
 public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
 
   private final List<Set<S>> values;
 
-  public ListFieldPartitioner(String name, List<Set<S>> values) {
-    super(name, Integer.class, cardinality(values));
+  public ListFieldPartitioner(String name, List<Set<S>> values, Class<S> sourceType) {
+    super(name, sourceType, Integer.class, cardinality(values));
     this.values = values;
   }
 
@@ -67,6 +71,11 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
     ListFieldPartitioner that = (ListFieldPartitioner) o;
     return Objects.equal(this.getName(), that.getName()) &&
         Objects.equal(this.values, that.values);
+  }
+
+  @Override
+  public int compare(Integer o1, Integer o2) {
+    return o1.compareTo(o2);
   }
 
   @Override

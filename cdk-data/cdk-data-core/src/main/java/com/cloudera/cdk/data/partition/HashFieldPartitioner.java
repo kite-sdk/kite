@@ -16,25 +16,25 @@
 package com.cloudera.cdk.data.partition;
 
 import com.cloudera.cdk.data.FieldPartitioner;
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
-import javax.annotation.Nonnull;
 
 import com.google.common.base.Objects;
 
-@SuppressWarnings(value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
+        "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+        "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
     justification="False positive due to generics.")
-public class HashFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
+public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
 
   public HashFieldPartitioner(String name, int buckets) {
-    super(name, Integer.class, buckets);
+    super(name, Object.class, Integer.class, buckets);
   }
 
   public HashFieldPartitioner(String sourceName, String name, int buckets) {
-    super(sourceName, name, Integer.class, buckets);
+    super(sourceName, name, Object.class, Integer.class, buckets);
   }
 
   @Override
-  public Integer apply(@Nonnull S value) {
+  public Integer apply(Object value) {
     return (value.hashCode() & Integer.MAX_VALUE) % getCardinality();
   }
 
@@ -55,6 +55,11 @@ public class HashFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
     return Objects.equal(this.getSourceName(), that.getSourceName()) &&
         Objects.equal(this.getName(), that.getName()) &&
         Objects.equal(this.getCardinality(), that.getCardinality());
+  }
+
+  @Override
+  public int compare(Integer o1, Integer o2) {
+    return o1.compareTo(o2);
   }
 
   @Override

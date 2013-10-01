@@ -20,6 +20,10 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 
 @Beta
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+    value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+    justification="Implement if we intend to use in Serializable objects "
+        + " (e.g., TreeMaps) and use java serialization.")
 public class HourFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 

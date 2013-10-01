@@ -32,6 +32,7 @@ import org.junit.Test;
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
 import static com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository
     .partitionKeyForPath;
+import com.cloudera.cdk.data.impl.Accessor;
 
 public class TestFileSystemDatasetPartitionKeyForPath {
 
@@ -99,7 +100,7 @@ public class TestFileSystemDatasetPartitionKeyForPath {
   public void testValidPartition() throws Exception {
     PartitionKey key = partitionKeyForPath(dataset,
         new Path(testDirectory, "username_part=1").toUri());
-    Assert.assertEquals(partitionStrategy.partitionKey(1), key);
+    Assert.assertEquals(Accessor.getDefault().newPartitionKey(1), key);
   }
 
 }

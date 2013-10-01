@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data.partition;
 
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,14 +23,16 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
 @Beta
-@SuppressWarnings(value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
+        "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+        "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
     justification="False positive due to generics.")
 public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
 
   private final List<String> upperBounds;
 
   public RangeFieldPartitioner(String name, String... upperBounds) {
-    super(name, String.class, upperBounds.length);
+    super(name, String.class, String.class, upperBounds.length);
     this.upperBounds = Arrays.asList(upperBounds);
   }
 
@@ -65,6 +66,11 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
     RangeFieldPartitioner that = (RangeFieldPartitioner) o;
     return Objects.equal(this.getName(), that.getName()) &&
         Objects.equal(this.upperBounds, that.upperBounds);
+  }
+
+  @Override
+  public int compare(String o1, String o2) {
+    return apply(o1).compareTo(apply(o2));
   }
 
   @Override

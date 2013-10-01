@@ -26,11 +26,11 @@ import com.google.common.annotations.Beta;
 @SuppressWarnings("unchecked")
 public class PartitionFunctions {
 
-  public static <S> FieldPartitioner<S, Integer> hash(String name, int buckets) {
+  public static FieldPartitioner<Object, Integer> hash(String name, int buckets) {
     return new HashFieldPartitioner(name, buckets);
   }
 
-  public static <S> FieldPartitioner<S, Integer> hash(String sourceName, String name, int buckets) {
+  public static FieldPartitioner<Object, Integer> hash(String sourceName, String name, int buckets) {
     return new HashFieldPartitioner(sourceName, name, buckets);
   }
 

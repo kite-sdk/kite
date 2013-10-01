@@ -20,10 +20,14 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
 @Beta
-public class IdentityFieldPartitioner<S> extends FieldPartitioner<S, S> {
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+    value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+    justification="Implement if we intend to use in Serializable objects "
+        + " (e.g., TreeMaps) and use java serialization.")
+public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartitioner<S, S> {
 
   public IdentityFieldPartitioner(String name, Class<S> type, int buckets) {
-    super(name, type, buckets);
+    super(name, type, type, buckets);
     if (!(type.equals(Integer.class) || type.equals(Long.class) ||
         type.equals(String.class))) {
       throw new IllegalArgumentException("Type not supported " + type);
@@ -59,6 +63,12 @@ public class IdentityFieldPartitioner<S> extends FieldPartitioner<S, S> {
     IdentityFieldPartitioner that = (IdentityFieldPartitioner) o;
     return Objects.equal(this.getName(), that.getName()) &&
         Objects.equal(this.getCardinality(), that.getCardinality());
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public int compare(S o1, S o2) {
+    return o1.compareTo(o2);
   }
 
   @Override

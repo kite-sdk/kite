@@ -24,7 +24,9 @@ import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.Formats;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.impl.Accessor;
+import com.cloudera.cdk.data.spi.AbstractDataset;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -43,7 +45,7 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class FileSystemDataset implements Dataset {
+class FileSystemDataset extends AbstractDataset {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemDataset.class);
@@ -94,7 +96,7 @@ class FileSystemDataset implements Dataset {
 
   @Override
   @SuppressWarnings("unchecked") // See https://github.com/Parquet/parquet-mr/issues/106
-  public <E> DatasetWriter<E> getWriter() {
+  public <E> DatasetWriter<E> newWriter() {
     logger.debug("Getting writer to dataset:{}", this);
 
     DatasetWriter<E> writer;
@@ -115,7 +117,7 @@ class FileSystemDataset implements Dataset {
   }
 
   @Override
-  public <E> DatasetReader<E> getReader() {
+  public <E> DatasetReader<E> newReader() {
     logger.debug("Getting reader for dataset:{}", this);
 
     List<Path> paths = Lists.newArrayList();
@@ -188,6 +190,15 @@ class FileSystemDataset implements Dataset {
     } catch (IOException e) {
       throw new DatasetException("Unable to locate or drop dataset partition directory " + partitionDirectory, e);
     }
+  }
+
+  @Override
+  public Iterable<View> getCoveringPartitions() {
+    Preconditions.checkState(descriptor.isPartitioned(),
+      "Attempt to get partitions on a non-partitioned dataset (name:%s)",
+      name);
+
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override

@@ -34,6 +34,7 @@ import com.cloudera.cdk.data.partition.RangeFieldPartitioner;
 import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
+import java.util.Comparator;
 
 /**
  * <p>
@@ -57,7 +58,11 @@ import com.google.common.collect.Lists;
  * @see Dataset
  */
 @Immutable
-public class PartitionStrategy {
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+    value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+    justification="Implement if we intend to use in Serializable objects "
+        + " (e.g., TreeMaps) and use java serialization.")
+public class PartitionStrategy implements Comparator<PartitionKey> {
 
   private final List<FieldPartitioner> fieldPartitioners;
 
@@ -138,7 +143,9 @@ public class PartitionStrategy {
    * <p>
    * Null values are not permitted.
    * </p>
+   * @deprecated will be removed in 0.10.0
    */
+  @Deprecated
   public PartitionKey partitionKey(Object... values) {
     return new PartitionKey(values);
   }
@@ -151,9 +158,101 @@ public class PartitionStrategy {
    * This is a convenient way to find the partition that a given entity would be
    * written to, or to find a partition using objects from the entity domain.
    * </p>
+   *
+   * @deprecated will be removed in 0.10.0
    */
+  @Deprecated
   public PartitionKey partitionKeyForEntity(Object entity) {
-    return partitionKeyForEntity(entity, null);
+    return keyFor(entity, null);
+  }
+
+  /**
+   * <p>
+   * Construct a partition key for the given entity, reusing the supplied key if not
+   * null.
+   * </p>
+   * <p>
+   * This is a convenient way to find the partition that a given entity would be
+   * written to, or to find a partition using objects from the entity domain.
+   * </p>
+   *
+   * @deprecated will be removed in 0.10.0
+   */
+  @Deprecated
+  public PartitionKey partitionKeyForEntity(Object entity,
+      @Nullable PartitionKey reuseKey) {
+    return keyFor(entity, reuseKey);
+  }
+
+  /**
+   * Constructs a new {@code PartitionKey} that can be used with this
+   * {@code PartitionStrategy}.
+   *
+   * @return a new {@code PartitionKey}
+   */
+  public PartitionKey newKey() {
+    return new PartitionKey(fieldPartitioners.size());
+  }
+
+  /**
+   * Construct a {@link PartitionKey} for the values in a {@link Marker}.
+   *
+   * Both source and final values may be set.
+   *
+   * @param marker a Marker containing source or final data
+   * @return a PartitionKey for this PartitionStrategy
+   * @throws IllegalArgumentException if the Marker has insufficent data
+   */
+  public PartitionKey keyFor(Marker marker) {
+    return keyFor(marker, null);
+  }
+
+  /**
+   * Construct a {@link PartitionKey} for the values in a {@link Marker}.
+   *
+   * Both source and final values may be set.
+   *
+   * @param marker a Marker containing source or final data
+   * @param reuseKey a PartitionKey instance to reuse, new allocated if null
+   * @return a PartitionKey for this PartitionStrategy
+   * @throws IllegalArgumentException if the Marker has insufficent data
+   */
+  @SuppressWarnings("unchecked")
+  public PartitionKey keyFor(Marker marker, @Nullable PartitionKey reuseKey) {
+    final PartitionKey key = (reuseKey == null ? newKey() : reuseKey);
+
+    for (int i = 0; i < fieldPartitioners.size(); i += 1) {
+      final FieldPartitioner fp = fieldPartitioners.get(i);
+
+      // get data from the Marker; source name is used first
+      final Object fieldValue;
+      if (marker.has(fp.getSourceName())) {
+        fieldValue = fp.apply(
+            marker.getAs(fp.getSourceName(), fp.getSourceType()));
+      } else if (marker.has(fp.getName())) {
+        fieldValue = marker.getAs(fp.getName(), fp.getType());
+      } else {
+        throw new IllegalArgumentException(
+            "Cannot create key, missing data for field:" + fp.getName());
+      }
+
+      key.set(i, fieldValue);
+    }
+
+    return key;
+  }
+
+  /**
+   * <p>
+   * Construct a partition key for the given entity.
+   * </p>
+   * <p>
+   * This is a convenient way to find the partition that a given entity would be
+   * written to, or to find a partition using objects from the entity domain.
+   * </p>
+   */
+  public PartitionKey keyFor(Object entity) {
+    return keyFor(entity, null);
   }
 
   /**
@@ -167,10 +266,10 @@ public class PartitionStrategy {
    * </p>
    */
   @SuppressWarnings("unchecked")
-  public PartitionKey partitionKeyForEntity(Object entity,
+  public PartitionKey keyFor(Object entity,
       @Nullable PartitionKey reuseKey) {
-    PartitionKey key = (reuseKey == null ?
-        new PartitionKey(new Object[fieldPartitioners.size()]) : reuseKey);
+    PartitionKey key = (reuseKey == null ? newKey() : reuseKey);
+
     for (int i = 0; i < fieldPartitioners.size(); i++) {
       FieldPartitioner fp = fieldPartitioners.get(i);
       String name = fp.getSourceName();
@@ -240,6 +339,18 @@ public class PartitionStrategy {
         .add("fieldPartitioners", fieldPartitioners).toString();
   }
 
+  @Override
+  @SuppressWarnings("unchecked")
+  public int compare(PartitionKey o1, PartitionKey o2) {
+    for (int i = 0; i < fieldPartitioners.size(); i += 1) {
+      final int cmp = fieldPartitioners.get(i).compare(o1.get(i), o2.get(i));
+      if (cmp != 0) {
+        return cmp;
+      }
+    }
+    return 0;
+  }
+
   /**
    * A fluent builder to aid in the construction of {@link PartitionStrategy}s.
    */
@@ -250,7 +361,7 @@ public class PartitionStrategy {
     /**
      * Configure a hash partitioner with the specified number of {@code buckets}
      * .
-     * 
+     *
      * @param name
      *          The entity field name from which to get values to be
      *          partitioned.

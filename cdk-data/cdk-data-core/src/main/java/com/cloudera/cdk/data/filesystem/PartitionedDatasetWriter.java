@@ -96,7 +96,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to write to a writer in state:%s", state);
 
-    key = partitionStrategy.partitionKeyForEntity(entity, key);
+    key = partitionStrategy.keyFor(entity, key);
     DatasetWriter<E> writer;
 
     try {
@@ -175,7 +175,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
     @Override
     public DatasetWriter<E> load(PartitionKey key) throws Exception {
       Dataset partition = dataset.getPartition(key, true);
-      DatasetWriter<E> writer = partition.getWriter();
+      DatasetWriter<E> writer = partition.newWriter();
 
       writer.open();
       return writer;

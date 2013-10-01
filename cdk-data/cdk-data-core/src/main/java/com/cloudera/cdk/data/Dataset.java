@@ -43,7 +43,7 @@ import javax.annotation.concurrent.Immutable;
  * @see Schema
  */
 @Immutable
-public interface Dataset {
+public interface Dataset extends View {
 
   /**
    * Get the name of a {@code Dataset}. No guarantees about the format of this
@@ -92,7 +92,10 @@ public interface Dataset {
    * </p>
    *
    * @throws DatasetException
+   *
+   * @deprecated will be removed in 0.10.0; use {@link #newWriter()}
    */
+  @Deprecated
   <E> DatasetWriter<E> getWriter();
 
   /**
@@ -109,7 +112,10 @@ public interface Dataset {
    * </p>
    *
    * @throws DatasetException
+   *
+   * @deprecated will be removed in 0.10.0; use {@link #newReader()}
    */
+  @Deprecated
   <E> DatasetReader<E> getReader();
 
   /**

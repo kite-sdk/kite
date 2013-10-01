@@ -16,13 +16,14 @@
 package com.cloudera.cdk.data.partition;
 
 import com.google.common.annotations.Beta;
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import javax.annotation.Nonnull;
 
 @Beta
-@SuppressWarnings(value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
+        "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+        "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
     justification="False positive due to generics.")
 public class MonthFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;

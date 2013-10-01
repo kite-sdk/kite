@@ -22,12 +22,16 @@ import com.google.common.base.Objects;
 import com.google.common.primitives.Ints;
 
 @Beta
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+    value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+    justification="Implement if we intend to use in Serializable objects "
+        + " (e.g., TreeMaps) and use java serialization.")
 public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer> {
 
   private final int[] upperBounds;
 
   public IntRangeFieldPartitioner(String name, int... upperBounds) {
-    super(name, Integer.class, upperBounds.length);
+    super(name, Integer.class, Integer.class, upperBounds.length);
     this.upperBounds = upperBounds;
   }
 
@@ -58,6 +62,11 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
     IntRangeFieldPartitioner that = (IntRangeFieldPartitioner) o;
     return Objects.equal(this.getName(), that.getName()) &&
         Objects.equal(Ints.asList(this.upperBounds), Ints.asList(that.upperBounds));
+  }
+
+  @Override
+  public int compare(Integer o1, Integer o2) {
+    return apply(o1).compareTo(apply(o2));
   }
 
   @Override
