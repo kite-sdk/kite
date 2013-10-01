@@ -67,7 +67,7 @@ public abstract class AbstractCommand implements Command {
     this.child = child;
     this.context = context;
     Preconditions.checkArgument(builder.getNames().size() > 0);
-    this.name = builder.getNames().iterator().next();
+    this.name = "morphline." + builder.getNames().iterator().next();
     Preconditions.checkNotNull(name);
     this.configs = new Configs();
     this.numProcessCallsMeter = getMeter(Metrics.NUM_PROCESS_CALLS);
@@ -84,7 +84,7 @@ public abstract class AbstractCommand implements Command {
     this.parent = parent;
     this.child = child;
     this.context = context;
-    this.name = getShortClassName(getClass());
+    this.name = "morphline." + getShortClassName(getClass());
     this.configs = new Configs();
     this.numProcessCallsMeter = getMeter(Metrics.NUM_PROCESS_CALLS);
     this.numNotifyCallsMeter = getMeter(Metrics.NUM_NOTIFY_CALLS);    
