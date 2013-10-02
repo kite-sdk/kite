@@ -55,12 +55,12 @@ public class TestCombinedLogFormatConverter {
     Path root = new Path(datasetRoot);
     FileSystem fs = root.getFileSystem( new Configuration());
     DatasetRepository repo = new FileSystemDatasetRepository(fs, root);
-    Dataset dataset = repo.get(datasetName);
+    Dataset dataset = repo.load(datasetName);
     DatasetReader<GenericRecord> reader = dataset.getReader();
     try {
       reader.open();
       Assert.assertTrue(reader.hasNext());
-      GenericRecord first = reader.read();
+      GenericRecord first = reader.next();
 
       Assert.assertEquals("ip1", first.get("host"));
       Assert.assertNull(first.get("rfc931_identity"));
