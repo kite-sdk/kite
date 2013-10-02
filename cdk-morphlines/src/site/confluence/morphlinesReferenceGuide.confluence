@@ -71,6 +71,7 @@ h3. cdk\-morphlines\-saxon
 - [xslt|#xslt]
 
 h3. cdk\-morphlines\-metrics\-servlets
+- [registerJVMMetrics|#registerJVMMetrics]
 - [startReportingMetricsToHTTP|#startReportingMetricsToHTTP]
 
 h3. cdk\-morphlines\-solr\-core
@@ -1882,6 +1883,22 @@ For more background, see resources such as the [XSLT Tutorial|http://www.w3schoo
 
 h1. cdk\-morphlines\-metrics\-servlets
 
+h2. registerJVMMetrics
+
+The {{registerJVMMetrics}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-metrics-servlets/src/main/java/com/cloudera/cdk/morphline/metrics/servlets/RegisterJVMMetricsBuilder.java]) registers metrics that are related to the Java Virtual Machine with the
+MorphlineContext of the morphline. For example, this includes metrics for garbage collection events, buffer pools, threads and thread deadlocks.
+
+Often, the {{registerJVMMetrics}} command is combined with commands such as 
+[startReportingMetricsToHTTP|#startReportingMetricsToHTTP] or 
+[startReportingMetricsToJMX|#startReportingMetricsToJMX] or 
+[startReportingMetricsToSLF4J|#startReportingMetricsToSLF4J] or
+[startReportingMetricsToCSV|#startReportingMetricsToCSV].
+
+Example usage:
+{code}
+registerJVMMetrics {}
+{code}
+
 h2. startReportingMetricsToHTTP
 
 *Status: EXPERIMENTAL*
@@ -1889,6 +1906,8 @@ h2. startReportingMetricsToHTTP
 The {{startReportingMetricsToHTTP}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-metrics-servlets/src/main/java/com/cloudera/cdk/morphline/metrics/servlets/StartReportingMetricsToHTTPBuilder.java]) exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by [Jetty|http://en.wikipedia.org/wiki/Jetty_(web_server)], using the [AdminServlet|http://metrics.codahale.com/manual/servlets/].
 
 On startup, a Jetty HTTP server is created that listens on a configurable port. If an HTTP server isn't required for your use case, and reporting metrics to JMX (or SLF4J or CSV) is sufficient, consider command such as [startReportingMetricsToJMX|#startReportingMetricsToJMX].
+
+Often, the {{startReportingMetricsToHTTP}} command is combined with the [registerJVMMetrics|#registerJVMMetrics] command.
 
 The following HTTP URLs are provided:
 

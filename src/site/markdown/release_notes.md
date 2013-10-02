@@ -11,6 +11,9 @@ Version TBD has the following notable changes:
 
 * Morphlines Library
     * Added option for commands to register health checks (not just metrics) with the MorphlineContext.
+    * Added `registerJVMMetrics` command that registers metrics that are related to the Java Virtual Machine 
+      with the MorphlineContext. For example, this includes metrics for garbage collection events, 
+      buffer pools, threads and thread deadlocks.
     * Added morphline commands to publish the metrics of all morphline commands to JMX, SLF4J and CSV files. 
       The new commands are: `startReportingMetricsToJMX`, `startReportingMetricsToSLF4J` and `startReportingMetricsToCSV`.
     * Added EXPERIMENTAL `cdk-morphlines-metrics-servlets` maven module with new `startReportingMetricsToHTTP` command that 

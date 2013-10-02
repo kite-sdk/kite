@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.morphline.metrics.servlets;
 
-import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,15 +30,8 @@ import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Notifications;
-import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.MetricSet;
 import com.codahale.metrics.health.HealthCheckRegistry;
-import com.codahale.metrics.health.jvm.ThreadDeadlockHealthCheck;
-import com.codahale.metrics.jvm.BufferPoolMetricSet;
-import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
-import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
 import com.codahale.metrics.servlets.AdminServlet;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
@@ -77,23 +69,11 @@ public final class StartReportingMetricsToHTTPBuilder implements CommandBuilder 
       super(builder, config, parent, child, context);      
 
       this.port = getConfigs().getInt(config, "port", 8080);
-      boolean showJvmMetrics = getConfigs().getBoolean(config, "showJvmMetrics", true);
       validateArguments();
 
       synchronized (SERVERS) {
         Server server = SERVERS.get(port);
         if (server == null) {
-          if (showJvmMetrics) {
-            MetricRegistry registry = context.getMetricRegistry();
-            BufferPoolMetricSet bufferPoolMetrics = new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer());
-            registerAll("jvm.buffers", bufferPoolMetrics, registry);
-            registerAll("jvm.gc", new GarbageCollectorMetricSet(), registry);
-            registerAll("jvm.memory", new MemoryUsageGaugeSet(), registry);
-            registerAll("jvm.threads", new ThreadStatesGaugeSet(), registry);
-            //registerAll("jvm.fileDescriptorUsageRatio", new FileDescriptorRatioGauge(), registry);
-            context.getHealthCheckRegistry().register("deadlocks", new ThreadDeadlockHealthCheck());
-          }
-
           ServletContextHandler servletContextHandler = new ServletContextHandler();
           servletContextHandler.addServlet(AdminServlet.class, "/*");
           
@@ -143,21 +123,6 @@ public final class StartReportingMetricsToHTTPBuilder implements CommandBuilder 
         }
       }
       super.doNotify(notification);
-    }
-    
-    // Same method as registry.registerAll(prefix, metrics) except that it avoids an exception 
-    // on registering the same metric more than once
-    private void registerAll(String prefix, MetricSet metrics, MetricRegistry registry) {
-      for (Map.Entry<String, Metric> entry : metrics.getMetrics().entrySet()) {
-        String name = MetricRegistry.name(prefix, entry.getKey());
-        if (entry.getValue() instanceof MetricSet) {
-          registerAll(name, (MetricSet) entry.getValue(), registry);
-        } else {
-          if (!registry.getMetrics().containsKey(name)) { // this check is the diff
-            registry.register(name, entry.getValue());
-          }
-        }
-      } 
     }
     
   }
