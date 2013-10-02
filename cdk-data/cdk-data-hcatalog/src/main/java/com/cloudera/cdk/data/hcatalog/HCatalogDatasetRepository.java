@@ -18,12 +18,12 @@ package com.cloudera.cdk.data.hcatalog;
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepository;
-import com.cloudera.cdk.data.DatasetRepositoryException;
+import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import com.cloudera.cdk.data.spi.AbstractDatasetRepository;
 import com.google.common.base.Supplier;
-import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -53,113 +53,39 @@ import org.apache.hadoop.fs.Path;
  */
 public class HCatalogDatasetRepository extends AbstractDatasetRepository {
 
-  private final boolean managed;
-
-  private final HCatalogMetadataProvider metadataProvider;
-  private FileSystemDatasetRepository fileSystemDatasetRepository;
+  private final MetadataProvider metadataProvider;
+  private final FileSystemDatasetRepository fsRepository;
 
   /**
-   * <p>
-   * Create an HCatalog dataset repository with managed tables. The location of the
-   * data directory is determined by the setting of
-   * <code>hive.metastore.warehouse.dir</code>, read from <i>hive-site.xml</i> on the
-   * classpath, or if no such file is found then the default for this property.
-   * </p>
+   * Create an HCatalog dataset repository with managed tables.
    */
-  public HCatalogDatasetRepository() {
-    this.managed = true;
-    this.metadataProvider = new HCatalogMetadataProvider(managed);
-  }
-
-  /**
-   * <p>
-   * Create an HCatalog dataset repository with external tables.
-   * </p>
-   * @param uri the root directory for datasets
-   * @since 0.3.0
-   */
-  public HCatalogDatasetRepository(URI uri) {
-    this.managed = false; // TODO depends
-    this.metadataProvider = new HCatalogMetadataProvider(managed);
-
-    this.fileSystemDatasetRepository = new FileSystemDatasetRepository.Builder()
-        .rootDirectory(uri).metadataProvider(metadataProvider).get();
-  }
-
-  /**
-   * <p>
-   * Create an HCatalog dataset repository with external tables.
-   * </p>
-   * @param fileSystem    the filesystem to store datasets in
-   * @param rootDirectory the root directory for datasets
-   */
-  public HCatalogDatasetRepository(FileSystem fileSystem, Path rootDirectory) {
-    this(fileSystem, rootDirectory, fileSystem.getConf());
-  }
-
-  HCatalogDatasetRepository(FileSystem fileSystem, Path rootDirectory,
-      Configuration conf) {
-    this.managed = false;
-    this.metadataProvider = new HCatalogMetadataProvider(managed, conf);
-    this.fileSystemDatasetRepository = new FileSystemDatasetRepository(fileSystem,
-        rootDirectory, metadataProvider);
+  HCatalogDatasetRepository(Configuration conf, MetadataProvider provider) {
+    this.metadataProvider = provider;
+    this.fsRepository = new FileSystemDatasetRepository(conf, metadataProvider);
   }
 
   @Override
   public Dataset create(String name, DatasetDescriptor descriptor) {
-    if (managed) {
-      // HCatalog handles data directory creation
-      metadataProvider.create(name, descriptor);
-      if (fileSystemDatasetRepository == null) {
-        fileSystemDatasetRepository = new FileSystemDatasetRepository(
-            metadataProvider.getFileSystem(),
-            /* unused */ metadataProvider.getDataDirectory().getParent(),
-            metadataProvider) {
-          @Override
-          protected Path pathForDataset(String name) {
-            return metadataProvider.getDataDirectory();
-          }
-        };
-      }
-      return fileSystemDatasetRepository.load(name);
-    } else {
-      metadataProvider.setFileSystem(fileSystemDatasetRepository.getFileSystem());
-      Path dataDir = new Path(fileSystemDatasetRepository.getRootDirectory(), name);
-      metadataProvider.setDataDirectory(dataDir);
-      return fileSystemDatasetRepository.create(name, descriptor);
-    }
+    // avoids calling fsRepository.create, which creates the data path
+    metadataProvider.create(name, descriptor);
+    return fsRepository.load(name);
   }
 
   @Override
   public Dataset update(String name, DatasetDescriptor descriptor) {
-    throw new DatasetRepositoryException("Descriptor updates are not supported.");
+    throw new UnsupportedOperationException(
+        "Descriptor updates are not supported.");
   }
 
   @Override
   public Dataset load(String name) {
-    if (managed && fileSystemDatasetRepository == null) {
-      metadataProvider.load(name);
-      fileSystemDatasetRepository = new FileSystemDatasetRepository(
-          metadataProvider.getFileSystem(),
-            /* unused */ metadataProvider.getDataDirectory().getParent(),
-          metadataProvider) {
-        @Override
-        protected Path pathForDataset(String name) {
-          return metadataProvider.getDataDirectory();
-        }
-      };
-    }
-    return fileSystemDatasetRepository.load(name);
+    return fsRepository.load(name);
   }
 
   @Override
   public boolean delete(String name) {
-    if (managed) {
-      // HCatalog handles data directory deletion
-      return metadataProvider.delete(name);
-    } else {
-      return fileSystemDatasetRepository.delete(name);
-    }
+    // avoids calling fsRepository.delete, which deletes the data path
+    return metadataProvider.delete(name);
   }
 
   @Override
@@ -177,7 +103,7 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
    * instances.
    * @since 0.3.0
    */
-  public static class Builder implements Supplier<HCatalogDatasetRepository> {
+  public static class Builder implements Supplier<DatasetRepository> {
 
     private FileSystem fileSystem;
     private Path rootDirectory;
@@ -200,10 +126,29 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
     }
 
     /**
-     * The {@link FileSystem} to store dataset files in. Optional. If not
-     * specified, the default filesystem will be used.
+     * The root directory for metadata and dataset files.
+     *
+     * @param uri a String to parse as a URI
+     * @return this Builder for method chaining.
+     * @throws URISyntaxException
+     *
+     * @since 0.8.0
      */
+    public Builder rootDirectory(String uri) throws URISyntaxException {
+      this.rootDirectory = new Path(new URI(uri));
+      return this;
+    }
+
+    /**
+     * The {@link FileSystem} to store dataset files in (ignored).
+     *
+     * Calls to this method are ignored because Hive requires using HDFS.
+     *
+     * @deprecated will be removed in 0.9.0
+     */
+    @Deprecated
     public Builder fileSystem(FileSystem fileSystem) {
+      // This method will be removed because a Hive-compatible FS must be used
       this.fileSystem = fileSystem;
       return this;
     }
@@ -218,28 +163,35 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
     }
 
     @Override
-    public HCatalogDatasetRepository get() {
-
-      if (rootDirectory == null) {
-        return new HCatalogDatasetRepository();
-      }
-
-      if (fileSystem == null) {
-        if (configuration == null) {
-          configuration = new Configuration();
-        }
-        try {
-          fileSystem = rootDirectory.getFileSystem(configuration);
-        } catch (IOException e) {
-          throw new DatasetRepositoryException("Problem creating " +
-              "HCatalogDatasetRepository.", e);
-        }
-      }
+    public DatasetRepository get() {
 
       if (configuration == null) {
-        return new HCatalogDatasetRepository(fileSystem, rootDirectory);
+        this.configuration = new Configuration();
       }
-      return new HCatalogDatasetRepository(fileSystem, rootDirectory, configuration);
+
+      if (rootDirectory != null) {
+        // external
+        if (fileSystem != null) {
+          // this will throw IllegalArgumentException if rootDirectory's FS
+          // doesn't match the fileSystem that is set.
+          HCatalogMetadataProvider metadataProvider =
+              new HCatalogExternalMetadataProvider(
+                  configuration, fileSystem.makeQualified(rootDirectory));
+          return new FileSystemDatasetRepository(
+              configuration, metadataProvider);
+        } else {
+          HCatalogMetadataProvider metadataProvider =
+              new HCatalogExternalMetadataProvider(
+                  configuration, rootDirectory);
+          return new FileSystemDatasetRepository(
+              configuration, metadataProvider);
+        }
+      } else {
+        // managed
+        HCatalogMetadataProvider metadataProvider =
+            new HCatalogManagedMetadataProvider(configuration);
+        return new HCatalogDatasetRepository(configuration, metadataProvider);
+      }
     }
   }
 }

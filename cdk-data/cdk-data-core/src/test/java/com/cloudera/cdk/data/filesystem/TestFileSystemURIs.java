@@ -18,9 +18,9 @@ package com.cloudera.cdk.data.filesystem;
 import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetRepositoryException;
+import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MiniDFSTest;
 import com.cloudera.cdk.data.filesystem.impl.Loader;
-import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.junit.Assert;
@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.junit.BeforeClass;
 
 public class TestFileSystemURIs extends MiniDFSTest {
@@ -43,19 +44,29 @@ public class TestFileSystemURIs extends MiniDFSTest {
 
     // We only do the deeper implementation checks one per combination.
     Assert.assertNotNull("Received a repository", repository);
-    Assert.assertTrue("Repo is a FileSystem repo", repository instanceof FileSystemDatasetRepository);
-    Assert.assertTrue("FileSystem is a LocalFileSystem",
-      ((FileSystemDatasetRepository) repository).getFileSystem() instanceof LocalFileSystem);
+    Assert.assertTrue("Repo is a FileSystem repo",
+        repository instanceof FileSystemDatasetRepository);
+    MetadataProvider provider = ((FileSystemDatasetRepository) repository)
+        .getMetadataProvider();
     Assert.assertTrue("Repo is using a FileSystemMetadataProvider",
-      ((FileSystemDatasetRepository) repository).getMetadataProvider() instanceof FileSystemMetadataProvider);
-    Assert.assertEquals(new Path("target/dsr-repo-test"), ((FileSystemDatasetRepository) repository).getRootDirectory());
+        provider instanceof FileSystemMetadataProvider);
+    FileSystemMetadataProvider fsProvider = (FileSystemMetadataProvider) provider;
+    Assert.assertTrue("FileSystem is a LocalFileSystem",
+        fsProvider.getFileSytem() instanceof LocalFileSystem);
+    Path expected = fsProvider.getFileSytem().makeQualified(
+        new Path("target/dsr-repo-test"));
+    Assert.assertEquals("Root directory should be the correct qualified path",
+        expected, fsProvider.getRootDirectory());
   }
 
   @Test
   public void testLocalAbsolute() throws URISyntaxException {
     DatasetRepository repository = DatasetRepositories.connect(new URI("dsr:file:/tmp/dsr-repo-test"));
 
-    Assert.assertEquals(new Path("/tmp/dsr-repo-test"), ((FileSystemDatasetRepository) repository).getRootDirectory());
+    FileSystemMetadataProvider provider = (FileSystemMetadataProvider)
+        ((FileSystemDatasetRepository) repository).getMetadataProvider();
+    Assert.assertEquals("Root directory should be the correct qualified path",
+        new Path("file:/tmp/dsr-repo-test"), provider.getRootDirectory());
   }
 
   @Test(expected = DatasetRepositoryException.class)
@@ -73,12 +84,19 @@ public class TestFileSystemURIs extends MiniDFSTest {
 
     // We only do the deeper implementation checks one per combination.
     Assert.assertNotNull("Received a repository", repository);
-    Assert.assertTrue("Repo is a FileSystem repo", repository instanceof FileSystemDatasetRepository);
-    Assert.assertTrue("FileSystem is a DistributedFileSystem",
-      ((FileSystemDatasetRepository) repository).getFileSystem() instanceof DistributedFileSystem);
+    Assert.assertTrue("Repo is a FileSystem repo",
+        repository instanceof FileSystemDatasetRepository);
+    MetadataProvider provider = ((FileSystemDatasetRepository) repository)
+        .getMetadataProvider();
     Assert.assertTrue("Repo is using a FileSystemMetadataProvider",
-      ((FileSystemDatasetRepository) repository).getMetadataProvider() instanceof FileSystemMetadataProvider);
-    Assert.assertEquals(new Path("/tmp/dsr-repo-test"), ((FileSystemDatasetRepository) repository).getRootDirectory());
+        provider instanceof FileSystemMetadataProvider);
+    FileSystemMetadataProvider fsProvider = (FileSystemMetadataProvider) provider;
+    Assert.assertTrue("FileSystem is a DistributedFileSystem",
+      fsProvider.getFileSytem() instanceof DistributedFileSystem);
+    Path expected = fsProvider.getFileSytem().makeQualified(
+        new Path("/tmp/dsr-repo-test"));
+    Assert.assertEquals("Root directory should be the correct qualified path",
+        expected, fsProvider.getRootDirectory());
   }
 
 }

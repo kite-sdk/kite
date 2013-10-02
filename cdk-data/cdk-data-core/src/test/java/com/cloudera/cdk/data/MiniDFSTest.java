@@ -26,9 +26,14 @@ import org.junit.BeforeClass;
  * Provides setup/teardown of a MiniDFSCluster for tests that need one.
  */
 public class MiniDFSTest {
+  private static Configuration conf = null;
   private static MiniDFSCluster cluster = null;
   private static FileSystem dfs = null;
   private static FileSystem lfs = null;
+
+  protected static Configuration getConfiguration() {
+    return conf;
+  }
 
   protected static FileSystem getDFS() {
     return dfs;
@@ -40,16 +45,19 @@ public class MiniDFSTest {
 
   @BeforeClass
   public static void setupFS() throws IOException {
-    final Configuration conf = new Configuration();
-    cluster = new MiniDFSCluster.Builder(conf).build();
-    dfs = cluster.getFileSystem();
-    lfs = FileSystem.getLocal(conf);
+    if (cluster == null) {
+      cluster = new MiniDFSCluster.Builder(new Configuration()).build();
+      dfs = cluster.getFileSystem();
+      conf = new Configuration(dfs.getConf());
+      lfs = FileSystem.getLocal(conf);
+    }
   }
 
   @AfterClass
   public static void teardownFS() throws IOException {
     dfs = null;
     lfs = null;
+    conf = null;
     if (cluster != null) {
       cluster.shutdown();
       cluster = null;

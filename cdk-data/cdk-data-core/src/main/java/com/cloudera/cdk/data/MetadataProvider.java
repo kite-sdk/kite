@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data;
 
+import java.util.Collection;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -118,4 +119,17 @@ public interface MetadataProvider {
    * @since 0.7.0
    */
   boolean exists(String name);
+
+
+  /**
+   * List the names of the {@link Dataset}s managed by this
+   * {@code MetadataProvider}. If there is not at least one {@code Dataset}, an
+   * empty list will be returned.
+   *
+   * @return a {@link Collection} of Dataset names ({@link String}s)
+   * @throws MetadataProviderException
+   *
+   * @since 0.8.0
+   */
+  Collection<String> list();
 }

@@ -15,222 +15,147 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
+import com.cloudera.cdk.data.TestDatasetRepositories;
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
-import com.cloudera.cdk.data.DatasetExistsException;
+import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.Formats;
+import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.google.common.collect.Lists;
-import com.google.common.collect.ImmutableMultiset;
-import com.google.common.io.Files;
 import java.io.IOException;
+import java.net.URI;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.codehaus.jackson.node.TextNode;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
-import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.datasetSize;
+public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
-public class TestFileSystemDatasetRepository {
-
-  private FileSystem fileSystem;
-  private Path testDirectory;
-  private FileSystemDatasetRepository repo;
-  private Schema testSchema;
-
-  @Before
-  public void setUp() throws IOException {
-    fileSystem = FileSystem.get(new Configuration());
-    testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    repo = new FileSystemDatasetRepository(fileSystem, testDirectory);
-
-    testSchema = Schema.createRecord("Test", "Test record schema",
-        "com.cloudera.cdk.data.filesystem", false);
-    testSchema.setFields(Lists.newArrayList(new Field("name", Schema
-        .create(Type.STRING), null, null)));
+  public TestFileSystemDatasetRepository(boolean distributed) {
+    super(distributed);
   }
 
-  @After
-  public void tearDown() throws IOException {
-    fileSystem.delete(testDirectory, true);
+  @Override
+  public DatasetRepository newRepo(MetadataProvider provider) {
+    // this purposely does not set the Configuration to test that the code
+    // relies on filesystem URIs set in the DatasetDescriptor.
+    return new FileSystemDatasetRepository.Builder()
+        .metadataProvider(provider)
+        .get();
   }
 
   @Test
-  public void testCreate() throws IOException {
-    Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
-        .schema(testSchema).get());
+  public void testCreatePath() throws IOException {
+    Dataset created = repo.create(NAME, testDescriptor);
 
-    Assert.assertEquals("Dataset name is propagated", "test1",
-        dataset.getName());
-    Assert.assertEquals("Dataset schema is propagated", testSchema, dataset
-        .getDescriptor().getSchema());
-    Assert.assertTrue("Dataset data directory exists",
-        fileSystem.exists(new Path(testDirectory, "test1/")));
-    Assert.assertTrue("Dataset properties file exists", fileSystem
-        .exists(new Path(testDirectory, "test1/.metadata/descriptor.properties")));
-    Assert.assertTrue("Dataset schema file exists",
-        fileSystem.exists(new Path(testDirectory, "test1/.metadata/schema.avsc")));
-  }
-
-  @Test(expected = DatasetExistsException.class)
-  public void testAlreadyExists() {
-    // TODO: move this into a TestDatasetRepositoryCommon class
-    try {
-      Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
-          .schema(testSchema).get());
-      // the first one should succeed
-    } catch (DatasetExistsException ex) {
-      Assert.fail("Initial creation failed");
-    }
-
-    // create the same dataset again, this time it should fail
-    Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
-        .schema(testSchema).get());
+    URI location = created.getDescriptor().getLocation();
+    Assert.assertNotNull(
+        "FileSystemDatasetRepository should return descriptor locations",
+        location);
+    Assert.assertTrue("Dataset data directory:" + location + " should exist",
+        fileSystem.exists(new Path(location)));
   }
 
   @Test
-  public void testList() {
-    Assert.assertEquals(ImmutableMultiset.of(),
-        ImmutableMultiset.copyOf(repo.list()));
+  public void testLoadNewHasZeroSize() {
+    ensureCreated();
 
-    repo.create("test1", new DatasetDescriptor.Builder()
-        .schema(testSchema).get());
-    Assert.assertEquals(ImmutableMultiset.of("test1"),
-        ImmutableMultiset.copyOf(repo.list()));
-
-    repo.create("test2", new DatasetDescriptor.Builder()
-        .schema(testSchema).get());
-    Assert.assertEquals(ImmutableMultiset.of("test1", "test2"),
-        ImmutableMultiset.copyOf(repo.list()));
-
-    repo.create("test3", new DatasetDescriptor.Builder()
-        .schema(testSchema).get());
-    Assert.assertEquals(ImmutableMultiset.of("test1", "test2", "test3"),
-        ImmutableMultiset.copyOf(repo.list()));
-
-    repo.delete("test2");
-    Assert.assertEquals(ImmutableMultiset.of("test1", "test3"),
-        ImmutableMultiset.copyOf(repo.list()));
-
-    repo.delete("test3");
-    Assert.assertEquals(ImmutableMultiset.of("test1"),
-        ImmutableMultiset.copyOf(repo.list()));
-
-    repo.delete("test1");
-    Assert.assertEquals(ImmutableMultiset.of(),
-        ImmutableMultiset.copyOf(repo.list()));
-  }
-
-  @Test
-  public void testExists() {
-    Assert.assertFalse(repo.exists("test1"));
-
-    repo.create("test1", new DatasetDescriptor.Builder()
-        .schema(testSchema).get());
-    Assert.assertTrue(repo.exists("test1"));
-
-    repo.delete("test1");
-    Assert.assertFalse(repo.exists("test1"));
-  }
-
-  @Test
-  public void testCreatePartitioned() throws IOException {
-    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
-        .schema(testSchema)
-        .partitionStrategy(
-            new PartitionStrategy.Builder().hash("name", 3).get()).get();
-
-    Dataset dataset = repo.create("test2", descriptor);
-
-    Assert.assertEquals("Dataset name is propagated", "test2",
-        dataset.getName());
-    Assert.assertEquals("Dataset schema is propagated", testSchema, dataset
-        .getDescriptor().getSchema());
-    Assert.assertTrue("Dataset data directory exists",
-        fileSystem.exists(new Path(testDirectory, "test2/")));
-    Assert.assertTrue("Dataset properties file exists", fileSystem
-        .exists(new Path(testDirectory, "test2/.metadata/descriptor.properties")));
-    Assert.assertTrue("Dataset schema file exists",
-        fileSystem.exists(new Path(testDirectory, "test2/.metadata/schema.avsc")));
-  }
-
-  @Test
-  public void testLoad() throws IOException {
-    // Just invoke the creation test so we have a dataset to test with.
-    testCreate();
-
-    Dataset dataset = repo.load("test1");
-
-    Assert.assertNotNull("Dataset is loaded and produced", dataset);
-    Assert.assertEquals("Dataset name is propagated", "test1",
-        dataset.getName());
-    Assert.assertEquals("Dataset schema is loaded", testSchema, dataset
-        .getDescriptor().getSchema());
+    Dataset dataset = repo.load(NAME);
 
     /*
      * We perform a read test to make sure only data files are encountered
      * during a read.
      */
-    Assert.assertEquals(0, datasetSize(dataset));
+    Assert.assertEquals(0, DatasetTestUtilities.datasetSize(dataset));
   }
 
   @Test
-  public void testDelete() throws IOException {
-    // Just invoke the creation test so we have a dataset to test with.
-    testCreate();
+  public void testUpdateFailsWithFormatChange() {
+    Dataset dataset = repo.create(NAME,
+        new DatasetDescriptor.Builder(testDescriptor)
+            .format(Formats.AVRO)
+            .get());
 
-    boolean result = repo.delete("test1");
-    Assert.assertTrue("Delete dataset should return true", result);
+    DatasetDescriptor changed =
+        new DatasetDescriptor.Builder(dataset.getDescriptor())
+        .format(Formats.PARQUET)
+        .get();
 
-    result = repo.delete("test1");
-    Assert.assertFalse("Delete nonexistent dataset should return false", result);
-  }
-
-  @Test
-  public void testUpdateFailsWithFormatChange() throws IOException {
-    Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
-        .schema(testSchema).format(Formats.AVRO).get());
     try {
-      repo.update("test1", new DatasetDescriptor.Builder().schema(testSchema).format
-          (Formats.PARQUET).get());
+      repo.update(NAME, changed);
       Assert.fail("Should fail due to format change");
     } catch (DatasetRepositoryException e) {
       // expected
     }
-    Assert.assertEquals(Formats.AVRO, repo.load("test1").getDescriptor().getFormat());
+
+    Assert.assertEquals(
+        Formats.AVRO, repo.load(NAME).getDescriptor().getFormat());
   }
 
   @Test
-  public void testUpdateFailsWithPartitionStrategyChange() throws IOException {
-    PartitionStrategy ps = new PartitionStrategy.Builder()
-        .hash("username", 2).get();
-    Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
-        .schema(testSchema).partitionStrategy(ps).get());
+  public void testUpdateFailsWithPartitionStrategyChange() {
+    PartitionStrategy ps1 = new PartitionStrategy.Builder()
+        .hash("username", 2)
+        .get();
+    PartitionStrategy ps2 = new PartitionStrategy.Builder()
+        .hash("username", 2)
+        .hash("email", 3)
+        .get();
+
+    Dataset dataset = repo.create(NAME,
+        new DatasetDescriptor.Builder(testDescriptor)
+            .partitionStrategy(ps1)
+            .get());
+
+    DatasetDescriptor changed =
+        new DatasetDescriptor.Builder(dataset.getDescriptor())
+            .partitionStrategy(ps2)
+            .get();
+
     try {
-      repo.update("test1", new DatasetDescriptor.Builder()
-          .schema(testSchema).partitionStrategy(new PartitionStrategy.Builder()
-              .hash("username", 2).hash("email", 3).get()).get());
+      repo.update(NAME, changed);
       Assert.fail("Should fail due to partition strategy change");
     } catch (DatasetRepositoryException e) {
       // expected
     }
-    Assert.assertEquals(ps, repo.load("test1").getDescriptor().getPartitionStrategy());
+
+    Assert.assertEquals(
+        ps1, repo.load(NAME).getDescriptor().getPartitionStrategy());
   }
 
   @Test
-  public void testUpdate() throws IOException {
-    Dataset dataset = repo.create("test1", new DatasetDescriptor.Builder()
+  public void testUpdateFailsWithLocationChange() {
+    ensureCreated();
+    Dataset dataset = repo.load(NAME);
+    URI location = dataset.getDescriptor().getLocation();
+
+    DatasetDescriptor changed =
+        new DatasetDescriptor.Builder(dataset.getDescriptor())
+            .location(new Path(testDirectory, "newDataLocation").toUri())
+            .get();
+
+    try {
+      repo.update(NAME, changed);
+      Assert.fail("Should fail due to data location change");
+    } catch (DatasetRepositoryException ex) {
+      // expected
+    }
+
+    Assert.assertEquals(
+        location, repo.load(NAME).getDescriptor().getLocation());
+  }
+
+  @Test
+  public void testUpdateFailsWithIncompatibleSchemaChange() {
+    Dataset dataset = repo.create(NAME, new DatasetDescriptor.Builder()
         .schema(testSchema).get());
 
-    Assert.assertEquals("Dataset name is propagated", "test1",
+    Assert.assertEquals("Dataset name is propagated", NAME,
         dataset.getName());
     Assert.assertEquals("Dataset schema is propagated", testSchema, dataset
         .getDescriptor().getSchema());
@@ -241,16 +166,21 @@ public class TestFileSystemDatasetRepository {
         new Field("name", Schema.create(Type.STRING), null, null),
         new Field("email", Schema.create(Type.STRING), null, null) // incompatible - no default
     ));
-
     try {
-      repo.update("test1", new DatasetDescriptor.Builder().schema(testSchemaV2).get());
+      repo.update(NAME, new DatasetDescriptor.Builder().schema(testSchemaV2).get());
       Assert.fail("Should fail due to incompatible update");
     } catch (DatasetRepositoryException e) {
       // expected
     }
-    dataset = repo.load("test1");
+    dataset = repo.load(NAME);
     Assert.assertEquals("Dataset schema is unchanged", testSchema, dataset
         .getDescriptor().getSchema());
+  }
+
+  @Test
+  public void testUpdateSuccessfulWithCompatibleSchemaChange() {
+    Dataset dataset = repo.create(NAME, new DatasetDescriptor.Builder()
+        .schema(testSchema).get());
 
     Schema testSchemaV3 = Schema.createRecord("Test", "Test record schema",
         "com.cloudera.cdk.data.filesystem", false);
@@ -260,11 +190,25 @@ public class TestFileSystemDatasetRepository {
             TextNode.valueOf("a@example.com"))
     ));
 
-    Dataset datasetV3 = repo.update("test1", new DatasetDescriptor.Builder().schema
-        (testSchemaV3).get());
+    Dataset datasetV3 = repo.update(NAME,
+        new DatasetDescriptor.Builder(dataset.getDescriptor())
+            .schema(testSchemaV3)
+            .get());
 
     Assert.assertEquals("Dataset schema is updated", testSchemaV3, datasetV3
         .getDescriptor().getSchema());
   }
 
+  @Test
+  public void testDeleteRemovesDatasetPath() throws IOException {
+    ensureCreated();
+
+    Dataset dataset = repo.load(NAME);
+    Path dataPath = new Path(dataset.getDescriptor().getLocation());
+    Assert.assertTrue(fileSystem.exists(dataPath));
+
+    repo.delete(NAME);
+
+    Assert.assertFalse(fileSystem.exists(dataPath));
+  }
 }

@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
+import com.cloudera.cdk.data.TestDatasetReaders;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetReaderException;
 import com.google.common.collect.Lists;
@@ -33,8 +34,32 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
+import org.apache.avro.generic.GenericData;
 
-public class TestFileSystemDatasetReader {
+public class TestFileSystemDatasetReader extends TestDatasetReaders {
+
+  @Override
+  public DatasetReader newReader() throws IOException {
+    return new FileSystemDatasetReader<String>(
+        FileSystem.getLocal(new Configuration()),
+        new Path(Resources.getResource("data/strings-100.avro").getFile()),
+        STRING_SCHEMA);
+  }
+
+  @Override
+  public int getTotalRecords() {
+    return 100;
+  }
+
+  @Override
+  public DatasetTestUtilities.RecordValidator getValidator() {
+    return new DatasetTestUtilities.RecordValidator<GenericData.Record>() {
+      @Override
+      public void validate(GenericData.Record record, int recordNum) {
+        Assert.assertEquals(String.valueOf(recordNum), record.get("text"));
+      }
+    };
+  }
 
   private FileSystem fileSystem;
 

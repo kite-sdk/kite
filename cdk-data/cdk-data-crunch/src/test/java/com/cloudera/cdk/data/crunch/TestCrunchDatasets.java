@@ -18,10 +18,10 @@ package com.cloudera.cdk.data.crunch;
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepository;
+import com.cloudera.cdk.data.MemoryMetadataProvider;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
-import com.google.common.io.Files;
 import java.io.IOException;
 import junit.framework.Assert;
 import org.apache.avro.generic.GenericData;
@@ -29,25 +29,22 @@ import org.apache.crunch.PCollection;
 import org.apache.crunch.Pipeline;
 import org.apache.crunch.Target;
 import org.apache.crunch.impl.mr.MRPipeline;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.Test;
 
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
+import org.apache.hadoop.conf.Configuration;
 
 public class TestCrunchDatasets {
 
-  private FileSystem fileSystem;
-  private Path testDirectory;
+  private Configuration conf;
   private DatasetRepository repo;
 
   @Before
   public void setUp() throws IOException {
-    fileSystem = FileSystem.get(new Configuration());
-    testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    repo = new FileSystemDatasetRepository(fileSystem, testDirectory);
+    this.conf = new Configuration();
+    this.repo =
+        new FileSystemDatasetRepository(conf, new MemoryMetadataProvider(conf));
   }
 
   @Test

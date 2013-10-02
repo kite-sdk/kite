@@ -18,6 +18,8 @@ package com.cloudera.cdk.data;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -32,8 +34,14 @@ import javax.annotation.concurrent.Immutable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 import org.apache.avro.reflect.ReflectData;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 
 /**
  * <p>
@@ -52,6 +60,8 @@ public class DatasetDescriptor {
   private final Schema schema;
   private final URL schemaUrl;
   private final Format format;
+  private final URI location;
+  private final Map<String, String> properties;
   private final PartitionStrategy partitionStrategy;
 
   /**
@@ -59,22 +69,34 @@ public class DatasetDescriptor {
    * and optional {@link PartitionStrategy}. The default {@link Format},
    * {@link Formats#AVRO}, will be used.
    */
-  public DatasetDescriptor(Schema schema, @Nullable PartitionStrategy
-      partitionStrategy) {
+  public DatasetDescriptor(Schema schema,
+      @Nullable PartitionStrategy partitionStrategy) {
 
-    this(schema, null, Formats.AVRO, partitionStrategy);
+    this(schema, null, Formats.AVRO, null, null, partitionStrategy);
   }
 
   /**
-   * Create an instance of this class with the supplied {@link Schema}, optional URL,
-   * {@link Format} and optional {@link PartitionStrategy}.
+   * Create an instance of this class with the supplied {@link Schema},
+   * optional URL, {@link Format}, optional location URL, and optional
+   * {@link PartitionStrategy}.
    */
   DatasetDescriptor(Schema schema, @Nullable URL schemaUrl, Format format,
+      @Nullable URI location, @Nullable Map<String, String> properties,
       @Nullable PartitionStrategy partitionStrategy) {
+    // URI can be null if the descriptor is configuring a new Dataset
+    Preconditions.checkArgument(
+        (location == null) || (location.getScheme() != null),
+        "Location URIs must be fully-qualified and have a FS scheme.");
 
     this.schema = schema;
     this.schemaUrl = schemaUrl;
     this.format = format;
+    this.location = location;
+    if (properties != null) {
+      this.properties = ImmutableMap.copyOf(properties);
+    } else {
+      this.properties = ImmutableMap.of();
+    }
     this.partitionStrategy = partitionStrategy;
   }
 
@@ -92,9 +114,9 @@ public class DatasetDescriptor {
   }
 
   /**
-   * Get a URL from which the {@link Schema} may be retrieved. Optional. This method
-   * may return <code>null</code> if the schema is not stored at a persistent URL,
-   * e.g. if it was constructed from a literal string.
+   * Get a URL from which the {@link Schema} may be retrieved (optional). This
+   * method may return {@code null} if the schema is not stored at a persistent
+   * URL, e.g. if it was constructed from a literal string.
    *
    * @return a URL from which the schema may be retrieved
    * @since 0.3.0
@@ -112,6 +134,55 @@ public class DatasetDescriptor {
    */
   public Format getFormat() {
     return format;
+  }
+
+  /**
+   * Get the URL location where the data for this {@link Dataset} is stored
+   * (optional).
+   *
+   * @return a location URL or null if one is not set
+   *
+   * @since 0.8.0
+   */
+  @Nullable
+  public URI getLocation() {
+    return location;
+  }
+
+  /**
+   * Get a named property.
+   *
+   * @param name the String property name to get.
+   * @return the String value of the property, or null if it does not exist.
+   *
+   * @since 0.8.0
+   */
+  @Nullable
+  public String getProperty(String name) {
+    return properties.get(name);
+  }
+
+  /**
+   * Check if a named property exists.
+   *
+   * @param name the String property name.
+   * @return true if the property exists, false otherwise.
+   *
+   * @since 0.8.0
+   */
+  public boolean hasProperty(String name) {
+    return properties.containsKey(name);
+  }
+
+  /**
+   * List the names of all custom properties set.
+   *
+   * @return a Collection of String property names.
+   *
+   * @since 0.8.0
+   */
+  public Collection<String> listProperties() {
+    return properties.keySet();
   }
 
   /**
@@ -138,9 +209,37 @@ public class DatasetDescriptor {
   }
 
   @Override
+  public int hashCode() {
+    return Objects.hashCode(
+        schema, format, location, properties, partitionStrategy);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final DatasetDescriptor other = (DatasetDescriptor) obj;
+    return (
+        Objects.equal(schema, other.schema) &&
+        Objects.equal(format, other.format) &&
+        Objects.equal(location, other.location) &&
+        Objects.equal(properties, other.properties) &&
+        Objects.equal(partitionStrategy, other.partitionStrategy));
+  }
+
+  @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("schema", schema)
-      .add("partitionStrategy", partitionStrategy).toString();
+    return Objects.toStringHelper(this)
+        .add("format", format)
+        .add("schema", schema)
+        .add("location", location)
+        .add("properties", properties)
+        .add("partitionStrategy", partitionStrategy)
+        .toString();
   }
 
   /**
@@ -151,9 +250,12 @@ public class DatasetDescriptor {
     private Schema schema;
     private URL schemaUrl;
     private Format format = Formats.AVRO;
+    private URI location;
+    private Map<String, String> properties;
     private PartitionStrategy partitionStrategy;
 
     public Builder() {
+      this.properties = Maps.newHashMap();
     }
 
     /**
@@ -168,6 +270,8 @@ public class DatasetDescriptor {
       this.schema = descriptor.getSchema();
       this.schemaUrl = descriptor.getSchemaUrl();
       this.format = descriptor.getFormat();
+      this.properties = Maps.newHashMap(descriptor.properties);
+      this.location = descriptor.getLocation();
 
       if (descriptor.isPartitioned()) {
         this.partitionStrategy = descriptor.getPartitionStrategy();
@@ -176,8 +280,8 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema. A schema is required, and may be set
-     * using one of the <code>schema</code> or
-     * <code>schemaFromAvroDataFile</code> methods.
+     * using one of the methods: {@code schema}, {@code schemaLiteral},
+     * {@code schemaUri}, or {@code schemaFromAvroDataFile}.
      *
      * @return An instance of the builder for method chaining.
      */
@@ -188,8 +292,9 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema from a {@link File}. A schema is required,
-     * and may be set using one of the <code>schema</code> or
-     * <code>schemaFromAvroDataFile</code> methods.
+     * and may be set using one of the methods: {@code schema},
+     * {@code schemaLiteral}, {@code schemaUri}, or
+     * {@code schemaFromAvroDataFile}.
      *
      * @return An instance of the builder for method chaining.
      */
@@ -202,8 +307,9 @@ public class DatasetDescriptor {
     /**
      * Configure the dataset's schema from an {@link InputStream}. It is the
      * caller's responsibility to close the {@link InputStream}. A schema is
-     * required, and may be set using one of the <code>schema</code> or
-     * <code>schemaFromAvroDataFile</code> methods.
+     * required, and may be set using one of the methods: {@code schema},
+     * {@code schemaLiteral}, {@code schemaUri}, or
+     * {@code schemaFromAvroDataFile}.
      *
      * @return An instance of the builder for method chaining.
      */
@@ -214,8 +320,9 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema from a {@link URI}. A schema is required,
-     * and may be set using one of the <code>schema</code> or
-     * <code>schemaFromAvroDataFile</code> methods.
+     * and may be set using one of the methods: {@code schema},
+     * {@code schemaLiteral}, {@code schemaUri}, or
+     * {@code schemaFromAvroDataFile}.
      *
      * @return An instance of the builder for method chaining.
      */
@@ -233,6 +340,42 @@ public class DatasetDescriptor {
       }
     }
 
+    /**
+     * Configure the {@link Dataset}'s schema from a URI. A schema is required,
+     * and may be set using one of the methods: {@code schema},
+     * {@code schemaLiteral}, {@code schemaUri}, or
+     * {@code schemaFromAvroDataFile}.
+     *
+     * @param uri a URI object for the schema's location.
+     * @return An instance of the builder for method chaining.
+     * @throws MalformedURLException if {@code uri} is not a valid URL
+     * @throws IOException
+     *
+     * @since 0.8.0
+     */
+    public Builder schemaUri(URI uri) throws MalformedURLException, IOException {
+      return schema(uri);
+    }
+
+    /**
+     * Configure the {@link Dataset}'s schema from a String URI. A schema is
+     * required, and may be set using one of the methods: {@code schema},
+     * {@code schemaLiteral}, {@code schemaUri}, or
+     * {@code schemaFromAvroDataFile}.
+     *
+     * @param uri a String URI
+     * @return An instance of the builder for method chaining.
+     * @throws URISyntaxException if {@code uri} is not a valid URI
+     * @throws MalformedURLException if {@code uri} is not a valid URL
+     * @throws IOException
+     *
+     * @since 0.8.0
+     */
+    public Builder schemaUri(String uri) throws
+        URISyntaxException, MalformedURLException, IOException {
+      return schema(new URI(uri));
+    }
+
     private URL toURL(URI uri) throws MalformedURLException {
       try {
         // try with installed URLStreamHandlers first...
@@ -245,21 +388,43 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema from a {@link String}. A schema is
-     * required, and may be set using one of the <code>schema</code> or
-     * <code>schemaFromAvroDataFile</code> methods.
+     * required, and may be set using one of the methods: {@code schema},
+     * {@code schemaLiteral}, {@code schemaUri}, or
+     * {@code schemaFromAvroDataFile}.
+     *
+     * This method is deprecated: use {@link #schemaLiteral(java.lang.String)}
+     * instead.
      *
      * @return An instance of the builder for method chaining.
+     * @deprecated will be removed in 0.9.0
      * @since 0.2.0
      */
+    @Deprecated
     public Builder schema(String s) {
       this.schema = new Schema.Parser().parse(s);
       return this;
     }
 
     /**
-     * Configure the dataset's schema via a Java class type. A schema is required,
-     * and may be set using one of the <code>schema</code> or
-     * <code>schemaFromAvroDataFile</code> methods.
+     * Configure the dataset's schema from a {@link String}. A schema is
+     * required, and may be set using one of the methods: {@code schema},
+     * {@code schemaLiteral}, {@code schemaUri}, or
+     * {@code schemaFromAvroDataFile}.
+     *
+     * @return An instance of the builder for method chaining.
+     *
+     * @since 0.8.0
+     */
+    public Builder schemaLiteral(String s) {
+      this.schema = new Schema.Parser().parse(s);
+      return this;
+    }
+
+    /**
+     * Configure the dataset's schema via a Java class type. A schema is
+     * required, and may be set using one of the methods: {@code schema},
+     * {@code schemaLiteral}, {@code schemaUri}, or
+     * {@code schemaFromAvroDataFile}.
      *
      * @return An instance of the builder for method chaining.
      * @since 0.2.0
@@ -271,8 +436,9 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema by using the schema from an existing Avro
-     * data file. A schema is required, and may be set using one of the
-     * <code>schema</code> or <code>schemaFromAvroDataFile</code> methods.
+     * data file. A schema is required, and may be set using one of the methods:
+     * {@code schema}, {@code schemaLiteral}, {@code schemaUri}, or
+     * {@code schemaFromAvroDataFile}.
      *
      * @return An instance of the builder for method chaining.
      */
@@ -294,7 +460,8 @@ public class DatasetDescriptor {
      * Configure the dataset's schema by using the schema from an existing Avro
      * data file. It is the caller's responsibility to close the
      * {@link InputStream}. A schema is required, and may be set using one of
-     * the <code>schema</code> or <code>schemaFromAvroDataFile</code> methods.
+     * the methods: {@code schema},  {@code schemaLiteral}, {@code schemaUri},
+     * or {@code schemaFromAvroDataFile}.
      *
      * @return An instance of the builder for method chaining.
      */
@@ -314,8 +481,9 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema by using the schema from an existing Avro
-     * data file. A schema is required, and may be set using one of the
-     * <code>schema</code> or <code>schemaFromAvroDataFile</code> methods.
+     * data file. A schema is required, and may be set using one of the methods:
+     * {@code schema}, {@code schemaLiteral}, {@code schemaUri}, or
+     * {@code schemaFromAvroDataFile}.
      *
      * @return An instance of the builder for method chaining.
      */
@@ -332,8 +500,8 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's format. Optional. If not specified {@link Formats#AVRO}
-     * is used by default.
+     * Configure the dataset's format (optional). If not specified
+     * {@link Formats#AVRO} is used by default.
      *
      * @return An instance of the builder for method chaining.
      * @since 0.2.0
@@ -344,7 +512,87 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's partitioning strategy. Optional.
+     * Configure the dataset's format from a format name String (optional). If
+     * not specified, {@link Formats#AVRO} will be used.
+     *
+     * @param formatName a String format name
+     * @return An instance of the builder for method chaining.
+     * @throws UnknownFormatException if the format name is not recognized.
+     *
+     * @since 0.8.0
+     */
+    public Builder format(String formatName) {
+      boolean found = false;
+      for (Format knownFormat : Arrays.asList(Formats.AVRO, Formats.PARQUET)) {
+        if (knownFormat.getName().equals(formatName)) {
+          this.format = knownFormat;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        throw new UnknownFormatException(
+            "Cannot find a known format named:" + formatName);
+      }
+      return this;
+    }
+
+    /**
+     * Configure the {@link Dataset}'s location (optional).
+     *
+     * @param uri A URI location
+     * @return An instance of the builder for method chaining.
+     *
+     * @since 0.8.0
+     */
+    public Builder location(URI uri) {
+      // URI can be null if the descriptor is configuring a new Dataset
+      Preconditions.checkArgument((uri == null) || (uri.getScheme() != null),
+          "Location URIs must be fully-qualified and have a FS scheme.");
+      this.location = uri;
+      return this;
+    }
+
+    /**
+     * Configure the {@link Dataset}'s location (optional).
+     *
+     * @param uri A location Path
+     * @return An instance of the builder for method chaining.
+     *
+     * @since 0.8.0
+     */
+    public Builder location(Path uri) {
+      return location(uri.toUri());
+    }
+
+    /**
+     * Configure the {@link Dataset}'s location (optional).
+     *
+     * @param uri A location String URI
+     * @return An instance of the builder for method chaining.
+     * @throws URISyntaxException if {@code uri} is not a valid URI
+     *
+     * @since 0.8.0
+     */
+    public Builder location(String uri) throws URISyntaxException {
+      return location(new URI(uri));
+    }
+
+    /**
+     * Configure the {@link Configuration} used to resolve the {@code location}.
+     *
+     * @param conf a {@code Configuration}
+     * @return An instance of the builder for method chaining.
+     *
+     * @since 0.8.0
+     */
+    public Builder property(String name, String value) {
+      this.properties.put(name, value);
+      return this;
+    }
+
+    /**
+     * Configure the dataset's partitioning strategy (optional).
      *
      * @return An instance of the builder for method chaining.
      */
@@ -361,9 +609,10 @@ public class DatasetDescriptor {
     @Override
     public DatasetDescriptor get() {
       Preconditions.checkState(schema != null,
-        "Descriptor schema may not be null");
+          "Descriptor schema is required and cannot be null");
 
-      return new DatasetDescriptor(schema, schemaUrl, format, partitionStrategy);
+      return new DatasetDescriptor(
+          schema, schemaUrl, format, location, properties, partitionStrategy);
     }
 
   }

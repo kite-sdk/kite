@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.apache.avro.Schema;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -138,7 +139,8 @@ class FileSystemDataset implements Dataset {
     logger.debug("Loading partition for key {}, allowCreate:{}", new Object[] {
       key, allowCreate });
 
-    Path partitionDirectory = toDirectoryName(directory, key);
+    Path partitionDirectory = fileSystem.makeQualified(
+        toDirectoryName(directory, key));
 
     try {
       if (!fileSystem.exists(partitionDirectory)) {
@@ -154,15 +156,17 @@ class FileSystemDataset implements Dataset {
 
     int partitionDepth = key.getLength();
     PartitionStrategy subpartitionStrategy = Accessor.getDefault()
-      .getSubpartitionStrategy(partitionStrategy, partitionDepth);
+        .getSubpartitionStrategy(partitionStrategy, partitionDepth);
 
     return new FileSystemDataset.Builder()
-      .name(name)
-      .fileSystem(fileSystem)
-      .descriptor(
-        new DatasetDescriptor.Builder().schema(schema).format(descriptor.getFormat())
-          .partitionStrategy(subpartitionStrategy).get())
-      .directory(partitionDirectory).partitionKey(key).get();
+        .name(name)
+        .fileSystem(fileSystem)
+        .descriptor(new DatasetDescriptor.Builder(descriptor)
+            .location(partitionDirectory)
+            .partitionStrategy(subpartitionStrategy)
+            .get())
+        .partitionKey(key)
+        .get();
   }
 
   @Override
@@ -204,18 +208,18 @@ class FileSystemDataset implements Dataset {
     }
 
     for (FileStatus stat : fileStatuses) {
-      Path p = stat.getPath();
+      Path p = fileSystem.makeQualified(stat.getPath());
       PartitionKey key = fromDirectoryName(p);
+      PartitionStrategy subPartitionStrategy = Accessor.getDefault()
+          .getSubpartitionStrategy(partitionStrategy, 1);
       Builder builder = new FileSystemDataset.Builder()
-        .name(name)
-        .fileSystem(fileSystem)
-        .descriptor(
-          new DatasetDescriptor.Builder()
-            .schema(schema).format(descriptor.getFormat())
-            .partitionStrategy(
-              Accessor.getDefault().getSubpartitionStrategy(
-                partitionStrategy, 1)).get()).directory(p)
-        .partitionKey(key);
+          .name(name)
+          .fileSystem(fileSystem)
+          .descriptor(new DatasetDescriptor.Builder(descriptor)
+              .location(p)
+              .partitionStrategy(subPartitionStrategy)
+              .get())
+          .partitionKey(key);
 
       partitions.add(builder.get());
     }
@@ -279,29 +283,34 @@ class FileSystemDataset implements Dataset {
 
   public static class Builder implements Supplier<FileSystemDataset> {
 
+    private Configuration conf;
     private FileSystem fileSystem;
     private Path directory;
     private String name;
     private DatasetDescriptor descriptor;
     private PartitionKey partitionKey;
 
-    public Builder fileSystem(FileSystem fileSystem) {
-      this.fileSystem = fileSystem;
-      return this;
-    }
-
     public Builder name(String name) {
       this.name = name;
       return this;
     }
 
-    public Builder directory(Path directory) {
-      this.directory = directory;
+    protected Builder fileSystem(FileSystem fs) {
+      this.fileSystem = fs;
       return this;
     }
 
-    public Builder descriptor(DatasetDescriptor descriptor) {
+    public Builder configuration(Configuration conf) {
+      this.conf = conf;
+      return this;
+    }
+
+     public Builder descriptor(DatasetDescriptor descriptor) {
+      Preconditions.checkArgument(descriptor.getLocation() != null,
+          "Dataset location cannot be null");
+
       this.descriptor = descriptor;
+
       return this;
     }
 
@@ -315,14 +324,22 @@ class FileSystemDataset implements Dataset {
       Preconditions.checkState(this.name != null, "No dataset name defined");
       Preconditions.checkState(this.descriptor != null,
         "No dataset descriptor defined");
-      Preconditions.checkState(this.directory != null,
-        "No dataset directory defined");
-      Preconditions
-        .checkState(this.fileSystem != null, "No filesystem defined");
+      Preconditions.checkState((conf != null) || (fileSystem != null),
+          "Configuration or FileSystem must be set");
+
+      this.directory = new Path(descriptor.getLocation());
+
+      if (fileSystem == null) {
+        try {
+          this.fileSystem = directory.getFileSystem(conf);
+        } catch (IOException ex) {
+          throw new DatasetException("Cannot access FileSystem", ex);
+        }
+      }
 
       Path absoluteDirectory = fileSystem.makeQualified(directory);
-      return new FileSystemDataset(fileSystem, absoluteDirectory, name, descriptor,
-        partitionKey);
+      return new FileSystemDataset(
+          fileSystem, absoluteDirectory, name, descriptor, partitionKey);
     }
   }
 

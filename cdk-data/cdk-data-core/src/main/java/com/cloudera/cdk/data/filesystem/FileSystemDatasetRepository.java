@@ -17,14 +17,12 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
-import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.NoSuchDatasetException;
-import com.cloudera.cdk.data.spi.OptionBuilder;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
@@ -35,7 +33,10 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.avro.Schema;
@@ -44,13 +45,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Map;
-import org.apache.commons.configuration.MapConfiguration;
-import org.apache.hadoop.fs.FileStatus;
 
 /**
  * <p>
@@ -86,9 +80,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   }
 
   private final MetadataProvider metadataProvider;
-
-  private final Path rootDirectory;
-  private final FileSystem fileSystem;
+  private final Configuration conf;
 
   /**
    * Construct a {@link FileSystemDatasetRepository} on the given {@link FileSystem} and
@@ -97,10 +89,21 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    *
    * @param fileSystem    the filesystem to store metadata and datasets in
    * @param rootDirectory the root directory for metadata and datasets
+   *
+   * @deprecated will be removed in 0.9.0
    */
+  @Deprecated
   public FileSystemDatasetRepository(FileSystem fileSystem, Path rootDirectory) {
-    this(fileSystem, rootDirectory,
-      new FileSystemMetadataProvider(fileSystem, rootDirectory));
+    Preconditions.checkArgument(fileSystem != null,
+        "FileSystem cannot be null");
+    Preconditions.checkArgument(rootDirectory != null,
+        "Root directory cannot be null");
+
+    // get a qualified path so we don't have to pass the FileSystem object
+    final Path qualifiedRoot = fileSystem.makeQualified(rootDirectory);
+    this.conf = new Configuration();
+    this.conf.set("fs.defaultFS", fileSystem.getUri().toString());
+    this.metadataProvider = new FileSystemMetadataProvider(conf, qualifiedRoot);
   }
 
   /**
@@ -110,19 +113,28 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    *
    * @param uri the root directory for metadata and datasets
    * @since 0.3.0
+   *
+   * @deprecated will be removed in 0.9.0
    */
+  @Deprecated
   public FileSystemDatasetRepository(URI uri) {
     Preconditions.checkArgument(uri != null,
         "URI provider can not be null");
 
-    this.rootDirectory = new Path(uri);
+    this.conf = new Configuration();
+    final Path rootDirectory = new Path(uri);
+    final FileSystem fileSystem;
     try {
-      fileSystem = rootDirectory.getFileSystem(new Configuration());
+      fileSystem = rootDirectory.getFileSystem(conf);
     } catch (IOException e) {
       throw new DatasetRepositoryException("Problem creating " +
           "FileSystemDatasetRepository.", e);
     }
-    this.metadataProvider = new FileSystemMetadataProvider(fileSystem, rootDirectory);
+    // default the FS
+    this.conf.set("fs.defaultFS", fileSystem.getUri().toString());
+    // get a qualified path so we don't have to pass the FileSystem object
+    final Path qualifiedRoot = fileSystem.makeQualified(rootDirectory);
+    this.metadataProvider = new FileSystemMetadataProvider(conf, qualifiedRoot);
   }
 
   /**
@@ -132,19 +144,39 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    * @param fileSystem       the filesystem to store datasets in
    * @param rootDirectory    the root directory for datasets
    * @param metadataProvider the provider for metadata storage
+   *
+   * @deprecated will be removed in 0.9.0
    */
+  @Deprecated
   public FileSystemDatasetRepository(FileSystem fileSystem, Path rootDirectory,
     MetadataProvider metadataProvider) {
-
     Preconditions.checkArgument(fileSystem != null,
-      "FileSystem can not be null");
+        "FileSystem cannot be null");
     Preconditions.checkArgument(rootDirectory != null,
-      "Root directory can not be null");
+        "Root directory cannot be null");
     Preconditions.checkArgument(metadataProvider != null,
       "Metadata provider can not be null");
 
-    this.fileSystem = fileSystem;
-    this.rootDirectory = rootDirectory;
+    this.conf = new Configuration();
+    this.conf.set("fs.defaultFS", fileSystem.getUri().toString());
+    this.metadataProvider = metadataProvider;
+  }
+
+  /**
+   * Construct a {@link FileSystemDatasetRepository} for the given
+   * {@link MetadataProvider} for metadata storage.
+   *
+   * @param metadataProvider the provider for metadata storage
+   *
+   * @since 0.8.0
+   */
+  public FileSystemDatasetRepository(
+      Configuration conf, MetadataProvider metadataProvider) {
+    Preconditions.checkArgument(conf != null, "Configuration cannot be null");
+    Preconditions.checkArgument(metadataProvider != null,
+      "Metadata provider can not be null");
+
+    this.conf = conf;
     this.metadataProvider = metadataProvider;
   }
 
@@ -153,50 +185,55 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkArgument(descriptor != null,
-      "Descriptor can not be null");
+        "Descriptor can not be null");
+    Preconditions.checkArgument(descriptor.getLocation() == null,
+        "Descriptor location cannot be set; " +
+        "it is assigned by the MetadataProvider");
 
-    Schema schema = descriptor.getSchema();
-    Path datasetPath = pathForDataset(name);
+    final DatasetDescriptor newDescriptor = metadataProvider
+        .create(name, descriptor);
 
-    try {
-      if (fileSystem.exists(datasetPath)) {
-        throw new DatasetExistsException(
-            "Attempt to create an existing dataset:" + name);
-      }
-    } catch (IOException e) {
-      throw new DatasetRepositoryException("Internal error while determining if dataset path already exists:" + datasetPath, e);
+    final URI location = newDescriptor.getLocation();
+    if (location == null) {
+      throw new DatasetRepositoryException(
+          "[BUG] MetadataProvider did not assign a location to dataset:" +
+          name);
     }
 
-    logger.debug("Creating dataset:{} schema:{} datasetPath:{}", new Object[] {
-      name, schema, datasetPath });
+    ensureExists(newDescriptor, conf);
 
-    try {
-      if (!fileSystem.mkdirs(datasetPath)) {
-        throw new DatasetRepositoryException("Failed to make dataset path:" + datasetPath);
-      }
-    } catch (IOException e) {
-      throw new DatasetRepositoryException("Internal failure while creating dataset path:" + datasetPath, e);
-    }
-
-    metadataProvider.create(name, descriptor);
+    logger.debug("Created dataset:{} schema:{} datasetPath:{}", new Object[] {
+        name, newDescriptor.getSchema(), location.toString() });
 
     return new FileSystemDataset.Builder()
-      .name(name)
-      .fileSystem(fileSystem)
-      .descriptor(descriptor)
-      .directory(pathForDataset(name))
-      .partitionKey(
-        descriptor.isPartitioned() ? com.cloudera.cdk.data.impl.Accessor.getDefault()
-          .newPartitionKey() : null).get();
+        .name(name)
+        .configuration(conf)
+        .descriptor(newDescriptor)
+        .partitionKey(newDescriptor.isPartitioned() ?
+            com.cloudera.cdk.data.impl.Accessor.getDefault().newPartitionKey() :
+            null)
+        .get();
   }
 
   @Override
   public Dataset update(String name, DatasetDescriptor descriptor) {
+    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
+    Preconditions.checkArgument(descriptor != null,
+        "DatasetDescriptro cannot be null");
+
     DatasetDescriptor oldDescriptor = metadataProvider.load(name);
+
+    // oldDescriptor is valid if load didn't throw NoSuchDatasetException
 
     if (!oldDescriptor.getFormat().equals(descriptor.getFormat())) {
       throw new DatasetRepositoryException("Cannot change dataset format from " +
           oldDescriptor.getFormat() + " to " + descriptor.getFormat());
+    }
+
+    final URI oldLocation = oldDescriptor.getLocation();
+    if ((oldLocation != null) && !(oldLocation.equals(descriptor.getLocation()))) {
+      throw new DatasetRepositoryException(
+          "Cannot change the dataset's location");
     }
 
     if (oldDescriptor.isPartitioned() != descriptor.isPartitioned()) {
@@ -209,24 +246,29 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
 
     // check can read records written with old schema using new schema
-    Schema oldSchema = oldDescriptor.getSchema();
-    Schema newSchema = descriptor.getSchema();
+    final Schema oldSchema = oldDescriptor.getSchema();
+    final Schema newSchema = descriptor.getSchema();
     if (!SchemaValidationUtil.canRead(oldSchema, newSchema)) {
       throw new DatasetRepositoryException("New schema cannot read data written using " +
           "old schema. New schema: " + newSchema.toString(true) + "\nOld schema: " +
           oldSchema.toString(true));
     }
 
-    metadataProvider.update(name, descriptor);
+    final DatasetDescriptor updatedDescriptor = metadataProvider
+        .update(name, descriptor);
+
+    logger.debug("Updated dataset:{} schema:{} datasetPath:{}", new Object[] {
+        name, updatedDescriptor.getSchema(),
+        updatedDescriptor.getLocation().toString() });
 
     return new FileSystemDataset.Builder()
         .name(name)
-        .fileSystem(fileSystem)
-        .descriptor(descriptor)
-        .directory(pathForDataset(name))
-        .partitionKey(
-            descriptor.isPartitioned() ? com.cloudera.cdk.data.impl.Accessor.getDefault()
-                .newPartitionKey() : null).get();
+        .configuration(conf)
+        .descriptor(updatedDescriptor)
+        .partitionKey(updatedDescriptor.isPartitioned() ?
+            com.cloudera.cdk.data.impl.Accessor.getDefault().newPartitionKey() :
+            null)
+        .get();
   }
 
   @Override
@@ -235,14 +277,16 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
     logger.debug("Loading dataset:{}", name);
 
-    Path datasetDirectory = pathForDataset(name);
-    checkExists(fileSystem, datasetDirectory);
-
     DatasetDescriptor descriptor = metadataProvider.load(name);
 
     FileSystemDataset ds = new FileSystemDataset.Builder()
-      .fileSystem(fileSystem).descriptor(descriptor)
-      .directory(datasetDirectory).name(name).get();
+        .name(name)
+        .configuration(conf)
+        .descriptor(descriptor)
+        .partitionKey(descriptor.isPartitioned() ?
+            com.cloudera.cdk.data.impl.Accessor.getDefault().newPartitionKey() :
+            null)
+        .get();
 
     logger.debug("Loaded dataset:{}", ds);
 
@@ -253,67 +297,55 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   public boolean delete(String name) {
     Preconditions.checkArgument(name != null, "Name can not be null");
 
-    logger.debug("Dropping dataset:{}", name);
+    logger.debug("Deleting dataset:{}", name);
 
-    Path datasetPath = pathForDataset(name);
+    final DatasetDescriptor descriptor;
+    try {
+      descriptor = metadataProvider.load(name);
+    } catch (NoSuchDatasetException ex) {
+      return false;
+    }
 
+    boolean changed;
     try {
       // don't care about the return value here -- if it already doesn't exist
       // we still need to delete the data directory
-      metadataProvider.delete(name);
+      changed = metadataProvider.delete(name);
     } catch (MetadataProviderException ex) {
       throw new DatasetRepositoryException(
           "Failed to delete descriptor for name:" + name, ex);
     }
 
+    final Path dataLocation = new Path(descriptor.getLocation());
+    final FileSystem fs = fsForPath(dataLocation, conf);
+
     try {
-      if (fileSystem.exists(datasetPath)) {
-        if (fileSystem.delete(datasetPath, true)) {
-          return true;
+      if (fs.exists(dataLocation)) {
+        if (fs.delete(dataLocation, true)) {
+          changed = true;
         } else {
-          throw new DatasetRepositoryException("Failed to delete dataset name:" + name
-            + " data path:" + datasetPath);
+          throw new DatasetRepositoryException(
+              "Failed to delete dataset name:" + name +
+              " location:" + dataLocation);
         }
-      } else {
-        return false;
       }
     } catch (IOException e) {
-      throw new DatasetRepositoryException("Internal failure to test if dataset path exists:" + datasetPath);
+      throw new DatasetRepositoryException(
+          "Internal failure when removing location:" + dataLocation);
     }
+
+    return changed;
   }
 
   @Override
   public boolean exists(String name) {
-    final Path potentialPath = pathForDataset(name);
-    try {
-      return (
-          fileSystem.exists(potentialPath) &&
-          fileSystem.isDirectory(rootDirectory));
-    } catch (IOException ex) {
-      throw new DatasetRepositoryException(
-          "Could not check data path:" + potentialPath, ex);
-    }
+    Preconditions.checkArgument(name != null, "Name can not be null");
+    return metadataProvider.exists(name);
   }
 
   @Override
   public Collection<String> list() {
-    List<String> datasets = Lists.newArrayList();
-    try {
-      FileStatus[] entries = fileSystem.listStatus(rootDirectory,
-          PathFilters.notHidden());
-      for (FileStatus entry : entries) {
-        // assumes that all unhidden directories under the root are data sets
-        if (entry.isDirectory()) {
-          // may want to add a check: !RESERVED_NAMES.contains(name)
-          datasets.add(entry.getPath().getName());
-        } else {
-          continue;
-        }
-      }
-    } catch (IOException ex) {
-      throw new DatasetRepositoryException("Could not list data sets", ex);
-    }
-    return datasets;
+    return metadataProvider.list();
   }
 
   /**
@@ -378,42 +410,39 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         values.toArray(new Object[values.size()]));
   }
 
-  /**
-   * <p>
-   * Implementations should return the fully-qualified path of the data directory for
-   * the dataset with the given name.
-   * </p>
-   * <p>
-   * This method is for internal use only and users should not call it directly.
-   * </p>
-   * @since 0.2.0
-   */
-  protected Path pathForDataset(String name) {
-    Preconditions.checkState(rootDirectory != null,
-      "Dataset repository root directory can not be null");
-
-    return pathForDataset(rootDirectory, name);
-  }
-
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("rootDirectory", rootDirectory)
-      .add("metadataProvider", metadataProvider)
-      .add("fileSystem", fileSystem).toString();
+    return Objects.toStringHelper(this)
+        .add("metadataProvider", metadataProvider)
+        .toString();
   }
 
   /**
    * @return the root directory in the filesystem where datasets are stored.
+   *
+   * @deprecated will be removed in 0.9.0
    */
+  @Deprecated
   public Path getRootDirectory() {
-    return rootDirectory;
+    if (metadataProvider instanceof FileSystemMetadataProvider) {
+      return ((FileSystemMetadataProvider) metadataProvider).getRootDirectory();
+    } else {
+      return null;
+    }
   }
 
   /**
    * @return the {@link FileSystem} on which datasets are stored.
+   *
+   * @deprecated will be removed in 0.9.0
    */
+  @Deprecated
   public FileSystem getFileSystem() {
-    return fileSystem;
+    if (metadataProvider instanceof FileSystemMetadataProvider) {
+      return ((FileSystemMetadataProvider) metadataProvider).getFileSytem();
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -425,36 +454,34 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   }
 
   /**
-   * Returns the correct dataset path for the given name and root directory.
+   * Creates, if necessary, the given the location for {@code descriptor}.
    *
-   * @param root A Path
-   * @param name A String dataset name
-   * @return the correct dataset Path
-   * @since 0.7.0
+   * @param conf A Configuration
+   * @param descriptor A DatasetDescriptor
    */
-  protected static Path pathForDataset(Path root, String name) {
-    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
+  private static void ensureExists(
+      DatasetDescriptor descriptor, Configuration conf) {
+    Preconditions.checkArgument(descriptor.getLocation() != null,
+        "Cannot get FileSystem for a descriptor with no location");
+    final Path dataPath = new Path(descriptor.getLocation());
 
-    // Why replace '.' here? Is this a namespacing hack?
-    return new Path(root, name.replace('.', Path.SEPARATOR_CHAR));
-  }
+    final FileSystem fs = fsForPath(dataPath, conf);
 
-  /**
-   * Precondition-style static validation that a dataset exists
-   *
-   * @param fs        A FileSystem where the data should be stored
-   * @param location  The Path where the data should be stored
-   * @throws NoSuchDatasetException     if the data location is missing
-   * @throws DatasetRepositoryException if any IOException is thrown
-   * @since 0.7.0
-   */
-  protected static void checkExists(FileSystem fs, Path location) {
     try {
-      if (!fs.exists(location)) {
-        throw new NoSuchDatasetException("Data location is missing");
+      if (!fs.exists(dataPath)) {
+        fs.mkdirs(dataPath);
       }
     } catch (IOException ex) {
       throw new DatasetRepositoryException("Cannot access data location", ex);
+    }
+  }
+
+  private static FileSystem fsForPath(Path dataPath, Configuration conf) {
+    try {
+      return dataPath.getFileSystem(conf);
+    } catch (IOException ex) {
+      throw new DatasetRepositoryException(
+          "Cannot get FileSystem for descriptor", ex);
     }
   }
 
@@ -465,13 +492,16 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    */
   public static class Builder implements Supplier<FileSystemDatasetRepository> {
 
-    private FileSystem fileSystem;
     private Path rootDirectory;
+    private FileSystem fileSystem;
     private MetadataProvider metadataProvider;
     private Configuration configuration;
 
     /**
      * The root directory for metadata and dataset files.
+     *
+     * @param path a Path to a FileSystem location
+     * @return this Builder for method chaining.
      */
     public Builder rootDirectory(Path path) {
       this.rootDirectory = path;
@@ -480,6 +510,9 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
     /**
      * The root directory for metadata and dataset files.
+     *
+     * @param uri a URI to a FileSystem location
+     * @return this Builder for method chaining.
      */
     public Builder rootDirectory(URI uri) {
       this.rootDirectory = new Path(uri);
@@ -487,8 +520,23 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
 
     /**
-     * The {@link FileSystem} to store metadata and dataset files in. Optional. If not
-     * specified, the default filesystem will be used.
+     * The root directory for metadata and dataset files.
+     *
+     * @param uri a String to parse as a URI
+     * @return this Builder for method chaining.
+     * @throws URISyntaxException
+     *
+     * @since 0.8.0
+     */
+    public Builder rootDirectory(String uri) throws URISyntaxException {
+      return rootDirectory(new URI(uri));
+    }
+
+    /**
+     * The {@link FileSystem} to store metadata and dataset files in (optional).
+     *
+     * The FileSystem for the root directory is used if this FileSystem is not
+     * set.
      */
     public Builder fileSystem(FileSystem fileSystem) {
       this.fileSystem = fileSystem;
@@ -496,7 +544,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
 
     /**
-     * The {@link MetadataProvider} for metadata storage. Optional. If not
+     * The {@link MetadataProvider} for metadata storage (optional). If not
      * specified, a {@link FileSystemMetadataProvider} will be used.
      */
     public Builder metadataProvider(MetadataProvider metadataProvider) {
@@ -505,8 +553,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
 
     /**
-     * The {@link Configuration} used to find the {@link FileSystem}. Optional. If not
-     * specified, the default configuration will be used.
+     * The {@link Configuration} used to find the {@link FileSystem} (optional).
+     * If not specified, the default configuration will be used.
      * @since 0.3.0
      */
     public Builder configuration(Configuration configuration) {
@@ -516,25 +564,32 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
     @Override
     public FileSystemDatasetRepository get() {
-      Preconditions.checkState(this.rootDirectory != null, "No root directory defined");
-
-      if (fileSystem == null) {
-        if (configuration == null) {
-          configuration = new Configuration();
-        }
-        try {
-          fileSystem = rootDirectory.getFileSystem(configuration);
-        } catch (IOException e) {
-          throw new DatasetRepositoryException("Problem creating " +
-              "FileSystemDatasetRepository.", e);
-        }
+      if (configuration == null) {
+        this.configuration = new Configuration();
       }
 
       if (metadataProvider == null) {
-        metadataProvider = new FileSystemMetadataProvider(fileSystem, rootDirectory);
+        Preconditions.checkState(this.rootDirectory != null,
+            "No root directory defined");
+
+        // the rootDirectory can have a scheme/authority that overrides
+
+        if (fileSystem != null) {
+          // if the FS doesn't match, this will throw IllegalArgumentException
+          this.metadataProvider = new FileSystemMetadataProvider(
+              configuration, fileSystem.makeQualified(rootDirectory));
+        } else {
+          this.metadataProvider = new FileSystemMetadataProvider(
+              configuration, rootDirectory);
+        }
+      } else {
+        Preconditions.checkState(rootDirectory == null,
+            "Root directory is ignored when a MetadataProvider is set");
+        Preconditions.checkState(fileSystem == null,
+            "File system is ignored when a MetadataProvider is set");
       }
 
-      return new FileSystemDatasetRepository(fileSystem, rootDirectory, metadataProvider);
+      return new FileSystemDatasetRepository(configuration, metadataProvider);
     }
   }
 }
