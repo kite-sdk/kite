@@ -72,5 +72,9 @@
         <groupId>com.cloudera.cdk</groupId>
         <artifactId>cdk-morphlines-twitter</artifactId>
       </dependency>
+      <dependency>
+        <groupId>com.cloudera.cdk</groupId>
+        <artifactId>cdk-morphlines-metrics-servlets</artifactId>
+      </dependency>
   </dependencies>
 </project>

@@ -120,6 +120,7 @@
     <vers.hadoop-mr1>2.0.0-mr1-cdh${cdh.version}</vers.hadoop-mr1>
     <vers.hcatalog>0.5.0-cdh${cdh.version}</vers.hcatalog>
     <vers.hive>0.10.0-cdh${cdh.version}</vers.hive>
+    <vers.jetty>8.1.13.v20130916</vers.jetty>
     <vers.jexl>2.1.1</vers.jexl>
     <vers.compress>1.4.1</vers.compress>
     <vers.junit>4.10</vers.junit>
@@ -757,6 +758,21 @@
         <artifactId>metrics-core</artifactId>
         <version>${vers.codahale.metrics}</version>
       </dependency>
+      <dependency>
+        <groupId>com.codahale.metrics</groupId>
+        <artifactId>metrics-healthchecks</artifactId>
+        <version>${vers.codahale.metrics}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.codahale.metrics</groupId>
+        <artifactId>metrics-servlets</artifactId>
+        <version>${vers.codahale.metrics}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-servlet</artifactId>
+        <version>${vers.jetty}</version>
+      </dependency>      
       <dependency>
         <groupId>com.typesafe</groupId>
         <artifactId>config</artifactId>

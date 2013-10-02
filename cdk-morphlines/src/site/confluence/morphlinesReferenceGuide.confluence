@@ -70,6 +70,9 @@ h3. cdk\-morphlines\-saxon
 - [xquery|#xquery]
 - [xslt|#xslt]
 
+h3. cdk\-morphlines\-metrics\-servlets
+- [startReportingMetricsToHTTP|#startReportingMetricsToHTTP]
+
 h3. cdk\-morphlines\-solr\-core
 - [solrLocator|#solrLocator]
 - [loadSolr|#loadSolr]
@@ -1141,7 +1144,7 @@ The {{startReportingMetricsToCSV}} command ([source code|https://github.com/clou
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
-| dir | n/a | The relative or absolute path of the output directory on the local file system. The directory and it's parent directories will be created automatically if they don't yet exist. |
+| outputDir | n/a | The relative or absolute path of the output directory on the local file system. The directory and it's parent directories will be created automatically if they don't yet exist. |
 | frequency | "10 seconds" | The amount of time between reports to the output file, given in [HOCON duration format|https://github.com/typesafehub/config/blob/master/HOCON.md#duration-format]. |
 | locale | JVM default Locale | Format numbers for the given Java Locale. Example: "en\_US" |
 | defaultDurationUnit | milliseconds | Report output durations in the given time unit. One of {{nanoseconds}},  {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. |
@@ -1159,7 +1162,7 @@ If the include specification is absent it defaults to MATCH ALL. If the exclude 
 h4. Example startReportingMetricsToCSV usage
 {code}
 startReportingMetricsToCSV {
-  dir : "mytest/metricsLogs"
+  outputDir : "mytest/metricsLogs"
   frequency : "10 seconds"
   locale : en_US
 }
@@ -1168,7 +1171,7 @@ startReportingMetricsToCSV {
 h4. More example startReportingMetricsToCSV usage
 {code}
 startReportingMetricsToCSV {
-  dir : "mytest/metricsLogs"
+  outputDir : "mytest/metricsLogs"
   frequency : "10 seconds"
   locale : en_US
   defaultDurationUnit : milliseconds
@@ -1876,6 +1879,37 @@ More examples can be found in the [unit tests|https://github.com/cloudera/cdk/tr
 
 For more background, see resources such as the [XSLT Tutorial|http://www.w3schools.com/xsl/] and [Wikipedia|http://en.wikipedia.org/wiki/XSLT].
 
+
+h1. cdk\-morphlines\-metrics\-servlets
+
+h2. startReportingMetricsToHTTP
+
+*Status: EXPERIMENTAL*
+
+The {{startReportingMetricsToHTTP}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-metrics-servlets/src/main/java/com/cloudera/cdk/morphline/metrics/servlets/StartReportingMetricsToHTTPBuilder.java]) exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by [Jetty|http://en.wikipedia.org/wiki/Jetty_(web_server)], using the [AdminServlet|http://metrics.codahale.com/manual/servlets/].
+
+On startup, a Jetty HTTP server is created that listens on a configurable port. If an HTTP server isn't required for your use case, and reporting metrics to JMX (or SLF4J or CSV) is sufficient, consider command such as [startReportingMetricsToJMX|#startReportingMetricsToJMX].
+
+The following HTTP URLs are provided:
+
+|| URL Path || Servlet || Description ||
+| / | AdminServlet | an HTML admin menu, for example at {{http://foo.com:8080/}}, with links to the following servlets: |
+| /ping | PingServlet | PingServlet responds to GET requests with a text/plain/200 OK response of {{pong}}. This is useful for determining liveness for load balancers, etc. |
+| /healthcheck | HealthCheckServlet | HealthCheckServlet responds to GET requests by running all the health checks registered with the morphline context, and returning 501 Not Implemented if no health checks are registered, 200 OK if all pass, or 500 Internal Service Error if one or more fail. The results are returned as a human\-readable text/plain JSON entity. |
+| /metrics | MetricsServlet | MetricsServlet exposes the state of the metrics registered with the morphline context as a JSON object. |
+| /threads | ThreadDumpServlet | ThreadDumpServlet responds to GET requests with a text/plain representation of all the live threads in the JVM, their states, their stack traces, and the state of any locks they may be waiting for. |
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| port | 8080 | The port on which the HTTP server shall listen. |
+
+Example usage:
+{code}
+startReportingMetricsToHTTP {
+  port : 8080
+}
+{code}
 
 h1. cdk\-morphlines\-solr\-core
 

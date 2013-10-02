@@ -10,8 +10,12 @@ Release date: TBD
 Version TBD has the following notable changes:
 
 * Morphlines Library
+    * Added option for commands to register health checks (not just metrics) with the MorphlineContext.
     * Added morphline commands to publish the metrics of all morphline commands to JMX, SLF4J and CSV files. 
       The new commands are: `startReportingMetricsToJMX`, `startReportingMetricsToSLF4J` and `startReportingMetricsToCSV`.
+    * Added EXPERIMENTAL `cdk-morphlines-metrics-servlets` maven module with new `startReportingMetricsToHTTP` command that 
+      exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URIs served by Jetty, 
+      using the AdminServlet.
     * Added `cdk-morphlines-hadoop-core` maven module with new `downloadHdfsFile` command for transferring HDFS files, e.g. 
       to help with centralized configuration file management.
     * Added option to specify boost values to `loadSolr` command.
