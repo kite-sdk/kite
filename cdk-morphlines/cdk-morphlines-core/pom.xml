@@ -41,6 +41,11 @@
       <artifactId>metrics-core</artifactId>
     </dependency>
 
+    <dependency> <!-- see http://metrics.codahale.com -->
+      <groupId>com.codahale.metrics</groupId>
+      <artifactId>metrics-healthchecks</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.cdk.morphline.shaded.com.google.common.reflect.ClassPath;
 import com.cloudera.cdk.morphline.shaded.com.google.common.reflect.ClassPath.ClassInfo;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.common.base.Preconditions;
 
 /**
@@ -40,6 +41,7 @@ public class MorphlineContext {
 
   private ExceptionHandler exceptionHandler;
   private MetricRegistry metricRegistry;
+  private HealthCheckRegistry healthCheckRegistry;
   private Map<String, Class<CommandBuilder>> commandBuilders = Collections.EMPTY_MAP;
 
   private static final Logger LOG = LoggerFactory.getLogger(MorphlineContext.class);
@@ -56,6 +58,11 @@ public class MorphlineContext {
   public MetricRegistry getMetricRegistry() {
     assert metricRegistry != null;
     return metricRegistry;
+  }
+
+  public HealthCheckRegistry getHealthCheckRegistry() {
+    assert healthCheckRegistry != null;
+    return healthCheckRegistry;
   }
 
   public Class<CommandBuilder> getCommandBuilder(String builderName) {
@@ -184,6 +191,7 @@ public class MorphlineContext {
     protected MorphlineContext context = create();
     private ExceptionHandler exceptionHandler = new DefaultExceptionHandler();
     private MetricRegistry metricRegistry = new MetricRegistry();
+    private HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
     
     public Builder() {}
 
@@ -199,9 +207,16 @@ public class MorphlineContext {
       return this;
     }
 
+    public Builder setHealthCheckRegistry(HealthCheckRegistry healthCheckRegistry) {
+      Preconditions.checkNotNull(healthCheckRegistry);
+      this.healthCheckRegistry = healthCheckRegistry;
+      return this;
+    }
+
     public MorphlineContext build() {
       context.exceptionHandler = exceptionHandler;
       context.metricRegistry = metricRegistry;
+      context.healthCheckRegistry = healthCheckRegistry;
       return context;
     }
 

@@ -49,7 +49,11 @@ import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Matcher;
 import com.cloudera.cdk.morphline.shaded.com.google.code.regexp.Pattern;
 import com.cloudera.cdk.morphline.shaded.com.google.common.reflect.ClassPath;
 import com.cloudera.cdk.morphline.shaded.com.google.common.reflect.ClassPath.ResourceInfo;
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.health.HealthCheck;
+import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
@@ -100,6 +104,38 @@ public class MorphlineTest extends AbstractMorphlineTest {
     assertEquals(0, collector.getRecords().size());    
   }
 
+  @Test
+  public void testMorphlineContext() throws Exception {
+    ExceptionHandler ex = new ExceptionHandler() {      
+      @Override
+      public void handleException(Throwable t, Record record) {
+        throw new RuntimeException(t);        
+      }
+    };
+    
+    MetricRegistry metricRegistry = new MetricRegistry();
+    metricRegistry.register("myCounter", new Counter());
+    
+    HealthCheckRegistry healthChecks = new HealthCheckRegistry();
+    healthChecks.register("foo", new HealthCheck() {      
+      @Override
+      protected Result check() throws Exception {
+        return Result.healthy("flawless");
+      }
+    });
+
+    MorphlineContext ctx = new MorphlineContext.Builder()
+      .setExceptionHandler(ex)
+      .setHealthCheckRegistry(healthChecks)
+      .setMetricRegistry(metricRegistry)
+      .build();
+    
+    assertSame(ex, ctx.getExceptionHandler());
+    assertSame(metricRegistry, ctx.getMetricRegistry());
+    assertSame(healthChecks, ctx.getHealthCheckRegistry());
+    ctx.getHealthCheckRegistry().runHealthChecks();
+  }
+  
   @Test
   public void testParseComplexConfig() throws Exception {
     parse("test-morphlines/parseComplexConfig");
@@ -1541,6 +1577,9 @@ public class MorphlineTest extends AbstractMorphlineTest {
     for (Class clazz : new MorphlineContext().getTopLevelClasses(importSpecs, CommandBuilder.class)) {
       //System.out.println("found " + clazz);
     }
+    MorphlineContext ctx = new MorphlineContext.Builder().build(); 
+    ctx.importCommandBuilders(importSpecs);
+    ctx.importCommandBuilders(importSpecs);    
   }
   
   @Test
