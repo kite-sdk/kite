@@ -91,8 +91,8 @@ public final class StartReportingMetricsToHTTPBuilder implements CommandBuilder 
             registerAll("jvm.memory", new MemoryUsageGaugeSet(), registry);
             registerAll("jvm.threads", new ThreadStatesGaugeSet(), registry);
             //registerAll("jvm.fileDescriptorUsageRatio", new FileDescriptorRatioGauge(), registry);
+            context.getHealthCheckRegistry().register("deadlocks", new ThreadDeadlockHealthCheck());
           }
-          context.getHealthCheckRegistry().register("deadlocks", new ThreadDeadlockHealthCheck());
 
           ServletContextHandler servletContextHandler = new ServletContextHandler();
           servletContextHandler.addServlet(AdminServlet.class, "/*");
