@@ -17,7 +17,6 @@ package com.cloudera.cdk.data.spi;
 
 import com.cloudera.cdk.data.DatasetReader;
 import java.util.Iterator;
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
 /**
  * A common DatasetReader base class to simplify implementations.
@@ -25,35 +24,6 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * @param <E> The type of entities returned by this DatasetReader.
  */
 public abstract class AbstractDatasetReader<E> implements DatasetReader<E> {
-
-  // used to detect a next-read call loop, can be removed with #read()
-  private boolean inRead = false;
-
-  @Deprecated
-  @Override
-  public E read() {
-    // this is for API backward-compatibility
-    try {
-      this.inRead = true;
-      return next();
-    } finally {
-      this.inRead = false;
-    }
-  }
-
-  @SuppressWarnings(value="IT_NO_SUCH_ELEMENT",
-      justification="For backward-compatibility with the non-Iterator API.")
-  @Override
-  public E next() {
-    // this is for implementation backward-compatibility
-    if (inRead) {
-      // the concrete class is using the default implementation of read and
-      // next, which is a stack loop.
-      throw new UnsupportedOperationException(
-              "You must implement DatasetReader#next");
-    }
-    return read();
-  }
 
   @Override
   public void remove() {

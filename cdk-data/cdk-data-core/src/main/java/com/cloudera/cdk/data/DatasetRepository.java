@@ -60,14 +60,6 @@ public interface DatasetRepository {
   Dataset load(String name);
 
   /**
-   * Deprecated synonym for {@link #load}.
-   *
-   * @deprecated will be removed in 0.8.x
-   */
-  @Deprecated
-  Dataset get(String name);
-
-  /**
    * Create a {@link Dataset} with the supplied {@code descriptor}. Depending on
    * the underlying dataset storage, some schemas types or configurations may
    * not be supported. If an illegal schema is supplied, an exception will be
@@ -125,14 +117,6 @@ public interface DatasetRepository {
    * @since 0.7.0
    */
   boolean delete(String name);
-
-  /**
-   * Deprecated synonym for {@link #delete}.
-   *
-   * @deprecated will be removed in 0.8.x
-   */
-  @Deprecated
-  boolean drop(String name);
 
   /**
    * Checks if there is a {@link Dataset} in this repository named {@code name}.

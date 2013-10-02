@@ -15,9 +15,7 @@
  */
 package com.cloudera.cdk.data.spi;
 
-import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.MetadataProvider;
-import com.cloudera.cdk.data.NoSuchDatasetException;
 
 /**
  * A common DatasetRepository base class to simplify implementation.
@@ -28,51 +26,4 @@ import com.cloudera.cdk.data.NoSuchDatasetException;
  * need to implement deprecated methods.
  */
 public abstract class AbstractMetadataProvider implements MetadataProvider {
-
-  // for detecting call loops; remove in 0.8.x
-  private boolean inSave = false;
-
-  @Override
-  public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
-    if (inSave) {
-      throw new UnsupportedOperationException(
-          "You must implement MetadataProvider#create");
-    }
-    save(name, descriptor);
-    return descriptor;
-  }
-
-  @Override
-  public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
-    if (inSave) {
-      throw new UnsupportedOperationException(
-          "You must implement MetadataProvider#create");
-    }
-    save(name, descriptor);
-    return descriptor;
-  }
-
-  @Deprecated
-  @Override
-  public void save(String name, DatasetDescriptor descriptor) {
-    try {
-      this.inSave = true;
-      boolean exists;
-      try {
-        DatasetDescriptor oldDescriptor = load(name);
-        exists = (oldDescriptor != null);
-      } catch (NoSuchDatasetException ex) {
-        exists = false;
-      }
-
-      if (exists) {
-        update(name, descriptor);
-      } else {
-        create(name, descriptor);
-      }
-    } finally {
-      this.inSave = false;
-    }
-  }
-
 }

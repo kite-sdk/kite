@@ -86,15 +86,6 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
 
   /**
    * <p>
-   * Deprecated synonym for {@link #next()}.
-   * </p>
-   * @deprecated will be removed in 0.8.x
-   */
-  @Deprecated
-  E read();
-
-  /**
-   * <p>
    * Fetch the next entity from the reader.
    * </p>
    * <p>

@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data.spi;
 
-import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetRepository;
 
 /**
@@ -27,53 +26,4 @@ import com.cloudera.cdk.data.DatasetRepository;
  * need to implement deprecated methods.
  */
 public abstract class AbstractDatasetRepository implements DatasetRepository {
-
-  // for detecting call loops; remove these in CDK 0.8.x
-  private boolean inGet = false;
-  private boolean inDrop = false;
-
-  @Deprecated
-  @Override
-  public Dataset get(String name) {
-    // this is for API backward-compatibility
-    try {
-      this.inGet = true;
-      return load(name);
-    } finally {
-      this.inGet = false;
-    }
-  }
-
-  @Override
-  public Dataset load(String name) {
-    // this is for implementation backward-compatibility
-    if (inGet) {
-      throw new UnsupportedOperationException(
-          "You must implement DatasetRepository#load");
-    }
-    return get(name);
-  }
-
-  @Deprecated
-  @Override
-  public boolean drop(String name) {
-    // this is for API backward-compatibility
-    try {
-      this.inDrop = true;
-      return delete(name);
-    } finally {
-      this.inDrop = false;
-    }
-  }
-
-  @Override
-  public boolean delete(String name) {
-    // this is for implementation backward-compatibility
-    if (inDrop) {
-      throw new UnsupportedOperationException(
-          "You must implement DatasetRepository#delete");
-    }
-    return drop(name);
-  }
-
 }
