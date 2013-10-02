@@ -24,6 +24,7 @@ import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.NoSuchDatasetException;
+import com.cloudera.cdk.data.spi.OptionBuilder;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
@@ -45,7 +46,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Map;
+import org.apache.commons.configuration.MapConfiguration;
 import org.apache.hadoop.fs.FileStatus;
 
 /**
@@ -533,5 +537,4 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
       return new FileSystemDatasetRepository(fileSystem, rootDirectory, metadataProvider);
     }
   }
-
 }

@@ -16,16 +16,19 @@
 package com.cloudera.cdk.data;
 
 import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
+import com.cloudera.cdk.data.spi.Loadable;
+import com.cloudera.cdk.data.spi.OptionBuilder;
+import com.cloudera.cdk.data.spi.URIPattern;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import com.google.common.base.Supplier;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.ServiceLoader;
 
 /**
  * <p>Convenience methods for working with {@link DatasetRepository} instances.</p>
@@ -33,6 +36,51 @@ import java.net.URISyntaxException;
 public class DatasetRepositories {
 
   private static final Logger logger = LoggerFactory.getLogger(DatasetRepositories.class);
+
+  private static final URIPattern BASE_PATTERN = new URIPattern(
+      URI.create("dsr:*storage-uri"));
+  private static final Map<URIPattern, OptionBuilder<DatasetRepository>>
+      REGISTRY = Maps.newLinkedHashMap();
+
+  /**
+   * Registers a {@link URIPattern} and an {@link OptionBuilder} to create
+   * instances of DatasetRepository from the pattern's match options.
+   *
+   * @param pattern a URIPattern
+   * @param builder an OptionBuilder that expects options defined by
+   *                {@code pattern} and builds DatasetRepository instances.
+   */
+  public static void register(
+      URIPattern pattern, OptionBuilder<DatasetRepository> builder) {
+    REGISTRY.put(pattern, builder);
+  }
+
+  static {
+    // load implementations, which will register themselves
+    ServiceLoader<Loadable> impls =
+        ServiceLoader.load(Loadable.class);
+    for (Loadable loader : impls) {
+      // the ServiceLoader is lazy, so this iteration forces service loading
+      logger.debug("Loading: " + loader.getClass().getName());
+      loader.load();
+    }
+    logger.debug(
+        "Registered repository URIs: " +
+        Joiner.on(", ").join(REGISTRY.keySet()));
+  }
+
+  /**
+   * Synonym for {@link #connect(java.net.URI)} for String URIs.
+   *
+   * @param uri a String URI
+   * @return a DatasetRepository for the given URI.
+   * @throws IllegalArgumentException If the String cannot be parsed into a
+   *                                  valid URI ({@see java.net.URI}).
+   */
+  public static DatasetRepository connect(String uri) {
+    // uses of URI.create throw IllegalArgumentException if the URI is invalid
+    return connect(URI.create(uri));
+  }
 
   /**
    * <p>
@@ -69,7 +117,7 @@ public class DatasetRepositories {
    * </p>
    * <h1>HDFS FileSystem URIs</h1>
    * <p>
-   * <code>hdfs://[host][port]/[path]</code> where <code>[host]</code> and
+   * <code>hdfs://[host]:[port]/[path]</code> where <code>[host]</code> and
    * <code>[port]</code> indicate the location of the Hadoop NameNode, and
    * <code>[path]</code> is the dataset repository root directory in which to
    * store dataset data. This form will load the Hadoop configuration
@@ -112,70 +160,28 @@ public class DatasetRepositories {
    * @since 0.8.0
    */
   public static DatasetRepository connect(URI repositoryUri) {
-    String scheme = repositoryUri.getScheme();
-    String schemeSpecific = repositoryUri.getSchemeSpecificPart();
+    final Map<String, String> baseMatch = BASE_PATTERN.getMatch(repositoryUri);
 
-    Preconditions.checkArgument(scheme != null && scheme.equals("dsr"),
-      "Invalid dataset repository URI:%s - scheme must be `dsr:`", repositoryUri);
-    Preconditions.checkArgument(schemeSpecific != null,
-      "Invalid dataset repository URI:%s - missing storage component", repositoryUri);
+    Preconditions.checkArgument(baseMatch != null,
+        "Invalid dataset repository URI:%s - scheme must be `dsr:`",
+        repositoryUri);
 
-    DatasetRepository repo = null;
-    URI uriInternal = null;
+    final URI storage = URI.create(baseMatch.get("storage-uri"));
+    Map<String, String> match;
 
-    try {
-      uriInternal = new URI(schemeSpecific);
-    } catch (URISyntaxException e) {
-      throw new IllegalArgumentException("Invalid dataset repository URI:" + repositoryUri
-        + " - storage component:" + schemeSpecific + " is malformed - " + e.getMessage());
+    for (URIPattern pattern : REGISTRY.keySet()) {
+      match = pattern.getMatch(storage);
+      if (match != null) {
+        final OptionBuilder<DatasetRepository> builder = REGISTRY.get(pattern);
+        final DatasetRepository repo = builder.getFromOptions(match);
+        logger.debug(
+            "Connected to repository:{} using uri:{}", repo, repositoryUri);
+
+        return repo;
+      }
     }
 
-    Preconditions.checkArgument(uriInternal.getScheme() != null,
-      "Invalid dataset repository URI:%s - storage component doesn't contain a valid scheme:%s",
-      repositoryUri, schemeSpecific);
-
-    if (uriInternal.getScheme().equals("file")) {
-      Configuration conf = new Configuration();
-
-      // TODO: Support non-2.0 versions.
-      conf.set("fs.defaultFS", "file:///");
-
-      Path basePath = null;
-
-      // A URI's path can be null if it's relative. e.g. file:foo/bar.
-      if (uriInternal.getPath() != null) {
-        basePath = new Path(uriInternal.getPath());
-      } else if (uriInternal.getSchemeSpecificPart() != null) {
-        basePath = new Path(uriInternal.getSchemeSpecificPart());
-      } else {
-        throw new IllegalArgumentException("Invalid dataset repository URI:" + repositoryUri
-          + " - storage component:" + schemeSpecific + " doesn't seem to have a path");
-      }
-
-      try {
-        repo = new FileSystemDatasetRepository(FileSystem.get(conf), basePath);
-      } catch (IOException e) {
-        throw new IllegalArgumentException("Unable to load Hadoop FileSystem implementation - " + e.getMessage(), e);
-      }
-    } else if (uriInternal.getScheme().equals("hdfs")) {
-      Configuration conf = new Configuration();
-
-      // TODO: Support non-2.0 versions.
-      conf.set("fs.defaultFS", "hdfs://" + uriInternal.getAuthority() + "/");
-
-      try {
-        repo = new FileSystemDatasetRepository(FileSystem.get(conf), new Path(uriInternal.getPath()));
-      } catch (IOException e) {
-        throw new IllegalArgumentException("Unable to load Hadoop FileSystem implementation - " + e.getMessage(), e);
-      }
-    } else if (uriInternal.getScheme().equals("hive")) {
-      throw new UnsupportedOperationException("Hive/HCatalog-based datasets are not yet supported. URI:" + repositoryUri);
-    } else {
-      throw new IllegalArgumentException("Invalid dataset repository URI:" + repositoryUri + " - unsupported storage method:" + schemeSpecific);
-    }
-
-    logger.debug("Connected to repository:{} using uri:{}", repo, repositoryUri);
-
-    return repo;
+    throw new IllegalArgumentException("Unknown storage URI:" + storage);
   }
+
 }

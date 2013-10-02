@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.data;
+package com.cloudera.cdk.data.filesystem;
 
-import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
-import com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider;
+import com.cloudera.cdk.data.DatasetRepositories;
+import com.cloudera.cdk.data.DatasetRepository;
+import com.cloudera.cdk.data.DatasetRepositoryException;
+import com.cloudera.cdk.data.MiniDFSTest;
+import com.cloudera.cdk.data.filesystem.impl.Loader;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
@@ -25,8 +28,14 @@ import org.junit.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.junit.BeforeClass;
 
-public class TestDatasetRepositories {
+public class TestFileSystemURIs extends MiniDFSTest {
+
+  @BeforeClass
+  public static void loadImpl() {
+    new Loader().load();
+  }
 
   @Test
   public void testLocalRelative() throws URISyntaxException {
@@ -49,9 +58,18 @@ public class TestDatasetRepositories {
     Assert.assertEquals(new Path("/tmp/dsr-repo-test"), ((FileSystemDatasetRepository) repository).getRootDirectory());
   }
 
+  @Test(expected = DatasetRepositoryException.class)
+  public void testHdfsFailsDefault() {
+    // the environment doesn't contain the HDFS URI, so this should cause a
+    // DatasetRepository exception about not finding HDFS
+    DatasetRepositories.connect("dsr:hdfs:/");
+  }
+
   @Test
   public void testHdfsAbsolute() throws URISyntaxException {
-    DatasetRepository repository = DatasetRepositories.connect(new URI("dsr:hdfs://localhost:8020/tmp/dsr-repo-test"));
+    URI hdfsUri = getDFS().getUri();
+    DatasetRepository repository = DatasetRepositories.connect(
+        new URI("dsr:hdfs://" + hdfsUri.getAuthority() + "/tmp/dsr-repo-test"));
 
     // We only do the deeper implementation checks one per combination.
     Assert.assertNotNull("Received a repository", repository);
