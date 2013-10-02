@@ -19,6 +19,7 @@ import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.MiniDFSTest;
+import com.cloudera.cdk.data.filesystem.impl.Loader;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
@@ -33,7 +34,7 @@ public class TestFileSystemURIs extends MiniDFSTest {
 
   @BeforeClass
   public static void loadImpl() {
-    new FileSystemDatasetRepository.Loader().load();
+    new Loader().load();
   }
 
   @Test
