@@ -35,7 +35,8 @@ include content in the site, create markdown documents in the
 `src/site/markdown` directory of your module. You'll also want to define a
 `site.xml` file that includes navigation for the module's site. Start with the
 `site.xml` file in the cdk-data module and customize from there. You should
-build the entire CDK site and test your output by running `mvn site site:stage`
+build the entire CDK site and test your output by running 
+`export MAVEN_OPTS=-Xmx512m; mvn post-site site:stage -DtopSiteURL=http://cloudera.github.com/cdk`
 in the top level directory. The site is assembled from the output of all modules
 and placed in the `target/staging/` directory (not the `target/site/`
 directory!). This is what will be published to the Github site and what users
