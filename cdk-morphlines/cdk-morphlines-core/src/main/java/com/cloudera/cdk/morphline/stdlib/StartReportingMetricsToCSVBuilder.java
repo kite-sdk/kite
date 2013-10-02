@@ -63,7 +63,7 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class StartReportingMetricsToCSV extends AbstractCommand {
 
-    private final File dir;
+    private final File outputDir;
     private static final Map<MetricRegistry, Map<File, CsvReporter>> REGISTRIES = new IdentityHashMap();
     
     public StartReportingMetricsToCSV(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
@@ -77,7 +77,7 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
         LOG.trace("availableLocales: {}", Joiner.on("\n").join(Locale.getAvailableLocales()));
       }
       Locale locale = getConfigs().getLocale(config, "locale", Locale.getDefault());
-      this.dir = new File(getConfigs().getString(config, "dir"));
+      this.outputDir = new File(getConfigs().getString(config, "outputDir"));
       validateArguments();
       
       MetricRegistry registry = context.getMetricRegistry();
@@ -87,7 +87,7 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
           reporters = new HashMap();
           REGISTRIES.put(registry, reporters);
         }
-        CsvReporter reporter = reporters.get(dir);
+        CsvReporter reporter = reporters.get(outputDir);
         if (reporter == null) {
           Builder reporterBuilder = CsvReporter.forRegistry(registry)
               .filter(filter)
@@ -95,16 +95,16 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
               .convertRatesTo(defaultRateUnit)
               .formatFor(locale);
               
-          reporter = reporterBuilder.build(dir);
-          dir.mkdirs();
-          if (!dir.isDirectory()) {
-            throw new MorphlineCompilationException("Directory not found: " + dir, config);
+          reporter = reporterBuilder.build(outputDir);
+          outputDir.mkdirs();
+          if (!outputDir.isDirectory()) {
+            throw new MorphlineCompilationException("Directory not found: " + outputDir, config);
           }
-          if (!dir.canWrite()) {
-            throw new MorphlineCompilationException("Directory not writeable: " + dir, config);
+          if (!outputDir.canWrite()) {
+            throw new MorphlineCompilationException("Directory not writeable: " + outputDir, config);
           }
           reporter.start(frequency, TimeUnit.NANOSECONDS);
-          reporters.put(dir, reporter);
+          reporters.put(outputDir, reporter);
         }
       }
     }
@@ -116,7 +116,7 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
           synchronized (REGISTRIES) {
             Map<File, CsvReporter> reporters = REGISTRIES.get(getContext().getMetricRegistry());
             if (reporters != null) {
-              CsvReporter reporter = reporters.remove(dir);
+              CsvReporter reporter = reporters.remove(outputDir);
               if (reporter != null) {
                 reporter.stop();
               }
