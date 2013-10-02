@@ -26,10 +26,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Delete a dataset and its metadata.
  */
-@Mojo(name = "drop-dataset", requiresProject = false)
-public class DropDatasetMojo extends AbstractDatasetMojo {
+@Mojo(name = "delete-dataset", requiresProject = false)
+public class DeleteDatasetMojo extends AbstractDatasetMojo {
 
-  private static final Logger logger = LoggerFactory.getLogger(DropDatasetMojo.class);
+  private static final Logger logger = LoggerFactory.getLogger(DeleteDatasetMojo.class);
 
   /**
    * The name of the dataset to drop.
@@ -39,7 +39,6 @@ public class DropDatasetMojo extends AbstractDatasetMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
-    logger.warn("CDK drop-dataset is deprecated -- please use delete-dataset");
     DatasetRepository repo = getDatasetRepository();
     repo.delete(datasetName);
   }
