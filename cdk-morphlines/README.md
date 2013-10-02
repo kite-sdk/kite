@@ -52,7 +52,8 @@ git clone git@github.com:cloudera/cdk.git
 cd cdk
 #git checkout master
 mvn clean package
-find cdk-morphlines -name '*.jar'
+find cdk-morphlines/cdk-morphlines-core/target -name '*.jar'
+find cdk-morphlines/cdk-morphlines-all/target -name '*.jar'
 ```
 
 ## Integrating with Eclipse
