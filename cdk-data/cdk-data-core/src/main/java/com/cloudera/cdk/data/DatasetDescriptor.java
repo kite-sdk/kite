@@ -15,12 +15,14 @@
  */
 package com.cloudera.cdk.data;
 
+import com.cloudera.cdk.data.spi.URIPattern;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
+import com.google.common.io.Resources;
 import java.net.MalformedURLException;
 import java.net.URI;
 import org.apache.avro.Schema;
@@ -249,6 +251,11 @@ public class DatasetDescriptor {
    */
   public static class Builder implements Supplier<DatasetDescriptor> {
 
+    // used to match resource:schema.avsc URIs
+    private static final String RESOURCE_PATH = "resource-path";
+    private static final URIPattern RESOURCE_URI_PATTERN =
+        new URIPattern(URI.create("resource:*" + RESOURCE_PATH));
+
     private Schema schema;
     private URL schemaUrl;
     private Format format = Formats.AVRO;
@@ -327,8 +334,18 @@ public class DatasetDescriptor {
      * {@code schemaFromAvroDataFile}.
      *
      * @return An instance of the builder for method chaining.
+     *
+     * @deprecated will be removed in 0.9.0, use {@link schemaUri(java.net.URI)}
      */
+    @Deprecated
     public Builder schema(URI uri) throws IOException {
+      // special support for resource URIs
+      Map<String, String> match = RESOURCE_URI_PATTERN.getMatch(uri);
+      if (match != null) {
+        return schema(
+            Resources.getResource(match.get(RESOURCE_PATH)).openStream());
+      }
+
       this.schemaUrl = toURL(uri);
 
       InputStream in = null;

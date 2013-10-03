@@ -54,4 +54,13 @@ public class TestDatasetDescriptor extends MiniDFSTest {
         .getSchema();
     Assert.assertEquals(STRING_SCHEMA, schema);
   }
+
+  @Test
+  public void testSchemaFromResourceURI() throws Exception {
+    String uri = "resource:standard_event.avsc";
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder().schemaUri(uri).get();
+
+    Assert.assertNotNull(descriptor);
+    Assert.assertTrue(descriptor.getSchema() instanceof Schema);
+  }
 }
