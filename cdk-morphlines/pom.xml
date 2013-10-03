@@ -205,7 +205,8 @@
                 <echo message="Fixing up anchors for HTML5"/>
                 <replaceregexp 
                   match="(&lt;a) name=(&quot;.*?&quot;&gt;&lt;/a&gt;)"
-                  replace="\1 id=\2">
+                  replace="\1 id=\2"
+                  flags="g">
                   <fileset dir="${project.build.directory}/site"> 
                     <include name="**/*.html"/>
                   </fileset>

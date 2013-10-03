@@ -1,104 +1,143 @@
-h1. Cloudera Morphlines Reference Guide \- Table of Contents
+h1. Cloudera Morphlines Reference Guide
 
-Cloudera Morphlines provides a set of frequently\-used high\-level transformation and I/O commands that can be combined in application specific ways. This chapter outlines the currently available commands.
+Cloudera Morphlines provides a set of frequently\-used high\-level transformation and I/O commands that can be combined in application specific ways. The following tables provide a short description of each available command and a link to the complete documentation.
 
+Note that perhaps the most important property of the Morphlines framework is how easy it is to add new transformations and I/O commands and integrate existing functionality and third party systems. If none of the existing commands match your use case, you can easily write your own command and plug it in. Simply implement the Java interface {{Command}} or subclass {{AbstractCommand}} and add the resulting Java class to the classpath. 
+Here are two examples: [toString|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java] and [readLine|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadLineBuilder.java]. No registration or other administrative action is required. Indeed, none of the standard commands are special or intrinsically known per se. All commands are implemented like this, even including standard commands such as {{pipe}}, {{if}}, and {{tryRules}}. This means your custom commands can even replace any standard commands, if desired.
+
+h3. Table of Contents
+
+- [cdk\-morphlines\-core\-stdio|#cdk\-morphlines\-core\-stdio]
+- [cdk\-morphlines\-core\-stdlib|#cdk\-morphlines\-core\-stdlib]
+- [cdk\-morphlines\-avro|#cdk\-morphlines\-avro]
+- [cdk\-morphlines\-json|#cdk\-morphlines\-json]
+- [cdk\-morphlines\-hadoop\-core|#cdk\-morphlines\-hadoop\-core]
+- [cdk\-morphlines\-hadoop\-sequencefile|#cdk\-morphlines\-hadoop\-sequencefile]
+- [cdk\-morphlines\-metrics\-servlets|#cdk\-morphlines\-metrics\-servlets]
+- [cdk\-morphlines\-tika\-core|#cdk\-morphlines\-tika\-core]
+- [cdk\-morphlines\-tika\-decompress|#cdk\-morphlines\-tika\-decompress]
+- [cdk\-morphlines\-saxon|#cdk\-morphlines\-saxon]
+- [cdk\-morphlines\-solr\-core|#cdk\-morphlines\-solr\-core]
+- [cdk\-morphlines\-solr\-cell|#cdk\-morphlines\-solr\-cell]
+
+{anchor:cdk\-morphlines\-core\-stdio}
+\\
+\\
 h3. cdk\-morphlines\-core\-stdio
-- [readClob|#readClob]
-- [readCSV|#readCSV]
-- [readLine|#readLine]
-- [readMultiLine|#readMultiLine]
+| [readClob|#readClob] | Converts a byte stream to a string. |
+| [readCSV|#readCSV] | Extracts zero or more records from the input stream of bytes representing a Comma Separated Values (CSV) file. |
+| [readLine|#readLine] | Emits one record per line in the input stream. |
+| [readMultiLine|#readMultiLine] | Log parser that collapses multiple input lines into a single record, based on regular expression pattern matching. |
 
+{anchor:cdk\-morphlines\-core\-stdlib}
+\\
+\\
 h3. cdk\-morphlines\-core\-stdlib
-- [addCurrentTime|#addCurrentTime]
-- [addLocalHost|#addLocalHost]
-- [addValues|#addValues]
-- [addValuesIfAbsent|#addValuesIfAbsent]
-- [callParentPipe|#callParentPipe]
-- [contains|#contains]
-- [convertTimestamp|#convertTimestamp]
-- [decodeBase64|#decodeBase64]
-- [dropRecord|#dropRecord]
-- [equals|#equals]
-- [extractURIComponents|#extractURIComponents]
-- [extractURIComponent|#extractURIComponent]
-- [extractURIQueryParameters|#extractURIQueryParameters]
-- [findReplace|#findReplace]
-- [generateUUID|#generateUUID]
-- [grok|#grok]
-- [if|#if]
-- [java|#java]
-- [logTrace, logDebug, logInfo, logWarn, logError|#logTrace]
-- [not|#not]
-- [pipe|#pipe]
-- [separateAttachments|#separateAttachments]
-- [setValues|#setValues]
-- [split|#split]
-- [splitKeyValue|#splitKeyValue]
-- [startReportingMetricsToCSV|#startReportingMetricsToCSV]
-- [startReportingMetricsToJMX|#startReportingMetricsToJMX]
-- [startReportingMetricsToSLF4J|#startReportingMetricsToSLF4J]
-- [toByteArray|#toByteArray]
-- [toString|#toString]
-- [translate|#translate]
-- [tryRules|#tryRules]
+| [addCurrentTime|#addCurrentTime] | Adds the result of [System.currentTimeMillis()|http://docs.oracle.com/javase/7/docs/api/java/lang/System.html#currentTimeMillis()] to a given output field. |
+| [addLocalHost|#addLocalHost] | Adds the name or IP of the local host to a given output field. |
+| [addValues|#addValues] | Adds a list of values (or the contents of another field) to a given field. |
+| [addValuesIfAbsent|#addValuesIfAbsent] | Adds a list of values (or the contents of another field) to a given field if not already contained. |
+| [callParentPipe|#callParentPipe] | Implements recursion for extracting data from container data formats. |
+| [contains|#contains] | Returns if a given value is contained in a given field. |
+| [convertTimestamp|#convertTimestamp] | Converts the timestamps in a given field from one of a set of input date formats to an output date format. |
+| [decodeBase64|#decodeBase64] | Converts a Base64 encoded String to a byte\[\]. |
+| [dropRecord|#dropRecord] | Silently consumes records without ever emitting any record. Think {{/dev/null}}. |
+| [equals|#equals] | Succeeds if all field values of the given named fields are equal to the the given values and fails otherwise. |
+| [extractURIComponents|#extractURIComponents] | Extracts subcomponents such as host, port, path, query, etc from a URI. |
+| [extractURIComponent|#extractURIComponent] | Extracts a particular subcomponent from a URI.  |
+| [extractURIQueryParameters|#extractURIQueryParameters] | Extracts the query parameters with a given name from a URI. |
+| [findReplace|#findReplace] | Examines each string value in a given field and replaces each substring of the string value that matches the given string literal or grok pattern with the given replacement. |
+| [generateUUID|#generateUUID] | Sets a universally unique identifier on all records that are intercepted. |
+| [grok|#grok] | Uses regular expression pattern matching to extract structured fields from unstructured log or text data. |
+| [if|#if] | Implements if\-then\-else conditional control flow. |
+| [java|#java] | Scripting support for Java. Dynamically compiles and executes the given Java code block. | 
+| [logTrace, logDebug, logInfo, logWarn, logError|#logTrace] | Logs a message to [SLF4J|http://www.slf4j.org] at the given log level. |
+| [not|#not] | Inverts the boolean return value of a nested command. | 
+| [pipe|#pipe] | Pipes a record through a chain of commands. | 
+| [separateAttachments|#separateAttachments] | Emits one separate output record for each attachment in the input record's list of attachments. |
+| [setValues|#setValues] | Assigns a given list of values (or the contents of another field) to a given field. |
+| [split|#split] | Divides a string into substrings, by recognizing a _separator_ (a.k.a. "delimiter") which can be expressed as a single character, literal string, regular expression, or grok pattern. |
+| [splitKeyValue|#splitKeyValue] | Splits key\-value pairs where the key and value are separated by the given separator character, and adds the pair's value to the record field named after the pair's key. |
+| [startReportingMetricsToCSV|#startReportingMetricsToCSV] | Starts periodically appending the metrics of all commands to a set of CSV files. |
+| [startReportingMetricsToJMX|#startReportingMetricsToJMX] | Starts publishing the metrics of all commands to [JMX|http://en.wikipedia.org/wiki/Java_Management_Extensions]. |
+| [startReportingMetricsToSLF4J|#startReportingMetricsToSLF4J] | Starts periodically logging the metrics of all morphline commands to [SLF4J|http://www.slf4j.org]. |
+| [toByteArray|#toByteArray] | Converts a String to the byte array representation of a given charset. |
+| [toString|#toString] | Converts a Java object to it's string representation; optionally also removes leading and trailing whitespace. |
+| [translate|#translate] | Replace a string with the replacement value defined in a given dictionary aka lookup hash table. |
+| [tryRules|#tryRules] | Simple rule engine for handling a list of heterogeneous input data formats. |
 
+{anchor:cdk\-morphlines\-avro}
+\\
+\\
 h3. cdk\-morphlines\-avro
-- [readAvroContainer|#readAvroContainer]
-- [readAvro|#readAvro]
-- [extractAvroTree|#extractAvroTree]
-- [extractAvroPaths|#extractAvroPaths]
+| [readAvroContainer|#readAvroContainer] | Parses an Avro binary container and emits a morphline record for each contained Avro datum. |
+| [readAvro|#readAvro] | Parses containerless Avro and emits a morphline record for each contained Avro datum. |
+| [extractAvroTree|#extractAvroTree] | Recursively walks an Avro tree and extracts all data into a single morphline record. |
+| [extractAvroPaths|#extractAvroPaths] | Extracts specific values from an Avro object, akin to a simple form of XPath. |
 
+{anchor:cdk\-morphlines\-json}
+\\
+\\
 h3. cdk\-morphlines\-json
-- [readJson|#readJson]
-- [extractJsonPaths|#extractJsonPaths]
+| [readJson|#readJson] | Parses JSON and emits a morphline record for each contained JSON object. |
+| [extractJsonPaths|#extractJsonPaths] | Extracts specific values from a JSON object, akin to a simple form of XPath. |
 
+{anchor:cdk\-morphlines\-hadoop\-core}
+\\
+\\
 h3. cdk\-morphlines\-hadoop\-core
-- [downloadHdfsFile|#downloadHdfsFile]
+| [downloadHdfsFile|#downloadHdfsFile] | Downloads, on startup, zero or more files or directory trees from HDFS to the local file system. |
 
+{anchor:cdk\-morphlines\-hadoop\-sequencefile}
+\\
+\\
 h3. cdk\-morphlines\-hadoop\-sequencefile
-- [readSequenceFile|#readSequenceFile]
+| [readSequenceFile|#readSequenceFile] | Parses an Apache Hadoop [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html] and emits a morphline record for each contained key\-value pair. |
 
-h3. cdk\-morphlines\-tika\-core
-- [detectMimeType|#detectMimeType]
-
-h3. cdk\-morphlines\-tika\-decompress
-- [decompress|#decompress]
-- [unpack|#unpack]
-
-h3. cdk\-morphlines\-saxon
-- [convertHTML|#convertHTML]
-- [xquery|#xquery]
-- [xslt|#xslt]
-
+{anchor:cdk\-morphlines\-metrics\-servlets}
+\\
+\\
 h3. cdk\-morphlines\-metrics\-servlets
-- [registerJVMMetrics|#registerJVMMetrics]
-- [startReportingMetricsToHTTP|#startReportingMetricsToHTTP]
+| [registerJVMMetrics|#registerJVMMetrics] | Registers metrics that are related to the Java Virtual Machine with the MorphlineContext. |
+| [startReportingMetricsToHTTP|#startReportingMetricsToHTTP] | Exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by Jetty, using the AdminServlet. |
 
+{anchor:cdk\-morphlines\-tika\-core}
+\\
+\\
+h3. cdk\-morphlines\-tika\-core
+| [detectMimeType|#detectMimeType] | Uses Apache Tika to auto-detect the [MIME type|https://en.wikipedia.org/wiki/Internet_media_type] of binary data. |
+
+{anchor:cdk\-morphlines\-tika\-decompress}
+\\
+\\
+h3. cdk\-morphlines\-tika\-decompress
+| [decompress|#decompress] | Decompresses gzip and bzip2 format. |
+| [unpack|#unpack] | Unpacks tar, zip, and jar format. | 
+
+{anchor:cdk\-morphlines\-saxon}
+\\
+\\
+h3. cdk\-morphlines\-saxon
+| [convertHTML|#convertHTML] | Converts any HTML to XHTML, using the [TagSoup|http://ccil.org/~cowan/XML/tagsoup] Java library. |
+| [xquery|#xquery] | Parses XML and runs the given W3C XQuery over it, using the [Saxon|http://www.saxonica.com] Java library. |
+| [xslt|#xslt] | Parses XML and runs the given W3C XSL Transform over it, using the [Saxon|http://www.saxonica.com] Java library. |
+
+{anchor:cdk\-morphlines\-solr\-core}
+\\
+\\
 h3. cdk\-morphlines\-solr\-core
-- [solrLocator|#solrLocator]
-- [loadSolr|#loadSolr]
-- [generateSolrSequenceKey|#generateSolrSequenceKey]
-- [sanitizeUnknownSolrFields|#sanitizeUnknownSolrFields]
-- [tokenizeText|#tokenizeText]
+| [solrLocator|#solrLocator] | Specifies a set of configuration parameters that identify the location and schema of a Solr server or SolrCloud. |
+| [loadSolr|#loadSolr] | Loads a record into a Solr server or MapReduce Reducer. |
+| [generateSolrSequenceKey|#generateSolrSequenceKey] | Assigns a unique key that is the concatenation of a field and a running count of the record number within the current session. |
+| [sanitizeUnknownSolrFields|#sanitizeUnknownSolrFields] | Removes record fields that are unknown to Solr {{schema.xml}}, or moves them to fields with a given prefix. |
+| [tokenizeText|#tokenizeText] | Uses the embedded [Solr/Lucene Analyzer library|http://wiki.apache.org/solr/AnalyzersTokenizersTokenFilters] to generate tokens from a text string, without sending data to a Solr server. |
 
+{anchor:cdk\-morphlines\-solr\-cell}
+\\
+\\
 h3. cdk\-morphlines\-solr\-cell
-- [solrCell|#solrCell]
+| [solrCell|#solrCell] | Uses Tika to parse data, then maps the Tika output back to a record using SolrCell. |
 
-
-h1. Introduction
-
-Cloudera Morphlines provides a set of frequently\-used high\-level transformation and I/O commands that can be combined in application specific ways. This chapter outlines the currently available commands.
-
-Note that perhaps the most important property of the Morphlines framework is how easy it is to add new transformations and I/O commands and integrate existing functionality and third party systems. If none of the existing commands match your use case, you can easily write your own command and plug it in. Simply implement the Java interface {{Command}} or subclass {{AbstractCommand}} and add the resulting Java class to the classpath. No registration or other administrative action is required.
-Here are links to two sample command implementations:
-\\
-\\
-* [toString|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java]
-\\
-* [readLine|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadLineBuilder.java]
-\\
-\\
-Indeed, none of the standard commands are special or intrinsically known per se. All commands are implemented like this, even including standard commands such as {{pipe}}, {{if}}, and {{tryRules}}. This means your custom commands can even replace any standard commands, if desired.
 
 h1. cdk\-morphlines\-core\-stdio
 
@@ -234,7 +273,7 @@ readLine {
 
 h2. readMultiLine
 
-The {{readMultiLine}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadMultiLineBuilder.java]) is a multiline log parser that collapses multiline messages into a single record. It supports {{regex}}, {{what}}, and {{negate}} configuration parameters similar to logstash. The line is put as a string into the {{message}} output field.
+The {{readMultiLine}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadMultiLineBuilder.java]) is a multiline log parser that collapses multiple input lines into a single record, based on regular expression pattern matching. It supports {{regex}}, {{what}}, and {{negate}} configuration parameters similar to logstash. The line is put as a string into the {{message}} output field.
 
 For example, this can be used to parse log4j with stack traces. Also see [https://gist.github.com/smougenot/3182192] and [http://logstash.net/docs/1.1.13/filters/multiline].
 
@@ -347,7 +386,7 @@ addValuesIfAbsent {
 
 h2. callParentPipe
 
-The {{callParentPipe}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/CallParentPipeBuilder.java]) routes records to the enclosing pipe object. Recall that a morphline _is a_ pipe. Thus, unless a morphline contains nested pipes, the parent pipe of a given command is the morphline itself, meaning that the first command of the morphline is called with the given record. Thus, the {{callParentPipe}} command effectively implements recursion, which is useful for extracting data from container file formats in elegant and concise ways. For example, you could use this to extract data from tar.gz files. This command is typically used in combination with the commands {{detectMimeType}}, {{tryRules}}, {{decompress}}, {{unpack}}, and possibly {{solrCell}}.
+The {{callParentPipe}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/CallParentPipeBuilder.java]) routes records to the enclosing pipe object. Recall that a morphline _is a_ pipe. Thus, unless a morphline contains nested pipes, the parent pipe of a given command is the morphline itself, meaning that the first command of the morphline is called with the given record. Thus, the {{callParentPipe}} command effectively implements recursion, which is useful for extracting data from container data formats in elegant and concise ways. For example, you could use this to extract data from tar.gz files. This command is typically used in combination with the commands {{detectMimeType}}, {{tryRules}}, {{decompress}}, {{unpack}}, and possibly {{solrCell}}.
 
 Example usage:
 {code}
@@ -837,8 +876,9 @@ java {
 }
 {code}
 
-{anchor:logTrace}\_
- 
+{anchor:logTrace}
+\\
+\\
 h2. logTrace, logDebug, logInfo, logWarn, logError
 
 These commands log a message to [SLF4J|http://www.slf4j.org] at the given log level. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}. The special field expression @\{\} can be used to log the entire record.
@@ -1645,6 +1685,55 @@ readSequenceFile {
 }
 {code}
 
+h1. cdk\-morphlines\-metrics\-servlets
+
+h2. registerJVMMetrics
+
+The {{registerJVMMetrics}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-metrics-servlets/src/main/java/com/cloudera/cdk/morphline/metrics/servlets/RegisterJVMMetricsBuilder.java]) registers metrics that are related to the Java Virtual Machine with the
+MorphlineContext of the morphline. For example, this includes metrics for garbage collection events, buffer pools, threads and thread deadlocks.
+
+Often, the {{registerJVMMetrics}} command is combined with commands such as 
+[startReportingMetricsToHTTP|#startReportingMetricsToHTTP] or 
+[startReportingMetricsToJMX|#startReportingMetricsToJMX] or 
+[startReportingMetricsToSLF4J|#startReportingMetricsToSLF4J] or
+[startReportingMetricsToCSV|#startReportingMetricsToCSV].
+
+Example usage:
+{code}
+registerJVMMetrics {}
+{code}
+
+h2. startReportingMetricsToHTTP
+
+*Status: EXPERIMENTAL*
+
+The {{startReportingMetricsToHTTP}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-metrics-servlets/src/main/java/com/cloudera/cdk/morphline/metrics/servlets/StartReportingMetricsToHTTPBuilder.java]) exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by [Jetty|http://en.wikipedia.org/wiki/Jetty_(web_server)], using the [AdminServlet|http://metrics.codahale.com/manual/servlets/].
+
+On startup, a Jetty HTTP server is created that listens on a configurable port. If an HTTP server isn't required for your use case, and reporting metrics to JMX (or SLF4J or CSV) is sufficient, consider command such as [startReportingMetricsToJMX|#startReportingMetricsToJMX].
+
+Often, the {{startReportingMetricsToHTTP}} command is combined with the [registerJVMMetrics|#registerJVMMetrics] command.
+
+The following HTTP URLs are provided:
+
+|| URL Path || Servlet || Description ||
+| / | AdminServlet | an HTML admin menu, for example at {{http://foo.com:8080/}}, with links to the following servlets: |
+| /ping | PingServlet | PingServlet responds to GET requests with a text/plain/200 OK response of {{pong}}. This is useful for determining liveness for load balancers, etc. |
+| /healthcheck | HealthCheckServlet | HealthCheckServlet responds to GET requests by running all the health checks registered with the morphline context, and returning 501 Not Implemented if no health checks are registered, 200 OK if all pass, or 500 Internal Service Error if one or more fail. The results are returned as a human\-readable text/plain JSON entity. |
+| /metrics | MetricsServlet | MetricsServlet exposes the state of the metrics registered with the morphline context as a JSON object. |
+| /threads | ThreadDumpServlet | ThreadDumpServlet responds to GET requests with a text/plain representation of all the live threads in the JVM, their states, their stack traces, and the state of any locks they may be waiting for. |
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| port | 8080 | The port on which the HTTP server shall listen. |
+
+Example usage:
+{code}
+startReportingMetricsToHTTP {
+  port : 8080
+}
+{code}
+
 h1. cdk\-morphlines\-tika\-core
 
 This module contains morphline commands for auto-detecting MIME types from binary data. Depends on tika\-core.
@@ -1881,55 +1970,6 @@ More examples can be found in the [unit tests|https://github.com/cloudera/cdk/tr
 
 For more background, see resources such as the [XSLT Tutorial|http://www.w3schools.com/xsl/] and [Wikipedia|http://en.wikipedia.org/wiki/XSLT].
 
-
-h1. cdk\-morphlines\-metrics\-servlets
-
-h2. registerJVMMetrics
-
-The {{registerJVMMetrics}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-metrics-servlets/src/main/java/com/cloudera/cdk/morphline/metrics/servlets/RegisterJVMMetricsBuilder.java]) registers metrics that are related to the Java Virtual Machine with the
-MorphlineContext of the morphline. For example, this includes metrics for garbage collection events, buffer pools, threads and thread deadlocks.
-
-Often, the {{registerJVMMetrics}} command is combined with commands such as 
-[startReportingMetricsToHTTP|#startReportingMetricsToHTTP] or 
-[startReportingMetricsToJMX|#startReportingMetricsToJMX] or 
-[startReportingMetricsToSLF4J|#startReportingMetricsToSLF4J] or
-[startReportingMetricsToCSV|#startReportingMetricsToCSV].
-
-Example usage:
-{code}
-registerJVMMetrics {}
-{code}
-
-h2. startReportingMetricsToHTTP
-
-*Status: EXPERIMENTAL*
-
-The {{startReportingMetricsToHTTP}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-metrics-servlets/src/main/java/com/cloudera/cdk/morphline/metrics/servlets/StartReportingMetricsToHTTPBuilder.java]) exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by [Jetty|http://en.wikipedia.org/wiki/Jetty_(web_server)], using the [AdminServlet|http://metrics.codahale.com/manual/servlets/].
-
-On startup, a Jetty HTTP server is created that listens on a configurable port. If an HTTP server isn't required for your use case, and reporting metrics to JMX (or SLF4J or CSV) is sufficient, consider command such as [startReportingMetricsToJMX|#startReportingMetricsToJMX].
-
-Often, the {{startReportingMetricsToHTTP}} command is combined with the [registerJVMMetrics|#registerJVMMetrics] command.
-
-The following HTTP URLs are provided:
-
-|| URL Path || Servlet || Description ||
-| / | AdminServlet | an HTML admin menu, for example at {{http://foo.com:8080/}}, with links to the following servlets: |
-| /ping | PingServlet | PingServlet responds to GET requests with a text/plain/200 OK response of {{pong}}. This is useful for determining liveness for load balancers, etc. |
-| /healthcheck | HealthCheckServlet | HealthCheckServlet responds to GET requests by running all the health checks registered with the morphline context, and returning 501 Not Implemented if no health checks are registered, 200 OK if all pass, or 500 Internal Service Error if one or more fail. The results are returned as a human\-readable text/plain JSON entity. |
-| /metrics | MetricsServlet | MetricsServlet exposes the state of the metrics registered with the morphline context as a JSON object. |
-| /threads | ThreadDumpServlet | ThreadDumpServlet responds to GET requests with a text/plain representation of all the live threads in the JVM, their states, their stack traces, and the state of any locks they may be waiting for. |
-
-The command provides the following configuration options:
-
-|| Property Name || Default || Description ||
-| port | 8080 | The port on which the HTTP server shall listen. |
-
-Example usage:
-{code}
-startReportingMetricsToHTTP {
-  port : 8080
-}
-{code}
 
 h1. cdk\-morphlines\-solr\-core
 
