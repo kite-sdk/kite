@@ -68,8 +68,10 @@ public class DatasetDescriptor {
    * Create an instance of this class with the supplied {@link Schema},
    * and optional {@link PartitionStrategy}. The default {@link Format},
    * {@link Formats#AVRO}, will be used.
+   *
+   * @deprecated will be removed in 0.9.0
    */
-  public DatasetDescriptor(Schema schema,
+  @Deprecated  public DatasetDescriptor(Schema schema,
       @Nullable PartitionStrategy partitionStrategy) {
 
     this(schema, null, Formats.AVRO, null, null, partitionStrategy);

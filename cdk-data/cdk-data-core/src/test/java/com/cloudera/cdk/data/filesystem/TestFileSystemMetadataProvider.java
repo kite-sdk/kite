@@ -40,7 +40,8 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
   @Override
   public MetadataProvider newProvider(Configuration conf) {
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    return new FileSystemMetadataProvider(conf, testDirectory);
+    return new FileSystemMetadataProvider.Builder().configuration(conf)
+        .rootDirectory(testDirectory).get();
   }
 
   @Before

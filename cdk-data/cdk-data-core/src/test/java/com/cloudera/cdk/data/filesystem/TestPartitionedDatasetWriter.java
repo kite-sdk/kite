@@ -47,8 +47,11 @@ public class TestPartitionedDatasetWriter {
     this.conf = new Configuration();
     this.fileSystem = FileSystem.get(conf);
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    this.testProvider = new FileSystemMetadataProvider(conf, testDirectory);
-    this.repo = new FileSystemDatasetRepository(conf, testProvider);
+    this.testProvider = new FileSystemMetadataProvider.Builder().configuration(conf)
+        .rootDirectory(testDirectory).get();
+    this.repo = new FileSystemDatasetRepository.Builder().configuration(conf)
+        .metadataProvider(testProvider).get();
+
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", 2).get();
     Dataset users = repo.create(

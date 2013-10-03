@@ -27,7 +27,8 @@ public class TestFileSystemRepoWithProvider extends TestFileSystemDatasetReposit
 
   @Override
   public MetadataProvider newProvider(Configuration conf) {
-    return new FileSystemMetadataProvider(conf, testDirectory);
+    return new FileSystemMetadataProvider.Builder().configuration(conf)
+        .rootDirectory(testDirectory).get();
   }
 
 }

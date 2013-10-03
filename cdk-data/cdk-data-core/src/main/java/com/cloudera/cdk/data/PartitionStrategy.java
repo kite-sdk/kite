@@ -47,6 +47,9 @@ import com.google.common.collect.Lists;
  * {@code PartitionStrategy} which, in turn, produces a {@link PartitionKey}
  * that is used by the dataset implementation to select the proper partition.
  * </p>
+ * <p>
+ * Users should use the inner {@link Builder} to create new instances.
+ * </p>
  * 
  * @see FieldPartitioner
  * @see PartitionKey
@@ -64,14 +67,20 @@ public class PartitionStrategy {
 
   /**
    * Construct a partition strategy with a variadic array of field partitioners.
+   *
+   * @deprecated will be removed in 0.9.0
    */
+  @Deprecated
   public PartitionStrategy(FieldPartitioner... partitioners) {
     fieldPartitioners = Lists.newArrayList(partitioners);
   }
 
   /**
    * Construct a partition strategy with a list of field partitioners.
+   *
+   * @deprecated will be removed in 0.9.0
    */
+  @Deprecated
   public PartitionStrategy(List<FieldPartitioner> partitioners) {
     fieldPartitioners = Lists.newArrayList(partitioners);
   }

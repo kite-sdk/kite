@@ -26,6 +26,7 @@ import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
@@ -109,6 +110,10 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     }
   }
 
+  /*
+   * @deprecated will be removed in 0.9.0
+   */
+  @Deprecated
   public FileSystemMetadataProvider(Configuration conf, Path rootDirectory) {
     Preconditions.checkArgument(conf != null, "Configuration cannot be null");
     Preconditions.checkArgument(rootDirectory != null, "Root cannot be null");
@@ -475,6 +480,42 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       }
     } catch (IOException ex) {
       throw new MetadataProviderException("Cannot access descriptor location", ex);
+    }
+  }
+
+  /**
+   * A fluent builder to aid in the construction of {@link FileSystemMetadataProvider}
+   * instances.
+   * @since 0.8.0
+   */
+  public static class Builder implements Supplier<FileSystemMetadataProvider> {
+
+    private Path rootDirectory;
+    private Configuration configuration;
+
+    /**
+     * The root directory for metadata files.
+     *
+     * @param path a Path to a FileSystem location
+     * @return this Builder for method chaining.
+     */
+    public Builder rootDirectory(Path path) {
+      this.rootDirectory = path;
+      return this;
+    }
+
+    /**
+     * The {@link Configuration} used to find the {@link FileSystem}.
+     */
+    public Builder configuration(Configuration configuration) {
+      this.configuration = configuration;
+      return this;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public FileSystemMetadataProvider get() {
+      return new FileSystemMetadataProvider(configuration, rootDirectory);
     }
   }
 

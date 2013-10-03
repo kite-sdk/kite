@@ -57,8 +57,9 @@ import org.slf4j.LoggerFactory;
  * FileSystem (HDFS). Users may directly instantiate this class with the three
  * dependencies above and then perform dataset-related operations using any of
  * the provided methods. The primary methods of interest will be
- * {@link #create(String, com.cloudera.cdk.data.DatasetDescriptor)}, {@link #get(String)}, and
- * {@link #drop(String)} which create a new dataset, load an existing
+ * {@link #create(String, com.cloudera.cdk.data.DatasetDescriptor)},
+ * {@link #load(String)}, and
+ * {@link #delete(String)} which create a new dataset, load an existing
  * dataset, or delete an existing dataset, respectively. Once a dataset has been created
  * or loaded, users can invoke the appropriate {@link com.cloudera.cdk.data.Dataset} methods to get a reader
  * or writer as needed.
@@ -103,7 +104,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     final Path qualifiedRoot = fileSystem.makeQualified(rootDirectory);
     this.conf = new Configuration();
     this.conf.set("fs.defaultFS", fileSystem.getUri().toString());
-    this.metadataProvider = new FileSystemMetadataProvider(conf, qualifiedRoot);
+    this.metadataProvider = new FileSystemMetadataProvider.Builder().configuration(conf)
+        .rootDirectory(qualifiedRoot).get();
   }
 
   /**
@@ -134,7 +136,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     this.conf.set("fs.defaultFS", fileSystem.getUri().toString());
     // get a qualified path so we don't have to pass the FileSystem object
     final Path qualifiedRoot = fileSystem.makeQualified(rootDirectory);
-    this.metadataProvider = new FileSystemMetadataProvider(conf, qualifiedRoot);
+    this.metadataProvider = new FileSystemMetadataProvider.Builder().configuration(conf)
+        .rootDirectory(qualifiedRoot).get();
   }
 
   /**
@@ -170,7 +173,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    *
    * @since 0.8.0
    */
-  public FileSystemDatasetRepository(
+  FileSystemDatasetRepository(
       Configuration conf, MetadataProvider metadataProvider) {
     Preconditions.checkArgument(conf != null, "Configuration cannot be null");
     Preconditions.checkArgument(metadataProvider != null,
@@ -576,11 +579,13 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
         if (fileSystem != null) {
           // if the FS doesn't match, this will throw IllegalArgumentException
-          this.metadataProvider = new FileSystemMetadataProvider(
-              configuration, fileSystem.makeQualified(rootDirectory));
+          this.metadataProvider = new FileSystemMetadataProvider.Builder()
+              .configuration(configuration)
+              .rootDirectory(fileSystem.makeQualified(rootDirectory)).get();
         } else {
-          this.metadataProvider = new FileSystemMetadataProvider(
-              configuration, rootDirectory);
+          this.metadataProvider = new FileSystemMetadataProvider.Builder()
+              .configuration(configuration)
+              .rootDirectory(rootDirectory).get();
         }
       } else {
         Preconditions.checkState(rootDirectory == null,

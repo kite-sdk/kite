@@ -43,8 +43,8 @@ public class TestCrunchDatasets {
   @Before
   public void setUp() throws IOException {
     this.conf = new Configuration();
-    this.repo =
-        new FileSystemDatasetRepository(conf, new MemoryMetadataProvider(conf));
+    this.repo = new FileSystemDatasetRepository.Builder().configuration(conf)
+        .metadataProvider(new MemoryMetadataProvider(conf)).get();
   }
 
   @Test
