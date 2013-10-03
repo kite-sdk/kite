@@ -38,7 +38,7 @@ h3. cdk\-morphlines\-core\-stdlib
 | [addValues|#addValues] | Adds a list of values (or the contents of another field) to a given field. |
 | [addValuesIfAbsent|#addValuesIfAbsent] | Adds a list of values (or the contents of another field) to a given field if not already contained. |
 | [callParentPipe|#callParentPipe] | Implements recursion for extracting data from container data formats. |
-| [contains|#contains] | Returns if a given value is contained in a given field. |
+| [contains|#contains] | Returns whether or not a given value is contained in a given field. |
 | [convertTimestamp|#convertTimestamp] | Converts the timestamps in a given field from one of a set of input date formats to an output date format. |
 | [decodeBase64|#decodeBase64] | Converts a Base64 encoded String to a byte\[\]. |
 | [dropRecord|#dropRecord] | Silently consumes records without ever emitting any record. Think {{/dev/null}}. |
@@ -1458,9 +1458,7 @@ The {{readAvroContainer}} command ([source code|https://github.com/cloudera/cdk/
 
 The Avro schema that was used to write the Avro data is retrieved from the Avro container. Optionally, the Avro schema that shall be used for reading can be supplied with a configuration option; otherwise it is assumed to be the same as the writer schema.
 
-{note}
 Note: Avro uses [Schema Resolution|http://avro.apache.org/docs/current/spec.html#Schema+Resolution] if the two schemas are different, e.g. if the reader schema is a subset of the writer schema for the purpose of efficient column projection.
-{note}
 
 The input stream or byte array is read from the first attachment of the input record.
 
@@ -1488,13 +1486,11 @@ readAvroContainer {
 
 h2. readAvro
 
-The {{readAvro}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ReadAvroBuilder.java]) is the same as the {{readAvroContainer}} command except that the Avro schema that was used to write the Avro data must be explicitly supplied to the {{readAvro}} command because it expects raw Avro data without an Avro container and hence without a built-in writer schema.
+The {{readAvro}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ReadAvroBuilder.java]) is the same as the {{readAvroContainer}} command except that the Avro schema that was used to write the Avro data must be explicitly supplied to the {{readAvro}} command because it expects raw Avro data without an Avro container and hence without a built\-in writer schema.
 
 Optionally, the Avro schema that shall be used for reading can be supplied with a configuration option; otherwise it is assumed to be the same as the writer schema.
 
-{note}
 Note: Avro uses [Schema Resolution|http://avro.apache.org/docs/current/spec.html#Schema+Resolution] if the two schemas are different, e.g. if the reader schema is a subset of the writer schema for the purpose of efficient column projection.
-{note}
 
 The command provides the following configuration options:
 
@@ -1503,7 +1499,7 @@ The command provides the following configuration options:
 | readerSchemaFile | null | An optional Avro schema file in JSON format on the local file system to use for reading. |
 | readerSchemaString | null | An optional Avro schema in JSON format given inline to use for reading. |
 | writerSchemaFile | null | The Avro schema file in JSON format that was used to write the Avro data. |
-| writerSchemaString | null | The Avro schema file in JSON format that was used to write the Avro data given inline. |
+| writerSchemaString | null | The Avro schema file in JSON format that was used to write the Avro data, given inline. |
 | isJson | false | Whether the Avro input data is encoded as JSON or binary. |
 
 Example usage:
@@ -1542,7 +1538,7 @@ h2. extractAvroPaths
 
 The {{extractAvroPaths}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ExtractAvroPathsBuilder.java]) uses zero or more Avro path expressions to extract values from an Avro object.
 
-The Avro input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream {{readAvroContainer}} or {{readAvro}} command.
+The Avro input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [readAvroContainer|#readAvroContainer] or [readAvro|#readAvro] command.
 
 Each path expression consists of a record output field name (on the left side of the colon ':') as well as zero or more path steps (on the right hand side), each path step separated by a '/' slash, akin to a simple form of XPath. Avro arrays are traversed with the '\[\]' notation.
 
@@ -1607,7 +1603,7 @@ h2. extractJsonPaths
 
 The {{extractJsonPaths}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ExtractJsonPathsBuilder.java]) uses zero or more JSON path expressions to extract values from a [Jackson|https://github.com/FasterXML/jackson-databind] JSON object of outputClass [com.fasterxml.jackson.databind.JsonNode|http://wiki.fasterxml.com/JacksonTreeModel].
 
-The JSON input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream {{readJson}} command with {{outputClass : com.fasterxml.jackson.databind.JsonNode}}.
+The JSON input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [readJson|#readJson] command with {{outputClass : com.fasterxml.jackson.databind.JsonNode}}.
 
 Each path expression consists of a record output field name (on the left side of the colon ':') as well as zero or more path steps (on the right hand side), each path step separated by a '/' slash, akin to a simple form of XPath. JSON arrays are traversed with the '\[\]' notation.
 
