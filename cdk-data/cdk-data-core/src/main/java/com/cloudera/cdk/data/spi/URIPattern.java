@@ -121,7 +121,7 @@ public class URIPattern {
           uri.getSchemeSpecificPart(),
           result);
 
-    } else {
+    } else if (!uri.isOpaque()) {
       addAuthority(uri, result);
 
       Iterator<String> parts = PATH_SPLITTER.split(uri.getPath()).iterator();
@@ -133,6 +133,8 @@ public class URIPattern {
       }
 
       addQuery(uri, result);
+    } else {
+      return null;
     }
 
     if (!addComplexMatch(pattern.getFragment(), uri.getFragment(), result)) {
