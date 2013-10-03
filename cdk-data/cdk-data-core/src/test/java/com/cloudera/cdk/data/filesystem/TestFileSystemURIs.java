@@ -40,7 +40,7 @@ public class TestFileSystemURIs extends MiniDFSTest {
 
   @Test
   public void testLocalRelative() throws URISyntaxException {
-    DatasetRepository repository = DatasetRepositories.connect(new URI("dsr:file:target/dsr-repo-test"));
+    DatasetRepository repository = DatasetRepositories.open(new URI("repo:file:target/dsr-repo-test"));
 
     // We only do the deeper implementation checks one per combination.
     Assert.assertNotNull("Received a repository", repository);
@@ -61,7 +61,7 @@ public class TestFileSystemURIs extends MiniDFSTest {
 
   @Test
   public void testLocalAbsolute() throws URISyntaxException {
-    DatasetRepository repository = DatasetRepositories.connect(new URI("dsr:file:/tmp/dsr-repo-test"));
+    DatasetRepository repository = DatasetRepositories.open(new URI("repo:file:/tmp/dsr-repo-test"));
 
     FileSystemMetadataProvider provider = (FileSystemMetadataProvider)
         ((FileSystemDatasetRepository) repository).getMetadataProvider();
@@ -73,14 +73,14 @@ public class TestFileSystemURIs extends MiniDFSTest {
   public void testHdfsFailsDefault() {
     // the environment doesn't contain the HDFS URI, so this should cause a
     // DatasetRepository exception about not finding HDFS
-    DatasetRepositories.connect("dsr:hdfs:/");
+    DatasetRepositories.open("repo:hdfs:/");
   }
 
   @Test
   public void testHdfsAbsolute() throws URISyntaxException {
     URI hdfsUri = getDFS().getUri();
-    DatasetRepository repository = DatasetRepositories.connect(
-        new URI("dsr:hdfs://" + hdfsUri.getAuthority() + "/tmp/dsr-repo-test"));
+    DatasetRepository repository = DatasetRepositories.open(
+        new URI("repo:hdfs://" + hdfsUri.getAuthority() + "/tmp/dsr-repo-test"));
 
     // We only do the deeper implementation checks one per combination.
     Assert.assertNotNull("Received a repository", repository);

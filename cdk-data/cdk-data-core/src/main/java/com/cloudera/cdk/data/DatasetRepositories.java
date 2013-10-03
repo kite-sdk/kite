@@ -38,7 +38,7 @@ public class DatasetRepositories {
   private static final Logger logger = LoggerFactory.getLogger(DatasetRepositories.class);
 
   private static final URIPattern BASE_PATTERN = new URIPattern(
-      URI.create("dsr:*storage-uri"));
+      URI.create("repo:*storage-uri"));
   private static final Map<URIPattern, OptionBuilder<DatasetRepository>>
       REGISTRY = Maps.newLinkedHashMap();
 
@@ -70,21 +70,21 @@ public class DatasetRepositories {
   }
 
   /**
-   * Synonym for {@link #connect(java.net.URI)} for String URIs.
+   * Synonym for {@link #open(java.net.URI)} for String URIs.
    *
    * @param uri a String URI
    * @return a DatasetRepository for the given URI.
    * @throws IllegalArgumentException If the String cannot be parsed into a
    *                                  valid URI ({@see java.net.URI}).
    */
-  public static DatasetRepository connect(String uri) {
+  public static DatasetRepository open(String uri) {
     // uses of URI.create throw IllegalArgumentException if the URI is invalid
-    return connect(URI.create(uri));
+    return open(URI.create(uri));
   }
 
   /**
    * <p>
-   * Connect to a {@link }DatasetRepository} given a URI.
+   * Open a {@link }DatasetRepository} for the given URI.
    * </p>
    * <p>
    * This method provides a simpler way to connect to a {@link DatasetRepository}
@@ -122,35 +122,48 @@ public class DatasetRepositories {
    * <code>[path]</code> is the dataset repository root directory in which to
    * store dataset data. This form will load the Hadoop configuration
    * information per the usual methods (i.e. searching the process's classpath
-   * for the various configuration files) but overrides any value of
-   * <code>fs.defaultFS</code> with what is provided. This is to ensure
-   * deterministic behaviour and avoid confusion where the URI and on-disk
-   * configuration values for <code>fs.defaultFS</code> differ. This storage
-   * backend will produce a {@link DatasetRepository} that stores both data and
-   * metadata in HDFS. See {@link FileSystemDatasetRepository} for more
-   * information.
+   * for the various configuration files). This storage backend will produce a
+   * {@link DatasetRepository} that stores both data and metadata in HDFS. See
+   * {@link FileSystemDatasetRepository} for more information.
    * </p>
    * <h1>Hive/HCatalog URIs</h1>
    * <p>
-   * Connecting to Hive/HCatalog-backed dataset repositories is not currently
-   * supported.
+   * <code>hive</code> will connect to the Hive MetaStore. Dataset locations
+   * will be determined by Hive as managed tables.
+   * </p>
+   * <p>
+   * <code>hive:/[path]</code> will also connect to the Hive MetaStore, but
+   * tables will be external and stored under <code>[path]</code>. The
+   * repository storage layout will be the same as <code>hdfs</code> and
+   * <code>file</code> repositories. HDFS connection options can be supplied
+   * by adding <code>hdfs-host</code> and <code>hdfs-port</code> query options
+   * to the URI (see examples).
    * </p>
    * <h1>Examples</h1>
    * <p>
    * <table>
    * <tr>
-   * <td><code>dsr:file:foo/bar</code></td>
+   * <td><code>repo:file:foo/bar</code></td>
    * <td>Store data+metadata on the local filesystem in the directory
    * <code>./foo/bar</code>.</td>
    * </tr>
    * <tr>
-   * <td><code>dsr:file:///data</code></td>
+   * <td><code>repo:file:///data</code></td>
    * <td>Store data+metadata on the local filesystem in the directory
    * <code>/data</code></td>
    * </tr>
    * <tr>
-   * <td><code>dsr:hdfs://localhost:8020/data</code></td>
+   * <td><code>repo:hdfs://localhost:8020/data</code></td>
    * <td>Same as above, but stores data+metadata on HDFS.</td>
+   * </tr>
+   * <tr>
+   * <td><code>repo:hive</code></td>
+   * <td>Connects to the Hive MetaStore and creates managed tables.</td>
+   * </tr>
+   * <tr>
+   * <td><code>repo:hive:/path?hdfs-host=localhost&hdfs-port=8020</code></td>
+   * <td>Connects to the Hive MetaStore and creates external tables stored in
+   * <code>hdfs://localhost:8020/path</code>.</td>
    * </tr>
    * </table>
    * </p>
@@ -159,11 +172,11 @@ public class DatasetRepositories {
    * @return An appropriate implementation of {@link DatasetRepository}
    * @since 0.8.0
    */
-  public static DatasetRepository connect(URI repositoryUri) {
+  public static DatasetRepository open(URI repositoryUri) {
     final Map<String, String> baseMatch = BASE_PATTERN.getMatch(repositoryUri);
 
     Preconditions.checkArgument(baseMatch != null,
-        "Invalid dataset repository URI:%s - scheme must be `dsr:`",
+        "Invalid dataset repository URI:%s - scheme must be `repo:`",
         repositoryUri);
 
     final URI storage = URI.create(baseMatch.get("storage-uri"));

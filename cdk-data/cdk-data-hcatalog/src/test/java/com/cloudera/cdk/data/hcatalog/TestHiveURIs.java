@@ -44,7 +44,7 @@ public class TestHiveURIs extends TestFileSystemURIs {
 
   @Test
   public void testManagedURI() {
-    DatasetRepository repo = DatasetRepositories.connect("dsr:hive");
+    DatasetRepository repo = DatasetRepositories.open("repo:hive");
 
     Assert.assertNotNull("Received a repository", repo);
     Assert.assertTrue("Repo should be a HCatalogDatasetRepository",
@@ -57,7 +57,7 @@ public class TestHiveURIs extends TestFileSystemURIs {
 
   @Test(expected=DatasetRepositoryException.class)
   public void testExternalURIFailsWithoutHDFSInfo() {
-    DatasetRepositories.connect("dsr:hive:/tmp/hive-repo");
+    DatasetRepositories.open("repo:hive:/tmp/hive-repo");
 
     // if no HDFS connection options are given, then the constructed URI will
     // look like this: hdfs:/tmp/hive-repo, but without the HDFS host and port,
@@ -67,8 +67,8 @@ public class TestHiveURIs extends TestFileSystemURIs {
   @Test
   public void testExternalURI() {
     URI hdfsUri = getDFS().getUri();
-    DatasetRepository repo = DatasetRepositories.connect(
-        "dsr:hive:/tmp/hive-repo?hdfs-host=" + hdfsUri.getHost() +
+    DatasetRepository repo = DatasetRepositories.open(
+        "repo:hive:/tmp/hive-repo?hdfs-host=" + hdfsUri.getHost() +
         "&hdfs-port=" + hdfsUri.getPort());
 
     Assert.assertNotNull("Received a repository", repo);
