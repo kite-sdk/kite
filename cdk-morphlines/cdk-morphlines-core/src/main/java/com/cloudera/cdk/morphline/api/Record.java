@@ -35,6 +35,7 @@ public final class Record {
   
   private ArrayListMultimap<String, Object> fields;
 
+  /** Creates a new empty record. */
   public Record() {
     this(create());
   }
@@ -44,7 +45,7 @@ public final class Record {
     this.fields = fields;
   }
 
-  /** Returns a shallow copy of this record */
+  /** Returns a shallow copy of this record. */
   public Record copy() {
     //return new Record(ArrayListMultimap.create(fields)); // adding fields later causes (slow) rehashing
     ArrayListMultimap copy = ArrayListMultimap.create(fields.size() + 16, 10);
@@ -52,23 +53,34 @@ public final class Record {
     return new Record(copy);
   }
   
+  /** Returns the fields that are stored in this record. */
   public ListMultimap<String, Object> getFields() {
     return fields;
   }
 
+  /**
+   * Returns a view of the values associated with the given key. An empty collection may be
+   * returned, but never <code>null</null>.
+   */
   public List get(String key) {
     return fields.get(key);
   }
   
+  /** Adds the given value to the values currently associated with the given key. */
   public void put(String key, Object value) {
     fields.put(key, value);    
   }
   
+  /** Returns the first value associated with the given key, or null if no such value exists */
   public Object getFirstValue(String key) {
     List values = fields.get(key);
     return values.size() > 0 ? values.get(0) : null;
   }
-  
+
+  /**
+   * Removes all values that are associated with the given key, and then associates the given value
+   * with the given key.
+   */
   public void replaceValues(String key, Object value) {
 //    fields.replaceValues(key, Collections.singletonList(value)); // unnecessarily slow
     List list = fields.get(key);
@@ -76,11 +88,16 @@ public final class Record {
     list.add(value);
   }
   
+  /** Removes all values that are associated with the given key */
   public void removeAll(String key) {
     //fields.removeAll(key); // unnecessarily slow
     fields.get(key).clear();
   }
   
+  /**
+   * Adds the given value to the values currently associated with the given key, iff the key isn't
+   * already associated with that same value.
+   */
   public void putIfAbsent(String key, Object value) {
     if (!fields.containsEntry(key, value)) {
       fields.put(key, value);

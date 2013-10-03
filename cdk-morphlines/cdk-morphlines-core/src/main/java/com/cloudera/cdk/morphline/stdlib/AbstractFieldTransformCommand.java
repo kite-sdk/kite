@@ -36,6 +36,7 @@ public abstract class AbstractFieldTransformCommand extends AbstractCommand {
     this.fieldName = getConfigs().getString(config, "field");
   }
       
+  /** Deprecated; Will be removed in the next release */
   @Deprecated
   protected AbstractFieldTransformCommand(Config config, Command parent, Command child, MorphlineContext context) {
     super(config, parent, child, context);      

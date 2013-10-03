@@ -20,7 +20,7 @@ package com.cloudera.cdk.morphline.api;
  * 
  * A command has a boolean return code, indicating success or failure. All record handlers in a
  * morphline implement this interface. Commands are chained together. The parent of a command A is
- * the command B that passes records to A.
+ * the command B that passes records to A. A is the child of B.
  * 
  * Data is sent on the data plane whereas notifications are sent on the control plane, which is a
  * separate communication channel.
@@ -40,8 +40,9 @@ public interface Command {
    */
   boolean process(Record record);
   
-  /** 
-   * Returns the parent of this command.
+  /**
+   * Returns the parent of this command. The parent of a command A is the command B that passes
+   * records to A. A is the child of B.
    */
   Command getParent();
 }

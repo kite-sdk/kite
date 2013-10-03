@@ -32,10 +32,11 @@ public interface CommandBuilder {
   Collection<String> getNames();
 
   /**
-   * Creates and returns a command rooted at the given morphline config.
+   * Creates and returns a command rooted at the given morphline JSON <code>config</code>.
    * 
-   * The command will feed records into child. The command will have parent as it's parent.
-   * Additional parameters can be passed via the morphline context.
+   * The command will feed records into <code>child</code>. The command will have
+   * <code>parent</code> as it's parent. Additional parameters can be passed via the morphline
+   * <code>context</code>.
    */
   Command build(Config config, Command parent, Command child, MorphlineContext context);
 

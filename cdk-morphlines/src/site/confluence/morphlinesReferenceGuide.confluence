@@ -2,8 +2,10 @@ h1. Cloudera Morphlines Reference Guide
 
 Cloudera Morphlines provides a set of frequently\-used high\-level transformation and I/O commands that can be combined in application specific ways. The following tables provide a short description of each available command and a link to the complete documentation.
 
-Note that perhaps the most important property of the Morphlines framework is how easy it is to add new transformations and I/O commands and integrate existing functionality and third party systems. If none of the existing commands match your use case, you can easily write your own command and plug it in. Simply implement the Java interface {{Command}} or subclass {{AbstractCommand}} and add the resulting Java class to the classpath. 
-Here are two examples: [toString|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java] and [readLine|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadLineBuilder.java]. No registration or other administrative action is required. Indeed, none of the standard commands are special or intrinsically known per se. All commands are implemented like this, even including standard commands such as {{pipe}}, {{if}}, and {{tryRules}}. This means your custom commands can even replace any standard commands, if desired.
+h3. Implementing your own Command
+
+Note that perhaps the most important property of the Morphlines framework is how easy it is to add new transformations and I/O commands and integrate existing functionality and third party systems. If none of the existing commands match your use case, you can easily write your own command and plug it in. Simply implement the Java interface [Command|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/api/Command.java] or subclass [AbstractCommand|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/base/AbstractCommand.java], have it handle a [Record|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/api/Record.java] and add the resulting Java class to the classpath. 
+Here are two example implementations: [toString|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java] and [readLine|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadLineBuilder.java]. No registration or other administrative action is required. Indeed, none of the standard commands are special or intrinsically known per se. All commands are implemented like this, even including standard commands such as {{pipe}}, {{if}}, and {{tryRules}}. This means your custom commands can even replace any standard commands, if desired.
 
 h3. Table of Contents
 
@@ -141,7 +143,7 @@ h3. cdk\-morphlines\-solr\-cell
 
 h1. cdk\-morphlines\-core\-stdio
 
-This module contains standard I/O commands for tasks such as acting on single\-line records, multi\-line records, CSV files, and for converting bytes to strings.
+This maven module contains standard I/O commands for tasks such as acting on single\-line records, multi\-line records, CSV files, and for converting bytes to strings.
 
 h2. readClob
 
@@ -308,7 +310,7 @@ readMultiLine {
 
 h1. cdk\-morphlines\-core\-stdlib
 
-This module contains standard transformation commands, such as commands for flexible log file analysis, regular expression based pattern matching and extraction, operations on fields for assignment and comparison, operations on fields with list and set semantics, if\-then\-else conditionals, string and timestamp conversions, scripting support for dynamic java code, a small rules engine, logging, and metrics and counters.
+This maven module contains standard transformation commands, such as commands for flexible log file analysis, regular expression based pattern matching and extraction, operations on fields for assignment and comparison, operations on fields with list and set semantics, if\-then\-else conditionals, string and timestamp conversions, scripting support for dynamic java code, a small rules engine, logging, and metrics and counters.
 
 h2. addCurrentTime
 
@@ -1450,7 +1452,7 @@ tryRules {
 
 h1. cdk\-morphlines\-avro
 
-This module contains morphline commands for reading, extracting, and transforming Avro files and Avro objects.
+This maven module contains morphline commands for reading, extracting, and transforming Avro files and Avro objects.
 
 h2. readAvroContainer
 
@@ -1574,7 +1576,7 @@ extractAvroPaths {
 
 h1. cdk\-morphlines\-json
 
-This module contains morphline commands for reading, extracting, and transforming JSON files and JSON objects.
+This maven module contains morphline commands for reading, extracting, and transforming JSON files and JSON objects.
 
 h2. readJson
 
@@ -1732,7 +1734,7 @@ startReportingMetricsToHTTP {
 
 h1. cdk\-morphlines\-tika\-core
 
-This module contains morphline commands for auto-detecting MIME types from binary data. Depends on tika\-core.
+This maven module contains morphline commands for auto-detecting MIME types from binary data. Depends on tika\-core.
 
 h2. detectMimeType
 
@@ -1779,7 +1781,7 @@ detectMimeType {
 
 h1. cdk\-morphlines\-tika\-decompress
 
-This module contains morphline commands for decompressing and unpacking files. Depends on tika\-core and commons\-compress.
+This maven module contains morphline commands for decompressing and unpacking files. Depends on tika\-core and commons\-compress.
 
 h2. decompress
 
@@ -1801,7 +1803,7 @@ unpack {}
 
 h1. cdk\-morphlines\-saxon
 
-This module contains morphline commands for reading, extracting and transforming XML and HTML with XPath, XQuery and XSLT.
+This maven module contains morphline commands for reading, extracting and transforming XML and HTML with XPath, XQuery and XSLT.
 
 h2. convertHTML
 
@@ -1969,7 +1971,7 @@ For more background, see resources such as the [XSLT Tutorial|http://www.w3schoo
 
 h1. cdk\-morphlines\-solr\-core
 
-This module contains morphline commands for Solr that higher level modules such as cdk\-morphlines\-solr\-cell, search\-mr, and search\-flume depend on for indexing.
+This maven module contains morphline commands for Solr that higher level modules such as cdk\-morphlines\-solr\-cell, search\-mr, and search\-flume depend on for indexing.
 
 h2. solrLocator
 
@@ -2124,7 +2126,7 @@ This example assumes the Solr field type named "text\_en" is defined in {{schema
 
 h1. cdk\-morphlines\-solr\-cell
 
-This module contains morphline commands for using SolrCell with Tika parsers. This includes support for types including HTML, XML, PDF, Word, Excel, Images, Audio, and Video.
+This maven module contains morphline commands for using SolrCell with Tika parsers. This includes support for types including HTML, XML, PDF, Word, Excel, Images, Audio, and Video.
 
 h2. solrCell
 

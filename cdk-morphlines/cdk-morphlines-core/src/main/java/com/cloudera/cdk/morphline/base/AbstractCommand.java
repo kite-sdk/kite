@@ -56,6 +56,14 @@ public abstract class AbstractCommand implements Command {
 
   protected final Logger LOG = LoggerFactory.getLogger(getClass());
     
+  /**
+   * Using the given <code>builder</code>, constructs a command rooted at the given morphline JSON
+   * <code>config</code>.
+   * 
+   * The command will feed records into <code>child</code>. The command will have
+   * <code>parent</code> as it's parent. Additional parameters can be passed via the morphline
+   * <code>context</code>.
+   */
   protected AbstractCommand(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
     Preconditions.checkNotNull(builder);
     Preconditions.checkNotNull(config);
@@ -74,6 +82,7 @@ public abstract class AbstractCommand implements Command {
     this.numNotifyCallsMeter = getMeter(Metrics.NUM_NOTIFY_CALLS);
   }
     
+  /** Deprecated; will be removed in the next release */
   @Deprecated
   protected AbstractCommand(Config config, Command parent, Command child, MorphlineContext context) {
     Preconditions.checkNotNull(config);
@@ -95,18 +104,25 @@ public abstract class AbstractCommand implements Command {
     return parent;
   }
   
+  /**
+   * Returns the child of this command. The parent of a command A is the command B that passes
+   * records to A. A is the child of B.
+   */
   protected Command getChild() {
     return child;
   }
   
+  /** Returns the JSON configuration of this command. */ 
   protected Config getConfig() {
     return config;
   }
   
+  /** Returns the context of this command. */ 
   protected MorphlineContext getContext() {
     return context;
   }
   
+  /** Returns a helper for convenient access to the JSON configuration of this command. */ 
   protected Configs getConfigs() {
     return configs;
   }
@@ -128,6 +144,9 @@ public abstract class AbstractCommand implements Command {
     }
   }
 
+  /**
+   * Processes the given notification on the control plane of the subtree rooted at this command.
+   */
   protected void doNotify(Record notification) {
     getChild().notify(notification);
   }
@@ -149,26 +168,37 @@ public abstract class AbstractCommand implements Command {
     }
   }
   
+  /**
+   * Processes the given record on the data plane of this command.
+   * 
+   * @return true to indicate that processing shall continue, false to indicate that backtracking
+   *         shall be done
+   */
   protected boolean doProcess(Record record) {
     return getChild().process(record);
   }
   
+  /** Helper that checks if the user provided configuration parameters are valid. */ 
   protected void validateArguments() {
     getConfigs().validateArguments(getConfig());
   }
   
+  /** Returns a counter for maintaining main-memory metrics. */
   protected Counter getCounter(String... names) {
     return getContext().getMetricRegistry().counter(getMetricName(names));
   }
   
+  /** Returns a histogram for maintaining main-memory metrics. */
   protected Histogram getHistogram(String... names) {
     return getContext().getMetricRegistry().histogram(getMetricName(names));
   }
   
+  /** Returns a meter for maintaining main-memory metrics. */
   protected Meter getMeter(String... names) {
     return getContext().getMetricRegistry().meter(getMetricName(names));
   }
   
+  /** Returns a timer for maintaining main-memory metrics. */
   protected Timer getTimer(String... names) {
     return getContext().getMetricRegistry().timer(getMetricName(names));
   }
@@ -177,6 +207,7 @@ public abstract class AbstractCommand implements Command {
     return MetricRegistry.name(name, names);
   }
   
+  /** Returns whether or not metrics should be measured. */
   protected final boolean isMeasuringMetrics() {
     return IS_MEASURING_METRICS;
   }
