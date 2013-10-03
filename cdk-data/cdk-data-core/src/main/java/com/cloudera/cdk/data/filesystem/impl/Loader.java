@@ -60,7 +60,7 @@ public class Loader implements Loadable {
       final Path root;
       String path = options.getString("path");
       if (path == null || path.isEmpty()) {
-        root = new Path(".");
+        root = new Path("/");
       } else if (options.getBoolean("absolute", false)) {
         root = new Path("/", path);
       } else {
@@ -74,8 +74,8 @@ public class Loader implements Loadable {
             "Could not get a FileSystem", ex);
       }
       return (DatasetRepository) new FileSystemDatasetRepository.Builder()
-          .configuration(new Configuration(envConf)) // make a modifiable copy
-          .rootDirectory(fs.makeQualified(root))
+          .rootDirectory(root)
+          .fileSystem(fs)
           .get();
     }
 
@@ -109,9 +109,9 @@ public class Loader implements Loadable {
         new URIBuilder(conf);
 
     DatasetRepositories.register(
-        new URIPattern(URI.create("file:/*path?absolute=true")), builder);
-    DatasetRepositories.register(
         new URIPattern(URI.create("file:*path")), builder);
+    DatasetRepositories.register(
+        new URIPattern(URI.create("file:/*path?absolute=true")), builder);
 
     String hdfsAuthority;
     try {
@@ -129,7 +129,5 @@ public class Loader implements Loadable {
         new URIPattern(URI.create(
             "hdfs://" + hdfsAuthority + "/*path?absolute=true")),
         builder);
-    DatasetRepositories.register(
-        new URIPattern(URI.create("hdfs:*path")), builder);
   }
 }
