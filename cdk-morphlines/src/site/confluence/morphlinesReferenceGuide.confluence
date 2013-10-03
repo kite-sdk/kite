@@ -837,7 +837,8 @@ java {
 }
 {code}
 
-{anchor:logTrace}
+{anchor:logTrace}\_
+ 
 h2. logTrace, logDebug, logInfo, logWarn, logError
 
 These commands log a message to [SLF4J|http://www.slf4j.org] at the given log level. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}. The special field expression @\{\} can be used to log the entire record.
