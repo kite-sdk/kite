@@ -53,13 +53,14 @@ public class URIPattern {
   private Map<String, String> lastMatch;
 
   public URIPattern(URI uri) {
-    Preconditions.checkArgument(uri.isAbsolute(), "URI must be absolute");
     this.pattern = uri;
 
     Map<String, String> accumulator = Maps.newHashMap();
     addQuery(pattern, accumulator);
     addAuthority(pattern, accumulator);
-    accumulator.put(SCHEME, pattern.getScheme());
+    if (pattern.getScheme() != null) {
+      accumulator.put(SCHEME, pattern.getScheme());
+    }
     this.defaults = ImmutableMap.copyOf(accumulator);
   }
 
@@ -103,7 +104,12 @@ public class URIPattern {
    */
   public Map<String, String> getMatch(URI uri) {
     // verify that the schemes match
-    if (!pattern.getScheme().equalsIgnoreCase(uri.getScheme())) {
+    if (pattern.isAbsolute()) {
+      // if there should be a scheme, make sure it matches
+      if (!pattern.getScheme().equalsIgnoreCase(uri.getScheme())) {
+        return null;
+      }
+    } else if (uri.getScheme() != null) {
       return null;
     }
 

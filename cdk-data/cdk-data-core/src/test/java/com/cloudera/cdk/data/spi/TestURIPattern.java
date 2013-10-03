@@ -16,7 +16,6 @@
 
 package com.cloudera.cdk.data.spi;
 
-import com.cloudera.cdk.data.spi.URIPattern;
 import com.google.common.collect.Maps;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -31,6 +30,13 @@ public class TestURIPattern {
   @Before
   public void setup() {
     expected = Maps.newHashMap();
+  }
+
+  @Test
+  public void testNonAbsoluteExactMatch() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("hive");
+    String uri = "hive";
+    Assert.assertTrue(pattern.matches(uri));
   }
 
   @Test

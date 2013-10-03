@@ -99,6 +99,15 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
   }
 
   /**
+   * Returns the {@link MetadataProvider} used by this repository.
+   *
+   * @return the MetadataProvider used by this repository.
+   */
+  MetadataProvider getMetadataProvider() {
+    return metadataProvider;
+  }
+
+  /**
    * A fluent builder to aid in the construction of {@link HCatalogDatasetRepository}
    * instances.
    * @since 0.3.0
