@@ -29,7 +29,8 @@ import java.util.Map;
 
 /**
  * Defines a URI pattern that can be used to parse and match other URIs.
- * 
+ *
+ * @since 0.8.0
  */
 public class URIPattern {
 

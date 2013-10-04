@@ -319,6 +319,7 @@ public class PartitionStrategy {
      *          data).
      * @return An instance of the builder for method chaining.
      * @see IdentityFieldPartitioner
+     * @since 0.8.0
      */
     @SuppressWarnings("unchecked")
     public <S> Builder identity(String name, Class<S> type, int buckets) {

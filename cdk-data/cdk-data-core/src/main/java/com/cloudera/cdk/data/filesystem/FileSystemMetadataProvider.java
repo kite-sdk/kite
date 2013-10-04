@@ -85,7 +85,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   // cache the rootDirectory's FileSystem to avoid multiple lookups
   private transient final FileSystem rootFileSystem;
 
-  /*
+  /**
    * All metadata is stored under rootDirectory. Data may also be stored under
    * rootDirectory if no location is set on incoming descriptors.
    *
@@ -110,7 +110,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     }
   }
 
-  /*
+  /**
    * @deprecated will be removed in 0.9.0
    */
   @Deprecated

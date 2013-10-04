@@ -24,6 +24,8 @@ package com.cloudera.cdk.data.spi;
  *
  * For implementations to be automatically loaded, they must be listed in:
  *   META-INF/services/com.cloudera.cdk.data.spi.Loadable
+ *
+ * @since 0.8.0
  */
 public interface Loadable {
   /**

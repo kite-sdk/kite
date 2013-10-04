@@ -16,6 +16,11 @@
 
 package com.cloudera.cdk.data;
 
+/**
+ * Exception thrown when trying to create a dataset that already exists.
+ *
+ * @since 0.8.0
+ */
 public class DatasetExistsException extends DatasetRepositoryException {
   public DatasetExistsException(String message) {
     super(message);

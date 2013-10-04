@@ -25,6 +25,8 @@ import java.util.Map;
  *
  * @param <T> The type of objects returned by the
  *            {@link #getFromOptions(java.util.Map)} method.
+ *
+ * @since 0.8.0
  */
 public interface OptionBuilder<T> {
   /**

@@ -31,6 +31,8 @@ import java.util.ServiceLoader;
 
 /**
  * <p>Convenience methods for working with {@link DatasetRepository} instances.</p>
+ *
+ * @since 0.8.0
  */
 public class DatasetRepositories {
 
