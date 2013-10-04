@@ -701,11 +701,6 @@
         <groupId>org.apache.hcatalog</groupId>
         <artifactId>hcatalog-core</artifactId>
         <version>${vers.hcatalog}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.hive</groupId>
-        <artifactId>hive-metastore</artifactId>
-        <version>${vers.hive}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
