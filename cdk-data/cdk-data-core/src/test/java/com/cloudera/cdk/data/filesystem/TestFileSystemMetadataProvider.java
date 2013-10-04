@@ -147,7 +147,7 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
         fileSystem.exists(schemaFile));
     Assert.assertFalse("Metadata directory should not exist",
         fileSystem.exists(metadataDirectory));
-    Assert.assertFalse("Named directory should note exist for name:" + NAME,
+    Assert.assertTrue("Named directory should still exist for name:" + NAME,
         fileSystem.exists(namedDirectory));
   }
 

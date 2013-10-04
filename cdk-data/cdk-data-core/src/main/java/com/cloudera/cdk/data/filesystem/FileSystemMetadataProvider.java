@@ -259,15 +259,11 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
     logger.debug("Deleting dataset metadata name:{}", name);
 
-    final Path namedDirectory = pathForDataset(name);
     final Path metadataDirectory = pathForMetadata(name);
 
     try {
       if (rootFileSystem.exists(metadataDirectory)) {
         if (rootFileSystem.delete(metadataDirectory, true)) {
-          // try to delete the named directory, but only if it is empty; the
-          // data may be stored there
-          rootFileSystem.delete(namedDirectory, false);
           return true;
         } else {
           throw new IOException("Failed to delete metadata directory:"
