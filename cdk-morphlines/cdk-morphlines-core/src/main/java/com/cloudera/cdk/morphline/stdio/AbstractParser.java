@@ -48,8 +48,19 @@ public abstract class AbstractParser extends AbstractCommand {
 
   public static final String SUPPORTED_MIME_TYPES = "supportedMimeTypes";
 
-  public AbstractParser(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
+  protected AbstractParser(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
     super(builder, config, parent, child, context);      
+    List<String> mimeTypes = getConfigs().getStringList(config, SUPPORTED_MIME_TYPES, Collections.EMPTY_LIST);
+    for (String mimeType : mimeTypes) {
+      addSupportedMimeType(mimeType);
+    }
+    this.numRecordsMeter = getMeter(Metrics.NUM_RECORDS);
+  }
+
+  /** Deprecated; will be removed in the next release */
+  @Deprecated
+  protected AbstractParser(Config config, Command parent, Command child, MorphlineContext context) {
+    super(config, parent, child, context);      
     List<String> mimeTypes = getConfigs().getStringList(config, SUPPORTED_MIME_TYPES, Collections.EMPTY_LIST);
     for (String mimeType : mimeTypes) {
       addSupportedMimeType(mimeType);
