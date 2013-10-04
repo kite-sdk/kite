@@ -17,7 +17,6 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
-import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.MetadataProvider;

@@ -27,7 +27,7 @@ import javax.annotation.concurrent.Immutable;
  * zero or more {@link Dataset}s. A repository acts as a factory, as well as a
  * registry, of datasets. Users can {@link #create(String, DatasetDescriptor)} a
  * new {@link Dataset} with a name and schema, or retrieve a handle to an
- * existing dataset, by name, by way of the {@link #get(String)} method. While
+ * existing dataset, by name, by way of the {@link #load(String)} method. While
  * not expressly forbidden, most repositories are expected to support only a
  * single concrete {@link Dataset} implementation.
  * </p>

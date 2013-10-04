@@ -42,7 +42,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import org.apache.avro.reflect.ReflectData;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
 /**
@@ -335,7 +334,7 @@ public class DatasetDescriptor {
      *
      * @return An instance of the builder for method chaining.
      *
-     * @deprecated will be removed in 0.9.0, use {@link schemaUri(java.net.URI)}
+     * @deprecated will be removed in 0.9.0, use {@link #schemaUri(java.net.URI)}
      */
     @Deprecated
     public Builder schema(URI uri) throws IOException {
@@ -372,7 +371,8 @@ public class DatasetDescriptor {
      *
      * @since 0.8.0
      */
-    public Builder schemaUri(URI uri) throws MalformedURLException, IOException {
+    @SuppressWarnings("deprecation")
+    public Builder schemaUri(URI uri) throws IOException {
       return schema(uri);
     }
 
@@ -390,8 +390,8 @@ public class DatasetDescriptor {
      *
      * @since 0.8.0
      */
-    public Builder schemaUri(String uri) throws
-        URISyntaxException, MalformedURLException, IOException {
+    @SuppressWarnings("deprecation")
+    public Builder schemaUri(String uri) throws URISyntaxException, IOException {
       return schema(new URI(uri));
     }
 
@@ -598,9 +598,10 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the {@link Configuration} used to resolve the {@code location}.
+     * Add a key-value property to the descriptor.
      *
-     * @param conf a {@code Configuration}
+     * @param name the property name
+     * @param value the property value
      * @return An instance of the builder for method chaining.
      *
      * @since 0.8.0

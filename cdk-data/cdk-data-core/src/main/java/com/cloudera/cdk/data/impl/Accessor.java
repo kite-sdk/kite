@@ -17,9 +17,7 @@ package com.cloudera.cdk.data.impl;
 
 import com.cloudera.cdk.data.Format;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.Format;
 import com.cloudera.cdk.data.PartitionKey;
-import com.cloudera.cdk.data.PartitionStrategy;
 
 /**
  * <p>

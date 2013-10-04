@@ -260,6 +260,7 @@ class FileSystemDataset implements Dataset {
     for (int i = 0; i < key.getLength(); i++) {
       FieldPartitioner fp = partitionStrategy.getFieldPartitioners().get(i);
       String fieldName = fp.getName();
+      @SuppressWarnings("unchecked")
       String fieldValue = fp.valueToString(key.get(i));
       result = new Path(result, fieldName + "=" + fieldValue);
     }

@@ -17,12 +17,6 @@ package com.cloudera.cdk.data;
 
 import com.cloudera.cdk.data.partition.DayOfMonthFieldPartitioner;
 import com.cloudera.cdk.data.partition.HashFieldPartitioner;
-import com.cloudera.cdk.data.partition.MinuteFieldPartitioner;
-import com.cloudera.cdk.data.partition.MonthFieldPartitioner;
-import com.cloudera.cdk.data.partition.PartitionFunctions;
-import com.cloudera.cdk.data.partition.RangeFieldPartitioner;
-import com.cloudera.cdk.data.partition.DayOfMonthFieldPartitioner;
-import com.cloudera.cdk.data.partition.HashFieldPartitioner;
 import com.cloudera.cdk.data.partition.HourFieldPartitioner;
 import com.cloudera.cdk.data.partition.IdentityFieldPartitioner;
 import com.cloudera.cdk.data.partition.MinuteFieldPartitioner;
@@ -62,6 +56,7 @@ class PartitionExpression {
     this.isStrict = isStrict;
   }
 
+  @SuppressWarnings("deprecation")
   public PartitionStrategy evaluate() {
     Object object = expression.evaluate(null);
     if (object instanceof FieldPartitioner) {

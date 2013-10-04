@@ -166,6 +166,7 @@ public class PartitionStrategy {
    * written to, or to find a partition using objects from the entity domain.
    * </p>
    */
+  @SuppressWarnings("unchecked")
   public PartitionKey partitionKeyForEntity(Object entity,
       @Nullable PartitionKey reuseKey) {
     PartitionKey key = (reuseKey == null ?
@@ -297,6 +298,7 @@ public class PartitionStrategy {
      * @deprecated Use {@link #identity(String, Class, int)}.
      */
     @Deprecated
+    @SuppressWarnings("unchecked")
     public Builder identity(String name, int buckets) {
       fieldPartitioners.add(new IdentityFieldPartitioner(name, String.class, buckets));
       return this;
@@ -318,6 +320,7 @@ public class PartitionStrategy {
      * @return An instance of the builder for method chaining.
      * @see IdentityFieldPartitioner
      */
+    @SuppressWarnings("unchecked")
     public <S> Builder identity(String name, Class<S> type, int buckets) {
       fieldPartitioners.add(new IdentityFieldPartitioner(name, type, buckets));
       return this;

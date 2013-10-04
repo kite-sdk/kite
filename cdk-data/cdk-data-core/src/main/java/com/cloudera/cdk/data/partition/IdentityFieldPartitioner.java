@@ -36,6 +36,7 @@ public class IdentityFieldPartitioner<S> extends FieldPartitioner<S, S> {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public S valueFromString(String stringValue) {
     if (getType() == Integer.class) {
       return (S) Integer.valueOf(stringValue);

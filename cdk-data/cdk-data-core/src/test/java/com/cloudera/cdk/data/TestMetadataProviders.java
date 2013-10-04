@@ -66,7 +66,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
         new Configuration());
     this.testDescriptor = new DatasetDescriptor.Builder()
         .format(Formats.AVRO)
-        .schema(USER_SCHEMA_URL)
+        .schemaUri(USER_SCHEMA_URL)
         .partitionStrategy(new PartitionStrategy.Builder()
             .year("timestamp")
             .month("timestamp")

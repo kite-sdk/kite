@@ -41,7 +41,7 @@ public class TestDatasetDescriptor extends MiniDFSTest {
     out.close();
 
     // build a schema using the HDFS path and check it's the same
-    Schema schema = new DatasetDescriptor.Builder().schema(schemaPath.toUri()).get()
+    Schema schema = new DatasetDescriptor.Builder().schemaUri(schemaPath.toUri()).get()
         .getSchema();
 
     Assert.assertEquals(USER_SCHEMA, schema);
@@ -61,6 +61,6 @@ public class TestDatasetDescriptor extends MiniDFSTest {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder().schemaUri(uri).get();
 
     Assert.assertNotNull(descriptor);
-    Assert.assertTrue(descriptor.getSchema() instanceof Schema);
+    Assert.assertNotNull(descriptor.getSchema());
   }
 }

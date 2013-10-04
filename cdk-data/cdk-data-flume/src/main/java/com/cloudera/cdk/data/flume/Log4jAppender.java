@@ -70,6 +70,7 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   protected void populateAvroHeaders(Map<String, String> hdrs, Schema schema,
       Object message) {
     if (!initialized) {

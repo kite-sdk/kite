@@ -19,7 +19,6 @@ import com.cloudera.cdk.data.FieldPartitioner;
 import java.util.List;
 import java.util.Set;
 
-import com.cloudera.cdk.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 

@@ -16,11 +16,10 @@
 package com.cloudera.cdk.data.partition;
 
 import com.cloudera.cdk.data.FieldPartitioner;
-import com.cloudera.cdk.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
-import java.util.Arrays;
+import com.google.common.primitives.Ints;
 
 @Beta
 public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer> {
@@ -58,17 +57,17 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
     }
     IntRangeFieldPartitioner that = (IntRangeFieldPartitioner) o;
     return Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(Arrays.asList(this.upperBounds), Arrays.asList(that.upperBounds));
+        Objects.equal(Ints.asList(this.upperBounds), Ints.asList(that.upperBounds));
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getName(), Arrays.asList(upperBounds));
+    return Objects.hashCode(getName(), Ints.asList(upperBounds));
   }
 
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("name", getName())
-      .add("upperBounds", Arrays.asList(upperBounds)).toString();
+      .add("upperBounds", Ints.asList(upperBounds)).toString();
   }
 }

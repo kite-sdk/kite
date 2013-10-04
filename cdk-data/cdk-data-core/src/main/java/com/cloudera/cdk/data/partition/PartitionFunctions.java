@@ -23,6 +23,7 @@ import com.google.common.annotations.Beta;
  * JEXL.
  */
 @Beta
+@SuppressWarnings("unchecked")
 public class PartitionFunctions {
 
   public static <S> FieldPartitioner<S, Integer> hash(String name, int buckets) {

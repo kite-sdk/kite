@@ -101,7 +101,7 @@ public class Loader implements Loadable {
     }
   }
 
-  private static class ManagedBuilder implements OptionBuilder {
+  private static class ManagedBuilder implements OptionBuilder<DatasetRepository> {
     private final Configuration envConf;
 
     public ManagedBuilder(Configuration envConf) {
@@ -109,7 +109,7 @@ public class Loader implements Loadable {
     }
 
     @Override
-    public Object getFromOptions(Map options) {
+    public DatasetRepository getFromOptions(Map options) {
       return new HCatalogDatasetRepository.Builder()
           .configuration(new Configuration(envConf)) // make a modifiable copy
           .get();

@@ -33,7 +33,7 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * {@link Dataset#getReader()} method to get an appropriate implementation.
  * Normally, users receive an instance of this interface from a dataset, call
  * {@link #open()} to prepare for IO operations, invoke {@link #hasNext()} and
- * {@link #read()} as necessary, and {@link #close()} when they are done or no
+ * {@link #next()} as necessary, and {@link #close()} when they are done or no
  * more data exists.
  * </p>
  * <p>
@@ -67,7 +67,7 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    * </p>
    * <p>
    * This method <strong>must</strong> be invoked prior to any calls of
-   * {@link #hasNext()} or {@link #read()}.
+   * {@link #hasNext()} or {@link #next()}.
    * </p>
    *
    * @throws UnknownFormatException

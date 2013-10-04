@@ -109,7 +109,7 @@ class HiveUtils {
     String schemaUrlString = table.getProperty(AVRO_SCHEMA_URL_PROPERTY_NAME);
     if (schemaUrlString != null) {
       try {
-        builder.schema(new URI(schemaUrlString));
+        builder.schemaUri(new URI(schemaUrlString));
       } catch (IOException e) {
         throw new MetadataProviderException("Could not read schema", e);
       } catch (URISyntaxException e) {

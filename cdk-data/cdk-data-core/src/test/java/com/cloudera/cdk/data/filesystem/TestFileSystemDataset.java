@@ -93,7 +93,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .name("test")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
-            .schema(USER_SCHEMA_URL)
+            .schemaUri(USER_SCHEMA_URL)
             .format(format)
             .location(testDirectory)
             .get())

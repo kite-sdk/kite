@@ -168,7 +168,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     }
     Path schemaPath = new Path(metadataPath, SCHEMA_FILE_NAME);
     try {
-      builder.schema(rootFileSystem.makeQualified(schemaPath).toUri());
+      builder.schemaUri(rootFileSystem.makeQualified(schemaPath).toUri());
     } catch (IOException e) {
       throw new MetadataProviderException(
         "Unable to load schema file:" + schemaPath + " for dataset:" + name, e);
@@ -324,7 +324,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   /**
    * Returns the root directory where metadata is stored.
    *
-   * @return a Path where {@link DatasetDescriptors} are stored
+   * @return a Path where {@link DatasetDescriptor}s are stored
    *
    * @since 0.8.0
    */
@@ -444,7 +444,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   /**
    * Returns the correct metadata path for the given dataset.
-   * @param datasetPath the Dataset Path
+   * @param root A Path
+   * @param name A String dataset name
    * @return the metadata Path
    */
   private static Path pathForMetadata(Path root, String name) {

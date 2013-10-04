@@ -17,8 +17,6 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
-import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.filesystem.impl.Accessor;
 import java.io.IOException;
 import java.util.List;
 import org.apache.hadoop.fs.Path;
