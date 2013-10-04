@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
-import org.apache.commons.configuration.MapConfiguration;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -56,19 +55,19 @@ public class Loader implements Loadable {
 
     @Override
     public DatasetRepository getFromOptions(Map<String, String> match) {
-      final MapConfiguration options = new MapConfiguration(match);
       final Path root;
-      String path = options.getString("path");
+      String path = match.get("path");
       if (path == null || path.isEmpty()) {
         root = new Path(".");
-      } else if (options.getBoolean("absolute", false)) {
+      } else if (match.containsKey("absolute")
+          && Boolean.valueOf(match.get("absolute"))) {
         root = new Path("/", path);
       } else {
         root = new Path(path);
       }
       final FileSystem fs;
       try {
-        fs = FileSystem.get(fileSystemURI(options), envConf);
+        fs = FileSystem.get(fileSystemURI(match), envConf);
       } catch (IOException ex) {
         throw new DatasetRepositoryException(
             "Could not get a FileSystem", ex);
@@ -79,22 +78,29 @@ public class Loader implements Loadable {
           .get();
     }
 
-    private URI fileSystemURI(MapConfiguration options) {
+    private URI fileSystemURI(Map<String, String> match) {
       final String userInfo;
-      if (options.containsKey("username")) {
-        if (options.containsKey("password")) {
-          userInfo = options.getString("password") + ":" +
-              options.getString("username");
+      if (match.containsKey("username")) {
+        if (match.containsKey("password")) {
+          userInfo = match.get("password") + ":" +
+              match.get("username");
         } else {
-          userInfo = options.getString("username");
+          userInfo = match.get("username");
         }
       } else {
         userInfo = null;
       }
       try {
-        return new URI(options.getString("scheme"), userInfo,
-            options.getString("host"), options.getInteger("port", -1),
-            "/", null, null);
+        int port = -1;
+        if (match.containsKey("port")) {
+          try {
+            port = Integer.parseInt(match.get("port"));
+          } catch (NumberFormatException e) {
+            port = -1;
+          }
+        }
+        return new URI(match.get("scheme"), userInfo, match.get("host"), port, "/",
+            null, null);
       } catch (URISyntaxException ex) {
         throw new DatasetRepositoryException("Could not build FS URI", ex);
       }
