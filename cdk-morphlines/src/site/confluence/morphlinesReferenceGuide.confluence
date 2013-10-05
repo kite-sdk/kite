@@ -1494,6 +1494,8 @@ Optionally, the Avro schema that shall be used for reading can be supplied with 
 
 Note: Avro uses [Schema Resolution|http://avro.apache.org/docs/current/spec.html#Schema+Resolution] if the two schemas are different, e.g. if the reader schema is a subset of the writer schema for the purpose of efficient column projection.
 
+Note: For the {{readAvro}} command to work correctly, each Avro event must have been written with the same writer schema by the ingesting app. That is, you cannot parse two Avro events with two different writer schemas A and B within the same {{readAvro}} command. The [readAvroContainer|#readAvroContainer] command doesn't have that limitation, of course, because the writer schema comes embedded inside each Avro container, per the standard Avro container specification.
+
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
