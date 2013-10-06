@@ -33,7 +33,12 @@ public final class Validator<T> {
   public void validateRange(Config config, T value, Comparable<T> min, Comparable<T>  max) {
     boolean isValid = min.compareTo(value) <= 0 && 0 <= max.compareTo(value);
     if (!isValid) {
-      fail(config, String.format("Invalid choice: '%s' (choose from {%s..%s})", value, min, max));
+      throw new MorphlineCompilationException(
+        String.format("Invalid choice: '%s' (choose from {%s..%s})", 
+                      value, 
+                      min,
+                      max), 
+        config);
     }
   }
   
@@ -53,13 +58,12 @@ public final class Validator<T> {
       }
       return result;
     } catch (IllegalArgumentException e) {
-      fail(config, String.format("Invalid choice: '%s' (choose from {%s})", value, Joiner.on(",").join(choices)));
-      return null; // keep compiler happy
+      throw new MorphlineCompilationException(
+        String.format("Invalid choice: '%s' (choose from {%s})", 
+                      value, 
+                      Joiner.on(",").join(choices)), 
+        config);
     }
-  }
-  
-  private void fail(Config config, String msg) {
-    throw new MorphlineCompilationException(msg, config);
   }
   
 //  public T validateChoice(Config config, String value, T... choices) {

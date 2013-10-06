@@ -60,6 +60,14 @@ public class ValidatorTest extends Assert {
     } catch (MorphlineCompilationException e) {
       ; // 
     }
+    
+    try {
+      new Validator<Integer>().validateRange(empty, 15, 9, 10);
+      fail();
+    } catch (MorphlineCompilationException e) {
+      ; // 
+    }
+
   }
   
   private static enum NumRequiredMatches {

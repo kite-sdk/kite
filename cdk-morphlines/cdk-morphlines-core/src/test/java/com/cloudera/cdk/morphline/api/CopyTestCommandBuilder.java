@@ -46,6 +46,10 @@ public final class CopyTestCommandBuilder implements CommandBuilder {
       super(builder, config, parent, child, context);
       this.name = getConfigs().getString(config, "name");
       this.count = getConfigs().getInt(config, "count", 2);
+      getCounter("counter1");
+      getHistogram("histogram1");
+      getMeter("meter1");
+      getTimer("timer1");
     }
     
     @Override

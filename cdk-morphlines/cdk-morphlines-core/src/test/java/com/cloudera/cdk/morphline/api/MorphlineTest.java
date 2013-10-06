@@ -18,6 +18,7 @@ package com.cloudera.cdk.morphline.api;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
@@ -42,6 +43,8 @@ import javax.management.ReflectionException;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.cloudera.cdk.morphline.base.Compiler;
+import com.cloudera.cdk.morphline.base.FaultTolerance;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Metrics;
 import com.cloudera.cdk.morphline.base.Notifications;
@@ -164,6 +167,115 @@ public class MorphlineTest extends AbstractMorphlineTest {
     morphline = createMorphline("test-morphlines/pipeWithTwoBasicCommands");    
     Record record = createBasicRecord();
     processAndVerifySuccess(record, record);
+  }
+  
+  @Test
+  public void testNotifications() throws Exception {
+    morphline = createMorphline("test-morphlines/pipeWithTwoBasicCommands");
+    Notifications.notifyBeginTransaction(morphline);
+    Notifications.notifyStartSession(morphline);
+    Notifications.notifyCommitTransaction(morphline);
+    Notifications.notifyRollbackTransaction(morphline);
+  }
+  
+  @Test
+  public void testCompile() throws Exception {
+    String file = "test-morphlines/pipeWithTwoBasicCommands";
+    morphline = new Compiler().compile(
+        new File(RESOURCES_DIR + "/" + file + ".conf"), 
+        "", 
+        new MorphlineContext.Builder().build(), 
+        null);
+    assertNotNull(morphline);
+    
+    new Fields();
+    new Metrics();    
+  }
+  
+  @Test
+  public void testCompileWithExplicitMorphlineId() throws Exception {
+    String file = "test-morphlines/pipeWithTwoBasicCommands";
+    morphline = new Compiler().compile(
+        new File(RESOURCES_DIR + "/" + file + ".conf"), 
+        "morphline1", 
+        new MorphlineContext.Builder().build(), 
+        null);
+    assertNotNull(morphline);
+  }
+  
+  @Test
+  public void testCompileWithUnknownMorphlineId() throws Exception {
+    String file = "test-morphlines/pipeWithTwoBasicCommands";
+    try {
+      new Compiler().compile(
+        new File(RESOURCES_DIR + "/" + file + ".conf"), 
+        "morphline2", 
+        new MorphlineContext.Builder().build(), 
+        null);
+      fail();
+    } catch (MorphlineCompilationException e) {
+      ; // expected
+    }
+  }
+  
+  @Test
+  public void testCompileWithMissingMorphline() throws Exception {
+    String file = "test-morphlines/compileWithMissingMorphline";
+    try {
+      new Compiler().compile(
+          new File(RESOURCES_DIR + "/" + file + ".conf"), 
+          "morphline1", 
+          new MorphlineContext.Builder().build(), 
+          null);
+      fail();
+    } catch (MorphlineCompilationException e) {
+      ; // expected
+    }
+  }
+  
+  @Test
+  public void testFaultTolerance() throws Exception {
+    FaultTolerance tolerance = new FaultTolerance(true, false);
+    tolerance = new FaultTolerance(true, true, IOException.class.getName());
+    tolerance.handleException(new IOException(), new Record());
+    
+    tolerance = new FaultTolerance(true, true, IOException.class.getName());
+    tolerance.handleException(new RuntimeException(), new Record());
+
+    tolerance = new FaultTolerance(true, true, IOException.class.getName());
+    tolerance.handleException(new RuntimeException(new IOException()), new Record());
+
+    tolerance = new FaultTolerance(true, false, IOException.class.getName());
+    try {
+      tolerance.handleException(new IOException(), new Record());
+      fail();
+    } catch (MorphlineRuntimeException e) {
+      ; // expected
+    }
+
+    tolerance = new FaultTolerance(false, false, IOException.class.getName());
+    try {
+      tolerance.handleException(new IOException(), new Record());
+      fail();
+    } catch (MorphlineRuntimeException e) {
+      ; // expected
+    }
+
+    tolerance = new FaultTolerance(false, false, IOException.class.getName());
+    try {
+      tolerance.handleException(new RuntimeException(), new Record());
+      fail();
+    } catch (MorphlineRuntimeException e) {
+      ; // expected
+    }
+    
+    tolerance = new FaultTolerance(true, true, Error.class.getName());
+    try {
+      tolerance.handleException(new Error(), new Record());
+      fail();
+    } catch (Error e) {
+      ; // expected
+    }
   }
   
   @Test
@@ -699,6 +811,42 @@ public class MorphlineTest extends AbstractMorphlineTest {
       }
     }
     assertTrue(foundCounter);
+  }  
+  
+  @Test
+  public void testReadLineWithMimeType() throws Exception {
+    String threeLines = "first\nsecond\nthird";
+    byte[] in = threeLines.getBytes("UTF-8");
+    morphline = createMorphline("test-morphlines/readLineWithMimeType"); // uses ignoreFirstLine : true
+    Record record = new Record();
+    record.put(Fields.ATTACHMENT_BODY, in);
+    processAndVerifySuccess(record, 
+        ImmutableMultimap.of(Fields.MESSAGE, "second"), 
+        ImmutableMultimap.of(Fields.MESSAGE, "third")
+    );
+  }  
+  
+  @Test
+  public void testReadLineWithMimeTypeWildcard() throws Exception {
+    String threeLines = "first\nsecond\nthird";
+    byte[] in = threeLines.getBytes("UTF-8");
+    morphline = createMorphline("test-morphlines/readLineWithMimeTypeWildcard"); // uses ignoreFirstLine : true
+    Record record = new Record();
+    record.put(Fields.ATTACHMENT_BODY, in);
+    processAndVerifySuccess(record, 
+        ImmutableMultimap.of(Fields.MESSAGE, "second"), 
+        ImmutableMultimap.of(Fields.MESSAGE, "third")
+    );
+  }  
+  
+  @Test
+  public void testReadLineWithMimeTypeMismatch() throws Exception {
+    String threeLines = "first\nsecond\nthird";
+    byte[] in = threeLines.getBytes("UTF-8");
+    morphline = createMorphline("test-morphlines/readLineWithMimeTypeMismatch"); // uses ignoreFirstLine : true
+    Record record = new Record();
+    record.put(Fields.ATTACHMENT_BODY, in);
+    processAndVerifyFailure(record);
   }  
   
   @Test
