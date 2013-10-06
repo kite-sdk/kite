@@ -19,12 +19,21 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Notifications;
 
 public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
 
+  @Test
+  public void testLoadSchema() throws Exception {
+    SolrLocator locator = new SolrLocator(new MorphlineContext.Builder().build());
+    locator.setCollectionName("collection1");
+    locator.setSolrHomeDir("solr/collection1");
+    assertNotNull(locator.getIndexSchema());
+  }
+  
   @Test
   public void testLoadSolrBasic() throws Exception {
     //System.setProperty("ENV_SOLR_HOME", testSolrHome + "/collection1");
