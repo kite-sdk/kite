@@ -11,23 +11,21 @@ Version TBD has the following notable changes:
 
 * Morphlines Library
     * Added option for commands to register health checks (not just metrics) with the MorphlineContext.
-    * Added [registerJVMMetrics](http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html#registerJVMMetrics) command that registers metrics that are related to the Java Virtual Machine 
+    * Added [registerJVMMetrics](cdk-morphlines/morphlinesReferenceGuide.html#registerJVMMetrics) command that registers metrics that are related to the Java Virtual Machine 
       with the MorphlineContext. For example, this includes metrics for garbage collection events, 
       buffer pools, threads and thread deadlocks.
     * Added morphline commands to publish the metrics of all morphline commands to JMX, SLF4J and CSV files. 
       The new commands are: 
-      [startReportingMetricsToJMX](http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToJMX), 
-      [startReportingMetricsToSLF4](http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToSLF4J) and 
-      [startReportingMetricsToCSV](http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToCSV).
+      [startReportingMetricsToJMX](cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToJMX), 
+      [startReportingMetricsToSLF4](cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToSLF4J) and 
+      [startReportingMetricsToCSV](cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToCSV).
     * Added EXPERIMENTAL `cdk-morphlines-metrics-servlets` maven module with new 
-      [startReportingMetricsToHTTP](http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToHTTP) command that 
+      [startReportingMetricsToHTTP](cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToHTTP) command that 
       exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URIs served by Jetty, 
       using the AdminServlet.
     * Added `cdk-morphlines-hadoop-core` maven module with new 
-      [downloadHdfsFile](http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html#downloadHdfsFile) 
+      [downloadHdfsFile](cdk-morphlines/morphlinesReferenceGuide.html#downloadHdfsFile) 
       command for transferring HDFS files, e.g. to help with centralized configuration file management.
-    * Added option to specify boost values to 
-      [loadSolr](http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html#loadSolr) command.
     * Added option to specify boost values to 
       [loadSolr](cdk-morphlines/morphlinesReferenceGuide.html#loadSolr) command.
     * Added several performance enhancements.
