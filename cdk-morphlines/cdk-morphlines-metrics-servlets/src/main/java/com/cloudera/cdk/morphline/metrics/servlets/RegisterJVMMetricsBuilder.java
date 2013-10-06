@@ -29,6 +29,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.MetricSet;
 import com.codahale.metrics.health.jvm.ThreadDeadlockHealthCheck;
 import com.codahale.metrics.jvm.BufferPoolMetricSet;
+import com.codahale.metrics.jvm.FileDescriptorRatioGauge;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
@@ -69,7 +70,7 @@ public final class RegisterJVMMetricsBuilder implements CommandBuilder {
       registerAll("jvm.gc", new GarbageCollectorMetricSet(), registry);
       registerAll("jvm.memory", new MemoryUsageGaugeSet(), registry);
       registerAll("jvm.threads", new ThreadStatesGaugeSet(), registry);
-      //registerAll("jvm.fileDescriptorUsageRatio", new FileDescriptorRatioGauge(), registry);
+      register("jvm.fileDescriptorCountRatio", new FileDescriptorRatioGauge(), registry);
       context.getHealthCheckRegistry().register("deadlocks", new ThreadDeadlockHealthCheck());
     }
         
@@ -81,19 +82,24 @@ public final class RegisterJVMMetricsBuilder implements CommandBuilder {
         if (entry.getValue() instanceof MetricSet) {
           registerAll(name, (MetricSet) entry.getValue(), registry);
         } else {
-          if (!registry.getMetrics().containsKey(name)) { // this check is the diff
-            try {
-              registry.register(name, entry.getValue());
-            } catch (IllegalArgumentException e) { 
-              // can happen because there is a small window for a race
-              String msg = "A metric named " + name + " already exists";
-              if (!msg.equals(e.getMessage())) {
-                throw e; // exception wasn't caused by said race
-              }
-            }
-          }
+          register(name, entry.getValue(), registry);
         }
       } 
+    }
+
+    // avoids an exception on registering the same metric more than once
+    private void register(String name, Metric metric, MetricRegistry registry) {
+      if (!registry.getMetrics().containsKey(name)) { // this check is the diff
+        try {
+          registry.register(name, metric);
+        } catch (IllegalArgumentException e) { 
+          // can happen because there is a small window for a race
+          String msg = "A metric named " + name + " already exists";
+          if (!msg.equals(e.getMessage())) {
+            throw e; // exception wasn't caused by said race
+          }
+        }
+      }
     }
     
   }
