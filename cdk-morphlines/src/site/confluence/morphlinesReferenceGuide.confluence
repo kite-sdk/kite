@@ -53,7 +53,7 @@ h3. cdk\-morphlines\-core\-stdlib
 | [grok|#grok] | Uses regular expression pattern matching to extract structured fields from unstructured log or text data. |
 | [if|#if] | Implements if\-then\-else conditional control flow. |
 | [java|#java] | Scripting support for Java. Dynamically compiles and executes the given Java code block. | 
-| [logTrace, logDebug, logInfo, logWarn, logError|#logTrace] | Logs a message to [SLF4J|http://www.slf4j.org] at the given log level. |
+| [logTrace, logDebug, logInfo, logWarn, logError|#logTrace] | Logs a message at the given log level to [SLF4J|http://www.slf4j.org]. |
 | [not|#not] | Inverts the boolean return value of a nested command. | 
 | [pipe|#pipe] | Pipes a record through a chain of commands. | 
 | [separateAttachments|#separateAttachments] | Emits one separate output record for each attachment in the input record's list of attachments. |
