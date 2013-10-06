@@ -998,7 +998,7 @@ setValues {
 
 h2. split
 
-The {{split}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SplitBuilder.java]) divides strings into substrings, by recognizing a _separator_ (a.k.a. "delimiter") which can be expressed as a single character, literal string, regular expression, or grok pattern. This class provides the functionality of Guava's [Splitter|http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/base/Splitter.html] class as a morphline command, plus it also supports grok dictionaries and regexes in the same way as the [#grok] command, except it doesn't support the grok extraction features.
+The {{split}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SplitBuilder.java]) divides strings into substrings, by recognizing a _separator_ (a.k.a. "delimiter") which can be expressed as a single character, literal string, regular expression, or [#grok] pattern. This class provides the functionality of Guava's [Splitter|http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/base/Splitter.html] class as a morphline command, plus it also supports grok dictionaries and regexes in the same way as the {{grok}} command, except it doesn't support the grok extraction features.
 
 The command provides the following configuration options:
 
@@ -1693,10 +1693,10 @@ The {{registerJVMMetrics}} command ([source code|https://github.com/cloudera/cdk
 MorphlineContext of the morphline. For example, this includes metrics for garbage collection events, buffer pools, threads and thread deadlocks.
 
 Often, the {{registerJVMMetrics}} command is combined with commands such as 
-[startReportingMetricsToHTTP|#startReportingMetricsToHTTP] or 
-[startReportingMetricsToJMX|#startReportingMetricsToJMX] or 
-[startReportingMetricsToSLF4J|#startReportingMetricsToSLF4J] or
-[startReportingMetricsToCSV|#startReportingMetricsToCSV].
+[#startReportingMetricsToHTTP] or 
+[#startReportingMetricsToJMX] or 
+[#startReportingMetricsToSLF4J] or
+[#startReportingMetricsToCSV].
 
 Example usage:
 {code}
@@ -1709,9 +1709,9 @@ h2. startReportingMetricsToHTTP
 
 The {{startReportingMetricsToHTTP}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-metrics-servlets/src/main/java/com/cloudera/cdk/morphline/metrics/servlets/StartReportingMetricsToHTTPBuilder.java]) exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by [Jetty|http://en.wikipedia.org/wiki/Jetty_(web_server)], using the [AdminServlet|http://metrics.codahale.com/manual/servlets/].
 
-On startup, a Jetty HTTP server is created that listens on a configurable port. If an HTTP server isn't required for your use case, and reporting metrics to JMX (or SLF4J or CSV) is sufficient, consider command such as [startReportingMetricsToJMX|#startReportingMetricsToJMX].
+On startup, a Jetty HTTP server is created that listens on a configurable port. If an HTTP server isn't required for your use case, and reporting metrics to JMX (or SLF4J or CSV) is sufficient, consider command such as [#startReportingMetricsToJMX].
 
-Often, the {{startReportingMetricsToHTTP}} command is combined with the [registerJVMMetrics|#registerJVMMetrics] command.
+Often, the {{startReportingMetricsToHTTP}} command is combined with the [#registerJVMMetrics] command.
 
 The following HTTP URLs are provided:
 
