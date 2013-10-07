@@ -1726,6 +1726,8 @@ The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | port | 8080 | The port on which the HTTP server shall listen. |
+| defaultDurationUnit | milliseconds | Report output durations in the given time unit. One of {{nanoseconds}},  {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. |
+| defaultRateUnit | seconds | Report output rates in the given time unit. One of {{nanoseconds}}, {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. Example output: events/second |
 
 Example usage:
 {code}

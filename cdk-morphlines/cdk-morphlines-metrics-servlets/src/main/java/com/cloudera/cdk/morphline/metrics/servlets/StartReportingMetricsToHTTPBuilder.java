@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -69,6 +70,8 @@ public final class StartReportingMetricsToHTTPBuilder implements CommandBuilder 
       super(builder, config, parent, child, context);      
 
       this.port = getConfigs().getInt(config, "port", 8080);
+      final TimeUnit defaultDurationUnit = getConfigs().getTimeUnit(config, "defaultDurationUnit", TimeUnit.MILLISECONDS);
+      final TimeUnit defaultRateUnit = getConfigs().getTimeUnit(config, "defaultRateUnit", TimeUnit.SECONDS); 
       validateArguments();
 
       synchronized (SERVERS) {
@@ -81,6 +84,14 @@ public final class StartReportingMetricsToHTTPBuilder implements CommandBuilder 
             @Override
             protected MetricRegistry getMetricRegistry() {
               return context.getMetricRegistry();
+            }
+            @Override
+            protected TimeUnit getRateUnit() {
+              return defaultRateUnit;
+            }
+            @Override
+            protected TimeUnit getDurationUnit() {
+              return defaultDurationUnit;
             }
           });
           
