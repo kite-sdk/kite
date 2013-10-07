@@ -9,136 +9,136 @@ Here are two example implementations: [toString|https://github.com/cloudera/cdk/
 
 h3. Table of Contents
 
-- [cdk\-morphlines\-core\-stdio|#cdk\-morphlines\-core\-stdio]
-- [cdk\-morphlines\-core\-stdlib|#cdk\-morphlines\-core\-stdlib]
-- [cdk\-morphlines\-avro|#cdk\-morphlines\-avro]
-- [cdk\-morphlines\-json|#cdk\-morphlines\-json]
-- [cdk\-morphlines\-hadoop\-core|#cdk\-morphlines\-hadoop\-core]
-- [cdk\-morphlines\-hadoop\-sequencefile|#cdk\-morphlines\-hadoop\-sequencefile]
-- [cdk\-morphlines\-metrics\-servlets|#cdk\-morphlines\-metrics\-servlets]
-- [cdk\-morphlines\-tika\-core|#cdk\-morphlines\-tika\-core]
-- [cdk\-morphlines\-tika\-decompress|#cdk\-morphlines\-tika\-decompress]
-- [cdk\-morphlines\-saxon|#cdk\-morphlines\-saxon]
-- [cdk\-morphlines\-solr\-core|#cdk\-morphlines\-solr\-core]
-- [cdk\-morphlines\-solr\-cell|#cdk\-morphlines\-solr\-cell]
+- [#cdk\-morphlines\-core\-stdio]
+- [#cdk\-morphlines\-core\-stdlib]
+- [#cdk\-morphlines\-avro]
+- [#cdk\-morphlines\-json]
+- [#cdk\-morphlines\-hadoop\-core]
+- [#cdk\-morphlines\-hadoop\-sequencefile]
+- [#cdk\-morphlines\-metrics\-servlets]
+- [#cdk\-morphlines\-tika\-core]
+- [#cdk\-morphlines\-tika\-decompress]
+- [#cdk\-morphlines\-saxon]
+- [#cdk\-morphlines\-solr\-core]
+- [#cdk\-morphlines\-solr\-cell]
 
 {anchor:cdk\-morphlines\-core\-stdio}
 \\
 \\
 h3. cdk\-morphlines\-core\-stdio
-| [readClob|#readClob] | Converts a byte stream to a string. |
-| [readCSV|#readCSV] | Extracts zero or more records from the input stream of bytes representing a Comma Separated Values (CSV) file. |
-| [readLine|#readLine] | Emits one record per line in the input stream. |
-| [readMultiLine|#readMultiLine] | Log parser that collapses multiple input lines into a single record, based on regular expression pattern matching. |
+| [#readClob] | Converts a byte stream to a string. |
+| [#readCSV] | Extracts zero or more records from the input stream of bytes representing a Comma Separated Values (CSV) file. |
+| [#readLine] | Emits one record per line in the input stream. |
+| [#readMultiLine] | Log parser that collapses multiple input lines into a single record, based on regular expression pattern matching. |
 
 {anchor:cdk\-morphlines\-core\-stdlib}
 \\
 \\
 h3. cdk\-morphlines\-core\-stdlib
-| [addCurrentTime|#addCurrentTime] | Adds the result of [System.currentTimeMillis()|http://docs.oracle.com/javase/7/docs/api/java/lang/System.html#currentTimeMillis()] to a given output field. |
-| [addLocalHost|#addLocalHost] | Adds the name or IP of the local host to a given output field. |
-| [addValues|#addValues] | Adds a list of values (or the contents of another field) to a given field. |
-| [addValuesIfAbsent|#addValuesIfAbsent] | Adds a list of values (or the contents of another field) to a given field if not already contained. |
-| [callParentPipe|#callParentPipe] | Implements recursion for extracting data from container data formats. |
-| [contains|#contains] | Returns whether or not a given value is contained in a given field. |
-| [convertTimestamp|#convertTimestamp] | Converts the timestamps in a given field from one of a set of input date formats to an output date format. |
-| [decodeBase64|#decodeBase64] | Converts a Base64 encoded String to a byte\[\]. |
-| [dropRecord|#dropRecord] | Silently consumes records without ever emitting any record. Think {{/dev/null}}. |
-| [equals|#equals] | Succeeds if all field values of the given named fields are equal to the the given values and fails otherwise. |
-| [extractURIComponents|#extractURIComponents] | Extracts subcomponents such as host, port, path, query, etc from a URI. |
-| [extractURIComponent|#extractURIComponent] | Extracts a particular subcomponent from a URI.  |
-| [extractURIQueryParameters|#extractURIQueryParameters] | Extracts the query parameters with a given name from a URI. |
-| [findReplace|#findReplace] | Examines each string value in a given field and replaces each substring of the string value that matches the given string literal or grok pattern with the given replacement. |
-| [generateUUID|#generateUUID] | Sets a universally unique identifier on all records that are intercepted. |
-| [grok|#grok] | Uses regular expression pattern matching to extract structured fields from unstructured log or text data. |
-| [if|#if] | Implements if\-then\-else conditional control flow. |
-| [java|#java] | Scripting support for Java. Dynamically compiles and executes the given Java code block. | 
+| [#addCurrentTime] | Adds the result of [System.currentTimeMillis()|http://docs.oracle.com/javase/7/docs/api/java/lang/System.html#currentTimeMillis()] to a given output field. |
+| [#addLocalHost] | Adds the name or IP of the local host to a given output field. |
+| [#addValues] | Adds a list of values (or the contents of another field) to a given field. |
+| [#addValuesIfAbsent] | Adds a list of values (or the contents of another field) to a given field if not already contained. |
+| [#callParentPipe] | Implements recursion for extracting data from container data formats. |
+| [#contains] | Returns whether or not a given value is contained in a given field. |
+| [#convertTimestamp] | Converts the timestamps in a given field from one of a set of input date formats to an output date format. |
+| [#decodeBase64] | Converts a Base64 encoded String to a byte\[\]. |
+| [#dropRecord] | Silently consumes records without ever emitting any record. Think {{/dev/null}}. |
+| [#equals] | Succeeds if all field values of the given named fields are equal to the the given values and fails otherwise. |
+| [#extractURIComponents] | Extracts subcomponents such as host, port, path, query, etc from a URI. |
+| [#extractURIComponent] | Extracts a particular subcomponent from a URI.  |
+| [#extractURIQueryParameters] | Extracts the query parameters with a given name from a URI. |
+| [#findReplace] | Examines each string value in a given field and replaces each substring of the string value that matches the given string literal or grok pattern with the given replacement. |
+| [#generateUUID] | Sets a universally unique identifier on all records that are intercepted. |
+| [#grok] | Uses regular expression pattern matching to extract structured fields from unstructured log or text data. |
+| [#if] | Implements if\-then\-else conditional control flow. |
+| [#java] | Scripting support for Java. Dynamically compiles and executes the given Java code block. | 
 | [logTrace, logDebug, logInfo, logWarn, logError|#logTrace] | Logs a message at the given log level to [SLF4J|http://www.slf4j.org]. |
-| [not|#not] | Inverts the boolean return value of a nested command. | 
-| [pipe|#pipe] | Pipes a record through a chain of commands. | 
-| [separateAttachments|#separateAttachments] | Emits one separate output record for each attachment in the input record's list of attachments. |
-| [setValues|#setValues] | Assigns a given list of values (or the contents of another field) to a given field. |
-| [split|#split] | Divides a string into substrings, by recognizing a _separator_ (a.k.a. "delimiter") which can be expressed as a single character, literal string, regular expression, or grok pattern. |
-| [splitKeyValue|#splitKeyValue] | Splits key\-value pairs where the key and value are separated by the given separator character, and adds the pair's value to the record field named after the pair's key. |
-| [startReportingMetricsToCSV|#startReportingMetricsToCSV] | Starts periodically appending the metrics of all commands to a set of CSV files. |
-| [startReportingMetricsToJMX|#startReportingMetricsToJMX] | Starts publishing the metrics of all commands to [JMX|http://en.wikipedia.org/wiki/Java_Management_Extensions]. |
-| [startReportingMetricsToSLF4J|#startReportingMetricsToSLF4J] | Starts periodically logging the metrics of all morphline commands to [SLF4J|http://www.slf4j.org]. |
-| [toByteArray|#toByteArray] | Converts a String to the byte array representation of a given charset. |
-| [toString|#toString] | Converts a Java object to it's string representation; optionally also removes leading and trailing whitespace. |
-| [translate|#translate] | Replace a string with the replacement value defined in a given dictionary aka lookup hash table. |
-| [tryRules|#tryRules] | Simple rule engine for handling a list of heterogeneous input data formats. |
+| [#not] | Inverts the boolean return value of a nested command. | 
+| [#pipe] | Pipes a record through a chain of commands. | 
+| [#separateAttachments] | Emits one separate output record for each attachment in the input record's list of attachments. |
+| [#setValues] | Assigns a given list of values (or the contents of another field) to a given field. |
+| [#split] | Divides a string into substrings, by recognizing a _separator_ (a.k.a. "delimiter") which can be expressed as a single character, literal string, regular expression, or grok pattern. |
+| [#splitKeyValue] | Splits key\-value pairs where the key and value are separated by the given separator character, and adds the pair's value to the record field named after the pair's key. |
+| [#startReportingMetricsToCSV] | Starts periodically appending the metrics of all commands to a set of CSV files. |
+| [#startReportingMetricsToJMX] | Starts publishing the metrics of all commands to [JMX|http://en.wikipedia.org/wiki/Java_Management_Extensions]. |
+| [#startReportingMetricsToSLF4J] | Starts periodically logging the metrics of all morphline commands to [SLF4J|http://www.slf4j.org]. |
+| [#toByteArray] | Converts a String to the byte array representation of a given charset. |
+| [#toString] | Converts a Java object to it's string representation; optionally also removes leading and trailing whitespace. |
+| [#translate] | Replace a string with the replacement value defined in a given dictionary aka lookup hash table. |
+| [#tryRules] | Simple rule engine for handling a list of heterogeneous input data formats. |
 
 {anchor:cdk\-morphlines\-avro}
 \\
 \\
 h3. cdk\-morphlines\-avro
-| [readAvroContainer|#readAvroContainer] | Parses an Avro binary container and emits a morphline record for each contained Avro datum. |
-| [readAvro|#readAvro] | Parses containerless Avro and emits a morphline record for each contained Avro datum. |
-| [extractAvroTree|#extractAvroTree] | Recursively walks an Avro tree and extracts all data into a single morphline record. |
-| [extractAvroPaths|#extractAvroPaths] | Extracts specific values from an Avro object, akin to a simple form of XPath. |
+| [#readAvroContainer] | Parses an Apache Avro binary container and emits a morphline record for each contained Avro datum. |
+| [#readAvro] | Parses containerless Avro and emits a morphline record for each contained Avro datum. |
+| [#extractAvroTree] | Recursively walks an Avro tree and extracts all data into a single morphline record. |
+| [#extractAvroPaths] | Extracts specific values from an Avro object, akin to a simple form of XPath. |
 
 {anchor:cdk\-morphlines\-json}
 \\
 \\
 h3. cdk\-morphlines\-json
-| [readJson|#readJson] | Parses JSON and emits a morphline record for each contained JSON object. |
-| [extractJsonPaths|#extractJsonPaths] | Extracts specific values from a JSON object, akin to a simple form of XPath. |
+| [#readJson] | Parses JSON and emits a morphline record for each contained JSON object, using the [Jackson|https://github.com/FasterXML/jackson-databind] library. |
+| [#extractJsonPaths] | Extracts specific values from a JSON object, akin to a simple form of XPath. |
 
 {anchor:cdk\-morphlines\-hadoop\-core}
 \\
 \\
 h3. cdk\-morphlines\-hadoop\-core
-| [downloadHdfsFile|#downloadHdfsFile] | Downloads, on startup, zero or more files or directory trees from HDFS to the local file system. |
+| [#downloadHdfsFile] | Downloads, on startup, zero or more files or directory trees from HDFS to the local file system. |
 
 {anchor:cdk\-morphlines\-hadoop\-sequencefile}
 \\
 \\
 h3. cdk\-morphlines\-hadoop\-sequencefile
-| [readSequenceFile|#readSequenceFile] | Parses an Apache Hadoop [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html] and emits a morphline record for each contained key\-value pair. |
+| [#readSequenceFile] | Parses an Apache Hadoop [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html] and emits a morphline record for each contained key\-value pair. |
 
 {anchor:cdk\-morphlines\-metrics\-servlets}
 \\
 \\
 h3. cdk\-morphlines\-metrics\-servlets
-| [registerJVMMetrics|#registerJVMMetrics] | Registers metrics that are related to the Java Virtual Machine with the MorphlineContext. |
-| [startReportingMetricsToHTTP|#startReportingMetricsToHTTP] | Exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by Jetty, using the AdminServlet. |
+| [#registerJVMMetrics] | Registers metrics that are related to the Java Virtual Machine with the MorphlineContext. |
+| [#startReportingMetricsToHTTP] | Exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by Jetty, using the AdminServlet. |
 
 {anchor:cdk\-morphlines\-tika\-core}
 \\
 \\
 h3. cdk\-morphlines\-tika\-core
-| [detectMimeType|#detectMimeType] | Uses Apache Tika to auto-detect the [MIME type|https://en.wikipedia.org/wiki/Internet_media_type] of binary data. |
+| [#detectMimeType] | Uses Apache Tika to auto-detect the [MIME type|https://en.wikipedia.org/wiki/Internet_media_type] of binary data. |
 
 {anchor:cdk\-morphlines\-tika\-decompress}
 \\
 \\
 h3. cdk\-morphlines\-tika\-decompress
-| [decompress|#decompress] | Decompresses gzip and bzip2 format. |
-| [unpack|#unpack] | Unpacks tar, zip, and jar format. | 
+| [#decompress] | Decompresses gzip and bzip2 format. |
+| [#unpack] | Unpacks tar, zip, and jar format. | 
 
 {anchor:cdk\-morphlines\-saxon}
 \\
 \\
 h3. cdk\-morphlines\-saxon
-| [convertHTML|#convertHTML] | Converts any HTML to XHTML, using the [TagSoup|http://ccil.org/~cowan/XML/tagsoup] Java library. |
-| [xquery|#xquery] | Parses XML and runs the given W3C XQuery over it, using the [Saxon|http://www.saxonica.com] Java library. |
-| [xslt|#xslt] | Parses XML and runs the given W3C XSL Transform over it, using the [Saxon|http://www.saxonica.com] Java library. |
+| [#convertHTML] | Converts any HTML to XHTML, using the [TagSoup|http://ccil.org/~cowan/XML/tagsoup] Java library. |
+| [#xquery] | Parses XML and runs the given W3C XQuery over it, using the [Saxon|http://www.saxonica.com] Java library. |
+| [#xslt] | Parses XML and runs the given W3C XSL Transform over it, using the [Saxon|http://www.saxonica.com] Java library. |
 
 {anchor:cdk\-morphlines\-solr\-core}
 \\
 \\
 h3. cdk\-morphlines\-solr\-core
-| [solrLocator|#solrLocator] | Specifies a set of configuration parameters that identify the location and schema of a Solr server or SolrCloud. |
-| [loadSolr|#loadSolr] | Loads a record into a Solr server or MapReduce Reducer. |
-| [generateSolrSequenceKey|#generateSolrSequenceKey] | Assigns a unique key that is the concatenation of a field and a running count of the record number within the current session. |
-| [sanitizeUnknownSolrFields|#sanitizeUnknownSolrFields] | Removes record fields that are unknown to Solr {{schema.xml}}, or moves them to fields with a given prefix. |
-| [tokenizeText|#tokenizeText] | Uses the embedded [Solr/Lucene Analyzer library|http://wiki.apache.org/solr/AnalyzersTokenizersTokenFilters] to generate tokens from a text string, without sending data to a Solr server. |
+| [#solrLocator] | Specifies a set of configuration parameters that identify the location and schema of a Solr server or SolrCloud. |
+| [#loadSolr] | Loads a record into a Solr server or MapReduce Reducer. |
+| [#generateSolrSequenceKey] | Assigns a unique key that is the concatenation of a field and a running count of the record number within the current session. |
+| [#sanitizeUnknownSolrFields] | Removes record fields that are unknown to Solr {{schema.xml}}, or moves them to fields with a given prefix. |
+| [#tokenizeText] | Uses the embedded [Solr/Lucene Analyzer library|http://wiki.apache.org/solr/AnalyzersTokenizersTokenFilters] to generate tokens from a text string, without sending data to a Solr server. |
 
 {anchor:cdk\-morphlines\-solr\-cell}
 \\
 \\
 h3. cdk\-morphlines\-solr\-cell
-| [solrCell|#solrCell] | Uses Tika to parse data, then maps the Tika output back to a record using SolrCell. |
+| [#solrCell] | Uses Apache [Tika|http://tika.apache.org] to parse data, then maps the Tika output back to a record using Apache SolrCell. |
 
 
 h1. cdk\-morphlines\-core\-stdio
@@ -316,7 +316,7 @@ h2. addCurrentTime
 
 The {{addCurrentTime}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddCurrentTimeBuilder.java]) adds the result of [System.currentTimeMillis()|http://docs.oracle.com/javase/7/docs/api/java/lang/System.html#currentTimeMillis()]
 as a Long integer to a given output field.
-Typically, a {{convertTimestamp}} command is subsequently used to convert this timestamp to an application specific output format.
+Typically, a [#convertTimestamp] command is subsequently used to convert this timestamp to an application specific output format.
 
 The command provides the following configuration options:
 
@@ -368,7 +368,7 @@ addValues {
 
 h2. addValuesIfAbsent
 
-The {{addValuesIfAbsent}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddValuesIfAbsentBuilder.java]) is the same as the {{addValues}} command, except that a given value is only added to the output field if it is not already contained in the output field.
+The {{addValuesIfAbsent}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddValuesIfAbsentBuilder.java]) is the same as the [#addValues] command, except that a given value is only added to the output field if it is not already contained in the output field.
 
 Example usage:
 {code}
@@ -792,7 +792,7 @@ Note: An easy way to test grok out is to use the [online grok debugger|http://gr
 
 h2. if
 
-The {{if}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/IfThenElseBuilder.java]) consists of a chain of zero or more conditions commands, as well as an optional chain of zero or or more commands that are processed if all conditions succeed ("{{then}} commands"), as well as an optional chain of zero or more commands that are processed if one of the conditions fails ("{{else}} commands").
+The {{if}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/IfThenElseBuilder.java]) implements if\-then\-else conditional control flow. It consists of a chain of zero or more conditions commands, as well as an optional chain of zero or or more commands that are processed if all conditions succeed ("{{then}} commands"), as well as an optional chain of zero or more commands that are processed if one of the conditions fails ("{{else}} commands").
 
 If one of the commands in the {{then}} chain or {{else}} chain fails, then the entire {{if}} command fails and any remaining commands in the {{then}} or {{else}} branch are skipped.
 
@@ -977,7 +977,7 @@ separateAttachments {}
 
 h2. setValues
 
-The {{setValues}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SetValuesBuilder.java]) is the same as the {{addValues}} command, except that it first removes all values from the given output field, and then it adds new values.
+The {{setValues}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SetValuesBuilder.java]) is the same as the [#addValues] command, except that it first removes all values from the given output field, and then it adds new values.
 
 Example usage:
 {code}
@@ -1488,7 +1488,7 @@ readAvroContainer {
 
 h2. readAvro
 
-The {{readAvro}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ReadAvroBuilder.java]) is the same as the {{readAvroContainer}} command except that the Avro schema that was used to write the Avro data must be explicitly supplied to the {{readAvro}} command because it expects raw Avro data without an Avro container and hence without a built\-in writer schema.
+The {{readAvro}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ReadAvroBuilder.java]) is the same as the [#readAvroContainer] command except that the Avro schema that was used to write the Avro data must be explicitly supplied to the {{readAvro}} command because it expects raw Avro data without an Avro container and hence without a built\-in writer schema.
 
 Optionally, the Avro schema that shall be used for reading can be supplied with a configuration option; otherwise it is assumed to be the same as the writer schema.
 
@@ -1522,7 +1522,7 @@ h2. extractAvroTree
 
 The {{extractAvroTree}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ExtractAvroTreeBuilder.java]) converts an attached Avro datum to a morphline record by recursively walking the Avro tree and extracting all data into a single morphline record, with fields named by their path in the Avro tree.
 
-The Avro input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream {{readAvroContainer}} or {{readAvro}} command.
+The Avro input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [#readAvroContainer] or [#readAvro] command.
 
 This kind of mapping is useful for simple Avro schemas, but for more complex schemas, this approach may be overly simplistic and expensive.
 
@@ -1542,7 +1542,7 @@ h2. extractAvroPaths
 
 The {{extractAvroPaths}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ExtractAvroPathsBuilder.java]) uses zero or more Avro path expressions to extract values from an Avro object.
 
-The Avro input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [readAvroContainer|#readAvroContainer] or [readAvro|#readAvro] command.
+The Avro input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [#readAvroContainer] or [#readAvro] command.
 
 Each path expression consists of a record output field name (on the left side of the colon ':') as well as zero or more path steps (on the right hand side), each path step separated by a '/' slash, akin to a simple form of XPath. Avro arrays are traversed with the '\[\]' notation.
 
@@ -1607,7 +1607,7 @@ h2. extractJsonPaths
 
 The {{extractJsonPaths}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ExtractJsonPathsBuilder.java]) uses zero or more JSON path expressions to extract values from a [Jackson|https://github.com/FasterXML/jackson-databind] JSON object of outputClass [com.fasterxml.jackson.databind.JsonNode|http://wiki.fasterxml.com/JacksonTreeModel].
 
-The JSON input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [readJson|#readJson] command with {{outputClass : com.fasterxml.jackson.databind.JsonNode}}.
+The JSON input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [#readJson] command with {{outputClass : com.fasterxml.jackson.databind.JsonNode}}.
 
 Each path expression consists of a record output field name (on the left side of the colon ':') as well as zero or more path steps (on the right hand side), each path step separated by a '/' slash, akin to a simple form of XPath. JSON arrays are traversed with the '\[\]' notation.
 
@@ -1709,7 +1709,7 @@ h2. startReportingMetricsToHTTP
 
 The {{startReportingMetricsToHTTP}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-metrics-servlets/src/main/java/com/cloudera/cdk/morphline/metrics/servlets/StartReportingMetricsToHTTPBuilder.java]) exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by [Jetty|http://en.wikipedia.org/wiki/Jetty_(web_server)], using the [AdminServlet|http://metrics.codahale.com/manual/servlets/].
 
-On startup, a Jetty HTTP server is created that listens on a configurable port. If an HTTP server isn't required for your use case, and reporting metrics to JMX (or SLF4J or CSV) is sufficient, consider command such as [#startReportingMetricsToJMX].
+On startup, a Jetty HTTP server is created that listens on a configurable port. If an HTTP server isn't required for your use case, and reporting metrics to JMX (or SLF4J or CSV) is sufficient, consider command such as [#startReportingMetricsToJMX] or [#startReportingMetricsToSLF4J] or [#startReportingMetricsToCSV].
 
 Often, the {{startReportingMetricsToHTTP}} command is combined with the [#registerJVMMetrics] command.
 
@@ -2134,7 +2134,7 @@ This maven module contains morphline commands for using SolrCell with Tika parse
 
 h2. solrCell
 
-The {{solrCell}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-cell/src/main/java/com/cloudera/cdk/morphline/solrcell/SolrCellBuilder.java]) pipes the first attachment of a record into one of the given Tika parsers, then maps the Tika output back to a record using SolrCell.
+The {{solrCell}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-cell/src/main/java/com/cloudera/cdk/morphline/solrcell/SolrCellBuilder.java]) pipes the first attachment of a record into one of the given Apache [Tika|http://tika.apache.org] parsers, then maps the Tika output back to a record using Apache SolrCell.
 
 The Tika parser is chosen from the configurable list of parsers, depending on the MIME type specified in the input record. Typically, this requires an upstream {{detectMimeType}} command.
 
@@ -2146,9 +2146,9 @@ The command provides the following configuration options:
 | fmaps | \[\] | Maps (moves) one field name to another. See the example below. |
 | uprefix | null | The {{uprefix}} option indicates that the command shall prefix all fields that are not defined in the Solr {{schema.xml}} with the given prefix. Recall that Solr throws an exception on any attempt to load a document that contains a field that is not specified in {{schema.xml}}. The {{uprefix}} option is very useful when combined with dynamic field definitions. For example, {{uprefix : ignored}}\_ would effectively ignore all unknown fields generated by Tika if the {{schema.xml}} contains the following dynamic field definition: {{dynamicField name="ignored}}\_\*" {{type="ignored"}} |
 | captureAttr | false | Whether to index attributes of the Tika XHTML elements into separate fields, named after the element. For example, when extracting from HTML, Tika can return the href attributes in {{<a>}} tags as fields named "a". |
-| xpath | null | When extracting, only return Tika XHTML content that satisfies the XPath expression. See [http://tika.apache.org/1.3/parser.html] for details on the format of Tika XHTML. See also [http://wiki.apache.org/solr/TikaExtractOnlyExampleOutput]. |
+| xpath | null | When extracting, only return Tika XHTML content that satisfies the XPath expression. See [http://tika.apache.org/1.4/parser.html] for details on the format of Tika XHTML. See also [http://wiki.apache.org/solr/TikaExtractOnlyExampleOutput]. |
 | lowernames | false | Map all field names to lowercase with underscores. For example, Content-Type would be mapped to content_type. |
-| solrContentHandlerFactory | com.cloudera.cdk.morphline.morphline.solrcell.TrimSolrContentHandlerFactory | A Java class to handle bridging from Tika to SolrCell. |
+| solrContentHandlerFactory | com.cloudera.cdk.morphline. solrcell.TrimSolrContentHandlerFactory | A Java class to handle bridging from Tika to SolrCell. |
 | parsers | \[\] | List of fully qualified Java class names of one or more Tika parsers. |
 
 Example usage:
