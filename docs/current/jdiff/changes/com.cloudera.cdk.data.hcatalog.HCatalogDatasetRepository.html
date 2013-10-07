@@ -18,7 +18,7 @@ com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/hcatalog/HCatalogDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/hcatalog/HCatalogDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.8.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_com.cloudera.cdk.data.hcatalog.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -31,13 +31,13 @@ com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV CLASS</B>&nbsp;
-&nbsp;<B>NEXT CLASS</B>&nbsp;
+&nbsp;<A HREF="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.Builder.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell3"><FONT SIZE="-2"> DETAIL: &nbsp;
-CONSTRUCTORS&nbsp;|&nbsp;
-<a href="#methods">METHODS</a>&nbsp;|&nbsp;
+<a href="#constructors">CONSTRUCTORS</a>&nbsp;|&nbsp;
+METHODS&nbsp;|&nbsp;
 FIELDS
   </FONT></TD>
 </TR>
@@ -47,73 +47,40 @@ FIELDS
 <H2>
 Class com.cloudera.cdk.data.hcatalog.<A HREF="../../apidocs/com/cloudera/cdk/data/hcatalog/HCatalogDatasetRepository.html" target="_top"><tt>HCatalogDatasetRepository</tt></A>
 </H2>
-<p><font size="+1">The superclass changed from <code>java.lang.Object</code> to <code>com.cloudera.cdk.data.spi.AbstractDatasetRepository</code>.<br> Removed interface <code>com.cloudera.cdk.data.DatasetRepository</code>.<br></font>
 <a NAME="constructors"></a>
+<p>
+<a NAME="Removed"></a>
+<TABLE summary="Removed Constructors" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Constructors</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.ctor_removed(java.net.URI)"></A>
+  <nobr>HCatalogDatasetRepository(<code>URI</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ Create an HCatalog dataset repository with external tables.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.ctor_removed(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path)"></A>
+  <nobr>HCatalogDatasetRepository(<code>FileSystem,</nobr> Path<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ Create an HCatalog dataset repository with external tables.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.ctor_removed()"></A>
+  <nobr>HCatalogDatasetRepository()</nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ Create an HCatalog dataset repository with managed tables.</TD>
+</TR>
+</TABLE>
+&nbsp;
 <a NAME="methods"></a>
-<p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
-<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.delete_added(java.lang.String)"></A>
-  <nobr><code>boolean</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/hcatalog/HCatalogDatasetRepository.html#delete(java.lang.String)" target="_top"><tt>delete</tt></A>(<code>String</code>)</nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.exists_added(java.lang.String)"></A>
-  <nobr><code>boolean</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/hcatalog/HCatalogDatasetRepository.html#exists(java.lang.String)" target="_top"><tt>exists</tt></A>(<code>String</code>)</nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.list_added()"></A>
-  <nobr><code>Collection&lt;String&gt;</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/hcatalog/HCatalogDatasetRepository.html#list()" target="_top"><tt>list</tt></A>()</nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.load_added(java.lang.String)"></A>
-  <nobr><code>Dataset</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/hcatalog/HCatalogDatasetRepository.html#load(java.lang.String)" target="_top"><tt>load</tt></A>(<code>String</code>)</nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-</TABLE>
-&nbsp;
-<p>
-<a NAME="Changed"></a>
-<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
-<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.drop_changed(java.lang.String)"></A>
-  <nobr><code>boolean</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/spi/AbstractDatasetRepository.html#drop(java.lang.String)" target="_top"><tt>drop</tt></A>(<code>String</code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-Method was locally defined, but is now inherited from <a href="../../apidocs/com/cloudera/cdk/data/spi/AbstractDatasetRepository.html#drop(java.lang.String)" target="_top"><tt>AbstractDatasetRepository</tt></a>.
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.get_changed(java.lang.String)"></A>
-  <nobr><code>Dataset</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/spi/AbstractDatasetRepository.html#get(java.lang.String)" target="_top"><tt>get</tt></A>(<code>String</code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-Method was locally defined, but is now inherited from <a href="../../apidocs/com/cloudera/cdk/data/spi/AbstractDatasetRepository.html#get(java.lang.String)" target="_top"><tt>AbstractDatasetRepository</tt></a>.
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-</TABLE>
-&nbsp;
 <a NAME="fields"></a>
 <HR>
 <!-- Start of nav bar -->
@@ -122,7 +89,7 @@ Method was locally defined, but is now inherited from <a href="../../apidocs/com
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/hcatalog/HCatalogDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/hcatalog/HCatalogDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.8.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_com.cloudera.cdk.data.hcatalog.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -135,7 +102,7 @@ Method was locally defined, but is now inherited from <a href="../../apidocs/com
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV CLASS</B>&nbsp;
-&nbsp;<B>NEXT CLASS</B>&nbsp;
+&nbsp;<A HREF="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.Builder.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

@@ -18,7 +18,7 @@ com.cloudera.cdk.data.DatasetRepository
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.8.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_com.cloudera.cdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -31,7 +31,7 @@ com.cloudera.cdk.data.DatasetRepository
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<A HREF="com.cloudera.cdk.data.DatasetReader.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="com.cloudera.cdk.data.DatasetWriter.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="com.cloudera.cdk.data.FieldPartitioner.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="com.cloudera.cdk.data.DatasetRepository.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -50,66 +50,24 @@ Interface com.cloudera.cdk.data.<A HREF="../../apidocs/com/cloudera/cdk/data/Dat
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.DatasetRepository.delete_added(java.lang.String)"></A>
-  <nobr><code>boolean</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepository.html#delete(java.lang.String)" target="_top"><tt>delete</tt></A>(<code>String</code>)</nobr>
+  <A NAME="com.cloudera.cdk.data.DatasetRepository.drop_removed(java.lang.String)"></A>
+  <nobr><code>boolean</code>&nbsp;drop(<code>String</code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Delete the named <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A>.</TD>
+  <TD VALIGN="TOP">Deprecated synonym for <A HREF="../../apidocs/.html#delete"><TT>.delete</TT></A>.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.DatasetRepository.exists_added(java.lang.String)"></A>
-  <nobr><code>boolean</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepository.html#exists(java.lang.String)" target="_top"><tt>exists</tt></A>(<code>String</code>)</nobr>
+  <A NAME="com.cloudera.cdk.data.DatasetRepository.get_removed(java.lang.String)"></A>
+  <nobr><code>Dataset</code>&nbsp;get(<code>String</code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Checks if there is a <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> in this repository named {@code name}.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.DatasetRepository.list_added()"></A>
-  <nobr><code>Collection&lt;String&gt;</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepository.html#list()" target="_top"><tt>list</tt></A>()</nobr>
-  </TD>
-  <TD VALIGN="TOP">List the names of the <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A>s in this {@code DatasetRepository}.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.DatasetRepository.load_added(java.lang.String)"></A>
-  <nobr><code>Dataset</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepository.html#load(java.lang.String)" target="_top"><tt>load</tt></A>(<code>String</code>)</nobr>
-  </TD>
-  <TD VALIGN="TOP">Get the latest version of a named <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A>.</TD>
-</TR>
-</TABLE>
-&nbsp;
-<p>
-<a NAME="Changed"></a>
-<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
-<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.DatasetRepository.drop_changed(java.lang.String)"></A>
-  <nobr><code>boolean</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepository.html#drop(java.lang.String)" target="_top"><tt>drop</tt></A>(<code>String</code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.8.x</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.DatasetRepository.get_changed(java.lang.String)"></A>
-  <nobr><code>Dataset</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepository.html#get(java.lang.String)" target="_top"><tt>get</tt></A>(<code>String</code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.8.x</TD>
+  <TD VALIGN="TOP">Deprecated synonym for <A HREF="../../apidocs/.html#load"><TT>.load</TT></A>.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -121,7 +79,7 @@ Interface com.cloudera.cdk.data.<A HREF="../../apidocs/com/cloudera/cdk/data/Dat
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.8.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_com.cloudera.cdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -134,7 +92,7 @@ Interface com.cloudera.cdk.data.<A HREF="../../apidocs/com/cloudera/cdk/data/Dat
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<A HREF="com.cloudera.cdk.data.DatasetReader.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="com.cloudera.cdk.data.DatasetWriter.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="com.cloudera.cdk.data.FieldPartitioner.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="com.cloudera.cdk.data.DatasetRepository.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

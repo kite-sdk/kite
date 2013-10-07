@@ -18,7 +18,7 @@ com.cloudera.cdk.data.DatasetDescriptor.Builder
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.8.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_com.cloudera.cdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -30,14 +30,14 @@ com.cloudera.cdk.data.DatasetDescriptor.Builder
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<B>PREV CLASS</B>&nbsp;
+&nbsp;<A HREF="com.cloudera.cdk.data.DatasetDescriptor.html"><B>PREV CLASS</B></A>
 &nbsp;<A HREF="com.cloudera.cdk.data.DatasetReader.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="com.cloudera.cdk.data.DatasetDescriptor.Builder.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell3"><FONT SIZE="-2"> DETAIL: &nbsp;
-<a href="#constructors">CONSTRUCTORS</a>&nbsp;|&nbsp;
-METHODS&nbsp;|&nbsp;
+CONSTRUCTORS&nbsp;|&nbsp;
+<a href="#methods">METHODS</a>&nbsp;|&nbsp;
 FIELDS
   </FONT></TD>
 </TR>
@@ -48,23 +48,99 @@ FIELDS
 Class com.cloudera.cdk.data.<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html" target="_top"><tt>DatasetDescriptor.Builder</tt></A>
 </H2>
 <a NAME="constructors"></a>
+<a NAME="methods"></a>
 <p>
 <a NAME="Added"></a>
-<TABLE summary="Added Constructors" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Constructors</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.DatasetDescriptor.Builder.ctor_added(com.cloudera.cdk.data.DatasetDescriptor)"></A>
-  <nobr><A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html#DatasetDescriptor.Builder(com.cloudera.cdk.data.DatasetDescriptor)" target="_top"><tt>DatasetDescriptor.Builder</tt></A>(<code>DatasetDescriptor</code>)</nobr>
+  <A NAME="com.cloudera.cdk.data.DatasetDescriptor.Builder.format_added(java.lang.String)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html#format(java.lang.String)" target="_top"><tt>format</tt></A>(<code>String</code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Creates a Builder configured to copy {@code descriptor}, if it is not
- modified.</TD>
+  <TD VALIGN="TOP">Configure the dataset's format from a format name String (optional).</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.DatasetDescriptor.Builder.location_added(java.lang.String)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html#location(java.lang.String)" target="_top"><tt>location</tt></A>(<code>String</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Configure the <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A>'s location (optional).</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.DatasetDescriptor.Builder.location_added(java.net.URI)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html#location(java.net.URI)" target="_top"><tt>location</tt></A>(<code>URI</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Configure the <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A>'s location (optional).</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.DatasetDescriptor.Builder.location_added(org.apache.hadoop.fs.Path)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html#location(org.apache.hadoop.fs.Path)" target="_top"><tt>location</tt></A>(<code>Path</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Configure the <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A>'s location (optional).</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.DatasetDescriptor.Builder.property_added(java.lang.String, java.lang.String)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html#property(java.lang.String, java.lang.String)" target="_top"><tt>property</tt></A>(<code>String,</nobr> String<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Add a key-value property to the descriptor.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.DatasetDescriptor.Builder.schemaLiteral_added(java.lang.String)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html#schemaLiteral(java.lang.String)" target="_top"><tt>schemaLiteral</tt></A>(<code>String</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Configure the dataset's schema from a <A HREF="../../apidocs/String.html"><TT>String</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.DatasetDescriptor.Builder.schemaUri_added(java.net.URI)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html#schemaUri(java.net.URI)" target="_top"><tt>schemaUri</tt></A>(<code>URI</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Configure the <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A>'s schema from a URI.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.DatasetDescriptor.Builder.schemaUri_added(java.lang.String)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html#schemaUri(java.lang.String)" target="_top"><tt>schemaUri</tt></A>(<code>String</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Configure the <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A>'s schema from a String URI.</TD>
 </TR>
 </TABLE>
 &nbsp;
-<a NAME="methods"></a>
+<p>
+<a NAME="Changed"></a>
+<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.DatasetDescriptor.Builder.schema_changed(java.net.URI)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html#schema(java.net.URI)" target="_top"><tt>schema</tt></A>(<code>URI</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+<b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.9.0, use {@link #schemaUri(java.net.URI)}</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.DatasetDescriptor.Builder.schema_changed(java.lang.String)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html#schema(java.lang.String)" target="_top"><tt>schema</tt></A>(<code>String</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+<b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.9.0</TD>
+</TR>
+</TABLE>
+&nbsp;
 <a NAME="fields"></a>
 <HR>
 <!-- Start of nav bar -->
@@ -73,7 +149,7 @@ Class com.cloudera.cdk.data.<A HREF="../../apidocs/com/cloudera/cdk/data/Dataset
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor.Builder.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.8.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_com.cloudera.cdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -85,7 +161,7 @@ Class com.cloudera.cdk.data.<A HREF="../../apidocs/com/cloudera/cdk/data/Dataset
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<B>PREV CLASS</B>&nbsp;
+&nbsp;<A HREF="com.cloudera.cdk.data.DatasetDescriptor.html"><B>PREV CLASS</B></A>
 &nbsp;<A HREF="com.cloudera.cdk.data.DatasetReader.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;

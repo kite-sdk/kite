@@ -18,7 +18,7 @@ com.cloudera.cdk.data
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.8.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -55,18 +55,19 @@ Package <A HREF="../../apidocs/com/cloudera/cdk/data/package-summary.html" targe
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="NoSuchDatasetException"></A>
-  <nobr><A HREF="../../apidocs/com/cloudera/cdk/data/NoSuchDatasetException.html" target="_top"><tt>NoSuchDatasetException</tt></A></nobr>
+  <A NAME="DatasetExistsException"></A>
+  <nobr><A HREF="../../apidocs/com/cloudera/cdk/data/DatasetExistsException.html" target="_top"><tt>DatasetExistsException</tt></A></nobr>
   </TD>
-  <TD VALIGN="TOP">Exception thrown when a DatasetRepository method is incorrectly called for a
- dataset name that does not yet exist.</TD>
+  <TD VALIGN="TOP">Exception thrown when trying to create a dataset that already exists.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="UnknownFormatException"></A>
-  <nobr><A HREF="../../apidocs/com/cloudera/cdk/data/UnknownFormatException.html" target="_top"><tt>UnknownFormatException</tt></A></nobr>
+  <A NAME="DatasetRepositories"></A>
+  <nobr><A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepositories.html" target="_top"><tt>DatasetRepositories</tt></A></nobr>
   </TD>
-  <TD VALIGN="TOP">Un-checked Exception thrown when a Dataset is in an unknown format.</TD>
+  <TD VALIGN="TOP"><p>Convenience methods for working with <A HREF="../../apidocs/com/cloudera/cdk/data/DatasetRepositories/DatasetRepository.html"><TT>DatasetRepository</TT></A> instances.</p>
+
+ </TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -75,6 +76,14 @@ Package <A HREF="../../apidocs/com/cloudera/cdk/data/package-summary.html" targe
 <TABLE summary="Changed Classes and Interfaces" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
   <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes and Interfaces</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="DatasetDescriptor"></A>
+  <nobr><A HREF="com.cloudera.cdk.data.DatasetDescriptor.html">DatasetDescriptor</A></nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ The structural definition of a <A HREF="../../apidocs/com/cloudera/cdk/data/DatasetDescriptor/Dataset.html"><TT>Dataset</TT></A>.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -101,11 +110,11 @@ Package <A HREF="../../apidocs/com/cloudera/cdk/data/package-summary.html" targe
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="DatasetWriter"></A>
-  <nobr><A HREF="com.cloudera.cdk.data.DatasetWriter.html"><I>DatasetWriter</I></A></nobr>
+  <A NAME="FieldPartitioner"></A>
+  <nobr><A HREF="com.cloudera.cdk.data.FieldPartitioner.html">FieldPartitioner</A></nobr>
   </TD>
   <TD VALIGN="TOP"><p>
- A stream-oriented dataset writer.</TD>
+ Partitions values for a named field.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -114,6 +123,21 @@ Package <A HREF="../../apidocs/com/cloudera/cdk/data/package-summary.html" targe
   </TD>
   <TD VALIGN="TOP"><p>
  Defines a service provider interface for metadata system plugins.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="PartitionStrategy"></A>
+  <nobr><A HREF="com.cloudera.cdk.data.PartitionStrategy.html">PartitionStrategy</A></nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ The strategy used to determine how a dataset is partitioned.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="PartitionStrategy.Builder"></A>
+  <nobr><A HREF="com.cloudera.cdk.data.PartitionStrategy.Builder.html">PartitionStrategy.Builder</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A fluent builder to aid in the construction of <A HREF="../../apidocs/com/cloudera/cdk/data/PartitionStrategy/Builder/PartitionStrategy.html"><TT>PartitionStrategy</TT></A>s.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -124,7 +148,7 @@ Package <A HREF="../../apidocs/com/cloudera/cdk/data/package-summary.html" targe
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.8.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>

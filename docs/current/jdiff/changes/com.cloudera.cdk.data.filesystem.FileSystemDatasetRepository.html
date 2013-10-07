@@ -18,7 +18,7 @@ com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.8.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_com.cloudera.cdk.data.filesystem.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -31,12 +31,12 @@ com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV CLASS</B>&nbsp;
-&nbsp;<A HREF="com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.Builder.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell3"><FONT SIZE="-2"> DETAIL: &nbsp;
-CONSTRUCTORS&nbsp;|&nbsp;
+<a href="#constructors">CONSTRUCTORS</a>&nbsp;|&nbsp;
 <a href="#methods">METHODS</a>&nbsp;|&nbsp;
 FIELDS
   </FONT></TD>
@@ -47,19 +47,56 @@ FIELDS
 <H2>
 Class com.cloudera.cdk.data.filesystem.<A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html" target="_top"><tt>FileSystemDatasetRepository</tt></A>
 </H2>
-<p><font size="+1">The superclass changed from <code>java.lang.Object</code> to <code>com.cloudera.cdk.data.spi.AbstractDatasetRepository</code>.<br> Removed interface <code>com.cloudera.cdk.data.DatasetRepository</code>.<br></font>
 <a NAME="constructors"></a>
-<a NAME="methods"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Changed"></a>
+<TABLE summary="Changed Constructors" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Constructors</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.checkExists_added(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path)"></A>
-  <nobr><code>void</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html#checkExists(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path)" target="_top"><tt>checkExists</tt></A>(<code>FileSystem,</nobr> Path<nobr><nobr></code>)</nobr>
+  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.ctor_changed(java.net.URI)"></A>
+  <nobr><A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html#FileSystemDatasetRepository(java.net.URI)" target="_top"><tt>FileSystemDatasetRepository</tt></A>(<code>URI</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+<b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.9.0</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.ctor_changed(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path)"></A>
+  <nobr><A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html#FileSystemDatasetRepository(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path)" target="_top"><tt>FileSystemDatasetRepository</tt></A>(<code>FileSystem,</nobr> Path<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+<b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.9.0</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.ctor_changed(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path, com.cloudera.cdk.data.MetadataProvider)"></A>
+  <nobr><A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html#FileSystemDatasetRepository(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path, com.cloudera.cdk.data.MetadataProvider)" target="_top"><tt>FileSystemDatasetRepository</tt></A>(<code>FileSystem,</nobr> Path<nobr>,</nobr> MetadataProvider<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+<b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.9.0</TD>
+</TR>
+</TABLE>
+&nbsp;
+<a NAME="methods"></a>
+<p>
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.checkExists_removed(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path)"></A>
+  <nobr><code>void</code>&nbsp;checkExists(<code>FileSystem,</nobr> Path<nobr><nobr></code>)</nobr>
   </TD>
   <TD VALIGN="TOP">Precondition-style static validation that a dataset exists
 
@@ -67,36 +104,17 @@ Class com.cloudera.cdk.data.filesystem.<A HREF="../../apidocs/com/cloudera/cdk/d
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.delete_added(java.lang.String)"></A>
-  <nobr><code>boolean</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html#delete(java.lang.String)" target="_top"><tt>delete</tt></A>(<code>String</code>)</nobr>
+  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.pathForDataset_removed(java.lang.String)"></A>
+  <nobr><code>Path</code>&nbsp;pathForDataset(<code>String</code>)</nobr>
   </TD>
-  <TD>&nbsp;</TD>
+  <TD VALIGN="TOP"><p>
+ Implementations should return the fully-qualified path of the data directory for
+ the dataset with the given name.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.exists_added(java.lang.String)"></A>
-  <nobr><code>boolean</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html#exists(java.lang.String)" target="_top"><tt>exists</tt></A>(<code>String</code>)</nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.list_added()"></A>
-  <nobr><code>Collection&lt;String&gt;</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html#list()" target="_top"><tt>list</tt></A>()</nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.load_added(java.lang.String)"></A>
-  <nobr><code>Dataset</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html#load(java.lang.String)" target="_top"><tt>load</tt></A>(<code>String</code>)</nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.pathForDataset_added(org.apache.hadoop.fs.Path, java.lang.String)"></A>
-  <nobr><code>Path</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html#pathForDataset(org.apache.hadoop.fs.Path, java.lang.String)" target="_top"><tt>pathForDataset</tt></A>(<code>Path,</nobr> String<nobr><nobr></code>)</nobr>
+  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.pathForDataset_removed(org.apache.hadoop.fs.Path, java.lang.String)"></A>
+  <nobr><code>Path</code>&nbsp;pathForDataset(<code>Path,</nobr> String<nobr><nobr></code>)</nobr>
   </TD>
   <TD VALIGN="TOP">Returns the correct dataset path for the given name and root directory.</TD>
 </TR>
@@ -110,23 +128,23 @@ Class com.cloudera.cdk.data.filesystem.<A HREF="../../apidocs/com/cloudera/cdk/d
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.drop_changed(java.lang.String)"></A>
-  <nobr><code>boolean</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/spi/AbstractDatasetRepository.html#drop(java.lang.String)" target="_top"><tt>drop</tt></A>(<code>String</code>)  </nobr>
+  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.getFileSystem_changed()"></A>
+  <nobr><code>FileSystem</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html#getFileSystem()" target="_top"><tt>getFileSystem</tt></A>()  </nobr>
   </TD>
   <TD VALIGN="TOP" WIDTH="30%">
-Method was locally defined, but is now inherited from <a href="../../apidocs/com/cloudera/cdk/data/spi/AbstractDatasetRepository.html#drop(java.lang.String)" target="_top"><tt>AbstractDatasetRepository</tt></a>.
+<b>Now deprecated</b>.<br>
   </TD>
-  <TD>&nbsp;</TD>
+  <TD VALIGN="TOP">will be removed in 0.9.0</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.get_changed(java.lang.String)"></A>
-  <nobr><code>Dataset</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/spi/AbstractDatasetRepository.html#get(java.lang.String)" target="_top"><tt>get</tt></A>(<code>String</code>)  </nobr>
+  <A NAME="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.getRootDirectory_changed()"></A>
+  <nobr><code>Path</code>&nbsp;<A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html#getRootDirectory()" target="_top"><tt>getRootDirectory</tt></A>()  </nobr>
   </TD>
   <TD VALIGN="TOP" WIDTH="30%">
-Method was locally defined, but is now inherited from <a href="../../apidocs/com/cloudera/cdk/data/spi/AbstractDatasetRepository.html#get(java.lang.String)" target="_top"><tt>AbstractDatasetRepository</tt></a>.
+<b>Now deprecated</b>.<br>
   </TD>
-  <TD>&nbsp;</TD>
+  <TD VALIGN="TOP">will be removed in 0.9.0</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -138,7 +156,7 @@ Method was locally defined, but is now inherited from <a href="../../apidocs/com
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.7.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/com/cloudera/cdk/data/filesystem/FileSystemDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>CDK 0.8.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_com.cloudera.cdk.data.filesystem.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -151,7 +169,7 @@ Method was locally defined, but is now inherited from <a href="../../apidocs/com
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV CLASS</B>&nbsp;
-&nbsp;<A HREF="com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.Builder.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
