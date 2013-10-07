@@ -28,6 +28,8 @@ import org.apache.crunch.Target;
 import org.apache.crunch.io.ReadableSource;
 import org.apache.crunch.io.avro.AvroFileSource;
 import org.apache.crunch.io.avro.AvroFileTarget;
+import org.apache.crunch.io.parquet.AvroParquetFileSource;
+import org.apache.crunch.io.parquet.AvroParquetFileTarget;
 import org.apache.crunch.types.avro.AvroType;
 import org.apache.crunch.types.avro.Avros;
 import org.apache.hadoop.fs.Path;
@@ -55,10 +57,6 @@ public class CrunchDatasets {
   public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
     Path directory = Accessor.getDefault().getDirectory(dataset);
     if (directory != null) {
-      if (dataset.getDescriptor().getFormat() == Formats.PARQUET) {
-        throw new UnsupportedOperationException("Parquet is not supported.");
-      }
-
       List<Path> paths = Lists.newArrayList();
       try {
         Accessor.getDefault().accumulateDatafilePaths(dataset, directory, paths);
@@ -72,6 +70,9 @@ public class CrunchDatasets {
         avroType = (AvroType<E>) Avros.generics(dataset.getDescriptor().getSchema());
       } else {
         avroType = Avros.records(type);
+      }
+      if (dataset.getDescriptor().getFormat() == Formats.PARQUET) {
+        return new AvroParquetFileSource<E>(paths, avroType);
       }
       return new AvroFileSource<E>(paths, avroType);
     }
@@ -90,7 +91,7 @@ public class CrunchDatasets {
     Path directory = Accessor.getDefault().getDirectory(dataset);
     if (directory != null) {
       if (dataset.getDescriptor().getFormat() == Formats.PARQUET) {
-        throw new UnsupportedOperationException("Parquet is not supported.");
+        return new AvroParquetFileTarget(directory);
       }
       return new AvroFileTarget(directory);
     }
