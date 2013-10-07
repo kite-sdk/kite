@@ -3,12 +3,19 @@
 All past CDK releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
-## Version TBD
+## Version 0.8.0
 
-Release date: TBD
+Release date: October 7, 2013
 
-Version TBD has the following notable changes:
+Version 0.8.0 has the following notable changes:
 
+* Dataset Repository URIs. Repositories can be referred to (and opened) by a URI. For
+  example, repo:hdfs://namenode:8020/data specifies a Dataset Repository stored in HDFS.
+  Dataset descriptors carry the repository URI.
+* Dataset API. Removed APIs that were deprecated in 0.7.0. Deprecated some constructors
+  in favor of builders. See [API Diffs](http://cloudera.github.io/cdk/docs/0.8.0/jdiff/changes.html)
+  for all the changes.
+* Upgrade to Parquet 1.2.0.
 * Morphlines Library
     * Added option for commands to register health checks (not just metrics) with the MorphlineContext.
     * Added [registerJVMMetrics](cdk-morphlines/morphlinesReferenceGuide.html#registerJVMMetrics) command that registers metrics that are related to the Java Virtual Machine 
@@ -38,9 +45,12 @@ Version TBD has the following notable changes:
       Previously some commands could not refer to record field names containing the '.' dot character. 
       This limitation has been removed.
 
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10268)
+is available from JIRA.
+
 ## Version 0.7.0
 
-Release date: Sept 5, 2013
+Release date: September 5, 2013
 
 Version 0.7.0 has the following notable changes:
 
@@ -60,7 +70,7 @@ is available from JIRA.
 
 ## Version 0.6.0
 
-Release date: Aug 16, 2013
+Release date: August 16, 2013
 
 Version 0.6.0 has the following notable changes:
 
@@ -69,7 +79,7 @@ Version 0.6.0 has the following notable changes:
 
 ## Version 0.5.0
 
-Release date: Aug 1, 2013
+Release date: August 1, 2013
 
 Version 0.5.0 has the following notable changes:
 
