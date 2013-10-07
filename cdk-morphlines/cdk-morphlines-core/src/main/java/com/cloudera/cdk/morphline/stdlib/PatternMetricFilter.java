@@ -18,7 +18,6 @@ package com.cloudera.cdk.morphline.stdlib;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
@@ -222,20 +221,20 @@ final class PatternMetricFilter implements MetricFilter {
   ///////////////////////////////////////////////////////////////////////////////
   public final class RegexExpression implements Expression {
     
-    private final Matcher regex;
+    private final Pattern regex;
     
     public RegexExpression(Pattern pattern) {
-      this.regex = pattern.matcher("");
+      this.regex = pattern;
     }
     
     @Override
     public boolean matches(String str) {
-      return regex.reset(str).matches();
+      return regex.matcher(str).matches();
     }
 
     @Override
     public String toString() {
-      return "regex:" + regex.pattern().pattern();
+      return "regex:" + regex.pattern();
     }
 
   }
@@ -246,17 +245,17 @@ final class PatternMetricFilter implements MetricFilter {
   ///////////////////////////////////////////////////////////////////////////////
   public class GlobExpression implements Expression {
     
-    private final Matcher regex;
+    private final Pattern regex;
     private final String pattern;
     
     public GlobExpression(String pattern) {
       this.pattern = pattern;
-      this.regex = GlobPattern.compile(pattern).matcher("");
+      this.regex = GlobPattern.compile(pattern);
     }
     
     @Override
     public boolean matches(String str) {
-      return regex.reset(str).matches();
+      return regex.matcher(str).matches();
     }
 
     @Override
