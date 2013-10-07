@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.cloudera.cdk</groupId>
     <artifactId>cdk-parent</artifactId>
-    <version>0.7.1-SNAPSHOT</version>
+    <version>0.8.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -202,13 +202,10 @@
             <phase>post-site</phase>
             <configuration>
               <target>
-                <echo message="Fixing up anchors for HTML5"/>
-                <replaceregexp 
-                  match="(&lt;a) name=(&quot;.*?&quot;&gt;&lt;/a&gt;)"
-                  replace="\1 id=\2"
-                  flags="g">
+                <echo message="Fixing up anchors for HTML5" />
+                <replaceregexp match="(&lt;a) name=(&quot;.*?&quot;&gt;&lt;/a&gt;)" replace="\1 id=\2" flags="g">
                   <fileset dir="${project.build.directory}/site"> 
-                    <include name="**/*.html"/>
+                    <include name="**/*.html" />
                   </fileset>
                 </replaceregexp>
               </target>
