@@ -4,8 +4,8 @@ Cloudera Morphlines provides a set of frequently\-used high\-level transformatio
 
 h3. Implementing your own Custom Command
 
-Note that perhaps the most important property of the Morphlines framework is how easy it is to add new transformations and I/O commands and integrate existing functionality and third party systems. If none of the existing commands match your use case, you can easily write your own command and plug it in. Simply implement the Java interface [Command|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/api/Command.java] or subclass [AbstractCommand|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/base/AbstractCommand.java], have it handle a [Record|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/api/Record.java] and add the resulting Java class to the classpath, along with a [CommandBuilder|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/api/CommandBuilder.java] implementation that defines the name(s) of the command and serves as a factory.
-Here are two example implementations: [toString|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java] and [readLine|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadLineBuilder.java]. No registration or other administrative action is required. Indeed, none of the standard commands are special or intrinsically known per se. All commands are implemented like this, even including standard commands such as {{pipe}}, {{if}}, and {{tryRules}}. This means your custom commands can even replace any standard commands, if desired.
+Before we dive into the _currently available_ commands, it is worth noting again that perhaps the most important property of the Morphlines framework is how easy it is to add new transformations and I/O commands and integrate existing functionality and third party systems. If none of the existing commands match your use case, you can easily write your own command and plug it in. Simply implement the Java interface [Command|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/api/Command.java] or subclass [AbstractCommand|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/base/AbstractCommand.java], have it handle a [Record|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/api/Record.java] and add the resulting Java class to the classpath, along with a [CommandBuilder|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/api/CommandBuilder.java] implementation that defines the name(s) of the command and serves as a factory.
+Here are two example implementations: [toString|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java] and [readLine|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadLineBuilder.java]. No registration or other administrative action is required. Indeed, none of the standard commands are special or intrinsically known per se. All commands are implemented like this, even including standard commands such as {{pipe}}, {{if}}, and {{tryRules}}. This means your custom commands can even replace any standard commands, if desired. With that said, the following tables provide a short description of each available command and a link to the complete documentation.
 
 h3. Table of Contents
 
@@ -147,7 +147,7 @@ This maven module contains standard I/O commands for tasks such as acting on sin
 
 h2. readClob
 
-The {{readClob}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadClobBuilder.java]) converts bytes to strings. It emits one record for the entire input stream of the first attachment, interpreting the stream as a Character Large Object (CLOB). The line is put as a string into the {{message}} output field.
+The {{readClob}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadClobBuilder.java]) converts bytes to a string. It emits one record for the entire input stream of the first attachment, interpreting the stream as a Character Large Object (CLOB). The line is put as a string into the {{message}} output field.
 
 The command provides the following configuration options:
 
@@ -350,7 +350,7 @@ addLocalHost {
 
 h2. addValues
 
-The {{addValues}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddValuesBuilder.java]) takes a set of {{outputField : values}} pairs and performs the following steps: For each output field, adds the given values to the field. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}.
+The {{addValues}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddValuesBuilder.java]) adds a list of values (or the contents of another field) to a given field. The command takes a set of {{outputField : values}} pairs and performs the following steps: For each output field, adds the given values to the field. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}.
 
 Example usage:
 {code}
@@ -368,7 +368,7 @@ addValues {
 
 h2. addValuesIfAbsent
 
-The {{addValuesIfAbsent}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddValuesIfAbsentBuilder.java]) is the same as the [#addValues] command, except that a given value is only added to the output field if it is not already contained in the output field.
+The {{addValuesIfAbsent}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddValuesIfAbsentBuilder.java]) adds a list of values (or the contents of another field) to a given field if not already contained. This command is the same as the [#addValues] command, except that a given value is only added to the output field if it is not already contained in the output field.
 
 Example usage:
 {code}
@@ -388,7 +388,7 @@ addValuesIfAbsent {
 
 h2. callParentPipe
 
-The {{callParentPipe}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/CallParentPipeBuilder.java]) routes records to the enclosing pipe object. Recall that a morphline _is a_ pipe. Thus, unless a morphline contains nested pipes, the parent pipe of a given command is the morphline itself, meaning that the first command of the morphline is called with the given record. Thus, the {{callParentPipe}} command effectively implements recursion, which is useful for extracting data from container data formats in elegant and concise ways. For example, you could use this to extract data from tar.gz files. This command is typically used in combination with the commands {{detectMimeType}}, {{tryRules}}, {{decompress}}, {{unpack}}, and possibly {{solrCell}}.
+The {{callParentPipe}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/CallParentPipeBuilder.java]) implements recursion for extracting data from container data formats. The command routes records to the enclosing pipe object. Recall that a morphline _is a_ pipe. Thus, unless a morphline contains nested pipes, the parent pipe of a given command is the morphline itself, meaning that the first command of the morphline is called with the given record. Thus, the {{callParentPipe}} command effectively implements recursion, which is useful for extracting data from container data formats in elegant and concise ways. For example, you could use this to extract data from tar.gz files. This command is typically used in combination with the commands {{detectMimeType}}, {{tryRules}}, {{decompress}}, {{unpack}}, and possibly {{solrCell}}.
 
 Example usage:
 {code}
@@ -399,7 +399,7 @@ For a real world example, see the {{solrCell}} command.
 
 h2. contains
 
-The {{contains}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ContainsBuilder.java]) succeeds if one of the field values of the given named field is equal to one of the the given values, and fails otherwise. Multiple fields can be named, in which case the results are ANDed.
+The {{contains}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ContainsBuilder.java]) returns whether or not a given value is contained in a given field. The command succeeds if one of the field values of the given named field is equal to one of the the given values, and fails otherwise. Multiple fields can be named, in which case the results are ANDed.
 
 Example usage:
 {code}
@@ -504,7 +504,7 @@ equals { tags : [version1, highPriority] }
 
 h2. extractURIComponents
 
-The {{extractURIComponents}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ExtractURIComponentsBuilder.java]) extracts subcomponents from the URIs contained in the given input field and adds them to output fields with the given prefix, namely scheme, authority, host, port, path, query, fragment, schemeSpecificPart, userInfo.
+The {{extractURIComponents}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ExtractURIComponentsBuilder.java]) extracts the following subcomponents from the URIs contained in the given input field and adds them to output fields with the given prefix: scheme, authority, host, port, path, query, fragment, schemeSpecificPart, userInfo.
 
 The command provides the following configuration options:
 
@@ -833,7 +833,7 @@ if {
 
 h2. java
 
-The {{java}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/JavaBuilder.java]) compiles and executes the given Java code block, wrapped into a Java method with a Boolean return type and several parameters, along with a Java class definition that contains the given import statements.
+The {{java}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/JavaBuilder.java]) provides scripting support for Java.  The command compiles and executes the given Java code block, wrapped into a Java method with a Boolean return type and several parameters, along with a Java class definition that contains the given import statements.
 
 The following enclosing method declaration is used to pass parameters to the Java code block:
 
@@ -883,7 +883,7 @@ java {
 \\
 h2. logTrace, logDebug, logInfo, logWarn, logError
 
-These commands log a message to [SLF4J|http://www.slf4j.org] at the given log level. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}. The special field expression @\{\} can be used to log the entire record.
+These commands logs a message at the given log level to [SLF4J|http://www.slf4j.org]. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}. The special field expression @\{\} can be used to log the entire record.
 
 Example usage:
 {code}
@@ -908,7 +908,7 @@ log4j.logger.com.cloudera.cdk.morphline=TRACE
 
 h2. not
 
-The {{not}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/NotBuilder.java]) consists of one nested command, the Boolean return value of which is inverted.
+The {{not}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/NotBuilder.java]) inverts the boolean return value of a nested command. The command consists of one nested command, the Boolean return value of which is inverted.
 
 Example usage:
 {code}
@@ -934,7 +934,7 @@ if {
 
 h2. pipe
 
-The {{pipe}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/Pipe.java]) has an identifier and contains a chain of zero or more commands, through which records get piped. A command transforms the record into zero or more records. The output records of a command are passed to the next command in the chain. A command has a Boolean return code, indicating success or failure. If any command in the pipe fails (meaning that it returns {{false}}), the whole pipe fails (meaning that it returns {{false}}), which causes backtracking of the command chain.
+The {{pipe}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/Pipe.java]) pipes a record through a chain of commands. The {{pipe}} command has an identifier and contains a chain of zero or more commands, through which records get piped. A command transforms the record into zero or more records. The output records of a command are passed to the next command in the chain. A command has a Boolean return code, indicating success or failure. If any command in the pipe fails (meaning that it returns {{false}}), the whole pipe fails (meaning that it returns {{false}}), which causes backtracking of the command chain.
 
 Because a pipe is itself a command, a pipe can contain arbitrarily nested pipes. A _morphline_ is a pipe. "Morphline" is simply another name for the pipe at the root of the command tree.
 
@@ -977,7 +977,7 @@ separateAttachments {}
 
 h2. setValues
 
-The {{setValues}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SetValuesBuilder.java]) is the same as the [#addValues] command, except that it first removes all values from the given output field, and then it adds new values.
+The {{setValues}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SetValuesBuilder.java]) assigns a given list of values (or the contents of another field) to a given field. This command is the same as the [#addValues] command, except that it first removes all values from the given output field, and then it adds new values.
 
 Example usage:
 {code}
@@ -1350,7 +1350,7 @@ toByteArray { field : _attachment_body }
 
 h2. toString
 
-The {{toString}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java]) converts the Java objects in a given field using the {{Object.toString()}} method to their string representation, and optionally also applies the {{String.trim()}} method.
+The {{toString}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java]) converts the Java objects in a given field using the {{Object.toString()}} method to their string representation, and optionally also applies the {{String.trim()}} method to remove leading and trailing whitespace.
 
 The command provides the following configuration options:
 
@@ -1402,7 +1402,7 @@ Expected output: {{level:Unknown}}
 
 h2. tryRules
 
-The {{tryRules}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/TryRulesBuilder.java]) consists of zero or more rules. A rule consists of zero or more commands.
+The {{tryRules}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/TryRulesBuilder.java]) is a simple rule engine for handling a list of heterogeneous input data formats. The command consists of zero or more rules. A rule consists of zero or more commands.
 
 The rules of a {{tryRules}} command are processed in top\-down order. If one of the commands in a rule fails, the {{tryRules}} command stops processing this rule, backtracks and tries the next rule, and so on, until a rule is found that runs all its commands to completion without failure (the rule _succeeds_). If a rule succeeds, the remaining rules of the current {{tryRules}} command are skipped. If no rule succeeds the record remains unchanged, but a warning may be issued or an exception may be thrown.
 
@@ -1456,7 +1456,7 @@ This maven module contains morphline commands for reading, extracting, and trans
 
 h2. readAvroContainer
 
-The {{readAvroContainer}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ReadAvroContainerBuilder.java]) parses an InputStream or byte array that contains Avro binary container file data. For each Avro datum, the command emits a morphline record containing the datum as an attachment in the field \_attachment\_body.
+The {{readAvroContainer}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ReadAvroContainerBuilder.java]) parses an InputStream or byte array that contains Apache Avro binary container file data. For each Avro datum, the command emits a morphline record containing the datum as an attachment in the field \_attachment\_body.
 
 The Avro schema that was used to write the Avro data is retrieved from the Avro container. Optionally, the Avro schema that shall be used for reading can be supplied with a configuration option; otherwise it is assumed to be the same as the writer schema.
 
@@ -1488,7 +1488,7 @@ readAvroContainer {
 
 h2. readAvro
 
-The {{readAvro}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ReadAvroBuilder.java]) is the same as the [#readAvroContainer] command except that the Avro schema that was used to write the Avro data must be explicitly supplied to the {{readAvro}} command because it expects raw Avro data without an Avro container and hence without a built\-in writer schema.
+The {{readAvro}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ReadAvroBuilder.java]) parses containerless Avro. This command is the same as the [#readAvroContainer] command except that the Avro schema that was used to write the Avro data must be explicitly supplied to the {{readAvro}} command because it expects raw Avro data without an Avro container and hence without a built\-in writer schema.
 
 Optionally, the Avro schema that shall be used for reading can be supplied with a configuration option; otherwise it is assumed to be the same as the writer schema.
 
@@ -1540,7 +1540,7 @@ extractAvroTree {
 
 h2. extractAvroPaths
 
-The {{extractAvroPaths}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ExtractAvroPathsBuilder.java]) uses zero or more Avro path expressions to extract values from an Avro object.
+The {{extractAvroPaths}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ExtractAvroPathsBuilder.java]) extracts specific values from an Avro object, akin to a simple form of XPath. The command uses zero or more Avro path expressions to extract values from an Avro object.
 
 The Avro input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [#readAvroContainer] or [#readAvro] command.
 
@@ -1582,7 +1582,7 @@ This maven module contains morphline commands for reading, extracting, and trans
 
 h2. readJson
 
-The {{readJson}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ReadJsonBuilder.java]) parses an InputStream or byte array that contains JSON data. For each top level JSON object, the command emits a morphline record containing the top level object as an attachment in the field \_attachment\_body.
+The {{readJson}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ReadJsonBuilder.java]) parses an InputStream or byte array that contains JSON data, using the [Jackson|https://github.com/FasterXML/jackson-databind] library. For each top level JSON object, the command emits a morphline record containing the top level object as an attachment in the field \_attachment\_body.
 
 The input stream or byte array is read from the first attachment of the input record.
 
@@ -1605,7 +1605,7 @@ readJson {
 
 h2. extractJsonPaths
 
-The {{extractJsonPaths}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ExtractJsonPathsBuilder.java]) uses zero or more JSON path expressions to extract values from a [Jackson|https://github.com/FasterXML/jackson-databind] JSON object of outputClass [com.fasterxml.jackson.databind.JsonNode|http://wiki.fasterxml.com/JacksonTreeModel].
+The {{extractJsonPaths}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ExtractJsonPathsBuilder.java]) extracts specific values from a JSON object, akin to a simple form of XPath. The command uses zero or more JSON path expressions to extract values from a [Jackson|https://github.com/FasterXML/jackson-databind] JSON object of outputClass [com.fasterxml.jackson.databind.JsonNode|http://wiki.fasterxml.com/JacksonTreeModel].
 
 The JSON input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [#readJson] command with {{outputClass : com.fasterxml.jackson.databind.JsonNode}}.
 
@@ -1665,9 +1665,7 @@ h1. cdk\-morphlines\-hadoop\-sequencefile
 
 h2. readSequenceFile
 
-The {{readSequenceFile}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-sequencefile/src/main/java/com/cloudera/cdk/morphline/hadoop/sequencefile/ReadSequenceFileBuilder.java]) extracts zero or more records from the input stream of the first attachment of the record, representing an Apache Hadoop SequenceFile.
-
-For the format and documentation of SequenceFiles see [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html].
+The {{readSequenceFile}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-sequencefile/src/main/java/com/cloudera/cdk/morphline/hadoop/sequencefile/ReadSequenceFileBuilder.java]) parses an Apache Hadoop [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html] and emits a morphline record for each contained key\-value pair. The sequence file is read from the input stream of the first attachment of the record.
 
 The command automatically handles Record\-Compressed and Block\-Compressed SequenceFiles.
 
