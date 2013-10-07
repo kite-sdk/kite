@@ -15,10 +15,12 @@
  */
 package com.cloudera.cdk.data.filesystem.impl;
 
+import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import com.cloudera.cdk.data.Dataset;
 import java.io.IOException;
 import java.util.List;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
 /**
@@ -61,4 +63,6 @@ public abstract class Accessor {
   public abstract Path getDirectory(Dataset dataset);
 
   public abstract void accumulateDatafilePaths(Dataset dataset, Path directory, List<Path> paths) throws IOException;
+
+  public abstract void ensureExists(DatasetDescriptor descriptor, Configuration conf);
 }

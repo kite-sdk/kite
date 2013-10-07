@@ -461,7 +461,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    * @param conf A Configuration
    * @param descriptor A DatasetDescriptor
    */
-  private static void ensureExists(
+  static void ensureExists(
       DatasetDescriptor descriptor, Configuration conf) {
     Preconditions.checkArgument(descriptor.getLocation() != null,
         "Cannot get FileSystem for a descriptor with no location");

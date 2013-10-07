@@ -18,6 +18,7 @@ package com.cloudera.cdk.data.hcatalog;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.MetadataProviderException;
+import com.cloudera.cdk.data.filesystem.impl.Accessor;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
@@ -80,6 +81,9 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
         new DatasetDescriptor.Builder(descriptor)
         .location(pathForDataset(name))
         .get();
+
+    // create the data directory first so it is owned by the current user, not Hive
+    Accessor.getDefault().ensureExists(newDescriptor, conf);
 
     // this object will be the table metadata
     final Table table = HiveUtils.tableForDescriptor(

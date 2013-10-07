@@ -16,9 +16,11 @@
 package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
 import java.io.IOException;
 import java.util.List;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
 final class AccessorImpl extends Accessor {
@@ -37,5 +39,11 @@ final class AccessorImpl extends Accessor {
     if (dataset instanceof FileSystemDataset) {
       ((FileSystemDataset) dataset).accumulateDatafilePaths(directory, paths);
     }
+  }
+
+  @Override
+  public void ensureExists(
+      DatasetDescriptor descriptor, Configuration conf) {
+    FileSystemDatasetRepository.ensureExists(descriptor, conf);
   }
 }
