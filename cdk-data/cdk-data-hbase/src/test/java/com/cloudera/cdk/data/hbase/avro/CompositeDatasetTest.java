@@ -26,8 +26,6 @@ import com.cloudera.cdk.data.hbase.avro.entities.SubEntity1;
 import com.cloudera.cdk.data.hbase.avro.entities.SubEntity2;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -42,7 +40,6 @@ public class CompositeDatasetTest {
   private static final String subEntity1String;
   private static final String subEntity2String;
   private static final String tableName = "testtable";
-  private HTablePool tablePool;
 
   static {
     try {
@@ -69,21 +66,11 @@ public class CompositeDatasetTest {
     HBaseTestUtils.util.deleteTable(Bytes.toBytes(tableName));
   }
 
-  @Before
-  public void beforeTest() throws Exception {
-    tablePool = new HTablePool(HBaseTestUtils.getConf(), 10);
-  }
-
-  @After
-  public void afterTest() throws Exception {
-    tablePool.close();
-  }
-
   @Test
   public void testSpecific() throws Exception {
 
-    HBaseAdmin hBaseAdmin = new HBaseAdmin(HBaseTestUtils.getConf());
-    HBaseDatasetRepository repo = new HBaseDatasetRepository(hBaseAdmin, tablePool);
+    HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
+        .configuration(HBaseTestUtils.getConf()).get();
 
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .identity("part1", 1).identity("part2", 2).get();

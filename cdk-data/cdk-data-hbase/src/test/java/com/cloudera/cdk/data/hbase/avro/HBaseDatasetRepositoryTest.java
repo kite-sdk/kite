@@ -25,8 +25,6 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.util.Utf8;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -44,8 +42,6 @@ public class HBaseDatasetRepositoryTest {
   private static final String testGenericEntity;
   private static final String tableName = "testtable";
   private static final String managedTableName = "managed_schemas";
-
-  private HTablePool tablePool;
 
   static {
     try {
@@ -70,14 +66,8 @@ public class HBaseDatasetRepositoryTest {
     HBaseTestUtils.util.deleteTable(Bytes.toBytes(tableName));
   }
 
-  @Before
-  public void before() throws Exception {
-    tablePool = new HTablePool(HBaseTestUtils.getConf(), 10);
-  }
-
   @After
   public void after() throws Exception {
-    tablePool.close();
     HBaseTestUtils.util.truncateTable(Bytes.toBytes(tableName));
     HBaseTestUtils.util.truncateTable(Bytes.toBytes(managedTableName));
   }
@@ -85,8 +75,8 @@ public class HBaseDatasetRepositoryTest {
   @Test
   public void testGeneric() throws Exception {
 
-    HBaseAdmin hBaseAdmin = new HBaseAdmin(HBaseTestUtils.getConf());
-    HBaseDatasetRepository repo = new HBaseDatasetRepository(hBaseAdmin, tablePool);
+    HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
+        .configuration(HBaseTestUtils.getConf()).get();
 
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .identity("part1", 1).identity("part2", 2).get();
@@ -154,8 +144,8 @@ public class HBaseDatasetRepositoryTest {
 
   @Test
   public void testSpecific() throws Exception {
-    HBaseAdmin hBaseAdmin = new HBaseAdmin(HBaseTestUtils.getConf());
-    HBaseDatasetRepository repo = new HBaseDatasetRepository(hBaseAdmin, tablePool);
+    HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
+        .configuration(HBaseTestUtils.getConf()).get();
 
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .identity("part1", 1).identity("part2", 2).get();

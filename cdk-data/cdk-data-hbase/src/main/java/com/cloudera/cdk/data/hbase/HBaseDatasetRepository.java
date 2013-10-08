@@ -10,12 +10,16 @@ import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
 import com.cloudera.cdk.data.spi.AbstractDatasetRepository;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecord;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.MasterNotRunningException;
+import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 
@@ -25,7 +29,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   private SchemaManager schemaManager;
   private HBaseMetadataProvider metadataProvider;
 
-  public HBaseDatasetRepository(HBaseAdmin hBaseAdmin, HTablePool tablePool) {
+  HBaseDatasetRepository(HBaseAdmin hBaseAdmin, HTablePool tablePool) {
     this.tablePool = tablePool;
     this.schemaManager = new DefaultSchemaManager(tablePool);
     this.metadataProvider = new HBaseMetadataProvider(hBaseAdmin, schemaManager);
@@ -104,5 +108,29 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   @Override
   public Collection<String> list() {
     throw new UnsupportedOperationException();
+  }
+
+  public static class Builder implements Supplier<HBaseDatasetRepository> {
+
+    private Configuration configuration;
+
+    public Builder configuration(Configuration configuration) {
+      this.configuration = configuration;
+      return this;
+    }
+
+    @Override
+    public HBaseDatasetRepository get() {
+      HTablePool pool = new HTablePool(configuration, 10);
+      HBaseAdmin admin;
+      try {
+        admin = new HBaseAdmin(configuration);
+      } catch (MasterNotRunningException e) {
+        throw new DatasetRepositoryException("Problem creating HBaseDatasetRepository.", e);
+      } catch (ZooKeeperConnectionException e) {
+        throw new DatasetRepositoryException("Problem creating HBaseDatasetRepository.", e);
+      }
+      return new HBaseDatasetRepository(admin, pool);
+    }
   }
 }

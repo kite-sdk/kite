@@ -26,7 +26,6 @@ import java.util.HashMap;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTablePool;
 
 /**
  * This is an example that demonstrates basic CDK HBase functionality. It uses a
@@ -72,7 +71,6 @@ public class UserProfileDatasetExample {
    */
   public UserProfileDatasetExample() throws Exception {
     Configuration conf = HBaseConfiguration.create();
-    HTablePool pool = new HTablePool(conf, 10);
     HBaseAdmin admin = new HBaseAdmin(conf);
 
     // Delete the table if it exists so we start fresh.
@@ -81,7 +79,8 @@ public class UserProfileDatasetExample {
       admin.deleteTable("cdk_example_user_profiles");
     }
 
-    HBaseDatasetRepository repo = new HBaseDatasetRepository(admin, pool);
+    HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
+        .configuration(conf).get();
 
     partitionStrategy = new PartitionStrategy.Builder()
         .identity("firstName", 1).identity("lastName", 2).get();
