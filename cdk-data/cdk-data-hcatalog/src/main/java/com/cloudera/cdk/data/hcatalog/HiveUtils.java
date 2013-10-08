@@ -37,7 +37,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -45,7 +46,10 @@ import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.metadata.Table;
+import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorUtils;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 
 class HiveUtils {
   static final String DEFAULT_DB = "default";
@@ -65,13 +69,13 @@ class HiveUtils {
   private static final Map<Format, String> FORMAT_TO_OUTPUT_FORMAT = Maps.newHashMap();
   static {
     FORMAT_TO_SERDE.put(Formats.AVRO, "org.apache.hadoop.hive.serde2.avro.AvroSerDe");
-    //FORMAT_TO_SERDE.put(Formats.PARQUET, "parquet.hive.serde.ParquetHiveSerDe");
+    FORMAT_TO_SERDE.put(Formats.PARQUET, "parquet.hive.serde.ParquetHiveSerDe");
 
     FORMAT_TO_INPUT_FORMAT.put(Formats.AVRO, "org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
-    //FORMAT_TO_INPUT_FORMAT.put(Formats.PARQUET, "parquet.hadoop.ParquetInputFormat");
+    FORMAT_TO_INPUT_FORMAT.put(Formats.PARQUET, "parquet.hive.DeprecatedParquetInputFormat");
 
     FORMAT_TO_OUTPUT_FORMAT.put(Formats.AVRO, "org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat");
-    //FORMAT_TO_INPUT_FORMAT.put(Formats.PARQUET, "parquet.hadoop.ParquetOutputFormat");
+    FORMAT_TO_OUTPUT_FORMAT.put(Formats.PARQUET, "parquet.hive.DeprecatedParquetOutputFormat");
   }
 
   static DatasetDescriptor descriptorForTable(Configuration conf, Table table) {
@@ -92,11 +96,10 @@ class HiveUtils {
     builder.location(fs.makeQualified(dataLocation));
 
     // custom properties
-    Properties props = table.getMetadata();
-    String namesProperty = props.getProperty(CUSTOM_PROPERTIES_PROPERTY_NAME);
+    String namesProperty = table.getProperty(CUSTOM_PROPERTIES_PROPERTY_NAME);
     if (namesProperty != null) {
       for (String property : NAME_SPLITTER.split(namesProperty)) {
-        builder.property(property, props.getProperty(property));
+        builder.property(property, table.getProperty(property));
       }
     }
 
@@ -197,6 +200,9 @@ class HiveUtils {
           schemaURL.toExternalForm());
     }
 
+    // convert the schema to Hive columns
+    table.setFields(convertSchema(descriptor.getSchema()));
+
     // copy partitioning info
     if (descriptor.isPartitioned()) {
       PartitionStrategy ps = descriptor.getPartitionStrategy();
@@ -261,4 +267,113 @@ class HiveUtils {
     return typeName;
   }
 
+  static List<FieldSchema> convertSchema(Schema avroSchema) {
+    List<FieldSchema> columns = Lists.newArrayList();
+    if (Schema.Type.RECORD.equals(avroSchema.getType())) {
+      for (Field field : avroSchema.getFields()) {
+        columns.add(new FieldSchema(
+            field.name(), convert(field.schema()).getTypeName(), field.doc()));
+      }
+    } else {
+      columns.add(new FieldSchema(
+          "column", convert(avroSchema).getTypeName(), avroSchema.getDoc()));
+    }
+    return columns;
+  }
+
+  static TypeInfo convert(Schema avroSchema) {
+    // TODO: throw an error on recursive types
+    switch (avroSchema.getType()) {
+      case RECORD:
+        avroSchema.getFullName();
+        return convertRecord(avroSchema);
+      case UNION:
+        return convertUnion(avroSchema);
+      case ARRAY:
+        return convertArray(avroSchema);
+      case MAP:
+        return convertMap(avroSchema);
+      default:
+        return convertPrimitive(avroSchema);
+    }
+  }
+
+  static TypeInfo convertRecord(Schema avroRecord) {
+    Preconditions.checkArgument(
+        Schema.Type.RECORD.equals(avroRecord.getType()),
+        "Avro Schema must be a Record");
+
+    final List<Field> fields = avroRecord.getFields();
+    final List<String> names = Lists.newArrayListWithExpectedSize(fields.size());
+    final List<TypeInfo> types = Lists.newArrayListWithExpectedSize(fields.size());
+    for (Field field : fields) {
+      names.add(field.name());
+      types.add(convert(field.schema()));
+    }
+
+    return TypeInfoFactory.getStructTypeInfo(names, types);
+  }
+
+  static TypeInfo convertUnion(Schema avroUnion) {
+    Preconditions.checkArgument(
+        Schema.Type.UNION.equals(avroUnion.getType()),
+        "Avro Schema must be a Union");
+
+    final List<TypeInfo> nonNullTypes = Lists.newArrayList();
+    for (Schema schema : avroUnion.getTypes()) {
+      if (!Schema.Type.NULL.equals(schema.getType())) {
+        nonNullTypes.add(convert(schema));
+      }
+    }
+
+    // check for a single, possible nullable field
+    if (nonNullTypes.size() == 1) {
+      // TODO: where does nullability get passed?
+      // nullable if avroUnion.getTypes().size() == 2
+      return nonNullTypes.get(0);
+    }
+
+    return TypeInfoFactory.getUnionTypeInfo(nonNullTypes);
+  }
+
+  static TypeInfo convertArray(Schema avroArray) {
+    Preconditions.checkArgument(
+        Schema.Type.ARRAY.equals(avroArray.getType()),
+        "Avro Schema must be an Array");
+
+    return TypeInfoFactory.getListTypeInfo(convert(avroArray.getElementType()));
+  }
+
+  static TypeInfo convertMap(Schema avroMap) {
+    Preconditions.checkArgument(
+        Schema.Type.MAP.equals(avroMap.getType()),
+        "Avro Schema must be a Map");
+
+    return TypeInfoFactory.getMapTypeInfo(
+        TypeInfoFactory.stringTypeInfo, convert(avroMap.getValueType()));
+  }
+
+  static final Map<Schema.Type, String> TYPE_TO_STRING =
+      Maps.newHashMapWithExpectedSize(10);
+  static {
+    TYPE_TO_STRING.put(Schema.Type.BOOLEAN, serdeConstants.BOOLEAN_TYPE_NAME);
+    TYPE_TO_STRING.put(Schema.Type.INT, serdeConstants.INT_TYPE_NAME);
+    TYPE_TO_STRING.put(Schema.Type.LONG, serdeConstants.BIGINT_TYPE_NAME);
+    TYPE_TO_STRING.put(Schema.Type.FLOAT, serdeConstants.FLOAT_TYPE_NAME);
+    TYPE_TO_STRING.put(Schema.Type.DOUBLE, serdeConstants.DOUBLE_TYPE_NAME);
+    TYPE_TO_STRING.put(Schema.Type.FLOAT, serdeConstants.FLOAT_TYPE_NAME);
+    TYPE_TO_STRING.put(Schema.Type.STRING, serdeConstants.STRING_TYPE_NAME);
+    TYPE_TO_STRING.put(Schema.Type.ENUM, serdeConstants.STRING_TYPE_NAME);
+    TYPE_TO_STRING.put(Schema.Type.BYTES, serdeConstants.BINARY_TYPE_NAME);
+    TYPE_TO_STRING.put(Schema.Type.FIXED, serdeConstants.BINARY_TYPE_NAME);
+  }
+
+  static TypeInfo convertPrimitive(Schema avroPrimitive) {
+    String typeName = TYPE_TO_STRING.get(avroPrimitive.getType());
+
+    Preconditions.checkArgument(typeName != null,
+        "Avro Schema must be a primitive type, not " + avroPrimitive.getType());
+
+    return TypeInfoFactory.getPrimitiveTypeInfo(typeName);
+  }
 }

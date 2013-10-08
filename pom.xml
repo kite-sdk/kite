@@ -645,9 +645,25 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-exec</artifactId>
+        <version>${vers.hive}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
         <groupId>com.twitter</groupId>
         <artifactId>parquet-hive</artifactId>
         <version>${vers.parquet}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-core</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.apache.hive</groupId>
+            <artifactId>hive-exec</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>com.twitter</groupId>
