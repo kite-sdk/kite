@@ -28,7 +28,7 @@ See [Online Documentation](http://cloudera.github.io/cdk/docs/current/cdk-morphl
 <dependency>
   <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-morphlines-core</artifactId>
-  <version>0.7.0</version> <!-- or whatever the latest version is -->
+  <version>0.8.0</version> <!-- or whatever the latest version is -->
 </dependency>
 ```
 
@@ -38,7 +38,7 @@ See [Online Documentation](http://cloudera.github.io/cdk/docs/current/cdk-morphl
 <dependency>
   <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-morphlines-all</artifactId>
-  <version>0.7.0</version> <!-- or whatever the latest version is -->
+  <version>0.8.0</version> <!-- or whatever the latest version is -->
   <type>pom</type>
 </dependency>
 ```

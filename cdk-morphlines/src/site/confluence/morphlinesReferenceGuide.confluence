@@ -140,7 +140,8 @@ h3. cdk\-morphlines\-solr\-core
 h3. cdk\-morphlines\-solr\-cell
 | [#solrCell] | Uses Apache [Tika|http://tika.apache.org] to parse data, then maps the Tika output back to a record using Apache SolrCell. |
 
-
+\\
+\\
 h1. cdk\-morphlines\-core\-stdio
 
 This maven module contains standard I/O commands for tasks such as acting on single\-line records, multi\-line records, CSV files, and for converting bytes to strings.
@@ -883,7 +884,7 @@ java {
 \\
 h2. logTrace, logDebug, logInfo, logWarn, logError
 
-These commands logs a message at the given log level to [SLF4J|http://www.slf4j.org]. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}. The special field expression @\{\} can be used to log the entire record.
+These commands log a message at the given log level to [SLF4J|http://www.slf4j.org]. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}. The special field expression @\{\} can be used to log the entire record.
 
 Example usage:
 {code}
@@ -1257,7 +1258,6 @@ h4. Example startReportingMetricsToJMX usage
 {code}
 startReportingMetricsToJMX {
   domain : myMetrics
-  frequency : "10 seconds"
 }
 {code}
 
@@ -1265,7 +1265,6 @@ h4. More example startReportingMetricsToJMX usage
 {code}
 startReportingMetricsToJMX {
   domain : myMetrics
-  frequency : "10 seconds"
   durationUnits : {
     myMetrics.myTimer : minutes
   }
@@ -1494,7 +1493,7 @@ Optionally, the Avro schema that shall be used for reading can be supplied with 
 
 Note: Avro uses [Schema Resolution|http://avro.apache.org/docs/current/spec.html#Schema+Resolution] if the two schemas are different, e.g. if the reader schema is a subset of the writer schema for the purpose of efficient column projection.
 
-Note: For the {{readAvro}} command to work correctly, each Avro event must have been written with the same writer schema by the ingesting app. That is, you cannot parse two Avro events with two different writer schemas A and B within the same {{readAvro}} command. The [readAvroContainer|#readAvroContainer] command doesn't have that limitation, of course, because the writer schema comes embedded inside each Avro container, per the standard Avro container specification.
+Note: For the {{readAvro}} command to work correctly, each Avro event must have been written with the same writer schema by the ingesting app. That is, you cannot parse two Avro events with two different writer schemas A and B within the same {{readAvro}} command. The [#readAvroContainer] command doesn't have that limitation, of course, because the writer schema comes embedded inside each Avro container, per the standard Avro container specification.
 
 The command provides the following configuration options:
 
