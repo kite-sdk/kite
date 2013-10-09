@@ -11,11 +11,7 @@ import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
 import com.cloudera.cdk.data.spi.AbstractDatasetRepository;
 import com.google.common.base.Supplier;
-import com.google.common.collect.Lists;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.MasterNotRunningException;
@@ -97,7 +93,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public boolean delete(String name) {
-    throw new UnsupportedOperationException();
+    return metadataProvider.delete(name);
   }
 
   @Override

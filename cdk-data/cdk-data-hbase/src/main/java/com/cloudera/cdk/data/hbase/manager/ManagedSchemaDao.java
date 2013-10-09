@@ -56,4 +56,6 @@ interface ManagedSchemaDao {
    * @return True if the save succeeded, or false if there was a conflict
    */
   public boolean save(ManagedSchema schema);
+
+  public boolean delete(ManagedSchema schema);
 }

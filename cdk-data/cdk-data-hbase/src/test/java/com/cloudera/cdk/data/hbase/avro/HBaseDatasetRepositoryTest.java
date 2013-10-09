@@ -25,6 +25,8 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.util.Utf8;
+
+import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -35,6 +37,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class HBaseDatasetRepositoryTest {
 
@@ -204,6 +207,49 @@ public class HBaseDatasetRepositoryTest {
     accessor.delete(key);
     TestEntity deletedRecord = accessor.get(key);
     assertNull(deletedRecord);
+  }
+
+  @Test
+  public void testDeleteDataset() throws Exception {
+
+    HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
+        .configuration(HBaseTestUtils.getConf()).get();
+
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .identity("part1", 1).identity("part2", 2).get();
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(testGenericEntity)
+        .partitionStrategy(partitionStrategy)
+        .get();
+    Dataset ds = repo.create(tableName, descriptor);
+    DatasetAccessor<GenericRecord> accessor = ds.newAccessor();
+
+    // Create a new entity
+    accessor.put(createGenericEntity(0));
+
+    // Retrieve the entity
+    String iStr = Long.toString(0);
+    PartitionKey key = partitionStrategy.partitionKey("part1_" + iStr, "part2_" + iStr);
+    compareEntitiesWithUtf8(0, accessor.get(key));
+
+    // delete dataset
+    boolean success = repo.delete(tableName);
+    assertTrue("table should have been successfully deleted", success);
+
+    // check that tables have no rows
+    assertEquals(0, HBaseTestUtils.util.countRows(new HTable(HBaseTestUtils.getConf(), managedTableName)));
+    assertEquals(0, HBaseTestUtils.util.countRows(new HTable(HBaseTestUtils.getConf(), tableName)));
+
+    // create the dataset again
+    ds = repo.create(tableName, descriptor);
+    accessor = ds.newAccessor();
+
+    // Create a new entity
+    accessor.put(createGenericEntity(0));
+
+    // Retrieve the entity
+    compareEntitiesWithUtf8(0, accessor.get(key));
   }
 
   // TODO: remove duplication from ManagedDaoTest

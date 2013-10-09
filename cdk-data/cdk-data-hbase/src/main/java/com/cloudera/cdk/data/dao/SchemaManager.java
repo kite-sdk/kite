@@ -157,6 +157,8 @@ public interface SchemaManager {
   public void migrateSchema(String tableName, String entityName,
       String newSchema);
 
+  public void deleteSchema(String tableName, String entityName);
+
   /**
    * Returns the entity names for a table. If no such table exists then an empty list
    * will be returned.

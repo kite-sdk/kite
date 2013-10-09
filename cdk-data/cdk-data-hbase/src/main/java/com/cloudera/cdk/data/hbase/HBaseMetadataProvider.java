@@ -1,8 +1,8 @@
 package com.cloudera.cdk.data.hbase;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
-import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.FieldPartitioner;
+import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.NoSuchDatasetException;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.dao.Constants;
@@ -13,7 +13,6 @@ import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
 import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
@@ -133,7 +132,32 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean delete(String name) {
-    throw new UnsupportedOperationException();
+    DatasetDescriptor descriptor = load(name);
+    String tableName = getTableName(name);
+    String entityName = getEntityName(name);
+
+    schemaManager.deleteSchema(tableName, entityName);
+
+    String entitySchemaString = descriptor.getSchema().toString(true);
+
+    AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
+    AvroEntitySchema entitySchema = parser.parseEntitySchema(entitySchemaString);
+
+    // TODO: this may delete columns for other entities if they share column families
+    // TODO: https://issues.cloudera.org/browse/CDK-145, https://issues.cloudera.org/browse/CDK-146
+    for (String columnFamily : entitySchema.getRequiredColumnFamilies()) {
+      try {
+        hbaseAdmin.disableTable(tableName);
+        try {
+          hbaseAdmin.deleteColumn(tableName, columnFamily);
+        } finally {
+          hbaseAdmin.enableTable(tableName);
+        }
+      } catch (IOException e) {
+        throw new MetadataProviderException(e);
+      }
+    }
+    return true;
   }
 
   @Override

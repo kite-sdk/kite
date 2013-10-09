@@ -101,4 +101,11 @@ class ManagedSchemaHBaseDao implements ManagedSchemaDao {
   public boolean save(ManagedSchema schema) {
     return managedSchemaDao.put(schema);
   }
+
+  @Override
+  public boolean delete(ManagedSchema schema) {
+    PartitionKey key = managedSchemaDao.getPartitionStrategy().partitionKey(
+        schema.getTable(), schema.getName());
+    return managedSchemaDao.delete(key, schema);
+  }
 }
