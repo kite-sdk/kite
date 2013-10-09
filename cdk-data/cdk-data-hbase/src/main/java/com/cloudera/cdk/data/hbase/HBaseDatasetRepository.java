@@ -49,29 +49,27 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
     return newDataset(name, descriptor);
   }
 
-  private Dataset newDataset(String name,
-      DatasetDescriptor descriptor) {
+  @SuppressWarnings("unchecked")
+  private Dataset newDataset(String name, DatasetDescriptor descriptor) {
     // TODO: use descriptor.getFormat() to decide type of DAO (Avro vs. other)
     String tableName = HBaseMetadataProvider.getTableName(name);
     String entityName = HBaseMetadataProvider.getEntityName(name);
+    Dao dao;
     if (isComposite(descriptor)) {
       try {
         Class<SpecificRecord> entityClass = (Class<SpecificRecord>)
             Class.forName(descriptor.getSchema().getFullName());
-        Dao<SpecificRecord> dao =
-            SpecificAvroDao.buildCompositeDaoWithEntityManager(tablePool, tableName,
+        dao = SpecificAvroDao.buildCompositeDaoWithEntityManager(tablePool, tableName,
                 entityClass, schemaManager);
-        return new CompositeAvroDaoDataset(dao, descriptor);
       } catch (ClassNotFoundException e) {
         throw new DatasetRepositoryException(e);
       }
     } else if (isSpecific(descriptor)) {
-      SpecificAvroDao dao = new SpecificAvroDao(tablePool, tableName, entityName, schemaManager);
-      return new SpecificAvroDaoDataset(dao, descriptor);
+      dao = new SpecificAvroDao(tablePool, tableName, entityName, schemaManager);
     } else {
-      GenericAvroDao dao = new GenericAvroDao(tablePool, tableName, entityName, schemaManager);
-      return new GenericAvroDaoDataset(dao, descriptor);
+      dao = new GenericAvroDao(tablePool, tableName, entityName, schemaManager);
     }
+    return new DaoDataset(name, dao, descriptor);
   }
 
   private static boolean isSpecific(DatasetDescriptor descriptor) {
@@ -83,8 +81,8 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
     }
   }
 
-  static boolean isComposite(DatasetDescriptor descriptor) {
-    // TODO: have a better way of detecting a specific class (currently just checks if
+  private static boolean isComposite(DatasetDescriptor descriptor) {
+    // TODO: have a better way of detecting a composite class (currently just checks if
     // there are field mappings)
     String entitySchema = descriptor.getSchema().toString();
     AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();

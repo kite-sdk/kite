@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.dao;
 
+import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 
@@ -31,7 +32,7 @@ import com.cloudera.cdk.data.PartitionStrategy;
  * @param <E>
  *          The type of entity the DAO should return.
  */
-public interface Dao<E> {
+public interface Dao<E> extends DatasetAccessor<E> {
 
   /**
    * Return the entity stored in HBase at the row specified with Key key. Return

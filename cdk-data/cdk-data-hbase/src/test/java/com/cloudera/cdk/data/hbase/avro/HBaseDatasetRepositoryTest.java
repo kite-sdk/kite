@@ -6,16 +6,13 @@ import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.PartitionKey;
-import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEntity;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
-import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
-import com.cloudera.cdk.data.hbase.tool.SchemaTool;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,12 +27,10 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -81,12 +76,8 @@ public class HBaseDatasetRepositoryTest {
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
         .configuration(HBaseTestUtils.getConf()).get();
 
-    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-        .identity("part1", 1).identity("part2", 2).get();
-
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(testGenericEntity)
-        .partitionStrategy(partitionStrategy)
         .get();
     Dataset ds = repo.create(tableName, descriptor);
     DatasetAccessor<GenericRecord> accessor = ds.newAccessor();
@@ -113,7 +104,8 @@ public class HBaseDatasetRepositoryTest {
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
       String iStr = Long.toString(i);
-      PartitionKey key = partitionStrategy.partitionKey("part1_" + iStr, "part2_" + iStr);
+      PartitionKey key = ds.getDescriptor().getPartitionStrategy()
+          .partitionKey("part1_" + iStr, "part2_" + iStr);
       compareEntitiesWithUtf8(i, accessor.get(key));
     }
 
@@ -131,7 +123,8 @@ public class HBaseDatasetRepositoryTest {
       reader.close();
     }
 
-    PartitionKey key = partitionStrategy.partitionKey("part1_5", "part2_5");
+    PartitionKey key = ds.getDescriptor().getPartitionStrategy()
+        .partitionKey("part1_5", "part2_5");
 
     // test increment
     long incrementResult = accessor.increment(key, "increment", 5);
@@ -150,12 +143,8 @@ public class HBaseDatasetRepositoryTest {
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
         .configuration(HBaseTestUtils.getConf()).get();
 
-    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-        .identity("part1", 1).identity("part2", 2).get();
-
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(testEntity)
-        .partitionStrategy(partitionStrategy)
         .get();
     Dataset ds = repo.create(tableName, descriptor);
     DatasetAccessor<TestEntity> accessor = ds.newAccessor();
@@ -178,7 +167,8 @@ public class HBaseDatasetRepositoryTest {
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
       String iStr = Long.toString(i);
-      PartitionKey key = partitionStrategy.partitionKey("part1_" + iStr, "part2_" + iStr);
+      PartitionKey key = ds.getDescriptor().getPartitionStrategy()
+          .partitionKey("part1_" + iStr, "part2_" + iStr);
       compareEntitiesWithString(i, accessor.get(key));
     }
 
@@ -196,7 +186,8 @@ public class HBaseDatasetRepositoryTest {
       reader.close();
     }
 
-    PartitionKey key = partitionStrategy.partitionKey("part1_5", "part2_5");
+    PartitionKey key = ds.getDescriptor().getPartitionStrategy()
+        .partitionKey("part1_5", "part2_5");
 
     // test increment
     long incrementResult = accessor.increment(key, "increment", 5);
@@ -215,12 +206,8 @@ public class HBaseDatasetRepositoryTest {
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
         .configuration(HBaseTestUtils.getConf()).get();
 
-    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-        .identity("part1", 1).identity("part2", 2).get();
-
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(testGenericEntity)
-        .partitionStrategy(partitionStrategy)
         .get();
     Dataset ds = repo.create(tableName, descriptor);
     DatasetAccessor<GenericRecord> accessor = ds.newAccessor();
@@ -230,7 +217,8 @@ public class HBaseDatasetRepositoryTest {
 
     // Retrieve the entity
     String iStr = Long.toString(0);
-    PartitionKey key = partitionStrategy.partitionKey("part1_" + iStr, "part2_" + iStr);
+    PartitionKey key = ds.getDescriptor().getPartitionStrategy()
+        .partitionKey("part1_" + iStr, "part2_" + iStr);
     compareEntitiesWithUtf8(0, accessor.get(key));
 
     // delete dataset

@@ -88,9 +88,19 @@ public class BaseEntityBatch<E> implements EntityBatch<E> {
   }
 
   @Override
+  public void open() {
+    // noop
+  }
+
+  @Override
   public void put(E entity) {
     PutAction putAction = entityMapper.mapFromEntity(entity);
     clientTemplate.put(putAction, table);
+  }
+
+  @Override
+  public void write(E entity) {
+    put(entity);
   }
 
   @Override
@@ -112,5 +122,10 @@ public class BaseEntityBatch<E> implements EntityBatch<E> {
     } catch (IOException e) {
       throw new HBaseClientException("Error closing table [" + table + "]", e);
     }
+  }
+
+  @Override
+  public boolean isOpen() {
+    return true; // TODO: track state properly
   }
 }

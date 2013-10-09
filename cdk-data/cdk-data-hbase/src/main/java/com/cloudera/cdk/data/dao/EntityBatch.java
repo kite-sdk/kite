@@ -15,10 +15,11 @@
  */
 package com.cloudera.cdk.data.dao;
 
+import com.cloudera.cdk.data.DatasetWriter;
 import java.io.Closeable;
 import java.io.Flushable;
 
-public interface EntityBatch<E> extends Flushable, Closeable {
+public interface EntityBatch<E> extends DatasetWriter<E> {
 
   /**
    * Put the entity into the HBase table with K key. Since this is a part of a

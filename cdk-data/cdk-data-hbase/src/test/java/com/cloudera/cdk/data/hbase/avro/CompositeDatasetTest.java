@@ -72,23 +72,17 @@ public class CompositeDatasetTest {
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
         .configuration(HBaseTestUtils.getConf()).get();
 
-    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-        .identity("part1", 1).identity("part2", 2).get();
-
     // create constituent datasets
     repo.create(tableName + ".SubEntity1", new DatasetDescriptor.Builder()
         .schema(SubEntity1.SCHEMA$)
-        .partitionStrategy(partitionStrategy)
         .get());
     repo.create(tableName + ".SubEntity2", new DatasetDescriptor.Builder()
         .schema(SubEntity2.SCHEMA$)
-        .partitionStrategy(partitionStrategy)
         .get());
 
     // create composite dataset
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(CompositeEntity.SCHEMA$)
-        .partitionStrategy(partitionStrategy)
         .get();
     Dataset ds = repo.create(tableName + ".CompositeEntity", descriptor);
     DatasetAccessor<CompositeEntity> accessor = ds.newAccessor();
@@ -105,7 +99,7 @@ public class CompositeDatasetTest {
     // Test put and get
     accessor.put(compositeEntity);
 
-    PartitionKey key = partitionStrategy.partitionKey("1", "1");
+    PartitionKey key = ds.getDescriptor().getPartitionStrategy().partitionKey("1", "1");
     CompositeEntity returnedCompositeEntity = accessor.get(key);
     assertNotNull("found entity", returnedCompositeEntity);
     assertEquals("field1_1", returnedCompositeEntity.getSubEntity1().getField1());
@@ -121,11 +115,7 @@ public class CompositeDatasetTest {
     subEntity1 = SubEntity1.newBuilder(subEntity1).setPart2("2").build(); // different key
     compositeEntity = CompositeEntity.newBuilder().setSubEntity1(subEntity1).build();
     accessor.put(compositeEntity);
-    returnedCompositeEntity = accessor.get(partitionStrategy.partitionKey("1", "2"));
-    // unlike using the Dao directly, the returned entity is not null since it contains
-    // the key, but its non-key fields are null
-    assertNotNull(returnedCompositeEntity.getSubEntity2());
-    assertNull(returnedCompositeEntity.getSubEntity2().getField1());
-    assertNull(returnedCompositeEntity.getSubEntity2().getField2());
+    returnedCompositeEntity = accessor.get(ds.getDescriptor().getPartitionStrategy().partitionKey("1", "2"));
+    assertNull(returnedCompositeEntity.getSubEntity2());
   }
 }

@@ -20,7 +20,6 @@ import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.PartitionKey;
-import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 import java.util.HashMap;
 import org.apache.hadoop.conf.Configuration;
@@ -41,11 +40,6 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
  * putting, composite datasets, and optimistic concurrency control (OCC).
  */
 public class UserProfileDatasetExample {
-
-  /**
-   * The partition strategy to define the keyspace.
-   */
-  private final PartitionStrategy partitionStrategy;
 
   /**
    * The user profile dataset
@@ -82,26 +76,20 @@ public class UserProfileDatasetExample {
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
         .configuration(conf).get();
 
-    partitionStrategy = new PartitionStrategy.Builder()
-        .identity("firstName", 1).identity("lastName", 2).get();
-
     // TODO: change to use namespace (CDK-140)
 
     DatasetDescriptor userProfileDatasetDescriptor =
-        new DatasetDescriptor.Builder().schema(UserProfileModel2.SCHEMA$)
-            .partitionStrategy(partitionStrategy).get();
+        new DatasetDescriptor.Builder().schema(UserProfileModel2.SCHEMA$).get();
     userProfileDataset = repo.create("cdk_example_user_profiles.UserProfileModel2",
         userProfileDatasetDescriptor);
 
     DatasetDescriptor userActionsDatasetDescriptor =
-        new DatasetDescriptor.Builder().schema(UserActionsModel2.SCHEMA$)
-            .partitionStrategy(partitionStrategy).get();
+        new DatasetDescriptor.Builder().schema(UserActionsModel2.SCHEMA$).get();
     userActionsDataset = repo.create("cdk_example_user_profiles.UserActionsModel2",
         userActionsDatasetDescriptor);
 
     DatasetDescriptor userProfileActionsDatasetDescriptor =
-        new DatasetDescriptor.Builder().schema(UserProfileActionsModel2.SCHEMA$)
-            .partitionStrategy(partitionStrategy).get();
+        new DatasetDescriptor.Builder().schema(UserProfileActionsModel2.SCHEMA$).get();
     userProfileActionsDataset = repo.create("cdk_example_user_profiles.UserProfileActionsProtocol2",
         userProfileActionsDatasetDescriptor);
 
@@ -215,7 +203,8 @@ public class UserProfileDatasetExample {
     long ts = System.currentTimeMillis();
 
     // Construct the key we'll use to fetch the user.
-    PartitionKey key = partitionStrategy.partitionKey(firstName, lastName);
+    PartitionKey key = userProfileActionsDataset.getDescriptor().getPartitionStrategy()
+        .partitionKey(firstName, lastName);
 
     // Get the profile and actions entity from the composite dao.
     DatasetAccessor<UserProfileActionsModel2> accessor = userProfileActionsDataset.newAccessor();
