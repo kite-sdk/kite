@@ -154,7 +154,6 @@ public class SchemaTool {
 
     for (Entry<String, List<String>> entry : tableEntitySchemaMap.entrySet()) {
       String table = entry.getKey();
-      String keySchema = tableKeySchemaMap.get(table);
       List<String> entitySchemas = entry.getValue();
       if (!tableKeySchemaMap.containsKey(table)) {
         String msg = "No Key Schema For Table: " + table;
@@ -167,8 +166,7 @@ public class SchemaTool {
         throw new SchemaValidationException(msg);
       }
       for (String entitySchema : entry.getValue()) {
-        createOrMigrateSchema(table, keySchema, entitySchema,
-            createTableAndFamilies);
+        createOrMigrateSchema(table, entitySchema, createTableAndFamilies);
       }
     }
   }
@@ -188,10 +186,9 @@ public class SchemaTool {
    *          exist, and will create families if they don't exist.
    */
   public void createOrMigrateSchemaFile(String tableName,
-      String keySchemaFilePath, String entitySchemaFilePath,
-      boolean createTableAndFamilies) {
-    createOrMigrateSchemaFile(tableName, new File(keySchemaFilePath), new File(
-        entitySchemaFilePath), createTableAndFamilies);
+      String entitySchemaFilePath, boolean createTableAndFamilies) {
+    createOrMigrateSchemaFile(tableName, new File(entitySchemaFilePath),
+        createTableAndFamilies);
   }
 
   /**
@@ -208,10 +205,10 @@ public class SchemaTool {
    *          If true, will create the table for this schema if it doesn't
    *          exist, and will create families if they don't exist.
    */
-  public void createOrMigrateSchemaFile(String tableName, File keySchemaFile,
+  public void createOrMigrateSchemaFile(String tableName,
       File entitySchemaFile, boolean createTableAndFamilies) {
-    createOrMigrateSchema(tableName, getSchemaStringFromFile(keySchemaFile),
-        getSchemaStringFromFile(entitySchemaFile), createTableAndFamilies);
+    createOrMigrateSchema(tableName, getSchemaStringFromFile(entitySchemaFile),
+        createTableAndFamilies);
   }
 
   /**
@@ -228,11 +225,12 @@ public class SchemaTool {
    *          If true, will create the table for this schema if it doesn't
    *          exist, and will create families if they don't exist.
    */
-  public void createOrMigrateSchema(String tableName, String keySchemaString,
+  public void createOrMigrateSchema(String tableName,
       String entitySchemaString, boolean createTableAndFamilies) {
     String entityName = getEntityNameFromSchemaString(entitySchemaString);
-    AvroEntitySchema entitySchema = parser.parseEntity(entitySchemaString);
-    AvroKeySchema keySchema = parser.parseKey(keySchemaString);
+    AvroEntitySchema entitySchema = parser
+        .parseEntitySchema(entitySchemaString);
+    AvroKeySchema keySchema = parser.parseKeySchema(entitySchemaString);
     if (schemaManager.hasManagedSchema(tableName, entityName)) {
       KeySchema currentKeySchema = schemaManager.getKeySchema(tableName,
           entityName);
@@ -254,9 +252,8 @@ public class SchemaTool {
       }
     } else {
       LOG.info("Creating Schema: (" + tableName + ", " + entityName + ")");
-      parser.parseEntity(entitySchemaString).getRequiredColumnFamilies();
-      schemaManager.createSchema(tableName, entityName, keySchemaString,
-          entitySchemaString,
+      parser.parseEntitySchema(entitySchemaString).getRequiredColumnFamilies();
+      schemaManager.createSchema(tableName, entityName, entitySchemaString,
           "com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser",
           "com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe",
           "com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe");

@@ -18,7 +18,7 @@ package com.cloudera.cdk.data.dao;
 import java.io.Closeable;
 import java.io.Flushable;
 
-public interface EntityBatch<K, E> extends Flushable, Closeable {
+public interface EntityBatch<E> extends Flushable, Closeable {
 
   /**
    * Put the entity into the HBase table with K key. Since this is a part of a
@@ -30,7 +30,7 @@ public interface EntityBatch<K, E> extends Flushable, Closeable {
    * @param entity
    *          The entity to store
    */
-  public void put(K key, E entity);
+  public void put(E entity);
 
   /**
    * Flushes the write buffer, committing any and all entities currently in the

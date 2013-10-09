@@ -15,9 +15,6 @@
  */
 package com.cloudera.cdk.data.hbase;
 
-import com.cloudera.cdk.data.dao.EntityScanner;
-import com.cloudera.cdk.data.dao.HBaseClientException;
-import com.cloudera.cdk.data.dao.KeyEntity;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -27,6 +24,9 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.FilterList;
+
+import com.cloudera.cdk.data.dao.EntityScanner;
+import com.cloudera.cdk.data.dao.HBaseClientException;
 
 /**
  * Base EntityScanner implementation. This EntityScanner will use an
@@ -38,9 +38,9 @@ import org.apache.hadoop.hbase.filter.FilterList;
  * @param <E>
  *          The entity type this scanner scans.
  */
-public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
+public class BaseEntityScanner<E> implements EntityScanner<E> {
 
-  private final EntityMapper<K, E> entityMapper;
+  private final EntityMapper<E> entityMapper;
   private final HTablePool tablePool;
   private final String tableName;
   private Scan scan;
@@ -61,7 +61,7 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
    *          true if this is a transactional scan.
    */
   public BaseEntityScanner(Scan scan, HTablePool tablePool, String tableName,
-      EntityMapper<K, E> entityMapper) {
+      EntityMapper<E> entityMapper) {
     this.scan = scan;
     this.entityMapper = entityMapper;
     this.tablePool = tablePool;
@@ -74,7 +74,7 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
    * @param scanBuilder
    *          Build object to construct the BaseEntityScanner with
    */
-  private BaseEntityScanner(Builder<K, E> scanBuilder) {
+  private BaseEntityScanner(Builder<E> scanBuilder) {
     this.entityMapper = scanBuilder.getEntityMapper();
     this.tablePool = scanBuilder.getTablePool();
     this.tableName = scanBuilder.getTableName();
@@ -84,19 +84,11 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
       byte[] keyBytes = entityMapper.getKeySerDe().serialize(
           scanBuilder.getStartKey());
       this.scan.setStartRow(keyBytes);
-    } else if (scanBuilder.getPartialStartKey() != null) {
-      byte[] keyBytes = entityMapper.getKeySerDe().serializePartial(
-          scanBuilder.getPartialStartKey());
-      this.scan.setStartRow(keyBytes);
     }
 
     if (scanBuilder.getStopKey() != null) {
       byte[] keyBytes = entityMapper.getKeySerDe().serialize(
           scanBuilder.getStopKey());
-      this.scan.setStopRow(keyBytes);
-    } else if (scanBuilder.getPartialStopKey() != null) {
-      byte[] keyBytes = entityMapper.getKeySerDe().serializePartial(
-          scanBuilder.getPartialStopKey());
       this.scan.setStopRow(keyBytes);
     }
 
@@ -128,9 +120,9 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
   }
 
   @Override
-  public Iterator<KeyEntity<K, E>> iterator() {
+  public Iterator<E> iterator() {
     final Iterator<Result> iterator = resultScanner.iterator();
-    return new Iterator<KeyEntity<K, E>>() {
+    return new Iterator<E>() {
 
       @Override
       public boolean hasNext() {
@@ -138,7 +130,7 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
       }
 
       @Override
-      public KeyEntity<K, E> next() {
+      public E next() {
         Result result = iterator.next();
         return entityMapper.mapToEntity(result);
       }
@@ -183,16 +175,16 @@ public class BaseEntityScanner<K, E> implements EntityScanner<K, E> {
    * @param <K>
    * @param <E>
    */
-  public static class Builder<K, E> extends EntityScannerBuilder<K, E> {
+  public static class Builder<E> extends EntityScannerBuilder<E> {
 
     public Builder(HTablePool tablePool, String tableName,
-        EntityMapper<K, E> entityMapper) {
+        EntityMapper<E> entityMapper) {
       super(tablePool, tableName, entityMapper);
     }
 
     @Override
-    public BaseEntityScanner<K, E> build() {
-      BaseEntityScanner<K, E> scanner = new BaseEntityScanner<K, E>(this);
+    public BaseEntityScanner<E> build() {
+      BaseEntityScanner<E> scanner = new BaseEntityScanner<E>(this);
       scanner.open();
       return scanner;
     }

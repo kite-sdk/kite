@@ -21,6 +21,9 @@ package com.cloudera.cdk.data.dao;
  */
 public enum MappingType {
 
+  // Maps a value to a part of the row key
+  KEY,
+  
   // Maps a value to a single column.
   COLUMN,
 

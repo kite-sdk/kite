@@ -28,9 +28,9 @@ import org.apache.hadoop.hbase.client.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.HBaseCommonException;
-import com.cloudera.cdk.data.dao.KeyEntity;
 import com.cloudera.cdk.data.dao.KeySchema;
 import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.dao.SchemaNotFoundException;
@@ -51,10 +51,11 @@ import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchemaEntityVersion;
  * @param <KEY>
  * @param <ENTITY>
  */
-public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends IndexedRecord>
-    implements EntityMapper<KEY, ENTITY> {
+public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
+    EntityMapper<ENTITY> {
 
-  private static Logger LOG = LoggerFactory.getLogger(VersionedAvroEntityMapper.class);
+  private static Logger LOG = LoggerFactory
+      .getLogger(VersionedAvroEntityMapper.class);
 
   /**
    * The schema parser we'll use to parse managed schemas.
@@ -75,14 +76,13 @@ public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends
   private final SchemaManager schemaManager;
   private final String tableName;
   private final String entityName;
-  private final Class<KEY> keyClass;
   private final Class<ENTITY> entityClass;
   private final AvroKeySchema keySchema;
   private final AvroEntitySchema entitySchema;
   private final int version;
   private final boolean specific;
-  private final ConcurrentHashMap<Integer, EntityMapper<KEY, ENTITY>> entityMappers = new ConcurrentHashMap<Integer, EntityMapper<KEY, ENTITY>>();
-  private EntityMapper<KEY, ManagedSchemaEntityVersion> managedSchemaEntityVersionEntityMapper;
+  private final ConcurrentHashMap<Integer, EntityMapper<ENTITY>> entityMappers = new ConcurrentHashMap<Integer, EntityMapper<ENTITY>>();
+  private EntityMapper<ManagedSchemaEntityVersion> managedSchemaEntityVersionEntityMapper;
 
   /**
    * Builder for the VersionedAvroEntityMapper. This is the only way to
@@ -121,8 +121,8 @@ public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends
       return this;
     }
 
-    public <K extends IndexedRecord, E extends IndexedRecord> VersionedAvroEntityMapper<K, E> build() {
-      return new VersionedAvroEntityMapper<K, E>(this);
+    public <E extends IndexedRecord> VersionedAvroEntityMapper<E> build() {
+      return new VersionedAvroEntityMapper<E>(this);
     }
   }
 
@@ -136,7 +136,6 @@ public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends
     if (!specific) {
       // Must be a Generic avro record. Tie the key and entity classes to
       // GenericRecords
-      keyClass = (Class<KEY>) GenericRecord.class;
       entityClass = (Class<ENTITY>) GenericRecord.class;
 
       // Get the key schema to use from the schema manager.
@@ -147,7 +146,7 @@ public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends
       // Builder. If not, use the highest version schema registered in the
       // schema manager.
       if (builder.genericSchemaString != null) {
-        entitySchema = schemaParser.parseEntity(builder.genericSchemaString);
+        entitySchema = schemaParser.parseEntitySchema(builder.genericSchemaString);
       } else {
         entitySchema = (AvroEntitySchema) schemaManager.getEntitySchema(
             tableName, entityName);
@@ -169,17 +168,15 @@ public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends
         // names.
         AvroEntitySchema mostRecentEntitySchema = (AvroEntitySchema) schemaManager
             .getEntitySchema(tableName, entityName);
-        String keyClassName = keySchema.getAvroSchema().getFullName();
         String entityClassName = mostRecentEntitySchema.getAvroSchema()
             .getFullName();
-        keyClass = (Class<KEY>) Class.forName(keyClassName);
         entityClass = (Class<ENTITY>) Class.forName(entityClassName);
 
         // Initialize the entitySchema from the SCHEMA$ field on the class. This
         // will be or schema we'll use to write with.
         String entitySchemaString = entityClass.getField("SCHEMA$").get(null)
             .toString();
-        entitySchema = schemaParser.parseEntity(entitySchemaString);
+        entitySchema = schemaParser.parseEntitySchema(entitySchemaString);
 
         // verify that this schema exists in the managed schema table, and get
         // its
@@ -218,14 +215,13 @@ public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends
   }
 
   @Override
-  public KeyEntity<KEY, ENTITY> mapToEntity(Result result) {
-    KeyEntity<KEY, ManagedSchemaEntityVersion> versionRecord = managedSchemaEntityVersionEntityMapper
+  public ENTITY mapToEntity(Result result) {
+    ManagedSchemaEntityVersion versionRecord = managedSchemaEntityVersionEntityMapper
         .mapToEntity(result);
     int resultVersion = 0;
-    if (versionRecord != null && versionRecord.getEntity() != null
-        && versionRecord.getEntity().getSchemaVersion().containsKey(entityName)) {
-      resultVersion = versionRecord.getEntity().getSchemaVersion()
-          .get(entityName);
+    if (versionRecord != null
+        && versionRecord.getSchemaVersion().containsKey(entityName)) {
+      resultVersion = versionRecord.getSchemaVersion().get(entityName);
     }
     if (entityMappers.containsKey(resultVersion)) {
       return entityMappers.get(resultVersion).mapToEntity(result);
@@ -244,23 +240,24 @@ public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends
   }
 
   @Override
-  public PutAction mapFromEntity(KEY key, ENTITY entity) {
-    EntityMapper<KEY, ENTITY> entityMapper = entityMappers.get(version);
-    PutAction entityPut = entityMapper.mapFromEntity(key, entity);
+  public PutAction mapFromEntity(ENTITY entity) {
+    EntityMapper<ENTITY> entityMapper = entityMappers.get(version);
+    PutAction entityPut = entityMapper.mapFromEntity(entity);
 
     ManagedSchemaEntityVersion versionRecord = ManagedSchemaEntityVersion
         .newBuilder().setSchemaVersion(new HashMap<String, Integer>()).build();
     versionRecord.getSchemaVersion().put(entityName, version);
     PutAction versionPut = managedSchemaEntityVersionEntityMapper
-        .mapFromEntity(key, versionRecord);
-
-    byte[] keyBytes = entityMapper.getKeySerDe().serialize(key);
+        .mapFromEntity(versionRecord);
+    
+    byte[] keyBytes = entityPut.getPut().getRow();
+    versionPut = HBaseUtils.mergePutActions(keyBytes, Arrays.asList(versionPut));
     return HBaseUtils.mergePutActions(keyBytes,
         Arrays.asList(entityPut, versionPut));
   }
 
   @Override
-  public Increment mapToIncrement(KEY key, String fieldName, long incrementValue) {
+  public Increment mapToIncrement(PartitionKey key, String fieldName, long incrementValue) {
     return entityMappers.get(version).mapToIncrement(key, fieldName,
         incrementValue);
   }
@@ -299,7 +296,7 @@ public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends
   }
 
   @Override
-  public KeySerDe<KEY> getKeySerDe() {
+  public KeySerDe getKeySerDe() {
     return entityMappers.get(version).getKeySerDe();
   }
 
@@ -313,20 +310,20 @@ public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends
    * metadata in each row to a ManagedSchemaEntityVersion record.
    */
   private void initializeEntityVersionEntityMapper() {
-    AvroKeySerDe<KEY> keySerDe = null;
-    for (EntityMapper<KEY, ENTITY> entityMapper : entityMappers.values()) {
-      keySerDe = (AvroKeySerDe<KEY>) entityMapper.getKeySerDe();
+    AvroKeySerDe keySerDe = null;
+    for (EntityMapper<ENTITY> entityMapper : entityMappers.values()) {
+      keySerDe = (AvroKeySerDe) entityMapper.getKeySerDe();
       break;
     }
     AvroEntitySchema avroEntitySchema = schemaParser
-        .parseEntity(managedSchemaEntityVersionSchema);
+        .parseEntitySchema(managedSchemaEntityVersionSchema);
     avroEntitySchema = AvroUtils.mergeSpecificStringTypes(
         ManagedSchemaEntityVersion.class, avroEntitySchema);
     AvroEntityComposer<ManagedSchemaEntityVersion> entityComposer = new AvroEntityComposer<ManagedSchemaEntityVersion>(
         avroEntitySchema, true);
     AvroEntitySerDe<ManagedSchemaEntityVersion> entitySerDe = new AvroEntitySerDe<ManagedSchemaEntityVersion>(
         entityComposer, avroEntitySchema, avroEntitySchema, true);
-    this.managedSchemaEntityVersionEntityMapper = new BaseEntityMapper<KEY, ManagedSchemaEntityVersion>(
+    this.managedSchemaEntityVersionEntityMapper = new BaseEntityMapper<ManagedSchemaEntityVersion>(
         keySchema, avroEntitySchema, keySerDe, entitySerDe);
   }
 
@@ -339,8 +336,8 @@ public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends
         tableName, entityName).entrySet()) {
       if (!entityMappers.containsKey(entry.getKey())) {
         AvroEntitySchema writtenSchema = (AvroEntitySchema) entry.getValue();
-        EntityMapper<KEY, ENTITY> entityMapper = constructWrappedEntityMapper(
-            keySchema, entitySchema, writtenSchema, keyClass, entityClass);
+        EntityMapper<ENTITY> entityMapper = constructWrappedEntityMapper(
+            keySchema, entitySchema, writtenSchema, entityClass);
         entityMappers.put(entry.getKey(), entityMapper);
       }
     }
@@ -356,21 +353,20 @@ public class VersionedAvroEntityMapper<KEY extends IndexedRecord, ENTITY extends
    * @return
    */
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  private EntityMapper<KEY, ENTITY> constructWrappedEntityMapper(
+  private EntityMapper<ENTITY> constructWrappedEntityMapper(
       AvroKeySchema keySchema, AvroEntitySchema readSchema,
-      AvroEntitySchema writeSchema, Class keyClass, Class entityClass) {
+      AvroEntitySchema writeSchema, Class entityClass) {
     if (specific) {
-      keySchema = AvroUtils.mergeSpecificStringTypes(keyClass, keySchema);
+      keySchema = AvroUtils.mergeSpecificStringTypes(entityClass, keySchema);
       readSchema = AvroUtils.mergeSpecificStringTypes(entityClass, readSchema);
-
-      KeySerDe keySerDe = new AvroKeySerDe(keySchema.getAvroSchema(), true);
       AvroEntityComposer entityComposer = new AvroEntityComposer(readSchema,
           true);
       AvroEntitySerDe entitySerDe = new AvroEntitySerDe(entityComposer,
           readSchema, writeSchema, true);
+      KeySerDe keySerDe = new AvroKeySerDe(keySchema.getAvroSchema(), keySchema.getPartitionStrategy());
       return new BaseEntityMapper(keySchema, readSchema, keySerDe, entitySerDe);
     } else {
-      KeySerDe keySerDe = new AvroKeySerDe(keySchema.getAvroSchema(), false);
+      KeySerDe keySerDe = new AvroKeySerDe(keySchema.getAvroSchema(), keySchema.getPartitionStrategy());
       AvroEntityComposer entityComposer = new AvroEntityComposer(readSchema,
           false);
       AvroEntitySerDe entitySerDe = new AvroEntitySerDe(entityComposer,

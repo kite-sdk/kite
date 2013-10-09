@@ -15,8 +15,14 @@
  */
 package com.cloudera.cdk.data.hbase.avro.impl;
 
-import org.apache.avro.Schema;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
+
+import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
 import com.cloudera.cdk.data.dao.KeySchema;
 
 /**
@@ -35,8 +41,22 @@ public class AvroKeySchema extends KeySchema {
    *          The Avro Schema as a string that underlies the KeySchema
    *          implementation
    */
-  public AvroKeySchema(Schema schema, String rawSchema) {
-    super(rawSchema);
+  public AvroKeySchema(Schema schema, String rawSchema,
+      List<FieldMapping> keyFieldMappings) {
+    super(rawSchema, keyFieldMappings);
+    List<Field> fieldsPartOfKey = new ArrayList<Field>();
+    for (Field field : schema.getFields()) {
+      for (FieldMapping fieldMapping : keyFieldMappings) {
+        if (field.name().equals(fieldMapping.getFieldName())) {
+          fieldsPartOfKey.add(AvroUtils.cloneField(field));
+        }
+      }
+    }
+    this.schema = Schema.createRecord(fieldsPartOfKey);
+  }
+  
+  public AvroKeySchema(Schema schema, String rawSchema, PartitionStrategy partitionStrategy) {
+    super(rawSchema, partitionStrategy);
     this.schema = schema;
   }
 
@@ -48,7 +68,7 @@ public class AvroKeySchema extends KeySchema {
   public Schema getAvroSchema() {
     return schema;
   }
-  
+
   @Override
   public int hashCode() {
     final int prime = 31;

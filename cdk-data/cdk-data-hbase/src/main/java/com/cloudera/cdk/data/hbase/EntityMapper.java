@@ -15,13 +15,14 @@
  */
 package com.cloudera.cdk.data.hbase;
 
-import com.cloudera.cdk.data.dao.EntitySchema;
-import com.cloudera.cdk.data.dao.KeyEntity;
-import com.cloudera.cdk.data.dao.KeySchema;
 import java.util.Set;
 
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
+
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.dao.EntitySchema;
+import com.cloudera.cdk.data.dao.KeySchema;
 
 /**
  * An interface for mapping HBase Result instances to a Key/Entity pair, and a
@@ -36,7 +37,7 @@ import org.apache.hadoop.hbase.client.Result;
  * @param <E>
  *          The entity type
  */
-public interface EntityMapper<K, E> {
+public interface EntityMapper<E> {
 
   /**
    * Map an HBase Result instance to an Entity of type T. Retrieve the Key from
@@ -47,7 +48,7 @@ public interface EntityMapper<K, E> {
    *          The HBase result instance representing a row from an HBase table.
    * @return A KeyEntity instance which wraps a Key and an Entity of type T.
    */
-  public KeyEntity<K, E> mapToEntity(Result result);
+  public E mapToEntity(Result result);
 
   /**
    * Map a Key and an entity of type T to an HBase Put instance.
@@ -58,7 +59,7 @@ public interface EntityMapper<K, E> {
    *          The entity which this function will map to a Put instance.
    * @return An HBase Put.
    */
-  public PutAction mapFromEntity(K key, E entity);
+  public PutAction mapFromEntity(E entity);
 
   /**
    * Maps a Key, fieldName and an increment value to an HBase Increment instance
@@ -72,7 +73,7 @@ public interface EntityMapper<K, E> {
    *          The amount to increment the field by
    * @return An HBase Increment
    */
-  public Increment mapToIncrement(K key, String fieldName, long amount);
+  public Increment mapToIncrement(PartitionKey key, String fieldName, long amount);
 
   /**
    * Maps the result of an increment to the new value of the field that was
@@ -121,7 +122,7 @@ public interface EntityMapper<K, E> {
    * 
    * @return The key serde for the entity mapper
    */
-  public KeySerDe<K> getKeySerDe();
+  public KeySerDe getKeySerDe();
 
   /**
    * Gets the entity serde instance for this entity mapper

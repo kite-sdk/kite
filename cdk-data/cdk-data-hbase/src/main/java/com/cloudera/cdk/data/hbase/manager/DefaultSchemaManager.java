@@ -34,9 +34,7 @@ import com.cloudera.cdk.data.dao.KeySchema;
 import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.dao.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.KeyEntitySchemaParser;
-import com.cloudera.cdk.data.hbase.manager.ManagedSchemaDao.ManagedKeySchemaPair;
 import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
-import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchemaKey;
 
 /**
  * The Default SchemaManager implementation. It uses a ManagedSchemaDao
@@ -50,7 +48,7 @@ public class DefaultSchemaManager implements SchemaManager {
   /**
    * A mapping of managed schema row keys to the managed schema entities.
    */
-  private volatile ConcurrentHashMap<ManagedSchemaKey, ManagedSchema> managedSchemaMap;
+  private volatile ConcurrentHashMap<String, ManagedSchema> managedSchemaMap;
 
   /**
    * A DAO which is used to access the managed key and entity schemas
@@ -97,8 +95,8 @@ public class DefaultSchemaManager implements SchemaManager {
     ManagedSchema managedSchema = getManagedSchema(tableName, entityName);
     KeyEntitySchemaParser<?, ?> schemaParser = getSchemaParser(managedSchema
         .getSchemaType());
-
-    return schemaParser.parseKey(managedSchema.getKeySchema());
+    String greatestVersionedSchema = getGreatestEntitySchemaString(managedSchema);
+    return schemaParser.parseKeySchema(greatestVersionedSchema);
   }
 
   @Override
@@ -106,7 +104,11 @@ public class DefaultSchemaManager implements SchemaManager {
     ManagedSchema managedSchema = getManagedSchema(tableName, entityName);
     KeyEntitySchemaParser<?, ?> schemaParser = getSchemaParser(managedSchema
         .getSchemaType());
-
+    String greatestVersionedSchema = getGreatestEntitySchemaString(managedSchema);
+    return schemaParser.parseEntitySchema(greatestVersionedSchema);
+  }
+  
+  private String getGreatestEntitySchemaString(ManagedSchema managedSchema) {
     int greatestVersion = -1;
     String greatestVersionedSchema = null;
     for (Entry<String, String> entry : managedSchema.getEntitySchemas()
@@ -119,11 +121,12 @@ public class DefaultSchemaManager implements SchemaManager {
     }
 
     if (greatestVersionedSchema == null) {
-      String msg = "No schema versions for " + tableName + ", " + entityName;
+      String msg = "No schema versions for " + managedSchema.getTable() + ", " + managedSchema.getName();
       LOG.error(msg);
       throw new SchemaNotFoundException(msg);
     }
-    return schemaParser.parseEntity(greatestVersionedSchema);
+    
+    return greatestVersionedSchema;
   }
 
   @Override
@@ -141,7 +144,7 @@ public class DefaultSchemaManager implements SchemaManager {
     String schema = managedSchema.getEntitySchemas().get(
         String.valueOf(version));
     if (schema != null) {
-      return schemaParser.parseEntity(schema);
+      return schemaParser.parseEntitySchema(schema);
     } else {
       String msg = "Could not find managed schema for " + tableName + ", "
           + entityName + ", and version " + Integer.toString(version);
@@ -159,7 +162,7 @@ public class DefaultSchemaManager implements SchemaManager {
     Map<Integer, EntitySchema> retMap = new HashMap<Integer, EntitySchema>();
     for (Entry<String, String> entry : managedSchema.getEntitySchemas()
         .entrySet()) {
-      EntitySchema entitySchema = schemaParser.parseEntity(entry.getValue());
+      EntitySchema entitySchema = schemaParser.parseEntitySchema(entry.getValue());
       retMap.put(Integer.parseInt(entry.getKey()), entitySchema);
     }
     return retMap;
@@ -172,7 +175,7 @@ public class DefaultSchemaManager implements SchemaManager {
         tableName, entityName).getSchemaType());
     for (Entry<Integer, String> entry : getManagedSchemaVersions(tableName,
         entityName).entrySet()) {
-      EntitySchema managedSchema = schemaParser.parseEntity(entry.getValue());
+      EntitySchema managedSchema = schemaParser.parseEntitySchema(entry.getValue());
       if (schema.equals(managedSchema)) {
         return entry.getKey();
       }
@@ -182,7 +185,7 @@ public class DefaultSchemaManager implements SchemaManager {
 
   @Override
   public void createSchema(String tableName, String entityName,
-      String keySchemaStr, String entitySchemaStr, String schemaParserType,
+      String entitySchemaStr, String schemaParserType,
       String keySerDeType, String entitySerDeType) {
 
     // We want to make sure the managed schema map has as recent
@@ -190,8 +193,7 @@ public class DefaultSchemaManager implements SchemaManager {
     refreshManagedSchemaCache(tableName, entityName);
 
     KeyEntitySchemaParser<?, ?> schemaParser = getSchemaParser(schemaParserType);
-    KeySchema keySchema = schemaParser.parseKey(keySchemaStr);
-    EntitySchema entitySchema = schemaParser.parseEntity(entitySchemaStr);
+    EntitySchema entitySchema = schemaParser.parseEntitySchema(entitySchemaStr);
 
     try {
       ManagedSchema managedSchema = getManagedSchema(tableName, entityName);
@@ -205,20 +207,17 @@ public class DefaultSchemaManager implements SchemaManager {
 
     ManagedSchema managedSchema = ManagedSchema.newBuilder()
         .setName(entityName).setTable(tableName)
-        .setKeySchema(keySchema.getRawSchema())
         .setEntitySchemas(new HashMap<String, String>())
         .setSchemaType(schemaParserType).setEntitySerDeType(entitySerDeType)
         .setKeySerDeType(keySerDeType).build();
 
     // at this point, the schema is a valid migration. persist it.
     managedSchema.getEntitySchemas().put("0", entitySchema.getRawSchema());
-    ManagedSchemaKey key = ManagedSchemaKey.newBuilder().setTable(tableName)
-        .setName(entityName).build();
-    if (!managedSchemaDao.save(key, managedSchema)) {
+    if (!managedSchemaDao.save(managedSchema)) {
       throw new ConcurrentSchemaModificationException(
           "The schema has been updated concurrently.");
     }
-    getManagedSchemaMap().put(key, managedSchema);
+    getManagedSchemaMap().put(getManagedSchemaMapKey(managedSchema.getTable(), managedSchema.getName()), managedSchema);
   }
 
   @Override
@@ -233,7 +232,7 @@ public class DefaultSchemaManager implements SchemaManager {
         .getSchemaType());
 
     // validate it's a valid avro schema by parsing it
-    EntitySchema newSchema = schemaParser.parseEntity(newSchemaStr);
+    EntitySchema newSchema = schemaParser.parseEntitySchema(newSchemaStr);
 
     // verify that the newSchema isn't a duplicate of a previous schema version.
     int existingVersion = getEntityVersion(tableName, entityName, newSchema);
@@ -255,7 +254,7 @@ public class DefaultSchemaManager implements SchemaManager {
         greatestSchemaVersion = version;
       }
       String schemaString = entry.getValue();
-      if (!newSchema.compatible(schemaParser.parseEntity(schemaString))) {
+      if (!newSchema.compatible(schemaParser.parseEntitySchema(schemaString))) {
         String msg = "Avro schema not compatible with version "
             + Integer.toString(version) + ": Old schema: " + schemaString
             + " New schema: " + newSchema.getRawSchema();
@@ -266,9 +265,7 @@ public class DefaultSchemaManager implements SchemaManager {
     // at this point, the schema is a valid migration. persist it.
     managedSchema.getEntitySchemas().put(
         Integer.toString(greatestSchemaVersion + 1), newSchema.getRawSchema());
-    ManagedSchemaKey key = ManagedSchemaKey.newBuilder().setTable(tableName)
-        .setName(entityName).build();
-    if (!managedSchemaDao.save(key, managedSchema)) {
+    if (!managedSchemaDao.save(managedSchema)) {
       throw new ConcurrentSchemaModificationException(
           "The schema has been updated concurrently.");
     }
@@ -285,20 +282,20 @@ public class DefaultSchemaManager implements SchemaManager {
    */
   @Override
   public void refreshManagedSchemaCache(String tableName, String entityName) {
-    ManagedKeySchemaPair keyEntity = managedSchemaDao.getManagedSchema(
+    ManagedSchema managedSchema = managedSchemaDao.getManagedSchema(
         tableName, entityName);
-    if (keyEntity != null) {
-      getManagedSchemaMap().put(keyEntity.getKey(),
-          keyEntity.getManagedSchema());
+    if (managedSchema != null) {
+      getManagedSchemaMap().put(getManagedSchemaMapKey(managedSchema.getTable(), managedSchema.getName()),
+          managedSchema);
     }
   }
 
   @Override
   public List<String> getEntityNames(String tableName) {
     List<String> names = Lists.newArrayList();
-    for (ManagedSchemaKey key : managedSchemaMap.keySet()) {
-      if (key.getTable().equals(tableName)) {
-        names.add(key.getName());
+    for (ManagedSchema managedSchema : managedSchemaMap.values()) {
+      if (managedSchema.getTable().equals(tableName)) {
+        names.add(managedSchema.getName());
       }
     }
     return names;
@@ -311,11 +308,11 @@ public class DefaultSchemaManager implements SchemaManager {
    * 
    * @return The managedSchemaMap
    */
-  private ConcurrentHashMap<ManagedSchemaKey, ManagedSchema> getManagedSchemaMap() {
+  private ConcurrentHashMap<String, ManagedSchema> getManagedSchemaMap() {
     if (managedSchemaMap == null) {
       synchronized (this) {
         if (managedSchemaMap == null) {
-          managedSchemaMap = new ConcurrentHashMap<ManagedSchemaKey, ManagedSchema>();
+          managedSchemaMap = new ConcurrentHashMap<String, ManagedSchema>();
           populateManagedSchemaMap();
         }
       }
@@ -328,9 +325,9 @@ public class DefaultSchemaManager implements SchemaManager {
    * the managedSchemaDao.
    */
   private void populateManagedSchemaMap() {
-    for (ManagedKeySchemaPair keyEntity : managedSchemaDao.getManagedSchemas()) {
-      getManagedSchemaMap().put(keyEntity.getKey(),
-          keyEntity.getManagedSchema());
+    for (ManagedSchema managedSchema : managedSchemaDao.getManagedSchemas()) {
+      getManagedSchemaMap().put(getManagedSchemaMapKey(managedSchema.getTable(), managedSchema.getName()),
+          managedSchema);
     }
   }
 
@@ -344,11 +341,9 @@ public class DefaultSchemaManager implements SchemaManager {
    *          The entity name of the managed schema
    * @return The ManagedSchema instance, or null if one doesn't exist.
    */
-  private ManagedSchema getManagedSchemaFromSchemaMap1(String tableName,
+  private ManagedSchema getManagedSchemaFromSchemaMap(String tableName,
       String entityName) {
-    ManagedSchemaKey key = ManagedSchemaKey.newBuilder().setTable(tableName)
-        .setName(entityName).build();
-    return getManagedSchemaMap().get(key);
+    return getManagedSchemaMap().get(getManagedSchemaMapKey(tableName, entityName));
   }
 
   /**
@@ -413,11 +408,11 @@ public class DefaultSchemaManager implements SchemaManager {
    * @throws SchemaNotFoundException
    */
   private ManagedSchema getManagedSchema(String tableName, String entityName) {
-    ManagedSchema managedSchema = getManagedSchemaFromSchemaMap1(tableName,
+    ManagedSchema managedSchema = getManagedSchemaFromSchemaMap(tableName,
         entityName);
     if (managedSchema == null) {
       refreshManagedSchemaCache(tableName, entityName);
-      managedSchema = getManagedSchemaFromSchemaMap1(tableName, entityName);
+      managedSchema = getManagedSchemaFromSchemaMap(tableName, entityName);
       if (managedSchema == null) {
         String msg = "Could not find managed schemas for " + tableName + ", "
             + entityName;
@@ -425,5 +420,9 @@ public class DefaultSchemaManager implements SchemaManager {
       }
     }
     return managedSchema;
+  }
+  
+  private String getManagedSchemaMapKey(String tableName, String entityName) {
+    return tableName + ":" + entityName;
   }
 }

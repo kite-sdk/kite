@@ -18,13 +18,6 @@ package com.cloudera.cdk.data.hbase.avro;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.cloudera.cdk.data.hbase.avro.impl.AvroEntityComposer;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySchema;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
@@ -43,19 +36,26 @@ import org.junit.Test;
 
 import com.cloudera.cdk.data.hbase.BaseEntityMapper;
 import com.cloudera.cdk.data.hbase.EntityMapper;
-import com.cloudera.cdk.data.dao.KeyEntity;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroEntityComposer;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySchema;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 
 public class AvroEntityMapperTest {
 
   private static final AvroKeyEntitySchemaParser schemaParser = new AvroKeyEntitySchemaParser();
 
-  private final String keySchemaString = "{ \"name\": \"key\", \"type\": \"record\", "
-      + "\"fields\": [ "
-      + "{ \"name\": \"field1\", \"type\": \"int\" }, "
-      + "{ \"name\": \"field2\", \"type\": \"int\" } " + "]}";
-
   private final String schemaString = "{ \"name\": \"test\", \"type\": \"record\", "
       + "\"fields\": [ "
+      + "{ \"name\": \"keyPart1\", \"type\": \"int\", \"mapping\": "
+      + "    { \"type\": \"key\", \"value\": \"0\" } "
+      + "}, "
+      + "{ \"name\": \"keyPart2\", \"type\": \"int\",  \"mapping\": "
+      + "    { \"type\": \"key\", \"value\": \"1\" } "
+      + "}, "      
       + "{ \"name\": \"field1\", \"type\": \"int\", \"mapping\": "
       + "    { \"type\": \"column\", \"value\": \"int:1\" } "
       + "}, "
@@ -76,15 +76,15 @@ public class AvroEntityMapperTest {
 
   @Test
   public void testMapToEntity() throws Exception {
-    AvroKeySchema keySchema = schemaParser.parseKey(keySchemaString);
-    AvroEntitySchema entitySchema = schemaParser.parseEntity(schemaString);
+    AvroKeySchema keySchema = schemaParser.parseKeySchema(schemaString);
+    AvroEntitySchema entitySchema = schemaParser.parseEntitySchema(schemaString);
 
-    AvroKeySerDe<GenericRecord> keySerDe = new AvroKeySerDe<GenericRecord>(
-        keySchema.getAvroSchema(), false);
+    AvroKeySerDe keySerDe = new AvroKeySerDe(
+        keySchema.getAvroSchema(), keySchema.getPartitionStrategy());
     AvroEntitySerDe<GenericRecord> entitySerDe = new AvroEntitySerDe<GenericRecord>(
         new AvroEntityComposer<GenericRecord>(entitySchema, false),
         entitySchema, entitySchema, false);
-    EntityMapper<GenericRecord, GenericRecord> entityMapper = new BaseEntityMapper<GenericRecord, GenericRecord>(
+    EntityMapper<GenericRecord> entityMapper = new BaseEntityMapper<GenericRecord>(
         keySchema, entitySchema, keySerDe, entitySerDe);
 
     byte[] row = new byte[] { (byte) 0x80, (byte) 0, (byte) 0, (byte) 1,
@@ -125,14 +125,11 @@ public class AvroEntityMapperTest {
         new KeyValue(row, recordFamily, recordQual2, recordIntValue2) };
     Result result = new Result(keyValues);
 
-    KeyEntity<GenericRecord, GenericRecord> keyEntity = entityMapper
+    GenericRecord entity = entityMapper
         .mapToEntity(result);
 
-    GenericRecord key = keyEntity.getKey();
-    GenericRecord entity = keyEntity.getEntity();
-
-    assertEquals(1, key.get("field1"));
-    assertEquals(2, key.get("field2"));
+    assertEquals(1, entity.get("keyPart1"));
+    assertEquals(2, entity.get("keyPart2"));
     assertEquals(1, entity.get("field1"));
     assertEquals(2, entity.get("field2"));
 
@@ -150,15 +147,15 @@ public class AvroEntityMapperTest {
 
   @Test
   public void testMapFromEntity() throws Exception {
-    AvroKeySchema keySchema = schemaParser.parseKey(keySchemaString);
-    AvroEntitySchema entitySchema = schemaParser.parseEntity(schemaString);
+    AvroKeySchema keySchema = schemaParser.parseKeySchema(schemaString);
+    AvroEntitySchema entitySchema = schemaParser.parseEntitySchema(schemaString);
 
-    AvroKeySerDe<GenericRecord> keySerDe = new AvroKeySerDe<GenericRecord>(
-        keySchema.getAvroSchema(), false);
+    AvroKeySerDe keySerDe = new AvroKeySerDe(
+        keySchema.getAvroSchema(), keySchema.getPartitionStrategy());
     AvroEntitySerDe<GenericRecord> entitySerDe = new AvroEntitySerDe<GenericRecord>(
         new AvroEntityComposer<GenericRecord>(entitySchema, false),
         entitySchema, entitySchema, false);
-    EntityMapper<GenericRecord, GenericRecord> entityMapper = new BaseEntityMapper<GenericRecord, GenericRecord>(
+    EntityMapper<GenericRecord> entityMapper = new BaseEntityMapper<GenericRecord>(
         keySchema, entitySchema, keySerDe, entitySerDe);
     @SuppressWarnings("deprecation")
     GenericRecord record = new GenericData.Record(Schema.parse(schemaString));
@@ -175,20 +172,14 @@ public class AvroEntityMapperTest {
     subRecord.put("sub_field1", 1);
     subRecord.put("sub_field2", 2);
 
+    record.put("keyPart1", 1);
+    record.put("keyPart2", 2);
     record.put("field1", 1);
     record.put("field2", 2);
     record.put("field3", map);
     record.put("field4", subRecord);
-
-    GenericRecord key = new GenericData.Record(keySchema.getAvroSchema());
-    key.put("field1", 1);
-    key.put("field2", 2);
-
-    Put put = entityMapper.mapFromEntity(key, record).getPut();
-
-    GenericRecord putKey = keySerDe.deserialize(put.getRow());
-    assertEquals(key.get("field1"), putKey.get("field1"));
-    assertEquals(key.get("field2"), putKey.get("field2"));
+    
+    Put put = entityMapper.mapFromEntity(record).getPut();
 
     List<KeyValue> field1 = put.get(stringToBytes("int"), stringToBytes("1"));
     assertEquals(1, field1.size());

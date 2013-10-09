@@ -15,7 +15,9 @@
  */
 package com.cloudera.cdk.data.hbase.avro.impl;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -23,11 +25,11 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.IndexedRecord;
 
-import com.cloudera.cdk.data.hbase.EntityComposer;
 import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
 import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.MappingType;
 import com.cloudera.cdk.data.dao.SchemaValidationException;
+import com.cloudera.cdk.data.hbase.EntityComposer;
 
 /**
  * An EntityComposer implementation for Avro records. It will handle both
@@ -64,6 +66,11 @@ public class AvroEntityComposer<E extends IndexedRecord> implements
    * parts.
    */
   private final Map<String, AvroRecordBuilderFactory<E>> kacRecordBuilderFactories;
+  
+  /**
+   * The number of key parts in the entity schema.
+   */
+  private final int keyPartCount;
 
   /**
    * AvroEntityComposer constructor.
@@ -80,6 +87,13 @@ public class AvroEntityComposer<E extends IndexedRecord> implements
     this.recordBuilderFactory = buildAvroRecordBuilderFactory(avroEntitySchema
         .getAvroSchema());
     this.kacRecordBuilderFactories = new HashMap<String, AvroRecordBuilderFactory<E>>();
+    int keyPartCount = 0;
+    for (FieldMapping fieldMapping : avroEntitySchema.getFieldMappings()) {
+      if (fieldMapping.getMappingType() == MappingType.KEY) {
+        keyPartCount++;
+      }
+    }
+    this.keyPartCount = keyPartCount;
     initRecordBuilderFactories();
   }
 
@@ -262,5 +276,18 @@ public class AvroEntityComposer<E extends IndexedRecord> implements
       // not a primitive type, so return null
       return null;
     }
+  }
+
+  @Override
+  public List<Object> getPartitionKeyParts(E entity) {
+    Object[] parts = new Object[keyPartCount];
+    for (FieldMapping fieldMapping : avroSchema.getFieldMappings()) {
+      if (fieldMapping.getMappingType() == MappingType.KEY) {
+        int pos = avroSchema.getAvroSchema()
+            .getField(fieldMapping.getFieldName()).pos();
+        parts[Integer.parseInt(fieldMapping.getMappingValue())] = entity.get(pos);
+      }
+    }
+    return Arrays.asList(parts);
   }
 }

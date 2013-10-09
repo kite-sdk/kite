@@ -218,10 +218,10 @@ public class AvroUtils {
     for (Schema.Field field : keySchema.getAvroSchema().getFields()) {
       fields.add(copy(schemaField.getField(field.name())));
     }
-    Schema schema = Schema.createRecord(schemaField.getName(), schemaField.getDoc(),
-        schemaField.getNamespace(), schemaField.isError());
+    Schema schema = Schema.createRecord(keySchema.getAvroSchema().getName(), keySchema.getAvroSchema().getDoc(),
+        keySchema.getAvroSchema().getNamespace(), keySchema.getAvroSchema().isError());
     schema.setFields(fields);
-    return new AvroKeySchema(schema, keySchema.getRawSchema());
+    return new AvroKeySchema(schema, keySchema.getRawSchema(), keySchema.getPartitionStrategy());
   }
 
   private static Schema.Field copy(Schema.Field f) {

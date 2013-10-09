@@ -15,6 +15,9 @@
  */
 package com.cloudera.cdk.data.dao;
 
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.PartitionStrategy;
+
 /**
  * Interface for HBase Common DAOs. Supports basic get, put, delete, and scan
  * operations over HBase.
@@ -25,12 +28,10 @@ package com.cloudera.cdk.data.dao;
  * concrete type. All access and modifier methods on the DAO also support the
  * ability to pass in this underlying type directly.
  *
- * @param <K>
- *          The underlying key type.
  * @param <E>
  *          The type of entity the DAO should return.
  */
-public interface Dao<K, E> {
+public interface Dao<E> {
 
   /**
    * Return the entity stored in HBase at the row specified with Key key. Return
@@ -40,7 +41,7 @@ public interface Dao<K, E> {
    *          The key entity to get
    * @return The entity of type T, or null if one is not found
    */
-  public E get(K key);
+  public E get(PartitionKey key);
 
   /**
    * Put the entity into the HBase table with K key.
@@ -51,7 +52,7 @@ public interface Dao<K, E> {
    * @return True if the put succeeded, False if the put failed due to update
    *         conflict
    */
-  public boolean put(K key, E entity);
+  public boolean put(E entity);
 
   /**
    * Increment a field named fieldName on the entity by value.
@@ -65,7 +66,7 @@ public interface Dao<K, E> {
    *          The amount to increment the field by
    * @return The new field amount.
    */
-  public long increment(K key, String fieldName, long amount);
+  public long increment(PartitionKey key, String fieldName, long amount);
 
   /**
    * Deletes the entity in the HBase table at K key.
@@ -73,7 +74,7 @@ public interface Dao<K, E> {
    * @param key
    *          The key of the entity to delete.
    */
-  public void delete(K key);
+  public void delete(PartitionKey key);
 
   /**
    * Deletes the entity in the HBase table at K key. If that entity has a
@@ -88,7 +89,7 @@ public interface Dao<K, E> {
    * @return True if the put succeeded, False if the put failed due to update
    *         conflict
    */
-  public boolean delete(K key, E entity);
+  public boolean delete(PartitionKey key, E entity);
 
   /**
    * Get a scanner to scan the HBase table this DAO reads from. This method
@@ -98,7 +99,7 @@ public interface Dao<K, E> {
    * @return An EntityScanner instance that can be used to iterate through
    *         entities in the table.
    */
-  public EntityScanner<K, E> getScanner();
+  public EntityScanner<E> getScanner();
 
   /**
    * Get a scanner to scan the HBase table this DAO reads from. The scanner is
@@ -113,22 +114,7 @@ public interface Dao<K, E> {
    * @return An EntityScanner instance that can be used to iterate through
    *         entities in the table.
    */
-  public EntityScanner<K, E> getScanner(PartialKey<K> startKey, PartialKey<K> stopKey);
-
-  /**
-   * Get a scanner to scan the HBase table this DAO reads from. The scanner is
-   * opened starting at the first row greater than or equal to startKey. It will
-   * stop at the first row it sees greater than or equal to stopKey.
-   *
-   * If startKey is null, it will start at the first row in the table. If
-   * stopKey is null, it will stop at the last row in the table.
-   *
-   * @param startKey
-   * @param stopKey
-   * @return An EntityScanner instance that can be used to iterate through
-   *         entities in the table.
-   */
-  public EntityScanner<K, E> getScanner(K startKey, K stopKey);
+  public EntityScanner<E> getScanner(PartitionKey startKey, PartitionKey stopKey);
 
   /**
    * Gets the key schema instance for this DAO.
@@ -143,6 +129,8 @@ public interface Dao<K, E> {
    * @return The HBaseCommonEntitySchema instance.
    */
   public EntitySchema getEntitySchema();
+  
+  public PartitionStrategy getPartitionStrategy();
 
   /**
    * Create an EntityBatch with a specified buffer size in bytes
@@ -151,12 +139,12 @@ public interface Dao<K, E> {
    *          Write buffer size in bytes
    * @return EntityBatch
    */
-  public EntityBatch<K, E> newBatch(long writeBufferSize);
+  public EntityBatch<E> newBatch(long writeBufferSize);
 
   /**
    * Create an EntityBatch with the default HBase buffer size.
    *
    * @return EntityBatch
    */
-  public EntityBatch<K, E> newBatch();
+  public EntityBatch<E> newBatch();
 }

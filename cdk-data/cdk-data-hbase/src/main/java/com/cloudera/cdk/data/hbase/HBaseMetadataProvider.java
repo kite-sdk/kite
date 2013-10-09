@@ -38,13 +38,12 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
   @Override
   public DatasetDescriptor create(String tableName, DatasetDescriptor descriptor) {
 
-    String keySchemaString = getKeySchema(descriptor).toString(true);
     String entitySchemaString = descriptor.getSchema().toString(true);
 
     AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
-    AvroEntitySchema entitySchema = parser.parseEntity(entitySchemaString);
+    AvroEntitySchema entitySchema = parser.parseEntitySchema(entitySchemaString);
 
-    schemaManager.createSchema(tableName, ENTITY_NAME, keySchemaString,
+    schemaManager.createSchema(tableName, ENTITY_NAME,
         entitySchemaString,
         "com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser",
         "com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe",

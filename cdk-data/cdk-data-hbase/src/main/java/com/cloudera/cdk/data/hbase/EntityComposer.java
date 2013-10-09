@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -75,6 +76,8 @@ public interface EntityComposer<E> {
    */
   public Object buildKeyAsColumnField(String fieldName,
       Map<CharSequence, Object> keyAsColumnValues);
+  
+  public List<Object> getPartitionKeyParts(E entity);
 
   /**
    * An interface for entity builders.

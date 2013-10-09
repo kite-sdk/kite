@@ -5,15 +5,15 @@
   "tables": ["cdk_example_user_profiles"],
   "fields": [
     { 
-      "name": "firstName", 
+      "name": "lastName", 
       "type": "string",
-      "mapping": { "type": "column", "value": "meta:firstName" }
+      "mapping": { "type": "key", "value": "0" }
     },
       
     { 
-      "name": "lastName", 
+      "name": "firstName", 
       "type": "string",
-      "mapping": { "type": "column", "value": "meta:lastName" } 
+      "mapping": { "type": "key", "value": "1" } 
     },
     
     {

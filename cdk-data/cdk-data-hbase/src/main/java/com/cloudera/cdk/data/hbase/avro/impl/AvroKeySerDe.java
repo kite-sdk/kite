@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data.hbase.avro.impl;
 
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -27,20 +26,16 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.Encoder;
-import org.apache.avro.specific.SpecificDatumReader;
-import org.apache.avro.specific.SpecificDatumWriter;
 
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.hbase.KeySerDe;
 import com.cloudera.cdk.data.hbase.avro.io.MemcmpDecoder;
 import com.cloudera.cdk.data.hbase.avro.io.MemcmpEncoder;
-import com.cloudera.cdk.data.dao.KeyBuildException;
-import com.cloudera.cdk.data.hbase.KeySerDe;
-import com.cloudera.cdk.data.dao.PartialKey;
-import com.cloudera.cdk.data.dao.PartialKey.KeyPartNameValue;
 
 /**
  * Avro implementation of the KeySerDe interface. This will serialize Keys and
@@ -49,82 +44,71 @@ import com.cloudera.cdk.data.dao.PartialKey.KeyPartNameValue;
  * @param <K>
  *          The Key type.
  */
-public class AvroKeySerDe<K extends IndexedRecord> implements KeySerDe<K> {
+public class AvroKeySerDe implements KeySerDe {
 
   private final Schema schema;
-  private final boolean specific;
+  private final Schema[] partialSchemas;
+  private final PartitionStrategy partitionStrategy;
 
-  public AvroKeySerDe(Schema schema, boolean specific) {
+  public AvroKeySerDe(Schema schema, PartitionStrategy partitionStrategy) {
     this.schema = schema;
-    this.specific = specific;
-  }
-
-  @Override
-  public byte[] serialize(K key) {
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    Encoder encoder = new MemcmpEncoder(outputStream);
-    DatumWriter<K> datumWriter = buildDatumWriter(schema);
-    AvroUtils.writeAvroEntity(key, encoder, datumWriter);
-    return outputStream.toByteArray();
-  }
-
-  @Override
-  public byte[] serializePartial(PartialKey<K> partialKey) {
-    boolean partNotFound = false;
-    List<KeyPartNameValue> partsOfKey = new ArrayList<KeyPartNameValue>();
-    List<Field> fieldsPartOfKey = new ArrayList<Field>();
-    for (Field field : schema.getFields()) {
-      KeyPartNameValue part = partialKey.getKeyPartByName(field.name());
-      if (part == null) {
-        partNotFound = true;
-      } else {
-        if (partNotFound) {
-          throw new KeyBuildException("Key part skipped field in schema.");
-        }
-        partsOfKey.add(part);
-        fieldsPartOfKey.add(AvroUtils.cloneField(field));
+    int fieldSize = schema.getFields().size();
+    partialSchemas = new Schema[fieldSize];
+    for (int i = 0; i < fieldSize; i++) {
+      if (i == (fieldSize - 1)) {
+        break;
       }
+      List<Field> partialFieldList = new ArrayList<Field>();
+      for (Field field : schema.getFields().subList(0, i + 1)) {
+        partialFieldList.add(AvroUtils.cloneField(field));
+      }
+      partialSchemas[i] = Schema.createRecord(partialFieldList);
     }
-    if (partsOfKey.size() != partialKey.getPartList().size()) {
-      throw new KeyBuildException(
-          "Some parts don't match fields in the schema.");
-    }
+    this.partitionStrategy = partitionStrategy;
+  }
 
-    Schema partialSchema = Schema.createRecord(fieldsPartOfKey);
-
-    GenericRecord record = new GenericData.Record(schema);
-    for (KeyPartNameValue keyPartNameValue : partsOfKey) {
-      record.put(keyPartNameValue.getName(), keyPartNameValue.getValue());
+  @Override
+  public byte[] serialize(PartitionKey key) {
+    if (key.getLength() == 0) {
+      return new byte[0];
     }
+    
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     Encoder encoder = new MemcmpEncoder(outputStream);
-    DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(
-        partialSchema);
+    
+    Schema schemaToUse;
+    if (key.getLength() == schema.getFields().size()) {
+      schemaToUse = schema;
+    } else {
+      schemaToUse = partialSchemas[key.getLength()-1];
+    }
+    DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schemaToUse);
+    GenericRecord record = new GenericData.Record(schemaToUse);
+    for (int i = 0; i < key.getLength(); i++) {
+      record.put(i, key.get(i));
+    }
     AvroUtils.writeAvroEntity(record, encoder, datumWriter);
     return outputStream.toByteArray();
   }
 
   @Override
-  public K deserialize(byte[] keyBytes) {
+  public PartitionKey deserialize(byte[] keyBytes) {
     ByteArrayInputStream inputStream = new ByteArrayInputStream(keyBytes);
     Decoder decoder = new MemcmpDecoder(inputStream);
-    DatumReader<K> datumReader = buildDatumReader(schema);
-    return AvroUtils.readAvroEntity(decoder, datumReader);
+    DatumReader<GenericRecord> datumReader = new GenericDatumReader<GenericRecord>(
+        schema);
+    GenericRecord genericRecord = AvroUtils
+        .readAvroEntity(decoder, datumReader);
+
+    Object[] keyParts = new Object[genericRecord.getSchema().getFields().size()];
+    for (int i = 0; i < genericRecord.getSchema().getFields().size(); i++) {
+      keyParts[i] = genericRecord.get(i);
+    }
+    return partitionStrategy.partitionKey(keyParts);
   }
 
-  private DatumReader<K> buildDatumReader(Schema schema) {
-    if (specific) {
-      return new SpecificDatumReader<K>(schema);
-    } else {
-      return new GenericDatumReader<K>(schema);
-    }
-  }
-
-  private DatumWriter<K> buildDatumWriter(Schema schema) {
-    if (specific) {
-      return new SpecificDatumWriter<K>(schema);
-    } else {
-      return new GenericDatumWriter<K>(schema);
-    }
+  @Override
+  public byte[] serialize(Object... keyPartValues) {
+    return serialize(partitionStrategy.partitionKey(keyPartValues));
   }
 }

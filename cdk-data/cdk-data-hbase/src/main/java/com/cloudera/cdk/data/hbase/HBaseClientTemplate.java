@@ -15,10 +15,6 @@
  */
 package com.cloudera.cdk.data.hbase;
 
-import com.cloudera.cdk.data.dao.Constants;
-import com.cloudera.cdk.data.dao.EntityBatch;
-import com.cloudera.cdk.data.dao.HBaseClientException;
-import com.cloudera.cdk.data.dao.KeyEntity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +29,10 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.dao.Constants;
+import com.cloudera.cdk.data.dao.EntityBatch;
+import com.cloudera.cdk.data.dao.HBaseClientException;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -274,7 +274,7 @@ public class HBaseClientTemplate {
    *          The EntityMapper to use to map the Result to an entity to return.
    * @return The entity created by the entityMapper.
    */
-  public <K, E> E get(K key, EntityMapper<K, E> entityMapper) {
+  public <E> E get(PartitionKey key, EntityMapper<E> entityMapper) {
     return get(key, null, entityMapper);
   }
 
@@ -299,8 +299,8 @@ public class HBaseClientTemplate {
    *          The EntityMapper to use to map the Result to an entity to return.
    * @return The entity created by the entityMapper.
    */
-  public <K, E> E get(K key, GetModifier getModifier,
-      EntityMapper<K, E> entityMapper) {
+  public <E> E get(PartitionKey key, GetModifier getModifier,
+      EntityMapper<E> entityMapper) {
     byte[] keyBytes = entityMapper.getKeySerDe().serialize(key);
     Get get = new Get(keyBytes);
     HBaseUtils.addColumnsToGet(entityMapper.getRequiredColumns(), get);
@@ -308,8 +308,7 @@ public class HBaseClientTemplate {
     if (result.isEmpty()) {
       return null;
     } else {
-      KeyEntity<K, E> keyEntity = entityMapper.mapToEntity(result);
-      return keyEntity.getEntity();
+      return entityMapper.mapToEntity(result);
     }
   }
 
@@ -420,8 +419,8 @@ public class HBaseClientTemplate {
    * @return True if the put succeeded, False if the put failed due to update
    *         conflict
    */
-  public <K, E> boolean put(K key, E entity, EntityMapper<K, E> entityMapper) {
-    return put(key, entity, null, entityMapper);
+  public <E> boolean put(E entity, EntityMapper<E> entityMapper) {
+    return put(entity, null, entityMapper);
   }
 
   /**
@@ -445,9 +444,9 @@ public class HBaseClientTemplate {
    * @return True if the put succeeded, False if the put failed due to update
    *         conflict
    */
-  public <K, E> boolean put(K key, E entity,
-      PutActionModifier putActionModifier, EntityMapper<K, E> entityMapper) {
-    PutAction putAction = entityMapper.mapFromEntity(key, entity);
+  public <E> boolean put(E entity, PutActionModifier putActionModifier,
+      EntityMapper<E> entityMapper) {
+    PutAction putAction = entityMapper.mapFromEntity(entity);
     return put(putAction, putActionModifier);
   }
 
@@ -466,8 +465,8 @@ public class HBaseClientTemplate {
    *          Increment.
    * @return The new field amount after the increment.
    */
-  public <K, E> long increment(K key, String fieldName, long amount,
-      EntityMapper<K, E> entityMapper) {
+  public <E> long increment(PartitionKey key, String fieldName, long amount,
+      EntityMapper<E> entityMapper) {
     Increment increment = entityMapper.mapToIncrement(key, fieldName, amount);
     HTableInterface table = pool.getTable(tableName);
     Result result;
@@ -570,8 +569,8 @@ public class HBaseClientTemplate {
    * @return True if the delete succeeded, False if the put failed due to update
    *         conflict
    */
-  public <K> boolean delete(K key, Set<String> columns,
-      VersionCheckAction checkAction, KeySerDe<K> keySerDe) {
+  public boolean delete(PartitionKey key, Set<String> columns,
+      VersionCheckAction checkAction, KeySerDe keySerDe) {
     return delete(key, columns, checkAction, null, keySerDe);
   }
 
@@ -598,9 +597,9 @@ public class HBaseClientTemplate {
    * @return True if the delete succeeded, False if the put failed due to update
    *         conflict
    */
-  public <K> boolean delete(K key, Set<String> columns,
+  public boolean delete(PartitionKey key, Set<String> columns,
       VersionCheckAction checkAction,
-      DeleteActionModifier deleteActionModifier, KeySerDe<K> keySerDe) {
+      DeleteActionModifier deleteActionModifier, KeySerDe keySerDe) {
     byte[] keyBytes = keySerDe.serialize(key);
     Delete delete = new Delete(keyBytes);
     for (String requiredColumn : columns) {
@@ -623,23 +622,23 @@ public class HBaseClientTemplate {
    *          The EntityMapper to use to map rows to entities.
    * @return The EntityScannerBuilder
    */
-  public <K, E> EntityScannerBuilder<K, E> getScannerBuilder(
-      EntityMapper<K, E> entityMapper) {
-    EntityScannerBuilder<K, E> builder = new BaseEntityScanner.Builder<K, E>(
-        pool, tableName, entityMapper);
+  public <E> EntityScannerBuilder<E> getScannerBuilder(
+      EntityMapper<E> entityMapper) {
+    EntityScannerBuilder<E> builder = new BaseEntityScanner.Builder<E>(pool,
+        tableName, entityMapper);
     for (ScanModifier scanModifier : scanModifiers) {
       builder.addScanModifier(scanModifier);
     }
     return builder;
   }
 
-  public <K, E> EntityBatch<K, E> createBatch(EntityMapper<K, E> entityMapper,
+  public <E> EntityBatch<E> createBatch(EntityMapper<E> entityMapper,
       long writeBufferSize) {
-    return new BaseEntityBatch<K, E>(this, entityMapper, pool, tableName,
+    return new BaseEntityBatch<E>(this, entityMapper, pool, tableName,
         writeBufferSize);
   }
 
-  public <K, E> EntityBatch<K, E> createBatch(EntityMapper<K, E> entityMapper) {
-    return new BaseEntityBatch<K, E>(this, entityMapper, pool, tableName);
+  public <E> EntityBatch<E> createBatch(EntityMapper<E> entityMapper) {
+    return new BaseEntityBatch<E>(this, entityMapper, pool, tableName);
   }
 }

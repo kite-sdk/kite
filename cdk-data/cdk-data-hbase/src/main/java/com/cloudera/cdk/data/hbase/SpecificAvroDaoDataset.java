@@ -68,30 +68,24 @@ class SpecificAvroDaoDataset implements Dataset {
     return new DatasetAccessor<E>() {
       @Override
       public E get(PartitionKey key) {
-        // turn a PartitionKey into a GenericRecord
-        GenericRecord keyRecord = new GenericData.Record(keySchema);
-        int i = 0;
-        for (FieldPartitioner fp : descriptor.getPartitionStrategy().getFieldPartitioners()) {
-          keyRecord.put(fp.getName(), key.get(i++));
-        }
-        return (E) dao.get(keyRecord);
+        return (E) dao.get(key);
       }
 
       @Override
       public boolean put(E e) {
         // the entity contains the key fields so we can use the same Specific
         // instance as a key
-        return dao.put(e, e);
+        return dao.put(e);
       }
     };
   }
 
-  private class SpecificAvroDaoDatasetReader<K, E> extends AbstractDatasetReader {
+  private class SpecificAvroDaoDatasetReader<E> extends AbstractDatasetReader {
 
-    private EntityScanner<K, E> scanner;
-    private Iterator<KeyEntity<K, E>> iterator;
+    private EntityScanner<E> scanner;
+    private Iterator<E> iterator;
 
-    public SpecificAvroDaoDatasetReader(EntityScanner<K, E> scanner) {
+    public SpecificAvroDaoDatasetReader(EntityScanner<E> scanner) {
       this.scanner = scanner;
     }
 
@@ -108,7 +102,7 @@ class SpecificAvroDaoDataset implements Dataset {
 
     @Override
     public E next() {
-      return iterator.next().getEntity();
+      return iterator.next();
     }
 
     @Override

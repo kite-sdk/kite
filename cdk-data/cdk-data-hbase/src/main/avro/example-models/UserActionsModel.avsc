@@ -5,6 +5,18 @@
   "tables": ["cdk_example_user_profiles"],
   "fields": [
     { 
+      "name": "lastName", 
+      "type": "string",
+      "mapping": { "type": "key", "value": "0" }
+    },
+      
+    { 
+      "name": "firstName", 
+      "type": "string",
+      "mapping": { "type": "key", "value": "1" } 
+    },
+        
+    {  
       "name": "actions",
       "type": { "type": "map", "values": "string" },
       "mapping": { "type": "keyAsColumn", "value": "actions:" }

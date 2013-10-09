@@ -223,7 +223,9 @@ public class EntitySchema {
     }
 
     private byte[] getFamilyFromMappingValue(String mappingValue) {
-      if (mappingType == MappingType.OCC_VERSION) {
+      if (mappingType == MappingType.KEY) {
+        return null;
+      } else if (mappingType == MappingType.OCC_VERSION) {
         return Constants.SYS_COL_FAMILY;
       } else {
         String[] familyQualifier = mappingValue.split(":", 2);
@@ -239,7 +241,9 @@ public class EntitySchema {
     }
 
     private byte[] getQualifierFromMappingValue(String mappingValue) {
-      if (mappingType == MappingType.OCC_VERSION) {
+      if (mappingType == MappingType.KEY) {
+        return null;
+      } else if (mappingType == MappingType.OCC_VERSION) {
         return Constants.VERSION_CHECK_COL_QUALIFIER;
       } else {
         String[] familyQualifier = mappingValue.split(":", 2);

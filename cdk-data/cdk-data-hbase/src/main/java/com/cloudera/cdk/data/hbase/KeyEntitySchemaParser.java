@@ -30,6 +30,8 @@ import com.cloudera.cdk.data.dao.KeySchema;
  */
 public interface KeyEntitySchemaParser<KEY_SCHEMA extends KeySchema, ENTITY_SCHEMA extends EntitySchema> {
 
+  public KEY_SCHEMA parseKeySchema(String schema);
+  
   /**
    * Parse the raw entity schema.
    * 
@@ -37,14 +39,5 @@ public interface KeyEntitySchemaParser<KEY_SCHEMA extends KeySchema, ENTITY_SCHE
    *          The raw entity schema
    * @return The parsed schema
    */
-  public ENTITY_SCHEMA parseEntity(String schema);
-
-  /**
-   * Parse the raw key schema
-   * 
-   * @param schema
-   *          The raw key schema
-   * @return The parsed schema
-   */
-  public KEY_SCHEMA parseKey(String schema);
+  public ENTITY_SCHEMA parseEntitySchema(String schema);
 }

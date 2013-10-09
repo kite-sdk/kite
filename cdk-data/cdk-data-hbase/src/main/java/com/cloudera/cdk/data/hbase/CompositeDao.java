@@ -15,9 +15,9 @@
  */
 package com.cloudera.cdk.data.hbase;
 
-import com.cloudera.cdk.data.dao.Dao;
-import com.cloudera.cdk.data.dao.KeyEntity;
 import java.util.List;
+
+import com.cloudera.cdk.data.dao.Dao;
 
 /**
  * The CompositeDao provides an interface for fetching from tables that may have
@@ -35,7 +35,7 @@ import java.util.List;
  * @param <S>
  *          The type of the sub entities.
  */
-public interface CompositeDao<K, E, S> extends Dao<K, E> {
+public interface CompositeDao<E, S> extends Dao<E> {
 
   /**
    * Compose an entity from the list of sub-entities.
@@ -43,7 +43,7 @@ public interface CompositeDao<K, E, S> extends Dao<K, E> {
    * @param keyEntities The list of sub-entities
    * @return The KeyEntity instance which contains the composed entity.
    */
-  public KeyEntity<K, E> compose(List<KeyEntity<K, S>> keyEntities);
+  public E compose(List<S> entities);
 
   /**
    * Decompose an entity into multiple sub entities.

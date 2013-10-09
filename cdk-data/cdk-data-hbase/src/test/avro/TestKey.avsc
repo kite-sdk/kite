@@ -1,9 +1,0 @@
-{
-  "type": "record",
-  "name": "TestKey",
-  "namespace": "com.cloudera.cdk.data.hbase.avro.entities",
-  "fields": [
-   { "name": "part1", "type": "string" },
-   { "name": "part2", "type": "string" }
-  ]
-}

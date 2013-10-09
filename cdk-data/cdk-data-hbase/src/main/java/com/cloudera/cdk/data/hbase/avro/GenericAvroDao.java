@@ -37,7 +37,7 @@ import com.cloudera.cdk.data.dao.SchemaManager;
  * underlying key record type, and the entity type are GenericRecords. This Dao
  * allows us to persist and fetch these GenericRecords to and from HBase.
  */
-public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
+public class GenericAvroDao extends BaseDao<GenericRecord> {
 
   private static final AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
 
@@ -58,9 +58,8 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
    *          {@link AvroEntityMapper} for details.
    */
   public GenericAvroDao(HTablePool tablePool, String tableName,
-      String keySchemaStr, String entitySchemaString) {
-    super(tablePool, tableName, buildEntityMapper(entitySchemaString,
-        keySchemaStr));
+      String entitySchemaString) {
+    super(tablePool, tableName, buildEntityMapper(entitySchemaString));
   }
 
   /**
@@ -81,10 +80,10 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
    *          details.
    */
   public GenericAvroDao(HTablePool tablePool, String tableName,
-      String keySchemaStr, InputStream entitySchemaStream) {
+      InputStream entitySchemaStream) {
 
-    super(tablePool, tableName, buildEntityMapper(
-        AvroUtils.inputStreamToString(entitySchemaStream), keySchemaStr));
+    super(tablePool, tableName, buildEntityMapper(AvroUtils
+        .inputStreamToString(entitySchemaStream)));
   }
 
   /**
@@ -111,8 +110,7 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
     super(tablePool, tableName, new VersionedAvroEntityMapper.Builder()
         .setSchemaManager(schemaManager).setTableName(tableName)
         .setEntityName(entityName).setSpecific(false)
-        .setGenericSchemaString(entitySchemaString)
-        .<GenericRecord, GenericRecord> build());
+        .setGenericSchemaString(entitySchemaString).<GenericRecord> build());
   }
 
   /**
@@ -136,29 +134,29 @@ public class GenericAvroDao extends BaseDao<GenericRecord, GenericRecord> {
 
     super(tablePool, tableName, new VersionedAvroEntityMapper.Builder()
         .setSchemaManager(schemaManager).setTableName(tableName)
-        .setEntityName(entityName).setSpecific(false)
-        .<GenericRecord, GenericRecord> build());
+        .setEntityName(entityName).setSpecific(false).<GenericRecord> build());
   }
 
-  private static BaseEntityMapper<GenericRecord, GenericRecord> buildEntityMapper(
-      String readerSchemaStr, String keySchemaStr) {
-    return buildEntityMapper(readerSchemaStr, readerSchemaStr, keySchemaStr);
+  private static BaseEntityMapper<GenericRecord> buildEntityMapper(
+      String readerSchemaStr) {
+    return buildEntityMapper(readerSchemaStr, readerSchemaStr);
   }
 
-  private static BaseEntityMapper<GenericRecord, GenericRecord> buildEntityMapper(
-      String readerSchemaStr, String writtenSchemaStr, String keySchemaStr) {
+  private static BaseEntityMapper<GenericRecord> buildEntityMapper(
+      String readerSchemaStr, String writtenSchemaStr) {
 
-    AvroEntitySchema readerSchema = parser.parseEntity(readerSchemaStr);
-    AvroEntitySchema writtenSchema = parser.parseEntity(writtenSchemaStr);
-    AvroKeySchema keySchema = parser.parseKey(keySchemaStr);
-    AvroKeySerDe<GenericRecord> keySerDe = new AvroKeySerDe<GenericRecord>(
-        keySchema.getAvroSchema(), false);
+    AvroEntitySchema readerSchema = parser.parseEntitySchema(readerSchemaStr);
+    AvroEntitySchema writtenSchema = parser.parseEntitySchema(writtenSchemaStr);
     AvroEntityComposer<GenericRecord> entityComposer = new AvroEntityComposer<GenericRecord>(
         readerSchema, false);
     AvroEntitySerDe<GenericRecord> entitySerDe = new AvroEntitySerDe<GenericRecord>(
         entityComposer, readerSchema, writtenSchema, false);
 
-    return new BaseEntityMapper<GenericRecord, GenericRecord>(keySchema,
-        readerSchema, keySerDe, entitySerDe);
+    AvroKeySchema keySchema = parser.parseKeySchema(readerSchemaStr);
+    AvroKeySerDe keySerDe = new AvroKeySerDe(keySchema.getAvroSchema(),
+        keySchema.getPartitionStrategy());
+
+    return new BaseEntityMapper<GenericRecord>(keySchema, readerSchema,
+        keySerDe, entitySerDe);
   }
 }

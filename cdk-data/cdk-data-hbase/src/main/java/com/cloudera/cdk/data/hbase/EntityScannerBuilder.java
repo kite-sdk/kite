@@ -15,8 +15,6 @@
  */
 package com.cloudera.cdk.data.hbase;
 
-import com.cloudera.cdk.data.dao.EntityScanner;
-import com.cloudera.cdk.data.dao.PartialKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +23,8 @@ import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.hbase.filters.EntityFilter;
 import com.cloudera.cdk.data.hbase.filters.RegexEntityFilter;
 import com.cloudera.cdk.data.hbase.filters.SingleFieldEntityFilter;
@@ -38,16 +38,14 @@ import com.cloudera.cdk.data.hbase.filters.SingleFieldEntityFilter;
  * @param <E>
  *          The entity type this canner scans
  */
-public abstract class EntityScannerBuilder<K, E> {
+public abstract class EntityScannerBuilder<E> {
 
   private HTablePool tablePool;
   private String tableName;
-  private K startKey;
-  private PartialKey<K> partialStartKey;
-  private K stopKey;
-  private PartialKey<K> partialStopKey;
+  private PartitionKey startKey;
+  private PartitionKey stopKey;
   private int caching;
-  private EntityMapper<K, E> entityMapper;
+  private EntityMapper<E> entityMapper;
   private List<ScanModifier> scanModifiers = new ArrayList<ScanModifier>();
   private boolean passAllFilters = true;
   private List<Filter> filterList = new ArrayList<Filter>();
@@ -65,7 +63,7 @@ public abstract class EntityScannerBuilder<K, E> {
    * @param <E>
    *          The entity type this scanner scans.
    */
-  public EntityScannerBuilder(HTablePool tablePool, String tableName, EntityMapper<K, E> entityMapper) {
+  public EntityScannerBuilder(HTablePool tablePool, String tableName, EntityMapper<E> entityMapper) {
     this.tablePool = tablePool;
     this.tableName = tableName;
     this.entityMapper = entityMapper;
@@ -94,7 +92,7 @@ public abstract class EntityScannerBuilder<K, E> {
    * 
    * @return EntityMapper
    */
-  EntityMapper<K, E> getEntityMapper() {
+  EntityMapper<E> getEntityMapper() {
     return entityMapper;
   }
 
@@ -103,7 +101,7 @@ public abstract class EntityScannerBuilder<K, E> {
    * 
    * @return Key
    */
-  K getStartKey() {
+  PartitionKey getStartKey() {
     return startKey;
   }
 
@@ -115,37 +113,8 @@ public abstract class EntityScannerBuilder<K, E> {
    *          The start key for this scan
    * @return ScannerBuilder
    */
-  public EntityScannerBuilder<K, E> setStartKey(K startKey) {
-    if (partialStartKey != null) {
-      partialStartKey = null;
-    }
+  public EntityScannerBuilder<E> setStartKey(PartitionKey startKey) {
     this.startKey = startKey;
-    return this;
-  }
-
-  /**
-   * Get The partial Start Key
-   * 
-   * @return PartialKey
-   */
-  PartialKey<K> getPartialStartKey() {
-    return partialStartKey;
-  }
-
-  /**
-   * Set The Partial Start Key. If the startKey has already been set, it will be
-   * reset to null.
-   * 
-   * @param partialStartKey
-   *          The start key for this scan
-   * @return ScannerBuilder
-   */
-  public EntityScannerBuilder<K, E> setPartialStartKey(
-      PartialKey<K> partialStartKey) {
-    if (startKey != null) {
-      startKey = null;
-    }
-    this.partialStartKey = partialStartKey;
     return this;
   }
 
@@ -154,7 +123,7 @@ public abstract class EntityScannerBuilder<K, E> {
    * 
    * @return Key
    */
-  K getStopKey() {
+  PartitionKey getStopKey() {
     return stopKey;
   }
 
@@ -166,37 +135,8 @@ public abstract class EntityScannerBuilder<K, E> {
    *          The stop key for this scan
    * @return ScannerBuilder
    */
-  public EntityScannerBuilder<K, E> setStopKey(K stopKey) {
-    if (partialStopKey != null) {
-      partialStopKey = null;
-    }
+  public EntityScannerBuilder<E> setStopKey(PartitionKey stopKey) {
     this.stopKey = stopKey;
-    return this;
-  }
-
-  /**
-   * Get The partial Stop Key
-   * 
-   * @return PartialKey
-   */
-  PartialKey<K> getPartialStopKey() {
-    return partialStopKey;
-  }
-
-  /**
-   * Set The Partial Stop Key. If the stopKey has already been set, it will be
-   * reset to null.
-   * 
-   * @param partialStopKey
-   *          The stop key for this scan
-   * @return ScannerBuilder
-   */
-  public EntityScannerBuilder<K, E> setPartialStopKey(
-      PartialKey<K> partialStopKey) {
-    if (stopKey != null) {
-      stopKey = null;
-    }
-    this.partialStopKey = partialStopKey;
     return this;
   }
 
@@ -216,7 +156,7 @@ public abstract class EntityScannerBuilder<K, E> {
    *          caching amount for scanner
    * @return ScannerBuilder
    */
-  public EntityScannerBuilder<K, E> setCaching(int caching) {
+  public EntityScannerBuilder<E> setCaching(int caching) {
     this.caching = caching;
     return this;
   }
@@ -231,7 +171,7 @@ public abstract class EntityScannerBuilder<K, E> {
    *          The value for comparison
    * @return ScannerBuilder
    */
-  public EntityScannerBuilder<K, E> addEqualFilter(String fieldName,
+  public EntityScannerBuilder<E> addEqualFilter(String fieldName,
       Object filterValue) {
     SingleFieldEntityFilter singleFieldEntityFilter = new SingleFieldEntityFilter(
         entityMapper.getEntitySchema(), entityMapper.getEntitySerDe(),
@@ -250,7 +190,7 @@ public abstract class EntityScannerBuilder<K, E> {
    *          The value for comparison
    * @return ScannerBuilder
    */
-  public EntityScannerBuilder<K, E> addNotEqualFilter(String fieldName,
+  public EntityScannerBuilder<E> addNotEqualFilter(String fieldName,
       Object filterValue) {
     SingleFieldEntityFilter singleFieldEntityFilter = new SingleFieldEntityFilter(
         entityMapper.getEntitySchema(), entityMapper.getEntitySerDe(),
@@ -269,7 +209,7 @@ public abstract class EntityScannerBuilder<K, E> {
    *          The regular expression to use for comparison
    * @return ScannerBuilder
    */
-  public EntityScannerBuilder<K, E> addRegexMatchFilter(String fieldName,
+  public EntityScannerBuilder<E> addRegexMatchFilter(String fieldName,
       String regexString) {
     RegexEntityFilter regexEntityFilter = new RegexEntityFilter(
         entityMapper.getEntitySchema(), entityMapper.getEntitySerDe(),
@@ -288,7 +228,7 @@ public abstract class EntityScannerBuilder<K, E> {
    *          The regular expression to use for comparison
    * @return ScannerBuilder
    */
-  public EntityScannerBuilder<K, E> addRegexNotMatchFilter(String fieldName,
+  public EntityScannerBuilder<E> addRegexNotMatchFilter(String fieldName,
       String regexString) {
     RegexEntityFilter regexEntityFilter = new RegexEntityFilter(
         entityMapper.getEntitySchema(), entityMapper.getEntitySerDe(),
@@ -304,7 +244,7 @@ public abstract class EntityScannerBuilder<K, E> {
    *          The field to check nullity
    * @return ScannerBuilder
    */
-  public EntityScannerBuilder<K, E> addNotNullFilter(String fieldName) {
+  public EntityScannerBuilder<E> addNotNullFilter(String fieldName) {
     RegexEntityFilter regexEntityFilter = new RegexEntityFilter(
         entityMapper.getEntitySchema(), entityMapper.getEntitySerDe(),
         fieldName, ".+");
@@ -319,7 +259,7 @@ public abstract class EntityScannerBuilder<K, E> {
    *          The field to check nullity
    * @return ScannerBuilder
    */
-  public EntityScannerBuilder<K, E> addIsNullFilter(String fieldName) {
+  public EntityScannerBuilder<E> addIsNullFilter(String fieldName) {
     RegexEntityFilter regexEntityFilter = new RegexEntityFilter(
         entityMapper.getEntitySchema(), entityMapper.getEntitySerDe(),
         fieldName, ".+", false);
@@ -335,7 +275,7 @@ public abstract class EntityScannerBuilder<K, E> {
    *          The field which should be missing
    * @return ScannerBuilder
    */
-  public EntityScannerBuilder<K, E> addIsMissingFilter(String fieldName) {
+  public EntityScannerBuilder<E> addIsMissingFilter(String fieldName) {
     SingleFieldEntityFilter singleFieldEntityFilter = new SingleFieldEntityFilter(
         entityMapper.getEntitySchema(), entityMapper.getEntitySerDe(),
         fieldName, "++++NON_SHALL_PASS++++", CompareFilter.CompareOp.EQUAL);
@@ -355,7 +295,7 @@ public abstract class EntityScannerBuilder<K, E> {
     return passAllFilters;
   }
 
-  public EntityScannerBuilder<K, E> setPassAllFilters(boolean passAllFilters) {
+  public EntityScannerBuilder<E> setPassAllFilters(boolean passAllFilters) {
     this.passAllFilters = passAllFilters;
     return this;
   }
@@ -375,7 +315,7 @@ public abstract class EntityScannerBuilder<K, E> {
    * @param filter
    *          EntityFilter object created by user
    */
-  public EntityScannerBuilder<K, E> addFilter(EntityFilter filter) {
+  public EntityScannerBuilder<E> addFilter(EntityFilter filter) {
     filterList.add(filter.getFilter());
     return this;
   }
@@ -395,7 +335,7 @@ public abstract class EntityScannerBuilder<K, E> {
    * @param scanModifier
    *          The ScanModifier to add
    */
-  public EntityScannerBuilder<K, E> addScanModifier(ScanModifier scanModifier) {
+  public EntityScannerBuilder<E> addScanModifier(ScanModifier scanModifier) {
     scanModifiers.add(scanModifier);
     return this;
   }
@@ -406,5 +346,5 @@ public abstract class EntityScannerBuilder<K, E> {
    * 
    * @return ScannerBuilder
    */
-  public abstract EntityScanner<K, E> build();
+  public abstract EntityScanner<E> build();
 }

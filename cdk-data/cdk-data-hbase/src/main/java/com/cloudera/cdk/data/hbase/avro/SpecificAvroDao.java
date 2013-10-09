@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.dao.HBaseCommonException;
-import com.cloudera.cdk.data.dao.KeyEntity;
 import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.dao.SchemaNotFoundException;
 import com.cloudera.cdk.data.dao.SchemaValidationException;
@@ -58,8 +57,7 @@ import com.cloudera.cdk.data.hbase.avro.impl.VersionedAvroEntityMapper;
  * @param <E>
  *          The entity type.
  */
-public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
-    extends BaseDao<K, E> {
+public class SpecificAvroDao<E extends SpecificRecord> extends BaseDao<E> {
 
   private static Logger LOG = LoggerFactory.getLogger(SpecificAvroDao.class);
 
@@ -85,11 +83,10 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    *          The class of the SpecificRecord this DAO will persist and fetch.
    */
   public SpecificAvroDao(HTablePool tablePool, String tableName,
-      String keySchemaString, String entitySchemaString, Class<K> keyClass,
-      Class<E> entityClass) {
+      String entitySchemaString, Class<E> entityClass) {
 
     super(tablePool, tableName, buildEntityMapper(entitySchemaString,
-        entitySchemaString, keySchemaString, keyClass, entityClass));
+        entitySchemaString, entityClass));
   }
 
   /**
@@ -111,12 +108,10 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    *          The class of the SpecificRecord this DAO will persist and fetch.
    */
   public SpecificAvroDao(HTablePool tablePool, String tableName,
-      InputStream keySchemaStream, InputStream entitySchemaStream,
-      Class<K> keyClass, Class<E> entityClass) {
+      InputStream entitySchemaStream, Class<E> entityClass) {
 
-    this(tablePool, tableName, AvroUtils.inputStreamToString(keySchemaStream),
-        AvroUtils.inputStreamToString(entitySchemaStream), keyClass,
-        entityClass);
+    this(tablePool, tableName, AvroUtils
+        .inputStreamToString(entitySchemaStream), entityClass);
   }
 
   /**
@@ -138,7 +133,7 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
       String entityName, SchemaManager schemaManager) {
     super(tablePool, tableName, new VersionedAvroEntityMapper.Builder()
         .setSchemaManager(schemaManager).setTableName(tableName)
-        .setEntityName(entityName).setSpecific(true).<K, E> build());
+        .setEntityName(entityName).setSpecific(true).<E> build());
   }
 
   /**
@@ -166,15 +161,14 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    * @throws SchemaValidationException
    */
   @SuppressWarnings("unchecked")
-  public static <K extends SpecificRecord, E extends SpecificRecord, S extends SpecificRecord> Dao<K, E> buildCompositeDao(
-      HTablePool tablePool, String tableName, String keySchemaString,
-      List<String> subEntitySchemaStrings, Class<K> keyClass,
-      Class<E> entityClass) {
+  public static <E extends SpecificRecord, S extends SpecificRecord> Dao<E> buildCompositeDao(
+      HTablePool tablePool, String tableName,
+      List<String> subEntitySchemaStrings, Class<E> entityClass) {
 
-    List<EntityMapper<K, S>> entityMappers = new ArrayList<EntityMapper<K, S>>();
+    List<EntityMapper<S>> entityMappers = new ArrayList<EntityMapper<S>>();
     for (String subEntitySchemaString : subEntitySchemaStrings) {
       AvroEntitySchema subEntitySchema = parser
-          .parseEntity(subEntitySchemaString);
+          .parseEntitySchema(subEntitySchemaString);
       Class<S> subEntityClass;
       try {
         subEntityClass = (Class<S>) Class.forName(subEntitySchema
@@ -182,12 +176,11 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
       } catch (ClassNotFoundException e) {
         throw new RuntimeException(e);
       }
-      entityMappers.add(SpecificAvroDao.<K, S> buildEntityMapper(
-          subEntitySchemaString, subEntitySchemaString, keySchemaString,
-          keyClass, subEntityClass));
+      entityMappers.add(SpecificAvroDao.<S> buildEntityMapper(
+          subEntitySchemaString, subEntitySchemaString, subEntityClass));
     }
 
-    return new SpecificCompositeAvroDao<K, E, S>(tablePool, tableName,
+    return new SpecificCompositeAvroDao<E, S>(tablePool, tableName,
         entityMappers, entityClass);
   }
 
@@ -212,15 +205,15 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    * @throws SchemaValidationException
    */
   @SuppressWarnings("unchecked")
-  public static <K extends SpecificRecord, S extends SpecificRecord> Dao<K,
+  public static <K extends SpecificRecord, S extends SpecificRecord> Dao<
       Map<String, S>> buildCompositeDao(
-      HTablePool tablePool, String tableName, String keySchemaString,
-      List<String> subEntitySchemaStrings, Class<K> keyClass) {
+      HTablePool tablePool, String tableName,
+      List<String> subEntitySchemaStrings) {
 
-    List<EntityMapper<K, S>> entityMappers = new ArrayList<EntityMapper<K, S>>();
+    List<EntityMapper<S>> entityMappers = new ArrayList<EntityMapper<S>>();
     for (String subEntitySchemaString : subEntitySchemaStrings) {
       AvroEntitySchema subEntitySchema = parser
-          .parseEntity(subEntitySchemaString);
+          .parseEntitySchema(subEntitySchemaString);
       Class<S> subEntityClass;
       try {
         subEntityClass = (Class<S>) Class.forName(subEntitySchema
@@ -228,12 +221,12 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
       } catch (ClassNotFoundException e) {
         throw new RuntimeException(e);
       }
-      entityMappers.add(SpecificAvroDao.<K, S> buildEntityMapper(
-          subEntitySchemaString, subEntitySchemaString, keySchemaString,
-          keyClass, subEntityClass));
+      entityMappers.add(SpecificAvroDao.<S> buildEntityMapper(
+          subEntitySchemaString, subEntitySchemaString, 
+          subEntityClass));
     }
 
-    return new SpecificMapCompositeAvroDao<K, S>(tablePool, tableName, entityMappers);
+    return new SpecificMapCompositeAvroDao<S>(tablePool, tableName, entityMappers);
   }
 
   /**
@@ -260,19 +253,17 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    * @throws SchemaNotFoundException
    * @throws SchemaValidationException
    */
-  public static <K extends SpecificRecord, E extends SpecificRecord, S extends SpecificRecord> Dao<K, E> buildCompositeDaoWithInputStream(
-      HTablePool tablePool, String tableName, InputStream keySchemaStream,
-      List<InputStream> subEntitySchemaStreams, Class<K> keyClass,
-      Class<E> entityClass) {
+  public static <E extends SpecificRecord, S extends SpecificRecord> Dao<E> buildCompositeDaoWithInputStream(
+      HTablePool tablePool, String tableName,
+      List<InputStream> subEntitySchemaStreams, Class<E> entityClass) {
 
     List<String> subEntitySchemaStrings = new ArrayList<String>();
     for (InputStream subEntitySchemaStream : subEntitySchemaStreams) {
       subEntitySchemaStrings.add(AvroUtils
           .inputStreamToString(subEntitySchemaStream));
     }
-    return buildCompositeDao(tablePool, tableName,
-        AvroUtils.inputStreamToString(keySchemaStream), subEntitySchemaStrings,
-        keyClass, entityClass);
+    return buildCompositeDao(tablePool, tableName, subEntitySchemaStrings,
+        entityClass);
   }
 
   /**
@@ -293,21 +284,21 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    * @return The CompositeDao instance.
    * @throws SchemaNotFoundException
    */
-  public static <K extends SpecificRecord, E extends SpecificRecord, S extends SpecificRecord> Dao<K, E> buildCompositeDaoWithEntityManager(
+  public static <K extends SpecificRecord, E extends SpecificRecord, S extends SpecificRecord> Dao<E> buildCompositeDaoWithEntityManager(
       HTablePool tablePool, String tableName, Class<E> entityClass,
       SchemaManager schemaManager) {
 
     Schema entitySchema = getSchemaFromEntityClass(entityClass);
 
-    List<EntityMapper<K, S>> entityMappers = new ArrayList<EntityMapper<K, S>>();
+    List<EntityMapper<S>> entityMappers = new ArrayList<EntityMapper<S>>();
     for (Schema.Field field : entitySchema.getFields()) {
       entityMappers.add(new VersionedAvroEntityMapper.Builder()
           .setSchemaManager(schemaManager).setTableName(tableName)
           .setEntityName(getSchemaName(field.schema())).setSpecific(true)
-          .<K, S> build());
+          .<S> build());
     }
 
-    return new SpecificCompositeAvroDao<K, E, S>(tablePool, tableName,
+    return new SpecificCompositeAvroDao<E, S>(tablePool, tableName,
         entityMappers, entityClass);
   }
 
@@ -342,20 +333,20 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    * @return The CompositeDao instance.
    * @throws SchemaNotFoundException
    */
-  public static <K extends SpecificRecord, S extends SpecificRecord> Dao<K, Map<String, S>> buildCompositeDaoWithEntityManager(
+  public static <K extends SpecificRecord, S extends SpecificRecord> Dao<Map<String, S>> buildCompositeDaoWithEntityManager(
       HTablePool tablePool, String tableName, List<Class<S>> subEntityClasses,
       SchemaManager schemaManager) {
 
-    List<EntityMapper<K, S>> entityMappers = new ArrayList<EntityMapper<K, S>>();
+    List<EntityMapper<S>> entityMappers = new ArrayList<EntityMapper<S>>();
     for (Class<S> subEntityClass : subEntityClasses) {
       String entityName = getSchemaFromEntityClass(subEntityClass).getName();
       entityMappers.add(new VersionedAvroEntityMapper.Builder()
           .setSchemaManager(schemaManager).setTableName(tableName)
           .setEntityName(entityName).setSpecific(true)
-          .<K, S> build());
+          .<S> build());
     }
 
-    return new SpecificMapCompositeAvroDao<K, S>(tablePool, tableName,
+    return new SpecificMapCompositeAvroDao<S>(tablePool, tableName,
         entityMappers);
   }
 
@@ -378,15 +369,15 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    * @param <E>
    *          The entity type this dao fetches and persists
    */
-  private static class SpecificCompositeAvroDao<K extends SpecificRecord, E extends SpecificRecord, S extends SpecificRecord>
-      extends CompositeBaseDao<K, E, S> {
+  private static class SpecificCompositeAvroDao<E extends SpecificRecord, S extends SpecificRecord>
+      extends CompositeBaseDao<E, S> {
 
     private final Class<E> entityClass;
     private final Constructor<E> entityConstructor;
     private final Schema entitySchema;
 
     public SpecificCompositeAvroDao(HTablePool tablePool, String tableName,
-        List<EntityMapper<K, S>> entityMappers, Class<E> entityClass) {
+        List<EntityMapper<S>> entityMappers, Class<E> entityClass) {
 
       super(tablePool, tableName, entityMappers);
       this.entityClass = entityClass;
@@ -403,8 +394,7 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
     }
 
     @Override
-    public KeyEntity<K, E> compose(List<KeyEntity<K, S>> keyEntities) {
-      K key = null;
+    public E compose(List<S> subEntities) {
       E entity;
       try {
         entity = entityConstructor.newInstance();
@@ -416,16 +406,13 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
       }
 
       int cnt = 0;
-      for (KeyEntity<K, S> keyEntity : keyEntities) {
-        if (keyEntity != null) {
-          if (key == null) {
-            key = keyEntity.getKey();
-          }
-          entity.put(cnt, keyEntity.getEntity());
+      for (S subEntity : subEntities) {
+        if (subEntity != null) {
+          entity.put(cnt, subEntity);
         }
         cnt++;
       }
-      return new KeyEntity<K, E>(key, entity);
+      return entity;
     }
 
     @SuppressWarnings("unchecked")
@@ -443,37 +430,33 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
    * CompositeBaseDao implementation for Specific avro records where the composite
    * entity is a map.
    */
-  private static class SpecificMapCompositeAvroDao<K extends SpecificRecord,
+  private static class SpecificMapCompositeAvroDao<
       S extends SpecificRecord>
-      extends CompositeBaseDao<K, Map<String, S>, S> {
+      extends CompositeBaseDao<Map<String, S>, S> {
 
     private final List<Schema> subEntitySchemas;
 
     public SpecificMapCompositeAvroDao(HTablePool tablePool, String tableName,
-        List<EntityMapper<K, S>> entityMappers) {
+        List<EntityMapper<S>> entityMappers) {
 
       super(tablePool, tableName, entityMappers);
       subEntitySchemas = Lists.newArrayList();
-      for (EntityMapper<K, S> entityMapper : entityMappers) {
-        subEntitySchemas.add(parser.parseEntity(entityMapper.getEntitySchema().getRawSchema()).getAvroSchema());
+      for (EntityMapper<S> entityMapper : entityMappers) {
+        subEntitySchemas.add(parser.parseEntitySchema(entityMapper.getEntitySchema().getRawSchema()).getAvroSchema());
       }
     }
 
     @Override
-    public KeyEntity<K, Map<String, S>> compose(List<KeyEntity<K, S>> keyEntities) {
-      K key = null;
-      Map<String, S> entity = new HashMap<String, S>();
+    public Map<String, S> compose(List<S> entities) {
+      Map<String, S> retEntity = new HashMap<String, S>();
       int cnt = 0;
-      for (KeyEntity<K, S> keyEntity : keyEntities) {
-        if (keyEntity != null) {
-          if (key == null) {
-            key = keyEntity.getKey();
-          }
-          entity.put(subEntitySchemas.get(cnt).getName(), keyEntity.getEntity());
+      for (S entity : entities) {
+        if (entity != null) {
+          retEntity.put(subEntitySchemas.get(cnt).getName(), entity);
         }
         cnt++;
       }
-      return new KeyEntity<K, Map<String, S>>(key, entity);
+      return retEntity;
     }
 
     @Override
@@ -486,29 +469,28 @@ public class SpecificAvroDao<K extends SpecificRecord, E extends SpecificRecord>
     }
   }
 
-  private static <K extends SpecificRecord, E extends SpecificRecord> BaseEntityMapper<K, E> buildEntityMapper(
-      String readerSchemaStr, String writtenSchemaStr, String keySchemaStr,
-      Class<K> keyClass, Class<E> entityClass) {
+  private static <E extends SpecificRecord> BaseEntityMapper<E> buildEntityMapper(
+      String readerSchemaStr, String writtenSchemaStr,
+      Class<E> entityClass) {
 
-    AvroEntitySchema readerSchema = parser.parseEntity(readerSchemaStr);
+    AvroEntitySchema readerSchema = parser.parseEntitySchema(readerSchemaStr);
     // The specific class may have been compiled with a setting that adds the
-    // string
-    // type to the string fields, but aren't in the local or managed schemas.
+    // string type to the string fields, but aren't in the local or managed
+    // schemas.
     readerSchema = AvroUtils
         .mergeSpecificStringTypes(entityClass, readerSchema);
-    AvroEntitySchema writtenSchema = parser.parseEntity(writtenSchemaStr);
+    AvroEntitySchema writtenSchema = parser.parseEntitySchema(writtenSchemaStr);
     AvroEntityComposer<E> entityComposer = new AvroEntityComposer<E>(
         readerSchema, true);
     AvroEntitySerDe<E> entitySerDe = new AvroEntitySerDe<E>(entityComposer,
         readerSchema, writtenSchema, true);
 
-    AvroKeySchema keySchema = parser.parseKey(keySchemaStr);
-    // Same as above. The key schema passed may have a different String type.
-    keySchema = AvroUtils.mergeSpecificStringTypes(keyClass, keySchema);
-    AvroKeySerDe<K> keySerDe = new AvroKeySerDe<K>(keySchema.getAvroSchema(),
-        true);
+    AvroKeySchema keySchema = parser.parseKeySchema(readerSchemaStr);
+    keySchema = AvroUtils.mergeSpecificStringTypes(entityClass, keySchema);
+    AvroKeySerDe keySerDe = new AvroKeySerDe(keySchema.getAvroSchema(),
+        keySchema.getPartitionStrategy());
 
-    return new BaseEntityMapper<K, E>(keySchema, readerSchema, keySerDe,
+    return new BaseEntityMapper<E>(keySchema, readerSchema, keySerDe,
         entitySerDe);
   }
 }

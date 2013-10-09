@@ -68,6 +68,10 @@ public class AvroEntitySchema extends EntitySchema {
   public Schema getAvroSchema() {
     return schema;
   }
+  
+  public Schema getKeyAvroSchema() {
+    return null;
+  }
 
   @Override
   public int hashCode() {

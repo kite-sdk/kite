@@ -15,7 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase;
 
-import com.cloudera.cdk.data.dao.PartialKey;
+import com.cloudera.cdk.data.PartitionKey;
 
 /**
  * This class handles key serialization and deserialization.
@@ -23,7 +23,7 @@ import com.cloudera.cdk.data.dao.PartialKey;
  * @param <K>
  *          The type of the key
  */
-public interface KeySerDe<K> {
+public interface KeySerDe {
 
   /**
    * Serialize the key to bytes.
@@ -32,16 +32,9 @@ public interface KeySerDe<K> {
    *          The key to serialize
    * @return The byte array
    */
-  public byte[] serialize(K key);
-
-  /**
-   * Serialize a partial key to bytes.
-   * 
-   * @param partialKey
-   *          The partial key to serialize
-   * @return The byte array
-   */
-  public byte[] serializePartial(PartialKey<K> partialKey);
+  public byte[] serialize(PartitionKey partitionKey);
+  
+  public byte[] serialize(Object... keyPartValues);
 
   /**
    * Deserialize the key from a byte array.
@@ -50,5 +43,5 @@ public interface KeySerDe<K> {
    *          The byte array to deserialize the key from.
    * @return The key
    */
-  public K deserialize(byte[] keyBytes);
+  public PartitionKey deserialize(byte[] keyBytes);
 }

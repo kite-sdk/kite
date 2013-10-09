@@ -23,10 +23,9 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 
+import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.dao.EntityScanner;
-import com.cloudera.cdk.data.dao.KeyEntity;
-import com.cloudera.cdk.data.dao.PartialKey;
 import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
@@ -50,20 +49,20 @@ public class UserProfileExample {
   /**
    * The user profile DAO
    */
-  private final Dao<UserProfileKey, UserProfileModel> userProfileDao;
+  private final Dao<UserProfileModel> userProfileDao;
 
   /**
    * The user actions DAO. User actions are stored in the same table along side
    * the user profiles.
    */
-  private final Dao<UserProfileKey, UserActionsModel> userActionsDao;
+  private final Dao<UserActionsModel> userActionsDao;
 
   /**
    * A composite dao that encapsulates the two entity types that can be stored
    * in the user_profile table (UserProfileModel and UserActionsModel).
    * UserProfileActionsModel is the compsite type this dao returns.
    */
-  private final Dao<UserProfileKey, UserProfileActionsModel> userProfileActionsDao;
+  private final Dao<UserProfileActionsModel> userProfileActionsDao;
 
   /**
    * The constructor will start by registering the schemas with the meta store
@@ -76,12 +75,13 @@ public class UserProfileExample {
 
     registerSchemas(conf, schemaManager);
 
-    userProfileDao = new SpecificAvroDao<UserProfileKey, UserProfileModel>(
-        pool, "cdk_example_user_profiles", "UserProfileModel", schemaManager);
-    userActionsDao = new SpecificAvroDao<UserProfileKey, UserActionsModel>(
-        pool, "cdk_example_user_profiles", "UserActionsModel", schemaManager);
+    userProfileDao = new SpecificAvroDao<UserProfileModel>(pool,
+        "cdk_example_user_profiles", "UserProfileModel", schemaManager);
+    userActionsDao = new SpecificAvroDao<UserActionsModel>(pool,
+        "cdk_example_user_profiles", "UserActionsModel", schemaManager);
     userProfileActionsDao = SpecificAvroDao.buildCompositeDaoWithEntityManager(
-        pool, "cdk_example_user_profiles", UserProfileActionsModel.class, schemaManager);
+        pool, "cdk_example_user_profiles", UserProfileActionsModel.class,
+        schemaManager);
   }
 
   /**
@@ -91,11 +91,10 @@ public class UserProfileExample {
    * table. It has no start or stop keys specified.
    */
   public void printUserProfies() {
-    EntityScanner<UserProfileKey, UserProfileModel> scanner = userProfileDao
-        .getScanner();
+    EntityScanner<UserProfileModel> scanner = userProfileDao.getScanner();
     try {
-      for (KeyEntity<UserProfileKey, UserProfileModel> keyEntity : scanner) {
-        System.out.println(keyEntity.getEntity().toString());
+      for (UserProfileModel entity : scanner) {
+        System.out.println(entity.toString());
       }
     } finally {
       // scanners need to be closed.
@@ -117,22 +116,23 @@ public class UserProfileExample {
   public void printUserProfileActionsForLastName(String lastName) {
     // Create a partial key that will allow us to start the scanner from the
     // first user record that has last name equal to the one provided.
-    PartialKey<UserProfileKey> startKey = new PartialKey.Builder<UserProfileKey>()
-        .addKeyPart("lastName", lastName).build();
+    PartitionKey startKey = userProfileActionsDao.getPartitionStrategy()
+        .partitionKey("lastName");
 
     // Get the scanner with the start key. Null for stopKey in the getScanner
     // method indicates that the scanner will scan to the end of the table. Our
     // loop will break out when it encounters a record without the last name.
-    EntityScanner<UserProfileKey, UserProfileActionsModel> scanner = userProfileActionsDao
+
+    EntityScanner<UserProfileActionsModel> scanner = userProfileActionsDao
         .getScanner(startKey, null);
     try {
       // scan until we find a last name not equal to the one provided
-      for (KeyEntity<UserProfileKey, UserProfileActionsModel> keyEntity : scanner) {
-        if (!keyEntity.getKey().getLastName().equals(lastName)) {
+      for (UserProfileActionsModel entity : scanner) {
+        if (!entity.getUserProfileModel().getLastName().equals(lastName)) {
           // last name of row different, break out of the scan.
           break;
         }
-        System.out.println(keyEntity.getEntity().toString());
+        System.out.println(entity.toString());
       }
     } finally {
       // scanners need to be closed.
@@ -158,12 +158,11 @@ public class UserProfileExample {
   public void create(String firstName, String lastName, boolean married) {
     long ts = System.currentTimeMillis();
 
-    UserProfileKey key = UserProfileKey.newBuilder().setFirstName(firstName)
-        .setLastName(lastName).build();
     UserProfileModel profileModel = UserProfileModel.newBuilder()
         .setFirstName(firstName).setLastName(lastName).setMarried(married)
         .setCreated(ts).build();
     UserActionsModel actionsModel = UserActionsModel.newBuilder()
+        .setFirstName(firstName).setLastName(lastName)
         .setActions(new HashMap<String, String>()).build();
     actionsModel.getActions().put("profile_created", Long.toString(ts));
 
@@ -171,7 +170,7 @@ public class UserProfileExample {
         .newBuilder().setUserProfileModel(profileModel)
         .setUserActionsModel(actionsModel).build();
 
-    if (!userProfileActionsDao.put(key, profileActionsModel)) {
+    if (!userProfileActionsDao.put(profileActionsModel)) {
       // If put returns false, a user already existed at this row
       System.out
           .println("Creating a new user profile failed due to a write conflict.");
@@ -201,8 +200,8 @@ public class UserProfileExample {
     long ts = System.currentTimeMillis();
 
     // Construct the key we'll use to fetch the user.
-    UserProfileKey key = UserProfileKey.newBuilder().setFirstName(firstName)
-        .setLastName(lastName).build();
+    PartitionKey key = userProfileActionsDao.getPartitionStrategy()
+        .partitionKey(lastName, firstName);
 
     // Get the profile and actions entity from the composite dao.
     UserProfileActionsModel profileActionsModel = userProfileActionsDao
@@ -222,7 +221,7 @@ public class UserProfileExample {
     updatedProfileActionsModel.getUserActionsModel().getActions()
         .put("profile_updated", Long.toString(ts));
 
-    if (!userProfileActionsDao.put(key, updatedProfileActionsModel)) {
+    if (!userProfileActionsDao.put(updatedProfileActionsModel)) {
       // If put returns false, a write conflict occurred where someone else
       // updated the row between the times we did the get and put.
       System.out
@@ -251,20 +250,17 @@ public class UserProfileExample {
    */
   public void addAction(String firstName, String lastName, String actionType,
       String actionValue) {
-    // Construct the key we'll use for the put
-    UserProfileKey key = UserProfileKey.newBuilder().setFirstName(firstName)
-        .setLastName(lastName).build();
-
     // Create a new UserActionsModel, and add a new actions map to it with a
     // single action value. Even if one exists in this row, since it has a lone
     // keyAsColumn field, it won't remove any actions that already exist in the
     // actions column family.
     UserActionsModel actionsModel = UserActionsModel.newBuilder()
+        .setLastName(lastName).setFirstName(firstName)
         .setActions(new HashMap<String, String>()).build();
     actionsModel.getActions().put(actionType, actionValue);
 
     // Perform the put.
-    userActionsDao.put(key, actionsModel);
+    userActionsDao.put(actionsModel);
   }
 
   /**

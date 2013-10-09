@@ -18,7 +18,6 @@ package com.cloudera.cdk.data.hbase.manager;
 import java.util.List;
 
 import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
-import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchemaKey;
 
 /**
  * Interface for fetching managed schemas from a persistence store. Managed
@@ -31,35 +30,11 @@ import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchemaKey;
 interface ManagedSchemaDao {
 
   /**
-   * Encapsulates a ManagedSchemaKey, and ManagedSchema. This is returned from
-   * rows of the persistence store.
-   */
-  public class ManagedKeySchemaPair {
-
-    private final ManagedSchemaKey key;
-    private final ManagedSchema managedSchema;
-
-    public ManagedKeySchemaPair(ManagedSchemaKey key,
-        ManagedSchema managedSchema) {
-      this.key = key;
-      this.managedSchema = managedSchema;
-    }
-
-    public ManagedSchemaKey getKey() {
-      return key;
-    }
-
-    public ManagedSchema getManagedSchema() {
-      return managedSchema;
-    }
-  }
-
-  /**
    * Get all Managed Schemas from the persistence store.
    * 
-   * @return The list of ManagedKeySchemaPair instances
+   * @return The list of ManagedSchema instances
    */
-  public List<ManagedKeySchemaPair> getManagedSchemas();
+  public List<ManagedSchema> getManagedSchemas();
 
   /**
    * Get a ManagedSchema for the table name, entity name pair. Returns null if
@@ -69,19 +44,16 @@ interface ManagedSchemaDao {
    *          The table name of the managed schema we are fetching
    * @param entityName
    *          The entity name of the managed schema we are fetching
-   * @return The ManagedKeySchemaPair, or null if one doesn't exist.
+   * @return The ManagedSchema, or null if one doesn't exist.
    */
-  public ManagedKeySchemaPair getManagedSchema(String tableName,
-      String entityName);
+  public ManagedSchema getManagedSchema(String tableName, String entityName);
 
   /**
    * Save a Managed schema to the persistence store.
    * 
-   * @param key
-   *          The key (table name, entity name) of the ManagedSchema
    * @param schema
    *          The ManagedSchema to save
-   * @return True if the save succeeded, or false if there wwas a conflict
+   * @return True if the save succeeded, or false if there was a conflict
    */
-  public boolean save(ManagedSchemaKey key, ManagedSchema schema);
+  public boolean save(ManagedSchema schema);
 }

@@ -25,12 +25,10 @@ import org.apache.avro.Schema;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
-import com.cloudera.cdk.data.hbase.KeyEntitySchemaParser;
-import com.cloudera.cdk.data.dao.KeySchema;
 import com.cloudera.cdk.data.dao.MappingType;
 import com.cloudera.cdk.data.dao.SchemaValidationException;
+import com.cloudera.cdk.data.hbase.KeyEntitySchemaParser;
 
 /**
  * This implementation parses Avro schemas for both the key and entities. The
@@ -88,34 +86,48 @@ import com.cloudera.cdk.data.dao.SchemaValidationException;
  * transactions.
  */
 public class AvroKeyEntitySchemaParser implements
-    KeyEntitySchemaParser<KeySchema, EntitySchema> {
+    KeyEntitySchemaParser<AvroKeySchema, AvroEntitySchema> {
 
   @SuppressWarnings("deprecation")
   @Override
-  public AvroKeySchema parseKey(String rawSchema) {
+  public AvroKeySchema parseKeySchema(String rawSchema) {
+    JsonNode schemaAsJson = rawSchemaAsJsonNode(rawSchema);
     Schema schema = Schema.parse(rawSchema);
-    return new AvroKeySchema(schema, rawSchema);
+    List<FieldMapping> fieldMappings = getFieldMappings(schemaAsJson, schema);
+
+    List<FieldMapping> keyFieldMappings = new ArrayList<FieldMapping>();
+    for (FieldMapping fieldMapping : fieldMappings) {
+      if (fieldMapping.getMappingType() == MappingType.KEY) {
+        keyFieldMappings.add(fieldMapping);
+      }
+    }
+    return new AvroKeySchema(schema, rawSchema, keyFieldMappings);
   }
 
   @SuppressWarnings("deprecation")
   @Override
-  public AvroEntitySchema parseEntity(String rawSchema) {
+  public AvroEntitySchema parseEntitySchema(String rawSchema) {
+    JsonNode schemaAsJson = rawSchemaAsJsonNode(rawSchema);
     Schema schema = Schema.parse(rawSchema);
+    List<FieldMapping> fieldMappings = getFieldMappings(schemaAsJson, schema);
 
+    boolean transactional = Boolean.valueOf(schema.getProp("transactional"));
+    List<String> tables = getTables(schemaAsJson);
+    return new AvroEntitySchema(tables, schema, rawSchema, fieldMappings,
+        transactional);
+  }
+
+  /**
+   * 
+   * @param schemaAsJson
+   * @param schema
+   * @return
+   */
+  private List<FieldMapping> getFieldMappings(JsonNode schemaAsJson,
+      Schema schema) {
     // Get the mapping of fields to default values.
     Map<String, Object> defaultValueMap = AvroUtils.getDefaultValueMap(schema);
-
-    // Convert the avroRecordSchemaStr into a JsonNode so we can inspect
-    // it's mapping types.
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode avroRecordSchemaJson;
-    try {
-      avroRecordSchemaJson = mapper.readValue(rawSchema, JsonNode.class);
-    } catch (IOException e) {
-      throw new SchemaValidationException(
-          "Could not parse the avro record as JSON.", e);
-    }
-    JsonNode fields = avroRecordSchemaJson.get("fields");
+    JsonNode fields = schemaAsJson.get("fields");
     if (fields == null) {
       throw new SchemaValidationException(
           "Avro Record Schema must contain fields");
@@ -135,10 +147,24 @@ public class AvroKeyEntitySchemaParser implements
       }
     }
 
-    boolean transactional = Boolean.valueOf(schema.getProp("transactional"));
-    List<String> tables = getTables(avroRecordSchemaJson);
-    return new AvroEntitySchema(tables, schema, rawSchema, fieldMappings,
-        transactional);
+    return fieldMappings;
+  }
+
+  /**
+   * 
+   * @param rawSchema
+   * @return
+   */
+  private JsonNode rawSchemaAsJsonNode(String rawSchema) {
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode avroRecordSchemaJson;
+    try {
+      avroRecordSchemaJson = mapper.readValue(rawSchema, JsonNode.class);
+    } catch (IOException e) {
+      throw new SchemaValidationException(
+          "Could not parse the avro record as JSON.", e);
+    }
+    return avroRecordSchemaJson;
   }
 
   /**
@@ -193,8 +219,15 @@ public class AvroKeyEntitySchemaParser implements
         if (prefixValueNode != null) {
           prefix = prefixValueNode.getTextValue();
         }
-      } else if ((mappingTypeNode.getTextValue().equals("occVersion"))) {
+      } else if (mappingTypeNode.getTextValue().equals("occVersion")) {
         mappingType = MappingType.OCC_VERSION;
+      } else if (mappingTypeNode.getTextValue().equals("key")) {
+        mappingType = MappingType.KEY;
+        if (mappingValueNode == null) {
+          throw new SchemaValidationException(
+              "key mapping type must contain an integer value specifying it's key order.");
+        }
+        mappingValue = mappingValueNode.getTextValue();
       }
       Object defaultValue = defaultValueMap.get(fieldName);
       boolean incrementable = (type == Schema.Type.INT || type == Schema.Type.LONG);

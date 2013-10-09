@@ -15,19 +15,42 @@
  */
 package com.cloudera.cdk.data.dao;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import com.cloudera.cdk.data.FieldPartitioner;
+import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
+import com.cloudera.cdk.data.partition.IdentityFieldPartitioner;
+
 /**
  * The KeySchema type.
  */
 public class KeySchema {
 
   private final String rawSchema;
+  private final PartitionStrategy partitionStrategy;
 
   /**
    * @param rawSchema
    *          The raw schema
    */
-  public KeySchema(String rawSchema) {
+  public KeySchema(String rawSchema, Collection<FieldMapping> fieldMappings) {
     this.rawSchema = rawSchema;
+    List<FieldPartitioner> fieldPartitioners = new ArrayList<FieldPartitioner>();
+    for (FieldMapping fieldMapping : fieldMappings) {
+      IdentityFieldPartitioner fieldPartitioner = new IdentityFieldPartitioner(
+          fieldMapping.getFieldName(), 1);
+      fieldPartitioners.add(fieldPartitioner);
+    }
+    partitionStrategy = new PartitionStrategy(
+        fieldPartitioners.toArray(new FieldPartitioner[0]));
+  }
+  
+  public KeySchema(String rawSchema, PartitionStrategy partitionStrategy) {
+    this.rawSchema = rawSchema;
+    this.partitionStrategy = partitionStrategy;
   }
 
   /**
@@ -37,5 +60,9 @@ public class KeySchema {
    */
   public String getRawSchema() {
     return rawSchema;
+  }
+
+  public PartitionStrategy getPartitionStrategy() {
+    return partitionStrategy;
   }
 }

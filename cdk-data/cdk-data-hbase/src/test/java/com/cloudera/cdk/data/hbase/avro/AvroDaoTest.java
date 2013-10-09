@@ -20,7 +20,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,31 +36,26 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.dao.EntityBatch;
-import com.cloudera.cdk.data.dao.KeyEntity;
 import com.cloudera.cdk.data.dao.EntityScanner;
-import com.cloudera.cdk.data.dao.KeyBuildException;
-import com.cloudera.cdk.data.dao.PartialKey;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
-import com.cloudera.cdk.data.hbase.avro.entities.TestKey;
 import com.cloudera.cdk.data.hbase.avro.entities.TestRecord;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
 
 public class AvroDaoTest {
 
-  private static final String keyString;
-  private static final String recordString;
+  private static final String schemaString;
   private static final String tableName = "testtable";
   private HTablePool tablePool;
 
   static {
     try {
-      keyString = AvroUtils.inputStreamToString(AvroDaoTest.class
-          .getResourceAsStream("/TestKey.avsc"));
-      recordString = AvroUtils.inputStreamToString(AvroDaoTest.class
+      schemaString = AvroUtils.inputStreamToString(AvroDaoTest.class
           .getResourceAsStream("/TestRecord.avsc"));
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -98,42 +92,33 @@ public class AvroDaoTest {
 
   @Test
   public void testGeneric() throws Exception {
-    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(tablePool,
-        tableName, keyString, recordString);
+    Dao<GenericRecord> dao = new GenericAvroDao(tablePool, tableName,
+        schemaString);
 
     for (int i = 0; i < 10; ++i) {
-      GenericRecord key = createGenericKey("part1_" + Integer.toString(i),
-          "part2_" + Integer.toString(i));
       @SuppressWarnings("deprecation")
-      GenericRecord entity = new GenericData.Record(Schema.parse(recordString));
-      entity.put("field1", "field1_" + Integer.toString(i));
-      entity.put("field2", "field2_" + Integer.toString(i));
-      dao.put(key, entity);
+      GenericRecord entity = new GenericData.Record(Schema.parse(schemaString));
+      entity.put("keyPart1", "part1_" + i);
+      entity.put("keyPart2", "part2_" + i);
+      entity.put("field1", "field1_" + i);
+      entity.put("field2", "field2_" + i);
+      dao.put(entity);
     }
 
     for (int i = 0; i < 10; ++i) {
-      GenericRecord key = createGenericKey("part1_" + Integer.toString(i),
-          "part2_" + Integer.toString(i));
+      PartitionKey key = dao.getPartitionStrategy().partitionKey(
+          "part1_" + Integer.toString(i), "part2_" + Integer.toString(i));
       GenericRecord genericRecord = dao.get(key);
-      assertEquals("field1_" + Integer.toString(i), genericRecord.get("field1")
-          .toString());
-      assertEquals("field2_" + Integer.toString(i), genericRecord.get("field2")
-          .toString());
+      assertEquals("field1_" + i, genericRecord.get("field1").toString());
+      assertEquals("field2_" + i, genericRecord.get("field2").toString());
     }
 
     int cnt = 0;
-    EntityScanner<GenericRecord, GenericRecord> entityScanner = dao
-        .getScanner();
+    EntityScanner<GenericRecord> entityScanner = dao.getScanner();
     try {
-      for (KeyEntity<GenericRecord, GenericRecord> keyEntity : entityScanner) {
-        assertEquals("part1_" + Integer.toString(cnt),
-            keyEntity.getKey().get("part1").toString());
-        assertEquals("part2_" + Integer.toString(cnt),
-            keyEntity.getKey().get("part2").toString());
-        assertEquals("field1_" + Integer.toString(cnt), keyEntity.getEntity()
-            .get("field1").toString());
-        assertEquals("field2_" + Integer.toString(cnt), keyEntity.getEntity()
-            .get("field2").toString());
+      for (GenericRecord entity : entityScanner) {
+        assertEquals("field1_" + cnt, entity.get("field1").toString());
+        assertEquals("field2_" + cnt, entity.get("field2").toString());
         cnt++;
       }
       assertEquals(10, cnt);
@@ -142,19 +127,12 @@ public class AvroDaoTest {
     }
 
     cnt = 5;
-    PartialKey<GenericRecord> startKey = new PartialKey.Builder<GenericRecord>()
-        .addKeyPart("part1", "part1_5").build();
+    PartitionKey startKey = dao.getPartitionStrategy().partitionKey("part1_5");
     entityScanner = dao.getScanner(startKey, null);
     try {
-      for (KeyEntity<GenericRecord, GenericRecord> keyEntity : entityScanner) {
-        assertEquals("part1_" + Integer.toString(cnt),
-            keyEntity.getKey().get("part1").toString());
-        assertEquals("part2_" + Integer.toString(cnt),
-            keyEntity.getKey().get("part2").toString());
-        assertEquals("field1_" + Integer.toString(cnt), keyEntity.getEntity()
-            .get("field1").toString());
-        assertEquals("field2_" + Integer.toString(cnt), keyEntity.getEntity()
-            .get("field2").toString());
+      for (GenericRecord entity : entityScanner) {
+        assertEquals("field1_" + cnt, entity.get("field1").toString());
+        assertEquals("field2_" + cnt, entity.get("field2").toString());
         cnt++;
       }
       assertEquals(10, cnt);
@@ -164,7 +142,8 @@ public class AvroDaoTest {
       }
     }
 
-    GenericRecord key = createGenericKey("part1_5", "part2_5");
+    PartitionKey key = dao.getPartitionStrategy().partitionKey("part1_5",
+        "part2_5");
     dao.delete(key);
     GenericRecord deletedRecord = dao.get(key);
     assertNull(deletedRecord);
@@ -172,57 +151,42 @@ public class AvroDaoTest {
 
   @Test
   public void testSpecific() throws Exception {
-    Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        tablePool, new String(tableName), keyString, recordString,
-        TestKey.class, TestRecord.class);
+    Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool,
+        new String(tableName), schemaString, TestRecord.class);
 
-    int cnt = 0;
     for (TestRecord testRecord : this.createSpecificEntities(10)) {
-      TestKey keyRecord = this.createSpecificKey(
-          "part1_" + Integer.toString(cnt), "part2_" + Integer.toString(cnt));
-      assertTrue(dao.put(keyRecord, testRecord));
-      cnt++;
+      assertTrue(dao.put(testRecord));
     }
 
     for (int i = 0; i < 10; ++i) {
-      String iStr = Integer.toString(i);
-      TestKey key = createSpecificKey("part1_" + iStr, "part2_" + iStr);
-
-      TestRecord record = dao.get(key);
-      assertEquals("field1_" + iStr, record.getField1());
-      assertEquals("field2_" + iStr, record.getField2());
+      PartitionKey partitionKey = dao.getPartitionStrategy().partitionKey(
+          "part1_" + i, "part2_" + i);
+      TestRecord record = dao.get(partitionKey);
+      assertEquals("field1_" + i, record.getField1());
+      assertEquals("field2_" + i, record.getField2());
       assertEquals(TestEnum.ENUM3, record.getEnum$());
-      assertEquals("field3_value_1_" + iStr,
-          record.getField3().get("field3_key_1_" + iStr));
-      assertEquals("field3_value_2_" + iStr,
-          record.getField3().get("field3_key_2_" + iStr));
-      assertEquals("embedded1_" + iStr, record.getField4().getEmbeddedField1());
+      assertEquals("field3_value_1_" + i,
+          record.getField3().get("field3_key_1_" + i));
+      assertEquals("field3_value_2_" + i,
+          record.getField3().get("field3_key_2_" + i));
+      assertEquals("embedded1_" + i, record.getField4().getEmbeddedField1());
       assertEquals(i, (long) record.getField4().getEmbeddedField2());
       assertEquals(2, record.getField5().size());
       // check 1st subrecord
-      assertEquals("subfield1_" + iStr, record.getField5().get(0)
-          .getSubfield1());
+      assertEquals("subfield1_" + i, record.getField5().get(0).getSubfield1());
       assertEquals(i, (long) record.getField5().get(0).getSubfield2());
-      assertEquals("subfield3_" + iStr, record.getField5().get(0)
-          .getSubfield3());
-      assertEquals("subfield4_" + iStr, record.getField5().get(1)
-          .getSubfield1());
+      assertEquals("subfield3_" + i, record.getField5().get(0).getSubfield3());
+      assertEquals("subfield4_" + i, record.getField5().get(1).getSubfield1());
       assertEquals(i, (long) record.getField5().get(1).getSubfield2());
-      assertEquals("subfield6_" + iStr, record.getField5().get(1)
-          .getSubfield3());
+      assertEquals("subfield6_" + i, record.getField5().get(1).getSubfield3());
     }
 
-    cnt = 0;
-    EntityScanner<TestKey, TestRecord> entityScanner = dao.getScanner();
+    int cnt = 0;
+    EntityScanner<TestRecord> entityScanner = dao.getScanner();
     try {
-      for (KeyEntity<TestKey, TestRecord> keyEntity : entityScanner) {
-        TestKey key = keyEntity.getKey();
-        assertEquals("part1_" + Integer.toString(cnt), key.getPart1());
-        assertEquals("part2_" + Integer.toString(cnt), key.getPart2());
-        assertEquals("field1_" + Integer.toString(cnt), keyEntity.getEntity()
-            .getField1());
-        assertEquals("field2_" + Integer.toString(cnt), keyEntity.getEntity()
-            .getField2());
+      for (TestRecord entity : entityScanner) {
+        assertEquals("field1_" + cnt, entity.getField1());
+        assertEquals("field2_" + cnt, entity.getField2());
         cnt++;
       }
       assertEquals(10, cnt);
@@ -231,45 +195,23 @@ public class AvroDaoTest {
     }
 
     // Test scanner with null keys
-    PartialKey<TestKey> key1 = new PartialKey.Builder<TestKey>().addKeyPart(
-        "part1", "part1_5").build();
+    PartitionKey key1 = dao.getPartitionStrategy().partitionKey("part1_5");
     entityScanner = dao.getScanner(key1, null);
-    assertEquals("field1_5", entityScanner.iterator().next().getEntity()
-        .getField1());
+    assertEquals("field1_5", entityScanner.iterator().next().getField1());
 
-    key1 = new PartialKey.Builder<TestKey>().addKeyPart("part1", "part1_5")
-        .build();
     entityScanner = dao.getScanner(null, key1);
-    assertEquals("field1_0", entityScanner.iterator().next().getEntity()
-        .getField1());
+    assertEquals("field1_0", entityScanner.iterator().next().getField1());
 
-    TestKey key = createSpecificKey("part1_5", "part2_5");
-    dao.delete(key);
-    assertNull(dao.get(key));
-  }
-
-  @Test(expected = KeyBuildException.class)
-  public void testInvalidPartialScan() {
-    Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        tablePool, new String(tableName), keyString, recordString,
-        TestKey.class, TestRecord.class);
-
-    // Test partial key scan with second part of key built
-    PartialKey<TestKey> key = new PartialKey.Builder<TestKey>().addKeyPart(
-        "part2", "part1_5").build();
-
-    // should throw a KeyBuildException
-    dao.getScanner(key, null);
+    PartitionKey deleteKey = dao.getPartitionStrategy().partitionKey("part1_5",
+        "part2_5");
+    dao.delete(deleteKey);
+    assertNull(dao.get(deleteKey));
   }
 
   @Test
   public void testIncrement() {
-    Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        tablePool, new String(tableName), keyString, recordString,
-        TestKey.class, TestRecord.class);
-
-    TestKey keyRecord = TestKey.newBuilder().setPart1("part1")
-        .setPart2("part2").build();
+    Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool,
+        new String(tableName), schemaString, TestRecord.class);
 
     Map<String, String> field3Map = new HashMap<String, String>();
     field3Map.put("field3_key_1", "field3_value_1");
@@ -278,73 +220,74 @@ public class AvroDaoTest {
     EmbeddedRecord embeddedRecord = EmbeddedRecord.newBuilder()
         .setEmbeddedField1("embedded1").setEmbeddedField2(2).build();
 
-    TestRecord entity = TestRecord.newBuilder().setField1("field1")
-        .setField2("field2").setEnum$(TestEnum.ENUM3).setField3(field3Map)
+    TestRecord entity = TestRecord.newBuilder().setKeyPart1("part1")
+        .setKeyPart2("part2").setField1("field1").setField2("field2")
+        .setEnum$(TestEnum.ENUM3).setField3(field3Map)
         .setField4(embeddedRecord).setField5(new ArrayList<ArrayRecord>())
         .setIncrement(10).build();
 
-    assertTrue(dao.put(keyRecord, entity));
+    assertTrue(dao.put(entity));
 
-    long incrementResult = dao.increment(keyRecord, "increment", 5);
+    PartitionKey key = dao.getPartitionStrategy()
+        .partitionKey("part1", "part2");
+    long incrementResult = dao.increment(key, "increment", 5);
     assertEquals(15L, incrementResult);
-    assertEquals(15L, (long) dao.get(keyRecord).getIncrement());
+    assertEquals(15L, (long) dao.get(key).getIncrement());
   }
 
   @Test
   public void testConflict() throws Exception {
-    Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        tablePool, new String(tableName), keyString, recordString,
-        TestKey.class, TestRecord.class);
+    Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool,
+        new String(tableName), schemaString, TestRecord.class);
 
     // create key and entity, and do a put
-    TestKey keyRecord = createSpecificKey("part1", "part2");
-    TestRecord entity = createSpecificEntity();
-    assertTrue(dao.put(keyRecord, entity));
+    TestRecord entity = createSpecificEntity("part1", "part2");
+    assertTrue(dao.put(entity));
 
     // now fetch the entity twice. Change one, and do a put. Change the other,
     // and the second put should fail.
-    TestRecord recordRef1 = TestRecord.newBuilder(dao.get(keyRecord))
+    PartitionKey key = dao.getPartitionStrategy()
+        .partitionKey("part1", "part2");
+    TestRecord recordRef1 = TestRecord.newBuilder(dao.get(key))
         .setField1("part1_1").build();
-    TestRecord recordRef2 = TestRecord.newBuilder(dao.get(keyRecord))
+    TestRecord recordRef2 = TestRecord.newBuilder(dao.get(key))
         .setField1("part1_2").build();
-    assertTrue(dao.put(keyRecord, recordRef1));
-    assertFalse(dao.put(keyRecord, recordRef2));
+    assertTrue(dao.put(recordRef1));
+    assertFalse(dao.put(recordRef2));
 
     // Now get the latest version, change it, and put should succeed.
-    recordRef2 = dao.get(keyRecord);
+    recordRef2 = dao.get(key);
     assertEquals("part1_1", recordRef2.getField1());
     recordRef2 = TestRecord.newBuilder(recordRef2).setField1("part1_2").build();
-    assertTrue(dao.put(keyRecord, recordRef2));
+    assertTrue(dao.put(recordRef2));
 
     // validate the most recent values.
-    TestRecord finalRecord = dao.get(keyRecord);
+    TestRecord finalRecord = dao.get(key);
     assertEquals("part1_2", finalRecord.getField1());
 
     // if we put a new entity, there should be a conflict
-    assertFalse(dao.put(keyRecord, entity));
+    assertFalse(dao.put(entity));
   }
 
   @Test
   public void testEmptyCollections() throws Exception {
-    Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        tablePool, new String(tableName), keyString, recordString,
-        TestKey.class, TestRecord.class);
-
-    TestKey keyRecord = TestKey.newBuilder().setPart1("part1")
-        .setPart2("part2").build();
+    Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool,
+        new String(tableName), schemaString, TestRecord.class);
 
     Map<String, String> field3Map = new HashMap<String, String>();
     EmbeddedRecord embeddedRecord = EmbeddedRecord.newBuilder()
         .setEmbeddedField1("embedded1").setEmbeddedField2(2).build();
 
-    TestRecord entity = TestRecord.newBuilder().setField1("field1")
-        .setField2("field2").setEnum$(TestEnum.ENUM3).setField3(field3Map)
+    TestRecord entity = TestRecord.newBuilder().setKeyPart1("part1")
+        .setKeyPart2("part2").setField1("field1").setField2("field2")
+        .setEnum$(TestEnum.ENUM3).setField3(field3Map)
         .setField4(embeddedRecord).setField5(new ArrayList<ArrayRecord>())
         .setIncrement(10).build();
 
-    assertTrue(dao.put(keyRecord, entity));
+    assertTrue(dao.put(entity));
 
-    TestKey key = createSpecificKey("part1", "part2");
+    PartitionKey key = dao.getPartitionStrategy()
+        .partitionKey("part1", "part2");
     TestRecord record = dao.get(key);
 
     assertEquals("field1", record.getField1());
@@ -362,23 +305,21 @@ public class AvroDaoTest {
    */
   @Test
   public void testDeleteAfterMultiplePuts() throws Exception {
-    Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        tablePool, new String(tableName), keyString, recordString,
-        TestKey.class, TestRecord.class);
+    Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool,
+        new String(tableName), schemaString, TestRecord.class);
 
     for (int i = 0; i < 10; ++i) {
-      String iStr = Integer.toString(i);
-      TestKey keyRecord = createSpecificKey("part1_" + iStr, "part2_" + iStr);
-      TestRecord entity = createSpecificEntity();
-      assertTrue(dao.put(keyRecord, entity));
+      TestRecord entity = createSpecificEntity("part1_" + i, "part2_" + i);
+      assertTrue(dao.put(entity));
     }
 
     // get and put it a couple of times to build up versions
-    TestKey key = createSpecificKey("part1_5", "part2_5");
+    PartitionKey key = dao.getPartitionStrategy().partitionKey("part1_5",
+        "part2_5");
     TestRecord entity = dao.get(key);
-    dao.put(key, entity);
+    dao.put(entity);
     entity = dao.get(key);
-    dao.put(key, entity);
+    dao.put(entity);
 
     // now make sure the dao removes all versions of all columns
     dao.delete(key);
@@ -388,42 +329,25 @@ public class AvroDaoTest {
 
   @Test
   public void testBatchPutOperation() throws Exception {
-    Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        tablePool, tableName, keyString, recordString, TestKey.class,
-        TestRecord.class);
+    Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool, tableName,
+        schemaString, TestRecord.class);
 
-    EntityBatch<TestKey, TestRecord> batch = dao.newBatch();
+    EntityBatch<TestRecord> batch = dao.newBatch();
 
-    int cnt = 0;
     for (TestRecord entity : createSpecificEntities(100)) {
-      TestKey keyRecord = createSpecificKey("part1_" + cnt, "part2_" + cnt);
-      batch.put(keyRecord, entity);
-      cnt++;
+      batch.put(entity);
     }
     batch.close();
 
     for (int i = 0; i < 100; i++) {
-      String iStr = Integer.toString(i);
-      TestKey keyRecord = createSpecificKey("part1_" + iStr, "part2_" + iStr);
-      TestRecord record = dao.get(keyRecord);
-      assertEquals("field1_" + iStr, record.getField1().toString());
+      PartitionKey key = dao.getPartitionStrategy().partitionKey("part1_" + i,
+          "part2_" + i);
+      TestRecord record = dao.get(key);
+      assertEquals("field1_" + i, record.getField1().toString());
     }
   }
 
-  private GenericRecord createGenericKey(String part1Value, String part2Value) {
-    Schema.Parser parser = new Schema.Parser();
-    GenericRecord key = new GenericData.Record(parser.parse(keyString));
-    key.put("part1", part1Value);
-    key.put("part2", part2Value);
-    return key;
-  }
-
-  private TestKey createSpecificKey(String part1Value, String part2Value) {
-    return TestKey.newBuilder().setPart1(part1Value).setPart2(part2Value)
-        .build();
-  }
-
-  private TestRecord createSpecificEntity() {
+  private TestRecord createSpecificEntity(String keyPart1, String keyPart2) {
     Map<String, String> field3Map = new HashMap<String, String>();
     field3Map.put("field3_key_1", "field3_value_1");
     field3Map.put("field3_key_2", "field3_value_2");
@@ -439,8 +363,9 @@ public class AvroDaoTest {
         .setSubfield2(1L).setSubfield3("subfield6").build();
     arrayRecordList.add(subRecord);
 
-    TestRecord entity = TestRecord.newBuilder().setField1("field1")
-        .setField2("field2").setEnum$(TestEnum.ENUM3).setField3(field3Map)
+    TestRecord entity = TestRecord.newBuilder().setKeyPart1(keyPart1)
+        .setKeyPart2(keyPart2).setField1("field1").setField2("field2")
+        .setEnum$(TestEnum.ENUM3).setField3(field3Map)
         .setField4(embeddedRecord).setField5(arrayRecordList).setIncrement(10)
         .build();
     return entity;
@@ -449,26 +374,24 @@ public class AvroDaoTest {
   private List<TestRecord> createSpecificEntities(int cnt) {
     List<TestRecord> entities = new ArrayList<TestRecord>();
     for (int i = 0; i < cnt; i++) {
-      String iterStr = Integer.toString(i);
       Map<String, String> field3Map = new HashMap<String, String>();
-      field3Map.put("field3_key_1_" + iterStr, "field3_value_1_" + iterStr);
-      field3Map.put("field3_key_2_" + iterStr, "field3_value_2_" + iterStr);
+      field3Map.put("field3_key_1_" + i, "field3_value_1_" + i);
+      field3Map.put("field3_key_2_" + i, "field3_value_2_" + i);
       EmbeddedRecord embeddedRecord = EmbeddedRecord.newBuilder()
-          .setEmbeddedField1("embedded1_" + iterStr).setEmbeddedField2(i)
-          .build();
+          .setEmbeddedField1("embedded1_" + i).setEmbeddedField2(i).build();
       List<ArrayRecord> arrayRecordList = new ArrayList<ArrayRecord>(2);
       arrayRecordList.add(ArrayRecord.newBuilder()
-          .setSubfield1("subfield1_" + iterStr).setSubfield2(i)
-          .setSubfield3("subfield3_" + iterStr).build());
+          .setSubfield1("subfield1_" + i).setSubfield2(i)
+          .setSubfield3("subfield3_" + i).build());
       arrayRecordList.add(ArrayRecord.newBuilder()
-          .setSubfield1("subfield4_" + iterStr).setSubfield2(i)
-          .setSubfield3("subfield6_" + iterStr).build());
+          .setSubfield1("subfield4_" + i).setSubfield2(i)
+          .setSubfield3("subfield6_" + i).build());
 
-      TestRecord entity = TestRecord.newBuilder()
-          .setField1("field1_" + iterStr).setField2("field2_" + iterStr)
-          .setEnum$(TestEnum.ENUM3).setField3(field3Map)
-          .setField4(embeddedRecord).setField5(arrayRecordList).setIncrement(i)
-          .build();
+      TestRecord entity = TestRecord.newBuilder().setKeyPart1("part1_" + i)
+          .setKeyPart2("part2_" + i).setField1("field1_" + i)
+          .setField2("field2_" + i).setEnum$(TestEnum.ENUM3)
+          .setField3(field3Map).setField4(embeddedRecord)
+          .setField5(arrayRecordList).setIncrement(i).build();
 
       entities.add(entity);
     }

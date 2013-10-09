@@ -136,7 +136,7 @@ public interface SchemaManager {
    * @throws SchemaValidationException
    */
   public void createSchema(String tableName, String entityName,
-      String keySchemaStr, String entitySchemaStr, String schemaType,
+      String entitySchemaStr, String schemaType,
       String keySerDeType, String entitySerDeType);
 
   /**

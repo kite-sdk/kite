@@ -39,6 +39,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.dao.IncompatibleSchemaException;
@@ -60,7 +62,6 @@ import com.cloudera.cdk.data.hbase.tool.SchemaTool;
 
 public class ManagedDaoTest {
 
-  private static final String keyString;
   private static final String testRecord;
   private static final String testRecordv2;
   private static final String badMigrationRecordAddFieldNoDefault;
@@ -70,7 +71,6 @@ public class ManagedDaoTest {
   private static final String goodMigrationRecordAddField;
   private static final String goodMigrationRecordAddSubField;
   private static final String goodMigrationRecordRemoveField;
-  private static final String managedKeyString;
   private static final String managedRecordString;
   private static final String tableName = "testtable";
   private static final String managedTableName = "managed_schemas";
@@ -79,8 +79,6 @@ public class ManagedDaoTest {
 
   static {
     try {
-      keyString = AvroUtils.inputStreamToString(AvroDaoTest.class
-          .getResourceAsStream("/TestKey.avsc"));
       testRecord = AvroUtils.inputStreamToString(AvroDaoTest.class
           .getResourceAsStream("/TestRecord.avsc"));
       testRecordv2 = AvroUtils.inputStreamToString(AvroDaoTest.class
@@ -106,8 +104,6 @@ public class ManagedDaoTest {
       goodMigrationRecordRemoveField = AvroUtils
           .inputStreamToString(AvroDaoTest.class
               .getResourceAsStream("/GoodMigrationRecordRemoveField.avsc"));
-      managedKeyString = AvroUtils.inputStreamToString(AvroDaoTest.class
-          .getResourceAsStream("/ManagedSchemaKey.avsc"));
       managedRecordString = AvroUtils.inputStreamToString(AvroDaoTest.class
           .getResourceAsStream("/ManagedSchema.avsc"));
     } catch (Exception e) {
@@ -130,8 +126,8 @@ public class ManagedDaoTest {
     tablePool = new HTablePool(HBaseTestUtils.getConf(), 10);
     SchemaTool tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
         new DefaultSchemaManager(tablePool));
-    tool.createOrMigrateSchema(tableName, keyString, testRecord, true);
-    tool.createOrMigrateSchema(tableName, keyString, testRecordv2, true);
+    tool.createOrMigrateSchema(tableName, testRecord, true);
+    tool.createOrMigrateSchema(tableName, testRecordv2, true);
   }
 
   @After
@@ -141,13 +137,10 @@ public class ManagedDaoTest {
     HBaseTestUtils.util.truncateTable(Bytes.toBytes(managedTableName));
   }
 
-  private GenericRecord createGenericKey(long uniqueIdx) {
-    String iStr = Long.toString(uniqueIdx);
-    Schema.Parser parser = new Schema.Parser();
-    GenericRecord keyRecord = new GenericData.Record(parser.parse(keyString));
-    keyRecord.put("part1", "part1_" + iStr);
-    keyRecord.put("part2", "part2_" + iStr);
-    return keyRecord;
+  private PartitionKey createKey(PartitionStrategy partitionStrategy,
+      long uniqueIdx) {
+    return partitionStrategy.partitionKey("part1_" + uniqueIdx, "part2_"
+        + uniqueIdx);
   }
 
   private GenericRecord createGenericEntity(long uniqueIdx) {
@@ -172,6 +165,8 @@ public class ManagedDaoTest {
         .getElementType();
 
     GenericRecord entity = new GenericData.Record(entitySchema);
+    entity.put("keyPart1", "part1_" + iStr);
+    entity.put("keyPart2", "part2_" + iStr);
     entity.put("field1", "field1_" + iStr);
     entity.put("field2", "field2_" + iStr);
     entity.put("enum", "ENUM3");
@@ -201,13 +196,6 @@ public class ManagedDaoTest {
     return entity;
   }
 
-  private TestKey createSpecificKey(long uniqueIdx) {
-    String iStr = Long.toString(uniqueIdx);
-    TestKey keyRecord = TestKey.newBuilder().setPart1("part1_" + iStr)
-        .setPart2("part2_" + iStr).build();
-    return keyRecord;
-  }
-
   private TestRecord createSpecificEntity(long uniqueIdx) {
     String iStr = Long.toString(uniqueIdx);
 
@@ -226,7 +214,8 @@ public class ManagedDaoTest {
         .setSubfield2(1L).setSubfield3("subfield6").build();
     arrayRecordList.add(subRecord);
 
-    TestRecord entity = TestRecord.newBuilder().setField1("field1_" + iStr)
+    TestRecord entity = TestRecord.newBuilder().setKeyPart1("part1_" + iStr)
+        .setKeyPart2("part2_" + iStr).setField1("field1_" + iStr)
         .setField2("field2_" + iStr).setEnum$(TestEnum.ENUM3)
         .setField3(field3Map).setField4(embeddedRecord)
         .setField5(arrayRecordList).setIncrement(10L).build();
@@ -236,86 +225,87 @@ public class ManagedDaoTest {
   @SuppressWarnings("unchecked")
   private void compareEntitiesWithString(long uniqueIdx, IndexedRecord record) {
     String iStr = Long.toString(uniqueIdx);
-    assertEquals("field1_" + iStr, record.get(0));
-    assertEquals("field2_" + iStr, record.get(1));
-    assertEquals(TestEnum.ENUM3.toString(), record.get(2).toString());
+    assertEquals("part1_" + iStr, record.get(0));
+    assertEquals("part2_" + iStr, record.get(1));
+    assertEquals("field1_" + iStr, record.get(2));
+    assertEquals("field2_" + iStr, record.get(3));
+    assertEquals(TestEnum.ENUM3.toString(), record.get(4).toString());
     assertEquals(
         "field3_value_1_" + iStr,
-        ((Map<CharSequence, CharSequence>) record.get(3)).get("field3_key_1_"
+        ((Map<CharSequence, CharSequence>) record.get(5)).get("field3_key_1_"
             + iStr));
     assertEquals(
         "field3_value_2_" + iStr,
-        ((Map<CharSequence, CharSequence>) record.get(3)).get("field3_key_2_"
+        ((Map<CharSequence, CharSequence>) record.get(5)).get("field3_key_2_"
             + iStr));
-    assertEquals("embedded1", ((IndexedRecord) record.get(4)).get(0));
-    assertEquals(2L, ((IndexedRecord) record.get(4)).get(1));
+    assertEquals("embedded1", ((IndexedRecord) record.get(6)).get(0));
+    assertEquals(2L, ((IndexedRecord) record.get(6)).get(1));
 
-    assertEquals(2, ((List<?>) record.get(5)).size());
+    assertEquals(2, ((List<?>) record.get(7)).size());
     assertEquals("subfield1",
-        ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(0));
-    assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(1));
+        ((IndexedRecord) ((List<?>) record.get(7)).get(0)).get(0));
+    assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(7)).get(0)).get(1));
     assertEquals("subfield3",
-        ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(2));
+        ((IndexedRecord) ((List<?>) record.get(7)).get(0)).get(2));
     assertEquals("subfield4",
-        ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(0));
-    assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(1));
+        ((IndexedRecord) ((List<?>) record.get(7)).get(1)).get(0));
+    assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(7)).get(1)).get(1));
     assertEquals("subfield6",
-        ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(2));
+        ((IndexedRecord) ((List<?>) record.get(7)).get(1)).get(2));
   }
 
   @SuppressWarnings("unchecked")
   private void compareEntitiesWithUtf8(long uniqueIdx, IndexedRecord record) {
     String iStr = Long.toString(uniqueIdx);
-    assertEquals(new Utf8("field1_" + iStr), record.get(0));
-    assertEquals(new Utf8("field2_" + iStr), record.get(1));
-    assertEquals(TestEnum.ENUM3.toString(), record.get(2).toString());
+    assertEquals(new Utf8("field1_" + iStr), record.get(2));
+    assertEquals(new Utf8("field2_" + iStr), record.get(3));
+    assertEquals(TestEnum.ENUM3.toString(), record.get(4).toString());
     assertEquals(new Utf8("field3_value_1_" + iStr),
-        ((Map<CharSequence, CharSequence>) record.get(3)).get(new Utf8(
+        ((Map<CharSequence, CharSequence>) record.get(5)).get(new Utf8(
             "field3_key_1_" + iStr)));
     assertEquals(new Utf8("field3_value_2_" + iStr),
-        ((Map<CharSequence, CharSequence>) record.get(3)).get(new Utf8(
+        ((Map<CharSequence, CharSequence>) record.get(5)).get(new Utf8(
             "field3_key_2_" + iStr)));
-    assertEquals(new Utf8("embedded1"), ((IndexedRecord) record.get(4)).get(0));
-    assertEquals(2L, ((IndexedRecord) record.get(4)).get(1));
+    assertEquals(new Utf8("embedded1"), ((IndexedRecord) record.get(6)).get(0));
+    assertEquals(2L, ((IndexedRecord) record.get(6)).get(1));
 
-    assertEquals(2, ((List<?>) record.get(5)).size());
+    assertEquals(2, ((List<?>) record.get(7)).size());
     assertEquals(new Utf8("subfield1"),
-        ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(0));
-    assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(1));
+        ((IndexedRecord) ((List<?>) record.get(7)).get(0)).get(0));
+    assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(7)).get(0)).get(1));
     assertEquals(new Utf8("subfield3"),
-        ((IndexedRecord) ((List<?>) record.get(5)).get(0)).get(2));
+        ((IndexedRecord) ((List<?>) record.get(7)).get(0)).get(2));
     assertEquals(new Utf8("subfield4"),
-        ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(0));
-    assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(1));
+        ((IndexedRecord) ((List<?>) record.get(7)).get(1)).get(0));
+    assertEquals(1L, ((IndexedRecord) ((List<?>) record.get(7)).get(1)).get(1));
     assertEquals(new Utf8("subfield6"),
-        ((IndexedRecord) ((List<?>) record.get(5)).get(1)).get(2));
+        ((IndexedRecord) ((List<?>) record.get(7)).get(1)).get(2));
   }
 
   @Test
   public void testGeneric() throws Exception {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
-    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(tablePool,
-        tableName, "TestRecord", manager, testRecord);
+    Dao<GenericRecord> dao = new GenericAvroDao(tablePool, tableName,
+        "TestRecord", manager, testRecord);
 
     // Create the new entities
     for (int i = 0; i < 10; ++i) {
-      GenericRecord keyRecord = createGenericKey(i);
       GenericRecord entity = createGenericEntity(i);
-      dao.put(keyRecord, entity);
+      dao.put(entity);
     }
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
-      compareEntitiesWithUtf8(i, dao.get(createGenericKey(i)));
+      compareEntitiesWithUtf8(i,
+          dao.get(createKey(dao.getPartitionStrategy(), i)));
     }
 
     // ensure the new entities are what we expect with scan operations
     int cnt = 0;
-    EntityScanner<GenericRecord, GenericRecord> entityScanner = dao
-        .getScanner();
+    EntityScanner<GenericRecord> entityScanner = dao.getScanner();
     try {
-      for (KeyEntity<GenericRecord, GenericRecord> keyEntity : entityScanner) {
-        compareEntitiesWithUtf8(cnt, keyEntity.getEntity());
+      for (GenericRecord entity : entityScanner) {
+        compareEntitiesWithUtf8(cnt, entity);
         cnt++;
       }
       assertEquals(10, cnt);
@@ -327,27 +317,27 @@ public class ManagedDaoTest {
   @Test
   public void testSpecific() throws Exception {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
-    Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        tablePool, tableName, "TestRecord", manager);
+    Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool, tableName,
+        "TestRecord", manager);
 
     // Create the new entities
     for (int i = 0; i < 10; ++i) {
-      TestKey keyRecord = createSpecificKey(i);
       TestRecord entity = createSpecificEntity(i);
-      dao.put(keyRecord, entity);
+      dao.put(entity);
     }
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
-      compareEntitiesWithString(i, dao.get(createSpecificKey(i)));
+      compareEntitiesWithString(i,
+          dao.get(createKey(dao.getPartitionStrategy(), i)));
     }
 
     // ensure the new entities are what we expect with scan operations
     int cnt = 0;
-    EntityScanner<TestKey, TestRecord> entityScanner = dao.getScanner();
+    EntityScanner<TestRecord> entityScanner = dao.getScanner();
     try {
-      for (KeyEntity<TestKey, TestRecord> keyEntity : entityScanner) {
-        compareEntitiesWithString(cnt, keyEntity.getEntity());
+      for (TestRecord entity : entityScanner) {
+        compareEntitiesWithString(cnt, entity);
         cnt++;
       }
       assertEquals(10, cnt);
@@ -359,24 +349,24 @@ public class ManagedDaoTest {
   @Test
   public void testMigrateEntities() throws Exception {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
-    Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        tablePool, tableName, "TestRecord", manager);
+    Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool, tableName,
+        "TestRecord", manager);
 
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
 
-    Dao<TestKey, TestRecord> afterDao = new SpecificAvroDao<TestKey, TestRecord>(
-        tablePool, tableName, "TestRecord", manager);
+    Dao<TestRecord> afterDao = new SpecificAvroDao<TestRecord>(tablePool,
+        tableName, "TestRecord", manager);
 
     // Create the new entities
     for (int i = 0; i < 10; ++i) {
-      TestKey keyRecord = createSpecificKey(i);
       TestRecord entity = createSpecificEntity(i);
-      afterDao.put(keyRecord, entity);
+      afterDao.put(entity);
     }
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
-      compareEntitiesWithString(i, dao.get(createSpecificKey(i)));
+      compareEntitiesWithString(i,
+          dao.get(createKey(dao.getPartitionStrategy(), i)));
     }
   }
 
@@ -384,36 +374,35 @@ public class ManagedDaoTest {
   @Test
   public void testMigrateAndPut() throws Exception {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
-    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(tablePool,
-        tableName, "TestRecord", manager, testRecord);
+    Dao<GenericRecord> dao = new GenericAvroDao(tablePool, tableName,
+        "TestRecord", manager, testRecord);
 
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
 
     SchemaManager afterManager = new DefaultSchemaManager(tablePool);
-    Dao<GenericRecord, GenericRecord> afterDao = new GenericAvroDao(tablePool,
-        tableName, "TestRecord", afterManager, goodMigrationRecordAddField);
+    Dao<GenericRecord> afterDao = new GenericAvroDao(tablePool, tableName,
+        "TestRecord", afterManager, goodMigrationRecordAddField);
 
     // Create the new entities
     for (int i = 0; i < 10; ++i) {
-      GenericRecord keyRecord = createGenericKey(i);
       GenericRecord entity = createGenericEntity(i, goodMigrationRecordAddField);
       entity.put("fieldToAdd1", i);
       entity.put("fieldToAdd2", i);
       for (GenericRecord rec : (List<GenericRecord>) entity.get("field5")) {
         rec.put("subfield4", String.valueOf(i));
       }
-      afterDao.put(keyRecord, entity);
+      afterDao.put(entity);
     }
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
       // When getting with old dao, expect no values for fieldToAdd
-      GenericRecord rec = dao.get(createGenericKey(i));
+      GenericRecord rec = dao.get(createKey(dao.getPartitionStrategy(), i));
       compareEntitiesWithUtf8(i, rec);
       assertEquals(null, rec.get("fieldToAdd1"));
       assertEquals(null, rec.get("fieldToAdd2"));
 
-      rec = afterDao.get(createGenericKey(i));
+      rec = afterDao.get(createKey(dao.getPartitionStrategy(), i));
       compareEntitiesWithUtf8(i, rec);
       assertEquals(i, rec.get("fieldToAdd1"));
       assertEquals(i, rec.get("fieldToAdd2"));
@@ -424,11 +413,10 @@ public class ManagedDaoTest {
 
     // ensure the new entities are what we expect with scan operations
     int cnt = 0;
-    EntityScanner<GenericRecord, GenericRecord> entityScanner = dao
-        .getScanner();
+    EntityScanner<GenericRecord> entityScanner = dao.getScanner();
     try {
-      for (KeyEntity<GenericRecord, GenericRecord> keyEntity : entityScanner) {
-        compareEntitiesWithUtf8(cnt, keyEntity.getEntity());
+      for (GenericRecord entity : entityScanner) {
+        compareEntitiesWithUtf8(cnt, entity);
         cnt++;
       }
       assertEquals(10, cnt);
@@ -445,30 +433,30 @@ public class ManagedDaoTest {
   @Test
   public void testDynamicGenericDao() throws Exception {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
-    Dao<GenericRecord, GenericRecord> dao = new GenericAvroDao(tablePool,
-        tableName, "TestRecord", manager);
+    Dao<GenericRecord> dao = new GenericAvroDao(tablePool, tableName,
+        "TestRecord", manager);
 
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
 
     SchemaManager afterManager = new DefaultSchemaManager(tablePool);
-    Dao<GenericRecord, GenericRecord> afterDao = new GenericAvroDao(tablePool,
-        tableName, "TestRecord", afterManager);
+    Dao<GenericRecord> afterDao = new GenericAvroDao(tablePool, tableName,
+        "TestRecord", afterManager);
 
     // Create an entity with each dao.
-    GenericRecord key1 = createGenericKey(1);
+    PartitionKey key1 = createKey(dao.getPartitionStrategy(), 1);
     GenericRecord entity1 = createGenericEntity(1, testRecordv2);
     for (GenericRecord rec : (List<GenericRecord>) entity1.get("field5")) {
       rec.put("subfield4", new Utf8(String.valueOf(2)));
     }
-    dao.put(key1, entity1);
-    GenericRecord key2 = createGenericKey(2);
+    dao.put(entity1);
+    PartitionKey key2 = createKey(dao.getPartitionStrategy(), 2);
     GenericRecord entity2 = createGenericEntity(2, goodMigrationRecordAddField);
     entity2.put("fieldToAdd1", 2);
     entity2.put("fieldToAdd2", 2);
     for (GenericRecord rec : (List<GenericRecord>) entity2.get("field5")) {
       rec.put("subfield4", new Utf8(String.valueOf(2)));
     }
-    afterDao.put(key2, entity2);
+    afterDao.put(entity2);
 
     // ensure the new entities are what we expect with get operations
     GenericRecord entity1After = dao.get(key1);
@@ -494,18 +482,18 @@ public class ManagedDaoTest {
   @Test
   public void testIncrement() {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
-    Dao<TestKey, TestRecord> dao = new SpecificAvroDao<TestKey, TestRecord>(
-        tablePool, tableName, "TestRecord", manager);
+    Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool, tableName,
+        "TestRecord", manager);
 
-    TestKey keyRecord = createSpecificKey(0);
     TestRecord entity = createSpecificEntity(0);
-    dao.put(keyRecord, entity);
+    dao.put(entity);
 
-    dao.increment(keyRecord, "increment", 10);
-    assertEquals(20L, (long) dao.get(keyRecord).getIncrement());
+    PartitionKey key = createKey(dao.getPartitionStrategy(), 0);
+    dao.increment(key, "increment", 10);
+    assertEquals(20L, (long) dao.get(key).getIncrement());
 
-    dao.increment(keyRecord, "increment", 5);
-    assertEquals(25L, (long) dao.get(keyRecord).getIncrement());
+    dao.increment(key, "increment", 5);
+    assertEquals(25L, (long) dao.get(key).getIncrement());
   }
 
   @Test(expected = IncompatibleSchemaException.class)
@@ -541,45 +529,42 @@ public class ManagedDaoTest {
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
     manager.migrateSchema(tableName, "TestRecord",
         goodMigrationRecordRemoveField);
-    manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddSubField);
+    manager.migrateSchema(tableName, "TestRecord",
+        goodMigrationRecordAddSubField);
   }
 
   @Test
   public void testCreate() throws Exception {
     AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
     // Clear out what was set up in before()
-    ManagedSchemaKey managedSchemaKey = ManagedSchemaKey.newBuilder()
-        .setName("test").setTable(tableName).build();
+    Dao<ManagedSchema> managedDao = new SpecificAvroDao<ManagedSchema>(
+        tablePool, "managed_schemas", managedRecordString, ManagedSchema.class);
 
-    Dao<ManagedSchemaKey, ManagedSchema> managedDao = new SpecificAvroDao<ManagedSchemaKey, ManagedSchema>(
-        tablePool, "managed_schemas", managedKeyString, managedRecordString,
-        ManagedSchemaKey.class, ManagedSchema.class);
-
-    managedDao.delete(managedSchemaKey);
+    managedDao.delete(managedDao.getPartitionStrategy().partitionKey(tableName,
+        "test"));
 
     SchemaManager manager = new DefaultSchemaManager(tablePool);
     try {
       manager.getEntityVersion(tableName, "test",
-          parser.parseEntity(testRecord));
+          parser.parseEntitySchema(testRecord));
       fail();
     } catch (SchemaNotFoundException e) {
       // This is what we expect
     }
-    manager.createSchema(tableName, "test", keyString, testRecord,
+    manager.createSchema(tableName, "test", testRecord,
         "com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser",
         "com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe",
         "com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe");
     assertEquals(
         0,
         manager.getEntityVersion(tableName, "test",
-            parser.parseEntity(testRecord)));
+            parser.parseEntitySchema(testRecord)));
   }
 
   @Test(expected = IncompatibleSchemaException.class)
   public void testCannotCreateExisting() throws Exception {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
-    manager.createSchema(tableName, "TestRecord", keyString,
-        goodMigrationRecordAddField,
+    manager.createSchema(tableName, "TestRecord", goodMigrationRecordAddField,
         "com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser",
         "com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe",
         "com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe");

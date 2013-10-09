@@ -15,16 +15,17 @@
  */
 package com.cloudera.cdk.data.hbase;
 
-import com.cloudera.cdk.data.dao.EntityBatch;
-import com.cloudera.cdk.data.dao.HBaseClientException;
 import java.io.IOException;
 
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.HTablePool;
 
-public class BaseEntityBatch<K, E> implements EntityBatch<K, E> {
+import com.cloudera.cdk.data.dao.EntityBatch;
+import com.cloudera.cdk.data.dao.HBaseClientException;
+
+public class BaseEntityBatch<E> implements EntityBatch<E> {
   private final HTableInterface table;
-  private final EntityMapper<K, E> entityMapper;
+  private final EntityMapper<E> entityMapper;
   private final HBaseClientTemplate clientTemplate;
 
   /**
@@ -43,7 +44,7 @@ public class BaseEntityBatch<K, E> implements EntityBatch<K, E> {
    *          The batch buffer size in bytes.
    */
   public BaseEntityBatch(HBaseClientTemplate clientTemplate,
-      EntityMapper<K, E> entityMapper, HTablePool pool, String tableName,
+      EntityMapper<E> entityMapper, HTablePool pool, String tableName,
       long writeBufferSize) {
     this.table = pool.getTable(tableName);
     this.table.setAutoFlush(false);
@@ -79,7 +80,7 @@ public class BaseEntityBatch<K, E> implements EntityBatch<K, E> {
    *          The name of the HBase table
    */
   public BaseEntityBatch(HBaseClientTemplate clientTemplate,
-      EntityMapper<K, E> entityMapper, HTablePool pool, String tableName) {
+      EntityMapper<E> entityMapper, HTablePool pool, String tableName) {
     this.table = pool.getTable(tableName);
     this.table.setAutoFlush(false);
     this.clientTemplate = clientTemplate;
@@ -87,8 +88,8 @@ public class BaseEntityBatch<K, E> implements EntityBatch<K, E> {
   }
 
   @Override
-  public void put(K key, E entity) {
-    PutAction putAction = entityMapper.mapFromEntity(key, entity);
+  public void put(E entity) {
+    PutAction putAction = entityMapper.mapFromEntity(entity);
     clientTemplate.put(putAction, table);
   }
 

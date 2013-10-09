@@ -15,13 +15,15 @@
  */
 package com.cloudera.cdk.data.hbase;
 
+import org.apache.hadoop.hbase.client.HTablePool;
+
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.dao.EntityBatch;
 import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.KeySchema;
-import com.cloudera.cdk.data.dao.PartialKey;
-import org.apache.hadoop.hbase.client.HTablePool;
 
 /**
  * A DAO implementation that uses a constructor provided EntityMapper to do
@@ -32,10 +34,10 @@ import org.apache.hadoop.hbase.client.HTablePool;
  * @param <E>
  *          The entity type.
  */
-public class BaseDao<K, E> implements Dao<K, E> {
+public class BaseDao<E> implements Dao<E> {
 
   private final String tableName;
-  private final EntityMapper<K, E> entityMapper;
+  private final EntityMapper<E> entityMapper;
   private final HBaseClientTemplate clientTemplate;
 
   /**
@@ -52,7 +54,7 @@ public class BaseDao<K, E> implements Dao<K, E> {
    *          Maps between entities and the HBase operations.
    */
   public BaseDao(HTablePool tablePool, String tableName,
-      EntityMapper<K, E> entityMapper) {
+      EntityMapper<E> entityMapper) {
     this.tableName = tableName;
     this.entityMapper = entityMapper;
     this.clientTemplate = new HBaseClientTemplate(tablePool, tableName);
@@ -64,69 +66,62 @@ public class BaseDao<K, E> implements Dao<K, E> {
    * @param dao
    *          Dao to copy.
    */
-  public BaseDao(BaseDao<K, E> dao) {
+  public BaseDao(BaseDao<E> dao) {
     this.tableName = dao.tableName;
     this.clientTemplate = new HBaseClientTemplate(dao.clientTemplate);
     this.entityMapper = dao.entityMapper;
   }
 
   @Override
-  public E get(K key) {
+  public E get(PartitionKey key) {
     return clientTemplate.get(key, entityMapper);
   }
 
   @Override
-  public boolean put(K key, E entity) {
-    return clientTemplate.put(key, entity, entityMapper);
+  public boolean put(E entity) {
+    return clientTemplate.put(entity, entityMapper);
   }
 
   @Override
-  public long increment(K key, String fieldName, long amount) {
+  public long increment(PartitionKey key, String fieldName, long amount) {
     return clientTemplate.increment(key, fieldName, amount, entityMapper);
   }
 
-  public void delete(K key) {
+  public void delete(PartitionKey key) {
     clientTemplate.delete(key, entityMapper.getRequiredColumns(), null,
         entityMapper.getKeySerDe());
   }
 
   @Override
-  public boolean delete(K key, E entity) {
-    VersionCheckAction checkAction = entityMapper.mapFromEntity(key, entity)
+  public boolean delete(PartitionKey key, E entity) {
+    VersionCheckAction checkAction = entityMapper.mapFromEntity(entity)
         .getVersionCheckAction();
     return clientTemplate.delete(key, entityMapper.getRequiredColumns(),
         checkAction, entityMapper.getKeySerDe());
   }
 
   @Override
-  public EntityScanner<K, E> getScanner() {
-    return getScanner((K) null, null);
+  public EntityScanner<E> getScanner() {
+    return getScanner(null, null);
   }
 
   @Override
-  public EntityScanner<K, E> getScanner(K startKey, K stopKey) {
+  public EntityScanner<E> getScanner(PartitionKey startKey, PartitionKey stopKey) {
     return clientTemplate.getScannerBuilder(entityMapper).setStartKey(startKey)
         .setStopKey(stopKey).build();
   }
 
-  @Override
-  public EntityScanner<K, E> getScanner(PartialKey<K> startKey,
-      PartialKey<K> stopKey) {
-    return clientTemplate.getScannerBuilder(entityMapper)
-        .setPartialStartKey(startKey).setPartialStopKey(stopKey).build();
-  }
-
-  public EntityScannerBuilder<K, E> getScannerBuilder() {
+  public EntityScannerBuilder<E> getScannerBuilder() {
     return clientTemplate.getScannerBuilder(entityMapper);
   }
 
   @Override
-  public EntityBatch<K, E> newBatch(long writeBufferSize) {
+  public EntityBatch<E> newBatch(long writeBufferSize) {
     return clientTemplate.createBatch(entityMapper, writeBufferSize);
   }
 
   @Override
-  public EntityBatch<K, E> newBatch() {
+  public EntityBatch<E> newBatch() {
     return clientTemplate.createBatch(entityMapper);
   }
 
@@ -155,7 +150,7 @@ public class BaseDao<K, E> implements Dao<K, E> {
    *
    * @return The KeySerDe
    */
-  public KeySerDe<K> getKeySerDe() {
+  public KeySerDe getKeySerDe() {
     return entityMapper.getKeySerDe();
   }
 
@@ -173,12 +168,17 @@ public class BaseDao<K, E> implements Dao<K, E> {
    *
    * @return EntityMapper
    */
-  public EntityMapper<K, E> getEntityMapper() {
+  public EntityMapper<E> getEntityMapper() {
     return this.entityMapper;
   }
 
   public String getTableName() {
     return tableName;
+  }
+
+  @Override
+  public PartitionStrategy getPartitionStrategy() {
+    return entityMapper.getKeySchema().getPartitionStrategy();
   }
 
 }
