@@ -11,6 +11,7 @@ import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
 import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Set;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -151,6 +152,10 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     String entityName = getEntityName(name);
     schemaManager.refreshManagedSchemaCache(tableName, entityName);
     return schemaManager.hasManagedSchema(tableName, entityName);
+  }
+
+  public Collection<String> list() {
+    throw new UnsupportedOperationException();
   }
 
   static String getTableName(String name) {

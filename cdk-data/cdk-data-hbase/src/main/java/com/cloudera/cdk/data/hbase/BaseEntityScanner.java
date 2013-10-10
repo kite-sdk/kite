@@ -183,7 +183,6 @@ public class BaseEntityScanner<E> implements EntityScanner<E> {
     return iterator.hasNext();
   }
 
-  @Override
   public E read() {
     throw new UnsupportedOperationException("read() not supported, use next().");
   }

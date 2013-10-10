@@ -41,7 +41,7 @@ public class KeySchema {
     List<FieldPartitioner> fieldPartitioners = new ArrayList<FieldPartitioner>();
     for (FieldMapping fieldMapping : fieldMappings) {
       IdentityFieldPartitioner fieldPartitioner = new IdentityFieldPartitioner(
-          fieldMapping.getFieldName(), 1);
+          fieldMapping.getFieldName(), String.class, 1); // TODO: get type from schema
       fieldPartitioners.add(fieldPartitioner);
     }
     partitionStrategy = new PartitionStrategy(

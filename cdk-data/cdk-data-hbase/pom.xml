@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.cloudera.cdk</groupId>
     <artifactId>cdk-data</artifactId>
-    <version>0.7.1-SNAPSHOT</version>
+    <version>0.8.1-SNAPSHOT</version>
   </parent>
 
   <name>CDK Data HBase Module</name>
@@ -35,6 +35,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <compilerArgs>
+            <arg>-Xlint:unchecked</arg>
+          </compilerArgs>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -138,7 +143,7 @@
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-data-core</artifactId>
-      <version>0.7.1-SNAPSHOT</version>
+      <version>0.8.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
