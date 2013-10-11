@@ -203,6 +203,7 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     return new DatasetDescriptor.Builder()
         .schema(descriptor.getSchema())
         .partitionStrategy(partitionStrategy)
+        .location(descriptor.getLocation())
         .get();
   }
 

@@ -276,7 +276,7 @@
               <useStandardDocletOptions>false</useStandardDocletOptions>
               <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
               <destDir>jdiff</destDir>
-              <excludePackageNames>com.cloudera.cdk.data.event,com.cloudera.cdk.maven.plugins,com.cloudera.cdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
+              <excludePackageNames>com.cloudera.cdk.data.dao:com.cloudera.cdk.data.event,com.cloudera.cdk.data.hbase:com.cloudera.cdk.maven.plugins,com.cloudera.cdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
             </configuration>
           </execution>
           <execution>
@@ -361,7 +361,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${vers.maven-javadoc-plugin}</version>
           <configuration>
-            <excludePackageNames>com.cloudera.cdk.data.event,com.cloudera.cdk.maven.plugins,com.cloudera.cdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
+            <excludePackageNames>com.cloudera.cdk.data.dao:com.cloudera.cdk.data.event,com.cloudera.cdk.data.hbase:com.cloudera.cdk.maven.plugins,com.cloudera.cdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
             <links>
               <link>http://avro.apache.org/docs/${vers.avro}/api/java/</link>
               <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
@@ -566,11 +566,11 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${vers.maven-javadoc-plugin}</version>
         <configuration>
-          <excludePackageNames>com.cloudera.cdk.data.event,com.cloudera.cdk.maven.plugins,com.cloudera.cdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
+          <excludePackageNames>com.cloudera.cdk.data.dao:com.cloudera.cdk.data.event,com.cloudera.cdk.data.hbase:com.cloudera.cdk.maven.plugins,com.cloudera.cdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
           <groups>
             <group>
               <title>Data Core</title>
-              <packages>com.cloudera.cdk.data:com.cloudera.cdk.data.dao:cdk.data.filesystem:com.cloudera.cdk.data.partition:com.cloudera.cdk.data.spi</packages>
+              <packages>com.cloudera.cdk.data:com.cloudera.cdk.data.filesystem:com.cloudera.cdk.data.partition:com.cloudera.cdk.data.spi</packages>
             </group>
             <group>
               <title>Data Crunch</title>
@@ -579,10 +579,6 @@
             <group>
               <title>Data Flume</title>
               <packages>com.cloudera.cdk.data.flume</packages>
-            </group>
-            <group>
-              <title>Data HBase</title>
-              <packages>com.cloudera.cdk.data.hbase.avro:com.cloudera.cdk.data.hbase.manager:com.cloudera.cdk.data.hbase.tool</packages>
             </group>
             <group>
               <title>Data HCatalog</title>
