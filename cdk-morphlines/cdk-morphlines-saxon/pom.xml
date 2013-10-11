@@ -63,8 +63,16 @@
       <version>4.2.0</version>
       <scope>test</scope>
     </dependency>
-    <!--<version>3.2.7</version>-->
-
+    
+    <!--
+    <dependency>
+      <groupId>woodstox</groupId>
+      <artifactId>wstx-asl</artifactId>
+      <version>3.2.7</version>
+      <scope>test</scope>
+    </dependency>
+    -->
+    
     <dependency>
       <groupId>com.cloudera.cdk</groupId>
       <artifactId>cdk-morphlines-core</artifactId>

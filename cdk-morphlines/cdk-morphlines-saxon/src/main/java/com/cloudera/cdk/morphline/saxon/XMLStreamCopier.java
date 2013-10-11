@@ -93,7 +93,7 @@ final class XMLStreamCopier {
 			switch (ev) {
 				case XMLStreamConstants.START_ELEMENT: {
 					writer.writeStartElement(
-							reader.getPrefix(), 
+					    nonNull(reader.getPrefix()), // fixup bug where woodstox-3.2.7 returns null
 							reader.getLocalName(), 
 							nonNull(reader.getNamespaceURI())); // Saxon requires nonNull
 					copyAttributes();
