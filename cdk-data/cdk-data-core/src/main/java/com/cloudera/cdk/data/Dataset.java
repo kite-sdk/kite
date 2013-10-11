@@ -132,6 +132,4 @@ public interface Dataset extends View {
    */
   Iterable<Dataset> getPartitions();
 
-  <E> DatasetAccessor<E> newAccessor();
-
 }

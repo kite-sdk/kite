@@ -88,7 +88,7 @@ public interface View {
    *
    * @throws DatasetException
    */
-  //<E> DatasetAccessor<E> newAccessor();
+  <E> DatasetAccessor<E> newAccessor();
 
   /**
    * Returns whether a {@link PartitionKey} is in this {@code View}.

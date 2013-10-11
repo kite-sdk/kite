@@ -17,6 +17,7 @@
 package com.cloudera.cdk.data.spi;
 
 import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.Marker;
@@ -49,6 +50,13 @@ public abstract class AbstractDataset implements Dataset {
   @Deprecated
   public <E> DatasetWriter<E> getWriter() {
     return newWriter();
+  }
+
+  @Override
+  public <E> DatasetAccessor<E> newAccessor() {
+    // this method is optional, so default to UnsupportedOperationException
+    throw new UnsupportedOperationException(
+        "This Dataset does not support random access");
   }
 
   @Override
@@ -95,4 +103,8 @@ public abstract class AbstractDataset implements Dataset {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
+  @Override
+  public Iterable<View> getCoveringPartitions() {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 }

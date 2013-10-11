@@ -22,8 +22,9 @@ import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.dao.Dao;
+import com.cloudera.cdk.data.spi.AbstractDataset;
 
-class DaoDataset implements Dataset {
+class DaoDataset extends AbstractDataset {
   private String name;
   private Dao dao;
   private DatasetDescriptor descriptor;
@@ -56,13 +57,13 @@ class DaoDataset implements Dataset {
 
   @Override
   @SuppressWarnings("unchecked")
-  public <E> DatasetWriter<E> getWriter() {
+  public <E> DatasetWriter<E> newWriter() {
     return dao.newBatch();
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <E> DatasetReader<E> getReader() {
+  public <E> DatasetReader<E> newReader() {
     return dao.getScanner();
   }
 
