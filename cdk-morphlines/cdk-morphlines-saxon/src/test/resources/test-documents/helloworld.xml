@@ -1,4 +1,5 @@
 <helloworld>   
   <description>An XSLT Morphline</description>   
   <welcome>Hello, World!</welcome>
+  <id>2</id>
 </helloworld>

@@ -10,7 +10,7 @@ Release date: TBD
 Version TBD has the following notable changes:
 
 * Morphlines Library
-    * Made xquery and xslt commands also compatible with woodstox-3.2.7, not just woodstox-4.x.
+    * Made xquery and xslt commands also compatible with woodstox-3.2.7 (not just woodstox-4.x).
 
 ## Version 0.8.0
 

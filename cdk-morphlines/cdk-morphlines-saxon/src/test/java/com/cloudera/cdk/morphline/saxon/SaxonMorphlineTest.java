@@ -15,9 +15,15 @@
  */
 package com.cloudera.cdk.morphline.saxon;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Iterator;
 
 import org.junit.Ignore;
@@ -26,6 +32,7 @@ import org.junit.Test;
 import com.cloudera.cdk.morphline.api.AbstractMorphlineTest;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
@@ -118,7 +125,7 @@ public class SaxonMorphlineTest extends AbstractMorphlineTest {
     Record record = new Record();
     record.put(Fields.ATTACHMENT_BODY, in);
     processAndVerifySuccess(record, 
-        ImmutableMultimap.of("description", "An XSLT Morphline", "welcome", "Hello, World!")
+        ImmutableMultimap.of("description", "An XSLT Morphline", "welcome", "Hello, World!", "id", "2")
         );    
     in.close();
   }  
@@ -138,14 +145,45 @@ public class SaxonMorphlineTest extends AbstractMorphlineTest {
   }  
 
   @Test
+  public void testXQueryJoin() throws Exception {
+    File table = new File("target/test-table.xml");
+    generateTestTable(table, 3);
+    morphline = createMorphline("test-morphlines/xquery-join");    
+    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/helloworld.xml"));
+    Record record = new Record();
+    record.put("id", "123");
+    record.put(Fields.ATTACHMENT_BODY, in);
+    processAndVerifySuccess(record, 
+        ImmutableMultimap.of("id", "123", "outputId", "2", "outputText", "Hello, World!")
+        );    
+    in.close();
+  }  
+
+  private void generateTestTable(File file, int numRecords) throws IOException {
+    Writer writer = new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(file)), Charsets.UTF_8));
+    writer.write("<items>");
+    for (int i = 0; i < numRecords; i++) {
+      writer.write("\n<item id=\"" + i + "\">" + i + "</item>" );
+    }
+    writer.write("\n</items>");
+    writer.flush();
+    writer.close();    
+  }
+  
+  @Test
   @Ignore
   public void benchmarkSaxon() throws Exception {
-    String morphlineConfigFile = "test-morphlines/xquery-tweet-texts";
+    File table = new File("target/test-table.xml");
+    generateTestTable(table, 1000000);
+    System.out.println("Setup done.");
+    
+    String morphlineConfigFile = "test-morphlines/xquery-join";
+    //String morphlineConfigFile = "test-morphlines/xquery-tweet-texts";
     //String morphlineConfigFile = "test-morphlines/xslt-helloworld";
     //String morphlineConfigFile = "test-morphlines/convertHTML";
     long durationSecs = 20;
-    File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433.xml");
-    //File file = new File(RESOURCES_DIR + "/test-documents/helloworld.xml");
+    //File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433.xml");
+    File file = new File(RESOURCES_DIR + "/test-documents/helloworld.xml");
     //File file = new File(RESOURCES_DIR + "/test-documents/blog.html");
     System.out.println("Now benchmarking " + morphlineConfigFile + " ...");
     morphline = createMorphline(morphlineConfigFile);    
