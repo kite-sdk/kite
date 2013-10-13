@@ -57,8 +57,8 @@ abstract class SaxonCommand extends AbstractParser {
     super(builder, config, parent, child, context);
     
     this.isTracing = getConfigs().getBoolean(config, "isTracing", false);
-    boolean licensedSaxonEdition = getConfigs().getBoolean(config, "licensedSaxonEdition", false);
-    this.processor = new Processor(licensedSaxonEdition);
+    boolean isLicensedSaxonEdition = getConfigs().getBoolean(config, "isLicensedSaxonEdition", false);
+    this.processor = new Processor(isLicensedSaxonEdition);
     this.documentBuilder = processor.newDocumentBuilder();
     
     Config features = getConfigs().getConfig(config, "features", ConfigFactory.empty());
