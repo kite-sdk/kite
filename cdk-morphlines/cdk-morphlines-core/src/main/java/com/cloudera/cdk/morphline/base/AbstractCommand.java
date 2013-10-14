@@ -76,7 +76,6 @@ public abstract class AbstractCommand implements Command {
     this.context = context;
     Preconditions.checkArgument(builder.getNames().size() > 0);
     this.name = "morphline." + builder.getNames().iterator().next();
-    Preconditions.checkNotNull(name);
     this.configs = new Configs();
     this.numProcessCallsMeter = getMeter(Metrics.NUM_PROCESS_CALLS);
     this.numNotifyCallsMeter = getMeter(Metrics.NUM_NOTIFY_CALLS);

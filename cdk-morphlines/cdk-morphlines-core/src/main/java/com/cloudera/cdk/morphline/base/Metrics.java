@@ -24,7 +24,11 @@ public final class Metrics {
   public static final String NUM_PROCESS_CALLS = "numProcessCalls";
   public static final String NUM_NOTIFY_CALLS = "numNotifyCalls";
   public static final String NUM_RECORDS = "numRecords";
+  public static final String NUM_FAILED_RECORDS = "numFailedRecords";
+  public static final String NUM_EXCEPTION_RECORDS = "numExceptionRecords";
   
   public static final String ELAPSED_TIME = "elapsedTime";
   //public static final String ELAPSED_TOTAL_TIME = "elapsedTotalTime";
+  
+  public static final String MORPHLINE_APP = "morphline.app";
 }
