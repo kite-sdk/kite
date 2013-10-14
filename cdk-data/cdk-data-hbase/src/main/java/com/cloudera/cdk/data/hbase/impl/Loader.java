@@ -47,7 +47,10 @@ public class Loader implements Loadable {
         Configuration conf = HBaseConfiguration.create();
         String[] hostsAndPort = parseHostsAndPort(options.get("zk"));
         conf.set(HConstants.ZOOKEEPER_QUORUM, hostsAndPort[0]);
-        conf.set(HConstants.ZOOKEEPER_CLIENT_PORT, hostsAndPort[1]);
+        String port = hostsAndPort[1];
+        if (port != null) {
+          conf.set(HConstants.ZOOKEEPER_CLIENT_PORT, port);
+        }
         return new HBaseDatasetRepository.Builder().configuration(conf).get();
       }
     });
