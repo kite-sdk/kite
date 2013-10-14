@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.maven.plugins;
 
+import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository;
@@ -38,6 +39,14 @@ abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
    */
   @Parameter(property = "cdk.hcatalog")
   protected boolean hcatalog = true;
+
+  /**
+   * The URI specifying the dataset repository, e.g. <i>repo:hdfs://host:8020/data</i>.
+   * Optional, but if specified then <code>cdk.rootDirectory</code> and
+   * <code>cdk.hcatalog</code> are ignored.
+   */
+  @Parameter(property = "cdk.repositoryUri")
+  protected String repositoryUri;
 
   /**
    * Hadoop configuration properties.
@@ -64,6 +73,9 @@ abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
 
   DatasetRepository getDatasetRepository() {
     DatasetRepository repo;
+    if (repositoryUri != null) {
+      return DatasetRepositories.open(repositoryUri);
+    }
     if (!hcatalog && rootDirectory == null) {
       throw new IllegalArgumentException("Root directory must be specified if not " +
           "using HCatalog.");
