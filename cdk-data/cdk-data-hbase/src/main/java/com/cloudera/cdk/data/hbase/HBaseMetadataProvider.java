@@ -20,6 +20,7 @@ import com.cloudera.cdk.data.MetadataProviderException;
 import com.cloudera.cdk.data.NoSuchDatasetException;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.dao.Constants;
+import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
@@ -31,8 +32,13 @@ import java.util.Set;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HBaseMetadataProvider extends AbstractMetadataProvider {
+
+  private static final Logger logger = LoggerFactory
+      .getLogger(HBaseMetadataProvider.class);
 
   private HBaseAdmin hbaseAdmin;
   private SchemaManager schemaManager;
@@ -116,8 +122,14 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     String tableName = getTableName(name);
     String entityName = getEntityName(name);
     schemaManager.refreshManagedSchemaCache(tableName, entityName);
-    schemaManager.migrateSchema(tableName, entityName,
-        descriptor.getSchema().toString());
+    String schemaString = descriptor.getSchema().toString();
+    AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
+    EntitySchema entitySchema = parser.parseEntitySchema(schemaString);
+    if (schemaManager.getEntityVersion(tableName, entityName, entitySchema) == -1) {
+      schemaManager.migrateSchema(tableName, entityName, schemaString);
+    } else {
+      logger.info("Schema hasn't changed, not migrating: (" + name + ")");
+    }
     return withPartitionStrategy(descriptor);
   }
 
