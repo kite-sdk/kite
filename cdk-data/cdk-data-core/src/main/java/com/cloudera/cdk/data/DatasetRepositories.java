@@ -96,7 +96,7 @@ public class DatasetRepositories {
    * <p>
    * The format of a repository URI is as follows.
    * </p>
-   * <code>dsr:[storage component]</code>
+   * <code>repo:[storage component]</code>
    * <p>
    * The <code>[storage component]</code> indicates the underlying metadata and,
    * in some cases, physical storage of the data, along with any options. The

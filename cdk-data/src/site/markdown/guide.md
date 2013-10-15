@@ -255,6 +255,35 @@ _Example: Creating a `HCatalogDatasetRepository` with external tables_
       .rootDirectory(new Path("/data"))
       .get();
 
+### Dataset Repository URIs
+
+Dataset repositories can be referenced by URI, using the `repo` URI scheme. The
+following table lists the URI formats that are supported. See the javadoc for
+`DatasetRepositories` for more information on the URI format.
+
+| Dataset Repository Implementation | URI format |
+| --- | --- |
+| Local filesystem | `repo:file:[path]` |
+| HDFS | `repo:hdfs://[host]:[port]/[path]` |
+| Hive/HCatalog with managed tables | `repo:hive` |
+| Hive/HCatalog with external tables | `repo:hive:[path]?hdfs-host=[host]&hdfs-port=[port]` |
+| HBase | `repo:hbase:[zookeeper-host1],[zookeeper-host2],[zookeeper-host3]` |
+
+The `DatasetRepositories` class in the `com.cloudera.cdk.data` package provides factory
+methods for retrieving a `DatasetRepository` instance for a URI. For almost all cases,
+this is the preferred method of retrieving an instance of a `DatasetRepository`.
+
+_DatasetRepositories Interface_
+
+    static DatasetRepository open(URI);
+    static DatasetRepository open(String);
+
+_Example: Creating a `DatasetRepository` for Hive managed tables from a dataset
+repository URI_
+
+    DatasetRepository repo = DatasetRepositories.open("repo:hive");
+
+
 ## Datasets
 
 _Summary_
