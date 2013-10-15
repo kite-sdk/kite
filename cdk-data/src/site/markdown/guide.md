@@ -22,13 +22,14 @@ topics (e.g. partitioning schemes, metadata management) will benefit even more.
 The CDK Data module is a set of APIs for interacting with datasets in the
 Hadoop ecosystem. Specifically built to simplify direct reading and writing
 of datasets in storage subsystems such as the Hadoop Distributed FileSystem
-(HDFS), the Data module provides familiar, stream-oriented APIs, that remove the
+(HDFS), the Data module provides familiar, stream-oriented and random-access APIs,
+that remove the
 complexity of data serialization, partitioning, organization, and metadata
 system integration. These APIs do not replace or supersede any of the existing
-Hadoop APIs. Instead, the Data module acts as a targetted application of those
+Hadoop APIs. Instead, the Data module acts as a targeted application of those
 APIs for its stated use case. In other words, many applications will still use
 the HDFS or Avro APIs directly when the developer has use cases outside of
-direct dataset create, drop, read, and write operations. On the other hand, for
+direct dataset create, delete, read, and write operations. On the other hand, for
 users building applications or systems such as data integration services, the
 Data module will usually be superior in its default choices, data organization,
 and metadata system integration, when compared to custom built code.
@@ -41,7 +42,7 @@ with niche use cases or applications will find it difficult, suboptimal, or even
 impossible to do unusual things. Limiting the user is not a goal, but when
 revealing an option creates significant opportunity for complexity, or would
 otherwise require the user to delve into a rathole of additional choices or
-topics to research, such a tradeoff has been made. The Data module is designed
+topics to research, such a trade-off has been made. The Data module is designed
 to be immediately useful, obvious, and in line with what most users want, out of
 the box.
 
@@ -59,14 +60,15 @@ constituent classes.
 The primary actors in the Data module are _entities_, _dataset repositories_,
 _datasets_, dataset _readers_ and _writers_, and _metadata providers_. Most of
 these objects are interfaces, permitting multiple implementations, each with
-different functionality. Today, there exists an implementation of each of these
-components for the Hadoop FileSystem abstraction, found in the
-`com.cloudera.cdk.data.filesystem` package. While, in theory, this means any
-implementation of Hadoop's `FileSystem` abstract class is supported by the Data
-module, only the local and HDFS filesystem implementations are tested and
-officially supported. For the remainder of this guide, you can assume the
-implementation of the Data module interfaces being described is the Hadoop
-`FileSystem` implementation.
+different functionality. The current release contains an implementation of
+each of these components for the Hadoop FileSystem abstraction (found in the
+`com.cloudera.cdk.data.filesystem` package), for HCatalog and Hive (found in the
+`com.cloudera.cdk.data.hcatalog` package), and for HBase (see the section about Dataset
+ Repository URIs for how to access it).
+
+While, in theory, any implementation of Hadoop's `FileSystem` abstract class is
+supported by the Data module, only the local and HDFS filesystem implementations are
+tested and officially supported.
 
 If you're not already familiar with [Avro][avro] schemas, now is a good time to
 go read a little [more about them][avro-s]. You need not concern yourself with
@@ -85,9 +87,9 @@ repositories for reasons related to logical grouping, security and access
 control, backup policies, and so forth. A dataset repository is represented by
 instances of the `com.cloudera.cdk.data.DatasetRepository` interface in the Data
 module. An instance of a `DatasetRepository` acts as a factory for datasets,
-supplying methods for creating, loading, and dropping datasets. Each dataset
+supplying methods for creating, loading, and deleting datasets. Each dataset
 belongs to exactly one dataset repository. There's no built in support for
-moving or copying datasets bewteen repositories. MapReduce and other execution
+moving or copying datasets between repositories. MapReduce and other execution
 engines can easily provide copy functionality, if desired.
 
 _DatasetRepository Interface_
@@ -110,7 +112,7 @@ worries about managing files and directories in the underlying filesystem. The
 supplied metadata provider is used to resolve dataset schemas and other related
 information.
 
-Instantiating FileSystemDatasetRepository is straight forward.
+Instantiating FileSystemDatasetRepository is straightforward.
 
     DatasetRepository repo = new FileSystemDatasetRepository.Builder()
       .rootDirectory(new Path("/data"))
@@ -129,7 +131,7 @@ and basic functional testing of your code.
 
 Once an instance of a `DatasetRepository` implementation has been created,
 new datasets can easily be created, and existing datasets can be loaded or
-dropped. Here's a more complete example of creating a dataset to store
+deleted. Here's a more complete example of creating a dataset to store
 application event data. You'll notice a few new classes; don't worry about them
 for now. We'll cover them later.
 
@@ -192,11 +194,11 @@ APIs. If you're paying close attention, you'll see that we didn't specify a
 metadata provider when we instantiated `FileSystemDatasetRepository` earlier.
 That's because `FileSystemDatasetRepository` uses an implementation of
 `MetadataProvider` called `FileSystemMetadataProvider` by default. Developers
-are free to explicitly pass a different implementation using the three argument
-constructor `FileSystemDatasetRepository(FileSystem, Path, MetadataProvider)` if
-they want to change this behavior.
+are free to explicitly pass a different implementation using the
+`metadataProvider(MetadataProvider)` method on `FileSystemDatasetRepository.Builder`
+if they want to change this behavior.
 
-The `FileSystemMetadataProvider` (also in the packge
+The `FileSystemMetadataProvider` (also in the package
 `com.cloudera.cdk.data.filesystem`) plugin stores dataset metadata information on
 a Hadoop `FileSystem` in a hidden directory. As with its sibling
 `FileSystemDatasetRepository`, its constructor accepts a Hadoop `FileSystem`
@@ -222,18 +224,19 @@ _Example: Explicitly configuring `FileSystemDatasetRepository` with
 
 Note how the same base directory of `/data` is used for both the metadata
 provider as well as the dataset repository. This is perfectly legal. In fact,
-this is exactly what happens when you use the two argument form of the
-`FileSystemDatasetRepository` constructor. Configured this way, data and
+this is exactly what happens when you don't explicitly specify a metadata provider.
+Configured this way, data and
 metadata will be stored together, side by side, on whatever filesystem Hadoop is
 currently configured to use. Later, when we create a dataset, we'll see the
 resultant file and directory structure created as a result of this
 configuration.
 
-To use HCatalog, create an instance of `HCatalogDatasetRepository` (in the package
-`com.cloudera.cdk.data.hcatalog`). `HCatalogDatasetRepository` uses an internal
-implementation of `MetadataProvider` called `HCatalogMetadataProvider` to communicate
-with HCatalog. When using HCatalog you have two options for specifying the location of
-the data files. You can let HCatalog manage the location of the data,
+It's very common to store metadata in the Hive/HCatalog Metastore (the terms are used
+interchangeably), since this opens datasets up to integration with any system that can
+work with Hive, such as BI tools, or Cloudera Impala.
+
+When using Hive/HCatalog you have two options for specifying the location of
+the data files. You can let Hive/HCatalog manage the location of the data,
 the so called "managed tables" option, in which case the data is stored in the warehouse
 directory that is configured by the Hive/HCatalog installation (see the
 `hive.metastore.warehouse.dir` setting in _hive-site.xml_). Alternatively,
@@ -243,7 +246,14 @@ just like `FileSystemDatasetRepository`. The latter option is referred to as
 
 _Example: Creating a `HCatalogDatasetRepository` with managed tables_
 
-    DatasetRepository repo = new HCatalogDatasetRepository();
+    DatasetRepository repo = new HCatalogDatasetRepository.Builder()
+      .get();
+
+_Example: Creating a `HCatalogDatasetRepository` with external tables_
+
+    DatasetRepository repo = new HCatalogDatasetRepository.Builder()
+      .rootDirectory(new Path("/data"))
+      .get();
 
 ## Datasets
 
@@ -252,18 +262,18 @@ _Summary_
 * A dataset is a collection of entities.
 * A dataset is represented by the interface `Dataset`.
 * The Hadoop FileSystem implementation of a dataset...
-    * is stored as Snappy-compressed Avro data files by default.
-    * may support pluggable formats such as Parquet in the future.
+    * is stored as Snappy-compressed Avro data files by default,
+    or in the column-oriented Parquet file format as an option
     * is made up of zero or more files in a directory.
 
 A dataset is a collection of zero or more entities (or records). All datasets
 have a name and an associated _dataset descriptor_. The dataset descriptor, as
 the name implies, describes all aspects of the dataset. Primarily, the
-descriptor information is the dataset's required _schema_ and its optional
-_partition strategy_. A descriptor must be provided at the time a dataset is
-created. The schema is defined using the Avro Schema APIs. Entities must all
-conform to the same schema, however, that schema can evolve based on a set of
-well-defined rules. The relational database analog of a dataset is a table.
+descriptor information is the dataset's required _schema_ and _format_, and its optional
+_location_ (a repository URI) and optional _partition strategy_. A descriptor must be
+provided at the time a dataset is created. The schema is defined using the Avro Schema APIs.
+Entities must all conform to the same schema, however, that schema can evolve based on
+a set of well-defined rules. The relational database analog of a dataset is a table.
 
 Datasets are represented by the `com.cloudera.cdk.data.Dataset` interface.
 Implementations of this interface decide how to physically store the entities
@@ -284,14 +294,18 @@ _Dataset Interface_
 
 The included Hadoop `FileSystemDatasetRepository` includes a `Dataset`
 implementation called `FileSystemDataset`. This dataset implementation stores
-data in the configured Hadoop `FileSystem` as Snappy-compressed Avro data files.
-Avro data files were selected because all components of CDH support them, they
-are language agnostic, support block compression, have a compact binary
+data in the configured Hadoop `FileSystem` as Snappy-compressed Avro data files,
+or optionally as Parquet files.
+Avro data files were selected as the default because all components of CDH support them,
+they are language agnostic, support block compression, have a compact binary
 representation, and are natively splittable by Hadoop MapReduce while
-compressed. While it's not currently possible to change this behavior, this will
-suit the needs of almost all users, and should be used whenever possible.
-Support for different serialization formats is planned for future releases for
-cases where users know something special about their data.
+compressed.
+
+Parquet, on the other hand, is a good choice for wide tables with a large number of
+columns (30 or so is considered "large" in this context), particularly if the data
+will be queried using Impala, since Impala can take advantage of the fact that Parquet
+is stored in a columnar form, and restricts the data being read to the columns in the
+query.
 
 Upon creation of dataset, a name and a _dataset descriptor_ must be provided to
 the `DatasetRepository#create()` method. The descriptor, represented by the
@@ -307,16 +321,19 @@ defining or attaching a schema.
 _DatasetDescriptor Class_
 
     org.apache.avro.Schema getSchema();
+    Format getFormat()
+    URI getLocation()
     PartitionStrategy getPartitionStrategy();
     boolean isPartitioned();
 
 _DatasetDescriptor.Builder Class_
 
     Builder schema(Schema schema);
-    Builder schema(String json);
     Builder schema(File file);
     Builder schema(InputStream inputStream);
-    Builder schema(URL url);
+    Builder schemaUri(URI uri);
+    Builder schemaUri(String uri);
+    Builder schemaLiteral(String json);
 
     Builder partitionStrategy(PartitionStrategy partitionStrategy);
 
@@ -355,8 +372,8 @@ resolution, but we could have (almost as) easily used Java's
 An instance of `Dataset` acts as a factory for both reader and writer streams.
 Each implementation is free to produce stream implementations that make sense
 for the underlying storage system. The `FileSystemDataset` implementation, for
-example, produces streams that read from, or write to, Avro data files on a
-Hadoop `FileSystem` implementation.
+example, produces streams that read from, or write to, Avro data files or Parquet files
+on a Hadoop `FileSystem` implementation.
 
 Reader and writer streams both function similarly to Java's standard IO streams,
 but are specialized. As indicated in the `Dataset` interface earlier, both
@@ -446,7 +463,7 @@ _Example: Writing to a Hadoop FileSystem_
 Reading data from an existing dataset is equally straight forward.
 DatasetReaders implement the standard [Iterator][ator-doc] and
 [Iterable][able-doc] interfaces, so java's for-each syntax works and is the
-easiest way to get entites from a reader. If calling `next()` without using
+easiest way to get entities from a reader. If calling `next()` without using
 for-each syntax, keep in mind that it is incorrect to call `next()` after the
 reader has been exhausted (i.e.  no more entities remain) and an exception will
 be thrown.  Instead, users must use the `hasNext()` method to test if the
@@ -475,22 +492,22 @@ _Example: Reading from a Hadoop FileSystem_
       reader.close();
     }
 
-Dropping a dataset - an operation as equally destructive as dropping a table
+Deleting a dataset - an operation as equally destructive as dropping a table
 in a relational database - works as expected.
 
-_Example: Dropping an existing dataset_
+_Example: Deleting an existing dataset_
 
     DatasetRepository repo = new FileSystemDatasetRepository.Builder()
       .rootDirectory(new Path("/data"))
       .get();
 
-    if (repo.drop("integers")) {
-      System.out.println("Dropped dataset integers");
+    if (repo.delete("integers")) {
+      System.out.println("Deleted dataset integers");
     }
 
 As discussed earlier, all operations performed on dataset repositories,
 datasets, and their associated readers and writers are tightly integrated with
-the dataset repository's configured metadata provider. Dropping a dataset like
+the dataset repository's configured metadata provider. Deleting a dataset like
 this, for example, removes both the data as well as the associated metadata.
 All applications that use the Data module APIs will automatically see changes
 made by one another if they share the same configuration. This is an incredibly
@@ -504,7 +521,7 @@ _Summary_
 * Datasets may be partitioned by attributes of the entity (i.e. fields of the
   record).
 * Partitioning is transparent to readers and writers.
-* Partitons also conform to the `Dataset` interface.
+* Partitions also conform to the `Dataset` interface.
 * A `PartitionStrategy` controls how a dataset is partitioned, and is part of
   the `DatasetDescriptor`.
 
@@ -522,25 +539,27 @@ nor can you write data into a partitioned dataset that does not land in
 a partition. Should you decide to partition an existing dataset, the best course
 of action is to create a new partitioned dataset with the same schema as the
 existing dataset, and use MapReduce to convert the dataset in batch to the new
-format. It will be possible to remove partitions from a partitioned dataset in
-a future release, but today, they may only be added. A partitioned dataset can
+format. A partitioned dataset can
 provide a list of partitions (described later).
 
 Upon creation of a dataset, a `PartitionStrategy` may be provided. A partition
 strategy is a list of one or more partition functions that, when applied to an
 attribute of an entity, produce a value used to decide in which partition an
 entity should be written. Different partition function implementations exist,
-each of which faciliates a different form of partitioning. The initial version
-of the library includes the identity and hash functions for use in partition
-strategies.
+each of which facilitates a different form of partitioning. The library includes
+identity, hash, and date functions for use in partition strategies.
 
-While users are free to instantiate the `PartitionStrategy` class directly, its
-`Builder` greatly simpifies life.
+`PartitionStrategy` has a `Builder` interface to create partition strategy instances.
 
 _PartitionStrategy.Builder API_
 
-    Builder identity(String, int);
+    <S> Builder identity(String, Class<S>, int);
     Builder hash(String, int);
+    Builder year(String, String);
+    Builder month(String, String);
+    Builder day(String, String);
+    Builder hour(String, String);
+    Builder minute(String, String);
 
     PartitionStrategy get();
 
@@ -573,7 +592,7 @@ _Example Creation of a dataset partitioned by an attribute_
       new DatasetDescriptor.Builder()
         .schema(new File("User.avsc"))
         .partitionStrategy(
-          new PartitionStrategy.Builder().identity("segment", 1024).get()
+          new PartitionStrategy.Builder().identity("segment", Long.class, 1024).get()
         ).get()
     );
 
@@ -602,8 +621,8 @@ _Example: Creation of a dataset partitioned by multiple attributes_
         .schema(new File("User.avsc"))
         .partitionStrategy(
           new PartitionStrategy.Builder()
-            .identity("segment", 1024)  // Partition first by segment
-            .hash("emailAddress", 3)    // and then by hash(email) % 3
+            .identity("segment", Long.class, 1024)  // Partition first by segment
+            .hash("emailAddress", 3)                // and then by hash(email) % 3
             .get()
         ).get()
 
@@ -621,7 +640,7 @@ choose. If, however, you wish to use the partition pruning in Hive/Impala's
 query engine, only the identity function will work. This is because both systems
 rely on the idea that the value in the path name equals the value found in each
 record. To mimic more complex partitioning schemes, users often resort to adding
-a surrogate field to each record to hold the dervived value and handle proper
+a surrogate field to each record to hold the derived value and handle proper
 setting of such a field themselves.
 
 ## Entities
@@ -636,40 +655,40 @@ _Summary_
 An _entity_ is a is a single record. The name "entity" is used rather than
 "record" because the latter caries a connotation of a simple list of primitives,
 while the former evokes the notion of a [POJO][] (e.g. in [JPA][]). That said,
-the terms are used interchangably. An entity can take one of three forms, at the
+the terms are used interchangeably. An entity can take one of three forms, at the
 user's option:
 
-1. A plain old Java object
+1. __A plain old Java object__
 
-   When a POJO is supplied, the library uses reflection to write the object out
-   to storage. While not the fastest, this is the simplest way to get up and
-   running. Users are encouraged to consider Avro [GenericRecord][avro-gr]s for
-   production systems, or after they become familiar with the APIs.
+    When a POJO is supplied, the library uses reflection to write the object out
+    to storage. While not the fastest, this is the simplest way to get up and
+    running. Users are encouraged to consider Avro [GenericRecord][avro-gr]s for
+    production systems, or after they become familiar with the APIs.
 
-1. An [Avro][avro] GenericRecord
+1. __An [Avro][avro] GenericRecord__
 
-   An Avro [GenericRecord][avro-gr] instance can be used to easily supply
-   entities that represent a schema without using custom types for each kind of
-   entity. These objects are easy to create and manipulate (see Avro's
-   [GenericRecordBuilder class][avro-grb]), especially in code that has no
-   knowledge of specific object types (such as libraries). Serialization of
-   generic records is fast, but requires use of the Avro APIs. This is
-   recommended for most users, in most cases.
+    An Avro [GenericRecord][avro-gr] instance can be used to easily supply
+    entities that represent a schema without using custom types for each kind of
+    entity. These objects are easy to create and manipulate (see Avro's
+    [GenericRecordBuilder class][avro-grb]), especially in code that has no
+    knowledge of specific object types (such as libraries). Serialization of
+    generic records is fast, but requires use of the Avro APIs. This is
+    recommended for most users, in most cases.
 
-1. An Avro specific type
+1. __An Avro specific type__
 
-   Advanced users may choose to use Avro's [code generation][avro-cg] support to
-   create classes that implicitly know how to serialize themselves. While the
-   fastest of the options, this requires specialized knowledge of Avro, code
-   generation, and handling of custom types. Keep in mind that, unlike generic
-   records, the applications that write datasets with specific types must also
-   have the same classes available to the applications that read those datasets.
+    Advanced users may choose to use Avro's [code generation][avro-cg] support to
+    create classes that implicitly know how to serialize themselves. While the
+    fastest of the options, this requires specialized knowledge of Avro, code
+    generation, and handling of custom types.
 
 Note that entities aren't represented by any particular type in the Data APIs.
 In each of the above three cases, the entities described are either simple POJOs
 or are Avro objects. Remember that what has been described here is only the _in
 memory_ representation of the entity; the Data module may store the data in HDFS
-in a different serialization format.
+in a different serialization format. By default this is the Avro data file
+serialization, but it can be Parquet files, or an HBase format if the HBase repository
+is being used.
 
 [POJO]: http://en.wikipedia.org/wiki/POJO "Plain Old Java Object"
 [JPA]: http://en.wikipedia.org/wiki/Java_Persistence_API "Java Persistance API"
