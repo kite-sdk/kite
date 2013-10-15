@@ -58,8 +58,8 @@ constituent classes.
 [guice]: http://code.google.com/p/google-guice/ "Google Guice"
 
 The primary actors in the Data module are _entities_, _dataset repositories_,
-_datasets_, dataset _readers_ and _writers_, and _metadata providers_. Most of
-these objects are interfaces, permitting multiple implementations, each with
+_datasets_, dataset _readers_, _writers_ and _accessors_, and _metadata providers_. Most
+of these objects are interfaces, permitting multiple implementations, each with
 different functionality. The current release contains an implementation of
 each of these components for the Hadoop FileSystem abstraction (found in the
 `com.cloudera.cdk.data.filesystem` package), for HCatalog and Hive (found in the
@@ -315,8 +315,9 @@ _Dataset Interface_
     String getName();
     DatasetDescriptor getDescriptor();
 
-    <E> DatasetWriter<E> getWriter();
-    <E> DatasetReader<E> getReader();
+    <E> DatasetWriter<E> newWriter();
+    <E> DatasetReader<E> newReader();
+    <E> DatasetReader<E> newAccessor();
 
     Dataset getPartition(PartitionKey, boolean);
     Iterable<Dataset> getPartitions();
@@ -370,7 +371,7 @@ _DatasetDescriptor.Builder Class_
 
 _Note_
 
-Some of the less important or specialized methods have been elided here in the
+Some of the less important or more specialized methods have been elided here in the
 interest of simplicity.
 
 From the methods in the `DatasetDescriptor.Builder`, you can see Avro schemas
@@ -398,7 +399,9 @@ resolution, but we could have (almost as) easily used Java's
         .get()
     );
 
-An instance of `Dataset` acts as a factory for both reader and writer streams.
+An instance of `Dataset` acts as a factory for both reader and writer streams,
+as well as for accessors that permit random reads and writes (discussed in the next
+section).
 Each implementation is free to produce stream implementations that make sense
 for the underlying storage system. The `FileSystemDataset` implementation, for
 example, produces streams that read from, or write to, Avro data files or Parquet files
@@ -437,7 +440,7 @@ nor may it be reopened.
 Writing to a dataset always follows the same sequence of events. A user obtains
 an instance of a `Dataset` from a `DatasetRepository` either by creating a new,
 or loading an existing dataset. With a reference to a `Dataset`, you can obtain
-a writer using its `getWriter()` method, open it, write any number of entities,
+a writer using its `newWriter()` method, open it, write any number of entities,
 flush as necessary, and close it to release resources back to the system. The
 use of `flush()` and `close()` can dramatically affect data durability.
 Implementations of the `DatasetWriter` interface are free to define the
@@ -472,7 +475,7 @@ _Example: Writing to a Hadoop FileSystem_
      * the try block. Here we're using Avro Generic records, discussed in
      * greater details later. See the Entities section.
      */
-    DatasetWriter<GenericRecord> writer = integers.getWriter();
+    DatasetWriter<GenericRecord> writer = integers.newWriter();
 
     try {
       writer.open();
@@ -509,7 +512,7 @@ _Example: Reading from a Hadoop FileSystem_
     // Load the integers dataset.
     Dataset integers = repo.get("integers");
 
-    DatasetReader<GenericRecord> reader = integers.getReader();
+    DatasetReader<GenericRecord> reader = integers.newReader();
 
     try {
       reader.open();
@@ -671,6 +674,73 @@ rely on the idea that the value in the path name equals the value found in each
 record. To mimic more complex partitioning schemes, users often resort to adding
 a surrogate field to each record to hold the derived value and handle proper
 setting of such a field themselves.
+
+### Random Access Datasets
+
+Datasets stored in HBase support random access read and write operations as well as
+the usual streaming read and write operations. The underlying HBase storage requires
+that each entity has a key associated with it; the key is defined by marking the key
+fields in the schema with the `key` mapping. Non-key fields are specified by the
+`column` mapping, with a value indicating the HBase column family and column name.
+
+_Example: User entity schema with mappings_
+
+    Avro schema (User.avsc)
+    -----------------------
+    {
+      "name": "User",
+      "type": "record",
+      "fields": [
+        { "name": "username",    "type": "string",
+          "mapping": { "type": "key", "value": "0" } },
+
+        { "name": "emailAddress", "type": [ "string", "null" ],
+          "mapping": { "type": "column", "value": "user:emailAddress" } },
+      ]
+    }
+
+With a reference to a `Dataset`, you can obtain a reference to a `DatasetAccessor`
+using its `newAccessor()` method.
+
+_DatasetAccessor Interface_
+
+    E get(PartitionKey);
+    boolean put(E);
+    void delete(PartitionKey);
+    boolean delete(PartitionKey, E);
+    long increment(PartitionKey, String, long);
+
+Entities are added to a dataset using `put`, retrieved by key with `get`,
+and removed from the dataset with `delete`. The overloaded form of `delete` that
+takes an entity is a conditional delete that only performs the delete if the entity's
+version field is the same as the one in the store (see Optimistic Concurrency Control,
+discussed below). The `increment` method performs an atomic increment on a named `int`
+or `long` field.
+
+Keys are represented by an instance of `PartitionKey`, constructed via the dataset's
+`PartitionStrategy` (which is internally derived from the key fields in the schema):
+
+    Dataset users = ...
+    PartitionKey key = users.getDescriptor().getPartitionStrategy().partitionKey("bill");
+
+Optimistic Concurrency Control (OCC) allows one to do get/update/put operations,
+ensuring that another thread or process didn't update the entity between the time we
+fetched it and updated it. OCC works by keeping a version column in each row of the
+table which tracks the version of the entity persisted. Versions are always increasing;
+every put will increase the version by 1. When reading a record, the version is passed
+along with the record. When the record is put back to the table, if the version isn't
+what it was when we fetched the entity, the put will fail.
+
+_Example: Avro field declared as an OCC check field_
+
+    {
+      "name": "conflictVersion",
+      "type": "long",
+      "mapping": { "type": "column", "value": "conflict:version", "conflictCheck": true }
+    }
+
+If an Avro entity has a mapping declared as a `conflictCheck`, operations will always use
+OCC on that entity.
 
 ## Entities
 
