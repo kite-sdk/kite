@@ -80,7 +80,7 @@ public class HttpMetricsMorphlineTest extends AbstractMorphlineTest {
     assertEquals(1, node.get("counters").get("myMetrics.myCounter").get("count").asInt());
     assertEquals(2, node.get("meters").get("morphline.logWarn.numProcessCalls").get("count").asInt());
     assertEquals(3, node.get("meters").get("morphline.logDebug.numProcessCalls").get("count").asInt());    
-    assertTrue(node.get("gauges").get("jvm.memory.heap.max").get("value").asInt() > 0);    
+    assertTrue(node.get("gauges").get("jvm.memory.heap.used").get("value").asInt() > 0);
     
     assertFalse(iter.hasNext());    
   }
