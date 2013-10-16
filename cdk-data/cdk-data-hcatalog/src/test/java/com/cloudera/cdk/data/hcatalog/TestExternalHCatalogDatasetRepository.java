@@ -81,8 +81,13 @@ public class TestExternalHCatalogDatasetRepository extends TestFileSystemDataset
     // updates are not supported
   }
 
-  @Override
-  public void testUpdateSuccessfulWithCompatibleSchemaChange() {
+  @Test
+  public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldAdded() {
+    // updates are not supported
+  }
+
+  @Test
+  public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldRemoved() {
     // updates are not supported
   }
 
