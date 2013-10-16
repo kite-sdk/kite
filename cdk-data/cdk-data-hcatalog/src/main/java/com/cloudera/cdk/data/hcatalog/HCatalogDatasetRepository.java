@@ -41,8 +41,8 @@ import org.apache.hadoop.fs.Path;
  * </p>
  * <p>
  * The primary methods of interest will be
- * {@link #create(String, DatasetDescriptor)}, {@link #get(String)}, and
- * {@link #drop(String)} which create a new dataset, load an existing
+ * {@link #create(String, DatasetDescriptor)}, {@link #load(String)}, and
+ * {@link #delete(String)} which create a new dataset, load an existing
  * dataset, or delete an existing dataset, respectively. Once a dataset has been created
  * or loaded, users can invoke the appropriate {@link Dataset} methods to get a reader
  * or writer as needed.
