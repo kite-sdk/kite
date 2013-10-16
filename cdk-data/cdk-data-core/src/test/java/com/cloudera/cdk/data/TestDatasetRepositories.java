@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data;
 
+import com.cloudera.cdk.data.filesystem.DatasetTestUtilities;
 import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.io.Files;
@@ -79,10 +80,7 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
 
   @Before
   public void setUp() throws IOException {
-    this.testSchema = Schema.createRecord("Test", "Test record schema",
-        "com.cloudera.cdk.data.filesystem", false);
-    this.testSchema.setFields(Lists.newArrayList(new Field("name", Schema
-        .create(Type.STRING), null, null)));
+    this.testSchema = DatasetTestUtilities.USER_SCHEMA;
 
     this.conf = (distributed ?
         MiniDFSTest.getConfiguration() :

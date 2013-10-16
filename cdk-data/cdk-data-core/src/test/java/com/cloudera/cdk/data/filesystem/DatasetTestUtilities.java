@@ -66,7 +66,7 @@ public class DatasetTestUtilities {
       writer = ds.newWriter();
       writer.open();
       for (int i = start; i < count + start; i++) {
-        GenericData.Record record = new GenericRecordBuilder(USER_SCHEMA)
+        GenericData.Record record = new GenericRecordBuilder(ds.getDescriptor().getSchema())
             .set("username", "test-" + i)
             .set("email", "email-" + i).build();
         writer.write(record);

@@ -23,16 +23,16 @@ import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.Formats;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Type;
+import org.apache.avro.SchemaBuilder;
 import org.apache.hadoop.fs.Path;
-import org.codehaus.jackson.node.TextNode;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.checkTestUsers;
+import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.writeTestUsers;
 
 public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
@@ -160,12 +160,12 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     Assert.assertEquals("Dataset schema is propagated", testSchema, dataset
         .getDescriptor().getSchema());
 
-    Schema testSchemaV2 = Schema.createRecord("Test", "Test record schema",
-        "com.cloudera.cdk.data.filesystem", false);
-    testSchemaV2.setFields(Lists.newArrayList(
-        new Field("name", Schema.create(Type.STRING), null, null),
-        new Field("email", Schema.create(Type.STRING), null, null) // incompatible - no default
-    ));
+    Schema testSchemaV2 = SchemaBuilder.record("user").fields()
+        .requiredString("username")
+        .requiredString("email")
+        .requiredString("favoriteColor") // incompatible - no default
+        .endRecord();
+
     try {
       repo.update(NAME, new DatasetDescriptor.Builder().schema(testSchemaV2).get());
       Assert.fail("Should fail due to incompatible update");
@@ -182,13 +182,14 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     Dataset dataset = repo.create(NAME, new DatasetDescriptor.Builder()
         .schema(testSchema).get());
 
-    Schema testSchemaV3 = Schema.createRecord("Test", "Test record schema",
-        "com.cloudera.cdk.data.filesystem", false);
-    testSchemaV3.setFields(Lists.newArrayList(
-        new Field("name", Schema.create(Type.STRING), null, null),
-        new Field("email", Schema.create(Type.STRING), null,
-            TextNode.valueOf("a@example.com"))
-    ));
+    writeTestUsers(dataset, 5);
+    checkTestUsers(dataset, 5);
+
+    Schema testSchemaV3 = SchemaBuilder.record("user").fields()
+        .requiredString("username")
+        .requiredString("email")
+        .nullableString("favoriteColor", "orange")
+        .endRecord();
 
     Dataset datasetV3 = repo.update(NAME,
         new DatasetDescriptor.Builder(dataset.getDescriptor())
@@ -197,6 +198,14 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
     Assert.assertEquals("Dataset schema is updated", testSchemaV3, datasetV3
         .getDescriptor().getSchema());
+
+    // test that the old records can be read back with the new schema
+    checkTestUsers(datasetV3, 5);
+
+    // write more users and test that the mixed set can be read back with both schemas
+    writeTestUsers(datasetV3, 5, 5);
+    checkTestUsers(datasetV3, 10);
+    checkTestUsers(dataset, 10);
   }
 
   @Test
