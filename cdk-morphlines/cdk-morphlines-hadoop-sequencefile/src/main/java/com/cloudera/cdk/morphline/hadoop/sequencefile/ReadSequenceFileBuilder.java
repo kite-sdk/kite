@@ -69,6 +69,7 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
     private final boolean includeMetaData;
     private final String keyField;
     private final String valueField;
+    private final Configuration conf = new Configuration();
   
     public ReadSequenceFile(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);
@@ -80,7 +81,6 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
   
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
-      Configuration conf = new Configuration();
       FSDataInputStream fsInputStream = new FSDataInputStream(new ForwardOnlySeekable(in));
       Option opt = SequenceFile.Reader.stream(fsInputStream);
       SequenceFile.Metadata sequenceFileMetaData = null;
