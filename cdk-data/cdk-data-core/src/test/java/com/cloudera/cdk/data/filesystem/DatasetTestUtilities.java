@@ -61,15 +61,21 @@ public class DatasetTestUtilities {
   }
 
   public static void writeTestUsers(Dataset ds, int count, int start) {
+    writeTestUsers(ds, count, start, "email");
+  }
+
+  public static void writeTestUsers(Dataset ds, int count, int start, String... fields) {
     DatasetWriter<GenericData.Record> writer = null;
     try {
       writer = ds.newWriter();
       writer.open();
       for (int i = start; i < count + start; i++) {
-        GenericData.Record record = new GenericRecordBuilder(ds.getDescriptor().getSchema())
-            .set("username", "test-" + i)
-            .set("email", "email-" + i).build();
-        writer.write(record);
+        GenericRecordBuilder recordBuilder = new GenericRecordBuilder(ds.getDescriptor
+            ().getSchema()).set("username", "test-" + i);
+        for (String field : fields) {
+          recordBuilder.set(field, field + "-" + i);
+        }
+        writer.write(recordBuilder.build());
       }
       writer.flush();
     } finally {
@@ -80,6 +86,10 @@ public class DatasetTestUtilities {
   }
 
   public static void checkTestUsers(Dataset ds, int count) {
+    checkTestUsers(ds, count, "email");
+  }
+
+  public static void checkTestUsers(Dataset ds, int count, final String... fields) {
     final Set<String> usernames = Sets.newHashSet();
     for (int i = 0; i < count; i++) {
       usernames.add("test-" + i);
@@ -87,12 +97,14 @@ public class DatasetTestUtilities {
 
     checkReaderBehavior(ds.<GenericData.Record>newReader(), count,
         new RecordValidator<GenericData.Record>() {
-      @Override
-      public void validate(GenericData.Record record, int recordNum) {
-        Assert.assertTrue(usernames.remove((String) record.get("username")));
-        Assert.assertNotNull(record.get("email"));
-      }
-    });
+          @Override
+          public void validate(GenericData.Record record, int recordNum) {
+            Assert.assertTrue(usernames.remove((String) record.get("username")));
+            for (String field : fields) {
+              Assert.assertNotNull(record.get(field));
+            }
+          }
+        });
 
     Assert.assertTrue(usernames.isEmpty());
   }

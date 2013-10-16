@@ -178,34 +178,61 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   }
 
   @Test
-  public void testUpdateSuccessfulWithCompatibleSchemaChange() {
+  public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldAdded() {
     Dataset dataset = repo.create(NAME, new DatasetDescriptor.Builder()
         .schema(testSchema).get());
 
-    writeTestUsers(dataset, 5);
-    checkTestUsers(dataset, 5);
+    writeTestUsers(dataset, 5, 0, "email");
+    checkTestUsers(dataset, 5, "email");
 
-    Schema testSchemaV3 = SchemaBuilder.record("user").fields()
+    Schema testSchemaV2 = SchemaBuilder.record("user").fields()
         .requiredString("username")
         .requiredString("email")
         .nullableString("favoriteColor", "orange")
         .endRecord();
 
-    Dataset datasetV3 = repo.update(NAME,
+    Dataset datasetV2 = repo.update(NAME,
         new DatasetDescriptor.Builder(dataset.getDescriptor())
-            .schema(testSchemaV3)
+            .schema(testSchemaV2)
             .get());
 
-    Assert.assertEquals("Dataset schema is updated", testSchemaV3, datasetV3
+    Assert.assertEquals("Dataset schema is updated", testSchemaV2, datasetV2
         .getDescriptor().getSchema());
 
     // test that the old records can be read back with the new schema
-    checkTestUsers(datasetV3, 5);
+    checkTestUsers(datasetV2, 5, "email", "favoriteColor");
 
-    // write more users and test that the mixed set can be read back with both schemas
-    writeTestUsers(datasetV3, 5, 5);
-    checkTestUsers(datasetV3, 10);
-    checkTestUsers(dataset, 10);
+    // write more users and test that the mixed set can be read back with the new schema
+    writeTestUsers(datasetV2, 5, 5, "email", "favoriteColor");
+    checkTestUsers(datasetV2, 10, "email", "favoriteColor");
+  }
+
+  @Test
+  public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldRemoved() {
+    Dataset dataset = repo.create(NAME, new DatasetDescriptor.Builder()
+        .schema(testSchema).get());
+
+    writeTestUsers(dataset, 5, 0, "email");
+    checkTestUsers(dataset, 5, "email");
+
+    Schema testSchemaV2 = SchemaBuilder.record("user").fields()
+        .requiredString("username")
+        .endRecord();
+
+    Dataset datasetV2 = repo.update(NAME,
+        new DatasetDescriptor.Builder(dataset.getDescriptor())
+            .schema(testSchemaV2)
+            .get());
+
+    Assert.assertEquals("Dataset schema is updated", testSchemaV2, datasetV2
+        .getDescriptor().getSchema());
+
+    // test that the old records can be read back with the new schema
+    checkTestUsers(datasetV2, 5, new String[0]);
+
+    // write more users and test that the mixed set can be read back with the new schema
+    writeTestUsers(datasetV2, 5, 5, new String[0]);
+    checkTestUsers(datasetV2, 10, new String[0]);
   }
 
   @Test
