@@ -31,7 +31,7 @@ public interface DatasetAccessor<E> {
    *          The key of the entity to get
    * @return The entity of type E, or null if one is not found
    */
-  public E get(PartitionKey key);
+  public E get(Marker key);
 
   /**
    * Put the entity into the dataset with {@link PartitionKey} <code>key</code>.
@@ -56,7 +56,7 @@ public interface DatasetAccessor<E> {
    *          The amount to increment the field by
    * @return The new field amount.
    */
-  public long increment(PartitionKey key, String fieldName, long amount);
+  public long increment(Marker key, String fieldName, long amount);
 
   /**
    * Deletes the entity in the dataset with {@link PartitionKey} <code>key</code>.
@@ -64,7 +64,7 @@ public interface DatasetAccessor<E> {
    * @param key
    *          The key of the entity to delete.
    */
-  public void delete(PartitionKey key);
+  public void delete(Marker key);
 
   /**
    * Deletes the entity passed to this method in the dataset.

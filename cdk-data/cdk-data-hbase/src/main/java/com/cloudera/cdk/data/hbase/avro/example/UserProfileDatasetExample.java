@@ -19,7 +19,7 @@ import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
-import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 import java.util.HashMap;
 import org.apache.hadoop.conf.Configuration;
@@ -203,8 +203,8 @@ public class UserProfileDatasetExample {
     long ts = System.currentTimeMillis();
 
     // Construct the key we'll use to fetch the user.
-    PartitionKey key = userProfileActionsDataset.getDescriptor().getPartitionStrategy()
-        .partitionKey(firstName, lastName);
+    Marker key = new Marker.Builder().add("firstName", firstName).add("lastName",
+        lastName).get();
 
     // Get the profile and actions entity from the composite dao.
     DatasetAccessor<UserProfileActionsModel2> accessor = userProfileActionsDataset.newAccessor();

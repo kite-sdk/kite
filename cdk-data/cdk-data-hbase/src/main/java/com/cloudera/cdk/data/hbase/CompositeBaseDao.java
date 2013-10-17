@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.Marker;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -184,8 +185,23 @@ public abstract class CompositeBaseDao<E, S> implements CompositeDao<E, S> {
   }
 
   @Override
+  public E get(Marker key) {
+    return baseDao.get(key);
+  }
+
+  @Override
   public boolean put(E entity) {
     return baseDao.put(entity);
+  }
+
+  @Override
+  public long increment(Marker key, String fieldName, long amount) {
+    return baseDao.increment(key, fieldName, amount);
+  }
+
+  @Override
+  public void delete(Marker key) {
+    baseDao.delete(key);
   }
 
   @Override

@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.Marker;
 import org.apache.hadoop.hbase.client.HTablePool;
 
 import com.cloudera.cdk.data.PartitionKey;
@@ -99,6 +100,21 @@ public class BaseDao<E> implements Dao<E> {
     PartitionKey key = getPartitionStrategy().partitionKeyForEntity(entity);
     return clientTemplate.delete(key, entityMapper.getRequiredColumns(),
         checkAction, entityMapper.getKeySerDe());
+  }
+
+  @Override
+  public E get(Marker key) {
+    return get(getPartitionStrategy().keyFor(key));
+  }
+
+  @Override
+  public long increment(Marker key, String fieldName, long amount) {
+    return increment(getPartitionStrategy().keyFor(key), fieldName, amount);
+  }
+
+  @Override
+  public void delete(Marker key) {
+    delete(getPartitionStrategy().keyFor(key));
   }
 
   @Override
