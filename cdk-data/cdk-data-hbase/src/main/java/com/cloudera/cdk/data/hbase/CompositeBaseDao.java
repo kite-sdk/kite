@@ -16,6 +16,7 @@
 package com.cloudera.cdk.data.hbase;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +31,7 @@ import com.cloudera.cdk.data.dao.EntityBatch;
 import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.KeySchema;
 
 /**
@@ -44,8 +46,7 @@ import com.cloudera.cdk.data.dao.KeySchema;
  * @param <S>
  *          The type of the sub entities.
  */
-public abstract class CompositeBaseDao<E, S> implements
-    CompositeDao<E, S> {
+public abstract class CompositeBaseDao<E, S> implements CompositeDao<E, S> {
 
   private final BaseDao<E> baseDao;
 
@@ -87,6 +88,11 @@ public abstract class CompositeBaseDao<E, S> implements
           PutAction put = entityMappers.get(i).mapFromEntity(subEntity);
           if (keyBytes == null) {
             keyBytes = put.getPut().getRow();
+          } else {
+            if (!Arrays.equals(keyBytes, put.getPut().getRow())) {
+              throw new HBaseCommonException(
+                  "Composite entity keys didn't serialize to the same row bytes.");
+            }
           }
           puts.add(entityMappers.get(i).mapFromEntity(subEntity));
         }
@@ -95,7 +101,8 @@ public abstract class CompositeBaseDao<E, S> implements
     }
 
     @Override
-    public Increment mapToIncrement(PartitionKey key, String fieldName, long amount) {
+    public Increment mapToIncrement(PartitionKey key, String fieldName,
+        long amount) {
       throw new UnsupportedOperationException(
           "We don't currently support increment on CompositeDaos");
     }
@@ -140,8 +147,7 @@ public abstract class CompositeBaseDao<E, S> implements
         tables.addAll(entityMapper.getEntitySchema().getTables());
         fieldMappings.addAll(entityMapper.getEntitySchema().getFieldMappings());
       }
-      return new EntitySchema(tables, null, fieldMappings,
-          transactional);
+      return new EntitySchema(tables, null, fieldMappings, transactional);
     }
 
     @Override
@@ -170,8 +176,8 @@ public abstract class CompositeBaseDao<E, S> implements
    */
   public CompositeBaseDao(HTablePool tablePool, String tableName,
       List<EntityMapper<S>> entityMappers) {
-    baseDao = new BaseDao<E>(tablePool, tableName,
-        new CompositeEntityMapper(entityMappers));
+    baseDao = new BaseDao<E>(tablePool, tableName, new CompositeEntityMapper(
+        entityMappers));
   }
 
   @Override
@@ -206,8 +212,7 @@ public abstract class CompositeBaseDao<E, S> implements
   }
 
   @Override
-  public EntityScanner<E> getScanner(PartitionKey startKey,
-      PartitionKey stopKey) {
+  public EntityScanner<E> getScanner(PartitionKey startKey, PartitionKey stopKey) {
     return baseDao.getScanner(startKey, stopKey);
   }
 
@@ -230,7 +235,7 @@ public abstract class CompositeBaseDao<E, S> implements
   public EntityBatch<E> newBatch() {
     return baseDao.newBatch();
   }
-  
+
   @Override
   public PartitionStrategy getPartitionStrategy() {
     return baseDao.getPartitionStrategy();

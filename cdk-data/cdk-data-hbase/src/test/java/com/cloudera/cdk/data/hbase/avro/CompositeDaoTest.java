@@ -20,9 +20,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -34,6 +34,7 @@ import org.junit.Test;
 
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.dao.Dao;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.hbase.avro.entities.CompositeRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.SubRecord1;
 import com.cloudera.cdk.data.hbase.avro.entities.SubRecord2;
@@ -170,5 +171,26 @@ public class CompositeDaoTest {
     key = dao.getPartitionStrategy().partitionKey("1", "2");
     compositeRecord = dao.get(key);
     assertEquals(null, compositeRecord.get("SubRecord2"));
+  }
+  
+  @Test(expected = HBaseCommonException.class)
+  public void testIncompatibleKeys() throws Exception {
+    // Construct Dao
+    Dao<Map<String, SpecificRecord>> dao = SpecificAvroDao.buildCompositeDao(
+        tablePool, tableName, 
+        Arrays.asList(subRecord1String, subRecord2String));
+    
+    // Construct records and keys
+    SubRecord1 subRecord1 = SubRecord1.newBuilder().setKeyPart1("1").setKeyPart2("1").setField1("field1_1")
+        .setField2("field1_2").build();
+    SubRecord2 subRecord2 = SubRecord2.newBuilder().setKeyPart1("1").setKeyPart2("unmatched").setField1("field2_1")
+        .setField2("field2_2").build();
+
+    Map<String, SpecificRecord> compositeRecord = new HashMap<String, SpecificRecord>();
+    compositeRecord.put("SubRecord1", subRecord1);
+    compositeRecord.put("SubRecord2", subRecord2);
+
+    // Test put and get
+    dao.put(compositeRecord);
   }
 }
