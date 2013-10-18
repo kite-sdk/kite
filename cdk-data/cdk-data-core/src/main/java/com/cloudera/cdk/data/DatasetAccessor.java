@@ -67,7 +67,7 @@ public interface DatasetAccessor<E> {
   public void delete(PartitionKey key);
 
   /**
-   * Deletes the entity in the dataset with {@link PartitionKey} <code>key</code>.
+   * Deletes the entity passed to this method in the dataset.
    * If that entity has a checkConflict field, then the delete will only be performed if
    * the entity in the dataset has the same value as the one in the
    * passed <code>entity</code> object.
@@ -80,6 +80,6 @@ public interface DatasetAccessor<E> {
    * @return True if the delete succeeded, false if the delete failed due to an update
    *         conflict
    */
-  public boolean delete(PartitionKey key, E entity);
+  public boolean delete(E entity);
 
 }

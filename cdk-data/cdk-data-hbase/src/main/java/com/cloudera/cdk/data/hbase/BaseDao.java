@@ -93,9 +93,10 @@ public class BaseDao<E> implements Dao<E> {
   }
 
   @Override
-  public boolean delete(PartitionKey key, E entity) {
+  public boolean delete(E entity) {
     VersionCheckAction checkAction = entityMapper.mapFromEntity(entity)
         .getVersionCheckAction();
+    PartitionKey key = getPartitionStrategy().partitionKeyForEntity(entity);
     return clientTemplate.delete(key, entityMapper.getRequiredColumns(),
         checkAction, entityMapper.getKeySerDe());
   }
@@ -180,5 +181,4 @@ public class BaseDao<E> implements Dao<E> {
   public PartitionStrategy getPartitionStrategy() {
     return entityMapper.getKeySchema().getPartitionStrategy();
   }
-
 }

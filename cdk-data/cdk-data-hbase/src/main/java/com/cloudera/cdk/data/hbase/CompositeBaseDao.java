@@ -196,8 +196,8 @@ public abstract class CompositeBaseDao<E, S> implements
   }
 
   @Override
-  public boolean delete(PartitionKey key, E entity) {
-    return baseDao.delete(key, entity);
+  public boolean delete(E entity) {
+    return baseDao.delete(entity);
   }
 
   @Override
