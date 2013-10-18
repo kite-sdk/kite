@@ -33,6 +33,7 @@ import org.apache.avro.io.Encoder;
 
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.hbase.KeySerDe;
 import com.cloudera.cdk.data.hbase.avro.io.MemcmpDecoder;
 import com.cloudera.cdk.data.hbase.avro.io.MemcmpEncoder;
@@ -72,20 +73,43 @@ public class AvroKeySerDe implements KeySerDe {
     if (key.getLength() == 0) {
       return new byte[0];
     }
-    
+
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     Encoder encoder = new MemcmpEncoder(outputStream);
-    
+
     Schema schemaToUse;
     if (key.getLength() == schema.getFields().size()) {
       schemaToUse = schema;
     } else {
-      schemaToUse = partialSchemas[key.getLength()-1];
+      schemaToUse = partialSchemas[key.getLength() - 1];
     }
-    DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schemaToUse);
+    DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(
+        schemaToUse);
     GenericRecord record = new GenericData.Record(schemaToUse);
     for (int i = 0; i < key.getLength(); i++) {
-      record.put(i, key.get(i));
+      Object keyPart = key.get(i);
+      if (keyPart == null) {
+        // keyPart is null, let's make sure we check that the key can support a
+        // null value so we can throw a friendly exception if it can't.
+        Schema fieldSchema = schemaToUse.getFields().get(i).schema();
+        if (fieldSchema.getType() != Schema.Type.NULL
+            && fieldSchema.getType() != Schema.Type.UNION) {
+          throw new HBaseCommonException(
+              "Null key field only supported in null type or union type that has a null type.");
+        } else if (fieldSchema.getType() == Schema.Type.UNION) {
+          boolean foundNullInUnion = false;
+          for (Schema unionSchema : fieldSchema.getTypes()) {
+            if (unionSchema.getType() == Schema.Type.NULL) {
+              foundNullInUnion = true;
+            }
+          }
+          if (!foundNullInUnion) {
+            throw new HBaseCommonException(
+                "Null key field only supported in union type that has a null type.");
+          }
+        }
+      }
+      record.put(i, keyPart);
     }
     AvroUtils.writeAvroEntity(record, encoder, datumWriter);
     return outputStream.toByteArray();

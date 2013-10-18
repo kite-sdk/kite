@@ -40,6 +40,7 @@ import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.dao.EntityBatch;
 import com.cloudera.cdk.data.dao.EntityScanner;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
@@ -345,6 +346,19 @@ public class AvroDaoTest {
       TestRecord record = dao.get(key);
       assertEquals("field1_" + i, record.getField1().toString());
     }
+  }
+  
+  @Test(expected = HBaseCommonException.class)
+  public void testPutWithNullKey() throws Exception {
+    Dao<GenericRecord> dao = new GenericAvroDao(tablePool, tableName,
+        schemaString);
+    @SuppressWarnings("deprecation")
+    GenericRecord entity = new GenericData.Record(Schema.parse(schemaString));
+    entity.put("keyPart1", "part1");
+    entity.put("keyPart2", null);
+    entity.put("field1", "field1");
+    entity.put("field2", "field2");
+    dao.put(entity);
   }
 
   private TestRecord createSpecificEntity(String keyPart1, String keyPart2) {
