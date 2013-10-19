@@ -15,7 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase.manager;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +26,7 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.dao.ConcurrentSchemaModificationException;
 import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.HBaseCommonException;
@@ -35,6 +36,7 @@ import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.dao.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.KeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
+import com.google.common.collect.Lists;
 
 /**
  * The Default SchemaManager implementation. It uses a ManagedSchemaDao
@@ -193,6 +195,7 @@ public class DefaultSchemaManager implements SchemaManager {
     refreshManagedSchemaCache(tableName, entityName);
 
     KeyEntitySchemaParser<?, ?> schemaParser = getSchemaParser(schemaParserType);
+    KeySchema keySchema = schemaParser.parseKeySchema(entitySchemaStr);
     EntitySchema entitySchema = schemaParser.parseEntitySchema(entitySchemaStr);
 
     try {
@@ -232,10 +235,11 @@ public class DefaultSchemaManager implements SchemaManager {
         .getSchemaType());
 
     // validate it's a valid avro schema by parsing it
-    EntitySchema newSchema = schemaParser.parseEntitySchema(newSchemaStr);
+    EntitySchema newEntitySchema = schemaParser.parseEntitySchema(newSchemaStr);
+    KeySchema newKeySchema = schemaParser.parseKeySchema(newSchemaStr);
 
     // verify that the newSchema isn't a duplicate of a previous schema version.
-    int existingVersion = getEntityVersion(tableName, entityName, newSchema);
+    int existingVersion = getEntityVersion(tableName, entityName, newEntitySchema);
     if (existingVersion != -1) {
       throw new IncompatibleSchemaException(
           "Schema already exists as version: "
@@ -254,17 +258,25 @@ public class DefaultSchemaManager implements SchemaManager {
         greatestSchemaVersion = version;
       }
       String schemaString = entry.getValue();
-      if (!newSchema.compatible(schemaParser.parseEntitySchema(schemaString))) {
+      KeySchema keySchema = schemaParser.parseKeySchema(schemaString);
+      EntitySchema entitySchema = schemaParser.parseEntitySchema(schemaString);
+      if (!newKeySchema.compatible(keySchema)) {
+        String msg = "Key fields of entity schema not compatible with version "
+            + Integer.toString(version) + ": Old schema: " + schemaString
+            + " New schema: " + newEntitySchema.getRawSchema();
+        throw new IncompatibleSchemaException(msg);
+      }
+      if (!newEntitySchema.compatible(entitySchema)) {
         String msg = "Avro schema not compatible with version "
             + Integer.toString(version) + ": Old schema: " + schemaString
-            + " New schema: " + newSchema.getRawSchema();
+            + " New schema: " + newEntitySchema.getRawSchema();
         throw new IncompatibleSchemaException(msg);
       }
     }
 
     // at this point, the schema is a valid migration. persist it.
     managedSchema.getEntitySchemas().put(
-        Integer.toString(greatestSchemaVersion + 1), newSchema.getRawSchema());
+        Integer.toString(greatestSchemaVersion + 1), newEntitySchema.getRawSchema());
     if (!managedSchemaDao.save(managedSchema)) {
       throw new ConcurrentSchemaModificationException(
           "The schema has been updated concurrently.");

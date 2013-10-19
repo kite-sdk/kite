@@ -52,6 +52,27 @@ public class KeySchema {
     this.rawSchema = rawSchema;
     this.partitionStrategy = partitionStrategy;
   }
+  
+  /**
+   * Method meant to determine if two KeySchemas are compatible with each
+   * other for schema migration purposes. Classes that inherit KeySchema
+   * should override this implementation, since this implementation isn't able
+   * to make that determination.
+   * 
+   * TODO: Figure out a base set of properties that all key schema
+   * implementations should share in their implementation of determining
+   * compatibility and execute that here.
+   * 
+   * @param keySchema
+   *          The other KeySchema to determine compatible with
+   * @return
+   */
+  public boolean compatible(KeySchema keySchema) {
+    // throw an exception if anyone calls this directly, as this should be
+    // overridden in derived classes.
+    throw new UnsupportedOperationException(
+        "KeyScheam class can't determine if two key schemas are compatible.");
+  }
 
   /**
    * Get the raw schema

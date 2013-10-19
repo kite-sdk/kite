@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 
+import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
 import com.cloudera.cdk.data.dao.KeySchema;
@@ -54,10 +55,30 @@ public class AvroKeySchema extends KeySchema {
     }
     this.schema = Schema.createRecord(fieldsPartOfKey);
   }
-  
-  public AvroKeySchema(Schema schema, String rawSchema, PartitionStrategy partitionStrategy) {
+
+  public AvroKeySchema(Schema schema, String rawSchema,
+      PartitionStrategy partitionStrategy) {
     super(rawSchema, partitionStrategy);
     this.schema = schema;
+  }
+
+  @Override
+  public boolean compatible(KeySchema keySchema) {
+    List<FieldPartitioner> fieldPartitioners = getPartitionStrategy()
+        .getFieldPartitioners();
+    List<FieldPartitioner> otherFieldPartitioners = keySchema
+        .getPartitionStrategy().getFieldPartitioners();
+    if (fieldPartitioners.size() != otherFieldPartitioners.size()) {
+      return false;
+    }
+
+    for (int i = 0; i < fieldPartitioners.size(); i++) {
+      if (!fieldPartitioners.get(i).getType()
+          .equals(otherFieldPartitioners.get(i).getType())) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**

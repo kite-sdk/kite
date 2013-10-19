@@ -61,6 +61,7 @@ public class ManagedDaoTest {
 
   private static final String testRecord;
   private static final String testRecordv2;
+  private static final String badMigrationRecordAddKeyField;
   private static final String badMigrationRecordAddFieldNoDefault;
   private static final String badMigrationRecordAddSubFieldNoDefault;
   private static final String badMigrationRecordModifiedMapping;
@@ -80,6 +81,9 @@ public class ManagedDaoTest {
           .getResourceAsStream("/TestRecord.avsc"));
       testRecordv2 = AvroUtils.inputStreamToString(AvroDaoTest.class
           .getResourceAsStream("/TestRecordv2.avsc"));
+      badMigrationRecordAddKeyField = AvroUtils
+          .inputStreamToString(AvroDaoTest.class
+              .getResourceAsStream("/BadMigrationRecordAddKeyField.avsc"));      
       badMigrationRecordAddFieldNoDefault = AvroUtils
           .inputStreamToString(AvroDaoTest.class
               .getResourceAsStream("/BadMigrationRecordAddFieldNoDefault.avsc"));
@@ -491,6 +495,11 @@ public class ManagedDaoTest {
 
     dao.increment(key, "increment", 5);
     assertEquals(25L, (long) dao.get(key).getIncrement());
+  }
+  
+  @Test(expected = IncompatibleSchemaException.class)
+  public void testBadMigrationKeyField() throws Exception {
+    badMigration(badMigrationRecordAddKeyField);
   }
 
   @Test(expected = IncompatibleSchemaException.class)
