@@ -61,29 +61,29 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
       final char c = line.charAt(pointer);
 
       if (!isQuoted) {
-          if (c == DELIMITER) {
+        if (c == DELIMITER) {
+          put(sb, j, record);
+          j++;
+          sb.setLength(0);
+        } else if (c == NEW_LINE) {
+          if (!(j == 0 && sb.length() == 0)) {
             put(sb, j, record);
             j++;
-            sb.setLength(0);
-          } else if (c == NEW_LINE) {
-            if (!(j == 0 && sb.length() == 0)) {
-              put(sb, j, record);
-              j++;
-            }
-            return;
-          } else if (c == QUOTE) {
-            if (sb.length() == 0) {
-              isQuoted = true;
-            } else if (line.charAt(pointer + 1) == QUOTE) {
-              sb.append(c);
-              pointer++;
-            } else {
-              isQuoted = true;
-            }
-          } else {
-            sb.append(c);
           }
-          
+          return;
+        } else if (c == QUOTE) {
+          if (sb.length() == 0) {
+            isQuoted = true;
+          } else if (line.charAt(pointer + 1) == QUOTE) {
+            sb.append(c);
+            pointer++;
+          } else {
+            isQuoted = true;
+          }
+        } else {
+          sb.append(c);
+        }
+        
       } else {
         assert isQuoted;
         if (c == NEW_LINE) {
