@@ -43,10 +43,6 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
     this.quoteChar = quoteChar;
   }
   
-  private enum State {
-    NORMAL, QUOTED
-  }
-
   /** Splits the given input line into parts, using the given delimiter. */
   @Override
   public void tokenizeLine(String line, BufferedReader reader, Record record) throws IOException {
@@ -57,15 +53,14 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
     final StringBuilder sb = new StringBuilder(30);
 
     line += NEW_LINE;
-    State state = State.NORMAL;
+    boolean isQuoted = false;
 
     int pointer = 0;
     int j = 0;
     while (true) {
       final char c = line.charAt(pointer);
 
-      switch (state) {
-        case NORMAL:
+      if (!isQuoted) {
           if (c == DELIMITER) {
             put(sb, j, record);
             j++;
@@ -78,39 +73,37 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
             return;
           } else if (c == QUOTE) {
             if (sb.length() == 0) {
-              state = State.QUOTED;
+              isQuoted = true;
             } else if (line.charAt(pointer + 1) == QUOTE) {
               sb.append(c);
               pointer++;
             } else {
-              state = State.QUOTED;
+              isQuoted = true;
             }
           } else {
             sb.append(c);
           }
-          break;
-
-        case QUOTED:
-          if (c == NEW_LINE) {
-            sb.append(NEW_LINE);
-            pointer = -1;
-            line = reader.readLine();
-            if (line == null) {
-              throw new IllegalStateException("unexpected end of file, unclosed quotation");
-            }
-            line += NEW_LINE;
-          } else if (c == QUOTE) {
-            if (line.charAt(pointer + 1) == QUOTE) {
-              sb.append(c);
-              pointer++;
-              break;
-            } else {
-              state = State.NORMAL;
-            }
-          } else {
-            sb.append(c);
+          
+      } else {
+        assert isQuoted;
+        if (c == NEW_LINE) {
+          sb.append(NEW_LINE);
+          pointer = -1;
+          line = reader.readLine();
+          if (line == null) {
+            throw new IllegalStateException("unexpected end of file, unclosed quotation");
           }
-          break;
+          line += NEW_LINE;
+        } else if (c == QUOTE) {
+          if (line.charAt(pointer + 1) == QUOTE) {
+            sb.append(c);
+            pointer++;
+          } else {
+            isQuoted = false;
+          }
+        } else {
+          sb.append(c);
+        }
       }
 
       pointer++;
