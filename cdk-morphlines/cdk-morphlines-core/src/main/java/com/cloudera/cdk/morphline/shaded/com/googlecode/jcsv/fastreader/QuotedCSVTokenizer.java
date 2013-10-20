@@ -48,12 +48,11 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
   public void tokenizeLine(String line, BufferedReader reader, Record record) throws IOException {
     final char DELIMITER = separatorChar;
     final char QUOTE = quoteChar;
-    final char NEW_LINE = '\n';
-
     final StringBuilder sb = new StringBuilder(30);
     boolean isQuoted = false;
     int i = 0;
     int j = 0;
+    
     while (i < line.length() || isQuoted) {
       
       if (!isQuoted) {
@@ -78,7 +77,7 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
       } else {
         assert isQuoted;
         if (i == line.length()) {
-          sb.append(NEW_LINE);
+          sb.append('\n');
           i = -1;
           line = reader.readLine();
           if (line == null) {
