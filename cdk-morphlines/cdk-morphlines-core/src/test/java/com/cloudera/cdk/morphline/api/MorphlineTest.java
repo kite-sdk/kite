@@ -710,7 +710,9 @@ public class MorphlineTest extends AbstractMorphlineTest {
           
           ImmutableMultimap.of("Age", "100", "Extras", "Labeled \"Vintage 1913\"", "Type", "yes"),
           
-          ImmutableMultimap.of("Age", "5", "Extras", "none", "Type", "This is a\nmulti, line text", "column4", "no")
+          ImmutableMultimap.of("Age", "5", "Extras", "none", "Type", "This is a\nmulti, line text", "column4", "no\""),
+          
+          ImmutableMultimap.of("Age", "6", "Extras", "many", "Type", "Another multi, line text", "column4", "maybe")
           );
       in.close();
     }

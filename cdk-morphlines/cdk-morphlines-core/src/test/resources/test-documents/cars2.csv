@@ -6,4 +6,6 @@ Age,Color,Extras,Type,Used
 
 100,red,Labeled ""Vintage 1913"",yes
 5,orange,none,"This is a
-multi, line text",no
+multi, line text",no""
+6,white,many,"
+Another multi, line text",maybe

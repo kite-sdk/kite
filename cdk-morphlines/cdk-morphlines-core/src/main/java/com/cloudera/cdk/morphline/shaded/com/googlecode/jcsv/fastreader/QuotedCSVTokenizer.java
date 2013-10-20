@@ -51,62 +51,59 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
     final char NEW_LINE = '\n';
 
     final StringBuilder sb = new StringBuilder(30);
-
-    line += NEW_LINE;
     boolean isQuoted = false;
-
-    int pointer = 0;
+    int i = 0;
     int j = 0;
-    while (true) {
-      final char c = line.charAt(pointer);
-
+    while (i < line.length() || isQuoted) {
+      
       if (!isQuoted) {
+        final char c = line.charAt(i);
         if (c == DELIMITER) {
           put(sb, j, record);
           j++;
           sb.setLength(0);
-        } else if (c == NEW_LINE) {
-          if (!(j == 0 && sb.length() == 0)) {
-            put(sb, j, record);
-            j++;
-          }
-          return;
         } else if (c == QUOTE) {
           if (sb.length() == 0) {
             isQuoted = true;
-          } else if (line.charAt(pointer + 1) == QUOTE) {
+          } else if (i + 1 < line.length() && line.charAt(i + 1) == QUOTE) {
             sb.append(c);
-            pointer++;
+            i++;
           } else {
             isQuoted = true;
           }
         } else {
           sb.append(c);
         }
-        
+          
       } else {
         assert isQuoted;
-        if (c == NEW_LINE) {
+        if (i == line.length()) {
           sb.append(NEW_LINE);
-          pointer = -1;
+          i = -1;
           line = reader.readLine();
           if (line == null) {
             throw new IllegalStateException("unexpected end of file, unclosed quotation");
           }
-          line += NEW_LINE;
-        } else if (c == QUOTE) {
-          if (line.charAt(pointer + 1) == QUOTE) {
-            sb.append(c);
-            pointer++;
-          } else {
-            isQuoted = false;
-          }
         } else {
-          sb.append(c);
+          final char c = line.charAt(i);
+          if (c == QUOTE) {
+            if (i + 1 < line.length() && line.charAt(i + 1) == QUOTE) {
+              sb.append(c); // found two quotes -> insert single quote
+              i++;
+            } else {
+              isQuoted = false;
+            }
+          } else {
+            sb.append(c);
+          }
         }
       }
 
-      pointer++;
+      i++;
+    }
+    
+    if (!(j == 0 && sb.length() == 0)) {
+      put(sb, j, record);
     }
   }
   
