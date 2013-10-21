@@ -21,6 +21,7 @@ import com.cloudera.cdk.data.Format;
 import com.cloudera.cdk.data.Formats;
 import com.cloudera.cdk.data.UnknownFormatException;
 import com.cloudera.cdk.data.spi.AbstractDatasetReader;
+import com.cloudera.cdk.data.spi.ReaderWriterState;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.fs.FileSystem;

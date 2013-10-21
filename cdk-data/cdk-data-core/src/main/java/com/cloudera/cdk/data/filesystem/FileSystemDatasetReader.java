@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
+import com.cloudera.cdk.data.spi.ReaderWriterState;
 import com.cloudera.cdk.data.DatasetReaderException;
 import com.cloudera.cdk.data.spi.AbstractDatasetReader;
 import com.google.common.base.Objects;
