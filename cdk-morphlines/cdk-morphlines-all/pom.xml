@@ -54,6 +54,10 @@
       </dependency>
       <dependency>
         <groupId>com.cloudera.cdk</groupId>
+        <artifactId>cdk-morphlines-hadoop-rcfile</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>com.cloudera.cdk</groupId>
         <artifactId>cdk-morphlines-tika-core</artifactId>
       </dependency>
       <dependency>

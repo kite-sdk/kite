@@ -75,6 +75,9 @@ dependencies yourself:
 * CDK Morphlines Hadoop Sequence File
  [Dependency Information](cdk-morphlines/cdk-morphlines-hadoop-sequencefile/dependency-info.html),
  [Dependencies](cdk-morphlines/cdk-morphlines-hadoop-sequencefile/dependencies.html)
+* CDK Morphlines Hadoop RC File
+ [Dependency Information](cdk-morphlines/cdk-morphlines-hadoop-rcfile/dependency-info.html),
+ [Dependencies](cdk-morphlines/cdk-morphlines-hadoop-rcfile/dependencies.html)
 * CDK Morphlines Metrics Servlets
  [Dependency Information](cdk-morphlines/cdk-morphlines-metrics-servlets/dependency-info.html),
  [Dependencies](cdk-morphlines/cdk-morphlines-metrics-servlets/dependencies.html)
