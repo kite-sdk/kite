@@ -53,9 +53,12 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
     int i = 0;
     int j = 0;
     
-    while (i < line.length() || isQuoted) {
+    while (true) {
       
       if (!isQuoted) {
+        if (i == line.length()) {
+          break; // we're done
+        }
         final char c = line.charAt(i);
         if (c == DELIMITER) {
           put(sb, j, record);
