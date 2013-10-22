@@ -147,7 +147,7 @@ public abstract class CompositeBaseDao<E, S> implements CompositeDao<E, S> {
         tables.addAll(entityMapper.getEntitySchema().getTables());
         fieldMappings.addAll(entityMapper.getEntitySchema().getFieldMappings());
       }
-      return new EntitySchema(tables, null, fieldMappings, transactional);
+      return new EntitySchema(tables, null, null, fieldMappings, transactional);
     }
 
     @Override

@@ -71,14 +71,7 @@ public class AvroKeySchema extends KeySchema {
     if (fieldPartitioners.size() != otherFieldPartitioners.size()) {
       return false;
     }
-
-    for (int i = 0; i < fieldPartitioners.size(); i++) {
-      if (!fieldPartitioners.get(i).getType()
-          .equals(otherFieldPartitioners.get(i).getType())) {
-        return false;
-      }
-    }
-    return true;
+    return AvroUtils.avroSchemaTypesEqual(schema, ((AvroKeySchema)keySchema).schema);
   }
 
   /**

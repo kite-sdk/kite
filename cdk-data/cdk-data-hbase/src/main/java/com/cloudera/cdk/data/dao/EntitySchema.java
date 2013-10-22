@@ -33,12 +33,15 @@ public class EntitySchema {
   private final Collection<String> tables;
   private final Map<String, FieldMapping> fieldMappings = new HashMap<String, FieldMapping>();
   private final String rawSchema;
+  private final String name;
 
   /**
    * Constructs the EntitySchema
    * 
    * @param tables
    *          The tables this EntitySchema can be persisted to
+   * @param name
+   *          The name of the entity schema 
    * @param rawSchema
    *          The raw schema type that underlies the EntitySchema implementation
    * @param fieldMappings
@@ -47,9 +50,10 @@ public class EntitySchema {
    * @param isTransactional
    *          Specifies whether this entity participates in transactions
    */
-  public EntitySchema(Collection<String> tables, String rawSchema,
+  public EntitySchema(Collection<String> tables, String name, String rawSchema,
       Collection<FieldMapping> fieldMappings, boolean isTransactional) {
     this.tables = tables;
+    this.name = name;
     this.rawSchema = rawSchema;
     this.isTransactional = isTransactional;
     for (FieldMapping fieldMapping : fieldMappings) {
@@ -73,6 +77,15 @@ public class EntitySchema {
    */
   public Collection<String> getTables() {
     return tables;
+  }
+  
+  /**
+   * Get the name of this EntitySchema
+   * 
+   * @return The name
+   */
+  public String getName() {
+    return name;
   }
 
   /**
@@ -201,7 +214,7 @@ public class EntitySchema {
     public String getMappingValue() {
       return mappingValue;
     }
-
+    
     public boolean isIncrementable() {
       return incrementable;
     }

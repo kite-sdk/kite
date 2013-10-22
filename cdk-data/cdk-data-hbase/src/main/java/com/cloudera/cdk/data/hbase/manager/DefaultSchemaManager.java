@@ -17,21 +17,24 @@ package com.cloudera.cdk.data.hbase.manager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.dao.ConcurrentSchemaModificationException;
 import com.cloudera.cdk.data.dao.EntitySchema;
+import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
 import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.IncompatibleSchemaException;
 import com.cloudera.cdk.data.dao.KeySchema;
+import com.cloudera.cdk.data.dao.MappingType;
 import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.dao.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.KeyEntitySchemaParser;
@@ -45,7 +48,8 @@ import com.google.common.collect.Lists;
  */
 public class DefaultSchemaManager implements SchemaManager {
 
-  private static Logger LOG = LoggerFactory.getLogger(DefaultSchemaManager.class);
+  private static Logger LOG = LoggerFactory
+      .getLogger(DefaultSchemaManager.class);
 
   /**
    * A mapping of managed schema row keys to the managed schema entities.
@@ -109,7 +113,7 @@ public class DefaultSchemaManager implements SchemaManager {
     String greatestVersionedSchema = getGreatestEntitySchemaString(managedSchema);
     return schemaParser.parseEntitySchema(greatestVersionedSchema);
   }
-  
+
   private String getGreatestEntitySchemaString(ManagedSchema managedSchema) {
     int greatestVersion = -1;
     String greatestVersionedSchema = null;
@@ -123,11 +127,12 @@ public class DefaultSchemaManager implements SchemaManager {
     }
 
     if (greatestVersionedSchema == null) {
-      String msg = "No schema versions for " + managedSchema.getTable() + ", " + managedSchema.getName();
+      String msg = "No schema versions for " + managedSchema.getTable() + ", "
+          + managedSchema.getName();
       LOG.error(msg);
       throw new SchemaNotFoundException(msg);
     }
-    
+
     return greatestVersionedSchema;
   }
 
@@ -164,7 +169,8 @@ public class DefaultSchemaManager implements SchemaManager {
     Map<Integer, EntitySchema> retMap = new HashMap<Integer, EntitySchema>();
     for (Entry<String, String> entry : managedSchema.getEntitySchemas()
         .entrySet()) {
-      EntitySchema entitySchema = schemaParser.parseEntitySchema(entry.getValue());
+      EntitySchema entitySchema = schemaParser.parseEntitySchema(entry
+          .getValue());
       retMap.put(Integer.parseInt(entry.getKey()), entitySchema);
     }
     return retMap;
@@ -177,7 +183,8 @@ public class DefaultSchemaManager implements SchemaManager {
         tableName, entityName).getSchemaType());
     for (Entry<Integer, String> entry : getManagedSchemaVersions(tableName,
         entityName).entrySet()) {
-      EntitySchema managedSchema = schemaParser.parseEntitySchema(entry.getValue());
+      EntitySchema managedSchema = schemaParser.parseEntitySchema(entry
+          .getValue());
       if (schema.equals(managedSchema)) {
         return entry.getKey();
       }
@@ -187,8 +194,8 @@ public class DefaultSchemaManager implements SchemaManager {
 
   @Override
   public void createSchema(String tableName, String entityName,
-      String entitySchemaStr, String schemaParserType,
-      String keySerDeType, String entitySerDeType) {
+      String entitySchemaStr, String schemaParserType, String keySerDeType,
+      String entitySerDeType) {
 
     // We want to make sure the managed schema map has as recent
     // a copy of the managed schema in HBase as possible.
@@ -208,6 +215,10 @@ public class DefaultSchemaManager implements SchemaManager {
       // we want the schema to not be found, continue
     }
 
+    // Validate that this schema is compatible with other schemas registered
+    // with this same table.
+    validateCompatibleWithTableSchemas(tableName, keySchema, entitySchema);
+
     ManagedSchema managedSchema = ManagedSchema.newBuilder()
         .setName(entityName).setTable(tableName)
         .setEntitySchemas(new HashMap<String, String>())
@@ -220,7 +231,9 @@ public class DefaultSchemaManager implements SchemaManager {
       throw new ConcurrentSchemaModificationException(
           "The schema has been updated concurrently.");
     }
-    getManagedSchemaMap().put(getManagedSchemaMapKey(managedSchema.getTable(), managedSchema.getName()), managedSchema);
+    getManagedSchemaMap().put(
+        getManagedSchemaMapKey(managedSchema.getTable(),
+            managedSchema.getName()), managedSchema);
   }
 
   @Override
@@ -239,7 +252,8 @@ public class DefaultSchemaManager implements SchemaManager {
     KeySchema newKeySchema = schemaParser.parseKeySchema(newSchemaStr);
 
     // verify that the newSchema isn't a duplicate of a previous schema version.
-    int existingVersion = getEntityVersion(tableName, entityName, newEntitySchema);
+    int existingVersion = getEntityVersion(tableName, entityName,
+        newEntitySchema);
     if (existingVersion != -1) {
       throw new IncompatibleSchemaException(
           "Schema already exists as version: "
@@ -274,9 +288,14 @@ public class DefaultSchemaManager implements SchemaManager {
       }
     }
 
+    // Validate that this schema is compatible with other schemas registered
+    // with this same table.
+    validateCompatibleWithTableSchemas(tableName, newKeySchema, newEntitySchema);
+
     // at this point, the schema is a valid migration. persist it.
     managedSchema.getEntitySchemas().put(
-        Integer.toString(greatestSchemaVersion + 1), newEntitySchema.getRawSchema());
+        Integer.toString(greatestSchemaVersion + 1),
+        newEntitySchema.getRawSchema());
     if (!managedSchemaDao.save(managedSchema)) {
       throw new ConcurrentSchemaModificationException(
           "The schema has been updated concurrently.");
@@ -296,7 +315,9 @@ public class DefaultSchemaManager implements SchemaManager {
           "The schema has been updated concurrently.");
     }
 
-    getManagedSchemaMap().remove(getManagedSchemaMapKey(managedSchema.getTable(), managedSchema.getName()));
+    getManagedSchemaMap().remove(
+        getManagedSchemaMapKey(managedSchema.getTable(),
+            managedSchema.getName()));
   }
 
   /**
@@ -310,11 +331,12 @@ public class DefaultSchemaManager implements SchemaManager {
    */
   @Override
   public void refreshManagedSchemaCache(String tableName, String entityName) {
-    ManagedSchema managedSchema = managedSchemaDao.getManagedSchema(
-        tableName, entityName);
+    ManagedSchema managedSchema = managedSchemaDao.getManagedSchema(tableName,
+        entityName);
     if (managedSchema != null) {
-      getManagedSchemaMap().put(getManagedSchemaMapKey(managedSchema.getTable(), managedSchema.getName()),
-          managedSchema);
+      getManagedSchemaMap().put(
+          getManagedSchemaMapKey(managedSchema.getTable(),
+              managedSchema.getName()), managedSchema);
     }
   }
 
@@ -354,8 +376,9 @@ public class DefaultSchemaManager implements SchemaManager {
    */
   private void populateManagedSchemaMap() {
     for (ManagedSchema managedSchema : managedSchemaDao.getManagedSchemas()) {
-      getManagedSchemaMap().put(getManagedSchemaMapKey(managedSchema.getTable(), managedSchema.getName()),
-          managedSchema);
+      getManagedSchemaMap().put(
+          getManagedSchemaMapKey(managedSchema.getTable(),
+              managedSchema.getName()), managedSchema);
     }
   }
 
@@ -371,13 +394,17 @@ public class DefaultSchemaManager implements SchemaManager {
    */
   private ManagedSchema getManagedSchemaFromSchemaMap(String tableName,
       String entityName) {
-    return getManagedSchemaMap().get(getManagedSchemaMapKey(tableName, entityName));
+    return getManagedSchemaMap().get(
+        getManagedSchemaMapKey(tableName, entityName));
   }
 
   /**
+   * Get the schema parser by its classname. This method will cache the
+   * constructed schema parsers.
    * 
    * @param schemaParserClassName
-   * @return
+   *          The class name of the schema parser
+   * @return The constructed schema parser.
    */
   @SuppressWarnings("unchecked")
   private KeyEntitySchemaParser<?, ?> getSchemaParser(
@@ -449,7 +476,205 @@ public class DefaultSchemaManager implements SchemaManager {
     }
     return managedSchema;
   }
-  
+
+  /**
+   * Validate that a KeySchema and EntitySchema will be compatible with the
+   * other schemas registered with a table. This includes making sure that the
+   * schema doesn't overlap with columns other schemas for the table map to, and
+   * validates that the key schemas are the same.
+   * 
+   * If validation fails, an IncompatibleSchemaException is thrown. Otherwise,
+   * no exception is thrown.
+   * 
+   * @param tableName
+   *          The name of the table who's schemas we want to validate against.
+   * @param keySchema
+   *          The KeySchema to validate against other KeySchemas registered with
+   *          this table
+   * @param entitySchema
+   *          The EntitySchema to validate against other EntitySchemas
+   *          registered with thsi table.
+   */
+  private void validateCompatibleWithTableSchemas(String tableName,
+      KeySchema keySchema, EntitySchema entitySchema) {
+    List<ManagedSchema> entitiesForTable = new ArrayList<ManagedSchema>();
+    for (Entry<String, ManagedSchema> entry : getManagedSchemaMap().entrySet()) {
+      if (entry.getKey().startsWith(tableName + ":")) {
+        entitiesForTable.add(entry.getValue());
+      }
+    }
+    for (ManagedSchema managedSchema : entitiesForTable) {
+      if (!managedSchema.getName().equals(entitySchema.getName())) {
+        KeyEntitySchemaParser<?, ?> parser = getSchemaParser(managedSchema
+            .getSchemaType());
+        for (String schema : managedSchema.getEntitySchemas().values()) {
+          EntitySchema otherEntitySchema = parser.parseEntitySchema(schema);
+          KeySchema otherKeySchema = parser.parseKeySchema(schema);
+          if (!keySchema.compatible(otherKeySchema)) {
+            String msg = "Key fields of schema not compatible with other schema for the table. "
+                + "Table: "
+                + tableName
+                + ". Other schema: "
+                + otherEntitySchema.getRawSchema()
+                + " New schema: "
+                + entitySchema.getRawSchema();
+            throw new IncompatibleSchemaException(msg);
+          }
+          if (!validateCompatibleWithTableColumns(entitySchema,
+              otherEntitySchema)) {
+            String msg = "Column mappings of schema not compatible with other schema for the table. "
+                + "Table: "
+                + tableName
+                + ". Other schema: "
+                + otherEntitySchema.getRawSchema()
+                + " New schema: "
+                + entitySchema.getRawSchema();
+            throw new IncompatibleSchemaException(msg);
+          }
+          if (!validateCompatibleWithTableOccVersion(entitySchema,
+              otherEntitySchema)) {
+            String msg = "OCCVersion mapping of schema not compatible with other schema for the table. "
+                + "Only one schema in the table can have one."
+                + "Table: "
+                + tableName
+                + ". Other schema: "
+                + otherEntitySchema.getRawSchema()
+                + " New schema: "
+                + entitySchema.getRawSchema();
+            throw new IncompatibleSchemaException(msg);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Validate that two schemas for a table don't overlap in columns.
+   * 
+   * @param entitySchema1
+   *          The first schema to compare
+   * @param entitySchema2
+   *          The second schema to compare
+   * @return True if compatible, otherwise False.
+   */
+  private boolean validateCompatibleWithTableColumns(
+      EntitySchema entitySchema1, EntitySchema entitySchema2) {
+
+    // Populate two collections of field mappings. One that contains all
+    // of the column mappings, and one that contains the keyAsColumn
+    // mappings from the first schema. These will be used to compare
+    // against the second schema.
+    Set<String> entitySchema1Columns = new HashSet<String>();
+    List<String> entitySchema1KeyAsColumns = new ArrayList<String>();
+    for (FieldMapping fieldMapping1 : entitySchema1.getFieldMappings()) {
+      if (fieldMapping1.getMappingType() == MappingType.COLUMN) {
+        entitySchema1Columns.add(fieldMapping1.getMappingValue());
+      } else if (fieldMapping1.getMappingType() == MappingType.KEY_AS_COLUMN) {
+        String value = fieldMapping1.getMappingValue();
+        if (fieldMapping1.getPrefix() != null) {
+          value += fieldMapping1.getPrefix();
+        }
+        entitySchema1KeyAsColumns.add(value);
+      }
+    }
+
+    // For each field mapping in the second entity schema, we want to
+    // validate the following:
+    //
+    // 1. That each column mapping in it doesn't map to the same column
+    // as a column mapping in the first schema.
+    //
+    // 2. That each column mapping in it doesn't "startsWith()" with a
+    // keyAsColumn mapping in the first schema, where the keyAsColumn
+    // mapping value is "columnfamily:prefix".
+    //
+    // 3. That each keyAsColumn mapping in it isn't a prefix of one of
+    // the first schema's column mappings.
+    //
+    // 4. That each keyAsColumn mapping in it isn't a prefix of one fo
+    // the first schema's keyAsColumn mappings, and one of the first
+    // schema's mappings isn't a prefix of this schema's keyAsColumn
+    // mappings.
+    for (FieldMapping fieldMapping2 : entitySchema2.getFieldMappings()) {
+      if (fieldMapping2.getMappingType() == MappingType.COLUMN) {
+        String value = fieldMapping2.getMappingValue();
+        if (entitySchema1Columns.contains(value)) {
+          LOG.warn("Field: " + fieldMapping2.getFieldName()
+              + " has a table column conflict with a column mapped field in "
+              + entitySchema1.getName());
+          return false;
+        }
+        for (String keyAsColumn : entitySchema1KeyAsColumns) {
+          if (value.startsWith(keyAsColumn)) {
+            LOG.warn("Field: "
+                + fieldMapping2.getFieldName()
+                + " has a table column conflict with a keyAsColumn mapped field in "
+                + entitySchema1.getName());
+            return false;
+          }
+        }
+      } else if (fieldMapping2.getMappingType() == MappingType.KEY_AS_COLUMN) {
+        String entitySchema2KeyAsColumn = fieldMapping2.getMappingValue();
+        if (fieldMapping2.getPrefix() != null) {
+          entitySchema2KeyAsColumn += fieldMapping2.getPrefix();
+        }
+        for (String entitySchema1KeyAsColumn : entitySchema1KeyAsColumns) {
+          if (entitySchema1KeyAsColumn.startsWith(entitySchema2KeyAsColumn)) {
+            LOG.warn("Field "
+                + fieldMapping2.getFieldName()
+                + " has a table keyAsColumn conflict with a keyAsColumn mapped field in "
+                + entitySchema1.getName());
+            return false;
+          }
+        }
+        for (String entitySchema1Column : entitySchema1Columns) {
+          if (entitySchema1Column.startsWith(entitySchema2KeyAsColumn)) {
+            LOG.warn("Field "
+                + fieldMapping2.getFieldName()
+                + " has a table keyAsColumn conflict with a column mapped field in "
+                + entitySchema1.getName());
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Only one schema for a table should contain an OCCVersion field mapping.
+   * This method will compare two schemas and return true if only one has an
+   * OCC_VERSION field.
+   * 
+   * @param entitySchema1
+   *          The first schema to compare
+   * @param entitySchema2
+   *          The second schema to compare
+   * @return True if compatible, otherwise False.
+   */
+  private boolean validateCompatibleWithTableOccVersion(
+      EntitySchema entitySchema1, EntitySchema entitySchema2) {
+    boolean foundOccMapping = false;
+    for (FieldMapping fieldMapping : entitySchema1.getFieldMappings()) {
+      if (fieldMapping.getMappingType() == MappingType.OCC_VERSION) {
+        foundOccMapping = true;
+        break;
+      }
+    }
+    if (foundOccMapping) {
+      for (FieldMapping fieldMapping : entitySchema2.getFieldMappings()) {
+        if (fieldMapping.getMappingType() == MappingType.OCC_VERSION) {
+          LOG.warn("Field: " + fieldMapping.getFieldName() + " in schema "
+              + entitySchema2.getName()
+              + " conflicts with an occVersion field in "
+              + entitySchema1.getName());
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   private String getManagedSchemaMapKey(String tableName, String entityName) {
     return tableName + ":" + entityName;
   }
