@@ -48,7 +48,7 @@ See [Online Documentation](http://cloudera.github.io/cdk/docs/current/cdk-morphl
 This step builds the software from source.
 
 ```bash
-git clone git@github.com:cloudera/cdk.git
+git clone https://github.com/cloudera/cdk.git
 cd cdk
 #git tag # list available releases
 #git checkout master
