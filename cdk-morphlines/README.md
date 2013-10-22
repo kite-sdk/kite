@@ -50,7 +50,9 @@ This step builds the software from source.
 ```bash
 git clone git@github.com:cloudera/cdk.git
 cd cdk
+#git tag # list available releases
 #git checkout master
+#git checkout release-0.8.0 # or whatever the latest version is
 mvn clean package
 find cdk-morphlines/cdk-morphlines-core/target -name '*.jar'
 find cdk-morphlines/cdk-morphlines-all/target -name '*.jar'
