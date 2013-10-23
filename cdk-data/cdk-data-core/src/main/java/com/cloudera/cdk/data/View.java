@@ -46,23 +46,6 @@ public interface View {
   <E> DatasetReader<E> newReader();
 
   /**
-   * Get an appropriate {@link OrderedDatasetReader} implementation based on
-   * this {@code View} of the underlying {@code Dataset} implementation.
-   *
-   * OrderedReader support is optional.
-   *
-   * Implementations are free to return different types of readers depending on
-   * the disposition of the data. For example, a partitioned dataset may use a
-   * different reader than that of a non-partitioned dataset. Clients should not
-   * make any assumptions about the returned implementations. Implementations
-   * are free to change them at any time.
-   *
-   * @throws DatasetException
-   * @throws UnsupportedOperationException If OrderedReader is not implemented.
-   */
-  <E> OrderedReader<E> newOrderedReader();
-
-  /**
    * Get an appropriate {@link DatasetWriter} implementation based on this
    * {@code View} of the underlying {@code Dataset} implementation.
    *

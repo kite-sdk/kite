@@ -21,7 +21,6 @@ import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.Marker;
-import com.cloudera.cdk.data.OrderedReader;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.View;
 import com.google.common.base.Preconditions;
@@ -37,13 +36,6 @@ public abstract class AbstractDataset implements Dataset {
   @Deprecated
   public <E> DatasetReader<E> getReader() {
     return newReader();
-  }
-
-  @Override
-  public <E> OrderedReader<E> newOrderedReader() {
-    // this method is optional, so default to UnsupportedOperationException
-    throw new UnsupportedOperationException(
-        "This Dataset does not support OrderedReaders");
   }
 
   @Override
