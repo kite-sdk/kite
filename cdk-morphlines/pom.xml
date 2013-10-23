@@ -37,6 +37,7 @@
     <module>cdk-morphlines-tika-decompress</module>
     <module>cdk-morphlines-twitter</module>
     <module>cdk-morphlines-hadoop-core</module>
+    <module>cdk-morphlines-hadoop-rcfile</module>
     <module>cdk-morphlines-hadoop-sequencefile</module>
     <module>cdk-morphlines-solr-core</module>
     <module>cdk-morphlines-solr-cell</module>
@@ -98,6 +99,11 @@
       <dependency>
         <groupId>com.cloudera.cdk</groupId>
         <artifactId>cdk-morphlines-hadoop-sequencefile</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.cloudera.cdk</groupId>
+        <artifactId>cdk-morphlines-hadoop-rcfile</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
