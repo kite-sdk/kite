@@ -33,10 +33,10 @@ import org.apache.hadoop.util.Progressable;
  * path. This is used to serve the underlying input stream from a FileSystem
  * Interface. Only open() and getFileStatus() is implemented.
  */
-public class SingleStreamFileSystem extends FileSystem {
+public final class SingleStreamFileSystem extends FileSystem {
   private final FSDataInputStream inputStream;
   private final Path path;
-  private FileStatus fileStatus;
+  private final FileStatus fileStatus;
 
   public SingleStreamFileSystem(InputStream inputStream, Path path)
       throws IOException {

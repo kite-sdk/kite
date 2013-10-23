@@ -78,11 +78,11 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
   }
 
   @Test
-  public void testSimpleRCFileRowWise() throws Exception {
-    morphline = createMorphline("test-morphlines/rcFileMorphlineSimpleRow");
-    String rcFileName = "testSimpleRCFileRowWise.rc";
+  public void testRCFileRowWise() throws Exception {
+    morphline = createMorphline("test-morphlines/rcFileMorphlineRow");
+    String rcFileName = "testRCFileRowWise.rc";
     List<Record> expected = setupRCFile(rcFileName, NUM_RECORDS, NUM_COLUMNS,
-        true, false);
+        true);
     Path inputFile = dfs.makeQualified(new Path(testDirectory, rcFileName));
     Record input = new Record();
     input.put(Fields.ATTACHMENT_NAME, inputFile.toString());
@@ -95,11 +95,11 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
   }
 
   @Test
-  public void testSimpleRCFileColumnWise() throws Exception {
-    morphline = createMorphline("test-morphlines/rcFileMorphlineSimpleColumn");
-    String rcFileName = "testSimpleRCFileColumnWise.rc";
+  public void testRCFileColumnWise() throws Exception {
+    morphline = createMorphline("test-morphlines/rcFileMorphlineColumn");
+    String rcFileName = "testRCFileColumnWise.rc";
     List<Record> expected = setupRCFile(rcFileName, NUM_RECORDS, NUM_COLUMNS,
-        false, false);
+        false);
     Path inputFile = dfs.makeQualified(new Path(testDirectory, rcFileName));
     Record input = new Record();
     input.put(Fields.ATTACHMENT_NAME, inputFile.toString());
@@ -109,40 +109,6 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
     assertTrue(morphline.process(input));
     assertTrue(areFieldsEqual(expected, collector.getRecords(), NUM_COLUMNS,
         NUM_RECORDS, false));
-  }
-
-  @Test
-  public void testCustomRCFileRowWise() throws Exception {
-    morphline = createMorphline("test-morphlines/rcFileMorphlineCustomRow");
-    String rcFileName = "testCustomRCFileRowWise.rc";
-    List<Record> expected = setupRCFile(rcFileName, NUM_RECORDS, NUM_COLUMNS,
-        true, true);
-    Path inputFile = dfs.makeQualified(new Path(testDirectory, rcFileName));
-    Record input = new Record();
-    input.put(Fields.ATTACHMENT_NAME, inputFile.toString());
-    input.put(Fields.ATTACHMENT_BODY, readPath(inputFile));
-    startSession();
-    assertEquals(1, collector.getNumStartEvents());
-    assertTrue(morphline.process(input));
-    assertTrue(areFieldsEqual(expected, collector.getRecords(), NUM_COLUMNS,
-        NUM_RECORDS, true));
-  }
-
-  @Test
-  public void testCustomRCFileColumnWise() throws Exception {
-    morphline = createMorphline("test-morphlines/rcFileMorphlineCustomColumn");
-    String rcFileName = "testCustomRCFileColumnWise.rc";
-    List<Record> expected = setupRCFile(rcFileName, NUM_RECORDS, NUM_COLUMNS,
-        false, true);
-    Path inputFile = dfs.makeQualified(new Path(testDirectory, rcFileName));
-    Record input = new Record();
-    input.put(Fields.ATTACHMENT_NAME, inputFile.toString());
-    input.put(Fields.ATTACHMENT_BODY, readPath(inputFile));
-    startSession();
-    assertEquals(1, collector.getNumStartEvents());
-    assertTrue(morphline.process(input));
-    assertTrue(areFieldsEqual(expected, collector.getRecords(), NUM_COLUMNS,
-        NUM_RECORDS, true));
   }
 
   private void createRCFile(final String fileName, final int numRecords,
@@ -174,7 +140,7 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
   }
 
   private List<Record> setupRCFile(final String fileName, final int numRecords,
-      final int maxColumns, final boolean rowWise, final boolean custom)
+      final int maxColumns, final boolean rowWise)
       throws IOException {
     createRCFile(fileName, numRecords, maxColumns);
     List<Record> expected = Lists.newArrayList();
@@ -185,14 +151,7 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
         for (int column = 0; column < maxColumns; column++) {
           Text sampleText = new Text("ROW-NUM:" + row + ", COLUMN-NUM:"
               + column);
-          if (!custom) {
-            ByteArrayDataOutput dataOutput = ByteStreams.newDataOutput();
-            sampleText.write(dataOutput);
-            record.put("field" + (column + 1),
-                new BytesRefWritable(dataOutput.toByteArray()));
-          } else {
-            record.put("field" + (column + 1), sampleText);
-          }
+          record.put("field" + (column + 1), sampleText);
         }
         expected.add(record);
       }
@@ -203,14 +162,7 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
           Record record = new Record();
           Text sampleText = new Text("ROW-NUM:" + row + ", COLUMN-NUM:"
               + column);
-          if (!custom) {
-            ByteArrayDataOutput dataOutput = ByteStreams.newDataOutput();
-            sampleText.write(dataOutput);
-            record.put("field" + (column + 1),
-                new BytesRefWritable(dataOutput.toByteArray()));
-          } else {
-            record.put("field" + (column + 1), sampleText);
-          }
+          record.put("field" + (column + 1), sampleText);
           expected.add(record);
         }
       }

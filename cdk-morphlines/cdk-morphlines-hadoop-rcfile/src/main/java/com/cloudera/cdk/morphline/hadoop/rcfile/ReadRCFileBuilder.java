@@ -42,6 +42,7 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
+import com.cloudera.cdk.morphline.base.Validator;
 import com.cloudera.cdk.morphline.stdio.AbstractParser;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -62,7 +63,7 @@ import com.typesafe.config.Config;
  * Column wise would emit 25 records. De-Compression is handled automatically
  * 
  */
-public class ReadRCFileBuilder implements CommandBuilder {
+public final class ReadRCFileBuilder implements CommandBuilder {
   public static final String OUTPUT_MEDIA_TYPE = "application/java-rc-file-record";
   public static final String RC_FILE_META_DATA = "RCFileMetaData";
 
@@ -81,58 +82,74 @@ public class ReadRCFileBuilder implements CommandBuilder {
   // Nested classes:
   // /////////////////////////////////////////////////////////////////////////////
   private static final class ReadRCFile extends AbstractParser {
-    public static final String CONFIG_READ_MODE = "readMode";
-    public static final String CONFIG_COLUMN_MAP = "columnMap";
-    public static final String COLUMN_INDEX = "index";
-    public static final String CONFIG_FIELD_NAME = "fieldName";
-    public static final String CONFIG_WRITABLE_CLASS = "writableClass";
-    public static final String CONFIG_INCLUDE_META_DATA = "includeMetaData";
     private static final Object STREAM_PROTOCOL = "stream://";
 
     private final boolean includeMetaData;
     private final RCFileReadMode readMode;
-    private Map<Integer, RCFileColumn> columnMap;
+    private final Map<Integer, RCFileColumn> columnMap;
+    private final Configuration conf = new Configuration();
 
     public ReadRCFile(CommandBuilder builder, Config config, Command parent,
         Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);
-      this.includeMetaData = getConfigs().getBoolean(config,
-          CONFIG_INCLUDE_META_DATA, false);
-      this.readMode = RCFileReadMode.valueOf(getConfigs().getString(config,
-          CONFIG_READ_MODE, RCFileReadMode.row.name()));
+      this.includeMetaData = getConfigs().getBoolean(config, "includeMetaData",
+          false);
+      this.readMode = new Validator<RCFileReadMode>()
+          .validateEnum(
+              config,
+              getConfigs().getString(config, "readMode",
+                  RCFileReadMode.row.name()), RCFileReadMode.class);
       this.columnMap = parseColumnMap(config);
-      validateArguments();
+      validateArguments(config);
     }
 
     private Map<Integer, RCFileColumn> parseColumnMap(final Config config) {
-      Configuration conf = new Configuration();
       List<? extends Config> columnMapConfigList = getConfigs().getConfigList(
-          config, CONFIG_COLUMN_MAP);
+          config, "columns");
       Map<Integer, RCFileColumn> rcFileColumnMap = Maps.newHashMap();
       for (Config columnMapConfig : columnMapConfigList) {
-        int index = getConfigs().getInt(columnMapConfig, COLUMN_INDEX);
-        String fieldName = getConfigs().getString(columnMapConfig,
-            CONFIG_FIELD_NAME);
+        int inputField = getConfigs().getInt(columnMapConfig, "inputField");
+        String fieldName = getConfigs().getString(columnMapConfig, "outputField");
         String writableClassString = getConfigs().getString(columnMapConfig,
-            CONFIG_WRITABLE_CLASS, BytesRefWritable.class.getName());
+            "writableClass");
 
+        if (writableClassString == null || writableClassString.isEmpty()) {
+          throw new MorphlineCompilationException(
+              "No writableClass specified for column " + fieldName, config);
+        }
         Class<Writable> writableClass;
         try {
-          writableClass = (Class<Writable>) Class.forName(writableClassString);
+          Class clazz = Class.forName(writableClassString);
+          if (!Writable.class.isAssignableFrom(clazz)) {
+            throw new MorphlineCompilationException("writableClass provided "
+                + writableClassString + " for column " + fieldName
+                + " does not implement " + Writable.class.getName(), config);
+          }
+          writableClass = (Class<Writable>) clazz;
         } catch (ClassNotFoundException e) {
           throw new MorphlineCompilationException("Could not load class "
               + writableClassString + " definition", config, e);
         }
-        rcFileColumnMap.put(index, new RCFileColumn(fieldName, writableClass,
+        rcFileColumnMap.put(inputField, new RCFileColumn(fieldName, writableClass,
             conf));
       }
       return ImmutableMap.copyOf(rcFileColumnMap);
     }
 
+    public void validateArguments(Config config) {
+      validateArguments();
+      // check if all column map index are > 0
+      for (Integer columnIndex : columnMap.keySet()) {
+        if (columnIndex < 0) {
+          throw new MorphlineCompilationException(
+              "Invalid column map index specified " + columnIndex, config);
+        }
+      }
+    }
+
     @Override
     protected boolean doProcess(Record record, InputStream in)
         throws IOException {
-      Configuration conf = new Configuration();
       Path attachmentPath = getAttachmentPath(record);
       SingleStreamFileSystem fs = new SingleStreamFileSystem(in, attachmentPath);
       RCFile.Reader reader = null;
@@ -187,14 +204,15 @@ public class ReadRCFileBuilder implements CommandBuilder {
           break;
         }
 
-        LOG.debug("Reading row " + rowID.get());
         BytesRefArrayWritable rowBatchBytes = new BytesRefArrayWritable();
         rowBatchBytes.resetValid(columnMap.size());
         reader.getCurrentRow(rowBatchBytes);
         Record outputRecord = prepareOutputRecord(record, metadata);
         // Read all the columns configured and set it in the output record
-        for (Integer columnIndex : columnMap.keySet()) {
-          RCFileColumn rcColumn = columnMap.get(columnIndex);
+        for (Map.Entry<Integer, RCFileColumn> columnMapEntry : columnMap
+            .entrySet()) {
+          RCFileColumn rcColumn = columnMapEntry.getValue();
+          Integer columnIndex = columnMapEntry.getKey();
           BytesRefWritable columnBytes = rowBatchBytes.get(columnIndex);
           updateColumnValue(columnIndex, columnBytes);
           outputRecord.put(rcColumn.getFieldName(), rcColumn.getWritable());
@@ -210,9 +228,10 @@ public class ReadRCFileBuilder implements CommandBuilder {
     private boolean readColumnWise(final RCFile.Reader reader,
         final Record record) throws IOException {
       SequenceFile.Metadata metadata = reader.getMetadata();
-      for (Integer columnIndex : columnMap.keySet()) {
-        RCFileColumn rcColumn = columnMap.get(columnIndex);
-        LOG.debug("Reading column " + rcColumn.getFieldName());
+      for (Map.Entry<Integer, RCFileColumn> columnMapEntry : columnMap
+          .entrySet()) {
+        RCFileColumn rcColumn = columnMapEntry.getValue();
+        Integer columnIndex = columnMapEntry.getKey();
         reader.sync(0);
         reader.resetBuffer();
         while (true) {
@@ -230,7 +249,7 @@ public class ReadRCFileBuilder implements CommandBuilder {
 
           BytesRefArrayWritable rowBatchBytes = reader.getColumn(columnIndex,
               null);
-          for (Integer rowIndex = 0; rowIndex < rowBatchBytes.size(); rowIndex++) {
+          for (int rowIndex = 0; rowIndex < rowBatchBytes.size(); rowIndex++) {
             Record outputRecord = prepareOutputRecord(record, metadata);
             BytesRefWritable rowBytes = rowBatchBytes.get(rowIndex);
             updateColumnValue(columnIndex, rowBytes);
@@ -283,11 +302,11 @@ public class ReadRCFileBuilder implements CommandBuilder {
     // /////////////////////////////////////////////////////////////////////////////
     // Nested classes:
     // /////////////////////////////////////////////////////////////////////////////
-    private class RCFileColumn {
-      private String fieldName;
+    private static final class RCFileColumn {
+      private final String fieldName;
+      private final Class<Writable> writableClass;
+      private final Configuration conf;
       private Writable writable;
-      private Class<Writable> writableClass;
-      private Configuration conf;
 
       private RCFileColumn(final String fieldName,
           final Class<Writable> writableClass, final Configuration conf) {

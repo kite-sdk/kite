@@ -1694,8 +1694,8 @@ h1. cdk\-morphlines\-hadoop\-rcfile
 h2. readRCFile
 
 The {{readRCFile}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-rcfile/src/main/java/com/cloudera/cdk/morphline/hadoop/rcfile/ReadRCFileBuilder.java]) parses an Apache Hadoop [RCFile|http://archive.cloudera.com/cdh4/cdh/4/hive/api/org/apache/hadoop/hive/ql/io/RCFile.html]. RCFile can be read Row\-wise or Column\-wise.
-* Row-wise: One morphline record is emitted for each row in the RCFile. Each record will contain fields for all the columns configured in the columnMap
-* Column-wise: One morphline record is emitted for every row under columns defined in column map. A single column is read completely before moving to the next column. Order of columns is as defined in the columnMap.
+* Row-wise: One morphline record is emitted for each row in the RCFile. Each record will contain fields for all the columns configured in the columns property
+* Column-wise: One morphline record is emitted for every row under columns defined in columns property. A single column is read completely before moving to the next column. Order of columns is as defined in the columns property.
 
 The InputStream of the RCFile is read from \_attachment\_body\ property in the input record.
 The name of the RCFile is read from \_attachment\_name\ property in the input record. This is optional and providing a name for the InputStream will result in named reference to the files failing when there are any errors.
@@ -1706,29 +1706,29 @@ The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | readMode | row | Valid values: row or column. Defines on the reading strategy. Affects the structure and number of output records emitted. |
-| includeMetaData | true | Should the RCFile metadata be included in the output record |
-| columnMap |  | A List of column configurations. Since the RCFile does not store the meta information about the columns itself, this configuration is necessary to read the RCFile. |
+| includeMetaData | false | Should the RCFile metadata be included in the output record |
+| columns | n/a | A List of column configurations. Since the RCFile does not store the meta information about the columns itself, this configuration is necessary to read the RCFile. |
 
-The columnMap configuration has the following configuration options:
+The columns configuration has the following configuration options:
 || Property Name || Default || Description ||
-| index |  | Index of the column which needs to be read. |
-| fieldName |  | A Field name for this column. The output record will have this field set with the value of the column |
-| writableClass | org\.apache\.hadoop\.hive\.serde2\.columnar\.BytesRefWritable | Fully Qualified Class Name of a sub-class of org\.apache\.hadoop\.io\.Writable which will be used to read the value of the column bytes. |
+| inputField | n/a | Index of the column which needs to be read. Index should be non-negative |
+| outputField | n/a | A Field name for this column. The output record will have this field set with the value of the column |
+| writableClass | n/a | Fully Qualified Class Name of a sub-class of org\.apache\.hadoop\.io\.Writable which will be used to read the value of the column bytes. e.g. org\.apache\.hadoop\.hive\.serde2\.columnar\.BytesRefWritable or org\.apache\.hadoop\.io\.Text |
 
 Example usage:
 {code}
 readRCFile {
   readMode: "row",
   includeMetaData: "true",
-  columnMap: [
+  columns: [
     {
-      index: 0,
-      fieldName: "name",
+      inputField: 0,
+      outputField: "name",
       writableClass: "org.apache.hadoop.io.Text"
     },
     {
-      index: 3,
-      fieldName: "age",
+      inputField: 3,
+      outputField: "age",
       writableClass: "org.apache.hadoop.io.LongWritable"
     }
   ]
