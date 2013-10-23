@@ -1726,11 +1726,341 @@ The command provides the following configuration options:
 | defaultDurationUnit | milliseconds | Report output durations in the given time unit. One of {{nanoseconds}},  {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. |
 | defaultRateUnit | seconds | Report output rates in the given time unit. One of {{nanoseconds}}, {{microseconds}}, {{milliseconds}}, {{seconds}}, {{minutes}}, {{hours}}, {{days}}. Example output: events/second |
 
-Example usage:
+h4. Example startReportingMetricsToHTTP Usage
 {code}
 startReportingMetricsToHTTP {
   port : 8080
 }
+{code}
+
+h4. Example startReportingMetricsToHTTP ping output 
+
+Here is the response to an HTTP GET to http://localhost:8080/ping for liveness check:
+{code}
+pong
+{code}
+
+h4. Example startReportingMetricsToHTTP healthcheck output 
+
+Example output of running healthchecks via a HTTP GET to http://localhost:8080/healthcheck
+{code}
+{"deadlocks":{"healthy":true}}
+{code}
+
+h4. Example startReportingMetricsToHTTP metrics output
+
+For an example on how to update user defined custom metrics such as counters, meters, timers and histograms, see the [#java] command. Here is an example output of the JSON metrics reported by an HTTP GET to http://localhost:8080/metrics?pretty=true
+{code}
+{
+ "version" : "3.0.0",
+ "gauges" : {
+   "jvm.gc.ConcurrentMarkSweep.count" : {
+     "value" : 0
+   },
+   "jvm.gc.ConcurrentMarkSweep.time" : {
+     "value" : 0
+   },
+   "jvm.gc.ParNew.count" : {
+     "value" : 4
+   },
+   "jvm.gc.ParNew.time" : {
+     "value" : 29
+   },
+   "jvm.memory.heap.committed" : {
+     "value" : 85000192
+   },
+   "jvm.memory.heap.init" : {
+     "value" : 0
+   },
+   "jvm.memory.heap.max" : {
+     "value" : 129957888
+   },
+   "jvm.memory.heap.usage" : {
+     "value" : 0.1319703810514372
+   },
+   "jvm.memory.heap.used" : {
+     "value" : 17150592
+   },
+   "jvm.memory.non-heap.committed" : {
+     "value" : 24711168
+   },
+   "jvm.memory.non-heap.init" : {
+     "value" : 24317952
+   },
+   "jvm.memory.non-heap.max" : {
+     "value" : 136314880
+   },
+   "jvm.memory.non-heap.usage" : {
+     "value" : 0.16856530996469352
+   },
+   "jvm.memory.non-heap.used" : {
+     "value" : 22978104
+   },
+   "jvm.memory.pools.CMS-Old-Gen.usage" : {
+     "value" : 0.05705025643464222
+   },
+   "jvm.memory.pools.CMS-Perm-Gen.usage" : {
+     "value" : 0.25629341311571074
+   },
+   "jvm.memory.pools.Code-Cache.usage" : {
+     "value" : 0.018703460693359375
+   },
+   "jvm.memory.pools.Par-Eden-Space.usage" : {
+     "value" : 0.5095581972509399
+   },
+   "jvm.memory.pools.Par-Survivor-Space.usage" : {
+     "value" : 0.9115804036458334
+   },
+   "jvm.memory.total.committed" : {
+     "value" : 109711360
+   },
+   "jvm.memory.total.init" : {
+     "value" : 24317952
+   },
+   "jvm.memory.total.max" : {
+     "value" : 266272768
+   },
+   "jvm.memory.total.used" : {
+     "value" : 40248344
+   },
+   "jvm.threads.blocked.count" : {
+     "value" : 2
+   },
+   "jvm.threads.count" : {
+     "value" : 22
+   },
+   "jvm.threads.daemon.count" : {
+     "value" : 4
+   },
+   "jvm.threads.deadlocks" : {
+     "value" : [ ]
+   },
+   "jvm.threads.new.count" : {
+     "value" : 0
+   },
+   "jvm.threads.runnable.count" : {
+     "value" : 10
+   },
+   "jvm.threads.terminated.count" : {
+     "value" : 0
+   },
+   "jvm.threads.timed_waiting.count" : {
+     "value" : 8
+   },
+   "jvm.threads.waiting.count" : {
+     "value" : 2
+   }
+ },
+ "counters" : {
+   "myMetrics.myCounter" : {
+     "count" : 1
+   }
+ },
+ "histograms" : {
+   "myMetrics.myHistogram" : {
+     "count" : 1,
+     "max" : 100,
+     "mean" : 100.0,
+     "min" : 100,
+     "p50" : 100.0,
+     "p75" : 100.0,
+     "p95" : 100.0,
+     "p98" : 100.0,
+     "p99" : 100.0,
+     "p999" : 100.0,
+     "stddev" : 0.0
+   }
+ },
+ "meters" : {
+   "morphline.java.numNotifyCalls" : {
+     "count" : 1,
+     "m15_rate" : 0.16929634497812282,
+     "m1_rate" : 0.19779007785878447,
+     "m5_rate" : 0.1934432200964012,
+     "mean_rate" : 0.06666243138019297,
+     "units" : "events/second"
+   },
+   "morphline.java.numProcessCalls" : {
+     "count" : 1,
+     "m15_rate" : 0.16929634497812282,
+     "m1_rate" : 0.19779007785878447,
+     "m5_rate" : 0.1934432200964012,
+     "mean_rate" : 0.06666191145031655,
+     "units" : "events/second"
+   },
+   "morphline.logDebug.numNotifyCalls" : {
+     "count" : 3,
+     "m15_rate" : 0.5078890349343685,
+     "m1_rate" : 0.5933702335763534,
+     "m5_rate" : 0.5803296602892035,
+     "mean_rate" : 0.1999690981087056,
+     "units" : "events/second"
+   },
+   "morphline.logDebug.numProcessCalls" : {
+     "count" : 3,
+     "m15_rate" : 0.5078890349343685,
+     "m1_rate" : 0.5933702335763534,
+     "m5_rate" : 0.5803296602892035,
+     "mean_rate" : 0.19996765856402157,
+     "units" : "events/second"
+   },
+   "morphline.logWarn.numNotifyCalls" : {
+     "count" : 2,
+     "m15_rate" : 0.33859268995624564,
+     "m1_rate" : 0.39558015571756894,
+     "m5_rate" : 0.3868864401928024,
+     "mean_rate" : 0.11979779569659962,
+     "units" : "events/second"
+   },
+   "morphline.logWarn.numProcessCalls" : {
+     "count" : 2,
+     "m15_rate" : 0.33859268995624564,
+     "m1_rate" : 0.39558015571756894,
+     "m5_rate" : 0.3868864401928024,
+     "mean_rate" : 0.11979702071997292,
+     "units" : "events/second"
+   },
+   "morphline.pipe.numNotifyCalls" : {
+     "count" : 1,
+     "m15_rate" : 0.16929634497812282,
+     "m1_rate" : 0.19779007785878447,
+     "m5_rate" : 0.1934432200964012,
+     "mean_rate" : 0.05774150456461029,
+     "units" : "events/second"
+   },
+   "morphline.pipe.numProcessCalls" : {
+     "count" : 1,
+     "m15_rate" : 0.16929634497812282,
+     "m1_rate" : 0.19779007785878447,
+     "m5_rate" : 0.1934432200964012,
+     "mean_rate" : 0.05766282424671017,
+     "units" : "events/second"
+   },
+   "morphline.registerJVMMetrics.numNotifyCalls" : {
+     "count" : 1,
+     "m15_rate" : 0.16929634497812282,
+     "m1_rate" : 0.19779007785878447,
+     "m5_rate" : 0.1934432200964012,
+     "mean_rate" : 0.059902898599428295,
+     "units" : "events/second"
+   },
+   "morphline.registerJVMMetrics.numProcessCalls" : {
+     "count" : 1,
+     "m15_rate" : 0.16929634497812282,
+     "m1_rate" : 0.19779007785878447,
+     "m5_rate" : 0.1934432200964012,
+     "mean_rate" : 0.059902518235973874,
+     "units" : "events/second"
+   },
+   "morphline.startReportingMetricsToHTTP.numNotifyCalls" : {
+     "count" : 3,
+     "m15_rate" : 0.5078890349343685,
+     "m1_rate" : 0.5933702335763534,
+     "m5_rate" : 0.5803296602892035,
+     "mean_rate" : 0.19066147711547488,
+     "units" : "events/second"
+   },
+   "morphline.startReportingMetricsToHTTP.numProcessCalls" : {
+     "count" : 3,
+     "m15_rate" : 0.5078890349343685,
+     "m1_rate" : 0.5933702335763534,
+     "m5_rate" : 0.5803296602892035,
+     "mean_rate" : 0.19066014422550162,
+     "units" : "events/second"
+   },
+   "myMetrics.myMeter" : {
+     "count" : 1,
+     "m15_rate" : 0.18400888292586468,
+     "m1_rate" : 0.19889196960097935,
+     "m5_rate" : 0.1966942907643235,
+     "mean_rate" : 0.0698670918312095,
+     "units" : "events/second"
+   }
+ },
+ "timers" : {
+   "myMetrics.myTimer" : {
+     "count" : 1,
+     "max" : 1.4000000000000001E-5,
+     "mean" : 1.4000000000000001E-5,
+     "min" : 1.4000000000000001E-5,
+     "p50" : 1.4000000000000001E-5,
+     "p75" : 1.4000000000000001E-5,
+     "p95" : 1.4000000000000001E-5,
+     "p98" : 1.4000000000000001E-5,
+     "p99" : 1.4000000000000001E-5,
+     "p999" : 1.4000000000000001E-5,
+     "stddev" : 0.0,
+     "m15_rate" : 0.18400888292586468,
+     "m1_rate" : 0.19889196960097935,
+     "m5_rate" : 0.1966942907643235,
+     "mean_rate" : 0.0698417274708746,
+     "duration_units" : "seconds",
+     "rate_units" : "calls/second"
+   },
+   "myMetrics.myTimer2" : {
+     "count" : 1,
+     "max" : 0.0,
+     "mean" : 0.0,
+     "min" : 0.0,
+     "p50" : 0.0,
+     "p75" : 0.0,
+     "p95" : 0.0,
+     "p98" : 0.0,
+     "p99" : 0.0,
+     "p999" : 0.0,
+     "stddev" : 0.0,
+     "m15_rate" : 0.18400888292586468,
+     "m1_rate" : 0.19889196960097935,
+     "m5_rate" : 0.1966942907643235,
+     "mean_rate" : 0.0698418152725891,
+     "duration_units" : "seconds",
+     "rate_units" : "calls/second"
+   }
+ }
+}
+{code}
+
+h3. Example startReportingMetricsToHTTP thread dump output
+
+Here is the response to an HTTP GET to http://localhost:8080/threads for a thread dump:
+{code}
+main id=1 state=TIMED_WAITING
+    at java.lang.Thread.sleep(Native Method)
+    at com.cloudera.cdk.morphline.metrics.servlets.HttpMetricsMorphlineTest.testBasic(HttpMetricsMorphlineTest.java:51)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+    at java.lang.reflect.Method.invoke(Method.java:597)
+    at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:45)
+    at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
+    at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:42)
+    at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:20)
+    at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:28)
+    at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:30)
+    at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:263)
+    at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:68)
+    at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:47)
+    at org.junit.runners.ParentRunner$3.run(ParentRunner.java:231)
+    at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:60)
+    at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:229)
+    at org.junit.runners.ParentRunner.access$000(ParentRunner.java:50)
+    at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:222)
+    at org.junit.runners.ParentRunner.run(ParentRunner.java:300)
+    at org.eclipse.jdt.internal.junit4.runner.JUnit4TestReference.run(JUnit4TestReference.java:50)
+    at org.eclipse.jdt.internal.junit.runner.TestExecution.run(TestExecution.java:38)
+    at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:467)
+    at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:683)
+    at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.run(RemoteTestRunner.java:390)
+    at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.main(RemoteTestRunner.java:197)
+
+Reference Handler id=2 state=WAITING
+    - waiting on <0x7418e252> (a java.lang.ref.Reference$Lock)
+    - locked <0x7418e252> (a java.lang.ref.Reference$Lock)
+    at java.lang.Object.wait(Native Method)
+    at java.lang.Object.wait(Object.java:485)
+    at java.lang.ref.Reference$ReferenceHandler.run(Reference.java:116)
+
+... and so on
 {code}
 
 h1. cdk\-morphlines\-tika\-core
