@@ -16,6 +16,7 @@
 package com.cloudera.cdk.morphline.hadoop.rcfile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -85,6 +86,7 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
     Path inputFile = dfs.makeQualified(new Path(testDirectory, rcFileName));
     Record input = new Record();
     input.put(Fields.ATTACHMENT_NAME, inputFile.toString());
+    input.put(Fields.ATTACHMENT_BODY, readPath(inputFile));
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(input));
@@ -101,6 +103,7 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
     Path inputFile = dfs.makeQualified(new Path(testDirectory, rcFileName));
     Record input = new Record();
     input.put(Fields.ATTACHMENT_NAME, inputFile.toString());
+    input.put(Fields.ATTACHMENT_BODY, readPath(inputFile));
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(input));
@@ -117,6 +120,7 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
     Path inputFile = dfs.makeQualified(new Path(testDirectory, rcFileName));
     Record input = new Record();
     input.put(Fields.ATTACHMENT_NAME, inputFile.toString());
+    input.put(Fields.ATTACHMENT_BODY, readPath(inputFile));
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(input));
@@ -133,6 +137,7 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
     Path inputFile = dfs.makeQualified(new Path(testDirectory, rcFileName));
     Record input = new Record();
     input.put(Fields.ATTACHMENT_NAME, inputFile.toString());
+    input.put(Fields.ATTACHMENT_BODY, readPath(inputFile));
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(input));
@@ -161,6 +166,11 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
       rcFileWriter.append(dataWrite);
     }
     rcFileWriter.close();
+  }
+
+  private InputStream readPath(final Path inputFile) throws IOException {
+    FileSystem fs = inputFile.getFileSystem(new Configuration());
+    return fs.open(inputFile);
   }
 
   private List<Record> setupRCFile(final String fileName, final int numRecords,

@@ -1,22 +1,9 @@
-/*
- * Copyright 2013 Cloudera Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.cloudera.cdk.morphline.hadoop.rcfile;
 
 import java.io.DataInput;
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.io.RCFile;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefArrayWritable;
@@ -40,24 +26,28 @@ import com.cloudera.cdk.morphline.api.MorphlineCompilationException;
 import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.MorphlineRuntimeException;
 import com.cloudera.cdk.morphline.api.Record;
-import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Fields;
-import com.cloudera.cdk.morphline.base.Metrics;
-import com.codahale.metrics.Meter;
+import com.cloudera.cdk.morphline.stdio.AbstractParser;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.typesafe.config.Config;
 
 /**
- * Command for reading Record Columnar (RC) Files. RCFile can be read in two ways
- * 1. Row Wise - Emits one record for every row in the RCFile, with columns mapped with names as provided in the column map
- * 2. Column Wise - Emits one record for every row in one column, before moving to the next column (in the order provided in the column map)
- *
- * For a RCFile with 5 rows and 5 columns. Row wise would emit 5 records and Column wise would emit 25 records.
- * De-Compression is handled automatically
+ * Command for reading Record Columnar (RC) Files. RCFile can be read in two
+ * ways
+ * 
+ * 1. Row Wise - Emits one record for every row in the RCFile, with columns
+ * mapped with names as provided in the column map
+ * 
+ * 2. Column Wise - Emits one record for every row in one column, before moving
+ * to the next column (in the order provided in the column map)
+ * 
+ * For a RCFile with 5 rows and 5 columns. Row wise would emit 5 records and
+ * Column wise would emit 25 records. De-Compression is handled automatically
+ * 
  */
-public final class ReadRCFileBuilder implements CommandBuilder {
+public class ReadRCFileBuilder implements CommandBuilder {
   public static final String OUTPUT_MEDIA_TYPE = "application/java-rc-file-record";
   public static final String RC_FILE_META_DATA = "RCFileMetaData";
 
@@ -75,17 +65,18 @@ public final class ReadRCFileBuilder implements CommandBuilder {
   // /////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   // /////////////////////////////////////////////////////////////////////////////
-  private static final class ReadRCFile extends AbstractCommand {
+  private static final class ReadRCFile extends AbstractParser {
     public static final String CONFIG_READ_MODE = "readMode";
     public static final String CONFIG_COLUMN_MAP = "columnMap";
     public static final String COLUMN_INDEX = "index";
     public static final String CONFIG_FIELD_NAME = "fieldName";
     public static final String CONFIG_WRITABLE_CLASS = "writableClass";
     public static final String CONFIG_INCLUDE_META_DATA = "includeMetaData";
+    private static final Object STREAM_PROTOCOL = "stream://";
+
     private final boolean includeMetaData;
     private final RCFileReadMode readMode;
     private Map<Integer, RCFileColumn> columnMap;
-    private final Meter numRecordsMeter;
 
     public ReadRCFile(CommandBuilder builder, Config config, Command parent,
         Command child, MorphlineContext context) {
@@ -95,7 +86,6 @@ public final class ReadRCFileBuilder implements CommandBuilder {
       this.readMode = RCFileReadMode.valueOf(getConfigs().getString(config,
           CONFIG_READ_MODE, RCFileReadMode.row.name()));
       this.columnMap = parseColumnMap(config);
-      numRecordsMeter = getMeter(Metrics.NUM_RECORDS);
       validateArguments();
     }
 
@@ -125,23 +115,26 @@ public final class ReadRCFileBuilder implements CommandBuilder {
     }
 
     @Override
-    protected boolean doProcess(Record record) {
+    protected boolean doProcess(Record record, InputStream in)
+        throws IOException {
       Configuration conf = new Configuration();
-      Path path = new Path(
-          (String) record.getFirstValue(Fields.ATTACHMENT_NAME));
+      Path attachmentPath = getAttachmentPath(record);
+      SingleStreamFileSystem fs = new SingleStreamFileSystem(in, attachmentPath);
       RCFile.Reader reader = null;
       try {
-        FileSystem fileSystem = path.getFileSystem(conf);
-        reader = new RCFile.Reader(fileSystem, path, conf);
+        reader = new RCFile.Reader(fs, attachmentPath, conf);
+        Record template = record.copy();
+        removeAttachments(template);
         switch (readMode) {
         case row:
-          return readRowWise(reader, record);
+          return readRowWise(reader, template);
         case column:
-          return readColumnWise(reader, record);
+          return readColumnWise(reader, template);
         }
       } catch (IOException e) {
         throw new MorphlineRuntimeException(
-            "IOException while processing RCFile " + path.getName(), e);
+            "IOException while processing attachment "
+                + attachmentPath.getName(), e);
       } finally {
         if (reader != null) {
           reader.close();
@@ -150,12 +143,35 @@ public final class ReadRCFileBuilder implements CommandBuilder {
       return true;
     }
 
+    private Path getAttachmentPath(final Record record) {
+      // We have meaningful references in RCFile Errors
+      // if we have a attachment name
+      String attachmentName = (String) record
+          .getFirstValue(Fields.ATTACHMENT_NAME);
+      if (attachmentName == null) {
+        attachmentName = record.toString();
+      }
+      return new Path(STREAM_PROTOCOL + attachmentName);
+    }
+
     private boolean readRowWise(final RCFile.Reader reader, final Record record)
         throws IOException {
       LongWritable rowID = new LongWritable();
       SequenceFile.Metadata metadata = reader.getMetadata();
 
-      while (reader.next(rowID)) {
+      while (true) {
+        boolean next;
+        try {
+          next = reader.next(rowID);
+        } catch (EOFException ex) {
+          // We have hit EOF of the stream
+          break;
+        }
+
+        if (!next) {
+          break;
+        }
+
         LOG.debug("Reading row " + rowID.get());
         BytesRefArrayWritable rowBatchBytes = new BytesRefArrayWritable();
         rowBatchBytes.resetValid(columnMap.size());
@@ -184,7 +200,19 @@ public final class ReadRCFileBuilder implements CommandBuilder {
         LOG.debug("Reading column " + rcColumn.getFieldName());
         reader.sync(0);
         reader.resetBuffer();
-        while (reader.nextBlock()) {
+        while (true) {
+          boolean next;
+          try {
+            next = reader.nextBlock();
+          } catch (EOFException ex) {
+            // We have hit EOF of the stream
+            break;
+          }
+
+          if (!next) {
+            break;
+          }
+
           BytesRefArrayWritable rowBatchBytes = reader.getColumn(columnIndex,
               null);
           for (Integer rowIndex = 0; rowIndex < rowBatchBytes.size(); rowIndex++) {
@@ -228,12 +256,6 @@ public final class ReadRCFileBuilder implements CommandBuilder {
         outputRecord.put(RC_FILE_META_DATA, metadata);
       }
       return outputRecord;
-    }
-
-    private void incrementNumRecords() {
-      if (isMeasuringMetrics()) {
-        numRecordsMeter.mark();
-      }
     }
 
     // /////////////////////////////////////////////////////////////////////////////
