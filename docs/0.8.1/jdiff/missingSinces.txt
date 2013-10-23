@@ -1,0 +1,3 @@
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.Metrics Field MORPHLINE_APP
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.Metrics Field NUM_EXCEPTION_RECORDS
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.Metrics Field NUM_FAILED_RECORDS
