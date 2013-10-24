@@ -83,9 +83,9 @@ public final class ReadRCFileBuilder implements CommandBuilder {
   // /////////////////////////////////////////////////////////////////////////////
   private static final class ReadRCFile extends AbstractParser {
     
-    private final boolean includeMetaData;
-    private final RCFileReadMode readMode;
     private final Map<Integer, RCFileColumn> columns = Maps.newLinkedHashMap();
+    private final RCFileReadMode readMode;
+    private final boolean includeMetaData;
     private final Configuration conf = new Configuration();
 
     private static final Object STREAM_PROTOCOL = "stream://";
@@ -105,36 +105,36 @@ public final class ReadRCFileBuilder implements CommandBuilder {
     }
 
     private void parseColumnMap(final Config config) {
-      for (Config columnMapConfig : getConfigs().getConfigList(config, "columns")) {
+      for (Config columnConfig : getConfigs().getConfigList(config, "columns")) {
         Configs configs = new Configs();
-        int inputField = configs.getInt(columnMapConfig, "inputField");
+        int inputField = configs.getInt(columnConfig, "inputField");
         if (inputField < 0) {
           throw new MorphlineCompilationException(
-              "Invalid column inputField specified: " + inputField, columnMapConfig);
+              "Invalid column inputField specified: " + inputField, columnConfig);
         }
 
-        String fieldName = configs.getString(columnMapConfig, "outputField");
-        String writableClassString = configs.getString(columnMapConfig, "writableClass");
+        String outputField = configs.getString(columnConfig, "outputField");
+        String writableClassString = configs.getString(columnConfig, "writableClass");
 
         if (writableClassString == null || writableClassString.isEmpty()) {
           throw new MorphlineCompilationException(
-              "No writableClass specified for column " + fieldName, columnMapConfig);
+              "No writableClass specified for column " + outputField, columnConfig);
         }
         Class<Writable> writableClass;
         try {
           Class clazz = Class.forName(writableClassString);
           if (!Writable.class.isAssignableFrom(clazz)) {
             throw new MorphlineCompilationException("writableClass provided "
-                + writableClassString + " for column " + fieldName
-                + " does not implement " + Writable.class.getName(), columnMapConfig);
+                + writableClassString + " for column " + outputField
+                + " does not implement " + Writable.class.getName(), columnConfig);
           }
           writableClass = clazz;
         } catch (ClassNotFoundException e) {
           throw new MorphlineCompilationException("Could not load class "
-              + writableClassString + " definition", columnMapConfig, e);
+              + writableClassString + " definition", columnConfig, e);
         }
-        columns.put(inputField, new RCFileColumn(fieldName, writableClass, conf));
-        configs.validateArguments(columnMapConfig);
+        columns.put(inputField, new RCFileColumn(outputField, writableClass, conf));
+        configs.validateArguments(columnConfig);
       }
     }
 
@@ -164,8 +164,7 @@ public final class ReadRCFileBuilder implements CommandBuilder {
           throw new IllegalStateException();
         }
       } catch (IOException e) {
-        throw new MorphlineRuntimeException(
-            "IOException while processing attachment "
+        throw new MorphlineRuntimeException("IOException while processing attachment "
                 + attachmentPath.getName(), e);
       } finally {
         if (reader != null) {
