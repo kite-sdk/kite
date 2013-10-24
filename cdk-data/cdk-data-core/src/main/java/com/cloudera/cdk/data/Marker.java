@@ -16,6 +16,7 @@
 
 package com.cloudera.cdk.data;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -58,19 +59,7 @@ import javax.annotation.concurrent.Immutable;
  * new Marker.Builder("timestamp", System.getTimeMillis()).get();
  * </pre>
  */
-@Immutable
-public class Marker {
-
-  private final Map<String, Object> values;
-
-  /**
-   * Constructor to create a Marker from the contents of a Map.
-   *
-   * @param content a Map
-   */
-  public Marker(Map<String, Object> content) {
-    this.values = ImmutableMap.copyOf(content);
-  }
+public abstract class Marker {
 
   /**
    * Returns whether {@code name} is stored in this Marker.
@@ -78,9 +67,15 @@ public class Marker {
    * @param name a String name
    * @return true if there is a value for {@code name}
    */
-  public boolean has(String name) {
-    return values.containsKey(name);
-  }
+  public abstract boolean has(String name);
+
+  /**
+   * Returns the value for {@code name}.
+   *
+   * @param name the String name of the value to return
+   * @return the Object stored for {@code name}
+   */
+  public abstract Object getObject(String name);
 
   /**
    * Returns the value for {@code name} coerced to the given type, T.
@@ -109,23 +104,13 @@ public class Marker {
   }
 
   /**
-   * Returns the value for {@code name}.
-   *
-   * @param name the String name of the value to return
-   * @return the Object stored for {@code name}
-   */
-  public Object getObject(String name) {
-    return values.get(name);
-  }
-
-  /**
    * Returns the value for {@code name} coerced to a Long.
    *
    * @param name the String name of the value to return
    * @return the Object stored for {@code name}
    */
   public Long getLong(String name) {
-    return makeLong(values.get(name));
+    return makeLong(getObject(name));
   }
 
   /**
@@ -135,7 +120,7 @@ public class Marker {
    * @return the Object stored for {@code name}
    */
   public Integer getInteger(String name) {
-    return makeInteger(values.get(name));
+    return makeInteger(getObject(name));
   }
 
   /**
@@ -145,10 +130,10 @@ public class Marker {
    * @return the Object stored for {@code name}
    */
   public String getString(String name) {
-    return makeString(values.get(name));
+    return makeString(getObject(name));
   }
 
-  private static Long makeLong(Object value) {
+  static Long makeLong(Object value) {
     if (value instanceof Number) {
       return ((Number) value).longValue();
     } else if (value instanceof String) {
@@ -159,7 +144,7 @@ public class Marker {
     }
   }
 
-  private static Integer makeInteger(Object value) {
+  static Integer makeInteger(Object value) {
     if (value instanceof Number) {
       return ((Number) value).intValue();
     } else if (value instanceof String) {
@@ -170,11 +155,45 @@ public class Marker {
     }
   }
 
-  private static String makeString(Object value) {
+  static String makeString(Object value) {
     // start simple, but we may want more complicated conversion here
     return value.toString();
   }
 
+  /**
+   * A basic Marker implementation backed by a Map.
+   */
+  @Immutable
+  public static class ImmutableMarker extends Marker {
+
+    final Map<String, Object> values;
+
+    public ImmutableMarker(Map<String, Object> content) {
+      this.values = ImmutableMap.copyOf(content);
+    }
+
+    @Override
+    public boolean has(String name) {
+      return values.containsKey(name);
+    }
+
+    @Override
+    public Object getObject(String name) {
+      return values.get(name);
+    }
+
+    @Override
+    public String toString() {
+      return Objects.toStringHelper(this).add("values", values).toString();
+    }
+
+  }
+
+  /**
+   * A fluent builder for creating Marker instances.
+   *
+   * @since 0.9.0
+   */
   public static class Builder implements Supplier<Marker> {
     private final Map<String, Object> content;
 
@@ -183,7 +202,7 @@ public class Marker {
      *
      * @param toCopy a Marker that will be copied
      */
-    public Builder(Marker toCopy) {
+    public Builder(ImmutableMarker toCopy) {
       this(toCopy.values);
     }
 
@@ -255,7 +274,7 @@ public class Marker {
      */
     @Override
     public Marker get() {
-      return new Marker(content);
+      return new ImmutableMarker(content);
     }
   }
 }
