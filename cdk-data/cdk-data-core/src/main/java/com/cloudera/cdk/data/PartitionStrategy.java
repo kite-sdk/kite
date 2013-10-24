@@ -34,7 +34,6 @@ import com.cloudera.cdk.data.partition.RangeFieldPartitioner;
 import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
-import java.util.Comparator;
 
 /**
  * <p>
@@ -58,11 +57,7 @@ import java.util.Comparator;
  * @see Dataset
  */
 @Immutable
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(
-    value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
-    justification="Implement if we intend to use in Serializable objects "
-        + " (e.g., TreeMaps) and use java serialization.")
-public class PartitionStrategy implements Comparator<PartitionKey> {
+public class PartitionStrategy {
 
   private final List<FieldPartitioner> fieldPartitioners;
 
@@ -163,7 +158,7 @@ public class PartitionStrategy implements Comparator<PartitionKey> {
    */
   @Deprecated
   public PartitionKey partitionKeyForEntity(Object entity) {
-    return keyFor(entity, null);
+    return partitionKeyForEntity(entity, null);
   }
 
   /**
@@ -179,9 +174,36 @@ public class PartitionStrategy implements Comparator<PartitionKey> {
    * @deprecated will be removed in 0.10.0
    */
   @Deprecated
+  @SuppressWarnings("unchecked")
   public PartitionKey partitionKeyForEntity(Object entity,
       @Nullable PartitionKey reuseKey) {
-    return keyFor(entity, reuseKey);
+    PartitionKey key = (reuseKey == null ? newKey() : reuseKey);
+
+    for (int i = 0; i < fieldPartitioners.size(); i++) {
+      FieldPartitioner fp = fieldPartitioners.get(i);
+      String name = fp.getSourceName();
+      Object value;
+      if (entity instanceof GenericRecord) {
+        value = ((GenericRecord) entity).get(name);
+      } else {
+        try {
+          PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name,
+              entity.getClass(), getter(name), null /* assume read only */);
+          value = propertyDescriptor.getReadMethod().invoke(entity);
+        } catch (IllegalAccessException e) {
+          throw new RuntimeException("Cannot read property " + name + " from "
+              + entity, e);
+        } catch (InvocationTargetException e) {
+          throw new RuntimeException("Cannot read property " + name + " from "
+              + entity, e);
+        } catch (IntrospectionException e) {
+          throw new RuntimeException("Cannot read property " + name + " from "
+              + entity, e);
+        }
+      }
+      key.set(i, fp.apply(value));
+    }
+    return key;
   }
 
   /**
@@ -189,8 +211,10 @@ public class PartitionStrategy implements Comparator<PartitionKey> {
    * {@code PartitionStrategy}.
    *
    * @return a new {@code PartitionKey}
+   *
+   * @deprecated will be removed in 0.10.0
    */
-  public PartitionKey newKey() {
+  private PartitionKey newKey() {
     return new PartitionKey(fieldPartitioners.size());
   }
 
@@ -242,61 +266,6 @@ public class PartitionStrategy implements Comparator<PartitionKey> {
     return key;
   }
 
-  /**
-   * <p>
-   * Construct a partition key for the given entity.
-   * </p>
-   * <p>
-   * This is a convenient way to find the partition that a given entity would be
-   * written to, or to find a partition using objects from the entity domain.
-   * </p>
-   */
-  public PartitionKey keyFor(Object entity) {
-    return keyFor(entity, null);
-  }
-
-  /**
-   * <p>
-   * Construct a partition key for the given entity, reusing the supplied key if not
-   * null.
-   * </p>
-   * <p>
-   * This is a convenient way to find the partition that a given entity would be
-   * written to, or to find a partition using objects from the entity domain.
-   * </p>
-   */
-  @SuppressWarnings("unchecked")
-  public PartitionKey keyFor(Object entity,
-      @Nullable PartitionKey reuseKey) {
-    PartitionKey key = (reuseKey == null ? newKey() : reuseKey);
-
-    for (int i = 0; i < fieldPartitioners.size(); i++) {
-      FieldPartitioner fp = fieldPartitioners.get(i);
-      String name = fp.getSourceName();
-      Object value;
-      if (entity instanceof GenericRecord) {
-        value = ((GenericRecord) entity).get(name);
-      } else {
-        try {
-          PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name,
-              entity.getClass(), getter(name), null /* assume read only */);
-          value = propertyDescriptor.getReadMethod().invoke(entity);
-        } catch (IllegalAccessException e) {
-          throw new RuntimeException("Cannot read property " + name + " from "
-              + entity, e);
-        } catch (InvocationTargetException e) {
-          throw new RuntimeException("Cannot read property " + name + " from "
-              + entity, e);
-        } catch (IntrospectionException e) {
-          throw new RuntimeException("Cannot read property " + name + " from "
-              + entity, e);
-        }
-      }
-      key.set(i, fp.apply(value));
-    }
-    return key;
-  }
-
   private String getter(String name) {
     return "get" + name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1);
   }
@@ -304,7 +273,10 @@ public class PartitionStrategy implements Comparator<PartitionKey> {
   /**
    * Return a {@link PartitionStrategy} for subpartitions starting at the given
    * index.
+   *
+   * @deprecated will be removed in 0.10.0
    */
+  @Deprecated
   PartitionStrategy getSubpartitionStrategy(int startIndex) {
     if (startIndex == 0) {
       return this;
@@ -337,18 +309,6 @@ public class PartitionStrategy implements Comparator<PartitionKey> {
   public String toString() {
     return Objects.toStringHelper(this)
         .add("fieldPartitioners", fieldPartitioners).toString();
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public int compare(PartitionKey o1, PartitionKey o2) {
-    for (int i = 0; i < fieldPartitioners.size(); i += 1) {
-      final int cmp = fieldPartitioners.get(i).compare(o1.get(i), o2.get(i));
-      if (cmp != 0) {
-        return cmp;
-      }
-    }
-    return 0;
   }
 
   /**

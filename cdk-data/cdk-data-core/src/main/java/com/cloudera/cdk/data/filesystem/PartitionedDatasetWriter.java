@@ -92,11 +92,12 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public void write(E entity) {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to write to a writer in state:%s", state);
 
-    key = partitionStrategy.keyFor(entity, key);
+    key = partitionStrategy.partitionKeyForEntity(entity, key);
     DatasetWriter<E> writer;
 
     try {

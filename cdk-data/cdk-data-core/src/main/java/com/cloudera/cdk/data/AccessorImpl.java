@@ -29,6 +29,7 @@ final class AccessorImpl extends Accessor {
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public PartitionStrategy getSubpartitionStrategy(PartitionStrategy partitionStrategy, int startIndex) {
     return partitionStrategy.getSubpartitionStrategy(startIndex);
   }
