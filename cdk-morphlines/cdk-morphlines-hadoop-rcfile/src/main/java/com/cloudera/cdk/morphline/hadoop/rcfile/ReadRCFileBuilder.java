@@ -188,7 +188,6 @@ public final class ReadRCFileBuilder implements CommandBuilder {
         throws IOException {
       
       LongWritable rowID = new LongWritable();      
-      BytesRefArrayWritable rowBatchBytes = new BytesRefArrayWritable();
 
       while (true) {
         boolean next;
@@ -205,6 +204,7 @@ public final class ReadRCFileBuilder implements CommandBuilder {
 
         incrementNumRecords();
         Record outputRecord = record.copy();        
+        BytesRefArrayWritable rowBatchBytes = new BytesRefArrayWritable();
         rowBatchBytes.resetValid(columns.size());
         reader.getCurrentRow(rowBatchBytes);
 
