@@ -56,6 +56,13 @@
       <organization>Cloudera</organization>
     </developer>
   </developers>
+  
+  <contributors> 
+    <contributor> 
+      <name>Prasanna Rajaperumal</name> 
+      <organization>Cloudera</organization>
+    </contributor> 
+  </contributors> 
 
   <scm>
     <connection>scm:git:git://github.com/cloudera/cdk.git</connection>
