@@ -21,7 +21,6 @@ import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.Marker;
-import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.View;
 import com.google.common.base.Preconditions;
 
@@ -52,7 +51,7 @@ public abstract class AbstractDataset implements Dataset {
   }
 
   @Override
-  public boolean contains(PartitionKey key) {
+  public boolean contains(Object key) {
     // A Dataset contains all PartitionKeys, only sub-views have to check
     return true;
   }

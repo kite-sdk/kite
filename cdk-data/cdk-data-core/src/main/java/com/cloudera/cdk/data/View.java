@@ -74,12 +74,12 @@ public interface View {
   <E> DatasetAccessor<E> newAccessor();
 
   /**
-   * Returns whether a {@link PartitionKey} is in this {@code View}.
+   * Returns whether an entity {@link Object} is in this {@code View}.
    *
-   * @param key a {@code PartitionKey}
+   * @param key an entity {@code Object}
    * @return true if {@code key} is in the partition space of this view.
    */
-  boolean contains(PartitionKey key);
+  boolean contains(Object key);
 
   /**
    * Returns whether a {@link Marker} is in this {@code View}
