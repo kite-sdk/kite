@@ -85,7 +85,7 @@ public final class ReadRCFileBuilder implements CommandBuilder {
     
     private final boolean includeMetaData;
     private final RCFileReadMode readMode;
-    private final Map<Integer, RCFileColumn> columns = Maps.newHashMap();
+    private final Map<Integer, RCFileColumn> columns = Maps.newLinkedHashMap();
     private final Configuration conf = new Configuration();
 
     private static final Object STREAM_PROTOCOL = "stream://";
@@ -294,13 +294,13 @@ public final class ReadRCFileBuilder implements CommandBuilder {
       private final Class<Writable> writableClass;
       private final Configuration conf;
 
-      private RCFileColumn(String outputField, Class<Writable> writableClass, Configuration conf) {
+      public RCFileColumn(String outputField, Class<Writable> writableClass, Configuration conf) {
         this.outputField = outputField;
         this.writableClass = writableClass;
         this.conf = conf;
       }
 
-      private String getOutputField() {
+      public String getOutputField() {
         return outputField;
       }
 

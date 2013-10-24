@@ -1693,43 +1693,49 @@ h1. cdk\-morphlines\-hadoop\-rcfile
 
 h2. readRCFile
 
-The {{readRCFile}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-rcfile/src/main/java/com/cloudera/cdk/morphline/hadoop/rcfile/ReadRCFileBuilder.java]) parses an Apache Hadoop [RCFile|http://archive.cloudera.com/cdh4/cdh/4/hive/api/org/apache/hadoop/hive/ql/io/RCFile.html]. RCFile can be read Row\-wise or Column\-wise.
-* Row-wise: One morphline record is emitted for each row in the RCFile. Each record will contain fields for all the columns configured in the columns property
-* Column-wise: One morphline record is emitted for every row under columns defined in columns property. A single column is read completely before moving to the next column. Order of columns is as defined in the columns property.
+The {{readRCFile}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-rcfile/src/main/java/com/cloudera/cdk/morphline/hadoop/rcfile/ReadRCFileBuilder.java]) parses an Apache Hadoop [RCFile|http://archive.cloudera.com/cdh4/cdh/4/hive/api/org/apache/hadoop/hive/ql/io/RCFile.html]. An RCFile can be read Row\-wise or Column\-wise, as follows:
 
-The InputStream of the RCFile is read from \_attachment\_body\ property in the input record.
-The name of the RCFile is read from \_attachment\_name\ property in the input record. This is optional and providing a name for the InputStream will result in named reference to the files failing when there are any errors.
+* Row\-wise: One morphline record is emitted for each row in the RCFile. Each record will contain fields for all the columns configured in the {{columns}} parameter. For example, with an RCFile with 10 rows and 5 columns, Row\-wise mode would emit 10 morphline records.
+* Column\-wise: For each column specified in the {{columns}} parameter, one morphline record per column cell value is emitted. A single RCFile column is read completely from top to bottom before moving to the next column. The order of columns is as specified in the {{columns}} parameter. For example, with an RCFile with 10 rows and 5 columns, Column\-wise mode would emit 50 morphline records.
+
+The InputStream of the RCFile is read from the \_attachment\_body\ field of the input record.
+Optionally, the name of the RCFile is read from the \_attachment\_name\ field of the input record. Providing a name for the InputStream will, in case of errors, result in error messages containing said name for better debugging and diagnostics.
 
 The command automatically handles compressed RCFiles.
 
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
-| readMode | row | Valid values: row or column. Defines on the reading strategy. Affects the structure and number of output records emitted. |
-| includeMetaData | false | Should the RCFile metadata be included in the output record |
-| columns | n/a | A List of column configurations. Since the RCFile does not store the meta information about the columns itself, this configuration is necessary to read the RCFile. |
+| readMode | row | Valid values: {{row}} or {{column}}. Defines the reading strategy. Affects the structure and number of output records that will be emitted, as discussed above. |
+| includeMetaData | false | Whether or not the RCFile metadata shall be included in the output record. |
+| columns | n/a | A list of column configurations. Since an RCFile does not store meta information about the columns itself, this configuration is necessary to read the RCFile. |
 
 The columns configuration has the following configuration options:
 || Property Name || Default || Description ||
-| inputField | n/a | Index of the column which needs to be read. Index should be non-negative |
-| outputField | n/a | A Field name for this column. The output record will have this field set with the value of the column |
-| writableClass | n/a | Fully Qualified Class Name of a sub-class of org\.apache\.hadoop\.io\.Writable which will be used to read the value of the column bytes. e.g. org\.apache\.hadoop\.hive\.serde2\.columnar\.BytesRefWritable or org\.apache\.hadoop\.io\.Text |
+| inputField | n/a | Non\-negative integer index of the RCFile column to read. |
+| outputField | n/a | The name of the field to add output values to. The output record will have the value of the column added to this field. |
+| writableClass | n/a | Fully Qualified Class Name of a sub\-class of {{org.apache.hadoop.io.Writable}}. Instances of this class are used to read the value of the column bytes, and said instances are added to the {{outputField}}. For example {{org.apache.hadoop.io.Text}} or {{org.apache.hadoop.io.LongWritable}} or {{org.apache.hadoop.hive.serde2.columnar.BytesRefWritable}}  |
 
 Example usage:
 {code}
 readRCFile {
-  readMode: "row",
-  includeMetaData: "true",
+  readMode: row
+  includeMetaData: false
   columns: [
     {
-      inputField: 0,
-      outputField: "name",
+      inputField: 0
+      outputField: name
       writableClass: "org.apache.hadoop.io.Text"
-    },
+    }
     {
-      inputField: 3,
-      outputField: "age",
+      inputField: 3
+      outputField: age
       writableClass: "org.apache.hadoop.io.LongWritable"
+    }
+    {
+      inputField: 1000
+      outputField: photo
+      writableClass: "org.apache.hadoop.hive.serde2.columnar.BytesRefWritable"
     }
   ]
 }
