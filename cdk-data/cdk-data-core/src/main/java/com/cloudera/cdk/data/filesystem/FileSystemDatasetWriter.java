@@ -26,6 +26,7 @@ import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.reflect.ReflectDatumWriter;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E> {
   private boolean enableCompression;
 
   private Path pathTmp;
+  private FSDataOutputStream out;
   private DataFileWriter<E> dataFileWriter;
   private DatumWriter<E> writer;
   private ReaderWriterState state;
@@ -81,7 +83,8 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E> {
     }
 
     try {
-      dataFileWriter.create(schema, fileSystem.create(pathTmp, true));
+      out = fileSystem.create(pathTmp, true);
+      dataFileWriter.create(schema, out);
     } catch (IOException e) {
       throw new DatasetWriterException("Unable to create writer to path:" + pathTmp, e);
     }
@@ -109,6 +112,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E> {
 
     try {
       dataFileWriter.flush();
+      out.hflush();
     } catch (IOException e) {
       throw new DatasetWriterException(
         "Unable to flush file writer:" + dataFileWriter);

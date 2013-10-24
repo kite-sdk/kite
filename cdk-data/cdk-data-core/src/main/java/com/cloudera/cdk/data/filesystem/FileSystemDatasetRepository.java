@@ -63,6 +63,14 @@ import org.slf4j.LoggerFactory;
  * or loaded, users can invoke the appropriate {@link com.cloudera.cdk.data.Dataset} methods to get a reader
  * or writer as needed.
  * </p>
+ * <p>
+ * {@link com.cloudera.cdk.data.DatasetWriter} instances returned from this
+ * implementation have the following <code>flush()</code> method semantics. For Avro
+ * files, <code>flush()</code> will invoke HDFS <code>hflush</code>,
+ * which guarantees that client buffers are flushed, so new readers will see all
+ * entries written up to that point. For Parquet files, <code>flush()</code> has no
+ * effect.
+ * </p>
  *
  * @see com.cloudera.cdk.data.DatasetRepository
  * @see com.cloudera.cdk.data.Dataset
