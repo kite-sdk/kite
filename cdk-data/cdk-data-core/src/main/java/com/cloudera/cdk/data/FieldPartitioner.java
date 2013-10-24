@@ -17,6 +17,7 @@ package com.cloudera.cdk.data;
 
 import com.google.common.base.Function;
 import java.util.Comparator;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -102,6 +103,30 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
    */
   @Override
   public abstract T apply(S value);
+
+  /**
+   * Return the value of this field for the given {@link Marker}.
+   *
+   * If the {@code Marker} has a value for this field's name, that value is
+   * returned using {@link Marker#getAs(java.lang.String, java.lang.Class)}. If
+   * the {@code Marker} only has a value for the the source field name, then
+   * that value is retrieved using
+   * {@link Marker#getAs(java.lang.String, java.lang.Class)} and this field's
+   * transformation is applied to it as the source value.
+   *
+   * @param marker a {@code Marker}
+   * @return the value of this field for {@code marker}, or null
+   */
+  @Nullable
+  public T valueFor(Marker marker) {
+    if (marker.has(name)) {
+      return marker.getAs(name, type);
+    } else if (marker.has(sourceName)) {
+      return apply(marker.getAs(sourceName, sourceType));
+    } else {
+      return null;
+    }
+  }
 
   /**
    * <p>
