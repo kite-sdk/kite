@@ -139,8 +139,7 @@ public final class ReadRCFileBuilder implements CommandBuilder {
     }
 
     @Override
-    protected boolean doProcess(Record record, InputStream in)
-        throws IOException {
+    protected boolean doProcess(Record record, InputStream in) throws IOException {
       Path attachmentPath = getAttachmentPath(record);
       SingleStreamFileSystem fs = new SingleStreamFileSystem(in, attachmentPath);
       RCFile.Reader reader = null;
@@ -161,6 +160,8 @@ public final class ReadRCFileBuilder implements CommandBuilder {
           return readRowWise(reader, template);
         case column:
           return readColumnWise(reader, template);
+        default :
+          throw new IllegalStateException();
         }
       } catch (IOException e) {
         throw new MorphlineRuntimeException(
@@ -171,12 +172,10 @@ public final class ReadRCFileBuilder implements CommandBuilder {
           reader.close();
         }
       }
-      return true;
     }
 
-    private Path getAttachmentPath(final Record record) {
-      // We have more meaningful RCFile error messages
-      // if we have a attachment name
+    private Path getAttachmentPath(Record record) {
+      // We have more meaningful RCFile error messages if we have an attachment name
       String attachmentName = (String) record.getFirstValue(Fields.ATTACHMENT_NAME);
       if (attachmentName == null) {
         attachmentName = "UNKNOWN";
@@ -280,7 +279,7 @@ public final class ReadRCFileBuilder implements CommandBuilder {
     // /////////////////////////////////////////////////////////////////////////////
     // Nested classes:
     // /////////////////////////////////////////////////////////////////////////////
-    private enum RCFileReadMode {
+    private static enum RCFileReadMode {
       column, row
     }
 
