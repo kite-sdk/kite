@@ -28,7 +28,7 @@ See [Online Documentation](http://cloudera.github.io/cdk/docs/current/cdk-morphl
 <dependency>
   <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-morphlines-core</artifactId>
-  <version>0.8.0</version> <!-- or whatever the latest version is -->
+  <version>0.8.1</version> <!-- or whatever the latest version is -->
 </dependency>
 ```
 
@@ -38,7 +38,7 @@ See [Online Documentation](http://cloudera.github.io/cdk/docs/current/cdk-morphl
 <dependency>
   <groupId>com.cloudera.cdk</groupId>
   <artifactId>cdk-morphlines-all</artifactId>
-  <version>0.8.0</version> <!-- or whatever the latest version is -->
+  <version>0.8.1</version> <!-- or whatever the latest version is -->
   <type>pom</type>
 </dependency>
 ```
@@ -52,7 +52,7 @@ git clone https://github.com/cloudera/cdk.git
 cd cdk
 #git tag # list available releases
 #git checkout master
-#git checkout release-0.8.0 # or whatever the latest version is
+#git checkout release-0.8.1 # or whatever the latest version is
 mvn clean package
 find cdk-morphlines/cdk-morphlines-core/target -name '*.jar'
 find cdk-morphlines/cdk-morphlines-all/target -name '*.jar'
