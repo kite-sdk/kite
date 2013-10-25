@@ -191,7 +191,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   }
 
   @Override
-  public Dataset create(String name, DatasetDescriptor descriptor) {
+  public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
 
     Preconditions.checkArgument(name != null, "Name can not be null");
     Preconditions.checkArgument(descriptor != null,
@@ -222,11 +222,11 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         .partitionKey(newDescriptor.isPartitioned() ?
             com.cloudera.cdk.data.impl.Accessor.getDefault().newPartitionKey() :
             null)
-        .get();
+        .build();
   }
 
   @Override
-  public Dataset update(String name, DatasetDescriptor descriptor) {
+  public <E> Dataset<E> update(String name, DatasetDescriptor descriptor) {
     Preconditions.checkArgument(name != null, "Dataset name cannot be null");
     Preconditions.checkArgument(descriptor != null,
         "DatasetDescriptro cannot be null");
@@ -278,25 +278,25 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         .partitionKey(updatedDescriptor.isPartitioned() ?
             com.cloudera.cdk.data.impl.Accessor.getDefault().newPartitionKey() :
             null)
-        .get();
+        .build();
   }
 
   @Override
-  public Dataset load(String name) {
+  public <E> Dataset<E> load(String name) {
     Preconditions.checkArgument(name != null, "Name can not be null");
 
     logger.debug("Loading dataset:{}", name);
 
     DatasetDescriptor descriptor = metadataProvider.load(name);
 
-    FileSystemDataset ds = new FileSystemDataset.Builder()
+    FileSystemDataset<E> ds = new FileSystemDataset.Builder()
         .name(name)
         .configuration(conf)
         .descriptor(descriptor)
         .partitionKey(descriptor.isPartitioned() ?
             com.cloudera.cdk.data.impl.Accessor.getDefault().newPartitionKey() :
             null)
-        .get();
+        .build();
 
     logger.debug("Loaded dataset:{}", ds);
 

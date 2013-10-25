@@ -66,20 +66,20 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
   }
 
   @Override
-  public Dataset create(String name, DatasetDescriptor descriptor) {
+  public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
     // avoids calling fsRepository.create, which creates the data path
     metadataProvider.create(name, descriptor);
     return fsRepository.load(name);
   }
 
   @Override
-  public Dataset update(String name, DatasetDescriptor descriptor) {
+  public <E> Dataset<E> update(String name, DatasetDescriptor descriptor) {
     throw new UnsupportedOperationException(
         "Descriptor updates are not supported.");
   }
 
   @Override
-  public Dataset load(String name) {
+  public <E> Dataset<E> load(String name) {
     return fsRepository.load(name);
   }
 

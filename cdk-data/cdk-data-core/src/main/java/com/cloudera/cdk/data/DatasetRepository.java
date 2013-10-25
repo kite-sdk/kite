@@ -57,7 +57,7 @@ public interface DatasetRepository {
    *
    * @since 0.7.0
    */
-  Dataset load(String name);
+  <E> Dataset<E> load(String name);
 
   /**
    * Create a {@link Dataset} with the supplied {@code descriptor}. Depending on
@@ -77,7 +77,7 @@ public interface DatasetRepository {
    *                                    already exists.
    * @throws DatasetRepositoryException
    */
-  Dataset create(String name, DatasetDescriptor descriptor);
+  <E> Dataset<E> create(String name, DatasetDescriptor descriptor);
 
   /**
    * Update an existing {@link Dataset} to reflect the supplied {@code descriptor}. The
@@ -100,7 +100,7 @@ public interface DatasetRepository {
    *
    * @since 0.3.0
    */
-  Dataset update(String name, DatasetDescriptor descriptor);
+  <E> Dataset<E> update(String name, DatasetDescriptor descriptor);
 
   /**
    * Delete the named {@link Dataset}. If no dataset with the

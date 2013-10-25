@@ -54,7 +54,7 @@ public class TestPartitionedDatasetWriter {
 
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", 2).get();
-    Dataset users = repo.create(
+    Dataset<Object> users = repo.create(
         "users",
         new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)

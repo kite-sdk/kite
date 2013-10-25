@@ -33,13 +33,14 @@ import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
 import static com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository
     .partitionKeyForPath;
 import com.cloudera.cdk.data.impl.Accessor;
+import org.apache.avro.generic.GenericData.Record;
 
 public class TestFileSystemDatasetPartitionKeyForPath {
 
   private FileSystem fileSystem;
   private Path testDirectory;
   private PartitionStrategy partitionStrategy;
-  private FileSystemDataset dataset;
+  private FileSystemDataset<Record> dataset;
 
   @Before
   public void setUp() throws IOException {
@@ -57,7 +58,7 @@ public class TestFileSystemDatasetPartitionKeyForPath {
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .get())
-        .get();
+        .build();
   }
 
   @After

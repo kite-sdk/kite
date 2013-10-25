@@ -52,7 +52,7 @@ public class CrunchDatasets {
    * filesystem-based.
    */
   @SuppressWarnings("unchecked")
-  public static <E> ReadableSource<E> asSource(Dataset dataset, Class<E> type) {
+  public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
     Path directory = Accessor.getDefault().getDirectory(dataset);
     if (directory != null) {
       if (dataset.getDescriptor().getFormat() == Formats.PARQUET) {

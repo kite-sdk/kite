@@ -202,7 +202,7 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     PartitionStrategy partitionStrategy = parser.parseKeySchema(schemaString)
         .getPartitionStrategy();
     return new DatasetDescriptor.Builder()
-        .schema(schemaString)
+        .schemaLiteral(schemaString)
         .partitionStrategy(partitionStrategy)
         .get();
   }

@@ -24,12 +24,12 @@ import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.spi.AbstractDataset;
 
-class DaoDataset extends AbstractDataset {
+class DaoDataset<E> extends AbstractDataset<E> {
   private String name;
-  private Dao dao;
+  private Dao<E> dao;
   private DatasetDescriptor descriptor;
 
-  public DaoDataset(String name, Dao dao, DatasetDescriptor descriptor) {
+  public DaoDataset(String name, Dao<E> dao, DatasetDescriptor descriptor) {
     this.name = name;
     this.dao = dao;
     this.descriptor = descriptor;
@@ -46,7 +46,7 @@ class DaoDataset extends AbstractDataset {
   }
 
   @Override
-  public Dataset getPartition(PartitionKey key, boolean autoCreate) {
+  public Dataset<E> getPartition(PartitionKey key, boolean autoCreate) {
     throw new UnsupportedOperationException();
   }
 
@@ -57,24 +57,24 @@ class DaoDataset extends AbstractDataset {
 
   @Override
   @SuppressWarnings("unchecked")
-  public <E> DatasetWriter<E> newWriter() {
+  public DatasetWriter<E> newWriter() {
     return dao.newBatch();
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <E> DatasetReader<E> newReader() {
+  public DatasetReader<E> newReader() {
     return dao.getScanner();
   }
 
   @Override
-  public Iterable<Dataset> getPartitions() {
+  public Iterable<Dataset<E>> getPartitions() {
     throw new UnsupportedOperationException();
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <E> DatasetAccessor<E> newAccessor() {
-    return (DatasetAccessor<E>) dao;
+  public DatasetAccessor<E> newAccessor() {
+    return dao;
   }
 }

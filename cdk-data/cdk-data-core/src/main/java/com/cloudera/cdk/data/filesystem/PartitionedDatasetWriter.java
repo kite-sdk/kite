@@ -39,7 +39,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   private static final Logger logger = LoggerFactory
     .getLogger(PartitionedDatasetWriter.class);
 
-  private Dataset dataset;
+  private Dataset<E> dataset;
   private int maxWriters;
 
   private final PartitionStrategy partitionStrategy;
@@ -48,7 +48,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
 
   private ReaderWriterState state;
 
-  public PartitionedDatasetWriter(Dataset dataset) {
+  public PartitionedDatasetWriter(Dataset<E> dataset) {
     Preconditions.checkArgument(dataset.getDescriptor().isPartitioned(),
       "Dataset " + dataset + " is not partitioned");
 
@@ -59,7 +59,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   }
 
   @Deprecated
-  public PartitionedDatasetWriter(Dataset dataset,
+  public PartitionedDatasetWriter(Dataset<E> dataset,
     PartitionStrategy partitionStrategy) {
 
     Preconditions.checkArgument(dataset.getDescriptor().isPartitioned(),
@@ -167,15 +167,15 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   private static class DatasetWriterCacheLoader<E> extends
     CacheLoader<PartitionKey, DatasetWriter<E>> {
 
-    private Dataset dataset;
+    private Dataset<E> dataset;
 
-    public DatasetWriterCacheLoader(Dataset dataset) {
+    public DatasetWriterCacheLoader(Dataset<E> dataset) {
       this.dataset = dataset;
     }
 
     @Override
     public DatasetWriter<E> load(PartitionKey key) throws Exception {
-      Dataset partition = dataset.getPartition(key, true);
+      Dataset<E> partition = dataset.getPartition(key, true);
       DatasetWriter<E> writer = partition.newWriter();
 
       writer.open();

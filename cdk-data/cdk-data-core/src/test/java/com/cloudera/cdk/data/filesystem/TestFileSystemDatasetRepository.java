@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.checkTestUsers;
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.writeTestUsers;
+import org.apache.avro.generic.GenericData.Record;
 
 public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
@@ -51,7 +52,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
   @Test
   public void testCreatePath() throws IOException {
-    Dataset created = repo.create(NAME, testDescriptor);
+    Dataset<Record> created = repo.create(NAME, testDescriptor);
 
     URI location = created.getDescriptor().getLocation();
     Assert.assertNotNull(
@@ -65,7 +66,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   public void testLoadNewHasZeroSize() {
     ensureCreated();
 
-    Dataset dataset = repo.load(NAME);
+    Dataset<Record> dataset = repo.load(NAME);
 
     /*
      * We perform a read test to make sure only data files are encountered
@@ -76,7 +77,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
   @Test
   public void testUpdateFailsWithFormatChange() {
-    Dataset dataset = repo.create(NAME,
+    Dataset<Record> dataset = repo.create(NAME,
         new DatasetDescriptor.Builder(testDescriptor)
             .format(Formats.AVRO)
             .get());
@@ -107,7 +108,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
         .hash("email", 3)
         .get();
 
-    Dataset dataset = repo.create(NAME,
+    Dataset<Record> dataset = repo.create(NAME,
         new DatasetDescriptor.Builder(testDescriptor)
             .partitionStrategy(ps1)
             .get());
@@ -131,7 +132,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   @Test
   public void testUpdateFailsWithLocationChange() {
     ensureCreated();
-    Dataset dataset = repo.load(NAME);
+    Dataset<Record> dataset = repo.load(NAME);
     URI location = dataset.getDescriptor().getLocation();
 
     DatasetDescriptor changed =
@@ -152,7 +153,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
   @Test
   public void testUpdateFailsWithIncompatibleSchemaChange() {
-    Dataset dataset = repo.create(NAME, new DatasetDescriptor.Builder()
+    Dataset<Record> dataset = repo.create(NAME, new DatasetDescriptor.Builder()
         .schema(testSchema).get());
 
     Assert.assertEquals("Dataset name is propagated", NAME,
@@ -179,7 +180,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
   @Test
   public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldAdded() {
-    Dataset dataset = repo.create(NAME, new DatasetDescriptor.Builder()
+    Dataset<Record> dataset = repo.create(NAME, new DatasetDescriptor.Builder()
         .schema(testSchema).get());
 
     writeTestUsers(dataset, 5, 0, "email");
@@ -191,7 +192,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
         .nullableString("favoriteColor", "orange")
         .endRecord();
 
-    Dataset datasetV2 = repo.update(NAME,
+    Dataset<Record> datasetV2 = repo.update(NAME,
         new DatasetDescriptor.Builder(dataset.getDescriptor())
             .schema(testSchemaV2)
             .get());
@@ -209,7 +210,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
   @Test
   public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldRemoved() {
-    Dataset dataset = repo.create(NAME, new DatasetDescriptor.Builder()
+    Dataset<Record> dataset = repo.create(NAME, new DatasetDescriptor.Builder()
         .schema(testSchema).get());
 
     writeTestUsers(dataset, 5, 0, "email");
@@ -219,7 +220,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
         .requiredString("username")
         .endRecord();
 
-    Dataset datasetV2 = repo.update(NAME,
+    Dataset<Record> datasetV2 = repo.update(NAME,
         new DatasetDescriptor.Builder(dataset.getDescriptor())
             .schema(testSchemaV2)
             .get());
@@ -239,7 +240,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   public void testDeleteRemovesDatasetPath() throws IOException {
     ensureCreated();
 
-    Dataset dataset = repo.load(NAME);
+    Dataset<Record> dataset = repo.load(NAME);
     Path dataPath = new Path(dataset.getDescriptor().getLocation());
     Assert.assertTrue(fileSystem.exists(dataPath));
 

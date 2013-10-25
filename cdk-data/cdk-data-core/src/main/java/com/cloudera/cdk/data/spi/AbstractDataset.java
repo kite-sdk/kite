@@ -24,34 +24,34 @@ import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.View;
 import com.google.common.base.Preconditions;
 
-public abstract class AbstractDataset implements Dataset {
+public abstract class AbstractDataset<E> implements Dataset<E> {
 
   @Override
-  public Dataset getDataset() {
+  public Dataset<E> getDataset() {
     return this;
   }
 
   @Override
   @Deprecated
-  public <E> DatasetReader<E> getReader() {
+  public DatasetReader<E> getReader() {
     return newReader();
   }
 
   @Override
   @Deprecated
-  public <E> DatasetWriter<E> getWriter() {
+  public DatasetWriter<E> getWriter() {
     return newWriter();
   }
 
   @Override
-  public <E> DatasetAccessor<E> newAccessor() {
+  public DatasetAccessor<E> newAccessor() {
     // this method is optional, so default to UnsupportedOperationException
     throw new UnsupportedOperationException(
         "This Dataset does not support random access");
   }
 
   @Override
-  public boolean contains(Object key) {
+  public boolean contains(E key) {
     // A Dataset contains all PartitionKeys, only sub-views have to check
     return true;
   }
@@ -63,39 +63,39 @@ public abstract class AbstractDataset implements Dataset {
   }
 
   @Override
-  public View union(View view) {
+  public View<E> union(View view) {
     Preconditions.checkArgument(this.equals(view.getDataset()),
         "Views can only be unioned if they have the same underlying Dataset");
     return this;
   }
 
   @Override
-  public View from(Marker start) {
+  public View<E> from(Marker start) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public View fromAfter(Marker start) {
+  public View<E> fromAfter(Marker start) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public View to(Marker end) {
+  public View<E> to(Marker end) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public View toBefore(Marker end) {
+  public View<E> toBefore(Marker end) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public View in(Marker partial) {
+  public View<E> in(Marker partial) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public Iterable<View> getCoveringPartitions() {
+  public Iterable<View<E>> getCoveringPartitions() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 }

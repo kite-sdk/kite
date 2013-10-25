@@ -46,7 +46,7 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class FileSystemDataset extends AbstractDataset {
+class FileSystemDataset<E> extends AbstractDataset<E> {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemDataset.class);
@@ -97,7 +97,7 @@ class FileSystemDataset extends AbstractDataset {
 
   @Override
   @SuppressWarnings("unchecked") // See https://github.com/Parquet/parquet-mr/issues/106
-  public <E> DatasetWriter<E> newWriter() {
+  public DatasetWriter<E> newWriter() {
     logger.debug("Getting writer to dataset:{}", this);
 
     DatasetWriter<E> writer;
@@ -118,7 +118,7 @@ class FileSystemDataset extends AbstractDataset {
   }
 
   @Override
-  public <E> DatasetReader<E> newReader() {
+  public DatasetReader<E> newReader() {
     logger.debug("Getting reader for dataset:{}", this);
 
     List<Path> paths = Lists.newArrayList();
@@ -134,7 +134,7 @@ class FileSystemDataset extends AbstractDataset {
 
   @Override
   @Nullable
-  public Dataset getPartition(PartitionKey key, boolean allowCreate) {
+  public Dataset<E> getPartition(PartitionKey key, boolean allowCreate) {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get a partition on a non-partitioned dataset (name:%s)",
       name);
@@ -169,7 +169,7 @@ class FileSystemDataset extends AbstractDataset {
             .partitionStrategy(subpartitionStrategy)
             .get())
         .partitionKey(key)
-        .get();
+        .build();
   }
 
   @Override
@@ -194,7 +194,7 @@ class FileSystemDataset extends AbstractDataset {
   }
 
   @Override
-  public Iterable<View> getCoveringPartitions() {
+  public Iterable<View<E>> getCoveringPartitions() {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get partitions on a non-partitioned dataset (name:%s)",
       name);
@@ -203,12 +203,12 @@ class FileSystemDataset extends AbstractDataset {
   }
 
   @Override
-  public Iterable<Dataset> getPartitions() {
+  public Iterable<Dataset<E>> getPartitions() {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get partitions on a non-partitioned dataset (name:%s)",
       name);
 
-    List<Dataset> partitions = Lists.newArrayList();
+    List<Dataset<E>> partitions = Lists.newArrayList();
 
     FileStatus[] fileStatuses;
 
@@ -233,14 +233,14 @@ class FileSystemDataset extends AbstractDataset {
               .get())
           .partitionKey(key);
 
-      partitions.add(builder.get());
+      partitions.add(builder.<E>build());
     }
 
     return partitions;
   }
 
   @Override
-  public <E> DatasetAccessor<E> newAccessor() {
+  public DatasetAccessor<E> newAccessor() {
     throw new UnsupportedOperationException();
   }
 
@@ -337,8 +337,16 @@ class FileSystemDataset extends AbstractDataset {
       return this;
     }
 
+    /**
+     * @deprecated will be removed in 0.10.0
+     */
     @Override
+    @Deprecated
     public FileSystemDataset get() {
+      return (FileSystemDataset) build();
+    }
+
+    public <E> FileSystemDataset<E> build() {
       Preconditions.checkState(this.name != null, "No dataset name defined");
       Preconditions.checkState(this.descriptor != null,
         "No dataset descriptor defined");
@@ -356,7 +364,7 @@ class FileSystemDataset extends AbstractDataset {
       }
 
       Path absoluteDirectory = fileSystem.makeQualified(directory);
-      return new FileSystemDataset(
+      return new FileSystemDataset<E>(
           fileSystem, absoluteDirectory, name, descriptor, partitionKey);
     }
   }

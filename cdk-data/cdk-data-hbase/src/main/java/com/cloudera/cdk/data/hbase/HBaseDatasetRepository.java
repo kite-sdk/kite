@@ -47,25 +47,25 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   }
 
   @Override
-  public Dataset create(String name, DatasetDescriptor descriptor) {
+  public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
     DatasetDescriptor newDescriptor = metadataProvider.create(name, descriptor);
     return newDataset(name, newDescriptor);
   }
 
   @Override
-  public Dataset update(String name, DatasetDescriptor descriptor) {
+  public <E> Dataset<E> update(String name, DatasetDescriptor descriptor) {
     DatasetDescriptor newDescriptor = metadataProvider.update(name, descriptor);
     return newDataset(name, newDescriptor);
   }
 
   @Override
-  public Dataset load(String name) {
+  public <E> Dataset<E> load(String name) {
     DatasetDescriptor descriptor = metadataProvider.load(name);
     return newDataset(name, descriptor);
   }
 
   @SuppressWarnings("unchecked")
-  private Dataset newDataset(String name, DatasetDescriptor descriptor) {
+  private <E> Dataset<E> newDataset(String name, DatasetDescriptor descriptor) {
     // TODO: use descriptor.getFormat() to decide type of DAO (Avro vs. other)
     String tableName = HBaseMetadataProvider.getTableName(name);
     String entityName = HBaseMetadataProvider.getEntityName(name);

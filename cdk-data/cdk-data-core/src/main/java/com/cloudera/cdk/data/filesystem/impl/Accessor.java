@@ -60,9 +60,9 @@ public abstract class Accessor {
   public Accessor() {
   }
 
-  public abstract Path getDirectory(Dataset dataset);
+  public abstract Path getDirectory(Dataset<?> dataset);
 
-  public abstract void accumulateDatafilePaths(Dataset dataset, Path directory, List<Path> paths) throws IOException;
+  public abstract void accumulateDatafilePaths(Dataset<?> dataset, Path directory, List<Path> paths) throws IOException;
 
   public abstract void ensureExists(DatasetDescriptor descriptor, Configuration conf);
 }

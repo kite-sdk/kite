@@ -56,15 +56,15 @@ public class DatasetTestUtilities {
     }
   }
 
-  public static void writeTestUsers(Dataset ds, int count) {
+  public static void writeTestUsers(Dataset<GenericData.Record> ds, int count) {
     writeTestUsers(ds, count, 0);
   }
 
-  public static void writeTestUsers(Dataset ds, int count, int start) {
+  public static void writeTestUsers(Dataset<GenericData.Record> ds, int count, int start) {
     writeTestUsers(ds, count, start, "email");
   }
 
-  public static void writeTestUsers(Dataset ds, int count, int start, String... fields) {
+  public static void writeTestUsers(Dataset<GenericData.Record> ds, int count, int start, String... fields) {
     DatasetWriter<GenericData.Record> writer = null;
     try {
       writer = ds.newWriter();
@@ -85,17 +85,17 @@ public class DatasetTestUtilities {
     }
   }
 
-  public static void checkTestUsers(Dataset ds, int count) {
+  public static void checkTestUsers(Dataset<GenericData.Record> ds, int count) {
     checkTestUsers(ds, count, "email");
   }
 
-  public static void checkTestUsers(Dataset ds, int count, final String... fields) {
+  public static void checkTestUsers(Dataset<GenericData.Record> ds, int count, final String... fields) {
     final Set<String> usernames = Sets.newHashSet();
     for (int i = 0; i < count; i++) {
       usernames.add("test-" + i);
     }
 
-    checkReaderBehavior(ds.<GenericData.Record>newReader(), count,
+    checkReaderBehavior(ds.newReader(), count,
         new RecordValidator<GenericData.Record>() {
           @Override
           public void validate(GenericData.Record record, int recordNum) {
@@ -125,13 +125,13 @@ public class DatasetTestUtilities {
     Assert.assertTrue(usernames.isEmpty());
   }
 
-  public static Set<GenericData.Record> materialize(Dataset ds) {
-    Set<GenericData.Record> records = Sets.newHashSet();
-    DatasetReader<GenericData.Record> reader = null;
+  public static <E> Set<E> materialize(Dataset<E> ds) {
+    Set<E> records = Sets.newHashSet();
+    DatasetReader<E> reader = null;
     try {
       reader = ds.newReader();
       reader.open();
-      for (GenericData.Record record : reader) {
+      for (E record : reader) {
         records.add(record);
       }
     } finally {
@@ -142,11 +142,11 @@ public class DatasetTestUtilities {
     return records;
   }
 
-  public static int datasetSize(Dataset ds) {
+  public static <E> int datasetSize(Dataset<E> ds) {
     return materialize(ds).size();
   }
 
-  public static void testPartitionKeysAreEqual(Dataset ds,
+  public static <E> void testPartitionKeysAreEqual(Dataset<E> ds,
       PartitionKey... expectedKeys) {
     Set<PartitionKey> expected = Sets.newHashSet(expectedKeys);
     Set<PartitionKey> actual = Sets.newHashSet(Iterables.transform(ds.getPartitions(),

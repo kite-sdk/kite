@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
+import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.conf.Configuration;
 
 public class TestCrunchDatasets {
@@ -50,9 +51,9 @@ public class TestCrunchDatasets {
 
   @Test
   public void testGeneric() throws IOException {
-    Dataset inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).get());
-    Dataset outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).get());
 
     // write two files, each of 5 records
@@ -73,16 +74,16 @@ public class TestCrunchDatasets {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).get();
 
-    Dataset inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).get());
-    Dataset outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).get());
 
     writeTestUsers(inputDataset, 10);
 
     PartitionKey key = partitionStrategy.keyFor(new Marker.Builder("username", 0).get());
-    Dataset inputPart0 = inputDataset.getPartition(key, false);
-    Dataset outputPart0 = outputDataset.getPartition(key, true);
+    Dataset<Record> inputPart0 = inputDataset.getPartition(key, false);
+    Dataset<Record> outputPart0 = outputDataset.getPartition(key, true);
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(

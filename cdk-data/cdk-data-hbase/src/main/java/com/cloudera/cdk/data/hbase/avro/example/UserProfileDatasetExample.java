@@ -44,20 +44,20 @@ public class UserProfileDatasetExample {
   /**
    * The user profile dataset
    */
-  private final Dataset userProfileDataset;
+  private final Dataset<UserProfileModel2> userProfileDataset;
 
   /**
    * The user actions dataset. User actions are stored in the same table along side
    * the user profiles.
    */
-  private final Dataset userActionsDataset;
+  private final Dataset<UserActionsModel2> userActionsDataset;
 
   /**
    * A composite dataset that encapsulates the two entity types that can be stored
    * in the user_profile table (UserProfileModel and UserActionsModel).
    * UserProfileActionsModel is the composite type this dao returns.
    */
-  private final Dataset userProfileActionsDataset;
+  private final Dataset<UserProfileActionsModel2> userProfileActionsDataset;
 
   /**
    * The constructor will start by registering the schemas with the meta store
@@ -102,7 +102,7 @@ public class UserProfileDatasetExample {
    * table. It has no start or stop keys specified.
    */
   public void printUserProfies() {
-    DatasetReader<UserProfileModel2> reader = userProfileDataset.getReader();
+    DatasetReader<UserProfileModel2> reader = userProfileDataset.newReader();
     reader.open();
     try {
       for (UserProfileModel2 userProfile : reader) {
@@ -127,7 +127,7 @@ public class UserProfileDatasetExample {
    */
   public void printUserProfileActionsForLastName(String lastName) {
     // TODO: use a reader with a start key
-    DatasetReader<UserProfileActionsModel2> reader = userProfileActionsDataset.getReader();
+    DatasetReader<UserProfileActionsModel2> reader = userProfileActionsDataset.newReader();
     reader.open();
     try {
       for (UserProfileActionsModel2 entity : reader) {

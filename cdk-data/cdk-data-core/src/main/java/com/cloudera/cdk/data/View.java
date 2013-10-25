@@ -21,15 +21,19 @@ package com.cloudera.cdk.data;
  * A {@code View} defines a space of potential PartitionKeys, or a partition
  * space. Views can be created from ranges, partial keys, or the union of other
  * views.
+ *
+ * @param <E>
+ *      The type of entities stored in the {@code Dataset} underlying this
+ *      {@code View}.
  */
-public interface View {
+public interface View<E> {
 
   /**
    * Returns the underlying {@link Dataset} that this is a {@code View} of.
    *
    * @return the underlying {@code Dataset}
    */
-  Dataset getDataset();
+  Dataset<E> getDataset();
 
   /**
    * Get an appropriate {@link DatasetReader} implementation based on this
@@ -43,7 +47,7 @@ public interface View {
    *
    * @throws DatasetException
    */
-  <E> DatasetReader<E> newReader();
+  DatasetReader<E> newReader();
 
   /**
    * Get an appropriate {@link DatasetWriter} implementation based on this
@@ -57,7 +61,7 @@ public interface View {
    *
    * @throws DatasetException
    */
-  <E> DatasetWriter<E> newWriter();
+  DatasetWriter<E> newWriter();
 
   /**
    * Get an appropriate {@link DatasetAccessor} implementation based on this
@@ -71,7 +75,7 @@ public interface View {
    *
    * @throws DatasetException
    */
-  <E> DatasetAccessor<E> newAccessor();
+  DatasetAccessor<E> newAccessor();
 
   /**
    * Returns whether an entity {@link Object} is in this {@code View}.
@@ -79,7 +83,7 @@ public interface View {
    * @param key an entity {@code Object}
    * @return true if {@code key} is in the partition space of this view.
    */
-  boolean contains(Object key);
+  boolean contains(E key);
 
   /**
    * Returns whether a {@link Marker} is in this {@code View}
@@ -111,7 +115,7 @@ public interface View {
    * @throws IllegalStateException
    *      If the underlying {@code Dataset} is not partitioned.
    */
-  Iterable<View> getCoveringPartitions();
+  Iterable<View<E>> getCoveringPartitions();
 
   /**
    * Creates a {@code View} that represents the union of this and {@code view}.
@@ -121,7 +125,7 @@ public interface View {
    *
    * @throws DatasetException If the underlying Datasets are not the same.
    */
-  View union(View view);
+  View<E> union(View<E> view);
 
   // TODO: should the View factory methods support entities also?
 
@@ -145,7 +149,7 @@ public interface View {
    * @throws IllegalArgumentException If either Marker is not in this
    *                                  {@code View}.
    */
-  //View range(Marker start, Marker end);
+  //View<E> range(Marker start, Marker end);
 
   /**
    * Creates a sub-{@code View}, from the {@code start} {@link Marker} to the
@@ -163,7 +167,7 @@ public interface View {
    * @throws IllegalArgumentException If {@code start} is null or not in this
    *                                  {@code View}.
    */
-  View from(Marker start);
+  View<E> from(Marker start);
 
   /**
    * Creates a sub-{@code View}, from after the {@code start} {@link Marker} to
@@ -181,7 +185,7 @@ public interface View {
    * @throws IllegalArgumentException If {@code start} is null or not in this
    *                                  {@code View}.
    */
-  View fromAfter(Marker start);
+  View<E> fromAfter(Marker start);
 
   /**
    * Creates a sub-{@code View}, from the start of this {@code View} to the
@@ -199,7 +203,7 @@ public interface View {
    * @throws IllegalArgumentException If {@code end} is null or not in this
    *                                  {@code View}.
    */
-  View to(Marker end);
+  View<E> to(Marker end);
 
   /**
    * Creates a sub-{@code View}, from the start of this {@code View} to before
@@ -217,7 +221,7 @@ public interface View {
    * @throws IllegalArgumentException If {@code end} is null or not in this
    *                                  {@code View}.
    */
-  View toBefore(Marker end);
+  View<E> toBefore(Marker end);
 
   /**
    * Creates a sub-{@code View} from the partition space contained by a partial
@@ -254,5 +258,5 @@ public interface View {
    * @throws IllegalArgumentException If {@code partial} is null or not in this
    *                                  {@code View}.
    */
-  View in(Marker partial);
+  View<E> in(Marker partial);
 }

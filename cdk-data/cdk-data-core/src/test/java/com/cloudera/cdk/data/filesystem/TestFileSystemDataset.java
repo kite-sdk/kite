@@ -95,7 +95,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
 
   @Test
   public void testWriteAndRead() throws IOException {
-    FileSystemDataset ds = new FileSystemDataset.Builder()
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("test")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -103,7 +103,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .format(format)
             .location(testDirectory)
             .get())
-        .get();
+        .build();
 
     Assert.assertFalse("Dataset is not partitioned", ds.getDescriptor()
       .isPartitioned());
@@ -117,7 +117,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
       "username", 2).get();
 
-    FileSystemDataset ds = new FileSystemDataset.Builder()
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -126,7 +126,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .get())
-        .get();
+        .build();
 
     Assert.assertTrue("Dataset is partitioned", ds.getDescriptor()
       .isPartitioned());
@@ -161,7 +161,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
       .hash("username", 2).hash("email", 3).get();
 
-    FileSystemDataset ds = new FileSystemDataset.Builder()
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -170,7 +170,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .get())
-        .get();
+        .build();
 
     Assert.assertTrue("Dataset is partitioned", ds.getDescriptor()
       .isPartitioned());
@@ -204,7 +204,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
     testPartitionKeysAreEqual(ds, key0, key1);
 
     Set<Record> records = Sets.newHashSet();
-    for (Dataset dataset : ds.getPartitions()) {
+    for (Dataset<Record> dataset : ds.getPartitions()) {
       Assert.assertTrue("Partitions should have further partitions", dataset
           .getDescriptor().isPartitioned());
       records.addAll(materialize(ds));
@@ -218,7 +218,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
       "username", 2).get();
 
-    FileSystemDataset ds = new FileSystemDataset.Builder()
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -227,7 +227,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .get())
-        .get();
+        .build();
 
     Assert
       .assertNull(ds.getPartition(partitionStrategy.keyFor(username1), false));
@@ -238,7 +238,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
       .hash("username", "username_part", 2).hash("email", 3).get();
 
-    FileSystemDataset ds = new FileSystemDataset.Builder()
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -247,10 +247,10 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .get())
-        .get();
+        .build();
 
     PartitionKey key = Accessor.getDefault().newPartitionKey(1);
-    FileSystemDataset userPartition = (FileSystemDataset) ds.getPartition(key, true);
+    FileSystemDataset<Record> userPartition = (FileSystemDataset<Record>) ds.getPartition(key, true);
     Assert.assertEquals(key, userPartition.getPartitionKey());
 
     writeTestUsers(userPartition, 1);
@@ -264,7 +264,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
       .hash("username", 2).get();
 
-    FileSystemDataset ds = new FileSystemDataset.Builder()
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -273,7 +273,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .get())
-        .get();
+        .build();
 
     writeTestUsers(ds, 10);
 
@@ -301,12 +301,12 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertNotNull(caught);
   }
 
-  private int readTestUsersInPartition(FileSystemDataset ds, PartitionKey key,
+  private int readTestUsersInPartition(FileSystemDataset<Record> ds, PartitionKey key,
       String subpartitionName) {
     int readCount = 0;
     DatasetReader<Record> reader = null;
     try {
-      Dataset partition = ds.getPartition(key, false);
+      Dataset<Record> partition = ds.getPartition(key, false);
       if (subpartitionName != null) {
         List<FieldPartitioner> fieldPartitioners = partition.getDescriptor()
             .getPartitionStrategy().getFieldPartitioners();

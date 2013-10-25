@@ -26,18 +26,18 @@ import org.apache.hadoop.fs.Path;
 final class AccessorImpl extends Accessor {
 
   @Override
-  public Path getDirectory(Dataset dataset) {
+  public Path getDirectory(Dataset<?> dataset) {
     if (dataset instanceof FileSystemDataset) {
-      return ((FileSystemDataset) dataset).getDirectory();
+      return ((FileSystemDataset<?>) dataset).getDirectory();
     }
     return null;
   }
 
   @Override
-  public void accumulateDatafilePaths(Dataset dataset, Path directory,
+  public void accumulateDatafilePaths(Dataset<?> dataset, Path directory,
       List<Path> paths) throws IOException {
     if (dataset instanceof FileSystemDataset) {
-      ((FileSystemDataset) dataset).accumulateDatafilePaths(directory, paths);
+      ((FileSystemDataset<?>) dataset).accumulateDatafilePaths(directory, paths);
     }
   }
 

@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
-import com.cloudera.cdk.data.filesystem.FileSystemDatasetWriter;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;

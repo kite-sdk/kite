@@ -16,13 +16,10 @@
 package com.cloudera.cdk.data;
 
 import com.cloudera.cdk.data.filesystem.DatasetTestUtilities;
-import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.io.Files;
 import java.io.IOException;
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;

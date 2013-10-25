@@ -35,6 +35,8 @@ import javax.annotation.concurrent.Immutable;
  * Implementations of {@link Dataset} are immutable.
  * </p>
  *
+ * @param <E> The type of entities stored in this {@code Dataset}
+ *
  * @see DatasetRepository
  * @see DatasetWriter
  * @see DatasetReader
@@ -43,7 +45,7 @@ import javax.annotation.concurrent.Immutable;
  * @see Schema
  */
 @Immutable
-public interface Dataset extends View {
+public interface Dataset<E> extends View<E> {
 
   /**
    * Get the name of a {@code Dataset}. No guarantees about the format of this
@@ -66,7 +68,7 @@ public interface Dataset extends View {
    * @param autoCreate If true, automatically create the partition if doesn't exist,
    * @throws DatasetException
    */
-  Dataset getPartition(PartitionKey key, boolean autoCreate);
+  Dataset<E> getPartition(PartitionKey key, boolean autoCreate);
 
   /**
    * Drop a partition for a {@link PartitionKey}. Dropping a partition that
@@ -96,7 +98,7 @@ public interface Dataset extends View {
    * @deprecated will be removed in 0.10.0; use {@link #newWriter()}
    */
   @Deprecated
-  <E> DatasetWriter<E> getWriter();
+  DatasetWriter<E> getWriter();
 
   /**
    * <p>
@@ -116,7 +118,7 @@ public interface Dataset extends View {
    * @deprecated will be removed in 0.10.0; use {@link #newReader()}
    */
   @Deprecated
-  <E> DatasetReader<E> getReader();
+  DatasetReader<E> getReader();
 
   /**
    * <p>
@@ -130,6 +132,6 @@ public interface Dataset extends View {
    * @return an iterable over all partitions of this dataset
    * @throws DatasetException
    */
-  Iterable<Dataset> getPartitions();
+  Iterable<Dataset<E>> getPartitions();
 
 }
