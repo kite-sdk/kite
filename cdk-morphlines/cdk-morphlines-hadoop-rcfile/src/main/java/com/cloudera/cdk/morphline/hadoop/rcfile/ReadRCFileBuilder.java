@@ -100,42 +100,10 @@ public final class ReadRCFileBuilder implements CommandBuilder {
               getConfigs().getString(config, "readMode",
                   RCFileReadMode.row.name()), RCFileReadMode.class);
       
-      parseColumnMap(config);
-      validateArguments();
-    }
-
-    private void parseColumnMap(final Config config) {
       for (Config columnConfig : getConfigs().getConfigList(config, "columns")) {
-        Configs configs = new Configs();
-        int inputField = configs.getInt(columnConfig, "inputField");
-        if (inputField < 0) {
-          throw new MorphlineCompilationException(
-              "Invalid column inputField specified: " + inputField, columnConfig);
-        }
-
-        String outputField = configs.getString(columnConfig, "outputField");
-        String writableClassString = configs.getString(columnConfig, "writableClass");
-
-        if (writableClassString == null || writableClassString.isEmpty()) {
-          throw new MorphlineCompilationException(
-              "No writableClass specified for column " + outputField, columnConfig);
-        }
-        Class<Writable> writableClass;
-        try {
-          Class clazz = Class.forName(writableClassString);
-          if (!Writable.class.isAssignableFrom(clazz)) {
-            throw new MorphlineCompilationException("writableClass provided "
-                + writableClassString + " for column " + outputField
-                + " does not implement " + Writable.class.getName(), columnConfig);
-          }
-          writableClass = clazz;
-        } catch (ClassNotFoundException e) {
-          throw new MorphlineCompilationException("Could not load class "
-              + writableClassString + " definition", columnConfig, e);
-        }
-        columns.add(new RCFileColumn(inputField, outputField, writableClass, conf));
-        configs.validateArguments(columnConfig);
+        columns.add(new RCFileColumn(columnConfig, conf));
       }
+      validateArguments();
     }
 
     @Override
@@ -289,11 +257,35 @@ public final class ReadRCFileBuilder implements CommandBuilder {
       private final Class<Writable> writableClass;
       private final Configuration conf;
 
-      public RCFileColumn(int inputField, String outputField, Class<Writable> writableClass, Configuration conf) {
-        this.inputField = inputField;
-        this.outputField = outputField;
-        this.writableClass = writableClass;
+      public RCFileColumn(Config columnConfig, Configuration conf) {
         this.conf = conf;
+        Configs configs = new Configs();
+        this.inputField = configs.getInt(columnConfig, "inputField");
+        if (inputField < 0) {
+          throw new MorphlineCompilationException(
+              "Invalid column inputField specified: " + inputField, columnConfig);
+        }
+
+        this.outputField = configs.getString(columnConfig, "outputField");
+        String writableClassString = configs.getString(columnConfig, "writableClass");
+
+        if (writableClassString == null || writableClassString.isEmpty()) {
+          throw new MorphlineCompilationException(
+              "No writableClass specified for column " + outputField, columnConfig);
+        }
+        try {
+          Class clazz = Class.forName(writableClassString);
+          if (!Writable.class.isAssignableFrom(clazz)) {
+            throw new MorphlineCompilationException("writableClass provided "
+                + writableClassString + " for column " + outputField
+                + " does not implement " + Writable.class.getName(), columnConfig);
+          }
+          this.writableClass = clazz;
+        } catch (ClassNotFoundException e) {
+          throw new MorphlineCompilationException("Could not load class "
+              + writableClassString + " definition", columnConfig, e);
+        }
+        configs.validateArguments(columnConfig);
       }
 
       public int getInputField() {
