@@ -56,7 +56,7 @@ public class TestCombinedLogFormatConverter {
     FileSystem fs = root.getFileSystem(new Configuration());
     DatasetRepository repo = new FileSystemDatasetRepository.Builder().fileSystem(fs)
         .rootDirectory(root).get();
-    Dataset dataset = repo.load(datasetName);
+    Dataset<GenericRecord> dataset = repo.load(datasetName);
     DatasetReader<GenericRecord> reader = dataset.newReader();
     try {
       reader.open();
