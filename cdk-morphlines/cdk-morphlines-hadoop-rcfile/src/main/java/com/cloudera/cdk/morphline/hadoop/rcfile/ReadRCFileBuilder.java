@@ -19,10 +19,11 @@ import java.io.DataInput;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -44,7 +45,6 @@ import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Validator;
 import com.cloudera.cdk.morphline.stdio.AbstractParser;
-import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.typesafe.config.Config;
 
@@ -83,7 +83,7 @@ public final class ReadRCFileBuilder implements CommandBuilder {
   // /////////////////////////////////////////////////////////////////////////////
   private static final class ReadRCFile extends AbstractParser {
     
-    private final Map<Integer, RCFileColumn> columns = Maps.newLinkedHashMap();
+    private final List<RCFileColumn> columns = new ArrayList();
     private final RCFileReadMode readMode;
     private final boolean includeMetaData;
     private final Configuration conf = new Configuration();
@@ -133,7 +133,7 @@ public final class ReadRCFileBuilder implements CommandBuilder {
           throw new MorphlineCompilationException("Could not load class "
               + writableClassString + " definition", columnConfig, e);
         }
-        columns.put(inputField, new RCFileColumn(outputField, writableClass, conf));
+        columns.add(new RCFileColumn(inputField, outputField, writableClass, conf));
         configs.validateArguments(columnConfig);
       }
     }
@@ -207,10 +207,8 @@ public final class ReadRCFileBuilder implements CommandBuilder {
         reader.getCurrentRow(rowBatchBytes);
 
         // Read all the columns configured and set it in the output record
-        for (Map.Entry<Integer, RCFileColumn> columnMapEntry : columns.entrySet()) {
-          RCFileColumn rcColumn = columnMapEntry.getValue();
-          Integer columnIndex = columnMapEntry.getKey();
-          BytesRefWritable columnBytes = rowBatchBytes.get(columnIndex);
+        for (RCFileColumn rcColumn : columns) {
+          BytesRefWritable columnBytes = rowBatchBytes.get(rcColumn.getInputField());
           outputRecord.put(rcColumn.getOutputField(), updateColumnValue(rcColumn, columnBytes));
         }
         
@@ -224,9 +222,7 @@ public final class ReadRCFileBuilder implements CommandBuilder {
 
     private boolean readColumnWise(RCFile.Reader reader, Record record) throws IOException {
       
-      for (Map.Entry<Integer, RCFileColumn> columnMapEntry : columns.entrySet()) {
-        RCFileColumn rcColumn = columnMapEntry.getValue();
-        Integer columnIndex = columnMapEntry.getKey();
+      for (RCFileColumn rcColumn : columns) {
         reader.sync(0);
         reader.resetBuffer();
         while (true) {
@@ -242,7 +238,7 @@ public final class ReadRCFileBuilder implements CommandBuilder {
             break;
           }
 
-          BytesRefArrayWritable rowBatchBytes = reader.getColumn(columnIndex, null);
+          BytesRefArrayWritable rowBatchBytes = reader.getColumn(rcColumn.getInputField(), null);
           for (int rowIndex = 0; rowIndex < rowBatchBytes.size(); rowIndex++) {
             incrementNumRecords();
             Record outputRecord = record.copy();
@@ -288,14 +284,20 @@ public final class ReadRCFileBuilder implements CommandBuilder {
     // /////////////////////////////////////////////////////////////////////////////
     private static final class RCFileColumn {
       
+      private final int inputField;
       private final String outputField;
       private final Class<Writable> writableClass;
       private final Configuration conf;
 
-      public RCFileColumn(String outputField, Class<Writable> writableClass, Configuration conf) {
+      public RCFileColumn(int inputField, String outputField, Class<Writable> writableClass, Configuration conf) {
+        this.inputField = inputField;
         this.outputField = outputField;
         this.writableClass = writableClass;
         this.conf = conf;
+      }
+
+      public int getInputField() {
+        return inputField;
       }
 
       public String getOutputField() {
