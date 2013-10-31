@@ -10,7 +10,7 @@ Release date: TBD
 Version TBD has the following notable changes:
 
 * Morphlines Library
-    * Added morphline command to read from RCFile: [readRCFile](cdk-morphlines/morphlinesReferenceGuide.html#readRCFile)
+    * Added morphline command to read from RCFile: [readRCFile](cdk-morphlines/morphlinesReferenceGuide.html#readRCFile) (Prasanna Rajaperumal via whoschek)
     * Upgraded cdk-morphlines-saxon module from saxon-HE-9.5.1-2 to saxon-HE-9.5.1-3
 
 ## Version 0.8.1
