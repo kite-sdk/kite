@@ -24,7 +24,9 @@ package com.cloudera.cdk.data;
  * @since 0.2.0
  */
 public class Formats {
-  private Formats() { }
+
+  private Formats() {
+  }
 
   /**
    * AVRO: the
@@ -37,4 +39,26 @@ public class Formats {
    * PARQUET: the <a href="http://parquet.io/">Parquet columnar format</a>
    */
   public static final Format PARQUET = new Format("parquet");
+
+  /**
+   * Return a {@link Format} for the format name specified. If {@code formatName}
+   * is not a valid name, an IllegalArgumentException is thrown. Currently the
+   * formats <q>avro</q> and <q>parquet</q> are supported. Format names are
+   * case sensitive.
+   *
+   * @since 0.9.0
+   * @param formatName
+   * @return an appropriate instance of Format
+   * @throws IllegalArgumentException if {@code formatName} is not a valid format.
+   */
+  public static Format fromString(String formatName) {
+    if (formatName.equals("avro")) {
+      return AVRO;
+    } else if (formatName.equals("parquet")) {
+      return PARQUET;
+    } else {
+      throw new IllegalArgumentException("Unknown format type: " + formatName);
+    }
+  }
+
 }
