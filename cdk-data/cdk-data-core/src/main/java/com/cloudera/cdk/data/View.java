@@ -15,6 +15,8 @@
  */
 package com.cloudera.cdk.data;
 
+import javax.annotation.concurrent.Immutable;
+
 /**
  * A {@code View} is a subset of a {@link Dataset}.
  *
@@ -26,6 +28,7 @@ package com.cloudera.cdk.data;
  *      The type of entities stored in the {@code Dataset} underlying this
  *      {@code View}.
  */
+@Immutable
 public interface View<E> {
 
   /**
