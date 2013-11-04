@@ -110,49 +110,7 @@ public class Key extends Marker implements Comparable<Key> {
    * @throws ClassCastException if the return type is unknown
    */
   public <T> T getAs(int index, Class<T> returnType) {
-    if (returnType.isAssignableFrom(Long.class)) {
-      return returnType.cast(getLong(index));
-    } else if (returnType.isAssignableFrom(Integer.class)) {
-      return returnType.cast(getInteger(index));
-    } else if (returnType.isAssignableFrom(String.class)) {
-      return returnType.cast(getString(index));
-    } else if (returnType.isAssignableFrom(Object.class)) {
-      return returnType.cast(getObject(index));
-    } else {
-      throw new ClassCastException(
-          "[BUG] getAs(int, Class) must be called with " +
-          "Long, Integer, String, or Object.");
-    }
-  }
-
-  /**
-   * Returns the value for {@code index} coerced to a Long.
-   *
-   * @param index the index of the value to return
-   * @return the Object stored for {@code index}
-   */
-  public Long getLong(int index) {
-    return makeLong(getObject(index));
-  }
-
-  /**
-   * Returns the value for {@code index} coerced to an Integer.
-   *
-   * @param index the index of the value to return
-   * @return the Object stored for {@code index}
-   */
-  public Integer getInteger(int index) {
-    return makeInteger(getObject(index));
-  }
-
-  /**
-   * Returns the value for {@code index} coerced to a String.
-   *
-   * @param index the index of the value to return
-   * @return the Object stored for {@code index}
-   */
-  public String getString(int index) {
-    return makeString(getObject(index));
+    return Conversions.convert(getObject(index), returnType);
   }
 
   /**
@@ -213,33 +171,6 @@ public class Key extends Marker implements Comparable<Key> {
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("values", values).toString();
-  }
-
-  static Long makeLong(Object value) {
-    if (value instanceof Number) {
-      return ((Number) value).longValue();
-    } else if (value instanceof String) {
-      return Long.valueOf((String) value);
-    } else {
-      throw new RuntimeException(
-          "Cannot coerce \"" + value + "\" to Long");
-    }
-  }
-
-  static Integer makeInteger(Object value) {
-    if (value instanceof Number) {
-      return ((Number) value).intValue();
-    } else if (value instanceof String) {
-      return Integer.valueOf((String) value);
-    } else {
-      throw new RuntimeException(
-          "Cannot coerce \"" + value + "\" to Integer");
-    }
-  }
-
-  static String makeString(Object value) {
-    // start simple, but we may want more complicated conversion here
-    return value.toString();
   }
 
   /**

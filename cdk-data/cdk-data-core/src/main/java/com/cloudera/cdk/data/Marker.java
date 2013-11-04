@@ -16,6 +16,7 @@
 
 package com.cloudera.cdk.data;
 
+import com.cloudera.cdk.data.spi.Conversions;
 import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
@@ -88,76 +89,7 @@ public abstract class Marker {
    * @throws ClassCastException if the return type is unknown
    */
   public <T> T getAs(String name, Class<T> returnType) {
-    if (returnType.isAssignableFrom(Long.class)) {
-      return returnType.cast(getLong(name));
-    } else if (returnType.isAssignableFrom(Integer.class)) {
-      return returnType.cast(getInteger(name));
-    } else if (returnType.isAssignableFrom(String.class)) {
-      return returnType.cast(getString(name));
-    } else if (returnType.isAssignableFrom(Object.class)) {
-      return returnType.cast(getObject(name));
-    } else {
-      throw new ClassCastException(
-          "[BUG] getAs(String, Class) must be called with " +
-          "Long, Integer, String, or Object.");
-    }
-  }
-
-  /**
-   * Returns the value for {@code name} coerced to a Long.
-   *
-   * @param name the String name of the value to return
-   * @return the Object stored for {@code name}
-   */
-  public Long getLong(String name) {
-    return makeLong(getObject(name));
-  }
-
-  /**
-   * Returns the value for {@code name} coerced to an Integer.
-   *
-   * @param name the String name of the value to return
-   * @return the Object stored for {@code name}
-   */
-  public Integer getInteger(String name) {
-    return makeInteger(getObject(name));
-  }
-
-  /**
-   * Returns the value for {@code name} coerced to a String.
-   *
-   * @param name the String name of the value to return
-   * @return the Object stored for {@code name}
-   */
-  public String getString(String name) {
-    return makeString(getObject(name));
-  }
-
-  static Long makeLong(Object value) {
-    if (value instanceof Number) {
-      return ((Number) value).longValue();
-    } else if (value instanceof String) {
-      return Long.valueOf((String) value);
-    } else {
-      throw new RuntimeException(
-          "Cannot coerce \"" + value + "\" to Long");
-    }
-  }
-
-  static Integer makeInteger(Object value) {
-    if (value instanceof Number) {
-      return ((Number) value).intValue();
-    } else if (value instanceof String) {
-      return Integer.valueOf((String) value);
-    } else {
-      throw new RuntimeException(
-          "Cannot coerce \"" + value + "\" to Integer");
-    }
-  }
-
-  static String makeString(Object value) {
-    // start simple, but we may want more complicated conversion here
-    return value.toString();
+    return Conversions.convert(getObject(name), returnType);
   }
 
   /**
