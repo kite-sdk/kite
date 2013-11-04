@@ -133,6 +133,7 @@ public class Key extends Marker implements Comparable<Key> {
    * @param values a List of values
    */
   public void replaceValues(List<Object> values) {
+    Preconditions.checkArgument(values != null, "Values cannot be null");
     Preconditions.checkArgument(values.size() == fields.size(),
         "Not enough values for a complete Key");
     this.values = values;
