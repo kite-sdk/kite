@@ -45,6 +45,7 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
   public FileSystemDatasetReader(FileSystem fileSystem, Path path, Schema schema) {
     Preconditions.checkArgument(fileSystem != null, "FileSystem cannot be null");
     Preconditions.checkArgument(path != null, "Path cannot be null");
+    Preconditions.checkArgument(schema != null, "Schema cannot be null");
 
     this.fileSystem = fileSystem;
     this.path = path;

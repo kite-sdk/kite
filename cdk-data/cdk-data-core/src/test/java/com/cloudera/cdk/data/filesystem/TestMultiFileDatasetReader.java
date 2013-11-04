@@ -111,7 +111,9 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
   @Test(expected = IllegalArgumentException.class)
   public void testRejectsNullPaths() throws IOException {
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, Lists.newArrayList(TEST_FILE, null, TEST_FILE), DESCRIPTOR);
+        fileSystem, Lists.newArrayList(null, TEST_FILE), DESCRIPTOR);
+    reader.open();
+    reader.hasNext();
   }
 
   @Test(expected = UnknownFormatException.class)

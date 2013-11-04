@@ -44,6 +44,10 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDa
     .getLogger(ParquetFileSystemDatasetReader.class);
 
   public ParquetFileSystemDatasetReader(FileSystem fileSystem, Path path, Schema schema) {
+    Preconditions.checkArgument(fileSystem != null, "FileSystem cannot be null");
+    Preconditions.checkArgument(path != null, "Path cannot be null");
+    Preconditions.checkArgument(schema != null, "Schema cannot be null");
+
     this.fileSystem = fileSystem;
     this.path = path;
     this.schema = schema;

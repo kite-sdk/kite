@@ -15,12 +15,15 @@
  */
 package com.cloudera.cdk.data;
 
-import java.io.IOException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.*;
-import org.junit.Assert;
+import java.io.IOException;
+
+import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.RecordValidator;
+import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.checkReaderBehavior;
+import static com.cloudera.cdk.data.filesystem.DatasetTestUtilities.checkReaderIteration;
 
 /**
  * Tests for all DatasetReader implementations.

@@ -23,12 +23,10 @@ import com.cloudera.cdk.data.UnknownFormatException;
 import com.cloudera.cdk.data.spi.AbstractDatasetReader;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
@@ -37,11 +35,11 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   private final DatasetDescriptor descriptor;
 
   private final Iterator<Path> filesIter;
-  private DatasetReader<E> reader;
+  private DatasetReader<E> reader = null;
 
   private ReaderWriterState state;
 
-  public MultiFileDatasetReader(FileSystem fileSystem, List<Path> files,
+  public MultiFileDatasetReader(FileSystem fileSystem, Iterable<Path> files,
       DatasetDescriptor descriptor) {
     Preconditions.checkArgument(fileSystem != null, "FileSystem cannot be null");
     Preconditions.checkArgument(descriptor != null, "Descriptor cannot be null");
@@ -49,14 +47,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
 
     this.fileSystem = fileSystem;
     this.descriptor = descriptor;
-
-    // verify there are no null files
-    try {
-      this.filesIter = ImmutableList.copyOf(files).iterator();
-    } catch (NullPointerException ex) {
-      throw new IllegalArgumentException("File list cannot contain null Paths");
-    }
-
+    this.filesIter = files.iterator();
     this.state = ReaderWriterState.NEW;
   }
 
