@@ -22,13 +22,12 @@ import com.cloudera.cdk.data.DatasetException;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.FieldPartitioner;
-import com.cloudera.cdk.data.Formats;
+import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.impl.Accessor;
 import com.cloudera.cdk.data.spi.AbstractDataset;
-import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -38,7 +37,6 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nullable;
-import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -58,7 +56,8 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   private final PartitionKey partitionKey;
 
   private final PartitionStrategy partitionStrategy;
-  private final Schema schema;
+
+  private final FileSystemView<E> unbounded;
 
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
     DatasetDescriptor descriptor, @Nullable PartitionKey partitionKey) {
@@ -70,7 +69,8 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     this.partitionKey = partitionKey;
     this.partitionStrategy =
       descriptor.isPartitioned() ? descriptor.getPartitionStrategy() : null;
-    this.schema = descriptor.getSchema();
+
+    this.unbounded = new FileSystemView<E>(this);
   }
 
   @Override
@@ -96,40 +96,51 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   }
 
   @Override
-  @SuppressWarnings("unchecked") // See https://github.com/Parquet/parquet-mr/issues/106
   public DatasetWriter<E> newWriter() {
     logger.debug("Getting writer to dataset:{}", this);
 
-    DatasetWriter<E> writer;
-
-    if (descriptor.isPartitioned()) {
-      writer = new PartitionedDatasetWriter<E>(this);
-    } else {
-      Path dataFile = new Path(directory, uniqueFilename());
-      if (Formats.PARQUET.equals(descriptor.getFormat())) {
-        writer = new ParquetFileSystemDatasetWriter(fileSystem, dataFile, schema);
-      } else {
-        writer = new FileSystemDatasetWriter.Builder<E>().fileSystem(fileSystem)
-          .path(dataFile).schema(schema).get();
-      }
-    }
-
-    return writer;
+    return unbounded.newWriter();
   }
 
   @Override
   public DatasetReader<E> newReader() {
     logger.debug("Getting reader for dataset:{}", this);
 
-    List<Path> paths = Lists.newArrayList();
+    return unbounded.newReader();
+  }
 
-    try {
-      accumulateDatafilePaths(directory, paths);
-    } catch (IOException e) {
-      throw new DatasetException("Unable to retrieve data file list for directory " + directory, e);
-    }
+  @Override
+  public Iterable<View<E>> getCoveringPartitions() {
+    Preconditions.checkState(descriptor.isPartitioned(),
+      "Attempt to get partitions on a non-partitioned dataset (name:%s)",
+      name);
 
-    return new MultiFileDatasetReader<E>(fileSystem, paths, descriptor);
+    return unbounded.getCoveringPartitions();
+  }
+
+  @Override
+  public View<E> from(Marker start) {
+    return unbounded.from(start);
+  }
+
+  @Override
+  public View<E> fromAfter(Marker start) {
+    return unbounded.fromAfter(start);
+  }
+
+  @Override
+  public View<E> to(Marker end) {
+    return unbounded.to(end);
+  }
+
+  @Override
+  public View<E> toBefore(Marker end) {
+    return unbounded.toBefore(end);
+  }
+
+  @Override
+  public View<E> in(Marker partial) {
+    return unbounded.in(partial);
   }
 
   @Override
@@ -194,15 +205,6 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   }
 
   @Override
-  public Iterable<View<E>> getCoveringPartitions() {
-    Preconditions.checkState(descriptor.isPartitioned(),
-      "Attempt to get partitions on a non-partitioned dataset (name:%s)",
-      name);
-
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
   public Iterable<Dataset<E>> getPartitions() {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get partitions on a non-partitioned dataset (name:%s)",
@@ -250,12 +252,6 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
       .add("descriptor", descriptor).add("directory", directory)
       .add("dataDirectory", directory).add("partitionKey", partitionKey)
       .toString();
-  }
-
-  private String uniqueFilename() {
-    // FIXME: This file name is not guaranteed to be truly unique.
-    return Joiner.on('-').join(System.currentTimeMillis(),
-        Thread.currentThread().getId() + "." + descriptor.getFormat().getExtension());
   }
 
   void accumulateDatafilePaths(Path directory, List<Path> paths)

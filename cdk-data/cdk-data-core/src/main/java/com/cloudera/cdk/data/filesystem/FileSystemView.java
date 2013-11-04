@@ -1,0 +1,223 @@
+/*
+ * Copyright 2013 Cloudera.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.cloudera.cdk.data.filesystem;
+
+import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetAccessor;
+import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetException;
+import com.cloudera.cdk.data.DatasetReader;
+import com.cloudera.cdk.data.DatasetWriter;
+import com.cloudera.cdk.data.Formats;
+import com.cloudera.cdk.data.Marker;
+import com.cloudera.cdk.data.View;
+import com.cloudera.cdk.data.spi.Key;
+import com.cloudera.cdk.data.spi.MarkerComparator;
+import com.cloudera.cdk.data.spi.MarkerRange;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import org.apache.hadoop.fs.Path;
+
+import javax.annotation.concurrent.Immutable;
+import java.io.IOException;
+
+@Immutable
+class FileSystemView<E> implements View<E> {
+
+  private final FileSystemDataset<E> dataset;
+  private final MarkerRange range;
+
+  // This class is Immutable and must be thread-safe
+  private final ThreadLocal<Key> keys;
+
+  FileSystemView(FileSystemDataset<E> dataset) {
+    this.dataset = dataset;
+    final DatasetDescriptor descriptor = dataset.getDescriptor();
+    if (descriptor.isPartitioned()) {
+      this.range = new MarkerRange(new MarkerComparator(
+          descriptor.getPartitionStrategy()));
+      this.keys = new ThreadLocal<Key>() {
+        @Override
+        protected Key initialValue() {
+          return new Key(descriptor.getPartitionStrategy());
+        }
+      };
+    } else {
+      // use UNDEFINED, which handles inappropriate calls to range methods
+      this.range = MarkerRange.UNDEFINED;
+      this.keys = null; // not used
+    }
+  }
+
+  private FileSystemView(FileSystemView<E> view, MarkerRange range) {
+    this.dataset = view.dataset;
+    this.range = range;
+    // thread-safe, so okay to reuse when views share a partition strategy
+    this.keys = view.keys;
+  }
+
+  @Override
+  public Dataset<E> getDataset() {
+    return dataset;
+  }
+
+  @Override
+  public DatasetReader<E> newReader() {
+    final Iterable<Path> directories;
+    if (dataset.getDescriptor().isPartitioned()) {
+      directories = Iterables.transform(
+          partitionIterator(),
+          new Function<Key, Path>() {
+            private final Path rootDirectory = dataset.getDirectory();
+            private final PathConversion convert = new PathConversion();
+            @Override
+            public Path apply(Key key) {
+              if (key != null) {
+                return new Path(
+                    rootDirectory, convert.fromKey(key));
+              } else {
+                throw new DatasetException("[BUG] Null partition");
+              }
+            }
+          });
+    } else {
+      directories = Lists.newArrayList(dataset.getDirectory());
+    }
+
+    return new MultiFileDatasetReader<E>(
+        dataset.getFileSystem(),
+        new PathIterator(dataset.getFileSystem(), directories),
+        dataset.getDescriptor());
+  }
+
+  @Override
+  @SuppressWarnings("unchecked") // See https://github.com/Parquet/parquet-mr/issues/106
+  public DatasetWriter<E> newWriter() {
+    DatasetDescriptor descriptor = dataset.getDescriptor();
+    DatasetWriter<E> writer;
+
+    if (descriptor.isPartitioned()) {
+      writer = new PartitionedDatasetWriter<E>(dataset);
+    } else {
+      Path dataFile = new Path(dataset.getDirectory(), uniqueFilename());
+      if (Formats.PARQUET.equals(descriptor.getFormat())) {
+        writer = new ParquetFileSystemDatasetWriter(
+            dataset.getFileSystem(), dataFile, descriptor.getSchema());
+      } else {
+        writer = new FileSystemDatasetWriter.Builder()
+            .fileSystem(dataset.getFileSystem())
+            .path(dataFile)
+            .schema(descriptor.getSchema())
+            .get();
+      }
+    }
+
+    return writer;
+  }
+
+  @Override
+  public DatasetAccessor<E> newAccessor() {
+    // this method is optional, so default to UnsupportedOperationException
+    throw new UnsupportedOperationException(
+        "This Dataset does not support random access");
+  }
+
+  private String uniqueFilename() {
+    // FIXME: This file name is not guaranteed to be truly unique.
+    return Joiner.on('-').join(System.currentTimeMillis(),
+        Thread.currentThread().getId() + "." +
+        dataset.getDescriptor().getFormat().getExtension());
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Iterable<View<E>> getCoveringPartitions() {
+    if (dataset.getDescriptor().isPartitioned()) {
+      return Iterables.transform(
+          partitionIterator(),
+          new Function<Key, View<E>>() {
+            @Override
+            public View<E> apply(Key key) {
+              if (key != null) {
+                // no need for the bounds checks, use dataset.in
+                return dataset.in(key);
+              } else {
+                throw new DatasetException("[BUG] Null partition");
+              }
+            }
+          });
+    } else {
+      return Lists.newArrayList((View<E>) this);
+    }
+  }
+
+  @Override
+  public boolean contains(E entity) {
+    if (dataset.getDescriptor().isPartitioned()) {
+      return range.contains(keys.get().reuseFor(entity));
+    } else {
+      return true;
+    }
+  }
+
+  @Override
+  public boolean contains(Marker marker) {
+    return range.contains(marker);
+  }
+
+  @Override
+  public View<E> union(View<E> view) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public View<E> from(Marker start) {
+    return new FileSystemView<E>(this, range.from(start));
+  }
+
+  @Override
+  public View<E> fromAfter(Marker start) {
+    return new FileSystemView<E>(this, range.fromAfter(start));
+  }
+
+  @Override
+  public View<E> to(Marker end) {
+    return new FileSystemView<E>(this, range.to(end));
+  }
+
+  @Override
+  public View<E> toBefore(Marker end) {
+    return new FileSystemView<E>(this, range.toBefore(end));
+  }
+
+  @Override
+  public View<E> in(Marker partial) {
+    return new FileSystemView<E>(this, range.in(partial));
+  }
+
+  private FileSystemPartitionIterator partitionIterator() {
+    try {
+      return new FileSystemPartitionIterator(
+          dataset.getFileSystem(), dataset.getDirectory(),
+          dataset.getDescriptor().getPartitionStrategy(), range);
+    } catch (IOException ex) {
+      throw new DatasetException("Cannot list partitions in view:" + this, ex);
+    }
+  }
+}
