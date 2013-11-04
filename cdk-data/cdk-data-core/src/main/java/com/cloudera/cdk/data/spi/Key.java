@@ -79,6 +79,10 @@ public class Key extends Marker implements Comparable<Key> {
     this.values = values;
   }
 
+  public PartitionStrategy getPartitionStrategy() {
+    return strategy;
+  }
+
   @Override
   public boolean has(String name) {
     return fields.containsKey(name);
@@ -103,7 +107,7 @@ public class Key extends Marker implements Comparable<Key> {
    * Returns the value for {@code index} coerced to the given type, T.
    *
    * @param <T> the return type
-   * @param name the String name of the value to return
+   * @param index the index of the value to return
    * @param returnType  The return type, which must be assignable from Long,
    *                    Integer, String, or Object
    * @return the Object stored for at {@code index} coerced to a T
@@ -114,7 +118,7 @@ public class Key extends Marker implements Comparable<Key> {
   }
 
   /**
-   * Replaces the value at index {@code index} with the given {@code value}.
+   * Replaces the value at {@code index} with the given {@code value}.
    *
    * @param index the {@code index} of the field to replace
    * @param value an Object to store at {@code index}
@@ -132,6 +136,82 @@ public class Key extends Marker implements Comparable<Key> {
     Preconditions.checkArgument(values.size() == fields.size(),
         "Not enough values for a complete Key");
     this.values = values;
+  }
+
+  /**
+   * Replaces all of the values in this {@link Key} with values from the given
+   * {@link Marker}.
+   *
+   * @param marker a {@code Marker} to reuse this {@code Key} for
+   * @return this updated {@code Key}
+   * @throws IllegalStateException
+   *      If the {@code Marker} cannot be used to produce a value for each
+   *      field in the {@code PartitionStrategy}
+   *
+   * @since 0.9.0
+   */
+  public Key reuseFor(Marker marker) {
+    final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
+
+    for (int i = 0; i < partitioners.size(); i += 1) {
+      final FieldPartitioner fp = partitioners.get(i);
+      final Object fieldValue = fp.valueFor(marker);
+      if (fieldValue == null) {
+        throw new IllegalStateException(
+            "Cannot create key, missing data for field:" + fp.getName());
+      } else {
+        replace(i, fieldValue);
+      }
+    }
+
+    return this;
+  }
+
+  /**
+   * Replaces all of the values in this {@link Key} with values from the given
+   * {@code entity}.
+   *
+   * @param entity an entity to reuse this {@code Key} for
+   * @return this updated {@code Key}
+   * @throws IllegalStateException
+   *      If the {@code entity} cannot be used to produce a value for each
+   *      field in the {@code PartitionStrategy}
+   *
+   * @since 0.9.0
+   */
+  @SuppressWarnings("unchecked")
+  public Key reuseFor(Object entity) {
+    final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
+
+    for (int i = 0; i < partitioners.size(); i++) {
+      final FieldPartitioner fp = partitioners.get(i);
+      final Object value;
+      // TODO: this should probably live elsewhere and be extensible
+      if (entity instanceof IndexedRecord) {
+        value = ((IndexedRecord) entity).get(i);
+      } else if (entity instanceof GenericRecord) {
+        value = ((GenericRecord) entity).get(fp.getSourceName());
+      } else {
+        final String name = fp.getSourceName();
+        try {
+          PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name,
+              entity.getClass(), getter(name), null /* assume read only */);
+          value = propertyDescriptor.getReadMethod().invoke(entity);
+        } catch (IllegalAccessException e) {
+          throw new IllegalStateException("Cannot read property " + name +
+              " from " + entity, e);
+        } catch (InvocationTargetException e) {
+          throw new IllegalStateException("Cannot read property " + name +
+              " from " + entity, e);
+        } catch (IntrospectionException e) {
+          throw new IllegalStateException("Cannot read property " + name +
+              " from " + entity, e);
+        }
+      }
+      replace(i, fp.apply(value));
+    }
+
+    return this;
   }
 
   @Override
@@ -173,180 +253,9 @@ public class Key extends Marker implements Comparable<Key> {
     return Objects.toStringHelper(this).add("values", values).toString();
   }
 
-  /**
-   * A builder class to help when constructing {@link Key} objects for a given
-   * {@link PartitionStrategy}.
-   */
-  public static class Builder {
-    private final PartitionStrategy strategy;
-
-    /**
-     * Create a new {@link Builder} for a {@link PartitionStrategy}.
-     *
-     * @param strategy
-     *      a {@code PartitionStrategy} to use for all {@code Key} objects
-     *      produced by this builder.
-     */
-    public Builder(PartitionStrategy strategy) {
-      this.strategy = strategy;
-    }
-
-    /**
-     * Returns a {@link Key} for the {@link Marker} using the
-     * {@link PartitionStrategy} this {@code Builder} was constructed with.
-     *
-     * @param marker a {@code Marker} to build a {@code Key} for
-     * @return a {@code Key} for the {@code Marker}
-     * @throws IllegalArgumentException
-     *      If the {@code PartitionStrategy} for {@code reuse} does not match
-     *      the {@code PartitionStrategy} of this {@code Builder}
-     * @throws IllegalStateException
-     *      If the {@code Marker} cannot be used to produce a value for each
-     *      field in the {@code PartitionStrategy}
-     *
-     * @since 0.9.0
-     */
-    public Key build(Marker marker) {
-      return build(marker, null);
-    }
-
-    /**
-     * Returns a {@link Key} for the {@link Marker} using the
-     * {@link PartitionStrategy} this {@code Builder} was constructed with.
-     *
-     * If {@code reuse} is non-null, it will be used and its contents will be
-     * replaced with values from {@code marker}.
-     *
-     * @param marker a {@code Marker} to build a {@code Key} for
-     * @param reuse a {@code Key} to reuse (optional)
-     * @return a {@code Key} for the {@code Marker}
-     * @throws IllegalArgumentException
-     *      If the {@code PartitionStrategy} for {@code reuse} does not match
-     *      the {@code PartitionStrategy} of this {@code Builder}
-     * @throws IllegalStateException
-     *      If the {@code Marker} cannot be used to produce a value for each
-     *      field in the {@code PartitionStrategy}
-     *
-     * @since 0.9.0
-     */
-    public Key build(Marker marker, @Nullable Key reuse) {
-      if (marker instanceof Key) {
-        return (Key) marker;
-      }
-
-      final Key key;
-      if (reuse != null) {
-        Preconditions.checkArgument(strategy == reuse.strategy,
-            "Cannot reuse a Key with a different PartitionStrategy");
-        key = reuse;
-      } else {
-        key = new Key(strategy);
-      }
-
-      final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
-
-      for (int i = 0; i < partitioners.size(); i += 1) {
-        final FieldPartitioner fp = partitioners.get(i);
-        final Object fieldValue = fp.valueFor(marker);
-        if (fieldValue == null) {
-          throw new IllegalStateException(
-              "Cannot create key, missing data for field:" + fp.getName());
-        } else {
-          key.replace(i, fieldValue);
-        }
-      }
-
-      return key;
-    }
-
-    /**
-     * Returns a {@link Key} for the entity using the {@link PartitionStrategy}
-     * this {@code Builder} was constructed with.
-     *
-     * @param entity an {@code Object} to build a {@code Key} for
-     * @return a {@code Key} for the {@code entity} {@code Object}
-     * @throws IllegalArgumentException
-     *      If the {@code PartitionStrategy} for {@code reuse} does not match
-     *      the {@code PartitionStrategy} of this {@code Builder}
-     * @throws IllegalStateException
-     *      If the {@code entity} cannot be used to produce a value for each
-     *      field in the {@code PartitionStrategy}
-     *
-     * @since 0.9.0
-     */
-    public Key build(Object entity) {
-      return build(entity, null);
-    }
-
-    /**
-     * Returns a {@link Key} for the entity using the {@link PartitionStrategy}
-     * this {@code Builder} was constructed with.
-     *
-     * If {@code reuse} is non-null, it will be used and its contents will be
-     * replaced with values from {@code entity}.
-     *
-     * @param entity an {@code Object} to build a {@code Key} for
-     * @param reuse a {@code Key} to reuse (optional)
-     * @return a {@code Key} for the {@code entity} {@code Object}
-     * @throws IllegalArgumentException
-     *      If the {@code PartitionStrategy} for {@code reuse} does not match
-     *      the {@code PartitionStrategy} of this {@code Builder}
-     * @throws IllegalStateException
-     *      If the {@code entity} cannot be used to produce a value for each
-     *      field in the {@code PartitionStrategy}
-     *
-     * @since 0.9.0
-     */
-    @SuppressWarnings("unchecked")
-    public Key build(Object entity, @Nullable Key reuse) {
-      if (entity instanceof Key) {
-        return (Key) entity;
-      }
-
-      final Key key;
-      if (reuse != null) {
-        Preconditions.checkArgument(strategy == reuse.strategy,
-            "Cannot reuse a Key with a different PartitionStrategy");
-        key = reuse;
-      } else {
-        key = new Key(strategy);
-      }
-
-      final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
-
-      for (int i = 0; i < partitioners.size(); i++) {
-        final FieldPartitioner fp = partitioners.get(i);
-        final Object value;
-        if (entity instanceof IndexedRecord) {
-          value = ((IndexedRecord) entity).get(i);
-        } else if (entity instanceof GenericRecord) {
-          value = ((GenericRecord) entity).get(fp.getSourceName());
-        } else {
-          final String name = fp.getSourceName();
-          try {
-            PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name,
-                entity.getClass(), getter(name), null /* assume read only */);
-            value = propertyDescriptor.getReadMethod().invoke(entity);
-          } catch (IllegalAccessException e) {
-            throw new IllegalStateException("Cannot read property " + name +
-                " from " + entity, e);
-          } catch (InvocationTargetException e) {
-            throw new IllegalStateException("Cannot read property " + name +
-                " from " + entity, e);
-          } catch (IntrospectionException e) {
-            throw new IllegalStateException("Cannot read property " + name +
-                " from " + entity, e);
-          }
-        }
-        key.replace(i, fp.apply(value));
-      }
-      return key;
-    }
-
-    private static String getter(String name) {
-      return "get" +
-          name.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-          name.substring(1);
-    }
+  private static String getter(String name) {
+    return "get" +
+        name.substring(0, 1).toUpperCase(Locale.ENGLISH) +
+        name.substring(1);
   }
 }
