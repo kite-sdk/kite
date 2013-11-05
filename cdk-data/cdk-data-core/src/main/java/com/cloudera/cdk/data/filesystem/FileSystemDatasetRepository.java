@@ -368,6 +368,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    * @return a partition key representing the partition at the given path
    * @since 0.4.0
    */
+  @SuppressWarnings("deprecation")
   public static PartitionKey partitionKeyForPath(Dataset dataset, URI partitionPath) {
     Preconditions.checkState(dataset.getDescriptor().isPartitioned(),
         "Attempt to get a partition on a non-partitioned dataset (name:%s)",

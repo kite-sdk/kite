@@ -42,6 +42,7 @@ public class MonthFieldPartitioner extends CalendarFieldPartitioner {
   }
 
   @Override
+  @Deprecated
   public String valueToString(Integer value) {
     return format.format(value);
   }

@@ -16,7 +16,10 @@
 
 package com.cloudera.cdk.data.spi;
 
+import java.text.NumberFormat;
+
 public class Conversions {
+
   public static <T> T convert(Object obj, Class<T> returnType) {
     if (returnType.isAssignableFrom(Long.class)) {
       return returnType.cast(makeLong(obj));
@@ -84,5 +87,16 @@ public class Conversions {
     // start simple, but we may want more complicated conversion here if, for
     // example, we needed to support Writables or other serializations
     return value.toString();
+  }
+
+  public static String makeString(Object value, Integer width) {
+    if (width != null && value instanceof Number) {
+      NumberFormat format = NumberFormat.getInstance();
+      format.setMinimumIntegerDigits(width);
+      format.setGroupingUsed(false);
+      return format.format(value);
+    } else {
+      return makeString(value);
+    }
   }
 }

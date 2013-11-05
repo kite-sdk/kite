@@ -133,7 +133,10 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
    * Retrieve the value for the field from the string representation.
    * </p>
    * @since 0.3.0
+   *
+   * @deprecated will be removed in 0.10.0
    */
+  @Deprecated
   public abstract T valueFromString(String stringValue);
 
   /**
@@ -143,7 +146,10 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
    * but some {@link FieldPartitioner}s may choose to provide a different representation.
    * </p>
    * @since 0.4.0
+   *
+   * @deprecated will be removed in 0.10.0
    */
+  @Deprecated
   public String valueToString(T value) {
     return value.toString();
   }

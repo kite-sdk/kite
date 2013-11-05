@@ -17,22 +17,32 @@
 package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.FieldPartitioner;
+import com.cloudera.cdk.data.partition.DayOfMonthFieldPartitioner;
+import com.cloudera.cdk.data.partition.HourFieldPartitioner;
+import com.cloudera.cdk.data.partition.MinuteFieldPartitioner;
+import com.cloudera.cdk.data.partition.MonthFieldPartitioner;
+import com.cloudera.cdk.data.partition.YearFieldPartitioner;
 import com.cloudera.cdk.data.spi.Conversions;
 import com.cloudera.cdk.data.spi.Key;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.fs.Path;
 
 import java.util.List;
+import java.util.Map;
 
 public class PathConversion {
 
   public Key toKey(Path fromPath, Key storage) {
     final List<FieldPartitioner> partitioners =
         storage.getPartitionStrategy().getFieldPartitioners();
-    final List<Object> values = Lists.newArrayListWithCapacity(partitioners.size());
+    final List<Object> values = Lists.newArrayList(
+        new Object[partitioners.size()]);
 
     Path currentPath = fromPath;
     int index = partitioners.size() - 1;
@@ -72,8 +82,8 @@ public class PathConversion {
   private static final Joiner PART_JOIN = Joiner.on('=');
 
   public <T> String dirnameForValue(FieldPartitioner<?, T> field, T value) {
-    return PART_JOIN.join(
-        field.getName(), Conversions.convert(value, String.class));
+    return PART_JOIN.join(field.getName(),
+        Conversions.makeString(value, 2 /* width */ ));
   }
 
   public <T> T valueForDirname(FieldPartitioner<?, T> field, String name) {

@@ -59,6 +59,9 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
 
   private final FileSystemView<E> unbounded;
 
+  // reusable path converter, has no relevant state
+  private final PathConversion convert;
+
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
     DatasetDescriptor descriptor, @Nullable PartitionKey partitionKey) {
 
@@ -69,6 +72,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     this.partitionKey = partitionKey;
     this.partitionStrategy =
       descriptor.isPartitioned() ? descriptor.getPartitionStrategy() : null;
+    this.convert = new PathConversion();
 
     this.unbounded = new FileSystemView<E>(this);
   }
@@ -268,29 +272,26 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private Path toDirectoryName(Path dir, PartitionKey key) {
     Path result = dir;
     for (int i = 0; i < key.getLength(); i++) {
-      FieldPartitioner fp = partitionStrategy.getFieldPartitioners().get(i);
-      String fieldName = fp.getName();
-      @SuppressWarnings("unchecked")
-      String fieldValue = fp.valueToString(key.get(i));
-      result = new Path(result, fieldName + "=" + fieldValue);
+      final FieldPartitioner fp = partitionStrategy.getFieldPartitioners().get(i);
+      result = new Path(result, convert.dirnameForValue(fp, key.get(i)));
     }
     return result;
   }
 
+  @SuppressWarnings("unchecked")
   private PartitionKey fromDirectoryName(Path dir) {
-    List<Object> values = Lists.newArrayList();
+    final FieldPartitioner fp = partitionStrategy.getFieldPartitioners().get(0);
+    final List<Object> values = Lists.newArrayList();
 
     if (partitionKey != null) {
       values.addAll(partitionKey.getValues());
     }
 
-    String stringValue = Iterables.get(Splitter.on('=').split(dir.getName()), 1);
-    Object value = partitionStrategy.getFieldPartitioners().get(0)
-        .valueFromString(stringValue);
-    values.add(value);
+    values.add(convert.valueForDirname(fp, dir.getName()));
 
     return Accessor.getDefault().newPartitionKey(values.toArray());
   }

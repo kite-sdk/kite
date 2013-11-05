@@ -47,6 +47,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
   }
 
   @Override
+  @Deprecated
   public String valueFromString(String stringValue) {
     return stringValue;
   }

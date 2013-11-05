@@ -39,6 +39,7 @@ public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
   }
 
   @Override
+  @Deprecated
   public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
   }

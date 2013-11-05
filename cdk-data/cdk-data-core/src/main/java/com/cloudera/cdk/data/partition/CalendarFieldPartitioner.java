@@ -54,6 +54,7 @@ class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
   }
 
   @Override
+  @Deprecated
   public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
   }

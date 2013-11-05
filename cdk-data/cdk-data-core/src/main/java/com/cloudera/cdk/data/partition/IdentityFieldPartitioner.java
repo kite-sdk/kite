@@ -40,6 +40,7 @@ public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartiti
   }
 
   @Override
+  @Deprecated
   @SuppressWarnings("unchecked")
   public S valueFromString(String stringValue) {
     if (getType() == Integer.class) {

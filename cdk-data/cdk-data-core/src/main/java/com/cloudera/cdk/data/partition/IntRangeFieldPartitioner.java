@@ -47,6 +47,7 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
   }
 
   @Override
+  @Deprecated
   public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
   }

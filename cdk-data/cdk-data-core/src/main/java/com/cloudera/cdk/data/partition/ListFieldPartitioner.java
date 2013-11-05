@@ -56,6 +56,7 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
   }
 
   @Override
+  @Deprecated
   public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
   }
