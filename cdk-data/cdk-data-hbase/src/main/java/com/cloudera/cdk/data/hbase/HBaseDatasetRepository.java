@@ -119,7 +119,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
     throw new UnsupportedOperationException();
   }
 
-  public static class Builder implements Supplier<HBaseDatasetRepository> {
+  public static class Builder { // implements Supplier<HBaseDatasetRepository> {
 
     private Configuration configuration;
 
@@ -128,8 +128,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
       return this;
     }
 
-    @Override
-    public HBaseDatasetRepository get() {
+    public HBaseDatasetRepository build() {
       HTablePool pool = new HTablePool(configuration, 10);
       HBaseAdmin admin;
       try {

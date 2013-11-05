@@ -70,7 +70,7 @@ public class CompositeDatasetTest {
   public void testSpecific() throws Exception {
 
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
-        .configuration(HBaseTestUtils.getConf()).get();
+        .configuration(HBaseTestUtils.getConf()).build();
 
     // create constituent datasets
     repo.create(tableName + ".SubEntity1", new DatasetDescriptor.Builder()

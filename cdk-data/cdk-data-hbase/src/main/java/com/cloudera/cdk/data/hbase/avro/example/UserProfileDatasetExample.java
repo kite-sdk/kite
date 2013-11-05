@@ -74,7 +74,7 @@ public class UserProfileDatasetExample {
     }
 
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
-        .configuration(conf).get();
+        .configuration(conf).build();
 
     // TODO: change to use namespace (CDK-140)
 

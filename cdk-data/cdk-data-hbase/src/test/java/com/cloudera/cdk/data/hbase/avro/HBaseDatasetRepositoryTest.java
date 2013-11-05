@@ -89,7 +89,7 @@ public class HBaseDatasetRepositoryTest {
   public void testGeneric() throws Exception {
 
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
-        .configuration(HBaseTestUtils.getConf()).get();
+        .configuration(HBaseTestUtils.getConf()).build();
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(testGenericEntity)
@@ -156,7 +156,7 @@ public class HBaseDatasetRepositoryTest {
   @Test
   public void testSpecific() throws Exception {
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
-        .configuration(HBaseTestUtils.getConf()).get();
+        .configuration(HBaseTestUtils.getConf()).build();
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(testEntity)
@@ -219,7 +219,7 @@ public class HBaseDatasetRepositoryTest {
   public void testDeleteDataset() throws Exception {
 
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
-        .configuration(HBaseTestUtils.getConf()).get();
+        .configuration(HBaseTestUtils.getConf()).build();
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(testGenericEntity)

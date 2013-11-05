@@ -51,7 +51,7 @@ public class Loader implements Loadable {
         if (port != null) {
           conf.set(HConstants.ZOOKEEPER_CLIENT_PORT, port);
         }
-        return new HBaseDatasetRepository.Builder().configuration(conf).get();
+        return new HBaseDatasetRepository.Builder().configuration(conf).build();
       }
     });
   }
