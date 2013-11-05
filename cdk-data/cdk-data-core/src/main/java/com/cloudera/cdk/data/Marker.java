@@ -25,27 +25,28 @@ import java.util.Map;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * A Marker is a bookmark in the partition space, which is the space of each
- * possible {@link PartitionKey} for a {@link PartitionStrategy}.
+ * A {@code Marker} is a bookmark in the partition space, which is the space of
+ * each possible partition in a {@link PartitionStrategy}.
  *
- * A Marker holds un-ordered values that can be used to create keys by a
- * {@code PartitionStrategy}. It can hold either source values, like a
+ * A {@code Marker} holds un-ordered values that can be used to create keys by
+ * a {@code PartitionStrategy}. It can hold either source values, like a
  * timestamp, or concrete values, like a year.
  *
- * A Marker can be used as a generic placeholder or bookmark for an Entity.
- * For example, when fetching a record from HBase, you can use a Marker to hold
- * the information that {@code PartitionStrategy} uses to build a concrete
- * {@code PartitonKey} and fetch the entity. This is easier than creating a
- * fake entity to fetch the real entity. {@see PartitionStrategy#keyFor(Marker)}
+ * A {@code Marker} can be used as a generic placeholder or bookmark for an
+ * entity (an object in a {@link Dataset}. For example, when fetching a record
+ * from HBase, you can use a {@code Marker} to hold the information that
+ * {@code PartitionStrategy} uses to build a concrete key and fetch the entity.
  *
- * A Marker can also be used as a partial key, where some of the values needed
- * to create a complete {@link PartitionKey} are missing. In this case, a
- * Marker contains a subset of the partition space: all of the keys that share
- * the values that are set in the Marker.
+ * A {@code Marker} can also be used as a partial key, where some of the values
+ * needed to create a complete key are missing. In this case, a {@code Marker}
+ * contains a subset of the partition space: all {@code Marker} the keys that
+ * share the values that are set in the Marker.
  *
- * Markers are Immutable and do not change. To work with Markers, use the
- * {@link Marker.Builder} class, which can copy values from other Markers and
- * easily create new Markers:
+ * The {@code Marker.Builder} class is the easiest way to make a {@code Marker}.
+ * Any {@code Marker} created by the {@link Marker.Builder} is {@link Immutable}
+ * and will not change. The {@code Builder} can copy values from other
+ * {@code Marker} objects and provides a fluent interface to easily create new
+ * instances:
  * <pre>
  * // a partial Marker for all events with the same hash code and approx time
  * Marker partial = new Marker.Builder()
