@@ -76,7 +76,7 @@ public class Loader implements Loadable {
       return (DatasetRepository) new HCatalogDatasetRepository.Builder()
           .configuration(new Configuration(envConf)) // make a modifiable copy
           .rootDirectory(fs.makeQualified(root))
-          .get();
+          .build();
     }
 
     private URI fileSystemURI(String scheme, Map<String, String> match) {
@@ -119,7 +119,7 @@ public class Loader implements Loadable {
     public DatasetRepository getFromOptions(Map options) {
       return new HCatalogDatasetRepository.Builder()
           .configuration(new Configuration(envConf)) // make a modifiable copy
-          .get();
+          .build();
     }
   }
 

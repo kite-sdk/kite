@@ -172,8 +172,16 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
       return this;
     }
 
+    /**
+     * @deprecated will be removed in 0.10.0
+     */
     @Override
+    @Deprecated
     public DatasetRepository get() {
+      return build();
+    }
+
+    public DatasetRepository build() {
 
       if (configuration == null) {
         this.configuration = new Configuration();

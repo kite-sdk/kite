@@ -93,7 +93,7 @@ abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
       }
     }
     if (hcatalog) {
-      repo = hcatRepoBuilder.configuration(getConf()).get();
+      repo = hcatRepoBuilder.configuration(getConf()).build();
     } else {
       repo = fsRepoBuilder.configuration(getConf()).build();
     }
