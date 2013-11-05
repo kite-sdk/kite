@@ -541,19 +541,7 @@ public class DatasetDescriptor {
      * @since 0.8.0
      */
     public Builder format(String formatName) {
-      boolean found = false;
-      for (Format knownFormat : Arrays.asList(Formats.AVRO, Formats.PARQUET)) {
-        if (knownFormat.getName().equals(formatName)) {
-          this.format = knownFormat;
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        throw new UnknownFormatException(
-            "Cannot find a known format named:" + formatName);
-      }
-      return this;
+      return this.format(Formats.fromString(formatName));
     }
 
     /**
