@@ -53,13 +53,13 @@ public class TestPartitionedDatasetWriter {
         .metadataProvider(testProvider).get();
 
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-        .hash("username", 2).get();
+        .hash("username", 2).build();
     Dataset<Object> users = repo.create(
         "users",
         new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .partitionStrategy(partitionStrategy)
-            .get());
+            .build());
     writer = new PartitionedDatasetWriter<Object>(users);
   }
 

@@ -66,6 +66,6 @@ public class UpdateDatasetMojo extends AbstractDatasetMojo {
       throw new MojoExecutionException("Problem while reading file " + avroSchemaFile, e);
     }
 
-    repo.update(datasetName, descriptorBuilder.get());
+    repo.update(datasetName, descriptorBuilder.build());
   }
 }

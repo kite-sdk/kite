@@ -75,15 +75,15 @@ public class CompositeDatasetTest {
     // create constituent datasets
     repo.create(tableName + ".SubEntity1", new DatasetDescriptor.Builder()
         .schema(SubEntity1.SCHEMA$)
-        .get());
+        .build());
     repo.create(tableName + ".SubEntity2", new DatasetDescriptor.Builder()
         .schema(SubEntity2.SCHEMA$)
-        .get());
+        .build());
 
     // create composite dataset
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(CompositeEntity.SCHEMA$)
-        .get();
+        .build();
     Dataset ds = repo.create(tableName + ".CompositeEntity", descriptor);
     DatasetAccessor<CompositeEntity> accessor = ds.newAccessor();
 

@@ -71,16 +71,16 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
             .year("timestamp")
             .month("timestamp")
             .day("timestamp")
-            .get())
-        .get();
+            .build())
+        .build();
     // something completely different
     this.anotherDescriptor = new DatasetDescriptor.Builder()
         .format(Formats.PARQUET)
         .schema(Schema.createArray(Schema.create(Schema.Type.FLOAT)))
         .partitionStrategy(new PartitionStrategy.Builder()
             .hash("some_field", 20000)
-            .get())
-        .get();
+            .build())
+        .build();
 
     this.provider = newProvider(conf);
   }
@@ -111,7 +111,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     URI requestedLocation = new URI("hdfs:/tmp/data/my_data_set");
     DatasetDescriptor requested = new DatasetDescriptor.Builder(testDescriptor)
         .location(requestedLocation)
-        .get();
+        .build();
 
     final DatasetDescriptor created;
     try {
@@ -301,7 +301,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     DatasetDescriptor descriptorWithProp =
         new DatasetDescriptor.Builder(testDescriptor)
         .property(propName, propValue)
-        .get();
+        .build();
 
     DatasetDescriptor created = provider.create(NAME, descriptorWithProp);
     junit.framework.Assert.assertTrue("Should have custom property",

@@ -91,7 +91,7 @@ public class TestPathConversion {
         .year("timestamp")
         .month("timestamp")
         .day("timestamp")
-        .get();
+        .build();
 
     Key key = new Key(strategy);
     key.replaceValues((List) Lists.newArrayList(2013, 11, 5));
@@ -108,7 +108,7 @@ public class TestPathConversion {
         .year("timestamp")
         .month("timestamp")
         .day("timestamp")
-        .get();
+        .build();
 
     Key expected = new Key(strategy);
     expected.replaceValues((List) Lists.newArrayList(2013, 11, 5));

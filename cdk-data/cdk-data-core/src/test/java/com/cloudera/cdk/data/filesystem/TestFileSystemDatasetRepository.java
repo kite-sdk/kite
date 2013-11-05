@@ -80,12 +80,12 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     Dataset<Record> dataset = repo.create(NAME,
         new DatasetDescriptor.Builder(testDescriptor)
             .format(Formats.AVRO)
-            .get());
+            .build());
 
     DatasetDescriptor changed =
         new DatasetDescriptor.Builder(dataset.getDescriptor())
         .format(Formats.PARQUET)
-        .get();
+        .build();
 
     try {
       repo.update(NAME, changed);
@@ -102,21 +102,21 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   public void testUpdateFailsWithPartitionStrategyChange() {
     PartitionStrategy ps1 = new PartitionStrategy.Builder()
         .hash("username", 2)
-        .get();
+        .build();
     PartitionStrategy ps2 = new PartitionStrategy.Builder()
         .hash("username", 2)
         .hash("email", 3)
-        .get();
+        .build();
 
     Dataset<Record> dataset = repo.create(NAME,
         new DatasetDescriptor.Builder(testDescriptor)
             .partitionStrategy(ps1)
-            .get());
+            .build());
 
     DatasetDescriptor changed =
         new DatasetDescriptor.Builder(dataset.getDescriptor())
             .partitionStrategy(ps2)
-            .get();
+            .build();
 
     try {
       repo.update(NAME, changed);
@@ -138,7 +138,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     DatasetDescriptor changed =
         new DatasetDescriptor.Builder(dataset.getDescriptor())
             .location(new Path(testDirectory, "newDataLocation").toUri())
-            .get();
+            .build();
 
     try {
       repo.update(NAME, changed);
@@ -154,7 +154,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   @Test
   public void testUpdateFailsWithIncompatibleSchemaChange() {
     Dataset<Record> dataset = repo.create(NAME, new DatasetDescriptor.Builder()
-        .schema(testSchema).get());
+        .schema(testSchema).build());
 
     Assert.assertEquals("Dataset name is propagated", NAME,
         dataset.getName());
@@ -168,7 +168,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
         .endRecord();
 
     try {
-      repo.update(NAME, new DatasetDescriptor.Builder().schema(testSchemaV2).get());
+      repo.update(NAME, new DatasetDescriptor.Builder().schema(testSchemaV2).build());
       Assert.fail("Should fail due to incompatible update");
     } catch (DatasetRepositoryException e) {
       // expected
@@ -181,7 +181,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   @Test
   public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldAdded() {
     Dataset<Record> dataset = repo.create(NAME, new DatasetDescriptor.Builder()
-        .schema(testSchema).get());
+        .schema(testSchema).build());
 
     writeTestUsers(dataset, 5, 0, "email");
     checkTestUsers(dataset, 5, "email");
@@ -195,7 +195,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     Dataset<Record> datasetV2 = repo.update(NAME,
         new DatasetDescriptor.Builder(dataset.getDescriptor())
             .schema(testSchemaV2)
-            .get());
+            .build());
 
     Assert.assertEquals("Dataset schema is updated", testSchemaV2, datasetV2
         .getDescriptor().getSchema());
@@ -211,7 +211,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   @Test
   public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldRemoved() {
     Dataset<Record> dataset = repo.create(NAME, new DatasetDescriptor.Builder()
-        .schema(testSchema).get());
+        .schema(testSchema).build());
 
     writeTestUsers(dataset, 5, 0, "email");
     checkTestUsers(dataset, 5, "email");
@@ -223,7 +223,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     Dataset<Record> datasetV2 = repo.update(NAME,
         new DatasetDescriptor.Builder(dataset.getDescriptor())
             .schema(testSchemaV2)
-            .get());
+            .build());
 
     Assert.assertEquals("Dataset schema is updated", testSchemaV2, datasetV2
         .getDescriptor().getSchema());

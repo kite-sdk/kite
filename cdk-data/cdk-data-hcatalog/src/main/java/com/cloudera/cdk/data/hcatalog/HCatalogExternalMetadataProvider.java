@@ -80,7 +80,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
     final DatasetDescriptor newDescriptor =
         new DatasetDescriptor.Builder(descriptor)
         .location(pathForDataset(name))
-        .get();
+        .build();
 
     // create the data directory first so it is owned by the current user, not Hive
     Accessor.getDefault().ensureExists(newDescriptor, conf);

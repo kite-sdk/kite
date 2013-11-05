@@ -41,35 +41,35 @@ public class TestMarkerComparator {
     OCT = new Marker.Builder()
         .add("year", 2013)
         .add("month", 10)
-        .get();
+        .build();
     OCT_12 = new Marker.Builder()
         .add("year", 2013)
         .add("month", 10)
         .add("day", 12)
-        .get();
+        .build();
     SEPT = new Marker.Builder()
         .add("year", 2013)
         .add("month", 9)
-        .get();
+        .build();
     SEPT_30 = new Marker.Builder()
         .add("year", 2013)
         .add("month", 9)
         .add("day", 30)
-        .get();
+        .build();
     NOV = new Marker.Builder()
         .add("year", 2013)
         .add("month", 11)
-        .get();
+        .build();
     NOV_1 = new Marker.Builder()
         .add("year", 2013)
         .add("month", 11)
         .add("day", 1)
-        .get();
+        .build();
     strategy = new PartitionStrategy.Builder()
         .year("timestamp")
         .month("timestamp")
         .day("timestamp")
-        .get();
+        .build();
     comparator = new MarkerComparator(strategy);
   }
 

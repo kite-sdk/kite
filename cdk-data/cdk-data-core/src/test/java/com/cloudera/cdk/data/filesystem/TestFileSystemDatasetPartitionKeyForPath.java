@@ -48,7 +48,7 @@ public class TestFileSystemDatasetPartitionKeyForPath {
     testDirectory = fileSystem.makeQualified(
         new Path(Files.createTempDir().getAbsolutePath()));
     partitionStrategy = new PartitionStrategy.Builder()
-        .hash("username", "username_part", 2).hash("email", 3).get();
+        .hash("username", "username_part", 2).hash("email", 3).build();
 
     dataset = new FileSystemDataset.Builder()
         .name("partitioned-users")
@@ -57,7 +57,7 @@ public class TestFileSystemDatasetPartitionKeyForPath {
             .schema(USER_SCHEMA)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
-            .get())
+            .build())
         .build();
   }
 

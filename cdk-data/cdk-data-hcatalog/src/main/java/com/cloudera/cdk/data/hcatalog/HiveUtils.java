@@ -127,7 +127,7 @@ class HiveUtils {
     }
 
     try {
-      return builder.get();
+      return builder.build();
     }  catch (IllegalStateException ex) {
       throw new MetadataProviderException("Cannot find schema: missing metadata");
     }

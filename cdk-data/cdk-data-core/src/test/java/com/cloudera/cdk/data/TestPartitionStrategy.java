@@ -57,7 +57,7 @@ public class TestPartitionStrategy {
     final PartitionStrategy p = new PartitionStrategy.Builder()
         .identity("month", Integer.class, 12)
         .hash("userId", 7)
-        .get();
+        .build();
 
     List<FieldPartitioner> fieldPartitioners = p.getFieldPartitioners();
     Assert.assertEquals(2, fieldPartitioners.size());

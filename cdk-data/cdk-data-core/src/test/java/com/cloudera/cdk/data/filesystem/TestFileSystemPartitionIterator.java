@@ -55,7 +55,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
         .year("timestamp")
         .month("timestamp")
         .day("timestamp")
-        .get();
+        .build();
 
     unbounded = new MarkerRange(new MarkerComparator(strategy));
 
@@ -115,7 +115,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testFromKey() throws Exception {
-    Marker october_24_2013 = new Marker.Builder().add("year", 2013).add("month", 10).add("day", 24).get();
+    Marker october_24_2013 = new Marker.Builder().add("year", 2013).add("month", 10).add("day", 24).build();
     Iterable<Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.from(october_24_2013));
     assertIterableEquals(keys.subList(16, 24), partitions);
@@ -123,7 +123,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testAfterKey() throws Exception {
-    Marker october_24_2013 = new Marker.Builder().add("year", 2013).add("month", 10).add("day", 24).get();
+    Marker october_24_2013 = new Marker.Builder().add("year", 2013).add("month", 10).add("day", 24).build();
     Iterable<Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.fromAfter(october_24_2013));
     assertIterableEquals(keys.subList(17, 24), partitions);
@@ -131,7 +131,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testToKey() throws Exception {
-    Marker october_25_2012 = new Marker.Builder().add("year", 2012).add("month", 10).add("day", 25).get();
+    Marker october_25_2012 = new Marker.Builder().add("year", 2012).add("month", 10).add("day", 25).build();
     Iterable<Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.to(october_25_2012));
     assertIterableEquals(keys.subList(0, 6), partitions);
@@ -139,7 +139,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testBeforeKey() throws Exception {
-    Marker october_25_2012 = new Marker.Builder().add("year", 2012).add("month", 10).add("day", 25).get();
+    Marker october_25_2012 = new Marker.Builder().add("year", 2012).add("month", 10).add("day", 25).build();
     Iterable <Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.toBefore(october_25_2012));
     assertIterableEquals(keys.subList(0, 5), partitions);
@@ -147,7 +147,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testInKey() throws Exception {
-    Marker october_24_2013 = new Marker.Builder().add("year", 2013).add("month", 10).add("day", 24).get();
+    Marker october_24_2013 = new Marker.Builder().add("year", 2013).add("month", 10).add("day", 24).build();
     Iterable<Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.in(october_24_2013));
     assertIterableEquals(keys.subList(16, 17), partitions);
@@ -155,8 +155,8 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testKeyRange() throws Exception {
-    Marker october_25_2012 = new Marker.Builder().add("year", 2012).add("month", 10).add("day", 25).get();
-    Marker october_24_2013 = new Marker.Builder().add("year", 2013).add("month", 10).add("day", 24).get();
+    Marker october_25_2012 = new Marker.Builder().add("year", 2012).add("month", 10).add("day", 25).build();
+    Marker october_24_2013 = new Marker.Builder().add("year", 2013).add("month", 10).add("day", 24).build();
     Iterable <Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.from(october_25_2012).to(october_24_2013));
     assertIterableEquals(keys.subList(5, 17), partitions);
@@ -164,7 +164,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testFromMarker() throws Exception {
-    Marker october_2013 = new Marker.Builder().add("year", 2013).add("month", 10).get();
+    Marker october_2013 = new Marker.Builder().add("year", 2013).add("month", 10).build();
     Iterable <Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.from(october_2013));
     assertIterableEquals(keys.subList(15, 24), partitions);
@@ -172,7 +172,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testAfterMarker() throws Exception {
-    Marker october_2013 = new Marker.Builder().add("year", 2013).add("month", 10).get();
+    Marker october_2013 = new Marker.Builder().add("year", 2013).add("month", 10).build();
     Iterable<Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.fromAfter(october_2013));
     assertIterableEquals(keys.subList(18, 24), partitions);
@@ -180,7 +180,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testToMarker() throws Exception {
-    Marker october_2012 = new Marker.Builder().add("year", 2012).add("month", 10).get();
+    Marker october_2012 = new Marker.Builder().add("year", 2012).add("month", 10).build();
     Iterable <Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.to(october_2012));
     assertIterableEquals(keys.subList(0, 6), partitions);
@@ -188,7 +188,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testBeforeMarker() throws Exception {
-    Marker october_2012 = new Marker.Builder().add("year", 2012).add("month", 10).get();
+    Marker october_2012 = new Marker.Builder().add("year", 2012).add("month", 10).build();
     Iterable<Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.toBefore(october_2012));
     assertIterableEquals(keys.subList(0, 3), partitions);
@@ -196,7 +196,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testInMarker() throws Exception {
-    Marker october_2012 = new Marker.Builder().add("year", 2012).add("month", 10).get();
+    Marker october_2012 = new Marker.Builder().add("year", 2012).add("month", 10).build();
     Iterable<Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.in(october_2012));
     assertIterableEquals(keys.subList(3, 6), partitions);
@@ -204,8 +204,8 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
 
   @Test
   public void testMarkerRange() throws Exception {
-    Marker october_2012 = new Marker.Builder().add("year", 2012).add("month", 10).get();
-    Marker october_2013 = new Marker.Builder().add("year", 2013).add("month", 10).get();
+    Marker october_2012 = new Marker.Builder().add("year", 2012).add("month", 10).build();
+    Marker october_2013 = new Marker.Builder().add("year", 2013).add("month", 10).build();
     Iterable<Key> partitions = new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, unbounded.from(october_2012).toBefore(october_2013));
     assertIterableEquals(keys.subList(3, 15), partitions);

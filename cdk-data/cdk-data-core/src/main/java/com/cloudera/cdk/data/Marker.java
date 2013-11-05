@@ -126,7 +126,7 @@ public abstract class Marker {
    *
    * @since 0.9.0
    */
-  public static class Builder implements Supplier<Marker> {
+  public static class Builder {
     private final Map<String, Object> content;
 
     /**
@@ -168,9 +168,9 @@ public abstract class Marker {
      * @param name a String name
      * @param value an Object value
      */
-    public Builder(String key, Object value) {
+    public Builder(String name, Object value) {
       this.content = Maps.newHashMapWithExpectedSize(1);
-      content.put(key, value);
+      content.put(name, value);
     }
 
     /**
@@ -204,8 +204,7 @@ public abstract class Marker {
      *
      * @return a Marker for the content in this Builder.
      */
-    @Override
-    public Marker get() {
+    public Marker build() {
       return new ImmutableMarker(content);
     }
   }

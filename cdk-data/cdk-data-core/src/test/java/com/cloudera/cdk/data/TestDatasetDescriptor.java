@@ -41,7 +41,7 @@ public class TestDatasetDescriptor extends MiniDFSTest {
     out.close();
 
     // build a schema using the HDFS path and check it's the same
-    Schema schema = new DatasetDescriptor.Builder().schemaUri(schemaPath.toUri()).get()
+    Schema schema = new DatasetDescriptor.Builder().schemaUri(schemaPath.toUri()).build()
         .getSchema();
 
     Assert.assertEquals(USER_SCHEMA, schema);
@@ -50,7 +50,7 @@ public class TestDatasetDescriptor extends MiniDFSTest {
   @Test
   public void testSchemaFromAvroDataFile() throws Exception {
     URI uri = Resources.getResource("data/strings-100.avro").toURI();
-    Schema schema = new DatasetDescriptor.Builder().schemaFromAvroDataFile(uri).get()
+    Schema schema = new DatasetDescriptor.Builder().schemaFromAvroDataFile(uri).build()
         .getSchema();
     Assert.assertEquals(STRING_SCHEMA, schema);
   }
@@ -58,7 +58,7 @@ public class TestDatasetDescriptor extends MiniDFSTest {
   @Test
   public void testSchemaFromResourceURI() throws Exception {
     String uri = "resource:standard_event.avsc";
-    DatasetDescriptor descriptor = new DatasetDescriptor.Builder().schemaUri(uri).get();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder().schemaUri(uri).build();
 
     Assert.assertNotNull(descriptor);
     Assert.assertNotNull(descriptor.getSchema());

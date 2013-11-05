@@ -72,6 +72,6 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
 
     return new DatasetDescriptor.Builder(descriptor)
         .location(newTable.getDataLocation())
-        .get();
+        .build();
   }
 }

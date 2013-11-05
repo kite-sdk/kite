@@ -86,6 +86,6 @@ public class CreateDatasetMojo extends AbstractDatasetMojo {
       descriptorBuilder.partitionStrategy(Accessor.getDefault().fromExpression(partitionExpression));
     }
 
-    repo.create(datasetName, descriptorBuilder.get());
+    repo.create(datasetName, descriptorBuilder.build());
   }
 }

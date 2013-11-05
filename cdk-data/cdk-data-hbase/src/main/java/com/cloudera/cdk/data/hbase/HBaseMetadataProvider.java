@@ -204,7 +204,7 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     return new DatasetDescriptor.Builder()
         .schemaLiteral(schemaString)
         .partitionStrategy(partitionStrategy)
-        .get();
+        .build();
   }
 
   // TODO: move the logic of parsing keys to DatasetDescriptor itself
@@ -216,7 +216,7 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
         .schema(descriptor.getSchema())
         .partitionStrategy(partitionStrategy)
         .location(descriptor.getLocation())
-        .get();
+        .build();
   }
 
 }

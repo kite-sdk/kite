@@ -88,7 +88,7 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
 
       newDescriptor = new DatasetDescriptor.Builder(descriptor)
           .location(location)
-          .get();
+          .build();
     } else {
       // don't need to modify it
       newDescriptor = descriptor;

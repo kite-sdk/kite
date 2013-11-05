@@ -52,9 +52,9 @@ public class TestCrunchDatasets {
   @Test
   public void testGeneric() throws IOException {
     Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
-        .schema(USER_SCHEMA).get());
+        .schema(USER_SCHEMA).build());
     Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
-        .schema(USER_SCHEMA).get());
+        .schema(USER_SCHEMA).build());
 
     // write two files, each of 5 records
     writeTestUsers(inputDataset, 5, 0);
@@ -72,16 +72,16 @@ public class TestCrunchDatasets {
   @Test
   public void testPartitionedSourceAndTarget() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
-        "username", 2).get();
+        "username", 2).build();
 
     Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
-        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).get());
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
     Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
-        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).get());
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
 
     writeTestUsers(inputDataset, 10);
 
-    PartitionKey key = partitionStrategy.keyFor(new Marker.Builder("username", 0).get());
+    PartitionKey key = partitionStrategy.keyFor(new Marker.Builder("username", 0).build());
     Dataset<Record> inputPart0 = inputDataset.getPartition(key, false);
     Dataset<Record> outputPart0 = outputDataset.getPartition(key, true);
 

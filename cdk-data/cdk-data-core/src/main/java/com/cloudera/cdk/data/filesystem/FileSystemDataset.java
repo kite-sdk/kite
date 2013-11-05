@@ -182,7 +182,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
         .descriptor(new DatasetDescriptor.Builder(descriptor)
             .location(partitionDirectory)
             .partitionStrategy(subpartitionStrategy)
-            .get())
+            .build())
         .partitionKey(key)
         .build();
   }
@@ -236,7 +236,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
           .descriptor(new DatasetDescriptor.Builder(descriptor)
               .location(p)
               .partitionStrategy(subPartitionStrategy)
-              .get())
+              .build())
           .partitionKey(key);
 
       partitions.add(builder.<E>build());

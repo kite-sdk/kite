@@ -83,7 +83,7 @@ public class TestHiveURIs extends TestFileSystemURIs {
     DatasetDescriptor created = provider.create("test",
         new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
-        .get());
+        .build());
     Assert.assertEquals("Locatoin should be in HDFS",
         "hdfs", created.getLocation().getScheme());
     Assert.assertEquals("Location should have the correct HDFS host",

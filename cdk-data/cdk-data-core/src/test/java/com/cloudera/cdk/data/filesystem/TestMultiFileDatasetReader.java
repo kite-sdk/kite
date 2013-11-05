@@ -48,7 +48,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
       }
     };
   public static final DatasetDescriptor DESCRIPTOR = new DatasetDescriptor
-      .Builder().schema(STRING_SCHEMA).get();
+      .Builder().schema(STRING_SCHEMA).build();
 
   @Override
   public DatasetReader newReader() throws IOException {
@@ -121,7 +121,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
     final DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(STRING_SCHEMA)
         .format(Accessor.getDefault().newFormat("explode!"))
-        .get();
+        .build();
 
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
         fileSystem, Lists.newArrayList(TEST_FILE), descriptor);

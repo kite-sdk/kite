@@ -192,7 +192,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       }
     }
 
-    return builder.get();
+    return builder.build();
   }
 
   @Override
@@ -218,7 +218,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     // get a DatasetDescriptor with the location set
     DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder(descriptor)
         .location(dataLocation)
-        .get();
+        .build();
 
     try {
       if (rootFileSystem.exists(metadataLocation)) {

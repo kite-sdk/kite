@@ -93,7 +93,7 @@ public class HBaseDatasetRepositoryTest {
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(testGenericEntity)
-        .get();
+        .build();
     Dataset ds = repo.create(tableName, descriptor);
     DatasetAccessor<GenericRecord> accessor = ds.newAccessor();
 
@@ -160,7 +160,7 @@ public class HBaseDatasetRepositoryTest {
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(testEntity)
-        .get();
+        .build();
     Dataset ds = repo.create(tableName, descriptor);
     DatasetAccessor<TestEntity> accessor = ds.newAccessor();
 
@@ -223,7 +223,7 @@ public class HBaseDatasetRepositoryTest {
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(testGenericEntity)
-        .get();
+        .build();
     Dataset ds = repo.create(tableName, descriptor);
     DatasetAccessor<GenericRecord> accessor = ds.newAccessor();
 

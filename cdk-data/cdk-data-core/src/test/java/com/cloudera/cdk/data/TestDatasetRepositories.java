@@ -88,7 +88,7 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
         new Path(Files.createTempDir().getAbsolutePath()));
     this.testDescriptor = new DatasetDescriptor.Builder()
         .schema(testSchema)
-        .get();
+        .build();
 
     this.testProvider = newProvider(conf);
     this.repo = newRepo(testProvider);
@@ -142,8 +142,8 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
   public void testCreatePartitioned() throws IOException {
     DatasetDescriptor requested = new DatasetDescriptor.Builder(testDescriptor)
         .partitionStrategy(
-            new PartitionStrategy.Builder().hash("name", 3).get())
-        .get();
+            new PartitionStrategy.Builder().hash("name", 3).build())
+        .build();
     Assert.assertFalse("Sanity check", testProvider.exists("test2"));
 
     Dataset dataset = repo.create("test2", requested);
@@ -167,7 +167,7 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
 
     // create the same dataset again, this time it should fail
     repo.create(NAME, new DatasetDescriptor.Builder()
-        .schema(testSchema).get());
+        .schema(testSchema).build());
   }
 
   @Test
@@ -252,7 +252,7 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
     Assert.assertFalse(repo.exists("test1"));
 
     repo.create("test1", new DatasetDescriptor.Builder()
-        .schema(testSchema).get());
+        .schema(testSchema).build());
     Assert.assertTrue(repo.exists("test1"));
 
     repo.delete("test1");

@@ -593,14 +593,28 @@ public class PartitionStrategy {
      * This builder should be considered single use and discarded after a call
      * to this method.
      * </p>
-     * 
+     *
      * @return The configured instance of {@link PartitionStrategy}.
+     *
+     * @deprecated will be removed in 0.10.0
      */
     @Override
+    @Deprecated
     public PartitionStrategy get() {
-      return new PartitionStrategy(fieldPartitioners);
+      return build();
     }
 
+    /**
+     * Build a configured {@link PartitionStrategy} instance.
+     *
+     * This builder should be considered single use and discarded after a call
+     * to this method.
+     *
+     * @return The configured instance of {@link PartitionStrategy}.
+     */
+    public PartitionStrategy build() {
+      return new PartitionStrategy(fieldPartitioners);
+    }
   }
 
 }

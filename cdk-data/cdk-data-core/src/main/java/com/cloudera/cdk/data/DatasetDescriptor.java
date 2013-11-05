@@ -624,10 +624,21 @@ public class DatasetDescriptor {
 
     /**
      * Get an instance of the configured dataset descriptor. Subsequent calls
-     * will produce new instances that are similarly configure.
+     * will produce new instances that are similarly configured.
+     *
+     * @deprecated will be removed in 0.10.0
      */
     @Override
+    @Deprecated
     public DatasetDescriptor get() {
+      return build();
+    }
+
+    /**
+     * Build an instance of the configured dataset descriptor. Subsequent calls
+     * will produce new instances that are similarly configured.
+     */
+    public DatasetDescriptor build() {
       Preconditions.checkState(schema != null,
           "Descriptor schema is required and cannot be null");
 

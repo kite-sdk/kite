@@ -78,8 +78,8 @@ public class TestFileSystemDataset extends MiniDFSTest {
   public TestFileSystemDataset(Format format, FileSystem fs) {
     this.format = format;
     this.fileSystem = fs;
-    this.username0 = new Marker.Builder("username", 0).get();
-    this.username1 = new Marker.Builder("username", 1).get();
+    this.username0 = new Marker.Builder("username", 0).build();
+    this.username1 = new Marker.Builder("username", 1).build();
   }
 
   @Before
@@ -102,7 +102,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .schemaUri(USER_SCHEMA_URL)
             .format(format)
             .location(testDirectory)
-            .get())
+            .build())
         .build();
 
     Assert.assertFalse("Dataset is not partitioned", ds.getDescriptor()
@@ -115,7 +115,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Test
   public void testPartitionedWriterSingle() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
-      "username", 2).get();
+      "username", 2).build();
 
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("partitioned-users")
@@ -125,7 +125,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .format(format)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
-            .get())
+            .build())
         .build();
 
     Assert.assertTrue("Dataset is partitioned", ds.getDescriptor()
@@ -159,7 +159,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Test
   public void testPartitionedWriterDouble() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-      .hash("username", 2).hash("email", 3).get();
+      .hash("username", 2).hash("email", 3).build();
 
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("partitioned-users")
@@ -169,7 +169,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .format(format)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
-            .get())
+            .build())
         .build();
 
     Assert.assertTrue("Dataset is partitioned", ds.getDescriptor()
@@ -194,7 +194,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         Marker current = new Marker.Builder()
             .add("username", i1)
             .add("email", i2)
-            .get();
+            .build();
         total += readTestUsersInPartition(ds,
           partitionStrategy.keyFor(current), null);
       }
@@ -216,7 +216,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Test
   public void testGetPartitionReturnsNullIfNoAutoCreate() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
-      "username", 2).get();
+      "username", 2).build();
 
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("partitioned-users")
@@ -226,7 +226,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .format(format)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
-            .get())
+            .build())
         .build();
 
     Assert
@@ -236,7 +236,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Test
   public void testWriteToSubpartition() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-      .hash("username", "username_part", 2).hash("email", 3).get();
+      .hash("username", "username_part", 2).hash("email", 3).build();
 
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("partitioned-users")
@@ -246,7 +246,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .format(format)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
-            .get())
+            .build())
         .build();
 
     PartitionKey key = Accessor.getDefault().newPartitionKey(1);
@@ -262,7 +262,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Test
   public void testDropPartition() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
-      .hash("username", 2).get();
+      .hash("username", 2).build();
 
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("partitioned-users")
@@ -272,7 +272,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .format(format)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
-            .get())
+            .build())
         .build();
 
     writeTestUsers(ds, 10);
