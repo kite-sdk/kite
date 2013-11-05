@@ -241,11 +241,11 @@ public class URIPattern {
 
     final String userInfo = uri.getUserInfo();
     if (userInfo != null) {
-      // the last colon is the delimiter between the username and the password
-      int index = USER_PASS_SEPARATOR.lastIndexIn(userInfo);
+      // the first colon is the delimiter between the username and the password
+      int index = USER_PASS_SEPARATOR.indexIn(userInfo);
       if (index > 0) {
-        storage.put(PASSWORD, userInfo.substring(0, index));
-        storage.put(USERNAME, userInfo.substring(index+1));
+        storage.put(USERNAME, userInfo.substring(0, index));
+        storage.put(PASSWORD, userInfo.substring(index+1));
       } else {
         storage.put(USERNAME, userInfo);
       }

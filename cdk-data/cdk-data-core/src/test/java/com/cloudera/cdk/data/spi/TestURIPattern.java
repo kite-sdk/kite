@@ -148,7 +148,7 @@ public class TestURIPattern {
 
   @Test
   public void testDefaultAuthority() throws URISyntaxException {
-    URIPattern pattern = new URIPattern("scheme://pass:w0rd:user@host:3434/*path");
+    URIPattern pattern = new URIPattern("scheme://user:pass:w0rd@host:3434/*path");
     String uri = "scheme:/path/to/data.avro";
     Assert.assertTrue(pattern.matches(uri));
 
@@ -164,7 +164,7 @@ public class TestURIPattern {
 
   @Test
   public void testOverrideAuthority() throws URISyntaxException {
-    URIPattern pattern = new URIPattern("scheme://pass:w0rd:user@host:3434/*path");
+    URIPattern pattern = new URIPattern("scheme://user:pass:w0rd@host:3434/*path");
     String uri = "scheme://other:3435/path/to/data.avro";
     Assert.assertTrue(pattern.matches(uri));
 
