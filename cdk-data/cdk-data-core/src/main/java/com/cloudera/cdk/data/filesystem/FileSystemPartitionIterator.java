@@ -25,6 +25,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -45,8 +46,6 @@ class FileSystemPartitionIterator implements Iterator<Key>, Iterable<Key> {
 
   private final FileSystem fs;
   private final Path rootDirectory;
-  private final PartitionStrategy strategy;
-  private final PathConversion convert;
   private final Iterator<Key> iterator;
 
   class FileSystemIterator extends MultiLevelIterator<String> {
@@ -57,20 +56,18 @@ class FileSystemPartitionIterator implements Iterator<Key>, Iterable<Key> {
     @Override
     @SuppressWarnings("unchecked")
     public Iterable<String> getLevel(List<String> current) {
-      final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
       final Set<String> dirs = Sets.newLinkedHashSet();
 
       Path dir = rootDirectory;
       for (int i = 0, n = current.size(); i < n; i += 1) {
-        dir = new Path(dir, convert.dirnameForValue(
-            partitioners.get(i), current.get(i)));
+        dir = new Path(dir, current.get(i));
       }
 
       try {
         for (FileStatus stat : fs.listStatus(dir, PathFilters.notHidden())) {
           if (stat.isDirectory()) {
             // TODO: add a check here for range.couldContain(Marker)
-            dirs.add(convert.valueStringForDirname(stat.getPath().getName()));
+            dirs.add(stat.getPath().getName());
           }
         }
       } catch (IOException ex) {
@@ -101,10 +98,14 @@ class FileSystemPartitionIterator implements Iterator<Key>, Iterable<Key> {
    * Conversion function to transform a List into a {@link Key}.
    */
   private static class MakeKey implements Function<List<String>, Key> {
+    private final List<FieldPartitioner> partitioners;
     private final Key reusableKey;
+    private final PathConversion convert;
 
     public MakeKey(PartitionStrategy strategy) {
+      this.partitioners = strategy.getFieldPartitioners();
       this.reusableKey = new Key(strategy);
+      this.convert = new PathConversion();
     }
 
     @Override
@@ -112,8 +113,12 @@ class FileSystemPartitionIterator implements Iterator<Key>, Iterable<Key> {
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(
         value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
         justification="Non-null @Nullable parameter inherited from Function")
-    public Key apply(List<String> values) {
-      reusableKey.replaceValues((List) values);
+    public Key apply(List<String> dirs) {
+      List<Object> values = Lists.newArrayListWithCapacity(dirs.size());
+      for (int i = 0, n = partitioners.size(); i < n; i += 1) {
+        values.add(convert.valueForDirname(partitioners.get(i), dirs.get(i)));
+      }
+      reusableKey.replaceValues(values);
       return reusableKey;
     }
   }
@@ -124,8 +129,6 @@ class FileSystemPartitionIterator implements Iterator<Key>, Iterable<Key> {
     Preconditions.checkArgument(fs.isDirectory(root));
     this.fs = fs;
     this.rootDirectory = root;
-    this.strategy = strategy;
-    this.convert = new PathConversion();
     this.iterator = Iterators.filter(
         Iterators.transform(
             new FileSystemIterator(strategy.getFieldPartitioners().size()),

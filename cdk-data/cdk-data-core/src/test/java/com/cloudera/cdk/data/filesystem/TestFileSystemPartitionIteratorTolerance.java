@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Set;
 
 @RunWith(Parameterized.class)
-public class TestFileSystemPartitionIterator extends MiniDFSTest {
+public class TestFileSystemPartitionIteratorTolerance extends MiniDFSTest {
   public FileSystem fileSystem;
   public Path testDirectory;
   public static PartitionStrategy strategy;
@@ -79,7 +79,7 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
     return Arrays.asList(data);
   }
 
-  public TestFileSystemPartitionIterator(FileSystem fileSystem) {
+  public TestFileSystemPartitionIteratorTolerance(FileSystem fileSystem) {
     this.fileSystem = fileSystem;
   }
 
@@ -88,9 +88,42 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
     testDirectory = fileSystem.makeQualified(
         new Path(Files.createTempDir().getAbsolutePath()));
 
-    for (String year : Arrays.asList("year=2012", "year=2013")) {
+    // 2012 had no names in the directory layout
+    for (String year : Arrays.asList("2012")) {
       final Path yearPath = new Path(testDirectory, year);
-      for (String month : Arrays.asList("month=09", "month=10", "month=11", "month=12")) {
+      for (String month : Arrays.asList("09", "10", "11", "12")) {
+        final Path monthPath = new Path(yearPath, month);
+        for (String day : Arrays.asList("22", "24", "25")) {
+          final Path dayPath = new Path(monthPath, day);
+          fileSystem.mkdirs(dayPath);
+        }
+      }
+    }
+    // 2013-09 is mixed
+    for (String year : Arrays.asList("2013")) {
+      final Path yearPath = new Path(testDirectory, year);
+      for (String month : Arrays.asList("09")) {
+        final Path monthPath = new Path(yearPath, month);
+        for (String day : Arrays.asList("22", "24")) {
+          final Path dayPath = new Path(monthPath, day);
+          fileSystem.mkdirs(dayPath);
+        }
+      }
+    }
+    for (String year : Arrays.asList("year=2013")) {
+      final Path yearPath = new Path(testDirectory, year);
+      for (String month : Arrays.asList("month=09")) {
+        final Path monthPath = new Path(yearPath, month);
+        for (String day : Arrays.asList("day=25")) {
+          final Path dayPath = new Path(monthPath, day);
+          fileSystem.mkdirs(dayPath);
+        }
+      }
+    }
+    // the rest of 2013 has names in the layout
+    for (String year : Arrays.asList("year=2013")) {
+      final Path yearPath = new Path(testDirectory, year);
+      for (String month : Arrays.asList("month=10", "month=11", "month=12")) {
         final Path monthPath = new Path(yearPath, month);
         for (String day : Arrays.asList("day=22", "day=24", "day=25")) {
           final Path dayPath = new Path(monthPath, day);
