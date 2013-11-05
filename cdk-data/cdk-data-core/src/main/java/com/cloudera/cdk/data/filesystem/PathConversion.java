@@ -33,7 +33,7 @@ import org.apache.hadoop.fs.Path;
 import java.util.List;
 import java.util.Map;
 
-public class PathConversion {
+class PathConversion {
 
   public Key toKey(Path fromPath, Key storage) {
     final List<FieldPartitioner> partitioners =
