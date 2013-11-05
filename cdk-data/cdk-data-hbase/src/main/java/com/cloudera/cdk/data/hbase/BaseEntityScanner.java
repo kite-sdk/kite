@@ -15,9 +15,12 @@
  */
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.spi.ReaderWriterState;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.Iterator;
 
+import java.util.NoSuchElementException;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Result;
@@ -46,6 +49,7 @@ public class BaseEntityScanner<E> implements EntityScanner<E> {
   private Scan scan;
   private ResultScanner resultScanner;
   private Iterator<Result> iterator;
+  private ReaderWriterState state;
 
   /**
    * @param scan
@@ -67,6 +71,8 @@ public class BaseEntityScanner<E> implements EntityScanner<E> {
     this.entityMapper = entityMapper;
     this.tablePool = tablePool;
     this.tableName = tableName;
+
+    this.state = ReaderWriterState.NEW;
   }
 
   /**
@@ -118,33 +124,20 @@ public class BaseEntityScanner<E> implements EntityScanner<E> {
     for (ScanModifier scanModifier : scanBuilder.getScanModifiers()) {
       this.scan = scanModifier.modifyScan(this.scan);
     }
+
+    this.state = ReaderWriterState.NEW;
   }
 
   @Override
   public Iterator<E> iterator() {
-    final Iterator<Result> iterator = resultScanner.iterator();
-    return new Iterator<E>() {
-
-      @Override
-      public boolean hasNext() {
-        return iterator.hasNext();
-      }
-
-      @Override
-      public E next() {
-        Result result = iterator.next();
-        return entityMapper.mapToEntity(result);
-      }
-
-      @Override
-      public void remove() {
-        iterator.remove();
-      }
-    };
+    return this;
   }
 
   @Override
   public void open() {
+    Preconditions.checkState(state.equals(ReaderWriterState.NEW),
+        "A scanner may not be opened more than once - current state:%s", state);
+
     HTableInterface table = null;
     try {
       table = tablePool.getTable(tableName);
@@ -164,22 +157,33 @@ public class BaseEntityScanner<E> implements EntityScanner<E> {
       }
     }
     iterator = resultScanner.iterator();
+
+    state = ReaderWriterState.OPEN;
   }
 
 
 
   @Override
   public void close() {
+    if (!state.equals(ReaderWriterState.OPEN)) {
+      return;
+    }
+
     resultScanner.close();
+
+    state = ReaderWriterState.CLOSED;
   }
 
   @Override
   public boolean isOpen() {
-    return true; // TODO: track state properly
+    return state.equals(ReaderWriterState.OPEN);
   }
 
   @Override
   public boolean hasNext() {
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to read from a scanner in state:%s", state);
+
     return iterator.hasNext();
   }
 
@@ -189,12 +193,21 @@ public class BaseEntityScanner<E> implements EntityScanner<E> {
 
   @Override
   public E next() {
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to read from a scanner in state:%s", state);
+
     Result result = iterator.next();
+    if (result == null) {
+      throw new NoSuchElementException();
+    }
     return entityMapper.mapToEntity(result);
   }
 
   @Override
   public void remove() {
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to read from a scanner in state:%s", state);
+
     iterator.remove();
   }
 
@@ -214,9 +227,7 @@ public class BaseEntityScanner<E> implements EntityScanner<E> {
 
     @Override
     public BaseEntityScanner<E> build() {
-      BaseEntityScanner<E> scanner = new BaseEntityScanner<E>(this);
-      scanner.open();
-      return scanner;
+      return new BaseEntityScanner<E>(this);
     }
 
   }

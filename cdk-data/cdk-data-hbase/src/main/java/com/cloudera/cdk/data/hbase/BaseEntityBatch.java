@@ -15,6 +15,8 @@
  */
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.spi.ReaderWriterState;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 
 import org.apache.hadoop.hbase.client.HTableInterface;
@@ -27,6 +29,7 @@ public class BaseEntityBatch<E> implements EntityBatch<E> {
   private final HTableInterface table;
   private final EntityMapper<E> entityMapper;
   private final HBaseClientTemplate clientTemplate;
+  private ReaderWriterState state;
 
   /**
    * Checks an HTable out of the HTablePool and modifies it to take advantage of
@@ -50,6 +53,7 @@ public class BaseEntityBatch<E> implements EntityBatch<E> {
     this.table.setAutoFlush(false);
     this.clientTemplate = clientTemplate;
     this.entityMapper = entityMapper;
+    this.state = ReaderWriterState.NEW;
 
     /**
      * If the writeBufferSize is less than the currentBufferSize, then the
@@ -85,15 +89,21 @@ public class BaseEntityBatch<E> implements EntityBatch<E> {
     this.table.setAutoFlush(false);
     this.clientTemplate = clientTemplate;
     this.entityMapper = entityMapper;
+    this.state = ReaderWriterState.NEW;
   }
 
   @Override
   public void open() {
-    // noop
+    Preconditions.checkState(state.equals(ReaderWriterState.NEW),
+        "Unable to open a writer from state:%s", state);
+    state = ReaderWriterState.OPEN;
   }
 
   @Override
   public void put(E entity) {
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to write to a writer in state:%s", state);
+
     PutAction putAction = entityMapper.mapFromEntity(entity);
     clientTemplate.put(putAction, table);
   }
@@ -105,6 +115,9 @@ public class BaseEntityBatch<E> implements EntityBatch<E> {
 
   @Override
   public void flush() {
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to flush a writer in state:%s", state);
+
     try {
       table.flushCommits();
     } catch (IOException e) {
@@ -115,17 +128,20 @@ public class BaseEntityBatch<E> implements EntityBatch<E> {
 
   @Override
   public void close() {
-    try {
-      table.flushCommits();
-      table.setAutoFlush(true);
-      table.close();
-    } catch (IOException e) {
-      throw new HBaseClientException("Error closing table [" + table + "]", e);
+    if (state.equals(ReaderWriterState.OPEN)) {
+      try {
+        table.flushCommits();
+        table.setAutoFlush(true);
+        table.close();
+      } catch (IOException e) {
+        throw new HBaseClientException("Error closing table [" + table + "]", e);
+      }
+      state = ReaderWriterState.CLOSED;
     }
   }
 
   @Override
   public boolean isOpen() {
-    return true; // TODO: track state properly
+    return state.equals(ReaderWriterState.OPEN);
   }
 }

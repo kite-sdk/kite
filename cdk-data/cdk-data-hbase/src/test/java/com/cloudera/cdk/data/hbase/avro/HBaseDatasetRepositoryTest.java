@@ -37,7 +37,6 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.util.Utf8;
-
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
@@ -46,6 +45,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -102,7 +102,9 @@ public class HBaseDatasetRepositoryTest {
     accessor.put(createGenericEntity(1));
 
     DatasetWriter<GenericRecord> writer = ds.getWriter();
+    assertFalse("Writer should not be open before calling open", writer.isOpen());
     writer.open();
+    assertTrue("Writer should be open after calling open", writer.isOpen());
     try {
       for (int i = 2; i < 10; ++i) {
         GenericRecord entity = createGenericEntity(i);
@@ -110,6 +112,7 @@ public class HBaseDatasetRepositoryTest {
       }
     } finally {
       writer.close();
+      assertFalse("Writer should be closed after calling close", writer.isOpen());
     }
 
     // reload
@@ -127,7 +130,9 @@ public class HBaseDatasetRepositoryTest {
     // ensure the new entities are what we expect with scan operations
     int cnt = 0;
     DatasetReader<GenericRecord> reader = ds.getReader();
+    assertFalse("Reader should not be open before calling open", reader.isOpen());
     reader.open();
+    assertTrue("Reader should be open after calling open", reader.isOpen());
     try {
       for (GenericRecord entity : reader) {
         compareEntitiesWithUtf8(cnt, entity);
@@ -136,6 +141,7 @@ public class HBaseDatasetRepositoryTest {
       assertEquals(10, cnt);
     } finally {
       reader.close();
+      assertFalse("Reader should be closed after calling close", reader.isOpen());
     }
 
     PartitionKey key = ds.getDescriptor().getPartitionStrategy()
@@ -247,7 +253,7 @@ public class HBaseDatasetRepositoryTest {
 
   // TODO: remove duplication from ManagedDaoTest
 
-  private GenericRecord createGenericEntity(long uniqueIdx) {
+  static GenericRecord createGenericEntity(long uniqueIdx) {
     return createGenericEntity(uniqueIdx, testGenericEntity);
   }
 
@@ -259,7 +265,7 @@ public class HBaseDatasetRepositoryTest {
    * @param schemaString
    * @return
    */
-  private GenericRecord createGenericEntity(long uniqueIdx, String schemaString) {
+  private static GenericRecord createGenericEntity(long uniqueIdx, String schemaString) {
     String iStr = Long.toString(uniqueIdx);
 
     Schema.Parser parser = new Schema.Parser();
@@ -304,7 +310,7 @@ public class HBaseDatasetRepositoryTest {
   }
 
   @SuppressWarnings("unchecked")
-  private void compareEntitiesWithUtf8(long uniqueIdx, IndexedRecord record) {
+  static void compareEntitiesWithUtf8(long uniqueIdx, IndexedRecord record) {
     String iStr = Long.toString(uniqueIdx);
 
     assertEquals(new String("part1_" + iStr), record.get(0).toString()); // TODO: check type

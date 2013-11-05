@@ -341,7 +341,7 @@ public abstract class EntityScannerBuilder<E> {
   }
 
   /**
-   * Build, open and return a EntityScanner object using all of the information
+   * Build and return a EntityScanner object using all of the information
    * the user provided.
    * 
    * @return ScannerBuilder
