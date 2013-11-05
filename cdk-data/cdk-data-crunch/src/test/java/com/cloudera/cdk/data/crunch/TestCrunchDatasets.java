@@ -46,7 +46,7 @@ public class TestCrunchDatasets {
   public void setUp() throws IOException {
     this.conf = new Configuration();
     this.repo = new FileSystemDatasetRepository.Builder().configuration(conf)
-        .metadataProvider(new MemoryMetadataProvider(conf)).get();
+        .metadataProvider(new MemoryMetadataProvider(conf)).build();
   }
 
   @Test

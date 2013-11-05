@@ -69,7 +69,7 @@ public class CombinedLogFormatConverter extends CrunchTool {
     FileSystem fs = root.getFileSystem(conf);
 
     DatasetRepository repo = new FileSystemDatasetRepository.Builder().fileSystem(fs)
-        .rootDirectory(root).get();
+        .rootDirectory(root).build();
     DatasetDescriptor datasetDescriptor = new DatasetDescriptor.Builder()
         .schema(schema).build();
 

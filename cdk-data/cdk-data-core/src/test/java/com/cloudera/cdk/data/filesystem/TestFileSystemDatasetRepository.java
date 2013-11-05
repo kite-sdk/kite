@@ -47,7 +47,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     // relies on filesystem URIs set in the DatasetDescriptor.
     return new FileSystemDatasetRepository.Builder()
         .metadataProvider(provider)
-        .get();
+        .build();
   }
 
   @Test

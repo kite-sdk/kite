@@ -509,9 +509,17 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       return this;
     }
 
-    @SuppressWarnings("deprecation")
+    /**
+     * @deprecated will be removed in 0.10.0
+     */
     @Override
+    @Deprecated
     public FileSystemMetadataProvider get() {
+      return build();
+    }
+
+    @SuppressWarnings("deprecation")
+    public FileSystemMetadataProvider build() {
       return new FileSystemMetadataProvider(configuration, rootDirectory);
     }
   }

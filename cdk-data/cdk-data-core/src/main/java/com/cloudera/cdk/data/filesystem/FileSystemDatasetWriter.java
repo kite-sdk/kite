@@ -167,8 +167,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E> {
       .toString();
   }
 
-  public static class Builder<E> implements
-    Supplier<FileSystemDatasetWriter<E>> {
+  public static class Builder {
 
     private FileSystem fileSystem;
     private Path path;
@@ -179,28 +178,27 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E> {
       enableCompression = true;
     }
 
-    public Builder<E> fileSystem(FileSystem fileSystem) {
+    public Builder fileSystem(FileSystem fileSystem) {
       this.fileSystem = fileSystem;
       return this;
     }
 
-    public Builder<E> path(Path path) {
+    public Builder path(Path path) {
       this.path = path;
       return this;
     }
 
-    public Builder<E> schema(Schema schema) {
+    public Builder schema(Schema schema) {
       this.schema = schema;
       return this;
     }
 
-    public Builder<E> enableCompression(boolean enableCompression) {
+    public Builder enableCompression(boolean enableCompression) {
       this.enableCompression = enableCompression;
       return this;
     }
 
-    @Override
-    public FileSystemDatasetWriter<E> get() {
+    public <E> FileSystemDatasetWriter<E> build() {
       Preconditions
         .checkState(fileSystem != null, "File system is not defined");
       Preconditions.checkState(path != null, "Path is not defined");

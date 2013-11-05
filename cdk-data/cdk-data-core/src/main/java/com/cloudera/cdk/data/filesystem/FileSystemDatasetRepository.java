@@ -112,7 +112,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     this.conf = new Configuration();
     this.conf.set("fs.defaultFS", fileSystem.getUri().toString());
     this.metadataProvider = new FileSystemMetadataProvider.Builder().configuration(conf)
-        .rootDirectory(qualifiedRoot).get();
+        .rootDirectory(qualifiedRoot).build();
   }
 
   /**
@@ -144,7 +144,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     // get a qualified path so we don't have to pass the FileSystem object
     final Path qualifiedRoot = fileSystem.makeQualified(rootDirectory);
     this.metadataProvider = new FileSystemMetadataProvider.Builder().configuration(conf)
-        .rootDirectory(qualifiedRoot).get();
+        .rootDirectory(qualifiedRoot).build();
   }
 
   /**
@@ -573,8 +573,16 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
       return this;
     }
 
+    /**
+     * @deprecated will be removed in 0.10.0
+     */
     @Override
+    @Deprecated
     public FileSystemDatasetRepository get() {
+      return build();
+    }
+
+    public FileSystemDatasetRepository build() {
       if (configuration == null) {
         this.configuration = new Configuration();
       }
@@ -589,11 +597,11 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
           // if the FS doesn't match, this will throw IllegalArgumentException
           this.metadataProvider = new FileSystemMetadataProvider.Builder()
               .configuration(configuration)
-              .rootDirectory(fileSystem.makeQualified(rootDirectory)).get();
+              .rootDirectory(fileSystem.makeQualified(rootDirectory)).build();
         } else {
           this.metadataProvider = new FileSystemMetadataProvider.Builder()
               .configuration(configuration)
-              .rootDirectory(rootDirectory).get();
+              .rootDirectory(rootDirectory).build();
         }
       } else {
         Preconditions.checkState(rootDirectory == null,

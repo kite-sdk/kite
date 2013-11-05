@@ -296,7 +296,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     return Accessor.getDefault().newPartitionKey(values.toArray());
   }
 
-  public static class Builder implements Supplier<FileSystemDataset> {
+  public static class Builder {
 
     private Configuration conf;
     private FileSystem fileSystem;
@@ -332,15 +332,6 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     Builder partitionKey(@Nullable PartitionKey partitionKey) {
       this.partitionKey = partitionKey;
       return this;
-    }
-
-    /**
-     * @deprecated will be removed in 0.10.0
-     */
-    @Override
-    @Deprecated
-    public FileSystemDataset get() {
-      return (FileSystemDataset) build();
     }
 
     public <E> FileSystemDataset<E> build() {

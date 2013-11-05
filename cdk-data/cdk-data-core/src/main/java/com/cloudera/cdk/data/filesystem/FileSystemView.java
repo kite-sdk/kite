@@ -101,7 +101,7 @@ class FileSystemView<E> extends AbstractRangeView<E> {
             .fileSystem(fsDataset.getFileSystem())
             .path(dataFile)
             .schema(descriptor.getSchema())
-            .get();
+            .build();
       }
     }
 

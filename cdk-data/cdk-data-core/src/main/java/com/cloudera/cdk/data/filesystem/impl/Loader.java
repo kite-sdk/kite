@@ -75,7 +75,7 @@ public class Loader implements Loadable {
       return (DatasetRepository) new FileSystemDatasetRepository.Builder()
           .configuration(new Configuration(envConf)) // make a modifiable copy
           .rootDirectory(fs.makeQualified(root))
-          .get();
+          .build();
     }
 
     private URI fileSystemURI(Map<String, String> match) {
