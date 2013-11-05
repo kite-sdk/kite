@@ -22,11 +22,14 @@ import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.hbase.avro.GenericAvroDao;
 import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
 import com.cloudera.cdk.data.spi.AbstractDatasetRepository;
 import com.google.common.base.Supplier;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.MasterNotRunningException;
@@ -60,8 +63,36 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public <E> Dataset<E> load(String name) {
-    DatasetDescriptor descriptor = metadataProvider.load(name);
-    return newDataset(name, descriptor);
+    String tableName = HBaseMetadataProvider.getTableName(name);
+    String entityName = HBaseMetadataProvider.getEntityName(name);
+    if (entityName.contains(".")) {
+      List<DatasetDescriptor> descriptors = new ArrayList<DatasetDescriptor>();
+      for (String subEntityName : entityName.split("\\.")) {
+        descriptors.add(metadataProvider.load(tableName + "." + subEntityName));
+      }
+      return newCompositeDataset(name, tableName, descriptors);
+    } else {
+      DatasetDescriptor descriptor = metadataProvider.load(name);
+      return newDataset(name, descriptor);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private <E> Dataset<E> newCompositeDataset(String name, String tableName,
+      List<DatasetDescriptor> descriptors) {
+    List<Class<SpecificRecord>> subEntityClasses = new ArrayList<Class<SpecificRecord>>();
+    for (DatasetDescriptor descriptor : descriptors) {
+      try {
+        Class<SpecificRecord> subEntityClass = (Class<SpecificRecord>) Class
+            .forName(descriptor.getSchema().getFullName());
+        subEntityClasses.add(subEntityClass);
+      } catch (ClassNotFoundException e) {
+        throw new DatasetRepositoryException(e);
+      }
+    }
+    Dao dao = SpecificAvroDao.buildCompositeDaoWithEntityManager(tablePool,
+        tableName, subEntityClasses, schemaManager);
+    return new DaoDataset<E>(name, dao, descriptors.get(0));
   }
 
   @SuppressWarnings("unchecked")
@@ -70,16 +101,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
     String tableName = HBaseMetadataProvider.getTableName(name);
     String entityName = HBaseMetadataProvider.getEntityName(name);
     Dao dao;
-    if (isComposite(descriptor)) {
-      try {
-        Class<SpecificRecord> entityClass = (Class<SpecificRecord>)
-            Class.forName(descriptor.getSchema().getFullName());
-        dao = SpecificAvroDao.buildCompositeDaoWithEntityManager(tablePool, tableName,
-                entityClass, schemaManager);
-      } catch (ClassNotFoundException e) {
-        throw new DatasetRepositoryException(e);
-      }
-    } else if (isSpecific(descriptor)) {
+    if (isSpecific(descriptor)) {
       dao = new SpecificAvroDao(tablePool, tableName, entityName, schemaManager);
     } else {
       dao = new GenericAvroDao(tablePool, tableName, entityName, schemaManager);
@@ -94,14 +116,6 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
     } catch (ClassNotFoundException e) {
       return false;
     }
-  }
-
-  private static boolean isComposite(DatasetDescriptor descriptor) {
-    // TODO: have a better way of detecting a composite class (currently just checks if
-    // there are field mappings)
-    String entitySchema = descriptor.getSchema().toString();
-    AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
-    return parser.parseEntitySchema(entitySchema).getFieldMappings().isEmpty();
   }
 
   @Override
@@ -134,9 +148,11 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
       try {
         admin = new HBaseAdmin(configuration);
       } catch (MasterNotRunningException e) {
-        throw new DatasetRepositoryException("Problem creating HBaseDatasetRepository.", e);
+        throw new DatasetRepositoryException(
+            "Problem creating HBaseDatasetRepository.", e);
       } catch (ZooKeeperConnectionException e) {
-        throw new DatasetRepositoryException("Problem creating HBaseDatasetRepository.", e);
+        throw new DatasetRepositoryException(
+            "Problem creating HBaseDatasetRepository.", e);
       }
       return new HBaseDatasetRepository(admin, pool);
     }

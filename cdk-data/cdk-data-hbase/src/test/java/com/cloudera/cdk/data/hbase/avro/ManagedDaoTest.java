@@ -50,7 +50,6 @@ import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
 import com.cloudera.cdk.data.hbase.avro.entities.TestRecord;
-import com.cloudera.cdk.data.hbase.avro.entities.Testing;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;

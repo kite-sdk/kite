@@ -19,21 +19,26 @@ import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.PartitionKey;
-import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 import com.cloudera.cdk.data.hbase.avro.entities.CompositeEntity;
 import com.cloudera.cdk.data.hbase.avro.entities.SubEntity1;
 import com.cloudera.cdk.data.hbase.avro.entities.SubEntity2;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.avro.specific.SpecificRecord;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class CompositeDatasetTest {
 
@@ -81,11 +86,8 @@ public class CompositeDatasetTest {
         .build());
 
     // create composite dataset
-    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
-        .schema(CompositeEntity.SCHEMA$)
-        .build();
-    Dataset ds = repo.create(tableName + ".CompositeEntity", descriptor);
-    DatasetAccessor<CompositeEntity> accessor = ds.newAccessor();
+    Dataset ds = repo.load(tableName + ".SubEntity1.SubEntity2");
+    DatasetAccessor<Map<String, SpecificRecord>> accessor = ds.newAccessor();
 
     // Construct entities
     SubEntity1 subEntity1 = SubEntity1.newBuilder().setPart1("1").setPart2("1")
@@ -93,19 +95,20 @@ public class CompositeDatasetTest {
     SubEntity2 subEntity2 = SubEntity2.newBuilder().setPart1("1").setPart2("1")
         .setField1("field2_1").setField2("field2_2").build();
 
-    CompositeEntity compositeEntity = CompositeEntity.newBuilder()
-        .setSubEntity1(subEntity1).setSubEntity2(subEntity2).build();
+    Map<String, SpecificRecord> compositeEntity = new HashMap<String, SpecificRecord>();
+    compositeEntity.put("SubEntity1", subEntity1);
+    compositeEntity.put("SubEntity2", subEntity2);
 
     // Test put and get
     accessor.put(compositeEntity);
 
     PartitionKey key = ds.getDescriptor().getPartitionStrategy().partitionKey("1", "1");
-    CompositeEntity returnedCompositeEntity = accessor.get(key);
+    Map<String, SpecificRecord> returnedCompositeEntity = accessor.get(key);
     assertNotNull("found entity", returnedCompositeEntity);
-    assertEquals("field1_1", returnedCompositeEntity.getSubEntity1().getField1());
-    assertEquals("field1_2", returnedCompositeEntity.getSubEntity1().getField2());
-    assertEquals("field2_1", returnedCompositeEntity.getSubEntity2().getField1());
-    assertEquals("field2_2", returnedCompositeEntity.getSubEntity2().getField2());
+    assertEquals("field1_1", ((SubEntity1)returnedCompositeEntity.get("SubEntity1")).getField1());
+    assertEquals("field1_2", ((SubEntity1)returnedCompositeEntity.get("SubEntity1")).getField2());
+    assertEquals("field2_1", ((SubEntity2)returnedCompositeEntity.get("SubEntity2")).getField1());
+    assertEquals("field2_2", ((SubEntity2)returnedCompositeEntity.get("SubEntity2")).getField2());
 
     // Test OCC
     assertFalse(accessor.put(compositeEntity));
@@ -113,9 +116,10 @@ public class CompositeDatasetTest {
 
     // Test null field
     subEntity1 = SubEntity1.newBuilder(subEntity1).setPart2("2").build(); // different key
-    compositeEntity = CompositeEntity.newBuilder().setSubEntity1(subEntity1).build();
+    compositeEntity = new HashMap<String, SpecificRecord>();
+    compositeEntity.put("SubEntity1", subEntity1);
     accessor.put(compositeEntity);
     returnedCompositeEntity = accessor.get(ds.getDescriptor().getPartitionStrategy().partitionKey("1", "2"));
-    assertNull(returnedCompositeEntity.getSubEntity2());
+    assertFalse(returnedCompositeEntity.containsKey("SubEntity2"));
   }
 }
