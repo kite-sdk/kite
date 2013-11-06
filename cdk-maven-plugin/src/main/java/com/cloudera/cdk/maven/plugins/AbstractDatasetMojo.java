@@ -15,15 +15,26 @@
  */
 package com.cloudera.cdk.maven.plugins;
 
+import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.Resources;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 
 abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
@@ -98,5 +109,44 @@ abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
       repo = fsRepoBuilder.configuration(getConf()).build();
     }
     return repo;
+  }
+
+  void configureSchema(DatasetDescriptor.Builder descriptorBuilder, String
+      avroSchemaFile, String avroSchemaReflectClass) throws MojoExecutionException {
+    if (avroSchemaFile != null) {
+      File avroSchema = new File(avroSchemaFile);
+      try {
+        if (avroSchema.exists()) {
+          descriptorBuilder.schema(avroSchema);
+        } else {
+          descriptorBuilder.schema(Resources.getResource(avroSchemaFile).openStream());
+        }
+      } catch (IOException e) {
+        throw new MojoExecutionException("Problem while reading file " + avroSchemaFile, e);
+      }
+    } else if (avroSchemaReflectClass != null) {
+
+      try {
+        List<URL> classpath = new ArrayList<URL>();
+        for (Object element : mavenProject.getCompileClasspathElements()) {
+          String path = (String) element;
+          classpath.add(new File(path).toURI().toURL());
+        }
+        ClassLoader parentClassLoader = getClass().getClassLoader(); // use Maven's classloader, not the system one
+        ClassLoader classLoader = new URLClassLoader(
+            classpath.toArray(new URL[classpath.size()]), parentClassLoader);
+
+        descriptorBuilder.schema(Class.forName(avroSchemaReflectClass, true, classLoader));
+      } catch (ClassNotFoundException e) {
+        throw new MojoExecutionException("Problem finding class " +
+            avroSchemaReflectClass, e);
+      } catch (MalformedURLException e) {
+        throw new MojoExecutionException("Problem finding class " +
+            avroSchemaReflectClass, e);
+      } catch (DependencyResolutionRequiredException e) {
+        throw new MojoExecutionException("Problem finding class " +
+            avroSchemaReflectClass, e);
+      }
+    }
   }
 }

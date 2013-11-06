@@ -19,18 +19,16 @@ import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.Formats;
 import com.cloudera.cdk.data.impl.Accessor;
-import com.google.common.io.Resources;
-import java.io.File;
-import java.io.IOException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Create a named dataset whose entries conform to a defined schema.
  */
-@Mojo(name = "create-dataset", requiresProject = false)
+@Mojo(name = "create-dataset", requiresProject = false, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class CreateDatasetMojo extends AbstractDatasetMojo {
 
   /**
@@ -42,9 +40,20 @@ public class CreateDatasetMojo extends AbstractDatasetMojo {
   /**
    * The file containing the Avro schema. If no file with the specified name is found
    * on the local filesystem, then the classpath is searched for a matching resource.
+   * One of either this property or <code>cdk.avroSchemaReflectClass</code> must be
+   * specified.
    */
-  @Parameter(property = "cdk.avroSchemaFile", required = true)
+  @Parameter(property = "cdk.avroSchemaFile")
   private String avroSchemaFile;
+
+  /**
+   * The fully-qualified classname of the Avro reflect class to use to generate a
+   * schema. The class must be available on the classpath.
+   * One of either this property or <code>cdk.avroSchemaFile</code> must be
+   * specified.
+   */
+  @Parameter(property = "cdk.avroSchemaReflectClass")
+  private String avroSchemaReflectClass;
 
   /**
    * The file format (avro or parquet).
@@ -60,19 +69,15 @@ public class CreateDatasetMojo extends AbstractDatasetMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    if (avroSchemaFile == null && avroSchemaReflectClass == null) {
+      throw new IllegalArgumentException("One of cdk.avroSchemaFile or " +
+          "cdk.avroSchemaReflectClass must be specified");
+    }
+
     DatasetRepository repo = getDatasetRepository();
 
     DatasetDescriptor.Builder descriptorBuilder = new DatasetDescriptor.Builder();
-    File avroSchema = new File(avroSchemaFile);
-    try {
-      if (avroSchema.exists()) {
-        descriptorBuilder.schema(avroSchema);
-      } else {
-        descriptorBuilder.schema(Resources.getResource(avroSchemaFile).openStream());
-      }
-    } catch (IOException e) {
-      throw new MojoExecutionException("Problem while reading file " + avroSchemaFile, e);
-    }
+    configureSchema(descriptorBuilder, avroSchemaFile, avroSchemaReflectClass);
 
     if (format.equals(Formats.AVRO.getName())) {
       descriptorBuilder.format(Formats.AVRO);
@@ -88,4 +93,5 @@ public class CreateDatasetMojo extends AbstractDatasetMojo {
 
     repo.create(datasetName, descriptorBuilder.build());
   }
+
 }
