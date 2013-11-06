@@ -473,7 +473,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   private static void checkExists(FileSystem fs, Path location) {
     try {
       if (!fs.exists(location)) {
-        throw new NoSuchDatasetException("Descriptor location is missing");
+        throw new NoSuchDatasetException("Descriptor location is missing: " + location);
       }
     } catch (IOException ex) {
       throw new MetadataProviderException("Cannot access descriptor location", ex);
