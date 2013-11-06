@@ -16,6 +16,7 @@
 package com.cloudera.cdk.data.flume;
 
 import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.PartitionKey;
@@ -77,10 +78,14 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
       // initialize here rather than in activateOptions to avoid initialization
       // cycle in Configuration and log4j
       try {
-        Class<?> c = Class.forName(datasetRepositoryClass);
-        Constructor<?> cons = c.getConstructor(URI.class);
-        DatasetRepository repo = (DatasetRepository)
-            cons.newInstance(new URI(datasetRepositoryUri));
+        DatasetRepository repo;
+        if (datasetRepositoryClass != null) {
+          Class<?> c = Class.forName(datasetRepositoryClass);
+          Constructor<?> cons = c.getConstructor(URI.class);
+          repo = (DatasetRepository) cons.newInstance(new URI(datasetRepositoryUri));
+        } else {
+          repo = DatasetRepositories.open(datasetRepositoryUri);
+        }
 
         Dataset dataset = repo.load(datasetName);
         if (dataset.getDescriptor().isPartitioned()) {
