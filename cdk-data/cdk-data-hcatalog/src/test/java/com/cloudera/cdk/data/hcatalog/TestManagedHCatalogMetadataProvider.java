@@ -35,7 +35,7 @@ public class TestManagedHCatalogMetadataProvider extends TestMetadataProviders {
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    HCatalog hcat = new HCatalog();
+    HCatalog hcat = new HCatalog(conf);
     for (String tableName : hcat.getAllTables("default")) {
       hcat.dropTable("default", tableName);
     }

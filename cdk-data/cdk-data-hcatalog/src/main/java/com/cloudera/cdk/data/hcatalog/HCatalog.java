@@ -23,22 +23,17 @@ import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hcatalog.common.HCatUtil;
+import org.apache.thrift.TException;
 
 final class HCatalog {
 
   private HiveMetaStoreClient client;
-
-  public HCatalog() {
-    try {
-      client = HCatUtil.getHiveClient(new HiveConf());
-    } catch (Exception e) {
-      throw new RuntimeException("Hive metastore exception", e);
-    }
-  }
+  private HiveConf hiveConf;
 
   public HCatalog(Configuration conf) {
     try {
-      client = HCatUtil.getHiveClient(new HiveConf(conf, HiveConf.class));
+      hiveConf = new HiveConf(conf, HiveConf.class);
+      client = HCatUtil.getHiveClient(hiveConf);
     } catch (Exception e) {
       throw new RuntimeException("Hive metastore exception", e);
     }
@@ -73,6 +68,14 @@ final class HCatalog {
       throw new RuntimeException("Hive table creation exception", e);
     }
   }
+
+  public void alterTable(Table tbl) {
+    try {
+      client.alter_table(tbl.getDbName(), tbl.getTableName(), tbl.getTTable());
+    } catch (Exception e) {
+      throw new RuntimeException("Hive alter table exception", e);
+    }
+  }
   
   public void dropTable(String dbName, String tableName) {
     try {
@@ -97,5 +100,9 @@ final class HCatalog {
     } catch (Exception e) {
       throw new MetadataProviderException("Hive metastore exception", e);
     }
+  }
+
+  public String getConf(String name, String def) throws Exception {
+    return hiveConf.get(name, def);
   }
 }

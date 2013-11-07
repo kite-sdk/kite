@@ -17,10 +17,12 @@
 package com.cloudera.cdk.data.hcatalog;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.NoSuchDatasetException;
 import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.ql.metadata.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +37,22 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider {
     Preconditions.checkArgument(conf != null, "Configuration cannot be null");
     this.conf = conf;
     this.hcat = new HCatalog(conf);
+  }
+
+  @Override
+  public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
+    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Preconditions.checkArgument(descriptor != null,
+        "Descriptor cannot be null");
+
+    if (!exists(name)) {
+      throw new NoSuchDatasetException("Table not found: " + name);
+    }
+
+    Table table = hcat.getTable(HiveUtils.DEFAULT_DB, name);
+    HiveUtils.updateTableSchema(table, descriptor);
+    hcat.alterTable(table);
+    return descriptor;
   }
 
   @Override
@@ -59,11 +77,6 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider {
   @Override
   public Collection<String> list() {
     return hcat.getAllTables(HiveUtils.DEFAULT_DB);
-  }
-
-  @Override
-  public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
-    throw new UnsupportedOperationException("Not supported.");
   }
 
 }

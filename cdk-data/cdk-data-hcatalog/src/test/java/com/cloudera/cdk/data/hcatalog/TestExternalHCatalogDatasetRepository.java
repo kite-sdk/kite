@@ -48,7 +48,7 @@ public class TestExternalHCatalogDatasetRepository extends TestFileSystemDataset
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    HCatalog hcat = new HCatalog();
+    HCatalog hcat = new HCatalog(conf);
     for (String tableName : hcat.getAllTables("default")) {
       hcat.dropTable("default", tableName);
     }
@@ -59,36 +59,6 @@ public class TestExternalHCatalogDatasetRepository extends TestFileSystemDataset
     ensureCreated();
     HiveTestUtils.assertTableExists(client, "default", NAME);
     HiveTestUtils.assertTableIsExternal(client, "default", NAME);
-  }
-
-  @Override
-  public void testUpdateFailsWithFormatChange() {
-    // updates are not supported
-  }
-
-  @Override
-  public void testUpdateFailsWithPartitionStrategyChange() {
-    // updates are not supported
-  }
-
-  @Override
-  public void testUpdateFailsWithLocationChange() {
-    // updates are not supported
-  }
-
-  @Override
-  public void testUpdateFailsWithIncompatibleSchemaChange() {
-    // updates are not supported
-  }
-
-  @Test
-  public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldAdded() {
-    // updates are not supported
-  }
-
-  @Test
-  public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldRemoved() {
-    // updates are not supported
   }
 
 }

@@ -74,8 +74,7 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public <E> Dataset<E> update(String name, DatasetDescriptor descriptor) {
-    throw new UnsupportedOperationException(
-        "Descriptor updates are not supported.");
+    return fsRepository.update(name, descriptor);
   }
 
   @Override

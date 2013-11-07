@@ -220,6 +220,27 @@ class HiveUtils {
     return table;
   }
 
+
+  public static void updateTableSchema(Table table, DatasetDescriptor descriptor) {
+    if (table.getProperty(AVRO_SCHEMA_LITERAL_PROPERTY_NAME) != null) {
+      table.setProperty(
+          AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
+          descriptor.getSchema().toString());
+    } else if (table.getProperty(AVRO_SCHEMA_URL_PROPERTY_NAME) != null) {
+      if (descriptor.getSchemaUrl() == null) {
+        throw new MetadataProviderException("Cannot update " +
+            AVRO_SCHEMA_URL_PROPERTY_NAME + " since descriptor schema URL is not set.");
+      }
+      table.setProperty(
+          AVRO_SCHEMA_URL_PROPERTY_NAME,
+          descriptor.getSchemaUrl().toExternalForm());
+    } else {
+      throw new MetadataProviderException("Cannot update Avro schema since neither " +
+          AVRO_SCHEMA_LITERAL_PROPERTY_NAME + " nor " + AVRO_SCHEMA_URL_PROPERTY_NAME +
+          " is set.");
+    }
+  }
+
   static FileSystem fsForPath(Configuration conf, Path path) {
     try {
       return path.getFileSystem(conf);
@@ -376,4 +397,5 @@ class HiveUtils {
 
     return TypeInfoFactory.getPrimitiveTypeInfo(typeName);
   }
+
 }
