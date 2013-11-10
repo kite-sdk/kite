@@ -186,13 +186,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
      * changes are incompatible.
      */
 
-    final DatasetDescriptor saved;
-    try {
-      saved = provider.update(NAME, anotherDescriptor);
-    } catch (UnsupportedOperationException ex) {
-      // this is okay, too
-      return;
-    }
+    final DatasetDescriptor saved = provider.update(NAME, anotherDescriptor);
 
     Assert.assertNotNull("Updated Descriptor should be returned", saved);
     Assert.assertEquals("Schema should match update",
@@ -205,32 +199,17 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
 
   @Test(expected=NoSuchDatasetException.class)
   public void testUpdateFailsNoDataset() {
-    try {
-      provider.update(NAME, testDescriptor);
-    } catch (UnsupportedOperationException ex) {
-      // this is okay, too
-      throw new NoSuchDatasetException(ex);
-    }
+    provider.update(NAME, testDescriptor);
   }
 
   @Test(expected=IllegalArgumentException.class)
   public void testUpdateFailsNullName() {
-    try {
-      provider.update(null, testDescriptor);
-    } catch (UnsupportedOperationException ex) {
-      // this is okay, too
-      throw new IllegalArgumentException(ex);
-    }
+    provider.update(null, testDescriptor);
   }
 
   @Test(expected=IllegalArgumentException.class)
   public void testUpdateFailsNullDescriptor() {
-    try {
-      provider.update(NAME, null);
-    } catch (UnsupportedOperationException ex) {
-      // this is okay, too
-      throw new IllegalArgumentException(ex);
-    }
+    provider.update(NAME, null);
   }
 
   public void testDelete() {

@@ -173,48 +173,28 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
   @Test
   public void testUpdateSuccessWithoutChanges() {
     ensureCreated();
-
-    try {
-      repo.update(NAME, testProvider.load(NAME));
-    } catch (UnsupportedOperationException ex) {
-      // this is okay, too
-    }
+    repo.update(NAME, testProvider.load(NAME));
   }
 
   @Test(expected=NoSuchDatasetException.class)
   public void testUpdateNoDataset() {
     Assert.assertFalse("Sanity check", testProvider.exists(NAME));
 
-    try {
-      repo.update(NAME, testDescriptor);
-    } catch (UnsupportedOperationException ex) {
-      // this is okay, too
-      throw new NoSuchDatasetException(ex);
-    }
+    repo.update(NAME, testDescriptor);
   }
 
   @Test(expected=IllegalArgumentException.class)
   public void testUpdateNullName() {
     ensureCreated();
 
-    try {
-      repo.update(null, testDescriptor);
-    } catch (UnsupportedOperationException ex) {
-      // this is okay, too
-      throw new IllegalArgumentException();
-    }
+    repo.update(null, testDescriptor);
   }
 
   @Test(expected=IllegalArgumentException.class)
   public void testUpdateNullDescriptor() {
     ensureCreated();
 
-    try {
-      repo.update(NAME, null);
-    } catch (UnsupportedOperationException ex) {
-      // this is okay, too
-      throw new IllegalArgumentException();
-    }
+    repo.update(NAME, null);
   }
 
   @Test
