@@ -15,10 +15,24 @@
  */
 package com.cloudera.cdk.data.hbase.avro;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.dao.Dao;
+import com.cloudera.cdk.data.dao.EntityScanner;
+import com.cloudera.cdk.data.dao.IncompatibleSchemaException;
+import com.cloudera.cdk.data.dao.SchemaManager;
+import com.cloudera.cdk.data.dao.SchemaNotFoundException;
+import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
+import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
+import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
+import com.cloudera.cdk.data.hbase.avro.entities.TestIncrement;
+import com.cloudera.cdk.data.hbase.avro.entities.TestRecord;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
+import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
+import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
+import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
+import com.cloudera.cdk.data.hbase.tool.SchemaTool;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,28 +53,16 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.cloudera.cdk.data.PartitionKey;
-import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.dao.Dao;
-import com.cloudera.cdk.data.dao.EntityScanner;
-import com.cloudera.cdk.data.dao.IncompatibleSchemaException;
-import com.cloudera.cdk.data.dao.SchemaManager;
-import com.cloudera.cdk.data.dao.SchemaNotFoundException;
-import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
-import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
-import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
-import com.cloudera.cdk.data.hbase.avro.entities.TestRecord;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
-import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
-import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
-import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
-import com.cloudera.cdk.data.hbase.tool.SchemaTool;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 public class ManagedDaoTest {
 
   private static final String testRecord;
   private static final String testRecordv2;
+  private static final String testIncrement;
   private static final String badCreateIncompatibleColumn1;
   private static final String badCreateIncompatibleColumn2;
   private static final String badCreateIncompatibleColumn3;
@@ -75,7 +77,8 @@ public class ManagedDaoTest {
   private static final String goodMigrationRecordAddSubField;
   private static final String goodMigrationRecordRemoveField;
   private static final String managedRecordString;
-  private static final String tableName = "testtable";
+  private static final String tableName = "test_table";
+  private static final String incrementTableName = "test_increment_table";
   private static final String managedTableName = "managed_schemas";
 
   private HTablePool tablePool;
@@ -86,6 +89,8 @@ public class ManagedDaoTest {
           .getResourceAsStream("/TestRecord.avsc"));
       testRecordv2 = AvroUtils.inputStreamToString(AvroDaoTest.class
           .getResourceAsStream("/TestRecordv2.avsc"));
+      testIncrement = AvroUtils.inputStreamToString(AvroDaoTest.class
+          .getResourceAsStream("/TestIncrement.avsc"));
       badCreateIncompatibleColumn1 = AvroUtils
           .inputStreamToString(AvroDaoTest.class
               .getResourceAsStream("/BadCreateIncompatibleColumn1.avsc"));
@@ -103,7 +108,7 @@ public class ManagedDaoTest {
               .getResourceAsStream("/BadCreateIncompatibleKey2.avsc"));
       badMigrationRecordAddKeyField = AvroUtils
           .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/BadMigrationRecordAddKeyField.avsc"));      
+              .getResourceAsStream("/BadMigrationRecordAddKeyField.avsc"));
       badMigrationRecordAddFieldNoDefault = AvroUtils
           .inputStreamToString(AvroDaoTest.class
               .getResourceAsStream("/BadMigrationRecordAddFieldNoDefault.avsc"));
@@ -140,6 +145,7 @@ public class ManagedDaoTest {
   @AfterClass
   public static void afterClass() throws Exception {
     HBaseTestUtils.util.deleteTable(Bytes.toBytes(tableName));
+    HBaseTestUtils.util.deleteTable(Bytes.toBytes(incrementTableName));
   }
 
   @Before
@@ -149,6 +155,7 @@ public class ManagedDaoTest {
         new DefaultSchemaManager(tablePool));
     tool.createOrMigrateSchema(tableName, testRecord, true);
     tool.createOrMigrateSchema(tableName, testRecordv2, true);
+    tool.createOrMigrateSchema(incrementTableName, testIncrement, true);
   }
 
   @After
@@ -239,7 +246,7 @@ public class ManagedDaoTest {
         .setKeyPart2("part2_" + iStr).setField1("field1_" + iStr)
         .setField2("field2_" + iStr).setEnum$(TestEnum.ENUM3)
         .setField3(field3Map).setField4(embeddedRecord)
-        .setField5(arrayRecordList).setIncrement(10L).build();
+        .setField5(arrayRecordList).build();
     return entity;
   }
 
@@ -503,20 +510,22 @@ public class ManagedDaoTest {
   @Test
   public void testIncrement() {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
-    Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool, tableName,
-        "TestRecord", manager);
+    Dao<TestIncrement> dao = new SpecificAvroDao<TestIncrement>(tablePool,
+        incrementTableName, "TestIncrement", manager);
 
-    TestRecord entity = createSpecificEntity(0);
+    TestIncrement entity = TestIncrement.newBuilder().setKeyPart1("part1")
+        .setKeyPart2("part2").setField1(10).build();
     dao.put(entity);
 
-    PartitionKey key = createKey(dao.getPartitionStrategy(), 0);
-    dao.increment(key, "increment", 10);
-    assertEquals(20L, (long) dao.get(key).getIncrement());
+    PartitionKey key = dao.getPartitionStrategy()
+        .partitionKey("part1", "part2");
+    dao.increment(key, "field1", 10);
+    assertEquals(20L, (long) dao.get(key).getField1());
 
-    dao.increment(key, "increment", 5);
-    assertEquals(25L, (long) dao.get(key).getIncrement());
+    dao.increment(key, "field1", 5);
+    assertEquals(25L, (long) dao.get(key).getField1());
   }
-  
+
   @Test(expected = IncompatibleSchemaException.class)
   public void testBadMigrationKeyField() throws Exception {
     badMigration(badMigrationRecordAddKeyField);
@@ -548,42 +557,42 @@ public class ManagedDaoTest {
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
     manager.migrateSchema(tableName, "TestRecord", badMigrationRecordIntToLong);
   }
-  
+
   @Test(expected = IncompatibleSchemaException.class)
   public void testBadCreateIncompatibleKey1() throws Exception {
     SchemaTool tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
         new DefaultSchemaManager(tablePool));
     tool.createOrMigrateSchema(tableName, badCreateIncompatibleKey1, false);
   }
-  
+
   @Test(expected = IncompatibleSchemaException.class)
   public void testBadCreateIncompatibleKey2() throws Exception {
     SchemaTool tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
         new DefaultSchemaManager(tablePool));
     tool.createOrMigrateSchema(tableName, badCreateIncompatibleKey2, false);
   }
-  
+
   @Test(expected = IncompatibleSchemaException.class)
   public void testBadCreateIncompatibleColumn1() throws Exception {
     SchemaTool tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
         new DefaultSchemaManager(tablePool));
     tool.createOrMigrateSchema(tableName, badCreateIncompatibleColumn1, false);
   }
-  
+
   @Test(expected = IncompatibleSchemaException.class)
   public void testBadCreateIncompatibleColumn2() throws Exception {
     SchemaTool tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
         new DefaultSchemaManager(tablePool));
     tool.createOrMigrateSchema(tableName, badCreateIncompatibleColumn2, false);
   }
-  
+
   @Test(expected = IncompatibleSchemaException.class)
   public void testBadCreateIncompatibleColumn3() throws Exception {
     SchemaTool tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
         new DefaultSchemaManager(tablePool));
     tool.createOrMigrateSchema(tableName, badCreateIncompatibleColumn3, false);
   }
-  
+
   @Test
   public void testGoodMigrations() throws Exception {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
@@ -634,7 +643,7 @@ public class ManagedDaoTest {
   private void badMigration(String badMigration) throws Exception {
     badMigration("TestRecord", badMigration);
   }
-  
+
   private void badMigration(String name, String badMigration) throws Exception {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
     manager.migrateSchema(tableName, name, badMigration);

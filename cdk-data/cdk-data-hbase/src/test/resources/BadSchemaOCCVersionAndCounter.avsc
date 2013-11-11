@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "TestRecord",
+  "namespace": "com.cloudera.cdk.data.hbase.avro.entities",
+  "fields": [
+
+    { "name": "keyPart1", "type": "string", "mapping": { "type": "key", "value": "0" } },
+    
+    { "name": "keyPart2", "type": "string", "mapping": { "type": "key", "value": "1" } },
+
+    { "name": "field1", "type": "long", "mapping": { "type": "counter", "value": "meta:field1" } },
+
+    {
+      "name": "version",
+      "type": "long",
+      "default": 0,
+      "mapping": { "type": "occVersion" }
+    }
+  ]
+}

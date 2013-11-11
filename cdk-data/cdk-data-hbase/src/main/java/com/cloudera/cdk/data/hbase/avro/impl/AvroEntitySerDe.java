@@ -127,7 +127,8 @@ public class AvroEntitySerDe<E extends IndexedRecord> extends EntitySerDe<E> {
       }
       Schema writtenFieldSchema = writtenField.schema();
 
-      if (fieldMapping.getMappingType() == MappingType.COLUMN) {
+      if (fieldMapping.getMappingType() == MappingType.COLUMN
+          || fieldMapping.getMappingType() == MappingType.COUNTER) {
         initColumnDatumMaps(fieldName, fieldSchema, writtenFieldSchema);
       } else if (fieldMapping.getMappingType() == MappingType.KEY_AS_COLUMN) {
         if (fieldSchema.getType() == Schema.Type.RECORD) {
@@ -208,9 +209,9 @@ public class AvroEntitySerDe<E extends IndexedRecord> extends EntitySerDe<E> {
   public byte[] serializeKeyAsColumnKeyToBytes(String fieldName,
       CharSequence columnKey) {
     if (columnKey.getClass().isAssignableFrom(String.class)) {
-      return ((String)columnKey).getBytes();
+      return ((String) columnKey).getBytes();
     } else if (columnKey.getClass().isAssignableFrom(Utf8.class)) {
-      return ((Utf8)columnKey).getBytes();
+      return ((Utf8) columnKey).getBytes();
     } else {
       return columnKey.toString().getBytes();
     }

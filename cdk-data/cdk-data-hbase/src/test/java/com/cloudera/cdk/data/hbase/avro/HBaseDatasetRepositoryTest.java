@@ -141,11 +141,6 @@ public class HBaseDatasetRepositoryTest {
     PartitionKey key = ds.getDescriptor().getPartitionStrategy()
         .partitionKey("part1_5", "part2_5");
 
-    // test increment
-    long incrementResult = accessor.increment(key, "increment", 5);
-    assertEquals(15L, incrementResult);
-    assertEquals(15L, ((Long) accessor.get(key).get("increment")).longValue());
-
     // test delete
     accessor.delete(key);
     GenericRecord deletedRecord = accessor.get(key);
@@ -203,11 +198,6 @@ public class HBaseDatasetRepositoryTest {
 
     PartitionKey key = ds.getDescriptor().getPartitionStrategy()
         .partitionKey("part1_5", "part2_5");
-
-    // test increment
-    long incrementResult = accessor.increment(key, "increment", 5);
-    assertEquals(15L, incrementResult);
-    assertEquals(15L, accessor.get(key).getIncrement().longValue());
 
     // test delete
     accessor.delete(key);
@@ -310,7 +300,6 @@ public class HBaseDatasetRepositoryTest {
 
     entity.put("field5", arrayRecordList);
 
-    entity.put("increment", 10L);
     return entity;
   }
 
@@ -403,7 +392,7 @@ public class HBaseDatasetRepositoryTest {
         .setField1("field1_" + iStr)
         .setField2("field2_" + iStr).setEnum$(TestEnum.ENUM3)
         .setField3(field3Map).setField4(embeddedRecord)
-        .setField5(arrayRecordList).setIncrement(10L).build();
+        .setField5(arrayRecordList).build();
     return entity;
   }
 }

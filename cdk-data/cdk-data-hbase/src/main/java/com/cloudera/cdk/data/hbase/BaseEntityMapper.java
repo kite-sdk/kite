@@ -134,8 +134,8 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
       throw new HBaseCommonException("Unknown field in the schema: "
           + fieldName);
     }
-    if (!fieldMapping.isIncrementable()) {
-      throw new HBaseCommonException("Field is not an incrementable type: "
+    if (fieldMapping.getMappingType() != MappingType.COUNTER) {
+      throw new HBaseCommonException("Field is not a counter type: "
           + fieldName);
     }
 
@@ -153,8 +153,8 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
       throw new HBaseCommonException("Unknown field in the schema: "
           + fieldName);
     }
-    if (!fieldMapping.isIncrementable()) {
-      throw new HBaseCommonException("Field is not an incrementable type: "
+    if (fieldMapping.getMappingType() != MappingType.COUNTER) {
+      throw new HBaseCommonException("Field is not a counter type: "
           + fieldName);
     }
     return (Long) entitySerDe.deserialize(fieldMapping, result);

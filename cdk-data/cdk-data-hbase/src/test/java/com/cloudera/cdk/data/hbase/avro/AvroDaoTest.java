@@ -15,10 +15,18 @@
  */
 package com.cloudera.cdk.data.hbase.avro;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.dao.Dao;
+import com.cloudera.cdk.data.dao.EntityBatch;
+import com.cloudera.cdk.data.dao.EntityScanner;
+import com.cloudera.cdk.data.dao.HBaseCommonException;
+import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
+import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
+import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
+import com.cloudera.cdk.data.hbase.avro.entities.TestIncrement;
+import com.cloudera.cdk.data.hbase.avro.entities.TestRecord;
+import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
+import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,28 +44,25 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.cloudera.cdk.data.PartitionKey;
-import com.cloudera.cdk.data.dao.Dao;
-import com.cloudera.cdk.data.dao.EntityBatch;
-import com.cloudera.cdk.data.dao.EntityScanner;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
-import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
-import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
-import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
-import com.cloudera.cdk.data.hbase.avro.entities.TestRecord;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
-import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class AvroDaoTest {
 
   private static final String schemaString;
-  private static final String tableName = "testtable";
+  private static final String incrementSchemaString;
+  private static final String tableName = "test_table";
+  private static final String incrementTableName = "test_increment_table";
   private HTablePool tablePool;
 
   static {
     try {
       schemaString = AvroUtils.inputStreamToString(AvroDaoTest.class
           .getResourceAsStream("/TestRecord.avsc"));
+      incrementSchemaString = AvroUtils.inputStreamToString(AvroDaoTest.class
+          .getResourceAsStream("/TestIncrement.avsc"));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -67,14 +72,17 @@ public class AvroDaoTest {
   public static void beforeClass() throws Exception {
     HBaseTestUtils.getMiniCluster();
     byte[] tableNameBytes = Bytes.toBytes(tableName);
+    byte[] incrementTableNameBytes = Bytes.toBytes(incrementTableName);
     byte[][] cfNames = { Bytes.toBytes("meta"), Bytes.toBytes("string"),
         Bytes.toBytes("embedded"), Bytes.toBytes("_s") };
     HBaseTestUtils.util.createTable(tableNameBytes, cfNames);
+    HBaseTestUtils.util.createTable(incrementTableNameBytes, cfNames);
   }
 
   @AfterClass
   public static void afterClass() throws Exception {
     HBaseTestUtils.util.deleteTable(Bytes.toBytes(tableName));
+    HBaseTestUtils.util.deleteTable(Bytes.toBytes(incrementTableName));
   }
 
   @Before
@@ -211,29 +219,19 @@ public class AvroDaoTest {
 
   @Test
   public void testIncrement() {
-    Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool,
-        new String(tableName), schemaString, TestRecord.class);
+    Dao<TestIncrement> dao = new SpecificAvroDao<TestIncrement>(tablePool,
+        new String(incrementTableName), incrementSchemaString,
+        TestIncrement.class);
 
-    Map<String, String> field3Map = new HashMap<String, String>();
-    field3Map.put("field3_key_1", "field3_value_1");
-    field3Map.put("field3_key_2", "field3_value_2");
-
-    EmbeddedRecord embeddedRecord = EmbeddedRecord.newBuilder()
-        .setEmbeddedField1("embedded1").setEmbeddedField2(2).build();
-
-    TestRecord entity = TestRecord.newBuilder().setKeyPart1("part1")
-        .setKeyPart2("part2").setField1("field1").setField2("field2")
-        .setEnum$(TestEnum.ENUM3).setField3(field3Map)
-        .setField4(embeddedRecord).setField5(new ArrayList<ArrayRecord>())
-        .setIncrement(10).build();
-
+    TestIncrement entity = TestIncrement.newBuilder().setKeyPart1("part1")
+        .setKeyPart2("part2").setField1(10).build();
     assertTrue(dao.put(entity));
 
     PartitionKey key = dao.getPartitionStrategy()
         .partitionKey("part1", "part2");
-    long incrementResult = dao.increment(key, "increment", 5);
+    long incrementResult = dao.increment(key, "field1", 5);
     assertEquals(15L, incrementResult);
-    assertEquals(15L, (long) dao.get(key).getIncrement());
+    assertEquals(15L, (long) dao.get(key).getField1());
   }
 
   @Test
@@ -283,7 +281,7 @@ public class AvroDaoTest {
         .setKeyPart2("part2").setField1("field1").setField2("field2")
         .setEnum$(TestEnum.ENUM3).setField3(field3Map)
         .setField4(embeddedRecord).setField5(new ArrayList<ArrayRecord>())
-        .setIncrement(10).build();
+        .build();
 
     assertTrue(dao.put(entity));
 
@@ -298,7 +296,6 @@ public class AvroDaoTest {
     assertEquals("embedded1", record.getField4().getEmbeddedField1());
     assertEquals(2L, (long) record.getField4().getEmbeddedField2());
     assertEquals(0, record.getField5().size());
-    assertEquals(10L, (long) record.getIncrement());
   }
 
   /*
@@ -347,7 +344,7 @@ public class AvroDaoTest {
       assertEquals("field1_" + i, record.getField1().toString());
     }
   }
-  
+
   @Test(expected = HBaseCommonException.class)
   public void testPutWithNullKey() throws Exception {
     Dao<GenericRecord> dao = new GenericAvroDao(tablePool, tableName,
@@ -380,8 +377,7 @@ public class AvroDaoTest {
     TestRecord entity = TestRecord.newBuilder().setKeyPart1(keyPart1)
         .setKeyPart2(keyPart2).setField1("field1").setField2("field2")
         .setEnum$(TestEnum.ENUM3).setField3(field3Map)
-        .setField4(embeddedRecord).setField5(arrayRecordList).setIncrement(10)
-        .build();
+        .setField4(embeddedRecord).setField5(arrayRecordList).build();
     return entity;
   }
 
@@ -405,7 +401,7 @@ public class AvroDaoTest {
           .setKeyPart2("part2_" + i).setField1("field1_" + i)
           .setField2("field2_" + i).setEnum$(TestEnum.ENUM3)
           .setField3(field3Map).setField4(embeddedRecord)
-          .setField5(arrayRecordList).setIncrement(i).build();
+          .setField5(arrayRecordList).build();
 
       entities.add(entity);
     }

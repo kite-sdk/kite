@@ -45,7 +45,7 @@ public class CompositeDaoTest {
 
   private static final String subRecord1String;
   private static final String subRecord2String;
-  private static final String tableName = "testtable";
+  private static final String tableName = "test_table";
   private HTablePool tablePool;
 
   static {

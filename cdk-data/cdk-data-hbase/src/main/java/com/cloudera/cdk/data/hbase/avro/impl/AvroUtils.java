@@ -252,8 +252,7 @@ public class AvroUtils {
       throw new HBaseCommonException(e);
     }
     return new AvroEntitySchema(entitySchema.getTables(), schemaField,
-        entitySchema.getRawSchema(), entitySchema.getFieldMappings(),
-        entitySchema.isTransactional());
+        entitySchema.getRawSchema(), entitySchema.getFieldMappings());
   }
 
   /**

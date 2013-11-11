@@ -139,15 +139,13 @@ public abstract class CompositeBaseDao<E, S> implements CompositeDao<E, S> {
 
     @Override
     public EntitySchema getEntitySchema() {
-      boolean transactional = entityMappers.get(0).getEntitySchema()
-          .isTransactional();
       List<String> tables = new ArrayList<String>();
       List<FieldMapping> fieldMappings = new ArrayList<FieldMapping>();
       for (EntityMapper<?> entityMapper : entityMappers) {
         tables.addAll(entityMapper.getEntitySchema().getTables());
         fieldMappings.addAll(entityMapper.getEntitySchema().getFieldMappings());
       }
-      return new EntitySchema(tables, null, null, fieldMappings, transactional);
+      return new EntitySchema(tables, null, null, fieldMappings);
     }
 
     @Override

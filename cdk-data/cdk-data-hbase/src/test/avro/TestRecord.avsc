@@ -55,10 +55,6 @@
       "mapping": { "type": "column", "value": "meta:field5" }
     },
     
-    { "name": "increment", "type": "long", "default": 0, "mapping":
-      { "type": "column", "value": "meta:increment" }
-    },
-    
     {
       "name": "version",
       "type": "long",

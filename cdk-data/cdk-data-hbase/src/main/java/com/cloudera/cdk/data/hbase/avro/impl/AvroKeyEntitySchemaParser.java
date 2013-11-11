@@ -111,10 +111,8 @@ public class AvroKeyEntitySchemaParser implements
     Schema schema = Schema.parse(rawSchema);
     List<FieldMapping> fieldMappings = getFieldMappings(schemaAsJson, schema);
 
-    boolean transactional = Boolean.valueOf(schema.getProp("transactional"));
     List<String> tables = getTables(schemaAsJson);
-    return new AvroEntitySchema(tables, schema, rawSchema, fieldMappings,
-        transactional);
+    return new AvroEntitySchema(tables, schema, rawSchema, fieldMappings);
   }
 
   /**
@@ -219,6 +217,16 @@ public class AvroKeyEntitySchemaParser implements
         if (prefixValueNode != null) {
           prefix = prefixValueNode.getTextValue();
         }
+      } else if (mappingTypeNode.getTextValue().equals("counter")) {
+        if (type != Schema.Type.INT && type != Schema.Type.LONG) {
+          throw new SchemaValidationException("counter mapping type must be an int or a long");
+        }
+        if (mappingValueNode == null) {
+          throw new SchemaValidationException(
+              "counter mapping type must contain a value.");
+        }
+        mappingType = MappingType.COUNTER;
+        mappingValue = mappingValueNode.getTextValue();
       } else if (mappingTypeNode.getTextValue().equals("occVersion")) {
         mappingType = MappingType.OCC_VERSION;
       } else if (mappingTypeNode.getTextValue().equals("key")) {
@@ -230,9 +238,8 @@ public class AvroKeyEntitySchemaParser implements
         mappingValue = mappingValueNode.getTextValue();
       }
       Object defaultValue = defaultValueMap.get(fieldName);
-      boolean incrementable = (type == Schema.Type.INT || type == Schema.Type.LONG);
       fieldMapping = new FieldMapping(fieldName, mappingType, mappingValue,
-          defaultValue, prefix, incrementable);
+          defaultValue, prefix);
     }
     return fieldMapping;
   }

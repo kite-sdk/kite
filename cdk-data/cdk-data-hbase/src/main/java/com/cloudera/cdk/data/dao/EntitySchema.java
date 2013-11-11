@@ -29,7 +29,6 @@ import java.util.Set;
  */
 public class EntitySchema {
 
-  private final boolean isTransactional;
   private final Collection<String> tables;
   private final Map<String, FieldMapping> fieldMappings = new HashMap<String, FieldMapping>();
   private final String rawSchema;
@@ -41,33 +40,22 @@ public class EntitySchema {
    * @param tables
    *          The tables this EntitySchema can be persisted to
    * @param name
-   *          The name of the entity schema 
+   *          The name of the entity schema
    * @param rawSchema
    *          The raw schema type that underlies the EntitySchema implementation
    * @param fieldMappings
    *          The list of FieldMappings that specify how each field maps to an
    *          HBase row
-   * @param isTransactional
-   *          Specifies whether this entity participates in transactions
    */
   public EntitySchema(Collection<String> tables, String name, String rawSchema,
-      Collection<FieldMapping> fieldMappings, boolean isTransactional) {
+      Collection<FieldMapping> fieldMappings) {
     this.tables = tables;
     this.name = name;
     this.rawSchema = rawSchema;
-    this.isTransactional = isTransactional;
+    validateFieldMappings(fieldMappings);
     for (FieldMapping fieldMapping : fieldMappings) {
       this.fieldMappings.put(fieldMapping.getFieldName(), fieldMapping);
     }
-  }
-
-  /**
-   * Specifies whether this EntitySchema will participate in transactions.
-   * 
-   * @return True if it should participate in transactions. Otherwise false.
-   */
-  public boolean isTransactional() {
-    return isTransactional;
   }
 
   /**
@@ -78,7 +66,7 @@ public class EntitySchema {
   public Collection<String> getTables() {
     return tables;
   }
-  
+
   /**
    * Get the name of this EntitySchema
    * 
@@ -126,7 +114,8 @@ public class EntitySchema {
   public Set<String> getRequiredColumns() {
     Set<String> set = new HashSet<String>();
     for (FieldMapping fieldMapping : fieldMappings.values()) {
-      if (MappingType.COLUMN == fieldMapping.getMappingType()) {
+      if (MappingType.COLUMN == fieldMapping.getMappingType()
+          || MappingType.COUNTER == fieldMapping.getMappingType()) {
         set.add(fieldMapping.getMappingValue());
       } else if (MappingType.KEY_AS_COLUMN == fieldMapping.getMappingType()) {
         String family = fieldMapping.getMappingValue().split(":", 1)[0];
@@ -176,6 +165,46 @@ public class EntitySchema {
   }
 
   /**
+   * Validate that the field mappings provided for this schema are compatible
+   * with a valid schema. The rules are:
+   * 
+   * <pre>
+   * 1. An entity schema can't contain multiple occVersion mapping fields
+   * 2. An entity schema can't contain both an occVersion field and a counter 
+   *    field.
+   * </pre>
+   * 
+   * This method will throw a SchemaValidationException if any of these
+   * rules are violated. Otherwise, no exception is thrown.
+   * 
+   * @param fieldMappings The collection of FieldMappings to validate
+   */
+  private void validateFieldMappings(Collection<FieldMapping> fieldMappings) {
+    boolean hasOCCVersion = false;
+    boolean hasCounter = false;
+
+    for (FieldMapping fieldMapping : fieldMappings) {
+      if (fieldMapping.getMappingType() == MappingType.OCC_VERSION) {
+        if (hasOCCVersion) {
+          throw new SchemaValidationException(
+              "Schema can't contain multiple occVersion fields.");
+        }
+        if (hasCounter) {
+          throw new SchemaValidationException(
+              "Schema can't contain both an occVersion field and a counter field.");
+        }
+        hasOCCVersion = true;
+      } else if (fieldMapping.getMappingType() == MappingType.COUNTER) {
+        if (hasOCCVersion) {
+          throw new SchemaValidationException(
+              "Schema can't contain both an occVersion field and a counter field.");
+        }
+        hasCounter = true;
+      }
+    }
+  }
+
+  /**
    * A field mapping represents a type that specifies how a schema field maps to
    * a column in HBase.
    */
@@ -184,20 +213,17 @@ public class EntitySchema {
     private final String fieldName;
     private final MappingType mappingType;
     private final String mappingValue;
-    private final boolean incrementable;
     private final Object defaultValue;
     private final String prefix;
     private final byte[] family;
     private final byte[] qualifier;
 
     public FieldMapping(String fieldName, MappingType mappingType,
-        String mappingValue, Object defaultValue, String prefix,
-        boolean incrementable) {
+        String mappingValue, Object defaultValue, String prefix) {
       this.fieldName = fieldName;
       this.mappingType = mappingType;
       this.mappingValue = mappingValue;
       this.defaultValue = defaultValue;
-      this.incrementable = incrementable;
       this.prefix = prefix;
       this.family = getFamilyFromMappingValue(mappingValue);
       this.qualifier = getQualifierFromMappingValue(mappingValue);
@@ -213,10 +239,6 @@ public class EntitySchema {
 
     public String getMappingValue() {
       return mappingValue;
-    }
-    
-    public boolean isIncrementable() {
-      return incrementable;
     }
 
     public Object getDefaultValue() {

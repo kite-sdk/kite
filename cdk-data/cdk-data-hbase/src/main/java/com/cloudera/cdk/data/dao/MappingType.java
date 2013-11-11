@@ -31,6 +31,9 @@ public enum MappingType {
   // in a column family.
   KEY_AS_COLUMN,
   
+  // Maps a field to one that can be incremented
+  COUNTER,
+  
   // The field will be populated with the
   // current version of the entity. This
   // allows the version to be checked if this

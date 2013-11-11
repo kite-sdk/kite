@@ -62,7 +62,8 @@ public abstract class EntitySerDe<E> {
     Put put = new Put(keyBytes);
     PutAction putAction = new PutAction(put);
     String fieldName = fieldMapping.getFieldName();
-    if (fieldMapping.getMappingType() == MappingType.COLUMN) {
+    if (fieldMapping.getMappingType() == MappingType.COLUMN
+        || fieldMapping.getMappingType() == MappingType.COUNTER) {
       serializeColumn(fieldName, fieldMapping.getFamily(),
           fieldMapping.getQualifier(), fieldValue, put);
     } else if (fieldMapping.getMappingType() == MappingType.KEY_AS_COLUMN) {
@@ -91,7 +92,7 @@ public abstract class EntitySerDe<E> {
   public Object deserialize(FieldMapping fieldMapping, Result result) {
     String fieldName = fieldMapping.getFieldName();
     MappingType mappingType = fieldMapping.getMappingType();
-    if (mappingType == MappingType.COLUMN) {
+    if (mappingType == MappingType.COLUMN || mappingType == MappingType.COUNTER) {
       return deserializeColumn(fieldMapping.getFieldName(),
           fieldMapping.getFamily(), fieldMapping.getQualifier(), result);
     } else if (mappingType == MappingType.KEY_AS_COLUMN) {

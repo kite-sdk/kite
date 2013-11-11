@@ -50,13 +50,10 @@ public class AvroEntitySchema extends EntitySchema {
    * @param fieldMappings
    *          The list of FieldMappings that specify how each field maps to an
    *          HBase row
-   * @param isTransactional
-   *          Specifies whether this entity participates in transactions
    */
   public AvroEntitySchema(Collection<String> tables, Schema schema,
-      String rawSchema, Collection<FieldMapping> fieldMappings,
-      boolean isTransactional) {
-    super(tables, schema.getName(), rawSchema, fieldMappings, isTransactional);
+      String rawSchema, Collection<FieldMapping> fieldMappings) {
+    super(tables, schema.getName(), rawSchema, fieldMappings);
     this.schema = schema;
   }
 
