@@ -188,9 +188,7 @@ public class Key extends Marker implements Comparable<Key> {
       final FieldPartitioner fp = partitioners.get(i);
       final Object value;
       // TODO: this should probably live elsewhere and be extensible
-      if (entity instanceof IndexedRecord) {
-        value = ((IndexedRecord) entity).get(i);
-      } else if (entity instanceof GenericRecord) {
+      if (entity instanceof GenericRecord) {
         value = ((GenericRecord) entity).get(fp.getSourceName());
       } else {
         final String name = fp.getSourceName();
