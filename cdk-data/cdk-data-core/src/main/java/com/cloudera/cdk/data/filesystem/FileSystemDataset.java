@@ -16,7 +16,6 @@
 package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetException;
 import com.cloudera.cdk.data.DatasetReader;
@@ -30,19 +29,17 @@ import com.cloudera.cdk.data.impl.Accessor;
 import com.cloudera.cdk.data.spi.AbstractDataset;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.base.Supplier;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import java.io.IOException;
-import java.util.List;
-import javax.annotation.Nullable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.List;
 
 class FileSystemDataset<E> extends AbstractDataset<E> {
 
@@ -243,11 +240,6 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     }
 
     return partitions;
-  }
-
-  @Override
-  public DatasetAccessor<E> newAccessor() {
-    throw new UnsupportedOperationException();
   }
 
   @Override
