@@ -74,12 +74,6 @@ public class TestFileSystemView extends TestRangeViews {
 //        testDataset.in(newMarker(2013)).getCoveringPartitions());
   }
 
-  @Test
-  @Override
-  public void testLimitedWriter() {
-    // range-limited writers are not currently implemented
-  }
-
   @Test(expected=UnsupportedOperationException.class)
   public void testLimitedAccessor() {
     testDataset.newAccessor();

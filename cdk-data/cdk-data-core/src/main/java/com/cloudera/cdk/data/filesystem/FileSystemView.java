@@ -27,6 +27,7 @@ import com.cloudera.cdk.data.spi.Key;
 import com.cloudera.cdk.data.spi.MarkerRange;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.fs.Path;
@@ -86,26 +87,19 @@ class FileSystemView<E> extends AbstractRangeView<E> {
   @Override
   @SuppressWarnings("unchecked") // See https://github.com/Parquet/parquet-mr/issues/106
   public DatasetWriter<E> newWriter() {
-    DatasetDescriptor descriptor = dataset.getDescriptor();
-    DatasetWriter<E> writer;
+    Preconditions.checkState(getDataset() instanceof FileSystemDataset,
+        "FileSystemWriters cannot create writer for " + getDataset());
 
-    if (descriptor.isPartitioned()) {
-      writer = new PartitionedDatasetWriter<E>(dataset);
+    final FileSystemDataset dataset = (FileSystemDataset) getDataset();
+
+    if (dataset.getDescriptor().isPartitioned()) {
+      return new PartitionedDatasetWriter<E>(this);
     } else {
-      Path dataFile = new Path(fsDataset.getDirectory(), uniqueFilename());
-      if (Formats.PARQUET.equals(descriptor.getFormat())) {
-        writer = new ParquetFileSystemDatasetWriter(
-            fsDataset.getFileSystem(), dataFile, descriptor.getSchema());
-      } else {
-        writer = new FileSystemDatasetWriter.Builder()
-            .fileSystem(fsDataset.getFileSystem())
-            .path(dataFile)
-            .schema(descriptor.getSchema())
-            .build();
-      }
+      return FileSystemWriters.newFileWriter(
+          dataset.getFileSystem(),
+          dataset.getDirectory(),
+          dataset.getDescriptor());
     }
-
-    return writer;
   }
 
   @Override
@@ -138,12 +132,5 @@ class FileSystemView<E> extends AbstractRangeView<E> {
     } catch (IOException ex) {
       throw new DatasetException("Cannot list partitions in view:" + this, ex);
     }
-  }
-
-  private String uniqueFilename() {
-    // FIXME: This file name is not guaranteed to be truly unique.
-    return Joiner.on('-').join(System.currentTimeMillis(),
-        Thread.currentThread().getId() + "." +
-            dataset.getDescriptor().getFormat().getExtension());
   }
 }

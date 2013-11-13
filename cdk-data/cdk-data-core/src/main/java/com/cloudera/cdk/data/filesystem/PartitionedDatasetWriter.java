@@ -15,12 +15,13 @@
  */
 package com.cloudera.cdk.data.filesystem;
 
-import com.cloudera.cdk.data.spi.ReaderWriterState;
-import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.DatasetWriterException;
-import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.View;
+import com.cloudera.cdk.data.spi.Key;
+import com.cloudera.cdk.data.spi.ReaderWriterState;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -28,11 +29,12 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.util.concurrent.UncheckedExecutionException;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
@@ -40,41 +42,26 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   private static final Logger logger = LoggerFactory
     .getLogger(PartitionedDatasetWriter.class);
 
-  private Dataset<E> dataset;
+  private View<E> view;
   private int maxWriters;
 
   private final PartitionStrategy partitionStrategy;
-  private LoadingCache<PartitionKey, DatasetWriter<E>> cachedWriters;
-  private PartitionKey key;
+  private LoadingCache<Key, DatasetWriter<E>> cachedWriters;
+
+  private final Key reusedKey;
 
   private ReaderWriterState state;
 
-  public PartitionedDatasetWriter(Dataset<E> dataset) {
-    Preconditions.checkArgument(dataset.getDescriptor().isPartitioned(),
-      "Dataset " + dataset + " is not partitioned");
+  public PartitionedDatasetWriter(View<E> view) {
+    final DatasetDescriptor descriptor = view.getDataset().getDescriptor();
+    Preconditions.checkArgument(descriptor.isPartitioned(),
+        "Dataset " + view.getDataset() + " is not partitioned");
 
-    this.dataset = dataset;
-    this.partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
+    this.view = view;
+    this.partitionStrategy = descriptor.getPartitionStrategy();
     this.maxWriters = Math.min(10, partitionStrategy.getCardinality());
     this.state = ReaderWriterState.NEW;
-  }
-
-  @Deprecated
-  public PartitionedDatasetWriter(Dataset<E> dataset,
-    PartitionStrategy partitionStrategy) {
-
-    Preconditions.checkArgument(dataset.getDescriptor().isPartitioned(),
-      "Dataset " + dataset + " is not partitioned");
-    Preconditions
-      .checkArgument(
-        dataset.getDescriptor().getPartitionStrategy()
-          .equals(partitionStrategy),
-        "Dataset descriptor's partitions strategy doesn't match the provided partition strategy");
-
-    this.dataset = dataset;
-    this.partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
-    this.maxWriters = Math.min(10, this.partitionStrategy.getCardinality());
-    this.state = ReaderWriterState.NEW;
+    this.reusedKey = new Key(partitionStrategy);
   }
 
   @Override
@@ -86,26 +73,33 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
       partitionStrategy);
 
     cachedWriters = CacheBuilder.newBuilder().maximumSize(maxWriters)
-      .removalListener(new DatasetWriterRemovalStrategy<E>())
-      .build(new DatasetWriterCacheLoader<E>(dataset));
+      .removalListener(new DatasetWriterCloser<E>())
+      .build(new DatasetWriterCacheLoader<E>(view));
 
     state = ReaderWriterState.OPEN;
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public void write(E entity) {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-      "Attempt to write to a writer in state:%s", state);
+        "Attempt to write to a writer in state:%s", state);
 
-    key = partitionStrategy.partitionKeyForEntity(entity, key);
-    DatasetWriter<E> writer;
+    reusedKey.reuseFor(entity);
 
-    try {
-      writer = cachedWriters.get(key);
-    } catch (ExecutionException e) {
-      throw new DatasetWriterException("Unable to get a writer for entity:" + entity
-        + " partition key:" + Arrays.asList(key), e);
+    DatasetWriter<E> writer = cachedWriters.getIfPresent(reusedKey);
+    if (writer == null) {
+      // get a new key because it is stored in the cache
+      Key key = new Key(partitionStrategy, reusedKey);
+      try {
+        writer = cachedWriters.getUnchecked(key);
+      } catch (UncheckedExecutionException ex) {
+        // catch & release: the correct exception is that the entity cannot be
+        // written because it isn't in the View. But to avoid checking in every
+        // write call, check when writers are created, catch the exception, and
+        // throw the correct one here.
+        throw new IllegalArgumentException(
+            "View does not contain entity:" + entity, ex.getCause());
+      }
     }
 
     writer.write(entity);
@@ -116,8 +110,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to write to a writer in state:%s", state);
 
-    logger.debug("Flushing all cached writers for partition strategy:{}",
-      partitionStrategy);
+    logger.debug("Flushing all cached writers for view:{}", view);
 
     /*
      * There's a potential for flushing entries that are created by other
@@ -126,11 +119,9 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
      * this, but it will be difficult as Cache (ideally) uses multiple
      * partitions to prevent cached writer contention.
      */
-    for (Map.Entry<PartitionKey, DatasetWriter<E>> entry : cachedWriters
-      .asMap().entrySet()) {
-      logger.debug("Flushing partition writer:{}.{}", entry.getKey(),
-        entry.getValue());
-      entry.getValue().flush();
+    for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
+      logger.debug("Flushing partition writer:{}", writer);
+      writer.flush();
     }
   }
 
@@ -138,14 +129,11 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   public void close() {
     if (state.equals(ReaderWriterState.OPEN)) {
 
-      logger.debug("Closing all cached writers for partition strategy:{}",
-        partitionStrategy);
+      logger.debug("Closing all cached writers for view:{}", view);
 
-      for (Map.Entry<PartitionKey, DatasetWriter<E>> entry : cachedWriters
-        .asMap().entrySet()) {
-        logger.debug("Closing partition writer:{}.{}", entry.getKey(),
-          entry.getValue());
-        entry.getValue().close();
+      for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
+        logger.debug("Closing partition writer:{}", writer);
+        writer.close();
       }
 
       state = ReaderWriterState.CLOSED;
@@ -160,46 +148,58 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   @Override
   public String toString() {
     return Objects.toStringHelper(this)
-      .add("partitionStrategy", partitionStrategy)
-      .add("maxWriters", maxWriters).add("dataset", dataset)
-      .add("cachedWriters", cachedWriters).toString();
+        .add("partitionStrategy", partitionStrategy)
+        .add("maxWriters", maxWriters)
+        .add("view", view)
+        .add("cachedWriters", cachedWriters)
+        .toString();
   }
 
   private static class DatasetWriterCacheLoader<E> extends
-    CacheLoader<PartitionKey, DatasetWriter<E>> {
+    CacheLoader<Key, DatasetWriter<E>> {
 
-    private Dataset<E> dataset;
+    private final View<E> view;
+    private final PathConversion convert;
 
-    public DatasetWriterCacheLoader(Dataset<E> dataset) {
-      this.dataset = dataset;
+    public DatasetWriterCacheLoader(View<E> view) {
+      this.view = view;
+      this.convert = new PathConversion();
     }
 
     @Override
-    public DatasetWriter<E> load(PartitionKey key) throws Exception {
-      Dataset<E> partition = dataset.getPartition(key, true);
-      DatasetWriter<E> writer = partition.newWriter();
+    public DatasetWriter<E> load(Key key) throws Exception {
+      Preconditions.checkArgument(view.contains(key),
+          "View {} does not contain Key {}", view, key);
+      Preconditions.checkState(view.getDataset() instanceof FileSystemDataset,
+          "FileSystemWriters cannot create writer for " + view.getDataset());
+
+      final FileSystemDataset dataset = (FileSystemDataset) view.getDataset();
+      final DatasetWriter<E> writer = FileSystemWriters.newFileWriter(
+          dataset.getFileSystem(),
+          new Path(dataset.getDirectory(), convert.fromKey(key)),
+          dataset.getDescriptor());
 
       writer.open();
+
       return writer;
     }
 
   }
 
-  private static class DatasetWriterRemovalStrategy<E> implements
-    RemovalListener<PartitionKey, DatasetWriter<E>> {
+  private static class DatasetWriterCloser<E> implements
+    RemovalListener<Key, DatasetWriter<E>> {
 
     @Override
     public void onRemoval(
-      RemovalNotification<PartitionKey, DatasetWriter<E>> notification) {
+      RemovalNotification<Key, DatasetWriter<E>> notification) {
 
       DatasetWriter<E> writer = notification.getValue();
 
-      logger.debug("Removing writer:{} for partition:{}", writer,
+      logger.debug("Closing writer:{} for partition:{}", writer,
         notification.getKey());
 
       writer.close();
     }
 
   }
-
 }
