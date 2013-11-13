@@ -67,6 +67,11 @@ public class Key extends Marker implements Comparable<Key> {
         new Object[strategy.getFieldPartitioners().size()]));
   }
 
+  public Key(PartitionStrategy strategy, Marker marker) {
+    this(strategy);
+    reuseFor(marker);
+  }
+
   public Key(PartitionStrategy strategy, List<Object> values) {
     try {
       this.fields = FIELD_CACHE.get(strategy);
@@ -77,6 +82,11 @@ public class Key extends Marker implements Comparable<Key> {
         "Not enough values for a complete Key");
     this.strategy = strategy;
     this.values = values;
+  }
+
+  public Key(PartitionStrategy strategy, Object entity) {
+    this(strategy);
+    reuseFor(entity);
   }
 
   public PartitionStrategy getPartitionStrategy() {
