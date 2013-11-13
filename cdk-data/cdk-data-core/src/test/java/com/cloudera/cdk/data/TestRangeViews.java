@@ -25,6 +25,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,6 +34,9 @@ import java.util.Set;
 
 @RunWith(Parameterized.class)
 public abstract class TestRangeViews extends MiniDFSTest {
+
+  private static final Logger LOG =
+      LoggerFactory.getLogger(TestRangeViews.class);
 
   protected static final Marker october = newMarker(2013, 10);
   protected static final Marker now = new Marker
@@ -43,7 +48,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
       .setUserId(0)
       .setSessionId("session-0")
       .setIp("localhost")
-      .setTimestamp(System.currentTimeMillis())
+      .setTimestamp(System.currentTimeMillis() + 35405168l)
       .build();
   protected static final StandardEvent sepEvent = StandardEvent
       .newBuilder(event)
