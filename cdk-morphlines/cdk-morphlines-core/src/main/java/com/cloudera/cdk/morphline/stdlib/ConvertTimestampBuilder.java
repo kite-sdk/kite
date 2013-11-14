@@ -35,7 +35,9 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Fields;
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.typesafe.config.Config;
 
 /**
@@ -141,7 +143,13 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
           }
         }
         if (!foundMatchingFormat) {
-          //LOG.debug("Cannot parse timestamp: " + timestamp + " with one of these inputFormats: " + inputFormats);
+          LOG.debug("Cannot parse timestamp '{}' with any of these input formats: {}", timestamp, 
+              Lists.transform(inputFormats, new Function<SimpleDateFormat, String>() {
+                @Override
+                public String apply(SimpleDateFormat dateFormat) {
+                  return dateFormat.toPattern(); // SimpleDateFormat.toString() doesn't print anything useful
+                }
+              }));
           return false;
         }
       }

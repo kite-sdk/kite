@@ -166,6 +166,7 @@ public final class GrokBuilder implements CommandBuilder {
             if (matcher.matches()) {
               numMatches++;
               if (numMatches > maxMatches) {
+                LOG.debug("grok failed because it found more than {} matches for values: {}", maxMatches, values);
                 return false;
               }
               extract(outputRecord, matcher, doExtract);
@@ -176,6 +177,7 @@ public final class GrokBuilder implements CommandBuilder {
               if (numMatches == previousNumMatches) {
                 numMatches++;
                 if (numMatches > maxMatches) {
+                  LOG.debug("grok failed because it found more than {} matches for values: {}", maxMatches, values);
                   return false;
                 }
                 if (!doExtract && numMatches >= minMatches && maxMatches == Integer.MAX_VALUE) {
@@ -191,6 +193,7 @@ public final class GrokBuilder implements CommandBuilder {
           }
         }
         if (numMatches + todo < minMatches) {
+          LOG.debug("grok failed because it found less than {} matches for values: {}", minMatches, values);
           return false;          
         }
       }

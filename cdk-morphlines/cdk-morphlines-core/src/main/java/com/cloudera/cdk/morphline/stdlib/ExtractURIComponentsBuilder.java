@@ -69,6 +69,7 @@ public final class ExtractURIComponentsBuilder implements CommandBuilder {
         try {
           uri = new URI(uriObj.toString());
         } catch (URISyntaxException e) {
+          LOG.debug("Invalid URI: {}", uriObj);
           if (failOnInvalidURI) {
             return false;
           }

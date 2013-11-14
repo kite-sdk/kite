@@ -78,6 +78,7 @@ public final class ExtractURIQueryParametersBuilder implements CommandBuilder {
         try {
           rawURIQuery = new URI(uri.toString()).getRawQuery();
         } catch (URISyntaxException e) {
+          LOG.debug("Invalid URI: {}", uri);
           if (failOnInvalidURI) {
             return false;
           }

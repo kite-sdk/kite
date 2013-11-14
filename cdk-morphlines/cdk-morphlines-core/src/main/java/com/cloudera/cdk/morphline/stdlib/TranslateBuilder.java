@@ -77,6 +77,7 @@ public final class TranslateBuilder implements CommandBuilder {
         } else if (fallback != null) {
           iter.set(fallback);
         } else {
+          LOG.debug("No match found for key: {}", key);
           return false;
         }
       }
