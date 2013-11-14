@@ -52,11 +52,13 @@ public final class ExtractURIComponentsBuilder implements CommandBuilder {
 
     private final String inputFieldName;
     private final String outputFieldPrefix;
+    private final boolean failOnInvalidURI;
     
     public ExtractURIComponents(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");
       this.outputFieldPrefix = getConfigs().getString(config, "outputFieldPrefix", "");
+      this.failOnInvalidURI = getConfigs().getBoolean(config, "failOnInvalidURI", false);
       validateArguments();
     }
         
@@ -67,6 +69,9 @@ public final class ExtractURIComponentsBuilder implements CommandBuilder {
         try {
           uri = new URI(uriObj.toString());
         } catch (URISyntaxException e) {
+          if (failOnInvalidURI) {
+            return false;
+          }
           continue;
         }
         addValue(record, "scheme", uri.getScheme());

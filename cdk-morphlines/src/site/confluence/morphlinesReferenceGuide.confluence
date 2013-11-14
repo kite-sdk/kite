@@ -519,6 +519,8 @@ The command provides the following configuration options:
 || Property Name || Default || Description ||
 | inputField | n/a | The name of the input field that contains zero or more URIs. |
 | outputFieldPrefix | "" | A prefix to prepend to output field names. |
+| failOnInvalidURI | false | If an URI is syntactically invalid (i.e. throws a {{URISyntaxException}} on parsing), fail the command ({{true}}) or ignore this URI ({{false}}). |
+
 
 Example usage:
 {code}
@@ -551,6 +553,7 @@ The command provides the following configuration options:
 || Property Name || Default || Description ||
 | inputField | n/a | The name of the input field that contains zero or more URIs. |
 | outputField | n/a | The field to add output values to. |
+| failOnInvalidURI | false | If an URI is syntactically invalid (i.e. throws a {{URISyntaxException}} on parsing), fail the command ({{true}}) or ignore this URI ({{false}}). |
 | component | n/a | The type of information to extract. Can be one of {{scheme}}, {{authority}}, {{host}}, {{port}}, {{path}}, {{query}}, {{fragment}}, {{schemeSpecificPart}}, {{userInfo}} |
 
 Example usage:
@@ -572,6 +575,7 @@ The command provides the following configuration options:
 | parameter | n/a | The name of the query parameter to find. |
 | inputField | n/a | The name of the input field that contains zero or more URI values. |
 | outputField | n/a | The field to add output values to. |
+| failOnInvalidURI | false | If an URI is syntactically invalid (i.e. throws a {{URISyntaxException}} on parsing), fail the command ({{true}}) or ignore this URI ({{false}}). |
 | maxParameters | 1000000000 | The maximum number of values to append to the output field per input field. |
 | charset | UTF\-8 | The character encoding to use, for example, UTF\-8. |
       

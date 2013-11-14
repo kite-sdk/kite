@@ -1636,6 +1636,10 @@ public class MorphlineTest extends AbstractMorphlineTest {
     expected.put(prefix + "userInfo", uri.getUserInfo());
     
     processAndVerifySuccess(record, expected);
+    
+    record = new Record();
+    record.put("uri", "invalidURI:");
+    processAndVerifyFailure(record);
   }
   
   @Test
@@ -1657,9 +1661,14 @@ public class MorphlineTest extends AbstractMorphlineTest {
     } catch (MorphlineCompilationException e) {
       ; // expected
     }
+    testExtractURIComponent2("invalidURI:", "host", uri.getHost(), false);
   }
   
   private void testExtractURIComponent2(String uriStr, String component, Object expectedComponent) throws Exception {
+    testExtractURIComponent2(uriStr, component, expectedComponent, true); 
+  }
+  
+  private void testExtractURIComponent2(String uriStr, String component, Object expectedComponent, boolean success) throws Exception {
     morphline = createMorphline(
         "test-morphlines/extractURIComponent", 
         ConfigFactory.parseMap(ImmutableMap.of("component", component)));
@@ -1669,7 +1678,11 @@ public class MorphlineTest extends AbstractMorphlineTest {
     Record expected = new Record();
     expected.put("uri", uriStr);
     expected.put("output", expectedComponent);
-    processAndVerifySuccess(record, expected);
+    if (success) {
+      processAndVerifySuccess(record, expected);
+    } else {
+      processAndVerifyFailure(record);      
+    }
   }
   
   @Test
@@ -1685,7 +1698,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
 
     internalExtractURIQueryParams("foo", "", Arrays.asList());
     internalExtractURIQueryParams("foo", "?", Arrays.asList());
-    internalExtractURIQueryParams("foo", "::", Arrays.asList()); // syntax error
+    internalExtractURIQueryParams("foo", "::", Arrays.asList()); // syntax error in URI
     internalExtractURIQueryParams("foo", new String(new byte[10], "ASCII"), Arrays.asList());
     internalExtractURIQueryParams("foo", host + "", Arrays.asList());
     internalExtractURIQueryParams("foo", host + "?", Arrays.asList());

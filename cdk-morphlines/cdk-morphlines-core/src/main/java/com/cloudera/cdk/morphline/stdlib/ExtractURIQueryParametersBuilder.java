@@ -57,12 +57,14 @@ public final class ExtractURIQueryParametersBuilder implements CommandBuilder {
     private final String outputFieldName;
     private final int maxParameters;
     private final String charset;
+    private final boolean failOnInvalidURI;
     
     public ExtractURIQueryParameters(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);      
       this.parameterName = getConfigs().getString(config, "parameter");
       this.inputFieldName = getConfigs().getString(config, "inputField");
       this.outputFieldName = getConfigs().getString(config, "outputField");
+      this.failOnInvalidURI = getConfigs().getBoolean(config, "failOnInvalidURI", false);
       this.maxParameters = getConfigs().getInt(config, "maxParameters", Integer.MAX_VALUE);
       this.charset = getConfigs().getString(config, "charset", "UTF-8");
       Charset.forName(charset); // fail fast if charset is unsupported
@@ -76,7 +78,9 @@ public final class ExtractURIQueryParametersBuilder implements CommandBuilder {
         try {
           rawURIQuery = new URI(uri.toString()).getRawQuery();
         } catch (URISyntaxException e) {
-          ; // ignore
+          if (failOnInvalidURI) {
+            return false;
+          }
         }
         if (rawURIQuery == null) {
           rawURIQuery = "";

@@ -52,12 +52,14 @@ public final class ExtractURIComponentBuilder implements CommandBuilder {
 
     private final String inputFieldName;
     private final String outputFieldName;
+    private final boolean failOnInvalidURI;
     private final Component component;
     
     public ExtractURIComponent(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");
       this.outputFieldName = getConfigs().getString(config, "outputField");
+      this.failOnInvalidURI = getConfigs().getBoolean(config, "failOnInvalidURI", false);
       this.component = new Validator<Component>().validateEnum(
           config,
           getConfigs().getString(config, "component"),
@@ -72,6 +74,9 @@ public final class ExtractURIComponentBuilder implements CommandBuilder {
         try {
           uri = new URI(uriObj.toString());
         } catch (URISyntaxException e) {
+          if (failOnInvalidURI) {
+            return false;
+          }
           continue;
         }
         
