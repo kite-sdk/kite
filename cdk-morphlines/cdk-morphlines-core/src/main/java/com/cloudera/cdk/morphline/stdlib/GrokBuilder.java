@@ -168,10 +168,8 @@ public final class GrokBuilder implements CommandBuilder {
             if (matcher.matches()) {
               numMatches++;
               if (numMatches > maxMatches) {
-                if (LOG.isDebugEnabled()) {
-                  LOG.debug("grok failed because it found too many matches for values: {} for grok command: {}",
-                            values, renderedConfig);
-                }
+                LOG.debug("grok failed because it found too many matches for values: {} for grok command: {}",
+                          values, renderedConfig);
                 return false;
               }
               extract(outputRecord, matcher, doExtract);
