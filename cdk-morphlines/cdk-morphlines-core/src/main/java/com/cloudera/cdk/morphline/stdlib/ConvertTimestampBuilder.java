@@ -153,6 +153,8 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
           return false;
         }
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
 
