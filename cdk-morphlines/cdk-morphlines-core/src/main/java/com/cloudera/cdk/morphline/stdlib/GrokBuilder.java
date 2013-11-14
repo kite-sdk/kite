@@ -70,6 +70,7 @@ public final class GrokBuilder implements CommandBuilder {
     private final boolean findSubstrings;
     private final boolean addEmptyStrings;
     private final String firstKey; // cached value
+    private final String renderedConfig;
 
     public Grok(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);
@@ -97,6 +98,7 @@ public final class GrokBuilder implements CommandBuilder {
       this.findSubstrings = getConfigs().getBoolean(config, "findSubstrings", false);
       this.addEmptyStrings = getConfigs().getBoolean(config, "addEmptyStrings", false);
       validateArguments();
+      this.renderedConfig = config.root().render();
     }
     
     @Override
@@ -166,7 +168,10 @@ public final class GrokBuilder implements CommandBuilder {
             if (matcher.matches()) {
               numMatches++;
               if (numMatches > maxMatches) {
-                LOG.debug("grok failed because it found more than {} matches for values: {}", maxMatches, values);
+                if (LOG.isDebugEnabled()) {
+                  LOG.debug("grok failed because it found too many matches for values: {} for grok command: {}",
+                            values, renderedConfig);
+                }
                 return false;
               }
               extract(outputRecord, matcher, doExtract);
@@ -177,7 +182,8 @@ public final class GrokBuilder implements CommandBuilder {
               if (numMatches == previousNumMatches) {
                 numMatches++;
                 if (numMatches > maxMatches) {
-                  LOG.debug("grok failed because it found more than {} matches for values: {}", maxMatches, values);
+                  LOG.debug("grok failed because it found too many matches for values: {} for grok command: {}",
+                            values, renderedConfig);
                   return false;
                 }
                 if (!doExtract && numMatches >= minMatches && maxMatches == Integer.MAX_VALUE) {
@@ -193,7 +199,8 @@ public final class GrokBuilder implements CommandBuilder {
           }
         }
         if (numMatches + todo < minMatches) {
-          LOG.debug("grok failed because it found less than {} matches for values: {}", minMatches, values);
+          LOG.debug("grok failed because it found too few matches for values: {} for grok command: {}", 
+                    values, renderedConfig);
           return false;          
         }
       }
