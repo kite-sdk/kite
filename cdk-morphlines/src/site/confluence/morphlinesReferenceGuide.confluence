@@ -1758,7 +1758,7 @@ h2. geoIP
 
 *Status: EXPERIMENTAL*
 
-The {{geoIP}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-maxmind/src/main/java/com/cloudera/cdk/morphline/maxmind/GeoIPBuilder.java]) returns Geolocation information for a given IP address, using an efficient in\-memory Maxmind database lookup. The command stores a corresponding Jackson JsonNode Java object into the \_attachment\_body record field.
+The {{geoIP}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-maxmind/src/main/java/com/cloudera/cdk/morphline/maxmind/GeoIPBuilder.java]) returns Geolocation information for a given IP address, using an efficient in\-memory Maxmind database lookup. The command stores a corresponding Jackson JsonNode Java object into the \_attachment\_body record field. The most recent version of the Maxmind GeoLite2 database can be downloaded from [Maxmind|http://dev.maxmind.com/geoip/geoip2/geolite2].
 
 Often, the {{geoIP}} command is combined with commands such as [#extractJsonPaths].
 
