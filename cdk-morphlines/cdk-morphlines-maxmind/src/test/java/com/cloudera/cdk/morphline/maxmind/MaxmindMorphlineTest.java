@@ -78,6 +78,7 @@ public class MaxmindMorphlineTest extends AbstractMorphlineTest {
     assertEquals(44.9733, root.get("location").get("latitude").doubleValue(), 0.00001);
     assertEquals(-93.2323, root.get("location").get("longitude").doubleValue(), 0.00001);    
     reader.close();
+    reader.close();
   }
   
   @Test
@@ -100,6 +101,7 @@ public class MaxmindMorphlineTest extends AbstractMorphlineTest {
     expected.put("/location/longitude", -93.2323);
     
     processAndVerifySuccess(record, expected, false);
+    Notifications.notifyShutdown(morphline);
     Notifications.notifyShutdown(morphline);
   }
   
