@@ -45,7 +45,7 @@ import com.typesafe.config.Config;
 final class GrokDictionaries {
 
   /*
-   * Uses a shaded version of com.google.code.regexp-0.1.9 to minimize potential dependency issues.
+   * Uses a shaded version of com.google.code.regexp-0.2.3 to minimize potential dependency issues.
    * See https://github.com/tony19/named-regexp
    */
   
