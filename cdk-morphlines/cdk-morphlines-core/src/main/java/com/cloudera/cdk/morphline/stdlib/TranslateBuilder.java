@@ -60,7 +60,7 @@ public final class TranslateBuilder implements CommandBuilder {
       this.fieldName = getConfigs().getString(config, "field");
       Config dict = getConfigs().getConfig(config, "dictionary");
       for (Map.Entry<String, Object> entry : new Configs().getEntrySet(dict)) {
-        dictionary.put(entry.getKey().toString(), entry.getValue());
+        dictionary.put(entry.getKey(), entry.getValue());
       }
       this.fallback = getConfigs().getString(config, "fallback", null);
       validateArguments();

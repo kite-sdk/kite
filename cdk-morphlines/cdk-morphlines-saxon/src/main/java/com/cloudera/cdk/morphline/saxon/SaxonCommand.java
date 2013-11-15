@@ -63,7 +63,7 @@ abstract class SaxonCommand extends AbstractParser {
     
     Config features = getConfigs().getConfig(config, "features", ConfigFactory.empty());
     for (Map.Entry<String, Object> entry : new Configs().getEntrySet(features)) {
-      processor.setConfigurationProperty(entry.getKey().toString(), entry.getValue());
+      processor.setConfigurationProperty(entry.getKey(), entry.getValue());
     }
   }
 
