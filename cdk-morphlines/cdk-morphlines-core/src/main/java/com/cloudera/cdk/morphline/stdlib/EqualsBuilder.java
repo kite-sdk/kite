@@ -53,10 +53,12 @@ public final class EqualsBuilder implements CommandBuilder {
   private static final class Equals extends AbstractCommand {
 
     private final Set<Map.Entry<String, Object>> entrySet;
+    private final String renderedConfig; // cached value
     
     public Equals(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);      
-      entrySet = new Configs().getEntrySet(config);
+      this.entrySet = new Configs().getEntrySet(config);
+      this.renderedConfig = config.root().render();
     }
         
     @Override
@@ -72,6 +74,10 @@ public final class EqualsBuilder implements CommandBuilder {
           results = new FieldExpression(entryValue.toString(), getConfig()).evaluate(record);
         }
         if (!values.equals(results)) {
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Equals command failed because {} does not match values: {} for command: {}",
+                new Object[]{results, values, renderedConfig});
+          }
           return false;
         }
       }

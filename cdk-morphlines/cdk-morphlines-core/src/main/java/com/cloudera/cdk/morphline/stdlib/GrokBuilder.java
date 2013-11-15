@@ -70,7 +70,7 @@ public final class GrokBuilder implements CommandBuilder {
     private final boolean findSubstrings;
     private final boolean addEmptyStrings;
     private final String firstKey; // cached value
-    private final String renderedConfig;
+    private final String renderedConfig; // cached value
 
     public Grok(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);

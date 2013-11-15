@@ -54,10 +54,12 @@ public final class ContainsBuilder implements CommandBuilder {
   private static final class Contains extends AbstractCommand {
 
     private final Set<Map.Entry<String, Object>> entrySet;
+    private final String renderedConfig; // cached value
     
     public Contains(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);      
-      entrySet = new Configs().getEntrySet(config);
+      this.entrySet = new Configs().getEntrySet(config);
+      this.renderedConfig = config.root().render();
     }
         
     @Override
@@ -80,6 +82,10 @@ public final class ContainsBuilder implements CommandBuilder {
           }
         }
         if (!found) {
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Contains command failed because it could not find any of {} in values: {} for command: {}",
+                new Object[]{results, values, renderedConfig});
+          }
           return false;
         }
       }
