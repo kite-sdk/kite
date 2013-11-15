@@ -78,6 +78,10 @@
       </dependency>
       <dependency>
         <groupId>com.cloudera.cdk</groupId>
+        <artifactId>cdk-morphlines-maxmind</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>com.cloudera.cdk</groupId>
         <artifactId>cdk-morphlines-metrics-servlets</artifactId>
       </dependency>
   </dependencies>

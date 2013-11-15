@@ -16,6 +16,7 @@ h3. Table of Contents
 - [#cdk\-morphlines\-hadoop\-core]
 - [#cdk\-morphlines\-hadoop\-sequencefile]
 - [#cdk\-morphlines\-hadoop\-rcfile]
+- [#cdk\-morphlines\-maxmind]
 - [#cdk\-morphlines\-metrics\-servlets]
 - [#cdk\-morphlines\-tika\-core]
 - [#cdk\-morphlines\-tika\-decompress]
@@ -102,6 +103,12 @@ h3. cdk\-morphlines\-hadoop\-sequencefile
 \\
 h3. cdk\-morphlines\-hadoop\-rcfile
 | [#readRCFile] | Parses an Apache Hadoop [RCFile|http://archive.cloudera.com/cdh4/cdh/4/hive/api/org/apache/hadoop/hive/ql/io/RCFile.html] and emits morphline records row\-wise or column\-wise. |
+
+{anchor:cdk\-morphlines\-maxmind}
+\\
+\\
+h3. cdk\-morphlines\-maxmind
+| [#geoIP] | Returns Geolocation information for a given IP address, using an efficient in\-memory Maxmind database lookup. |
 
 {anchor:cdk\-morphlines\-metrics\-servlets}
 \\
@@ -1742,6 +1749,154 @@ readRCFile {
       writableClass: "org.apache.hadoop.hive.serde2.columnar.BytesRefWritable"
     }
   ]
+}
+{code}
+
+h1. cdk\-morphlines\-maxmind
+
+h2. geoIP
+
+*Status: EXPERIMENTAL*
+
+The {{geoIP}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-maxmind/src/main/java/com/cloudera/cdk/morphline/maxmind/GeoIPBuilder.java]) returns Geolocation information for a given IP address, using an efficient in\-memory Maxmind database lookup. The command stores a corresponding Jackson JsonNode Java object into the \_attachment\_body record field.
+
+Often, the {{geoIP}} command is combined with commands such as [#extractJsonPaths].
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| inputField | n/a | The name of the input field that contains zero or more IP addresses. |
+| database | GeoLite2\-City.mmdb | The relative or absolute path of a Maxmind database file on the local file system. |
+
+Example usage:
+{code}
+# extract geolocation info into a Jackson JsonNode Java object 
+# and store it into the _attachment_body field:
+geoIP {
+  inputField : ip
+  database : "target/test-classes/GeoLite2-City.mmdb"
+}
+
+# extract parts of the geolocation info from the Jackson JsonNode Java 
+# object contained in the _attachment_body field and store the parts in
+# the given record output fields:      
+extractJsonPaths {
+  flatten : false
+  paths : { 
+    /country/iso_code : /country/iso_code
+    /country/names/en : /country/names/en
+    /country/names/zh-CN : /country/names/zh-CN       
+    "/subdivisions[]/names/en" : "/subdivisions[]/names/en"     
+    "/subdivisions[]/iso_code" : "/subdivisions[]/iso_code"     
+    /city/names/en : /city/names/en
+    /postal/code : /postal/code
+    /location/latitude : /location/latitude
+    /location/longitude : /location/longitude
+  } 
+}
+{code}
+
+h3. Example geoIP JSON output with extractJsonPaths
+
+Input: {{ip: 128.101.101.101}}
+  
+Expected output:
+{code}
+ip: 128.101.101.101
+/country/iso_code: US
+/country/names/en: United States
+/country/names/zh-CN: 美国
+/subdivisions[]/names/en: Minnesota
+/subdivisions[]/iso_code: MN
+/city/names/en: Minneapolis
+/postal/code: 55455
+/location/latitude: 44.9733
+/location/longitude: -93.2323
+{code}
+
+h3. Example geoIP JSON output
+
+Input: {{ip: 128.101.101.101}}
+  
+Expected output:
+{code}
+{
+   "city":{
+      "geoname_id":5037649,
+      "names":{
+         "de":"Minneapolis",
+         "en":"Minneapolis",
+         "es":"Mineápolis",
+         "fr":"Minneapolis",
+         "ja":"ミネアポリス",
+         "pt-BR":"Minneapolis",
+         "ru":"Миннеаполис",
+         "zh-CN":"明尼阿波利斯"
+      }
+   },
+   "continent":{
+      "code":"NA",
+      "geoname_id":6255149,
+      "names":{
+         "de":"Nordamerika",
+         "en":"North America",
+         "es":"Norteamérica",
+         "fr":"Amérique du Nord",
+         "ja":"北アメリカ",
+         "pt-BR":"América do Norte",
+         "ru":"Северная Америка",
+         "zh-CN":"北美洲"
+      }
+   },
+   "country":{
+      "geoname_id":6252001,
+      "iso_code":"US",
+      "names":{
+         "de":"USA",
+         "en":"United States",
+         "es":"Estados Unidos",
+         "fr":"États-Unis",
+         "ja":"アメリカ合衆国",
+         "pt-BR":"Estados Unidos",
+         "ru":"США",
+         "zh-CN":"美国"
+      }
+   },
+   "location":{
+      "latitude":44.9733,
+      "longitude":-93.2323,
+      "metro_code":"613",
+      "time_zone":"America/Chicago"
+   },
+   "postal":{
+      "code":"55455"
+   },
+   "registered_country":{
+      "geoname_id":6252001,
+      "iso_code":"US",
+      "names":{
+         "de":"USA",
+         "en":"United States",
+         "es":"Estados Unidos",
+         "fr":"États-Unis",
+         "ja":"アメリカ合衆国",
+         "pt-BR":"Estados Unidos",
+         "ru":"США",
+         "zh-CN":"美国"
+      }
+   },
+   "subdivisions":[
+      {
+         "geoname_id":5037779,
+         "iso_code":"MN",
+         "names":{
+            "en":"Minnesota",
+            "es":"Minnesota",
+            "ja":"ミネソタ州",
+            "ru":"Миннесота"
+         }
+      }
+   ]
 }
 {code}
 

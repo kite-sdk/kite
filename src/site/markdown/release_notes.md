@@ -11,6 +11,8 @@ Version TBD has the following notable changes:
 
 * Morphlines Library
     * Added morphline command to read from RCFile: [readRCFile](cdk-morphlines/morphlinesReferenceGuide.html#readRCFile) (Prasanna Rajaperumal via whoschek)
+    * Added morphline command that returns Geolocation information for a given IP address, using an efficient in-memory Maxmind database lookup: 
+      [geoIP](cdk-morphlines/morphlinesReferenceGuide.html#geoIP)
     * Added option to fail the following commands if an URI is syntactically invalid: 
       [extractURIComponents](cdk-morphlines/morphlinesReferenceGuide.html#extractURIComponents), 
       [extractURIComponent](cdk-morphlines/morphlinesReferenceGuide.html#extractURIComponent), 
