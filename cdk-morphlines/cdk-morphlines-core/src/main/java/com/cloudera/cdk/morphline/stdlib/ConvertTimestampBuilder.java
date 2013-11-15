@@ -35,9 +35,7 @@ import com.cloudera.cdk.morphline.api.MorphlineContext;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Fields;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.typesafe.config.Config;
 
 /**
@@ -66,6 +64,7 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
     private final String fieldName;
     private final List<SimpleDateFormat> inputFormats = new ArrayList();
     private final SimpleDateFormat outputFormat;
+    private final String inputFormatsDebugString; // cached
     
     private static final String NATIVE_SOLR_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"; // e.g. 2007-04-26T08:05:04.789Z
     private static final SimpleDateFormat UNIX_TIME_IN_MILLIS = new SimpleDateFormat("'unixTimeInMillis'");
@@ -100,8 +99,16 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
       }
       this.outputFormat = dateFormat;
       validateArguments();
-      
+
+      List<String> inputFormatsStringList = new ArrayList();
+      for (SimpleDateFormat inputFormat : inputFormats) {
+        // SimpleDateFormat.toString() doesn't print anything useful
+        inputFormatsStringList.add(inputFormat.toPattern()); 
+      }
+      this.inputFormatsDebugString = inputFormatsStringList.toString();
+
       if (LOG.isTraceEnabled()) {
+        LOG.trace("inputFormatsDebugString: {}", inputFormatsDebugString);
         LOG.trace("availableTimeZoneIDs: {}", Joiner.on("\n").join(TimeZone.getAvailableIDs()));
         LOG.trace("availableLocales: {}", Joiner.on("\n").join(Locale.getAvailableLocales()));
       }
@@ -143,13 +150,7 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
           }
         }
         if (!foundMatchingFormat) {
-          LOG.debug("Cannot parse timestamp '{}' with any of these input formats: {}", timestamp, 
-              Lists.transform(inputFormats, new Function<SimpleDateFormat, String>() {
-                @Override
-                public String apply(SimpleDateFormat dateFormat) {
-                  return dateFormat.toPattern(); // SimpleDateFormat.toString() doesn't print anything useful
-                }
-              }));
+          LOG.debug("Cannot parse timestamp '{}' with any of these input formats: {}", timestamp, inputFormatsDebugString);
           return false;
         }
       }
