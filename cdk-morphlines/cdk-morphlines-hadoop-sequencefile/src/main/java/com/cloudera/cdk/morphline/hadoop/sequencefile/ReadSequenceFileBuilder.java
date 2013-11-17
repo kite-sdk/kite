@@ -90,31 +90,38 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
         if (includeMetaData) {
           sequenceFileMetaData = reader.getMetadata();
         }
-        Writable key = (Writable)ReflectionUtils.newInstance(reader.getKeyClass(), conf);
-        Writable val = (Writable)ReflectionUtils.newInstance(reader.getValueClass(), conf);
+        Class keyClass = reader.getKeyClass();
+        Class valueClass = reader.getValueClass();
         Record template = inputRecord.copy();
         removeAttachments(template);
-        try {
-          while (reader.next(key, val)) {
-            incrementNumRecords();
-            Record outputRecord = template.copy();
-            outputRecord.put(keyField, key);
-            outputRecord.put(valueField, val);
-            outputRecord.put(Fields.ATTACHMENT_MIME_TYPE, OUTPUT_MEDIA_TYPE);
-            if (includeMetaData && sequenceFileMetaData != null) {
-              outputRecord.put(SEQUENCE_FILE_META_DATA, sequenceFileMetaData);
+        
+        while (true) {
+          Writable key = (Writable)ReflectionUtils.newInstance(keyClass, conf);
+          Writable val = (Writable)ReflectionUtils.newInstance(valueClass, conf);
+          try {
+            if (!reader.next(key, val)) {
+              break;
             }
-            
-            // pass record to next command in chain:
-            if (!getChild().process(outputRecord)) {
-              return false;
-            }
+          } catch (EOFException ex) {
+            // SequenceFile.Reader will throw an EOFException after reading
+            // all the data, if it doesn't know the length.  Since we are
+            // passing in an InputStream, we hit this case;
+            LOG.trace("Received expected EOFException", ex);
+            break;
           }
-        } catch (EOFException ex) {
-          // SequenceFile.Reader will throw an EOFException after reading
-          // all the data, if it doesn't know the length.  Since we are
-          // passing in an InputStream, we hit this case;
-          LOG.trace("Received expected EOFException", ex);
+          incrementNumRecords();
+          Record outputRecord = template.copy();
+          outputRecord.put(keyField, key);
+          outputRecord.put(valueField, val);
+          outputRecord.put(Fields.ATTACHMENT_MIME_TYPE, OUTPUT_MEDIA_TYPE);
+          if (includeMetaData && sequenceFileMetaData != null) {
+            outputRecord.put(SEQUENCE_FILE_META_DATA, sequenceFileMetaData);
+          }
+          
+          // pass record to next command in chain:
+          if (!getChild().process(outputRecord)) {
+            return false;
+          }
         }
       } finally {
         Closeables.closeQuietly(reader);
