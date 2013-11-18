@@ -182,6 +182,14 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>maven-twttr</id>
+      <name>Twitter Public Maven Repo</name>
+      <url>http://maven.twttr.com</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
   </repositories>
 
   <build>
