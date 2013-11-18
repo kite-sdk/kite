@@ -1773,7 +1773,7 @@ The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | inputField | n/a | The name of the input field that contains zero or more IP addresses. |
-| database | GeoLite2\-City.mmdb | The relative or absolute path of a Maxmind database file on the local file system. |
+| database | GeoLite2\-City.mmdb | The relative or absolute path of a Maxmind database file on the local file system. Example: /path/to/GeoLite2\-City.mmdb |
 
 Example usage:
 {code}
@@ -2944,6 +2944,7 @@ The command provides the following configuration options:
 || Property Name || Default || Description ||
 | inputField | n/a | The name of the input field that contains zero or more user agent strings. |
 | outputFields | \[\] | A JSON object containing zero or more user agent mappings. Each mapping consists of a record output field name (on the left side of the colon ':') as well as an expression (on the right hand side). An expression consists of a concatenation of zero or more literal strings or _components_ of the form @\{componentName\}. Example mapping: myOutputField : "@{ua\_family}/@{ua\_major}.@{ua\_minor}.@{ua\_patch}". The following components are available: ua\_family, ua\_major, ua\_minor, ua\_patch, os\_family, os\_major, os\_minor, os\_patch, os\_patch\_minor, device\_family. If a component resolves to null or the empty string the preceding string separator, if any, is suppressed. |
+| database | null | The (optional) relative or absolute path of a regexes.yaml database file on the local file system. The default is to use the standard regexes.yaml database file that ships embedded inside of the ua\-parser\-\*.jar. Example: /path/to/regexes.yaml |
 
 Example usage:
 {code}

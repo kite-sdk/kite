@@ -15,7 +15,10 @@
  */
 package com.cloudera.cdk.morphline.useragent;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +38,7 @@ import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Configs;
 import com.cloudera.cdk.morphline.base.Validator;
 import com.google.common.base.Preconditions;
+import com.google.common.io.Closeables;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -69,14 +73,24 @@ public final class UserAgentBuilder implements CommandBuilder {
       
       super(builder, config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");
+      String databaseFile = getConfigs().getString(config, "database", null);
       int cacheCapacity = getConfigs().getInt(config, "cacheCapacity", 1000);
       String nullReplacement = getConfigs().getString(config, "nullReplacement", "");
 
       Parser parser;
       try {
-        parser = new Parser();
+        if (databaseFile == null) {
+          parser = new Parser(); 
+        } else {
+          InputStream in = new BufferedInputStream(new FileInputStream(databaseFile));
+          try {
+            parser = new Parser(in);
+          } finally {
+            Closeables.closeQuietly(in);
+          }
+        }        
       } catch (IOException e) {
-        throw new MorphlineCompilationException("Cannot read UserAgent database", config, e);
+        throw new MorphlineCompilationException("Cannot parse UserAgent database: " + databaseFile, config, e);
       }
       
       Config outputFields = getConfigs().getConfig(config, "outputFields", ConfigFactory.empty());
@@ -188,7 +202,6 @@ public final class UserAgentBuilder implements CommandBuilder {
           lastString = null;
         } else {
           lastString = (String)component;
-          assert lastString.length() > 0;
         }
       }
       
