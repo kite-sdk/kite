@@ -58,6 +58,12 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
     setAvroReflectionEnabled(true);
   }
 
+  @Override
+  public boolean requiresLayout() {
+    // We don't support use of a layout
+    return false;
+  }
+
   public void setDatasetRepositoryClass(String datasetRepositoryClass) {
     this.datasetRepositoryClass = datasetRepositoryClass;
   }
