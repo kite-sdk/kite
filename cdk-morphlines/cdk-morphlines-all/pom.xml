@@ -84,5 +84,9 @@
         <groupId>com.cloudera.cdk</groupId>
         <artifactId>cdk-morphlines-metrics-servlets</artifactId>
       </dependency>
+      <dependency>
+        <groupId>com.cloudera.cdk</groupId>
+        <artifactId>cdk-morphlines-useragent</artifactId>
+      </dependency>
   </dependencies>
 </project>

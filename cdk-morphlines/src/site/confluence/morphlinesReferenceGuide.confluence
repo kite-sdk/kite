@@ -23,6 +23,7 @@ h3. Table of Contents
 - [#cdk\-morphlines\-saxon]
 - [#cdk\-morphlines\-solr\-core]
 - [#cdk\-morphlines\-solr\-cell]
+- [#cdk\-morphlines\-useragent]
 
 {anchor:cdk\-morphlines\-core\-stdio}
 \\
@@ -153,6 +154,12 @@ h3. cdk\-morphlines\-solr\-core
 \\
 h3. cdk\-morphlines\-solr\-cell
 | [#solrCell] | Uses Apache [Tika|http://tika.apache.org] to parse data, then maps the Tika output back to a record using Apache SolrCell. |
+
+{anchor:cdk\-morphlines\-useragent}
+\\
+\\
+h3. cdk\-morphlines\-useragent
+| [#userAgent] | Parses a user agent string and returns structured higher level data like user agent family, operating system, version, and device type. |
 
 \\
 \\
@@ -2925,3 +2932,41 @@ morphlines : [
 {note}
 Note: More information on SolrCell can be found here: [http://wiki.apache.org/solr/ExtractingRequestHandler]
 {note}
+
+h1. cdk\-morphlines\-useragent
+
+h2. userAgent
+
+The {{userAgent}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-useragent/src/main/java/com/cloudera/cdk/morphline/useragent/UserAgentBuilder.java]) parses a user agent string and returns structured higher level data like user agent family, operating system, version, and device type, using the underlying API and regexes.yaml BrowserScope database from [ua-parser|https://github.com/tobie/ua-parser].
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| inputField | n/a | The name of the input field that contains zero or more user agent strings. |
+| outputFields | \[\] | A JSON object containing zero or more user agent mappings. Each mapping consists of a record output field name (on the left side of the colon ':') as well as an expression (on the right hand side). An expression consists of a concatenation of zero or more literal strings or _components_ of the form @\{componentName\}. Example mapping: myOutputField : "@{ua\_family}/@{ua\_major}.@{ua\_minor}.@{ua\_patch}". The following components are available: ua\_family, ua\_major, ua\_minor, ua\_patch, os\_family, os\_major, os\_minor, os\_patch, os\_patch\_minor, device\_family. If a component resolves to null or the empty string the preceding string separator, if any, is suppressed. |
+
+Example usage:
+{code}
+userAgent {
+  inputField : user_agents
+  outputFields : {
+    ua_family : "@{ua_family}"
+    device_family : "@{device_family}"
+    ua_family_and_version : "@{ua_family}/@{ua_major}.@{ua_minor}.@{ua_patch}"
+    os_family_and_version : "@{os_family} @{os_major}.@{os_minor}.@{os_patch}"
+  }          
+}
+{code}
+
+Example input:
+{code}
+user_agents : Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3
+{code}
+
+Expected output:
+{code}
+ua_family : Mobile Safari
+device_family : iPhone
+ua_family_and_version : Mobile Safari/5.1
+os_family_and_version : iOS 5.1.1
+{code}
