@@ -65,7 +65,7 @@ public final class UserAgentBuilder implements CommandBuilder {
     private final List<Mapping> mappings = new ArrayList();
     
     public UserAgent(CommandBuilder builder, Config config, Command parent, 
-                                       Command child, final MorphlineContext context) {
+                     Command child, MorphlineContext context) {
       
       super(builder, config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");
@@ -81,13 +81,12 @@ public final class UserAgentBuilder implements CommandBuilder {
       
       Config outputFields = getConfigs().getConfig(config, "outputFields", ConfigFactory.empty());
       for (Map.Entry<String, Object> entry : new Configs().getEntrySet(outputFields)) {
-        Map<String, String> cache = new BoundedLRUHashMap(cacheCapacity);
         mappings.add(
             new Mapping(
                 entry.getKey(), 
-                entry.getValue().toString(), 
+                entry.getValue().toString().trim(), 
                 parser, 
-                cache, 
+                new BoundedLRUHashMap(cacheCapacity), 
                 nullReplacement, 
                 config));
       }
@@ -98,8 +97,9 @@ public final class UserAgentBuilder implements CommandBuilder {
     protected boolean doProcess(Record record) {      
       for (Object value : record.get(inputFieldName)) {
         Preconditions.checkNotNull(value);
+        String stringValue = value.toString().trim();
         for (Mapping mapping : mappings) {
-          mapping.apply(record, value.toString());
+          mapping.apply(record, stringValue);
         }
       }
       
@@ -179,7 +179,7 @@ public final class UserAgentBuilder implements CommandBuilder {
             result = nullReplacement;
           }
           
-          // supress preceding string separator if component resolves to empty string:
+          // suppress preceding string separator if component resolves to empty string:
           if (result.length() > 0 && lastString != null) {
             buf.append(lastString); 
           }
