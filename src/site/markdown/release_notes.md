@@ -13,14 +13,11 @@ Version TBD has the following notable changes:
     * Added morphline command to read from RCFile: [readRCFile](cdk-morphlines/morphlinesReferenceGuide.html#readRCFile) (Prasanna Rajaperumal via whoschek)
     * Added morphline command that returns Geolocation information for a given IP address, using an efficient in-memory Maxmind database lookup: 
       [geoIP](cdk-morphlines/morphlinesReferenceGuide.html#geoIP)
-    * Added morphline command that parses a user agent string and returns structured higher level data like user agent family, operating system, version, and device type: 
-      [userAgent](cdk-morphlines/morphlinesReferenceGuide.html#userAgent)
     * Added option to fail the following commands if an URI is syntactically invalid: 
       [extractURIComponents](cdk-morphlines/morphlinesReferenceGuide.html#extractURIComponents), 
       [extractURIComponent](cdk-morphlines/morphlinesReferenceGuide.html#extractURIComponent), 
       [extractURIQueryParameters](cdk-morphlines/morphlinesReferenceGuide.html#extractURIQueryParameters)  
     * Upgraded cdk-morphlines-saxon module from saxon-HE-9.5.1-2 to saxon-HE-9.5.1-3
-    * readSequenceFile command nomore reuses the identity of Hadoop Writeable objects
 
 ## Version 0.8.1
 

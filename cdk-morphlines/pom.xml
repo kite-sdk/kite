@@ -40,7 +40,6 @@
     <module>cdk-morphlines-hadoop-core</module>
     <module>cdk-morphlines-hadoop-rcfile</module>
     <module>cdk-morphlines-hadoop-sequencefile</module>
-    <module>cdk-morphlines-useragent</module>
     <module>cdk-morphlines-solr-core</module>
     <module>cdk-morphlines-solr-cell</module>
     <module>cdk-morphlines-all</module>
@@ -134,11 +133,6 @@
         <artifactId>cdk-morphlines-solr-core</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
-      </dependency>
-      <dependency>
-        <groupId>com.cloudera.cdk</groupId>
-        <artifactId>cdk-morphlines-useragent</artifactId>
-        <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
