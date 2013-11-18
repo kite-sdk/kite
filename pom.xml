@@ -136,7 +136,7 @@
     <vers.maven>2.0.6</vers.maven>
     <vers.mojo-executor>1.5</vers.mojo-executor>
     <vers.oozie>3.3.2-cdh${cdh.version}</vers.oozie>
-    <vers.parquet>1.2.0</vers.parquet>
+    <vers.parquet>1.2.5</vers.parquet>
     <vers.plexus-utils>3.0</vers.plexus-utils>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
