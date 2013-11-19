@@ -233,7 +233,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
     }
     assertContentEquals(Sets.newHashSet(octEvent, novEvent), range);
 
-    assertThrows("Should reject older event",
+    TestHelpers.assertThrows("Should reject older event",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -246,7 +246,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
         }
       }
     });
-    assertThrows("Should reject current event",
+    TestHelpers.assertThrows("Should reject current event",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -302,35 +302,35 @@ public abstract class TestRangeViews extends MiniDFSTest {
         fromOctober.toBefore(newMarker(2013, 10, 22)));
 
     // test limiting to a sub-view with before markers
-    assertThrows("in(before marker) should fail",
+    TestHelpers.assertThrows("in(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         fromOctober.in(newMarker(2013, 9, 5));
       }
     });
-    assertThrows("from(before marker) should fail",
+    TestHelpers.assertThrows("from(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         fromOctober.fromAfter(newMarker(2013, 9, 6));
       }
     });
-    assertThrows("fromAfter(before marker) should fail",
+    TestHelpers.assertThrows("fromAfter(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         fromOctober.fromAfter(newMarker(2013, 9, 18));
       }
     });
-    assertThrows("to(before marker) should fail",
+    TestHelpers.assertThrows("to(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         fromOctober.to(newMarker(2013, 9, 21));
       }
     });
-    assertThrows("toBefore(before marker) should fail",
+    TestHelpers.assertThrows("toBefore(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -351,7 +351,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
         fromOctober.toBefore(newMarker(2013, 11, 4)));
 
     // test limiting to a sub-view with a containing
-    assertThrows("in(not contained) should fail",
+    TestHelpers.assertThrows("in(not contained) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -389,35 +389,35 @@ public abstract class TestRangeViews extends MiniDFSTest {
         afterOct.contains(event));
 
     // test limiting to a sub-view with contained markers
-    assertThrows("in(contained marker) should fail",
+    TestHelpers.assertThrows("in(contained marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         afterOct.in(newMarker(2013, 10, 5));
       }
     });
-    assertThrows("from(contained marker) should fail",
+    TestHelpers.assertThrows("from(contained marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         afterOct.fromAfter(newMarker(2013, 10, 6));
       }
     });
-    assertThrows("fromAfter(contained marker) should fail",
+    TestHelpers.assertThrows("fromAfter(contained marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         afterOct.fromAfter(newMarker(2013, 10, 4));
       }
     });
-    assertThrows("to(contained marker) should fail",
+    TestHelpers.assertThrows("to(contained marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         afterOct.to(newMarker(2013, 10, 21));
       }
     });
-    assertThrows("toBefore(contained marker) should fail",
+    TestHelpers.assertThrows("toBefore(contained marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -426,35 +426,35 @@ public abstract class TestRangeViews extends MiniDFSTest {
     });
 
     // test limiting to a sub-view with before markers
-    assertThrows("in(before marker) should fail",
+    TestHelpers.assertThrows("in(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         afterOct.in(newMarker(2013, 9, 5));
       }
     });
-    assertThrows("from(before marker) should fail",
+    TestHelpers.assertThrows("from(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         afterOct.fromAfter(newMarker(2013, 9, 6));
       }
     });
-    assertThrows("fromAfter(before marker) should fail",
+    TestHelpers.assertThrows("fromAfter(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         afterOct.fromAfter(newMarker(2013, 9, 18));
       }
     });
-    assertThrows("to(before marker) should fail",
+    TestHelpers.assertThrows("to(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         afterOct.to(newMarker(2013, 9, 21));
       }
     });
-    assertThrows("toBefore(before marker) should fail",
+    TestHelpers.assertThrows("toBefore(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -475,7 +475,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
         afterOct.toBefore(newMarker(2013, 11, 4)));
 
     // test limiting to a sub-view with a containing
-    assertThrows("in(not contained) should fail",
+    TestHelpers.assertThrows("in(not contained) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -537,35 +537,35 @@ public abstract class TestRangeViews extends MiniDFSTest {
         toOctober.toBefore(newMarker(2013, 9, 22)));
 
     // test limiting to a sub-view with after markers
-    assertThrows("in(after marker) should fail",
+    TestHelpers.assertThrows("in(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         toOctober.in(newMarker(2013, 11, 19));
       }
     });
-    assertThrows("from(after marker) should fail",
+    TestHelpers.assertThrows("from(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         toOctober.fromAfter(newMarker(2013, 11, 1));
       }
     });
-    assertThrows("fromAfter(after marker) should fail",
+    TestHelpers.assertThrows("fromAfter(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         toOctober.fromAfter(newMarker(2013, 11, 1));
       }
     });
-    assertThrows("to(after marker) should fail",
+    TestHelpers.assertThrows("to(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         toOctober.to(newMarker(2013, 11));
       }
     });
-    assertThrows("toBefore(after marker) should fail",
+    TestHelpers.assertThrows("toBefore(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -574,7 +574,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
     });
 
     // test limiting to a sub-view with a containing
-    assertThrows("in(not contained) should fail",
+    TestHelpers.assertThrows("in(not contained) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -612,35 +612,35 @@ public abstract class TestRangeViews extends MiniDFSTest {
         beforeOct.contains(event));
 
     // test limiting to a sub-view with contained markers
-    assertThrows("in(contained marker) should fail",
+    TestHelpers.assertThrows("in(contained marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         beforeOct.in(newMarker(2013, 10, 5));
       }
     });
-    assertThrows("from(contained marker) should fail",
+    TestHelpers.assertThrows("from(contained marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         beforeOct.fromAfter(newMarker(2013, 10, 6));
       }
     });
-    assertThrows("fromAfter(contained marker) should fail",
+    TestHelpers.assertThrows("fromAfter(contained marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         beforeOct.fromAfter(newMarker(2013, 10, 4));
       }
     });
-    assertThrows("to(contained marker) should fail",
+    TestHelpers.assertThrows("to(contained marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         beforeOct.to(newMarker(2013, 10, 21));
       }
     });
-    assertThrows("toBefore(contained marker) should fail",
+    TestHelpers.assertThrows("toBefore(contained marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -661,35 +661,35 @@ public abstract class TestRangeViews extends MiniDFSTest {
         beforeOct.toBefore(newMarker(2013, 9, 22)));
 
     // test limiting to a sub-view with after markers
-    assertThrows("in(after marker) should succeed",
+    TestHelpers.assertThrows("in(after marker) should succeed",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         beforeOct.in(newMarker(2013, 11, 19));
       }
     });
-    assertThrows("from(after marker) should fail",
+    TestHelpers.assertThrows("from(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         beforeOct.fromAfter(newMarker(2013, 11, 1));
       }
     });
-    assertThrows("fromAfter(after marker) should fail",
+    TestHelpers.assertThrows("fromAfter(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         beforeOct.fromAfter(newMarker(2013, 11, 1));
       }
     });
-    assertThrows("to(after marker) should fail",
+    TestHelpers.assertThrows("to(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         beforeOct.to(newMarker(2013, 11));
       }
     });
-    assertThrows("toBefore(after marker) should fail",
+    TestHelpers.assertThrows("toBefore(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -698,7 +698,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
     });
 
     // test limiting to a sub-view with a containing
-    assertThrows("in(not contained) should fail",
+    TestHelpers.assertThrows("in(not contained) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -748,35 +748,35 @@ public abstract class TestRangeViews extends MiniDFSTest {
         inOctober.toBefore(newMarker(2013, 10, 22)));
 
     // test limiting to a sub-view with before markers
-    assertThrows("in(before marker) should fail",
+    TestHelpers.assertThrows("in(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         inOctober.in(newMarker(2013, 9, 5));
       }
     });
-    assertThrows("from(before marker) should fail",
+    TestHelpers.assertThrows("from(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         inOctober.fromAfter(newMarker(2013, 9, 6));
       }
     });
-    assertThrows("fromAfter(before marker) should fail",
+    TestHelpers.assertThrows("fromAfter(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         inOctober.fromAfter(newMarker(2013, 9, 18));
       }
     });
-    assertThrows("to(before marker) should fail",
+    TestHelpers.assertThrows("to(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         inOctober.to(newMarker(2013, 9, 21));
       }
     });
-    assertThrows("toBefore(before marker) should fail",
+    TestHelpers.assertThrows("toBefore(before marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -785,35 +785,35 @@ public abstract class TestRangeViews extends MiniDFSTest {
     });
 
     // test limiting to a sub-view with after markers
-    assertThrows("in(after marker) should succeed",
+    TestHelpers.assertThrows("in(after marker) should succeed",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         inOctober.in(newMarker(2013, 11, 19));
       }
     });
-    assertThrows("from(after marker) should fail",
+    TestHelpers.assertThrows("from(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         inOctober.fromAfter(newMarker(2013, 11, 1));
       }
     });
-    assertThrows("fromAfter(after marker) should fail",
+    TestHelpers.assertThrows("fromAfter(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         inOctober.fromAfter(newMarker(2013, 11, 1));
       }
     });
-    assertThrows("to(after marker) should fail",
+    TestHelpers.assertThrows("to(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         inOctober.to(newMarker(2013, 11));
       }
     });
-    assertThrows("toBefore(after marker) should fail",
+    TestHelpers.assertThrows("toBefore(after marker) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -822,7 +822,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
     });
 
     // test limiting to a sub-view with a containing
-    assertThrows("in(not contained) should fail",
+    TestHelpers.assertThrows("in(not contained) should fail",
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
@@ -889,35 +889,35 @@ public abstract class TestRangeViews extends MiniDFSTest {
     Assert.assertTrue("Should contain even null events",
         notPartitioned.contains((StandardEvent) null));
 
-    assertThrows("from should fail",
+    TestHelpers.assertThrows("from should fail",
         IllegalStateException.class, new Runnable() {
       @Override
       public void run() {
         notPartitioned.from(now);
       }
     });
-    assertThrows("fromAfter should fail",
+    TestHelpers.assertThrows("fromAfter should fail",
         IllegalStateException.class, new Runnable() {
       @Override
       public void run() {
         notPartitioned.fromAfter(now);
       }
     });
-    assertThrows("to should fail",
+    TestHelpers.assertThrows("to should fail",
         IllegalStateException.class, new Runnable() {
       @Override
       public void run() {
         notPartitioned.to(now);
       }
     });
-    assertThrows("toBefore should fail",
+    TestHelpers.assertThrows("toBefore should fail",
         IllegalStateException.class, new Runnable() {
       @Override
       public void run() {
         notPartitioned.toBefore(now);
       }
     });
-    assertThrows("in should fail",
+    TestHelpers.assertThrows("in should fail",
         IllegalStateException.class, new Runnable() {
       @Override
       public void run() {
@@ -938,22 +938,5 @@ public abstract class TestRangeViews extends MiniDFSTest {
       }
     }
     return builder.build();
-  }
-
-  /**
-   * A convenience method to avoid a large number of @Test(expected=...) tests
-   * @param message A String message to describe this assertion
-   * @param expected An Exception class that the Runnable should throw
-   * @param runnable A Runnable that is expected to throw the exception
-   */
-  public static void assertThrows(
-      String message, Class<? extends Exception> expected, Runnable runnable) {
-    try {
-      runnable.run();
-      Assert.fail("No exception was thrown (" + message + "), expected: " +
-          expected.getName());
-    } catch (Exception actual) {
-      Assert.assertEquals(message, expected, actual.getClass());
-    }
   }
 }
