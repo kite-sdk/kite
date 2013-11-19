@@ -41,6 +41,11 @@ public class Formats {
   public static final Format PARQUET = new Format("parquet");
 
   /**
+   * CSV: comma-separated values (read-only).
+   */
+  public static final Format CSV = new Format("csv");
+
+  /**
    * Return a {@link Format} for the format name specified. If {@code formatName}
    * is not a valid name, an IllegalArgumentException is thrown. Currently the
    * formats <q>avro</q> and <q>parquet</q> are supported. Format names are
@@ -55,6 +60,8 @@ public class Formats {
       return AVRO;
     } else if (formatName.equals("parquet")) {
       return PARQUET;
+    } else if (formatName.equals("csv")) {
+      return CSV;
     } else {
       throw new IllegalArgumentException("Unknown format type: " + formatName);
     }

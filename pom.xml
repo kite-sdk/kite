@@ -146,6 +146,7 @@
     <solr.expected.version>4.6.0</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
     <vers.tika>1.4</vers.tika>
     <vers.jackson>2.2.1</vers.jackson>
+    <vers.opencsv>2.3</vers.opencsv>
 
     <!-- Plugin versions -->
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
@@ -934,6 +935,11 @@
         <groupId>org.twdata.maven</groupId>
         <artifactId>mojo-executor</artifactId>
         <version>${vers.mojo-executor}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.sf.opencsv</groupId>
+        <artifactId>opencsv</artifactId>
+        <version>${vers.opencsv}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

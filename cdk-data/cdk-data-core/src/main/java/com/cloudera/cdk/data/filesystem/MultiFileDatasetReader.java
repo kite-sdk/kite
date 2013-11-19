@@ -17,6 +17,7 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
+import com.cloudera.cdk.data.DatasetReaderException;
 import com.cloudera.cdk.data.Format;
 import com.cloudera.cdk.data.Formats;
 import com.cloudera.cdk.data.UnknownFormatException;
@@ -58,7 +59,8 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
       "A reader may not be opened more than once - current state:%s", state);
 
     final Format format = descriptor.getFormat();
-    if (!(Formats.AVRO.equals(format) || Formats.PARQUET.equals(format))) {
+    if (!(Formats.AVRO.equals(format) || Formats.PARQUET.equals(format)
+        || Formats.CSV.equals(format))) {
       throw new UnknownFormatException("Cannot open format:" + format.getName());
     }
 
@@ -70,6 +72,8 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
     if (Formats.PARQUET.equals(descriptor.getFormat())) {
       reader = new ParquetFileSystemDatasetReader(fileSystem, filesIter.next(),
           descriptor.getSchema());
+    } else if (Formats.CSV.equals(descriptor.getFormat())) {
+      reader = new CSVFileReader<E>(fileSystem, filesIter.next(), descriptor);
     } else {
       reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
           descriptor.getSchema());
