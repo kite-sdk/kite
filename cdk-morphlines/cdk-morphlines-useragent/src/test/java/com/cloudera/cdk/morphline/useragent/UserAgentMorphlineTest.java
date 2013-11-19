@@ -45,6 +45,26 @@ public class UserAgentMorphlineTest extends AbstractMorphlineTest {
   }  
 
   @Test
+  public void testRawAPIWithUnknownUserAgent() throws Exception {
+    String userAgentStr = "fp@$%3489jvp#3E";
+    Client client = new Parser().parse(userAgentStr);
+    
+    assertNotNull(client);
+    assertEquals("Other", client.userAgent.family); 
+    assertNull(client.userAgent.major);
+    assertNull(client.userAgent.minor); 
+    assertNull(client.userAgent.patch);
+
+    assertEquals("Other", client.os.family); 
+    assertNull(client.os.major); 
+    assertNull(client.os.minor);
+    assertNull(client.os.patch);
+    assertNull(client.os.patchMinor);
+
+    assertEquals("Other", client.device.family); 
+  }  
+
+  @Test
   public void testBasic() throws Exception {
     testBasic("test-morphlines/userAgent");    
   }

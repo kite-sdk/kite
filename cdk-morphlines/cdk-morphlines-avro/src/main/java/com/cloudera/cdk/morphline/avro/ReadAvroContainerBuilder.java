@@ -162,7 +162,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  private static final class BoundedLRUHashMap extends LinkedHashMap {
+  private static final class BoundedLRUHashMap<K,V> extends LinkedHashMap<K,V> {
     
     private final int capacity;
 

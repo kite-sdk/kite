@@ -271,7 +271,7 @@ public final class UserAgentBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  private static final class BoundedLRUHashMap<S,T> extends LinkedHashMap<S,T> {
+  private static final class BoundedLRUHashMap<K,V> extends LinkedHashMap<K,V> {
     
     private final int capacity;
 
