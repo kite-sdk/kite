@@ -27,17 +27,12 @@
 
   <dependencies>
 
-    <!-- see https://github.com/maxmind/GeoIP2-java and http://dev.maxmind.com/geoip/geoip2/geolite2/ -->
+    <!-- see https://github.com/maxmind/MaxMind-DB-Reader-java -->
+    <!-- see https://github.com/maxmind/GeoIP2-java and http://dev.maxmind.com/geoip/geoip2/geolite2/ and maven geoip2-0.7.0-->
     <dependency> 
-      <groupId>com.maxmind.geoip2</groupId>
-      <artifactId>geoip2</artifactId>
-      <version>0.7.0</version>
-      <exclusions> <!-- unnecessary for non-WebServiceClient purposes -->
-        <exclusion>
-          <groupId>com.google.http-client</groupId>
-          <artifactId>google-http-client</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>com.maxmind.db</groupId>
+      <artifactId>maxmind-db</artifactId>
+      <version>0.3.1</version>
     </dependency>
 
     <dependency>

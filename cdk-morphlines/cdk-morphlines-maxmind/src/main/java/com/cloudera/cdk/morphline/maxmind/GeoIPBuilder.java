@@ -18,7 +18,6 @@ package com.cloudera.cdk.morphline.maxmind;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -32,6 +31,7 @@ import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Notifications;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.net.InetAddresses;
 import com.maxmind.db.Reader;
 import com.typesafe.config.Config;
 
@@ -79,25 +79,23 @@ public final class GeoIPBuilder implements CommandBuilder {
     @Override
     protected boolean doProcess(Record record) {      
       for (Object value : record.get(inputFieldName)) {
-        InetAddress host;
+        InetAddress addr;
         if (value instanceof InetAddress) {
-          host = (InetAddress) value;
+          addr = (InetAddress) value;
         } else {
           try {
-            host = InetAddress.getByName(value.toString());
-          } catch (UnknownHostException e) {
-            if (LOG.isDebugEnabled()) {
-              LOG.debug("Cannot get InetAddress for name: " + value, e);
-            }
+            addr = InetAddresses.forString(value.toString());
+          } catch (IllegalArgumentException e) {
+            LOG.debug("Invalid IP string literal: {}", value);
             return false;
           }   
         }
         
         JsonNode json;
         try {
-          json = databaseReader.get(host);
+          json = databaseReader.get(addr);
         } catch (IOException e) {
-          throw new MorphlineRuntimeException("Cannot perform GeoIP lookup for host: " + host, e);
+          throw new MorphlineRuntimeException("Cannot perform GeoIP lookup for IP: " + addr, e);
         }
         
         record.put(Fields.ATTACHMENT_BODY, json);

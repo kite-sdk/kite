@@ -15,9 +15,6 @@
  */
 package com.cloudera.cdk.morphline.maxmind;
 
-import java.io.File;
-import java.net.InetAddress;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -25,62 +22,9 @@ import com.cloudera.cdk.morphline.api.AbstractMorphlineTest;
 import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Notifications;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.maxmind.db.Reader;
-import com.maxmind.geoip2.DatabaseReader;
-import com.maxmind.geoip2.model.CityResponse;
-import com.maxmind.geoip2.model.CountryResponse;
 
 public class MaxmindMorphlineTest extends AbstractMorphlineTest {
 
-  private static final String RESOURCES_DIR = "target/test-classes";
-
-  @Test
-  public void testRawMaxMindAPI() throws Exception {
-    InetAddress HOST = InetAddress.getByName("128.101.101.101");    
-    File database = new File(RESOURCES_DIR + "/GeoLite2-City.mmdb");
-//  File database = new File(RESOURCES_DIR + "/GeoLite2-Country.mmdb");
-
-    DatabaseReader dbReader = new DatabaseReader.Builder(database).build();
-    CityResponse cityResponse = dbReader.city(HOST);
-
-    assertEquals("US", cityResponse.getCountry().getIsoCode());
-    assertEquals("United States", cityResponse.getCountry().getName());
-    assertEquals("美国", cityResponse.getCountry().getNames().get("zh-CN"));
-
-    assertEquals("Minnesota", cityResponse.getMostSpecificSubdivision().getName());
-    assertEquals("MN", cityResponse.getMostSpecificSubdivision().getIsoCode());
-
-    assertEquals("Minneapolis", cityResponse.getCity().getName());
-    assertEquals("55455", cityResponse.getPostal().getCode());
-
-    assertEquals(new Double(44.9733), cityResponse.getLocation().getLatitude());
-    assertEquals(new Double(-93.2323), cityResponse.getLocation().getLongitude());
-
-    CountryResponse countryResponse = dbReader.country(HOST);
-    //System.out.println("countryResponse="+countryResponse.toString());
-    assertEquals("US", countryResponse.getCountry().getIsoCode());
-    assertEquals("United States", countryResponse.getCountry().getName());
-
-    Reader reader = new Reader(database);
-    JsonNode root = reader.get(HOST);
-    //System.out.println("json="+root.toString());
-    assertEquals("US", root.get("country").get("iso_code").textValue());
-    assertEquals("United States", root.get("country").get("names").get("en").textValue());
-    assertEquals("美国", root.get("country").get("names").get("zh-CN").textValue());
-    
-    assertEquals("Minnesota", root.get("subdivisions").get(0).get("names").get("en").textValue());
-    assertEquals("MN", root.get("subdivisions").get(0).get("iso_code").textValue());
-    
-    assertEquals("Minneapolis", root.get("city").get("names").get("en").textValue());
-    assertEquals("55455", root.get("postal").get("code").textValue());
-    
-    assertEquals(44.9733, root.get("location").get("latitude").doubleValue(), 0.00001);
-    assertEquals(-93.2323, root.get("location").get("longitude").doubleValue(), 0.00001);    
-    reader.close();
-    reader.close();
-  }
-  
   @Test
   public void testBasic() throws Exception {
     morphline = createMorphline("test-morphlines/geoIP");    
@@ -146,4 +90,54 @@ public class MaxmindMorphlineTest extends AbstractMorphlineTest {
     System.out.println("Results: iters=" + iters + ", took[secs]=" + secs + ", iters/secs=" + (iters/secs));
   }  
 
+  /*
+  private static final String RESOURCES_DIR = "target/test-classes";
+
+  @Test
+  public void testRawMaxMindAPI() throws Exception {
+    InetAddress HOST = InetAddress.getByName("128.101.101.101");    
+    File database = new File(RESOURCES_DIR + "/GeoLite2-City.mmdb");
+//  File database = new File(RESOURCES_DIR + "/GeoLite2-Country.mmdb");
+
+    DatabaseReader dbReader = new DatabaseReader.Builder(database).build();
+    CityResponse cityResponse = dbReader.city(HOST);
+
+    assertEquals("US", cityResponse.getCountry().getIsoCode());
+    assertEquals("United States", cityResponse.getCountry().getName());
+    assertEquals("美国", cityResponse.getCountry().getNames().get("zh-CN"));
+
+    assertEquals("Minnesota", cityResponse.getMostSpecificSubdivision().getName());
+    assertEquals("MN", cityResponse.getMostSpecificSubdivision().getIsoCode());
+
+    assertEquals("Minneapolis", cityResponse.getCity().getName());
+    assertEquals("55455", cityResponse.getPostal().getCode());
+
+    assertEquals(new Double(44.9733), cityResponse.getLocation().getLatitude());
+    assertEquals(new Double(-93.2323), cityResponse.getLocation().getLongitude());
+
+    CountryResponse countryResponse = dbReader.country(HOST);
+    //System.out.println("countryResponse="+countryResponse.toString());
+    assertEquals("US", countryResponse.getCountry().getIsoCode());
+    assertEquals("United States", countryResponse.getCountry().getName());
+
+    Reader reader = new Reader(database);
+    JsonNode root = reader.get(HOST);
+    //System.out.println("json="+root.toString());
+    assertEquals("US", root.get("country").get("iso_code").textValue());
+    assertEquals("United States", root.get("country").get("names").get("en").textValue());
+    assertEquals("美国", root.get("country").get("names").get("zh-CN").textValue());
+    
+    assertEquals("Minnesota", root.get("subdivisions").get(0).get("names").get("en").textValue());
+    assertEquals("MN", root.get("subdivisions").get(0).get("iso_code").textValue());
+    
+    assertEquals("Minneapolis", root.get("city").get("names").get("en").textValue());
+    assertEquals("55455", root.get("postal").get("code").textValue());
+    
+    assertEquals(44.9733, root.get("location").get("latitude").doubleValue(), 0.00001);
+    assertEquals(-93.2323, root.get("location").get("longitude").doubleValue(), 0.00001);    
+    reader.close();
+    reader.close();
+  }
+  */
+  
 }
