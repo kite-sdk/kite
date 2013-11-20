@@ -31,6 +31,7 @@ import com.cloudera.cdk.morphline.base.AbstractCommand;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Notifications;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.InetAddresses;
 import com.maxmind.db.Reader;
 import com.typesafe.config.Config;
@@ -98,13 +99,24 @@ public final class GeoIPBuilder implements CommandBuilder {
           throw new MorphlineRuntimeException("Cannot perform GeoIP lookup for IP: " + addr, e);
         }
         
+        ObjectNode location = (ObjectNode) json.get("location");
+        if (location != null) {
+          JsonNode jlatitude = location.get("latitude");
+          JsonNode jlongitude = location.get("longitude");
+          if (jlatitude != null && jlongitude != null) {
+            String latitude = jlatitude.toString();
+            String longitude = jlongitude.toString();
+            location.put("latitude_longitude", latitude + "," + longitude);
+            location.put("longitude_latitude", longitude + "," + latitude);
+          }
+        }        
         record.put(Fields.ATTACHMENT_BODY, json);
       }
       
       // pass record to next command in chain:
       return super.doProcess(record);
     }
-
+    
     @Override
     protected void doNotify(Record notification) {      
       for (Object event : Notifications.getLifecycleEvents(notification)) {

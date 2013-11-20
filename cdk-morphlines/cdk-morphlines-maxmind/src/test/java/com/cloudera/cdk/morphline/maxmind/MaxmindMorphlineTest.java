@@ -43,6 +43,8 @@ public class MaxmindMorphlineTest extends AbstractMorphlineTest {
     expected.put("/postal/code", "55455");
     expected.put("/location/latitude", 44.9733);
     expected.put("/location/longitude", -93.2323);
+    expected.put("/location/latitude_longitude", "44.9733,-93.2323");
+    expected.put("/location/longitude_latitude", "-93.2323,44.9733");
     
     processAndVerifySuccess(record, expected, false);
     Notifications.notifyShutdown(morphline);

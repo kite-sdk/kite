@@ -1799,6 +1799,8 @@ extractJsonPaths {
     /postal/code : /postal/code
     /location/latitude : /location/latitude
     /location/longitude : /location/longitude
+    /location/latitude_longitude : /location/latitude_longitude
+    /location/longitude_latitude : /location/longitude_latitude
   } 
 }
 {code}
@@ -1819,6 +1821,8 @@ ip: 128.101.101.101
 /postal/code: 55455
 /location/latitude: 44.9733
 /location/longitude: -93.2323
+/location/latitude_longitude: 44.9733,-93.2323
+/location/longitude_latitude: -93.2323,44.9733
 {code}
 
 h3. Example geoIP JSON output
@@ -1874,6 +1878,8 @@ Expected output:
       "longitude":-93.2323,
       "metro_code":"613",
       "time_zone":"America/Chicago"
+      "latitude_longitude":"44.9733,-93.2323"
+      "longitude_latitude":"-93.2323,44.9733"
    },
    "postal":{
       "code":"55455"
