@@ -945,7 +945,7 @@
     </repository>
     <snapshotRepository>
       <id>cloudera.snapshots.repo</id>
-      <url>https://repository.cloudera.com/artifactory/libs-snapshot-local</url>
+      <url>http://maven.jenkins.cloudera.com:8081/artifactory/cdh-snapshot-local</url>
     </snapshotRepository>
     <site>
       <id>cdk.website</id>
