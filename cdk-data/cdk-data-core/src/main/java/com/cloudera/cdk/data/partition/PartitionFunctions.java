@@ -82,4 +82,9 @@ public class PartitionFunctions {
     return new MinuteFieldPartitioner(sourceName, name);
   }
 
+  @Beta
+  public static FieldPartitioner<Long, String> dateFormat(String sourceName, String name, String format) {
+    return new DateFormatPartitioner(sourceName, name, format);
+  }
+
 }

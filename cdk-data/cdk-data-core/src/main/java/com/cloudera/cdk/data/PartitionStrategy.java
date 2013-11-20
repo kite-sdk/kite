@@ -586,6 +586,24 @@ public class PartitionStrategy {
     }
 
     /**
+     * Configure a partitioner that applies a custom date format to a timestamp
+     * field. The UTC timezone is assumed.
+     *
+     * @param sourceName
+     *          The entity field name of the timestamp to format
+     * @param name
+     *          A name for the partitions created by the format (e.g. "day")
+     * @param format
+     *          A {@link java.text.SimpleDateFormat} format-string.
+     * @return This builder for method chaining.
+     * @since 0.9.0
+     */
+    public Builder dateFormat(String sourceName, String name, String format) {
+      fieldPartitioners.add(PartitionFunctions.dateFormat(sourceName, name, format));
+      return this;
+    }
+
+    /**
      * <p>
      * Get the configured {@link PartitionStrategy} instance.
      * </p>
