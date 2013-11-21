@@ -16,8 +16,6 @@
 package com.cloudera.cdk.data.dao;
 
 import com.cloudera.cdk.data.DatasetWriter;
-import java.io.Closeable;
-import java.io.Flushable;
 
 public interface EntityBatch<E> extends DatasetWriter<E> {
 

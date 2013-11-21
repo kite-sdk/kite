@@ -15,12 +15,12 @@
  */
 package com.cloudera.cdk.data.hbase.avro;
 
-import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.Marker;
+import com.cloudera.cdk.data.RandomAccessDataset;
+import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
@@ -28,10 +28,12 @@ import com.cloudera.cdk.data.hbase.avro.entities.TestEntity;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -87,19 +89,17 @@ public class HBaseDatasetRepositoryTest {
 
   @Test
   public void testGeneric() throws Exception {
-
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
         .configuration(HBaseTestUtils.getConf()).build();
-
+    
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
-        .schema(testGenericEntity)
+        .schemaLiteral(testGenericEntity)
         .build();
-    Dataset ds = repo.create(tableName, descriptor);
-    DatasetAccessor<GenericRecord> accessor = ds.newAccessor();
+    RandomAccessDataset<GenericRecord> ds = repo.create(tableName, descriptor);
 
     // Create the new entities
-    accessor.put(createGenericEntity(0));
-    accessor.put(createGenericEntity(1));
+    ds.put(createGenericEntity(0));
+    ds.put(createGenericEntity(1));
 
     DatasetWriter<GenericRecord> writer = ds.getWriter();
     assertFalse("Writer should not be open before calling open", writer.isOpen());
@@ -117,15 +117,14 @@ public class HBaseDatasetRepositoryTest {
 
     // reload
     ds = repo.load(tableName);
-    accessor = ds.newAccessor();
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
       String iStr = Long.toString(i);
       Marker key = new Marker.Builder()
           .add("part1", "part1_" + iStr)
-          .add("part2", "part2_" + iStr).get();
-      compareEntitiesWithUtf8(i, accessor.get(key));
+          .add("part2", "part2_" + iStr).build();
+      compareEntitiesWithUtf8(i, ds.get(key));
     }
 
     // ensure the new entities are what we expect with scan operations
@@ -148,8 +147,8 @@ public class HBaseDatasetRepositoryTest {
     // test a partial scan
     cnt = 3;
     reader = ds
-        .from(new Marker.Builder().add("part1", "part1_3").add("part2", "part2_3").get())
-        .to(new Marker.Builder().add("part1", "part1_7").add("part2", "part2_7").get())
+        .from(new Marker.Builder().add("part1", "part1_3").add("part2", "part2_3").build())
+        .to(new Marker.Builder().add("part1", "part1_7").add("part2", "part2_7").build())
         .newReader();
     reader.open();
     try {
@@ -164,13 +163,12 @@ public class HBaseDatasetRepositoryTest {
 
     Marker key = new Marker.Builder()
         .add("part1", "part1_5")
-        .add("part2", "part2_5").get();
+        .add("part2", "part2_5").build();
 
     // test delete
-    accessor.delete(key);
-    GenericRecord deletedRecord = accessor.get(key);
+    ds.delete(key);
+    GenericRecord deletedRecord = ds.get(key);
     assertNull(deletedRecord);
-
   }
 
   @Test
@@ -179,16 +177,15 @@ public class HBaseDatasetRepositoryTest {
         .configuration(HBaseTestUtils.getConf()).build();
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
-        .schema(testEntity)
+        .schemaLiteral(testEntity)
         .build();
-    Dataset ds = repo.create(tableName, descriptor);
-    DatasetAccessor<TestEntity> accessor = ds.newAccessor();
+    RandomAccessDataset<TestEntity> ds = repo.create(tableName, descriptor);
 
     // Create the new entities
-    accessor.put(createSpecificEntity(0));
-    accessor.put(createSpecificEntity(1));
+    ds.put(createSpecificEntity(0));
+    ds.put(createSpecificEntity(1));
 
-    DatasetWriter<TestEntity> writer = ds.getWriter();
+    DatasetWriter<TestEntity> writer = ds.newWriter();
     writer.open();
     try {
       for (int i = 2; i < 10; ++i) {
@@ -204,13 +201,13 @@ public class HBaseDatasetRepositoryTest {
       String iStr = Long.toString(i);
       Marker key = new Marker.Builder()
           .add("part1", "part1_" + iStr)
-          .add("part2", "part2_" + iStr).get();
-      compareEntitiesWithString(i, accessor.get(key));
+          .add("part2", "part2_" + iStr).build();
+      compareEntitiesWithString(i, ds.get(key));
     }
 
     // ensure the new entities are what we expect with scan operations
     int cnt = 0;
-    DatasetReader<TestEntity> reader = ds.getReader();
+    DatasetReader<TestEntity> reader = ds.newReader();
     reader.open();
     try {
       for (TestEntity entity : reader) {
@@ -224,11 +221,11 @@ public class HBaseDatasetRepositoryTest {
 
     Marker key = new Marker.Builder()
         .add("part1", "part1_5")
-        .add("part2", "part2_5").get();
+        .add("part2", "part2_5").build();
 
     // test delete
-    accessor.delete(key);
-    TestEntity deletedRecord = accessor.get(key);
+    ds.delete(key);
+    TestEntity deletedRecord = ds.get(key);
     assertNull(deletedRecord);
   }
 
@@ -239,20 +236,19 @@ public class HBaseDatasetRepositoryTest {
         .configuration(HBaseTestUtils.getConf()).build();
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
-        .schema(testGenericEntity)
+        .schemaLiteral(testGenericEntity)
         .build();
-    Dataset ds = repo.create(tableName, descriptor);
-    DatasetAccessor<GenericRecord> accessor = ds.newAccessor();
+    RandomAccessDataset<GenericRecord> ds = repo.create(tableName, descriptor);
 
     // Create a new entity
-    accessor.put(createGenericEntity(0));
+    ds.put(createGenericEntity(0));
 
     // Retrieve the entity
     String iStr = Long.toString(0);
     Marker key = new Marker.Builder()
         .add("part1", "part1_" + iStr)
-        .add("part2", "part2_" + iStr).get();
-    compareEntitiesWithUtf8(0, accessor.get(key));
+        .add("part2", "part2_" + iStr).build();
+    compareEntitiesWithUtf8(0, ds.get(key));
 
     // delete dataset
     boolean success = repo.delete(tableName);
@@ -264,13 +260,12 @@ public class HBaseDatasetRepositoryTest {
 
     // create the dataset again
     ds = repo.create(tableName, descriptor);
-    accessor = ds.newAccessor();
 
     // Create a new entity
-    accessor.put(createGenericEntity(0));
+    ds.put(createGenericEntity(0));
 
     // Retrieve the entity
-    compareEntitiesWithUtf8(0, accessor.get(key));
+    compareEntitiesWithUtf8(0, ds.get(key));
   }
 
   // TODO: remove duplication from ManagedDaoTest

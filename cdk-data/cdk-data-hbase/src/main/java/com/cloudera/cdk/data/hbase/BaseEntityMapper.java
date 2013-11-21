@@ -31,11 +31,9 @@ import com.cloudera.cdk.data.dao.MappingType;
 
 /**
  * A base implementation of EntityMapper, that uses the provided EntitySerDe and
- * KeyBuilderFactory to map Key/Entity pairs to HBase puts, and HBase results to
- * KeyEntity pairs.
+ * KeySerDe to map entities to HBase puts, and HBase results to
+ * Entities
  * 
- * @param <K>
- *          The key type
  * @param <E>
  *          The entity type
  */

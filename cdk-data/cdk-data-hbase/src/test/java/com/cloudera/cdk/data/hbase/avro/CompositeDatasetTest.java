@@ -15,12 +15,10 @@
  */
 package com.cloudera.cdk.data.hbase.avro;
 
-import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.Marker;
+import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
-import com.cloudera.cdk.data.hbase.avro.entities.CompositeEntity;
 import com.cloudera.cdk.data.hbase.avro.entities.SubEntity1;
 import com.cloudera.cdk.data.hbase.avro.entities.SubEntity2;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
@@ -38,6 +36,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class CompositeDatasetTest {
@@ -86,8 +85,7 @@ public class CompositeDatasetTest {
         .build());
 
     // create composite dataset
-    Dataset ds = repo.load(tableName + ".SubEntity1.SubEntity2");
-    DatasetAccessor<Map<String, SpecificRecord>> accessor = ds.newAccessor();
+    RandomAccessDataset<Map<String, SpecificRecord>> ds = repo.load(tableName + ".SubEntity1.SubEntity2");
 
     // Construct entities
     SubEntity1 subEntity1 = SubEntity1.newBuilder().setPart1("1").setPart2("1")
@@ -100,10 +98,10 @@ public class CompositeDatasetTest {
     compositeEntity.put("SubEntity2", subEntity2);
 
     // Test put and get
-    accessor.put(compositeEntity);
+    ds.put(compositeEntity);
 
-    Marker key = new Marker.Builder().add("part1", "1").add("part2", "1").get();
-    CompositeEntity returnedCompositeEntity = accessor.get(key);
+    Marker key = new Marker.Builder().add("part1", "1").add("part2", "1").build();
+    Map<String, SpecificRecord> returnedCompositeEntity = ds.get(key);
     assertNotNull("found entity", returnedCompositeEntity);
     assertEquals("field1_1", ((SubEntity1)returnedCompositeEntity.get("SubEntity1")).getField1());
     assertEquals("field1_2", ((SubEntity1)returnedCompositeEntity.get("SubEntity1")).getField2());
@@ -111,15 +109,15 @@ public class CompositeDatasetTest {
     assertEquals("field2_2", ((SubEntity2)returnedCompositeEntity.get("SubEntity2")).getField2());
 
     // Test OCC
-    assertFalse(accessor.put(compositeEntity));
-    assertTrue(accessor.put(returnedCompositeEntity));
+    assertFalse(ds.put(compositeEntity));
+    assertTrue(ds.put(returnedCompositeEntity));
 
     // Test null field
     subEntity1 = SubEntity1.newBuilder(subEntity1).setPart2("2").build(); // different key
     compositeEntity = new HashMap<String, SpecificRecord>();
     compositeEntity.put("SubEntity1", subEntity1);
-    accessor.put(compositeEntity);
-    returnedCompositeEntity = accessor.get(new Marker.Builder().add("part1", "1").add("part2", "2").get());
-    assertNull(returnedCompositeEntity.getSubEntity2());
+    ds.put(compositeEntity);
+    returnedCompositeEntity = ds.get(new Marker.Builder().add("part1", "1").add("part2", "2").build());
+    assertNull(returnedCompositeEntity.get("SubEntity2"));
   }
 }

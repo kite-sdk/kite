@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data.dao;
 
-import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 
@@ -27,7 +26,7 @@ import com.cloudera.cdk.data.PartitionStrategy;
  *          The type of entity the DAO should be able to fetch and persist to an
  *          HBase table.
  */
-public interface Dao<E> extends DatasetAccessor<E> {
+public interface Dao<E> {
 
   /**
    * Return the entity stored in HBase at the row specified keyed on the
@@ -111,6 +110,27 @@ public interface Dao<E> extends DatasetAccessor<E> {
   public EntityScanner<E> getScanner(PartitionKey startKey, PartitionKey stopKey);
 
   /**
+   * Get a scanner to scan the HBase table this DAO reads from. If
+   * startInclusive is true, the scanner is opened starting at the first row
+   * greater than or equal to startKey. Otherwise, it starts at the first row
+   * greater than the startKey. If stopInclusive is true It will stop at the
+   * first row it sees greater than the stopKey. Otherwise, it stop at the first
+   * row greater than or equal to the stopKey.
+   * 
+   * If startKey is null, it will start at the first row in the table. If
+   * stopKey is null, it will stop at the last row in the table.
+   * 
+   * @param startKey
+   * @param startInclusive
+   * @param stopKey
+   * @param stopInclusive
+   * @return An EntityScanner instance that can be used to iterate through
+   *         entities in the table.
+   */
+  public EntityScanner<E> getScanner(PartitionKey startKey,
+      boolean startInclusive, PartitionKey stopKey, boolean stopInclusive);
+
+  /**
    * Gets the key schema instance for this DAO.
    * 
    * @return The HBaseCommonKeySchema instance.
@@ -124,6 +144,11 @@ public interface Dao<E> extends DatasetAccessor<E> {
    */
   public EntitySchema getEntitySchema();
 
+  /**
+   * Get the entity's PartitonStrategy
+   * 
+   * @return The PartitionStrategy
+   */
   public PartitionStrategy getPartitionStrategy();
 
   /**

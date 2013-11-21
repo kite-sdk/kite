@@ -17,7 +17,6 @@
 package com.cloudera.cdk.data.spi;
 
 import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.Marker;
@@ -47,13 +46,6 @@ public abstract class AbstractDataset<E> implements Dataset<E> {
   @Deprecated
   public DatasetWriter<E> getWriter() {
     return newWriter();
-  }
-
-  @Override
-  public DatasetAccessor<E> newAccessor() {
-    // this method is optional, so default to UnsupportedOperationException
-    throw new UnsupportedOperationException(
-        "This Dataset does not support random access");
   }
 
   @Override

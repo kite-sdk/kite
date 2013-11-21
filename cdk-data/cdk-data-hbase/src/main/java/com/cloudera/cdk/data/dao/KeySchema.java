@@ -38,7 +38,7 @@ public class KeySchema {
    */
   public KeySchema(String rawSchema, Collection<FieldMapping> fieldMappings) {
     this.rawSchema = rawSchema;
-    List<FieldPartitioner> fieldPartitioners = new ArrayList<FieldPartitioner>();
+    List<FieldPartitioner<?, ?>> fieldPartitioners = new ArrayList<FieldPartitioner<?, ?>>();
     for (FieldMapping fieldMapping : fieldMappings) {
       IdentityFieldPartitioner fieldPartitioner = new IdentityFieldPartitioner(
           fieldMapping.getFieldName(), String.class, 1); // TODO: get type from schema

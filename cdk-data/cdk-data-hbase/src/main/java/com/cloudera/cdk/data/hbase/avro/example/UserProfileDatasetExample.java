@@ -15,13 +15,14 @@
  */
 package com.cloudera.cdk.data.hbase.avro.example;
 
-import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.Marker;
+import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
+
 import java.util.HashMap;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
@@ -44,20 +45,20 @@ public class UserProfileDatasetExample {
   /**
    * The user profile dataset
    */
-  private final Dataset<UserProfileModel2> userProfileDataset;
+  private final RandomAccessDataset<UserProfileModel2> userProfileDataset;
 
   /**
    * The user actions dataset. User actions are stored in the same table along side
    * the user profiles.
    */
-  private final Dataset<UserActionsModel2> userActionsDataset;
+  private final RandomAccessDataset<UserActionsModel2> userActionsDataset;
 
   /**
    * A composite dataset that encapsulates the two entity types that can be stored
    * in the user_profile table (UserProfileModel and UserActionsModel).
    * UserProfileActionsModel is the composite type this dao returns.
    */
-  private final Dataset<UserProfileActionsModel2> userProfileActionsDataset;
+  private final RandomAccessDataset<UserProfileActionsModel2> userProfileActionsDataset;
 
   /**
    * The constructor will start by registering the schemas with the meta store
@@ -172,8 +173,7 @@ public class UserProfileDatasetExample {
         .newBuilder().setUserProfileModel(profileModel)
         .setUserActionsModel(actionsModel).build();
 
-    DatasetAccessor<UserProfileActionsModel2> accessor = userProfileActionsDataset.newAccessor();
-    if (!accessor.put(profileActionsModel)) {
+    if (!userProfileActionsDataset.put(profileActionsModel)) {
       // If put returns false, a user already existed at this row
       System.out
           .println("Creating a new user profile failed due to a write conflict.");
@@ -204,11 +204,10 @@ public class UserProfileDatasetExample {
 
     // Construct the key we'll use to fetch the user.
     Marker key = new Marker.Builder().add("firstName", firstName).add("lastName",
-        lastName).get();
+        lastName).build();
 
     // Get the profile and actions entity from the composite dao.
-    DatasetAccessor<UserProfileActionsModel2> accessor = userProfileActionsDataset.newAccessor();
-    UserProfileActionsModel2 profileActionsModel = accessor.get(key);
+    UserProfileActionsModel2 profileActionsModel = userProfileActionsDataset.get(key);
 
     // Updating the married status is hairy since our avro compiler isn't setup
     // to compile setters for fields. We have to construct a clone through the
@@ -224,7 +223,7 @@ public class UserProfileDatasetExample {
     updatedProfileActionsModel.getUserActionsModel().getActions()
         .put("profile_updated", Long.toString(ts));
 
-    if (!accessor.put(profileActionsModel)) {
+    if (!userProfileActionsDataset.put(profileActionsModel)) {
       // If put returns false, a write conflict occurred where someone else
       // updated the row between the times we did the get and put.
       System.out
@@ -263,8 +262,7 @@ public class UserProfileDatasetExample {
     actionsModel.getActions().put(actionType, actionValue);
 
     // Perform the put.
-    DatasetAccessor<UserActionsModel2> accessor = userActionsDataset.newAccessor();
-    accessor.put(actionsModel);
+    userActionsDataset.put(actionsModel);
   }
 
   /**

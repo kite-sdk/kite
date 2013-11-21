@@ -15,9 +15,6 @@
  */
 package com.cloudera.cdk.data.hbase;
 
-import com.cloudera.cdk.data.Marker;
-import org.apache.hadoop.hbase.client.HTablePool;
-
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.dao.Dao;
@@ -26,12 +23,12 @@ import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.KeySchema;
 
+import org.apache.hadoop.hbase.client.HTablePool;
+
 /**
  * A DAO implementation that uses a constructor provided EntityMapper to do
  * basic conversion between entities and HBase Gets and Puts.
  * 
- * @param <K>
- *          The key type
  * @param <E>
  *          The entity type.
  */
@@ -103,29 +100,21 @@ public class BaseDao<E> implements Dao<E> {
   }
 
   @Override
-  public E get(Marker key) {
-    return get(getPartitionStrategy().keyFor(key));
-  }
-
-  @Override
-  public long increment(Marker key, String fieldName, long amount) {
-    return increment(getPartitionStrategy().keyFor(key), fieldName, amount);
-  }
-
-  @Override
-  public void delete(Marker key) {
-    delete(getPartitionStrategy().keyFor(key));
-  }
-
-  @Override
   public EntityScanner<E> getScanner() {
     return getScanner(null, null);
   }
 
   @Override
   public EntityScanner<E> getScanner(PartitionKey startKey, PartitionKey stopKey) {
+    return getScanner(startKey, true, stopKey, true);
+  }
+
+  @Override
+  public EntityScanner<E> getScanner(PartitionKey startKey,
+      boolean startInclusive, PartitionKey stopKey, boolean stopInclusive) {
     return clientTemplate.getScannerBuilder(entityMapper).setStartKey(startKey)
-        .setStopKey(stopKey).build();
+        .setStartInclusive(startInclusive).setStopKey(stopKey)
+        .setStopInclusive(stopInclusive).build();
   }
 
   public EntityScannerBuilder<E> getScannerBuilder() {
@@ -164,7 +153,7 @@ public class BaseDao<E> implements Dao<E> {
 
   /**
    * Gets the key serde for this DAO
-   *
+   * 
    * @return The KeySerDe
    */
   public KeySerDe getKeySerDe() {
@@ -173,7 +162,7 @@ public class BaseDao<E> implements Dao<E> {
 
   /**
    * Gets the entity serde for this DAO
-   *
+   * 
    * @return The EntitySerDe
    */
   public EntitySerDe<E> getEntitySerDe() {
@@ -182,7 +171,7 @@ public class BaseDao<E> implements Dao<E> {
 
   /**
    * Gets the EntityMapper for this DAO.
-   *
+   * 
    * @return EntityMapper
    */
   public EntityMapper<E> getEntityMapper() {

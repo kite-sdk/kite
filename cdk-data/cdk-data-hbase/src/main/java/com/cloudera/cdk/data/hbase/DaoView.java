@@ -15,12 +15,12 @@
  */
 package com.cloudera.cdk.data.hbase;
 
-import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.spi.AbstractRangeView;
+import com.cloudera.cdk.data.spi.Key;
 import com.cloudera.cdk.data.spi.MarkerRange;
 
 class DaoView<E> extends AbstractRangeView<E> {
@@ -45,33 +45,61 @@ class DaoView<E> extends AbstractRangeView<E> {
   @Override
   public DatasetReader<E> newReader() {
     return dataset.getDao().getScanner(toPartitionKey(range.getStart()),
-        toPartitionKey(range.getEnd()));
+        range.getStart().isInclusive(), toPartitionKey(range.getEnd()),
+        range.getEnd().isInclusive());
   }
 
   @Override
   public DatasetWriter<E> newWriter() {
-    // TODO: need to check keys are within range
-    return dataset.getDao().newBatch();
-  }
+    final DatasetWriter<E> wrappedWriter = dataset.getDao().newBatch();
+    final Key partitionStratKey = new Key(dataset.getDescriptor().getPartitionStrategy());
+    // Return a dataset writer that checks on write that an entity is within the
+    // range of the view
+    return new DatasetWriter<E>() {
+      @Override
+      public void open() {
+        wrappedWriter.open();
+      }
 
-  @Override
-  public DatasetAccessor<E> newAccessor() {
-    // TODO: need to respect start and end of range
-    return dataset.getDao();
+      @Override
+      public void write(E entity) {
+        Key key = partitionStratKey.reuseFor(entity);
+        if (!range.contains(key)) {
+          throw new IllegalArgumentException("View does not contain entity: "
+              + entity);
+        }
+        wrappedWriter.write(entity);
+      }
+
+      @Override
+      public void flush() {
+        wrappedWriter.flush();
+      }
+
+      @Override
+      public void close() {
+        wrappedWriter.close();
+      }
+
+      @Override
+      public boolean isOpen() {
+        return wrappedWriter.isOpen();
+      }
+    };
   }
 
   @Override
   public Iterable<View<E>> getCoveringPartitions() {
     // TODO: use HBase InputFormat to construct splits
-    throw new UnsupportedOperationException("getCoveringPartitions is not yet " +
-        "supported.");
+    throw new UnsupportedOperationException("getCoveringPartitions is not yet "
+        + "supported.");
   }
 
   private PartitionKey toPartitionKey(MarkerRange.Boundary boundary) {
     if (boundary == null || boundary.getBound() == null) {
       return null;
     }
-    // TODO: check inclusive/exclusive
-    return dataset.getDescriptor().getPartitionStrategy().keyFor(boundary.getBound());
+    return dataset.getDescriptor().getPartitionStrategy()
+        .keyFor(boundary.getBound());
   }
 }

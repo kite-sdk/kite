@@ -1,11 +1,11 @@
-/**
- * Copyright 2013 Cloudera Inc.
+/*
+ * Copyright 2013 Cloudera.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,14 +15,8 @@
  */
 package com.cloudera.cdk.data;
 
-/**
- * <p>
- * A random-access interface to dataset entities.
- * </p>
- * @param <E>
- */
-public interface DatasetAccessor<E> {
-
+public interface RandomAccessDataset<E> extends Dataset<E> {
+  
   /**
    * Return the entity stored in the dataset at the row specified with {@link
    * PartitionKey} <code>key</code>. Return null if no such entity exists.
@@ -81,5 +75,4 @@ public interface DatasetAccessor<E> {
    *         conflict
    */
   public boolean delete(E entity);
-
 }

@@ -44,6 +44,8 @@ public abstract class EntityScannerBuilder<E> {
   private String tableName;
   private PartitionKey startKey;
   private PartitionKey stopKey;
+  private boolean startInclusive;
+  private boolean stopInclusive;
   private int caching;
   private EntityMapper<E> entityMapper;
   private List<ScanModifier> scanModifiers = new ArrayList<ScanModifier>();
@@ -63,7 +65,8 @@ public abstract class EntityScannerBuilder<E> {
    * @param <E>
    *          The entity type this scanner scans.
    */
-  public EntityScannerBuilder(HTablePool tablePool, String tableName, EntityMapper<E> entityMapper) {
+  public EntityScannerBuilder(HTablePool tablePool, String tableName,
+      EntityMapper<E> entityMapper) {
     this.tablePool = tablePool;
     this.tableName = tableName;
     this.entityMapper = entityMapper;
@@ -106,8 +109,7 @@ public abstract class EntityScannerBuilder<E> {
   }
 
   /**
-   * Set The Start Key. If the partialStartKey has already been set, it will be
-   * reset to null.
+   * Set The Start Key.
    * 
    * @param startKey
    *          The start key for this scan
@@ -128,8 +130,7 @@ public abstract class EntityScannerBuilder<E> {
   }
 
   /**
-   * Set The Stop Key. If a partialStopKey has already been set, it will be
-   * reset to null.
+   * Set The Stop Key.
    * 
    * @param stopKey
    *          The stop key for this scan
@@ -137,6 +138,50 @@ public abstract class EntityScannerBuilder<E> {
    */
   public EntityScannerBuilder<E> setStopKey(PartitionKey stopKey) {
     this.stopKey = stopKey;
+    return this;
+  }
+
+  /**
+   * Returns true if the scan should include the row pointed to by the start
+   * key, or start right after it..
+   * 
+   * @return startInclusive
+   */
+  boolean getStartInclusive() {
+    return startInclusive;
+  }
+
+  /**
+   * Set the startInclusive parameter.
+   * 
+   * @param startInclusive
+   *          The startInclusive setting.
+   * @return ScannerBuilder
+   */
+  public EntityScannerBuilder<E> setStartInclusive(boolean startInclusive) {
+    this.startInclusive = startInclusive;
+    return this;
+  }
+
+  /**
+   * Returns true if the scan should include the row pointed to by the stop key,
+   * or stop just short of it.
+   * 
+   * @return stopInclusive
+   */
+  boolean getStopInclusive() {
+    return stopInclusive;
+  }
+
+  /**
+   * Set the startInclusive parameter.
+   * 
+   * @param stopInclusive
+   *          The stopInclusive setting.
+   * @return ScannerBuilder
+   */
+  public EntityScannerBuilder<E> setStopInclusive(boolean stopInclusive) {
+    this.stopInclusive = stopInclusive;
     return this;
   }
 

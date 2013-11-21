@@ -135,9 +135,10 @@ public class TestFileSystemView extends TestRangeViews {
         testDataset.deleteAll());
   }
 
-  @Test(expected=UnsupportedOperationException.class)
-  public void testLimitedAccessor() {
-    testDataset.newAccessor();
+  @Test
+  @Override
+  public void testLimitedWriter() {
+    // range-limited writers are not currently implemented
   }
 
   public static void assertDirectoriesExist(FileSystem fs, Path... dirs)

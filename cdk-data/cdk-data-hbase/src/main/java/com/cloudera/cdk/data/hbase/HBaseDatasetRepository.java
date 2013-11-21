@@ -15,16 +15,15 @@
  */
 package com.cloudera.cdk.data.hbase;
 
-import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepositoryException;
+import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.hbase.avro.GenericAvroDao;
 import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
 import com.cloudera.cdk.data.spi.AbstractDatasetRepository;
-import com.google.common.base.Supplier;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,19 +49,19 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   }
 
   @Override
-  public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
+  public <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor) {
     DatasetDescriptor newDescriptor = metadataProvider.create(name, descriptor);
     return newDataset(name, newDescriptor);
   }
 
   @Override
-  public <E> Dataset<E> update(String name, DatasetDescriptor descriptor) {
+  public <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor) {
     DatasetDescriptor newDescriptor = metadataProvider.update(name, descriptor);
     return newDataset(name, newDescriptor);
   }
 
   @Override
-  public <E> Dataset<E> load(String name) {
+  public <E> RandomAccessDataset<E> load(String name) {
     String tableName = HBaseMetadataProvider.getTableName(name);
     String entityName = HBaseMetadataProvider.getEntityName(name);
     if (entityName.contains(".")) {
@@ -78,7 +77,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   }
 
   @SuppressWarnings("unchecked")
-  private <E> Dataset<E> newCompositeDataset(String name, String tableName,
+  private <E> RandomAccessDataset<E> newCompositeDataset(String name, String tableName,
       List<DatasetDescriptor> descriptors) {
     List<Class<SpecificRecord>> subEntityClasses = new ArrayList<Class<SpecificRecord>>();
     for (DatasetDescriptor descriptor : descriptors) {
@@ -96,7 +95,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   }
 
   @SuppressWarnings("unchecked")
-  private <E> Dataset<E> newDataset(String name, DatasetDescriptor descriptor) {
+  private <E> RandomAccessDataset<E> newDataset(String name, DatasetDescriptor descriptor) {
     // TODO: use descriptor.getFormat() to decide type of DAO (Avro vs. other)
     String tableName = HBaseMetadataProvider.getTableName(name);
     String entityName = HBaseMetadataProvider.getEntityName(name);

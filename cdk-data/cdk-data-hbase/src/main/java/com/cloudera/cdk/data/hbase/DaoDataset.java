@@ -16,20 +16,21 @@
 package com.cloudera.cdk.data.hbase;
 
 import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.dao.Dao;
 import com.cloudera.cdk.data.spi.AbstractDataset;
 import com.google.common.base.Preconditions;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class DaoDataset<E> extends AbstractDataset<E> {
+class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E> {
 
   private static final Logger logger = LoggerFactory
       .getLogger(DaoDataset.class);
@@ -90,13 +91,6 @@ class DaoDataset<E> extends AbstractDataset<E> {
   }
 
   @Override
-  public DatasetAccessor<E> newAccessor() {
-    logger.debug("Getting accessor for dataset:{}", this);
-
-    return unbounded.newAccessor();
-  }
-
-  @Override
   public Iterable<View<E>> getCoveringPartitions() {
     Preconditions.checkState(descriptor.isPartitioned(),
         "Attempt to get partitions on a non-partitioned dataset (name:%s)",
@@ -130,4 +124,28 @@ class DaoDataset<E> extends AbstractDataset<E> {
     return unbounded.in(partial);
   }
 
+  @Override
+  public E get(Marker key) {
+    return dao.get(getDescriptor().getPartitionStrategy().keyFor(key));
+  }
+
+  @Override
+  public boolean put(E entity) {
+    return dao.put(entity);
+  }
+
+  @Override
+  public long increment(Marker key, String fieldName, long amount) {
+    return dao.increment(getDescriptor().getPartitionStrategy().keyFor(key), fieldName, amount);
+  }
+
+  @Override
+  public void delete(Marker key) {
+    dao.delete(getDescriptor().getPartitionStrategy().keyFor(key));
+  }
+
+  @Override
+  public boolean delete(E entity) {
+    return dao.delete(entity);
+  }
 }

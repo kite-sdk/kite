@@ -17,7 +17,6 @@
 package com.cloudera.cdk.data.spi;
 
 import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.View;
@@ -71,13 +70,6 @@ public abstract class AbstractRangeView<E> implements View<E> {
   public boolean deleteAll() {
     throw new UnsupportedOperationException(
         "This Dataset does not support deletion");
-  }
-
-  @Override
-  public DatasetAccessor<E> newAccessor() {
-    // this method is optional, so default to UnsupportedOperationException
-    throw new UnsupportedOperationException(
-        "This Dataset does not support random access");
   }
 
   @Override

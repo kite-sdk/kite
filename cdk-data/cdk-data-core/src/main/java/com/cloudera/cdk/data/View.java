@@ -85,20 +85,6 @@ public interface View<E> {
   DatasetWriter<E> newWriter();
 
   /**
-   * Get an appropriate {@link DatasetAccessor} implementation based on this
-   * {@code View} of the underlying {@code Dataset} implementation.
-   *
-   * Implementations are free to return different types of accessors depending
-   * on the disposition of the data. For example, a partitioned dataset may use
-   * a different accessor than that of a non-partitioned dataset. Clients should
-   * not make any assumptions about the returned implementations.
-   * Implementations are free to change them at any time.
-   *
-   * @throws DatasetException
-   */
-  DatasetAccessor<E> newAccessor();
-
-  /**
    * Returns whether an entity {@link Object} is in this {@code View}.
    *
    * @param key an entity {@code Object}
