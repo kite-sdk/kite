@@ -88,11 +88,6 @@ public abstract class AbstractRangeView<E> implements View<E> {
   }
 
   @Override
-  public View<E> union(View<E> view) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
   public View<E> from(Marker start) {
     return newLimitedCopy(range.from(start));
   }

@@ -63,13 +63,6 @@ public abstract class AbstractDataset<E> implements Dataset<E> {
   }
 
   @Override
-  public View<E> union(View view) {
-    Preconditions.checkArgument(this.equals(view.getDataset()),
-        "Views can only be unioned if they have the same underlying Dataset");
-    return this;
-  }
-
-  @Override
   public View<E> from(Marker start) {
     throw new UnsupportedOperationException("Not supported yet.");
   }

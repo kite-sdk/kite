@@ -120,16 +120,6 @@ public interface View<E> {
    */
   Iterable<View<E>> getCoveringPartitions();
 
-  /**
-   * Creates a {@code View} that represents the union of this and {@code view}.
-   *
-   * @param view another {@code View} of this view's Dataset
-   * @return a View for the union of this and {@code view}
-   *
-   * @throws DatasetException If the underlying Datasets are not the same.
-   */
-  View<E> union(View<E> view);
-
   // TODO: should the View factory methods support entities also?
 
   /**
