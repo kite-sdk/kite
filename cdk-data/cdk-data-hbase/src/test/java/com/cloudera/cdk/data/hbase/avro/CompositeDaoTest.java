@@ -15,11 +15,14 @@
  */
 package com.cloudera.cdk.data.hbase.avro;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import com.cloudera.cdk.data.DatasetException;
+import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.hbase.avro.entities.CompositeRecord;
+import com.cloudera.cdk.data.hbase.avro.entities.SubRecord1;
+import com.cloudera.cdk.data.hbase.avro.entities.SubRecord2;
+import com.cloudera.cdk.data.hbase.impl.Dao;
+import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,13 +36,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.cloudera.cdk.data.PartitionKey;
-import com.cloudera.cdk.data.dao.Dao;
-import com.cloudera.cdk.data.hbase.avro.entities.CompositeRecord;
-import com.cloudera.cdk.data.hbase.avro.entities.SubRecord1;
-import com.cloudera.cdk.data.hbase.avro.entities.SubRecord2;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
-import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class CompositeDaoTest {
 

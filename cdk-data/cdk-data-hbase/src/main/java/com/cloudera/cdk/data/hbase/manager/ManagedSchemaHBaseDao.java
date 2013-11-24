@@ -21,12 +21,12 @@ import java.util.List;
 import org.apache.hadoop.hbase.client.HTablePool;
 
 import com.cloudera.cdk.data.PartitionKey;
-import com.cloudera.cdk.data.dao.Dao;
-import com.cloudera.cdk.data.dao.EntityScanner;
+import com.cloudera.cdk.data.hbase.avro.AvroEntitySchema;
+import com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser;
+import com.cloudera.cdk.data.hbase.avro.AvroUtils;
 import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
+import com.cloudera.cdk.data.hbase.impl.Dao;
+import com.cloudera.cdk.data.hbase.impl.EntityScanner;
 import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
 
 /**

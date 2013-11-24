@@ -25,16 +25,18 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HConstants;
 
 /**
- * A Loader implementation to register URIs for {@link com.cloudera.cdk.data.hbase.HBaseDatasetRepository}.
+ * A Loader implementation to register URIs for {@link com.cloudera.cdk.data.hbase.impl.HBaseDatasetRepository}.
  */
 public class Loader implements Loadable {
 

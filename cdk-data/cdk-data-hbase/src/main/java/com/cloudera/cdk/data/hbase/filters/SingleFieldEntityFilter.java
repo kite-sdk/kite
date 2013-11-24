@@ -15,15 +15,15 @@
  */
 package com.cloudera.cdk.data.hbase.filters;
 
+import com.cloudera.cdk.data.DatasetException;
+import com.cloudera.cdk.data.hbase.impl.EntitySchema;
+import com.cloudera.cdk.data.hbase.impl.EntitySchema.FieldMapping;
+import com.cloudera.cdk.data.hbase.impl.EntitySerDe;
+import com.cloudera.cdk.data.hbase.impl.MappingType;
+
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
-
-import com.cloudera.cdk.data.dao.EntitySchema;
-import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
-import com.cloudera.cdk.data.hbase.EntitySerDe;
-import com.cloudera.cdk.data.DatasetException;
-import com.cloudera.cdk.data.dao.MappingType;
 
 /**
  * An EntityFilter that will perform an equality filter on a single entity

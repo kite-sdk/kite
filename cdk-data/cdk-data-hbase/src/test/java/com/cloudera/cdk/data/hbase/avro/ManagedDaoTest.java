@@ -15,20 +15,18 @@
  */
 package com.cloudera.cdk.data.hbase.avro;
 
+import com.cloudera.cdk.data.IncompatibleSchemaException;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.dao.Dao;
-import com.cloudera.cdk.data.dao.EntityScanner;
-import com.cloudera.cdk.data.IncompatibleSchemaException;
-import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
 import com.cloudera.cdk.data.hbase.avro.entities.TestIncrement;
 import com.cloudera.cdk.data.hbase.avro.entities.TestRecord;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
+import com.cloudera.cdk.data.hbase.impl.Dao;
+import com.cloudera.cdk.data.hbase.impl.EntityScanner;
+import com.cloudera.cdk.data.hbase.impl.SchemaManager;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
 import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;

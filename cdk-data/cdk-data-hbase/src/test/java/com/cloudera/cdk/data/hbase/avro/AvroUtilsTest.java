@@ -18,7 +18,6 @@ package com.cloudera.cdk.data.hbase.avro;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 

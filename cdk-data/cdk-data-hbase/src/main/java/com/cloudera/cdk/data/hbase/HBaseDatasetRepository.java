@@ -18,10 +18,10 @@ package com.cloudera.cdk.data.hbase;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.RandomAccessDataset;
-import com.cloudera.cdk.data.dao.Dao;
-import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.hbase.avro.GenericAvroDao;
 import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
+import com.cloudera.cdk.data.hbase.impl.Dao;
+import com.cloudera.cdk.data.hbase.impl.SchemaManager;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
 import com.cloudera.cdk.data.spi.AbstractDatasetRepository;
 

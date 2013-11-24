@@ -20,13 +20,11 @@ import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.RandomAccessDataset;
-import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEntity;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
 
 import java.util.ArrayList;

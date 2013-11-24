@@ -15,7 +15,19 @@
  */
 package com.cloudera.cdk.data.hbase.manager;
 
+import com.cloudera.cdk.data.ConcurrentSchemaModificationException;
 import com.cloudera.cdk.data.DatasetException;
+import com.cloudera.cdk.data.IncompatibleSchemaException;
+import com.cloudera.cdk.data.SchemaNotFoundException;
+import com.cloudera.cdk.data.hbase.impl.EntitySchema;
+import com.cloudera.cdk.data.hbase.impl.EntitySchema.FieldMapping;
+import com.cloudera.cdk.data.hbase.impl.KeyEntitySchemaParser;
+import com.cloudera.cdk.data.hbase.impl.KeySchema;
+import com.cloudera.cdk.data.hbase.impl.MappingType;
+import com.cloudera.cdk.data.hbase.impl.SchemaManager;
+import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
+import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,18 +40,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.cloudera.cdk.data.ConcurrentSchemaModificationException;
-import com.cloudera.cdk.data.dao.EntitySchema;
-import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
-import com.cloudera.cdk.data.IncompatibleSchemaException;
-import com.cloudera.cdk.data.dao.KeySchema;
-import com.cloudera.cdk.data.dao.MappingType;
-import com.cloudera.cdk.data.dao.SchemaManager;
-import com.cloudera.cdk.data.SchemaNotFoundException;
-import com.cloudera.cdk.data.hbase.KeyEntitySchemaParser;
-import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
-import com.google.common.collect.Lists;
 
 /**
  * The Default SchemaManager implementation. It uses a ManagedSchemaDao

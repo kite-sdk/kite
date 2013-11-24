@@ -34,15 +34,8 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.junit.Test;
 
-import com.cloudera.cdk.data.hbase.BaseEntityMapper;
-import com.cloudera.cdk.data.hbase.EntityMapper;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroEntityComposer;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySchema;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
+import com.cloudera.cdk.data.hbase.impl.BaseEntityMapper;
+import com.cloudera.cdk.data.hbase.impl.EntityMapper;
 
 public class AvroEntityMapperTest {
 

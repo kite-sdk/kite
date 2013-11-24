@@ -28,8 +28,8 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import com.cloudera.cdk.data.hbase.impl.SchemaManager;
 import com.cloudera.cdk.data.hbase.manager.DefaultSchemaManager;
-import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.hbase.tool.SchemaTool;
 
 public class HBaseTestUtils {

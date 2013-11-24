@@ -23,7 +23,7 @@ import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.View;
-import com.cloudera.cdk.data.dao.Dao;
+import com.cloudera.cdk.data.hbase.impl.Dao;
 import com.cloudera.cdk.data.spi.AbstractDataset;
 import com.google.common.base.Preconditions;
 

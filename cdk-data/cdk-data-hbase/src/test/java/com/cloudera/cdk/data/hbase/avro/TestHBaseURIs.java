@@ -20,10 +20,12 @@ import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 import com.cloudera.cdk.data.hbase.impl.Loader;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
-import junit.framework.Assert;
+
 import org.apache.hadoop.hbase.HConstants;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import junit.framework.Assert;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

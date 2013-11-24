@@ -21,7 +21,6 @@ import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 import com.cloudera.cdk.data.hbase.avro.entities.SubEntity1;
 import com.cloudera.cdk.data.hbase.avro.entities.SubEntity2;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
 
 import java.util.HashMap;
