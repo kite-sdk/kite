@@ -13,24 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.data.dao;
+package com.cloudera.cdk.data;
+
+import java.io.IOException;
 
 /**
- * Exception that is thrown when the construction of a Key fails with an error.
+ * <p>
+ * Exception thrown for dataset IO-related failures.
+ * </p>
+ *
+ * @since 0.9.0
  */
-public class KeyBuildException extends HBaseCommonException {
+public class DatasetIOException extends DatasetException {
 
-  private static final long serialVersionUID = 1L;
-
-  public KeyBuildException(String msg) {
-    super(msg);
+  private final IOException ioException;
+  
+  public DatasetIOException(String message, IOException root) {
+    super(message, root);
+    this.ioException = root;
   }
-
-  public KeyBuildException(Throwable cause) {
-    super(cause);
-  }
-
-  public KeyBuildException(String msg, Throwable cause) {
-    super(msg, cause);
+  
+  public IOException getIOException() {
+    return ioException;
   }
 }

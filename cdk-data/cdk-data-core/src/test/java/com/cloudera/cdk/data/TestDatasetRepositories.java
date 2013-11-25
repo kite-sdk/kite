@@ -176,7 +176,7 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
     repo.update(NAME, testProvider.load(NAME));
   }
 
-  @Test(expected=NoSuchDatasetException.class)
+  @Test(expected=DatasetNotFoundException.class)
   public void testUpdateNoDataset() {
     Assert.assertFalse("Sanity check", testProvider.exists(NAME));
 
@@ -257,7 +257,7 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
         testSchema, dataset.getDescriptor().getSchema());
   }
 
-  @Test(expected=NoSuchDatasetException.class)
+  @Test(expected=DatasetNotFoundException.class)
   public void testLoadNoDataset() {
     Assert.assertFalse("Santity check", testProvider.exists(NAME));
 

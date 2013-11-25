@@ -165,7 +165,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
         testDescriptor.getFormat(), loaded.getFormat());
   }
 
-  @Test(expected=NoSuchDatasetException.class)
+  @Test(expected=DatasetNotFoundException.class)
   public void testLoadNoDataset() {
     Assert.assertFalse("Sanity check", provider.exists(NAME));
     provider.load(NAME);
@@ -197,7 +197,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
         anotherDescriptor.getFormat(), saved.getFormat());
   }
 
-  @Test(expected=NoSuchDatasetException.class)
+  @Test(expected=DatasetNotFoundException.class)
   public void testUpdateFailsNoDataset() {
     provider.update(NAME, testDescriptor);
   }

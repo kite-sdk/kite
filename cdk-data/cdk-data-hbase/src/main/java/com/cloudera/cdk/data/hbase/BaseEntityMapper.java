@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.DatasetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -25,7 +26,6 @@ import org.apache.hadoop.hbase.client.Result;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.KeySchema;
 import com.cloudera.cdk.data.dao.MappingType;
 
@@ -131,11 +131,11 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
       long amount) {
     FieldMapping fieldMapping = entitySchema.getFieldMapping(fieldName);
     if (fieldMapping == null) {
-      throw new HBaseCommonException("Unknown field in the schema: "
+      throw new DatasetException("Unknown field in the schema: "
           + fieldName);
     }
     if (fieldMapping.getMappingType() != MappingType.COUNTER) {
-      throw new HBaseCommonException("Field is not a counter type: "
+      throw new DatasetException("Field is not a counter type: "
           + fieldName);
     }
 
@@ -150,11 +150,11 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
   public long mapFromIncrementResult(Result result, String fieldName) {
     FieldMapping fieldMapping = entitySchema.getFieldMapping(fieldName);
     if (fieldMapping == null) {
-      throw new HBaseCommonException("Unknown field in the schema: "
+      throw new DatasetException("Unknown field in the schema: "
           + fieldName);
     }
     if (fieldMapping.getMappingType() != MappingType.COUNTER) {
-      throw new HBaseCommonException("Field is not a counter type: "
+      throw new DatasetException("Field is not a counter type: "
           + fieldName);
     }
     return (Long) entitySerDe.deserialize(fieldMapping, result);

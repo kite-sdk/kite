@@ -15,13 +15,12 @@
  */
 package com.cloudera.cdk.data.hbase;
 
-import com.cloudera.cdk.data.dao.HBaseClientException;
+import com.cloudera.cdk.data.DatasetIOException;
 
 import java.io.IOException;
 import java.util.*;
 
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.KeyValue.Type;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Scan;
@@ -65,7 +64,7 @@ public class HBaseUtils {
           try {
             put.add(new KeyValue(keyBytes, keyValue.getFamily(), keyValue.getQualifier(), keyValue.getTimestamp(), keyValue.getValue()));
           } catch (IOException e) {
-            throw new HBaseClientException("Could not add KeyValue to put", e);
+            throw new DatasetIOException("Could not add KeyValue to put", e);
           }
         }
       }
@@ -114,7 +113,7 @@ public class HBaseUtils {
         try {
           put1.add(keyValue);
         } catch (IOException e) {
-          throw new HBaseClientException("Could not add KeyValue to put", e);
+          throw new DatasetIOException("Could not add KeyValue to put", e);
         }
       }
     }

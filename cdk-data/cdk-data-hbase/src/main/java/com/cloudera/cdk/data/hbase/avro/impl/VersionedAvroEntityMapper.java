@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase.avro.impl;
 
+import com.cloudera.cdk.data.DatasetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -30,10 +31,9 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.dao.EntitySchema;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.KeySchema;
 import com.cloudera.cdk.data.dao.SchemaManager;
-import com.cloudera.cdk.data.dao.SchemaNotFoundException;
+import com.cloudera.cdk.data.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.BaseEntityMapper;
 import com.cloudera.cdk.data.hbase.EntityMapper;
 import com.cloudera.cdk.data.hbase.EntitySerDe;
@@ -188,19 +188,19 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
         String msg = "Key or entity class not found. Make sure the specific "
             + "record instances are on the classpath.";
         LOG.error(msg, e);
-        throw new HBaseCommonException(msg, e);
+        throw new DatasetException(msg, e);
       } catch (SecurityException e) {
         String msg = "Cannot access key or entity class.";
         LOG.error(msg, e);
-        throw new HBaseCommonException(msg, e);
+        throw new DatasetException(msg, e);
       } catch (NoSuchFieldException e) {
         String msg = "SCHEMA$ field not found in the entity class";
         LOG.error(msg, e);
-        throw new HBaseCommonException(msg, e);
+        throw new DatasetException(msg, e);
       } catch (IllegalAccessException e) {
         String msg = "Not allowed to access SCHEMA$ field in the entity class";
         LOG.error(msg, e);
-        throw new HBaseCommonException(msg, e);
+        throw new DatasetException(msg, e);
       }
     }
 

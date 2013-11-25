@@ -19,9 +19,9 @@ import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.FieldPartitioner;
+import com.cloudera.cdk.data.IncompatibleSchemaException;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MetadataProviderException;
-import com.cloudera.cdk.data.NoSuchDatasetException;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
@@ -259,7 +259,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     final Schema oldSchema = oldDescriptor.getSchema();
     final Schema newSchema = descriptor.getSchema();
     if (!SchemaValidationUtil.canRead(oldSchema, newSchema)) {
-      throw new DatasetRepositoryException("New schema cannot read data written using " +
+      throw new IncompatibleSchemaException("New schema cannot read data " +
+          "written using " +
           "old schema. New schema: " + newSchema.toString(true) + "\nOld schema: " +
           oldSchema.toString(true));
     }
@@ -303,6 +304,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     return ds;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public boolean delete(String name) {
     Preconditions.checkArgument(name != null, "Name can not be null");
@@ -312,7 +314,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     final DatasetDescriptor descriptor;
     try {
       descriptor = metadataProvider.load(name);
-    } catch (NoSuchDatasetException ex) {
+    } catch (com.cloudera.cdk.data.NoSuchDatasetException ex) {
       return false;
     }
 

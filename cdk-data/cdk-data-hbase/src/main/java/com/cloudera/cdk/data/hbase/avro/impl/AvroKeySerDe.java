@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase.avro.impl;
 
+import com.cloudera.cdk.data.DatasetException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import org.apache.avro.io.Encoder;
 
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.hbase.KeySerDe;
 import com.cloudera.cdk.data.hbase.avro.io.MemcmpDecoder;
 import com.cloudera.cdk.data.hbase.avro.io.MemcmpEncoder;
@@ -94,7 +94,7 @@ public class AvroKeySerDe implements KeySerDe {
         Schema fieldSchema = schemaToUse.getFields().get(i).schema();
         if (fieldSchema.getType() != Schema.Type.NULL
             && fieldSchema.getType() != Schema.Type.UNION) {
-          throw new HBaseCommonException(
+          throw new DatasetException(
               "Null key field only supported in null type or union type that has a null type.");
         } else if (fieldSchema.getType() == Schema.Type.UNION) {
           boolean foundNullInUnion = false;
@@ -104,7 +104,7 @@ public class AvroKeySerDe implements KeySerDe {
             }
           }
           if (!foundNullInUnion) {
-            throw new HBaseCommonException(
+            throw new DatasetException(
                 "Null key field only supported in union type that has a null type.");
           }
         }

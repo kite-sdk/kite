@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase;
 
+import com.cloudera.cdk.data.DatasetIOException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.dao.Constants;
 import com.cloudera.cdk.data.dao.EntityBatch;
-import com.cloudera.cdk.data.dao.HBaseClientException;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -224,14 +224,14 @@ public class HBaseClientTemplate {
       try {
         return table.get(get);
       } catch (IOException e) {
-        throw new HBaseClientException("Error performing get", e);
+        throw new DatasetIOException("Error performing get", e);
       }
     } finally {
       if (table != null) {
         try {
           table.close();
         } catch (IOException e) {
-          throw new HBaseClientException("Error putting table back into pool",
+          throw new DatasetIOException("Error putting table back into pool",
               e);
         }
       }
@@ -332,7 +332,7 @@ public class HBaseClientTemplate {
         try {
           table.close();
         } catch (IOException e) {
-          throw new HBaseClientException("Error putting table back into pool",
+          throw new DatasetIOException("Error putting table back into pool",
               e);
         }
       }
@@ -367,7 +367,7 @@ public class HBaseClientTemplate {
         return table.checkAndPut(put.getRow(), Constants.SYS_COL_FAMILY,
             Constants.VERSION_CHECK_COL_QUALIFIER, versionBytes, put);
       } catch (IOException e) {
-        throw new HBaseClientException(
+        throw new DatasetIOException(
             "Error putting row from table with checkAndPut", e);
       }
     } else {
@@ -375,7 +375,7 @@ public class HBaseClientTemplate {
         table.put(put);
         return true;
       } catch (IOException e) {
-        throw new HBaseClientException("Error putting row from table", e);
+        throw new DatasetIOException("Error putting row from table", e);
       }
     }
   }
@@ -473,7 +473,7 @@ public class HBaseClientTemplate {
     try {
       result = table.increment(increment);
     } catch (IOException e) {
-      throw new HBaseClientException("Error incrementing field.", e);
+      throw new DatasetIOException("Error incrementing field.", e);
     }
     return entityMapper.mapFromIncrementResult(result, fieldName);
 
@@ -505,7 +505,7 @@ public class HBaseClientTemplate {
               Constants.SYS_COL_FAMILY, Constants.VERSION_CHECK_COL_QUALIFIER,
               versionBytes, delete);
         } catch (IOException e) {
-          throw new HBaseClientException(
+          throw new DatasetIOException(
               "Error deleteing row from table with checkAndDelete", e);
         }
       } else {
@@ -513,7 +513,7 @@ public class HBaseClientTemplate {
           table.delete(delete);
           return true;
         } catch (IOException e) {
-          throw new HBaseClientException("Error deleteing row from table", e);
+          throw new DatasetIOException("Error deleteing row from table", e);
         }
       }
     } finally {
@@ -521,7 +521,7 @@ public class HBaseClientTemplate {
         try {
           table.close();
         } catch (IOException e) {
-          throw new HBaseClientException("Error putting table back into pool",
+          throw new DatasetIOException("Error putting table back into pool",
               e);
         }
       }

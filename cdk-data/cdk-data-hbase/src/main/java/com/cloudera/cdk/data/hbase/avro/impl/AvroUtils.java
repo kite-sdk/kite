@@ -41,8 +41,8 @@ import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificRecord;
 
-import com.cloudera.cdk.data.dao.HBaseCommonException;
-import com.cloudera.cdk.data.dao.SerializationException;
+import com.cloudera.cdk.data.DatasetException;
+import com.cloudera.cdk.data.SerializationException;
 import org.codehaus.jackson.JsonNode;
 
 /**
@@ -145,7 +145,7 @@ public class AvroUtils {
     try {
       bufferedReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
     } catch (UnsupportedEncodingException e) {
-      throw new HBaseCommonException(
+      throw new DatasetException(
           "Platform doesn't support UTF-8. It must!", e);
     }
     char[] buffer = new char[BUFFER_SIZE];
@@ -156,7 +156,7 @@ public class AvroUtils {
         stringBuilder.append(buffer, 0, bytesRead);
       }
     } catch (IOException e) {
-      throw new HBaseCommonException("Error reading from input stream", e);
+      throw new DatasetException("Error reading from input stream", e);
     }
     return stringBuilder.toString();
   }
@@ -204,13 +204,13 @@ public class AvroUtils {
     try {
       schemaField = (Schema) specificClass.getField("SCHEMA$").get(null);
     } catch (IllegalArgumentException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     } catch (SecurityException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     } catch (IllegalAccessException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     } catch (NoSuchFieldException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     }
     // Ensure schema is limited to keySchema's fields. The class may have more
     // fields
@@ -243,13 +243,13 @@ public class AvroUtils {
     try {
       schemaField = (Schema) specificClass.getField("SCHEMA$").get(null);
     } catch (IllegalArgumentException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     } catch (SecurityException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     } catch (IllegalAccessException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     } catch (NoSuchFieldException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     }
     return new AvroEntitySchema(entitySchema.getTables(), schemaField,
         entitySchema.getRawSchema(), entitySchema.getFieldMappings());

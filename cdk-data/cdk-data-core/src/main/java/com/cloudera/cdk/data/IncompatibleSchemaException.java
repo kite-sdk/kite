@@ -13,21 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.data.dao;
+package com.cloudera.cdk.data;
 
-public class SchemaNotFoundException extends HBaseCommonException {
+/**
+ * <p>
+ * Exception thrown when a schema update is not compatible
+ * with the previous schema (or schemas) or with existing
+ * datasets (if shared storage is used, for example).
+ * <p>
+ * @since 0.9.0
+ */
+public class IncompatibleSchemaException extends DatasetException {
 
-  private static final long serialVersionUID = 1L;
-  
-  public SchemaNotFoundException(String message) {
+  public IncompatibleSchemaException(String message) {
     super(message);
   }
   
-  public SchemaNotFoundException(String message, Throwable cause) {
+  public IncompatibleSchemaException(String message, Throwable cause) {
     super(message, cause);
   }
   
-  public SchemaNotFoundException(Throwable cause) {
+  public IncompatibleSchemaException(Throwable cause) {
     super(cause);
   }
 }

@@ -49,10 +49,10 @@ public interface DatasetRepository {
 
   /**
    * Get the latest version of a named {@link Dataset}. If no dataset with the
-   * provided {@code name} exists, a {@link NoSuchDatasetException} is thrown.
+   * provided {@code name} exists, a {@link DatasetNotFoundException} is thrown.
    *
    * @param name The name of the dataset.
-   * @throws NoSuchDatasetException If there is no data set named {@code name}
+   * @throws DatasetNotFoundException If there is no data set named {@code name}
    * @throws DatasetRepositoryException
    *
    * @since 0.7.0
@@ -75,6 +75,16 @@ public interface DatasetRepository {
    *                                    is {@code null}
    * @throws DatasetExistsException     If a {@code Dataset} named {@code name}
    *                                    already exists.
+   * @throws ConcurrentSchemaModificationException
+   *                                    If the {@code Dataset}
+   *                                    schema is updated
+   *                                    concurrently.
+   * @throws IncompatibleSchemaException
+   *                                    If the schema is not
+   *                                    compatible with existing
+   *                                    datasets with shared
+   *                                    storage (e.g. in the
+   *                                    same HBase table).
    * @throws DatasetRepositoryException
    */
   <E> Dataset<E> create(String name, DatasetDescriptor descriptor);
@@ -92,10 +102,22 @@ public interface DatasetRepository {
    *                   dataset
    * @return The updated dataset
    * @throws IllegalArgumentException      If {@code name} is null
-   * @throws NoSuchDatasetException        If there is no data set named
+   * @throws DatasetNotFoundException      If there is no data set named
    *                                       {@code name}
    * @throws UnsupportedOperationException If descriptor updates are not
    *                                       supported by the implementation.
+   * @throws ConcurrentSchemaModificationException
+   *                                       If the {@code Dataset}
+   *                                       schema is updated
+   *                                       concurrently.
+   * @throws IncompatibleSchemaException
+   *                                    If the schema is not
+   *                                    compatible with
+   *                                    previous schemas,
+   *                                    or with existing
+   *                                    datasets with shared
+   *                                    storage (e.g. in the
+   *                                    same HBase table).
    * @throws DatasetRepositoryException
    *
    * @since 0.3.0
@@ -104,14 +126,17 @@ public interface DatasetRepository {
 
   /**
    * Delete the named {@link Dataset}. If no dataset with the
-   * provided {@code name} exists, a {@link NoSuchDatasetException} is thrown.
+   * provided {@code name} exists, a {@link DatasetNotFoundException} is thrown.
    *
    * @param name The name of the dataset.
    * @return {@code true} if the dataset was successfully deleted, false if the
    *         dataset does not exist.
    * @throws IllegalArgumentException If {@code name} is null
-   * @throws NoSuchDatasetException   If the {@code Dataset} location cannot be
+   * @throws DatasetNotFoundException If the {@code Dataset} location cannot be
    *                                  determined because no metadata exists.
+   * @throws ConcurrentSchemaModificationException
+   *                                  If the {@code Dataset}
+   *                                  schema is updated concurrently.
    * @throws DatasetRepositoryException
    *
    * @since 0.7.0

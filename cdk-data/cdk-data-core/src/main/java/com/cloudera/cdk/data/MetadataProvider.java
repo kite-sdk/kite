@@ -40,7 +40,7 @@ public interface MetadataProvider {
    *
    * @param name The fully qualified name of an existing dataset.
    * @return A dataset descriptor.
-   * @throws NoSuchDatasetException    If there is no descriptor for {@code name}
+   * @throws DatasetNotFoundException  If there is no descriptor for {@code name}
    * @throws MetadataProviderException If the dataset doesn't exist or the descriptor can not be loaded.
    */
   DatasetDescriptor load(String name);
@@ -77,7 +77,7 @@ public interface MetadataProvider {
    * @param descriptor A dataset descriptor.
    * @return The descriptor as persisted to the Metadata store.
    *
-   * @throws NoSuchDatasetException        If there is no descriptor for
+   * @throws DatasetNotFoundException      If there is no descriptor for
    *                                       {@code name}
    * @throws UnsupportedOperationException If descriptor updates are not
    *                                       supported by the implementation.

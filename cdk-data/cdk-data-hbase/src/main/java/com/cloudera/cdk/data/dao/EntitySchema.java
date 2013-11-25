@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.dao;
 
+import com.cloudera.cdk.data.SchemaValidationException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collection;

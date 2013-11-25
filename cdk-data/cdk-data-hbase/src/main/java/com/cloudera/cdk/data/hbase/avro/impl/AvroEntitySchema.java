@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase.avro.impl;
 
+import com.cloudera.cdk.data.DatasetException;
 import com.google.common.base.Objects;
 import java.io.IOException;
 import java.util.Collection;
@@ -27,8 +28,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.cloudera.cdk.data.dao.EntitySchema;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
-import com.cloudera.cdk.data.dao.SchemaValidationException;
+import com.cloudera.cdk.data.SchemaValidationException;
 
 /**
  * An EntitySchema implementation powered by Avro.
@@ -178,7 +178,7 @@ public class AvroEntitySchema extends EntitySchema {
       ResolvingGrammarGenerator g = new ResolvingGrammarGenerator();
       rootSymbol = g.generate(writer, reader);
     } catch (IOException e) {
-      throw new HBaseCommonException("IOException while generating grammar.", e);
+      throw new DatasetException("IOException while generating grammar.", e);
     }
 
     return !hasErrorSymbol(rootSymbol);

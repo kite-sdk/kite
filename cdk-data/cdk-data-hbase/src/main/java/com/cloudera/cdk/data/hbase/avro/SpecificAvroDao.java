@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase.avro;
 
+import com.cloudera.cdk.data.DatasetException;
 import com.google.common.collect.Lists;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -30,10 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.cdk.data.dao.Dao;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.SchemaManager;
-import com.cloudera.cdk.data.dao.SchemaNotFoundException;
-import com.cloudera.cdk.data.dao.SchemaValidationException;
+import com.cloudera.cdk.data.SchemaNotFoundException;
+import com.cloudera.cdk.data.SchemaValidationException;
 import com.cloudera.cdk.data.hbase.BaseDao;
 import com.cloudera.cdk.data.hbase.BaseEntityMapper;
 import com.cloudera.cdk.data.hbase.CompositeBaseDao;
@@ -357,7 +357,7 @@ public class SpecificAvroDao<E extends SpecificRecord> extends BaseDao<E> {
       LOG.error(
           "Error getting schema from entity of type: " + entityClass.getName(),
           e);
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     }
   }
 
@@ -389,7 +389,7 @@ public class SpecificAvroDao<E extends SpecificRecord> extends BaseDao<E> {
         LOG.error(
             "Error getting constructor or schema field for entity of type: "
                 + entityClass.getName(), e);
-        throw new HBaseCommonException(e);
+        throw new DatasetException(e);
       }
     }
 
@@ -402,7 +402,7 @@ public class SpecificAvroDao<E extends SpecificRecord> extends BaseDao<E> {
         LOG.error(
             "Error trying to construct entity of type: "
                 + entityClass.getName(), e);
-        throw new HBaseCommonException(e);
+        throw new DatasetException(e);
       }
 
       int cnt = 0;

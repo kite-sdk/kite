@@ -28,7 +28,7 @@ package com.cloudera.cdk.data;
  * @see MetadataProvider
  * @since 0.2.0
  */
-public class MetadataProviderException extends RuntimeException {
+public class MetadataProviderException extends DatasetException {
 
   public MetadataProviderException() {
     super();

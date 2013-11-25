@@ -45,7 +45,7 @@ public interface SchemaManager {
    * @param entityName
    *          The entity name of the managed schema.
    * @return The key schema.
-   * @throws SchemaNotFoundException
+   * @throws com.cloudera.cdk.data.SchemaNotFoundException
    */
   public KeySchema getKeySchema(String tableName, String entityName);
 
@@ -58,7 +58,7 @@ public interface SchemaManager {
    * @param entityName
    *          The entity name of the managed schema.
    * @return The entity schema
-   * @throws SchemaNotFoundException
+   * @throws com.cloudera.cdk.data.SchemaNotFoundException
    */
   public EntitySchema getEntitySchema(String tableName, String entityName);
 
@@ -72,7 +72,7 @@ public interface SchemaManager {
    * @param version
    *          The version of the entity schema.
    * @return The entity schema
-   * @throws SchemaNotFoundException
+   * @throws com.cloudera.cdk.data.SchemaNotFoundException
    */
   public EntitySchema getEntitySchema(String tableName, String entityName,
       int version);
@@ -101,7 +101,7 @@ public interface SchemaManager {
    * @param schema
    *          The entity schema, whose version this method will return.
    * @return The entity schema's version
-   * @throws SchemaNotFoundException
+   * @throws com.cloudera.cdk.data.SchemaNotFoundException
    */
   public int getEntityVersion(String tableName, String entityName,
       EntitySchema schema);
@@ -130,10 +130,10 @@ public interface SchemaManager {
    *          The schema of the key being added
    * @param entitySchema
    *          The schema of the entity being added
-   * @throws IncompatibleSchemaException
+   * @throws com.cloudera.cdk.data.IncompatibleSchemaException
    *           if a previous schema exists
-   * @throws ConcurrentSchemaModificationException
-   * @throws SchemaValidationException
+   * @throws com.cloudera.cdk.data.ConcurrentSchemaModificationException
+   * @throws com.cloudera.cdk.data.SchemaValidationException
    */
   public void createSchema(String tableName, String entityName,
       String entitySchemaStr, String schemaType,
@@ -149,10 +149,10 @@ public interface SchemaManager {
    *          The entity name of the managed schema
    * @param newSchema
    *          The new schema
-   * @throws SchemaNotFoundException
-   * @throws IncompatibleSchemaException
-   * @throws ConcurrentSchemaModificationException
-   * @throws SchemaValidationException
+   * @throws com.cloudera.cdk.data.SchemaNotFoundException
+   * @throws com.cloudera.cdk.data.IncompatibleSchemaException
+   * @throws com.cloudera.cdk.data.ConcurrentSchemaModificationException
+   * @throws com.cloudera.cdk.data.SchemaValidationException
    */
   public void migrateSchema(String tableName, String entityName,
       String newSchema);

@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase.avro.impl;
 
+import com.cloudera.cdk.data.DatasetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -26,9 +27,8 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.IndexedRecord;
 
 import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.MappingType;
-import com.cloudera.cdk.data.dao.SchemaValidationException;
+import com.cloudera.cdk.data.SchemaValidationException;
 import com.cloudera.cdk.data.hbase.EntityComposer;
 
 /**
@@ -237,7 +237,7 @@ public class AvroEntityComposer<E extends IndexedRecord> implements
       try {
         specificClass = (Class<E>) Class.forName(className);
       } catch (ClassNotFoundException e) {
-        throw new HBaseCommonException("Could not get Class instance for "
+        throw new DatasetException("Could not get Class instance for "
             + className);
       }
       return new SpecificAvroRecordBuilderFactory(specificClass);

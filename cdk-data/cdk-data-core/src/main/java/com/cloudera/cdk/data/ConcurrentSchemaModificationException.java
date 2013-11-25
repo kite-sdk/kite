@@ -13,24 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.data.dao;
-
-import java.io.IOException;
+package com.cloudera.cdk.data;
 
 /**
- * Wraps IOExceptions exceptions thrown by the HBase Client API.
+ * <p>
+ * Exception thrown when a schema modification collided with
+ * another client trying to modify the schema of the same
+ * dataset.
+ * <p>
+ * @since 0.9.0
  */
-public class HBaseClientException extends HBaseCommonException {
+public class ConcurrentSchemaModificationException extends
+    DatasetException {
 
-  private static final long serialVersionUID = 1L;
-  private final IOException ioException;
-  
-  public HBaseClientException(String message, IOException root) {
-    super(message, root);
-    this.ioException = root;
+  public ConcurrentSchemaModificationException(String msg) {
+    super(msg);
   }
-  
-  public IOException getIOException() {
-    return ioException;
+
+  public ConcurrentSchemaModificationException(Throwable cause) {
+    super(cause);
+  }
+
+  public ConcurrentSchemaModificationException(String msg, Throwable cause) {
+    super(msg, cause);
   }
 }

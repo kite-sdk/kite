@@ -21,7 +21,7 @@ import org.apache.avro.specific.SpecificRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.cdk.data.dao.HBaseCommonException;
+import com.cloudera.cdk.data.DatasetException;
 
 /**
  * An AvroRecordBuilderFactory instance that can construct AvroRecordBuilders
@@ -56,11 +56,11 @@ public class SpecificAvroRecordBuilderFactory<T extends SpecificRecord>
     } catch (Exception e) {
       // A number of reflection exceptions could be caught here.
       // No good way to handle these types of exceptions, so
-      // throw an HBaseCommonException up to the user.
+      // throw an DatasetException up to the user.
       String msg = "Could not get a default constructor for class: "
           + recordClass.toString();
       LOG.error(msg, e);
-      throw new HBaseCommonException(msg, e);
+      throw new DatasetException(msg, e);
     }
   }
 

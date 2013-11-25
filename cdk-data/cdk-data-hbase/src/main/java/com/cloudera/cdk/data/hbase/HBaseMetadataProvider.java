@@ -17,11 +17,10 @@ package com.cloudera.cdk.data.hbase;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.MetadataProviderException;
-import com.cloudera.cdk.data.NoSuchDatasetException;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.dao.Constants;
+import com.cloudera.cdk.data.DatasetException;
 import com.cloudera.cdk.data.dao.EntitySchema;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.SchemaManager;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
@@ -61,7 +60,7 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
         hbaseAdmin.createTable(table);
       }
     } catch (IOException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     }
 
     String entitySchemaString = descriptor.getSchema().toString(true);
@@ -112,7 +111,7 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
         }
       }
     } catch (IOException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     }
     return withPartitionStrategy(descriptor);
   }
@@ -133,10 +132,11 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     return withPartitionStrategy(descriptor);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public DatasetDescriptor load(String name) {
     if (!exists(name)) {
-      throw new NoSuchDatasetException("No such dataset: " + name);
+      throw new com.cloudera.cdk.data.NoSuchDatasetException("No such dataset: " + name);
     }
     String tableName = getTableName(name);
     String entityName = getEntityName(name);

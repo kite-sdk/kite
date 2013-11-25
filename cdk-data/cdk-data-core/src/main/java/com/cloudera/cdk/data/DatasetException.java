@@ -17,7 +17,8 @@ package com.cloudera.cdk.data;
 
 /**
  * <p>
- * Exception thrown for dataset-related failures.
+ * Exception thrown for dataset-related failures. The root of
+ * the dataset exception hierarchy.
  * </p>
  * <p>
  * Implementations of the {@link Dataset} interface throw this exception if

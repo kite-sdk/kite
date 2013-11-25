@@ -17,7 +17,7 @@ package com.cloudera.cdk.data.hbase;
 
 import com.cloudera.cdk.data.dao.Constants;
 import com.cloudera.cdk.data.dao.MappingType;
-import com.cloudera.cdk.data.dao.SchemaValidationException;
+import com.cloudera.cdk.data.SchemaValidationException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

@@ -31,7 +31,7 @@ import com.cloudera.cdk.data.dao.EntityBatch;
 import com.cloudera.cdk.data.dao.EntityScanner;
 import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
+import com.cloudera.cdk.data.DatasetException;
 import com.cloudera.cdk.data.dao.KeySchema;
 
 /**
@@ -90,7 +90,7 @@ public abstract class CompositeBaseDao<E, S> implements CompositeDao<E, S> {
             keyBytes = put.getPut().getRow();
           } else {
             if (!Arrays.equals(keyBytes, put.getPut().getRow())) {
-              throw new HBaseCommonException(
+              throw new DatasetException(
                   "Composite entity keys didn't serialize to the same row bytes.");
             }
           }

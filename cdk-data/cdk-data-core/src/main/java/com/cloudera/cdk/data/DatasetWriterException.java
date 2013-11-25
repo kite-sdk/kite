@@ -27,7 +27,7 @@ package com.cloudera.cdk.data;
  * @see DatasetWriter
  * @since 0.2.0
  */
-public class DatasetWriterException extends RuntimeException {
+public class DatasetWriterException extends DatasetException {
 
   public DatasetWriterException() {
     super();

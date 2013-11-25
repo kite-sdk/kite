@@ -22,7 +22,7 @@ import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
 import com.cloudera.cdk.data.hbase.EntitySerDe;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
+import com.cloudera.cdk.data.DatasetException;
 import com.cloudera.cdk.data.dao.MappingType;
 
 /**
@@ -44,7 +44,7 @@ public class SingleFieldEntityFilter implements EntityFilter {
       CompareFilter.CompareOp equalityOperator) {
     FieldMapping fieldMapping = entitySchema.getFieldMapping(fieldName);
     if (fieldMapping.getMappingType() != MappingType.COLUMN) {
-      throw new HBaseCommonException(
+      throw new DatasetException(
           "SingleColumnValueFilter only compatible with COLUMN mapping types.");
     }
 

@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase.manager;
 
+import com.cloudera.cdk.data.DatasetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,15 +29,14 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.cdk.data.dao.ConcurrentSchemaModificationException;
+import com.cloudera.cdk.data.ConcurrentSchemaModificationException;
 import com.cloudera.cdk.data.dao.EntitySchema;
 import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
-import com.cloudera.cdk.data.dao.IncompatibleSchemaException;
+import com.cloudera.cdk.data.IncompatibleSchemaException;
 import com.cloudera.cdk.data.dao.KeySchema;
 import com.cloudera.cdk.data.dao.MappingType;
 import com.cloudera.cdk.data.dao.SchemaManager;
-import com.cloudera.cdk.data.dao.SchemaNotFoundException;
+import com.cloudera.cdk.data.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.KeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchema;
 import com.google.common.collect.Lists;
@@ -420,7 +420,7 @@ public class DefaultSchemaManager implements SchemaManager {
         schemaParsers.putIfAbsent(schemaParserClassName, schemaParser);
         return schemaParser;
       } catch (Exception e) {
-        throw new HBaseCommonException(
+        throw new DatasetException(
             "Could not instantiate schema parser class: "
                 + schemaParserClassName, e);
       }

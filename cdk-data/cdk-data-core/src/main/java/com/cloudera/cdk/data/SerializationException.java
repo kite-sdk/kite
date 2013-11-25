@@ -13,25 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.data.dao;
+package com.cloudera.cdk.data;
 
 /**
- * An exception that indicates a managed schema modification collided with
- * another client trying to modify that same managed schema.
+ * Exception thrown when an object cannot be serialized to,
+ * or deserialized from, its binary representation.
+ * @since 0.9.0
  */
-public class ConcurrentSchemaModificationException extends HBaseCommonException {
+public class SerializationException extends DatasetException {
 
-  private static final long serialVersionUID = 1L;
-
-  public ConcurrentSchemaModificationException(String msg) {
-    super(msg);
-  }
-
-  public ConcurrentSchemaModificationException(Throwable cause) {
-    super(cause);
-  }
-
-  public ConcurrentSchemaModificationException(String msg, Throwable cause) {
-    super(msg, cause);
+  public SerializationException(String message, Throwable root) {
+    super(message, root);
   }
 }

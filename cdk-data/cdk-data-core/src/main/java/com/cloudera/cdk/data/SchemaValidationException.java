@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.data.dao;
+package com.cloudera.cdk.data;
 
-public class SchemaValidationException extends HBaseCommonException {
+/**
+ * <p>
+ * Exception thrown to indicate that there was a problem
+ * parsing or validating a schema.
+ * <p>
+ * @since 0.9.0
+ */
+public class SchemaValidationException extends DatasetException {
   
-  private static final long serialVersionUID = 1L;
-
   public SchemaValidationException(String msg) {
     super(msg);
   }

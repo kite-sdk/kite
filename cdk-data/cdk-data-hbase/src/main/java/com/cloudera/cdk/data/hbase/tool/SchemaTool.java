@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data.hbase.tool;
 
+import com.cloudera.cdk.data.DatasetException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,10 +51,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.cdk.data.dao.Constants;
-import com.cloudera.cdk.data.dao.HBaseCommonException;
 import com.cloudera.cdk.data.dao.KeySchema;
 import com.cloudera.cdk.data.dao.SchemaManager;
-import com.cloudera.cdk.data.dao.SchemaValidationException;
+import com.cloudera.cdk.data.SchemaValidationException;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySchema;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser;
 import com.cloudera.cdk.data.hbase.avro.impl.AvroKeySchema;
@@ -107,7 +107,7 @@ public class SchemaTool {
         try {
           schemaStrings = getSchemaStringsFromDir(new File(dirURL.toURI()));
         } catch (URISyntaxException e) {
-          throw new HBaseCommonException(e);
+          throw new DatasetException(e);
         }
       } else if (dirURL != null && dirURL.getProtocol().equals("jar")) {
         String jarPath = dirURL.getPath().substring(5,
@@ -117,7 +117,7 @@ public class SchemaTool {
       } else {
         String msg = "Could not find classpath resource: " + schemaDirectory;
         LOG.error(msg);
-        throw new HBaseCommonException(msg);
+        throw new DatasetException(msg);
       }
     } else {
       schemaStrings = getSchemaStringsFromDir(new File(schemaDirectory));
@@ -158,7 +158,7 @@ public class SchemaTool {
       if (!tableKeySchemaMap.containsKey(table)) {
         String msg = "No Key Schema For Table: " + table;
         LOG.error(msg);
-        throw new HBaseCommonException(msg);
+        throw new DatasetException(msg);
       }
       if (entitySchemas.size() == 0) {
         String msg = "Key, but no entity schemas for Table: " + table;
@@ -293,7 +293,7 @@ public class SchemaTool {
           }
         }
       } catch (IOException e) {
-        throw new HBaseCommonException(e);
+        throw new DatasetException(e);
       }
     }
   }
@@ -312,7 +312,7 @@ public class SchemaTool {
       fis = new FileInputStream(schemaFile);
       schemaString = AvroUtils.inputStreamToString(fis);
     } catch (IOException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     } finally {
       if (fis != null) {
         try {
@@ -398,9 +398,9 @@ public class SchemaTool {
     try {
       jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
     } catch (UnsupportedEncodingException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     } catch (IOException e) {
-      throw new HBaseCommonException(e);
+      throw new DatasetException(e);
     }
     Enumeration<JarEntry> entries = jar.entries();
     List<String> schemaStrings = new ArrayList<String>();
@@ -413,7 +413,7 @@ public class SchemaTool {
         try {
           inputStream = jar.getInputStream(jarEntry);
         } catch (IOException e) {
-          throw new HBaseCommonException(e);
+          throw new DatasetException(e);
         }
         String schemaString = AvroUtils.inputStreamToString(inputStream);
         schemaStrings.add(schemaString);

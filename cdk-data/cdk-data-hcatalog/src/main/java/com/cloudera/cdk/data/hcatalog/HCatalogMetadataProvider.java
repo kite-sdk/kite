@@ -17,7 +17,6 @@
 package com.cloudera.cdk.data.hcatalog;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
-import com.cloudera.cdk.data.NoSuchDatasetException;
 import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
@@ -39,6 +38,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider {
     this.hcat = new HCatalog(conf);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
     Preconditions.checkArgument(name != null, "Name cannot be null");
@@ -46,7 +46,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider {
         "Descriptor cannot be null");
 
     if (!exists(name)) {
-      throw new NoSuchDatasetException("Table not found: " + name);
+      throw new com.cloudera.cdk.data.NoSuchDatasetException("Table not found: " + name);
     }
 
     Table table = hcat.getTable(HiveUtils.DEFAULT_DB, name);

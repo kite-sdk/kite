@@ -13,24 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.data.dao;
+package com.cloudera.cdk.data;
 
 /**
- * The base Exception type for HBase Common.
+ * <p>
+ * Exception thrown to indicate that there was a problem
+ * finding a particular version of a schema.
+ * <p>
+ * @since 0.9.0
  */
-public class HBaseCommonException extends RuntimeException {
+public class SchemaNotFoundException extends DatasetException {
 
-  private static final long serialVersionUID = 1L;
-
-  public HBaseCommonException(Throwable root) {
-    super(root);
+  public SchemaNotFoundException(String message) {
+    super(message);
   }
-
-  public HBaseCommonException(String string, Throwable root) {
-    super(string, root);
+  
+  public SchemaNotFoundException(String message, Throwable cause) {
+    super(message, cause);
   }
-
-  public HBaseCommonException(String s) {
-    super(s);
+  
+  public SchemaNotFoundException(Throwable cause) {
+    super(cause);
   }
 }

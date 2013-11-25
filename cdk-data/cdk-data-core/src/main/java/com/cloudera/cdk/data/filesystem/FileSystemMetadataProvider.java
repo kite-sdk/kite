@@ -20,7 +20,6 @@ import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetExistsException;
 import com.cloudera.cdk.data.MetadataProvider;
 import com.cloudera.cdk.data.MetadataProviderException;
-import com.cloudera.cdk.data.NoSuchDatasetException;
 import com.cloudera.cdk.data.impl.Accessor;
 import com.cloudera.cdk.data.spi.AbstractMetadataProvider;
 import com.google.common.base.Charsets;
@@ -467,13 +466,15 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
    *
    * @param fs        A FileSystem where the metadata should be stored
    * @param location  The Path where the metadata should be stored
-   * @throws NoSuchDatasetException     if the descriptor location is missing
+   * @throws com.cloudera.cdk.data.NoSuchDatasetException if the descriptor location is missing
    * @throws MetadataProviderException  if any IOException is thrown
    */
+  @SuppressWarnings("deprecation")
   private static void checkExists(FileSystem fs, Path location) {
     try {
       if (!fs.exists(location)) {
-        throw new NoSuchDatasetException("Descriptor location is missing: " + location);
+        throw new com.cloudera.cdk.data.NoSuchDatasetException("Descriptor location is missing: " +
+            location);
       }
     } catch (IOException ex) {
       throw new MetadataProviderException("Cannot access descriptor location", ex);

@@ -28,7 +28,7 @@ package com.cloudera.cdk.data;
  * @since 0.2.0
  */
 
-public class DatasetReaderException extends RuntimeException {
+public class DatasetReaderException extends DatasetException {
 
   public DatasetReaderException() {
     super();

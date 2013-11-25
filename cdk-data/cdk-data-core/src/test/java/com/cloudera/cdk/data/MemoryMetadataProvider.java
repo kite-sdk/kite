@@ -53,6 +53,7 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
     return new Path(Files.createTempDir().getAbsolutePath()).toUri();
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public DatasetDescriptor load(String name) {
     Preconditions.checkArgument(name != null, "Name cannot be null");
@@ -99,6 +100,7 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
     return newDescriptor;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
     Preconditions.checkArgument(name != null, "Name cannot be null");

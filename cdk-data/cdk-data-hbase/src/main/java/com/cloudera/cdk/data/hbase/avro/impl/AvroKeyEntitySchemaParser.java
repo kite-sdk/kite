@@ -27,7 +27,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import com.cloudera.cdk.data.dao.EntitySchema.FieldMapping;
 import com.cloudera.cdk.data.dao.MappingType;
-import com.cloudera.cdk.data.dao.SchemaValidationException;
+import com.cloudera.cdk.data.SchemaValidationException;
 import com.cloudera.cdk.data.hbase.KeyEntitySchemaParser;
 
 /**
