@@ -19,8 +19,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,9 +53,164 @@ import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Notifications;
 import com.cloudera.cdk.morphline.stdio.AbstractParser;
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 
 public class AvroMorphlineTest extends AbstractMorphlineTest {
+
+  @Test
+  public void testToAvroBasic() throws Exception {
+    Schema schema = new Parser().parse(new File("src/test/resources/test-avro-schemas/interop.avsc"));
+    morphline = createMorphline("test-morphlines/toAvroWithSchemaFile");
+    
+    byte[] bytes = new byte[] {47, 13};
+    byte[] fixed = new byte[16];
+    Record jdoc1 = new Record();     
+    jdoc1.put("_dataset_descriptor_schema", schema);
+    collector.reset();
+    assertFalse(morphline.process(jdoc1)); // "has no default value"
+
+    jdoc1.put("intField", "notAnInteger");
+    collector.reset();
+    assertFalse(morphline.process(jdoc1)); // can't convert
+
+    jdoc1.replaceValues("intField", "20");
+    jdoc1.put("longField", "200");
+    jdoc1.put("stringField", "abc");
+    jdoc1.put("boolField", "true");
+    jdoc1.put("floatField", "200");
+    jdoc1.put("doubleField","200");
+    jdoc1.put("bytesField", bytes);
+    jdoc1.put("nullField", null);
+    jdoc1.getFields().putAll("arrayField", Arrays.asList(10.0, 20.0));
+    jdoc1.put("mapField", 
+        new HashMap(ImmutableMap.of("myMap", 
+          ImmutableMap.of("label", "car")
+        ))
+    );
+    jdoc1.put("unionField", new ArrayList(Arrays.asList(bytes)));
+    jdoc1.put("enumField", "B");
+    jdoc1.put("fixedField", fixed);
+    jdoc1.put("recordField", 
+        ImmutableMap.of(  
+            "label", "house",
+            "children", new ArrayList(Arrays.asList(bytes)))
+    );    
+    collector.reset();
+    assertTrue(morphline.process(jdoc1));
+    
+    GenericData.Record actual = (GenericData.Record) collector.getFirstRecord().getFirstValue(Fields.ATTACHMENT_BODY);
+    assertEquals(20, actual.get("intField"));
+    assertEquals(123, actual.get("defaultIntField"));    
+    assertEquals(200L, actual.get("longField"));
+    assertEquals("abc", actual.get("stringField"));
+    assertEquals(Boolean.TRUE, actual.get("boolField"));
+    assertEquals(200.0f, actual.get("floatField"));
+    assertEquals(200.0, actual.get("doubleField"));
+    assertEquals(ByteBuffer.wrap(bytes), actual.get("bytesField"));
+    assertNull(actual.get("nullField"));
+    assertEquals(Arrays.asList(10.0, 20.0), actual.get("arrayField"));
+    GenericData.Record expected = new GenericData.Record(schema.getField("mapField").schema().getValueType());
+    expected.put("label", "car");
+    assertEquals(ImmutableMap.of("myMap", expected), actual.get("mapField"));
+    assertEquals(Arrays.asList(ByteBuffer.wrap(bytes)), actual.get("unionField"));
+    assertEquals("B", actual.get("enumField"));
+    assertEquals(
+        new GenericData.Fixed(schema.getField("fixedField").schema(), fixed), 
+        actual.get("fixedField"));
+    expected = new GenericData.Record(schema.getField("recordField").schema());
+    expected.put("label", "house");
+    expected.put("children", new ArrayList(Arrays.asList(ByteBuffer.wrap(bytes))));
+    assertEquals(expected, actual.get("recordField"));
+  }
+
+  @Test
+  public void testToAvroWithUnion() throws Exception {
+    morphline = createMorphline("test-morphlines/toAvro");
+    
+    List<Schema> types = Arrays.asList(
+            Schema.create(Type.INT), 
+            Schema.create(Type.LONG), 
+            Schema.create(Type.FLOAT), 
+            Schema.create(Type.DOUBLE), 
+            Schema.create(Type.BOOLEAN), 
+            Schema.create(Type.STRING), 
+            Schema.create(Type.NULL));
+    
+    processAndVerifyUnion(5, 5, types);
+    processAndVerifyUnion(5L, 5L, types);
+    processAndVerifyUnion(5.0f, 5.0f, types);
+    processAndVerifyUnion(5.0, 5.0, types);
+    processAndVerifyUnion("5", "5", types);
+    processAndVerifyUnion(Boolean.TRUE, Boolean.TRUE, types);
+    processAndVerifyUnion(Boolean.FALSE, Boolean.FALSE, types);
+    processAndVerifyUnion(null, null, types);
+    processAndVerifyUnion(Arrays.asList(1, 2), "[1, 2]", types);
+
+    types = Arrays.asList(
+        Schema.create(Type.DOUBLE), 
+        Schema.create(Type.INT)
+        );
+    processAndVerifyUnion("5", 5.0, types);
+
+    
+    types = Arrays.asList(
+        Schema.create(Type.INT),
+        Schema.create(Type.DOUBLE) 
+        );
+    processAndVerifyUnion("5", 5, types);
+    
+    
+    types = Arrays.asList(
+        Schema.create(Type.STRING),
+        Schema.create(Type.DOUBLE) 
+        );
+    processAndVerifyUnion(5, "5", types);
+
+    
+    types = Arrays.asList(
+        Schema.create(Type.DOUBLE), 
+        Schema.create(Type.STRING)
+        );
+    processAndVerifyUnion(5, 5.0, types);
+
+    
+    Schema recordSchema = Schema.createRecord("Rec", "arec", null, false);
+    recordSchema.setFields(Arrays.asList(new Field("foo", Schema.create(Type.STRING), null, null))); 
+    types = Arrays.asList(
+        Schema.create(Type.INT), 
+        Schema.createMap(Schema.create(Type.STRING)),
+        recordSchema 
+        );
+    Map<String, String> map = new HashMap(ImmutableMap.of("foo", "bar"));
+    processAndVerifyUnion(map, new HashMap(map), types);
+
+    
+    types = Arrays.asList(
+        Schema.create(Type.INT), 
+        recordSchema, 
+        Schema.createMap(Schema.create(Type.STRING))
+        );
+    GenericData.Record avroRecord = new GenericData.Record(recordSchema);
+    avroRecord.put("foo", "bar");    
+    processAndVerifyUnion(map, avroRecord, types);
+  }
+  
+  private void processAndVerifyUnion(Object input, Object expected, List<Schema> types) {
+    Schema documentSchema = Schema.createRecord("Doc", "adoc", null, false);
+    Schema unionSchema = Schema.createUnion(types);
+    documentSchema.setFields(Arrays.asList(new Field("price", unionSchema, null, null)));        
+
+    GenericData.Record document1 = new GenericData.Record(documentSchema);
+    document1.put("price", expected);    
+
+    Record jdoc1 = new Record();     
+    jdoc1.put("_dataset_descriptor_schema", documentSchema);
+    jdoc1.put("price", input);
+    Record expect1 = jdoc1.copy();
+    expect1.put(Fields.ATTACHMENT_BODY, document1);
+    processAndVerifySuccess(jdoc1, expect1, false);  
+  }
   
   @Test
   public void testAvroArrayUnionDocument() throws Exception {
@@ -148,6 +305,31 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     AbstractParser.removeAttachments(first);
     assertEquals(Arrays.asList(1, 2, 3, 4, 5, 10, 20, 100, 200), first.get("/price"));
     assertEquals(1, first.getFields().asMap().size());
+    
+    {
+      morphline = createMorphline("test-morphlines/toAvro");
+      Record jdoc1 = new Record();     
+      jdoc1.put("_dataset_descriptor_schema", documentSchema);
+      jdoc1.put("price", Arrays.asList(1000));
+      Record expect1 = jdoc1.copy();
+      expect1.put(Fields.ATTACHMENT_BODY, document1);
+      processAndVerifySuccess(jdoc1, expect1, false);
+  
+      Record jdoc0 = new Record();     
+      jdoc0.put("_dataset_descriptor_schema", documentSchema);
+      jdoc0.getFields().putAll("price", Arrays.asList(
+          Arrays.asList(1, 2, 3, 4, 5),
+          Arrays.asList(10, 20),
+          null,
+          null,
+          Arrays.asList(100, 200),
+          null
+        )
+      );
+      Record expect0 = jdoc0.copy();
+      expect0.put(Fields.ATTACHMENT_BODY, document0);
+      processAndVerifySuccess(jdoc0, expect0, false);
+    }
   }
   
   @Test
@@ -308,6 +490,56 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     assertEquals(Arrays.asList(10), first.get("/docId"));
     AbstractParser.removeAttachments(first);
     assertEquals(5, first.getFields().asMap().size());
+
+    {
+      morphline = createMorphline("test-morphlines/toAvro");
+      Record jdoc1 = new Record();     
+      jdoc1.put("_dataset_descriptor_schema", documentSchema);
+      jdoc1.put("docId", 20);
+      jdoc1.put("links", 
+          ImmutableMap.of(
+            "backward", Arrays.asList(10, 30),
+            "forward", Arrays.asList(80))
+      );
+      jdoc1.getFields().putAll("name", 
+          Arrays.asList(
+            ImmutableMap.of(  
+              "language", Arrays.asList(),
+              "url", "http://C"))
+      );
+      Record expect1 = jdoc1.copy();
+      expect1.put(Fields.ATTACHMENT_BODY, document1);
+      processAndVerifySuccess(jdoc1, expect1, false);
+  
+      Record jdoc0 = new Record();     
+      jdoc0.put("_dataset_descriptor_schema", documentSchema);
+      jdoc0.put("docId", 10);
+      jdoc0.put("links", 
+          ImmutableMap.of(
+            "backward", Arrays.asList(),
+            "forward", Arrays.asList(20, 40, 60))
+      );
+      
+      jdoc0.getFields().putAll("name", 
+          Arrays.asList(
+            ImmutableMap.of(  
+              "language", new ArrayList(Arrays.asList(
+                  ImmutableMap.of("code", "en-us", "country", "us"),
+                  ImmutableMap.of("code", "en"))),
+              "url", "http://A"),
+            ImmutableMap.of(  
+              "language", Arrays.asList(),
+              "url", "http://B"),
+            ImmutableMap.of(  
+              "language", new ArrayList(Arrays.asList(
+                  ImmutableMap.of("code", "en-gb", "country", "gb")))
+               )
+          )
+      );
+      Record expect0 = jdoc0.copy();
+      expect0.put(Fields.ATTACHMENT_BODY, document0);
+      processAndVerifySuccess(jdoc0, expect0, false);
+    }
   }
   
   @Test
@@ -358,8 +590,72 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     assertEquals(Arrays.asList("nadja"), first.get("/mapField/foo/label"));
     AbstractParser.removeAttachments(first);
     assertEquals(1, first.getFields().asMap().size());
+
+    {
+      morphline = createMorphline("test-morphlines/toAvro");
+      Record jdoc0 = new Record();     
+      jdoc0.put("_dataset_descriptor_schema", schema);
+      jdoc0.put("mapField", new HashMap(ImmutableMap.of(
+          utf8("foo"), ImmutableMap.of("label", "nadja")
+          )) 
+      );
+      Record expect0 = jdoc0.copy();
+      expect0.put(Fields.ATTACHMENT_BODY, document0);
+      processAndVerifySuccess(jdoc0, expect0, false);  
+      
+      // verify that multiple maps can't be converted to a non-array schema
+      jdoc0 = new Record();     
+      jdoc0.put("_dataset_descriptor_schema", schema);
+      jdoc0.put("mapField", new HashMap(ImmutableMap.of(
+          utf8("foo"), ImmutableMap.of("label", "nadja")
+          )) 
+      );
+      jdoc0.put("mapField", new HashMap(ImmutableMap.of(
+          utf8("foo"), ImmutableMap.of("label", "nadja")
+          )) 
+      );
+      collector.reset();
+      assertFalse(morphline.process(jdoc0));
+      
+      // verify that an exception is raised if a required field is missing
+      jdoc0 = new Record();     
+      jdoc0.put("_dataset_descriptor_schema", schema);
+      jdoc0.put("mapField", new HashMap(ImmutableMap.of(
+          utf8("foo"), ImmutableMap.of()
+          )) 
+      );
+      collector.reset();
+      assertFalse(morphline.process(jdoc0));
+      
+      // verify that default field is used if value is missing
+      Schema schema2 = new Parser().parse(new File("src/test/resources/test-avro-schemas/intero2.avsc"));
+      jdoc0 = new Record();     
+      jdoc0.put("_dataset_descriptor_schema", schema2);
+      jdoc0.put("mapField", new HashMap(ImmutableMap.of(
+          utf8("foo"), ImmutableMap.of()
+          )) 
+      );
+      collector.reset();
+      assertTrue(morphline.process(jdoc0));
+      GenericData.Record result = (GenericData.Record) collector.getFirstRecord().getFirstValue(Fields.ATTACHMENT_BODY);
+      GenericData.Record result2 = (GenericData.Record) ((Map)result.get("mapField")).get(utf8("foo"));
+      assertEquals("nadja", result2.get("label"));
+    }
   }
 
+  private void processAndVerifySuccess(Record input, Record expected, boolean isSame) {
+    collector.reset();
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(input));
+    assertEquals(expected, collector.getFirstRecord());
+    if (isSame) {
+      assertSame(input, collector.getFirstRecord());    
+    } else {
+      assertNotSame(input, collector.getFirstRecord());    
+    }
+  }
+  
   private void ingestAndVerifyAvro(Schema schema, GenericData.Record... records) throws IOException {
     deleteAllDocuments();
     

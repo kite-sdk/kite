@@ -79,6 +79,7 @@ h3. cdk\-morphlines\-avro
 | [#readAvro] | Parses containerless Avro and emits a morphline record for each contained Avro datum. |
 | [#extractAvroTree] | Recursively walks an Avro tree and extracts all data into a single morphline record. |
 | [#extractAvroPaths] | Extracts specific values from an Avro object, akin to a simple form of XPath. |
+| [#toAvro] | Converts a morphline record to an Avro record. | 
 
 {anchor:cdk\-morphlines\-json}
 \\
@@ -1598,6 +1599,59 @@ extractAvroPaths {
     /mymapField/foo/label : /mapField/foo/label/
   }
 }
+{code}
+
+h2. toAvro
+
+The {{toAvro}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ToAvroBuilder.java]) converts a morphline record to an Avro record of Java class {{org.apache.avro.generic.IndexedRecord}}.
+
+The conversion supports all Avro concepts, including such concepts as nested structures, records, arrays, maps, and unions.
+
+The Avro output record object is added to the morphline field \_attachment\_body.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| schemaFile | null | An optional Avro schema file in JSON format on the local file system to use for writing. |
+| schemaString | null | An optional Avro schema in JSON format given inline to use for writing. |
+| schemaField | null | An optional {{org.apache.avro.Schema}} object fetched from the given record input field. One of {{schemaFile}} or {{schemaString}} or {{schemaField}} must be present, but not more than one. |
+| mappings | \[\] | An optional JSON object containing zero or more mappings from morphline record field names to Avro record field names. Each mapping consists of an Avro output field name (on the left side of the colon ':') as well as a Morphline field name (on the right hand side). Example mapping: avroPrice : morphlinePrice. Any such mappings are optional \- by default data is extracted from the morphline fields that carry the same name as the Avro fields defined in the Avro schema. |
+
+Example usage:
+{code}
+toAvro {
+  #schemaFile : /path/to/interop.avsc 
+  #schemaField : _dataset_descriptor_schema 
+  schemaString : """
+    {
+      "type" : "record",
+      "name" : "Rating",
+      "fields" : [ 
+        {
+          "name" : "userId",
+          "type" : "int"
+        }, 
+        {
+          "name" : "rating",
+          "type" : ["int","null"]
+        }, 
+        {
+          "name" : "reviews",
+          "type" : {"type": "array", "items": "string"}
+        }, 
+        {
+          "name" : "history",
+          "type" : ["null", {"type": "map", "values":     
+                              {"type": "record", "name": "Foo",
+                                   "fields": [{"name": "timestamp", "type": "long"}]}}]
+        } 
+      ]
+    }
+  """
+  mappings : { 
+    userId : morphlineUserId
+  }          
+} 
 {code}
 
 h1. cdk\-morphlines\-json
