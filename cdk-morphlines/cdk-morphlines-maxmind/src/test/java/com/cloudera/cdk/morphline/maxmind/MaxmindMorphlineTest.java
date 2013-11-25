@@ -26,14 +26,14 @@ import com.cloudera.cdk.morphline.base.Notifications;
 public class MaxmindMorphlineTest extends AbstractMorphlineTest {
 
   @Test
-  public void testBasic() throws Exception {
+  public void testIPv4() throws Exception {
     morphline = createMorphline("test-morphlines/geoIP");    
     
     Record record = new Record();
-    String msg = "128.101.101.101";
-    record.put("ip", msg);
+    String ip = "128.101.101.101";
+    record.put("ip", ip);
     Record expected = new Record();
-    expected.put("ip", msg);
+    expected.put("ip", ip);
     expected.put("/country/iso_code", "US");
     expected.put("/country/names/en", "United States");
     expected.put("/country/names/zh-CN", "美国");
@@ -45,6 +45,28 @@ public class MaxmindMorphlineTest extends AbstractMorphlineTest {
     expected.put("/location/longitude", -93.2323);
     expected.put("/location/latitude_longitude", "44.9733,-93.2323");
     expected.put("/location/longitude_latitude", "-93.2323,44.9733");
+    
+    processAndVerifySuccess(record, expected, false);
+    Notifications.notifyShutdown(morphline);
+    Notifications.notifyShutdown(morphline);
+  }
+  
+  @Test
+  public void testIPv6() throws Exception {
+    morphline = createMorphline("test-morphlines/geoIP");    
+    
+    Record record = new Record();
+    String ip = "2001:620::1";
+    record.put("ip", ip);
+    Record expected = new Record();
+    expected.put("ip", ip);
+    expected.put("/country/iso_code", "CH");
+    expected.put("/country/names/en", "Switzerland");
+    expected.put("/country/names/zh-CN", "瑞士");
+    expected.put("/location/latitude", 47.00016);
+    expected.put("/location/longitude", 8.01427);
+    expected.put("/location/latitude_longitude", "47.00016,8.01427");
+    expected.put("/location/longitude_latitude", "8.01427,47.00016");
     
     processAndVerifySuccess(record, expected, false);
     Notifications.notifyShutdown(morphline);
