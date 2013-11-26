@@ -25,7 +25,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Delete a dataset and its metadata.
+ *
+ * @deprecated will be removed in 0.10.0; use delete-dataset instead.
  */
+@Deprecated
 @Mojo(name = "drop-dataset", requiresProject = false)
 public class DropDatasetMojo extends AbstractDatasetMojo {
 
