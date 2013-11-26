@@ -19,9 +19,10 @@ Version TBD has the following notable changes:
     * Added option to fail the following commands if an URI is syntactically invalid: 
       [extractURIComponents](cdk-morphlines/morphlinesReferenceGuide.html#extractURIComponents), 
       [extractURIComponent](cdk-morphlines/morphlinesReferenceGuide.html#extractURIComponent), 
-      [extractURIQueryParameters](cdk-morphlines/morphlinesReferenceGuide.html#extractURIQueryParameters)  
-    * Upgraded cdk-morphlines-saxon module from saxon-HE-9.5.1-2 to saxon-HE-9.5.1-3
-    * For enhanced safety readSequenceFile command nomore reuses the identity of Hadoop Writeable objects 
+      [extractURIQueryParameters](cdk-morphlines/morphlinesReferenceGuide.html#extractURIQueryParameters)
+    * Upgraded cdk-morphlines-solr-core from solr-4.4 to solr-4.6.  
+    * Upgraded cdk-morphlines-saxon module from saxon-HE-9.5.1-2 to saxon-HE-9.5.1-3.
+    * For enhanced safety readSequenceFile command nomore reuses the identity of Hadoop Writeable objects.
 
 ## Version 0.8.1
 
