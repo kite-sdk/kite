@@ -59,10 +59,6 @@ public class MarkerRange {
     this.end = end;
   }
 
-  public boolean contains(Object entity) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
   public boolean contains(Marker marker) {
     return (start.isLessThan(marker) && end.isGreaterThan(marker));
   }
@@ -123,11 +119,6 @@ public class MarkerRange {
    * correctly responds to range methods for this case.
    */
   private static class Undefined extends MarkerRange {
-
-    @Override
-    public boolean contains(Object entity) {
-      return true;
-    }
 
     @Override
     public boolean contains(Marker marker) {
