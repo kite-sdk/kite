@@ -20,7 +20,7 @@ import javax.annotation.concurrent.Immutable;
 /**
  * A {@code View} is a subset of a {@link Dataset}.
  *
- * A {@code View} defines a space of potential PartitionKeys, or a partition
+ * A {@code View} defines a space of potential storage keys, or a partition
  * space. Views can be created from ranges, partial keys, or the union of other
  * views.
  *
@@ -37,6 +37,24 @@ public interface View<E> {
    * @return the underlying {@code Dataset}
    */
   Dataset<E> getDataset();
+
+  /**
+   * Deletes the data in this {@link View} or throws an {@code Exception}.
+   *
+   * Implementations may choose to throw {@link UnsupportedOperationException}
+   * for deletes that cannot be easily satisfied by the implementation. For
+   * example, in a partitioned {@link Dataset}, the implementation may reject
+   * deletes that do not align with partition boundaries. Implementations must
+   * document what deletes are supported and under what conditions deletes will
+   * be rejected.
+   *
+   * @return true if any data was deleted; false if the view was already empty
+   * @throws UnsupportedOperationException
+   *          If the requested delete cannot be completed by the implementation
+   * @throws DatasetIOException
+   *          If the requested delete failed because of an IOException
+   */
+  boolean delete();
 
   /**
    * Get an appropriate {@link DatasetReader} implementation based on this

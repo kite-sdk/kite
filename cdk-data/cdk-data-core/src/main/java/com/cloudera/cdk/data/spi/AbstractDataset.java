@@ -32,6 +32,12 @@ public abstract class AbstractDataset<E> implements Dataset<E> {
   }
 
   @Override
+  public boolean delete() {
+    throw new UnsupportedOperationException(
+        "This Dataset does not support deletion");
+  }
+
+  @Override
   @Deprecated
   public DatasetReader<E> getReader() {
     return newReader();
