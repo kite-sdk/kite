@@ -145,8 +145,8 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   }
 
   @Override
-  public View<E> in(Marker partial) {
-    return unbounded.in(partial);
+  public View<E> of(Marker partial) {
+    return unbounded.of(partial);
   }
 
   @Override

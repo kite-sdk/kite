@@ -89,7 +89,7 @@ public abstract class AbstractDataset<E> implements Dataset<E> {
   }
 
   @Override
-  public View<E> in(Marker partial) {
+  public View<E> of(Marker partial) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 

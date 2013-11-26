@@ -95,7 +95,7 @@ public class MarkerRange {
         new Boundary(comparator, end, false));
   }
 
-  public MarkerRange in(Marker partial) {
+  public MarkerRange of(Marker partial) {
     Preconditions.checkArgument(contains(partial),
         "Marker is outside of this range");
     return new MarkerRange(comparator,
@@ -167,7 +167,7 @@ public class MarkerRange {
     }
 
     @Override
-    public MarkerRange in(Marker partial) {
+    public MarkerRange of(Marker partial) {
       throw new IllegalStateException("Undefined range: no PartitionStrategy");
     }
 

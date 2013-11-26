@@ -68,9 +68,9 @@ public class TestFileSystemView extends TestRangeViews {
     }
 
     final Set<View<StandardEvent>> expected = Sets.newHashSet(
-        testDataset.in(new Key(strategy, sepEvent)),
-        testDataset.in(new Key(strategy, octEvent)),
-        testDataset.in(new Key(strategy, novEvent)));
+        testDataset.of(new Key(strategy, sepEvent)),
+        testDataset.of(new Key(strategy, octEvent)),
+        testDataset.of(new Key(strategy, novEvent)));
 
     Assert.assertEquals("Covering partitions should match",
         expected, Sets.newHashSet(testDataset.getCoveringPartitions()));
@@ -125,11 +125,11 @@ public class TestFileSystemView extends TestRangeViews {
 
     // delete October and the 2013 directory
     Assert.assertTrue("Delete should return true to indicate FS changed",
-        testDataset.in(newMarker(2013, 10, 12)).deleteAll());
+        testDataset.of(newMarker(2013, 10, 12)).deleteAll());
     assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
     assertDirectoriesExist(fs, root);
     Assert.assertFalse("Delete should return false to indicate no changes",
-        testDataset.in(newMarker(2013, 10, 12)).deleteAll());
+        testDataset.of(newMarker(2013, 10, 12)).deleteAll());
 
     Assert.assertFalse("Delete should return false to indicate no changes",
         testDataset.deleteAll());

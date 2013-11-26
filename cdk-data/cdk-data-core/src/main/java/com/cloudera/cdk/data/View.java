@@ -141,28 +141,6 @@ public interface View<E> {
   // TODO: should the View factory methods support entities also?
 
   /**
-   * Creates a sub-{@code View} from the given range, represented by
-   * {@code start} and {@code end} {@link Marker} objects.
-   *
-   * The returned View is inclusive: the space contained by both Markers is
-   * included.
-   *
-   * Both {@code start} and {@code end} must be contained by this {@code View},
-   * as determined by {@link #contains(com.cloudera.cdk.data.Marker)}.
-   *
-   * If either Marker is null, the start or end of this {@code View} will be
-   * used.
-   *
-   * @param start a starting {@code Marker}
-   * @param end an ending {@code Marker}
-   * @return a {@code View} for the range
-   *
-   * @throws IllegalArgumentException If either Marker is not in this
-   *                                  {@code View}.
-   */
-  //View<E> range(Marker start, Marker end);
-
-  /**
    * Creates a sub-{@code View}, from the {@code start} {@link Marker} to the
    * end of this {@code View}.
    *
@@ -269,5 +247,5 @@ public interface View<E> {
    * @throws IllegalArgumentException If {@code partial} is null or not in this
    *                                  {@code View}.
    */
-  View<E> in(Marker partial);
+  View<E> of(Marker partial);
 }

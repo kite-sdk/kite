@@ -115,8 +115,8 @@ public abstract class AbstractRangeView<E> implements View<E> {
   }
 
   @Override
-  public View<E> in(Marker partial) {
-    return newLimitedCopy(range.in(partial));
+  public View<E> of(Marker partial) {
+    return newLimitedCopy(range.of(partial));
   }
 
   @Override
