@@ -67,7 +67,7 @@ public abstract class AbstractRangeView<E> implements View<E> {
   }
 
   @Override
-  public boolean delete() {
+  public boolean deleteAll() {
     throw new UnsupportedOperationException(
         "This Dataset does not support deletion");
   }

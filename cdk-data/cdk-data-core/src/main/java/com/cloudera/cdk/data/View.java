@@ -54,7 +54,7 @@ public interface View<E> {
    * @throws DatasetIOException
    *          If the requested delete failed because of an IOException
    */
-  boolean delete();
+  boolean deleteAll();
 
   /**
    * Get an appropriate {@link DatasetReader} implementation based on this

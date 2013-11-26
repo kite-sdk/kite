@@ -32,7 +32,7 @@ public abstract class AbstractDataset<E> implements Dataset<E> {
   }
 
   @Override
-  public boolean delete() {
+  public boolean deleteAll() {
     throw new UnsupportedOperationException(
         "This Dataset does not support deletion");
   }
