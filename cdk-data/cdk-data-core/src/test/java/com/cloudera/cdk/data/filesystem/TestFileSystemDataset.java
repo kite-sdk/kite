@@ -72,14 +72,10 @@ public class TestFileSystemDataset extends MiniDFSTest {
   private Format format;
   private FileSystem fileSystem;
   private Path testDirectory;
-  private Marker username0;
-  private Marker username1;
 
   public TestFileSystemDataset(Format format, FileSystem fs) {
     this.format = format;
     this.fileSystem = fs;
-    this.username0 = new Marker.Builder("username", 0).build();
-    this.username1 = new Marker.Builder("username", 1).build();
   }
 
   @Before
@@ -113,6 +109,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testPartitionedWriterSingle() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
       "username", 2).build();
@@ -139,8 +136,8 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertTrue("Partitioned directory 1 exists",
       fileSystem.exists(new Path(testDirectory, "username=1")));
     checkTestUsers(ds, 10);
-    PartitionKey key0 = partitionStrategy.keyFor(username0);
-    PartitionKey key1 = partitionStrategy.keyFor(username1);
+    PartitionKey key0 = partitionStrategy.partitionKey(0);
+    PartitionKey key1 = partitionStrategy.partitionKey(1);
     int total = readTestUsersInPartition(ds, key0, null)
       + readTestUsersInPartition(ds, key1, null);
     Assert.assertEquals(10, total);
@@ -157,6 +154,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testPartitionedWriterDouble() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
       .hash("username", 2).hash("email", 3).build();
@@ -191,12 +189,8 @@ public class TestFileSystemDataset extends MiniDFSTest {
         String part = "username=" + i1 + "/email=" + i2;
         Assert.assertTrue("Partitioned directory " + part + " exists",
           fileSystem.exists(new Path(testDirectory, part)));
-        Marker current = new Marker.Builder()
-            .add("username", i1)
-            .add("email", i2)
-            .build();
         total += readTestUsersInPartition(ds,
-          partitionStrategy.keyFor(current), null);
+          partitionStrategy.partitionKey(i1, i2), null);
       }
     }
     Assert.assertEquals(10, total);
@@ -214,6 +208,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testGetPartitionReturnsNullIfNoAutoCreate() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
       "username", 2).build();
@@ -230,10 +225,11 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .build();
 
     Assert
-      .assertNull(ds.getPartition(partitionStrategy.keyFor(username1), false));
+      .assertNull(ds.getPartition(partitionStrategy.partitionKey(1), false));
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testWriteToSubpartition() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
       .hash("username", "username_part", 2).hash("email", 3).build();
@@ -260,6 +256,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testDropPartition() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
       .hash("username", 2).build();
@@ -282,18 +279,18 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertTrue(
       fileSystem.isDirectory(new Path(testDirectory, "username=1")));
 
-    ds.dropPartition(partitionStrategy.keyFor(username0));
+    ds.dropPartition(partitionStrategy.partitionKey(0));
     Assert.assertFalse(
       fileSystem.isDirectory(new Path(testDirectory, "username=0")));
 
-    ds.dropPartition(partitionStrategy.keyFor(username1));
+    ds.dropPartition(partitionStrategy.partitionKey(1));
     Assert.assertFalse(
       fileSystem.isDirectory(new Path(testDirectory, "username=1")));
 
     DatasetException caught = null;
 
     try {
-      ds.dropPartition(partitionStrategy.keyFor(username0));
+      ds.dropPartition(partitionStrategy.partitionKey(0));
     } catch (DatasetException e) {
       caught = e;
     }
@@ -301,6 +298,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertNotNull(caught);
   }
 
+  @SuppressWarnings("deprecation")
   private int readTestUsersInPartition(FileSystemDataset<Record> ds, PartitionKey key,
       String subpartitionName) {
     int readCount = 0;

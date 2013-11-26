@@ -65,27 +65,8 @@ class FileSystemView<E> extends AbstractRangeView<E> {
 
   @Override
   public DatasetReader<E> newReader() {
-    final Iterable<Path> directories;
-    if (dataset.getDescriptor().isPartitioned()) {
-      directories = Iterables.transform(
-          partitionIterator(),
-          new Function<Key, Path>() {
-            private final PathConversion convert = new PathConversion();
-            @Override
-            public Path apply(Key key) {
-              if (key != null) {
-                return new Path(root, convert.fromKey(key));
-              } else {
-                throw new DatasetException("[BUG] Null partition");
-              }
-            }
-          });
-    } else {
-      directories = Lists.newArrayList(root);
-    }
-
     return new MultiFileDatasetReader<E>(
-        fs, new PathIterator(fs, directories), dataset.getDescriptor());
+        fs, pathIterator(), dataset.getDescriptor());
   }
 
   @Override
@@ -129,7 +110,27 @@ class FileSystemView<E> extends AbstractRangeView<E> {
     }
   }
 
-
+  PathIterator pathIterator() {
+    final Iterable<Path> directories;
+    if (dataset.getDescriptor().isPartitioned()) {
+      directories = Iterables.transform(
+          partitionIterator(),
+          new Function<Key, Path>() {
+            private final PathConversion convert = new PathConversion();
+            @Override
+            public Path apply(Key key) {
+              if (key != null) {
+                return new Path(root, convert.fromKey(key));
+              } else {
+                throw new DatasetException("[BUG] Null partition");
+              }
+            }
+          });
+    } else {
+      directories = Lists.newArrayList(root);
+    }
+    return new PathIterator(fs, directories);
+  }
 
   private FileSystemPartitionIterator partitionIterator() {
     try {

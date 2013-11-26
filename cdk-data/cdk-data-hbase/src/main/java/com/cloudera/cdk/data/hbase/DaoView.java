@@ -17,11 +17,16 @@ package com.cloudera.cdk.data.hbase;
 
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
+import com.cloudera.cdk.data.FieldPartitioner;
+import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.spi.AbstractRangeView;
 import com.cloudera.cdk.data.spi.Key;
 import com.cloudera.cdk.data.spi.MarkerRange;
+
+import java.util.List;
 
 class DaoView<E> extends AbstractRangeView<E> {
 
@@ -95,11 +100,13 @@ class DaoView<E> extends AbstractRangeView<E> {
         + "supported.");
   }
 
+  @SuppressWarnings("deprecation")
   private PartitionKey toPartitionKey(MarkerRange.Boundary boundary) {
     if (boundary == null || boundary.getBound() == null) {
       return null;
     }
-    return dataset.getDescriptor().getPartitionStrategy()
-        .keyFor(boundary.getBound());
+
+    return DaoDataset.keyFor(dataset.getDescriptor().getPartitionStrategy(),
+        boundary.getBound());
   }
 }

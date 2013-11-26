@@ -146,6 +146,7 @@ public class DatasetTestUtilities {
     return materialize(ds).size();
   }
 
+  @SuppressWarnings("deprecation")
   public static <E> void testPartitionKeysAreEqual(Dataset<E> ds,
       PartitionKey... expectedKeys) {
     Set<PartitionKey> expected = Sets.newHashSet(expectedKeys);

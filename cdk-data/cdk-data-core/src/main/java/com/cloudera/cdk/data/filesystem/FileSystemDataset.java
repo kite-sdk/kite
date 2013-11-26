@@ -50,7 +50,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   private final Path directory;
   private final String name;
   private final DatasetDescriptor descriptor;
-  private final PartitionKey partitionKey;
+  private PartitionKey partitionKey;
 
   private final PartitionStrategy partitionStrategy;
 
@@ -60,18 +60,29 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   private final PathConversion convert;
 
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
-    DatasetDescriptor descriptor, @Nullable PartitionKey partitionKey) {
+                    DatasetDescriptor descriptor) {
 
     this.fileSystem = fileSystem;
     this.directory = directory;
     this.name = name;
     this.descriptor = descriptor;
-    this.partitionKey = partitionKey;
     this.partitionStrategy =
-      descriptor.isPartitioned() ? descriptor.getPartitionStrategy() : null;
+        descriptor.isPartitioned() ? descriptor.getPartitionStrategy() : null;
     this.convert = new PathConversion();
 
     this.unbounded = new FileSystemView<E>(this);
+    // remove this.partitionKey for 0.10.0
+    this.partitionKey = null;
+  }
+
+  /**
+   * @deprecated will be removed in 0.10.0
+   */
+  @Deprecated
+  FileSystemDataset(FileSystem fileSystem, Path directory, String name,
+    DatasetDescriptor descriptor, @Nullable PartitionKey partitionKey) {
+    this(fileSystem, directory, name, descriptor);
+    this.partitionKey = partitionKey;
   }
 
   @Override
@@ -84,6 +95,10 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     return descriptor;
   }
 
+  /**
+   * @deprecated will be removed in 0.10.0
+   */
+  @Deprecated
   PartitionKey getPartitionKey() {
     return partitionKey;
   }
@@ -124,6 +139,10 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     return unbounded.getCoveringPartitions();
   }
 
+  PathIterator pathIterator() {
+    return unbounded.pathIterator();
+  }
+
   @Override
   public View<E> from(Marker start) {
     return unbounded.from(start);
@@ -151,6 +170,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
 
   @Override
   @Nullable
+  @Deprecated
   public Dataset<E> getPartition(PartitionKey key, boolean allowCreate) {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get a partition on a non-partitioned dataset (name:%s)",
@@ -190,6 +210,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   }
 
   @Override
+  @Deprecated
   public void dropPartition(PartitionKey key) {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to drop a partition on a non-partitioned dataset (name:%s)",
@@ -211,6 +232,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   }
 
   @Override
+  @Deprecated
   public Iterable<Dataset<E>> getPartitions() {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get partitions on a non-partitioned dataset (name:%s)",
@@ -255,6 +277,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
       .toString();
   }
 
+  @Deprecated
   void accumulateDatafilePaths(Path directory, List<Path> paths)
     throws IOException {
 

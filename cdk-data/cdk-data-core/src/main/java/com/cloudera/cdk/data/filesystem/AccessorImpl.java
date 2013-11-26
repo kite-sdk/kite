@@ -17,6 +17,8 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetException;
+import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
 import java.io.IOException;
 import java.util.List;
@@ -34,10 +36,23 @@ final class AccessorImpl extends Accessor {
   }
 
   @Override
+  @Deprecated
   public void accumulateDatafilePaths(Dataset<?> dataset, Path directory,
       List<Path> paths) throws IOException {
     if (dataset instanceof FileSystemDataset) {
       ((FileSystemDataset<?>) dataset).accumulateDatafilePaths(directory, paths);
+    }
+  }
+
+  @Override
+  public Iterable<Path> getPathIterator(View view) {
+    if (view instanceof FileSystemView) {
+      return ((FileSystemView) view).pathIterator();
+    } else if (view instanceof FileSystemDataset) {
+      return ((FileSystemDataset) view).pathIterator();
+    } else {
+      throw new DatasetException(
+          "Underlying Dataset must be a FileSystemDataset");
     }
   }
 

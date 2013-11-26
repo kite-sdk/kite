@@ -57,13 +57,8 @@ public class CrunchDatasets {
   public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
     Path directory = Accessor.getDefault().getDirectory(dataset);
     if (directory != null) {
-      List<Path> paths = Lists.newArrayList();
-      try {
-        Accessor.getDefault().accumulateDatafilePaths(dataset, directory, paths);
-      } catch (IOException e) {
-        throw new DatasetException("Unable to retrieve data file list for directory " +
-            directory, e);
-      }
+      List<Path> paths = Lists.newArrayList(
+          Accessor.getDefault().getPathIterator(dataset));
 
       AvroType<E> avroType;
       if (type.isAssignableFrom(GenericData.Record.class)) {

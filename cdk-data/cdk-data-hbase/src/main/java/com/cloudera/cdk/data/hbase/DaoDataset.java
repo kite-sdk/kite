@@ -19,8 +19,10 @@ import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
+import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.hbase.impl.Dao;
@@ -29,6 +31,8 @@ import com.google.common.base.Preconditions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E> {
 
@@ -125,8 +129,9 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public E get(Marker key) {
-    return dao.get(getDescriptor().getPartitionStrategy().keyFor(key));
+    return dao.get(keyFor(getDescriptor().getPartitionStrategy(), key));
   }
 
   @Override
@@ -135,17 +140,32 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public long increment(Marker key, String fieldName, long amount) {
-    return dao.increment(getDescriptor().getPartitionStrategy().keyFor(key), fieldName, amount);
+    return dao.increment(keyFor(getDescriptor().getPartitionStrategy(), key), fieldName, amount);
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public void delete(Marker key) {
-    dao.delete(getDescriptor().getPartitionStrategy().keyFor(key));
+    dao.delete(keyFor(getDescriptor().getPartitionStrategy(), key));
   }
 
   @Override
   public boolean delete(E entity) {
     return dao.delete(entity);
+  }
+
+  @Deprecated
+  static PartitionKey keyFor(PartitionStrategy strategy, Marker marker) {
+    final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
+    final Object[] values = new Object[partitioners.size()];
+
+    for (int i = 0, n = partitioners.size(); i < n; i += 1) {
+      final FieldPartitioner fp = partitioners.get(i);
+      values[i] = fp.valueFor(marker);
+    }
+
+    return strategy.partitionKey(values);
   }
 }

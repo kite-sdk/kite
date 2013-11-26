@@ -41,7 +41,6 @@ public interface Dao<E> {
   /**
    * Put the entity into the HBase table with K key.
    * 
-   * @param key
    * @param entity
    *          The entity to store
    * @return True if the put succeeded, False if the put failed due to update

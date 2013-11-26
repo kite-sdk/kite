@@ -218,54 +218,6 @@ public class PartitionStrategy {
     return new PartitionKey(fieldPartitioners.size());
   }
 
-  /**
-   * Construct a {@link PartitionKey} for the values in a {@link Marker}.
-   *
-   * Both source and final values may be set.
-   *
-   * @param marker a Marker containing source or final data
-   * @return a PartitionKey for this PartitionStrategy
-   * @throws IllegalArgumentException if the Marker has insufficent data
-   */
-  public PartitionKey keyFor(Marker marker) {
-    return keyFor(marker, null);
-  }
-
-  /**
-   * Construct a {@link PartitionKey} for the values in a {@link Marker}.
-   *
-   * Both source and final values may be set.
-   *
-   * @param marker a Marker containing source or final data
-   * @param reuseKey a PartitionKey instance to reuse, new allocated if null
-   * @return a PartitionKey for this PartitionStrategy
-   * @throws IllegalArgumentException if the Marker has insufficent data
-   */
-  @SuppressWarnings("unchecked")
-  public PartitionKey keyFor(Marker marker, @Nullable PartitionKey reuseKey) {
-    final PartitionKey key = (reuseKey == null ? newKey() : reuseKey);
-
-    for (int i = 0; i < fieldPartitioners.size(); i += 1) {
-      final FieldPartitioner fp = fieldPartitioners.get(i);
-
-      // get data from the Marker; source name is used first
-      final Object fieldValue;
-      if (marker.has(fp.getSourceName())) {
-        fieldValue = fp.apply(
-            marker.getAs(fp.getSourceName(), fp.getSourceType()));
-      } else if (marker.has(fp.getName())) {
-        fieldValue = marker.getAs(fp.getName(), fp.getType());
-      } else {
-        throw new IllegalArgumentException(
-            "Cannot create key, missing data for field:" + fp.getName());
-      }
-
-      key.set(i, fieldValue);
-    }
-
-    return key;
-  }
-
   private String getter(String name) {
     return "get" + name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1);
   }
