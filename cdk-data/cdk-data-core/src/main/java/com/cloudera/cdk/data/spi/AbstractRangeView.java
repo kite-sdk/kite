@@ -21,6 +21,7 @@ import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.View;
+import com.google.common.base.Objects;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -116,5 +117,33 @@ public abstract class AbstractRangeView<E> implements View<E> {
   @Override
   public View<E> in(Marker partial) {
     return newLimitedCopy(range.in(partial));
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if ((o == null) || !Objects.equal(this.getClass(), o.getClass())) {
+      return false;
+    }
+
+    AbstractRangeView that = (AbstractRangeView) o;
+    return (Objects.equal(this.dataset, that.dataset) &&
+        Objects.equal(this.range, that.range));
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getClass(), dataset, range);
+  }
+
+  @Override
+  public String toString() {
+    return Objects.toStringHelper(this)
+        .add("dataset", dataset)
+        .add("range", range)
+        .toString();
   }
 }

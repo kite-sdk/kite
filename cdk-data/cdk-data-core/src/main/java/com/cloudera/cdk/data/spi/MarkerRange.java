@@ -104,6 +104,27 @@ public class MarkerRange {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      // this covers the UNDEFINED case
+      return true;
+    }
+
+    if (!(o instanceof MarkerRange)) {
+      return false;
+    }
+
+    MarkerRange that = (MarkerRange) o;
+    return (Objects.equal(this.start, that.start) &&
+        Objects.equal(this.end, that.end));
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(start, end);
+  }
+
+  @Override
   public String toString() {
     return Objects.toStringHelper(this)
         .add("start", start)
@@ -221,6 +242,27 @@ public class MarkerRange {
           return false;
         }
       }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+
+      if (!(o instanceof Boundary)) {
+        return false;
+      }
+
+      Boundary that = (Boundary) o;
+      return (Objects.equal(this.isInclusive, that.isInclusive) &&
+          Objects.equal(this.bound, that.bound) &&
+          Objects.equal(this.comparator, that.comparator));
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(isInclusive, bound, comparator);
     }
 
     @Override

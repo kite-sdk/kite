@@ -17,6 +17,7 @@
 package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.DatasetException;
+import com.cloudera.cdk.data.DatasetIOException;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.View;
@@ -27,24 +28,34 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import javax.annotation.concurrent.Immutable;
 import java.io.IOException;
 
+/**
+ * FileSystem implementation of a range-based {@link View}.
+ *
+ * @param <E> The type of records read and written by this view.
+ */
 @Immutable
 class FileSystemView<E> extends AbstractRangeView<E> {
 
-  private final FileSystemDataset<E> fsDataset;
+  private final FileSystem fs;
+  private final Path root;
 
   FileSystemView(FileSystemDataset<E> dataset) {
     super(dataset);
-    this.fsDataset = dataset;
+    this.fs = dataset.getFileSystem();
+    this.root = dataset.getDirectory();
   }
 
   private FileSystemView(FileSystemView<E> view, MarkerRange range) {
     super(view, range);
-    this.fsDataset = view.fsDataset;
+    this.fs = view.fs;
+    this.root = view.root;
   }
 
   @Override
@@ -59,44 +70,41 @@ class FileSystemView<E> extends AbstractRangeView<E> {
       directories = Iterables.transform(
           partitionIterator(),
           new Function<Key, Path>() {
-            private final Path rootDirectory = fsDataset.getDirectory();
             private final PathConversion convert = new PathConversion();
             @Override
             public Path apply(Key key) {
               if (key != null) {
-                return new Path(
-                    rootDirectory, convert.fromKey(key));
+                return new Path(root, convert.fromKey(key));
               } else {
                 throw new DatasetException("[BUG] Null partition");
               }
             }
           });
     } else {
-      directories = Lists.newArrayList(fsDataset.getDirectory());
+      directories = Lists.newArrayList(root);
     }
 
     return new MultiFileDatasetReader<E>(
-        fsDataset.getFileSystem(),
-        new PathIterator(fsDataset.getFileSystem(), directories),
-        dataset.getDescriptor());
+        fs, new PathIterator(fs, directories), dataset.getDescriptor());
   }
 
   @Override
-  @SuppressWarnings("unchecked") // See https://github.com/Parquet/parquet-mr/issues/106
   public DatasetWriter<E> newWriter() {
-    Preconditions.checkState(getDataset() instanceof FileSystemDataset,
-        "FileSystemWriters cannot create writer for " + getDataset());
-
-    final FileSystemDataset dataset = (FileSystemDataset) getDataset();
-
     if (dataset.getDescriptor().isPartitioned()) {
       return new PartitionedDatasetWriter<E>(this);
     } else {
-      return FileSystemWriters.newFileWriter(
-          dataset.getFileSystem(),
-          dataset.getDirectory(),
-          dataset.getDescriptor());
+      return FileSystemWriters.newFileWriter(fs, root, dataset.getDescriptor());
     }
+  }
+
+  @Override
+  public boolean deleteAll() {
+    PathConversion convert = new PathConversion();
+    boolean deleted = false;
+    for (Key partition : partitionIterator()) {
+      deleted = cleanlyDelete(fs, root, convert.fromKey(partition)) || deleted;
+    }
+    return deleted;
   }
 
   @Override
@@ -121,13 +129,44 @@ class FileSystemView<E> extends AbstractRangeView<E> {
     }
   }
 
+
+
   private FileSystemPartitionIterator partitionIterator() {
     try {
       return new FileSystemPartitionIterator(
-          fsDataset.getFileSystem(), fsDataset.getDirectory(),
+          fs, root,
           dataset.getDescriptor().getPartitionStrategy(), range);
     } catch (IOException ex) {
       throw new DatasetException("Cannot list partitions in view:" + this, ex);
+    }
+  }
+
+  private static boolean cleanlyDelete(FileSystem fs, Path root, Path dir) {
+    try {
+      boolean deleted = false;
+      if (dir.isAbsolute()) {
+        deleted = fs.delete(dir, true /* include any files */ );
+      } else {
+        // the path should be treated as relative to the root path
+        Path absolute = new Path(root, dir);
+        deleted = fs.delete(absolute, true /* include any files */ );
+        // iterate up to the root, removing empty directories
+        for (Path current = absolute.getParent();
+             !current.equals(root) && !current.isRoot();
+             current = current.getParent()) {
+          final FileStatus[] stats = fs.listStatus(current);
+          if (stats == null || stats.length == 0) {
+            // dir is empty and should be removed
+            deleted = fs.delete(current, true) || deleted;
+          } else {
+            // all parent directories will be non-empty
+            break;
+          }
+        }
+      }
+      return deleted;
+    } catch (IOException ex) {
+      throw new DatasetIOException("Could not cleanly delete path:" + dir, ex);
     }
   }
 }
