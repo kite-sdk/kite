@@ -142,8 +142,8 @@
     <vers.slf4j>1.6.1</vers.slf4j>
     <vers.codahale.metrics>3.0.1</vers.codahale.metrics>
     <vers.typesafe.config>1.0.2</vers.typesafe.config>
-    <vers.solr>4.4.0</vers.solr>
-    <solr.expected.version>4.4.0</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
+    <vers.solr>4.6.0</vers.solr>
+    <solr.expected.version>4.6.0</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
     <vers.tika>1.4</vers.tika>
     <vers.jackson>2.2.1</vers.jackson>
 

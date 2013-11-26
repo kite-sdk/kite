@@ -109,8 +109,6 @@ public class SolrMorphlineZkAliasTest extends AbstractSolrMorphlineZkTest {
     } catch (IllegalArgumentException e) {
       
     }
-    
-    cloudClient.shutdown();
   }
   
   private NamedList<Object> createAlias(String alias, String collections) throws SolrServerException, IOException {

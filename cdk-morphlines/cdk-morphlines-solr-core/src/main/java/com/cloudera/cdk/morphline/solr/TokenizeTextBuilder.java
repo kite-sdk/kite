@@ -103,6 +103,8 @@ public final class TokenizeTextBuilder implements CommandBuilder {
               outputValues.add(tokenStr);
             }
           }
+          tokenStream.end();
+          tokenStream.close();
         }
       } catch (IOException e) {
         throw new MorphlineRuntimeException(e);

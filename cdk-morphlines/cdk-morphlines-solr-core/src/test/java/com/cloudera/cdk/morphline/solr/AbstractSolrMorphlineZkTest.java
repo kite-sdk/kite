@@ -19,9 +19,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
 import org.apache.solr.cloud.AbstractFullDistribZkTestBase;
+import org.apache.solr.cloud.AbstractZkTestCase;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.cloud.SolrZkClient;
 import org.junit.After;
@@ -36,23 +38,24 @@ import com.cloudera.cdk.morphline.api.Record;
 import com.cloudera.cdk.morphline.base.Compiler;
 import com.cloudera.cdk.morphline.base.FaultTolerance;
 import com.cloudera.cdk.morphline.base.Notifications;
-import com.cloudera.cdk.morphline.solr.SolrLocator;
 import com.cloudera.cdk.morphline.stdlib.PipeBuilder;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ListMultimap;
 import com.typesafe.config.Config;
 
 public abstract class AbstractSolrMorphlineZkTest extends AbstractFullDistribZkTestBase {
+  private static final File solrHomeDirectory = new File(TEMP_DIR, AbstractSolrMorphlineZkTest.class.getName());
   
   protected static final String RESOURCES_DIR = "target/test-classes";
-  protected static final File SOLR_HOME_DIR = new File(RESOURCES_DIR + "/solr/collection1");
+  private static final File SOLR_INSTANCE_DIR = new File(RESOURCES_DIR + "/solr");
+  private static final File SOLR_CONF_DIR = new File(RESOURCES_DIR + "/solr/collection1");
 
   protected Collector collector;
   protected Command morphline;
 
   @Override
   public String getSolrHome() {
-    return SOLR_HOME_DIR.getPath();
+    return SOLR_INSTANCE_DIR.getPath();
   }
   
   public AbstractSolrMorphlineZkTest() {
@@ -184,57 +187,57 @@ public abstract class AbstractSolrMorphlineZkTest extends AbstractFullDistribZkT
   private void uploadConfFiles() throws Exception {
     // upload our own config files
     SolrZkClient zkClient = new SolrZkClient(zkServer.getZkAddress(), 10000);
-    putConfig(zkClient, SOLR_HOME_DIR, "solrconfig.xml");
-    putConfig(zkClient, SOLR_HOME_DIR, "schema.xml");
-    putConfig(zkClient, SOLR_HOME_DIR, "elevate.xml");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_en.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_ar.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "solrconfig.xml");
+    putConfig(zkClient, SOLR_CONF_DIR, "schema.xml");
+    putConfig(zkClient, SOLR_CONF_DIR, "elevate.xml");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_en.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_ar.txt");
     
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_bg.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_ca.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_cz.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_da.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_el.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_es.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_eu.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_de.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_fa.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_fi.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_fr.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_ga.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_gl.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_hi.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_hu.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_hy.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_id.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_it.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_ja.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_lv.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_nl.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_no.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_pt.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_ro.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_ru.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_sv.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_th.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stopwords_tr.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_bg.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_ca.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_cz.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_da.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_el.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_es.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_eu.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_de.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_fa.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_fi.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_fr.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_ga.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_gl.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_hi.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_hu.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_hy.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_id.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_it.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_ja.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_lv.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_nl.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_no.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_pt.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_ro.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_ru.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_sv.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_th.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stopwords_tr.txt");
     
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/contractions_ca.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/contractions_fr.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/contractions_ga.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/contractions_it.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/contractions_ca.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/contractions_fr.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/contractions_ga.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/contractions_it.txt");
     
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/stemdict_nl.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/stemdict_nl.txt");
     
-    putConfig(zkClient, SOLR_HOME_DIR, "lang/hyphenations_ga.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "lang/hyphenations_ga.txt");
     
-    putConfig(zkClient, SOLR_HOME_DIR, "stopwords.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "protwords.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "currency.xml");
-    putConfig(zkClient, SOLR_HOME_DIR, "open-exchange-rates.json");
-    putConfig(zkClient, SOLR_HOME_DIR, "mapping-ISOLatin1Accent.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "old_synonyms.txt");
-    putConfig(zkClient, SOLR_HOME_DIR, "synonyms.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "stopwords.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "protwords.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "currency.xml");
+    putConfig(zkClient, SOLR_CONF_DIR, "open-exchange-rates.json");
+    putConfig(zkClient, SOLR_CONF_DIR, "mapping-ISOLatin1Accent.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "old_synonyms.txt");
+    putConfig(zkClient, SOLR_CONF_DIR, "synonyms.txt");
     zkClient.close();
   }
   
