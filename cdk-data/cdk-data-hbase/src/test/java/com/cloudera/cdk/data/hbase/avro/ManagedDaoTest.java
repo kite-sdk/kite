@@ -623,9 +623,9 @@ public class ManagedDaoTest {
       // This is what we expect
     }
     manager.createSchema(tableName, "test", testRecord,
-        "com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser",
-        "com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe",
-        "com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe");
+        "com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser",
+        "com.cloudera.cdk.data.hbase.avro.AvroKeySerDe",
+        "com.cloudera.cdk.data.hbase.avro.AvroEntitySerDe");
     assertEquals(
         0,
         manager.getEntityVersion(tableName, "test",
@@ -636,9 +636,9 @@ public class ManagedDaoTest {
   public void testCannotCreateExisting() throws Exception {
     SchemaManager manager = new DefaultSchemaManager(tablePool);
     manager.createSchema(tableName, "TestRecord", goodMigrationRecordAddField,
-        "com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser",
-        "com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe",
-        "com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe");
+        "com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser",
+        "com.cloudera.cdk.data.hbase.avro.AvroKeySerDe",
+        "com.cloudera.cdk.data.hbase.avro.AvroEntitySerDe");
   }
 
   private void badMigration(String badMigration) throws Exception {

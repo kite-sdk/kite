@@ -254,9 +254,9 @@ public class SchemaTool {
       LOG.info("Creating Schema: (" + tableName + ", " + entityName + ")");
       parser.parseEntitySchema(entitySchemaString).getRequiredColumnFamilies();
       schemaManager.createSchema(tableName, entityName, entitySchemaString,
-          "com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser",
-          "com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe",
-          "com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe");
+          "com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser",
+          "com.cloudera.cdk.data.hbase.avro.AvroKeySerDe",
+          "com.cloudera.cdk.data.hbase.avro.AvroEntitySerDe");
     }
 
     if (createTableAndFamilies) {

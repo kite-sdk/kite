@@ -43,8 +43,8 @@ public abstract class EntityScannerBuilder<E> {
   private String tableName;
   private PartitionKey startKey;
   private PartitionKey stopKey;
-  private boolean startInclusive;
-  private boolean stopInclusive;
+  private boolean startInclusive = true;
+  private boolean stopInclusive = false;
   private int caching;
   private EntityMapper<E> entityMapper;
   private List<ScanModifier> scanModifiers = new ArrayList<ScanModifier>();

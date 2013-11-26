@@ -120,8 +120,8 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   }
 
   @Override
-  public View<E> in(Marker partial) {
-    return unbounded.in(partial);
+  public View<E> of(Marker partial) {
+    return unbounded.of(partial);
   }
 
   @Override

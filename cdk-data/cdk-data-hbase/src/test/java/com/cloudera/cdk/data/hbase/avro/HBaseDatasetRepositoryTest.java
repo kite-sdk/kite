@@ -154,7 +154,7 @@ public class HBaseDatasetRepositoryTest {
         compareEntitiesWithUtf8(cnt, entity);
         cnt++;
       }
-      assertEquals(7, cnt);
+      assertEquals(8, cnt);
     } finally {
       reader.close();
     }

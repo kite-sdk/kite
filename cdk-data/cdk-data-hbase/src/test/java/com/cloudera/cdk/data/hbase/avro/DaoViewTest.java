@@ -91,7 +91,7 @@ public class DaoViewTest {
 
     final View<TestEntity> range = ds.fromAfter(newMarker("1", "1")).to(
         newMarker("9", "9"));
-    
+
     // Test marker range checks
     Assert.assertTrue(range.contains(newMarker("1", "10")));
     Assert.assertTrue(range.contains(newMarker("5", "5")));
@@ -101,7 +101,7 @@ public class DaoViewTest {
     Assert.assertFalse(range.contains(newMarker("1", "1")));
     Assert.assertFalse(range.contains(newMarker("1", "0")));
     Assert.assertFalse(range.contains(newMarker("9", "99")));
-    
+
     // Test entity range checks
     Assert.assertTrue(range.contains(newTestEntity("1", "10")));
     Assert.assertTrue(range.contains(newTestEntity("5", "5")));
@@ -110,7 +110,7 @@ public class DaoViewTest {
     Assert.assertFalse(range.contains(newTestEntity("1", "1")));
     Assert.assertFalse(range.contains(newTestEntity("1", "0")));
     Assert.assertFalse(range.contains(newTestEntity("9", "99")));
-    
+
     DatasetReader<TestEntity> reader = range.newReader();
     reader.open();
     int cnt = 2;
@@ -126,31 +126,23 @@ public class DaoViewTest {
 
     Assert.assertEquals(10, cnt);
   }
-  
+
   @Test
   public void testLimitedReader() {
     populateTestEntities(10);
 
-    final View<TestEntity> range = ds.fromAfter(newMarker("1", "1")).to(
+    View<TestEntity> range = ds.from(newMarker("0", "0")).to(
         newMarker("9", "9"));
-    
-    DatasetReader<TestEntity> reader = range.newReader();
-    reader.open();
-    // First scan should start at 2
-    int cnt = 2;
-    try {
-      for (TestEntity entity : reader) {
-        Assert.assertEquals(Integer.toString(cnt), entity.getPart1());
-        Assert.assertEquals(Integer.toString(cnt), entity.getPart2());
-        cnt++;
-      }
-    } finally {
-      reader.close();
-    }
-    // Last entity ended at index 9, so cnt is 10.
-    Assert.assertEquals(10, cnt);
+    validRange(range, 0, 10);
+
+    range = ds.fromAfter(newMarker("1", "1")).to(newMarker("9", "9"));
+    validRange(range, 2, 10);
+
+    range = ds.from(newMarker("0", "0")).toBefore(newMarker("9", "9"));
+    validRange(range, 0, 9);
   }
-  
+
+  @Test
   public void testLimitedWriter() {
     final View<TestEntity> range = ds.fromAfter(newMarker("1", "1")).to(
         newMarker("5", "5"));
@@ -163,12 +155,12 @@ public class DaoViewTest {
       writer.close();
     }
   }
-  
+
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidLimitedWriter() {
     final View<TestEntity> range = ds.fromAfter(newMarker("1", "1")).toBefore(
         newMarker("5", "5"));
-    range.newWriter().write(newTestEntity("6", "6"));    
+    range.newWriter().write(newTestEntity("6", "6"));
   }
 
   private Marker newMarker(String part1, String part2) {
@@ -194,5 +186,21 @@ public class DaoViewTest {
     for (int i = 0; i < num; i++) {
       ds.put(newTestEntity(Integer.toString(i), Integer.toString(i)));
     }
+  }
+  
+  private void validRange(View<TestEntity> range, int startIdx, int endIdx) {
+    int cnt = startIdx;
+    DatasetReader<TestEntity> reader = range.newReader();
+    reader.open();
+    try {
+      for (TestEntity entity : reader) {
+        Assert.assertEquals(Integer.toString(cnt), entity.getPart1());
+        Assert.assertEquals(Integer.toString(cnt), entity.getPart2());
+        cnt++;
+      }
+    } finally {
+      reader.close();
+    }
+    Assert.assertEquals(endIdx, cnt);
   }
 }

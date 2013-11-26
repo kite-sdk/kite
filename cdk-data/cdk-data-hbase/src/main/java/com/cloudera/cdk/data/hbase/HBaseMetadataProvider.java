@@ -76,9 +76,9 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     schemaManager.refreshManagedSchemaCache(tableName, entityName);
     schemaManager.createSchema(tableName, entityName,
         entitySchemaString,
-        "com.cloudera.cdk.data.hbase.avro.impl.AvroKeyEntitySchemaParser",
-        "com.cloudera.cdk.data.hbase.avro.impl.AvroKeySerDe",
-        "com.cloudera.cdk.data.hbase.avro.impl.AvroEntitySerDe");
+        "com.cloudera.cdk.data.hbase.avro.AvroKeyEntitySchemaParser",
+        "com.cloudera.cdk.data.hbase.avro.AvroKeySerDe",
+        "com.cloudera.cdk.data.hbase.avro.AvroEntitySerDe");
 
     try {
       if (!hbaseAdmin.tableExists(tableName)) {

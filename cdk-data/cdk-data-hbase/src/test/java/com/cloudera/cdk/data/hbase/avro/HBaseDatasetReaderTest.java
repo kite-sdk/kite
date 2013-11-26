@@ -15,16 +15,16 @@
  */
 package com.cloudera.cdk.data.hbase.avro;
 
-import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.DatasetAccessor;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
+import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.TestDatasetReaders;
 import com.cloudera.cdk.data.filesystem.DatasetTestUtilities;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
-import com.cloudera.cdk.data.hbase.avro.impl.AvroUtils;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
+
 import java.io.IOException;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.AfterClass;
@@ -35,7 +35,7 @@ public class HBaseDatasetReaderTest extends TestDatasetReaders<GenericRecord> {
   private static final String tableName = "testtable";
   private static final String managedTableName = "managed_schemas";
 
-  private static Dataset dataset;
+  private static RandomAccessDataset<GenericRecord> dataset;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -50,9 +50,8 @@ public class HBaseDatasetReaderTest extends TestDatasetReaders<GenericRecord> {
         .schemaLiteral(testGenericEntity)
         .build();
     dataset = repo.create("testtable", descriptor);
-    DatasetAccessor<GenericRecord> accessor = dataset.newAccessor();
     for (int i = 0; i < 10; i++) {
-      accessor.put(HBaseDatasetRepositoryTest.createGenericEntity(i));
+      dataset.put(HBaseDatasetRepositoryTest.createGenericEntity(i));
     }
   }
 
@@ -63,7 +62,7 @@ public class HBaseDatasetReaderTest extends TestDatasetReaders<GenericRecord> {
   }
 
   @Override
-  public DatasetReader newReader() throws IOException {
+  public DatasetReader<GenericRecord> newReader() throws IOException {
     return dataset.newReader();
   }
 

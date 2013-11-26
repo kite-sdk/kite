@@ -18,6 +18,7 @@ package com.cloudera.cdk.data.hbase;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.RandomAccessDataset;
+import com.cloudera.cdk.data.RandomAccessDatasetRepository;
 import com.cloudera.cdk.data.hbase.avro.GenericAvroDao;
 import com.cloudera.cdk.data.hbase.avro.SpecificAvroDao;
 import com.cloudera.cdk.data.hbase.impl.Dao;
@@ -36,7 +37,7 @@ import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 
-public class HBaseDatasetRepository extends AbstractDatasetRepository {
+public class HBaseDatasetRepository extends AbstractDatasetRepository implements RandomAccessDatasetRepository {
 
   private HTablePool tablePool;
   private SchemaManager schemaManager;

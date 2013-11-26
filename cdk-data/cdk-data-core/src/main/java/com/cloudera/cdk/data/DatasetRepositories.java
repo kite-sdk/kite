@@ -198,4 +198,36 @@ public class DatasetRepositories {
     throw new IllegalArgumentException("Unknown storage URI:" + storage);
   }
 
+  /**
+   * Synonym for {@link #openRandomAccess(java.net.URI)} for String URIs.
+   * 
+   * @param uri a String URI
+   * @return An appropriate implementation of {@link RandomAccessDatasetRepository}
+   * @throws IllegalArgumentException If the String cannot be parsed into a
+   *                                  valid URI ({@see java.net.URI}).
+   * @since 0.9.0
+   */
+  public static RandomAccessDatasetRepository openRandomAccess(String uri) {
+    return openRandomAccess(URI.create(uri));
+  }
+  
+  /**
+   * <p>
+   * Synonym for {@link #open(java.net.URI)} for {@link RandomAccessDatasetRepository}s
+   * </p>
+   * <p>
+   * This method provides a simpler way to connect to a {@link DatasetRepository} the same
+   * way {@link #open(Java.net.URI)} does, but instead returns an implementation of type 
+   * {@link RandomAccessDatasetRepository}. This method should be used when one needs to
+   * access {@link RandomAccessDataset}s to take advantage of the random access methods.
+   * </p>
+   * 
+   * @param repositoryUri The repository URI
+   * @return An appropriate implementation of {@link RandomAccessDatasetRepository}
+   * 
+   * @since 0.9.0
+   */
+  public static RandomAccessDatasetRepository openRandomAccess(URI repositoryUri) {
+    return (RandomAccessDatasetRepository)open(repositoryUri);
+  }
 }

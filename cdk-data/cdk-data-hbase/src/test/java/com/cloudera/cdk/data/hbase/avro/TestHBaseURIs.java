@@ -16,7 +16,7 @@
 package com.cloudera.cdk.data.hbase.avro;
 
 import com.cloudera.cdk.data.DatasetRepositories;
-import com.cloudera.cdk.data.DatasetRepository;
+import com.cloudera.cdk.data.RandomAccessDatasetRepository;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 import com.cloudera.cdk.data.hbase.impl.Loader;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
@@ -67,7 +67,7 @@ public class TestHBaseURIs {
     String zkQuorum = HBaseTestUtils.getConf().get(HConstants.ZOOKEEPER_QUORUM);
     String zkClientPort = HBaseTestUtils.getConf().get(HConstants.ZOOKEEPER_CLIENT_PORT);
     String zk = zkQuorum + ":" + zkClientPort; // OK since zkQuorum is a single host
-    DatasetRepository repo = DatasetRepositories.open("repo:hbase:" + zk);
+    RandomAccessDatasetRepository repo = DatasetRepositories.openRandomAccess("repo:hbase:" + zk);
 
     Assert.assertNotNull("Received a repository", repo);
     assertTrue("Repo is a HBase repo", repo instanceof HBaseDatasetRepository);

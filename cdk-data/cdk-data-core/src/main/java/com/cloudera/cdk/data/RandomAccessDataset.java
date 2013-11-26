@@ -19,7 +19,7 @@ public interface RandomAccessDataset<E> extends Dataset<E> {
   
   /**
    * Return the entity stored in the dataset at the row specified with {@link
-   * PartitionKey} <code>key</code>. Return null if no such entity exists.
+   * Marker} <code>key</code>. Return null if no such entity exists.
    *
    * @param key
    *          The key of the entity to get
@@ -28,7 +28,7 @@ public interface RandomAccessDataset<E> extends Dataset<E> {
   public E get(Marker key);
 
   /**
-   * Put the entity into the dataset with {@link PartitionKey} <code>key</code>.
+   * Put the entity into the dataset.
    *
    * @param entity
    *          The entity to store
@@ -53,7 +53,7 @@ public interface RandomAccessDataset<E> extends Dataset<E> {
   public long increment(Marker key, String fieldName, long amount);
 
   /**
-   * Deletes the entity in the dataset with {@link PartitionKey} <code>key</code>.
+   * Deletes the entity in the dataset with {@link Marker} <code>key</code>.
    *
    * @param key
    *          The key of the entity to delete.
@@ -65,9 +65,7 @@ public interface RandomAccessDataset<E> extends Dataset<E> {
    * If that entity has a checkConflict field, then the delete will only be performed if
    * the entity in the dataset has the same value as the one in the
    * passed <code>entity</code> object.
-   *
-   * @param key
-   *          The key of the entity to delete.
+   *.
    * @param entity
    *          The entity, whose checkConflict field may be validated before the
    *          delete is performed.
