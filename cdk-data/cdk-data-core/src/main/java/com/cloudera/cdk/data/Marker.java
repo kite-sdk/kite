@@ -18,7 +18,6 @@ package com.cloudera.cdk.data;
 
 import com.cloudera.cdk.data.spi.Conversions;
 import com.google.common.base.Objects;
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.util.Map;
@@ -101,7 +100,7 @@ public abstract class Marker {
    * @since 0.9.0
    */
   @Immutable
-  public static class ImmutableMarker extends Marker {
+  static class ImmutableMarker extends Marker {
 
     final Map<String, Object> values;
 
