@@ -26,6 +26,7 @@ public class PrettyPrinterTest extends Assert {
   public void testBasic() throws Exception {
     PrettyPrinter.main(new String[] {"target/test-classes/test-morphlines/grokSyslogNgCisco.conf"});
     PrettyPrinter.main(new String[] {"target/test-classes/test-morphlines/parseComplexConfig.conf"});
+    PrettyPrinter.main(new String[0]);
   }
   
 }
