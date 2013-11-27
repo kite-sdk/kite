@@ -60,7 +60,8 @@ class PartitionExpression {
   public PartitionStrategy evaluate() {
     Object object = expression.evaluate(null);
     if (object instanceof FieldPartitioner) {
-      return new PartitionStrategy((FieldPartitioner) object);
+      return new PartitionStrategy(
+          Lists.newArrayList((FieldPartitioner) object));
     } else if (object instanceof Object[]) {
       /*
        * JEXL doesn't recognize that [hash(...), range(...)] is an array of

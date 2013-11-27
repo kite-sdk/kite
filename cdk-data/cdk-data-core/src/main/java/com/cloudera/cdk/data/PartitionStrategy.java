@@ -66,21 +66,8 @@ public class PartitionStrategy {
   }
 
   /**
-   * Construct a partition strategy with a variadic array of field partitioners.
-   *
-   * @deprecated will be removed in 0.9.0
-   */
-  @Deprecated
-  public PartitionStrategy(FieldPartitioner... partitioners) {
-    fieldPartitioners = Lists.newArrayList(partitioners);
-  }
-
-  /**
    * Construct a partition strategy with a list of field partitioners.
-   *
-   * @deprecated will be removed in 0.9.0
    */
-  @Deprecated
   public PartitionStrategy(List<FieldPartitioner> partitioners) {
     fieldPartitioners = Lists.newArrayList(partitioners);
   }

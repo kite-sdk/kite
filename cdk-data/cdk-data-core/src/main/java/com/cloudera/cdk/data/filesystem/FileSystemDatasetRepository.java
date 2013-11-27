@@ -91,96 +91,15 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   private final Configuration conf;
 
   /**
-   * Construct a {@link FileSystemDatasetRepository} on the given {@link FileSystem} and
-   * root directory, and a {@link FileSystemMetadataProvider} with the same {@link
-   * FileSystem} and root directory.
-   *
-   * @param fileSystem    the filesystem to store metadata and datasets in
-   * @param rootDirectory the root directory for metadata and datasets
-   *
-   * @deprecated will be removed in 0.9.0
-   */
-  @Deprecated
-  public FileSystemDatasetRepository(FileSystem fileSystem, Path rootDirectory) {
-    Preconditions.checkArgument(fileSystem != null,
-        "FileSystem cannot be null");
-    Preconditions.checkArgument(rootDirectory != null,
-        "Root directory cannot be null");
-
-    // get a qualified path so we don't have to pass the FileSystem object
-    final Path qualifiedRoot = fileSystem.makeQualified(rootDirectory);
-    this.conf = new Configuration();
-    this.conf.set("fs.defaultFS", fileSystem.getUri().toString());
-    this.metadataProvider = new FileSystemMetadataProvider.Builder().configuration(conf)
-        .rootDirectory(qualifiedRoot).build();
-  }
-
-  /**
-   * Construct a {@link FileSystemDatasetRepository} with a root directory at the
-   * given {@link URI}, and a {@link FileSystemMetadataProvider} with the same root
-   * directory.
-   *
-   * @param uri the root directory for metadata and datasets
-   * @since 0.3.0
-   *
-   * @deprecated will be removed in 0.9.0
-   */
-  @Deprecated
-  public FileSystemDatasetRepository(URI uri) {
-    Preconditions.checkArgument(uri != null,
-        "URI provider can not be null");
-
-    this.conf = new Configuration();
-    final Path rootDirectory = new Path(uri);
-    final FileSystem fileSystem;
-    try {
-      fileSystem = rootDirectory.getFileSystem(conf);
-    } catch (IOException e) {
-      throw new DatasetRepositoryException("Problem creating " +
-          "FileSystemDatasetRepository.", e);
-    }
-    // default the FS
-    this.conf.set("fs.defaultFS", fileSystem.getUri().toString());
-    // get a qualified path so we don't have to pass the FileSystem object
-    final Path qualifiedRoot = fileSystem.makeQualified(rootDirectory);
-    this.metadataProvider = new FileSystemMetadataProvider.Builder().configuration(conf)
-        .rootDirectory(qualifiedRoot).build();
-  }
-
-  /**
-   * Construct a {@link FileSystemDatasetRepository} on the given {@link FileSystem} and
-   * root directory, with the given {@link MetadataProvider} for metadata storage.
-   *
-   * @param fileSystem       the filesystem to store datasets in
-   * @param rootDirectory    the root directory for datasets
-   * @param metadataProvider the provider for metadata storage
-   *
-   * @deprecated will be removed in 0.9.0
-   */
-  @Deprecated
-  public FileSystemDatasetRepository(FileSystem fileSystem, Path rootDirectory,
-    MetadataProvider metadataProvider) {
-    Preconditions.checkArgument(fileSystem != null,
-        "FileSystem cannot be null");
-    Preconditions.checkArgument(rootDirectory != null,
-        "Root directory cannot be null");
-    Preconditions.checkArgument(metadataProvider != null,
-      "Metadata provider can not be null");
-
-    this.conf = new Configuration();
-    this.conf.set("fs.defaultFS", fileSystem.getUri().toString());
-    this.metadataProvider = metadataProvider;
-  }
-
-  /**
    * Construct a {@link FileSystemDatasetRepository} for the given
    * {@link MetadataProvider} for metadata storage.
    *
+   * @param conf a {@link Configuration} for {@link FileSystem} access
    * @param metadataProvider the provider for metadata storage
    *
    * @since 0.8.0
    */
-  FileSystemDatasetRepository(
+  public FileSystemDatasetRepository(
       Configuration conf, MetadataProvider metadataProvider) {
     Preconditions.checkArgument(conf != null, "Configuration cannot be null");
     Preconditions.checkArgument(metadataProvider != null,
@@ -428,34 +347,6 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     return Objects.toStringHelper(this)
         .add("metadataProvider", metadataProvider)
         .toString();
-  }
-
-  /**
-   * @return the root directory in the filesystem where datasets are stored.
-   *
-   * @deprecated will be removed in 0.9.0
-   */
-  @Deprecated
-  public Path getRootDirectory() {
-    if (metadataProvider instanceof FileSystemMetadataProvider) {
-      return ((FileSystemMetadataProvider) metadataProvider).getRootDirectory();
-    } else {
-      return null;
-    }
-  }
-
-  /**
-   * @return the {@link FileSystem} on which datasets are stored.
-   *
-   * @deprecated will be removed in 0.9.0
-   */
-  @Deprecated
-  public FileSystem getFileSystem() {
-    if (metadataProvider instanceof FileSystemMetadataProvider) {
-      return ((FileSystemMetadataProvider) metadataProvider).getFileSytem();
-    } else {
-      return null;
-    }
   }
 
   /**

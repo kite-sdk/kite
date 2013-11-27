@@ -15,14 +15,10 @@
  */
 package com.cloudera.cdk.data.hbase.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.hbase.impl.EntitySchema.FieldMapping;
-import com.cloudera.cdk.data.partition.IdentityFieldPartitioner;
+
+import java.util.Collection;
 
 /**
  * The KeySchema type.
@@ -38,14 +34,11 @@ public class KeySchema {
    */
   public KeySchema(String rawSchema, Collection<FieldMapping> fieldMappings) {
     this.rawSchema = rawSchema;
-    List<FieldPartitioner<?, ?>> fieldPartitioners = new ArrayList<FieldPartitioner<?, ?>>();
+    PartitionStrategy.Builder strategyBuilder = new PartitionStrategy.Builder();
     for (FieldMapping fieldMapping : fieldMappings) {
-      IdentityFieldPartitioner fieldPartitioner = new IdentityFieldPartitioner(
-          fieldMapping.getFieldName(), String.class, 1); // TODO: get type from schema
-      fieldPartitioners.add(fieldPartitioner);
+      strategyBuilder.identity(fieldMapping.getFieldName(), String.class, 1);
     }
-    partitionStrategy = new PartitionStrategy(
-        fieldPartitioners.toArray(new FieldPartitioner[0]));
+    partitionStrategy = strategyBuilder.build();
   }
   
   public KeySchema(String rawSchema, PartitionStrategy partitionStrategy) {

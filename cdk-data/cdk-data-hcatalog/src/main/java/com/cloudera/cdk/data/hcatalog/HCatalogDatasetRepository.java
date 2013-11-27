@@ -114,7 +114,6 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
    */
   public static class Builder implements Supplier<DatasetRepository> {
 
-    private FileSystem fileSystem;
     private Path rootDirectory;
     private Configuration configuration;
 
@@ -149,20 +148,6 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
     }
 
     /**
-     * The {@link FileSystem} to store dataset files in (ignored).
-     *
-     * Calls to this method are ignored because Hive requires using HDFS.
-     *
-     * @deprecated will be removed in 0.9.0
-     */
-    @Deprecated
-    public Builder fileSystem(FileSystem fileSystem) {
-      // This method will be removed because a Hive-compatible FS must be used
-      this.fileSystem = fileSystem;
-      return this;
-    }
-
-    /**
      * The {@link Configuration} used to find the {@link FileSystem}. Optional. If not
      * specified, the default configuration will be used.
      */
@@ -193,21 +178,11 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
 
       if (rootDirectory != null) {
         // external
-        if (fileSystem != null) {
-          // this will throw IllegalArgumentException if rootDirectory's FS
-          // doesn't match the fileSystem that is set.
-          HCatalogMetadataProvider metadataProvider =
-              new HCatalogExternalMetadataProvider(
-                  configuration, fileSystem.makeQualified(rootDirectory));
-          return new FileSystemDatasetRepository.Builder().configuration(configuration)
-              .metadataProvider(metadataProvider).build();
-        } else {
-          HCatalogMetadataProvider metadataProvider =
-              new HCatalogExternalMetadataProvider(
-                  configuration, rootDirectory);
-          return new FileSystemDatasetRepository.Builder().configuration(configuration)
-              .metadataProvider(metadataProvider).build();
-        }
+        HCatalogMetadataProvider metadataProvider =
+            new HCatalogExternalMetadataProvider(configuration, rootDirectory);
+        return new FileSystemDatasetRepository.Builder()
+            .configuration(configuration)
+            .metadataProvider(metadataProvider).build();
       } else {
         // managed
         HCatalogMetadataProvider metadataProvider =

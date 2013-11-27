@@ -23,26 +23,25 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
-import java.net.MalformedURLException;
-import java.net.URI;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.reflect.ReflectData;
+import org.apache.hadoop.fs.Path;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import org.apache.avro.reflect.ReflectData;
-import org.apache.hadoop.fs.Path;
 
 /**
  * <p>
@@ -67,23 +66,10 @@ public class DatasetDescriptor {
 
   /**
    * Create an instance of this class with the supplied {@link Schema},
-   * and optional {@link PartitionStrategy}. The default {@link Format},
-   * {@link Formats#AVRO}, will be used.
-   *
-   * @deprecated will be removed in 0.9.0
-   */
-  @Deprecated  public DatasetDescriptor(Schema schema,
-      @Nullable PartitionStrategy partitionStrategy) {
-
-    this(schema, null, Formats.AVRO, null, null, partitionStrategy);
-  }
-
-  /**
-   * Create an instance of this class with the supplied {@link Schema},
    * optional URL, {@link Format}, optional location URL, and optional
    * {@link PartitionStrategy}.
    */
-  DatasetDescriptor(Schema schema, @Nullable URL schemaUrl, Format format,
+  public DatasetDescriptor(Schema schema, @Nullable URL schemaUrl, Format format,
       @Nullable URI location, @Nullable Map<String, String> properties,
       @Nullable PartitionStrategy partitionStrategy) {
     // URI can be null if the descriptor is configuring a new Dataset
@@ -327,17 +313,19 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's schema from a {@link URI}. A schema is required,
+     * Configure the {@link Dataset}'s schema from a URI. A schema is required,
      * and may be set using one of the methods: {@code schema},
      * {@code schemaLiteral}, {@code schemaUri}, or
      * {@code schemaFromAvroDataFile}.
      *
+     * @param uri a URI object for the schema's location.
      * @return An instance of the builder for method chaining.
+     * @throws MalformedURLException if {@code uri} is not a valid URL
+     * @throws IOException
      *
-     * @deprecated will be removed in 0.9.0, use {@link #schemaUri(java.net.URI)}
+     * @since 0.8.0
      */
-    @Deprecated
-    public Builder schema(URI uri) throws IOException {
+    public Builder schemaUri(URI uri) throws IOException {
       // special support for resource URIs
       Map<String, String> match = RESOURCE_URI_PATTERN.getMatch(uri);
       if (match != null) {
@@ -359,24 +347,6 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the {@link Dataset}'s schema from a URI. A schema is required,
-     * and may be set using one of the methods: {@code schema},
-     * {@code schemaLiteral}, {@code schemaUri}, or
-     * {@code schemaFromAvroDataFile}.
-     *
-     * @param uri a URI object for the schema's location.
-     * @return An instance of the builder for method chaining.
-     * @throws MalformedURLException if {@code uri} is not a valid URL
-     * @throws IOException
-     *
-     * @since 0.8.0
-     */
-    @SuppressWarnings("deprecation")
-    public Builder schemaUri(URI uri) throws IOException {
-      return schema(uri);
-    }
-
-    /**
      * Configure the {@link Dataset}'s schema from a String URI. A schema is
      * required, and may be set using one of the methods: {@code schema},
      * {@code schemaLiteral}, {@code schemaUri}, or
@@ -390,9 +360,8 @@ public class DatasetDescriptor {
      *
      * @since 0.8.0
      */
-    @SuppressWarnings("deprecation")
     public Builder schemaUri(String uri) throws URISyntaxException, IOException {
-      return schema(new URI(uri));
+      return schemaUri(new URI(uri));
     }
 
     private URL toURL(URI uri) throws MalformedURLException {
@@ -403,25 +372,6 @@ public class DatasetDescriptor {
         // if that fails then try using the Hadoop protocol handler
         return new URL(null, uri.toString(), new HadoopFileSystemURLStreamHandler());
       }
-    }
-
-    /**
-     * Configure the dataset's schema from a {@link String}. A schema is
-     * required, and may be set using one of the methods: {@code schema},
-     * {@code schemaLiteral}, {@code schemaUri}, or
-     * {@code schemaFromAvroDataFile}.
-     *
-     * This method is deprecated: use {@link #schemaLiteral(java.lang.String)}
-     * instead.
-     *
-     * @return An instance of the builder for method chaining.
-     * @deprecated will be removed in 0.9.0
-     * @since 0.2.0
-     */
-    @Deprecated
-    public Builder schema(String s) {
-      this.schema = new Schema.Parser().parse(s);
-      return this;
     }
 
     /**

@@ -84,35 +84,6 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   // cache the rootDirectory's FileSystem to avoid multiple lookups
   private transient final FileSystem rootFileSystem;
 
-  /**
-   * All metadata is stored under rootDirectory. Data may also be stored under
-   * rootDirectory if no location is set on incoming descriptors.
-   *
-   * @deprecated will be removed in 0.9.0
-   */
-  @Deprecated
-  public FileSystemMetadataProvider(FileSystem fileSystem, Path rootDirectory) {
-    Preconditions.checkArgument(fileSystem != null,
-        "FileSystem cannot be null");
-    Preconditions.checkArgument(rootDirectory != null, "Root cannot be null");
-
-    this.conf = new Configuration();
-    // the default FS should be the one given
-    this.conf.set("fs.defaultFS", fileSystem.getUri().toString());
-    this.rootDirectory = fileSystem.makeQualified(rootDirectory);
-    try {
-      // get the FS for the root, in case they don't match
-      this.rootFileSystem = rootDirectory.getFileSystem(conf);
-    } catch (IOException ex) {
-      throw new MetadataProviderException(
-          "Cannot get FileSystem for root path", ex);
-    }
-  }
-
-  /**
-   * @deprecated will be removed in 0.9.0
-   */
-  @Deprecated
   public FileSystemMetadataProvider(Configuration conf, Path rootDirectory) {
     Preconditions.checkArgument(conf != null, "Configuration cannot be null");
     Preconditions.checkArgument(rootDirectory != null, "Root cannot be null");
