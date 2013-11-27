@@ -21,8 +21,15 @@ import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.View;
-import com.google.common.base.Preconditions;
+import javax.annotation.concurrent.Immutable;
 
+/**
+ * A common Dataset base class to simplify implementations.
+ *
+ * @param <E> The type of entities stored in this {@code Dataset}.
+ * @since 0.9.0
+ */
+@Immutable
 public abstract class AbstractDataset<E> implements Dataset<E> {
 
   @Override

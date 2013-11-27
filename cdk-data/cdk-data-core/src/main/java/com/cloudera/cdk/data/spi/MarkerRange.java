@@ -26,6 +26,8 @@ import javax.annotation.concurrent.Immutable;
  *
  * Boundaries are defined by {@link Marker} objects, which contain one or more
  * concrete partitions, and can be inclusive or exclusive.
+ *
+ * @since 0.9.0
  */
 @Immutable
 public class MarkerRange {
@@ -190,6 +192,8 @@ public class MarkerRange {
 
   /**
    * Represents the boundary of a range, either inclusive or exclusive.
+   *
+   * @since 0.9.0
    */
   public static class Boundary {
 

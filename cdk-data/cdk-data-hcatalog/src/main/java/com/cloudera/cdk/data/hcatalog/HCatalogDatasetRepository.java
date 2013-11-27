@@ -180,6 +180,11 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
       return build();
     }
 
+    /**
+     * Build an instance of the configured {@link HCatalogDatasetRepository}.
+     *
+     * @since 0.9.0
+     */
     public DatasetRepository build() {
 
       if (configuration == null) {

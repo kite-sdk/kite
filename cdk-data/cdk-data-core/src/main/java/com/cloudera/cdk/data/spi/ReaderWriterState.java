@@ -15,6 +15,12 @@
  */
 package com.cloudera.cdk.data.spi;
 
+/**
+ * An enum representing the state of a {@link com.cloudera.cdk.data.DatasetReader} or
+ * {@link com.cloudera.cdk.data.DatasetWriter}.
+ *
+ * @since 0.9.0
+ */
 public enum ReaderWriterState {
   NEW, OPEN, CLOSED
 }

@@ -15,6 +15,22 @@
  */
 package com.cloudera.cdk.data;
 
+import javax.annotation.concurrent.Immutable;
+
+/**
+ * <p>
+ * A {@link Dataset} that supports random access operations on entities.
+ * </p>
+ * <p>
+ * Implementations of {@link RandomAccessDataset} are immutable.
+ * </p>
+ *
+ * @param <E> The type of entities stored in this {@code RandomAccessDataset}.
+ *
+ * @see Dataset
+ * @since 0.9.0
+ */
+@Immutable
 public interface RandomAccessDataset<E> extends Dataset<E> {
   
   /**

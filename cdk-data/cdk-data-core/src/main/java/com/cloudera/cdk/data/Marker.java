@@ -60,6 +60,8 @@ import javax.annotation.concurrent.Immutable;
  * // a partial Marker for approx time, for all shards
  * new Marker.Builder("timestamp", System.getTimeMillis()).get();
  * </pre>
+ *
+ * @since 0.9.0
  */
 public abstract class Marker {
 
@@ -95,6 +97,8 @@ public abstract class Marker {
 
   /**
    * A basic Marker implementation backed by a Map.
+   *
+   * @since 0.9.0
    */
   @Immutable
   public static class ImmutableMarker extends Marker {

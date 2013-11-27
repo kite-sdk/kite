@@ -24,6 +24,14 @@ import com.google.common.base.Objects;
 
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * A common View base class to simplify implementations of Views created from ranges.
+ *
+ * @param <E>
+ *      The type of entities stored in the {@code Dataset} underlying this
+ *      {@code View}.
+ * @since 0.9.0
+ */
 @Immutable
 public abstract class AbstractRangeView<E> implements View<E> {
 

@@ -32,8 +32,9 @@ import javax.annotation.concurrent.Immutable;
  * </p>
  * 
  * @see RandomAccessDataset
- * @See DatasetRepository
+ * @see DatasetRepository
  * @see DatasetDescriptor
+ * @since 0.9.0
  */
 @Immutable
 public interface RandomAccessDatasetRepository extends DatasetRepository {

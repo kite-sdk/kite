@@ -29,6 +29,8 @@ import java.util.TimeZone;
  * A FieldPartitioner that formats a timestamp (long) in milliseconds since
  *  epoch, such as those returned by {@link System.currentTimeMillis()}, using
  * {@link SimpleDateFormat}.
+ *
+ * @since 0.9.0
  */
 @Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={

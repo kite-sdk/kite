@@ -38,6 +38,8 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * A Key is a Marker that is complete for a PartitionStrategy.
+ *
+ * @since 0.9.0
  */
 public class Key extends Marker implements Comparable<Key> {
 

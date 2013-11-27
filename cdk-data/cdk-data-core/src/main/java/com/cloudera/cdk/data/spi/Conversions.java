@@ -18,6 +18,11 @@ package com.cloudera.cdk.data.spi;
 
 import java.text.NumberFormat;
 
+/**
+ * Static helper methods for converting between types.
+ *
+ * @since 0.9.0
+ */
 public class Conversions {
 
   public static <T> T convert(Object obj, Class<T> returnType) {

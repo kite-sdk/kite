@@ -27,6 +27,7 @@ import javax.annotation.concurrent.Immutable;
  * @param <E>
  *      The type of entities stored in the {@code Dataset} underlying this
  *      {@code View}.
+ * @since 0.9.0
  */
 @Immutable
 public interface View<E> {

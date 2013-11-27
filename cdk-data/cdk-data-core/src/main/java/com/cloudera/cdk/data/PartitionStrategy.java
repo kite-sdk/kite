@@ -581,6 +581,7 @@ public class PartitionStrategy {
      * to this method.
      *
      * @return The configured instance of {@link PartitionStrategy}.
+     * @since 0.9.0
      */
     public PartitionStrategy build() {
       return new PartitionStrategy(fieldPartitioners);

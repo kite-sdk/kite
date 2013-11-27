@@ -584,6 +584,11 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
       return build();
     }
 
+    /**
+     * Build an instance of the configured {@link FileSystemDatasetRepository}.
+     *
+     * @since 0.9.0
+     */
     public FileSystemDatasetRepository build() {
       if (configuration == null) {
         this.configuration = new Configuration();

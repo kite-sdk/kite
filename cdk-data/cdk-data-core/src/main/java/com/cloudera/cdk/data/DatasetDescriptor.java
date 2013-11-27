@@ -625,6 +625,8 @@ public class DatasetDescriptor {
     /**
      * Build an instance of the configured dataset descriptor. Subsequent calls
      * will produce new instances that are similarly configured.
+     *
+     * @since 0.9.0
      */
     public DatasetDescriptor build() {
       Preconditions.checkState(schema != null,

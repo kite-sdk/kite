@@ -35,7 +35,7 @@ import javax.annotation.concurrent.Immutable;
  * Implementations of {@link Dataset} are immutable.
  * </p>
  *
- * @param <E> The type of entities stored in this {@code Dataset}
+ * @param <E> The type of entities stored in this {@code Dataset}.
  *
  * @see View
  * @see DatasetRepository

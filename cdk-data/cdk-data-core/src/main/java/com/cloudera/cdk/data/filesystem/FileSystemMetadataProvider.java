@@ -519,6 +519,11 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       return build();
     }
 
+    /**
+     * Build an instance of the configured {@link FileSystemMetadataProvider}.
+     *
+     * @since 0.9.0
+     */
     @SuppressWarnings("deprecation")
     public FileSystemMetadataProvider build() {
       return new FileSystemMetadataProvider(configuration, rootDirectory);

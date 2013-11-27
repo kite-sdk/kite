@@ -47,7 +47,6 @@ public class Formats {
    * case sensitive.
    *
    * @since 0.9.0
-   * @param formatName
    * @return an appropriate instance of Format
    * @throws IllegalArgumentException if {@code formatName} is not a valid format.
    */

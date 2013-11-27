@@ -116,6 +116,7 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
    *
    * @param marker a {@code Marker}
    * @return the value of this field for {@code marker}, or null
+   * @since 0.9.0
    */
   @Nullable
   public T valueFor(Marker marker) {

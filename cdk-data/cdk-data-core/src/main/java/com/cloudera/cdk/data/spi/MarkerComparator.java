@@ -25,6 +25,8 @@ import javax.annotation.concurrent.Immutable;
 /**
  * Comparison methods for {@link Marker} objects with respect to a
  * {@link PartitionStrategy}.
+ *
+ * @since 0.9.0
  */
 @Immutable
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(

@@ -50,6 +50,8 @@ import com.typesafe.config.ConfigFactory;
 
 /**
  * Command that converts a morphline record to an Avro record.
+ *
+ * @since 0.9.0
  */
 public final class ToAvroBuilder implements CommandBuilder {
   
