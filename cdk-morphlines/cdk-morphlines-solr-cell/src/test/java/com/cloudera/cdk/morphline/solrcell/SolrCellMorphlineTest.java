@@ -125,7 +125,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
         path + "/complex.mbox", 
         path + "/test-outlook.msg", 
         path + "/testEMLX.emlx",
-//        path + "/testRFC822",  
+        path + "/testRFC822",  
         path + "/rsstest.rss", 
 //        path + "/testDITA.dita", 
         
