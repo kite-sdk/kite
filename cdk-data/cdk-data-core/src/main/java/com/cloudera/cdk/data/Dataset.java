@@ -68,10 +68,7 @@ public interface Dataset<E> extends View<E> {
    * @param key        The key used to look up the partition.
    * @param autoCreate If true, automatically create the partition if doesn't exist,
    * @throws DatasetException
-   *
-   * @deprecated will be removed in 0.10.0; use {@link View} methods.
    */
-  @Deprecated
   Dataset<E> getPartition(PartitionKey key, boolean autoCreate);
 
   /**
@@ -81,10 +78,7 @@ public interface Dataset<E> extends View<E> {
    * @param key The key used to look up the partition.
    * @throws DatasetException
    * @since 0.2.0
-   *
-   * @deprecated will be removed in 0.10.0; use {@link View#deleteAll()}.
    */
-  @Deprecated
   void dropPartition(PartitionKey key);
 
   /**
@@ -138,10 +132,7 @@ public interface Dataset<E> extends View<E> {
    *
    * @return an iterable over all partitions of this dataset
    * @throws DatasetException
-   *
-   * @deprecated will be removed in 0.10.0; use {@link View} methods.
    */
-  @Deprecated
   Iterable<Dataset<E>> getPartitions();
 
 }

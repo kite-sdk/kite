@@ -125,9 +125,7 @@ public class PartitionStrategy {
    * <p>
    * Null values are not permitted.
    * </p>
-   * @deprecated will be removed in 0.10.0
    */
-  @Deprecated
   public PartitionKey partitionKey(Object... values) {
     return new PartitionKey(values);
   }
@@ -140,10 +138,7 @@ public class PartitionStrategy {
    * This is a convenient way to find the partition that a given entity would be
    * written to, or to find a partition using objects from the entity domain.
    * </p>
-   *
-   * @deprecated will be removed in 0.10.0
    */
-  @Deprecated
   public PartitionKey partitionKeyForEntity(Object entity) {
     return partitionKeyForEntity(entity, null);
   }
@@ -157,10 +152,7 @@ public class PartitionStrategy {
    * This is a convenient way to find the partition that a given entity would be
    * written to, or to find a partition using objects from the entity domain.
    * </p>
-   *
-   * @deprecated will be removed in 0.10.0
    */
-  @Deprecated
   @SuppressWarnings("unchecked")
   public PartitionKey partitionKeyForEntity(Object entity,
       @Nullable PartitionKey reuseKey) {
@@ -198,8 +190,6 @@ public class PartitionStrategy {
    * {@code PartitionStrategy}.
    *
    * @return a new {@code PartitionKey}
-   *
-   * @deprecated will be removed in 0.10.0
    */
   private PartitionKey newKey() {
     return new PartitionKey(fieldPartitioners.size());
@@ -212,10 +202,7 @@ public class PartitionStrategy {
   /**
    * Return a {@link PartitionStrategy} for subpartitions starting at the given
    * index.
-   *
-   * @deprecated will be removed in 0.10.0
    */
-  @Deprecated
   PartitionStrategy getSubpartitionStrategy(int startIndex) {
     if (startIndex == 0) {
       return this;
