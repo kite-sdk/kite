@@ -1,0 +1,44 @@
+OK: com.cloudera.cdk.data.spi.AbstractDataset Class
+OK: com.cloudera.cdk.data.spi.AbstractRangeView Class
+OK: com.cloudera.cdk.data.spi.CompleteKey Class
+OK: com.cloudera.cdk.data.ConcurrentSchemaModificationException Class
+OK: com.cloudera.cdk.data.spi.Conversions Class
+OK: com.cloudera.cdk.data.DatasetIOException Class
+OK: com.cloudera.cdk.data.DatasetNotFoundException Class
+OK: com.cloudera.cdk.data.partition.DateFormatPartitioner Class
+OK: com.cloudera.cdk.data.IncompatibleSchemaException Class
+MISSING @SINCE TAG: com.cloudera.cdk.data.Key Class
+NO DOC BLOCK: com.cloudera.cdk.data.Key.Builder Class
+OK: com.cloudera.cdk.data.spi.Marker Class
+OK: com.cloudera.cdk.data.spi.Marker.Builder Class
+OK: com.cloudera.cdk.data.spi.MarkerComparator Class
+OK: com.cloudera.cdk.data.spi.MarkerRange Class
+OK: com.cloudera.cdk.data.spi.MarkerRange.Boundary Class
+MISSING @SINCE TAG: com.cloudera.cdk.morphline.base.PrettyPrinter Class
+OK: com.cloudera.cdk.data.RandomAccessDataset Interface
+OK: com.cloudera.cdk.data.RandomAccessDatasetRepository Interface
+OK: com.cloudera.cdk.data.spi.ReaderWriterState Class
+OK: com.cloudera.cdk.data.SchemaNotFoundException Class
+OK: com.cloudera.cdk.data.SchemaValidationException Class
+OK: com.cloudera.cdk.data.SerializationException Class
+OK: com.cloudera.cdk.morphline.avro.ToAvroBuilder Class
+OK: com.cloudera.cdk.data.View Interface
+NO DOC BLOCK: com.cloudera.cdk.data.FieldPartitioner Constructor (java.lang.String, java.lang.Class<S>, java.lang.Class<T>, int)
+NO DOC BLOCK: com.cloudera.cdk.data.FieldPartitioner Constructor (java.lang.String, java.lang.String, java.lang.Class<S>, java.lang.Class<T>, int)
+OK: com.cloudera.cdk.data.DatasetDescriptor.Builder Method build()
+OK: com.cloudera.cdk.data.PartitionStrategy.Builder Method build()
+OK: com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.Builder Method build()
+OK: com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider.Builder Method build()
+OK: com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.Builder Method build()
+NO DOC BLOCK: com.cloudera.cdk.data.partition.HashFieldPartitioner Method compare(java.lang.Integer, java.lang.Integer)
+NO DOC BLOCK: com.cloudera.cdk.data.partition.IdentityFieldPartitioner Method compare(S extends java.lang.Comparable, S extends java.lang.Comparable)
+NO DOC BLOCK: com.cloudera.cdk.data.partition.IntRangeFieldPartitioner Method compare(java.lang.Integer, java.lang.Integer)
+NO DOC BLOCK: com.cloudera.cdk.data.partition.ListFieldPartitioner Method compare(java.lang.Integer, java.lang.Integer)
+NO DOC BLOCK: com.cloudera.cdk.data.partition.RangeFieldPartitioner Method compare(java.lang.String, java.lang.String)
+OK: com.cloudera.cdk.data.PartitionStrategy.Builder Method dateFormat(java.lang.String, java.lang.String, java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.data.partition.PartitionFunctions Method dateFormat(java.lang.String, java.lang.String, java.lang.String)
+OK: com.cloudera.cdk.data.Formats Method fromString(java.lang.String)
+OK: com.cloudera.cdk.data.FieldPartitioner Method getSourceType()
+OK: com.cloudera.cdk.data.DatasetRepositories Method openRandomAccess(java.lang.String)
+OK: com.cloudera.cdk.data.DatasetRepositories Method openRandomAccess(java.net.URI)
+NO DOC BLOCK: com.cloudera.cdk.data.flume.Log4jAppender Method requiresLayout()

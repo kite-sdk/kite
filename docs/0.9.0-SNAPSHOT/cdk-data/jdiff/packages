@@ -1,0 +1,7 @@
+com.cloudera.cdk.data
+com.cloudera.cdk.data.filesystem
+com.cloudera.cdk.data.partition
+com.cloudera.cdk.data.spi
+com.cloudera.cdk.data.crunch
+com.cloudera.cdk.data.flume
+com.cloudera.cdk.data.hcatalog
