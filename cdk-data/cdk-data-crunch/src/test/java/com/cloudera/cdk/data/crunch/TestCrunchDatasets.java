@@ -19,10 +19,9 @@ import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.Formats;
-import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.MemoryMetadataProvider;
+import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import junit.framework.Assert;
 import org.apache.avro.generic.GenericData;
@@ -95,26 +94,28 @@ public class TestCrunchDatasets {
   }
 
   @Test
-  public void testSourceView() throws IOException {
+  @SuppressWarnings("deprecation")
+  public void testPartitionedSourceAndTarget() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
 
     Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
     Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
-        .schema(USER_SCHEMA).build());
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
 
     writeTestUsers(inputDataset, 10);
 
-    Marker key = new Marker.Builder("username", 0).build();
-    View<Record> inputPart0 = inputDataset.of(key);
+    PartitionKey key = partitionStrategy.partitionKey(0);
+    Dataset<Record> inputPart0 = inputDataset.getPartition(key, false);
+    Dataset<Record> outputPart0 = outputDataset.getPartition(key, true);
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
         CrunchDatasets.asSource(inputPart0, GenericData.Record.class));
-    pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
+    pipeline.write(data, CrunchDatasets.asTarget(outputPart0), Target.WriteMode.APPEND);
     pipeline.run();
 
-    Assert.assertEquals(5, datasetSize(outputDataset));
+    Assert.assertEquals(5, datasetSize(outputPart0));
   }
 }

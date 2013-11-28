@@ -16,9 +16,7 @@
 package com.cloudera.cdk.data.crunch;
 
 import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.Formats;
-import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.Lists;
@@ -54,34 +52,18 @@ public class CrunchDatasets {
    * filesystem-based.
    */
   public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
-    return asSource((View<E>) dataset, type);
-  }
-
-  /**
-   * <p>
-   * Expose the given {@link View} as a Crunch {@link ReadableSource}.
-   * </p>
-   * @param view the view to read from
-   * @param type the Java type of the entities in the dataset
-   * @param <E>  the type of entity produced by the source
-   * @return the {@link ReadableSource}, or <code>null</code> if the view's dataset is
-   * not filesystem-based.
-   */
-  @SuppressWarnings("unchecked")
-  public static <E> ReadableSource<E> asSource(View<E> view, Class<E> type) {
-    Path directory = Accessor.getDefault().getDirectory(view.getDataset());
+    Path directory = Accessor.getDefault().getDirectory(dataset);
     if (directory != null) {
       List<Path> paths = Lists.newArrayList(
-          Accessor.getDefault().getPathIterator(view));
+          Accessor.getDefault().getPathIterator(dataset));
 
-      DatasetDescriptor descriptor = view.getDataset().getDescriptor();
       AvroType<E> avroType;
       if (type.isAssignableFrom(GenericData.Record.class)) {
-        avroType = (AvroType<E>) Avros.generics(descriptor.getSchema());
+        avroType = (AvroType<E>) Avros.generics(dataset.getDescriptor().getSchema());
       } else {
         avroType = Avros.records(type);
       }
-      if (descriptor.getFormat() == Formats.PARQUET) {
+      if (dataset.getDescriptor().getFormat() == Formats.PARQUET) {
         return new AvroParquetFileSource<E>(paths, avroType);
       }
       return new AvroFileSource<E>(paths, avroType);
