@@ -19,8 +19,8 @@ import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.FieldPartitioner;
+import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.spi.Key;
 import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URL;
@@ -38,7 +38,7 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
   private boolean initialized;
   
   private PartitionStrategy partitionStrategy;
-  private Key key;
+  private PartitionKey key;
 
   public Log4jAppender() {
     super();
@@ -96,7 +96,6 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
         Dataset dataset = repo.load(datasetName);
         if (dataset.getDescriptor().isPartitioned()) {
           partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
-          key = new Key(partitionStrategy);
         }
         URL schemaUrl = dataset.getDescriptor().getSchemaUrl();
         if (schemaUrl != null) {
@@ -110,9 +109,10 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
     }
     super.populateAvroHeaders(hdrs, schema, message);
     if (partitionStrategy != null) {
-      key.reuseFor(message);
+      key = partitionStrategy.partitionKeyForEntity(message, key);
+      int i = 0;
       for (FieldPartitioner fp : partitionStrategy.getFieldPartitioners()) {
-        hdrs.put(PARTITION_PREFIX + fp.getName(), fp.valueToString(key.getObject(fp.getName())));
+        hdrs.put(PARTITION_PREFIX + fp.getName(), fp.valueToString(key.get(i++)));
       }
     }
   }
