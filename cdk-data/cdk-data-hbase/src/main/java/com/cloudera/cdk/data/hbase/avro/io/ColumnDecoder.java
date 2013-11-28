@@ -24,6 +24,7 @@ import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.util.Utf8;
+import org.apache.hadoop.hbase.util.Bytes;
 
 /**
  * An Avro Decoder implementation used for decoding Avro instances from HBase
@@ -33,18 +34,20 @@ import org.apache.avro.util.Utf8;
  * int and long are serialized in standard 4 and 8 byte format (instead of
  * Avro's ZigZag encoding) so that we can use HBase's atomic increment
  * functionality on columns.
- * 
- * Strings are encoding as UTF-8 bytes. This is for backward compatibility
- * reasons, and is something we want to change in the future.
+ *
+ * Strings are encoded as UTF-8 bytes. This is consistent
+ * with HBase, and will allow appends in the future.
  */
 public class ColumnDecoder extends Decoder {
 
   private final BinaryDecoder wrappedDecoder;
   private final InputStream in;
+  private final DataInputStream dataIn;
 
   public ColumnDecoder(InputStream in) {
     this.in = in;
     this.wrappedDecoder = new DecoderFactory().binaryDecoder(in, null);
+    this.dataIn = new DataInputStream(in);
   }
 
   @Override
@@ -59,14 +62,16 @@ public class ColumnDecoder extends Decoder {
 
   @Override
   public int readInt() throws IOException {
-    DataInputStream dataIn = new DataInputStream(in);
-    return dataIn.readInt();
+    byte[] b = new byte[4];
+    dataIn.readFully(b);
+    return Bytes.toInt(b);
   }
 
   @Override
   public long readLong() throws IOException {
-    DataInputStream dataIn = new DataInputStream(in);
-    return dataIn.readLong();
+    byte[] b = new byte[8];
+    dataIn.readFully(b);
+    return Bytes.toLong(b);
   }
 
   @Override
@@ -81,11 +86,10 @@ public class ColumnDecoder extends Decoder {
 
   @Override
   public Utf8 readString(Utf8 old) throws IOException {
-    int bytesAvailable = in.available();
+    int bytesAvailable = in.available(); // assumes 'in' is ByteArrayInputStream so knows length
     byte[] bytes = new byte[bytesAvailable];
     in.read(bytes);
-    String s = new String(bytes);
-    return new Utf8(s);
+    return new Utf8(bytes);
   }
 
   @Override
@@ -95,7 +99,7 @@ public class ColumnDecoder extends Decoder {
 
   @Override
   public void skipString() throws IOException {
-    int bytesAvailable = in.available();
+    int bytesAvailable = in.available(); // assumes 'in' is ByteArrayInputStream so knows length
     in.skip(bytesAvailable);
   }
 
