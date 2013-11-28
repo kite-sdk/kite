@@ -43,11 +43,11 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
     expectedRecords.put(path + "/sample-statuses-20120906-141433", 2);
     expectedRecords.put(path + "/sample-statuses-20120906-141433.gz", 2);
     expectedRecords.put(path + "/sample-statuses-20120906-141433.bz2", 2);
-    expectedRecords.put(path + "/cars.csv", 5);
-    expectedRecords.put(path + "/cars.csv.gz", 5);
+    expectedRecords.put(path + "/cars.csv", 6);
+    expectedRecords.put(path + "/cars.csv.gz", 6);
     expectedRecords.put(path + "/cars.tar.gz", 4);
-    expectedRecords.put(path + "/cars.tsv", 5);
-    expectedRecords.put(path + "/cars.ssv", 5);
+    expectedRecords.put(path + "/cars.tsv", 6);
+    expectedRecords.put(path + "/cars.ssv", 6);
     expectedRecords.put(path + "/test-documents.7z", 9);
     expectedRecords.put(path + "/test-documents.cpio", 9);
     expectedRecords.put(path + "/test-documents.tar", 9);
@@ -94,15 +94,16 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
         path + "/testJPEG_EXIF.jpg.gz",
         path + "/testJPEG_EXIF.jpg.tar.gz",
         path + "/testXML.xml",          
-//        path + "/cars.csv",
+        path + "/cars.csv",
 //        path + "/cars.tsv",
 //        path + "/cars.ssv",
-//        path + "/cars.csv.gz",
-//        path + "/cars.tar.gz",
+        path + "/cars.csv.gz",
+        path + "/cars.tar.gz",
         path + "/sample-statuses-20120906-141433.avro",
         path + "/sample-statuses-20120906-141433",
         path + "/sample-statuses-20120906-141433.gz",
         path + "/sample-statuses-20120906-141433.bz2",
+        path + "/email.eml",
     };
     testDocumentTypesInternal(files, expectedRecords);
   }

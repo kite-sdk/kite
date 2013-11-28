@@ -160,7 +160,7 @@ public class DetectMimeTypesTest extends AbstractMorphlineTest {
         path + "/cars.ssv", "text/plain", "text/space-separated-values",
         path + "/cars.csv", "text/plain", "text/csv",
         path + "/cars.csv.gz", "application/x-gzip", "application/x-gzip",
-        path + "/cars.tar.gz", "application/x-gtar", "application/x-gtar",
+        path + "/cars.tar.gz", "application/x-gzip", "application/x-gzip",
         path + "/sample-statuses-20120906-141433.avro", "avro/binary", "avro/binary",
         
         path + "/testPPT_various.ppt", "application/x-tika-msoffice", "application/vnd.ms-powerpoint",
