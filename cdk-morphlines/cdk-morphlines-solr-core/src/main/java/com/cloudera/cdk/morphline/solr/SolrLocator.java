@@ -59,8 +59,6 @@ public class SolrLocator {
   private String solrHomeDir;
   private int batchSize = 1000;
   
-  private static final String SOLR_HOME_PROPERTY_NAME = "solr.solr.home";
-
   private static final Logger LOG = LoggerFactory.getLogger(SolrLocator.class);
 
   protected SolrLocator(MorphlineContext context) {
@@ -126,7 +124,6 @@ public class SolrLocator {
     
     // If solrHomeDir isn't defined and zkHost and collectionName are defined 
     // then download schema.xml and solrconfig.xml, etc from zk and use that as solrHomeDir
-    String oldSolrHomeDir = null;
     String mySolrHomeDir = solrHomeDir;
     if (solrHomeDir == null || solrHomeDir.length() == 0) {
       if (zkHost == null || zkHost.length() == 0) {
@@ -156,20 +153,13 @@ public class SolrLocator {
       }
     }
     
-    oldSolrHomeDir = System.setProperty(SOLR_HOME_PROPERTY_NAME, mySolrHomeDir);
+    LOG.debug("SolrLocator loading IndexSchema from dir {}", mySolrHomeDir);
     try {
-      SolrConfig solrConfig = new SolrConfig(); // TODO use SolrResourceLoader ala TikaMapper?
-      // SolrConfig solrConfig = new SolrConfig("solrconfig.xml");
-      // SolrConfig solrConfig = new
-      // SolrConfig("/cloud/apache-solr-4.0.0-BETA/example/solr/collection1",
-      // "solrconfig.xml", null);
-      // SolrConfig solrConfig = new
-      // SolrConfig("/cloud/apache-solr-4.0.0-BETA/example/solr/collection1/conf/solrconfig.xml");
-      SolrResourceLoader loader = solrConfig.getResourceLoader();
-      
+      SolrResourceLoader loader = new SolrResourceLoader(mySolrHomeDir);
+      SolrConfig solrConfig = new SolrConfig(loader, "solrconfig.xml", null);
       InputSource is = new InputSource(loader.openSchema("schema.xml"));
-          is.setSystemId(SystemIdResolver.createSystemIdFromResourceName("schema.xml"));
-        
+      is.setSystemId(SystemIdResolver.createSystemIdFromResourceName("schema.xml"));
+      
       IndexSchema schema = new IndexSchema(solrConfig, "schema.xml", is);
       validateSchema(schema);
       return schema;
@@ -179,14 +169,6 @@ public class SolrLocator {
       throw new MorphlineRuntimeException(e);
     } catch (SAXException e) {
       throw new MorphlineRuntimeException(e);
-    } finally { // restore old global state
-      if (solrHomeDir != null) {
-        if (oldSolrHomeDir == null) {
-          System.clearProperty(SOLR_HOME_PROPERTY_NAME);
-        } else {
-          System.setProperty(SOLR_HOME_PROPERTY_NAME, oldSolrHomeDir);
-        }
-      }
     }
   }
   
