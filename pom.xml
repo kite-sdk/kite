@@ -17,22 +17,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-parent</artifactId>
+  <groupId>org.kitesdk</groupId>
+  <artifactId>kite-parent</artifactId>
   <version>0.9.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
-    <module>cdk-data</module>
-    <module>cdk-flume-avro-event-serializer</module>
-    <module>cdk-maven-plugin</module>
-    <module>cdk-tools</module>
-    <module>cdk-morphlines</module>
+    <module>kite-data</module>
+    <module>kite-flume-avro-event-serializer</module>
+    <module>kite-maven-plugin</module>
+    <module>kite-tools</module>
+    <module>kite-morphlines</module>
   </modules>
 
   <name>Cloudera Development Kit</name>
   <description>
-    The CDK is a set of libraries, tools, and docs to simplify the development
+    Kite SDK is a set of libraries, tools, and docs to simplify the development
     of data-related systems.
   </description>
 
@@ -65,9 +65,9 @@
   </contributors> 
 
   <scm>
-    <connection>scm:git:git://github.com/cloudera/cdk.git</connection>
-    <url>https://github.com/cloudera/cdk</url>
-    <developerConnection>scm:git:git@github.com:cloudera/cdk.git
+    <connection>scm:git:git://github.com/kite-sdk/kite.git</connection>
+    <url>https://github.com/kite-sdk/kite</url>
+    <developerConnection>scm:git:git@github.com:kite-sdk/kite.git
     </developerConnection>
     <tag>HEAD</tag>
   </scm>
@@ -76,11 +76,6 @@
     <system>JIRA</system>
     <url>${url.jira}</url>
   </issueManagement>
-
-  <organization>
-    <name>Cloudera</name>
-    <url>${url.cloudera}</url>
-  </organization>
 
   <mailingLists>
     <mailingList>
@@ -166,7 +161,7 @@
     <vers.maven-jar-plugin>2.4</vers.maven-jar-plugin>
 
     <url.cloudera>http://www.cloudera.com</url.cloudera>
-    <url.project>http://cloudera.github.com/cdk</url.project>
+    <url.project>http://kitesdk.org/</url.project>
     <url.jira>http://issues.cloudera.com/browse/CDK</url.jira>
 
     <github.global.server>github</github.global.server>
@@ -287,7 +282,7 @@
               <doclet>jdiff.JDiff</doclet>
               <docletPath>${project.basedir}/lib/jdiff.jar</docletPath>
               <additionalparam>
-                -XDignore.symbol.file -apiname 'CDK ${project.version}'
+                -XDignore.symbol.file -apiname 'Kite SDK ${project.version}'
               </additionalparam>
               <useStandardDocletOptions>false</useStandardDocletOptions>
               <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
@@ -305,7 +300,7 @@
               <doclet>jdiff.JDiff</doclet>
               <docletPath>${project.basedir}/lib/jdiff.jar:${project.basedir}/lib/xerces.jar</docletPath>
               <additionalparam>
-                -XDignore.symbol.file -oldapi 'CDK ${previous.project.version}' -newapi 'CDK ${project.version}' -oldapidir '${project.basedir}/src/jdiff' -newapidir '${project.reporting.outputDirectory}/jdiff' -javadocnew ../../apidocs/ -d ${project.reporting.outputDirectory}/jdiff
+                -XDignore.symbol.file -oldapi 'Kite SDK ${previous.project.version}' -newapi 'Kite SDK ${project.version}' -oldapidir '${project.basedir}/src/jdiff' -newapidir '${project.reporting.outputDirectory}/jdiff' -javadocnew ../../apidocs/ -d ${project.reporting.outputDirectory}/jdiff
               </additionalparam>
               <useStandardDocletOptions>false</useStandardDocletOptions>
               <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
@@ -954,8 +949,8 @@
       <url>http://maven.jenkins.cloudera.com:8081/artifactory/cdh-snapshot-local</url>
     </snapshotRepository>
     <site>
-      <id>cdk.website</id>
-      <name>CDK documentation</name>
+      <id>kitesdk.website</id>
+      <name>Kite SDK documentation</name>
       <url>docs/${project.version}</url>
     </site>
   </distributionManagement>
