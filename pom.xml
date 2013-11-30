@@ -30,7 +30,7 @@
     <module>kite-morphlines</module>
   </modules>
 
-  <name>Cloudera Development Kit</name>
+  <name>Kite Development Kit</name>
   <description>
     Kite SDK is a set of libraries, tools, and docs to simplify the development
     of data-related systems.
