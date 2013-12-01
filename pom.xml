@@ -286,7 +286,7 @@
               <useStandardDocletOptions>false</useStandardDocletOptions>
               <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
               <destDir>jdiff</destDir>
-              <excludePackageNames>com.cloudera.cdk.data.dao:com.cloudera.cdk.data.event,com.cloudera.cdk.data.hbase:com.cloudera.cdk.maven.plugins,com.cloudera.cdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
+              <excludePackageNames>org.kitesdk.data.dao:org.kitesdk.data.event,org.kitesdk.data.hbase:org.kitesdk.maven.plugins,org.kitesdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
             </configuration>
           </execution>
           <execution>
@@ -371,7 +371,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${vers.maven-javadoc-plugin}</version>
           <configuration>
-            <excludePackageNames>com.cloudera.cdk.data.dao:com.cloudera.cdk.data.event,com.cloudera.cdk.data.hbase:com.cloudera.cdk.maven.plugins,com.cloudera.cdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
+            <excludePackageNames>org.kitesdk.data.dao:org.kitesdk.data.event,org.kitesdk.data.hbase:org.kitesdk.maven.plugins,org.kitesdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
             <links>
               <link>http://avro.apache.org/docs/${vers.avro}/api/java/</link>
               <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
@@ -576,31 +576,31 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${vers.maven-javadoc-plugin}</version>
         <configuration>
-          <excludePackageNames>com.cloudera.cdk.data.dao:com.cloudera.cdk.data.event,com.cloudera.cdk.data.hbase:com.cloudera.cdk.maven.plugins,com.cloudera.cdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
+          <excludePackageNames>org.kitesdk.data.dao:org.kitesdk.data.event,org.kitesdk.data.hbase:org.kitesdk.maven.plugins,org.kitesdk.morphline.shaded.*,*.impl,org.apache.*</excludePackageNames>
           <groups>
             <group>
               <title>Data Core</title>
-              <packages>com.cloudera.cdk.data:com.cloudera.cdk.data.filesystem:com.cloudera.cdk.data.partition:com.cloudera.cdk.data.spi</packages>
+              <packages>org.kitesdk.data:org.kitesdk.data.filesystem:org.kitesdk.data.partition:org.kitesdk.data.spi</packages>
             </group>
             <group>
               <title>Data Crunch</title>
-              <packages>com.cloudera.cdk.data.crunch</packages>
+              <packages>org.kitesdk.data.crunch</packages>
             </group>
             <group>
               <title>Data Flume</title>
-              <packages>com.cloudera.cdk.data.flume</packages>
+              <packages>org.kitesdk.data.flume</packages>
             </group>
             <group>
               <title>Data HCatalog</title>
-              <packages>com.cloudera.cdk.data.hcatalog</packages>
+              <packages>org.kitesdk.data.hcatalog</packages>
             </group>
             <group>
               <title>Morphlines</title>
-              <packages>com.cloudera.cdk.morphline.*</packages>
+              <packages>org.kitesdk.morphline.*</packages>
             </group>
             <group>
               <title>Tools</title>
-              <packages>com.cloudera.cdk.tools</packages>
+              <packages>org.kitesdk.tools</packages>
             </group>
           </groups>
           <links>

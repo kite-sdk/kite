@@ -54,7 +54,7 @@
               <goal>helpmojo</goal>
             </goals>
             <configuration>
-              <helpPackageName>com.cloudera.cdk.maven.plugins</helpPackageName>
+              <helpPackageName>org.kitesdk.maven.plugins</helpPackageName>
             </configuration>
           </execution>
         </executions>

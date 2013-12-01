@@ -1,8 +1,8 @@
 {
   "type": "record",
   "name": "UserActionsModel2",
-  "namespace": "com.cloudera.cdk.data.hbase.avro.example",
-  "tables": ["cdk_example_user_profiles"],
+  "namespace": "org.kitesdk.data.hbase.avro.example",
+  "tables": ["kite_example_user_profiles"],
   "fields": [
     {
       "name": "lastName",

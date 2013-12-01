@@ -1,13 +1,13 @@
-@namespace("com.cloudera.cdk.data.hbase.avro.example.protocol")
+@namespace("org.kitesdk.data.hbase.avro.example.protocol")
 protocol UserProfileActionsProtocol2 {
 
   import schema "UserProfileModel2.avsc";
   import schema "UserActionsModel2.avsc";
 
-  @namespace("com.cloudera.cdk.data.hbase.avro.example")
+  @namespace("org.kitesdk.data.hbase.avro.example")
   record UserProfileActionsModel2 {
 
-	com.cloudera.cdk.data.hbase.avro.example.UserProfileModel2 userProfileModel;
-    com.cloudera.cdk.data.hbase.avro.example.UserActionsModel2 userActionsModel;
+    org.kitesdk.data.hbase.avro.example.UserProfileModel2 userProfileModel;
+    org.kitesdk.data.hbase.avro.example.UserActionsModel2 userActionsModel;
   }
 }

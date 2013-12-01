@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "ManagedSchemaEntityVersion",
-  "namespace": "com.cloudera.cdk.data.hbase.manager.generated",
+  "namespace": "org.kitesdk.data.hbase.manager.generated",
   "fields": [
 
     { "name": "schemaVersion", "type": { "type": "map", "values": "int" },
