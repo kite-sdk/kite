@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "TestGenericEntity",
-  "namespace": "com.cloudera.cdk.data.hbase.avro.entities",
+  "namespace": "org.kitesdk.data.hbase.avro.entities",
   "fields": [
 
     { "name": "part1", "type": "string", "mapping":
