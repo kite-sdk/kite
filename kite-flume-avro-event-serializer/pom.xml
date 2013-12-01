@@ -11,6 +11,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>kite-flume-avro-event-serializer</artifactId>
+  <name>Kite Flume Avro Event Serializer</name>
 
   <dependencies>
     <dependency>
