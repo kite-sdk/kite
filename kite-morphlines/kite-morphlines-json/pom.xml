@@ -16,29 +16,29 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.cloudera.cdk</groupId>
-    <artifactId>cdk-morphlines</artifactId>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-morphlines</artifactId>
     <version>0.9.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-morphlines-tika-core</artifactId>
-  <name>CDK Morphlines Tika Core</name>
+  <artifactId>kite-morphlines-json</artifactId>
+  <name>Kite Morphlines JSON</name>
 
   <dependencies>
-    <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
-    </dependency>
 
-    <dependency> <!-- see http://tika.apache.org -->
-      <groupId>org.apache.tika</groupId>
-      <artifactId>tika-core</artifactId>
+    <dependency> <!-- see http://wiki.fasterxml.com/JacksonHome -->
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-core</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -46,6 +46,12 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency> <!-- see http://www.slf4j.org -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -63,7 +69,7 @@
             <configuration>
               <target>
                 <copy todir="${project.build.directory}/test-classes">
-                  <fileset dir="${basedir}/../cdk-morphlines-core/src/test/resources" />
+                  <fileset dir="${basedir}/../kite-morphlines-core/src/test/resources" />
                 </copy>
               </target>
             </configuration>
@@ -73,6 +79,7 @@
           </execution>
         </executions>
       </plugin>
+
     </plugins>
   </build>
 </project>

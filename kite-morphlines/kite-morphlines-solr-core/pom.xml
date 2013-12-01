@@ -16,31 +16,49 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.cloudera.cdk</groupId>
-    <artifactId>cdk-morphlines</artifactId>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-morphlines</artifactId>
     <version>0.9.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-morphlines-twitter</artifactId>
-  <name>CDK Morphlines Twitter</name>
+  <artifactId>kite-morphlines-solr-core</artifactId>
+  <name>Kite Morphlines Solr Core</name>
 
   <dependencies>
 
-    <dependency> <!-- see http://wiki.fasterxml.com/JacksonHome -->
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-core</artifactId>
+    </dependency>
+
+    <dependency> <!-- see http://lucene.apache.org/solr -->
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-test-framework</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency> <!-- see http://lucene.apache.org/solr -->
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-core</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-jdk14</artifactId> <!-- instead use slf4j on top of log4j or logback  -->
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-core</artifactId>
       <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-avro</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -50,16 +68,28 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency> <!-- see http://www.slf4j.org -->
+    <dependency> <!-- (required by solrj) see http://www.slf4j.org -->
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
+      <artifactId>jcl-over-slf4j</artifactId>
     </dependency>
 
   </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>-Dtests.locale=en_us</argLine>
+          <!--<forkMode>always</forkMode>-->
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+          <systemPropertyVariables>
+            <solr.expected.version>${solr.expected.version}</solr.expected.version>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -70,7 +100,7 @@
             <configuration>
               <target>
                 <copy todir="${project.build.directory}/test-classes">
-                  <fileset dir="${basedir}/../cdk-morphlines-core/src/test/resources" />
+                  <fileset dir="${basedir}/../kite-morphlines-core/src/test/resources" />
                 </copy>
               </target>
             </configuration>

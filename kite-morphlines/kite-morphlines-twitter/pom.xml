@@ -16,39 +16,29 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.cloudera.cdk</groupId>
-    <artifactId>cdk-morphlines</artifactId>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-morphlines</artifactId>
     <version>0.9.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-morphlines-maxmind</artifactId>
-  <name>CDK Morphlines Maxmind</name>
+  <artifactId>kite-morphlines-twitter</artifactId>
+  <name>Kite Morphlines Twitter</name>
 
   <dependencies>
 
-    <!-- see https://github.com/maxmind/MaxMind-DB-Reader-java -->
-    <!-- see https://github.com/maxmind/GeoIP2-java and http://dev.maxmind.com/geoip/geoip2/geolite2/ and maven geoip2-0.7.0-->
-    <dependency> 
-      <groupId>com.maxmind.db</groupId>
-      <artifactId>maxmind-db</artifactId>
-      <version>0.3.1</version>
+    <dependency> <!-- see http://wiki.fasterxml.com/JacksonHome -->
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-core</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-json</artifactId>
-      <scope>test</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-core</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -64,7 +54,32 @@
       <artifactId>slf4j-log4j12</artifactId>
       <scope>test</scope>
     </dependency>
-    
+
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-test-env</id>
+            <phase>process-test-resources</phase>
+            <configuration>
+              <target>
+                <copy todir="${project.build.directory}/test-classes">
+                  <fileset dir="${basedir}/../kite-morphlines-core/src/test/resources" />
+                </copy>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
 </project>

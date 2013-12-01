@@ -16,22 +16,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.cloudera.cdk</groupId>
-    <artifactId>cdk-morphlines</artifactId>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-morphlines</artifactId>
     <version>0.9.0-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-morphlines-solr-core</artifactId>
-  <name>CDK Morphlines Solr Core</name>
+  <artifactId>kite-morphlines-solr-cell</artifactId>
+  <name>Kite Morphlines Solr Cell</name>
 
   <dependencies>
-
-    <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
-    </dependency>
 
     <dependency> <!-- see http://lucene.apache.org/solr -->
       <groupId>org.apache.solr</groupId>
@@ -39,27 +32,66 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency> <!-- see http://lucene.apache.org/solr -->
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-core</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-jdk14</artifactId> <!-- instead use slf4j on top of log4j or logback  -->
-        </exclusion>
-      </exclusions>
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-solr-core</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-tika-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-tika-decompress</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency> <!-- see http://tika.apache.org -->
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-xmp</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-core</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
 
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-avro</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-solr-core</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency> <!-- see http://lucene.apache.org/solr -->
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-cell</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>xerces</groupId>
+          <artifactId>xercesImpl</artifactId> <!-- used by ExtractingDocumentLoader but we never call it -->
+        </exclusion>
+        <exclusion>
+          <groupId>com.ibm.icu</groupId>
+          <artifactId>icu4j</artifactId> <!-- nothing in solr-cell is using this -->
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-avro</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-twitter</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -69,9 +101,10 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency> <!-- (required by solrj) see http://www.slf4j.org -->
+    <dependency> <!-- see http://www.slf4j.org -->
       <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>
@@ -101,7 +134,10 @@
             <configuration>
               <target>
                 <copy todir="${project.build.directory}/test-classes">
-                  <fileset dir="${basedir}/../cdk-morphlines-core/src/test/resources" />
+                  <fileset dir="${basedir}/../kite-morphlines-core/src/test/resources" />
+                </copy>
+                <copy todir="${project.build.directory}/test-classes">
+                  <fileset dir="${basedir}/../kite-morphlines-solr-core/src/test/resources" />
                 </copy>
               </target>
             </configuration>

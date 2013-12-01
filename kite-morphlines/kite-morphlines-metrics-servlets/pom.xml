@@ -16,14 +16,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.cloudera.cdk</groupId>
-    <artifactId>cdk-morphlines</artifactId>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-morphlines</artifactId>
     <version>0.9.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-morphlines-metrics-servlets</artifactId>
-  <name>CDK Morphlines Metrics Servlets</name>
+  <artifactId>kite-morphlines-metrics-servlets</artifactId>
+  <name>Kite Morphlines Metrics Servlets</name>
 
   <dependencies>
 
@@ -38,13 +37,13 @@
     </dependency>
     
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-core</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-core</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
