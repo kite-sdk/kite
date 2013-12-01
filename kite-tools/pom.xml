@@ -17,18 +17,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>cdk-tools</artifactId>
+  <artifactId>kite-tools</artifactId>
 
   <parent>
-    <groupId>com.cloudera.cdk</groupId>
-    <artifactId>cdk-parent</artifactId>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-parent</artifactId>
     <version>0.9.0-SNAPSHOT</version>
   </parent>
 
-  <name>CDK Tools Module</name>
+  <name>Kite Tools Module</name>
   <description>
-    The CDK Tools module provides command-line tools and APIs for performing
-    common tasks with CDK.
+    The Kite Tools module provides command-line tools and APIs for performing
+    common tasks with Kite.
   </description>
 
   <build>
@@ -106,8 +106,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-data-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
       <version>0.9.0-SNAPSHOT</version>
     </dependency>
     <dependency>
