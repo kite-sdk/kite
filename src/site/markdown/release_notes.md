@@ -22,6 +22,7 @@ Version TBD has the following notable changes:
       [extractURIQueryParameters](cdk-morphlines/morphlinesReferenceGuide.html#extractURIQueryParameters)
     * Upgraded cdk-morphlines-solr-core module from solr-4.4 to solr-4.6.  
     * Upgraded cdk-morphlines-saxon module from saxon-HE-9.5.1-2 to saxon-HE-9.5.1-3.
+    * Fixed race condition on parallel initialization of multiple Solr morphlines within the same JVM.
     * For enhanced safety readSequenceFile command nomore reuses the identity of Hadoop Writeable objects.
 
 ## Version 0.8.1
