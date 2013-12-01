@@ -487,9 +487,9 @@
               <exclude>.idea/**</exclude>
               <exclude>*/jdiff/*.xml</exclude>
               <exclude>**/scriptengine/java/**.java</exclude> <!-- BSD -->
-              <exclude>**/cdk/morphline/saxon/ClassLoaderUtil.java</exclude> <!-- BSD -->
-              <exclude>**/cdk/morphline/saxon/XMLStreamCopier.java</exclude> <!-- BSD -->
-              <exclude>**/cdk/morphline/saxon/XMLInputFactoryCreator.java</exclude> <!-- BSD -->
+              <exclude>**/morphline/saxon/ClassLoaderUtil.java</exclude> <!-- BSD -->
+              <exclude>**/morphline/saxon/XMLStreamCopier.java</exclude> <!-- BSD -->
+              <exclude>**/morphline/saxon/XMLInputFactoryCreator.java</exclude> <!-- BSD -->
               <exclude>**/src/test/resources/grok-dictionaries/**</exclude> <!-- ASL 2.0 -->
               <exclude>**/src/test/resources/test-documents/**</exclude> <!-- ASL 2.0 -->
               <exclude>**/src/site/**/*.confluence</exclude>
