@@ -17,6 +17,7 @@ package com.cloudera.cdk.morphline.avro;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -671,7 +672,7 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
     writer.flush();
     writer.close();
 
-    FileReader<GenericData.Record> reader = new DataFileReader(new ReadAvroContainerBuilder.ForwardOnlySeekableInputStream(new ByteArrayInputStream(bout.toByteArray())), new GenericDatumReader());
+    DataFileReader<GenericData.Record> reader = new DataFileReader(new ReadAvroContainerBuilder.ForwardOnlySeekableInputStream(new ByteArrayInputStream(bout.toByteArray())), new GenericDatumReader());
     Schema schema2 = reader.getSchema();
     assertEquals(schema, schema2);
     for (GenericData.Record record : records) {
@@ -679,6 +680,8 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
       GenericData.Record record2 = reader.next();
       assertEquals(record, record2);
     }
+    assertFalse(reader.hasNext());
+    reader.close();
 
     Record event = new Record();
     event.getFields().put(Fields.ATTACHMENT_BODY, new ByteArrayInputStream(bout.toByteArray()));
@@ -723,6 +726,57 @@ public class AvroMorphlineTest extends AbstractMorphlineTest {
       deleteAllDocuments();
       assertTrue(load(event));
       assertEquals(1, queryResultSetSize("*:*"));
+    }
+    
+    String[] formats = new String[] {"", "AndSnappy"};
+    for (String format : formats) {
+      morphline = createMorphline("test-morphlines/writeAvroToByteArrayWithContainer" + format);
+      event = new Record();
+      event.getFields().putAll(Fields.ATTACHMENT_BODY, Arrays.asList(records));
+      deleteAllDocuments();
+      assertTrue(load(event));
+      assertEquals(1, collector.getFirstRecord().get(Fields.ATTACHMENT_BODY).size());
+      byte[] bytes = (byte[]) collector.getFirstRecord().getFirstValue(Fields.ATTACHMENT_BODY);
+      assertNotNull(bytes);
+      reader = new DataFileReader(new ReadAvroContainerBuilder.ForwardOnlySeekableInputStream(new ByteArrayInputStream(bytes)), new GenericDatumReader());
+      assertEquals("bar", new String(reader.getMeta("foo"), Charsets.UTF_8));
+      assertEquals("Nadja", new String(reader.getMeta("firstName"), Charsets.UTF_8));
+      assertEquals(schema, reader.getSchema());
+      for (GenericData.Record record : records) {
+        assertTrue(reader.hasNext());
+        GenericData.Record record2 = reader.next();
+        assertEquals(record, record2);
+      }
+      assertFalse(reader.hasNext());
+      reader.close();
+    }
+    
+    formats = new String[] {"Binary", "JSON"};
+    for (String format : formats) {
+      morphline = createMorphline("test-morphlines/writeAvroToByteArrayWithContainerless" + format);
+      event = new Record();
+      event.getFields().putAll(Fields.ATTACHMENT_BODY, Arrays.asList(records));
+      deleteAllDocuments();
+      assertTrue(load(event));
+      assertEquals(1, collector.getFirstRecord().get(Fields.ATTACHMENT_BODY).size());
+      byte[] bytes = (byte[]) collector.getFirstRecord().getFirstValue(Fields.ATTACHMENT_BODY);
+      assertNotNull(bytes);
+      if (format.equals("Binary")) {
+        decoder = DecoderFactory.get().binaryDecoder(new ByteArrayInputStream(bytes), null);
+      } else {
+        decoder = DecoderFactory.get().jsonDecoder(schema, new ByteArrayInputStream(bytes));
+      }
+      datumReader = new GenericDatumReader<GenericData.Record>(schema);
+      for (int i = 0; i < records.length; i++) {
+        GenericData.Record record3 = datumReader.read(null, decoder);
+        assertEquals(records[i], record3);
+      }
+      try {
+        datumReader.read(null, decoder);
+        fail();
+      } catch (EOFException e) {
+        ; // expected
+      }
     }
   }
 

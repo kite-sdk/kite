@@ -12,6 +12,7 @@ Version TBD has the following notable changes:
 * Morphlines Library
     * Added morphline command to read from RCFile: [readRCFile](cdk-morphlines/morphlinesReferenceGuide.html#readRCFile) (Prasanna Rajaperumal via whoschek)
     * Added morphline command to convert a morphline record to an Avro record: [toAvro](cdk-morphlines/morphlinesReferenceGuide.html#toAvro)
+    * Added morphline command that serializes Avro records into a byte array: [writeAvroToByteArray](cdk-morphlines/morphlinesReferenceGuide.html#writeAvroToByteArray)
     * Added morphline command that returns Geolocation information for a given IP address, using an efficient in-memory Maxmind database lookup: 
       [geoIP](cdk-morphlines/morphlinesReferenceGuide.html#geoIP)
     * Added morphline command that parses a user agent string and returns structured higher level data like user agent family, operating system, version, and device type: 

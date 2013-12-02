@@ -80,6 +80,7 @@ h3. cdk\-morphlines\-avro
 | [#extractAvroTree] | Recursively walks an Avro tree and extracts all data into a single morphline record. |
 | [#extractAvroPaths] | Extracts specific values from an Avro object, akin to a simple form of XPath. |
 | [#toAvro] | Converts a morphline record to an Avro record. | 
+| [#writeAvroToByteArray] | Serializes Avro records into a byte array. | 
 
 {anchor:cdk\-morphlines\-json}
 \\
@@ -1652,6 +1653,24 @@ toAvro {
     userId : morphlineUserId
   }          
 } 
+{code}
+
+h2. writeAvroToByteArray
+
+The {{writeAvroToByteArray}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/WriteAvroToByteArrayBuilder.java]) serializes the Avro records contained in the \_attachment\_body field into a byte array and replaces the \_attachment\_body field with that byte array. The records must have share an identical Avro schema.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| format | container | Indicates the type of Avro output format that shall be written. Must be one of {{container}} (serialize into a byte array that contains Apache Avro binary container file data) or {{containerlessBinary}} (serialize into a byte array that contains Apache Avro without an Avro container and hence without a built\-in writer schema) or {{containerlessJSON}} (same as {{containerlessBinary}} except that Avro output is encoded as JSON). |
+| codec | null | Optional parameter that specifies the compression algorithm to use. Must be one of {{null}} or {{snappy}} or {{deflate}} or {{bzip2}}. This parameter only applies if {{format = container}}. |
+
+Example usage:
+{code}
+writeAvroToByteArray {
+  format : container 
+  codec : snappy
+}
 {code}
 
 h1. cdk\-morphlines\-json
