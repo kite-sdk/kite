@@ -15,9 +15,11 @@
  */
 package com.cloudera.cdk.tools;
 
+import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
-import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
+import com.cloudera.cdk.data.crunch.CrunchDatasets;
 import com.google.common.io.Resources;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,13 +30,9 @@ import org.apache.crunch.DoFn;
 import org.apache.crunch.Emitter;
 import org.apache.crunch.PCollection;
 import org.apache.crunch.Target;
-import org.apache.crunch.io.avro.AvroFileTarget;
 import org.apache.crunch.types.avro.AvroType;
 import org.apache.crunch.types.avro.Avros;
 import org.apache.crunch.util.CrunchTool;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 
 /**
@@ -53,27 +51,21 @@ public class CombinedLogFormatConverter extends CrunchTool {
   public int run(String... args) throws Exception {
     if (args.length != 3) {
       System.err.println("Usage: " + CombinedLogFormatConverter.class.getSimpleName() +
-          " <input> <dataset_root> <dataset name>");
+          " <input> <dataset_uri> <dataset name>");
       return 1;
     }
     String input = args[0];
-    String datasetRoot = args[1];
+    String datasetUri = args[1];
     String datasetName = args[2];
 
     Schema schema = new Schema.Parser().parse(
         Resources.getResource("combined_log_format.avsc").openStream());
 
     // Create the dataset
-    Path root = new Path(datasetRoot);
-    Configuration conf = new Configuration();
-    FileSystem fs = root.getFileSystem(conf);
-
-    DatasetRepository repo = new FileSystemDatasetRepository.Builder().fileSystem(fs)
-        .rootDirectory(root).build();
+    DatasetRepository repo = DatasetRepositories.open(datasetUri);
     DatasetDescriptor datasetDescriptor = new DatasetDescriptor.Builder()
         .schema(schema).build();
-
-    repo.create(datasetName, datasetDescriptor);
+    Dataset<Object> dataset = repo.create(datasetName, datasetDescriptor);
 
     // Run the job
     final String schemaString = schema.toString();
@@ -81,7 +73,7 @@ public class CombinedLogFormatConverter extends CrunchTool {
     PCollection<String> lines = readTextFile(input);
     PCollection<GenericData.Record> records = lines.parallelDo(
         new ConvertFn(schemaString), outputType);
-    getPipeline().write(records, new AvroFileTarget(new Path(root, datasetName)),
+    getPipeline().write(records, CrunchDatasets.asTarget(dataset),
         Target.WriteMode.APPEND);
     run();
     return 0;

@@ -17,16 +17,13 @@ package com.cloudera.cdk.tools;
 
 import com.cloudera.cdk.data.Dataset;
 import com.cloudera.cdk.data.DatasetReader;
+import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
-import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import com.google.common.io.Resources;
 import java.io.File;
 import junit.framework.Assert;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,17 +42,14 @@ public class TestCombinedLogFormatConverter {
     CombinedLogFormatConverter tool = new CombinedLogFormatConverter();
 
     String input = Resources.getResource("access_log.txt").toExternalForm();
-    String datasetRoot = TEST_DIR.toURI().toURL().toExternalForm();
+    String datasetUri = "repo:" + TEST_DIR.toURI().toURL().toExternalForm();
     String datasetName = "logs";
 
-    int exitCode = tool.run(input, datasetRoot, datasetName);
+    int exitCode = tool.run(input, datasetUri, datasetName);
 
     Assert.assertEquals(0, exitCode);
 
-    Path root = new Path(datasetRoot);
-    FileSystem fs = root.getFileSystem(new Configuration());
-    DatasetRepository repo = new FileSystemDatasetRepository.Builder().fileSystem(fs)
-        .rootDirectory(root).build();
+    DatasetRepository repo = DatasetRepositories.open(datasetUri);
     Dataset<GenericRecord> dataset = repo.load(datasetName);
     DatasetReader<GenericRecord> reader = dataset.newReader();
     try {
