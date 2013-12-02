@@ -40,6 +40,9 @@ public class Loader implements Loadable {
 
   private static final Logger logger = LoggerFactory.getLogger(Loader.class);
 
+  public static final String HIVE_METASTORE_URI_PROP = "hive.metastore.uris";
+  private static final int UNSPECIFIED_PORT = -1;
+
   /**
    * This class builds configured instances of
    * {@code FileSystemDatasetRepository} from a Map of options. This is for the
@@ -73,38 +76,15 @@ public class Loader implements Loadable {
         throw new DatasetRepositoryException(
             "Could not get a FileSystem", ex);
       }
-      return (DatasetRepository) new HCatalogDatasetRepository.Builder()
-          .configuration(new Configuration(envConf)) // make a modifiable copy
+
+      // make a modifiable copy and setup the MetaStore URI
+      Configuration conf = new Configuration(envConf);
+      setMetaStoreURI(conf, match);
+
+      return new HCatalogDatasetRepository.Builder()
+          .configuration(conf)
           .rootDirectory(fs.makeQualified(root))
           .build();
-    }
-
-    private URI fileSystemURI(String scheme, Map<String, String> match) {
-      final String userInfo;
-      if (match.containsKey("username")) {
-        if (match.containsKey("password")) {
-          userInfo = match.get("username") + ":" +
-              match.get("password");
-        } else {
-          userInfo = match.get("username");
-        }
-      } else {
-        userInfo = null;
-      }
-      try {
-        int port = -1;
-        if (match.containsKey("hdfs-port")) {
-          try {
-            port = Integer.parseInt(match.get("hdfs-port"));
-          } catch (NumberFormatException e) {
-            port = -1;
-          }
-        }
-        return new URI(scheme, userInfo, match.get("hdfs-host"),
-            port, "/", null, null);
-      } catch (URISyntaxException ex) {
-        throw new DatasetRepositoryException("Could not build FS URI", ex);
-      }
     }
   }
 
@@ -116,9 +96,12 @@ public class Loader implements Loadable {
     }
 
     @Override
-    public DatasetRepository getFromOptions(Map options) {
+    public DatasetRepository getFromOptions(Map<String, String> match) {
+      // make a modifiable copy and setup the MetaStore URI
+      Configuration conf = new Configuration(envConf);
+      setMetaStoreURI(conf, match);
       return new HCatalogDatasetRepository.Builder()
-          .configuration(new Configuration(envConf)) // make a modifiable copy
+          .configuration(conf)
           .build();
     }
   }
@@ -128,9 +111,26 @@ public class Loader implements Loadable {
     // get a default Configuration to configure defaults (so it's okay!)
     final Configuration conf = new Configuration();
 
+    String hiveAuthority;
+    if (conf.get(HIVE_METASTORE_URI_PROP) != null) {
+      try {
+        hiveAuthority = new URI(conf.get(HIVE_METASTORE_URI_PROP))
+            .getAuthority();
+      } catch (URISyntaxException ex) {
+        hiveAuthority = "";
+      }
+    } else {
+      hiveAuthority = "";
+    }
+
     // Hive-managed data sets
+    final OptionBuilder<DatasetRepository> managedBuilder =
+        new ManagedBuilder(conf);
     DatasetRepositories.register(
-        new URIPattern(URI.create("hive")), new ManagedBuilder(conf));
+        new URIPattern(URI.create("hive")), managedBuilder);
+    DatasetRepositories.register(
+        new URIPattern(URI.create("hive://" + hiveAuthority + "/")),
+        managedBuilder);
 
     // external data sets
     final OptionBuilder<DatasetRepository> externalBuilder =
@@ -150,16 +150,71 @@ public class Loader implements Loadable {
       hdfsAuthority = "";
     }
 
-    // rather than using the URI authority to pass the HDFS host and port, the
-    // URI is registered to pass these options as query arguments. This is
-    // the most flexible URI pattern for now, while it is not clear if the
-    // authority section should be used to specify the connection info for the
-    // Hive MetaStore.
-
     DatasetRepositories.register(
-        new URIPattern(URI.create("hive:/*path?absolute=true" + hdfsAuthority)),
+        new URIPattern(URI.create("hive://" + hiveAuthority +
+            "/*path?absolute=true" + hdfsAuthority)),
         externalBuilder);
     DatasetRepositories.register(
         new URIPattern(URI.create("hive:*path")), externalBuilder);
+  }
+
+  private static URI fileSystemURI(String scheme, Map<String, String> match) {
+    final String userInfo;
+    if (match.containsKey("username")) {
+      if (match.containsKey("password")) {
+        userInfo = match.get("username") + ":" +
+            match.get("password");
+      } else {
+        userInfo = match.get("username");
+      }
+    } else {
+      userInfo = null;
+    }
+    try {
+      int port = UNSPECIFIED_PORT;
+      if (match.containsKey("hdfs-port")) {
+        try {
+          port = Integer.parseInt(match.get("hdfs-port"));
+        } catch (NumberFormatException e) {
+          port = UNSPECIFIED_PORT;
+        }
+      }
+      return new URI(scheme, userInfo, match.get("hdfs-host"),
+          port, "/", null, null);
+    } catch (URISyntaxException ex) {
+      throw new DatasetRepositoryException("Could not build FS URI", ex);
+    }
+  }
+
+  /**
+   * Sets the MetaStore URI in the given Configuration, if there is a host in
+   * the match arguments. If there is no host, then the conf is not changed.
+   *
+   * @param conf a Configuration that will be used to connect to the MetaStore
+   * @param match URIPattern match results
+   */
+  private static void setMetaStoreURI(
+      Configuration conf, Map<String, String> match) {
+    try {
+      int port = UNSPECIFIED_PORT;
+      if (match.containsKey("port")) {
+        try {
+          port = Integer.parseInt(match.get("port"));
+        } catch (NumberFormatException e) {
+          port = UNSPECIFIED_PORT;
+        }
+      }
+      // if either the host or the port is set, construct a new MetaStore URI
+      // and set the property in the Configuration. otherwise, this will not
+      // change the connection URI.
+      if (match.containsKey("host")) {
+         conf.set(HIVE_METASTORE_URI_PROP,
+             new URI("thrift", null, match.get("host"), port, "/", null, null)
+                 .toString());
+      }
+    } catch (URISyntaxException ex) {
+      throw new DatasetRepositoryException(
+          "Could not build metastore URI", ex);
+    }
   }
 }
