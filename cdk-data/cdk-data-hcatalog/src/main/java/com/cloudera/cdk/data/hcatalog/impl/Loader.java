@@ -83,8 +83,8 @@ public class Loader implements Loadable {
       final String userInfo;
       if (match.containsKey("username")) {
         if (match.containsKey("password")) {
-          userInfo = match.get("password") + ":" +
-              match.get("username");
+          userInfo = match.get("username") + ":" +
+              match.get("password");
         } else {
           userInfo = match.get("username");
         }
