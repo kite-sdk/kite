@@ -58,7 +58,7 @@ public class Loader implements Loadable {
 
     @Override
     public DatasetRepository getFromOptions(Map<String, String> match) {
-      logger.info("Match options: {}", match);
+      logger.debug("External URI options: {}", match);
       final Path root;
       String path = match.get("path");
       if (path == null || path.isEmpty()) {
@@ -97,6 +97,7 @@ public class Loader implements Loadable {
 
     @Override
     public DatasetRepository getFromOptions(Map<String, String> match) {
+      logger.debug("Managed URI options: {}", match);
       // make a modifiable copy and setup the MetaStore URI
       Configuration conf = new Configuration(envConf);
       setMetaStoreURI(conf, match);
