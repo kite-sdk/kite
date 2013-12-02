@@ -53,9 +53,8 @@ public class CrunchDatasets {
    * @return the {@link ReadableSource}, or <code>null</code> if the dataset is not
    * filesystem-based.
    */
-  @SuppressWarnings("unchecked")
   public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
-    return asSource((View) dataset, type);
+    return asSource((View<E>) dataset, type);
   }
 
   /**
