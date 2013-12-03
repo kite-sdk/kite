@@ -14,10 +14,23 @@
  * limitations under the License.
  */
 
-package com.cloudera.cdk.data;
+package com.cloudera.cdk.data.spi;
 
+import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetDescriptor;
+import com.cloudera.cdk.data.DatasetReader;
+import com.cloudera.cdk.data.DatasetRepository;
+import com.cloudera.cdk.data.DatasetWriter;
+import com.cloudera.cdk.data.Marker;
+import com.cloudera.cdk.data.MiniDFSTest;
+import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.TestHelpers;
+import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.event.StandardEvent;
 import com.google.common.collect.Sets;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.junit.Assert;
@@ -27,10 +40,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Set;
 
 @RunWith(Parameterized.class)
 public abstract class TestRangeViews extends MiniDFSTest {
@@ -88,6 +97,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
   protected PartitionStrategy strategy = null;
   protected DatasetDescriptor testDescriptor = null;
   protected Dataset<StandardEvent> testDataset = null;
+  protected RangeView<StandardEvent> unbounded = null;
 
   @Before
   public void setup() throws Exception {
@@ -107,13 +117,14 @@ public abstract class TestRangeViews extends MiniDFSTest {
         .partitionStrategy(strategy)
         .build();
     this.testDataset = repo.create("test", testDescriptor);
+    this.unbounded = (RangeView<StandardEvent>) testDataset;
   }
 
   @Test public abstract void testCoveringPartitions();
 
   @Test
   public void testRange() {
-    final View<StandardEvent> range = testDataset
+    final RangeView<StandardEvent> range = unbounded
         .from(october).toBefore(newMarker(2013, 11, 14));
 
     Assert.assertTrue("Should contain Oct", range.contains(october));
@@ -171,56 +182,56 @@ public abstract class TestRangeViews extends MiniDFSTest {
 
     // single bound
     assertContentEquals(Sets.newHashSet(octEvent, novEvent),
-        testDataset.from(newMarker(2013, 10, 12)));
+        unbounded.from(newMarker(2013, 10, 12)));
     assertContentEquals(Sets.newHashSet(novEvent),
-        testDataset.fromAfter(newMarker(2013, 10, 12)));
+        unbounded.fromAfter(newMarker(2013, 10, 12)));
     assertContentEquals(Sets.newHashSet(sepEvent, octEvent),
-        testDataset.to(newMarker(2013, 10, 12)));
+        unbounded.to(newMarker(2013, 10, 12)));
     assertContentEquals(Sets.newHashSet(sepEvent),
-        testDataset.toBefore(newMarker(2013, 10, 12)));
+        unbounded.toBefore(newMarker(2013, 10, 12)));
 
     // in
     assertContentEquals(Sets.<StandardEvent>newHashSet(),
-        testDataset.of(newMarker(2012)));
+        unbounded.of(newMarker(2012)));
     assertContentEquals(Sets.newHashSet(sepEvent, octEvent, novEvent),
-        testDataset.of(newMarker(2013)));
+        unbounded.of(newMarker(2013)));
     assertContentEquals(Sets.<StandardEvent>newHashSet(),
-        testDataset.of(newMarker(2012, 10)));
+        unbounded.of(newMarker(2012, 10)));
     assertContentEquals(Sets.newHashSet(octEvent),
-        testDataset.of(newMarker(2013, 10)));
+        unbounded.of(newMarker(2013, 10)));
     assertContentEquals(Sets.newHashSet(octEvent),
-        testDataset.of(newMarker(2013, 10, 12)));
+        unbounded.of(newMarker(2013, 10, 12)));
     assertContentEquals(Sets.<StandardEvent>newHashSet(),
-        testDataset.of(newMarker(2013, 10, 11)));
+        unbounded.of(newMarker(2013, 10, 11)));
 
     // double bound
     assertContentEquals(Sets.newHashSet(sepEvent, octEvent, novEvent),
-        testDataset.from(newMarker(2013, 9)).to(newMarker(2013, 11)));
+        unbounded.from(newMarker(2013, 9)).to(newMarker(2013, 11)));
     assertContentEquals(Sets.newHashSet(octEvent, novEvent),
-        testDataset.from(newMarker(2013, 9, 22)).to(newMarker(2013, 11)));
+        unbounded.from(newMarker(2013, 9, 22)).to(newMarker(2013, 11)));
     assertContentEquals(Sets.newHashSet(octEvent, novEvent),
-        testDataset.fromAfter(newMarker(2013, 9, 22)).to(newMarker(2013, 11)));
+        unbounded.fromAfter(newMarker(2013, 9, 22)).to(newMarker(2013, 11)));
     assertContentEquals(Sets.newHashSet(octEvent),
-        testDataset.from(newMarker(2013, 9, 22)).toBefore(newMarker(2013, 11)));
+        unbounded.from(newMarker(2013, 9, 22)).toBefore(newMarker(2013, 11)));
     assertContentEquals(Sets.newHashSet(sepEvent, octEvent),
-        testDataset.from(newMarker(2013, 9)).to(newMarker(2013, 11, 4)));
+        unbounded.from(newMarker(2013, 9)).to(newMarker(2013, 11, 4)));
     assertContentEquals(Sets.newHashSet(octEvent),
-        testDataset.fromAfter(newMarker(2013, 9)).to(newMarker(2013, 11, 4)));
+        unbounded.fromAfter(newMarker(2013, 9)).to(newMarker(2013, 11, 4)));
     assertContentEquals(Sets.newHashSet(sepEvent, octEvent),
-        testDataset.from(newMarker(2013, 9)).toBefore(newMarker(2013, 11, 4)));
+        unbounded.from(newMarker(2013, 9)).toBefore(newMarker(2013, 11, 4)));
     assertContentEquals(Sets.newHashSet(sepEvent, octEvent, novEvent),
-        testDataset.from(newMarker(2013, 9, 1)).to(newMarker(2013, 11, 31)));
+        unbounded.from(newMarker(2013, 9, 1)).to(newMarker(2013, 11, 31)));
     assertContentEquals(Sets.newHashSet(octEvent, novEvent),
-        testDataset.fromAfter(newMarker(2013, 9, 12)).to(newMarker(2013, 11, 31)));
+        unbounded.fromAfter(newMarker(2013, 9, 12)).to(newMarker(2013, 11, 31)));
     assertContentEquals(Sets.newHashSet(sepEvent, octEvent),
-        testDataset.from(newMarker(2013, 9, 12)).toBefore(newMarker(2013, 11, 11)));
+        unbounded.from(newMarker(2013, 9, 12)).toBefore(newMarker(2013, 11, 11)));
     assertContentEquals(Sets.<StandardEvent>newHashSet(),
-        testDataset.from(newMarker(2012)).to(newMarker(2013, 8)));
+        unbounded.from(newMarker(2012)).to(newMarker(2013, 8)));
   }
 
   @Test
   public void testLimitedWriter() {
-    final View<StandardEvent> range = testDataset
+    final RangeView<StandardEvent> range = unbounded
         .from(october).toBefore(newMarker(2013, 11, 14));
 
     DatasetWriter<StandardEvent> writer = range.newWriter();
@@ -263,7 +274,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
 
   @Test
   public void testFromView() {
-    final View<StandardEvent> fromOctober = testDataset.from(october);
+    final RangeView<StandardEvent> fromOctober = unbounded.from(october);
 
     Assert.assertTrue("Should contain partial", fromOctober.contains(october));
     Assert.assertTrue("Should contain days",
@@ -362,7 +373,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
 
   @Test
   public void testFromAfterView() {
-    final View<StandardEvent> afterOct = testDataset.fromAfter(october);
+    final RangeView<StandardEvent> afterOct = unbounded.fromAfter(october);
 
     Assert.assertFalse("Should not contain partial", afterOct.contains(october));
     Assert.assertFalse("Should contain days",
@@ -486,7 +497,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
 
   @Test
   public void testToView() {
-    final View<StandardEvent> toOctober = testDataset.to(october);
+    final RangeView<StandardEvent> toOctober = unbounded.to(october);
 
     Assert.assertTrue("Should contain partial", toOctober.contains(october));
     Assert.assertTrue("Should contain days",
@@ -585,7 +596,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
 
   @Test
   public void testToBeforeView() {
-    final View<StandardEvent> beforeOct = testDataset.toBefore(october);
+    final RangeView<StandardEvent> beforeOct = unbounded.toBefore(october);
 
     Assert.assertFalse("Should not contain partial", beforeOct.contains(october));
     Assert.assertFalse("Should not contain days",
@@ -709,7 +720,7 @@ public abstract class TestRangeViews extends MiniDFSTest {
 
   @Test
   public void testInView() {
-    final View<StandardEvent> inOctober = testDataset.of(october);
+    final RangeView<StandardEvent> inOctober = unbounded.of(october);
 
     Assert.assertTrue("Should contain partial", inOctober.contains(october));
     Assert.assertTrue("Should contain days",
@@ -834,46 +845,49 @@ public abstract class TestRangeViews extends MiniDFSTest {
   @Test
   public void testUnboundedView() {
     Assert.assertTrue("Should contain any Marker",
-        testDataset.contains(now));
+        unbounded.contains(now));
     Assert.assertTrue("Should contain an empty Marker",
-        testDataset.contains(empty));
+        unbounded.contains(empty));
 
     // null is not contained in any bounded range, even if one end is unbounded
     Assert.assertTrue("Should be unbounded",
-        testDataset.contains((Marker) null));
+        unbounded.contains((Marker) null));
 
     // test events
     Assert.assertTrue("Should contain any StandardEvent",
-        testDataset.contains(event));
+        unbounded.contains(event));
     Assert.assertTrue("Should contain even null events",
-        testDataset.contains((StandardEvent) null));
+        unbounded.contains((StandardEvent) null));
     Assert.assertTrue("Should contain older event",
-        testDataset.contains(sepEvent));
+        unbounded.contains(sepEvent));
     Assert.assertTrue("Should contain event",
-        testDataset.contains(octEvent));
+        unbounded.contains(octEvent));
     Assert.assertTrue("Should contain newer event",
-        testDataset.contains(novEvent));
+        unbounded.contains(novEvent));
 
     // test range limiting
     Marker y2013 = newMarker(2013);
     Assert.assertNotNull("from should succeed",
-        testDataset.from(y2013));
+        unbounded.from(y2013));
     Assert.assertNotNull("fromAfter should succeed",
-        testDataset.fromAfter(y2013));
+        unbounded.fromAfter(y2013));
     Assert.assertNotNull("to should succeed",
-        testDataset.to(y2013));
+        unbounded.to(y2013));
     Assert.assertNotNull("toBefore should succeed",
-        testDataset.toBefore(y2013));
+        unbounded.toBefore(y2013));
     Assert.assertNotNull("in should succeed",
-        testDataset.of(y2013));
+        unbounded.of(y2013));
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testNotPartitioned() throws Exception {
     final DatasetDescriptor flatDescriptor = new DatasetDescriptor
         .Builder(testDescriptor).partitionStrategy(null).build();
-    final Dataset<StandardEvent> notPartitioned = repo
-        .create("flat", flatDescriptor);
+    final Dataset<StandardEvent> flatDataset =
+        repo.create("flat", flatDescriptor);
+    final RangeView<StandardEvent> notPartitioned = (RangeView<StandardEvent>)
+        flatDataset;
 
     // test contains(Marker)
     Assert.assertTrue("Should contain any Marker",

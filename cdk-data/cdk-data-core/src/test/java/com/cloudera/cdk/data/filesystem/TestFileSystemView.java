@@ -18,7 +18,7 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetWriter;
-import com.cloudera.cdk.data.TestRangeViews;
+import com.cloudera.cdk.data.spi.TestRangeViews;
 import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.event.StandardEvent;
 import com.cloudera.cdk.data.spi.Key;
@@ -56,6 +56,8 @@ public class TestFileSystemView extends TestRangeViews {
   @Override
   @SuppressWarnings("unchecked")
   public void testCoveringPartitions() {
+    final FileSystemDataset dataset = (FileSystemDataset<StandardEvent>)
+        testDataset;
     // NOTE: this is an un-restricted write so all should succeed
     final DatasetWriter<StandardEvent> writer = testDataset.newWriter();
     try {
@@ -67,17 +69,20 @@ public class TestFileSystemView extends TestRangeViews {
       writer.close();
     }
 
-    final Set<View<StandardEvent>> expected = Sets.newHashSet(
-        testDataset.of(new Key(strategy, sepEvent)),
-        testDataset.of(new Key(strategy, octEvent)),
-        testDataset.of(new Key(strategy, novEvent)));
+    final Set<View<StandardEvent>> expected = (Set) Sets.newHashSet(
+        dataset.of(new Key(strategy, sepEvent)),
+        dataset.of(new Key(strategy, octEvent)),
+        dataset.of(new Key(strategy, novEvent)));
 
     Assert.assertEquals("Covering partitions should match",
-        expected, Sets.newHashSet(testDataset.getCoveringPartitions()));
+        expected, Sets.newHashSet(dataset.getCoveringPartitions()));
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testDelete() throws Exception {
+    final FileSystemView<StandardEvent> view =
+        new FileSystemView((FileSystemDataset) testDataset);
     // NOTE: this is an un-restricted write so all should succeed
     final DatasetWriter<StandardEvent> writer = testDataset.newWriter();
     try {
@@ -100,45 +105,39 @@ public class TestFileSystemView extends TestRangeViews {
     assertDirectoriesExist(fs, root, y2013, sep, sep12, oct, oct12, nov, nov11);
 
     Assert.assertFalse("Delete should return false to indicate no changes",
-        testDataset.from(newMarker(2013, 6)).toBefore(newMarker(2013, 9))
+        view.from(newMarker(2013, 6)).toBefore(newMarker(2013, 9))
             .deleteAll());
     Assert.assertFalse("Delete should return false to indicate no changes",
-        testDataset.from(newMarker(2013, 11, 12)).deleteAll());
+        view.from(newMarker(2013, 11, 12)).deleteAll());
 
     // delete everything up to September
     Assert.assertTrue("Delete should return true to indicate FS changed",
-        testDataset.to(newMarker(2013, 9)).deleteAll());
+        view.to(newMarker(2013, 9)).deleteAll());
     assertDirectoriesDoNotExist(fs, sep12, sep);
     assertDirectoriesExist(fs, root, y2013, oct, oct12, nov, nov11);
     Assert.assertFalse("Delete should return false to indicate no changes",
-        testDataset.to(newMarker(2013, 9)).deleteAll());
+        view.to(newMarker(2013, 9)).deleteAll());
 
     // delete November 11 and later
     Assert.assertTrue("Delete should return true to indicate FS changed",
-        testDataset.from(newMarker(2013, 11, 11)).to(newMarker(2013, 11, 12))
+        view.from(newMarker(2013, 11, 11)).to(newMarker(2013, 11, 12))
             .deleteAll());
     assertDirectoriesDoNotExist(fs, sep12, sep, nov11, nov);
     assertDirectoriesExist(fs, root, y2013, oct, oct12);
     Assert.assertFalse("Delete should return false to indicate no changes",
-        testDataset.from(newMarker(2013, 11, 11)).to(newMarker(2013, 11, 12))
+        view.from(newMarker(2013, 11, 11)).to(newMarker(2013, 11, 12))
             .deleteAll());
 
     // delete October and the 2013 directory
     Assert.assertTrue("Delete should return true to indicate FS changed",
-        testDataset.of(newMarker(2013, 10, 12)).deleteAll());
+        view.of(newMarker(2013, 10, 12)).deleteAll());
     assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
     assertDirectoriesExist(fs, root);
     Assert.assertFalse("Delete should return false to indicate no changes",
-        testDataset.of(newMarker(2013, 10, 12)).deleteAll());
+        view.of(newMarker(2013, 10, 12)).deleteAll());
 
     Assert.assertFalse("Delete should return false to indicate no changes",
-        testDataset.deleteAll());
-  }
-
-  @Test
-  @Override
-  public void testLimitedWriter() {
-    // range-limited writers are not currently implemented
+        view.deleteAll());
   }
 
   public static void assertDirectoriesExist(FileSystem fs, Path... dirs)

@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.data.hbase.avro;
+package com.cloudera.cdk.data.hbase;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.Marker;
-import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.View;
-import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
+import com.cloudera.cdk.data.hbase.avro.AvroUtils;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEntity;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
 
+import com.cloudera.cdk.data.spi.AbstractRangeView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -45,7 +45,7 @@ public class DaoViewTest {
   private static final String tableName = "testtable";
   private static final String managedTableName = "managed_schemas";
   private HBaseDatasetRepository repo;
-  private RandomAccessDataset<TestEntity> ds;
+  private DaoDataset<TestEntity> ds;
 
   static {
     try {
@@ -70,12 +70,13 @@ public class DaoViewTest {
   }
 
   @Before
+  @SuppressWarnings("unchecked")
   public void setup() throws Exception {
     repo = new HBaseDatasetRepository.Builder().configuration(
         HBaseTestUtils.getConf()).build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testEntity).build();
-    ds = repo.create(tableName, descriptor);
+    ds = (DaoDataset) repo.create(tableName, descriptor);
   }
 
   @After
@@ -89,8 +90,8 @@ public class DaoViewTest {
   public void testRange() {
     populateTestEntities(10);
 
-    final View<TestEntity> range = ds.fromAfter(newMarker("1", "1")).to(
-        newMarker("9", "9"));
+    final AbstractRangeView<TestEntity> range = new DaoView<TestEntity>(ds)
+            .fromAfter(newMarker("1", "1")).to(newMarker("9", "9"));
 
     // Test marker range checks
     Assert.assertTrue(range.contains(newMarker("1", "10")));
@@ -131,14 +132,16 @@ public class DaoViewTest {
   public void testLimitedReader() {
     populateTestEntities(10);
 
-    View<TestEntity> range = ds.from(newMarker("0", "0")).to(
-        newMarker("9", "9"));
+    AbstractRangeView<TestEntity> range = new DaoView<TestEntity>(ds)
+        .from(newMarker("0", "0")).to(newMarker("9", "9"));
     validRange(range, 0, 10);
 
-    range = ds.fromAfter(newMarker("1", "1")).to(newMarker("9", "9"));
+    range = new DaoView<TestEntity>(ds)
+        .fromAfter(newMarker("1", "1")).to(newMarker("9", "9"));
     validRange(range, 2, 10);
 
-    range = ds.from(newMarker("0", "0")).toBefore(newMarker("9", "9"));
+    range = new DaoView<TestEntity>(ds)
+        .from(newMarker("0", "0")).toBefore(newMarker("9", "9"));
     validRange(range, 0, 9);
   }
 

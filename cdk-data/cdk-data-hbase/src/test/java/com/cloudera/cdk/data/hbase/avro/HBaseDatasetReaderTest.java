@@ -21,6 +21,7 @@ import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.TestDatasetReaders;
 import com.cloudera.cdk.data.filesystem.DatasetTestUtilities;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
+import com.cloudera.cdk.data.hbase.HBaseDatasetRepositoryTest;
 import com.cloudera.cdk.data.hbase.testing.HBaseTestUtils;
 
 import java.io.IOException;

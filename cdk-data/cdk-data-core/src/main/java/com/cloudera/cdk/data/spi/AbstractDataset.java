@@ -30,7 +30,7 @@ import javax.annotation.concurrent.Immutable;
  * @since 0.9.0
  */
 @Immutable
-public abstract class AbstractDataset<E> implements Dataset<E> {
+public abstract class AbstractDataset<E> implements Dataset<E>, RangeView<E> {
 
   @Override
   public Dataset<E> getDataset() {
@@ -68,27 +68,27 @@ public abstract class AbstractDataset<E> implements Dataset<E> {
   }
 
   @Override
-  public View<E> from(Marker start) {
+  public AbstractRangeView<E> from(Marker start) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public View<E> fromAfter(Marker start) {
+  public AbstractRangeView<E> fromAfter(Marker start) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public View<E> to(Marker end) {
+  public AbstractRangeView<E> to(Marker end) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public View<E> toBefore(Marker end) {
+  public AbstractRangeView<E> toBefore(Marker end) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public View<E> of(Marker partial) {
+  public AbstractRangeView<E> of(Marker partial) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 

@@ -104,28 +104,28 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   }
 
   @Override
-  public View<E> from(Marker start) {
-    return unbounded.from(start);
+  public DaoView<E> from(Marker start) {
+    return (DaoView<E>) unbounded.from(start);
   }
 
   @Override
-  public View<E> fromAfter(Marker start) {
-    return unbounded.fromAfter(start);
+  public DaoView<E> fromAfter(Marker start) {
+    return (DaoView<E>) unbounded.fromAfter(start);
   }
 
   @Override
-  public View<E> to(Marker end) {
-    return unbounded.to(end);
+  public DaoView<E> to(Marker end) {
+    return (DaoView<E>) unbounded.to(end);
   }
 
   @Override
-  public View<E> toBefore(Marker end) {
-    return unbounded.toBefore(end);
+  public DaoView<E> toBefore(Marker end) {
+    return (DaoView<E>) unbounded.toBefore(end);
   }
 
   @Override
-  public View<E> of(Marker partial) {
-    return unbounded.of(partial);
+  public DaoView<E> of(Marker partial) {
+    return (DaoView<E>) unbounded.of(partial);
   }
 
   @Override

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cloudera.cdk.data.hbase.avro;
+package com.cloudera.cdk.data.hbase;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.RandomAccessDataset;
-import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
+import com.cloudera.cdk.data.hbase.avro.AvroUtils;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEntity;
@@ -86,6 +86,7 @@ public class HBaseDatasetRepositoryTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testGeneric() throws Exception {
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
         .configuration(HBaseTestUtils.getConf()).build();
@@ -93,7 +94,7 @@ public class HBaseDatasetRepositoryTest {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    RandomAccessDataset<GenericRecord> ds = repo.create(tableName, descriptor);
+    DaoDataset<GenericRecord> ds = (DaoDataset) repo.create(tableName, descriptor);
 
     // Create the new entities
     ds.put(createGenericEntity(0));
@@ -114,7 +115,7 @@ public class HBaseDatasetRepositoryTest {
     }
 
     // reload
-    ds = repo.load(tableName);
+    ds = (DaoDataset) repo.load(tableName);
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
@@ -144,7 +145,7 @@ public class HBaseDatasetRepositoryTest {
 
     // test a partial scan
     cnt = 3;
-    reader = ds
+    reader = new DaoView<GenericRecord>(ds)
         .from(new Marker.Builder().add("part1", "part1_3").add("part2", "part2_3").build())
         .to(new Marker.Builder().add("part1", "part1_7").add("part2", "part2_7").build())
         .newReader();
@@ -268,7 +269,7 @@ public class HBaseDatasetRepositoryTest {
 
   // TODO: remove duplication from ManagedDaoTest
 
-  static GenericRecord createGenericEntity(long uniqueIdx) {
+  public static GenericRecord createGenericEntity(long uniqueIdx) {
     return createGenericEntity(uniqueIdx, testGenericEntity);
   }
 
@@ -325,7 +326,7 @@ public class HBaseDatasetRepositoryTest {
   }
 
   @SuppressWarnings("unchecked")
-  static void compareEntitiesWithUtf8(long uniqueIdx, IndexedRecord record) {
+  public static void compareEntitiesWithUtf8(long uniqueIdx, IndexedRecord record) {
     String iStr = Long.toString(uniqueIdx);
 
     assertEquals(new String("part1_" + iStr), record.get(0).toString()); // TODO: check type

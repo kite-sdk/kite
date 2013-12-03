@@ -33,7 +33,7 @@ import javax.annotation.concurrent.Immutable;
  * @since 0.9.0
  */
 @Immutable
-public abstract class AbstractRangeView<E> implements View<E> {
+public abstract class AbstractRangeView<E> implements RangeView<E> {
 
   protected final Dataset<E> dataset;
   protected final MarkerRange range;
@@ -95,27 +95,27 @@ public abstract class AbstractRangeView<E> implements View<E> {
   }
 
   @Override
-  public View<E> from(Marker start) {
+  public AbstractRangeView<E> from(Marker start) {
     return newLimitedCopy(range.from(start));
   }
 
   @Override
-  public View<E> fromAfter(Marker start) {
+  public AbstractRangeView<E> fromAfter(Marker start) {
     return newLimitedCopy(range.fromAfter(start));
   }
 
   @Override
-  public View<E> to(Marker end) {
+  public AbstractRangeView<E> to(Marker end) {
     return newLimitedCopy(range.to(end));
   }
 
   @Override
-  public View<E> toBefore(Marker end) {
+  public AbstractRangeView<E> toBefore(Marker end) {
     return newLimitedCopy(range.toBefore(end));
   }
 
   @Override
-  public View<E> of(Marker partial) {
+  public AbstractRangeView<E> of(Marker partial) {
     return newLimitedCopy(range.of(partial));
   }
 

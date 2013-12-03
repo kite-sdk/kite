@@ -17,9 +17,7 @@ package com.cloudera.cdk.data.filesystem;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetWriter;
-import com.cloudera.cdk.data.DatasetWriterException;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.spi.Key;
 import com.cloudera.cdk.data.spi.ReaderWriterState;
 import com.google.common.base.Objects;
@@ -34,15 +32,12 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
-
 class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
 
   private static final Logger logger = LoggerFactory
     .getLogger(PartitionedDatasetWriter.class);
 
-  private View<E> view;
+  private FileSystemView<E> view;
   private int maxWriters;
 
   private final PartitionStrategy partitionStrategy;
@@ -52,7 +47,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
 
   private ReaderWriterState state;
 
-  public PartitionedDatasetWriter(View<E> view) {
+  public PartitionedDatasetWriter(FileSystemView<E> view) {
     final DatasetDescriptor descriptor = view.getDataset().getDescriptor();
     Preconditions.checkArgument(descriptor.isPartitioned(),
         "Dataset " + view.getDataset() + " is not partitioned");
@@ -158,10 +153,10 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   private static class DatasetWriterCacheLoader<E> extends
     CacheLoader<Key, DatasetWriter<E>> {
 
-    private final View<E> view;
+    private final FileSystemView<E> view;
     private final PathConversion convert;
 
-    public DatasetWriterCacheLoader(View<E> view) {
+    public DatasetWriterCacheLoader(FileSystemView<E> view) {
       this.view = view;
       this.convert = new PathConversion();
     }

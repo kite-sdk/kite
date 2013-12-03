@@ -144,28 +144,28 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   }
 
   @Override
-  public View<E> from(Marker start) {
-    return unbounded.from(start);
+  public FileSystemView<E> from(Marker start) {
+    return (FileSystemView<E>) unbounded.from(start);
   }
 
   @Override
-  public View<E> fromAfter(Marker start) {
-    return unbounded.fromAfter(start);
+  public FileSystemView<E> fromAfter(Marker start) {
+    return (FileSystemView<E>) unbounded.fromAfter(start);
   }
 
   @Override
-  public View<E> to(Marker end) {
-    return unbounded.to(end);
+  public FileSystemView<E> to(Marker end) {
+    return (FileSystemView<E>) unbounded.to(end);
   }
 
   @Override
-  public View<E> toBefore(Marker end) {
-    return unbounded.toBefore(end);
+  public FileSystemView<E> toBefore(Marker end) {
+    return (FileSystemView<E>) unbounded.toBefore(end);
   }
 
   @Override
-  public View<E> of(Marker partial) {
-    return unbounded.of(partial);
+  public FileSystemView<E> of(Marker partial) {
+    return (FileSystemView<E>) unbounded.of(partial);
   }
 
   @Override

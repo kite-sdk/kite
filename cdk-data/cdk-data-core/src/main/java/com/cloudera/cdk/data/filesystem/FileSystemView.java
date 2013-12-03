@@ -99,7 +99,7 @@ class FileSystemView<E> extends AbstractRangeView<E> {
             public View<E> apply(Key key) {
               if (key != null) {
                 // no need for the bounds checks, use dataset.in
-                return dataset.of(key);
+                return ((FileSystemDataset) dataset).of(key);
               } else {
                 throw new DatasetException("[BUG] Null partition");
               }
