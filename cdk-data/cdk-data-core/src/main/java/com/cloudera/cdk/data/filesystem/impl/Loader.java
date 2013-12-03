@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 public class Loader implements Loadable {
 
   private static final Logger logger = LoggerFactory.getLogger(Loader.class);
+  private static final int UNSPECIFIED_PORT = -1;
 
   /**
    * This class builds configured instances of
@@ -77,34 +78,6 @@ public class Loader implements Loadable {
           .rootDirectory(fs.makeQualified(root))
           .build();
     }
-
-    private URI fileSystemURI(Map<String, String> match) {
-      final String userInfo;
-      if (match.containsKey("username")) {
-        if (match.containsKey("password")) {
-          userInfo = match.get("username") + ":" +
-              match.get("password");
-        } else {
-          userInfo = match.get("username");
-        }
-      } else {
-        userInfo = null;
-      }
-      try {
-        int port = -1;
-        if (match.containsKey("port")) {
-          try {
-            port = Integer.parseInt(match.get("port"));
-          } catch (NumberFormatException e) {
-            port = -1;
-          }
-        }
-        return new URI(match.get("scheme"), userInfo, match.get("host"), port, "/",
-            null, null);
-      } catch (URISyntaxException ex) {
-        throw new DatasetRepositoryException("Could not build FS URI", ex);
-      }
-    }
   }
 
   @Override
@@ -137,5 +110,33 @@ public class Loader implements Loadable {
         builder);
     DatasetRepositories.register(
         new URIPattern(URI.create("hdfs:*path")), builder);
+  }
+
+  private static URI fileSystemURI(Map<String, String> match) {
+    final String userInfo;
+    if (match.containsKey("username")) {
+      if (match.containsKey("password")) {
+        userInfo = match.get("username") + ":" +
+            match.get("password");
+      } else {
+        userInfo = match.get("username");
+      }
+    } else {
+      userInfo = null;
+    }
+    try {
+      int port = UNSPECIFIED_PORT;
+      if (match.containsKey("port")) {
+        try {
+          port = Integer.parseInt(match.get("port"));
+        } catch (NumberFormatException e) {
+          port = UNSPECIFIED_PORT;
+        }
+      }
+      return new URI(match.get("scheme"), userInfo, match.get("host"), port, "/",
+          null, null);
+    } catch (URISyntaxException ex) {
+      throw new DatasetRepositoryException("Could not build FS URI", ex);
+    }
   }
 }

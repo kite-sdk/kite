@@ -25,6 +25,7 @@ import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
 import com.cloudera.cdk.data.filesystem.TestFileSystemURIs;
 import java.net.URI;
 import junit.framework.Assert;
+import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -53,6 +54,35 @@ public class TestHiveURIs extends TestFileSystemURIs {
         .getMetadataProvider();
     Assert.assertTrue("Repo is using a HCatalogManagedMetadataProvider",
         provider instanceof HCatalogManagedMetadataProvider);
+  }
+
+  @Test
+  public void testManagedURIWithRootPath() {
+    // URIs with "/" as the path should open managed repositories
+    DatasetRepository repo = DatasetRepositories.open(
+        "repo:hive:/");
+
+    Assert.assertNotNull("Received a repository", repo);
+    Assert.assertTrue("Repo should be a HCatalogDatasetRepository",
+        repo instanceof HCatalogDatasetRepository);
+    MetadataProvider provider = ((HCatalogDatasetRepository) repo)
+        .getMetadataProvider();
+    Assert.assertTrue("Repo is using a HCatalogManagedMetadataProvider",
+        provider instanceof HCatalogManagedMetadataProvider);
+  }
+
+  @Test
+  public void testManagedURIWithHostAndPort() {
+    try {
+      // This should cause a failure when trying to connect to meta-host
+      DatasetRepositories.open("repo:hive://meta-host:1234/");
+      Assert.fail("Failed to set the MetaStore host via repo URI");
+    } catch (RuntimeException ex) {
+      Assert.assertEquals(MetaException.class, ex.getCause().getClass());
+      // The exception isn't properly wrapped as a cause, but this will check
+      // that the hostname is used and in the exception message.
+      Assert.assertTrue(ex.getCause().getMessage().contains("meta-host"));
+    }
   }
 
   @Test(expected=DatasetRepositoryException.class)
@@ -84,7 +114,7 @@ public class TestHiveURIs extends TestFileSystemURIs {
         new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build());
-    Assert.assertEquals("Locatoin should be in HDFS",
+    Assert.assertEquals("Location should be in HDFS",
         "hdfs", created.getLocation().getScheme());
     Assert.assertEquals("Location should have the correct HDFS host",
         hdfsUri.getHost(), created.getLocation().getHost());
@@ -92,5 +122,22 @@ public class TestHiveURIs extends TestFileSystemURIs {
         hdfsUri.getPort(), created.getLocation().getPort());
     Assert.assertTrue("Location should be in the repo path",
         created.getLocation().getPath().startsWith("/tmp/hive-repo"));
+  }
+
+  @Test
+  public void testExternalURIWithHostAndPort() {
+    URI hdfsUri = getDFS().getUri();
+    try {
+      // This should cause a failure when trying to connect to meta-host
+      DatasetRepositories.open(
+          "repo:hive://meta-host:1234/tmp/data?hdfs-host=" + hdfsUri.getHost() +
+          "&hdfs-port=" + hdfsUri.getPort());
+      Assert.fail("Failed to set the MetaStore host via repo URI");
+    } catch (RuntimeException ex) {
+      Assert.assertEquals(MetaException.class, ex.getCause().getClass());
+      // The exception isn't properly wrapped as a cause, but this will check
+      // that the hostname is used and in the exception message.
+      Assert.assertTrue(ex.getCause().getMessage().contains("meta-host"));
+    }
   }
 }

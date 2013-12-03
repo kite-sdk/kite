@@ -16,20 +16,27 @@
 package com.cloudera.cdk.data.hcatalog;
 
 import com.cloudera.cdk.data.MetadataProviderException;
+import com.cloudera.cdk.data.hcatalog.impl.Loader;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hcatalog.common.HCatUtil;
-import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class HCatalog {
+
+  private static final Logger LOG = LoggerFactory.getLogger(HCatalog.class);
 
   private HiveMetaStoreClient client;
   private HiveConf hiveConf;
 
   public HCatalog(Configuration conf) {
+    if (conf.get(Loader.HIVE_METASTORE_URI_PROP) == null) {
+      LOG.warn("Using a local Hive MetaStore (for testing only)");
+    }
     try {
       hiveConf = new HiveConf(conf, HiveConf.class);
       client = HCatUtil.getHiveClient(hiveConf);
