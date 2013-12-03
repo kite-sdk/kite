@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.io.IOException;
@@ -46,7 +47,6 @@ import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.metadata.Table;
-import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
@@ -306,7 +306,6 @@ class HiveUtils {
     // TODO: throw an error on recursive types
     switch (avroSchema.getType()) {
       case RECORD:
-        avroSchema.getFullName();
         return convertRecord(avroSchema);
       case UNION:
         return convertUnion(avroSchema);
@@ -374,28 +373,26 @@ class HiveUtils {
         TypeInfoFactory.stringTypeInfo, convert(avroMap.getValueType()));
   }
 
-  static final Map<Schema.Type, String> TYPE_TO_STRING =
-      Maps.newHashMapWithExpectedSize(10);
-  static {
-    TYPE_TO_STRING.put(Schema.Type.BOOLEAN, serdeConstants.BOOLEAN_TYPE_NAME);
-    TYPE_TO_STRING.put(Schema.Type.INT, serdeConstants.INT_TYPE_NAME);
-    TYPE_TO_STRING.put(Schema.Type.LONG, serdeConstants.BIGINT_TYPE_NAME);
-    TYPE_TO_STRING.put(Schema.Type.FLOAT, serdeConstants.FLOAT_TYPE_NAME);
-    TYPE_TO_STRING.put(Schema.Type.DOUBLE, serdeConstants.DOUBLE_TYPE_NAME);
-    TYPE_TO_STRING.put(Schema.Type.FLOAT, serdeConstants.FLOAT_TYPE_NAME);
-    TYPE_TO_STRING.put(Schema.Type.STRING, serdeConstants.STRING_TYPE_NAME);
-    TYPE_TO_STRING.put(Schema.Type.ENUM, serdeConstants.STRING_TYPE_NAME);
-    TYPE_TO_STRING.put(Schema.Type.BYTES, serdeConstants.BINARY_TYPE_NAME);
-    TYPE_TO_STRING.put(Schema.Type.FIXED, serdeConstants.BINARY_TYPE_NAME);
-  }
+  static final ImmutableMap<Schema.Type, TypeInfo> TYPE_TO_TYPEINFO =
+      ImmutableMap.<Schema.Type, TypeInfo>builder()
+          .put(Schema.Type.BOOLEAN, TypeInfoFactory.booleanTypeInfo)
+          .put(Schema.Type.INT, TypeInfoFactory.intTypeInfo)
+          .put(Schema.Type.LONG, TypeInfoFactory.longTypeInfo)
+          .put(Schema.Type.FLOAT, TypeInfoFactory.floatTypeInfo)
+          .put(Schema.Type.DOUBLE, TypeInfoFactory.doubleTypeInfo)
+          .put(Schema.Type.STRING, TypeInfoFactory.stringTypeInfo)
+          .put(Schema.Type.ENUM, TypeInfoFactory.stringTypeInfo)
+          .put(Schema.Type.BYTES, TypeInfoFactory.binaryTypeInfo)
+          .put(Schema.Type.FIXED, TypeInfoFactory.binaryTypeInfo)
+          .build();
 
   static TypeInfo convertPrimitive(Schema avroPrimitive) {
-    String typeName = TYPE_TO_STRING.get(avroPrimitive.getType());
+    TypeInfo type = TYPE_TO_TYPEINFO.get(avroPrimitive.getType());
 
-    Preconditions.checkArgument(typeName != null,
+    Preconditions.checkArgument(type != null,
         "Avro Schema must be a primitive type, not " + avroPrimitive.getType());
 
-    return TypeInfoFactory.getPrimitiveTypeInfo(typeName);
+    return type;
   }
 
 }
