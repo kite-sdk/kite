@@ -238,6 +238,9 @@ public final class ToAvroBuilder implements CommandBuilder {
           if (item instanceof Map) {
             Map<String,Object> map = (Map) item;
             for (Map.Entry entry : map.entrySet()) {
+              if (!(entry.getKey() instanceof CharSequence)) {
+                return ERROR; // Avro requires that map keys are CharSequences 
+              }
               Object result = toAvro(entry.getValue(), schema.getValueType());
               if (result == ERROR) {
                 return ERROR;
