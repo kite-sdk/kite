@@ -43,7 +43,7 @@ import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
-public class CSVFileReader<E> extends AbstractDatasetReader<E> {
+class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
   private static final Logger logger = LoggerFactory
       .getLogger(CSVFileReader.class);
