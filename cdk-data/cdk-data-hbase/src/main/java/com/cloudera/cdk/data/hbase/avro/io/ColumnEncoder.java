@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data.hbase.avro.io;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -24,6 +23,7 @@ import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.util.Utf8;
+import org.apache.hadoop.hbase.util.Bytes;
 
 /* An Avro Encoder implementation used for encoding Avro
  * instances to HBase columns. This is basically an
@@ -35,9 +35,8 @@ import org.apache.avro.util.Utf8;
  * we can use HBase's atomic increment functionality on
  * columns.
  * 
- * Strings are encoding as UTF-8 bytes. This is for
- * backward compatibility reasons, and is something
- * we want to change in the future.
+ * Strings are encoded as UTF-8 bytes. This is consistent
+ * with HBase, and will allow appends in the future.
  */
 public class ColumnEncoder extends Encoder {
 
@@ -71,14 +70,12 @@ public class ColumnEncoder extends Encoder {
 
   @Override
   public void writeInt(int n) throws IOException {
-    DataOutputStream dataOut = new DataOutputStream(out);
-    dataOut.writeInt(n);
+    out.write(Bytes.toBytes(n));
   }
 
   @Override
   public void writeLong(long n) throws IOException {
-    DataOutputStream dataOut = new DataOutputStream(out);
-    dataOut.writeLong(n);
+    out.write(Bytes.toBytes(n));
   }
 
   @Override
@@ -93,8 +90,7 @@ public class ColumnEncoder extends Encoder {
 
   @Override
   public void writeString(Utf8 utf8) throws IOException {
-    byte[] bytes = utf8.toString().getBytes("UTF-8");
-    out.write(bytes);
+    out.write(utf8.getBytes());
   }
 
   @Override
