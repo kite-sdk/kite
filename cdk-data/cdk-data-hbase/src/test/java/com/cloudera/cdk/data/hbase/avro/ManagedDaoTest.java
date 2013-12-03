@@ -20,7 +20,10 @@ import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.SchemaNotFoundException;
 import com.cloudera.cdk.data.hbase.avro.entities.ArrayRecord;
+import com.cloudera.cdk.data.hbase.avro.entities.CompositeRecord;
 import com.cloudera.cdk.data.hbase.avro.entities.EmbeddedRecord;
+import com.cloudera.cdk.data.hbase.avro.entities.SubRecord1;
+import com.cloudera.cdk.data.hbase.avro.entities.SubRecord2;
 import com.cloudera.cdk.data.hbase.avro.entities.TestEnum;
 import com.cloudera.cdk.data.hbase.avro.entities.TestIncrement;
 import com.cloudera.cdk.data.hbase.avro.entities.TestRecord;
@@ -52,6 +55,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
@@ -60,6 +64,8 @@ public class ManagedDaoTest {
 
   private static final String testRecord;
   private static final String testRecordv2;
+  private static final String compositeSubrecord1;
+  private static final String compositeSubrecord2;
   private static final String testIncrement;
   private static final String badCreateIncompatibleColumn1;
   private static final String badCreateIncompatibleColumn2;
@@ -76,6 +82,7 @@ public class ManagedDaoTest {
   private static final String goodMigrationRecordRemoveField;
   private static final String managedRecordString;
   private static final String tableName = "test_table";
+  private static final String compositeTableName = "test_composite_table";
   private static final String incrementTableName = "test_increment_table";
   private static final String managedTableName = "managed_schemas";
 
@@ -87,6 +94,10 @@ public class ManagedDaoTest {
           .getResourceAsStream("/TestRecord.avsc"));
       testRecordv2 = AvroUtils.inputStreamToString(AvroDaoTest.class
           .getResourceAsStream("/TestRecordv2.avsc"));
+      compositeSubrecord1 = AvroUtils.inputStreamToString(AvroDaoTest.class
+          .getResourceAsStream("/SubRecord1.avsc"));
+      compositeSubrecord2 = AvroUtils.inputStreamToString(AvroDaoTest.class
+          .getResourceAsStream("/SubRecord2.avsc"));
       testIncrement = AvroUtils.inputStreamToString(AvroDaoTest.class
           .getResourceAsStream("/TestIncrement.avsc"));
       badCreateIncompatibleColumn1 = AvroUtils
@@ -153,6 +164,8 @@ public class ManagedDaoTest {
         new DefaultSchemaManager(tablePool));
     tool.createOrMigrateSchema(tableName, testRecord, true);
     tool.createOrMigrateSchema(tableName, testRecordv2, true);
+    tool.createOrMigrateSchema(compositeTableName, compositeSubrecord1, true);
+    tool.createOrMigrateSchema(compositeTableName, compositeSubrecord2, true);
     tool.createOrMigrateSchema(incrementTableName, testIncrement, true);
   }
 
@@ -160,6 +173,8 @@ public class ManagedDaoTest {
   public void after() throws Exception {
     tablePool.close();
     HBaseTestUtils.util.truncateTable(Bytes.toBytes(tableName));
+    HBaseTestUtils.util.truncateTable(Bytes.toBytes(compositeTableName));
+    HBaseTestUtils.util.truncateTable(Bytes.toBytes(incrementTableName));
     HBaseTestUtils.util.truncateTable(Bytes.toBytes(managedTableName));
   }
 
@@ -525,6 +540,44 @@ public class ManagedDaoTest {
 
     dao.increment(key, "field1", 5);
     assertEquals(25L, (long) dao.get(key).getField1());
+  }
+  
+  @Test
+  public void testComposite() {
+    SchemaManager manager = new DefaultSchemaManager(tablePool);
+    
+    // Construct Dao
+    Dao<CompositeRecord> dao = SpecificAvroDao.buildCompositeDaoWithEntityManager(tablePool,
+        compositeTableName, CompositeRecord.class, manager);
+    Dao<SubRecord1> subRecord1Dao = new SpecificAvroDao<SubRecord1>(tablePool, compositeTableName, "SubRecord1", manager);
+    Dao<SubRecord2> subRecord2Dao = new SpecificAvroDao<SubRecord2>(tablePool, compositeTableName, "SubRecord2", manager);
+
+    // Construct records
+    SubRecord1 subRecord1 = SubRecord1.newBuilder().setKeyPart1("1")
+        .setKeyPart2("1").setField1("field1_1").setField2("field1_2").build();
+    SubRecord2 subRecord2 = SubRecord2.newBuilder().setKeyPart1("1")
+        .setKeyPart2("1").setField1("field2_1").setField2("field2_2").build();
+
+    CompositeRecord compositeRecord = CompositeRecord.newBuilder()
+        .setSubRecord1(subRecord1).setSubRecord2(subRecord2).build();
+
+    // Test put
+    assertTrue(dao.put(compositeRecord));
+    
+    // validate deleting one of the records doesn't delete the entire row
+    PartitionKey key = dao.getPartitionStrategy().partitionKey("1", "1");
+    subRecord2Dao.delete(key);
+    subRecord1 = subRecord1Dao.get(key);
+    assertNotNull(subRecord1);
+    assertNull(subRecord2Dao.get(key));
+    
+    // validate the _s columns (like OCCVersion fields) weren't messed with
+    assertEquals(1L, (long)subRecord1.getVersion());
+    
+    // validate fetching as composite after a delete of one still works.
+    compositeRecord = dao.get(key);
+    assertNotNull(compositeRecord.getSubRecord1());
+    assertNull(compositeRecord.getSubRecord2());
   }
 
   @Test(expected = IncompatibleSchemaException.class)

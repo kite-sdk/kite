@@ -18,6 +18,7 @@ package com.cloudera.cdk.data.hbase.avro;
 import com.cloudera.cdk.data.DatasetException;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.SchemaNotFoundException;
+import com.cloudera.cdk.data.SchemaValidationException;
 import com.cloudera.cdk.data.hbase.impl.BaseEntityMapper;
 import com.cloudera.cdk.data.hbase.impl.EntityMapper;
 import com.cloudera.cdk.data.hbase.impl.EntitySchema;
@@ -29,8 +30,8 @@ import com.cloudera.cdk.data.hbase.impl.PutAction;
 import com.cloudera.cdk.data.hbase.impl.SchemaManager;
 import com.cloudera.cdk.data.hbase.manager.generated.ManagedSchemaEntityVersion;
 
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,6 +40,9 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,17 +66,6 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
    */
   private static final AvroKeyEntitySchemaParser schemaParser = new AvroKeyEntitySchemaParser();
 
-  /**
-   * The Avro schema (represented as a string) which represents an entity
-   * version.
-   */
-  private static final String managedSchemaEntityVersionSchema;
-  static {
-    managedSchemaEntityVersionSchema = AvroUtils
-        .inputStreamToString(VersionedAvroEntityMapper.class
-            .getResourceAsStream("/ManagedSchemaEntityVersion.avsc"));
-  }
-
   private final SchemaManager schemaManager;
   private final String tableName;
   private final String entityName;
@@ -82,6 +75,7 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
   private final int version;
   private final boolean specific;
   private final ConcurrentHashMap<Integer, EntityMapper<ENTITY>> entityMappers = new ConcurrentHashMap<Integer, EntityMapper<ENTITY>>();
+  private final String managedSchemaEntityVersionSchema;
   private EntityMapper<ManagedSchemaEntityVersion> managedSchemaEntityVersionEntityMapper;
 
   /**
@@ -132,6 +126,7 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
     this.tableName = builder.tableName;
     this.entityName = builder.entityName;
     this.specific = builder.specific;
+    this.managedSchemaEntityVersionSchema = getManagedSchemaEntityVersionSchema(entityName);
 
     if (!specific) {
       // Must be a Generic avro record. Tie the key and entity classes to
@@ -219,9 +214,8 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
     ManagedSchemaEntityVersion versionRecord = managedSchemaEntityVersionEntityMapper
         .mapToEntity(result);
     int resultVersion = 0;
-    if (versionRecord != null
-        && versionRecord.getSchemaVersion().containsKey(entityName)) {
-      resultVersion = versionRecord.getSchemaVersion().get(entityName);
+    if (versionRecord != null) {
+      resultVersion = versionRecord.getSchemaVersion();
     }
     if (entityMappers.containsKey(resultVersion)) {
       return entityMappers.get(resultVersion).mapToEntity(result);
@@ -245,8 +239,7 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
     PutAction entityPut = entityMapper.mapFromEntity(entity);
 
     ManagedSchemaEntityVersion versionRecord = ManagedSchemaEntityVersion
-        .newBuilder().setSchemaVersion(new HashMap<String, Integer>()).build();
-    versionRecord.getSchemaVersion().put(entityName, version);
+        .newBuilder().setSchemaVersion(version).build();
     PutAction versionPut = managedSchemaEntityVersionEntityMapper
         .mapFromEntity(versionRecord);
     
@@ -310,11 +303,24 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
    * metadata in each row to a ManagedSchemaEntityVersion record.
    */
   private void initializeEntityVersionEntityMapper() {
-    AvroKeySerDe keySerDe = null;
-    for (EntityMapper<ENTITY> entityMapper : entityMappers.values()) {
-      keySerDe = (AvroKeySerDe) entityMapper.getKeySerDe();
-      break;
-    }
+    // Create a special key serde that doesn't try to serialize/deserialize
+    // the key for the ManagedSchemaEntityVersion record. This schema
+    // doesn't have any key mapping types since it's added to every table.
+    KeySerDe keySerDe = new KeySerDe() {
+      @Override
+      public byte[] serialize(PartitionKey partitionKey) {
+        return new byte[0];
+      }
+      @Override
+      public byte[] serialize(Object... keyPartValues) {
+        return new byte[0];
+      }
+      @Override
+      public PartitionKey deserialize(byte[] keyBytes) {
+        return null;
+      }
+    };
+    
     AvroEntitySchema avroEntitySchema = schemaParser
         .parseEntitySchema(managedSchemaEntityVersionSchema);
     avroEntitySchema = AvroUtils.mergeSpecificStringTypes(
@@ -373,5 +379,31 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
           readSchema, writeSchema, false);
       return new BaseEntityMapper(keySchema, readSchema, keySerDe, entitySerDe);
     }
+  }
+  
+  private static String getManagedSchemaEntityVersionSchema(String entityName) {
+    String avroSchemaString = AvroUtils
+        .inputStreamToString(VersionedAvroEntityMapper.class
+            .getResourceAsStream("/ManagedSchemaEntityVersion.avsc"));
+
+    JsonNode jsonNode = rawSchemaAsJsonNode(avroSchemaString);
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectNode mappingNode = mapper.createObjectNode();
+    mappingNode.put("type", "column");
+    mappingNode.put("value", "_s:sv_" + entityName);
+    ((ObjectNode)jsonNode.get("fields").get(0)).put("mapping", mappingNode);
+    return jsonNode.toString();
+  }
+  
+  private static JsonNode rawSchemaAsJsonNode(String rawSchema) {
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode avroRecordSchemaJson;
+    try {
+      avroRecordSchemaJson = mapper.readValue(rawSchema, JsonNode.class);
+    } catch (IOException e) {
+      throw new SchemaValidationException(
+          "Could not parse the avro record as JSON.", e);
+    }
+    return avroRecordSchemaJson;
   }
 }

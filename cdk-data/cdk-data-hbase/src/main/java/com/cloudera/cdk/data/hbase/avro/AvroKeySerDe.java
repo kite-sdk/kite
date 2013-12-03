@@ -70,10 +70,6 @@ public class AvroKeySerDe implements KeySerDe {
 
   @Override
   public byte[] serialize(PartitionKey key) {
-    if (key.getLength() == 0) {
-      return new byte[0];
-    }
-
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     Encoder encoder = new MemcmpEncoder(outputStream);
 

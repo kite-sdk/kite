@@ -4,8 +4,7 @@
   "namespace": "com.cloudera.cdk.data.hbase.manager.generated",
   "fields": [
 
-    { "name": "schemaVersion", "type": { "type": "map", "values": "int" },
-      "mapping": { "type": "keyAsColumn", "value": "_s:", "prefix": "sv_" } }
+    { "name": "schemaVersion", "type": "int" }
       
   ]
 }
