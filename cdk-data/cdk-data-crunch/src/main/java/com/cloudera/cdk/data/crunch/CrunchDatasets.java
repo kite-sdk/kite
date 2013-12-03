@@ -16,6 +16,7 @@
 package com.cloudera.cdk.data.crunch;
 
 import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.Format;
 import com.cloudera.cdk.data.Formats;
 import com.cloudera.cdk.data.filesystem.impl.Accessor;
 import com.google.common.annotations.Beta;
@@ -42,15 +43,18 @@ import org.apache.hadoop.fs.Path;
 public class CrunchDatasets {
 
   /**
-   * <p>
    * Expose the given {@link Dataset} as a Crunch {@link ReadableSource}.
-   * </p>
+   *
+   * Only the FileSystem {@code Dataset} implementation is supported and the
+   * file format must be {@code Formats.PARQUET} or {@code Formats.AVRO}.
+   *
    * @param dataset the dataset to read from
    * @param type    the Java type of the entities in the dataset
    * @param <E>     the type of entity produced by the source
    * @return the {@link ReadableSource}, or <code>null</code> if the dataset is not
    * filesystem-based.
    */
+  @SuppressWarnings("unchecked")
   public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
     Path directory = Accessor.getDefault().getDirectory(dataset);
     if (directory != null) {
@@ -63,18 +67,30 @@ public class CrunchDatasets {
       } else {
         avroType = Avros.records(type);
       }
-      if (dataset.getDescriptor().getFormat() == Formats.PARQUET) {
+      final Format format = dataset.getDescriptor().getFormat();
+      if (Formats.PARQUET.equals(format)) {
         return new AvroParquetFileSource<E>(paths, avroType);
+      } else if (Formats.AVRO.equals(format)) {
+        return new AvroFileSource<E>(paths, avroType);
+      } else {
+        throw new UnsupportedOperationException(
+            "Not a supported format: " + format);
       }
-      return new AvroFileSource<E>(paths, avroType);
     }
     return null;
   }
 
   /**
-   * <p>
    * Expose the given {@link Dataset} as a Crunch {@link Target}.
-   * </p>
+   *
+   * Only the FileSystem {@code Dataset} implementation is supported and the
+   * file format must be {@code Formats.PARQUET} or {@code Formats.AVRO}. In
+   * addition, the given {@code Dataset} must not be partitioned,
+   * <strong>or</strong> must be a leaf partition in the partition hierarchy.
+   *
+   * <strong>The {@code Target} returned by this method will not write to
+   * sub-partitions.</strong>
+   *
    * @param dataset the dataset to write to
    * @return the {@link Target}, or <code>null</code> if the dataset is not
    * filesystem-based.
@@ -82,10 +98,15 @@ public class CrunchDatasets {
   public static Target asTarget(Dataset dataset) {
     Path directory = Accessor.getDefault().getDirectory(dataset);
     if (directory != null) {
-      if (dataset.getDescriptor().getFormat() == Formats.PARQUET) {
+      final Format format = dataset.getDescriptor().getFormat();
+      if (Formats.PARQUET.equals(format)) {
         return new AvroParquetFileTarget(directory);
+      } else if (Formats.AVRO.equals(format)) {
+        return new AvroFileTarget(directory);
+      } else {
+        throw new UnsupportedOperationException(
+            "Not a supported format: " + format);
       }
-      return new AvroFileTarget(directory);
     }
     return null;
   }
