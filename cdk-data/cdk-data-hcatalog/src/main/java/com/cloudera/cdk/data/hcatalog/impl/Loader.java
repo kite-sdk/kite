@@ -20,6 +20,7 @@ import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository;
+import com.cloudera.cdk.data.impl.Accessor;
 import com.cloudera.cdk.data.spi.Loadable;
 import com.cloudera.cdk.data.spi.OptionBuilder;
 import com.cloudera.cdk.data.spi.URIPattern;
@@ -127,9 +128,9 @@ public class Loader implements Loadable {
     // Hive-managed data sets
     final OptionBuilder<DatasetRepository> managedBuilder =
         new ManagedBuilder(conf);
-    DatasetRepositories.register(
+    Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create("hive")), managedBuilder);
-    DatasetRepositories.register(
+    Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create("hive://" + hiveAuthority + "/")),
         managedBuilder);
 
@@ -151,11 +152,11 @@ public class Loader implements Loadable {
       hdfsAuthority = "";
     }
 
-    DatasetRepositories.register(
+    Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create("hive://" + hiveAuthority +
             "/*path?absolute=true" + hdfsAuthority)),
         externalBuilder);
-    DatasetRepositories.register(
+    Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create("hive:*path")), externalBuilder);
   }
 

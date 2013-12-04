@@ -16,6 +16,8 @@
 package com.cloudera.cdk.data;
 
 import com.cloudera.cdk.data.impl.Accessor;
+import com.cloudera.cdk.data.spi.OptionBuilder;
+import com.cloudera.cdk.data.spi.URIPattern;
 
 final class AccessorImpl extends Accessor {
 
@@ -42,5 +44,10 @@ final class AccessorImpl extends Accessor {
   @Override
   public PartitionStrategy fromExpression(String partitionExpression) {
     return new PartitionExpression(partitionExpression, true).evaluate();
+  }
+
+  @Override
+  public void registerDatasetRepository(URIPattern pattern, OptionBuilder<DatasetRepository> builder) {
+    DatasetRepositories.register(pattern, builder);
   }
 }

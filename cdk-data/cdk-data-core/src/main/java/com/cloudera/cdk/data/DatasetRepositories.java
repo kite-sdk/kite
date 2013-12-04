@@ -51,7 +51,7 @@ public class DatasetRepositories {
    * @param builder an OptionBuilder that expects options defined by
    *                {@code pattern} and builds DatasetRepository instances.
    */
-  public static void register(
+  static void register(
       URIPattern pattern, OptionBuilder<DatasetRepository> builder) {
     REGISTRY.put(pattern, builder);
   }

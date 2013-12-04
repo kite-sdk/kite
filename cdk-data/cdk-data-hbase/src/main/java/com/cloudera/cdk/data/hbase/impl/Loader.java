@@ -15,9 +15,9 @@
  */
 package com.cloudera.cdk.data.hbase.impl;
 
-import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
+import com.cloudera.cdk.data.impl.Accessor;
 import com.cloudera.cdk.data.spi.Loadable;
 import com.cloudera.cdk.data.spi.OptionBuilder;
 import com.cloudera.cdk.data.spi.URIPattern;
@@ -42,20 +42,20 @@ public class Loader implements Loadable {
 
   @Override
   public void load() {
-    DatasetRepositories.register(new URIPattern(URI.create("hbase:*zk")),
+    Accessor.getDefault().registerDatasetRepository(new URIPattern(URI.create("hbase:*zk")),
         new OptionBuilder<DatasetRepository>() {
-      @Override
-      public DatasetRepository getFromOptions(Map<String, String> options) {
-        Configuration conf = HBaseConfiguration.create();
-        String[] hostsAndPort = parseHostsAndPort(options.get("zk"));
-        conf.set(HConstants.ZOOKEEPER_QUORUM, hostsAndPort[0]);
-        String port = hostsAndPort[1];
-        if (port != null) {
-          conf.set(HConstants.ZOOKEEPER_CLIENT_PORT, port);
-        }
-        return new HBaseDatasetRepository.Builder().configuration(conf).build();
-      }
-    });
+          @Override
+          public DatasetRepository getFromOptions(Map<String, String> options) {
+            Configuration conf = HBaseConfiguration.create();
+            String[] hostsAndPort = parseHostsAndPort(options.get("zk"));
+            conf.set(HConstants.ZOOKEEPER_QUORUM, hostsAndPort[0]);
+            String port = hostsAndPort[1];
+            if (port != null) {
+              conf.set(HConstants.ZOOKEEPER_CLIENT_PORT, port);
+            }
+            return new HBaseDatasetRepository.Builder().configuration(conf).build();
+          }
+        });
   }
 
   @VisibleForTesting

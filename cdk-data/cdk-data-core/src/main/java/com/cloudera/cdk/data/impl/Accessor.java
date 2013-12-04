@@ -15,9 +15,12 @@
  */
 package com.cloudera.cdk.data.impl;
 
+import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.Format;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.PartitionKey;
+import com.cloudera.cdk.data.spi.OptionBuilder;
+import com.cloudera.cdk.data.spi.URIPattern;
 
 /**
  * <p>
@@ -64,5 +67,7 @@ public abstract class Accessor {
   public abstract String toExpression(PartitionStrategy partitionStrategy);
 
   public abstract PartitionStrategy fromExpression(String partitionExpression);
+
+  public abstract void registerDatasetRepository(URIPattern pattern, OptionBuilder<DatasetRepository> builder);
 
 }

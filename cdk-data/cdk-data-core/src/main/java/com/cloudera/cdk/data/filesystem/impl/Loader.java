@@ -16,7 +16,6 @@
 
 package com.cloudera.cdk.data.filesystem.impl;
 
-import com.cloudera.cdk.data.DatasetRepositories;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetRepositoryException;
 import com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository;
@@ -87,9 +86,9 @@ public class Loader implements Loadable {
     final OptionBuilder<DatasetRepository> builder =
         new URIBuilder(conf);
 
-    DatasetRepositories.register(
+    com.cloudera.cdk.data.impl.Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create("file:/*path?absolute=true")), builder);
-    DatasetRepositories.register(
+    com.cloudera.cdk.data.impl.Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create("file:*path")), builder);
 
     String hdfsAuthority;
@@ -104,11 +103,11 @@ public class Loader implements Loadable {
       hdfsAuthority = "";
     }
 
-    DatasetRepositories.register(
+    com.cloudera.cdk.data.impl.Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create(
             "hdfs://" + hdfsAuthority + "/*path?absolute=true")),
         builder);
-    DatasetRepositories.register(
+    com.cloudera.cdk.data.impl.Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create("hdfs:*path")), builder);
   }
 
