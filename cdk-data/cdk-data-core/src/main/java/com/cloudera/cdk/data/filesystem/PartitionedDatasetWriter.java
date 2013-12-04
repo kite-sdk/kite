@@ -18,7 +18,7 @@ package com.cloudera.cdk.data.filesystem;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.spi.Key;
+import com.cloudera.cdk.data.spi.StorageKey;
 import com.cloudera.cdk.data.spi.ReaderWriterState;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -41,9 +41,9 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   private int maxWriters;
 
   private final PartitionStrategy partitionStrategy;
-  private LoadingCache<Key, DatasetWriter<E>> cachedWriters;
+  private LoadingCache<StorageKey, DatasetWriter<E>> cachedWriters;
 
-  private final Key reusedKey;
+  private final StorageKey reusedKey;
 
   private ReaderWriterState state;
 
@@ -56,7 +56,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
     this.partitionStrategy = descriptor.getPartitionStrategy();
     this.maxWriters = Math.min(10, partitionStrategy.getCardinality());
     this.state = ReaderWriterState.NEW;
-    this.reusedKey = new Key(partitionStrategy);
+    this.reusedKey = new StorageKey(partitionStrategy);
   }
 
   @Override
@@ -84,7 +84,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
     DatasetWriter<E> writer = cachedWriters.getIfPresent(reusedKey);
     if (writer == null) {
       // get a new key because it is stored in the cache
-      Key key = Key.copy(reusedKey);
+      StorageKey key = StorageKey.copy(reusedKey);
       try {
         writer = cachedWriters.getUnchecked(key);
       } catch (UncheckedExecutionException ex) {
@@ -151,7 +151,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   }
 
   private static class DatasetWriterCacheLoader<E> extends
-    CacheLoader<Key, DatasetWriter<E>> {
+    CacheLoader<StorageKey, DatasetWriter<E>> {
 
     private final FileSystemView<E> view;
     private final PathConversion convert;
@@ -162,9 +162,9 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
     }
 
     @Override
-    public DatasetWriter<E> load(Key key) throws Exception {
+    public DatasetWriter<E> load(StorageKey key) throws Exception {
       Preconditions.checkArgument(view.contains(key),
-          "View {} does not contain Key {}", view, key);
+          "View {} does not contain StorageKey {}", view, key);
       Preconditions.checkState(view.getDataset() instanceof FileSystemDataset,
           "FileSystemWriters cannot create writer for " + view.getDataset());
 
@@ -182,11 +182,11 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   }
 
   private static class DatasetWriterCloser<E> implements
-    RemovalListener<Key, DatasetWriter<E>> {
+    RemovalListener<StorageKey, DatasetWriter<E>> {
 
     @Override
     public void onRemoval(
-      RemovalNotification<Key, DatasetWriter<E>> notification) {
+      RemovalNotification<StorageKey, DatasetWriter<E>> notification) {
 
       DatasetWriter<E> writer = notification.getValue();
 

@@ -42,7 +42,7 @@ public class GenericAvroDao extends BaseDao<GenericRecord> {
    *          The name of the table this Dao will read from and write to in
    *          HBase.
    * @param keySchemaStr
-   *          The Avro schema that represents the Key structure for row keys in
+   *          The Avro schema that represents the StorageKey structure for row keys in
    *          this table.
    * @param entitySchemaString
    *          The json string representing the special avro record schema, that
@@ -63,7 +63,7 @@ public class GenericAvroDao extends BaseDao<GenericRecord> {
    *          The name of the table this Dao will read from and write to in
    *          HBase.
    * @param keySchemaStr
-   *          The Avro schema that represents the Key structure for row keys in
+   *          The Avro schema that represents the StorageKey structure for row keys in
    *          this table.
    * @param entitySchemaStream
    *          The InputStream that contains a json string representing the

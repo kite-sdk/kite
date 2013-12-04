@@ -23,8 +23,8 @@ import org.apache.hadoop.hbase.client.Result;
 import com.cloudera.cdk.data.PartitionKey;
 
 /**
- * An interface for mapping HBase Result instances to a Key/Entity pair, and a
- * Key/Entity to an HBase Put instances.
+ * An interface for mapping HBase Result instances to a StorageKey/Entity pair, and a
+ * StorageKey/Entity to an HBase Put instances.
  * 
  * EntityMapper instances should be state-less so they can be reused across
  * multiple Result and Entity instances. They should encapsulate in one place
@@ -38,18 +38,18 @@ import com.cloudera.cdk.data.PartitionKey;
 public interface EntityMapper<E> {
 
   /**
-   * Map an HBase Result instance to an Entity of type T. Retrieve the Key from
+   * Map an HBase Result instance to an Entity of type T. Retrieve the StorageKey from
    * the result instance as well, and wraps both in an KeyEntity instance. This
    * KeyEntity instance is returned.
    * 
    * @param result
    *          The HBase result instance representing a row from an HBase table.
-   * @return A KeyEntity instance which wraps a Key and an Entity of type T.
+   * @return A KeyEntity instance which wraps a StorageKey and an Entity of type T.
    */
   public E mapToEntity(Result result);
 
   /**
-   * Map a Key and an entity of type T to an HBase Put instance.
+   * Map a StorageKey and an entity of type T to an HBase Put instance.
    * 
    * @param key
    *          a key to use to construct the Put instance.
@@ -60,7 +60,7 @@ public interface EntityMapper<E> {
   public PutAction mapFromEntity(E entity);
 
   /**
-   * Maps a Key, fieldName and an increment value to an HBase Increment instance
+   * Maps a StorageKey, fieldName and an increment value to an HBase Increment instance
    * that will increment the value in the cell pointed to by fieldName.
    * 
    * @param key

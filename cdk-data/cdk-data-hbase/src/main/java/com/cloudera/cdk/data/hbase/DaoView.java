@@ -22,7 +22,7 @@ import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.spi.AbstractRangeView;
-import com.cloudera.cdk.data.spi.Key;
+import com.cloudera.cdk.data.spi.StorageKey;
 import com.cloudera.cdk.data.spi.Marker;
 import com.cloudera.cdk.data.spi.MarkerRange;
 import java.util.List;
@@ -56,7 +56,7 @@ class DaoView<E> extends AbstractRangeView<E> {
   @Override
   public DatasetWriter<E> newWriter() {
     final DatasetWriter<E> wrappedWriter = dataset.getDao().newBatch();
-    final Key partitionStratKey = new Key(dataset.getDescriptor().getPartitionStrategy());
+    final StorageKey partitionStratKey = new StorageKey(dataset.getDescriptor().getPartitionStrategy());
     // Return a dataset writer that checks on write that an entity is within the
     // range of the view
     return new DatasetWriter<E>() {
@@ -67,7 +67,7 @@ class DaoView<E> extends AbstractRangeView<E> {
 
       @Override
       public void write(E entity) {
-        Key key = partitionStratKey.reuseFor(entity);
+        StorageKey key = partitionStratKey.reuseFor(entity);
         if (!range.contains(key)) {
           throw new IllegalArgumentException("View does not contain entity: "
               + entity);

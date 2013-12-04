@@ -21,7 +21,7 @@ import com.cloudera.cdk.data.partition.HourFieldPartitioner;
 import com.cloudera.cdk.data.partition.MinuteFieldPartitioner;
 import com.cloudera.cdk.data.partition.MonthFieldPartitioner;
 import com.cloudera.cdk.data.partition.YearFieldPartitioner;
-import com.cloudera.cdk.data.spi.Key;
+import com.cloudera.cdk.data.spi.StorageKey;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -93,7 +93,7 @@ public class TestPathConversion {
         .day("timestamp")
         .build();
 
-    Key key = new Key(strategy);
+    StorageKey key = new StorageKey(strategy);
     key.replaceValues((List) Lists.newArrayList(2013, 11, 5));
 
     Assert.assertEquals(
@@ -110,10 +110,10 @@ public class TestPathConversion {
         .day("timestamp")
         .build();
 
-    Key expected = new Key(strategy);
+    StorageKey expected = new StorageKey(strategy);
     expected.replaceValues((List) Lists.newArrayList(2013, 11, 5));
 
     Assert.assertEquals(expected, convert.toKey(
-        new Path("year=2013/month=11/day=5"), new Key(strategy)));
+        new Path("year=2013/month=11/day=5"), new StorageKey(strategy)));
   }
 }

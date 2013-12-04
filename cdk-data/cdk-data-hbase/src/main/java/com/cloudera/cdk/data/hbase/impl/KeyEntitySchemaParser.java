@@ -17,7 +17,7 @@ package com.cloudera.cdk.data.hbase.impl;
 
 
 /**
- * Interface for the HBase Common Key and Entity parser.
+ * Interface for the HBase Common StorageKey and Entity parser.
  *
  * @param <KEY_SCHEMA>
  *          The type that the key schema gets parsed to. Extends

@@ -43,7 +43,7 @@ import org.apache.avro.io.Encoder;
  * PartialKeys to a special ordered memcmp-able avro encoding.
  * 
  * @param <K>
- *          The Key type.
+ *          The StorageKey type.
  */
 public class AvroKeySerDe implements KeySerDe {
 

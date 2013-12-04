@@ -21,7 +21,7 @@ import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.spi.TestRangeViews;
 import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.event.StandardEvent;
-import com.cloudera.cdk.data.spi.Key;
+import com.cloudera.cdk.data.spi.StorageKey;
 import com.google.common.collect.Sets;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -70,9 +70,9 @@ public class TestFileSystemView extends TestRangeViews {
     }
 
     final Set<View<StandardEvent>> expected = (Set) Sets.newHashSet(
-        dataset.of(new Key.Builder(strategy).buildFrom(sepEvent)),
-        dataset.of(new Key.Builder(strategy).buildFrom(octEvent)),
-        dataset.of(new Key.Builder(strategy).buildFrom(novEvent)));
+        dataset.of(new StorageKey.Builder(strategy).buildFrom(sepEvent)),
+        dataset.of(new StorageKey.Builder(strategy).buildFrom(octEvent)),
+        dataset.of(new StorageKey.Builder(strategy).buildFrom(novEvent)));
 
     Assert.assertEquals("Covering partitions should match",
         expected, Sets.newHashSet(dataset.getCoveringPartitions()));

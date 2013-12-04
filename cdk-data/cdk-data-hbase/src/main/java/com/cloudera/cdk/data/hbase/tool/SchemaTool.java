@@ -128,7 +128,7 @@ public class SchemaTool {
     for (String schemaString : schemaStrings) {
       String name = getEntityNameFromSchemaString(schemaString);
       List<String> tables = getTablesFromSchemaString(schemaString);
-      if (name.endsWith("Key")) {
+      if (name.endsWith("StorageKey")) {
         for (String table : tables) {
           if (tableKeySchemaMap.containsKey(table)) {
             String msg = "Multiple keys for table: " + table;
@@ -156,12 +156,12 @@ public class SchemaTool {
       String table = entry.getKey();
       List<String> entitySchemas = entry.getValue();
       if (!tableKeySchemaMap.containsKey(table)) {
-        String msg = "No Key Schema For Table: " + table;
+        String msg = "No StorageKey Schema For Table: " + table;
         LOG.error(msg);
         throw new DatasetException(msg);
       }
       if (entitySchemas.size() == 0) {
-        String msg = "Key, but no entity schemas for Table: " + table;
+        String msg = "StorageKey, but no entity schemas for Table: " + table;
         LOG.error(msg);
         throw new SchemaValidationException(msg);
       }

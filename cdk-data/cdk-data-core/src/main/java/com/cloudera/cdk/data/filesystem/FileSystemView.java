@@ -22,10 +22,9 @@ import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.spi.AbstractRangeView;
-import com.cloudera.cdk.data.spi.Key;
+import com.cloudera.cdk.data.spi.StorageKey;
 import com.cloudera.cdk.data.spi.MarkerRange;
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.fs.FileStatus;
@@ -82,7 +81,7 @@ class FileSystemView<E> extends AbstractRangeView<E> {
   public boolean deleteAll() {
     PathConversion convert = new PathConversion();
     boolean deleted = false;
-    for (Key partition : partitionIterator()) {
+    for (StorageKey partition : partitionIterator()) {
       deleted = cleanlyDelete(fs, root, convert.fromKey(partition)) || deleted;
     }
     return deleted;
@@ -94,9 +93,9 @@ class FileSystemView<E> extends AbstractRangeView<E> {
     if (dataset.getDescriptor().isPartitioned()) {
       return Iterables.transform(
           partitionIterator(),
-          new Function<Key, View<E>>() {
+          new Function<StorageKey, View<E>>() {
             @Override
-            public View<E> apply(Key key) {
+            public View<E> apply(StorageKey key) {
               if (key != null) {
                 // no need for the bounds checks, use dataset.in
                 return ((FileSystemDataset) dataset).of(key);
@@ -115,10 +114,10 @@ class FileSystemView<E> extends AbstractRangeView<E> {
     if (dataset.getDescriptor().isPartitioned()) {
       directories = Iterables.transform(
           partitionIterator(),
-          new Function<Key, Path>() {
+          new Function<StorageKey, Path>() {
             private final PathConversion convert = new PathConversion();
             @Override
-            public Path apply(Key key) {
+            public Path apply(StorageKey key) {
               if (key != null) {
                 return new Path(root, convert.fromKey(key));
               } else {

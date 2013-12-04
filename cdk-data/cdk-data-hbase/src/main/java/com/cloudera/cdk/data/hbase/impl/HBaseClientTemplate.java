@@ -267,7 +267,7 @@ public class HBaseClientTemplate {
    * the Get is executed.
    * 
    * @param key
-   *          The Key to create a Get from.
+   *          The StorageKey to create a Get from.
    * @param entityMapper
    *          The EntityMapper to use to map the Result to an entity to return.
    * @return The entity created by the entityMapper.
@@ -289,7 +289,7 @@ public class HBaseClientTemplate {
    * executed.
    * 
    * @param key
-   *          The Key to create a Get from.
+   *          The StorageKey to create a Get from.
    * @param getModifier
    *          Invoked before the Get to give callers a chance to modify the Get
    *          before it is executed.
@@ -409,7 +409,7 @@ public class HBaseClientTemplate {
    * the Put is executed.
    * 
    * @param key
-   *          The Key to map to a Put with the entityMapper.
+   *          The StorageKey to map to a Put with the entityMapper.
    * @param entity
    *          The entity to map to a Put with the entityMapper.
    * @param entityMapper
@@ -431,7 +431,7 @@ public class HBaseClientTemplate {
    * executed.
    * 
    * @param key
-   *          The Key to map to a Put with the entityMapper.
+   *          The StorageKey to map to a Put with the entityMapper.
    * @param entity
    *          The entity to map to a Put with the entityMapper.
    * @param putActionModifier
@@ -558,7 +558,7 @@ public class HBaseClientTemplate {
    * invoked before the Delete is executed.
    * 
    * @param key
-   *          The Key to map to a Put with the entityMapper.
+   *          The StorageKey to map to a Put with the entityMapper.
    * @param columns
    *          The set of columns to delete from the row.
    * @param checkAction
@@ -583,7 +583,7 @@ public class HBaseClientTemplate {
    * and before the Delete is executed.
    * 
    * @param key
-   *          The Key to map to a Put with the entityMapper.
+   *          The StorageKey to map to a Put with the entityMapper.
    * @param columns
    *          The set of columns to delete from the row.
    * @param checkAction
@@ -613,7 +613,7 @@ public class HBaseClientTemplate {
   }
 
   /**
-   * Refactored the key subsystem by removing the "Key" wrapper type, Get an
+   * Refactored the key subsystem by removing the "StorageKey" wrapper type, Get an
    * EntityScannerBuilder that the client can use to build an EntityScanner.
    * 
    * @param entityMapper

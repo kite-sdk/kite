@@ -16,6 +16,8 @@
 
 package com.cloudera.cdk.data.spi;
 
+import com.cloudera.cdk.data.Dataset;
+import com.cloudera.cdk.data.DatasetException;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.google.common.base.Objects;
@@ -37,11 +39,11 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
- * A Key is a complete set of values for a PartitionStrategy.
+ * A StorageKey is a complete set of values for a PartitionStrategy.
  *
  * @since 0.9.0
  */
-public class Key extends Marker implements Comparable<Key> {
+public class StorageKey extends Marker implements Comparable<StorageKey> {
 
   // Cache the field to index mappings for each PartitionStrategy
   private static final LoadingCache<PartitionStrategy, Map<String, Integer>>
@@ -63,19 +65,19 @@ public class Key extends Marker implements Comparable<Key> {
   private final Map<String, Integer> fields;
   private List<Object> values;
 
-  public Key(PartitionStrategy strategy) {
+  public StorageKey(PartitionStrategy strategy) {
     this(strategy, Arrays.asList(
         new Object[strategy.getFieldPartitioners().size()]));
   }
 
-  private Key(PartitionStrategy strategy, List<Object> values) {
+  private StorageKey(PartitionStrategy strategy, List<Object> values) {
     try {
       this.fields = FIELD_CACHE.get(strategy);
     } catch (ExecutionException ex) {
       throw new RuntimeException("[BUG] Could not get field map");
     }
     Preconditions.checkArgument(values.size() == fields.size(),
-        "Not enough values for a complete Key");
+        "Not enough values for a complete StorageKey");
     this.strategy = strategy;
     this.values = values;
   }
@@ -115,23 +117,23 @@ public class Key extends Marker implements Comparable<Key> {
   }
 
   /**
-   * Replaces all of the values in this {@link Key} with the given List.
+   * Replaces all of the values in this {@link StorageKey} with the given List.
    *
    * @param values a List of values
    */
   public void replaceValues(List<Object> values) {
     Preconditions.checkArgument(values != null, "Values cannot be null");
     Preconditions.checkArgument(values.size() == fields.size(),
-        "Not enough values for a complete Key");
+        "Not enough values for a complete StorageKey");
     this.values = values;
   }
 
   /**
-   * Replaces all of the values in this {@link Key} with values from the given
+   * Replaces all of the values in this {@link StorageKey} with values from the given
    * {@code entity}.
    *
-   * @param entity an entity to reuse this {@code Key} for
-   * @return this updated {@code Key}
+   * @param entity an entity to reuse this {@code StorageKey} for
+   * @return this updated {@code StorageKey}
    * @throws IllegalStateException
    *      If the {@code entity} cannot be used to produce a value for each
    *      field in the {@code PartitionStrategy}
@@ -139,7 +141,7 @@ public class Key extends Marker implements Comparable<Key> {
    * @since 0.9.0
    */
   @SuppressWarnings("unchecked")
-  public Key reuseFor(Object entity) {
+  public StorageKey reuseFor(Object entity) {
     final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
 
     for (int i = 0; i < partitioners.size(); i++) {
@@ -173,9 +175,9 @@ public class Key extends Marker implements Comparable<Key> {
 
   @Override
   @SuppressWarnings("unchecked")
-  public int compareTo(Key other) {
+  public int compareTo(StorageKey other) {
     if (other == null) {
-      throw new NullPointerException("Cannot compare a Key with null");
+      throw new NullPointerException("Cannot compare a StorageKey with null");
     } else if (!strategy.equals(other.strategy)) {
       throw new RuntimeException("PartitionStrategy does not match");
     }
@@ -198,8 +200,8 @@ public class Key extends Marker implements Comparable<Key> {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof Key) {
-      return Objects.equal(values, ((Key) obj).values);
+    if (obj instanceof StorageKey) {
+      return Objects.equal(values, ((StorageKey) obj).values);
     } else {
       return false;
     }
@@ -217,19 +219,19 @@ public class Key extends Marker implements Comparable<Key> {
   }
 
   /**
-   * A convenience method to make a copy of a {@link Key}.
+   * A convenience method to make a copy of a {@link StorageKey}.
    *
    * This is not a deep copy.
    *
-   * @param toCopy a {@code Key} to copy
-   * @return a new Key with the same {@link PartitionStrategy} and content
+   * @param toCopy a {@code StorageKey} to copy
+   * @return a new StorageKey with the same {@link PartitionStrategy} and content
    */
-  public static Key copy(Key toCopy) {
-    return new Key(toCopy.strategy, Lists.newArrayList(toCopy.values));
+  public static StorageKey copy(StorageKey toCopy) {
+    return new StorageKey(toCopy.strategy, Lists.newArrayList(toCopy.values));
   }
 
   /**
-   * A fluent {@code Builder} for creating a {@link Key}.
+   * A fluent {@code Builder} for creating a {@link StorageKey}.
    */
   public static class Builder {
     private final PartitionStrategy strategy;
@@ -253,12 +255,12 @@ public class Key extends Marker implements Comparable<Key> {
       return this;
     }
 
-    public Key buildFrom(Object entity) {
-      return new Key(strategy).reuseFor(entity);
+    public StorageKey buildFrom(Object entity) {
+      return new StorageKey(strategy).reuseFor(entity);
     }
 
     @SuppressWarnings("unchecked")
-    public Key build() {
+    public StorageKey build() {
       final List<FieldPartitioner> partitioners =
           strategy.getFieldPartitioners();
       final List<Object> content = Lists.newArrayListWithCapacity(
@@ -266,7 +268,7 @@ public class Key extends Marker implements Comparable<Key> {
       for (FieldPartitioner fp : partitioners) {
         content.add(valueFor(fp));
       }
-      return new Key(strategy, content);
+      return new StorageKey(strategy, content);
     }
 
     private <S, T> T valueFor(FieldPartitioner<S, T> fp) {
@@ -280,7 +282,7 @@ public class Key extends Marker implements Comparable<Key> {
 
       } else {
         throw new IllegalStateException(
-            "Cannot create Key, missing data for field:" + fp.getName());
+            "Cannot create StorageKey, missing data for field:" + fp.getName());
       }
     }
   }

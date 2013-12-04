@@ -275,7 +275,7 @@ public class DefaultSchemaManager implements SchemaManager {
       KeySchema keySchema = schemaParser.parseKeySchema(schemaString);
       EntitySchema entitySchema = schemaParser.parseEntitySchema(schemaString);
       if (!newKeySchema.compatible(keySchema)) {
-        String msg = "Key fields of entity schema not compatible with version "
+        String msg = "StorageKey fields of entity schema not compatible with version "
             + Integer.toString(version) + ": Old schema: " + schemaString
             + " New schema: " + newEntitySchema.getRawSchema();
         throw new IncompatibleSchemaException(msg);
@@ -511,7 +511,7 @@ public class DefaultSchemaManager implements SchemaManager {
           EntitySchema otherEntitySchema = parser.parseEntitySchema(schema);
           KeySchema otherKeySchema = parser.parseKeySchema(schema);
           if (!keySchema.compatible(otherKeySchema)) {
-            String msg = "Key fields of schema not compatible with other schema for the table. "
+            String msg = "StorageKey fields of schema not compatible with other schema for the table. "
                 + "Table: "
                 + tableName
                 + ". Other schema: "

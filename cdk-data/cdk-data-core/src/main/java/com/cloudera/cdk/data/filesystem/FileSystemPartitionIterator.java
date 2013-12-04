@@ -19,7 +19,7 @@ package com.cloudera.cdk.data.filesystem;
 import com.cloudera.cdk.data.DatasetException;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.spi.Key;
+import com.cloudera.cdk.data.spi.StorageKey;
 import com.cloudera.cdk.data.spi.MarkerRange;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
@@ -38,14 +38,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-class FileSystemPartitionIterator implements Iterator<Key>, Iterable<Key> {
+class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<StorageKey> {
 
   private static final Logger logger = LoggerFactory.getLogger(
       FileSystemPartitionIterator.class);
 
   private final FileSystem fs;
   private final Path rootDirectory;
-  private final Iterator<Key> iterator;
+  private final Iterator<StorageKey> iterator;
 
   class FileSystemIterator extends MultiLevelIterator<String> {
     public FileSystemIterator(int depth) throws IOException {
@@ -78,9 +78,9 @@ class FileSystemPartitionIterator implements Iterator<Key>, Iterable<Key> {
   }
 
   /**
-   * Predicate to determine whether a {@link Key} is in a {@link MarkerRange}.
+   * Predicate to determine whether a {@link com.cloudera.cdk.data.spi.StorageKey} is in a {@link MarkerRange}.
    */
-  private static class InRange implements Predicate<Key> {
+  private static class InRange implements Predicate<StorageKey> {
     private final MarkerRange range;
 
     public InRange(MarkerRange range) {
@@ -88,22 +88,22 @@ class FileSystemPartitionIterator implements Iterator<Key>, Iterable<Key> {
     }
 
     @Override
-    public boolean apply(Key key) {
+    public boolean apply(StorageKey key) {
       return range.contains(key);
     }
   }
 
   /**
-   * Conversion function to transform a List into a {@link Key}.
+   * Conversion function to transform a List into a {@link com.cloudera.cdk.data.spi.StorageKey}.
    */
-  private static class MakeKey implements Function<List<String>, Key> {
+  private static class MakeKey implements Function<List<String>, StorageKey> {
     private final List<FieldPartitioner> partitioners;
-    private final Key reusableKey;
+    private final StorageKey reusableKey;
     private final PathConversion convert;
 
     public MakeKey(PartitionStrategy strategy) {
       this.partitioners = strategy.getFieldPartitioners();
-      this.reusableKey = new Key(strategy);
+      this.reusableKey = new StorageKey(strategy);
       this.convert = new PathConversion();
     }
 
@@ -112,7 +112,7 @@ class FileSystemPartitionIterator implements Iterator<Key>, Iterable<Key> {
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(
         value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
         justification="Non-null @Nullable parameter inherited from Function")
-    public Key apply(List<String> dirs) {
+    public StorageKey apply(List<String> dirs) {
       List<Object> values = Lists.newArrayListWithCapacity(dirs.size());
       for (int i = 0, n = partitioners.size(); i < n; i += 1) {
         values.add(convert.valueForDirname(partitioners.get(i), dirs.get(i)));
@@ -141,7 +141,7 @@ class FileSystemPartitionIterator implements Iterator<Key>, Iterable<Key> {
   }
 
   @Override
-  public Key next() {
+  public StorageKey next() {
     return iterator.next();
   }
 
@@ -151,7 +151,7 @@ class FileSystemPartitionIterator implements Iterator<Key>, Iterable<Key> {
   }
 
   @Override
-  public Iterator<Key> iterator() {
+  public Iterator<StorageKey> iterator() {
     return this;
   }
 

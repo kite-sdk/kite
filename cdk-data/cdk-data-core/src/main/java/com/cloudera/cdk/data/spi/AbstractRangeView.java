@@ -37,7 +37,7 @@ public abstract class AbstractRangeView<E> implements RangeView<E> {
   protected final MarkerRange range;
 
   // This class is Immutable and must be thread-safe
-  protected final ThreadLocal<Key> keys;
+  protected final ThreadLocal<StorageKey> keys;
 
   protected AbstractRangeView(Dataset<E> dataset) {
     this.dataset = dataset;
@@ -45,10 +45,10 @@ public abstract class AbstractRangeView<E> implements RangeView<E> {
     if (descriptor.isPartitioned()) {
       this.range = new MarkerRange(new MarkerComparator(
           descriptor.getPartitionStrategy()));
-      this.keys = new ThreadLocal<Key>() {
+      this.keys = new ThreadLocal<StorageKey>() {
         @Override
-        protected Key initialValue() {
-          return new Key(descriptor.getPartitionStrategy());
+        protected StorageKey initialValue() {
+          return new StorageKey(descriptor.getPartitionStrategy());
         }
       };
     } else {

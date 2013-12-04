@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * allows us to persist and fetch these SpecificRecords to and from HBase.
  * 
  * @param <K>
- *          The Key's underlying record type.
+ *          The StorageKey's underlying record type.
  * @param <E>
  *          The entity type.
  */
@@ -63,7 +63,7 @@ public class SpecificAvroDao<E extends SpecificRecord> extends BaseDao<E> {
    * @param tableName
    *          The name of the table this Dao will read from and write to.
    * @param keySchemaString
-   *          The Avro schema string that represents the Key structure for row
+   *          The Avro schema string that represents the StorageKey structure for row
    *          keys in this table.
    * @param entitySchemaString
    *          The json string representing the special avro record schema, that
@@ -138,13 +138,13 @@ public class SpecificAvroDao<E extends SpecificRecord> extends BaseDao<E> {
    * @param tableName
    *          The table name this dao will read from and write to
    * @param keySchemaString
-   *          The Avro schema string that represents the Key structure for row
+   *          The Avro schema string that represents the StorageKey structure for row
    *          keys in this table.
    * @param subEntitySchemaStrings
    *          The list of entities that make up the composite. This list must be
    *          in the same order as the fields defined in the entitySchemaString.
    * @param keyClass
-   *          The class of the SpecificRecord representing the Key of rows this
+   *          The class of the SpecificRecord representing the StorageKey of rows this
    *          dao will fetch.
    * @param entityClass
    *          The class of the SpecificRecord this DAO will persist and fetch.
@@ -185,12 +185,12 @@ public class SpecificAvroDao<E extends SpecificRecord> extends BaseDao<E> {
    * @param tableName
    *          The table name this dao will read from and write to
    * @param keySchemaString
-   *          The Avro schema string that represents the Key structure for row
+   *          The Avro schema string that represents the StorageKey structure for row
    *          keys in this table.
    * @param subEntitySchemaStrings
    *          The list of entities that make up the composite.
    * @param keyClass
-   *          The class of the SpecificRecord representing the Key of rows this
+   *          The class of the SpecificRecord representing the StorageKey of rows this
    *          dao will fetch.
    * @return The CompositeDao instance.
    * @throws SchemaNotFoundException
@@ -231,13 +231,13 @@ public class SpecificAvroDao<E extends SpecificRecord> extends BaseDao<E> {
    * @param tableName
    *          The table name this dao will read from and write to
    * @param keySchemaStream
-   *          The Avro schema input stream that represents the Key structure for
+   *          The Avro schema input stream that represents the StorageKey structure for
    *          row keys in this table.
    * @param subEntitySchemaStreams
    *          The list of entities that make up the composite. This list must be
    *          in the same order as the fields defined in the entitySchemaString.
    * @param keyClass
-   *          The class of the SpecificRecord representing the Key of rows this
+   *          The class of the SpecificRecord representing the StorageKey of rows this
    *          dao will fetch.
    * @param entityClass
    *          The class of the SpecificRecord this DAO will persist and fetch.
