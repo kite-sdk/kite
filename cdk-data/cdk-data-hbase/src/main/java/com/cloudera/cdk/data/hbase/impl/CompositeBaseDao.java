@@ -147,10 +147,10 @@ public abstract class CompositeBaseDao<E, S> implements CompositeDao<E, S> {
       return entityMappers.get(0).getKeySerDe();
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @Override
-    public EntitySerDe getEntitySerDe() {
-      return entityMappers.get(0).getEntitySerDe();
+    public EntitySerDe<E> getEntitySerDe() {
+      return (EntitySerDe<E>) entityMappers.get(0).getEntitySerDe();
     }
   }
 

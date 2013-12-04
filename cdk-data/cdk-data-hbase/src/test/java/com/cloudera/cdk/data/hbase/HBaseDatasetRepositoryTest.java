@@ -101,7 +101,7 @@ public class HBaseDatasetRepositoryTest {
     ds.put(createGenericEntity(0));
     ds.put(createGenericEntity(1));
 
-    DatasetWriter<GenericRecord> writer = ds.getWriter();
+    DatasetWriter<GenericRecord> writer = ds.newWriter();
     assertFalse("Writer should not be open before calling open", writer.isOpen());
     writer.open();
     assertTrue("Writer should be open after calling open", writer.isOpen());
@@ -129,7 +129,7 @@ public class HBaseDatasetRepositoryTest {
 
     // ensure the new entities are what we expect with scan operations
     int cnt = 0;
-    DatasetReader<GenericRecord> reader = ds.getReader();
+    DatasetReader<GenericRecord> reader = ds.newReader();
     assertFalse("Reader should not be open before calling open", reader.isOpen());
     reader.open();
     assertTrue("Reader should be open after calling open", reader.isOpen());
