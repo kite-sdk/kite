@@ -48,7 +48,7 @@ public class Formats {
   /**
    * Return a {@link Format} for the format name specified. If {@code formatName}
    * is not a valid name, an IllegalArgumentException is thrown. Currently the
-   * formats <q>avro</q> and <q>parquet</q> are supported. Format names are
+   * formats <q>avro</q>, <q>csv</q>, and <q>parquet</q> are supported. Format names are
    * case sensitive.
    *
    * @since 0.9.0
