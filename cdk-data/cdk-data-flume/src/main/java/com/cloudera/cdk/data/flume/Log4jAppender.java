@@ -21,8 +21,6 @@ import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;
-import java.lang.reflect.Constructor;
-import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 import org.apache.avro.Schema;
@@ -32,7 +30,6 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
 
   private static final String PARTITION_PREFIX = "cdk.partition.";
 
-  private String datasetRepositoryClass;
   private String datasetRepositoryUri;
   private String datasetName;
   private boolean initialized;
@@ -64,8 +61,13 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
     return false;
   }
 
+  /**
+   * @deprecated Use datasetRepositoryUri with a 'repo:' URI.
+   */
+  @Deprecated
   public void setDatasetRepositoryClass(String datasetRepositoryClass) {
-    this.datasetRepositoryClass = datasetRepositoryClass;
+    throw new UnsupportedOperationException("datasetRepositoryClass is no longer " +
+        "supported. Use datasetRepositoryUri with a 'repo:' URI.");
   }
 
   public void setDatasetRepositoryUri(String datasetRepositoryUri) {
@@ -84,15 +86,7 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
       // initialize here rather than in activateOptions to avoid initialization
       // cycle in Configuration and log4j
       try {
-        DatasetRepository repo;
-        if (datasetRepositoryClass != null) {
-          Class<?> c = Class.forName(datasetRepositoryClass);
-          Constructor<?> cons = c.getConstructor(URI.class);
-          repo = (DatasetRepository) cons.newInstance(new URI(datasetRepositoryUri));
-        } else {
-          repo = DatasetRepositories.open(datasetRepositoryUri);
-        }
-
+        DatasetRepository repo = DatasetRepositories.open(datasetRepositoryUri);
         Dataset dataset = repo.load(datasetName);
         if (dataset.getDescriptor().isPartitioned()) {
           partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
