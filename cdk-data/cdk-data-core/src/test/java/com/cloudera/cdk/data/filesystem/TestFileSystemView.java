@@ -70,9 +70,9 @@ public class TestFileSystemView extends TestRangeViews {
     }
 
     final Set<View<StandardEvent>> expected = (Set) Sets.newHashSet(
-        dataset.of(new Key(strategy, sepEvent)),
-        dataset.of(new Key(strategy, octEvent)),
-        dataset.of(new Key(strategy, novEvent)));
+        dataset.of(new Key.Builder(strategy).buildFrom(sepEvent)),
+        dataset.of(new Key.Builder(strategy).buildFrom(octEvent)),
+        dataset.of(new Key.Builder(strategy).buildFrom(novEvent)));
 
     Assert.assertEquals("Covering partitions should match",
         expected, Sets.newHashSet(dataset.getCoveringPartitions()));

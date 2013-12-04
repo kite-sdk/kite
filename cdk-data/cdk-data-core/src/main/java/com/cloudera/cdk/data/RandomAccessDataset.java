@@ -15,7 +15,6 @@
  */
 package com.cloudera.cdk.data;
 
-import com.cloudera.cdk.data.spi.Marker;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -36,13 +35,13 @@ public interface RandomAccessDataset<E> extends Dataset<E> {
   
   /**
    * Return the entity stored in the dataset at the row specified with {@link
-   * Marker} <code>key</code>. Return null if no such entity exists.
+   * Key} <code>key</code>. Return null if no such entity exists.
    *
    * @param key
    *          The key of the entity to get
    * @return The entity of type E, or null if one is not found
    */
-  public E get(Marker key);
+  public E get(Key key);
 
   /**
    * Put the entity into the dataset.
@@ -67,15 +66,15 @@ public interface RandomAccessDataset<E> extends Dataset<E> {
    *          The amount to increment the field by
    * @return The new field amount.
    */
-  public long increment(Marker key, String fieldName, long amount);
+  public long increment(Key key, String fieldName, long amount);
 
   /**
-   * Deletes the entity in the dataset with {@link Marker} <code>key</code>.
+   * Deletes the entity in the dataset with {@link Key} <code>key</code>.
    *
    * @param key
    *          The key of the entity to delete.
    */
-  public void delete(Marker key);
+  public void delete(Key key);
 
   /**
    * Deletes the entity passed to this method in the dataset.

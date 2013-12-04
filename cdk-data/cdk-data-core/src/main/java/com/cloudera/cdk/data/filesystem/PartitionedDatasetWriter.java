@@ -84,7 +84,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
     DatasetWriter<E> writer = cachedWriters.getIfPresent(reusedKey);
     if (writer == null) {
       // get a new key because it is stored in the cache
-      Key key = new Key(partitionStrategy, reusedKey);
+      Key key = Key.copy(reusedKey);
       try {
         writer = cachedWriters.getUnchecked(key);
       } catch (UncheckedExecutionException ex) {

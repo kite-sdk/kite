@@ -23,6 +23,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.avro.generic.GenericRecord;
 
@@ -36,7 +37,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
- * A Key is a Marker that is complete for a PartitionStrategy.
+ * A Key is a complete set of values for a PartitionStrategy.
  *
  * @since 0.9.0
  */
@@ -58,21 +59,16 @@ public class Key extends Marker implements Comparable<Key> {
         }
       });
 
-  final PartitionStrategy strategy;
-  final Map<String, Integer> fields;
-  List<Object> values;
+  private final PartitionStrategy strategy;
+  private final Map<String, Integer> fields;
+  private List<Object> values;
 
   public Key(PartitionStrategy strategy) {
     this(strategy, Arrays.asList(
         new Object[strategy.getFieldPartitioners().size()]));
   }
 
-  public Key(PartitionStrategy strategy, Marker marker) {
-    this(strategy);
-    reuseFor(marker);
-  }
-
-  public Key(PartitionStrategy strategy, List<Object> values) {
+  private Key(PartitionStrategy strategy, List<Object> values) {
     try {
       this.fields = FIELD_CACHE.get(strategy);
     } catch (ExecutionException ex) {
@@ -82,11 +78,6 @@ public class Key extends Marker implements Comparable<Key> {
         "Not enough values for a complete Key");
     this.strategy = strategy;
     this.values = values;
-  }
-
-  public Key(PartitionStrategy strategy, Object entity) {
-    this(strategy);
-    reuseFor(entity);
   }
 
   public PartitionStrategy getPartitionStrategy() {
@@ -99,7 +90,7 @@ public class Key extends Marker implements Comparable<Key> {
   }
 
   @Override
-  public Object getObject(String name) {
+  public Object get(String name) {
     return values.get(fields.get(name));
   }
 
@@ -109,22 +100,8 @@ public class Key extends Marker implements Comparable<Key> {
    * @param index the {@code index} of the value to return
    * @return the Object stored at {@code index}
    */
-  public Object getObject(int index) {
+  public Object get(int index) {
     return values.get(index);
-  }
-
-  /**
-   * Returns the value for {@code index} coerced to the given type, T.
-   *
-   * @param <T> the return type
-   * @param index the index of the value to return
-   * @param returnType  The return type, which must be assignable from Long,
-   *                    Integer, String, or Object
-   * @return the Object stored for at {@code index} coerced to a T
-   * @throws ClassCastException if the return type is unknown
-   */
-  public <T> T getAs(int index, Class<T> returnType) {
-    return Conversions.convert(getObject(index), returnType);
   }
 
   /**
@@ -147,36 +124,6 @@ public class Key extends Marker implements Comparable<Key> {
     Preconditions.checkArgument(values.size() == fields.size(),
         "Not enough values for a complete Key");
     this.values = values;
-  }
-
-  /**
-   * Replaces all of the values in this {@link Key} with values from the given
-   * {@link Marker}.
-   *
-   * @param marker a {@code Marker} to reuse this {@code Key} for
-   * @return this updated {@code Key}
-   * @throws IllegalStateException
-   *      If the {@code Marker} cannot be used to produce a value for each
-   *      field in the {@code PartitionStrategy}
-   *
-   * @since 0.9.0
-   */
-  @SuppressWarnings("unchecked")
-  public Key reuseFor(Marker marker) {
-    final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
-
-    for (int i = 0; i < partitioners.size(); i += 1) {
-      final FieldPartitioner fp = partitioners.get(i);
-      final Object fieldValue = marker.valueFor(fp);
-      if (fieldValue == null) {
-        throw new IllegalStateException(
-            "Cannot create key, missing data for field:" + fp.getName());
-      } else {
-        replace(i, fieldValue);
-      }
-    }
-
-    return this;
   }
 
   /**
@@ -236,7 +183,7 @@ public class Key extends Marker implements Comparable<Key> {
     final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
     for (int i = 0; i < partitioners.size(); i += 1) {
       final FieldPartitioner fp = partitioners.get(i);
-      final int cmp = fp.compare(getObject(i), other.getObject(i));
+      final int cmp = fp.compare(get(i), other.get(i));
       if (cmp != 0) {
         return cmp;
       }
@@ -267,5 +214,74 @@ public class Key extends Marker implements Comparable<Key> {
     return "get" +
         name.substring(0, 1).toUpperCase(Locale.ENGLISH) +
         name.substring(1);
+  }
+
+  /**
+   * A convenience method to make a copy of a {@link Key}.
+   *
+   * This is not a deep copy.
+   *
+   * @param toCopy a {@code Key} to copy
+   * @return a new Key with the same {@link PartitionStrategy} and content
+   */
+  public static Key copy(Key toCopy) {
+    return new Key(toCopy.strategy, Lists.newArrayList(toCopy.values));
+  }
+
+  /**
+   * A fluent {@code Builder} for creating a {@link Key}.
+   */
+  public static class Builder {
+    private final PartitionStrategy strategy;
+    private final Map<String, Object> values;
+
+    public Builder(PartitionStrategy strategy) {
+      this.strategy = strategy;
+      this.values = Maps.newHashMap();
+    }
+
+    public Builder(Dataset dataset) {
+      if (!dataset.getDescriptor().isPartitioned()) {
+        throw new DatasetException("Dataset is not partitioned");
+      }
+      this.strategy = dataset.getDescriptor().getPartitionStrategy();
+      this.values = Maps.newHashMap();
+    }
+
+    public Builder add(String name, Object value) {
+      this.values.put(name, value);
+      return this;
+    }
+
+    public Key buildFrom(Object entity) {
+      return new Key(strategy).reuseFor(entity);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Key build() {
+      final List<FieldPartitioner> partitioners =
+          strategy.getFieldPartitioners();
+      final List<Object> content = Lists.newArrayListWithCapacity(
+          partitioners.size());
+      for (FieldPartitioner fp : partitioners) {
+        content.add(valueFor(fp));
+      }
+      return new Key(strategy, content);
+    }
+
+    private <S, T> T valueFor(FieldPartitioner<S, T> fp) {
+      if (values.containsKey(fp.getName())) {
+        return Conversions.convert(values.get(fp.getName()), fp.getType());
+
+      } else if (values.containsKey(fp.getSourceName())) {
+        return fp.apply(Conversions.convert(
+            values.get(fp.getSourceName()),
+            fp.getSourceType()));
+
+      } else {
+        throw new IllegalStateException(
+            "Cannot create Key, missing data for field:" + fp.getName());
+      }
+    }
   }
 }

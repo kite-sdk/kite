@@ -79,7 +79,7 @@ public abstract class Marker {
    * @param name the String name of the value to return
    * @return the Object stored for {@code name}
    */
-  public abstract Object getObject(String name);
+  public abstract Object get(String name);
 
   /**
    * Returns the value for {@code name} coerced to the given type, T.
@@ -92,7 +92,7 @@ public abstract class Marker {
    * @throws ClassCastException if the return type is unknown
    */
   public <T> T getAs(String name, Class<T> returnType) {
-    return Conversions.convert(getObject(name), returnType);
+    return Conversions.convert(get(name), returnType);
   }
 
   /**
@@ -140,7 +140,7 @@ public abstract class Marker {
     }
 
     @Override
-    public Object getObject(String name) {
+    public Object get(String name) {
       return values.get(name);
     }
 

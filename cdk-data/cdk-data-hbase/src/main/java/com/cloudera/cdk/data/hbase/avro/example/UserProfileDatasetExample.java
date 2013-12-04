@@ -17,7 +17,7 @@ package com.cloudera.cdk.data.hbase.avro.example;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
-import com.cloudera.cdk.data.spi.Marker;
+import com.cloudera.cdk.data.Key;
 import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 
@@ -203,8 +203,10 @@ public class UserProfileDatasetExample {
     long ts = System.currentTimeMillis();
 
     // Construct the key we'll use to fetch the user.
-    Marker key = new Marker.Builder().add("firstName", firstName).add("lastName",
-        lastName).build();
+    Key key = new Key.Builder(userProfileActionsDataset)
+        .add("firstName", firstName)
+        .add("lastName", lastName)
+        .build();
 
     // Get the profile and actions entity from the composite dao.
     UserProfileActionsModel2 profileActionsModel = userProfileActionsDataset.get(key);

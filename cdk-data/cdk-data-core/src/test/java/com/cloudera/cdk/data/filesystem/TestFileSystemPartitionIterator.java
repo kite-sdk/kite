@@ -63,7 +63,8 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
     for (Object year : Arrays.asList(2012, 2013)) {
       for (Object month : Arrays.asList(9, 10, 11, 12)) {
         for (Object day : Arrays.asList(22, 24, 25)) {
-          Key k = new Key(strategy, Arrays.asList(year, month, day));
+          Key k = new Key.Builder(strategy)
+              .add("year", year).add("month", month).add("day", day).build();
           keys.add(k);
         }
       }

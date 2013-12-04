@@ -68,7 +68,7 @@ class PathConversion {
         pathBuilder.append(Path.SEPARATOR_CHAR);
       }
       @SuppressWarnings("unchecked")
-      String dirname = dirnameForValue(fp, key.getAs(i, fp.getType()));
+      String dirname = dirnameForValue(fp, key.get(i));
       pathBuilder.append(dirname);
     }
 

@@ -16,7 +16,7 @@
 package com.cloudera.cdk.data.hbase.avro;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
-import com.cloudera.cdk.data.spi.Marker;
+import com.cloudera.cdk.data.Key;
 import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 import com.cloudera.cdk.data.hbase.avro.entities.SubEntity1;
@@ -99,7 +99,7 @@ public class CompositeDatasetTest {
     // Test put and get
     ds.put(compositeEntity);
 
-    Marker key = new Marker.Builder().add("part1", "1").add("part2", "1").build();
+    Key key = new Key.Builder(ds).add("part1", "1").add("part2", "1").build();
     Map<String, SpecificRecord> returnedCompositeEntity = ds.get(key);
     assertNotNull("found entity", returnedCompositeEntity);
     assertEquals("field1_1", ((SubEntity1)returnedCompositeEntity.get("SubEntity1")).getField1());
@@ -116,7 +116,7 @@ public class CompositeDatasetTest {
     compositeEntity = new HashMap<String, SpecificRecord>();
     compositeEntity.put("SubEntity1", subEntity1);
     ds.put(compositeEntity);
-    returnedCompositeEntity = ds.get(new Marker.Builder().add("part1", "1").add("part2", "2").build());
+    returnedCompositeEntity = ds.get(new Key.Builder(ds).add("part1", "1").add("part2", "2").build());
     assertNull(returnedCompositeEntity.get("SubEntity2"));
   }
 }
