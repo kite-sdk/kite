@@ -16,10 +16,12 @@
 
 package com.cloudera.cdk.data.spi;
 
+import com.cloudera.cdk.data.FieldPartitioner;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.util.Map;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -91,6 +93,31 @@ public abstract class Marker {
    */
   public <T> T getAs(String name, Class<T> returnType) {
     return Conversions.convert(getObject(name), returnType);
+  }
+
+  /**
+   * Return the value of a {@code FieldPartitioner} field for this {@link Marker}.
+   *
+   * If the {@code Marker} has a value for the field's name, that value is
+   * returned using {@link Marker#getAs(java.lang.String, java.lang.Class)}. If
+   * the {@code Marker} only has a value for the the source field name, then
+   * that value is retrieved using
+   * {@link com.cloudera.cdk.data.spi.Marker#getAs(java.lang.String,
+   * java.lang.Class)} and the field's transformation is applied to it as the source value.
+   *
+   * @param fp a {@code FieldPartitioner}
+   * @return the value of the field for this {@code marker}, or null
+   * @since 0.9.0
+   */
+  @Nullable
+  public <S, T> T valueFor(FieldPartitioner<S, T> fp) {
+    if (has(fp.getName())) {
+      return getAs(fp.getName(), fp.getType());
+    } else if (has(fp.getSourceName())) {
+      return fp.apply(getAs(fp.getSourceName(), fp.getSourceType()));
+    } else {
+      return null;
+    }
   }
 
   /**

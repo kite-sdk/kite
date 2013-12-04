@@ -43,7 +43,7 @@ public class MarkerComparator implements Comparator<Marker> {
    * Returns true if {@code container} contains {@code test}, false otherwise.
    *
    * Fields for which {@code set} has no value
-   * ({@link FieldPartitioner#valueFor(Marker)} returns
+   * ({@link Marker#valueFor(FieldPartitioner)} returns
    * null) are treated as wildcards and always match.
    *
    * All fields in the {@link PartitionStrategy} are compared.
@@ -57,9 +57,9 @@ public class MarkerComparator implements Comparator<Marker> {
   @SuppressWarnings("unchecked")
   public boolean contains(Marker container, Marker test) {
     for (FieldPartitioner field : strategy.getFieldPartitioners()) {
-      Object containerValue = field.valueFor(container);
+      Object containerValue = container.valueFor(field);
       if (containerValue != null) {
-        Object testValue = field.valueFor(test);
+        Object testValue = test.valueFor(field);
         if (field.compare(containerValue, testValue) != 0) {
           return false;
         }
@@ -122,8 +122,8 @@ public class MarkerComparator implements Comparator<Marker> {
   @SuppressWarnings("unchecked")
   public int compare(Marker m1, Marker m2) {
     for (FieldPartitioner field : strategy.getFieldPartitioners()) {
-      Object m1Value = field.valueFor(m1);
-      Object m2Value = field.valueFor(m2);
+      Object m1Value = m1.valueFor(field);
+      Object m2Value = m2.valueFor(field);
       // if either is null, but not both, then they are Incomparable
       if (m1Value == null) {
         if (m2Value != null) {
@@ -191,8 +191,8 @@ public class MarkerComparator implements Comparator<Marker> {
   @SuppressWarnings("unchecked")
   public int rightCompare(Marker m1, Marker m2) {
     for (FieldPartitioner field : strategy.getFieldPartitioners()) {
-      Object m1Value = field.valueFor(m1);
-      Object m2Value = field.valueFor(m2);
+      Object m1Value = m1.valueFor(field);
+      Object m2Value = m2.valueFor(field);
       if (m1Value == null) {
         if (m2Value != null) {
           // m1 contains m2
@@ -259,8 +259,8 @@ public class MarkerComparator implements Comparator<Marker> {
   @SuppressWarnings("unchecked")
   public int leftCompare(Marker m1, Marker m2) {
     for (FieldPartitioner field : strategy.getFieldPartitioners()) {
-      Object m1Value = field.valueFor(m1);
-      Object m2Value = field.valueFor(m2);
+      Object m1Value = m1.valueFor(field);
+      Object m2Value = m2.valueFor(field);
       if (m1Value == null) {
         if (m2Value != null) {
           // m1 contains m2

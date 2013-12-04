@@ -161,12 +161,13 @@ public class Key extends Marker implements Comparable<Key> {
    *
    * @since 0.9.0
    */
+  @SuppressWarnings("unchecked")
   public Key reuseFor(Marker marker) {
     final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
 
     for (int i = 0; i < partitioners.size(); i += 1) {
       final FieldPartitioner fp = partitioners.get(i);
-      final Object fieldValue = fp.valueFor(marker);
+      final Object fieldValue = marker.valueFor(fp);
       if (fieldValue == null) {
         throw new IllegalStateException(
             "Cannot create key, missing data for field:" + fp.getName());
