@@ -58,11 +58,11 @@ constituent classes.
 [guice]: http://code.google.com/p/google-guice/ "Google Guice"
 
 The primary actors in the Data module are _entities_, _dataset repositories_,
-_datasets_, dataset _readers_, _writers_ and _accessors_, and _metadata providers_. Most
+_datasets_, dataset _readers_, dataset _writers_, and _metadata providers_. Most
 of these objects are interfaces, permitting multiple implementations, each with
 different functionality. The current release contains an implementation of
 each of these components for the Hadoop FileSystem abstraction (found in the
-`com.cloudera.cdk.data.filesystem` package), for HCatalog and Hive (found in the
+`com.cloudera.cdk.data.filesystem` package), for Hive (found in the
 `com.cloudera.cdk.data.hcatalog` package), and for HBase (see the section about Dataset
  Repository URIs for how to access it).
 
@@ -88,15 +88,15 @@ control, backup policies, and so forth. A dataset repository is represented by
 instances of the `com.cloudera.cdk.data.DatasetRepository` interface in the Data
 module. An instance of a `DatasetRepository` acts as a factory for datasets,
 supplying methods for creating, loading, and deleting datasets. Each dataset
-belongs to exactly one dataset repository. There's no built in support for
+belongs to exactly one dataset repository. There's no built-in support for
 moving or copying datasets between repositories. MapReduce and other execution
 engines can easily provide copy functionality, if desired.
 
 _DatasetRepository Interface_
 
-    Dataset create(String, DatasetDescriptor);
-    Dataset load(String);
-    Dataset update(String);
+    <E> Dataset<E> create(String, DatasetDescriptor);
+    <E> Dataset<E> load(String);
+    <E> Dataset<E> update(String);
     boolean delete(String);
     boolean exists(String);
     Collection<String> list();
@@ -104,63 +104,75 @@ _DatasetRepository Interface_
 The Data module ships with a `DatasetRepository` implementation
 `com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository` built for operating
 on datasets stored in a filesystem supported by Hadoop's `FileSystem`
-abstraction. This implementation requires an instance of a Hadoop `FileSystem`,
-a root directory under which datasets will be (or are) stored, and an optional
-_metadata provider_ (described later) to be supplied upon instantiation. Once
-complete, users can freely interact with datasets while the implementation
+abstraction. This implementation requires a root directory under which datasets
+will be (or are) stored, and a `Configuration` that is used to get the `FileSystem`
+for that directory. Optionally, a _metadata provider_ can be supplied as well.
+With a `DatasetRepository`, users can freely interact with datasets while the implementation
 worries about managing files and directories in the underlying filesystem. The
-supplied metadata provider is used to resolve dataset schemas and other related
-information.
+metadata provider is used to store and retrieve dataset schemas and other related
+information needed to read and write data (more about them later).
 
-Instantiating FileSystemDatasetRepository is straightforward.
+The Data module supports URI-based instantiation to build `DatasetRepository`
+instances. The following opens a `DatasetRepository` that stores its data in
+HDFS:
 
-    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
+    // get a repository with data stored in hdfs:/data
+    DatasetRepository hdfsRepo = DatasetRepositories.open("repo:hdfs:/data");
+
+For more information, see [the repository URI section](#Dataset Repository URIs).
+
+Instantiating `FileSystemDatasetRepository` using its builder is also
+straightforward, and supports additional options, such as supplying a specific
+hadoop `Configuration`. This demonstrates building a `DatasetRepository` in a
+`Configured` class, like `Tool`:
+
+    DatasetRepository hdfsRepo = new FileSystemDatasetRepository.Builder()
+      .configuration(this.getConf())
       .rootDirectory(new Path("/data"))
-      .get();
+      .build();
 
-This example uses the currently configured Hadoop `FileSystem` implementation,
+This example uses the currently configured default Hadoop `FileSystem`,
 typically an HDFS cluster. Since Hadoop's also supports a "local" implementation
 of `FileSystem`, it's possible to use the Data APIs to interact with data
 residing on a local OS filesystem. This is especially useful during development
-and basic functional testing of your code.
+and basic functional testing of your code. The `Path` object tells the
+repository builder the path and configured filesystem for data storage.
 
-    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
-      .fileSystem(FileSystem.getLocal(new Configuration()))
-      .rootDirectory(new Path("/tmp/test-data"))
-      .get();
+    DatasetRepository localRepo = new FileSystemDatasetRepository.Builder()
+      .configuration(getConf())
+      .rootDirectory(new Path("file:/tmp/test-data"))
+      .build();
+    
+    // alternative URI-based instantiation:
+    localRepo = DatasetRepositories.open("repo:file:/data")
 
-Once an instance of a `DatasetRepository` implementation has been created,
+Using these instances of `DatasetRepository`,
 new datasets can easily be created, and existing datasets can be loaded or
 deleted. Here's a more complete example of creating a dataset to store
 application event data. You'll notice a few new classes; don't worry about them
 for now. We'll cover them later.
 
-    /*
-     * Instantiate a FileSystemDatasetRepository with a Hadoop FileSystem object
-     * based on the current configuration. The FileSystem and Configuration
-     * classes come from Hadoop. The Path object tells the dataset repository
-     * under what path in the configured filesystem datasets reside.
-     */
-    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
-      .fileSystem(FileSystem.get(new Configuration()))
-      .rootDirectory(new Path("/data"))
-      .get();
+    // Instantiate a DatasetRepository backed by HDFS, stored under /data
+    DatasetRepository repo = DatasetRepositories.open("repo:hdfs:/data")
 
-    /*
-     * Create the dataset "users" with the schema defined in the file User.avsc.
-     */
+    // Create the dataset "users" with the schema defined in the file User.avsc.
     Dataset users = repo.create(
       "users",
       new DatasetDescriptor.Builder()
         .schema(new File("User.avsc"))
-        .get()
+        .build()
     );
 
-Related to the dataset repository, the _metadata provider_ is a service provider
-interface used to interact with the service that provides dataset metadata
-information to the rest of the Data APIs. The
-`com.cloudera.cdk.data.MetadataProvider` interface defines the contract metadata
-services must provide to the library, and specifically, the `DatasetRepository`.
+Related to the dataset repository, the _metadata provider_ stores information
+needed to read from and write to datasets in a repository. That information is
+created with a dataset and after that is managed by the repository and its
+metadata provider.
+
+The providers implement `com.cloudera.cdk.data.MetadataProvider`, which defines
+a service provider interface used to interact with a service that provides
+dataset metadata information to the rest of the Data APIs. This interface
+defines the contract that metadata services must provide to the library, and
+specifically, the `DatasetRepository`.
 
 _MetadataProvider Interface_
 
@@ -187,8 +199,11 @@ input/output formats.
 
 [hcat]: http://incubator.apache.org/hcatalog/ "Apache HCatalog"
 
-Users aren't expected to use metadata providers directly. Instead,
-`DatasetRepository` implementations accept instances of `MetadataProvider`
+Users aren't expected to use metadata providers directly. Typically, the URI
+used to open a `DatasetRepository` also holds information about the metadata
+provider.
+
+Most `DatasetRepository` implementations accept instances of `MetadataProvider`
 plugins, and make whatever calls are needed as users interact with the Data
 APIs. If you're paying close attention, you'll see that we didn't specify a
 metadata provider when we instantiated `FileSystemDatasetRepository` earlier.
@@ -217,14 +232,10 @@ _Example: Explicitly configuring `FileSystemDatasetRepository` with
       fileSystem, basePath);
 
     DatasetRepository repo = new FileSystemDatasetRepository.Builder()
-      .fileSystem(fileSystem)
-      .rootDirectory(basePath)
+      .configuration(getConf())
       .metadataProvider(metaProvider)
-      .get();
+      .build();
 
-Note how the same base directory of `/data` is used for both the metadata
-provider as well as the dataset repository. This is perfectly legal. In fact,
-this is exactly what happens when you don't explicitly specify a metadata provider.
 Configured this way, data and
 metadata will be stored together, side by side, on whatever filesystem Hadoop is
 currently configured to use. Later, when we create a dataset, we'll see the
@@ -246,14 +257,11 @@ just like `FileSystemDatasetRepository`. The latter option is referred to as
 
 _Example: Creating a `HCatalogDatasetRepository` with managed tables_
 
-    DatasetRepository repo = new HCatalogDatasetRepository.Builder()
-      .get();
+    DatasetRepository repo = DatasetRepositories.open("repo:hive");
 
 _Example: Creating a `HCatalogDatasetRepository` with external tables_
 
-    DatasetRepository repo = new HCatalogDatasetRepository.Builder()
-      .rootDirectory(new Path("/data"))
-      .get();
+    DatasetRepository repo = DatasetRepositories.open("repo:hive:/data");
 
 ### Dataset Repository URIs
 
@@ -265,9 +273,9 @@ following table lists the URI formats that are supported. See the javadoc for
 | --- | --- |
 | Local filesystem | `repo:file:[path]` |
 | HDFS | `repo:hdfs://[host]:[port]/[path]` |
-| Hive/HCatalog with managed tables | `repo:hive` |
-| Hive/HCatalog with external tables | `repo:hive:[path]?hdfs-host=[host]&hdfs-port=[port]` |
-| HBase | `repo:hbase:[zookeeper-host1],[zookeeper-host2],[zookeeper-host3]` |
+| Hive/HCatalog with managed tables | `repo:hive` or `repo:hive://[metastore-host]:[metastore-port]/` |
+| Hive/HCatalog with external tables | `repo:hive://[ms-host]:[ms-port]/[path]?hdfs-host=[host]&hdfs-port=[port]` |
+| HBase (random access) | `repo:hbase:[zookeeper-host1],[zookeeper-host2],[zookeeper-host3]` |
 
 The `DatasetRepositories` class in the `com.cloudera.cdk.data` package provides factory
 methods for retrieving a `DatasetRepository` instance for a URI. For almost all cases,
@@ -278,11 +286,17 @@ _DatasetRepositories Interface_
     static DatasetRepository open(URI);
     static DatasetRepository open(String);
 
+    static RandomAccessDatasetRepository openRandomAccess(URI);
+    static RandomAccessDatasetRepository openRandomAccess(String);
+
 _Example: Creating a `DatasetRepository` for Hive managed tables from a dataset
 repository URI_
 
     DatasetRepository repo = DatasetRepositories.open("repo:hive");
 
+_Example: Creating a `DatasetRepository` for HBase from a repository URI_
+
+    DatasetRepository repo = DatasetRepositories.open("repo:hbase:zk1,zk2,zk3");
 
 ## Datasets
 
@@ -304,23 +318,32 @@ provided at the time a dataset is created. The schema is defined using the Avro 
 Entities must all conform to the same schema, however, that schema can evolve based on
 a set of well-defined rules. The relational database analog of a dataset is a table.
 
-Datasets are represented by the `com.cloudera.cdk.data.Dataset` interface.
-Implementations of this interface decide how to physically store the entities
-within the dataset. Users do not instantiate implementations of the `Dataset`
-interface directly. Instead, implementations of the `DatasetRepository` act as
-a factory of the appropriate `Dataset` implementation.
+Datasets are represented by the `com.cloudera.cdk.data.Dataset` interface,
+which is parameterized by the java type of the entities it is used to read and
+write.
 
-_Dataset Interface_
+_Dataset Interface for entity type &lt;E&gt;_
 
     String getName();
     DatasetDescriptor getDescriptor();
 
-    <E> DatasetWriter<E> newWriter();
-    <E> DatasetReader<E> newReader();
-    <E> DatasetReader<E> newAccessor();
+    DatasetWriter<E> newWriter();
+    DatasetReader<E> newReader();
 
     Dataset getPartition(PartitionKey, boolean);
-    Iterable<Dataset> getPartitions();
+    Iterable<Dataset<E>> getPartitions();
+
+Up to this point, this tutorial has omitted `Dataset` type parameter for
+brevity.  But to demonstrate correct use of types in the rest of the tutorial,
+it will be included whenever a `Dataset` is loaded or created:
+
+    DatasetRepository repo = ...
+    Dataset<User> users = repo.load("users");
+
+`Dataset` implementations decide how to physically store the entities
+within the dataset. Users do not instantiate implementations of the `Dataset`
+interface directly. Instead, implementations of the `DatasetRepository` act as
+a factory of the appropriate `Dataset` implementation.
 
 The included Hadoop `FileSystemDatasetRepository` includes a `Dataset`
 implementation called `FileSystemDataset`. This dataset implementation stores
@@ -367,7 +390,7 @@ _DatasetDescriptor.Builder Class_
 
     Builder partitionStrategy(PartitionStrategy partitionStrategy);
 
-    DatasetDescriptor get();
+    DatasetDescriptor build();
 
 _Note_
 
@@ -379,10 +402,10 @@ can be defined in a few different ways. Here, for instance, is an example of
 creating a dataset with a schema defined in a file on the local filesystem.
 
     DatasetRepository repo = ...
-    Dataset users = repo.create("users",
+    Dataset<User> users = repo.create("users",
       new DatasetDescriptor.Builder()
         .schema(new File("User.avsc"))
-        .get()
+        .build()
     );
 
 Just as easily, a the schema could be loaded from a Java classpath resource.
@@ -396,12 +419,10 @@ resolution, but we could have (almost as) easily used Java's
     Dataset users = repo.create("users",
       new DatasetDescriptor.Builder()
         .schema(Resources.getResource("Users.avsc"))
-        .get()
+        .build()
     );
 
-An instance of `Dataset` acts as a factory for both reader and writer streams,
-as well as for accessors that permit random reads and writes (discussed in the next
-section).
+An instance of `Dataset` acts as a factory for both reader and writer streams.
 Each implementation is free to produce stream implementations that make sense
 for the underlying storage system. The `FileSystemDataset` implementation, for
 example, produces streams that read from, or write to, Avro data files or Parquet files
@@ -450,9 +471,7 @@ information.
 
 _Example: Writing to a Hadoop FileSystem_
 
-    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
-      .rootDirectory(new Path("/data"))
-      .get();
+    DatasetRepository repo = DatasetRepositories.open("repo:hdfs:/data");
 
     /*
      * Let's assume MyInteger.avsc is defined as follows:
@@ -464,10 +483,10 @@ _Example: Writing to a Hadoop FileSystem_
      *   ]
      * }
      */
-    Dataset integers = repo.create("integers",
+    Dataset<GenericRecord> integers = repo.create("integers",
       new DatasetDescriptor.Builder()
         .schema("MyInteger.avsc")
-        .get()
+        .build()
     );
 
     /*
@@ -506,11 +525,10 @@ reader can produce further data.
 
 _Example: Reading from a Hadoop FileSystem_
 
-    DatasetRepository repo = new FileSystemDatasetRepository(
-      FileSystem.get(new Configuration()), new Path("/data"));
+    DatasetRepository repo = DatasetRepositories.open("repo:hdfs:/data");
 
     // Load the integers dataset.
-    Dataset integers = repo.get("integers");
+    Dataset<GenericReader> integers = repo.get("integers");
 
     DatasetReader<GenericRecord> reader = integers.newReader();
 
@@ -529,9 +547,7 @@ in a relational database - works as expected.
 
 _Example: Deleting an existing dataset_
 
-    DatasetRepository repo = new FileSystemDatasetRepository.Builder()
-      .rootDirectory(new Path("/data"))
-      .get();
+    DatasetRepository repo = DatasetRepositories.open("repo:hdfs:/data");
 
     if (repo.delete("integers")) {
       System.out.println("Deleted dataset integers");
@@ -574,7 +590,7 @@ existing dataset, and use MapReduce to convert the dataset in batch to the new
 format. A partitioned dataset can
 provide a list of partitions (described later).
 
-Upon creation of a dataset, a `PartitionStrategy` may be provided. A partition
+When creating of a dataset, a `PartitionStrategy` may be provided. A partition
 strategy is a list of one or more partition functions that, when applied to an
 attribute of an entity, produce a value used to decide in which partition an
 entity should be written. Different partition function implementations exist,
@@ -587,13 +603,14 @@ _PartitionStrategy.Builder API_
 
     <S> Builder identity(String, Class<S>, int);
     Builder hash(String, int);
-    Builder year(String, String);
-    Builder month(String, String);
-    Builder day(String, String);
-    Builder hour(String, String);
-    Builder minute(String, String);
+    Builder year(String);
+    Builder month(String);
+    Builder day(String);
+    Builder hour(String);
+    Builder minute(String);
+    Builder dateFormat(String, String);
 
-    PartitionStrategy get();
+    PartitionStrategy build();
 
 When building a partition strategy, the attribute (i.e. field) name from which
 to take the function input is specified, along with a cardinality hint (or
@@ -619,16 +636,16 @@ _Example Creation of a dataset partitioned by an attribute_
 
     DatasetRepository repo = ...
 
-    Dataset usersDataset = repo.create(
+    Dataset<User> usersDataset = repo.create(
       "users",
       new DatasetDescriptor.Builder()
         .schema(new File("User.avsc"))
         .partitionStrategy(
-          new PartitionStrategy.Builder().identity("segment", Long.class, 1024).get()
-        ).get()
+          new PartitionStrategy.Builder().identity("segment", Long.class, 1024).build()
+        ).build()
     );
 
-Given the ficticious User entities shown in _Example: Sample Users_, users A, B,
+Given the ficticious `User` entities shown in _Example: Sample Users_, users A, B,
 and C would be written to partition 1, while D and E end up in partition 2.
 
 _Example: Sample Users_
@@ -647,7 +664,7 @@ _Example: Creation of a dataset partitioned by multiple attributes_
 
     DatasetRepository repo = ...
 
-    Dataset users = repo.create(
+    Dataset<User> users = repo.create(
       "users",
       new DatasetDescriptor.Builder()
         .schema(new File("User.avsc"))
@@ -655,8 +672,8 @@ _Example: Creation of a dataset partitioned by multiple attributes_
           new PartitionStrategy.Builder()
             .identity("segment", Long.class, 1024)  // Partition first by segment
             .hash("emailAddress", 3)                // and then by hash(email) % 3
-            .get()
-        ).get()
+            .build()
+        ).build()
 
 The order in which the partition functions are defined is important. This
 controls the way the data is physically partitioned in certain implementations
@@ -677,9 +694,33 @@ setting of such a field themselves.
 
 ### Random Access Datasets
 
-Datasets stored in HBase support random access read and write operations as well as
-the usual streaming read and write operations. The underlying HBase storage requires
-that each entity has a key associated with it; the key is defined by marking the key
+Datasets stored in HBase support random access read and write operations as
+well as the usual streaming read and write operations. The random-access
+pattern associates a `Key` with each record that is stored (covered next), and
+the `Dataset` implementations implement an additional interface,
+`RandomAccessDataset`:
+
+_RandomAccessDataset Interface_
+
+    E get(Key);
+    boolean put(E);
+    boolean delete(Key);
+    boolean delete(E);
+    long increment(Key, String, long);
+
+The type parameter, E, is the java type of the entities stored in the `Dataset`.
+
+The recommended way to access these methods is by first instantiating the HBase
+dataset repository as a `RandomAccessDatasetRepository`, which returns
+`RandomAccessDataset` implementations rather than vanilla `Dataset`
+implementations:
+
+    RandomAccessDatasetRepository repo = DatasetRepositories.openRandomAccess("repo:hbase:...");
+    RandomAccessDataset<User> users = repo.open("users");
+    users.put(...);
+
+The underlying HBase storage requires that each entity has a key associated
+with it; in the current release, the key is defined by marking the key
 fields in the schema with the `key` mapping. Non-key fields are specified by the
 `column` mapping, with a value indicating the HBase column family and column name.
 
@@ -699,17 +740,6 @@ _Example: User entity schema with mappings_
       ]
     }
 
-With a reference to a `Dataset`, you can obtain a reference to a `DatasetAccessor`
-using its `newAccessor()` method.
-
-_DatasetAccessor Interface_
-
-    E get(PartitionKey);
-    boolean put(E);
-    void delete(PartitionKey);
-    boolean delete(PartitionKey, E);
-    long increment(PartitionKey, String, long);
-
 Entities are added to a dataset using `put`, retrieved by key with `get`,
 and removed from the dataset with `delete`. The overloaded form of `delete` that
 takes an entity is a conditional delete that only performs the delete if the entity's
@@ -717,11 +747,9 @@ version field is the same as the one in the store (see Optimistic Concurrency Co
 discussed below). The `increment` method performs an atomic increment on a named `int`
 or `long` field.
 
-Keys are represented by an instance of `PartitionKey`, constructed via the dataset's
-`PartitionStrategy` (which is internally derived from the key fields in the schema):
-
-    Dataset users = ...
-    PartitionKey key = users.getDescriptor().getPartitionStrategy().partitionKey("bill");
+Keys are represented by the `Key` class, constructed via a `Builder`. All of
+the schema's key fields are required to construct a `Key`, and the builder will
+throw an `IllegalStateException` if a field is missing.
 
 Optimistic Concurrency Control (OCC) allows one to do get/update/put operations,
 ensuring that another thread or process didn't update the entity between the time we
