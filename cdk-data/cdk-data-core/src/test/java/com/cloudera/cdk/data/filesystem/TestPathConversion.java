@@ -21,7 +21,7 @@ import com.cloudera.cdk.data.partition.HourFieldPartitioner;
 import com.cloudera.cdk.data.partition.MinuteFieldPartitioner;
 import com.cloudera.cdk.data.partition.MonthFieldPartitioner;
 import com.cloudera.cdk.data.partition.YearFieldPartitioner;
-import com.cloudera.cdk.data.Key;
+import com.cloudera.cdk.data.spi.Key;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;

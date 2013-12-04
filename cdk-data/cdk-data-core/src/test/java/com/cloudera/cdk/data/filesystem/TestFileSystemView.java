@@ -21,7 +21,7 @@ import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.spi.TestRangeViews;
 import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.event.StandardEvent;
-import com.cloudera.cdk.data.Key;
+import com.cloudera.cdk.data.spi.Key;
 import com.google.common.collect.Sets;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;

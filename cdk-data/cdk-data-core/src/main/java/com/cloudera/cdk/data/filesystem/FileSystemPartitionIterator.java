@@ -19,7 +19,7 @@ package com.cloudera.cdk.data.filesystem;
 import com.cloudera.cdk.data.DatasetException;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.Key;
+import com.cloudera.cdk.data.spi.Key;
 import com.cloudera.cdk.data.spi.MarkerRange;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
