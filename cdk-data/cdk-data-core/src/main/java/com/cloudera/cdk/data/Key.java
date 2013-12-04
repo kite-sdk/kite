@@ -109,6 +109,8 @@ public class Key {
 
     /**
      * Build an instance of the configured key.
+     *
+     * @throws IllegalStateException If any required key field is missing.
      */
     @SuppressWarnings("unchecked")
     public Key build() {
