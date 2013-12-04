@@ -76,7 +76,7 @@ public class DatasetRepositories {
    * @param uri a String URI
    * @return a DatasetRepository for the given URI.
    * @throws IllegalArgumentException If the String cannot be parsed into a
-   *                                  valid URI ({@see java.net.URI}).
+   *                                  valid {@link java.net.URI}.
    */
   public static DatasetRepository open(String uri) {
     // uses of URI.create throw IllegalArgumentException if the URI is invalid
@@ -85,7 +85,7 @@ public class DatasetRepositories {
 
   /**
    * <p>
-   * Open a {@link }DatasetRepository} for the given URI.
+   * Open a {@link DatasetRepository} for the given URI.
    * </p>
    * <p>
    * This method provides a simpler way to connect to a {@link DatasetRepository}
@@ -224,7 +224,7 @@ public class DatasetRepositories {
    * @param uri a String URI
    * @return An appropriate implementation of {@link RandomAccessDatasetRepository}
    * @throws IllegalArgumentException If the String cannot be parsed into a
-   *                                  valid URI ({@see java.net.URI}).
+   *                                  valid {@link java.net.URI}.
    * @since 0.9.0
    */
   public static RandomAccessDatasetRepository openRandomAccess(String uri) {
