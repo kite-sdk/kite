@@ -17,7 +17,6 @@
 package com.cloudera.cdk.data.spi;
 
 import com.cloudera.cdk.data.FieldPartitioner;
-import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.PartitionStrategy;
 import java.util.Comparator;
 import javax.annotation.concurrent.Immutable;
@@ -44,7 +43,7 @@ public class MarkerComparator implements Comparator<Marker> {
    * Returns true if {@code container} contains {@code test}, false otherwise.
    *
    * Fields for which {@code set} has no value
-   * ({@link FieldPartitioner#valueFor(com.cloudera.cdk.data.Marker)} returns
+   * ({@link FieldPartitioner#valueFor(Marker)} returns
    * null) are treated as wildcards and always match.
    *
    * All fields in the {@link PartitionStrategy} are compared.

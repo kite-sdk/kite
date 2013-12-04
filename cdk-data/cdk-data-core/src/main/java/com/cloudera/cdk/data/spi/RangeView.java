@@ -17,7 +17,6 @@
 package com.cloudera.cdk.data.spi;
 
 import com.cloudera.cdk.data.Dataset;
-import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.View;
 
 interface RangeView<E> extends View<E> {
@@ -81,14 +80,14 @@ interface RangeView<E> extends View<E> {
   Iterable<View<E>> getCoveringPartitions();
 
   /**
-   * Creates a sub-{@code View}, from the {@code start} {@link com.cloudera.cdk.data.Marker} to the
+   * Creates a sub-{@code View}, from the {@code start} {@link Marker} to the
    * end of this {@code View}.
    *
    * The returned View is inclusive: the partition space contained by the start
    * Marker is included.
    *
    * {@code start} must be contained by this {@code View}, as determined by
-   * {@link #contains(com.cloudera.cdk.data.Marker)}.
+   * {@link #contains(Marker)}.
    *
    * @param start a starting {@code Marker}
    * @return a {@code View} for the range
@@ -106,7 +105,7 @@ interface RangeView<E> extends View<E> {
    * Marker is not included.
    *
    * {@code start} must be contained by this {@code View}, as determined by
-   * {@link #contains(com.cloudera.cdk.data.Marker)}.
+   * {@link #contains(Marker)}.
    *
    * @param start a starting {@code Marker}
    * @return a {@code View} for the range
@@ -124,7 +123,7 @@ interface RangeView<E> extends View<E> {
    * included.
    *
    * {@code end} must be contained by this {@code View}, as determined by
-   * {@link #contains(com.cloudera.cdk.data.Marker)}.
+   * {@link #contains(Marker)}.
    *
    * @param end an ending {@code Marker}
    * @return a {@code View} for the range
@@ -142,7 +141,7 @@ interface RangeView<E> extends View<E> {
    * not included.
    *
    * {@code end} must be contained by this {@code View}, as determined by
-   * {@link #contains(com.cloudera.cdk.data.Marker)}.
+   * {@link #contains(Marker)}.
    *
    * @param end an ending {@code Marker}
    * @return a {@code View} for the range
@@ -179,7 +178,7 @@ interface RangeView<E> extends View<E> {
    * </pre>
    *
    * {@code partial} must be contained by this {@code View}, as determined by
-   * {@link #contains(com.cloudera.cdk.data.Marker)}.
+   * {@link #contains(Marker)}.
    *
    * @param partial a partial {@code Marker}
    * @return a {@code View} of the partition space under {@code partial}.

@@ -16,7 +16,6 @@
 
 package com.cloudera.cdk.data.spi;
 
-import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.PartitionStrategy;
 import org.junit.Assert;
 import org.junit.BeforeClass;

@@ -16,7 +16,7 @@
 
 package com.cloudera.cdk.data.filesystem;
 
-import com.cloudera.cdk.data.Marker;
+import com.cloudera.cdk.data.spi.Marker;
 import com.cloudera.cdk.data.MiniDFSTest;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.spi.Key;

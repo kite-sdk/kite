@@ -16,7 +16,6 @@
 
 package com.cloudera.cdk.data.spi;
 
-import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.spi.MarkerRange.Boundary;
 import org.junit.Assert;

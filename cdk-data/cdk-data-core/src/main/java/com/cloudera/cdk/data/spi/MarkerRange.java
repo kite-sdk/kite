@@ -16,7 +16,6 @@
 
 package com.cloudera.cdk.data.spi;
 
-import com.cloudera.cdk.data.Marker;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.Immutable;

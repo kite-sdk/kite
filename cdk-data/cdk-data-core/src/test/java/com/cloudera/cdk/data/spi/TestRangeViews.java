@@ -21,7 +21,6 @@ import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.DatasetRepository;
 import com.cloudera.cdk.data.DatasetWriter;
-import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.MiniDFSTest;
 import com.cloudera.cdk.data.PartitionStrategy;
 import com.cloudera.cdk.data.TestHelpers;

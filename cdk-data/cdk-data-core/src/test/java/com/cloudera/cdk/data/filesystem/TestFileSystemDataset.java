@@ -22,7 +22,6 @@ import com.cloudera.cdk.data.DatasetReader;
 import com.cloudera.cdk.data.FieldPartitioner;
 import com.cloudera.cdk.data.Format;
 import com.cloudera.cdk.data.Formats;
-import com.cloudera.cdk.data.Marker;
 import com.cloudera.cdk.data.MiniDFSTest;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.PartitionStrategy;

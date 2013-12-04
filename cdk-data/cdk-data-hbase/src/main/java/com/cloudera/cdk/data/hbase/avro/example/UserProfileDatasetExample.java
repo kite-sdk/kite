@@ -17,7 +17,7 @@ package com.cloudera.cdk.data.hbase.avro.example;
 
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetReader;
-import com.cloudera.cdk.data.Marker;
+import com.cloudera.cdk.data.spi.Marker;
 import com.cloudera.cdk.data.RandomAccessDataset;
 import com.cloudera.cdk.data.hbase.HBaseDatasetRepository;
 

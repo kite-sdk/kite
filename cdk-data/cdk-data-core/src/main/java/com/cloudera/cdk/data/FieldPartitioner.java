@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data;
 
+import com.cloudera.cdk.data.spi.Marker;
 import com.google.common.base.Function;
 import java.util.Comparator;
 import javax.annotation.Nullable;

@@ -15,6 +15,7 @@
  */
 package com.cloudera.cdk.data;
 
+import com.cloudera.cdk.data.spi.Marker;
 import javax.annotation.concurrent.Immutable;
 
 /**

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.cloudera.cdk.data;
+package com.cloudera.cdk.data.spi;
 
-import com.cloudera.cdk.data.spi.Conversions;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -25,14 +24,14 @@ import javax.annotation.concurrent.Immutable;
 
 /**
  * A {@code Marker} is a bookmark in the partition space, which is the space of
- * each possible partition in a {@link PartitionStrategy}.
+ * each possible partition in a {@link com.cloudera.cdk.data.PartitionStrategy}.
  *
  * A {@code Marker} holds un-ordered values that can be used to create keys by
  * a {@code PartitionStrategy}. It can hold either source values, like a
  * timestamp, or concrete values, like a year.
  *
  * A {@code Marker} can be used as a generic placeholder or bookmark for an
- * entity (an object in a {@link Dataset}. For example, when fetching a record
+ * entity (an object in a {@link com.cloudera.cdk.data.Dataset}. For example, when fetching a record
  * from HBase, you can use a {@code Marker} to hold the information that
  * {@code PartitionStrategy} uses to build a concrete key and fetch the entity.
  *
