@@ -18,7 +18,7 @@ package com.cloudera.cdk.data.filesystem;
 import com.cloudera.cdk.data.DatasetDescriptor;
 import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.PartitionStrategy;
-import com.cloudera.cdk.data.spi.Key;
+import com.cloudera.cdk.data.Key;
 import com.cloudera.cdk.data.spi.ReaderWriterState;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;

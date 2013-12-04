@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.cloudera.cdk.data.spi;
+package com.cloudera.cdk.data;
 
-import com.cloudera.cdk.data.FieldPartitioner;
-import com.cloudera.cdk.data.PartitionStrategy;
+import com.cloudera.cdk.data.spi.Conversions;
+import com.cloudera.cdk.data.spi.Marker;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;

@@ -20,7 +20,7 @@ import com.cloudera.cdk.data.DatasetWriter;
 import com.cloudera.cdk.data.PartitionKey;
 import com.cloudera.cdk.data.View;
 import com.cloudera.cdk.data.spi.AbstractRangeView;
-import com.cloudera.cdk.data.spi.Key;
+import com.cloudera.cdk.data.Key;
 import com.cloudera.cdk.data.spi.MarkerRange;
 
 class DaoView<E> extends AbstractRangeView<E> {

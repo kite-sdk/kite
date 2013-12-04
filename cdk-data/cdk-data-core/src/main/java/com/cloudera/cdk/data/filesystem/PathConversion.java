@@ -22,7 +22,7 @@ import com.cloudera.cdk.data.partition.HourFieldPartitioner;
 import com.cloudera.cdk.data.partition.MinuteFieldPartitioner;
 import com.cloudera.cdk.data.partition.MonthFieldPartitioner;
 import com.cloudera.cdk.data.spi.Conversions;
-import com.cloudera.cdk.data.spi.Key;
+import com.cloudera.cdk.data.Key;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
