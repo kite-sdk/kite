@@ -129,16 +129,26 @@ public class DatasetRepositories {
    * </p>
    * <h1>Hive/HCatalog URIs</h1>
    * <p>
-   * <code>hive</code> will connect to the Hive MetaStore. Dataset locations
-   * will be determined by Hive as managed tables.
+   * <code>hive</code> and
+   * <code>hive://[metastore-host]:[metastore-port]/</code> will connect to the
+   * Hive MetaStore.  Dataset locations will be determined by Hive as managed
+   * tables.
    * </p>
    * <p>
-   * <code>hive:/[path]</code> will also connect to the Hive MetaStore, but
-   * tables will be external and stored under <code>[path]</code>. The
-   * repository storage layout will be the same as <code>hdfs</code> and
-   * <code>file</code> repositories. HDFS connection options can be supplied
-   * by adding <code>hdfs-host</code> and <code>hdfs-port</code> query options
-   * to the URI (see examples).
+   * <code>hive:/[path]</code> and
+   * <code>hive://[metastore-host]:[metastore-port]/[path]</code> will also
+   * connect to the Hive MetaStore, but tables will be external and stored
+   * under <code>[path]</code>. The repository storage layout will be the same
+   * as <code>hdfs</code> and <code>file</code> repositories. HDFS connection
+   * options can be supplied by adding <code>hdfs-host</code> and
+   * <code>hdfs-port</code> query options to the URI (see examples).
+   * </p>
+   * <h1>HBase URIs</h1>
+   * <p>
+   * <code>repo:hbase:[zookeeper-host1]:[zk-port],[zookeeper-host2],...
+   * </code> will open a HBase-backed DatasetRepository. This URI may also be
+   * instantiated with {@link #openRandomAccess(URI)} to instantiate a {@link
+   * RandomAccessDatasetRepository}
    * </p>
    * <h1>Examples</h1>
    * <p>
@@ -176,7 +186,7 @@ public class DatasetRepositories {
    * </tr>
    * <tr>
    * <td>
-   * <code>repo:hive://meta-host:9083/path?hdfs-host=localhost&hdfs-port=8020
+   * <code>repo:hive://meta-host:9083/path?hdfs-host=localhost&amp;hdfs-port=8020
    * </code>
    * </td>
    * <td>
@@ -184,6 +194,14 @@ public class DatasetRepositories {
    * and creates external tables stored in <code>hdfs://localhost:8020/</code>
    * at <code>path</code>. <code>hdfs-host</code> and <code>hdfs-port</code>
    * are optional.
+   * </td>
+   * </tr>
+   * <tr>
+   * <td>
+   * <code>repo:hbase:zk1,zk2,zk3</code>
+   * </td>
+   * <td>
+   * Connects to HBase via the given zookeeper quorum nodes.
    * </td>
    * </tr>
    * </table>
@@ -241,6 +259,36 @@ public class DatasetRepositories {
    * {@link RandomAccessDatasetRepository}. This method should be used when one needs to
    * access {@link RandomAccessDataset}s to take advantage of the random access methods.
    * </p>
+   * </>
+   * The format of a repository URI is as follows.
+   * </p>
+   * <code>repo:[storage component]</code>
+   * <p>
+   * The <code>[storage component]</code> indicates the underlying metadata and,
+   * in some cases, physical storage of the data, along with any options. The
+   * supported storage backends are:
+   * </p>
+   * <h1>HBase URIs</h1>
+   * <p>
+   * <code>repo:hbase:[zookeeper-host1]:[zk-port],[zookeeper-host2],...
+   * </code> will open a HBase-backed DatasetRepository. This URI may also be
+   * instantiated with {@link #openRandomAccess(URI)} to instantiate a {@link
+   * RandomAccessDatasetRepository}
+   * </p>
+   * <h1>Examples</h1>
+   * <p>
+   * <table>
+   * </tr>
+   * <tr>
+   * <td>
+   * <code>repo:hbase:zk1,zk2,zk3
+   * </code>
+   * </td>
+   * <td>
+   * Connects to HBase via the given zookeeper quorum nodes.
+   * </td>
+   * </tr>
+   * </table>
    * 
    * @param repositoryUri The repository URI
    * @return An appropriate implementation of {@link RandomAccessDatasetRepository}
