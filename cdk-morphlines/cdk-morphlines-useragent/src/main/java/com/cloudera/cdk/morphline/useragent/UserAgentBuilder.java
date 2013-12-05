@@ -280,6 +280,7 @@ public final class UserAgentBuilder implements CommandBuilder {
       this.capacity = capacity;
     }
     
+    @Override
     protected boolean removeEldestEntry(Map.Entry eldest) {
       return size() > capacity;
     }

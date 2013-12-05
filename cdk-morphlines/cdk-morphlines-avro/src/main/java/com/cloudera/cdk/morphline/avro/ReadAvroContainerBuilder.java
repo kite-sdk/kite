@@ -171,6 +171,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
       this.capacity = capacity;
     }
     
+    @Override
     protected boolean removeEldestEntry(Map.Entry eldest) {
       return size() > capacity;
     }
