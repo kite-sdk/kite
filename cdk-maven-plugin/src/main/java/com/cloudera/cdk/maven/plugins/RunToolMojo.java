@@ -62,6 +62,18 @@ public class RunToolMojo extends AbstractHadoopMojo {
 
   /**
    * Hadoop configuration properties.
+   *
+   * WARNING: This configuration setting is not compatible with the factory
+   * methods in {@link com.cloudera.cdk.data.DatasetRepositories} because it
+   * does not alter the environment configuration. For example, if using
+   * this to modify the environment's "fs.defaultFS" property in the tool that
+   * is run by this Mojo, opening a repo by URI will continue to use the
+   * environment's default FS.
+   *
+   * Configuration properties set using this option will only affect the
+   * {@link org.apache.hadoop.conf.Configuration} objects passed by
+   * {@link org.apache.hadoop.util.ToolRunner} or created by
+   * {@link org.apache.hadoop.util.GenericOptionsParser}.
    */
   @Parameter(property = "cdk.hadoopConfiguration")
   private Properties hadoopConfiguration;
