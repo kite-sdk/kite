@@ -65,7 +65,7 @@ public abstract class Accessor {
 
   /**
    * @deprecated
-   *          will be removed in 0.10.0; use
+   *          will be removed in 0.11.0; use
    *          {@link #getPathIterator(View)}
    */
   @Deprecated

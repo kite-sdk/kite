@@ -96,7 +96,7 @@ public interface Dataset<E> extends View<E> {
    *
    * @throws DatasetException
    *
-   * @deprecated will be removed in 0.10.0; use {@link #newWriter()}
+   * @deprecated will be removed in 0.11.0; use {@link #newWriter()}
    */
   @Deprecated
   DatasetWriter<E> getWriter();
@@ -116,7 +116,7 @@ public interface Dataset<E> extends View<E> {
    *
    * @throws DatasetException
    *
-   * @deprecated will be removed in 0.10.0; use {@link #newReader()}
+   * @deprecated will be removed in 0.11.0; use {@link #newReader()}
    */
   @Deprecated
   DatasetReader<E> getReader();

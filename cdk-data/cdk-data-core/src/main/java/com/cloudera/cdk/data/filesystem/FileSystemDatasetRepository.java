@@ -467,7 +467,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
 
     /**
-     * @deprecated will be removed in 0.10.0
+     * @deprecated will be removed in 0.11.0
      */
     @Override
     @Deprecated

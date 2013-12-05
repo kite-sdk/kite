@@ -19,7 +19,7 @@ package com.cloudera.cdk.data;
  * Exception thrown when a DatasetRepository method is incorrectly called for a
  * dataset name that does not yet exist.
  * @since 0.7.0
- * @deprecated will be removed in 0.10.0, use {@link DatasetNotFoundException} instead
+ * @deprecated will be removed in 0.11.0, use {@link DatasetNotFoundException} instead
  */
 public class NoSuchDatasetException extends DatasetNotFoundException {
 

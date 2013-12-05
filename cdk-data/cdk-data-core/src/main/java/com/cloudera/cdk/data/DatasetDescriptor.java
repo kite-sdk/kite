@@ -564,7 +564,7 @@ public class DatasetDescriptor {
      * Get an instance of the configured dataset descriptor. Subsequent calls
      * will produce new instances that are similarly configured.
      *
-     * @deprecated will be removed in 0.10.0
+     * @deprecated will be removed in 0.11.0
      */
     @Override
     @Deprecated

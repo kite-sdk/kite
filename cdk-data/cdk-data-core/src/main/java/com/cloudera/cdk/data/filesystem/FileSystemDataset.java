@@ -71,12 +71,12 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     this.convert = new PathConversion();
 
     this.unbounded = new FileSystemView<E>(this);
-    // remove this.partitionKey for 0.10.0
+    // remove this.partitionKey for 0.11.0
     this.partitionKey = null;
   }
 
   /**
-   * @deprecated will be removed in 0.10.0
+   * @deprecated will be removed in 0.11.0
    */
   @Deprecated
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
@@ -96,7 +96,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   }
 
   /**
-   * @deprecated will be removed in 0.10.0
+   * @deprecated will be removed in 0.11.0
    */
   @Deprecated
   PartitionKey getPartitionKey() {
