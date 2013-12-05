@@ -18,6 +18,7 @@ package com.cloudera.cdk.morphline.solr;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,10 +49,6 @@ import com.cloudera.cdk.morphline.base.Compiler;
 import com.cloudera.cdk.morphline.base.FaultTolerance;
 import com.cloudera.cdk.morphline.base.Fields;
 import com.cloudera.cdk.morphline.base.Notifications;
-import com.cloudera.cdk.morphline.solr.DocumentLoader;
-import com.cloudera.cdk.morphline.solr.SolrLocator;
-import com.cloudera.cdk.morphline.solr.SolrMorphlineContext;
-import com.cloudera.cdk.morphline.solr.SolrServerDocumentLoader;
 import com.cloudera.cdk.morphline.stdlib.PipeBuilder;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.io.Files;
@@ -72,6 +69,8 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
   protected static final String DEFAULT_BASE_DIR = "solr";
   protected static final AtomicInteger SEQ_NUM = new AtomicInteger();
   protected static final AtomicInteger SEQ_NUM2 = new AtomicInteger();
+  
+  protected static final Object NON_EMPTY_FIELD = new Object();
   
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSolrMorphlineTest.class);
 
@@ -119,7 +118,11 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
     super.tearDown();
   }
 
-  protected void testDocumentTypesInternal(String[] files, Map<String,Integer> expectedRecords) throws Exception {
+  protected void testDocumentTypesInternal(
+      String[] files, 
+      Map<String,Integer> expectedRecords, 
+      Map<String, Map<String, Object>> expectedRecordContents) throws Exception {
+    
     deleteAllDocuments();
     int numDocs = 0;    
     for (int i = 0; i < 1; i++) {
@@ -132,6 +135,7 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
         event.getFields().put(Fields.ATTACHMENT_BODY, new ByteArrayInputStream(body));
         event.getFields().put(Fields.ATTACHMENT_NAME, f.getName());
         event.getFields().put(Fields.BASE_ID, f.getName());        
+        collector.reset();
         load(event);
         Integer count = expectedRecords.get(file);
         if (count != null) {
@@ -140,6 +144,20 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
           numDocs++;
         }
         assertEquals("unexpected results in " + file, numDocs, queryResultSetSize("*:*"));
+        Map<String, Object> expectedContents = expectedRecordContents.get(file);
+        if (expectedContents != null) {
+          Record actual = collector.getFirstRecord();
+          for (Map.Entry<String, Object> entry : expectedContents.entrySet()) {
+            if (entry.getValue() == NON_EMPTY_FIELD) {
+              assertNotNull(entry.getKey());
+              assertTrue(actual.getFirstValue(entry.getKey()).toString().length() > 0);
+            } else if (entry.getValue() == null) {
+              assertEquals("key:" + entry.getKey(), 0, actual.get(entry.getKey()).size());
+            } else {
+              assertEquals("key:" + entry.getKey(), Arrays.asList(entry.getValue()), actual.get(entry.getKey()));
+            }
+          }
+        }
       }
     }
     assertEquals(numDocs, queryResultSetSize("*:*"));

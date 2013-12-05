@@ -16,6 +16,7 @@
 package com.cloudera.cdk.morphline.solrcell;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.solr.common.SolrInputDocument;
@@ -28,11 +29,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.cloudera.cdk.morphline.solr.AbstractSolrMorphlineTest;
-import com.cloudera.cdk.morphline.solrcell.StripNonCharSolrContentHandlerFactory;
 
 public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
 
   private Map<String,Integer> expectedRecords = new HashMap();
+  private Map<String, Map<String, Object>> expectedRecordContents = new HashMap();
 
   @Before
   public void setUp() throws Exception {
@@ -55,6 +56,76 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
     expectedRecords.put(path + "/test-documents.tgz", 9);
     expectedRecords.put(path + "/test-documents.zip", 9);
     expectedRecords.put(path + "/multiline-stacktrace.log", 4);
+    
+    {
+      Map<String, Object> record = new LinkedHashMap();
+      record.put("ignored__attachment_mimetype", "image/jpeg");
+      record.put("ignored_exif_isospeedratings", "400");
+      record.put("ignored_meta_creation_date", "2009-08-11T09:09:45");
+      record.put("ignored_tiff_model", "Canon EOS 40D");
+      record.put("text", NON_EMPTY_FIELD);
+      expectedRecordContents.put("/testJPEG_EXIF.jpg", record);
+      expectedRecordContents.put("/testJPEG_EXIF.jpg.tar", record);
+      expectedRecordContents.put("/testJPEG_EXIF.jpg.tar.gz", record);
+    }
+    
+    {
+      String file = path + "/testWORD_various.doc";
+      Map<String, Object> record = new LinkedHashMap();
+      record.put("ignored__attachment_mimetype", "application/msword");
+      record.put("ignored_author", "Michael McCandless");
+      record.put("ignored_creation_date", "2011-09-02T10:11:00Z");
+      record.put("ignored_title", "");
+      record.put("ignored_keywords", "Keyword1 Keyword2");
+      record.put("ignored_subject", "Subject is here");
+      record.put("text", NON_EMPTY_FIELD);
+      expectedRecordContents.put(file, record);
+    }
+    
+    {
+      String file = path + "/testPDF.pdf";
+      Map<String, Object> record = new LinkedHashMap();
+      record.put("ignored__attachment_mimetype", "application/pdf");
+      record.put("ignored_author", "Bertrand Delacrétaz");
+      record.put("ignored_creation_date", "2007-09-15T09:02:31Z");
+      record.put("ignored_title", "Apache Tika - Apache Tika");
+      record.put("ignored_xmp_creatortool", "Firefox");
+      record.put("text", NON_EMPTY_FIELD);
+      expectedRecordContents.put(file, record);
+    }
+    
+    {
+      String file = path + "/email.eml";
+      Map<String, Object> record = new LinkedHashMap();
+      String name = "Patrick Foo <foo@cloudera.com>";
+      record.put("ignored__attachment_mimetype", "message/rfc822");
+      record.put("ignored_author", name);
+      //record.put("ignored_content_length", "1068");
+      record.put("ignored_creation_date", "2013-11-27T20:01:23Z");
+      record.put("ignored_message_from", name);
+      record.put("ignored_message_to", name);
+      record.put("ignored_creator", name);
+      record.put("ignored_dc_creator", name);
+      record.put("ignored_dc_title", "Test EML");
+      record.put("ignored_dcterms_created", "2013-11-27T20:01:23Z");
+      record.put("ignored_meta_author", name);
+      record.put("ignored_meta_creation_date", "2013-11-27T20:01:23Z");
+      record.put("ignored_subject", "Test EML");
+      record.put("text", NON_EMPTY_FIELD);
+      expectedRecordContents.put(file, record);
+    }
+
+    {
+      String file = path + "/testEXCEL.xlsx";
+      Map<String, Object> record = new LinkedHashMap();
+      record.put("ignored__attachment_mimetype", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      record.put("ignored_author", "Keith Bennett");
+      record.put("ignored_creation_date", "2007-10-01T16:13:56Z");
+      record.put("ignored_title", "Simple Excel document");
+      record.put("text", NON_EMPTY_FIELD);
+      expectedRecordContents.put(file, record);
+    }    
+    
   }
   
   @Test
@@ -67,7 +138,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
         path + "/testJPEG_EXIF.jpg.tar.gz",
         //path + "/jpeg2000.jp2",
     };
-    testDocumentTypesInternal(files, expectedRecords);
+    testDocumentTypesInternal(files, expectedRecords, expectedRecordContents);
   }  
 
   @Test
@@ -77,7 +148,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
     String[] files = new String[] {
         path + "/testXML2.xml",
     };
-    testDocumentTypesInternal(files, expectedRecords);
+    testDocumentTypesInternal(files, expectedRecords, expectedRecordContents);
   }  
 
   @Test
@@ -105,7 +176,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
         path + "/sample-statuses-20120906-141433.bz2",
         path + "/email.eml",
     };
-    testDocumentTypesInternal(files, expectedRecords);
+    testDocumentTypesInternal(files, expectedRecords, expectedRecordContents);
   }
   
   @Test
@@ -164,7 +235,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
 //        path + "/testWINMAIL.dat", 
 //        path + "/testWMF.wmf", 
     };   
-    testDocumentTypesInternal(files, expectedRecords);
+    testDocumentTypesInternal(files, expectedRecords, expectedRecordContents);
   }
 
   /**
