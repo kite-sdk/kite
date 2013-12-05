@@ -745,11 +745,28 @@ and removed from the dataset with `delete`. The overloaded form of `delete` that
 takes an entity is a conditional delete that only performs the delete if the entity's
 version field is the same as the one in the store (see Optimistic Concurrency Control,
 discussed below). The `increment` method performs an atomic increment on a named `int`
-or `long` field.
+or `long` field, which must be mapped as a "counter" (see mapping table below).
 
 Keys are represented by the `Key` class, constructed via a `Builder`. All of
 the schema's key fields are required to construct a `Key`, and the builder will
 throw an `IllegalStateException` if a field is missing.
+
+_Schema Mapping_
+
+The "column" and "key" mappings used above demonstrate how fields in the entity
+schema are configured to be stored in HBase. A "mapping" is required for each
+field and indicates how to store that field. The table below shows the
+different mapping types and their definitions:
+
+| Mapping type | Details | Example |
+| --- | --- | --- |
+| key | Store the field in the row key; position is set by the value | `{"type": "key", "value": "0"}` |
+| column | Store the field in the family:qualifier given by the value | `{"type": "column", "value": "fam:qual"}` |
+| keyAsColumn | Store a map or record with the value as the column family and key/field names as qualifiers | `{"type": "keyAsColumn", "value": "fam:"}` |
+| counter | Like column, but can be incremented (cannot be used with OCC) | `{"type": "counter", "value": "fam:qual"}` |
+| occVersion | Use OCC (see below) | `{"type": "counter"}` |
+
+_Optimistic Concurrency_
 
 Optimistic Concurrency Control (OCC) allows one to do get/update/put operations,
 ensuring that another thread or process didn't update the entity between the time we
@@ -764,11 +781,12 @@ _Example: Avro field declared as an OCC check field_
     {
       "name": "conflictVersion",
       "type": "long",
-      "mapping": { "type": "column", "value": "conflict:version", "conflictCheck": true }
+      "default": 0,
+      "mapping": { "type": "occVersion" }
     }
 
-If an Avro entity has a mapping declared as a `conflictCheck`, operations will always use
-OCC on that entity.
+If an Avro entity has a mapping declared with a mapping type `occVersion`,
+operations will always use OCC on that entity.
 
 ## Entities
 

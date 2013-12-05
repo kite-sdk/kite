@@ -36,7 +36,8 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HConstants;
 
 /**
- * A Loader implementation to register URIs for {@link com.cloudera.cdk.data.hbase.impl.HBaseDatasetRepository}.
+ * A Loader implementation to register URIs for
+ * {@link com.cloudera.cdk.data.hbase.HBaseDatasetRepository}.
  */
 public class Loader implements Loadable {
 
