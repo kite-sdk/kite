@@ -42,6 +42,8 @@ public class Formats {
 
   /**
    * CSV: comma-separated values (read-only).
+   *
+   * @since 0.9.0
    */
   public static final Format CSV = new Format("csv");
 

@@ -3,12 +3,24 @@
 All past CDK releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
-## Version TBD
+## Version 0.9.0
 
-Release date: TBD
+Release date: December 5, 2013
 
-Version TBD has the following notable changes:
+Version 0.9.0 has the following notable changes:
 
+* HBase support. There is a new experimental API working with random access datasets
+  stored in HBase. The API exposes get/put operations, but there is no support for
+  scans from an arbitrary row in this release. (The latter will be added in 0.11.0 as a
+  part of the forthcoming [views API](https://issues.cloudera.org/browse/CDK-177).) For
+  usage information, consult the new
+  [HBase example](https://github.com/cloudera/cdk-examples/tree/master/dataset-hbase).
+* Parquet. Datasets in Parquet format can now be written (and read) using Crunch.
+* CSV. Datasets in CSV format can now be read using the dataset APIs. See the
+  [compatibility example](https://github.com/cloudera/cdk-examples/tree/master/dataset-compatibility).
+* Dataset API. Removed APIs that were deprecated in 0.8.0. See the
+  [API Diffs](http://cloudera.github.io/cdk/docs/0.9.0/jdiff/changes.html) for all the
+  changes.
 * Morphlines Library
     * Added morphline command to read from RCFile: [readRCFile](cdk-morphlines/morphlinesReferenceGuide.html#readRCFile) (Prasanna Rajaperumal via whoschek)
     * Added morphline command to convert a morphline record to an Avro record: [toAvro](cdk-morphlines/morphlinesReferenceGuide.html#toAvro)
@@ -25,6 +37,9 @@ Version TBD has the following notable changes:
     * Upgraded cdk-morphlines-saxon module from saxon-HE-9.5.1-2 to saxon-HE-9.5.1-3.
     * Fixed race condition on parallel initialization of multiple Solr morphlines within the same JVM.
     * For enhanced safety readSequenceFile command nomore reuses the identity of Hadoop Writeable objects.
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10277)
+is available from JIRA.
 
 ## Version 0.8.1
 
