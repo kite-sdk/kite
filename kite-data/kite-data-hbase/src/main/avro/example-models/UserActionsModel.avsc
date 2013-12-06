@@ -2,7 +2,7 @@
   "type": "record",
   "name": "UserActionsModel",
   "namespace": "org.kitesdk.data.hbase.avro.example",
-  "tables": ["cdk_example_user_profiles"],
+  "tables": ["kite_example_user_profiles"],
   "fields": [
     { 
       "name": "lastName", 
