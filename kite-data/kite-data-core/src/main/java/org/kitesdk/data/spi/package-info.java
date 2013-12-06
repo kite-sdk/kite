@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * Provides a service provider interface for implementors of CDK Data APIs.
+ * Provides a service provider interface for implementors of Kite Data APIs.
  */
 package org.kitesdk.data.spi;
 

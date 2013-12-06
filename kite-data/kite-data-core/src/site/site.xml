@@ -18,7 +18,7 @@
 
   <body>
 
-    <menu ref="reports" name="CDK Data Core Reports"/>
+    <menu ref="reports" name="Kite Data Core Reports"/>
 
   </body>
 

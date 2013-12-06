@@ -18,7 +18,7 @@
 
   <body>
 
-    <menu name="CDK Data" inherit="top">
+    <menu name="Kite Data" inherit="top">
       <item name="Home" href="index.html"/>
       <item name="Reference Guide" href="guide.html"/>
       <item name="Design" href="design.html"/>
