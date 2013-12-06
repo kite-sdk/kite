@@ -48,11 +48,18 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
   private static final Logger logger = LoggerFactory
       .getLogger(CSVFileReader.class);
 
-  public static final String CHARSET_PROPERTY = "cdk.csv.charset";
-  public static final String DELIMITER_PROPERTY = "cdk.csv.delimiter";
-  public static final String QUOTE_CHAR_PROPERTY = "cdk.csv.quote-char";
-  public static final String ESCAPE_CHAR_PROPERTY = "cdk.csv.escape-char";
-  public static final String LINES_TO_SKIP_PROPERTY = "cdk.csv.lines-to-skip";
+  public static final String CHARSET_PROPERTY = "dataset.csv.charset";
+  public static final String DELIMITER_PROPERTY = "dataset.csv.delimiter";
+  public static final String QUOTE_CHAR_PROPERTY = "dataset.csv.quote-char";
+  public static final String ESCAPE_CHAR_PROPERTY = "dataset.csv.escape-char";
+  public static final String LINES_TO_SKIP_PROPERTY = "dataset.csv.lines-to-skip";
+
+  // old properties
+  public static final String OLD_CHARSET_PROPERTY = "cdk.csv.charset";
+  public static final String OLD_DELIMITER_PROPERTY = "cdk.csv.delimiter";
+  public static final String OLD_QUOTE_CHAR_PROPERTY = "cdk.csv.quote-char";
+  public static final String OLD_ESCAPE_CHAR_PROPERTY = "cdk.csv.escape-char";
+  public static final String OLD_LINES_TO_SKIP_PROPERTY = "cdk.csv.lines-to-skip";
 
   public static final String DEFAULT_CHARSET = "utf8";
   public static final String DEFAULT_DELIMITER = ",";
@@ -65,11 +72,11 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
   private final Schema schema;
 
   // configuration
-  private String charset = DEFAULT_CHARSET;
-  private String delimiter = DEFAULT_DELIMITER;
-  private String quote = DEFAULT_QUOTE;
-  private String escape = DEFAULT_ESCAPE;
-  private int linesToSkip = DEFAULT_LINES_TO_SKIP;
+  private final String charset;
+  private final String delimiter;
+  private final String quote;
+  private final String escape;
+  private final int linesToSkip;
   private Class<E> recordClass = null;
 
   private CSVReader reader = null;
@@ -89,32 +96,49 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
     Preconditions.checkArgument(Schema.Type.RECORD.equals(schema.getType()),
         "Schemas for CSV files must be records of primitive types");
 
-    String charset = descriptor.getProperty(CHARSET_PROPERTY);
-    if (charset != null) {
-      this.charset = charset;
-    }
-    String delimiter = descriptor.getProperty(DELIMITER_PROPERTY);
-    if (delimiter != null) {
-      this.delimiter = delimiter;
-    }
-    String quote = descriptor.getProperty(QUOTE_CHAR_PROPERTY);
-    if (quote != null) {
-      this.quote = quote;
-    }
-    String escape = descriptor.getProperty(ESCAPE_CHAR_PROPERTY);
-    if (escape != null) {
-      this.escape = escape;
-    }
-    String linesToSkip = descriptor.getProperty(LINES_TO_SKIP_PROPERTY);
-    if (linesToSkip != null) {
+    this.charset = firstNonNull(
+        descriptor.getProperty(CHARSET_PROPERTY),
+        descriptor.getProperty(OLD_CHARSET_PROPERTY),
+        DEFAULT_CHARSET);
+    this.delimiter= firstNonNull(
+        descriptor.getProperty(DELIMITER_PROPERTY),
+        descriptor.getProperty(OLD_DELIMITER_PROPERTY),
+        DEFAULT_DELIMITER);
+    this.quote = firstNonNull(
+        descriptor.getProperty(QUOTE_CHAR_PROPERTY),
+        descriptor.getProperty(OLD_QUOTE_CHAR_PROPERTY),
+        DEFAULT_QUOTE);
+    this.escape = firstNonNull(
+        descriptor.getProperty(ESCAPE_CHAR_PROPERTY),
+        descriptor.getProperty(OLD_ESCAPE_CHAR_PROPERTY),
+        DEFAULT_ESCAPE);
+    final String linesToSkipString = firstNonNull(
+        descriptor.getProperty(LINES_TO_SKIP_PROPERTY),
+        descriptor.getProperty(OLD_LINES_TO_SKIP_PROPERTY));
+    int lines = DEFAULT_LINES_TO_SKIP;
+    if (linesToSkipString != null) {
       try {
-        this.linesToSkip = Integer.valueOf(linesToSkip);
+        lines = Integer.valueOf(linesToSkipString);
       } catch (NumberFormatException ex) {
         logger.debug("Defaulting lines to skip, failed to parse: {}",
-            linesToSkip);
-        // linesToSkip remains set to the default
+            linesToSkipString);
+        // lines remains set to the default
       }
     }
+    this.linesToSkip = lines;
+  }
+
+  /**
+   * Returns the first non-null value from the sequence or null if there is no
+   * non-null value. Guava's version allows only 2 operands.
+   */
+  private static <T> T firstNonNull(T... values) {
+    for (T value : values) {
+      if (value != null) {
+        return value;
+      }
+    }
+    return null;
   }
 
   @Override

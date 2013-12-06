@@ -116,7 +116,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
   @Override
   public DatasetReader<GenericData.Record> newReader() throws IOException {
     final DatasetDescriptor desc = new DatasetDescriptor.Builder()
-        .property("cdk.csv.lines-to-skip", "1")
+        .property("dataset.csv.lines-to-skip", "1")
         .schema(VALIDATOR_SCHEMA)
         .build();
     return new CSVFileReader<GenericData.Record>(localfs, validatorFile, desc);
@@ -183,6 +183,41 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
   @Test
   public void testTSV() {
+    final DatasetDescriptor desc = new DatasetDescriptor.Builder()
+        .property("dataset.csv.delimiter", "\t")
+        .property("dataset.csv.lines-to-skip", "1")
+        .schema(STRINGS)
+        .build();
+    final CSVFileReader<GenericData.Record> reader =
+        new CSVFileReader<GenericData.Record>(localfs, tsvFile, desc);
+
+    reader.open();
+    Assert.assertTrue(reader.hasNext());
+    GenericData.Record rec = reader.next();
+    Assert.assertEquals("str", rec.get(0));
+    Assert.assertEquals("34", rec.get(1));
+    Assert.assertEquals("2.11", rec.get(2));
+    Assert.assertEquals("false", rec.get(3));
+
+    Assert.assertTrue(reader.hasNext());
+    rec = reader.next();
+    Assert.assertEquals("str\t2", rec.get(0));
+    Assert.assertEquals("", rec.get(1));
+    Assert.assertEquals("4", rec.get(2));
+    Assert.assertEquals("true", rec.get(3));
+
+    Assert.assertTrue(reader.hasNext());
+    rec = reader.next();
+    Assert.assertEquals("str3", rec.get(0));
+    Assert.assertEquals("", rec.get(1));
+    Assert.assertEquals("null", rec.get(2));
+    Assert.assertEquals("missing value", rec.get(3));
+
+    Assert.assertFalse(reader.hasNext());
+  }
+
+  @Test
+  public void testTSVWithDeprecatedProperties() {
     final DatasetDescriptor desc = new DatasetDescriptor.Builder()
         .property("cdk.csv.delimiter", "\t")
         .property("cdk.csv.lines-to-skip", "1")
