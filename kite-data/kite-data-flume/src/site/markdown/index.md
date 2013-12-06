@@ -1,6 +1,6 @@
-# Cloudera Development Kit - Data Flume Module
+# Kite Data - Flume Module
 
-The CDK Data Flume module contains a Log4j appender for writing Avro records to Flume.
+The Kite Data Flume module contains a Log4j appender for writing Avro records to Flume.
 
-The [CDK logging example](https://github.com/cloudera/cdk-examples/tree/master/logging)
+The [Kite logging example](https://github.com/kite-sdk/kite-examples/tree/master/logging)
 has a usage example for this module.
