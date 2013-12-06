@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "combined_log_format",
-  "namespace": "com.cloudera.cdk.tools",
+  "namespace": "org.kitesdk.tools",
   "fields": [
     {
       "name": "host",

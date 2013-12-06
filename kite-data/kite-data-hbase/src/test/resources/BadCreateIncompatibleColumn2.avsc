@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "OtherTestRecord",
-  "namespace": "com.cloudera.cdk.data.hbase.avro.entities",
+  "namespace": "org.kitesdk.data.hbase.avro.entities",
   "fields": [
     { "name": "keyPart1", "type": "string", "mapping": { "type": "key", "value": "0" } },
     { "name": "keyPart2", "type": "string", "mapping": { "type": "key", "value": "1" } },

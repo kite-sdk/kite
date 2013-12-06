@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "UserProfileModel",
-  "namespace": "com.cloudera.cdk.data.hbase.avro.example",
+  "namespace": "org.kitesdk.data.hbase.avro.example",
   "tables": ["cdk_example_user_profiles"],
   "fields": [
     { 

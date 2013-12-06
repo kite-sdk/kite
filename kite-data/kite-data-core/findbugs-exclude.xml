@@ -15,6 +15,6 @@
   -->
 <FindBugsFilter>
   <Match>
-    <Package name="~com.cloudera.cdk.data.event.*" />
+    <Package name="~org.kitesdk.data.event.*" />
   </Match>
 </FindBugsFilter>
