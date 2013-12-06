@@ -1,0 +1,29 @@
+<bookList>
+    <books region="west">
+        <item cat="S">
+            <title>Number, the Language of Science</title>
+            <author>Danzig</author>
+            <price>5.95</price>
+            <quantity>3</quantity>
+        </item>
+        <item cat="F">
+            <title>Tales of Grandpa Cat</title>
+            <publisher>Associated Press</publisher>
+            <author>Wardlaw, Lee</author>
+            <price>6.58</price>
+            <quantity>5</quantity>
+            <year>2013</year>
+        </item>
+        <item cat="S">
+            <title>Language the Science of Number</title>
+            <author>Danzig</author>
+            <price>8.95</price>
+            <quantity>5</quantity>
+        </item>
+        <?testpi1 here is a message ?>
+    </books>
+    <categories desc="Miscellaneous categories"> A list of categories 
+        <category code="S" desc="Science"/>
+        <category code="I" desc="Science" note="Limited Stock"/>
+    </categories>
+</bookList>
