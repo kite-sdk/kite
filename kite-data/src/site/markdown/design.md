@@ -1,11 +1,12 @@
-# CDK Data Module
+# CDK / Kite Data Module
 
-This is the design draft for the CDK Data module.
+This is the design draft for the CDK Data module, now known as the Kite Data
+Module.
 
 __WARNING WARNING WARNING__
 
-This is the original design document for the CDK data module. It is _not_ kept
-up to date with the current state of the code base. It's here to provide context
+This is the original design document for the data module. It is _not_ kept
+up to date with the current state of the code base or project name. It's here to provide context
 and insight into why the decisions that were made were made, but it's not for
 most users. Instead, check out the [reference guide](guide.html).
 
