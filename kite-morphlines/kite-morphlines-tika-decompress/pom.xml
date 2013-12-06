@@ -16,19 +16,19 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.cloudera.cdk</groupId>
-    <artifactId>cdk-morphlines</artifactId>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-morphlines</artifactId>
     <version>0.9.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-morphlines-tika-decompress</artifactId>
-  <name>CDK Morphlines Tika Decompress</name>
+  <groupId>org.kitesdk</groupId>
+  <artifactId>kite-morphlines-tika-decompress</artifactId>
+  <name>Kite Morphlines Tika Decompress</name>
 
   <dependencies>
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-core</artifactId>
     </dependency>
 
     <dependency> <!-- see http://tika.apache.org -->
@@ -42,8 +42,8 @@
     </dependency>
 
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-morphlines-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-morphlines-core</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -68,7 +68,7 @@
             <configuration>
               <target>
                 <copy todir="${project.build.directory}/test-classes">
-                  <fileset dir="${basedir}/../cdk-morphlines-core/src/test/resources" />
+                  <fileset dir="${basedir}/../kite-morphlines-core/src/test/resources" />
                 </copy>
               </target>
             </configuration>

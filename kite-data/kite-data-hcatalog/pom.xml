@@ -17,17 +17,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>cdk-data-hcatalog</artifactId>
+  <artifactId>kite-data-hcatalog</artifactId>
 
   <parent>
-    <groupId>com.cloudera.cdk</groupId>
-    <artifactId>cdk-data</artifactId>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-data</artifactId>
     <version>0.9.1-SNAPSHOT</version>
   </parent>
 
-  <name>CDK Data Hive Module</name>
+  <name>Kite Data Hive Module</name>
   <description>
-    The CDK Data Hive module provides integration with Hive for CDK datasets.
+    The Kite Data Hive module provides integration with Hive for Kite datasets.
   </description>
 
   <build>
@@ -91,8 +91,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-data-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
 
@@ -129,8 +129,8 @@
 
     <!-- TEST DEPENDENCIES -->
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-data-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
       <version>${project.parent.version}</version>
       <type>test-jar</type>
       <scope>test</scope>

@@ -16,14 +16,14 @@
   <modelVersion>4.0.0</modelVersion>
  
   <parent>
-    <groupId>com.cloudera.cdk</groupId>
-    <artifactId>cdk-morphlines</artifactId>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-morphlines</artifactId>
     <version>0.9.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-morphlines-core</artifactId>
-  <name>CDK Morphlines Core</name>
+  <groupId>org.kitesdk</groupId>
+  <artifactId>kite-morphlines-core</artifactId>
+  <name>Kite Morphlines Core</name>
 
   <dependencies>
     <dependency> <!-- see https://code.google.com/p/guava-libraries -->

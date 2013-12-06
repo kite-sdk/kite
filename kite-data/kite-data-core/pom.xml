@@ -17,18 +17,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>cdk-data-core</artifactId>
+  <artifactId>kite-data-core</artifactId>
 
   <parent>
-    <groupId>com.cloudera.cdk</groupId>
-    <artifactId>cdk-data</artifactId>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-data</artifactId>
     <version>0.9.1-SNAPSHOT</version>
   </parent>
 
-  <name>CDK Data Core Module</name>
+  <name>Kite Data Core Module</name>
   <description>
-    The CDK Data Core module provides simple, intuitive APIs for working with
-    datasets in the Cloudera Platform.
+    The Kite Data Core module provides simple, intuitive APIs for working with
+    datasets in the Hadoop Platform.
   </description>
 
   <build>

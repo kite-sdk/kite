@@ -17,17 +17,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>cdk-data-hbase</artifactId>
+  <artifactId>kite-data-hbase</artifactId>
 
   <parent>
-    <groupId>com.cloudera.cdk</groupId>
-    <artifactId>cdk-data</artifactId>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-data</artifactId>
     <version>0.9.1-SNAPSHOT</version>
   </parent>
 
-  <name>CDK Data HBase Module</name>
+  <name>Kite Data HBase Module</name>
   <description>
-    The CDK Data HBase module provides integration with HBase.
+    The Kite Data HBase module provides integration with HBase.
   </description>
 
   <build>
@@ -141,13 +141,13 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-data-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
       <version>0.9.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>com.cloudera.cdk</groupId>
-      <artifactId>cdk-data-core</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
       <version>0.9.1-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
