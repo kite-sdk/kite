@@ -1,8 +1,8 @@
-# CDK Data Reference Guide
+# Kite Data Reference Guide
 
 ## About This Guide
 
-This reference guide is the primary source of documentation for the CDK Data
+This reference guide is the primary source of documentation for the Kite Data
 module. It covers the high level organization of the APIs,
 primary classes and interfaces, intended usage, available extension points
 for customization, and implementation information where helpful and
@@ -19,7 +19,7 @@ topics (e.g. partitioning schemes, metadata management) will benefit even more.
 
 ## Overview of the Data Module
 
-The CDK Data module is a set of APIs for interacting with datasets in the
+The Kite Data module is a set of APIs for interacting with datasets in the
 Hadoop ecosystem. Specifically built to simplify direct reading and writing
 of datasets in storage subsystems such as the Hadoop Distributed FileSystem
 (HDFS), the Data module provides familiar, stream-oriented and random-access APIs,
@@ -34,7 +34,7 @@ users building applications or systems such as data integration services, the
 Data module will usually be superior in its default choices, data organization,
 and metadata system integration, when compared to custom built code.
 
-In keeping with the overarching theme and principles of the CDK, the Data module
+In keeping with the overarching theme and principles of the Kite, the Data module
 is prescriptive. Rather than present a do-all Swiss Army knife library, this
 module makes specific design choices that guide users toward well-known patterns
 that make sense for many, if not all, cases. It is likely that advanced users
@@ -62,8 +62,8 @@ _datasets_, dataset _readers_, dataset _writers_, and _metadata providers_. Most
 of these objects are interfaces, permitting multiple implementations, each with
 different functionality. The current release contains an implementation of
 each of these components for the Hadoop FileSystem abstraction (found in the
-`com.cloudera.cdk.data.filesystem` package), for Hive (found in the
-`com.cloudera.cdk.data.hcatalog` package), and for HBase (see the section about Dataset
+`org.kitesdk.data.filesystem` package), for Hive (found in the
+`org.kitesdk.data.hcatalog` package), and for HBase (see the section about Dataset
  Repository URIs for how to access it).
 
 While, in theory, any implementation of Hadoop's `FileSystem` abstract class is
@@ -85,7 +85,7 @@ with the relational database analogy, a dataset repository is the equivalent of
 a database of tables. Developers may organize datasets into different dataset
 repositories for reasons related to logical grouping, security and access
 control, backup policies, and so forth. A dataset repository is represented by
-instances of the `com.cloudera.cdk.data.DatasetRepository` interface in the Data
+instances of the `org.kitesdk.data.DatasetRepository` interface in the Data
 module. An instance of a `DatasetRepository` acts as a factory for datasets,
 supplying methods for creating, loading, and deleting datasets. Each dataset
 belongs to exactly one dataset repository. There's no built-in support for
@@ -102,7 +102,7 @@ _DatasetRepository Interface_
     Collection<String> list();
 
 The Data module ships with a `DatasetRepository` implementation
-`com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository` built for operating
+`org.kitesdk.data.filesystem.FileSystemDatasetRepository` built for operating
 on datasets stored in a filesystem supported by Hadoop's `FileSystem`
 abstraction. This implementation requires a root directory under which datasets
 will be (or are) stored, and a `Configuration` that is used to get the `FileSystem`
@@ -168,7 +168,7 @@ needed to read from and write to datasets in a repository. That information is
 created with a dataset and after that is managed by the repository and its
 metadata provider.
 
-The providers implement `com.cloudera.cdk.data.MetadataProvider`, which defines
+The providers implement `org.kitesdk.data.MetadataProvider`, which defines
 a service provider interface used to interact with a service that provides
 dataset metadata information to the rest of the Data APIs. This interface
 defines the contract that metadata services must provide to the library, and
@@ -189,7 +189,7 @@ implementation that makes the necessary API calls to HCatalog's REST service,
 any and all datasets are immediately consumable by systems compatible with
 HCatalog, the storage system represented by the `DatasetRepository`
 implementation, and the format in which the data is written. As it turns out,
-that's a pretty tall order and, in keeping with the CDK's purpose of simplifying
+that's a pretty tall order and, in keeping with the Kite's purpose of simplifying
 rather than presenting additional options, users are encouraged to 1. use
 HCatalog, 2. allow this library to default to snappy compressed Avro data files,
 and 3. use systems that also integrate with HCatalog (directly or indirectly).
@@ -214,7 +214,7 @@ are free to explicitly pass a different implementation using the
 if they want to change this behavior.
 
 The `FileSystemMetadataProvider` (also in the package
-`com.cloudera.cdk.data.filesystem`) plugin stores dataset metadata information on
+`org.kitesdk.data.filesystem`) plugin stores dataset metadata information on
 a Hadoop `FileSystem` in a hidden directory. As with its sibling
 `FileSystemDatasetRepository`, its constructor accepts a Hadoop `FileSystem`
 object and a base directory. When metadata needs to be stored, a directory
@@ -277,7 +277,7 @@ following table lists the URI formats that are supported. See the javadoc for
 | Hive/HCatalog with external tables | `repo:hive://[ms-host]:[ms-port]/[path]?hdfs-host=[host]&hdfs-port=[port]` |
 | HBase (random access) | `repo:hbase:[zookeeper-host1],[zookeeper-host2],[zookeeper-host3]` |
 
-The `DatasetRepositories` class in the `com.cloudera.cdk.data` package provides factory
+The `DatasetRepositories` class in the `org.kitesdk.data` package provides factory
 methods for retrieving a `DatasetRepository` instance for a URI. For almost all cases,
 this is the preferred method of retrieving an instance of a `DatasetRepository`.
 
@@ -318,7 +318,7 @@ provided at the time a dataset is created. The schema is defined using the Avro 
 Entities must all conform to the same schema, however, that schema can evolve based on
 a set of well-defined rules. The relational database analog of a dataset is a table.
 
-Datasets are represented by the `com.cloudera.cdk.data.Dataset` interface,
+Datasets are represented by the `org.kitesdk.data.Dataset` interface,
 which is parameterized by the java type of the entities it is used to read and
 write.
 
@@ -362,7 +362,7 @@ query.
 
 Upon creation of dataset, a name and a _dataset descriptor_ must be provided to
 the `DatasetRepository#create()` method. The descriptor, represented by the
-`com.cloudera.cdk.data.DatasetDescriptor` class, holds all metadata associated with
+`org.kitesdk.data.DatasetDescriptor` class, holds all metadata associated with
 the dataset, the most important of which is the schema. Schemas are always
 represented using Avro's Schema APIs, regardless of how the data is stored by
 the underlying dataset implementation. This simplifies the API for users,
@@ -929,7 +929,7 @@ _Example: Using Avro's GenericRecordBuilder to create a generic entity_
 
     /*
      * Load the schema from User.avsc. Later, we'll an easier way to reference
-     * Avro schemas when working with the CDK Data APIs.
+     * Avro schemas when working with the Kite Data APIs.
      */
     Schema userSchema = new Schema.Parser().parse(new File("User.avsc"));
 

@@ -1,6 +1,6 @@
 # Known Limitations
 
-The CDK Data module has the following known limitations as well as the intended
+The Kite Data module has the following known limitations as well as the intended
 course of action, if available. Users are encouraged to participate in the
 discussion of any feature addition or improvements by way of the mailing lists
 or the indicated JIRA, if it exists.
