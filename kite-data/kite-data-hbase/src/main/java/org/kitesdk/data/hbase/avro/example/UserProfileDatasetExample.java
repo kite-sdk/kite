@@ -28,7 +28,7 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 
 /**
- * This is an example that demonstrates basic CDK HBase functionality. It uses a
+ * This is an example that demonstrates basic Kite HBase functionality. It uses a
  * fictional "user profile" use case that needs basic user profile data (first
  * name, last name, etc...) and user action log data (login, profile changed,
  * etc...) persisted in a wide user table.
@@ -37,7 +37,7 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
  * action data with a single HBase request, as well as atomically update both
  * profile and action log data.
  * 
- * The basic CDK HBase functionality demonstrated includes basic scanning,
+ * The basic Kite HBase functionality demonstrated includes basic scanning,
  * putting, composite datasets, and optimistic concurrency control (OCC).
  */
 public class UserProfileDatasetExample {
@@ -69,9 +69,9 @@ public class UserProfileDatasetExample {
     HBaseAdmin admin = new HBaseAdmin(conf);
 
     // Delete the table if it exists so we start fresh.
-    if (admin.tableExists("cdk_example_user_profiles")) {
-      admin.disableTable("cdk_example_user_profiles");
-      admin.deleteTable("cdk_example_user_profiles");
+    if (admin.tableExists("kite_example_user_profiles")) {
+      admin.disableTable("kite_example_user_profiles");
+      admin.deleteTable("kite_example_user_profiles");
     }
 
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
@@ -81,17 +81,17 @@ public class UserProfileDatasetExample {
 
     DatasetDescriptor userProfileDatasetDescriptor =
         new DatasetDescriptor.Builder().schema(UserProfileModel2.SCHEMA$).build();
-    userProfileDataset = repo.create("cdk_example_user_profiles.UserProfileModel2",
+    userProfileDataset = repo.create("kite_example_user_profiles.UserProfileModel2",
         userProfileDatasetDescriptor);
 
     DatasetDescriptor userActionsDatasetDescriptor =
         new DatasetDescriptor.Builder().schema(UserActionsModel2.SCHEMA$).build();
-    userActionsDataset = repo.create("cdk_example_user_profiles.UserActionsModel2",
+    userActionsDataset = repo.create("kite_example_user_profiles.UserActionsModel2",
         userActionsDatasetDescriptor);
 
     DatasetDescriptor userProfileActionsDatasetDescriptor =
         new DatasetDescriptor.Builder().schema(UserProfileActionsModel2.SCHEMA$).build();
-    userProfileActionsDataset = repo.create("cdk_example_user_profiles.UserProfileActionsProtocol2",
+    userProfileActionsDataset = repo.create("kite_example_user_profiles.UserProfileActionsProtocol2",
         userProfileActionsDatasetDescriptor);
 
   }

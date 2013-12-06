@@ -32,7 +32,7 @@ import org.kitesdk.data.hbase.manager.DefaultSchemaManager;
 import org.kitesdk.data.hbase.tool.SchemaTool;
 
 /**
- * This is an example that demonstrates basic CDK HBase functionality. It uses a
+ * This is an example that demonstrates basic Kite HBase functionality. It uses a
  * fictional "user profile" use case that needs basic user profile data (first
  * name, last name, etc...) and user action log data (login, profile changed,
  * etc...) persisted in a wide user table.
@@ -41,7 +41,7 @@ import org.kitesdk.data.hbase.tool.SchemaTool;
  * action data with a single HBase request, as well as atomically update both
  * profile and action log data.
  * 
- * The basic CDK HBase functionality demonstrated includes basic scanning,
+ * The basic Kite HBase functionality demonstrated includes basic scanning,
  * putting, composite DAOs, and optimistic concurrency control (OCC).
  */
 public class UserProfileExample {
@@ -76,11 +76,11 @@ public class UserProfileExample {
     registerSchemas(conf, schemaManager);
 
     userProfileDao = new SpecificAvroDao<UserProfileModel>(pool,
-        "cdk_example_user_profiles", "UserProfileModel", schemaManager);
+        "kite_example_user_profiles", "UserProfileModel", schemaManager);
     userActionsDao = new SpecificAvroDao<UserActionsModel>(pool,
-        "cdk_example_user_profiles", "UserActionsModel", schemaManager);
+        "kite_example_user_profiles", "UserActionsModel", schemaManager);
     userProfileActionsDao = SpecificAvroDao.buildCompositeDaoWithEntityManager(
-        pool, "cdk_example_user_profiles", UserProfileActionsModel.class,
+        pool, "kite_example_user_profiles", UserProfileActionsModel.class,
         schemaManager);
   }
 
@@ -280,9 +280,9 @@ public class UserProfileExample {
       // Construct an HBaseAdmin object (required by schema tool), and delete it
       // if it exists so we start fresh.
       admin = new HBaseAdmin(conf);
-      if (admin.tableExists("cdk_example_user_profiles")) {
-        admin.disableTable("cdk_example_user_profiles");
-        admin.deleteTable("cdk_example_user_profiles");
+      if (admin.tableExists("kite_example_user_profiles")) {
+        admin.disableTable("kite_example_user_profiles");
+        admin.deleteTable("kite_example_user_profiles");
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
