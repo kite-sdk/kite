@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Copyright 2013 Cloudera Inc.
 #
@@ -15,6 +15,9 @@
 # limitations under the License.
 #
 
+# the directory that contains this file
+source_dir=$(cd "$(dirname "$0")"; pwd)
+
 SCALA=`type -p scala`
 MVN=`type -p mvn`
 
@@ -29,6 +32,6 @@ echo "== Determining classpath. Please wait..."
 dep_classpath=`$MVN dependency:build-classpath | grep -v '^\['`
 full_classpath="target/test-classes:target/classes:$dep_classpath"
 
-echo "== Starting a shell with CDK Data classes"
+echo "== Starting a shell with Kite Data classes"
 
-"$SCALA" -cp "$full_classpath" -i tools/data-shell/data-shell-inc.scala $*
+"$SCALA" -cp "$full_classpath" -i $source_dir/data-shell-inc.scala $*

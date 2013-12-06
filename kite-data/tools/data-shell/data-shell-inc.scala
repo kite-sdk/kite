@@ -27,9 +27,9 @@ import com.google.common.collect.Lists
 import com.google.common.io.Files
 import com.google.common.io.Resources
 
-import com.cloudera.cdk.data._
-import com.cloudera.cdk.data.partition._
-import com.cloudera.cdk.data.filesystem._
+import org.kitesdk.data._
+import org.kitesdk.data.partition._
+import org.kitesdk.data.filesystem._
 
 val fileSystem = FileSystem.get(new Configuration())
 
