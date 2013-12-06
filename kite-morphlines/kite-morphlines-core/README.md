@@ -1,7 +1,7 @@
 # CDK - Morphlines Core
 
-This module contains the Cloudera Morphline compiler, runtime and standard library of commands that higher
-level modules such as `cdk-morphlines-avro` and `cdk-morphlines-tika` depend on.
+This module contains the Morphline compiler, runtime and standard library of commands that higher
+level modules such as `kite-morphlines-avro` and `kite-morphlines-tika` depend on.
 
 Includes commands for flexible log file analysis, single-line records, multi-line records, 
 CSV files, regular expression based pattern matching and extraction, operations on fields for 

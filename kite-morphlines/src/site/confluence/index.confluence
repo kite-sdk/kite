@@ -1,6 +1,6 @@
-h1. Cloudera Morphlines
+h1. Morphlines
 
-Cloudera Morphlines is an open source framework that reduces the time and skills necessary to build and change Hadoop ETL stream processing applications that extract, transform and load data into Apache Solr, HBase, HDFS, Enterprise Data Warehouses, or Analytic Online Dashboards. Want to build or facilitate ETL jobs without programming and without substantial MapReduce skills? Get the job done with a minimum amount of fuss and support costs? Here is how to get started.
+Morphlines is an open source framework that reduces the time and skills necessary to build and change Hadoop ETL stream processing applications that extract, transform and load data into Apache Solr, HBase, HDFS, Enterprise Data Warehouses, or Analytic Online Dashboards. Want to build or facilitate ETL jobs without programming and without substantial MapReduce skills? Get the job done with a minimum amount of fuss and support costs? Here is how to get started.
 
 A morphline is a rich configuration file that makes it easy to define a transformation chain that consumes any kind of data from any kind of data source, processes the data and loads the results into a Hadoop component.  It replaces Java programming with simple configuration steps, and correspondingly reduces the cost and integration effort associated with developing and maintaining custom ETL projects.
 
@@ -10,7 +10,7 @@ The [morphline commands|morphlinesReferenceGuide.html] were developed as part of
 
 h1. Usage in your Maven Project 
 
-To use Cloudera Morphlines in your Maven project, add the following repository to the {{<repositories>}} section of your pom.xml:
+To use Morphlines in your Maven project, add the following repository to the {{<repositories>}} section of your pom.xml:
 
 {code}
 <repository>
@@ -27,8 +27,8 @@ Also, to pull in the minimum set of dependencies add the following dependency to
 
 {code}
 <dependency>
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-morphlines-core</artifactId>
+  <groupId>org.kitesdk</groupId>
+  <artifactId>kite-morphlines-core</artifactId>
   <version>0.8.1</version> <!-- or whatever the latest version is -->
 </dependency>
 {code}
@@ -37,8 +37,8 @@ Alternatively, to pull in the maximum set of dependencies (i.e. all available co
 
 {code}
 <dependency>
-  <groupId>com.cloudera.cdk</groupId>
-  <artifactId>cdk-morphlines-all</artifactId>
+  <groupId>org.kitesdk</groupId>
+  <artifactId>kite-morphlines-all</artifactId>
   <version>0.8.1</version> <!-- or whatever the latest version is -->
   <type>pom</type>
 </dependency>
@@ -147,7 +147,7 @@ morphlines : [
     # Import all morphline commands in these java packages and their
     # subpackages. Other commands that may be present on the classpath are 
     # not visible to this morphline.
-    importCommands : ["com.cloudera.**", "org.apache.solr.**"]
+    importCommands : ["org.kitesdk.**", "org.apache.solr.**"]
 
     commands : [
       {
@@ -225,7 +225,7 @@ morphlines : [
 
 h1. Example Driver Program
 
-This section provides a simple sample Java program that illustrates how to use the API to embed and execute a morphline in a host system ([full source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/test/java/com/cloudera/cdk/morphline/api/MorphlineDemo.java]).
+This section provides a simple sample Java program that illustrates how to use the API to embed and execute a morphline in a host system ([full source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/test/java/org/kitesdk/morphline/api/MorphlineDemo.java]).
 
 {code}
 /** Usage: java ... <morphlines.conf> <dataFile1> ... <dataFileN> */
@@ -253,7 +253,7 @@ You can use this program to rapidly prototype ETL logic and try it with sample f
 To print diagnostic information such as the content of records as they pass through the morphline commands, consider enabling TRACE log level, for example by adding the following line to your log4j.properties file:
 
 {code}
-log4j.logger.com.cloudera.cdk.morphline=TRACE
+log4j.logger.org.kitesdk.morphline=TRACE
 {code}
 
 This code is, in essence, what production tools like [MapReduceIndexerTool|https://github.com/cloudera/search/tree/master/search-mr], [Apache Flume Morphline Solr Sink|http://flume.apache.org/FlumeUserGuide.html#morphlinesolrsink] and [Apache Flume MorphlineInterceptor|http://flume.apache.org/FlumeUserGuide.html#morphline-interceptor] and [Morphline Lily HBase Indexer|http://ngdata.github.io/hbase-indexer] are running as part of their operation, as outlined in the following figure:
@@ -264,11 +264,11 @@ h1. Any Questions?
 
 If you’ve got any questions, please do ask us. The best place is over on our [mailing list|https://groups.google.com/a/cloudera.org/forum/?#!forum/cdk-dev].
 
-More example morphline configuration files can be found in the [unit tests|https://github.com/cloudera/cdk/tree/master/cdk-morphlines/cdk-morphlines-core/src/test/resources/test-morphlines].
+More example morphline configuration files can be found in the [unit tests|https://github.com/kite-sdk/kite/tree/master/kite-morphlines/kite-morphlines-core/src/test/resources/test-morphlines].
 
 A detailed description of all morphline commands can be found in the [Morphlines Reference Guide|morphlinesReferenceGuide.html].
 
-The CDK lives on [GitHub|https://github.com/cloudera/cdk] where users can freely browse, download, fork, and contribute back to the source. Community contributions are not only welcome but strongly encouraged. Since most Java developers use tools such as Maven (or tools that are compatible with Maven repositories), artifacts are also available from the [Cloudera Maven Repository|http://www.cloudera.com/content/cloudera-content/cloudera-docs/CDH4/4.2.0/CDH4-Installation-Guide/cdh4ig_topic_31.html] for easy project integration.
+The CDK lives on [GitHub|https://github.com/kite-sdk/kite] where users can freely browse, download, fork, and contribute back to the source. Community contributions are not only welcome but strongly encouraged. Since most Java developers use tools such as Maven (or tools that are compatible with Maven repositories), artifacts are also available from the [Cloudera Maven Repository|http://www.cloudera.com/content/cloudera-content/cloudera-docs/CDH4/4.2.0/CDH4-Installation-Guide/cdh4ig_topic_31.html] for easy project integration.
 
 
 h1. Avro Use Case
@@ -280,12 +280,12 @@ h3. Viewing Avro
 Let's view the content of a sample Avro file to understand the data:
 {code}
 $ wget http://archive.apache.org/dist/avro/avro-1.7.4/java/avro-tools-1.7.4.jar
-$ java -jar avro-tools-1.7.4.jar tojson cdk-morphlines/cdk-morphlines-core/src/test/resources/test-documents/sample-statuses-20120906-141433.avro
+$ java -jar avro-tools-1.7.4.jar tojson kite-morphlines/kite-morphlines-core/src/test/resources/test-documents/sample-statuses-20120906-141433.avro
 {code}
 
 h3. Inspecting the Schema of the Avro file
 {code}
-$ java -jar avro-tools-1.7.4.jar getschema cdk-morphlines/cdk-morphlines-core/src/test/resources/test-documents/sample-statuses-20120906-141433.avro
+$ java -jar avro-tools-1.7.4.jar getschema kite-morphlines/kite-morphlines-core/src/test/resources/test-documents/sample-statuses-20120906-141433.avro
 
 {
   "type" : "record",
@@ -361,7 +361,7 @@ morphlines : [
     # Import all morphline commands in these java packages and their subpackages.
     # Other commands that may be present on the classpath are not visible to this
     # morphline.
-    importCommands : ["com.cloudera.**", "org.apache.solr.**"]
+    importCommands : ["org.kitesdk.**", "org.apache.solr.**"]
 
     commands : [
       {

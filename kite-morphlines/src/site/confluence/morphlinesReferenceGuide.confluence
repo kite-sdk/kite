@@ -1,43 +1,43 @@
-h1. Cloudera Morphlines Reference Guide
+h1. Morphlines Reference Guide
 
-Cloudera Morphlines provides a set of frequently\-used high\-level transformation and I/O commands that can be combined in application specific ways. The following tables provide a short description of each available command and a link to the complete documentation.
+Morphlines provides a set of frequently\-used high\-level transformation and I/O commands that can be combined in application specific ways. The following tables provide a short description of each available command and a link to the complete documentation.
 
 h3. Implementing your own Custom Command
 
-Before we dive into the _currently available_ commands, it is worth noting again that perhaps the most important property of the Morphlines framework is how easy it is to add new transformations and I/O commands and integrate existing functionality and third party systems. If none of the existing commands match your use case, you can easily write your own command and plug it in. Simply implement the Java interface [Command|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/api/Command.java] or subclass [AbstractCommand|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/base/AbstractCommand.java], have it handle a [Record|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/api/Record.java] and add the resulting Java class to the classpath, along with a [CommandBuilder|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/api/CommandBuilder.java] implementation that defines the name(s) of the command and serves as a factory.
-Here are two example implementations: [toString|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java] and [readLine|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadLineBuilder.java]. No registration or other administrative action is required. Indeed, none of the standard commands are special or intrinsically known per se. All commands are implemented like this, even including standard commands such as {{pipe}}, {{if}}, and {{tryRules}}. This means your custom commands can even replace any standard commands, if desired. With that said, the following tables provide a short description of each available command and a link to the complete documentation.
+Before we dive into the _currently available_ commands, it is worth noting again that perhaps the most important property of the Morphlines framework is how easy it is to add new transformations and I/O commands and integrate existing functionality and third party systems. If none of the existing commands match your use case, you can easily write your own command and plug it in. Simply implement the Java interface [Command|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/api/Command.java] or subclass [AbstractCommand|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/base/AbstractCommand.java], have it handle a [Record|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/api/Record.java] and add the resulting Java class to the classpath, along with a [CommandBuilder|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/api/CommandBuilder.java] implementation that defines the name(s) of the command and serves as a factory.
+Here are two example implementations: [toString|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/ToStringBuilder.java] and [readLine|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdio/ReadLineBuilder.java]. No registration or other administrative action is required. Indeed, none of the standard commands are special or intrinsically known per se. All commands are implemented like this, even including standard commands such as {{pipe}}, {{if}}, and {{tryRules}}. This means your custom commands can even replace any standard commands, if desired. With that said, the following tables provide a short description of each available command and a link to the complete documentation.
 
 h3. Table of Contents
 
-- [#cdk\-morphlines\-core\-stdio]
-- [#cdk\-morphlines\-core\-stdlib]
-- [#cdk\-morphlines\-avro]
-- [#cdk\-morphlines\-json]
-- [#cdk\-morphlines\-hadoop\-core]
-- [#cdk\-morphlines\-hadoop\-sequencefile]
-- [#cdk\-morphlines\-hadoop\-rcfile]
-- [#cdk\-morphlines\-maxmind]
-- [#cdk\-morphlines\-metrics\-servlets]
-- [#cdk\-morphlines\-tika\-core]
-- [#cdk\-morphlines\-tika\-decompress]
-- [#cdk\-morphlines\-saxon]
-- [#cdk\-morphlines\-solr\-core]
-- [#cdk\-morphlines\-solr\-cell]
-- [#cdk\-morphlines\-useragent]
+- [#kite\-morphlines\-core\-stdio]
+- [#kite\-morphlines\-core\-stdlib]
+- [#kite\-morphlines\-avro]
+- [#kite\-morphlines\-json]
+- [#kite\-morphlines\-hadoop\-core]
+- [#kite\-morphlines\-hadoop\-sequencefile]
+- [#kite\-morphlines\-hadoop\-rcfile]
+- [#kite\-morphlines\-maxmind]
+- [#kite\-morphlines\-metrics\-servlets]
+- [#kite\-morphlines\-tika\-core]
+- [#kite\-morphlines\-tika\-decompress]
+- [#kite\-morphlines\-saxon]
+- [#kite\-morphlines\-solr\-core]
+- [#kite\-morphlines\-solr\-cell]
+- [#kite\-morphlines\-useragent]
 
-{anchor:cdk\-morphlines\-core\-stdio}
+{anchor:kite\-morphlines\-core\-stdio}
 \\
 \\
-h3. cdk\-morphlines\-core\-stdio
+h3. kite\-morphlines\-core\-stdio
 | [#readClob] | Converts a byte stream to a string. |
 | [#readCSV] | Extracts zero or more records from the input stream of bytes representing a Comma Separated Values (CSV) file. |
 | [#readLine] | Emits one record per line in the input stream. |
 | [#readMultiLine] | Log parser that collapses multiple input lines into a single record, based on regular expression pattern matching. |
 
-{anchor:cdk\-morphlines\-core\-stdlib}
+{anchor:kite\-morphlines\-core\-stdlib}
 \\
 \\
-h3. cdk\-morphlines\-core\-stdlib
+h3. kite\-morphlines\-core\-stdlib
 | [#addCurrentTime] | Adds the result of [System.currentTimeMillis()|http://docs.oracle.com/javase/7/docs/api/java/lang/System.html#currentTimeMillis()] to a given output field. |
 | [#addLocalHost] | Adds the name or IP of the local host to a given output field. |
 | [#addValues] | Adds a list of values (or the contents of another field) to a given field. |
@@ -71,10 +71,10 @@ h3. cdk\-morphlines\-core\-stdlib
 | [#translate] | Replace a string with the replacement value defined in a given dictionary aka lookup hash table. |
 | [#tryRules] | Simple rule engine for handling a list of heterogeneous input data formats. |
 
-{anchor:cdk\-morphlines\-avro}
+{anchor:kite\-morphlines\-avro}
 \\
 \\
-h3. cdk\-morphlines\-avro
+h3. kite\-morphlines\-avro
 | [#readAvroContainer] | Parses an Apache Avro binary container and emits a morphline record for each contained Avro datum. |
 | [#readAvro] | Parses containerless Avro and emits a morphline record for each contained Avro datum. |
 | [#extractAvroTree] | Recursively walks an Avro tree and extracts all data into a single morphline record. |
@@ -82,96 +82,96 @@ h3. cdk\-morphlines\-avro
 | [#toAvro] | Converts a morphline record to an Avro record. | 
 | [#writeAvroToByteArray] | Serializes Avro records into a byte array. | 
 
-{anchor:cdk\-morphlines\-json}
+{anchor:kite\-morphlines\-json}
 \\
 \\
-h3. cdk\-morphlines\-json
+h3. kite\-morphlines\-json
 | [#readJson] | Parses JSON and emits a morphline record for each contained JSON object, using the [Jackson|https://github.com/FasterXML/jackson-databind] library. |
 | [#extractJsonPaths] | Extracts specific values from a JSON object, akin to a simple form of XPath. |
 
-{anchor:cdk\-morphlines\-hadoop\-core}
+{anchor:kite\-morphlines\-hadoop\-core}
 \\
 \\
-h3. cdk\-morphlines\-hadoop\-core
+h3. kite\-morphlines\-hadoop\-core
 | [#downloadHdfsFile] | Downloads, on startup, zero or more files or directory trees from HDFS to the local file system. |
 
-{anchor:cdk\-morphlines\-hadoop\-sequencefile}
+{anchor:kite\-morphlines\-hadoop\-sequencefile}
 \\
 \\
-h3. cdk\-morphlines\-hadoop\-sequencefile
+h3. kite\-morphlines\-hadoop\-sequencefile
 | [#readSequenceFile] | Parses an Apache Hadoop [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html] and emits a morphline record for each contained key\-value pair. |
 
-{anchor:cdk\-morphlines\-hadoop\-rcfile}
+{anchor:kite\-morphlines\-hadoop\-rcfile}
 \\
 \\
-h3. cdk\-morphlines\-hadoop\-rcfile
+h3. kite\-morphlines\-hadoop\-rcfile
 | [#readRCFile] | Parses an Apache Hadoop [RCFile|http://archive.cloudera.com/cdh4/cdh/4/hive/api/org/apache/hadoop/hive/ql/io/RCFile.html] and emits morphline records row\-wise or column\-wise. |
 
-{anchor:cdk\-morphlines\-maxmind}
+{anchor:kite\-morphlines\-maxmind}
 \\
 \\
-h3. cdk\-morphlines\-maxmind
+h3. kite\-morphlines\-maxmind
 | [#geoIP] | Returns Geolocation information for a given IP address, using an efficient in\-memory Maxmind database lookup. |
 
-{anchor:cdk\-morphlines\-metrics\-servlets}
+{anchor:kite\-morphlines\-metrics\-servlets}
 \\
 \\
-h3. cdk\-morphlines\-metrics\-servlets
+h3. kite\-morphlines\-metrics\-servlets
 | [#registerJVMMetrics] | Registers metrics that are related to the Java Virtual Machine with the MorphlineContext. |
 | [#startReportingMetricsToHTTP] | Exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by Jetty, using the AdminServlet. |
 
-{anchor:cdk\-morphlines\-tika\-core}
+{anchor:kite\-morphlines\-tika\-core}
 \\
 \\
-h3. cdk\-morphlines\-tika\-core
+h3. kite\-morphlines\-tika\-core
 | [#detectMimeType] | Uses Apache Tika to auto-detect the [MIME type|https://en.wikipedia.org/wiki/Internet_media_type] of binary data. |
 
-{anchor:cdk\-morphlines\-tika\-decompress}
+{anchor:kite\-morphlines\-tika\-decompress}
 \\
 \\
-h3. cdk\-morphlines\-tika\-decompress
+h3. kite\-morphlines\-tika\-decompress
 | [#decompress] | Decompresses gzip and bzip2 format. |
 | [#unpack] | Unpacks tar, zip, and jar format. | 
 
-{anchor:cdk\-morphlines\-saxon}
+{anchor:kite\-morphlines\-saxon}
 \\
 \\
-h3. cdk\-morphlines\-saxon
+h3. kite\-morphlines\-saxon
 | [#convertHTML] | Converts any HTML to XHTML, using the [TagSoup|http://ccil.org/~cowan/XML/tagsoup] Java library. |
 | [#xquery] | Parses XML and runs the given W3C XQuery over it, using the [Saxon|http://www.saxonica.com] Java library. |
 | [#xslt] | Parses XML and runs the given W3C XSL Transform over it, using the [Saxon|http://www.saxonica.com] Java library. |
 
-{anchor:cdk\-morphlines\-solr\-core}
+{anchor:kite\-morphlines\-solr\-core}
 \\
 \\
-h3. cdk\-morphlines\-solr\-core
+h3. kite\-morphlines\-solr\-core
 | [#solrLocator] | Specifies a set of configuration parameters that identify the location and schema of a Solr server or SolrCloud. |
 | [#loadSolr] | Loads a record into a Solr server or MapReduce Reducer. |
 | [#generateSolrSequenceKey] | Assigns a unique key that is the concatenation of a field and a running count of the record number within the current session. |
 | [#sanitizeUnknownSolrFields] | Removes record fields that are unknown to Solr {{schema.xml}}, or moves them to fields with a given prefix. |
 | [#tokenizeText] | Uses the embedded [Solr/Lucene Analyzer library|http://wiki.apache.org/solr/AnalyzersTokenizersTokenFilters] to generate tokens from a text string, without sending data to a Solr server. |
 
-{anchor:cdk\-morphlines\-solr\-cell}
+{anchor:kite\-morphlines\-solr\-cell}
 \\
 \\
-h3. cdk\-morphlines\-solr\-cell
+h3. kite\-morphlines\-solr\-cell
 | [#solrCell] | Uses Apache [Tika|http://tika.apache.org] to parse data, then maps the Tika output back to a record using Apache SolrCell. |
 
-{anchor:cdk\-morphlines\-useragent}
+{anchor:kite\-morphlines\-useragent}
 \\
 \\
-h3. cdk\-morphlines\-useragent
+h3. kite\-morphlines\-useragent
 | [#userAgent] | Parses a user agent string and returns structured higher level data like user agent family, operating system, version, and device type. |
 
 \\
 \\
-h1. cdk\-morphlines\-core\-stdio
+h1. kite\-morphlines\-core\-stdio
 
 This maven module contains standard I/O commands for tasks such as acting on single\-line records, multi\-line records, CSV files, and for converting bytes to strings.
 
 h2. readClob
 
-The {{readClob}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadClobBuilder.java]) converts bytes to a string. It emits one record for the entire input stream of the first attachment, interpreting the stream as a Character Large Object (CLOB). The line is put as a string into the {{message}} output field.
+The {{readClob}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdio/ReadClobBuilder.java]) converts bytes to a string. It emits one record for the entire input stream of the first attachment, interpreting the stream as a Character Large Object (CLOB). The line is put as a string into the {{message}} output field.
 
 The command provides the following configuration options:
 
@@ -188,7 +188,7 @@ readClob {
 
 h2. readCSV
 
-The {{readCSV}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadCSVBuilder.java]) extracts zero or more records from the input stream of the first attachment of the record, representing a Comma Separated Values (CSV) file.
+The {{readCSV}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdio/ReadCSVBuilder.java]) extracts zero or more records from the input stream of the first attachment of the record, representing a Comma Separated Values (CSV) file.
 
 For the format see this [article|http://www.creativyst.com/Doc/Articles/CSV/CSV01.htm].
 
@@ -278,7 +278,7 @@ readCSV {
 
 h2. readLine
 
-The {{readLine}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadLineBuilder.java]) emits one record per line in the input stream of the first attachment. The line is put as a string into the {{message}} output field. Empty lines are ignored.
+The {{readLine}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdio/ReadLineBuilder.java]) emits one record per line in the input stream of the first attachment. The line is put as a string into the {{message}} output field. Empty lines are ignored.
 
 The command provides the following configuration options:
 
@@ -299,7 +299,7 @@ readLine {
 
 h2. readMultiLine
 
-The {{readMultiLine}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdio/ReadMultiLineBuilder.java]) is a multiline log parser that collapses multiple input lines into a single record, based on regular expression pattern matching. It supports {{regex}}, {{what}}, and {{negate}} configuration parameters similar to logstash. The line is put as a string into the {{message}} output field.
+The {{readMultiLine}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdio/ReadMultiLineBuilder.java]) is a multiline log parser that collapses multiple input lines into a single record, based on regular expression pattern matching. It supports {{regex}}, {{what}}, and {{negate}} configuration parameters similar to logstash. The line is put as a string into the {{message}} output field.
 
 For example, this can be used to parse log4j with stack traces. Also see [https://gist.github.com/smougenot/3182192] and [http://logstash.net/docs/1.1.13/filters/multiline].
 
@@ -332,13 +332,13 @@ readMultiLine {
 
 {code}
 
-h1. cdk\-morphlines\-core\-stdlib
+h1. kite\-morphlines\-core\-stdlib
 
 This maven module contains standard transformation commands, such as commands for flexible log file analysis, regular expression based pattern matching and extraction, operations on fields for assignment and comparison, operations on fields with list and set semantics, if\-then\-else conditionals, string and timestamp conversions, scripting support for dynamic java code, a small rules engine, logging, and metrics and counters.
 
 h2. addCurrentTime
 
-The {{addCurrentTime}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddCurrentTimeBuilder.java]) adds the result of [System.currentTimeMillis()|http://docs.oracle.com/javase/7/docs/api/java/lang/System.html#currentTimeMillis()]
+The {{addCurrentTime}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/AddCurrentTimeBuilder.java]) adds the result of [System.currentTimeMillis()|http://docs.oracle.com/javase/7/docs/api/java/lang/System.html#currentTimeMillis()]
 as a Long integer to a given output field.
 Typically, a [#convertTimestamp] command is subsequently used to convert this timestamp to an application specific output format.
 
@@ -355,7 +355,7 @@ addCurrentTime {}
 
 h2. addLocalHost
 
-The {{addLocalHost}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddLocalHostBuilder.java]) adds the name or IP of the local host to a given output field.
+The {{addLocalHost}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/AddLocalHostBuilder.java]) adds the name or IP of the local host to a given output field.
 
 The command provides the following configuration options:
 
@@ -374,7 +374,7 @@ addLocalHost {
 
 h2. addValues
 
-The {{addValues}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddValuesBuilder.java]) adds a list of values (or the contents of another field) to a given field. The command takes a set of {{outputField : values}} pairs and performs the following steps: For each output field, adds the given values to the field. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}.
+The {{addValues}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/AddValuesBuilder.java]) adds a list of values (or the contents of another field) to a given field. The command takes a set of {{outputField : values}} pairs and performs the following steps: For each output field, adds the given values to the field. The command can fetch the values of a record field using a _field expression_, which is a string of the form @\{fieldname\}.
 
 Example usage:
 {code}
@@ -392,7 +392,7 @@ addValues {
 
 h2. addValuesIfAbsent
 
-The {{addValuesIfAbsent}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/AddValuesIfAbsentBuilder.java]) adds a list of values (or the contents of another field) to a given field if not already contained. This command is the same as the [#addValues] command, except that a given value is only added to the output field if it is not already contained in the output field.
+The {{addValuesIfAbsent}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/AddValuesIfAbsentBuilder.java]) adds a list of values (or the contents of another field) to a given field if not already contained. This command is the same as the [#addValues] command, except that a given value is only added to the output field if it is not already contained in the output field.
 
 Example usage:
 {code}
@@ -412,7 +412,7 @@ addValuesIfAbsent {
 
 h2. callParentPipe
 
-The {{callParentPipe}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/CallParentPipeBuilder.java]) implements recursion for extracting data from container data formats. The command routes records to the enclosing pipe object. Recall that a morphline _is a_ pipe. Thus, unless a morphline contains nested pipes, the parent pipe of a given command is the morphline itself, meaning that the first command of the morphline is called with the given record. Thus, the {{callParentPipe}} command effectively implements recursion, which is useful for extracting data from container data formats in elegant and concise ways. For example, you could use this to extract data from tar.gz files. This command is typically used in combination with the commands {{detectMimeType}}, {{tryRules}}, {{decompress}}, {{unpack}}, and possibly {{solrCell}}.
+The {{callParentPipe}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/CallParentPipeBuilder.java]) implements recursion for extracting data from container data formats. The command routes records to the enclosing pipe object. Recall that a morphline _is a_ pipe. Thus, unless a morphline contains nested pipes, the parent pipe of a given command is the morphline itself, meaning that the first command of the morphline is called with the given record. Thus, the {{callParentPipe}} command effectively implements recursion, which is useful for extracting data from container data formats in elegant and concise ways. For example, you could use this to extract data from tar.gz files. This command is typically used in combination with the commands {{detectMimeType}}, {{tryRules}}, {{decompress}}, {{unpack}}, and possibly {{solrCell}}.
 
 Example usage:
 {code}
@@ -423,7 +423,7 @@ For a real world example, see the {{solrCell}} command.
 
 h2. contains
 
-The {{contains}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ContainsBuilder.java]) returns whether or not a given value is contained in a given field. The command succeeds if one of the field values of the given named field is equal to one of the the given values, and fails otherwise. Multiple fields can be named, in which case the results are ANDed.
+The {{contains}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/ContainsBuilder.java]) returns whether or not a given value is contained in a given field. The command succeeds if one of the field values of the given named field is equal to one of the the given values, and fails otherwise. Multiple fields can be named, in which case the results are ANDed.
 
 Example usage:
 {code}
@@ -438,7 +438,7 @@ contains { tags : [version1, version2] }
 
 h2. convertTimestamp
 
-The {{convertTimestamp}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ConvertTimestampBuilder.java]) converts the timestamps in a given field from one of a set of input date formats (in an input timezone) to an output date format (in an output timezone), while respecting daylight savings time rules. The command provides reasonable defaults for common use cases.
+The {{convertTimestamp}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/ConvertTimestampBuilder.java]) converts the timestamps in a given field from one of a set of input date formats (in an input timezone) to an output date format (in an output timezone), while respecting daylight savings time rules. The command provides reasonable defaults for common use cases.
 
 The command provides the following configuration options:
 
@@ -488,7 +488,7 @@ convertTimestamp {
 
 h2. decodeBase64
 
-The {{decodeBase64}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/DecodeBase64Builder.java]) converts a Base64 encoded String to a byte\[\] per Section 6.8. "Base64 Content\-Transfer\-Encoding" of [RFC 2045|http://www.ietf.org/rfc/rfc2045.txt]. The command converts each value in the given field and replaces it with the decoded value.
+The {{decodeBase64}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/DecodeBase64Builder.java]) converts a Base64 encoded String to a byte\[\] per Section 6.8. "Base64 Content\-Transfer\-Encoding" of [RFC 2045|http://www.ietf.org/rfc/rfc2045.txt]. The command converts each value in the given field and replaces it with the decoded value.
  
 The command provides the following configuration options:
 
@@ -504,7 +504,7 @@ decodeBase64 {
 
 h2. dropRecord
 
-The {{dropRecord}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/DropRecordBuilder.java]) silently consumes records without ever emitting any record. This is much like piping to {{/dev/null}} in Unix.
+The {{dropRecord}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/DropRecordBuilder.java]) silently consumes records without ever emitting any record. This is much like piping to {{/dev/null}} in Unix.
 
 Example usage:
 {code}
@@ -513,7 +513,7 @@ dropRecord {}
 
 h2. equals
 
-The {{equals}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/EqualsBuilder.java]) succeeds if all field values of the given named fields are equal to the the given values and fails otherwise. Multiple fields can be named, in which case a logical AND is applied to the results.
+The {{equals}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/EqualsBuilder.java]) succeeds if all field values of the given named fields are equal to the the given values and fails otherwise. Multiple fields can be named, in which case a logical AND is applied to the results.
 
 Example usage:
 {code}
@@ -528,7 +528,7 @@ equals { tags : [version1, highPriority] }
 
 h2. extractURIComponents
 
-The {{extractURIComponents}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ExtractURIComponentsBuilder.java]) extracts the following subcomponents from the URIs contained in the given input field and adds them to output fields with the given prefix: scheme, authority, host, port, path, query, fragment, schemeSpecificPart, userInfo.
+The {{extractURIComponents}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/ExtractURIComponentsBuilder.java]) extracts the following subcomponents from the URIs contained in the given input field and adds them to output fields with the given prefix: scheme, authority, host, port, path, query, fragment, schemeSpecificPart, userInfo.
 
 The command provides the following configuration options:
 
@@ -562,7 +562,7 @@ For example, given the input field {{myUri}} with the value {{ http://userinfo@w
 
 h2. extractURIComponent
 
-The {{extractURIComponent}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ExtractURIComponentBuilder.java]) extracts a subcomponent from the URIs contained in the given input field and adds it to the given output field. This is the same as the [#extractURIComponents] command, except that only one component is extracted.
+The {{extractURIComponent}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/ExtractURIComponentBuilder.java]) extracts a subcomponent from the URIs contained in the given input field and adds it to the given output field. This is the same as the [#extractURIComponents] command, except that only one component is extracted.
 
 The command provides the following configuration options:
 
@@ -583,7 +583,7 @@ extractURIComponent {
 
 h2. extractURIQueryParameters
 
-The {{extractURIQueryParameters}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ExtractURIQueryParametersBuilder.java]) extracts the query parameters with a given name from the URIs contained in the given input field and appends them to the given output field.
+The {{extractURIQueryParameters}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/ExtractURIQueryParametersBuilder.java]) extracts the query parameters with a given name from the URIs contained in the given input field and appends them to the given output field.
 
 The command provides the following configuration options:
 
@@ -613,7 +613,7 @@ my_query_params:z
 
 h2. findReplace
 
-The {{findReplace}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/FindReplaceBuilder.java]) examines each string value in a given field and replaces each substring of the string value that matches the given string literal or grok pattern with the given replacement.
+The {{findReplace}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/FindReplaceBuilder.java]) examines each string value in a given field and replaces each substring of the string value that matches the given string literal or grok pattern with the given replacement.
  
 This command also supports grok dictionaries and regexes in the same way as the [#grok] command.
 
@@ -632,7 +632,7 @@ Example usage with grok pattern:
 {code}
 findReplace { 
   field : message
-  dictionaryFiles : [cdk-morphlines-core/src/test/resources/grok-dictionaries]                               
+  dictionaryFiles : [kite-morphlines-core/src/test/resources/grok-dictionaries]                               
   pattern : """%{WORD:myGroup}"""
   #pattern : """(\b\w+\b)"""      
   isRegex : true
@@ -649,7 +649,7 @@ Expected output: {{"hello! world!"}}
 
 h2. generateUUID
 
-The {{generateUUID}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/GenerateUUIDBuilder.java]) sets a universally unique identifier on all records that are intercepted. An example UUID is b5755073\-77a9\-43c1\-8fad\-b7a586fc1b97, which represents a 128-bit value.
+The {{generateUUID}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/GenerateUUIDBuilder.java]) sets a universally unique identifier on all records that are intercepted. An example UUID is b5755073\-77a9\-43c1\-8fad\-b7a586fc1b97, which represents a 128-bit value.
 
 The command provides the following configuration options:
 
@@ -668,7 +668,7 @@ generateUUID {
 
 h2. grok
 
-The {{grok}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/GrokBuilder.java]) uses regular expression pattern matching to extract structured fields from unstructured log data.
+The {{grok}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/GrokBuilder.java]) uses regular expression pattern matching to extract structured fields from unstructured log data.
 
 This is well suited for syslog logs, apache, and other webserver logs, mysql logs, and in general, any log format that is generally written for humans and not computer consumption.
 
@@ -689,7 +689,7 @@ and matches strings like "123", whereas the regex named "HOSTNAME" is associated
 {code}
 and matches strings like "www.cloudera.com".
 
-Morphlines ships with [several standard grok dictionaries|https://github.com/cloudera/cdk/tree/master/cdk-morphlines/cdk-morphlines-core/src/test/resources/grok-dictionaries].
+Morphlines ships with [several standard grok dictionaries|https://github.com/kite-sdk/kite/tree/master/kite-morphlines/kite-morphlines-core/src/test/resources/grok-dictionaries].
 
 A grok command can contain zero or more grok expressions. Each grok expression refers to a record input field name and can contain zero or more grok patterns. The following is an example grok expression that refers to the input field named "message" and contains two grok patterns:
 
@@ -752,7 +752,7 @@ Example usage:
 # syslog_message:listening on 0.0.0.0 port 22.
 #
 grok {
-  dictionaryFiles : [cdk-morphlines-core/src/test/resources/grok-dictionaries]
+  dictionaryFiles : [kite-morphlines-core/src/test/resources/grok-dictionaries]
   expressions : {
     message : """<%{POSINT:syslog_pri}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}"""
 
@@ -803,7 +803,7 @@ Even more example usage:
 # syslog_message:%myproduct-3-mysubfacility-123456: Health probe failed
 #
 grok {
-  dictionaryFiles : [cdk-morphlines-core/src/test/resources/grok-dictionaries]
+  dictionaryFiles : [kite-morphlines-core/src/test/resources/grok-dictionaries]
   dictionaryString : """
     MY_CUSTOM_TIMESTAMP %{MONTH} %{MONTHDAY} %{YEAR} %{TIME}
   """
@@ -820,7 +820,7 @@ Note: An easy way to test grok out is to use the [online grok debugger|http://gr
 
 h2. if
 
-The {{if}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/IfThenElseBuilder.java]) implements if\-then\-else conditional control flow. It consists of a chain of zero or more conditions commands, as well as an optional chain of zero or or more commands that are processed if all conditions succeed ("{{then}} commands"), as well as an optional chain of zero or more commands that are processed if one of the conditions fails ("{{else}} commands").
+The {{if}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/IfThenElseBuilder.java]) implements if\-then\-else conditional control flow. It consists of a chain of zero or more conditions commands, as well as an optional chain of zero or or more commands that are processed if all conditions succeed ("{{then}} commands"), as well as an optional chain of zero or more commands that are processed if one of the conditions fails ("{{else}} commands").
 
 If one of the commands in the {{then}} chain or {{else}} chain fails, then the entire {{if}} command fails and any remaining commands in the {{then}} or {{else}} branch are skipped.
 
@@ -861,7 +861,7 @@ if {
 
 h2. java
 
-The {{java}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/JavaBuilder.java]) provides scripting support for Java.  The command compiles and executes the given Java code block, wrapped into a Java method with a Boolean return type and several parameters, along with a Java class definition that contains the given import statements.
+The {{java}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/JavaBuilder.java]) provides scripting support for Java.  The command compiles and executes the given Java code block, wrapped into a Java method with a Boolean return type and several parameters, along with a Java class definition that contains the given import statements.
 
 The following enclosing method declaration is used to pass parameters to the Java code block:
 
@@ -931,12 +931,12 @@ logInfo {
 To automatically print diagnostic information such as the content of records as they pass through the morphline commands, consider enabling TRACE log level, for example by adding the following line to your log4j.properties file:
 
 {code}
-log4j.logger.com.cloudera.cdk.morphline=TRACE
+log4j.logger.org.kitesdk.morphline=TRACE
 {code}
 
 h2. not
 
-The {{not}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/NotBuilder.java]) inverts the boolean return value of a nested command. The command consists of one nested command, the Boolean return value of which is inverted.
+The {{not}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/NotBuilder.java]) inverts the boolean return value of a nested command. The command consists of one nested command, the Boolean return value of which is inverted.
 
 Example usage:
 {code}
@@ -962,7 +962,7 @@ if {
 
 h2. pipe
 
-The {{pipe}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/Pipe.java]) pipes a record through a chain of commands. The {{pipe}} command has an identifier and contains a chain of zero or more commands, through which records get piped. A command transforms the record into zero or more records. The output records of a command are passed to the next command in the chain. A command has a Boolean return code, indicating success or failure. If any command in the pipe fails (meaning that it returns {{false}}), the whole pipe fails (meaning that it returns {{false}}), which causes backtracking of the command chain.
+The {{pipe}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/Pipe.java]) pipes a record through a chain of commands. The {{pipe}} command has an identifier and contains a chain of zero or more commands, through which records get piped. A command transforms the record into zero or more records. The output records of a command are passed to the next command in the chain. A command has a Boolean return code, indicating success or failure. If any command in the pipe fails (meaning that it returns {{false}}), the whole pipe fails (meaning that it returns {{false}}), which causes backtracking of the command chain.
 
 Because a pipe is itself a command, a pipe can contain arbitrarily nested pipes. A _morphline_ is a pipe. "Morphline" is simply another name for the pipe at the root of the command tree.
 
@@ -981,10 +981,10 @@ pipe {
   # Import all commands in these java packages, subpackages and classes.
   # Other commands on the Java classpath are not visible to this morphline.
   importCommands : [
-    "com.cloudera.**",   # package and all subpackages
+    "org.kitesdk.**",   # package and all subpackages
     "org.apache.solr.**", # package and all subpackages
     "com.mycompany.mypackage.*", # package only
-    "com.cloudera.cdk.morphline.stdlib.GrokBuilder" # fully qualified class
+    "org.kitesdk.morphline.stdlib.GrokBuilder" # fully qualified class
   ]
 
   commands : [
@@ -996,7 +996,7 @@ pipe {
 
 h2. separateAttachments
 
-The {{separateAttachments}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SeparateAttachmentsBuilder.java]) emits one output record for each attachment in the input record's list of attachments. The result is many records, each of which has at most one attachment.
+The {{separateAttachments}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/SeparateAttachmentsBuilder.java]) emits one output record for each attachment in the input record's list of attachments. The result is many records, each of which has at most one attachment.
 
 Example usage:
 {code}
@@ -1005,7 +1005,7 @@ separateAttachments {}
 
 h2. setValues
 
-The {{setValues}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SetValuesBuilder.java]) assigns a given list of values (or the contents of another field) to a given field. This command is the same as the [#addValues] command, except that it first removes all values from the given output field, and then it adds new values.
+The {{setValues}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/SetValuesBuilder.java]) assigns a given list of values (or the contents of another field) to a given field. This command is the same as the [#addValues] command, except that it first removes all values from the given output field, and then it adds new values.
 
 Example usage:
 {code}
@@ -1026,7 +1026,7 @@ setValues {
 
 h2. split
 
-The {{split}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SplitBuilder.java]) divides strings into substrings, by recognizing a _separator_ (a.k.a. "delimiter") which can be expressed as a single character, literal string, regular expression, or [#grok] pattern. This class provides the functionality of Guava's [Splitter|http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/base/Splitter.html] class as a morphline command, plus it also supports grok dictionaries and regexes in the same way as the {{grok}} command, except it doesn't support the grok extraction features.
+The {{split}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/SplitBuilder.java]) divides strings into substrings, by recognizing a _separator_ (a.k.a. "delimiter") which can be expressed as a single character, literal string, regular expression, or [#grok] pattern. This class provides the functionality of Guava's [Splitter|http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/base/Splitter.html] class as a morphline command, plus it also supports grok dictionaries and regexes in the same way as the {{grok}} command, except it doesn't support the grok extraction features.
 
 The command provides the following configuration options:
 
@@ -1100,7 +1100,7 @@ h4. More example usage with grok pattern or normal regex:
 split { 
   inputField : message
   outputField : substrings
-  # dictionaryFiles : [cdk-morphlines-core/src/test/resources/grok-dictionaries] 
+  # dictionaryFiles : [kite-morphlines-core/src/test/resources/grok-dictionaries] 
   dictionaryString : """COMMA_SURROUNDED_BY_WHITESPACE \s*,\s*"""          
   separator : """%{COMMA_SURROUNDED_BY_WHITESPACE}"""        
   # separator : """\s*,\s*"""        
@@ -1112,7 +1112,7 @@ split {
 
 h2. splitKeyValue
 
-The {{splitKeyValue}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/SplitKeyValueBuilder.java]) iterates over the items in a given record input field, interprets each item as a key\-value pair where the key and value are separated by the given separator character, and adds the pair's value to the record field named after the pair's key. Typically, the input field items have been placed there by an upstream [#split] command with a single output field.
+The {{splitKeyValue}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/SplitKeyValueBuilder.java]) iterates over the items in a given record input field, interprets each item as a key\-value pair where the key and value are separated by the given separator character, and adds the pair's value to the record field named after the pair's key. Typically, the input field items have been placed there by an upstream [#split] command with a single output field.
 
 The command provides the following configuration options:
 
@@ -1211,7 +1211,7 @@ WINDOW:0
 
 h2. startReportingMetricsToCSV
 
-The {{startReportingMetricsToCSV}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/StartReportingMetricsToCSVBuilder.java]) starts periodically appending the metrics of all morphline commands to a set of CSV files. The CSV files are named after the metrics.
+The {{startReportingMetricsToCSV}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/StartReportingMetricsToCSVBuilder.java]) starts periodically appending the metrics of all morphline commands to a set of CSV files. The CSV files are named after the metrics.
 
 The command provides the following configuration options:
 
@@ -1227,7 +1227,7 @@ h4. metricFilter
 
 A metricFilter uses pattern matching with include/exclude specifications to determine if a given metric shall be reported to the output destination.
 
-A metric consists of a metric name and a metric class name. A metric matches the filter if the metric matches at least one include specification, but matches none of the exclude specifications. An include/exclude specification consists of zero or more expression pairs. Each expression pair consists of an expression for the metric name, as well as an expression for the metric's class name. Each expression can be a [regex pattern|http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html] (e.g. "regex:foo.\*") or [POSIX glob pattern|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/shaded/org/apache/hadoop/fs/GlobPattern.java] (e.g. "glob:foo\*") or literal string (e.g. "literal:foo") or "\*" which is equivalent to "glob:\*". Each expression pair defines one expression for the metric name and another expression for the metric class name.
+A metric consists of a metric name and a metric class name. A metric matches the filter if the metric matches at least one include specification, but matches none of the exclude specifications. An include/exclude specification consists of zero or more expression pairs. Each expression pair consists of an expression for the metric name, as well as an expression for the metric's class name. Each expression can be a [regex pattern|http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html] (e.g. "regex:foo.\*") or [POSIX glob pattern|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/shaded/org/apache/hadoop/fs/GlobPattern.java] (e.g. "glob:foo\*") or literal string (e.g. "literal:foo") or "\*" which is equivalent to "glob:\*". Each expression pair defines one expression for the metric name and another expression for the metric class name.
  
 If the include specification is absent it defaults to MATCH ALL. If the exclude specification is absent it defaults to MATCH NONE.
 
@@ -1269,7 +1269,7 @@ t,count,mean_rate,m1_rate,m5_rate,m15_rate,rate_unit
 
 h2. startReportingMetricsToJMX
 
-The {{startReportingMetricsToJMX}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/StartReportingMetricsToJMXBuilder.java]) starts publishing the metrics of all morphline commands to [JMX|http://en.wikipedia.org/wiki/Java_Management_Extensions].
+The {{startReportingMetricsToJMX}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/StartReportingMetricsToJMXBuilder.java]) starts publishing the metrics of all morphline commands to [JMX|http://en.wikipedia.org/wiki/Java_Management_Extensions].
 
 The command provides the following configuration options:
 
@@ -1315,7 +1315,7 @@ startReportingMetricsToJMX {
 
 h2. startReportingMetricsToSLF4J
 
-The {{startReportingMetricsToSLF4J}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/StartReportingMetricsToSLF4JBuilder.java]) starts periodically logging the metrics of all morphline commands to [SLF4J|http://www.slf4j.org].
+The {{startReportingMetricsToSLF4J}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/StartReportingMetricsToSLF4JBuilder.java]) starts periodically logging the metrics of all morphline commands to [SLF4J|http://www.slf4j.org].
 
 The command provides the following configuration options:
 
@@ -1330,7 +1330,7 @@ The command provides the following configuration options:
 h4. Example startReportingMetricsToSLF4J usage
 {code}
 startReportingMetricsToSLF4J {
-  logger : "com.cloudera.cdk.morphline.domain1"
+  logger : "org.kitesdk.morphline.domain1"
   frequency : "10 seconds"
 }
 {code}
@@ -1338,7 +1338,7 @@ startReportingMetricsToSLF4J {
 h4. More example startReportingMetricsToSLF4J usage
 {code}
 startReportingMetricsToSLF4J {
-  logger : "com.cloudera.cdk.morphline.domain1"
+  logger : "org.kitesdk.morphline.domain1"
   frequency : "10 seconds"
   defaultDurationUnit : milliseconds
   defaultRateUnit : seconds
@@ -1356,12 +1356,12 @@ startReportingMetricsToSLF4J {
 
 h4. Example output log line
 {code}
-457  [metrics-logger-reporter-thread-1] INFO  com.cloudera.cdk.morphline.domain1  - type=METER, name=morphline.logDebug.numProcessCalls, count=2, mean_rate=144.3001443001443, m1=0.0, m5=0.0, m15=0.0, rate_unit=events/second
+457  [metrics-logger-reporter-thread-1] INFO  org.kitesdk.morphline.domain1  - type=METER, name=morphline.logDebug.numProcessCalls, count=2, mean_rate=144.3001443001443, m1=0.0, m5=0.0, m15=0.0, rate_unit=events/second
 {code}
 
 h2. toByteArray
 
-The {{toByteArray}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToByteArrayBuilder.java]) converts the Java objects in a given field via {{Object.toString()}} to their string representation, and then via {{String.getBytes(Charset)}} to their byte array representation. If the input Java objects are already byte arrays the command does nothing.
+The {{toByteArray}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/ToByteArrayBuilder.java]) converts the Java objects in a given field via {{Object.toString()}} to their string representation, and then via {{String.getBytes(Charset)}} to their byte array representation. If the input Java objects are already byte arrays the command does nothing.
 
 The command provides the following configuration options:
 
@@ -1376,7 +1376,7 @@ toByteArray { field : _attachment_body }
 
 h2. toString
 
-The {{toString}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/ToStringBuilder.java]) converts the Java objects in a given field using the {{Object.toString()}} method to their string representation, and optionally also applies the {{String.trim()}} method to remove leading and trailing whitespace.
+The {{toString}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/ToStringBuilder.java]) converts the Java objects in a given field using the {{Object.toString()}} method to their string representation, and optionally also applies the {{String.trim()}} method to remove leading and trailing whitespace.
 
 The command provides the following configuration options:
 
@@ -1391,7 +1391,7 @@ toString { field : source_type }
 
 h2. translate
 
-The {{translate}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/TranslateBuilder.java]) examines each value in a given field and replaces it with the replacement value defined in a given dictionary aka lookup hash table.
+The {{translate}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/TranslateBuilder.java]) examines each value in a given field and replaces it with the replacement value defined in a given dictionary aka lookup hash table.
  
 The command provides the following configuration options:
 
@@ -1428,7 +1428,7 @@ Expected output: {{level:Unknown}}
 
 h2. tryRules
 
-The {{tryRules}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-core/src/main/java/com/cloudera/cdk/morphline/stdlib/TryRulesBuilder.java]) is a simple rule engine for handling a list of heterogeneous input data formats. The command consists of zero or more rules. A rule consists of zero or more commands.
+The {{tryRules}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/TryRulesBuilder.java]) is a simple rule engine for handling a list of heterogeneous input data formats. The command consists of zero or more rules. A rule consists of zero or more commands.
 
 The rules of a {{tryRules}} command are processed in top\-down order. If one of the commands in a rule fails, the {{tryRules}} command stops processing this rule, backtracks and tries the next rule, and so on, until a rule is found that runs all its commands to completion without failure (the rule _succeeds_). If a rule succeeds, the remaining rules of the current {{tryRules}} command are skipped. If no rule succeeds the record remains unchanged, but a warning may be issued or an exception may be thrown.
 
@@ -1476,13 +1476,13 @@ tryRules {
 }
 {code}
 
-h1. cdk\-morphlines\-avro
+h1. kite\-morphlines\-avro
 
 This maven module contains morphline commands for reading, extracting, and transforming Avro files and Avro objects.
 
 h2. readAvroContainer
 
-The {{readAvroContainer}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ReadAvroContainerBuilder.java]) parses an InputStream or byte array that contains Apache Avro binary container file data. For each Avro datum, the command emits a morphline record containing the datum as an attachment in the field \_attachment\_body.
+The {{readAvroContainer}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-avro/src/main/java/org/kitesdk/morphline/avro/ReadAvroContainerBuilder.java]) parses an InputStream or byte array that contains Apache Avro binary container file data. For each Avro datum, the command emits a morphline record containing the datum as an attachment in the field \_attachment\_body.
 
 The Avro schema that was used to write the Avro data is retrieved from the Avro container. Optionally, the Avro schema that shall be used for reading can be supplied with a configuration option; otherwise it is assumed to be the same as the writer schema.
 
@@ -1514,7 +1514,7 @@ readAvroContainer {
 
 h2. readAvro
 
-The {{readAvro}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ReadAvroBuilder.java]) parses containerless Avro. This command is the same as the [#readAvroContainer] command except that the Avro schema that was used to write the Avro data must be explicitly supplied to the {{readAvro}} command because it expects raw Avro data without an Avro container and hence without a built\-in writer schema.
+The {{readAvro}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-avro/src/main/java/org/kitesdk/morphline/avro/ReadAvroBuilder.java]) parses containerless Avro. This command is the same as the [#readAvroContainer] command except that the Avro schema that was used to write the Avro data must be explicitly supplied to the {{readAvro}} command because it expects raw Avro data without an Avro container and hence without a built\-in writer schema.
 
 Optionally, the Avro schema that shall be used for reading can be supplied with a configuration option; otherwise it is assumed to be the same as the writer schema.
 
@@ -1546,7 +1546,7 @@ readAvro {
 
 h2. extractAvroTree
 
-The {{extractAvroTree}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ExtractAvroTreeBuilder.java]) converts an attached Avro datum to a morphline record by recursively walking the Avro tree and extracting all data into a single morphline record, with fields named by their path in the Avro tree.
+The {{extractAvroTree}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-avro/src/main/java/org/kitesdk/morphline/avro/ExtractAvroTreeBuilder.java]) converts an attached Avro datum to a morphline record by recursively walking the Avro tree and extracting all data into a single morphline record, with fields named by their path in the Avro tree.
 
 The Avro input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [#readAvroContainer] or [#readAvro] command.
 
@@ -1566,7 +1566,7 @@ extractAvroTree {
 
 h2. extractAvroPaths
 
-The {{extractAvroPaths}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ExtractAvroPathsBuilder.java]) extracts specific values from an Avro object, akin to a simple form of XPath. The command uses zero or more Avro path expressions to extract values from an Avro object.
+The {{extractAvroPaths}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-avro/src/main/java/org/kitesdk/morphline/avro/ExtractAvroPathsBuilder.java]) extracts specific values from an Avro object, akin to a simple form of XPath. The command uses zero or more Avro path expressions to extract values from an Avro object.
 
 The Avro input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [#readAvroContainer] or [#readAvro] command.
 
@@ -1604,7 +1604,7 @@ extractAvroPaths {
 
 h2. toAvro
 
-The {{toAvro}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/ToAvroBuilder.java]) converts a morphline record to an Avro record of Java class {{org.apache.avro.generic.IndexedRecord}}.
+The {{toAvro}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-avro/src/main/java/org/kitesdk/morphline/avro/ToAvroBuilder.java]) converts a morphline record to an Avro record of Java class {{org.apache.avro.generic.IndexedRecord}}.
 
 The conversion supports all Avro concepts, including such concepts as nested structures, records, arrays, maps, and unions.
 
@@ -1657,7 +1657,7 @@ toAvro {
 
 h2. writeAvroToByteArray
 
-The {{writeAvroToByteArray}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-avro/src/main/java/com/cloudera/cdk/morphline/avro/WriteAvroToByteArrayBuilder.java]) serializes the Avro records contained in the \_attachment\_body field into a byte array and replaces the \_attachment\_body field with that byte array. The records must share an identical Avro schema. Often, the records were originally generated by the [#toAvro] command.
+The {{writeAvroToByteArray}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-avro/src/main/java/org/kitesdk/morphline/avro/WriteAvroToByteArrayBuilder.java]) serializes the Avro records contained in the \_attachment\_body field into a byte array and replaces the \_attachment\_body field with that byte array. The records must share an identical Avro schema. Often, the records were originally generated by the [#toAvro] command.
 
 The command provides the following configuration options:
 
@@ -1673,13 +1673,13 @@ writeAvroToByteArray {
 }
 {code}
 
-h1. cdk\-morphlines\-json
+h1. kite\-morphlines\-json
 
 This maven module contains morphline commands for reading, extracting, and transforming JSON files and JSON objects.
 
 h2. readJson
 
-The {{readJson}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ReadJsonBuilder.java]) parses an InputStream or byte array that contains JSON data, using the [Jackson|https://github.com/FasterXML/jackson-databind] library. For each top level JSON object, the command emits a morphline record containing the top level object as an attachment in the field \_attachment\_body.
+The {{readJson}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-json/src/main/java/org/kitesdk/morphline/json/ReadJsonBuilder.java]) parses an InputStream or byte array that contains JSON data, using the [Jackson|https://github.com/FasterXML/jackson-databind] library. For each top level JSON object, the command emits a morphline record containing the top level object as an attachment in the field \_attachment\_body.
 
 The input stream or byte array is read from the first attachment of the input record.
 
@@ -1702,7 +1702,7 @@ readJson {
 
 h2. extractJsonPaths
 
-The {{extractJsonPaths}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-json/src/main/java/com/cloudera/cdk/morphline/json/ExtractJsonPathsBuilder.java]) extracts specific values from a JSON object, akin to a simple form of XPath. The command uses zero or more JSON path expressions to extract values from a [Jackson|https://github.com/FasterXML/jackson-databind] JSON object of outputClass [com.fasterxml.jackson.databind.JsonNode|http://wiki.fasterxml.com/JacksonTreeModel].
+The {{extractJsonPaths}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-json/src/main/java/org/kitesdk/morphline/json/ExtractJsonPathsBuilder.java]) extracts specific values from a JSON object, akin to a simple form of XPath. The command uses zero or more JSON path expressions to extract values from a [Jackson|https://github.com/FasterXML/jackson-databind] JSON object of outputClass [com.fasterxml.jackson.databind.JsonNode|http://wiki.fasterxml.com/JacksonTreeModel].
 
 The JSON input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [#readJson] command with {{outputClass : com.fasterxml.jackson.databind.JsonNode}}.
 
@@ -1736,11 +1736,11 @@ extractJsonPaths {
 }
 {code}
 
-h1. cdk\-morphlines\-hadoop\-core
+h1. kite\-morphlines\-hadoop\-core
 
 h2. downloadHdfsFile
 
-The {{downloadHdfsFile}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-core/src/main/java/com/cloudera/cdk/morphline/hadoop/core/DownloadHdfsFileBuilder.java]) downloads, on startup, zero or more files or directory trees from HDFS to the local file system. These files are typically static configuration files that are required by downstream morphline commands, e.g. Avro schema files, XML join tables, grok dictionaries, etc. Storing such configuration files in HDFS can help with consistent centralized configuration management across a set of cluster nodes. 
+The {{downloadHdfsFile}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-hadoop-core/src/main/java/org/kitesdk/morphline/hadoop/core/DownloadHdfsFileBuilder.java]) downloads, on startup, zero or more files or directory trees from HDFS to the local file system. These files are typically static configuration files that are required by downstream morphline commands, e.g. Avro schema files, XML join tables, grok dictionaries, etc. Storing such configuration files in HDFS can help with consistent centralized configuration management across a set of cluster nodes. 
 
 The output directory on the local file system defaults to the current working directory of the current process. If the effective output file or directory already exists it will be deleted and overwritten. 
 
@@ -1758,11 +1758,11 @@ downloadHdfsFile {
 }
 {code}
 
-h1. cdk\-morphlines\-hadoop\-sequencefile
+h1. kite\-morphlines\-hadoop\-sequencefile
 
 h2. readSequenceFile
 
-The {{readSequenceFile}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-sequencefile/src/main/java/com/cloudera/cdk/morphline/hadoop/sequencefile/ReadSequenceFileBuilder.java]) parses an Apache Hadoop [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html] and emits a morphline record for each contained key\-value pair. The sequence file is read from the input stream of the first attachment of the record.
+The {{readSequenceFile}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-hadoop-sequencefile/src/main/java/org/kitesdk/morphline/hadoop/sequencefile/ReadSequenceFileBuilder.java]) parses an Apache Hadoop [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html] and emits a morphline record for each contained key\-value pair. The sequence file is read from the input stream of the first attachment of the record.
 
 The command automatically handles Record\-Compressed and Block\-Compressed SequenceFiles.
 
@@ -1780,11 +1780,11 @@ readSequenceFile {
 }
 {code}
 
-h1. cdk\-morphlines\-hadoop\-rcfile
+h1. kite\-morphlines\-hadoop\-rcfile
 
 h2. readRCFile
 
-The {{readRCFile}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-rcfile/src/main/java/com/cloudera/cdk/morphline/hadoop/rcfile/ReadRCFileBuilder.java]) parses an Apache Hadoop [RCFile|http://archive.cloudera.com/cdh4/cdh/4/hive/api/org/apache/hadoop/hive/ql/io/RCFile.html]. An RCFile can be read Row\-wise or Column\-wise, as follows:
+The {{readRCFile}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-hadoop-rcfile/src/main/java/org/kitesdk/morphline/hadoop/rcfile/ReadRCFileBuilder.java]) parses an Apache Hadoop [RCFile|http://archive.cloudera.com/cdh4/cdh/4/hive/api/org/apache/hadoop/hive/ql/io/RCFile.html]. An RCFile can be read Row\-wise or Column\-wise, as follows:
 
 * Row\-wise: One morphline record is emitted for each row in the RCFile. Each record will contain fields for all the columns configured in the {{columns}} parameter. For example, with an RCFile with 10 rows and 5 columns, Row\-wise mode would emit 10 morphline records.
 * Column\-wise: For each column specified in the {{columns}} parameter, one morphline record per column cell value is emitted. A single RCFile column is read completely from top to bottom before moving to the next column. The order of columns is as specified in the {{columns}} parameter. For example, with an RCFile with 10 rows and 5 columns, Column\-wise mode would emit 50 morphline records.
@@ -1832,13 +1832,13 @@ readRCFile {
 }
 {code}
 
-h1. cdk\-morphlines\-maxmind
+h1. kite\-morphlines\-maxmind
 
 h2. geoIP
 
 *Status: EXPERIMENTAL*
 
-The {{geoIP}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-maxmind/src/main/java/com/cloudera/cdk/morphline/maxmind/GeoIPBuilder.java]) returns Geolocation information for a given IP address, using an efficient in\-memory Maxmind database lookup. The command stores a corresponding Jackson JsonNode Java object into the \_attachment\_body record field. The most recent version of the Maxmind GeoLite2 database can be downloaded as a flat data file from [Maxmind|http://dev.maxmind.com/geoip/geoip2/geolite2].
+The {{geoIP}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-maxmind/src/main/java/org/kitesdk/morphline/maxmind/GeoIPBuilder.java]) returns Geolocation information for a given IP address, using an efficient in\-memory Maxmind database lookup. The command stores a corresponding Jackson JsonNode Java object into the \_attachment\_body record field. The most recent version of the Maxmind GeoLite2 database can be downloaded as a flat data file from [Maxmind|http://dev.maxmind.com/geoip/geoip2/geolite2].
 
 Often, the {{geoIP}} command is combined with commands such as [#extractJsonPaths].
 
@@ -1986,11 +1986,11 @@ Expected output:
 }
 {code}
 
-h1. cdk\-morphlines\-metrics\-servlets
+h1. kite\-morphlines\-metrics\-servlets
 
 h2. registerJVMMetrics
 
-The {{registerJVMMetrics}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-metrics-servlets/src/main/java/com/cloudera/cdk/morphline/metrics/servlets/RegisterJVMMetricsBuilder.java]) registers metrics that are related to the Java Virtual Machine with the
+The {{registerJVMMetrics}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-metrics-servlets/src/main/java/org/kitesdk/morphline/metrics/servlets/RegisterJVMMetricsBuilder.java]) registers metrics that are related to the Java Virtual Machine with the
 MorphlineContext of the morphline. For example, this includes metrics for garbage collection events, buffer pools, threads and thread deadlocks.
 
 Often, the {{registerJVMMetrics}} command is combined with commands such as 
@@ -2008,7 +2008,7 @@ h2. startReportingMetricsToHTTP
 
 *Status: EXPERIMENTAL*
 
-The {{startReportingMetricsToHTTP}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-metrics-servlets/src/main/java/com/cloudera/cdk/morphline/metrics/servlets/StartReportingMetricsToHTTPBuilder.java]) exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by [Jetty|http://en.wikipedia.org/wiki/Jetty_(web_server)], using the [AdminServlet|http://metrics.codahale.com/manual/servlets/].
+The {{startReportingMetricsToHTTP}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-metrics-servlets/src/main/java/org/kitesdk/morphline/metrics/servlets/StartReportingMetricsToHTTPBuilder.java]) exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URLs served by [Jetty|http://en.wikipedia.org/wiki/Jetty_(web_server)], using the [AdminServlet|http://metrics.codahale.com/manual/servlets/].
 
 On startup, a Jetty HTTP server is created that listens on a configurable port. If an HTTP server isn't required for your use case, and reporting metrics to JMX (or SLF4J or CSV) is sufficient, consider command such as [#startReportingMetricsToJMX] or [#startReportingMetricsToSLF4J] or [#startReportingMetricsToCSV].
 
@@ -2330,7 +2330,7 @@ Here is the response to an HTTP GET to http://localhost:8080/threads for a threa
 {code}
 main id=1 state=TIMED_WAITING
     at java.lang.Thread.sleep(Native Method)
-    at com.cloudera.cdk.morphline.metrics.servlets.HttpMetricsMorphlineTest.testBasic(HttpMetricsMorphlineTest.java:51)
+    at org.kitesdk.morphline.metrics.servlets.HttpMetricsMorphlineTest.testBasic(HttpMetricsMorphlineTest.java:51)
     at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
     at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
     at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
@@ -2367,13 +2367,13 @@ Reference Handler id=2 state=WAITING
 ... and so on
 {code}
 
-h1. cdk\-morphlines\-tika\-core
+h1. kite\-morphlines\-tika\-core
 
 This maven module contains morphline commands for auto-detecting MIME types from binary data. Depends on tika\-core.
 
 h2. detectMimeType
 
-The {{detectMimeType}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-tika-core/src/main/java/com/cloudera/cdk/morphline/tika/DetectMimeTypeBuilder.java]) uses Apache Tika to auto-detect the [MIME type|https://en.wikipedia.org/wiki/Internet_media_type] of the first attachment from the binary data. The detected MIME type is assigned to the \_attachment\_mimetype field.
+The {{detectMimeType}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-tika-core/src/main/java/org/kitesdk/morphline/tika/DetectMimeTypeBuilder.java]) uses Apache Tika to auto-detect the [MIME type|https://en.wikipedia.org/wiki/Internet_media_type] of the first attachment from the binary data. The detected MIME type is assigned to the \_attachment\_mimetype field.
 
 The command provides the following configuration options:
 
@@ -2414,13 +2414,13 @@ detectMimeType {
 }
 {code}
 
-h1. cdk\-morphlines\-tika\-decompress
+h1. kite\-morphlines\-tika\-decompress
 
 This maven module contains morphline commands for decompressing and unpacking files. Depends on tika\-core and commons\-compress.
 
 h2. decompress
 
-The {{decompress}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-tika-decompress/src/main/java/com/cloudera/cdk/morphline/tika/decompress/DecompressBuilder.java]) decompresses the first attachment, and supports gzip and bzip2 format.
+The {{decompress}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-tika-decompress/src/main/java/org/kitesdk/morphline/tika/decompress/DecompressBuilder.java]) decompresses the first attachment, and supports gzip and bzip2 format.
 
 Example usage:
 {code}
@@ -2429,20 +2429,20 @@ decompress {}
 
 h2. unpack
 
-The {{unpack}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-tika-decompress/src/main/java/com/cloudera/cdk/morphline/tika/decompress/UnpackBuilder.java]) unpacks the first attachment, and supports tar, zip, and jar format. The command emits one record per contained file.
+The {{unpack}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-tika-decompress/src/main/java/org/kitesdk/morphline/tika/decompress/UnpackBuilder.java]) unpacks the first attachment, and supports tar, zip, and jar format. The command emits one record per contained file.
 
 Example usage:
 {code}
 unpack {}
 {code}
 
-h1. cdk\-morphlines\-saxon
+h1. kite\-morphlines\-saxon
 
 This maven module contains morphline commands for reading, extracting and transforming XML and HTML with XPath, XQuery and XSLT.
 
 h2. convertHTML
 
-The {{convertHTML}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-saxon/src/main/java/com/cloudera/cdk/morphline/saxon/ConvertHTMLBuilder.java]) converts any HTML to XHTML, using the [TagSoup|http://ccil.org/~cowan/XML/tagsoup] Java library. 
+The {{convertHTML}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-saxon/src/main/java/org/kitesdk/morphline/saxon/ConvertHTMLBuilder.java]) converts any HTML to XHTML, using the [TagSoup|http://ccil.org/~cowan/XML/tagsoup] Java library. 
 
 Instead of parsing well\-formed or valid XML, this command parses HTML as it is found in the wild: poor, nasty and brutish, though quite often far from short. TagSoup (and hence this command) is designed for people who have to process this stuff using some semblance of a rational application design. By providing this converter, it allows standard XML tools to be applied to even the worst malformed HTML.
 
@@ -2472,7 +2472,7 @@ convertHTML {
 
 h2. xquery
 
-The {{xquery}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-saxon/src/main/java/com/cloudera/cdk/morphline/saxon/XQueryBuilder.java]) parses an InputStream that contains an XML document and runs the given [W3C XQuery|http://www.w3.org/TR/xquery] over the XML document, using the [Saxon|http://www.saxonica.com] Java library. For each item in the query result sequence, the command emits a corresponding morphline record.
+The {{xquery}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-saxon/src/main/java/org/kitesdk/morphline/saxon/XQueryBuilder.java]) parses an InputStream that contains an XML document and runs the given [W3C XQuery|http://www.w3.org/TR/xquery] over the XML document, using the [Saxon|http://www.saxonica.com] Java library. For each item in the query result sequence, the command emits a corresponding morphline record.
  
 The command reads an InputStream or byte array from the first attachment (field \_attachment\_body) of the input record. 
 
@@ -2540,13 +2540,13 @@ text:Come, see new hot tub under Redwood Tree!
 greeting:hello world
 {code}
 
-More examples can be found in the [unit tests|https://github.com/cloudera/cdk/tree/master/cdk-morphlines/cdk-morphlines-saxon/src/test/resources/test-morphlines].
+More examples can be found in the [unit tests|https://github.com/kite-sdk/kite/tree/master/kite-morphlines/kite-morphlines-saxon/src/test/resources/test-morphlines].
 
 For more background, see resources such as the [XQuery Primer|http://www.stylusstudio.com/xquery_primer_new.html] and [XQuery FLOWR Tutorial|http://www.stylusstudio.com/xquery_flwor.html] and [XQuery: A Guided Tour|http://www.datadirect.com/resources/dis/xquery-guided-tour/index.html] and [Wikipedia|http://en.wikipedia.org/wiki/XQuery].
 
 h2. xslt
 
-The {{xslt}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-saxon/src/main/java/com/cloudera/cdk/morphline/saxon/XSLTBuilder.java]) parses an InputStream that contains an XML document and runs the given [W3C XSL Transform|http://www.w3.org/TR/xslt20] over the XML document, using the [Saxon|http://www.saxonica.com] Java library. For each item in the query result sequence, the command emits a corresponding morphline record.
+The {{xslt}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-saxon/src/main/java/org/kitesdk/morphline/saxon/XSLTBuilder.java]) parses an InputStream that contains an XML document and runs the given [W3C XSL Transform|http://www.w3.org/TR/xslt20] over the XML document, using the [Saxon|http://www.saxonica.com] Java library. For each item in the query result sequence, the command emits a corresponding morphline record.
  
 The command reads an InputStream or byte array from the first attachment (field \_attachment\_body) of the input record. 
 
@@ -2599,14 +2599,14 @@ xslt {
 }
 {code}
 
-More examples can be found in the [unit tests|https://github.com/cloudera/cdk/tree/master/cdk-morphlines/cdk-morphlines-saxon/src/test/resources/test-morphlines].
+More examples can be found in the [unit tests|https://github.com/kite-sdk/kite/tree/master/kite-morphlines/kite-morphlines-saxon/src/test/resources/test-morphlines].
 
 For more background, see resources such as the [XSLT Tutorial|http://www.w3schools.com/xsl/] and [Wikipedia|http://en.wikipedia.org/wiki/XSLT].
 
 
-h1. cdk\-morphlines\-solr\-core
+h1. kite\-morphlines\-solr\-core
 
-This maven module contains morphline commands for Solr that higher level modules such as cdk\-morphlines\-solr\-cell, search\-mr, and search\-flume depend on for indexing.
+This maven module contains morphline commands for Solr that higher level modules such as kite\-morphlines\-solr\-cell, search\-mr, and search\-flume depend on for indexing.
 
 h2. solrLocator
 
@@ -2628,7 +2628,7 @@ solrLocator : {
 
 h2. loadSolr
 
-The {{loadSolr}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-core/src/main/java/com/cloudera/cdk/morphline/solr/LoadSolrBuilder.java]) loads a record into a Solr server or MapReduce Reducer.
+The {{loadSolr}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-solr-core/src/main/java/org/kitesdk/morphline/solr/LoadSolrBuilder.java]) loads a record into a Solr server or MapReduce Reducer.
 
 The command provides the following configuration options:
 
@@ -2657,7 +2657,7 @@ loadSolr {
 
 h2. generateSolrSequenceKey
 
-The {{generateSolrSequenceKey}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-core/src/main/java/com/cloudera/cdk/morphline/solr/GenerateSolrSequenceKeyBuilder.java]) assigns a record unique key that is the concatenation of the given {{baseIdField}} record field, followed by a running count of the record number within the current session. The count is reset to zero whenever a {{startSession}} notification is received.
+The {{generateSolrSequenceKey}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-solr-core/src/main/java/org/kitesdk/morphline/solr/GenerateSolrSequenceKeyBuilder.java]) assigns a record unique key that is the concatenation of the given {{baseIdField}} record field, followed by a running count of the record number within the current session. The count is reset to zero whenever a {{startSession}} notification is received.
 
 For example, assume a CSV file containing multiple records but no unique ids, and the base\_id field is the filesystem path of the file. Now this command can be used to assign the following record values to Solr's unique key field: {{$path#0, $path#1, ... $path#N}}.
 
@@ -2680,7 +2680,7 @@ generateSolrSequenceKey {
 
 h2. sanitizeUnknownSolrFields
 
-The {{sanitizeUnknownSolrFields}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-core/src/main/java/com/cloudera/cdk/morphline/solr/SanitizeUnknownSolrFieldsBuilder.java]) sanitizes record fields that are unknown to Solr {{schema.xml}} by either deleting them ({{renameToPrefix}} parameter is absent or a zero length string) or by moving them to a field prefixed with the given {{renameToPrefix}} (for example, {{renameToPrefix = "ignored_"}} to use typical dynamic Solr fields).
+The {{sanitizeUnknownSolrFields}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-solr-core/src/main/java/org/kitesdk/morphline/solr/SanitizeUnknownSolrFieldsBuilder.java]) sanitizes record fields that are unknown to Solr {{schema.xml}} by either deleting them ({{renameToPrefix}} parameter is absent or a zero length string) or by moving them to a field prefixed with the given {{renameToPrefix}} (for example, {{renameToPrefix = "ignored_"}} to use typical dynamic Solr fields).
 
 Recall that Solr throws an exception on any attempt to load a document that contains a field that is not specified in {{schema.xml}}.
 
@@ -2700,7 +2700,7 @@ sanitizeUnknownSolrFields {
 
 h2. tokenizeText
 
-The {{tokenizeText}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-core/src/main/java/com/cloudera/cdk/morphline/solr/TokenizeTextBuilder.java]) uses the embedded [Solr/Lucene Analyzer library|http://wiki.apache.org/solr/AnalyzersTokenizersTokenFilters] to generate tokens from a text string, without sending data to a Solr server.
+The {{tokenizeText}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-solr-core/src/main/java/org/kitesdk/morphline/solr/TokenizeTextBuilder.java]) uses the embedded [Solr/Lucene Analyzer library|http://wiki.apache.org/solr/AnalyzersTokenizersTokenFilters] to generate tokens from a text string, without sending data to a Solr server.
 
 This is useful for prototyping and debugging Solr applications. It is also useful for standalone usage outside of Solr, e.g. for extracting text features from documents for use with recommendation systems, clustering and classification applications.
 
@@ -2759,13 +2759,13 @@ This example assumes the Solr field type named "text\_en" is defined in {{schema
 </fieldType>
 {code}
 
-h1. cdk\-morphlines\-solr\-cell
+h1. kite\-morphlines\-solr\-cell
 
 This maven module contains morphline commands for using SolrCell with Tika parsers. This includes support for types including HTML, XML, PDF, Word, Excel, Images, Audio, and Video.
 
 h2. solrCell
 
-The {{solrCell}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-solr-cell/src/main/java/com/cloudera/cdk/morphline/solrcell/SolrCellBuilder.java]) pipes the first attachment of a record into one of the given Apache [Tika|http://tika.apache.org] parsers, then maps the Tika output back to a record using Apache SolrCell.
+The {{solrCell}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-solr-cell/src/main/java/org/kitesdk/morphline/solrcell/SolrCellBuilder.java]) pipes the first attachment of a record into one of the given Apache [Tika|http://tika.apache.org] parsers, then maps the Tika output back to a record using Apache SolrCell.
 
 The Tika parser is chosen from the configurable list of parsers, depending on the MIME type specified in the input record. Typically, this requires an upstream {{detectMimeType}} command.
 
@@ -2779,7 +2779,7 @@ The command provides the following configuration options:
 | captureAttr | false | Whether to index attributes of the Tika XHTML elements into separate fields, named after the element. For example, when extracting from HTML, Tika can return the href attributes in {{<a>}} tags as fields named "a". |
 | xpath | null | When extracting, only return Tika XHTML content that satisfies the XPath expression. See [http://tika.apache.org/1.4/parser.html] for details on the format of Tika XHTML. See also [http://wiki.apache.org/solr/TikaExtractOnlyExampleOutput]. |
 | lowernames | false | Map all field names to lowercase with underscores. For example, Content-Type would be mapped to content_type. |
-| solrContentHandlerFactory | com.cloudera.cdk.morphline. solrcell.TrimSolrContentHandlerFactory | A Java class to handle bridging from Tika to SolrCell. |
+| solrContentHandlerFactory | org.kitesdk.morphline. solrcell.TrimSolrContentHandlerFactory | A Java class to handle bridging from Tika to SolrCell. |
 | parsers | \[\] | List of fully qualified Java class names of one or more Tika parsers. |
 
 Example usage:
@@ -2808,7 +2808,7 @@ Here is a complex morphline that demonstrates integrating multiple heterogenous 
 morphlines : [
   {
     id : morphline1
-    importCommands : ["com.cloudera.**", "org.apache.solr.**"]
+    importCommands : ["org.kitesdk.**", "org.apache.solr.**"]
 
     commands : [
       {
@@ -3012,11 +3012,11 @@ morphlines : [
 Note: More information on SolrCell can be found here: [http://wiki.apache.org/solr/ExtractingRequestHandler]
 {note}
 
-h1. cdk\-morphlines\-useragent
+h1. kite\-morphlines\-useragent
 
 h2. userAgent
 
-The {{userAgent}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-useragent/src/main/java/com/cloudera/cdk/morphline/useragent/UserAgentBuilder.java]) parses a user agent string and returns structured higher level data like user agent family, operating system, version, and device type, using the underlying API and regexes.yaml BrowserScope database from [ua-parser|https://github.com/tobie/ua-parser].
+The {{userAgent}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-useragent/src/main/java/org/kitesdk/morphline/useragent/UserAgentBuilder.java]) parses a user agent string and returns structured higher level data like user agent family, operating system, version, and device type, using the underlying API and regexes.yaml BrowserScope database from [ua-parser|https://github.com/tobie/ua-parser].
 
 The command provides the following configuration options:
 

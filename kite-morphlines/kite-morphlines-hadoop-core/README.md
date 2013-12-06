@@ -1,3 +1,3 @@
 # CDK - Morphlines Hadoop Core
 
-This module contains Cloudera Morphline commands for transferring HDFS files.
+This module contains Morphline commands for transferring HDFS files.
