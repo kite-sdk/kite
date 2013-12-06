@@ -1736,7 +1736,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
   
   @Test
   public void testImportSpecs() {
-    List<String> importSpecs = Arrays.asList("com.cloudera.**", "org.apache.solr.**", "net.*", getClass().getName());
+    List<String> importSpecs = Arrays.asList("org.kitesdk.**", "org.apache.solr.**", "net.*", getClass().getName());
     for (Class clazz : new MorphlineContext().getTopLevelClasses(importSpecs, CommandBuilder.class)) {
       //System.out.println("found " + clazz);
     }
