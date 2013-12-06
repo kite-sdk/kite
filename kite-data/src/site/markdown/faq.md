@@ -21,9 +21,19 @@
     percentage of the time. For the rest of the time, well, feature requests are
     happily accepted (double karma if they come with patches)!
 
+* What happened to CDK?
+
+    CDK has been renamed to Kite, this project. The main goal of Kite is to
+    increase the accessibility of Apache Hadoop as a platform. This isn't
+    specific to Cloudera, so we updated the name to correctly represent the
+    project as an open, community-driven set of tools. 
+
 * What format is my data stored in?
 
-    Snappy compressed, binary, Avro data files, according to Avro's [object
+    Data is stored using either Avro, for record-oriented storage, or Parquet,
+    for column-oriented storage.
+
+    Avro files are snappy-compressed and encoded using Avro's binary encoder, according to Avro's [object
     container file spec][avro-cf]. Avro meets the criteria for sane storage and
     operation of data. Specifically, Avro:
 
@@ -35,6 +45,10 @@
     * is fast to serialize/deserialize.
     * is well-supported within the Hadoop ecosystem.
     * is open source under a permissive license.
+
+    Parquet files are also compressed, binary-encoded files for efficient
+    column-oriented data patterns, defined by the [parquet file
+    specification][parquet-spec].
 
 * Why not store data as protocol buffers?
 
@@ -61,3 +75,4 @@
     * Follow the existing style and standards.
 
 [avro-cf]: http://avro.apache.org/docs/current/spec.html#Object+Container+Files "Apache Avro - Object container files"
+[parquet-spec]: https://github.com/Parquet/parquet-format#file-format
