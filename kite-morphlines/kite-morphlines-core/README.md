@@ -1,4 +1,4 @@
-# CDK - Morphlines Core
+# Kite - Morphlines Core
 
 This module contains the Morphline compiler, runtime and standard library of commands that higher
 level modules such as `kite-morphlines-avro` and `kite-morphlines-tika` depend on.

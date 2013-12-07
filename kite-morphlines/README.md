@@ -1,4 +1,4 @@
-# CDK - Morphlines Parent
+# Kite - Morphlines Parent
 
 Morphlines is an open source framework that reduces the time and skills necessary to build and
 change Hadoop ETL stream processing applications that extract, transform and load data into Apache Solr, Enterprise Data Warehouses, HDFS, HBase or Analytic Online Dashboards.
