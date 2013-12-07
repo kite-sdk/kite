@@ -1,6 +1,6 @@
 # How to Contribute
 
-The CDK is an open source project open to contribution from anyone who chooses
+The Kite SDK is an open source project open to contribution from anyone who chooses
 to do so. Anyone may contribute anything to the project they wish. This
 includes, but is not limited to: code, build system enhancements, documentation,
 examples, and supporting tools. There are, however, a few guidelines, as well as
@@ -9,7 +9,7 @@ even fewer hard rules we ask you to follow.
 ## Join the cdk-dev group
 
 Join the [cdk-dev](https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev)
-group for discussion of CDK development.
+group for discussion of Kite development.
 
 ## Complete a Contributor License Agreement
 

@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<project name="CDK">
+<project name="Kite">
 
   <publishDate position="bottom" format="yyyy-MM-dd" />
   <version position="bottom" />
@@ -32,19 +32,19 @@
       <highlightJsTheme>github</highlightJsTheme>
       <brand>
         <!-- Brand text in top-left part of the site -->
-        <name>Cloudera Development Kit</name>
+        <name>Kite Software Development Kit</name>
       </brand>
 
       <!-- Split menus in the bottom navigation -->
       <bottomNav>
         <column>Main</column>
-        <column>Modules|CDK.*</column>
+        <column>Modules|Kite.*</column>
         <column>Contribute</column>
       </bottomNav>
 
       <pages>
-          <index project="cdk-parent">
-            <titleTemplate>Cloudera Development Kit</titleTemplate>
+          <index project="kite-parent">
+            <titleTemplate>Kite Software Development Kit</titleTemplate>
             <breadcrumbs>false</breadcrumbs>
             <toc>false</toc>
             <markPageHeader>false</markPageHeader>
@@ -64,18 +64,18 @@
       <item name="Javadoc" href="apidocs/index.html"/>
       <item name="API Diffs" href="jdiff/changes.html"/>
       <item name="Dependency Information" href="dependencies.html"/>
-      <item name="Examples" href="http://github.com/cloudera/cdk-examples"/>
+      <item name="Examples" href="http://github.com/kite-sdk/kite-examples"/>
     </menu>
 
     <menu name="Modules" inherit="top">
-      <item name="CDK Data" href="cdk-data/index.html"/>
-      <item name="CDK Maven Plugin" href="cdk-maven-plugin/index.html"/>
-      <item name="CDK Morphlines" href="cdk-morphlines/index.html"/>
-      <item name="CDK Tools" href="cdk-tools/index.html"/>
+      <item name="Kite Data" href="kite-data/index.html"/>
+      <item name="Kite Maven Plugin" href="kite-maven-plugin/index.html"/>
+      <item name="Kite Morphlines" href="kite-morphlines/index.html"/>
+      <item name="Kite Tools" href="kite-tools/index.html"/>
     </menu>
 
     <menu name="Contribute" inherit="bottom">
-      <item name="Source Repository" href="http://github.com/cloudera/cdk"/>
+      <item name="Source Repository" href="http://github.com/kite-sdk/kite"/>
       <item name="JIRA" href="https://issues.cloudera.org/browse/CDK"/>
       <item name="Mailing List" href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"/>
       <item name="How To Contribute" href="how_to_contribute.html"/>
