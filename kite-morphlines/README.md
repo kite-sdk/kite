@@ -26,7 +26,7 @@ See [Online Documentation](http://kitesdk.org/docs/current/kite-morphlines/index
 
 ```xml
 <dependency>
-  <groupId>com.cloudera.cdk</groupId>
+  <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-core</artifactId>
   <version>0.8.1</version> <!-- or whatever the latest version is -->
 </dependency>
@@ -36,7 +36,7 @@ See [Online Documentation](http://kitesdk.org/docs/current/kite-morphlines/index
 
 ```xml
 <dependency>
-  <groupId>com.cloudera.cdk</groupId>
+  <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-all</artifactId>
   <version>0.8.1</version> <!-- or whatever the latest version is -->
   <type>pom</type>
@@ -49,7 +49,7 @@ This step builds the software from source.
 
 ```bash
 git clone https://github.com/kite-sdk/kite.git
-cd cdk
+cd kite
 #git tag # list available releases
 #git checkout master
 #git checkout release-0.8.1 # or whatever the latest version is
@@ -64,7 +64,7 @@ find kite-morphlines/kite-morphlines-all/target -name '*.jar'
 * Build the software as described above. Then create Eclipse projects like this:
 
 ```bash
-cd cdk
+cd kite
 mvn eclipse:eclipse
 ```
 
@@ -72,7 +72,7 @@ mvn eclipse:eclipse
 It will also download and attach the jars of all transitive dependencies and their source code to the eclipse
 projects, so you can readily browse around the source of the entire call stack.
 * Then in eclipse do Menu `File/Import/Maven/Existing Maven Project/` on the root parent
-directory `~/cdk` and select all submodules, then "Next" and "Finish".
+directory `~/kite` and select all submodules, then "Next" and "Finish".
 * You will see some maven project errors that keep eclipse from building the workspace because
 the eclipse maven plugin has some weird quirks and limitations. To work around this, next, disable
 the maven "Nature" by clicking on the project in the browser, right clicking on Menu
