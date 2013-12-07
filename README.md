@@ -1,10 +1,10 @@
-# Cloudera Development Kit
+# Kite
 
-The Cloudera Development Kit, or CDK for short, is a set of libraries, tools, examples,
+Kite is a set of libraries, tools, examples,
 and documentation focused on making it easier to build systems on top of the
 Hadoop ecosystem.
 
-The goals of the CDK are:
+The goals of Kite are:
 
 * Codify expert patterns and practices for building data-oriented systems and
 applications.
@@ -13,46 +13,46 @@ applications.
 * Support piecemeal adoption via loosely-coupled modules.
 
 Eric Sammer recorded a [webinar](http://www.cloudera.com/content/cloudera/en/resources/library/recordedwebinar/cloudera-development-kit-cdk-hadoop-application-development-made-easier.html)
-in which he talks about the goals of the CDK.
+in which he talks about the goals of the project, which was then called CDK (the Cloudera Development Kit).
 
 This project is organized into modules. Modules may be independent or have
-dependencies on other modules within the CDK. When possible, dependencies on
+dependencies on other modules within Kite. When possible, dependencies on
 external projects are minimized.
 
 ## Modules
 
 The following modules currently exist.
 
-### CDK Data
+### Kite Data
 
 The data module provides logical abstractions on top of storage subsystems (e.g.
 HDFS) that let users think and operate in terms of records, datasets, and
 dataset repositories. If you're looking to read or write records directly
 to/from a storage system, the data module is for you.
 
-### CDK Maven Plugin
+### Kite Maven Plugin
 
-The CDK Maven Plugin provides Maven goals for packaging, deploying, and running
+The Kite Maven Plugin provides Maven goals for packaging, deploying, and running
 distributed applications.
 
-### CDK Morphlines
+### Kite Morphlines
 
 The Morphlines module reduces the time and skills necessary to build and change Hadoop
 ETL stream processing applications that extract, transform and load data into Apache
 Solr, Enterprise Data Warehouses, HDFS, HBase or Analytic Online Dashboards.
 
-### CDK Tools
+### Kite Tools
 
 The tools module provides command-line tools and APIs for performing common tasks with
-the CDK.
+the Kite.
 
 ## Examples
 
-Example code demonstrating how to use the CDK can be found in the separate GitHub
-repository at [https://github.com/cloudera/cdk-examples](https://github.com/cloudera/cdk-examples)
+Example code demonstrating how to use Kite can be found in the separate GitHub
+repository at [https://github.com/kite-sdk/kite-examples](https://github.com/kite-sdk/kite-examples)
 
 ## License
 
-The CDK is provided under the Apache Software License 2.0. See the file
+Kite is provided under the Apache Software License 2.0. See the file
 `LICENSE.txt` for more information.
 
