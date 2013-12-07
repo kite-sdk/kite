@@ -96,23 +96,23 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
     Preconditions.checkArgument(Schema.Type.RECORD.equals(schema.getType()),
         "Schemas for CSV files must be records of primitive types");
 
-    this.charset = firstNonNull(
+    this.charset = coalesce(
         descriptor.getProperty(CHARSET_PROPERTY),
         descriptor.getProperty(OLD_CHARSET_PROPERTY),
         DEFAULT_CHARSET);
-    this.delimiter= firstNonNull(
+    this.delimiter= coalesce(
         descriptor.getProperty(DELIMITER_PROPERTY),
         descriptor.getProperty(OLD_DELIMITER_PROPERTY),
         DEFAULT_DELIMITER);
-    this.quote = firstNonNull(
+    this.quote = coalesce(
         descriptor.getProperty(QUOTE_CHAR_PROPERTY),
         descriptor.getProperty(OLD_QUOTE_CHAR_PROPERTY),
         DEFAULT_QUOTE);
-    this.escape = firstNonNull(
+    this.escape = coalesce(
         descriptor.getProperty(ESCAPE_CHAR_PROPERTY),
         descriptor.getProperty(OLD_ESCAPE_CHAR_PROPERTY),
         DEFAULT_ESCAPE);
-    final String linesToSkipString = firstNonNull(
+    final String linesToSkipString = coalesce(
         descriptor.getProperty(LINES_TO_SKIP_PROPERTY),
         descriptor.getProperty(OLD_LINES_TO_SKIP_PROPERTY));
     int lines = DEFAULT_LINES_TO_SKIP;
@@ -130,9 +130,9 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
   /**
    * Returns the first non-null value from the sequence or null if there is no
-   * non-null value. Guava's version allows only 2 operands.
+   * non-null value.
    */
-  private static <T> T firstNonNull(T... values) {
+  private static <T> T coalesce(T... values) {
     for (T value : values) {
       if (value != null) {
         return value;

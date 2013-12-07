@@ -99,7 +99,7 @@ class HiveUtils {
     builder.location(fs.makeQualified(dataLocation));
 
     // custom properties
-    String namesProperty = Objects.firstNonNull(
+    String namesProperty = coalesce(
         table.getProperty(CUSTOM_PROPERTIES_PROPERTY_NAME),
         table.getProperty(OLD_CUSTOM_PROPERTIES_PROPERTY_NAME));
     if (namesProperty != null) {
@@ -108,7 +108,7 @@ class HiveUtils {
       }
     }
 
-    String partitionProperty = Objects.firstNonNull(
+    String partitionProperty = coalesce(
         table.getProperty(PARTITION_EXPRESSION_PROPERTY_NAME),
         table.getProperty(OLD_PARTITION_EXPRESSION_PROPERTY_NAME));
     if (partitionProperty != null) {
@@ -138,6 +138,19 @@ class HiveUtils {
     }  catch (IllegalStateException ex) {
       throw new MetadataProviderException("Cannot find schema: missing metadata");
     }
+  }
+
+  /**
+   * Returns the first non-null value from the sequence or null if there is no
+   * non-null value.
+   */
+  private static <T> T coalesce(T... values) {
+    for (T value : values) {
+      if (value != null) {
+        return value;
+      }
+    }
+    return null;
   }
 
   static Table tableForDescriptor(
