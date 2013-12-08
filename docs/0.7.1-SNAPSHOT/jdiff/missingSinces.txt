@@ -1,0 +1,24 @@
+NO DOC BLOCK: com.cloudera.cdk.data.DatasetExistsException Class
+MISSING @SINCE TAG: com.cloudera.cdk.data.DatasetRepositories Class
+MISSING @SINCE TAG: com.cloudera.cdk.morphline.stdlib.StartReportingMetricsToCSVBuilder Class
+MISSING @SINCE TAG: com.cloudera.cdk.morphline.stdlib.StartReportingMetricsToJMXBuilder Class
+MISSING @SINCE TAG: com.cloudera.cdk.morphline.stdlib.StartReportingMetricsToSLF4JBuilder Class
+NO DOC BLOCK: com.cloudera.cdk.data.FieldPartitioner Constructor (java.lang.String, java.lang.Class<T>, int)
+NO DOC BLOCK: com.cloudera.cdk.data.FieldPartitioner Constructor (java.lang.String, java.lang.String, java.lang.Class<T>, int)
+OK: com.cloudera.cdk.data.PartitionStrategy.Builder Method day(java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.Configs Method getEntrySet(com.typesafe.config.Config)
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.Configs Method getLocale(com.typesafe.config.Config, java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.Configs Method getLocale(com.typesafe.config.Config, java.lang.String, java.util.Locale)
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.Configs Method getNanoseconds(com.typesafe.config.Config, java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.Configs Method getNanoseconds(com.typesafe.config.Config, java.lang.String, long)
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.Configs Method getTimeUnit(com.typesafe.config.Config, java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.Configs Method getTimeUnit(com.typesafe.config.Config, java.lang.String, java.util.concurrent.TimeUnit)
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.Configs Method getTimeUnit(java.lang.String)
+OK: com.cloudera.cdk.data.FieldPartitioner Method getType()
+OK: com.cloudera.cdk.data.PartitionStrategy.Builder Method hour(java.lang.String)
+MISSING @SINCE TAG: com.cloudera.cdk.data.PartitionStrategy.Builder Method identity(java.lang.String, java.lang.Class<S>, int)
+NO DOC BLOCK: com.cloudera.cdk.data.partition.PartitionFunctions Method identity(java.lang.String, java.lang.Class<S>, int)
+NO DOC BLOCK: com.cloudera.cdk.morphline.base.AbstractCommand Method isMeasuringMetrics()
+OK: com.cloudera.cdk.data.PartitionStrategy.Builder Method minute(java.lang.String)
+OK: com.cloudera.cdk.data.PartitionStrategy.Builder Method month(java.lang.String)
+OK: com.cloudera.cdk.data.PartitionStrategy.Builder Method year(java.lang.String)

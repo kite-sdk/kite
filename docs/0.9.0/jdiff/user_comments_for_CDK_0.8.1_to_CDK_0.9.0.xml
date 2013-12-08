@@ -1,0 +1,751 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<comments
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xsi:noNamespaceSchemaLocation='comments.xsd'
+  name="CDK_0.8.1_to_CDK_0.9.0"
+  jdversion="1.1.1">
+
+<!-- This file contains comments for a JDiff report. -->
+<!-- It is used only in generating the report, and does not need to ship with the final report. -->
+
+<!-- The id attribute in an identifier element identifies the change as noted in the report. -->
+<!-- An id has the form package[.class[.[ctor|method|field].signature]], where [] indicates optional text. -->
+<!-- A comment element can have multiple identifier elements, which will -->
+<!-- will cause the same text to appear at each place in the report, but -->
+<!-- will be converted to separate comments when the comments file is used. -->
+<!-- HTML tags in the text field will appear in the report. -->
+<!-- You also need to close p HTML elements, used for paragraphs - see the top-level documentation. -->
+<comment>
+  <identifier id="com.cloudera.cdk.data"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.ConcurrentSchemaModificationException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.Dataset"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.Dataset.getPartition_changed(com.cloudera.cdk.data.PartitionKey, boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.Dataset.getPartitions_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.Dataset.getReader_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.Dataset.getWriter_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetDescriptor"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetDescriptor.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetDescriptor.Builder.build_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetDescriptor.Builder.get_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetDescriptor.Builder.schema_removed(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetDescriptor.Builder.schema_removed(java.net.URI)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetDescriptor.ctor_changed(org.apache.avro.Schema, java.net.URL, com.cloudera.cdk.data.Format, java.net.URI, java.util.Map&lt;java.lang.String, java.lang.String&gt;, com.cloudera.cdk.data.PartitionStrategy)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetIOException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetNotFoundException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetReaderException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetRepositories"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetRepositories.openRandomAccess_added(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetRepositories.openRandomAccess_added(java.net.URI)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetRepositories.register_removed(com.cloudera.cdk.data.spi.URIPattern, com.cloudera.cdk.data.spi.OptionBuilder&lt;com.cloudera.cdk.data.DatasetRepository&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetRepository"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetRepository.create_changed(java.lang.String, com.cloudera.cdk.data.DatasetDescriptor)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetRepository.load_changed(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetRepository.update_changed(java.lang.String, com.cloudera.cdk.data.DatasetDescriptor)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetRepositoryException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.DatasetWriterException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.FieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.FieldPartitioner.ctor_added(java.lang.String, java.lang.Class&lt;S&gt;, java.lang.Class&lt;T&gt;, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.FieldPartitioner.ctor_added(java.lang.String, java.lang.String, java.lang.Class&lt;S&gt;, java.lang.Class&lt;T&gt;, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.FieldPartitioner.ctor_removed(java.lang.String, java.lang.Class&lt;T&gt;, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.FieldPartitioner.ctor_removed(java.lang.String, java.lang.String, java.lang.Class&lt;T&gt;, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.FieldPartitioner.getSourceType_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.FieldPartitioner.valueFromString_changed(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.FieldPartitioner.valueToString_changed(T)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.Formats"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.Formats.CSV"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.Formats.fromString_added(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.IncompatibleSchemaException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.Key"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.Key.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.MetadataProviderException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.NoSuchDatasetException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.PartitionStrategy"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.PartitionStrategy.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.PartitionStrategy.Builder.build_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.PartitionStrategy.Builder.dateFormat_added(java.lang.String, java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.PartitionStrategy.Builder.get_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.PartitionStrategy.ctor_changed(java.util.List&lt;com.cloudera.cdk.data.FieldPartitioner&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.PartitionStrategy.ctor_removed(com.cloudera.cdk.data.FieldPartitioner[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.RandomAccessDataset"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.RandomAccessDatasetRepository"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.SchemaNotFoundException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.SchemaValidationException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.SerializationException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.UnknownFormatException"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.View"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.crunch"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.crunch.CrunchDatasets"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.crunch.CrunchDatasets.asSource_changed(com.cloudera.cdk.data.Dataset&lt;E&gt;, java.lang.Class&lt;E&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.Builder.build_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.Builder.get_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.create_changed(java.lang.String, com.cloudera.cdk.data.DatasetDescriptor)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.ctor_added(org.apache.hadoop.conf.Configuration, com.cloudera.cdk.data.MetadataProvider)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.ctor_removed(java.net.URI)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.ctor_removed(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.ctor_removed(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path, com.cloudera.cdk.data.MetadataProvider)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.getFileSystem_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.getRootDirectory_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.load_changed(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository.update_changed(java.lang.String, com.cloudera.cdk.data.DatasetDescriptor)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider.Builder.build_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider.Builder.get_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider.ctor_changed(org.apache.hadoop.conf.Configuration, org.apache.hadoop.fs.Path)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider.ctor_removed(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.flume"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.flume.Log4jAppender"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.flume.Log4jAppender.requiresLayout_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.flume.Log4jAppender.setDatasetRepositoryClass_changed(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.hcatalog"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.Builder.build_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.Builder.fileSystem_removed(org.apache.hadoop.fs.FileSystem)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.Builder.get_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.create_changed(java.lang.String, com.cloudera.cdk.data.DatasetDescriptor)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.load_changed(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository.update_changed(java.lang.String, com.cloudera.cdk.data.DatasetDescriptor)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.DateFormatPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.HashFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.HashFieldPartitioner.apply_changed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.HashFieldPartitioner.compare_added(java.lang.Integer, java.lang.Integer)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.IdentityFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.IdentityFieldPartitioner.apply_changed(S extends java.lang.Comparable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.IdentityFieldPartitioner.compare_added(S extends java.lang.Comparable, S extends java.lang.Comparable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.IdentityFieldPartitioner.valueFromString_changed(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.IntRangeFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.IntRangeFieldPartitioner.compare_added(java.lang.Integer, java.lang.Integer)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.ListFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.ListFieldPartitioner.compare_added(java.lang.Integer, java.lang.Integer)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.ListFieldPartitioner.ctor_changed(java.lang.String, java.util.List&lt;java.util.Set&lt;S&gt;&gt;, java.lang.Class&lt;S&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.PartitionFunctions"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.PartitionFunctions.dateFormat_added(java.lang.String, java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.PartitionFunctions.hash_changed(java.lang.String, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.PartitionFunctions.hash_changed(java.lang.String, java.lang.String, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.RangeFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.partition.RangeFieldPartitioner.compare_added(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.data.spi"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.morphline.avro"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.morphline.avro.ToAvroBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.morphline.avro.WriteAvroToByteArrayBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.morphline.base"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.morphline.base.PrettyPrinter"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.morphline.hadoop.rcfile"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.morphline.maxmind"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.cloudera.cdk.morphline.useragent"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+
+</comments>

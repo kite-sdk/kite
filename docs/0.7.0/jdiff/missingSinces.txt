@@ -1,0 +1,29 @@
+MISSING @SINCE TAG: com.cloudera.cdk.morphline.stdlib.ExtractURIComponentBuilder Class
+OK: com.cloudera.cdk.data.NoSuchDatasetException Class
+MISSING @SINCE TAG: com.cloudera.cdk.morphline.stdlib.SplitKeyValueBuilder Class
+MISSING @SINCE TAG: com.cloudera.cdk.morphline.stdlib.ToByteArrayBuilder Class
+OK: com.cloudera.cdk.data.UnknownFormatException Class
+OK: com.cloudera.cdk.data.DatasetDescriptor.Builder Constructor (com.cloudera.cdk.data.DatasetDescriptor)
+OK: com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository Method checkExists(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path)
+OK: com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider Method checkExists(org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path)
+OK: com.cloudera.cdk.data.MetadataProvider Method create(java.lang.String, com.cloudera.cdk.data.DatasetDescriptor)
+NO DOC BLOCK: com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider Method create(java.lang.String, com.cloudera.cdk.data.DatasetDescriptor)
+OK: com.cloudera.cdk.data.DatasetRepository Method delete(java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository Method delete(java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository Method delete(java.lang.String)
+OK: com.cloudera.cdk.data.DatasetRepository Method exists(java.lang.String)
+OK: com.cloudera.cdk.data.MetadataProvider Method exists(java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository Method exists(java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider Method exists(java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository Method exists(java.lang.String)
+OK: com.cloudera.cdk.data.DatasetRepository Method list()
+NO DOC BLOCK: com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository Method list()
+NO DOC BLOCK: com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository Method list()
+OK: com.cloudera.cdk.data.DatasetRepository Method load(java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository Method load(java.lang.String)
+NO DOC BLOCK: com.cloudera.cdk.data.hcatalog.HCatalogDatasetRepository Method load(java.lang.String)
+OK: com.cloudera.cdk.data.DatasetReader Method next()
+OK: com.cloudera.cdk.data.filesystem.FileSystemDatasetRepository Method pathForDataset(org.apache.hadoop.fs.Path, java.lang.String)
+OK: com.cloudera.cdk.data.DatasetReader Method remove()
+OK: com.cloudera.cdk.data.MetadataProvider Method update(java.lang.String, com.cloudera.cdk.data.DatasetDescriptor)
+NO DOC BLOCK: com.cloudera.cdk.data.filesystem.FileSystemMetadataProvider Method update(java.lang.String, com.cloudera.cdk.data.DatasetDescriptor)
