@@ -2932,6 +2932,7 @@ morphlines : [
 
                     # Tika parsers to be registered:
                     parsers : [
+                      # { parser : org.apache.tika.parser.AutoDetectParser }
                       { parser : org.apache.tika.parser.asm.ClassParser }
                       { parser : org.gagravarr.tika.FlacParser }
                       { parser : org.apache.tika.parser.audio.AudioParser }
