@@ -5,46 +5,19 @@ All past Kite releases are documented on this page. Upcoming release dates can b
 
 ## Version 0.10.0
 
-Release date: TBD
+Release date: December 9, 2013
 
 Version 0.10.0 has the following notable changes:
 
-* Renamed the project from CDK to Kite. 
+* Renamed the project from CDK to Kite.
   The main goal of Kite is to increase the accessibility of Apache Hadoop as a platform. 
   This isn't specific to Cloudera, so we updated the name to correctly represent the project as an open, community-driven set of tools.
+  To make migration easier, there are no **feature changes** and [migration instructions](migrating.html) have been added for existing projects.
     * Renamed java packages `com.cloudera.cdk.*` to `org.kitesdk.*`. This change is trivial and mechanical but it does break backwards compatibility. This is a one-time event - going forward no such backwards incompatible renames are planned. This mass rename is the only change going from the `cdk-0.9.0` release to the `kite-0.10.0` release.
     * Renamed maven module names and jar files from `cdk-*` to `kite-*`.
     * Moved github repo from http://github.com/cloudera/cdk to http://github.com/kite-sdk/kite.
     * Moved documentation from http://cloudera.github.io/cdk/docs/current to http://kitesdk.org/docs/current.
-    * Moved morphline reference guide from http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html to http://kitesdk.org/docs/current/kite-morphlines/morphlinesReferenceGuide.html.    
-    * As a result, Morphline users that maintain custom Java morphline commands need to change these commands to implement Java interface `org.kitesdk.morphline.api.Command` instead of `com.cloudera.cdk.morphline.api.Command` or subclass `org.kitesdk.morphline.base.AbstractCommand` instead of `com.cloudera.cdk.morphline.base.AbstractCommand`.
-    * As a result, Morphline users need to change all occurances of `com.cloudera.cdk.*` to `org.kitesdk.*` in all morphline configuration files. For example, use an upgrade script along the following lines:
-
-```bash
-find . -name *.conf -exec sed -i '' 's/com\.cloudera\.cdk/org.kitesdk/g' '{}' \;
-find . -name *.conf -exec sed -i '' 's/com\.cloudera\.\*\*/org.kitesdk.**/g' '{}' \;
-find . -name log4j.properties -exec sed -i '' 's/com\.cloudera\.cdk/org.kitesdk/g' '{}' \;
-```
-
-* Morphline configuration files that aren't upgraded in such a way cause startup exceptions like this:
-
-```
-org.kitesdk.morphline.api.MorphlineCompilationException: No command builder registered for name: readLine near: {
-    # target/test-classes/test-morphlines/readLine.conf: 22
-    "readLine" : {
-        # target/test-classes/test-morphlines/readLine.conf: 24
-        "commentPrefix" : "#",
-        # target/test-classes/test-morphlines/readLine.conf: 23
-        "ignoreFirstLine" : true,
-        # target/test-classes/test-morphlines/readLine.conf: 25
-        "charset" : "UTF-8"
-    }
-}
-	at org.kitesdk.morphline.base.AbstractCommand.buildCommand(AbstractCommand.java:271)
-	at org.kitesdk.morphline.base.AbstractCommand.buildCommandChain(AbstractCommand.java:242)
-	at org.kitesdk.morphline.stdlib.Pipe.<init>(Pipe.java:45)
-	at org.kitesdk.morphline.stdlib.PipeBuilder.build(PipeBuilder.java:39)
-```
+    * Moved morphline reference guide from http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html to http://kitesdk.org/docs/current/kite-morphlines/morphlinesReferenceGuide.html.
 
 ## Version 0.9.0
 
