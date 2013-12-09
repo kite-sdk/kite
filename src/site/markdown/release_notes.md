@@ -9,7 +9,10 @@ Release date: TBD
 
 Version 0.10.0 has the following notable changes:
 
-* Renamed java packages `com.cloudera.cdk.*` to `org.kitesdk.*`. This change is trivial and mechanical but it does break backwards compatibility. This is a one-time event - going forward no such backwards incompatible renames are planned. This mass rename is the only change going from the `cdk-0.9.0` release to the `kite-0.10.0` release.
+* Renamed the project from CDK to Kite. 
+  The main goal of Kite is to increase the accessibility of Hadoop as a platform. 
+  This isn't specific to Cloudera, so we updated the name to correctly represent the project as an open, community-driven set of tools.
+    * Renamed java packages `com.cloudera.cdk.*` to `org.kitesdk.*`. This change is trivial and mechanical but it does break backwards compatibility. This is a one-time event - going forward no such backwards incompatible renames are planned. This mass rename is the only change going from the `cdk-0.9.0` release to the `kite-0.10.0` release.
     * Moved github repo from http://github.com/cloudera/cdk to http://github.com/kite-sdk/kite.
     * Moved documentation from http://cloudera.github.io/cdk/docs/current to http://kitesdk.org/docs/current.
     * Moved morphline reference guide from http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html to http://kitesdk.org/docs/current/kite-morphlines/morphlinesReferenceGuide.html.    
