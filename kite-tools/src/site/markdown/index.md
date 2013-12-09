@@ -1,9 +1,9 @@
 # Cloudera Development Kit - Tools Module
 
 The Tools Module is a collection of command-line tools and APIs for performing common
-tasks with CDK.
+tasks with Kite.
 
-## Example - Convert Combined Log Format files to a CDK dataset
+## Example - Convert Combined Log Format files to a Kite dataset
 
 From the tools module, build with
 
@@ -15,7 +15,7 @@ Then run with
 
 ```bash
 cp src/test/resources/access_log.txt /tmp/input
-mvn exec:java -Dexec.mainClass="com.cloudera.cdk.tools.CombinedLogFormatConverter" \
+mvn exec:java -Dexec.mainClass="org.kitesdk.tools.CombinedLogFormatConverter" \
 -Dexec.args="file:///tmp/input file:///tmp/output logs"
 ```
 
