@@ -28,7 +28,7 @@ import org.apache.flume.FlumeException;
 
 public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jAppender {
 
-  private static final String PARTITION_PREFIX = "cdk.partition.";
+  private static final String PARTITION_PREFIX = "kite.partition.";
 
   private String datasetRepositoryUri;
   private String datasetName;
