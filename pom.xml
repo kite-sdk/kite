@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-parent</artifactId>
-  <version>0.10.0</version>
+  <version>0.10.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -69,7 +69,7 @@
     <url>https://github.com/kite-sdk/kite</url>
     <developerConnection>scm:git:git@github.com:kite-sdk/kite.git
     </developerConnection>
-    <tag>release-0.10.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
