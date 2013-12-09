@@ -1,11 +1,5 @@
 # Kite Software Development Kit
 
-<p align="center">
-  <img src="images/cdk-big.jpg" alt="Kite Software Development Kit" />
-</p>
-
----
-
 ## Hadoop App Development Made Easier
 
 The Kite Software Development Kit (Apache License, Version 2.0), or Kite for short,
