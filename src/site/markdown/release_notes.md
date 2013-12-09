@@ -3,6 +3,25 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version 0.10.0
+
+Release date: TBD
+
+Version 0.10.0 has the following notable changes:
+
+* Renamed java packages `com.cloudera.cdk.*` to `org.kitesdk.*`. This change is trivial and mechanical but it does break backwards compatibility. This is a one-time event - going forward no such backwards incompatible renames are planned.
+* Moved github repo from [http://github.com/cloudera/cdk] to [http://github.com/kite-sdk].
+* Moved documentation from [http://cloudera.github.io/cdk/docs/current] to [http://kitesdk.org/docs/current].
+* As a result, morphline users need to change all occurances of `com.cloudera.cdk.*` to `org.kitesdk.*` in all morphline config files. For example, use a script along the following lines:
+
+```bash
+find . -name *.conf -exec sed -i '' 's/com\.cloudera\.cdk/org.kitesdk/g' '{}' \;
+find . -name *.conf -exec sed -i '' 's/com\.cloudera\.\*\*/org.kitesdk.**/g' '{}' \;
+find . -name log4j.properties -exec sed -i '' 's/com\.cloudera\.cdk/org.kitesdk/g' '{}' \;
+```
+
+* Morphline users that maintain custom Java morphline commands need to change these commands to implement Java interface `org.kitesdk.morphline.api.Command` instead of `com.cloudera.cdk.api.Command` or subclass `org.kitesdk.morphline.base.AbstractCommand` instead of `com.cloudera.cdk.morphline.base.AbstractCommand`.
+
 ## Version 0.9.0
 
 Release date: December 5, 2013
