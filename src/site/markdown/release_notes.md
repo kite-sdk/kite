@@ -17,12 +17,32 @@ Version 0.10.0 has the following notable changes:
     * Moved documentation from http://cloudera.github.io/cdk/docs/current to http://kitesdk.org/docs/current.
     * Moved morphline reference guide from http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html to http://kitesdk.org/docs/current/kite-morphlines/morphlinesReferenceGuide.html.    
     * As a result, Morphline users that maintain custom Java morphline commands need to change these commands to implement Java interface `org.kitesdk.morphline.api.Command` instead of `com.cloudera.cdk.morphline.api.Command` or subclass `org.kitesdk.morphline.base.AbstractCommand` instead of `com.cloudera.cdk.morphline.base.AbstractCommand`.
-    * As a result, Morphline users need to change all occurances of `com.cloudera.cdk.*` to `org.kitesdk.*` in all morphline config files. For example, use an upgrade script along the following lines:
+    * As a result, Morphline users need to change all occurances of `com.cloudera.cdk.*` to `org.kitesdk.*` in all morphline configuration files. For example, use an upgrade script along the following lines:
 
 ```bash
 find . -name *.conf -exec sed -i '' 's/com\.cloudera\.cdk/org.kitesdk/g' '{}' \;
 find . -name *.conf -exec sed -i '' 's/com\.cloudera\.\*\*/org.kitesdk.**/g' '{}' \;
 find . -name log4j.properties -exec sed -i '' 's/com\.cloudera\.cdk/org.kitesdk/g' '{}' \;
+```
+
+* Morphline configuration files that aren't upgraded in such a way cause startup exceptions like this:
+
+```
+org.kitesdk.morphline.api.MorphlineCompilationException: No command builder registered for name: readLine near: {
+    # target/test-classes/test-morphlines/readLine.conf: 22
+    "readLine" : {
+        # target/test-classes/test-morphlines/readLine.conf: 24
+        "commentPrefix" : "#",
+        # target/test-classes/test-morphlines/readLine.conf: 23
+        "ignoreFirstLine" : true,
+        # target/test-classes/test-morphlines/readLine.conf: 25
+        "charset" : "UTF-8"
+    }
+}
+	at org.kitesdk.morphline.base.AbstractCommand.buildCommand(AbstractCommand.java:271)
+	at org.kitesdk.morphline.base.AbstractCommand.buildCommandChain(AbstractCommand.java:242)
+	at org.kitesdk.morphline.stdlib.Pipe.<init>(Pipe.java:45)
+	at org.kitesdk.morphline.stdlib.PipeBuilder.build(PipeBuilder.java:39)
 ```
 
 ## Version 0.9.0
