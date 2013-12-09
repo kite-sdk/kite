@@ -29,14 +29,14 @@ abstract class AbstractAppMojo extends AbstractHadoopMojo {
    * The base directory in the Hadoop filesystem (typically HDFS) where
    * applications are stored.
    */
-  @Parameter(property = "cdk.applicationsDirectory",
+  @Parameter(property = "kite.applicationsDirectory",
       defaultValue = "/user/${user.name}/apps/")
   protected String applicationsDirectory;
 
   /**
    * The name of the application.
    */
-  @Parameter(property = "cdk.applicationName",
+  @Parameter(property = "kite.applicationName",
       defaultValue = "${project.build.finalName}-app")
   protected String applicationName;
 

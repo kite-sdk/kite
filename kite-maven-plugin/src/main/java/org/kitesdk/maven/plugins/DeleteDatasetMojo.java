@@ -34,7 +34,7 @@ public class DeleteDatasetMojo extends AbstractDatasetMojo {
   /**
    * The name of the dataset to drop.
    */
-  @Parameter(property = "cdk.datasetName", required = true)
+  @Parameter(property = "kite.datasetName", required = true)
   private String datasetName;
 
   @Override

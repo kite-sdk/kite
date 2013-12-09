@@ -32,13 +32,13 @@ public class RunAppMojo extends AbstractAppMojo {
   /**
    * The URL of the Oozie service to use.
    */
-  @Parameter(property = "cdk.oozieUrl", required = true)
+  @Parameter(property = "kite.oozieUrl", required = true)
   private String oozieUrl;
 
   /**
    * Hadoop configuration properties.
    */
-  @Parameter(property = "cdk.hadoopConfiguration")
+  @Parameter(property = "kite.hadoopConfiguration")
   private Properties hadoopConfiguration;
 
   /**
@@ -46,7 +46,7 @@ public class RunAppMojo extends AbstractAppMojo {
    * or <code>bundle</code>).
    */
   // TODO: support applications which are more than one type
-  @Parameter(property = "cdk.applicationType",
+  @Parameter(property = "kite.applicationType",
       defaultValue = "workflow")
   private String applicationType;
 
@@ -54,7 +54,7 @@ public class RunAppMojo extends AbstractAppMojo {
    * Job configuration properties for the application. This provides a means
    * to specify values for parameterized properties in Oozie applications.
    */
-  @Parameter(property = "cdk.jobProperties")
+  @Parameter(property = "kite.jobProperties")
   private Properties jobProperties;
 
   public void execute() throws MojoExecutionException, MojoFailureException {

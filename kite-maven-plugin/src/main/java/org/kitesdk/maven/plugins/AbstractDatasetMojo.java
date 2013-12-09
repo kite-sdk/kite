@@ -42,27 +42,27 @@ abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
   /**
    * The root directory of the dataset repository. Optional if using HCatalog for metadata storage.
    */
-  @Parameter(property = "cdk.rootDirectory")
+  @Parameter(property = "kite.rootDirectory")
   protected String rootDirectory;
 
   /**
    * If true, store dataset metadata in HCatalog, otherwise store it on the filesystem.
    */
-  @Parameter(property = "cdk.hcatalog")
+  @Parameter(property = "kite.hcatalog")
   protected boolean hcatalog = true;
 
   /**
    * The URI specifying the dataset repository, e.g. <i>repo:hdfs://host:8020/data</i>.
-   * Optional, but if specified then <code>cdk.rootDirectory</code> and
-   * <code>cdk.hcatalog</code> are ignored.
+   * Optional, but if specified then <code>kite.rootDirectory</code> and
+   * <code>kite.hcatalog</code> are ignored.
    */
-  @Parameter(property = "cdk.repositoryUri")
+  @Parameter(property = "kite.repositoryUri")
   protected String repositoryUri;
 
   /**
    * Hadoop configuration properties.
    */
-  @Parameter(property = "cdk.hadoopConfiguration")
+  @Parameter(property = "kite.hadoopConfiguration")
   private Properties hadoopConfiguration;
 
   @VisibleForTesting

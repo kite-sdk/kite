@@ -18,7 +18,7 @@
 
   <body>
 
-    <menu name="CDK Maven Plugin" inherit="top">
+    <menu name="Kite Maven Plugin" inherit="top">
       <item name="Home" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
       <item name="Usage" href="usage.html"/>

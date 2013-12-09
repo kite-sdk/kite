@@ -37,7 +37,7 @@ public class DeployAppMojo extends AbstractAppMojo {
   /**
    * The local directory of the application to deploy.
    */
-  @Parameter(property = "cdk.localApplicationFile",
+  @Parameter(property = "kite.localApplicationFile",
       defaultValue = "${project.build.directory}/${project.build.finalName}-app")
   private File localApplicationFile;
 
@@ -45,7 +45,7 @@ public class DeployAppMojo extends AbstractAppMojo {
    * The Hadoop fileystem used to deploy the application. The filesystem must be
    * accessible by the client deploying the application.
    */
-  @Parameter(property = "cdk.deployFileSystem", required = true)
+  @Parameter(property = "kite.deployFileSystem", required = true)
   private String deployFileSystem;
 
   /**
@@ -53,7 +53,7 @@ public class DeployAppMojo extends AbstractAppMojo {
    * If <code>false</code>, and this application has already been deployed,
    * then an error will be reported.
    */
-  @Parameter(property = "cdk.updateApplication", defaultValue = "false")
+  @Parameter(property = "kite.updateApplication", defaultValue = "false")
   private boolean updateApplication;
 
   public void execute() throws MojoExecutionException, MojoFailureException {

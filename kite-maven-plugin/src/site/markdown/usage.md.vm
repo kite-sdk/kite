@@ -7,7 +7,7 @@ $h1 Usage
 
 $h2 Working with datasets
 
-The `cdk:create-dataset` and `cdk:drop-dataset` goals are for creating and dropping
+The `kite:create-dataset` and `kite:drop-dataset` goals are for creating and dropping
 datasets. Configure the Hadoop settings by declaring the plugin in your POM:
 
 ```xml
@@ -16,8 +16,8 @@ datasets. Configure the Hadoop settings by declaring the plugin in your POM:
   <build>
     <plugins>
       <plugin>
-        <groupId>com.cloudera.cdk</groupId>
-        <artifactId>cdk-maven-plugin</artifactId>
+        <groupId>org.kitesdk</groupId>
+        <artifactId>kite-maven-plugin</artifactId>
         <version>${project.version}</version>
         <configuration>
           <hadoopConfiguration>
@@ -44,10 +44,10 @@ you can omit the `configuration` element.
 To create a new dataset, run:
 
 ```bash
-mvn cdk:create-dataset \
-  -Dcdk.rootDirectory=/tmp/data \
-  -Dcdk.datasetName=mydataset \
-  -Dcdk.avroSchemaFile=myschema.avsc
+mvn kite:create-dataset \
+  -Dkite.rootDirectory=/tmp/data \
+  -Dkite.datasetName=mydataset \
+  -Dkite.avroSchemaFile=myschema.avsc
 ```
 
 The `avroSchemaFile` property specifies a local file.
@@ -55,12 +55,12 @@ The `avroSchemaFile` property specifies a local file.
 To drop a dataset, run:
 
 ```bash
-mvn cdk:drop-dataset \
-  -Dcdk.rootDirectory=/tmp/data \
-  -Dcdk.datasetName=mydataset
+mvn kite:drop-dataset \
+  -Dkite.rootDirectory=/tmp/data \
+  -Dkite.datasetName=mydataset
 ```
 
-$h2 Launching jobs locally with cdk:run-tool
+$h2 Launching jobs locally with kite:run-tool
 
 This goal is used to run a Hadoop Tool. The Tool's `run()` method is executed in the same
 local VM as Maven, however it is common for the Tool to launch distributed processes,
@@ -72,8 +72,8 @@ such as MapReduce jobs which run on a cluster.
   <build>
     <plugins>
       <plugin>
-        <groupId>com.cloudera.cdk</groupId>
-        <artifactId>cdk-maven-plugin</artifactId>
+        <groupId>org.kitesdk</groupId>
+        <artifactId>kite-maven-plugin</artifactId>
         <version>${project.version}</version>
         <configuration>
           <toolClass>org.example.ToolImplementation</toolClass>
@@ -103,7 +103,7 @@ such as MapReduce jobs which run on a cluster.
 Run the tool using:
 
 ```bash
-mvn cdk:run-tool
+mvn kite:run-tool
 ```
 
 $h3 Understanding the classpath
@@ -114,7 +114,7 @@ so there is no need to include Hadoop in the _compile_ and _runtime_ scopes (and
 doing so may cause undefined behaviour).
 
 The classpath for distributed processes is made up of the _runtime_ classpath , unless
-`cdk.addDependenciesToDistributedCache` is set to `false` (the default is `true`),
+`kite.addDependenciesToDistributedCache` is set to `false` (the default is `true`),
 in which case no dependencies are included in the distributed classpath.
 
 This makes it very convenient to run distributed jobs, since all runtime dependencies
@@ -124,15 +124,15 @@ $h2 Launching jobs from the cluster
 
 There are three goals for building and running jobs on the cluster:
 
-* `cdk:package-app` builds a packaged application locally (in the Oozie package format)
-* `cdk:deploy-app` deploys the packaged application to the cluster
-* `cdk:run-app` runs the deployed application as an Oozie job
+* `kite:package-app` builds a packaged application locally (in the Oozie package format)
+* `kite:deploy-app` deploys the packaged application to the cluster
+* `kite:run-app` runs the deployed application as an Oozie job
 
 A packaged application includes an Oozie workflow file, an Oozie coordinator file
 (optional), and the dependencies on the _runtime_ classpath. The workflow file may be
 generated from the plugin configuration. The following example shows how to run the
 previous example from the cluster, by adding properties for `deployFileSystem`
-and `oozieUrl`, and a `executions` section to bind `cdk-package` to the `package` phase
+and `oozieUrl`, and a `executions` section to bind `kite-package` to the `package` phase
 of the Maven lifecycle.
 
 ```xml
@@ -141,8 +141,8 @@ of the Maven lifecycle.
   <build>
     <plugins>
       <plugin>
-        <groupId>com.cloudera.cdk</groupId>
-        <artifactId>cdk-maven-plugin</artifactId>
+        <groupId>org.kitesdk</groupId>
+        <artifactId>kite-maven-plugin</artifactId>
         <version>${project.version}</version>
         <configuration>
           <toolClass>org.example.ToolImplementation</toolClass>
@@ -183,6 +183,6 @@ of the Maven lifecycle.
 Build and run with:
 
 ```bash
-mvn package cdk:deploy-app
-mvn cdk:run-app
+mvn package kite:deploy-app
+mvn kite:run-app
 ```

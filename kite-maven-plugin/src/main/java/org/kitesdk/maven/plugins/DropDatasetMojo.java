@@ -37,12 +37,12 @@ public class DropDatasetMojo extends AbstractDatasetMojo {
   /**
    * The name of the dataset to drop.
    */
-  @Parameter(property = "cdk.datasetName", required = true)
+  @Parameter(property = "kite.datasetName", required = true)
   private String datasetName;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
-    logger.warn("CDK drop-dataset is deprecated -- please use delete-dataset");
+    logger.warn("Kite drop-dataset is deprecated -- please use delete-dataset");
     DatasetRepository repo = getDatasetRepository();
     repo.delete(datasetName);
   }

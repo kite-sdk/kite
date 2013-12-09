@@ -36,32 +36,32 @@ public class UpdateDatasetMojo extends AbstractDatasetMojo {
   /**
    * The name of the dataset to update.
    */
-  @Parameter(property = "cdk.datasetName", required = true)
+  @Parameter(property = "kite.datasetName", required = true)
   private String datasetName;
 
   /**
    * The file containing the Avro schema. If no file with the specified name is found
    * on the local filesystem, then the classpath is searched for a matching resource.
-   * One of either this property or <code>cdk.avroSchemaReflectClass</code> must be
+   * One of either this property or <code>kite.avroSchemaReflectClass</code> must be
    * specified.
    */
-  @Parameter(property = "cdk.avroSchemaFile")
+  @Parameter(property = "kite.avroSchemaFile")
   private String avroSchemaFile;
 
   /**
    * The fully-qualified classname of the Avro reflect class to use to generate a
    * schema. The class must be available on the classpath.
-   * One of either this property or <code>cdk.avroSchemaFile</code> must be
+   * One of either this property or <code>kite.avroSchemaFile</code> must be
    * specified.
    */
-  @Parameter(property = "cdk.avroSchemaReflectClass")
+  @Parameter(property = "kite.avroSchemaReflectClass")
   private String avroSchemaReflectClass;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (avroSchemaFile == null && avroSchemaReflectClass == null) {
-      throw new IllegalArgumentException("One of cdk.avroSchemaFile or " +
-          "cdk.avroSchemaReflectClass must be specified");
+      throw new IllegalArgumentException("One of kite.avroSchemaFile or " +
+          "kite.avroSchemaReflectClass must be specified");
     }
 
     DatasetRepository repo = getDatasetRepository();
