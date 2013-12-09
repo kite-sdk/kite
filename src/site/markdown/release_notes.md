@@ -25,7 +25,7 @@ find . -name *.conf -exec sed -i '' 's/com\.cloudera\.\*\*/org.kitesdk.**/g' '{}
 find . -name log4j.properties -exec sed -i '' 's/com\.cloudera\.cdk/org.kitesdk/g' '{}' \;
 ```
 
-* Morphline configuration files that aren't upgraded in such a way cause startup exceptions like this:
+    * Morphline configuration files that aren't upgraded in such a way cause startup exceptions like this:
 
 ```
 org.kitesdk.morphline.api.MorphlineCompilationException: No command builder registered for name: readLine near: {
