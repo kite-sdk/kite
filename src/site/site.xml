@@ -64,6 +64,7 @@
       <item name="Javadoc" href="apidocs/index.html"/>
       <item name="API Diffs" href="jdiff/changes.html"/>
       <item name="Dependency Information" href="dependencies.html"/>
+      <item name="Migrating from CDK" href="migrating.html"/>
       <item name="Examples" href="http://github.com/kite-sdk/kite-examples"/>
     </menu>
 
