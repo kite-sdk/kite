@@ -116,7 +116,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
   @Override
   public DatasetReader<GenericData.Record> newReader() throws IOException {
     final DatasetDescriptor desc = new DatasetDescriptor.Builder()
-        .property("dataset.csv.lines-to-skip", "1")
+        .property("kite.csv.lines-to-skip", "1")
         .schema(VALIDATOR_SCHEMA)
         .build();
     return new CSVFileReader<GenericData.Record>(localfs, validatorFile, desc);
@@ -184,8 +184,8 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
   @Test
   public void testTSV() {
     final DatasetDescriptor desc = new DatasetDescriptor.Builder()
-        .property("dataset.csv.delimiter", "\t")
-        .property("dataset.csv.lines-to-skip", "1")
+        .property("kite.csv.delimiter", "\t")
+        .property("kite.csv.lines-to-skip", "1")
         .schema(STRINGS)
         .build();
     final CSVFileReader<GenericData.Record> reader =

@@ -48,11 +48,11 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
   private static final Logger logger = LoggerFactory
       .getLogger(CSVFileReader.class);
 
-  public static final String CHARSET_PROPERTY = "dataset.csv.charset";
-  public static final String DELIMITER_PROPERTY = "dataset.csv.delimiter";
-  public static final String QUOTE_CHAR_PROPERTY = "dataset.csv.quote-char";
-  public static final String ESCAPE_CHAR_PROPERTY = "dataset.csv.escape-char";
-  public static final String LINES_TO_SKIP_PROPERTY = "dataset.csv.lines-to-skip";
+  public static final String CHARSET_PROPERTY = "kite.csv.charset";
+  public static final String DELIMITER_PROPERTY = "kite.csv.delimiter";
+  public static final String QUOTE_CHAR_PROPERTY = "kite.csv.quote-char";
+  public static final String ESCAPE_CHAR_PROPERTY = "kite.csv.escape-char";
+  public static final String LINES_TO_SKIP_PROPERTY = "kite.csv.lines-to-skip";
 
   // old properties
   public static final String OLD_CHARSET_PROPERTY = "cdk.csv.charset";

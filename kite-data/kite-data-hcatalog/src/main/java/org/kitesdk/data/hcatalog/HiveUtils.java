@@ -56,8 +56,8 @@ class HiveUtils {
   static final String DEFAULT_DB = "default";
   static final String HDFS_SCHEME = "hdfs";
 
-  private static final String CUSTOM_PROPERTIES_PROPERTY_NAME = "dataset.custom.property.names";
-  private static final String PARTITION_EXPRESSION_PROPERTY_NAME = "dataset.partition.expression";
+  private static final String CUSTOM_PROPERTIES_PROPERTY_NAME = "kite.custom.property.names";
+  private static final String PARTITION_EXPRESSION_PROPERTY_NAME = "kite.partition.expression";
   private static final String OLD_CUSTOM_PROPERTIES_PROPERTY_NAME = "cdk.custom.property.names";
   private static final String OLD_PARTITION_EXPRESSION_PROPERTY_NAME = "cdk.partition.expression";
   private static final String AVRO_SCHEMA_URL_PROPERTY_NAME = "avro.schema.url";
