@@ -10,7 +10,7 @@ Release date: TBD
 Version 0.10.0 has the following notable changes:
 
 * Renamed java packages `com.cloudera.cdk.*` to `org.kitesdk.*`. This change is trivial and mechanical but it does break backwards compatibility. This is a one-time event - going forward no such backwards incompatible renames are planned. This mass rename is the only change going from the `cdk-0.9.0` release to the `kite-0.10.0` release.
-    * Moved github repo from http://github.com/cloudera/cdk to http://github.com/kite-sdk.
+    * Moved github repo from http://github.com/cloudera/cdk to http://github.com/kite-sdk/kite.
     * Moved documentation from http://cloudera.github.io/cdk/docs/current to http://kitesdk.org/docs/current.
     * As a result, Morphline users that maintain custom Java morphline commands need to change these commands to implement Java interface `org.kitesdk.morphline.api.Command` instead of `com.cloudera.cdk.api.Command` or subclass `org.kitesdk.morphline.base.AbstractCommand` instead of `com.cloudera.cdk.morphline.base.AbstractCommand`.
     * As a result, Morphline users need to change all occurances of `com.cloudera.cdk.*` to `org.kitesdk.*` in all morphline config files. For example, use an upgrade script along the following lines:
