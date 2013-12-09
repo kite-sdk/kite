@@ -5,7 +5,7 @@ modules.
 
 ## Module POM Configuration
 
-The parent pom for all modules is `com.cloudera:kite-parent:VERSION` where
+The parent pom for all modules is `org.kitesdk:kite-parent:VERSION` where
 `VERSION` is whatever is currently under development. When in doubt, look at
 one of the existing modules. Most of the critical pom parameters are defined
 by the parent pom. Modules should _not_ define a groupId or version; they're
