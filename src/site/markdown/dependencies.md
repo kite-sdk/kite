@@ -108,6 +108,9 @@ dependencies yourself:
 * Kite Morphlines All
  [Dependency Information](kite-morphlines/kite-morphlines-all/dependency-info.html),
  [Dependencies](kite-morphlines/kite-morphlines-all/dependencies.html)
+* Kite Morphlines All Except Solr
+ [Dependency Information](kite-morphlines/kite-morphlines-all-except-solr/dependency-info.html),
+ [Dependencies](kite-morphlines/kite-morphlines-all-except-solr/dependencies.html)
 
 ## Kite Tools Modules
 
