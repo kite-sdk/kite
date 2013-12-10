@@ -198,7 +198,7 @@ The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
-| separator | "," | The character separating any two fields. |
+| separator | "," | The character separating any two fields. Must be a string of length one. |
 | columns | n/a | The name of the output fields for each input column. An empty string indicates omit this column in the output. If more columns are contained in the input than specified here, those columns are automatically named {{columnN}}. |
 | ignoreFirstLine | false | Whether to ignore the first line. This flag can be used for CSV files that contain a header line. |
 | trim | true | Whether leading and trailing whitespace shall be removed from the output fields. |
@@ -1468,7 +1468,7 @@ tryRules {
     # for records that don't match any rule:
     {
       commands : [
-        { logWarn { format : "Ignoring record with unsupported input format: {}", args : ["@{}"] }
+        { logWarn { format : "Ignoring record with unsupported input format: {}", args : ["@{}"] } }
         { dropRecord {} }    
       ]
     }
