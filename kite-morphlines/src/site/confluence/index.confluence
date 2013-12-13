@@ -29,7 +29,7 @@ Also, to pull in the minimum set of dependencies add the following dependency to
 <dependency>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-core</artifactId>
-  <version>0.8.1</version> <!-- or whatever the latest version is -->
+  <version>0.10.0</version> <!-- or whatever the latest version is -->
 </dependency>
 {code}
 
@@ -39,7 +39,7 @@ Alternatively, to pull in the maximum set of dependencies (i.e. all available co
 <dependency>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-all</artifactId>
-  <version>0.8.1</version> <!-- or whatever the latest version is -->
+  <version>0.10.0</version> <!-- or whatever the latest version is -->
   <type>pom</type>
 </dependency>
 {code}

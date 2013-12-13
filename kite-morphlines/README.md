@@ -28,7 +28,7 @@ See [Online Documentation](http://kitesdk.org/docs/current/kite-morphlines/index
 <dependency>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-core</artifactId>
-  <version>0.8.1</version> <!-- or whatever the latest version is -->
+  <version>0.10.0</version> <!-- or whatever the latest version is -->
 </dependency>
 ```
 
@@ -38,7 +38,7 @@ See [Online Documentation](http://kitesdk.org/docs/current/kite-morphlines/index
 <dependency>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-all</artifactId>
-  <version>0.8.1</version> <!-- or whatever the latest version is -->
+  <version>0.10.0</version> <!-- or whatever the latest version is -->
   <type>pom</type>
 </dependency>
 ```
@@ -52,7 +52,7 @@ git clone https://github.com/kite-sdk/kite.git
 cd kite
 #git tag # list available releases
 #git checkout master
-#git checkout release-0.8.1 # or whatever the latest version is
+#git checkout release-0.10.0 # or whatever the latest version is
 mvn clean package
 find kite-morphlines/kite-morphlines-core/target -name '*.jar'
 find kite-morphlines/kite-morphlines-all/target -name '*.jar'
