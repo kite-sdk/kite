@@ -38,17 +38,17 @@ Version 0.9.0 has the following notable changes:
   [API Diffs](http://cloudera.github.io/cdk/docs/0.9.0/jdiff/changes.html) for all the
   changes.
 * Morphlines Library
-    * Added morphline command to read from RCFile: [readRCFile](cdk-morphlines/morphlinesReferenceGuide.html#readRCFile) (Prasanna Rajaperumal via whoschek)
-    * Added morphline command to convert a morphline record to an Avro record: [toAvro](cdk-morphlines/morphlinesReferenceGuide.html#toAvro)
-    * Added morphline command that serializes Avro records into a byte array: [writeAvroToByteArray](cdk-morphlines/morphlinesReferenceGuide.html#writeAvroToByteArray)
+    * Added morphline command to read from RCFile: [readRCFile](kite-morphlines/morphlinesReferenceGuide.html#readRCFile) (Prasanna Rajaperumal via whoschek)
+    * Added morphline command to convert a morphline record to an Avro record: [toAvro](kite-morphlines/morphlinesReferenceGuide.html#toAvro)
+    * Added morphline command that serializes Avro records into a byte array: [writeAvroToByteArray](kite-morphlines/morphlinesReferenceGuide.html#writeAvroToByteArray)
     * Added morphline command that returns Geolocation information for a given IP address, using an efficient in-memory Maxmind database lookup:
-      [geoIP](cdk-morphlines/morphlinesReferenceGuide.html#geoIP)
+      [geoIP](kite-morphlines/morphlinesReferenceGuide.html#geoIP)
     * Added morphline command that parses a user agent string and returns structured higher level data like user agent family, operating system, version, and device type:
-      [userAgent](cdk-morphlines/morphlinesReferenceGuide.html#userAgent)
+      [userAgent](kite-morphlines/morphlinesReferenceGuide.html#userAgent)
     * Added option to fail the following commands if an URI is syntactically invalid:
-      [extractURIComponents](cdk-morphlines/morphlinesReferenceGuide.html#extractURIComponents),
-      [extractURIComponent](cdk-morphlines/morphlinesReferenceGuide.html#extractURIComponent),
-      [extractURIQueryParameters](cdk-morphlines/morphlinesReferenceGuide.html#extractURIQueryParameters)
+      [extractURIComponents](kite-morphlines/morphlinesReferenceGuide.html#extractURIComponents),
+      [extractURIComponent](kite-morphlines/morphlinesReferenceGuide.html#extractURIComponent),
+      [extractURIQueryParameters](kite-morphlines/morphlinesReferenceGuide.html#extractURIQueryParameters)
     * Upgraded cdk-morphlines-solr-core module from solr-4.4 to solr-4.6.
     * Upgraded cdk-morphlines-saxon module from saxon-HE-9.5.1-2 to saxon-HE-9.5.1-3.
     * Fixed race condition on parallel initialization of multiple Solr morphlines within the same JVM.
@@ -81,23 +81,23 @@ Version 0.8.0 has the following notable changes:
 * Upgrade to Parquet 1.2.0.
 * Morphlines Library
     * Added option for commands to register health checks (not just metrics) with the MorphlineContext.
-    * Added [registerJVMMetrics](cdk-morphlines/morphlinesReferenceGuide.html#registerJVMMetrics) command that registers metrics that are related to the Java Virtual Machine
+    * Added [registerJVMMetrics](kite-morphlines/morphlinesReferenceGuide.html#registerJVMMetrics) command that registers metrics that are related to the Java Virtual Machine
       with the MorphlineContext. For example, this includes metrics for garbage collection events,
       buffer pools, threads and thread deadlocks.
     * Added morphline commands to publish the metrics of all morphline commands to JMX, SLF4J and CSV files.
       The new commands are:
-      [startReportingMetricsToJMX](cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToJMX),
-      [startReportingMetricsToSLF4](cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToSLF4J) and
-      [startReportingMetricsToCSV](cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToCSV).
+      [startReportingMetricsToJMX](kite-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToJMX),
+      [startReportingMetricsToSLF4](kite-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToSLF4J) and
+      [startReportingMetricsToCSV](kite-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToCSV).
     * Added EXPERIMENTAL `cdk-morphlines-metrics-servlets` maven module with new
-      [startReportingMetricsToHTTP](cdk-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToHTTP) command that
+      [startReportingMetricsToHTTP](kite-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToHTTP) command that
       exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URIs served by Jetty,
       using the AdminServlet.
     * Added `cdk-morphlines-hadoop-core` maven module with new
-      [downloadHdfsFile](cdk-morphlines/morphlinesReferenceGuide.html#downloadHdfsFile)
+      [downloadHdfsFile](kite-morphlines/morphlinesReferenceGuide.html#downloadHdfsFile)
       command for transferring HDFS files, e.g. to help with centralized configuration file management.
     * Added option to specify boost values to
-      [loadSolr](cdk-morphlines/morphlinesReferenceGuide.html#loadSolr) command.
+      [loadSolr](kite-morphlines/morphlinesReferenceGuide.html#loadSolr) command.
     * Added several performance enhancements.
     * Upgraded `cdk-morphlines-solr-cell` maven module from tika-1.3 to tika-1.4 to pick up some bug fixes.
     * Upgraded `cdk-morphlines-core` maven module from com.google.code.regexp-0.1.9 to 0.2.3 to pick up some bug fixes (Internally shaded version).
