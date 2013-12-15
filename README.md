@@ -1,4 +1,4 @@
-# Kite
+# Kite [![Build Status](https://travis-ci.org/kite-sdk/kite.png?branch=master)](http://travis-ci.org/kite-sdk/kite)
 
 Kite is a set of libraries, tools, examples,
 and documentation focused on making it easier to build systems on top of the
