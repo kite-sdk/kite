@@ -38,10 +38,12 @@ final class Connector implements Command {
   }
   
   public void setParent(Command parent) {
+    Preconditions.checkNotNull(parent);
     this.parent = parent;
   }
   
   public void setChild(Command child) {
+    Preconditions.checkNotNull(child);
     this.child = child;
   }
 

@@ -227,7 +227,10 @@ public abstract class AbstractCommand implements Command {
    *          This is a feature that multi-branch commands like tryRules and ifThenElse need to
    *          avoid sending a notification multiple times to finalChild, once from each branch.
    */
-  protected List<Command> buildCommandChain(Config rootConfig, String configKey, Command finalChild, boolean ignoreNotifications) {    
+  protected List<Command> buildCommandChain(Config rootConfig, String configKey, Command finalChild, boolean ignoreNotifications) {
+    Preconditions.checkNotNull(rootConfig);
+    Preconditions.checkNotNull(configKey);
+    Preconditions.checkNotNull(finalChild);
     List<? extends Config> commandConfigs = new Configs().getConfigList(rootConfig, configKey, Collections.EMPTY_LIST);
     List<Command> commands = new ArrayList();
     Command currentParent = this;
@@ -255,7 +258,10 @@ public abstract class AbstractCommand implements Command {
    * Factory method to create a command rooted at the given cmdConfig. The command will feed records
    * into finalChild. The command will have currentParent as it's parent.
    */
-  protected Command buildCommand(Config cmdConfig, Command currentParent, Command finalChild) {    
+  protected Command buildCommand(Config cmdConfig, Command currentParent, Command finalChild) {   
+    Preconditions.checkNotNull(cmdConfig);
+    Preconditions.checkNotNull(currentParent);
+    Preconditions.checkNotNull(finalChild);    
     Set<Map.Entry<String, Object>> entries = cmdConfig.root().unwrapped().entrySet();
     if (entries.size() != 1) {
       throw new MorphlineCompilationException("Illegal number of entries: " + entries.size(), cmdConfig);
