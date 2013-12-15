@@ -162,7 +162,7 @@ public class AvroDaoTest {
   @Test
   public void testSpecific() throws Exception {
     Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool,
-        new String(tableName), schemaString, TestRecord.class);
+      tableName, schemaString, TestRecord.class);
 
     for (TestRecord testRecord : this.createSpecificEntities(10)) {
       assertTrue(dao.put(testRecord));
@@ -224,7 +224,7 @@ public class AvroDaoTest {
   @Test
   public void testIncrement() {
     Dao<TestIncrement> dao = new SpecificAvroDao<TestIncrement>(tablePool,
-        new String(incrementTableName), incrementSchemaString,
+      incrementTableName, incrementSchemaString,
         TestIncrement.class);
 
     TestIncrement entity = TestIncrement.newBuilder().setKeyPart1("part1")
@@ -241,7 +241,7 @@ public class AvroDaoTest {
   @Test
   public void testConflict() throws Exception {
     Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool,
-        new String(tableName), schemaString, TestRecord.class);
+      tableName, schemaString, TestRecord.class);
 
     // create key and entity, and do a put
     TestRecord entity = createSpecificEntity("part1", "part2");
@@ -275,7 +275,7 @@ public class AvroDaoTest {
   @Test
   public void testEmptyCollections() throws Exception {
     Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool,
-        new String(tableName), schemaString, TestRecord.class);
+      tableName, schemaString, TestRecord.class);
 
     Map<String, String> field3Map = new HashMap<String, String>();
     EmbeddedRecord embeddedRecord = EmbeddedRecord.newBuilder()
@@ -308,7 +308,7 @@ public class AvroDaoTest {
   @Test
   public void testDeleteAfterMultiplePuts() throws Exception {
     Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool,
-        new String(tableName), schemaString, TestRecord.class);
+      tableName, schemaString, TestRecord.class);
 
     for (int i = 0; i < 10; ++i) {
       TestRecord entity = createSpecificEntity("part1_" + i, "part2_" + i);
@@ -345,7 +345,7 @@ public class AvroDaoTest {
       PartitionKey key = dao.getPartitionStrategy().partitionKey("part1_" + i,
           "part2_" + i);
       TestRecord record = dao.get(key);
-      assertEquals("field1_" + i, record.getField1().toString());
+      assertEquals("field1_" + i, record.getField1());
     }
   }
 
