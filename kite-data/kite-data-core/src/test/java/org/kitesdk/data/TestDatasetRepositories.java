@@ -199,7 +199,7 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
 
   @Test
   public void testList() {
-    Assert.assertEquals(ImmutableMultiset.of(),
+    Assert.assertEquals(ImmutableMultiset.<String>of(),
         ImmutableMultiset.copyOf(repo.list()));
 
     repo.create("test1", testDescriptor);
@@ -223,7 +223,7 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
         ImmutableMultiset.copyOf(repo.list()));
 
     repo.delete("test1");
-    Assert.assertEquals(ImmutableMultiset.of(),
+    Assert.assertEquals(ImmutableMultiset.<String>of(),
         ImmutableMultiset.copyOf(repo.list()));
   }
 
