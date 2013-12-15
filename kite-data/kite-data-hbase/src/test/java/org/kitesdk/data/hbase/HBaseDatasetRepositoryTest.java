@@ -330,8 +330,8 @@ public class HBaseDatasetRepositoryTest {
   public static void compareEntitiesWithUtf8(long uniqueIdx, IndexedRecord record) {
     String iStr = Long.toString(uniqueIdx);
 
-    assertEquals(new String("part1_" + iStr), record.get(0).toString()); // TODO: check type
-    assertEquals(new String("part2_" + iStr), record.get(1).toString()); // TODO: check type
+    assertEquals("part1_" + iStr, record.get(0).toString()); // TODO: check type
+    assertEquals("part2_" + iStr, record.get(1).toString()); // TODO: check type
 
     assertEquals(new Utf8("field1_" + iStr), record.get(2));
     assertEquals(new Utf8("field2_" + iStr), record.get(3));
@@ -362,8 +362,8 @@ public class HBaseDatasetRepositoryTest {
   private void compareEntitiesWithString(long uniqueIdx, IndexedRecord record) {
     String iStr = Long.toString(uniqueIdx);
 
-    assertEquals(new String("part1_" + iStr), record.get(0).toString()); // TODO: check type
-    assertEquals(new String("part2_" + iStr), record.get(1).toString()); // TODO: check type
+    assertEquals("part1_" + iStr, record.get(0).toString()); // TODO: check type
+    assertEquals("part2_" + iStr, record.get(1).toString()); // TODO: check type
 
     assertEquals("field1_" + iStr, record.get(2));
     assertEquals("field2_" + iStr, record.get(3));
