@@ -21,7 +21,6 @@
     <version>0.10.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-tika-core</artifactId>
   <name>Kite Morphlines Tika Core</name>
 

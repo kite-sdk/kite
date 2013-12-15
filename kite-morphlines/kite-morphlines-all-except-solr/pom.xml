@@ -22,7 +22,6 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-all-except-solr</artifactId>
   <name>Kite Morphlines Dependency Aggregator (Excluding Solr)</name>
   <packaging>pom</packaging>

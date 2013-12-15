@@ -22,7 +22,6 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-all</artifactId>
   <name>Kite Morphlines Dependency Aggregator</name>
   <packaging>pom</packaging>

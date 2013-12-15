@@ -21,7 +21,6 @@
     <version>0.10.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-useragent</artifactId>
   <name>Kite Morphlines UserAgent</name>
 

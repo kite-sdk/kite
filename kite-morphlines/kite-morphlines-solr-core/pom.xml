@@ -22,7 +22,6 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-solr-core</artifactId>
   <name>Kite Morphlines Solr Core</name>
 
