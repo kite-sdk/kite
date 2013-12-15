@@ -194,11 +194,6 @@ class HiveUtils {
       throw new UnknownFormatException(
           "No known serde for format:" + format.getName());
     }
-    try {
-    } catch (Exception e) {
-      throw new MetadataProviderException("Error configuring Hive Avro table, " +
-          "table creation failed", e);
-    }
 
     // copy schema info
     boolean useLiteral;
