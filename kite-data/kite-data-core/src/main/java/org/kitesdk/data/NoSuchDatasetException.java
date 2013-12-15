@@ -21,6 +21,7 @@ package org.kitesdk.data;
  * @since 0.7.0
  * @deprecated will be removed in 0.11.0, use {@link DatasetNotFoundException} instead
  */
+@Deprecated
 public class NoSuchDatasetException extends DatasetNotFoundException {
 
   public NoSuchDatasetException(String message) {
