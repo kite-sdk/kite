@@ -55,6 +55,11 @@
       <name>Wolfgang Hoschek</name>
       <organization>Cloudera</organization>
     </developer>
+    <developer>
+      <id>awarrington</id>
+      <name>Adam Warrington</name>
+      <organization>Cloudera</organization>
+    </developer>
   </developers>
   
   <contributors> 
