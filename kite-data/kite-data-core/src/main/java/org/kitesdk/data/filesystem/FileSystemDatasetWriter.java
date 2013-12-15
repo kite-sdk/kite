@@ -20,7 +20,6 @@ import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.DatasetWriterException;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
 import com.google.common.io.Closeables;
 import org.apache.avro.Schema;
 import org.apache.avro.file.CodecFactory;

@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.hcatalog.impl;
 
-import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;

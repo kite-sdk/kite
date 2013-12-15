@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.hcatalog;
 
-import com.google.common.base.Objects;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.Format;

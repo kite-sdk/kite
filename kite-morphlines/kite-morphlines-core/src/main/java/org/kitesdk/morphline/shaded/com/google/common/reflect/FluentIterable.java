@@ -26,7 +26,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.*;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;

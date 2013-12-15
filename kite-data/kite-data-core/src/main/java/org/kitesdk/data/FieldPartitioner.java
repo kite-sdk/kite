@@ -15,10 +15,8 @@
  */
 package org.kitesdk.data;
 
-import org.kitesdk.data.spi.Marker;
 import com.google.common.base.Function;
 import java.util.Comparator;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 /**

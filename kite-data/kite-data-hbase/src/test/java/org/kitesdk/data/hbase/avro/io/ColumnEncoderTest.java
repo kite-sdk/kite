@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.hbase.avro.io;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.util.Utf8;
@@ -23,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 public class ColumnEncoderTest {
 

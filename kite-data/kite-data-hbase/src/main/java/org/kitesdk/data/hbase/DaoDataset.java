@@ -19,7 +19,6 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.Key;
 import org.kitesdk.data.spi.Marker;
 import org.kitesdk.data.PartitionKey;
@@ -32,8 +31,6 @@ import com.google.common.base.Preconditions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E> {
 

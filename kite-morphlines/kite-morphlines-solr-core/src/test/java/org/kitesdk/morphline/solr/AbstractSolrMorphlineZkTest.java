@@ -19,11 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
 import org.apache.solr.cloud.AbstractFullDistribZkTestBase;
-import org.apache.solr.cloud.AbstractZkTestCase;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.cloud.SolrZkClient;
 import org.junit.After;
