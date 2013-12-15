@@ -192,12 +192,8 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     
     @Override
     public boolean equals(Object other) {
-      if (other instanceof ByteArrayKey) {
-        ByteArrayKey otherKey = (ByteArrayKey) other;
-        return Arrays.equals(bytes, otherKey.bytes);
-      } else {
-        return false;
-      }
+      ByteArrayKey otherKey = (ByteArrayKey) other;
+      return Arrays.equals(bytes, otherKey.bytes);
     }
     
     @Override
