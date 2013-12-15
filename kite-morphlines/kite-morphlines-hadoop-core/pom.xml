@@ -51,6 +51,11 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+
     <!-- for MiniDFSCluster -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
