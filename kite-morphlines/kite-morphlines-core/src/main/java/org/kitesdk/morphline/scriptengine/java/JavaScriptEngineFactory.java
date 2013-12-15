@@ -69,7 +69,7 @@ public class JavaScriptEngineFactory implements ScriptEngineFactory {
 		if (args.length != 0) {
 			int i = 0;
 			for (; i < args.length - 1; i++) {
-				buf.append(args[i] + ", ");
+				buf.append(args[i]).append(", ");
 			}
 			buf.append(args[i]);
 		}		
