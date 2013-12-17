@@ -156,7 +156,11 @@ public abstract class AbstractCommand implements Command {
       numProcessCallsMeter.mark();
     }
     beforeProcess(record);
-    return doProcess(record);
+    boolean returnValue = doProcess(record);
+    if (!returnValue) {
+      LOG.debug("Command failed!");
+    }
+    return returnValue;
   }
   
   private void beforeProcess(Record record) {
