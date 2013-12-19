@@ -12,3 +12,4 @@ kite-data/kite-data-hcatalog/metastore_db
 kite-data/kite-data-hcatalog/derby.log
 .idea
 *.iml
+dependency-reduced-pom.xml
