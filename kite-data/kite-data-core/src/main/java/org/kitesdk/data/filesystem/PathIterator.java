@@ -63,6 +63,7 @@ class PathIterator implements Iterator<Path>, Iterable<Path> {
     throw new UnsupportedOperationException("Not supported.");
   }
 
+  @SuppressWarnings("deprecation")
   private boolean advance() {
     while (true) {
       if (directories.hasNext()) {
@@ -71,7 +72,7 @@ class PathIterator implements Iterator<Path>, Iterable<Path> {
           final FileStatus[] stats = fs.listStatus(directory, PathFilters.notHidden());
           final List<Path> nextFileSet = Lists.newArrayListWithCapacity(stats.length);
           for (FileStatus stat : stats) {
-            if (stat.isFile()) {
+            if (!stat.isDir()) {
               nextFileSet.add(stat.getPath());
             }
           }
