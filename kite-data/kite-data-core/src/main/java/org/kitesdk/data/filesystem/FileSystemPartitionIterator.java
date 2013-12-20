@@ -52,7 +52,7 @@ class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<Stor
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "deprecation"})
     public Iterable<String> getLevel(List<String> current) {
       final Set<String> dirs = Sets.newLinkedHashSet();
 
@@ -63,7 +63,7 @@ class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<Stor
 
       try {
         for (FileStatus stat : fs.listStatus(dir, PathFilters.notHidden())) {
-          if (stat.isDirectory()) {
+          if (stat.isDir()) {
             // TODO: add a check here for range.couldContain(Marker)
             dirs.add(stat.getPath().getName());
           }
@@ -105,6 +105,7 @@ class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<Stor
     }
   }
 
+  @SuppressWarnings("deprecation")
   FileSystemPartitionIterator(
       FileSystem fs, Path root, PartitionStrategy strategy,
       final Constraints constraints)

@@ -23,7 +23,6 @@ import com.google.common.base.Preconditions;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.reflect.ReflectDatumReader;
-import org.apache.hadoop.fs.AvroFSInput;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;

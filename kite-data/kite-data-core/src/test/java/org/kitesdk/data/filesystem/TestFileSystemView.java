@@ -167,6 +167,7 @@ public class TestFileSystemView extends TestRefinableViews {
     return ((FileSystemView) v).deleteAll(); // until deleteAll is exposed on View
   }
 
+  @SuppressWarnings("deprecation")
   public static void assertDirectoriesExist(FileSystem fs, Path... dirs)
       throws IOException {
     for (Path path : dirs) {

@@ -262,6 +262,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     }
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public List<String> list() {
     List<String> datasets = Lists.newArrayList();
@@ -270,7 +271,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
           PathFilters.notHidden());
       for (FileStatus entry : entries) {
         // assumes that all unhidden directories under the root are data sets
-        if (entry.isDirectory() &&
+        if (entry.isDir() &&
             rootFileSystem.exists(new Path(entry.getPath(), ".metadata"))) {
           // may want to add a check: !RESERVED_NAMES.contains(name)
           datasets.add(entry.getPath().getName());
