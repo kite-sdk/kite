@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.partition;
 
+import java.util.List;
 import org.kitesdk.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 
@@ -87,4 +88,53 @@ public class PartitionFunctions {
     return new DateFormatPartitioner(sourceName, name, format);
   }
 
+  @Beta
+  public static String toExpression(FieldPartitioner fieldPartitioner) {
+    // TODO: add other strategies
+    if (fieldPartitioner instanceof HashFieldPartitioner) {
+      return String.format("hash(\"%s\", \"%s\", %s)", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName(), fieldPartitioner.getCardinality());
+    } else if (fieldPartitioner instanceof IdentityFieldPartitioner) {
+      return String.format("identity(\"%s\", %s)", fieldPartitioner.getName(),
+          fieldPartitioner.getCardinality());
+    } else if (fieldPartitioner instanceof RangeFieldPartitioner) {
+      List<String> upperBounds = ((RangeFieldPartitioner) fieldPartitioner)
+          .getUpperBounds();
+
+      StringBuilder builder = new StringBuilder();
+
+      for (String bound : upperBounds) {
+        if (builder.length() > 0) {
+          builder.append(", ");
+        }
+        builder.append("\"").append(bound).append("\"");
+      }
+
+      return String.format("range(\"%s\", %s", fieldPartitioner.getName(),
+          builder.toString());
+    } else if (fieldPartitioner instanceof DateFormatPartitioner) {
+      return String.format("dateFormat(\"%s\", \"%s\", \"%s\")",
+          fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName(),
+          ((DateFormatPartitioner) fieldPartitioner).getPattern());
+    } else if (fieldPartitioner instanceof YearFieldPartitioner) {
+      return String.format("year(\"%s\", \"%s\")", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName());
+    } else if (fieldPartitioner instanceof MonthFieldPartitioner) {
+      return String.format("month(\"%s\", \"%s\")", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName());
+    } else if (fieldPartitioner instanceof DayOfMonthFieldPartitioner) {
+      return String.format("day(\"%s\", \"%s\")", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName());
+    } else if (fieldPartitioner instanceof HourFieldPartitioner) {
+      return String.format("hour(\"%s\", \"%s\")", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName());
+    } else if (fieldPartitioner instanceof MinuteFieldPartitioner) {
+      return String.format("minute(\"%s\", \"%s\")", fieldPartitioner.getSourceName(),
+          fieldPartitioner.getName());
+    }
+
+    throw new IllegalArgumentException("Unrecognized PartitionStrategy: "
+        + fieldPartitioner);
+  }
 }

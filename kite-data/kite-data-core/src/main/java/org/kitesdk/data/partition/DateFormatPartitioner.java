@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.partition;
 
+import com.google.common.base.Objects;
 import org.kitesdk.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.CharMatcher;
@@ -72,6 +73,10 @@ public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
     this.format.setTimeZone(zone);
   }
 
+  String getPattern() {
+    return format.toPattern();
+  }
+
   @Override
   public String apply(Long value) {
     return format.format(new Date(value));
@@ -87,4 +92,25 @@ public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
   public int compare(String o1, String o2) {
     return o1.compareTo(o2);
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || !getClass().equals(o.getClass())) {
+      return false;
+    }
+    DateFormatPartitioner that = (DateFormatPartitioner) o;
+    return Objects.equal(this.getSourceName(), that.getSourceName()) &&
+        Objects.equal(this.getName(), that.getName()) &&
+        Objects.equal(this.format, that.format) &&
+        Objects.equal(this.getCardinality(), that.getCardinality());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getSourceName(), getName(), format, getCardinality());
+  }
+
 }

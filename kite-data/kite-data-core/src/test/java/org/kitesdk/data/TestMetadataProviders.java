@@ -71,6 +71,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
             .year("timestamp")
             .month("timestamp")
             .day("timestamp")
+            .dateFormat("timestamp", "day", "yyyy-MM-dd")
             .build())
         .build();
     // something completely different
