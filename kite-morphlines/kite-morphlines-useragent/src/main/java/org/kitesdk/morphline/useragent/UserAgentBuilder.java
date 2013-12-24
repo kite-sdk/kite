@@ -36,7 +36,10 @@ import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Configs;
+import org.kitesdk.morphline.base.Metrics;
 import org.kitesdk.morphline.base.Validator;
+
+import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import com.typesafe.config.Config;
@@ -93,6 +96,9 @@ public final class UserAgentBuilder implements CommandBuilder {
         throw new MorphlineCompilationException("Cannot parse UserAgent database: " + databaseFile, config, e);
       }
       
+      Meter numCacheHitsMeter = isMeasuringMetrics() ? getMeter(Metrics.NUM_CACHE_HITS) : null;
+      Meter numCacheMissesMeter = isMeasuringMetrics() ? getMeter(Metrics.NUM_CACHE_MISSES) : null;
+      
       Config outputFields = getConfigs().getConfig(config, "outputFields", ConfigFactory.empty());
       for (Map.Entry<String, Object> entry : new Configs().getEntrySet(outputFields)) {
         mappings.add(
@@ -102,7 +108,10 @@ public final class UserAgentBuilder implements CommandBuilder {
                 parser, 
                 new BoundedLRUHashMap(cacheCapacity), 
                 nullReplacement, 
-                config));
+                config,
+                numCacheHitsMeter,
+                numCacheMissesMeter
+                ));
       }
       validateArguments();
     }
@@ -135,17 +144,22 @@ public final class UserAgentBuilder implements CommandBuilder {
     private final Map<String, String> cache;
     private final String nullReplacement;
     
+    private final Meter numCacheHitsMeter;
+    private final Meter numCacheMissesMeter;
+    
     private static final String START_TOKEN = "@{";
     private static final char END_TOKEN = '}';
     
     public Mapping(String fieldName, String expression, Parser parser, Map<String, String> cache,
-        String nullReplacement, Config config) {
+        String nullReplacement, Config config, Meter numCacheHitsMeter, Meter numCacheMissesMeter) {
       
       this.fieldName = fieldName;
       this.parser = parser;
       this.cache = cache;
       Preconditions.checkNotNull(nullReplacement);
       this.nullReplacement = nullReplacement;
+      this.numCacheHitsMeter = numCacheHitsMeter;
+      this.numCacheMissesMeter = numCacheMissesMeter;
       int from = 0;
       
       while (from < expression.length()) {
@@ -174,8 +188,13 @@ public final class UserAgentBuilder implements CommandBuilder {
     public void apply(Record record, String userAgent) {
       String result = cache.get(userAgent);
       if (result == null) { // cache miss
+        if (numCacheMissesMeter != null) {
+          numCacheMissesMeter.mark();
+        }
         result = extract(userAgent);
         cache.put(userAgent, result);
+      } else if (numCacheHitsMeter != null) {
+        numCacheHitsMeter.mark();
       }
       record.put(fieldName, result);
     }

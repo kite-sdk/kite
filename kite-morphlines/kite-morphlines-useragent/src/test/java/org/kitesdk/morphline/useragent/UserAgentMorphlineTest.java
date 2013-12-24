@@ -77,23 +77,25 @@ public class UserAgentMorphlineTest extends AbstractMorphlineTest {
   private void testBasic(String morphlineFile) throws Exception {
     morphline = createMorphline(morphlineFile);    
       
-    Record record = new Record();
-    String userAgentStr = "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3";
-    record.put("user_agents", userAgentStr);
-    Record expected = new Record();
-    expected.put("user_agents", userAgentStr);
-    expected.put("ua_family", "Mobile Safari");
-    expected.put("device_family", "iPhone");
-    expected.put("string_constant1", "foo");
-    expected.put("string_constant2", "");
-    expected.put("ua_family_and_version", "Mobile Safari/5.1");
-    expected.put("os_family_and_version", "iOS5.1.1-foo@bar");
-            
-    processAndVerifySuccess(record, expected, true);
-    
-    record = new Record();
-    record.put("user_agents", userAgentStr);
-    processAndVerifySuccess(record, expected, true);
+    for (int i = 0; i < 3; i++) {
+      Record record = new Record();
+      String userAgentStr = "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3";
+      record.put("user_agents", userAgentStr);
+      Record expected = new Record();
+      expected.put("user_agents", userAgentStr);
+      expected.put("ua_family", "Mobile Safari");
+      expected.put("device_family", "iPhone");
+      expected.put("string_constant1", "foo");
+      expected.put("string_constant2", "");
+      expected.put("ua_family_and_version", "Mobile Safari/5.1");
+      expected.put("os_family_and_version", "iOS5.1.1-foo@bar");
+              
+      processAndVerifySuccess(record, expected, true);
+      
+      record = new Record();
+      record.put("user_agents", userAgentStr);
+      processAndVerifySuccess(record, expected, true);
+    }
   }
   
   private void processAndVerifySuccess(Record input, Record expected, boolean isSame) {
