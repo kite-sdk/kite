@@ -17,6 +17,7 @@
  */
 package org.kitesdk.morphline.solr;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -37,6 +38,7 @@ import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope.Scope;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies.Consequence;
+
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Notifications;
@@ -55,7 +57,7 @@ public class SolrMorphlineZkAliasTest extends AbstractSolrMorphlineZkTest {
     
     createAlias("aliascollection", "collection1");
     
-    morphline = parse("test-morphlines/loadSolrBasic", "aliascollection");
+    morphline = parse("test-morphlines" + File.separator + "loadSolrBasic", "aliascollection");
     Record record = new Record();
     record.put(Fields.ID, "id0-innsbruck");
     record.put("text", "mytext");
@@ -104,7 +106,7 @@ public class SolrMorphlineZkAliasTest extends AbstractSolrMorphlineZkTest {
     createAlias("aliascollection", "collection1,collection2");
     
     try {
-      parse("test-morphlines/loadSolrBasic", "aliascollection");
+      parse("test-morphlines" + File.separator + "loadSolrBasic", "aliascollection");
       fail("Expected IAE because update alias maps to multiple collections");
     } catch (IllegalArgumentException e) {
       

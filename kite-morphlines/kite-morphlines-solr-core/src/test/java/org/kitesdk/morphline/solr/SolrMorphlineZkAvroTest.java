@@ -39,9 +39,12 @@ import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope.Scope;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies.Consequence;
+
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Notifications;
+
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
 
@@ -54,12 +57,13 @@ public class SolrMorphlineZkAvroTest extends AbstractSolrMorphlineZkTest {
   
   @Override
   public void doTest() throws Exception {
-    File file = new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433-medium.avro");
+    Joiner joiner = Joiner.on(File.separator);
+    File file = new File(joiner.join(RESOURCES_DIR, "test-documents", "sample-statuses-20120906-141433-medium.avro"));
     
     waitForRecoveriesToFinish(false);
     
     // load avro records via morphline and zk into solr
-    morphline = parse("test-morphlines/tutorialReadAvroContainer");    
+    morphline = parse("test-morphlines" + File.separator + "tutorialReadAvroContainer");    
     Record record = new Record();
     byte[] body = Files.toByteArray(file);    
     record.put(Fields.ATTACHMENT_BODY, body);

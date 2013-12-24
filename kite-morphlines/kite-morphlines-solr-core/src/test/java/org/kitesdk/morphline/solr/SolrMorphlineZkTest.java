@@ -17,6 +17,7 @@
  */
 package org.kitesdk.morphline.solr;
 
+import java.io.File;
 import java.util.Iterator;
 
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
@@ -31,6 +32,7 @@ import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope.Scope;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies.Consequence;
+
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Notifications;
@@ -47,7 +49,7 @@ public class SolrMorphlineZkTest extends AbstractSolrMorphlineZkTest {
     
     waitForRecoveriesToFinish(false);
     
-    morphline = parse("test-morphlines/loadSolrBasic");    
+    morphline = parse("test-morphlines" + File.separator + "loadSolrBasic");    
     Record record = new Record();
     record.put(Fields.ID, "id0-innsbruck");
     record.put("text", "mytext");

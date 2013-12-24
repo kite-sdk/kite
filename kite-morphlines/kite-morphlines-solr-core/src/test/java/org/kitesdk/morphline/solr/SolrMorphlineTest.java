@@ -15,10 +15,10 @@
  */
 package org.kitesdk.morphline.solr;
 
+import java.io.File;
 import java.util.Arrays;
 
 import org.junit.Test;
-
 import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
@@ -30,14 +30,14 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
   public void testLoadSchema() throws Exception {
     SolrLocator locator = new SolrLocator(new MorphlineContext.Builder().build());
     locator.setCollectionName("collection1");
-    locator.setSolrHomeDir("solr/collection1");
+    locator.setSolrHomeDir("solr" + File.separator + "collection1");
     assertNotNull(locator.getIndexSchema());
   }
   
   @Test
   public void testLoadSolrBasic() throws Exception {
-    //System.setProperty("ENV_SOLR_HOME", testSolrHome + "/collection1");
-    morphline = createMorphline("test-morphlines/loadSolrBasic");    
+    //System.setProperty("ENV_SOLR_HOME", testSolrHome + File.separator + "collection1");
+    morphline = createMorphline("test-morphlines" + File.separator + "loadSolrBasic");    
     //System.clearProperty("ENV_SOLR_HOME");
     Record record = new Record();
     record.put(Fields.ID, "id0");
@@ -57,7 +57,7 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
     
   @Test
   public void testTokenizeText() throws Exception {
-    morphline = createMorphline("test-morphlines/tokenizeText");
+    morphline = createMorphline("test-morphlines" + File.separator + "tokenizeText");
     for (int i = 0; i < 3; i++) {
       Record record = new Record();
       record.put(Fields.MESSAGE, "Hello World!");

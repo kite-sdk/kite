@@ -40,7 +40,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.kitesdk.morphline.api.Collector;
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.MorphlineContext;
@@ -50,7 +49,9 @@ import org.kitesdk.morphline.base.FaultTolerance;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Notifications;
 import org.kitesdk.morphline.stdlib.PipeBuilder;
+
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Joiner;
 import com.google.common.io.Files;
 import com.typesafe.config.Config;
 
@@ -65,7 +66,7 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
   protected static final String EXTERNAL_SOLR_SERVER_URL = System.getProperty("externalSolrServer");
 //  protected static final String EXTERNAL_SOLR_SERVER_URL = "http://127.0.0.1:8983/solr";
 
-  protected static final String RESOURCES_DIR = "target/test-classes";
+  protected static final String RESOURCES_DIR = "target" + File.separator + "test-classes";
   protected static final String DEFAULT_BASE_DIR = "solr";
   protected static final AtomicInteger SEQ_NUM = new AtomicInteger();
   protected static final AtomicInteger SEQ_NUM2 = new AtomicInteger();
@@ -80,10 +81,11 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
   }
 
   protected static void myInitCore(String baseDirName) throws Exception {
+    Joiner joiner = Joiner.on(File.separator);
     initCore(
-        RESOURCES_DIR + "/" + baseDirName + "/collection1/conf/solrconfig.xml",
-        RESOURCES_DIR + "/" + baseDirName + "/collection1/conf/schema.xml",
-        RESOURCES_DIR + "/" + baseDirName
+        joiner.join(RESOURCES_DIR, baseDirName, "collection1", "conf", "solrconfig.xml"),
+        joiner.join(RESOURCES_DIR, baseDirName, "collection1", "conf", "schema.xml"),
+        joiner.join(RESOURCES_DIR, baseDirName)
         );    
   }
   
@@ -208,8 +210,8 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
   
   private Config parse(String file) throws IOException {
     SolrLocator locator = new SolrLocator(createMorphlineContext());
-    locator.setSolrHomeDir(testSolrHome + "/collection1");
-    Config config = new Compiler().parse(new File(RESOURCES_DIR + "/" + file + ".conf"), locator.toConfig("SOLR_LOCATOR"));
+    locator.setSolrHomeDir(testSolrHome + File.separator + "collection1");
+    Config config = new Compiler().parse(new File(RESOURCES_DIR + File.separator + file + ".conf"), locator.toConfig("SOLR_LOCATOR"));
     config = config.getConfigList("morphlines").get(0);
     return config;
   }
