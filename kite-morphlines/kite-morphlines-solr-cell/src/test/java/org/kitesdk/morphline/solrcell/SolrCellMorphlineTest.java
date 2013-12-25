@@ -120,7 +120,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
       Map<String, Object> record = new LinkedHashMap();
       record.put("ignored__attachment_mimetype", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       record.put("ignored_author", "Keith Bennett");
-//      record.put("ignored_creation_date", "2007-10-01T16:13:56Z");
+      record.put("ignored_creation_date", "2007-10-01T16:13:56Z");
       record.put("ignored_title", "Simple Excel document");
       record.put("text", NON_EMPTY_FIELD);
       expectedRecordContents.put(file, record);

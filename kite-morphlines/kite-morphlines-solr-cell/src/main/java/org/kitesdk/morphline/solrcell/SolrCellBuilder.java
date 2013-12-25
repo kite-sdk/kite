@@ -101,6 +101,7 @@ public final class SolrCellBuilder implements CommandBuilder {
     private final String xpathExpr;
     private final List<Parser> parsers = new ArrayList();
     private final SolrContentHandlerFactory solrContentHandlerFactory;
+    private final Locale locale;
     
     private final SolrParams solrParams;
     private final Map<MediaType, Parser> mediaTypeToParserMap;
@@ -162,6 +163,8 @@ public final class SolrCellBuilder implements CommandBuilder {
       }
       this.solrContentHandlerFactory = getSolrContentHandlerFactory(factoryClass, dateFormats, config);
 
+      this.locale = getLocale(getConfigs().getString(config, "locale", ""));
+      
       this.mediaTypeToParserMap = new HashMap<MediaType, Parser>();
       //MimeTypes mimeTypes = MimeTypes.getDefaultMimeTypes(); // FIXME getMediaTypeRegistry.normalize() 
 
@@ -221,6 +224,7 @@ public final class SolrCellBuilder implements CommandBuilder {
       }
       
       ParseContext parseContext = new ParseContext();
+      parseContext.set(Locale.class, locale);
       
       Metadata metadata = new Metadata();
       for (Entry<String, Object> entry : record.getFields().entries()) {
@@ -335,6 +339,18 @@ public final class SolrCellBuilder implements CommandBuilder {
       return record;
     }
     
+    private Locale getLocale(String name) {
+      for (Locale locale : Locale.getAvailableLocales()) {
+        if (locale.toString().equals(name)) {
+          return locale;
+        }
+      }
+      assert Locale.ROOT.toString().equals("");
+      if (name.equals(Locale.ROOT.toString())) {
+        return Locale.ROOT;
+      }
+      throw new MorphlineCompilationException("Unknown locale: " + name, getConfig());
+    }
   }
 
 }
