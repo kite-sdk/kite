@@ -17,8 +17,8 @@ package org.kitesdk.morphline.api;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.kitesdk.morphline.base.Validator;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 

@@ -42,7 +42,6 @@ import javax.management.ReflectionException;
 
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.kitesdk.morphline.base.Compiler;
 import org.kitesdk.morphline.base.FaultTolerance;
 import org.kitesdk.morphline.base.Fields;
@@ -52,6 +51,7 @@ import org.kitesdk.morphline.shaded.com.google.code.regexp.Matcher;
 import org.kitesdk.morphline.shaded.com.google.code.regexp.Pattern;
 import org.kitesdk.morphline.shaded.com.google.common.reflect.ClassPath;
 import org.kitesdk.morphline.shaded.com.google.common.reflect.ClassPath.ResourceInfo;
+
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;

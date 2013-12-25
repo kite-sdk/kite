@@ -26,11 +26,11 @@ import java.util.Map;
 
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.kitesdk.morphline.api.AbstractMorphlineTest;
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;

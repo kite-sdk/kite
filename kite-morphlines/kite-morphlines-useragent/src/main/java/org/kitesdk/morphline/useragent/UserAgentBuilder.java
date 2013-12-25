@@ -26,9 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import ua_parser.Client;
-import ua_parser.Parser;
-
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineCompilationException;
@@ -38,6 +35,9 @@ import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.base.Metrics;
 import org.kitesdk.morphline.base.Validator;
+
+import ua_parser.Client;
+import ua_parser.Parser;
 
 import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.kitesdk.morphline.api.Record;
+
 import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 

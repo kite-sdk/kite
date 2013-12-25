@@ -20,10 +20,10 @@ import java.io.InputStream;
 import org.apache.tika.io.CloseShieldInputStream;
 import org.apache.tika.io.TemporaryResources;
 import org.apache.tika.io.TikaInputStream;
-
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
+
 import com.google.common.io.Closeables;
 
 /**

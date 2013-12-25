@@ -15,11 +15,15 @@
  */
 package org.kitesdk.morphline.api;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-import org.kitesdk.morphline.api.*;
-import org.kitesdk.morphline.base.*;
 import org.kitesdk.morphline.base.Compiler;
+import org.kitesdk.morphline.base.Fields;
+import org.kitesdk.morphline.base.Notifications;
 
 /** Sample program that illustrates how to use the API to embed and execute a morphline in a host system */
 public class MorphlineDemo {

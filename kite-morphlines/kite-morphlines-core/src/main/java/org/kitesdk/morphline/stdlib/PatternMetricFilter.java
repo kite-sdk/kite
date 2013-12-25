@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.kitesdk.morphline.api.MorphlineCompilationException;
 import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.shaded.org.apache.hadoop.fs.GlobPattern;
+
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.google.common.base.Preconditions;

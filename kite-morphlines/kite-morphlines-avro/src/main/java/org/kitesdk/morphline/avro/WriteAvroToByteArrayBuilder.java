@@ -30,7 +30,6 @@ import org.apache.avro.generic.GenericContainer;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
-
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineContext;
@@ -41,6 +40,7 @@ import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Validator;
 import org.kitesdk.morphline.stdio.AbstractParser;
+
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
 import com.typesafe.config.Config;

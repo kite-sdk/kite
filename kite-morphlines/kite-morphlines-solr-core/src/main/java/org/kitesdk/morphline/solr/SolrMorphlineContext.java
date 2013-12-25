@@ -16,7 +16,6 @@
 package org.kitesdk.morphline.solr;
 
 import org.apache.solr.schema.IndexSchema;
-
 import org.kitesdk.morphline.api.MorphlineContext;
 
 /**

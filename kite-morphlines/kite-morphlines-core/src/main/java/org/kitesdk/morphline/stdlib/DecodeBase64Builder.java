@@ -22,6 +22,7 @@ import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.shaded.org.apache.commons.codec.binary.binary.Base64;
+
 import com.typesafe.config.Config;
 
 /**

@@ -17,9 +17,9 @@ package org.kitesdk.morphline.stdlib;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.shaded.com.google.code.regexp.Pattern;
+
 import com.typesafe.config.ConfigFactory;
 
 public class GrokDictionaryTest extends Assert {

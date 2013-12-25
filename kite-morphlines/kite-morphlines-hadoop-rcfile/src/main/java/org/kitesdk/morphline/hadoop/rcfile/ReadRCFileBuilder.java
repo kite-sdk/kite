@@ -34,7 +34,6 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
-
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineCompilationException;
@@ -45,6 +44,7 @@ import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Validator;
 import org.kitesdk.morphline.stdio.AbstractParser;
+
 import com.google.common.io.ByteStreams;
 import com.typesafe.config.Config;
 

@@ -22,7 +22,6 @@ import java.util.Random;
 
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
-
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineContext;
@@ -31,6 +30,7 @@ import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Notifications;
+
 import com.typesafe.config.Config;
 
 /**

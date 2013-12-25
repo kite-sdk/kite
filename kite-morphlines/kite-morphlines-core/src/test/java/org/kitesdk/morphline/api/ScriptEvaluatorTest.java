@@ -18,8 +18,8 @@ package org.kitesdk.morphline.api;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.kitesdk.morphline.scriptengine.java.ScriptEvaluator;
+
 import com.google.common.collect.ArrayListMultimap;
 
 

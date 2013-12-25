@@ -17,9 +17,9 @@ package org.kitesdk.morphline.stdlib;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.kitesdk.morphline.api.MorphlineCompilationException;
 import org.kitesdk.morphline.base.Configs;
+
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.Timer;

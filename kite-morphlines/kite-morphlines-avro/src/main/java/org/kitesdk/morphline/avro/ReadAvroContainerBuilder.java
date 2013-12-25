@@ -33,7 +33,6 @@ import org.apache.avro.file.SeekableInput;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.ResolvingDecoder;
-
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineCompilationException;
@@ -41,6 +40,7 @@ import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.stdio.AbstractParser;
+
 import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 

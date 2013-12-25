@@ -17,12 +17,12 @@
  */
 package org.kitesdk.morphline.stdio;
 
+import static java.util.Collections.singletonMap;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
-
-import static java.util.Collections.singletonMap;
 
 public class MediaTypeTest extends TestCase {
 

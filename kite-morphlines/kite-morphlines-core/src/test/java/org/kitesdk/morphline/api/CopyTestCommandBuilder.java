@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.kitesdk.morphline.base.AbstractCommand;
+
 import com.typesafe.config.Config;
 
 public final class CopyTestCommandBuilder implements CommandBuilder {

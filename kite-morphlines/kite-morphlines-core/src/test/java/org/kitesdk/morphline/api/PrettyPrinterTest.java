@@ -17,7 +17,6 @@ package org.kitesdk.morphline.api;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.kitesdk.morphline.base.PrettyPrinter;
 
 public class PrettyPrinterTest extends Assert {

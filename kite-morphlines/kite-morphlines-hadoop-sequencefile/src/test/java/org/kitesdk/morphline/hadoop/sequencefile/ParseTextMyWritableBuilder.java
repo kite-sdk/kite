@@ -24,13 +24,13 @@ import java.util.Collections;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Fields;
+
 import com.typesafe.config.Config;
 
 /**

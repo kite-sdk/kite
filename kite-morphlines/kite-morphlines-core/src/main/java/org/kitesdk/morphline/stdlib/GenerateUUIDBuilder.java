@@ -30,6 +30,7 @@ import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Validator;
 import org.kitesdk.morphline.shaded.org.apache.commons.math3.random.RandomGenerator;
 import org.kitesdk.morphline.shaded.org.apache.commons.math3.random.Well19937c;
+
 import com.typesafe.config.Config;
 
 /**

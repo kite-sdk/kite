@@ -33,6 +33,7 @@ import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Metrics;
+
 import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;

@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
-
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineContext;
@@ -33,6 +32,7 @@ import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.base.Metrics;
 import org.kitesdk.morphline.base.Notifications;
+
 import com.codahale.metrics.Timer;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;

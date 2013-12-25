@@ -32,6 +32,7 @@ import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.shaded.com.googlecode.jcsv.fastreader.CSVTokenizer;
 import org.kitesdk.morphline.shaded.com.googlecode.jcsv.fastreader.QuotedCSVTokenizer;
 import org.kitesdk.morphline.shaded.com.googlecode.jcsv.fastreader.SimpleCSVTokenizer;
+
 import com.typesafe.config.Config;
 
 /**

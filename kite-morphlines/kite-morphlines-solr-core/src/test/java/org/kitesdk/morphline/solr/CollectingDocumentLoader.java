@@ -24,8 +24,6 @@ import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.kitesdk.morphline.solr.DocumentLoader;
-
 /**
  * A mockup DocumentLoader implementation for unit tests; collects all documents into a main memory list.
  */

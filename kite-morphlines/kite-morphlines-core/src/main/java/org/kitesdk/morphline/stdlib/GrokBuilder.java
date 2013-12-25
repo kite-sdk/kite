@@ -30,6 +30,7 @@ import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.base.Validator;
 import org.kitesdk.morphline.shaded.com.google.code.regexp.GroupInfo;
 import org.kitesdk.morphline.shaded.com.google.code.regexp.Matcher;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 

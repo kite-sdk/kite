@@ -25,11 +25,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.kitesdk.morphline.shaded.com.google.common.reflect.ClassPath;
+import org.kitesdk.morphline.shaded.com.google.common.reflect.ClassPath.ClassInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.kitesdk.morphline.shaded.com.google.common.reflect.ClassPath;
-import org.kitesdk.morphline.shaded.com.google.common.reflect.ClassPath.ClassInfo;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.common.base.Preconditions;

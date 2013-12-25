@@ -21,12 +21,11 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Iterator;
-
 import java.util.TimeZone;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.kitesdk.morphline.api.AbstractMorphlineTest;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;

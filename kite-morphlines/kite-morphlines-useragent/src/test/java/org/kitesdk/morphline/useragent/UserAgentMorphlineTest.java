@@ -16,12 +16,11 @@
 package org.kitesdk.morphline.useragent;
 
 import org.junit.Test;
+import org.kitesdk.morphline.api.AbstractMorphlineTest;
+import org.kitesdk.morphline.api.Record;
 
 import ua_parser.Client;
 import ua_parser.Parser;
-
-import org.kitesdk.morphline.api.AbstractMorphlineTest;
-import org.kitesdk.morphline.api.Record;
 
 public class UserAgentMorphlineTest extends AbstractMorphlineTest {
 

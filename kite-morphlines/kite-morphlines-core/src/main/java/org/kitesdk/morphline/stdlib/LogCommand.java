@@ -24,6 +24,7 @@ import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.FieldExpression;
+
 import com.typesafe.config.Config;
 
 /**

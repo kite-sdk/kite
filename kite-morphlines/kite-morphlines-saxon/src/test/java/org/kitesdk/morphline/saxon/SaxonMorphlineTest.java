@@ -28,10 +28,10 @@ import java.util.Iterator;
 
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.kitesdk.morphline.api.AbstractMorphlineTest;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
+
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;

@@ -17,6 +17,7 @@ package org.kitesdk.morphline.base;
 
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.Record;
+
 import com.google.common.base.Preconditions;
 
 /**

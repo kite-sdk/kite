@@ -20,8 +20,6 @@ import java.util.Collections;
 
 import javax.script.ScriptException;
 
-import org.slf4j.Logger;
-
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineCompilationException;
@@ -32,6 +30,8 @@ import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.scriptengine.java.ScriptEvaluator;
+import org.slf4j.Logger;
+
 import com.typesafe.config.Config;
 
 /**

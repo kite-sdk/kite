@@ -18,6 +18,7 @@ package org.kitesdk.morphline.base;
 import java.util.Arrays;
 
 import org.kitesdk.morphline.api.MorphlineCompilationException;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;

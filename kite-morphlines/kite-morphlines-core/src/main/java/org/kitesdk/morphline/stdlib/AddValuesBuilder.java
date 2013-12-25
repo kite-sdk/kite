@@ -21,6 +21,7 @@ import java.util.Collections;
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineContext;
+
 import com.typesafe.config.Config;
 
 /**

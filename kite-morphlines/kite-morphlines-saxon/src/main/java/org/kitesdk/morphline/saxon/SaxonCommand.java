@@ -42,6 +42,7 @@ import org.kitesdk.morphline.api.MorphlineRuntimeException;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.stdio.AbstractParser;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 

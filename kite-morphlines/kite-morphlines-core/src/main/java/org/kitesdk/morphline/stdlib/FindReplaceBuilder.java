@@ -22,6 +22,7 @@ import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.shaded.com.google.code.regexp.Matcher;
+
 import com.typesafe.config.Config;
 
 /**

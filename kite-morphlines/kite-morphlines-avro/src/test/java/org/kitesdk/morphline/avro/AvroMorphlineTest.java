@@ -46,13 +46,13 @@ import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.util.Utf8;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.kitesdk.morphline.api.AbstractMorphlineTest;
 import org.kitesdk.morphline.api.MorphlineCompilationException;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Notifications;
 import org.kitesdk.morphline.stdio.AbstractParser;
+
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;

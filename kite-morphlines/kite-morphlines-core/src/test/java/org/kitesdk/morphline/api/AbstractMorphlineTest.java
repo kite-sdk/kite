@@ -22,10 +22,10 @@ import java.lang.reflect.Array;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-
 import org.kitesdk.morphline.base.Compiler;
 import org.kitesdk.morphline.base.Notifications;
 import org.kitesdk.morphline.stdlib.PipeBuilder;
+
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;

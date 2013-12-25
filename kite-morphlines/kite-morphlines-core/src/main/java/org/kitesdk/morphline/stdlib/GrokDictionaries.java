@@ -28,12 +28,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.kitesdk.morphline.api.MorphlineCompilationException;
 import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.shaded.com.google.code.regexp.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;

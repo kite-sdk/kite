@@ -15,12 +15,11 @@
  */
 package org.kitesdk.morphline.base;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.kitesdk.morphline.api.ExceptionHandler;
 import org.kitesdk.morphline.api.MorphlineRuntimeException;
 import org.kitesdk.morphline.api.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Mission critical, large-scale online production systems need to make progress without downtime

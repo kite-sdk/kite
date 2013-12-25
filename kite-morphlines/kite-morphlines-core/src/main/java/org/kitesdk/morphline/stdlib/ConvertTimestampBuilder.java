@@ -35,6 +35,7 @@ import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Fields;
+
 import com.google.common.base.Joiner;
 import com.typesafe.config.Config;
 

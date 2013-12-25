@@ -26,6 +26,7 @@ import org.kitesdk.morphline.api.MorphlineCompilationException;
 import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.AbstractCommand;
+
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.typesafe.config.Config;
