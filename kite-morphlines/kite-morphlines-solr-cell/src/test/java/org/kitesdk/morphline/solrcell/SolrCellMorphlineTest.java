@@ -61,7 +61,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
       Map<String, Object> record = new LinkedHashMap();
       record.put("ignored__attachment_mimetype", "image/jpeg");
       record.put("ignored_exif_isospeedratings", "400");
-  //    record.put("ignored_meta_creation_date", "2009-08-11T09:09:45");
+      record.put("ignored_meta_creation_date", "2009-08-11T09:09:45");
       record.put("ignored_tiff_model", "Canon EOS 40D");
       record.put("text", NON_EMPTY_FIELD);
       expectedRecordContents.put("/testJPEG_EXIF.jpg", record);
@@ -74,7 +74,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
       Map<String, Object> record = new LinkedHashMap();
       record.put("ignored__attachment_mimetype", "application/msword");
       record.put("ignored_author", "Michael McCandless");
-//      record.put("ignored_creation_date", "2011-09-02T10:11:00Z");
+      record.put("ignored_creation_date", "2011-09-02T10:11:00Z");
       record.put("ignored_title", "");
       record.put("ignored_keywords", "Keyword1 Keyword2");
       record.put("ignored_subject", "Subject is here");
@@ -87,7 +87,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
       Map<String, Object> record = new LinkedHashMap();
       record.put("ignored__attachment_mimetype", "application/pdf");
       record.put("ignored_author", "Bertrand Delacrétaz");
-//      record.put("ignored_creation_date", "2007-09-15T09:02:31Z");
+      record.put("ignored_creation_date", "2007-09-15T09:02:31Z");
       record.put("ignored_title", "Apache Tika - Apache Tika");
       record.put("ignored_xmp_creatortool", "Firefox");
       record.put("text", NON_EMPTY_FIELD);
@@ -101,15 +101,15 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
       record.put("ignored__attachment_mimetype", "message/rfc822");
       record.put("ignored_author", name);
       //record.put("ignored_content_length", "1068");
-//      record.put("ignored_creation_date", "2013-11-27T20:01:23Z");
+      record.put("ignored_creation_date", "2013-11-27T20:01:23Z");
       record.put("ignored_message_from", name);
       record.put("ignored_message_to", name);
       record.put("ignored_creator", name);
       record.put("ignored_dc_creator", name);
       record.put("ignored_dc_title", "Test EML");
-//      record.put("ignored_dcterms_created", "2013-11-27T20:01:23Z");
+      record.put("ignored_dcterms_created", "2013-11-27T20:01:23Z");
       record.put("ignored_meta_author", name);
-//      record.put("ignored_meta_creation_date", "2013-11-27T20:01:23Z");
+      record.put("ignored_meta_creation_date", "2013-11-27T20:01:23Z");
       record.put("ignored_subject", "Test EML");
       record.put("text", NON_EMPTY_FIELD);
       expectedRecordContents.put(file, record);
