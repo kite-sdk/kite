@@ -3,6 +3,15 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version 0.11.0
+
+Release date: TBD
+
+Version 0.11.0 has the following notable changes:
+
+* Morphlines Library
+    * Upgraded cdk-morphlines-json module from jackson-databind-2.2.1 to jackson-databind-2.3.0.
+
 ## Version 0.10.0
 
 Release date: December 9, 2013
