@@ -10,7 +10,7 @@ Release date: TBD
 Version 0.11.0 has the following notable changes:
 
 * Morphlines Library
-    * Upgraded cdk-morphlines-json module from jackson-databind-2.2.1 to jackson-databind-2.3.0.
+    * Upgraded kite-morphlines-json module from jackson-databind-2.2.1 to jackson-databind-2.3.0.
 
 ## Version 0.10.0
 
