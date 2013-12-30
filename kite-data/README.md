@@ -7,5 +7,5 @@ This project is part of the Kite project, an open source
 set of APIs that helps developers more easily build robust systems and applications
 with Apache Hadoop.
 
-See the [online documentation](http://kitesdk.org/kite/docs/current/) for
+See the [online documentation](http://kitesdk.org/docs/current/) for
 more information.
