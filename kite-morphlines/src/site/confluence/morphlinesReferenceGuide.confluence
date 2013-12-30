@@ -14,6 +14,7 @@ h3. Table of Contents
 - [#kite\-morphlines\-avro]
 - [#kite\-morphlines\-json]
 - [#kite\-morphlines\-hadoop\-core]
+- [#kite\-morphlines\-hadoop\-parquet\-avro]
 - [#kite\-morphlines\-hadoop\-sequencefile]
 - [#kite\-morphlines\-hadoop\-rcfile]
 - [#kite\-morphlines\-maxmind]
@@ -95,17 +96,23 @@ h3. kite\-morphlines\-json
 h3. kite\-morphlines\-hadoop\-core
 | [#downloadHdfsFile] | Downloads, on startup, zero or more files or directory trees from HDFS to the local file system. |
 
-{anchor:kite\-morphlines\-hadoop\-sequencefile}
+{anchor:kite\-morphlines\-hadoop\-parquet\-avro}
 \\
 \\
-h3. kite\-morphlines\-hadoop\-sequencefile
-| [#readSequenceFile] | Parses an Apache Hadoop [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html] and emits a morphline record for each contained key\-value pair. |
+h3. kite\-morphlines\-hadoop\-parquet\-avro
+| [#readAvroParquetFile] | Parses a Hadoop [Parquet|http://parquet.io] file and emits a morphline record for each contained Avro datum. |
 
 {anchor:kite\-morphlines\-hadoop\-rcfile}
 \\
 \\
 h3. kite\-morphlines\-hadoop\-rcfile
 | [#readRCFile] | Parses an Apache Hadoop [RCFile|http://archive.cloudera.com/cdh4/cdh/4/hive/api/org/apache/hadoop/hive/ql/io/RCFile.html] and emits morphline records row\-wise or column\-wise. |
+
+{anchor:kite\-morphlines\-hadoop\-sequencefile}
+\\
+\\
+h3. kite\-morphlines\-hadoop\-sequencefile
+| [#readSequenceFile] | Parses an Apache Hadoop [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html] and emits a morphline record for each contained key\-value pair. |
 
 {anchor:kite\-morphlines\-maxmind}
 \\
@@ -1758,25 +1765,38 @@ downloadHdfsFile {
 }
 {code}
 
-h1. kite\-morphlines\-hadoop\-sequencefile
+h1. kite\-morphlines\-hadoop\-parquet\-avro
 
-h2. readSequenceFile
+This maven module contains morphline commands for handling Hadoop Avro Parquet files.
 
-The {{readSequenceFile}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-hadoop-sequencefile/src/main/java/org/kitesdk/morphline/hadoop/sequencefile/ReadSequenceFileBuilder.java]) parses an Apache Hadoop [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html] and emits a morphline record for each contained key\-value pair. The sequence file is read from the input stream of the first attachment of the record.
+h2. readAvroParquetFile
 
-The command automatically handles Record\-Compressed and Block\-Compressed SequenceFiles.
+The {{readAvroParquetFile}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-hadoop-parquet-avro/src/main/java/org/kitesdk/morphline/hadoop/parquet/avro/ReadParquetFileBuilder.java]) parses a Hadoop [Parquet|http://parquet.io] file and emits a morphline record for each contained Avro datum.
+
+The morphline record input field file\_upload\_url must contain the HDFS Path of the Parquet file to read. (This field is already provided out of the box with {{MapReduceIndexerTool}}).
+
+For each Avro datum, the command emits a morphline record containing the datum as an attachment in the field \_attachment\_body. Typically, the emitted Avro datum is further post\-processed with downstream commands such as [#extractAvroPaths].
+
+The Avro schema that was used to write the Avro data is retrieved from the parquet container. Optionally, the Avro schema that shall be used for reading can be supplied with a configuration option; otherwise it is assumed to be the same as the writer schema.
+
+Note: Avro uses [Schema Resolution|http://avro.apache.org/docs/current/spec.html#Schema+Resolution] if the two schemas are different, e.g. if the reader schema is a subset of the writer schema for the purpose of efficient column projection.
+
+Note: The current implementation requires that the parquet file contains an explicit Avro schema, e.g. as written by {{parquet.avro.AvroParquetWriter}}. This limitation might be removed in a future release.
 
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
-| keyField | \_attachment\_name | The name of the output field to store the SequenceFile Record key. |
-| valueField | \_attachment\_body | The name of the output field to store the SequenceFile Record value. |
+| readerSchemaFile | null | An optional Avro schema file in JSON format on the local file system to use for reading. |
+| readerSchemaString | null | An optional Avro schema in JSON format given inline to use for reading. |
 
 Example usage:
 {code}
-readSequenceFile {
-  keyField : "key"
-  valueField : "value"
+readAvroParquetFile {
+  # Optionally, use this Avro schema in JSON format inline for reading:
+  # readerSchemaString : """<json can go here>"""
+
+  # Optionally, use this Avro schema file in JSON format for reading:
+  # readerSchemaFile : /path/to/syslog.avsc
 }
 {code}
 
@@ -1829,6 +1849,28 @@ readRCFile {
       writableClass: "org.apache.hadoop.hive.serde2.columnar.BytesRefWritable"
     }
   ]
+}
+{code}
+
+h1. kite\-morphlines\-hadoop\-sequencefile
+
+h2. readSequenceFile
+
+The {{readSequenceFile}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-hadoop-sequencefile/src/main/java/org/kitesdk/morphline/hadoop/sequencefile/ReadSequenceFileBuilder.java]) parses an Apache Hadoop [SequenceFile|http://archive.cloudera.com/cdh4/cdh/4/hadoop/api/org/apache/hadoop/io/SequenceFile.html] and emits a morphline record for each contained key\-value pair. The sequence file is read from the input stream of the first attachment of the record.
+
+The command automatically handles Record\-Compressed and Block\-Compressed SequenceFiles.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| keyField | \_attachment\_name | The name of the output field to store the SequenceFile Record key. |
+| valueField | \_attachment\_body | The name of the output field to store the SequenceFile Record value. |
+
+Example usage:
+{code}
+readSequenceFile {
+  keyField : "key"
+  valueField : "value"
 }
 {code}
 

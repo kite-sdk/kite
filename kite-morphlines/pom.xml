@@ -37,6 +37,7 @@
     <module>kite-morphlines-tika-decompress</module>
     <module>kite-morphlines-twitter</module>
     <module>kite-morphlines-hadoop-core</module>
+    <module>kite-morphlines-hadoop-parquet-avro</module>
     <module>kite-morphlines-hadoop-rcfile</module>
     <module>kite-morphlines-hadoop-sequencefile</module>
     <module>kite-morphlines-useragent</module>
@@ -96,6 +97,11 @@
       <dependency>
         <groupId>org.kitesdk</groupId>
         <artifactId>kite-morphlines-hadoop-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.kitesdk</groupId>
+        <artifactId>kite-morphlines-hadoop-parquet-avro</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

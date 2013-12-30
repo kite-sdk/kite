@@ -49,6 +49,10 @@
       </dependency>
       <dependency>
         <groupId>org.kitesdk</groupId>
+        <artifactId>kite-morphlines-hadoop-parquet-avro</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.kitesdk</groupId>
         <artifactId>kite-morphlines-hadoop-sequencefile</artifactId>
       </dependency>
       <dependency>

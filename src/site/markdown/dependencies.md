@@ -72,12 +72,15 @@ dependencies yourself:
 * Kite Morphlines Hadoop Core
  [Dependency Information](kite-morphlines/kite-morphlines-hadoop-core/dependency-info.html),
  [Dependencies](kite-morphlines/kite-morphlines-hadoop-core/dependencies.html)
-* Kite Morphlines Hadoop Sequence File
- [Dependency Information](kite-morphlines/kite-morphlines-hadoop-sequencefile/dependency-info.html),
- [Dependencies](kite-morphlines/kite-morphlines-hadoop-sequencefile/dependencies.html)
+* Kite Morphlines Hadoop Parquet Avro
+ [Dependency Information](kite-morphlines/kite-morphlines-hadoop-parquet-avro/dependency-info.html),
+ [Dependencies](kite-morphlines/kite-morphlines-hadoop-parquet-avro/dependencies.html)
 * Kite Morphlines Hadoop RC File
  [Dependency Information](kite-morphlines/kite-morphlines-hadoop-rcfile/dependency-info.html),
  [Dependencies](kite-morphlines/kite-morphlines-hadoop-rcfile/dependencies.html)
+* Kite Morphlines Hadoop Sequence File
+ [Dependency Information](kite-morphlines/kite-morphlines-hadoop-sequencefile/dependency-info.html),
+ [Dependencies](kite-morphlines/kite-morphlines-hadoop-sequencefile/dependencies.html)
 * Kite Morphlines Maxmind
  [Dependency Information](kite-morphlines/kite-morphlines-maxmind/dependency-info.html),
  [Dependencies](kite-morphlines/kite-morphlines-maxmind/dependencies.html)
