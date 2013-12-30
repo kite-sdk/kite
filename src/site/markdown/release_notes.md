@@ -10,7 +10,8 @@ Release date: TBD
 Version 0.11.0 has the following notable changes:
 
 * Morphlines Library
-    * Upgraded kite-morphlines-json module from jackson-databind-2.2.1 to jackson-databind-2.3.0.
+    * Added morphline command to read from Hadoop Parquet Files: [readParquetFile](kite-morphlines/morphlinesReferenceGuide.html#readParquetFile)
+    * Upgraded kite-morphlines-json module from jackson-databind-2.2.1 to jackson-databind-2.3.1.
 
 ## Version 0.10.0
 
