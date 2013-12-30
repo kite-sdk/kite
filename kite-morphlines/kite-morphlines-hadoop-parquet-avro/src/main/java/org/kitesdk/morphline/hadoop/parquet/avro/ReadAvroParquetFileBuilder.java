@@ -128,7 +128,13 @@ public final class ReadAvroParquetFileBuilder implements CommandBuilder {
       if (paths.size() == 0) {
         return false;
       }
-      Path path = new Path(paths.get(0).toString());
+      Path path;
+      Object obj = paths.get(0);
+      if (obj instanceof Path) {
+        path = (Path) obj;
+      } else {
+        path = new Path(obj.toString());
+      }
       
       Record template = inputRecord.copy();
       AbstractParser.removeAttachments(template);
