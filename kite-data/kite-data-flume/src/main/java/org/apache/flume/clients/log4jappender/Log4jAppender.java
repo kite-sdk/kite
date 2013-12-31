@@ -166,8 +166,6 @@ public class Log4jAppender extends AppenderSkeleton {
       hdrs.put(Log4jAvroHeaders.AVRO_SCHEMA_URL.toString(), avroSchemaUrl);
       return;
     }
-    LogLog.warn("Cannot find ID for schema. Adding header for schema, " +
-        "which may be inefficient. Consider setting up an Avro Schema Cache.");
     hdrs.put(Log4jAvroHeaders.AVRO_SCHEMA_LITERAL.toString(), schema.toString());
   }
 
