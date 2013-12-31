@@ -166,6 +166,8 @@ public class Log4jAppender extends AppenderSkeleton {
       hdrs.put(Log4jAvroHeaders.AVRO_SCHEMA_URL.toString(), avroSchemaUrl);
       return;
     }
+    LogLog.warn("The Dataset is using a schema literal rather than a URL and " +
+        "will be attached to every message. See http://tinyurl.com/lkfuhnm");
     hdrs.put(Log4jAvroHeaders.AVRO_SCHEMA_LITERAL.toString(), schema.toString());
   }
 
