@@ -209,6 +209,7 @@ The command provides the following configuration options:
 | columns | n/a | The name of the output fields for each input column. An empty string indicates omit this column in the output. If more columns are contained in the input than specified here, those columns are automatically named {{columnN}}. |
 | ignoreFirstLine | false | Whether to ignore the first line. This flag can be used for CSV files that contain a header line. |
 | trim | true | Whether leading and trailing whitespace shall be removed from the output fields. |
+| addEmptyStrings | true | Whether or not to add zero length strings to the output fields. |
 | charset | null | The character encoding to use, for example, UTF\-8. If none is specified the charset specified in the \_attachment\_charset input field is used instead. |
 | quoteChar | "" | Must be a string of length zero or one. If this parameter is a String containing a single character then a quoted field can span multiple lines in the input stream. To disable quoting and multi-line fields set this parameter to the empty string {{""}}. |
 | commentPrefix | "" | Must be a string of length zero or one, for example "#". If this parameter is a String containing a single character then lines starting with that character are ignored as comments. To disable the comment line feature set this parameter to the empty string {{""}}. |

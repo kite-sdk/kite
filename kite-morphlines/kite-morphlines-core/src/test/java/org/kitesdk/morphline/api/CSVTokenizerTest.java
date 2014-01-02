@@ -32,42 +32,57 @@ public class CSVTokenizerTest extends Assert {
   
   @Test
   public void testBasic() throws Exception {
-    assertEquals(Arrays.asList("hello", "world"), split("hello,world", ',', false));
-    assertEquals(Arrays.asList(" hello", " world "), split(" hello| world ", '|', false));
-    assertEquals(Arrays.asList("", "hello", "world", ""), split("|hello|world|", '|', false));
-    assertEquals(Arrays.asList(""), split("", '|', false));
-    assertEquals(Arrays.asList("", "", "x"), split("||x", '|', false));
+    split(Arrays.asList("hello", "world"), "hello,world", ',', false, true);
+    split(Arrays.asList(" hello", " world "), " hello| world ", '|', false, true);
+    split(Arrays.asList("", "hello", "world", ""), "|hello|world|", '|', false, true);
+    split(Arrays.asList(""), "", '|', false, true);
+    split(Arrays.asList("", "", "x"), "||x", '|', false, true);
+    split(Arrays.asList(), "", '|', false, false);
+    split(Arrays.asList("x"), "x", '|', false, false);
+    split(Arrays.asList(null,"x"), "|x", '|', false, false);
+    
+    Record record = new Record();
+    CSVTokenizer tokenizer = new SimpleCSVTokenizer(',', true, true, new ArrayList());
+    tokenizer.tokenizeLine(" x ", null, record);
+    assertEquals(Arrays.asList("x"), record.get("column0"));
   }
   
-  private List<String> split(String line, char separator, boolean isQuoted) throws IOException {
+  private void split(List expected, String line, char separator, boolean isQuoted, boolean addEmptyStrings) throws IOException {
     Record record = new Record();
     CSVTokenizer tokenizer;
     if (isQuoted) {
-      tokenizer = new QuotedCSVTokenizer(separator, false, new ArrayList(), '"');
+      tokenizer = new QuotedCSVTokenizer(separator, false, addEmptyStrings, new ArrayList(), '"');
       tokenizer.tokenizeLine(line, new BufferedReader(new StringReader("")), record);      
     } else {
-      tokenizer = new SimpleCSVTokenizer(separator, false, new ArrayList());
+      tokenizer = new SimpleCSVTokenizer(separator, false, addEmptyStrings, new ArrayList());
       tokenizer.tokenizeLine(line, null, record);
     }
-    List results = new ArrayList();
-    for (int i = 0; i < record.getFields().asMap().size(); i++) {
-      assertEquals(1, record.get("column" + i).size());
-      results.add(record.getFirstValue("column" + i));
+    for (int i = 0; i < expected.size(); i++) {
+      assertEquals(expected.get(i), record.getFirstValue("column" + i));
     }
-    return results;
+    assertTrue(record.getFields().asMap().size() <= expected.size());
   }
   
   @Test
   public void testQuoted() throws Exception {
-    assertEquals(
+    char quote = '"';
+    String doubleQuote = String.valueOf(quote) + String.valueOf(quote);
+    split(
         Arrays.asList("5", "orange", "This is a\nmulti, line text", "no\""), 
-        split("5,orange,\"This is a\nmulti, line text\",no\"\"", ',', true)
-    );
+        "5,orange,\"This is a\nmulti, line text\",no\"\"", ',', true, true);
+    split(Arrays.asList("x", ""), "x|", '|', true, true);
+    split(Arrays.asList("x", ""), "x|" + doubleQuote, '|', true, true);
+    split(Arrays.asList(), doubleQuote, '|', true, true);
+    split(Arrays.asList(), "", '|', true, true);
+    split(Arrays.asList(), "", '|', true, false);
+    split(Arrays.asList("x"), "x", '|', true, false);
+    split(Arrays.asList(null,"x"), "|x", '|', true, false);
+    split(Arrays.asList(null,"x"), doubleQuote + "|" + quote + "x" + quote, '|', true, false);
   }
 
   @Test(expected=IllegalStateException.class)
   public void testIllegalQuotedState() throws Exception {
-    split("foo,maybe\"", ',', true);
+    split(Arrays.asList(), "foo,maybe\"", ',', true, true);
   }
 
 }

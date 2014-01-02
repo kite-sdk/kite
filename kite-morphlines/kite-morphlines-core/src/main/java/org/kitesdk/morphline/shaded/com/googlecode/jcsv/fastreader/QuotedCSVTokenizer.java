@@ -33,12 +33,14 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
   
   private final char separatorChar;
   private final boolean trim;
+  private final boolean addEmptyStrings; 
   private final List<String> columnNames;
   private final char quoteChar;
   
-  public QuotedCSVTokenizer(char separatorChar, boolean trim, List<String> columnNames, char quoteChar) {
+  public QuotedCSVTokenizer(char separatorChar, boolean trim, boolean addEmptyStrings, List<String> columnNames, char quoteChar) {
     this.separatorChar = separatorChar;
     this.trim = trim;
+    this.addEmptyStrings = addEmptyStrings;
     this.columnNames = columnNames;
     this.quoteChar = quoteChar;
   }
@@ -117,7 +119,9 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
     if (columnName.length() != 0) { // empty column name indicates omit this field on output
       String col = sb.toString();
       col = trim ? col.trim() : col;
-      record.put(columnName, col);
+      if (col.length() > 0 || addEmptyStrings) {
+        record.put(columnName, col);
+      }
     }
   }
 

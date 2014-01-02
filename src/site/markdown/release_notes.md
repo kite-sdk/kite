@@ -11,6 +11,7 @@ Version 0.11.0 has the following notable changes:
 
 * Morphlines Library
     * Added morphline command to read from Hadoop Avro Parquet Files: [readAvroParquetFile](kite-morphlines/morphlinesReferenceGuide.html#readAvroParquetFile)
+    * Added `addEmptyStrings` parameter to [readCSV](kite-morphlines/morphlinesReferenceGuide.html#readCSV) command to indicate whether or not to add zero length strings to the output field.
     * Upgraded kite-morphlines-json module from jackson-databind-2.2.1 to jackson-databind-2.3.1.
 
 ## Version 0.10.0

@@ -31,10 +31,12 @@ public final class SimpleCSVTokenizer implements CSVTokenizer {
   private final char separatorChar;
   private final boolean trim;
   private final List<String> columnNames;
+  private final boolean addEmptyStrings; 
   
-  public SimpleCSVTokenizer(char separatorChar, boolean trim, List<String> columnNames) {
+  public SimpleCSVTokenizer(char separatorChar, boolean trim, boolean addEmptyStrings, List<String> columnNames) {
     this.separatorChar = separatorChar;
     this.trim = trim;
+    this.addEmptyStrings = addEmptyStrings;
     this.columnNames = columnNames;    
   }
   
@@ -63,7 +65,9 @@ public final class SimpleCSVTokenizer implements CSVTokenizer {
     if (columnName.length() != 0) { // empty column name indicates omit this field on output
       String col = line.substring(start, i);
       col = trim ? col.trim() : col;
-      record.put(columnName, col);
+      if (col.length() > 0 || addEmptyStrings) {
+        record.put(columnName, col);
+      }
     }
   }
 }
