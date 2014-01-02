@@ -48,9 +48,16 @@ public class Formats {
   public static final Format CSV = new Format("csv");
 
   /**
+   * MORPHLINE: morphline view of a file (read-only).
+   *
+   * @since 0.11.0
+   */
+  public static final Format MORPHLINE = new Format("morphline");
+
+  /**
    * Return a {@link Format} for the format name specified. If {@code formatName}
    * is not a valid name, an IllegalArgumentException is thrown. Currently the
-   * formats <q>avro</q>, <q>csv</q>, and <q>parquet</q> are supported. Format names are
+   * formats <q>avro</q>, <q>csv</q>, <q>morphline</q>, and <q>parquet</q> are supported. Format names are
    * case sensitive.
    *
    * @since 0.9.0
@@ -64,6 +71,8 @@ public class Formats {
       return PARQUET;
     } else if (formatName.equals("csv")) {
       return CSV;
+    } else if (formatName.equals("morphline")) {
+      return MORPHLINE;
     } else {
       throw new IllegalArgumentException("Unknown format type: " + formatName);
     }
