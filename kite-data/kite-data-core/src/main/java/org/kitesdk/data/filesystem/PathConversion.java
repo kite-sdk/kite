@@ -85,7 +85,7 @@ class PathConversion {
           .put(MonthFieldPartitioner.class, 2)
           .build();
 
-  public <T> String dirnameForValue(FieldPartitioner<?, T> field, T value) {
+  public static <T> String dirnameForValue(FieldPartitioner<?, T> field, T value) {
     return PART_JOIN.join(field.getName(),
         Conversions.makeString(value, WIDTHS.get(field.getClass())));
   }

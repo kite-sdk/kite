@@ -21,6 +21,8 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
+import org.apache.hadoop.hive.metastore.api.Partition;
+import org.apache.hadoop.hive.metastore.api.hive_metastoreConstants;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hcatalog.common.HCatUtil;
 import org.slf4j.Logger;
@@ -88,6 +90,27 @@ final class HCatalog {
     try {
       client.dropTable(dbName, tableName, true /* deleteData */,
           true /* ignoreUnknownTable */);
+    } catch (Exception e) {
+      throw new RuntimeException("Hive metastore exception", e);
+    }
+  }
+
+  public void addPartition(String dbName, String tableName,
+      List<String> partitionValues) {
+    try {
+      org.apache.hadoop.hive.metastore.api.Table table = client.getTable(dbName,
+          tableName);
+      Partition partition = new Partition();
+      partition.setDbName(dbName);
+      partition.setTableName(tableName);
+      partition.setValues(partitionValues);
+      partition.setSd(table.getSd());
+      long time = System.currentTimeMillis() / 1000;
+      partition.setCreateTime((int) time);
+      partition.putToParameters(hive_metastoreConstants.DDL_TIME, Long.toString(time));
+      client.add_partition(partition);
+    } catch (RuntimeException e) {
+      throw new RuntimeException("Hive metastore exception", e);
     } catch (Exception e) {
       throw new RuntimeException("Hive metastore exception", e);
     }
