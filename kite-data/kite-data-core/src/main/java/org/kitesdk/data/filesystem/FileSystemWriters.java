@@ -16,13 +16,13 @@
 
 package org.kitesdk.data.filesystem;
 
+import java.util.UUID;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.DatasetWriterException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.UnknownFormatException;
-import com.google.common.base.Joiner;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -56,13 +56,8 @@ abstract class FileSystemWriters {
     }
   }
 
-  private static Joiner DASH = Joiner.on('-');
-
   private static String uniqueFilename(Format format) {
-    // FIXME: This file name is not guaranteed to be truly unique.
-    return DASH.join(
-        System.currentTimeMillis(),
-        Thread.currentThread().getId() + "." + format.getExtension());
+    return UUID.randomUUID() + "." + format.getExtension();
   }
 
 }
