@@ -16,6 +16,7 @@
 package org.kitesdk.data.filesystem.impl;
 
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.View;
@@ -82,4 +83,6 @@ public abstract class Accessor {
   public abstract Iterable<Path> getPathIterator(View view);
 
   public abstract void ensureExists(DatasetDescriptor descriptor, Configuration conf);
+
+  public abstract <T> String dirnameForValue(FieldPartitioner<?, T> field, T value);
 }

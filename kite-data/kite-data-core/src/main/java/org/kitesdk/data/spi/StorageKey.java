@@ -70,7 +70,7 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
         new Object[strategy.getFieldPartitioners().size()]));
   }
 
-  private StorageKey(PartitionStrategy strategy, List<Object> values) {
+  public StorageKey(PartitionStrategy strategy, List<Object> values) {
     try {
       this.fields = FIELD_CACHE.get(strategy);
     } catch (ExecutionException ex) {
