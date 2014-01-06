@@ -16,7 +16,7 @@ Then run with
 ```bash
 cp src/test/resources/access_log.txt /tmp/input
 mvn exec:java -Dexec.mainClass="org.kitesdk.tools.CombinedLogFormatConverter" \
--Dexec.args="file:///tmp/input file:///tmp/output logs"
+-Dexec.args="file:///tmp/input repo:file:///tmp/output logs"
 ```
 
 Look at the output (Combined Log format converted to Avro files):
