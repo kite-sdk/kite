@@ -23,9 +23,6 @@ import org.kitesdk.data.DatasetWriterException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.UnknownFormatException;
-import org.kitesdk.data.spi.PartitionListener;
-import org.kitesdk.data.spi.StorageKey;
-import javax.annotation.Nullable;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -35,15 +32,10 @@ abstract class FileSystemWriters {
 
   @SuppressWarnings("unchecked") // See https://github.com/Parquet/parquet-mr/issues/106
   public static <E> DatasetWriter<E> newFileWriter(
-      FileSystem fs, Path path, DatasetDescriptor descriptor,
-      @Nullable PartitionListener partitionListener, @Nullable String name,
-      @Nullable StorageKey key) {
+      FileSystem fs, Path path, DatasetDescriptor descriptor) {
     // ensure the path exists
     try {
       fs.mkdirs(path);
-      if (partitionListener != null) {
-        partitionListener.partitionAdded(name, key);
-      }
     } catch (IOException ex) {
       throw new DatasetWriterException("Could not create path:" + path, ex);
     }

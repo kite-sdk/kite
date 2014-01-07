@@ -19,7 +19,6 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.View;
-import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.filesystem.impl.Accessor;
 import java.io.IOException;
 import java.util.List;
@@ -61,10 +60,5 @@ final class AccessorImpl extends Accessor {
   public void ensureExists(
       DatasetDescriptor descriptor, Configuration conf) {
     FileSystemDatasetRepository.ensureExists(descriptor, conf);
-  }
-
-  @Override
-  public <T> String dirnameForValue(FieldPartitioner<?, T> field, T value) {
-    return PathConversion.dirnameForValue(field, value);
   }
 }

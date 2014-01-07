@@ -16,6 +16,8 @@
 
 package org.kitesdk.data.hcatalog;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.filesystem.impl.Accessor;
@@ -36,6 +38,8 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
 
   private static final Logger logger = LoggerFactory
       .getLogger(HCatalogMetadataProvider.class);
+  private static final Splitter PATH_SPLITTER = Splitter.on('/');
+
   protected final Configuration conf;
   final HCatalog hcat;
 
@@ -88,12 +92,8 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
 
   @Override
   @SuppressWarnings("unchecked")
-  public void partitionAdded(String name, StorageKey key) {
-    List<String> partitionValues = Lists.newArrayList();
-    for (FieldPartitioner fp : key.getPartitionStrategy().getFieldPartitioners()) {
-      partitionValues.add(Accessor.getDefault().dirnameForValue(fp,
-          key.get(fp.getName())));
-    }
-    hcat.addPartition(HiveUtils.DEFAULT_DB, name, partitionValues);
+  public void partitionAdded(String name, String key) {
+    hcat.addPartition(HiveUtils.DEFAULT_DB, name,
+        Lists.newArrayList(PATH_SPLITTER.split(key)));
   }
 }

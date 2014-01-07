@@ -18,6 +18,7 @@ package org.kitesdk.data.filesystem;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.PartitionListener;
 import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.ReaderWriterState;
 import com.google.common.base.Objects;
@@ -168,11 +169,17 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
       Preconditions.checkState(view.getDataset() instanceof FileSystemDataset,
           "FileSystemWriters cannot create writer for " + view.getDataset());
 
-      final FileSystemDataset dataset = (FileSystemDataset) view.getDataset();
-      final DatasetWriter<E> writer = FileSystemWriters.newFileWriter(
+      FileSystemDataset dataset = (FileSystemDataset) view.getDataset();
+      Path partition = convert.fromKey(key);
+      DatasetWriter<E> writer = FileSystemWriters.newFileWriter(
           dataset.getFileSystem(),
-          new Path(dataset.getDirectory(), convert.fromKey(key)),
-          dataset.getDescriptor(), dataset.getPartitionListener(), dataset.getName(), key);
+          new Path(dataset.getDirectory(), partition),
+          dataset.getDescriptor());
+
+      PartitionListener listener = dataset.getPartitionListener();
+      if (listener != null) {
+        listener.partitionAdded(dataset.getName(), partition.toString());
+      }
 
       writer.open();
 
