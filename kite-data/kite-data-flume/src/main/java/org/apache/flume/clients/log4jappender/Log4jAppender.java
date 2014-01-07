@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.BinaryEncoder;
@@ -35,6 +36,7 @@ import org.apache.flume.Event;
 import org.apache.flume.EventDeliveryException;
 import org.apache.flume.FlumeException;
 import org.apache.flume.api.RpcClient;
+import org.apache.flume.api.RpcClientConfigurationConstants;
 import org.apache.flume.api.RpcClientFactory;
 import org.apache.flume.event.EventBuilder;
 import org.apache.log4j.AppenderSkeleton;
@@ -70,6 +72,7 @@ public class Log4jAppender extends AppenderSkeleton {
 
   private String hostname;
   private int port;
+  private long timeout = RpcClientConfigurationConstants.DEFAULT_REQUEST_TIMEOUT_MILLIS;
   private boolean avroReflectionEnabled;
   private String avroSchemaUrl;
 
@@ -231,6 +234,14 @@ public class Log4jAppender extends AppenderSkeleton {
     this.port = port;
   }
 
+  public void setTimeout(long timeout) {
+    this.timeout = timeout;
+  }
+
+  public long getTimeout() {
+    return this.timeout;
+  }
+
   public void setAvroReflectionEnabled(boolean avroReflectionEnabled) {
     this.avroReflectionEnabled = avroReflectionEnabled;
   }
@@ -246,17 +257,25 @@ public class Log4jAppender extends AppenderSkeleton {
    *  <tt>port</tt> combination is invalid.
    */
   @Override
-  public void activateOptions() throws FlumeException{
+  public void activateOptions() throws FlumeException {
+    Properties props = new Properties();
+    props.setProperty(RpcClientConfigurationConstants.CONFIG_HOSTS, "h1");
+    props.setProperty(RpcClientConfigurationConstants.CONFIG_HOSTS_PREFIX + "h1",
+        hostname + ":" + port);
+    props.setProperty(RpcClientConfigurationConstants.CONFIG_CONNECT_TIMEOUT,
+        String.valueOf(timeout));
+    props.setProperty(RpcClientConfigurationConstants.CONFIG_REQUEST_TIMEOUT,
+        String.valueOf(timeout));
     try {
-      rpcClient = RpcClientFactory.getDefaultInstance(hostname, port);
+      rpcClient = RpcClientFactory.getInstance(props);
+      if (layout != null) {
+        layout.activateOptions();
+      }
     } catch (FlumeException e) {
       String errormsg = "RPC client creation failed! " +
           e.getMessage();
       LogLog.error(errormsg);
       throw e;
-    }
-    if(layout != null) {
-      layout.activateOptions();
     }
   }
 
