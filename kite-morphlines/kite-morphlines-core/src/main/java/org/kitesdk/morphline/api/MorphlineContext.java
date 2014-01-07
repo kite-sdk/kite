@@ -88,6 +88,7 @@ public class MorphlineContext {
           throw new MorphlineRuntimeException(e);
         }
       }
+      LOG.info("Done importing commands");
     }
   }
 
