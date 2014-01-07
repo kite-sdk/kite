@@ -197,8 +197,8 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
         if (allowCreate) {
           fileSystem.mkdirs(partitionDirectory);
           if (partitionListener != null) {
-            partitionListener.partitionAdded(name, new StorageKey(partitionStrategy,
-                key.getValues()));
+            partitionListener.partitionAdded(name,
+                toRelativeDirectory(key).toString());
           }
         } else {
           return null;
@@ -313,9 +313,18 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     Path result = dir;
     for (int i = 0; i < key.getLength(); i++) {
       final FieldPartitioner fp = partitionStrategy.getFieldPartitioners().get(i);
-      result = new Path(result, convert.dirnameForValue(fp, key.get(i)));
+      if (result != null) {
+        result = new Path(result, convert.dirnameForValue(fp, key.get(i)));
+      } else {
+        result = new Path(convert.dirnameForValue(fp, key.get(i)));
+      }
     }
     return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  private Path toRelativeDirectory(PartitionKey key) {
+    return toDirectoryName(null, key);
   }
 
   @SuppressWarnings("unchecked")

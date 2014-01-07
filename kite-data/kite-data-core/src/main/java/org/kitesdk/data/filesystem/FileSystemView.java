@@ -73,7 +73,7 @@ class FileSystemView<E> extends AbstractRangeView<E> {
     if (dataset.getDescriptor().isPartitioned()) {
       return new PartitionedDatasetWriter<E>(this);
     } else {
-      return FileSystemWriters.newFileWriter(fs, root, dataset.getDescriptor(), null, null, null);
+      return FileSystemWriters.newFileWriter(fs, root, dataset.getDescriptor());
     }
   }
 
