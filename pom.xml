@@ -128,7 +128,7 @@
     <vers.hbase>0.94.6-cdh${cdh.version}</vers.hbase>
     <vers.hcatalog>0.5.0-cdh${cdh.version}</vers.hcatalog>
     <vers.hive>0.10.0-cdh${cdh.version}</vers.hive>
-    <vers.jetty>8.1.13.v20130916</vers.jetty>
+    <vers.jetty>8.1.14.v20131031</vers.jetty>
     <vers.jexl>2.1.1</vers.jexl>
     <vers.compress>1.4.1</vers.compress>
     <vers.junit>4.10</vers.junit>
