@@ -117,7 +117,23 @@ final class ZooKeeperDownloader {
       Files.move(dir, confDir);
       dir = confDir.getParentFile();
     }
+    verifyConfigDir(confDir);
     return dir;
+  }
+  
+  private void verifyConfigDir(File confDir) throws IOException {
+    File solrConfigFile = new File(confDir, "solrconfig.xml");
+    if (!solrConfigFile.exists()) {
+      throw new IOException("Detected invalid Solr config dir in ZooKeeper - Reason: File not found: "
+          + solrConfigFile.getName());
+    }
+    if (!solrConfigFile.isFile()) {
+      throw new IOException("Detected invalid Solr config dir in ZooKeeper - Reason: Not a file: "
+          + solrConfigFile.getName());
+    }
+    if (!solrConfigFile.canRead()) {
+      throw new IOException("Insufficient permissions to read file: " + solrConfigFile);
+    }    
   }
 
 }
