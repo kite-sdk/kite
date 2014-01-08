@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.crunch;
 
+import org.apache.avro.generic.IndexedRecord;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
@@ -55,7 +56,7 @@ public class CrunchDatasets {
    * filesystem-based.
    */
   @SuppressWarnings("unchecked")
-  public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
+  public static <E extends IndexedRecord> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
     Path directory = Accessor.getDefault().getDirectory(dataset);
     if (directory != null) {
       List<Path> paths = Lists.newArrayList(
