@@ -255,10 +255,6 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
       return this;
     }
 
-    public StorageKey buildFrom(Object entity) {
-      return new StorageKey(strategy).reuseFor(entity);
-    }
-
     @SuppressWarnings("unchecked")
     public StorageKey build() {
       final List<FieldPartitioner> partitioners =

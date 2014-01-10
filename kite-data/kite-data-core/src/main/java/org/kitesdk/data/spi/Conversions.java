@@ -16,7 +16,13 @@
 
 package org.kitesdk.data.spi;
 
+import com.google.common.base.Preconditions;
 import java.text.NumberFormat;
+import org.apache.avro.Schema;
+import org.apache.avro.specific.SpecificData;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.PartitionStrategy;
 
 /**
  * Static helper methods for converting between types.
@@ -103,5 +109,43 @@ public class Conversions {
     } else {
       return makeString(value);
     }
+  }
+
+  /**
+   * Checks that the type of each of {@code values} is consistent with the type of
+   * field {@code fieldName} declared in the Avro schema (from {@code descriptor}).
+   */
+  public static void checkTypeConsistency(DatasetDescriptor descriptor, String fieldName,
+      Object... values) {
+
+    Preconditions.checkArgument(hasField(descriptor, fieldName),
+        "No field '%s' in descriptor %s", fieldName, descriptor);
+
+    Schema schema = descriptor.getSchema();
+    Schema.Field field = schema.getField(fieldName);
+
+    for (Object value : values) {
+      // SpecificData#validate checks consistency for generic, reflect,
+      // and specific models.
+      Preconditions.checkArgument(SpecificData.get().validate(field.schema(), value),
+          "Value '%s' of type '%s' inconsistent with field %s.", value, value.getClass(),
+          field);
+    }
+  }
+
+
+  private static boolean hasField(DatasetDescriptor descriptor, String fieldName) {
+    Schema schema = descriptor.getSchema();
+    Schema.Field field = schema.getField(fieldName);
+    if (field != null) {
+      return true;
+    }
+    PartitionStrategy partitionStrategy = descriptor.getPartitionStrategy();
+    for (FieldPartitioner<?, ?> fp : partitionStrategy.getFieldPartitioners()) {
+      if (fp.getName().equals(fieldName)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

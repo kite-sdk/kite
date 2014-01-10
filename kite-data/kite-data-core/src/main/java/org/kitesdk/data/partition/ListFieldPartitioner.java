@@ -15,12 +15,15 @@
  */
 package org.kitesdk.data.partition;
 
-import org.kitesdk.data.FieldPartitioner;
-import java.util.List;
-import java.util.Set;
-
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Range;
+import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Set;
+import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.Predicates;
 
 @Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
@@ -56,6 +59,30 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
   @Deprecated
   public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Predicate<Integer> project(Predicate<S> predicate) {
+    if (predicate instanceof Predicates.Exists) {
+      return Predicates.exists();
+    } else if (predicate instanceof Predicates.In) {
+      return ((Predicates.In<S>) predicate).transform(this);
+    } else if (predicate instanceof Range) {
+      Range range = (Range) predicate;
+      Set<Integer> possibleValues = Sets.newHashSet();
+      for (int i = 0; i < values.size(); i += 1) {
+        for (S item : values.get(i)) {
+          if (range.contains((Comparable) item)) {
+            possibleValues.add(i);
+            break; // no need to test additional items in this set
+          }
+        }
+      }
+      return Predicates.in(possibleValues);
+    } else {
+      return null;
+    }
   }
 
   @Override

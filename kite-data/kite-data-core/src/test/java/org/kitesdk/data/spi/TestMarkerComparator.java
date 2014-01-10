@@ -32,7 +32,6 @@ public class TestMarkerComparator {
   private static Marker SEPT_30;
   private static Marker NOV;
   private static Marker NOV_1;
-  private static PartitionStrategy strategy;
   private static MarkerComparator comparator;
 
   @BeforeClass
@@ -64,7 +63,7 @@ public class TestMarkerComparator {
         .add("month", 11)
         .add("day", 1)
         .build();
-    strategy = new PartitionStrategy.Builder()
+    PartitionStrategy strategy = new PartitionStrategy.Builder()
         .year("timestamp")
         .month("timestamp")
         .day("timestamp")
@@ -135,6 +134,7 @@ public class TestMarkerComparator {
   public void testContains() {
     Assert.assertTrue(comparator.contains(OCT, OCT_12));
     Assert.assertTrue(comparator.contains(OCT, OCT));
+    Assert.assertFalse(comparator.contains(OCT_12, OCT));
     Assert.assertFalse(comparator.contains(OCT, SEPT));
     Assert.assertFalse(comparator.contains(OCT, SEPT_30));
     Assert.assertFalse(comparator.contains(OCT, NOV));

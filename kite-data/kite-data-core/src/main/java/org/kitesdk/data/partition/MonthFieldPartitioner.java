@@ -23,8 +23,9 @@ import javax.annotation.Nonnull;
 @Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
         "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
-        "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
-    justification="False positive due to generics.")
+        "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", "EQ_DOESNT_OVERRIDE_EQUALS"},
+    justification="False positive due to generics. " +
+        "EQ: parent equals implementation checks child type")
 public class MonthFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 

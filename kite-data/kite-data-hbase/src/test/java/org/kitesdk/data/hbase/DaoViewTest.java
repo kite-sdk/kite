@@ -18,7 +18,6 @@ package org.kitesdk.data.hbase;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.spi.Marker;
 import org.kitesdk.data.View;
 import org.kitesdk.data.hbase.avro.AvroUtils;
 import org.kitesdk.data.hbase.avro.entities.ArrayRecord;
@@ -27,7 +26,7 @@ import org.kitesdk.data.hbase.avro.entities.TestEntity;
 import org.kitesdk.data.hbase.avro.entities.TestEnum;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;
 
-import org.kitesdk.data.spi.AbstractRangeView;
+import org.kitesdk.data.spi.AbstractRefineableView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -41,6 +40,7 @@ import org.junit.Test;
 
 public class DaoViewTest {
 
+  private static final String[] NAMES = new String[] { "part1", "part2" };
   private static final String testEntity;
   private static final String tableName = "testtable";
   private static final String managedTableName = "managed_schemas";
@@ -90,27 +90,20 @@ public class DaoViewTest {
   public void testRange() {
     populateTestEntities(10);
 
-    final AbstractRangeView<TestEntity> range = new DaoView<TestEntity>(ds)
-            .fromAfter(newMarker("1", "1")).to(newMarker("9", "9"));
-
-    // Test marker range checks
-    Assert.assertTrue(range.contains(newMarker("1", "10")));
-    Assert.assertTrue(range.contains(newMarker("5", "5")));
-    Assert.assertTrue(range.contains(newMarker("5", "55")));
-    Assert.assertTrue(range.contains(newMarker("9", "89")));
-    Assert.assertTrue(range.contains(newMarker("9", "9")));
-    Assert.assertFalse(range.contains(newMarker("1", "1")));
-    Assert.assertFalse(range.contains(newMarker("1", "0")));
-    Assert.assertFalse(range.contains(newMarker("9", "99")));
+    final AbstractRefineableView<TestEntity> range = new DaoView<TestEntity>(ds)
+            .fromAfter(NAMES[0], "1").to(NAMES[0], "9")
+            .fromAfter(NAMES[1], "1").to(NAMES[1], "9");
 
     // Test entity range checks
-    Assert.assertTrue(range.contains(newTestEntity("1", "10")));
-    Assert.assertTrue(range.contains(newTestEntity("5", "5")));
-    Assert.assertTrue(range.contains(newTestEntity("9", "89")));
-    Assert.assertTrue(range.contains(newTestEntity("9", "9")));
-    Assert.assertFalse(range.contains(newTestEntity("1", "1")));
-    Assert.assertFalse(range.contains(newTestEntity("1", "0")));
-    Assert.assertFalse(range.contains(newTestEntity("9", "99")));
+    // Note that these are strings, not ints, so lexicographic ordering is used
+    Assert.assertTrue(range.includes(newTestEntity("5", "5")));
+    Assert.assertTrue(range.includes(newTestEntity("5", "55")));
+    Assert.assertTrue(range.includes(newTestEntity("9", "89")));
+    Assert.assertTrue(range.includes(newTestEntity("9", "9")));
+    Assert.assertFalse(range.includes(newTestEntity("1", "1")));
+    Assert.assertFalse(range.includes(newTestEntity("1", "0")));
+    Assert.assertFalse(range.includes(newTestEntity("1", "10")));
+    Assert.assertFalse(range.includes(newTestEntity("9", "99")));
 
     DatasetReader<TestEntity> reader = range.newReader();
     reader.open();
@@ -132,23 +125,27 @@ public class DaoViewTest {
   public void testLimitedReader() {
     populateTestEntities(10);
 
-    AbstractRangeView<TestEntity> range = new DaoView<TestEntity>(ds)
-        .from(newMarker("0", "0")).to(newMarker("9", "9"));
+    AbstractRefineableView<TestEntity> range = new DaoView<TestEntity>(ds)
+        .from(NAMES[0], "0").to(NAMES[0], "9")
+        .from(NAMES[1], "0").to(NAMES[1], "9");
     validRange(range, 0, 10);
 
     range = new DaoView<TestEntity>(ds)
-        .fromAfter(newMarker("1", "1")).to(newMarker("9", "9"));
+        .fromAfter(NAMES[0], "1").to(NAMES[0], "9")
+        .fromAfter(NAMES[1], "1").to(NAMES[1], "9");
     validRange(range, 2, 10);
 
     range = new DaoView<TestEntity>(ds)
-        .from(newMarker("0", "0")).toBefore(newMarker("9", "9"));
+        .from(NAMES[0], "0").toBefore(NAMES[0], "9")
+        .from(NAMES[1], "0").toBefore(NAMES[1], "9");
     validRange(range, 0, 9);
   }
 
   @Test
   public void testLimitedWriter() {
-    final View<TestEntity> range = ds.fromAfter(newMarker("1", "1")).to(
-        newMarker("5", "5"));
+    final View<TestEntity> range = ds
+        .fromAfter(NAMES[0], "1").to(NAMES[0], "5")
+        .fromAfter(NAMES[1], "1").to(NAMES[1], "5");
     DatasetWriter<TestEntity> writer = range.newWriter();
     writer.open();
     try {
@@ -161,13 +158,10 @@ public class DaoViewTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidLimitedWriter() {
-    final View<TestEntity> range = ds.fromAfter(newMarker("1", "1")).toBefore(
-        newMarker("5", "5"));
+    final View<TestEntity> range = ds
+        .fromAfter(NAMES[0], "1").to(NAMES[0], "5")
+        .fromAfter(NAMES[1], "1").to(NAMES[1], "5");
     range.newWriter().write(newTestEntity("6", "6"));
-  }
-
-  private Marker newMarker(String part1, String part2) {
-    return new Marker.Builder().add("part1", part1).add("part2", part2).build();
   }
 
   private TestEntity newTestEntity(String part1, String part2) {

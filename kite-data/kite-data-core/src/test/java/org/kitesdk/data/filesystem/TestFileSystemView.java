@@ -16,13 +16,14 @@
 
 package org.kitesdk.data.filesystem;
 
+import java.util.Iterator;
+import org.joda.time.DateTime;
+import org.junit.Ignore;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.spi.TestRangeViews;
 import org.kitesdk.data.View;
+import org.kitesdk.data.spi.TestRefinableViews;
 import org.kitesdk.data.event.StandardEvent;
-import org.kitesdk.data.spi.StorageKey;
-import com.google.common.collect.Sets;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
@@ -31,9 +32,11 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Set;
 
-public class TestFileSystemView extends TestRangeViews {
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class TestFileSystemView extends TestRefinableViews {
 
   public TestFileSystemView(boolean distributed) {
     super(distributed);
@@ -53,13 +56,11 @@ public class TestFileSystemView extends TestRangeViews {
   }
 
   @Test
-  @Override
+  @Ignore("getCoveringPartitions is not yet implemented")
   @SuppressWarnings("unchecked")
   public void testCoveringPartitions() {
-    final FileSystemDataset dataset = (FileSystemDataset<StandardEvent>)
-        testDataset;
     // NOTE: this is an un-restricted write so all should succeed
-    final DatasetWriter<StandardEvent> writer = testDataset.newWriter();
+    final DatasetWriter<StandardEvent> writer = unbounded.newWriter();
     try {
       writer.open();
       writer.write(sepEvent);
@@ -69,22 +70,39 @@ public class TestFileSystemView extends TestRangeViews {
       writer.close();
     }
 
-    final Set<View<StandardEvent>> expected = (Set) Sets.newHashSet(
-        dataset.of(new StorageKey.Builder(strategy).buildFrom(sepEvent)),
-        dataset.of(new StorageKey.Builder(strategy).buildFrom(octEvent)),
-        dataset.of(new StorageKey.Builder(strategy).buildFrom(novEvent)));
+    Iterator<View<StandardEvent>> coveringPartitions =
+        ((FileSystemView) unbounded).getCoveringPartitions().iterator();
 
-    Assert.assertEquals("Covering partitions should match",
-        expected, Sets.newHashSet(dataset.getCoveringPartitions()));
+    assertTrue(coveringPartitions.hasNext());
+    View v1 = coveringPartitions.next();
+    assertTrue(v1.includes(standardEvent(sepEvent.getTimestamp())));
+    assertFalse(v1.includes(standardEvent(octEvent.getTimestamp())));
+    assertFalse(v1.includes(standardEvent(novEvent.getTimestamp())));
+
+    assertTrue(coveringPartitions.hasNext());
+    View v2 = coveringPartitions.next();
+    assertFalse(v2.includes(standardEvent(sepEvent.getTimestamp())));
+    assertTrue(v2.includes(standardEvent(octEvent.getTimestamp())));
+    assertFalse(v2.includes(standardEvent(novEvent.getTimestamp())));
+
+    assertTrue(coveringPartitions.hasNext());
+    View v3 = coveringPartitions.next();
+    assertFalse(v3.includes(standardEvent(sepEvent.getTimestamp())));
+    assertFalse(v3.includes(standardEvent(octEvent.getTimestamp())));
+    assertTrue(v3.includes(standardEvent(novEvent.getTimestamp())));
+
+    assertFalse(coveringPartitions.hasNext());
+  }
+
+  private StandardEvent standardEvent(long timestamp) {
+    return StandardEvent.newBuilder(event).setTimestamp(timestamp).build();
   }
 
   @Test
   @SuppressWarnings("unchecked")
   public void testDelete() throws Exception {
-    final FileSystemView<StandardEvent> view =
-        new FileSystemView((FileSystemDataset) testDataset);
     // NOTE: this is an un-restricted write so all should succeed
-    final DatasetWriter<StandardEvent> writer = testDataset.newWriter();
+    final DatasetWriter<StandardEvent> writer = unbounded.newWriter();
     try {
       writer.open();
       writer.write(sepEvent);
@@ -104,46 +122,55 @@ public class TestFileSystemView extends TestRangeViews {
     final Path nov11 = new Path("target/data/test/year=2013/month=11/day=11");
     assertDirectoriesExist(fs, root, y2013, sep, sep12, oct, oct12, nov, nov11);
 
+    long julStart = new DateTime(2013, 6, 1, 0, 0).getMillis();
+    long sepStart = new DateTime(2013, 9, 1, 0, 0).getMillis();
+    long nov11Start = new DateTime(2013, 11, 11, 0, 0).getMillis();
+    long nov12Start = new DateTime(2013, 11, 12, 0, 0).getMillis();
+    long decStart = new DateTime(2013, 12, 1, 0, 0).getMillis();
+    long sepInstant = sepEvent.getTimestamp();
+    long octInstant = octEvent.getTimestamp();
+
     Assert.assertFalse("Delete should return false to indicate no changes",
-        view.from(newMarker(2013, 6)).toBefore(newMarker(2013, 9))
-            .deleteAll());
+        deleteAll(unbounded.from("timestamp", julStart).toBefore("timestamp", sepStart)));
     Assert.assertFalse("Delete should return false to indicate no changes",
-        view.from(newMarker(2013, 11, 12)).deleteAll());
+        deleteAll(unbounded.from("timestamp", decStart)));
 
     // delete everything up to September
-    Assert.assertTrue("Delete should return true to indicate FS changed",
-        view.to(newMarker(2013, 9)).deleteAll());
+    assertTrue("Delete should return true to indicate FS changed",
+        deleteAll(unbounded.to("timestamp", sepInstant)));
     assertDirectoriesDoNotExist(fs, sep12, sep);
     assertDirectoriesExist(fs, root, y2013, oct, oct12, nov, nov11);
     Assert.assertFalse("Delete should return false to indicate no changes",
-        view.to(newMarker(2013, 9)).deleteAll());
+        deleteAll(unbounded.to("timestamp", sepInstant)));
 
     // delete November 11 and later
-    Assert.assertTrue("Delete should return true to indicate FS changed",
-        view.from(newMarker(2013, 11, 11)).to(newMarker(2013, 11, 12))
-            .deleteAll());
+    assertTrue("Delete should return true to indicate FS changed",
+        deleteAll(unbounded.from("timestamp", nov11Start).to("timestamp", nov12Start)));
     assertDirectoriesDoNotExist(fs, sep12, sep, nov11, nov);
     assertDirectoriesExist(fs, root, y2013, oct, oct12);
     Assert.assertFalse("Delete should return false to indicate no changes",
-        view.from(newMarker(2013, 11, 11)).to(newMarker(2013, 11, 12))
-            .deleteAll());
+        deleteAll(unbounded.from("timestamp", nov11Start).to("timestamp", nov12Start)));
 
     // delete October and the 2013 directory
-    Assert.assertTrue("Delete should return true to indicate FS changed",
-        view.of(newMarker(2013, 10, 12)).deleteAll());
+    assertTrue("Delete should return true to indicate FS changed",
+        deleteAll(unbounded.from("timestamp", octInstant).to("timestamp", octInstant)));
     assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
     assertDirectoriesExist(fs, root);
     Assert.assertFalse("Delete should return false to indicate no changes",
-        view.of(newMarker(2013, 10, 12)).deleteAll());
+        deleteAll(unbounded.from("timestamp", octInstant).to("timestamp", octInstant)));
 
     Assert.assertFalse("Delete should return false to indicate no changes",
-        view.deleteAll());
+        ((FileSystemDataset) unbounded).deleteAll());
+  }
+
+  private boolean deleteAll(View v) {
+    return ((FileSystemView) v).deleteAll(); // until deleteAll is exposed on View
   }
 
   public static void assertDirectoriesExist(FileSystem fs, Path... dirs)
       throws IOException {
     for (Path path : dirs) {
-      Assert.assertTrue("Directory should exist: " + path,
+      assertTrue("Directory should exist: " + path,
           fs.exists(path) && fs.isDirectory(path));
     }
   }
@@ -151,7 +178,7 @@ public class TestFileSystemView extends TestRangeViews {
   public static void assertDirectoriesDoNotExist(FileSystem fs, Path... dirs)
       throws IOException {
     for (Path path : dirs) {
-      Assert.assertTrue("Directory should not exist: " + path,
+      assertTrue("Directory should not exist: " + path,
           !fs.exists(path));
     }
   }

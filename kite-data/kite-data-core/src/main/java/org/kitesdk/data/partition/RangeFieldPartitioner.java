@@ -15,12 +15,15 @@
  */
 package org.kitesdk.data.partition;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Range;
 import java.util.Arrays;
 import java.util.List;
 
 import org.kitesdk.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
+import org.kitesdk.data.spi.Predicates;
 
 @Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
@@ -50,6 +53,21 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
   @Deprecated
   public String valueFromString(String stringValue) {
     return stringValue;
+  }
+
+  @Override
+  public Predicate<String> project(Predicate<String> predicate) {
+    if (predicate instanceof Predicates.Exists) {
+      return Predicates.exists();
+    } else if (predicate instanceof Predicates.In) {
+      return ((Predicates.In<String>) predicate).transform(this);
+    } else if (predicate instanceof Range) {
+      // must use a closed range:
+      //   if this( abc ) => b then this( acc ) => b, so b must be included
+      return Predicates.transformClosed((Range<String>) predicate, this);
+    } else {
+      return null;
+    }
   }
 
   public List<String> getUpperBounds() {
