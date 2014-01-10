@@ -19,8 +19,10 @@ package org.kitesdk.data.spi;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.View;
+import org.kitesdk.data.RefineableView;
 import javax.annotation.concurrent.Immutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A common Dataset base class to simplify implementations.
@@ -29,17 +31,15 @@ import javax.annotation.concurrent.Immutable;
  * @since 0.9.0
  */
 @Immutable
-public abstract class AbstractDataset<E> implements Dataset<E>, RangeView<E> {
+public abstract class AbstractDataset<E> implements Dataset<E>, RefineableView<E> {
+
+  private static final Logger logger = LoggerFactory.getLogger(AbstractDataset.class);
+
+  protected abstract RefineableView<E> asRefineableView();
 
   @Override
   public Dataset<E> getDataset() {
     return this;
-  }
-
-  @Override
-  public boolean deleteAll() {
-    throw new UnsupportedOperationException(
-        "This Dataset does not support deletion");
   }
 
   @Override
@@ -55,44 +55,52 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RangeView<E> {
   }
 
   @Override
-  public boolean contains(E key) {
-    // A Dataset contains all PartitionKeys, only sub-views have to check
+  public DatasetWriter<E> newWriter() {
+    logger.debug("Getting writer to dataset:{}", this);
+
+    return asRefineableView().newWriter();
+  }
+
+  @Override
+  public DatasetReader<E> newReader() {
+    logger.debug("Getting reader for dataset:{}", this);
+
+    return asRefineableView().newReader();
+  }
+
+  @Override
+  public boolean includes(E entity) {
     return true;
   }
 
   @Override
-  public boolean contains(Marker marker) {
-    // A Dataset contains all PartitionKeys contained by any Marker
-    return true;
+  public RefineableView<E> with(String name, Object... values) {
+    Conversions.checkTypeConsistency(getDescriptor(), name, values);
+    return asRefineableView().with(name, values);
   }
 
   @Override
-  public AbstractRangeView<E> from(Marker start) {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public RefineableView<E> from(String name, Comparable value) {
+    Conversions.checkTypeConsistency(getDescriptor(), name, value);
+    return asRefineableView().from(name, value);
   }
 
   @Override
-  public AbstractRangeView<E> fromAfter(Marker start) {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public RefineableView<E> fromAfter(String name, Comparable value) {
+    Conversions.checkTypeConsistency(getDescriptor(), name, value);
+    return asRefineableView().fromAfter(name, value);
   }
 
   @Override
-  public AbstractRangeView<E> to(Marker end) {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public RefineableView<E> to(String name, Comparable value) {
+    Conversions.checkTypeConsistency(getDescriptor(), name, value);
+    return asRefineableView().to(name, value);
   }
 
   @Override
-  public AbstractRangeView<E> toBefore(Marker end) {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public RefineableView<E> toBefore(String name, Comparable value) {
+    Conversions.checkTypeConsistency(getDescriptor(), name, value);
+    return asRefineableView().toBefore(name, value);
   }
 
-  @Override
-  public AbstractRangeView<E> of(Marker partial) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public Iterable<View<E>> getCoveringPartitions() {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
 }

@@ -130,7 +130,7 @@ public abstract class Marker {
 
     final Map<String, Object> values;
 
-    public ImmutableMarker(Map<String, Object> content) {
+    ImmutableMarker(Map<String, Object> content) {
       this.values = ImmutableMap.copyOf(content);
     }
 
@@ -149,6 +149,21 @@ public abstract class Marker {
       return Objects.toStringHelper(this).add("values", values).toString();
     }
 
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(values);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null || !getClass().equals(obj.getClass())) {
+        return false;
+      }
+      return Objects.equal(this.values, ((ImmutableMarker) obj).values);
+    }
   }
 
   /**
@@ -208,13 +223,6 @@ public abstract class Marker {
      */
     public Builder() {
       this.content = Maps.newHashMap();
-    }
-
-    /**
-     * Clears the content already added to this builder so it can be reused.
-     */
-    public void clear() {
-      content.clear();
     }
 
     /**

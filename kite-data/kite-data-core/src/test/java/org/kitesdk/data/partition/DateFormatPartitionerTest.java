@@ -26,7 +26,7 @@ import org.kitesdk.data.impl.Accessor;
 public class DateFormatPartitionerTest {
   @Test
   public void testApply() {
-    long time = 1384912178434l;
+    long time = 1384912178434L;
     DateFormatPartitioner yyyyMMdd_UTC = new DateFormatPartitioner(
         "sourceField", "day", "yyyy-MM-dd");
     // Nov 19 ~5:50 PM PDT, but Nov 20 UTC

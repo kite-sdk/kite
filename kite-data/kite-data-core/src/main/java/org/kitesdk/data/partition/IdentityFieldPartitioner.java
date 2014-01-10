@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.partition;
 
+import com.google.common.base.Predicate;
 import org.kitesdk.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
@@ -51,6 +52,11 @@ public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartiti
       return (S) stringValue;
     }
     throw new IllegalArgumentException("Cannot convert string to type " + getType());
+  }
+
+  @Override
+  public Predicate<S> project(Predicate<S> predicate) {
+    return predicate;
   }
 
   @Override

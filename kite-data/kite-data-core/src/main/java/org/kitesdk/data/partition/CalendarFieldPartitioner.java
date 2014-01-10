@@ -15,6 +15,8 @@
  */
 package org.kitesdk.data.partition;
 
+import com.google.common.base.Predicate;
+import javax.annotation.concurrent.NotThreadSafe;
 import org.kitesdk.data.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
@@ -35,7 +37,8 @@ import javax.annotation.Nonnull;
         "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
         "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
     justification="False positive due to generics.")
-class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
+@NotThreadSafe
+public class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
 
   protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
   protected int calendarField;
@@ -51,6 +54,15 @@ class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
     Calendar cal = Calendar.getInstance(UTC);
     cal.setTimeInMillis(timestamp);
     return cal.get(calendarField);
+  }
+
+  @Override
+  public Predicate<Integer> project(Predicate<Long> predicate) {
+    return null;
+  }
+
+  public int getCalendarField() {
+    return calendarField;
   }
 
   @Override

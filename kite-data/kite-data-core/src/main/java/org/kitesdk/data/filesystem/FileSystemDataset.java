@@ -18,17 +18,13 @@ package org.kitesdk.data.filesystem;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.FieldPartitioner;
-import org.kitesdk.data.spi.Marker;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.View;
+import org.kitesdk.data.RefineableView;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.PartitionListener;
-import org.kitesdk.data.spi.StorageKey;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -121,32 +117,8 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     return partitionListener;
   }
 
-  @Override
-  public DatasetWriter<E> newWriter() {
-    logger.debug("Getting writer to dataset:{}", this);
-
-    return unbounded.newWriter();
-  }
-
-  @Override
-  public DatasetReader<E> newReader() {
-    logger.debug("Getting reader for dataset:{}", this);
-
-    return unbounded.newReader();
-  }
-
-  @Override
   public boolean deleteAll() {
     return unbounded.deleteAll();
-  }
-
-  @Override
-  public Iterable<View<E>> getCoveringPartitions() {
-    Preconditions.checkState(descriptor.isPartitioned(),
-      "Attempt to get partitions on a non-partitioned dataset (name:%s)",
-      name);
-
-    return unbounded.getCoveringPartitions();
   }
 
   PathIterator pathIterator() {
@@ -154,28 +126,8 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   }
 
   @Override
-  public FileSystemView<E> from(Marker start) {
-    return (FileSystemView<E>) unbounded.from(start);
-  }
-
-  @Override
-  public FileSystemView<E> fromAfter(Marker start) {
-    return (FileSystemView<E>) unbounded.fromAfter(start);
-  }
-
-  @Override
-  public FileSystemView<E> to(Marker end) {
-    return (FileSystemView<E>) unbounded.to(end);
-  }
-
-  @Override
-  public FileSystemView<E> toBefore(Marker end) {
-    return (FileSystemView<E>) unbounded.toBefore(end);
-  }
-
-  @Override
-  public FileSystemView<E> of(Marker partial) {
-    return (FileSystemView<E>) unbounded.of(partial);
+  protected RefineableView<E> asRefineableView() {
+    return unbounded;
   }
 
   @Override

@@ -60,7 +60,7 @@ public class MarkerComparator implements Comparator<Marker> {
       Object containerValue = container.valueFor(field);
       if (containerValue != null) {
         Object testValue = test.valueFor(field);
-        if (field.compare(containerValue, testValue) != 0) {
+        if (testValue == null || field.compare(containerValue, testValue) != 0) {
           return false;
         }
       }
@@ -277,5 +277,20 @@ public class MarkerComparator implements Comparator<Marker> {
       }
     }
     return 0;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    MarkerComparator that = (MarkerComparator) o;
+
+    return strategy.equals(that.strategy);
+  }
+
+  @Override
+  public int hashCode() {
+    return strategy.hashCode();
   }
 }

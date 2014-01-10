@@ -146,6 +146,7 @@
     <vers.tika>1.4</vers.tika>
     <vers.jackson>2.3.1</vers.jackson>
     <vers.opencsv>2.3</vers.opencsv>
+    <vers.jodatime>2.3</vers.jodatime>
 
     <!-- Plugin versions -->
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
@@ -942,6 +943,11 @@
         <groupId>net.sf.opencsv</groupId>
         <artifactId>opencsv</artifactId>
         <version>${vers.opencsv}</version>
+      </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>${vers.jodatime}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

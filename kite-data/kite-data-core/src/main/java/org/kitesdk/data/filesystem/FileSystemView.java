@@ -21,9 +21,9 @@ import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.View;
-import org.kitesdk.data.spi.AbstractRangeView;
+import org.kitesdk.data.spi.AbstractRefineableView;
+import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.StorageKey;
-import org.kitesdk.data.spi.MarkerRange;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -40,7 +40,7 @@ import java.io.IOException;
  * @param <E> The type of records read and written by this view.
  */
 @Immutable
-class FileSystemView<E> extends AbstractRangeView<E> {
+class FileSystemView<E> extends AbstractRefineableView<E> {
 
   private final FileSystem fs;
   private final Path root;
@@ -51,21 +51,21 @@ class FileSystemView<E> extends AbstractRangeView<E> {
     this.root = dataset.getDirectory();
   }
 
-  private FileSystemView(FileSystemView<E> view, MarkerRange range) {
-    super(view, range);
+  private FileSystemView(FileSystemView<E> view, Constraints c) {
+    super(view, c);
     this.fs = view.fs;
     this.root = view.root;
   }
 
   @Override
-  protected FileSystemView<E> newLimitedCopy(MarkerRange newRange) {
-    return new FileSystemView<E>(this, newRange);
+  protected FileSystemView<E> filter(Constraints c) {
+    return new FileSystemView<E>(this, c);
   }
 
   @Override
   public DatasetReader<E> newReader() {
     return new MultiFileDatasetReader<E>(
-        fs, pathIterator(), dataset.getDescriptor());
+        fs, pathIterator(), dataset.getDescriptor(), constraints);
   }
 
   @Override
@@ -85,28 +85,6 @@ class FileSystemView<E> extends AbstractRangeView<E> {
       deleted = cleanlyDelete(fs, root, convert.fromKey(partition)) || deleted;
     }
     return deleted;
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public Iterable<View<E>> getCoveringPartitions() {
-    if (dataset.getDescriptor().isPartitioned()) {
-      return Iterables.transform(
-          partitionIterator(),
-          new Function<StorageKey, View<E>>() {
-            @Override
-            public View<E> apply(StorageKey key) {
-              if (key != null) {
-                // no need for the bounds checks, use dataset.in
-                return ((FileSystemDataset) dataset).of(key);
-              } else {
-                throw new DatasetException("[BUG] Null partition");
-              }
-            }
-          });
-    } else {
-      return Lists.newArrayList((View<E>) this);
-    }
   }
 
   PathIterator pathIterator() {
@@ -135,7 +113,7 @@ class FileSystemView<E> extends AbstractRangeView<E> {
     try {
       return new FileSystemPartitionIterator(
           fs, root,
-          dataset.getDescriptor().getPartitionStrategy(), range);
+          dataset.getDescriptor().getPartitionStrategy(), constraints);
     } catch (IOException ex) {
       throw new DatasetException("Cannot list partitions in view:" + this, ex);
     }
@@ -143,7 +121,7 @@ class FileSystemView<E> extends AbstractRangeView<E> {
 
   private static boolean cleanlyDelete(FileSystem fs, Path root, Path dir) {
     try {
-      boolean deleted = false;
+      boolean deleted;
       if (dir.isAbsolute()) {
         deleted = fs.delete(dir, true /* include any files */ );
       } else {

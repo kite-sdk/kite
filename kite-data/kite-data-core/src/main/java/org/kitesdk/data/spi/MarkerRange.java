@@ -18,6 +18,9 @@ package org.kitesdk.data.spi;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Ordering;
+import java.io.Serializable;
+import java.util.Comparator;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -31,16 +34,14 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class MarkerRange {
 
-  public static final MarkerRange UNDEFINED = new Undefined();
-
   private final MarkerComparator comparator;
   private final Boundary start;
   private final Boundary end;
 
   private MarkerRange() {
     this.comparator = null;
-    this.start = Boundary.UNBOUNDED;
-    this.end = Boundary.UNBOUNDED;
+    this.start = Boundary.NEGATIVE_INFINITY;
+    this.end = Boundary.POSITIVE_INFINITY;
   }
 
   public MarkerRange(MarkerComparator comparator) {
@@ -48,13 +49,25 @@ public class MarkerRange {
         "Comparator cannot be null.");
 
     this.comparator = comparator;
-    this.start = Boundary.UNBOUNDED;
-    this.end = Boundary.UNBOUNDED;
+    this.start = Boundary.NEGATIVE_INFINITY;
+    this.end = Boundary.POSITIVE_INFINITY;
   }
 
   private MarkerRange(
       MarkerComparator comparator,
       Boundary start, Boundary end) {
+    try {
+      if (start.compareTo(end) > 0) {
+        throw new IllegalArgumentException("Invalid range: " + start + ", " + end);
+      }
+    } catch (IllegalStateException e) {
+      // one boundary contains the other
+      // check that the containing boundary is an inclusive bound
+      if ((comparator.contains(start.bound, end.bound) && !start.isInclusive) ||
+          (comparator.contains(end.bound, start.bound) && !end.isInclusive)) {
+        throw new IllegalArgumentException("Invalid range: " + start + ", " + end);
+      }
+    }
     this.comparator = comparator;
     this.start = start;
     this.end = end;
@@ -104,6 +117,35 @@ public class MarkerRange {
         new Boundary(comparator, partial, true));
   }
 
+  public MarkerRange intersection(MarkerRange other) {
+    Boundary newStart = Ordering.from(new Boundary.LeftComparator()).max(start, other.start);
+    Boundary newEnd = Ordering.from(new Boundary.RightComparator()).min(end, other.end);
+    return new MarkerRange(comparator, newStart, newEnd);
+  }
+
+  public MarkerRange span(MarkerRange other) {
+    Boundary newStart = Ordering.from(new Boundary.LeftComparator()).min(start, other.start);
+    Boundary newEnd = Ordering.from(new Boundary.RightComparator()).max(end, other.end);
+    return new MarkerRange(comparator, newStart, newEnd);
+  }
+
+  public MarkerRange complement() {
+    if (start == Boundary.NEGATIVE_INFINITY && end == Boundary.POSITIVE_INFINITY) {
+      throw new IllegalArgumentException("Cannot find complement of unbounded range.");
+    }
+    if (start == Boundary.NEGATIVE_INFINITY) {
+      Boundary newStart = new Boundary(comparator, end.bound, !end.isInclusive);
+      Boundary newEnd = Boundary.POSITIVE_INFINITY;
+      return new MarkerRange(comparator, newStart, newEnd);
+    } else if (end == Boundary.POSITIVE_INFINITY) {
+      Boundary newStart = Boundary.NEGATIVE_INFINITY;
+      Boundary newEnd = new Boundary(comparator, start.bound, !start.isInclusive);
+      return new MarkerRange(comparator, newStart, newEnd);
+    }
+    return new MarkerRange(); // unbounded TODO: use set of ranges to improve efficiency
+  }
+
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -142,61 +184,11 @@ public class MarkerRange {
   }
 
   /**
-   * Placeholder range that can be used when there is no PartitionStrategy.
-   *
-   * MarkerRange requires a MarkerComparator. Without a way to compare bounds,
-   * a Range is undefined. However it is convenient to have a place-holder that
-   * correctly responds to range methods for this case.
-   */
-  private static class Undefined extends MarkerRange {
-
-    @Override
-    public boolean contains(Marker marker) {
-      return true;
-    }
-
-    @Override
-    public MarkerRange from(Marker start) {
-      throw new IllegalStateException("Undefined range: no PartitionStrategy");
-    }
-
-    @Override
-    public MarkerRange fromAfter(Marker start) {
-      throw new IllegalStateException("Undefined range: no PartitionStrategy");
-    }
-
-    @Override
-    public MarkerRange to(Marker end) {
-      throw new IllegalStateException("Undefined range: no PartitionStrategy");
-    }
-
-    @Override
-    public MarkerRange toBefore(Marker end) {
-      throw new IllegalStateException("Undefined range: no PartitionStrategy");
-    }
-
-    @Override
-    public MarkerRange of(Marker partial) {
-      throw new IllegalStateException("Undefined range: no PartitionStrategy");
-    }
-
-    @Override
-    public String toString() {
-      return Objects.toStringHelper(MarkerRange.class)
-          .add("range", "UNDEFINED")
-          .toString();
-    }
-
-  }
-
-  /**
    * Represents the boundary of a range, either inclusive or exclusive.
    *
    * @since 0.9.0
    */
-  public static class Boundary {
-
-    public static final Boundary UNBOUNDED = new Boundary();
+  public static class Boundary implements Comparable<Boundary> {
 
     private final MarkerComparator comparator;
     private final Marker bound;
@@ -205,7 +197,7 @@ public class MarkerRange {
     private Boundary() {
       this.comparator = null;
       this.bound = null;
-      this.isInclusive = true;
+      this.isInclusive = false;
     }
 
     public Boundary(MarkerComparator comparator, Marker bound, boolean isInclusive) {
@@ -255,6 +247,20 @@ public class MarkerRange {
       }
     }
 
+    @Override
+    public int compareTo(Boundary other) {
+      if (this == NEGATIVE_INFINITY) {
+        return other == NEGATIVE_INFINITY ? 0 : -1;
+      } else if (other == NEGATIVE_INFINITY) {
+        return 1;
+      } else if (this == POSITIVE_INFINITY) {
+        return other == POSITIVE_INFINITY ? 0 : 1;
+      } else if (other == POSITIVE_INFINITY) {
+        return -1;
+      }
+      return comparator.compare(bound, other.bound);
+    }
+
     public Marker getBound() {
       return bound;
     }
@@ -294,9 +300,149 @@ public class MarkerRange {
         return Objects.toStringHelper(this)
             .add("inclusive", isInclusive)
             .add("bound", bound)
+            .add("comparator", comparator)
             .toString();
       }
     }
 
+    public static final Boundary NEGATIVE_INFINITY = new Boundary() {
+      @Override
+      public boolean isLessThan(Marker other) {
+        return true;
+      }
+
+      @Override
+      public boolean isGreaterThan(Marker other) {
+        return false;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        return this == o;
+      }
+
+      @Override
+      public String toString() {
+        return Objects.toStringHelper(this)
+              .add("bound", "NEGATIVE_INFINITY")
+              .toString();
+      }
+    };
+
+    public static final Boundary POSITIVE_INFINITY = new Boundary() {
+      @Override
+      public boolean isLessThan(Marker other) {
+        return false;
+      }
+
+      @Override
+      public boolean isGreaterThan(Marker other) {
+        return true;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        return this == o;
+      }
+
+      @Override
+      public String toString() {
+        return Objects.toStringHelper(this)
+            .add("bound", "POSITIVE_INFINITY")
+            .toString();
+      }
+    };
+
+    public static class LeftComparator implements Comparator<Boundary>, Serializable {
+      private static final long serialVersionUID = 0;
+      @Override
+      public int compare(Boundary b1, Boundary b2) {
+        if (b1 == NEGATIVE_INFINITY) {
+          return b2 == NEGATIVE_INFINITY ? 0 : -1;
+        } else if (b2 == NEGATIVE_INFINITY) {
+          return 1;
+        } else if (b1 == POSITIVE_INFINITY) {
+          return b2 == POSITIVE_INFINITY ? 0 : 1;
+        } else if (b2 == POSITIVE_INFINITY) {
+          return -1;
+        }
+        if (b1.isInclusive) {
+          return b1.comparator.leftCompare(b1.bound, b2.bound);
+        } else {
+          try {
+            return b1.comparator.compare(b1.bound, b2.bound);
+          } catch (IllegalStateException ex) {
+            // one contained the other, which is not allowed for exclusive ranges
+            return 0;
+          }
+        }
+      }
+    }
+
+    public static class RightComparator implements Comparator<Boundary>, Serializable {
+      private static final long serialVersionUID = 0;
+      @Override
+      public int compare(Boundary b1, Boundary b2) {
+        if (b1 == NEGATIVE_INFINITY) {
+          return b2 == NEGATIVE_INFINITY ? 0 : -1;
+        } else if (b2 == NEGATIVE_INFINITY) {
+          return 1;
+        } else if (b1 == POSITIVE_INFINITY) {
+          return b2 == POSITIVE_INFINITY ? 0 : 1;
+        } else if (b2 == POSITIVE_INFINITY) {
+          return -1;
+        }
+        if (b1.isInclusive) {
+          return b1.comparator.rightCompare(b1.bound, b2.bound);
+        } else {
+          try {
+            return b1.comparator.compare(b1.bound, b2.bound);
+          } catch (IllegalStateException ex) {
+            // one contained the other, which is not allowed for exclusive ranges
+            return 0;
+          }
+        }
+
+      }
+    }
+
+  }
+
+  public static class Builder {
+
+    private Marker.Builder start;
+    private Marker.Builder end;
+    private MarkerComparator comparator;
+
+    public Builder(MarkerComparator comparator) {
+      this.comparator = comparator;
+    }
+
+    public Builder addToStart(String name, Object value) {
+      if (start == null) {
+        start = new Marker.Builder();
+      }
+      start.add(name, value);
+      return this;
+    }
+
+    public Builder addToEnd(String name, Object value) {
+      if (end == null) {
+        end = new Marker.Builder();
+      }
+      end.add(name, value);
+      return this;
+    }
+
+    public MarkerRange build() {
+      MarkerRange markerRange = new MarkerRange(comparator);
+      if (start != null) {
+        markerRange = markerRange.from(start.build());
+      }
+      if (end != null) {
+        markerRange = markerRange.to(end.build());
+      }
+      return markerRange;
+    }
   }
 }
