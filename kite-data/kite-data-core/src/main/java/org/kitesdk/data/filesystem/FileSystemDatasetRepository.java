@@ -26,6 +26,7 @@ import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.filesystem.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
+import org.kitesdk.data.spi.PartitionListener;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -141,6 +142,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         .partitionKey(newDescriptor.isPartitioned() ?
             org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
             null)
+        .partitionListener(getPartitionListener())
         .build();
   }
 
@@ -198,6 +200,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         .partitionKey(updatedDescriptor.isPartitioned() ?
             org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
             null)
+        .partitionListener(getPartitionListener())
         .build();
   }
 
@@ -216,6 +219,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         .partitionKey(descriptor.isPartitioned() ?
             org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
             null)
+        .partitionListener(getPartitionListener())
         .build();
 
     logger.debug("Loaded dataset:{}", ds);
@@ -355,6 +359,11 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    */
   public MetadataProvider getMetadataProvider() {
     return metadataProvider;
+  }
+
+  private PartitionListener getPartitionListener() {
+    return metadataProvider instanceof PartitionListener ?
+        (PartitionListener) metadataProvider : null;
   }
 
   /**

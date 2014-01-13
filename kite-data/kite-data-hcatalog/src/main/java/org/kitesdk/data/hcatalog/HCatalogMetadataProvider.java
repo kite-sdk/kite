@@ -16,19 +16,30 @@
 
 package org.kitesdk.data.hcatalog;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.filesystem.impl.Accessor;
 import org.kitesdk.data.spi.AbstractMetadataProvider;
+import org.kitesdk.data.spi.PartitionListener;
+import org.kitesdk.data.spi.StorageKey;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import java.util.Collection;
+import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class HCatalogMetadataProvider extends AbstractMetadataProvider {
+abstract class HCatalogMetadataProvider extends AbstractMetadataProvider implements
+    PartitionListener {
 
   private static final Logger logger = LoggerFactory
       .getLogger(HCatalogMetadataProvider.class);
+  private static final Splitter PATH_SPLITTER = Splitter.on('/');
+
   protected final Configuration conf;
   final HCatalog hcat;
 
@@ -79,4 +90,10 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider {
     return hcat.getAllTables(HiveUtils.DEFAULT_DB);
   }
 
+  @Override
+  @SuppressWarnings("unchecked")
+  public void partitionAdded(String name, String key) {
+    hcat.addPartition(HiveUtils.DEFAULT_DB, name,
+        Lists.newArrayList(PATH_SPLITTER.split(key)));
+  }
 }
