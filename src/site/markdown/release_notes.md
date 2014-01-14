@@ -3,6 +3,21 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version 0.10.1
+
+Release date: January 13, 2014
+
+Version 0.10.1 includes the following bug fixes:
+* CDK-249: Correctly add new partitions to the Hive MetaStore
+* CDK-260: Fixed the date-format partition function in expressions
+* CDK-266: Fixed file name uniqueness
+* CDK-273: Fixed spurious batch size warning in log4j integration
+* Fixed NoClassDefFoundError for crunch in kite-tools module
+* Added more debug logging to Morphlines
+* Solr should fail fast if ZK has no solr configuration
+
+This patch release is fully-compatible with 0.9.1, which uses the deprecated CDK packages.
+
 ## Version 0.10.0
 
 Release date: December 9, 2013
