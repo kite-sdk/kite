@@ -1,0 +1,3 @@
+NO DOC BLOCK: org.kitesdk.data.partition.DateFormatPartitioner Method equals(java.lang.Object)
+NO DOC BLOCK: org.kitesdk.data.partition.DateFormatPartitioner Method hashCode()
+NO DOC BLOCK: org.kitesdk.data.partition.PartitionFunctions Method toExpression(org.kitesdk.data.FieldPartitioner)
