@@ -96,25 +96,25 @@ public final class ReadAvroParquetFileBuilder implements CommandBuilder {
         conf.addResource(new Path(value)); // see Hadoop's GenericOptionsParser
       }
       
-      String schemaString = getConfigs().getString(config, "readerSchemaString", null);
-      Schema readerSchema;
+      String schemaString = getConfigs().getString(config, "projectionSchemaString", null);
+      Schema projectionSchema;
       if (schemaString != null) {
-        readerSchema = new Parser().parse(schemaString);
+        projectionSchema = new Parser().parse(schemaString);
       } else {        
-        String schemaFile = getConfigs().getString(config, "readerSchemaFile", null);
+        String schemaFile = getConfigs().getString(config, "projectionSchemaFile", null);
         if (schemaFile != null) {
           try { 
-            readerSchema = new Parser().parse(new File(schemaFile));
+            projectionSchema = new Parser().parse(new File(schemaFile));
           } catch (IOException e) {
             throw new MorphlineCompilationException("Cannot parse external Avro reader schema file: " + schemaFile, config, e);
           }
         } else {
-          readerSchema = null;
+          projectionSchema = null;
         }
       }      
       
-      if (readerSchema != null) {
-        AvroReadSupport.setRequestedProjection(conf, readerSchema);
+      if (projectionSchema != null) {
+        AvroReadSupport.setRequestedProjection(conf, projectionSchema);
       }
       
       this.numRecordsMeter = getMeter(Metrics.NUM_RECORDS);

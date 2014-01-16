@@ -1778,26 +1778,24 @@ The morphline record input field file\_upload\_url must contain the HDFS Path of
 
 For each Avro datum, the command emits a morphline record containing the datum as an attachment in the field \_attachment\_body. Typically, the emitted Avro datum is further post\-processed with downstream commands such as [#extractAvroPaths].
 
-The Avro schema that was used to write the Avro data is retrieved from the parquet container. Optionally, the Avro schema that shall be used for reading can be supplied with a configuration option; otherwise it is assumed to be the same as the writer schema.
-
-Note: Avro uses [Schema Resolution|http://avro.apache.org/docs/current/spec.html#Schema+Resolution] if the two schemas are different, e.g. if the reader schema is a subset of the writer schema for the purpose of efficient column projection.
+The Avro schema that was used to write the Avro data is retrieved from the parquet container. Optionally, an Avro schema that shall be used for projecting parquet columns can be supplied with a configuration option.
 
 Note: The current implementation requires that the parquet file contains an explicit Avro schema, e.g. as written by {{parquet.avro.AvroParquetWriter}}. This limitation might be removed in a future release.
 
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
-| readerSchemaFile | null | An optional Avro schema file in JSON format on the local file system to use for reading. |
-| readerSchemaString | null | An optional Avro schema in JSON format given inline to use for reading. |
+| projectionSchemaFile | null | An optional Avro schema file in JSON format on the local file system to use for projection. This Avro schema is converted to a parquet schema before applying the projection. |
+| projectionSchemaString | null | An optional Avro schema in JSON format given inline to use for projection. This Avro schema is converted to a parquet schema before applying the projection. |
 
 Example usage:
 {code}
 readAvroParquetFile {
-  # Optionally, use this Avro schema in JSON format inline for reading:
-  # readerSchemaString : """<json can go here>"""
+  # Optionally, use this Avro schema in JSON format inline for projection:
+  # projectionSchemaString : """<json can go here>"""
 
-  # Optionally, use this Avro schema file in JSON format for reading:
-  # readerSchemaFile : /path/to/syslog.avsc
+  # Optionally, use this Avro schema file in JSON format for projection:
+  # projectionSchemaFile : /path/to/syslog.avsc
 }
 {code}
 
