@@ -15,12 +15,10 @@
  */
 package org.kitesdk.data.filesystem;
 
-import org.kitesdk.data.spi.ReaderWriterState;
-import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.DatasetWriterException;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Closeables;
+import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
@@ -29,15 +27,27 @@ import org.apache.avro.reflect.ReflectDatumWriter;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.DatasetWriterException;
+import org.kitesdk.data.spi.DynMethods;
+import org.kitesdk.data.spi.ReaderWriterState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 class FileSystemDatasetWriter<E> implements DatasetWriter<E> {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemDatasetWriter.class);
+
+  private static DynMethods.UnboundMethod hflush = new DynMethods.Builder("hflush")
+      .impl(FSDataOutputStream.class, "sync")
+      .impl(FSDataOutputStream.class, "hflush")
+      .build();
+
+  private static DynMethods.UnboundMethod hsync = new DynMethods.Builder("hsync")
+      .impl(FSDataOutputStream.class, "hsync")
+      .defaultNoop() // no hadoop-1 equivalent
+      .build();
 
   private Path path;
   private Schema schema;
@@ -112,7 +122,7 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E> {
 
     try {
       dataFileWriter.flush();
-      out.hflush();
+      hflush.invoke(out);
     } catch (IOException e) {
       throw new DatasetWriterException(
         "Unable to flush file writer:" + dataFileWriter);
@@ -208,5 +218,4 @@ class FileSystemDatasetWriter<E> implements DatasetWriter<E> {
     }
 
   }
-
 }
