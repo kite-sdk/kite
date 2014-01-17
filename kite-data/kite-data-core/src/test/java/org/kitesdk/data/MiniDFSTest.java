@@ -44,9 +44,12 @@ public class MiniDFSTest {
   }
 
   @BeforeClass
+  @SuppressWarnings("deprecation")
   public static void setupFS() throws IOException {
     if (cluster == null) {
-      cluster = new MiniDFSCluster.Builder(new Configuration()).build();
+      // if this fails with "The directory is already locked" set umask to 0022
+      cluster = new MiniDFSCluster(new Configuration(), 1, true, null);
+      //cluster = new MiniDFSCluster.Builder(new Configuration()).build();
       dfs = cluster.getFileSystem();
       conf = new Configuration(dfs.getConf());
       lfs = FileSystem.getLocal(conf);

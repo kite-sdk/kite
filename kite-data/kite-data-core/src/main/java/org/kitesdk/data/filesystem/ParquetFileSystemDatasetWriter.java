@@ -15,6 +15,8 @@
  */
 package org.kitesdk.data.filesystem;
 
+import org.apache.hadoop.conf.Configuration;
+import org.kitesdk.data.spi.DynMethods;
 import org.kitesdk.data.spi.ReaderWriterState;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.DatasetWriterException;
@@ -38,6 +40,12 @@ class ParquetFileSystemDatasetWriter<E extends IndexedRecord> implements Dataset
   private static final Logger logger = LoggerFactory
     .getLogger(ParquetFileSystemDatasetWriter.class);
   private static final int DEFAULT_BLOCK_SIZE = 50 * 1024 * 1024;
+
+  private static final DynMethods.StaticMethod isSnappyNative =
+      new DynMethods.Builder("SnappyCodec.isNativeCodeLoaded")
+      .impl(SnappyCodec.class, "isNativeCodeLoaded")
+      .impl(SnappyCodec.class, "isNativeSnappyLoaded", Configuration.class)
+      .buildStatic();
 
   private Path path;
   private Schema schema;
@@ -75,12 +83,12 @@ class ParquetFileSystemDatasetWriter<E extends IndexedRecord> implements Dataset
     try {
       CompressionCodecName codecName = CompressionCodecName.UNCOMPRESSED;
       if (enableCompression) {
-         if (SnappyCodec.isNativeCodeLoaded()) {
-           codecName = CompressionCodecName.SNAPPY;
-         } else {
-           logger.warn("Compression enabled, but Snappy native code not loaded. " +
-               "Parquet file will not be compressed.");
-         }
+        if ((Boolean) isSnappyNative.invoke(fileSystem.getConf())) {
+          codecName = CompressionCodecName.SNAPPY;
+        } else {
+          logger.warn("Compression enabled, but Snappy native code not loaded. " +
+              "Parquet file will not be compressed.");
+        }
       }
       avroParquetWriter = new AvroParquetWriter<E>(fileSystem.makeQualified(pathTmp),
           schema, codecName, DEFAULT_BLOCK_SIZE,
