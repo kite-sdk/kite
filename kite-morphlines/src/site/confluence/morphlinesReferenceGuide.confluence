@@ -1804,7 +1804,7 @@ h1. kite\-morphlines\-hadoop\-rcfile
 h2. readRCFile
 
 
-The {{readRCFile}} command ([source code|https://github.com/cloudera/cdk/blob/master/cdk-morphlines/cdk-morphlines-hadoop-rcfile/src/main/java/com/cloudera/cdk/morphline/hadoop/rcfile/ReadRCFileBuilder.java]) parses an Apache Hadoop [RCFile|http://archive.cloudera.com/cdh4/cdh/4/hive/api/org/apache/hadoop/hive/ql/io/RCFile.html]. An RCFile can be read Row\-wise or Column\-wise, as follows:
+The {{readRCFile}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-hadoop-rcfile/src/main/java/org/kitesdk/morphline/hadoop/rcfile/ReadRCFileBuilder.java]) parses an Apache Hadoop [RCFile|http://archive.cloudera.com/cdh4/cdh/4/hive/api/org/apache/hadoop/hive/ql/io/RCFile.html]. An RCFile can be read Row\-wise or Column\-wise, as follows:
 
 * Row\-wise: One morphline record is emitted for each row in the RCFile. Each record will contain fields for all the columns configured in the {{columns}} parameter. For example, with an RCFile with 10 rows and 5 columns, Row\-wise mode would emit 10 morphline records.
 * Column\-wise: For every row\-split (block) in the RC File, Emits one record for each column specified in the {{columns}} parameter. This record will contain a list of row values for that column as a list. The order of columns is as specified in the {{columns}} parameter. For example, with an RCFile with 10 rows and 5 columns, Column\-wise mode would emit 5 morphline records each with a list of 10 values assuming there are no row\-splits.
