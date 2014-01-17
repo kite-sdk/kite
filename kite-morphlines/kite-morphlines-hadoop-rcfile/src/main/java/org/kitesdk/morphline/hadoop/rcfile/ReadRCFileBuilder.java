@@ -51,16 +51,17 @@ import com.typesafe.config.Config;
 /**
  * Command for reading Record Columnar (RC) Files. RCFile can be read in two
  * ways
- * 
+ *
  * 1. Row Wise - Emits one record for every row in the RCFile, with columns
  * mapped with names as provided in the column map
- * 
- * 2. Column Wise - Emits one record for every row in one column, before moving
- * to the next column (in the order provided in the column map)
- * 
- * For a RCFile with 5 rows and 5 columns. Row wise would emit 5 records and
- * Column wise would emit 25 records. De-Compression is handled automatically
- * 
+ *
+ * 2. Column Wise - For every row split (block) in the RC File, Emits one record
+ * for each column with all the row values for that column as a List
+ *
+ * For a RCFile with n rows and m columns. Row wise would emit n records and
+ * Column wise would emit m * (row splits) records.
+ * De-Compression is handled automatically
+ *
  */
 public final class ReadRCFileBuilder implements CommandBuilder {
   
@@ -188,35 +189,35 @@ public final class ReadRCFileBuilder implements CommandBuilder {
       return true;
     }
 
-    private boolean readColumnWise(RCFile.Reader reader, Record record) throws IOException {
-      
-      for (RCFileColumn rcColumn : columns) {
-        reader.sync(0);
-        reader.resetBuffer();
-        while (true) {
-          boolean next;
-          try {
-            next = reader.nextBlock();
-          } catch (EOFException ex) {
-            // We have hit EOF of the stream
-            break;
-          }
+    private boolean readColumnWise(RCFile.Reader reader, Record record)
+        throws IOException {
 
-          if (!next) {
-            break;
-          }
+      while (true) {
+        boolean next;
+        try {
+          next = reader.nextBlock();
+        } catch (EOFException ex) {
+          // We have hit EOF of the stream
+          break;
+        }
+        if (!next) {
+          break;
+        }
 
+        for (RCFileColumn rcColumn : columns) {
           BytesRefArrayWritable rowBatchBytes = reader.getColumn(rcColumn.getInputField(), null);
+          List<Writable> rowValues = new ArrayList<Writable>(rowBatchBytes.size());
+          incrementNumRecords();
+          Record outputRecord = record.copy();
           for (int rowIndex = 0; rowIndex < rowBatchBytes.size(); rowIndex++) {
-            incrementNumRecords();
-            Record outputRecord = record.copy();
             BytesRefWritable rowBytes = rowBatchBytes.get(rowIndex);
-            outputRecord.put(rcColumn.getOutputField(), updateColumnValue(rcColumn, rowBytes));
-            
-            // pass record to next command in chain:
-            if (!getChild().process(outputRecord)) {
-              return false;
-            }
+            rowValues.add(updateColumnValue(rcColumn, rowBytes));
+          }
+          outputRecord.put(rcColumn.getOutputField(), rowValues);
+          
+          // pass record to next command in chain:
+          if (!getChild().process(outputRecord)) {
+            return false;
           }
         }
       }

@@ -15,8 +15,10 @@
  */
 package org.kitesdk.morphline.hadoop.rcfile;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -28,6 +30,7 @@ import org.apache.hadoop.hive.serde2.columnar.BytesRefArrayWritable;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -91,7 +94,7 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(input));
     assertTrue(areFieldsEqual(expected, collector.getRecords(), NUM_COLUMNS,
-        NUM_RECORDS, true));
+        true));
   }
 
   @Test
@@ -108,11 +111,11 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(input));
     assertTrue(areFieldsEqual(expected, collector.getRecords(), NUM_COLUMNS,
-        NUM_RECORDS, false));
+        false));
   }
 
   private void createRCFile(final String fileName, final int numRecords,
-      final int maxColumns) throws IOException {
+                            final int maxColumns) throws IOException {
     // Write the sequence file
     SequenceFile.Metadata metadata = getMetadataForRCFile();
     Configuration conf = new Configuration();
@@ -136,11 +139,11 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
 
   private InputStream readPath(final Path inputFile) throws IOException {
     FileSystem fs = inputFile.getFileSystem(new Configuration());
-    return fs.open(inputFile);
+    return new BufferedInputStream(fs.open(inputFile));
   }
 
   private List<Record> setupRCFile(final String fileName, final int numRecords,
-      final int maxColumns, final boolean rowWise)
+                                   final int maxColumns, final boolean rowWise)
       throws IOException {
     createRCFile(fileName, numRecords, maxColumns);
     List<Record> expected = Lists.newArrayList();
@@ -158,13 +161,15 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
     } else {
       // Column wise expected records
       for (int column = 0; column < maxColumns; column++) {
+        Record record = new Record();
+        List<Writable> outputs = new ArrayList<Writable>();
         for (int row = 0; row < numRecords; row++) {
-          Record record = new Record();
           Text sampleText = new Text("ROW-NUM:" + row + ", COLUMN-NUM:"
               + column);
-          record.put("field" + (column + 1), sampleText);
-          expected.add(record);
+          outputs.add(sampleText);
         }
+        record.put("field" + (column + 1), outputs);
+        expected.add(record);
       }
     }
     return expected;
@@ -175,7 +180,7 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
   }
 
   private boolean areFieldsEqual(List<Record> expected, List<Record> actual,
-      final int columnSize, final int rowSize, final boolean rowWiseCheck) {
+                                 final int columnSize, final boolean rowWiseCheck) {
     if (expected.size() != actual.size()) {
       return false;
     }
@@ -191,12 +196,10 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
     } else {
       for (int i = 0; i < columnSize; i++) {
         String fieldName = "field" + (i + 1);
-        for (int j = 0; j < rowSize; j++) {
-          Record currentExpected = expected.get((i * rowSize) + j);
-          Record currentActual = actual.get((i * rowSize) + j);
-          if (!isRecordColumnEqual(currentActual, currentExpected, fieldName)) {
-            return false;
-          }
+        Record currentExpected = expected.get(i);
+        Record currentActual = actual.get(i);
+        if (!isRecordColumnEqual(currentActual, currentExpected, fieldName)) {
+          return false;
         }
       }
     }
@@ -204,7 +207,7 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
   }
 
   private boolean areRecordColumnsEqual(final Record actual,
-      final Record expected, final int columnSize) {
+                                        final Record expected, final int columnSize) {
     for (int i = 0; i < columnSize; i++) {
       String fieldName = "field" + (i + 1);
       if (!isRecordColumnEqual(actual, expected, fieldName)) {
@@ -215,7 +218,7 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
   }
 
   private boolean isRecordColumnEqual(final Record actual,
-      final Record expected, final String fieldName) {
+                                      final Record expected, final String fieldName) {
     return actual.get(fieldName).equals(expected.get(fieldName));
   }
 
