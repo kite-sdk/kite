@@ -60,7 +60,12 @@ public class AvroParquetMorphlineTest extends AbstractMorphlineTest {
     writer.write(record);
     writer.close();
 
-    for (String configFile : Arrays.asList("readAvroParquetFile", "readAvroParquetFileWithReaderSchema")) {
+    for (String configFile : Arrays.asList(
+        "readAvroParquetFile", 
+        "readAvroParquetFileWithProjectionSchema", 
+        "readAvroParquetFileWithReaderSchema1",
+        "readAvroParquetFileWithReaderSchemaExternal"
+        )) {
       morphline = createMorphline("test-morphlines/" + configFile);
       
       Record morphlineRecord = new Record();
@@ -123,7 +128,7 @@ public class AvroParquetMorphlineTest extends AbstractMorphlineTest {
     writer.write(record);
     writer.close();
 
-    morphline = createMorphline("test-morphlines/readAvroParquetFileWithReaderSubSchema");
+    morphline = createMorphline("test-morphlines/readAvroParquetFileWithProjectionSubSchema");
     
     Record morphlineRecord = new Record();
     morphlineRecord.put(ReadAvroParquetFileBuilder.FILE_UPLOAD_URL, file.toString());

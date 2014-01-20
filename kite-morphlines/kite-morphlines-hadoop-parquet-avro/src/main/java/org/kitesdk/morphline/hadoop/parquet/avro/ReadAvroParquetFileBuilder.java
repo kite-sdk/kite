@@ -96,17 +96,18 @@ public final class ReadAvroParquetFileBuilder implements CommandBuilder {
         conf.addResource(new Path(value)); // see Hadoop's GenericOptionsParser
       }
       
-      String schemaString = getConfigs().getString(config, "projectionSchemaString", null);
+      // configure projection schema, if any
+      String projectionSchemaString = getConfigs().getString(config, "projectionSchemaString", null);
       Schema projectionSchema;
-      if (schemaString != null) {
-        projectionSchema = new Parser().parse(schemaString);
+      if (projectionSchemaString != null) {
+        projectionSchema = new Parser().parse(projectionSchemaString);
       } else {        
-        String schemaFile = getConfigs().getString(config, "projectionSchemaFile", null);
-        if (schemaFile != null) {
+        String projectionSchemaFile = getConfigs().getString(config, "projectionSchemaFile", null);
+        if (projectionSchemaFile != null) {
           try { 
-            projectionSchema = new Parser().parse(new File(schemaFile));
+            projectionSchema = new Parser().parse(new File(projectionSchemaFile));
           } catch (IOException e) {
-            throw new MorphlineCompilationException("Cannot parse external Avro reader schema file: " + schemaFile, config, e);
+            throw new MorphlineCompilationException("Cannot parse external Avro projection schema file: " + projectionSchemaFile, config, e);
           }
         } else {
           projectionSchema = null;
@@ -115,6 +116,28 @@ public final class ReadAvroParquetFileBuilder implements CommandBuilder {
       
       if (projectionSchema != null) {
         AvroReadSupport.setRequestedProjection(conf, projectionSchema);
+      }
+      
+      // configure reader schema, if any
+      String readerSchemaString = getConfigs().getString(config, "readerSchemaString", null);
+      Schema readerSchema;
+      if (readerSchemaString != null) {
+        readerSchema = new Parser().parse(readerSchemaString);
+      } else {        
+        String readerSchemaFile = getConfigs().getString(config, "readerSchemaFile", null);
+        if (readerSchemaFile != null) {
+          try { 
+            readerSchema = new Parser().parse(new File(readerSchemaFile));
+          } catch (IOException e) {
+            throw new MorphlineCompilationException("Cannot parse external Avro reader schema file: " + readerSchemaFile, config, e);
+          }
+        } else {
+          readerSchema = null;
+        }
+      }      
+      
+      if (readerSchema != null) {
+        AvroReadSupport.setAvroReadSchema(conf, readerSchema);
       }
       
       this.numRecordsMeter = getMeter(Metrics.NUM_RECORDS);
