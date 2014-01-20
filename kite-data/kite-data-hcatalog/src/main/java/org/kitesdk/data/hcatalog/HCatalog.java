@@ -15,16 +15,15 @@
  */
 package org.kitesdk.data.hcatalog;
 
-import org.kitesdk.data.MetadataProviderException;
-import org.kitesdk.data.hcatalog.impl.Loader;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
-import org.apache.hadoop.hive.metastore.api.Partition;
-import org.apache.hadoop.hive.metastore.api.hive_metastoreConstants;
+import org.apache.hadoop.hive.metastore.api.AlreadyExistsException;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hcatalog.common.HCatUtil;
+import org.kitesdk.data.MetadataProviderException;
+import org.kitesdk.data.hcatalog.impl.Loader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,20 +94,14 @@ final class HCatalog {
     }
   }
 
-  public void addPartition(String dbName, String tableName,
-      List<String> partitionValues) {
+  public void addPartition(String dbName, String tableName, String path) {
     try {
-      org.apache.hadoop.hive.metastore.api.Table table = client.getTable(dbName,
-          tableName);
-      Partition partition = new Partition();
-      partition.setDbName(dbName);
-      partition.setTableName(tableName);
-      partition.setValues(partitionValues);
-      partition.setSd(table.getSd());
-      long time = System.currentTimeMillis() / 1000;
-      partition.setCreateTime((int) time);
-      partition.putToParameters(hive_metastoreConstants.DDL_TIME, Long.toString(time));
-      client.add_partition(partition);
+      // purposely don't check if the partition already exists because
+      // getPartition(db, table, path) will throw an exception to indicate the
+      // partition doesn't exist also. this way, it's only one call.
+      client.appendPartition(dbName, tableName, path);
+    } catch (AlreadyExistsException e) {
+      // this is okay
     } catch (RuntimeException e) {
       throw new RuntimeException("Hive metastore exception", e);
     } catch (Exception e) {

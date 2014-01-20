@@ -38,7 +38,6 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
 
   private static final Logger logger = LoggerFactory
       .getLogger(HCatalogMetadataProvider.class);
-  private static final Splitter PATH_SPLITTER = Splitter.on('/');
 
   protected final Configuration conf;
   final HCatalog hcat;
@@ -92,8 +91,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
 
   @Override
   @SuppressWarnings("unchecked")
-  public void partitionAdded(String name, String key) {
-    hcat.addPartition(HiveUtils.DEFAULT_DB, name,
-        Lists.newArrayList(PATH_SPLITTER.split(key)));
+  public void partitionAdded(String name, String path) {
+    hcat.addPartition(HiveUtils.DEFAULT_DB, name, path);
   }
 }
