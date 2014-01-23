@@ -51,7 +51,7 @@ import javax.script.SimpleBindings;
  * This is a fast script engine for Java programming language - I modified JSR
  * 223 Java Scripting a little for some 100x less overhead for invoking "static" methods.
  */
-public class FastJavaScriptEngine extends AbstractScriptEngine implements Compilable {
+class FastJavaScriptEngine extends AbstractScriptEngine implements Compilable {
 
 	// Java compiler
 	private JavaCompiler compiler;

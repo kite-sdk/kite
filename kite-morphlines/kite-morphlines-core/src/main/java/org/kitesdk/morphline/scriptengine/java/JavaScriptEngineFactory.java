@@ -39,7 +39,7 @@ import javax.script.ScriptEngineFactory;
 /**
  * This is script engine factory for "Java" script engine.
  */
-public class JavaScriptEngineFactory implements ScriptEngineFactory {
+class JavaScriptEngineFactory implements ScriptEngineFactory {
 	public String getEngineName() { 
 		return "java";
 	}
