@@ -30,7 +30,7 @@ import java.lang.reflect.Proxy;
  * @since 12.0
  */
 @Beta
-public final class Reflection {
+final class Reflection {
 
   /**
    * Returns the package name of {@code clazz} according to the Java Language Specification (section
