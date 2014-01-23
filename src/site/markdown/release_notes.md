@@ -14,6 +14,7 @@ Version 0.11.0 has the following notable changes:
     * Added `addEmptyStrings` parameter to [readCSV](kite-morphlines/morphlinesReferenceGuide.html#readCSV) command to indicate whether or not to add zero length strings to the output field.
     * Upgraded kite-morphlines-json module from jackson-databind-2.2.1 to jackson-databind-2.3.1.
     * Upgraded kite-morphlines-metrics-servlets module from jetty-8.1.13.v20130916 to jetty-8.1.14.v20131031.
+    * Upgraded kite-morphlines-saxon module from Saxon-HE-9.5.1-3 to Saxon-HE-9.5.1-4.
     * Fixed CDK-282 `readRCFile` command is broken (Prasanna Rajaperumal via whoschek).
 
 ## Version 0.10.0
