@@ -30,7 +30,7 @@ import java.util.Arrays;
  *
  * @version $Id: BaseNCodec.java 1465182 2013-04-06 04:03:12Z ggregory $
  */
-public abstract class BaseNCodec { // implements BinaryEncoder, BinaryDecoder {
+abstract class BaseNCodec { // implements BinaryEncoder, BinaryDecoder {
 
     /**
      * Holds thread context so classes can be thread-safe.

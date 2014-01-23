@@ -35,7 +35,7 @@ import java.io.Serializable;
  * @since 2.2
 
  */
-public abstract class AbstractWell extends BitsStreamGenerator implements Serializable {
+abstract class AbstractWell extends BitsStreamGenerator implements Serializable {
 
     /** Serializable version identifier. */
     private static final long serialVersionUID = -817701723016583596L;

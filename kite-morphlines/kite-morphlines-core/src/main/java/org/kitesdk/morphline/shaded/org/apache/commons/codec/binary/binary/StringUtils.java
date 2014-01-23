@@ -39,7 +39,7 @@ import com.google.common.base.Charsets;
  * @version $Id: StringUtils.java 1435550 2013-01-19 14:09:52Z tn $
  * @since 1.4
  */
-public class StringUtils {
+class StringUtils {
 
     /**
      * Calls {@link String#getBytes(Charset)}

@@ -24,7 +24,7 @@ import java.io.Serializable;
  * @version $Id: BitsStreamGenerator.java 1454897 2013-03-10 19:02:54Z luc $
  * @since 2.0
  */
-public abstract class BitsStreamGenerator
+abstract class BitsStreamGenerator
     implements RandomGenerator,
                Serializable {
     /** Serializable version identifier */
