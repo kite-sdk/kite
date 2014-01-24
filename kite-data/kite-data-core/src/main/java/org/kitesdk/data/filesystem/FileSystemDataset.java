@@ -265,7 +265,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   }
 
   @SuppressWarnings("unchecked")
-  private PartitionKey fromDirectoryName(Path dir) {
+  PartitionKey fromDirectoryName(Path dir) {
     final FieldPartitioner fp = partitionStrategy.getFieldPartitioners().get(0);
     final List<Object> values = Lists.newArrayList();
 

@@ -45,12 +45,11 @@ import static org.kitesdk.data.filesystem.DatasetTestUtilities.writeTestUsers;
 
 public class TestCrunchDatasets {
 
-  private Configuration conf;
   private DatasetRepository repo;
 
   @Before
-  public void setUp() throws IOException {
-    this.conf = new Configuration();
+  public void setUp() throws Exception {
+    Configuration conf = new Configuration();
     FileSystem fileSystem = FileSystem.get(conf);
     Path testDirectory = fileSystem.makeQualified(
         new Path(Files.createTempDir().getAbsolutePath()));
@@ -145,5 +144,30 @@ public class TestCrunchDatasets {
     pipeline.run();
 
     Assert.assertEquals(5, datasetSize(outputPart0));
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void testPartitionedSourceAndTargetWritingToTopLevel() throws IOException {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", 2).build();
+
+    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+
+    writeTestUsers(inputDataset, 10);
+
+    PartitionKey key = partitionStrategy.partitionKey(0);
+    Dataset<Record> inputPart0 = inputDataset.getPartition(key, false);
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputPart0, GenericData.Record.class));
+    pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
+    pipeline.run();
+
+    Assert.assertEquals(5, datasetSize(outputDataset));
   }
 }
