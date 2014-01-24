@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>kite-data-hbase</artifactId>
+  <artifactId>kite-data-mapreduce</artifactId>
 
   <parent>
     <groupId>org.kitesdk</groupId>
@@ -25,9 +25,9 @@
     <version>0.11.1-SNAPSHOT</version>
   </parent>
 
-  <name>Kite Data HBase Module</name>
+  <name>Kite Data MapReduce Module</name>
   <description>
-    The Kite Data HBase module provides integration with HBase.
+    The Kite Data MapReduce module provides MapReduce support for working with Kite datasets.
   </description>
 
   <build>
@@ -35,22 +35,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <compilerArgs>
-            <arg>-Xlint:unchecked</arg>
-          </compilerArgs>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>test-jar</goal> <!-- publish test-jar for other modules -->
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -68,59 +52,10 @@
         <artifactId>apache-rat-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.apache.avro</groupId>
-        <artifactId>avro-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>schema</goal>
-              <goal>idl-protocol</goal>
-            </goals>
-            <configuration>
-              <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
-              <outputDirectory>${project.basedir}/target/generated-sources/src/main/java/</outputDirectory>
-              <testSourceDirectory>${project.basedir}/src/test/avro/</testSourceDirectory>
-              <testOutputDirectory>${project.basedir}/target/generated-sources/src/test/java/</testOutputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.basedir}/target/generated-sources/src/main/java</source>
-                <source>${project.basedir}/target/generated-sources/src/test/java</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
+        <artifactId>findbugs-maven-plugin</artifactId>
       </plugin>
     </plugins>
-    <resources>
-      <resource>
-        <directory>src/main/avro</directory>
-      </resource>
-      <resource>
-        <directory>src/test/avro</directory>
-      </resource>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-      <resource>
-        <directory>src/test/resources</directory>
-      </resource>      
-    </resources>
   </build>
 
   <reporting>
@@ -156,6 +91,7 @@
       <artifactId>kite-data-core</artifactId>
       <version>0.11.1-SNAPSHOT</version>
     </dependency>
+
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
@@ -163,12 +99,14 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-hadoop-dependencies</artifactId>
       <type>pom</type>
       <scope>provided</scope>
     </dependency>
+    
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-hadoop-test-dependencies</artifactId>
@@ -177,22 +115,29 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>    
-    <dependency>
-      <groupId>org.apache.hbase</groupId>
-      <artifactId>hbase</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hbase</groupId>
-      <artifactId>hbase</artifactId>
-      <classifier>tests</classifier>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
     </dependency>
   </dependencies>
+
 </project>

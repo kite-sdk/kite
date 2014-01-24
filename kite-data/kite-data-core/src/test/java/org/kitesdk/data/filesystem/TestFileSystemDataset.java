@@ -19,7 +19,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.spi.FieldPartitioner;
+import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.kitesdk.data.filesystem.DatasetTestUtilities.*;
 import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.spi.FieldPartitioner;
 
 @RunWith(Parameterized.class)
 public class TestFileSystemDataset extends MiniDFSTest {
@@ -295,6 +296,118 @@ public class TestFileSystemDataset extends MiniDFSTest {
     }
 
     Assert.assertNotNull(caught);
+  }
+  
+  @Test
+  public void testMerge() throws IOException {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", 2).build();
+
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
+        .name("partitioned-users")
+        .configuration(getConfiguration())
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(USER_SCHEMA)
+            .format(format)
+            .location(testDirectory)
+            .partitionStrategy(partitionStrategy)
+            .build())
+        .build();
+
+    writeTestUsers(ds, 10);
+    checkTestUsers(ds, 10);
+
+    Path newTestDirectory = fileSystem.makeQualified(
+        new Path(Files.createTempDir().getAbsolutePath()));
+
+    FileSystemDataset<Record> dsUpdate = new FileSystemDataset.Builder()
+        .name("partitioned-users")
+        .configuration(getConfiguration())
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(USER_SCHEMA)
+            .format(format)
+            .location(newTestDirectory)
+            .partitionStrategy(partitionStrategy)
+            .build())
+        .build();
+
+    writeTestUsers(dsUpdate, 5, 10);
+    checkTestUsers(dsUpdate, 5, 10);
+
+    ds.merge(dsUpdate);
+
+    checkTestUsers(dsUpdate, 0);
+    checkTestUsers(ds, 15);
+
+  }
+
+  @Test(expected = DatasetRepositoryException.class)
+  public void testCannotMergeDatasetsWithDifferentFormats() throws IOException {
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
+        .name("users")
+        .configuration(getConfiguration())
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(USER_SCHEMA)
+            .format(Formats.AVRO)
+            .location(testDirectory)
+            .build())
+        .build();
+    FileSystemDataset<Record> dsUpdate = new FileSystemDataset.Builder()
+        .name("users")
+        .configuration(getConfiguration())
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(USER_SCHEMA)
+            .format(Formats.PARQUET)
+            .location(testDirectory)
+            .build())
+        .build();
+    ds.merge(dsUpdate);
+  }
+
+  @Test(expected = DatasetRepositoryException.class)
+  public void testCannotMergeDatasetsWithDifferentPartitionStrategies() throws IOException {
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
+        .name("users")
+        .configuration(getConfiguration())
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(USER_SCHEMA)
+            .location(testDirectory)
+            .partitionStrategy(new PartitionStrategy.Builder()
+                .hash("username", 2).build())
+            .build())
+        .build();
+    FileSystemDataset<Record> dsUpdate = new FileSystemDataset.Builder()
+        .name("users")
+        .configuration(getConfiguration())
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(USER_SCHEMA)
+            .location(testDirectory)
+            .partitionStrategy(new PartitionStrategy.Builder()
+                .hash("username", 2).hash("email", 3).build())
+            .build())
+        .build();
+    ds.merge(dsUpdate);
+  }
+
+  @Test(expected = DatasetRepositoryException.class)
+  public void testCannotMergeDatasetsWithDifferentSchemas() throws IOException {
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
+        .name("users")
+        .configuration(getConfiguration())
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(STRING_SCHEMA)
+            .location(testDirectory)
+            .build())
+        .build();
+    FileSystemDataset<Record> dsUpdate = new FileSystemDataset.Builder()
+        .name("users")
+        .configuration(getConfiguration())
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(USER_SCHEMA)
+            .location(testDirectory)
+            .build())
+        .build();
+    ds.merge(dsUpdate);
   }
 
   @SuppressWarnings("deprecation")

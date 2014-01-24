@@ -89,9 +89,17 @@ public class DatasetTestUtilities {
     checkTestUsers(ds, count, "email");
   }
 
+  public static void checkTestUsers(Dataset<GenericData.Record> ds, int count, int start) {
+    checkTestUsers(ds, count, start, "email");
+  }
+
   public static void checkTestUsers(Dataset<GenericData.Record> ds, int count, final String... fields) {
+    checkTestUsers(ds, count, 0, fields);
+  }
+
+  public static void checkTestUsers(Dataset<GenericData.Record> ds, int count, int start, final String... fields) {
     final Set<String> usernames = Sets.newHashSet();
-    for (int i = 0; i < count; i++) {
+    for (int i = start; i < count + start; i++) {
       usernames.add("test-" + i);
     }
 

@@ -96,19 +96,7 @@ public class CrunchDatasets {
    * @return the {@link Target}, or <code>null</code> if the dataset is not
    * filesystem-based.
    */
-  public static Target asTarget(Dataset dataset) {
-    Path directory = Accessor.getDefault().getDirectory(dataset);
-    if (directory != null) {
-      final Format format = dataset.getDescriptor().getFormat();
-      if (Formats.PARQUET.equals(format)) {
-        return new AvroParquetFileTarget(directory);
-      } else if (Formats.AVRO.equals(format)) {
-        return new AvroFileTarget(directory);
-      } else {
-        throw new UnsupportedOperationException(
-            "Not a supported format: " + format);
-      }
-    }
-    return null;
+  public static <E> Target asTarget(Dataset<E> dataset) {
+    return new DatasetTarget<E>(dataset);
   }
 }

@@ -15,9 +15,11 @@
  */
 package org.kitesdk.data.filesystem;
 
+import java.io.IOException;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.View;
 import org.kitesdk.data.filesystem.impl.Accessor;
 import org.apache.hadoop.conf.Configuration;
@@ -50,4 +52,13 @@ final class AccessorImpl extends Accessor {
       DatasetDescriptor descriptor, Configuration conf) {
     FileSystemDatasetRepository.ensureExists(descriptor, conf);
   }
+
+  @Override
+  public <E> PartitionKey fromDirectoryName(Dataset<E> dataset, Path dir) {
+    if (dataset instanceof FileSystemDataset) {
+      return ((FileSystemDataset<E>) dataset).fromDirectoryName(dir);
+    }
+    return null;
+  }
+
 }

@@ -15,15 +15,20 @@
  */
 package org.kitesdk.data.filesystem;
 
+import com.google.common.collect.Sets;
+import java.util.Set;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.spi.FieldPartitioner;
+import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.RefineableView;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDataset;
+import org.kitesdk.data.spi.FieldPartitioner;
+import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.PartitionListener;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -37,9 +42,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
-class FileSystemDataset<E> extends AbstractDataset<E> {
+class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeable<FileSystemDataset<E>> {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemDataset.class);
@@ -245,6 +251,57 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
       .toString();
   }
 
+  @Override
+  public void merge(FileSystemDataset<E> update) {
+    DatasetDescriptor updateDescriptor = update.getDescriptor();
+
+    if (!updateDescriptor.getFormat().equals(descriptor.getFormat())) {
+      throw new DatasetRepositoryException("Cannot merge dataset format " +
+          updateDescriptor.getFormat() + " with format " + descriptor.getFormat());
+    }
+
+    if (updateDescriptor.isPartitioned() != descriptor.isPartitioned()) {
+      throw new DatasetRepositoryException("Cannot merge an unpartitioned dataset with a " +
+          " partitioned one or vice versa.");
+    } else if (updateDescriptor.isPartitioned() && descriptor.isPartitioned() &&
+        !updateDescriptor.getPartitionStrategy().equals(descriptor.getPartitionStrategy())) {
+      throw new DatasetRepositoryException("Cannot merge dataset partition strategy " +
+          updateDescriptor.getPartitionStrategy() + " with " + descriptor.getPartitionStrategy());
+    }
+
+    if (!updateDescriptor.getSchema().equals(descriptor.getSchema())) {
+      throw new DatasetRepositoryException("Cannot merge dataset schema " +
+          updateDescriptor.getFormat() + " with schema " + descriptor.getFormat());
+    }
+
+    Set<String> addedPartitions = Sets.newHashSet();
+    for (Path path : update.pathIterator()) {
+      URI relativePath = update.getDirectory().toUri().relativize(path.toUri());
+      Path newPath = new Path(directory, new Path(relativePath));
+      Path newPartitionDirectory = newPath.getParent();
+      try {
+        if (!fileSystem.exists(newPartitionDirectory)) {
+          fileSystem.mkdirs(newPartitionDirectory);
+        }
+        logger.debug("Renaming {} to {}", path, newPath);
+        boolean renameOk = fileSystem.rename(path, newPath);
+        if (!renameOk) {
+          throw new DatasetException("Dataset merge failed during rename of " + path +
+              " to " + newPath);
+        }
+      } catch (IOException e) {
+        throw new DatasetIOException("Dataset merge failed", e);
+      }
+      if (partitionListener != null) {
+        String partition = newPartitionDirectory.toString();
+        if (!addedPartitions.contains(partition)) {
+          partitionListener.partitionAdded(name, partition);
+          addedPartitions.add(partition);
+        }
+      }
+    }
+  }
+
   @SuppressWarnings("unchecked")
   private Path toDirectoryName(Path dir, PartitionKey key) {
     Path result = dir;
@@ -265,7 +322,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   }
 
   @SuppressWarnings("unchecked")
-  private PartitionKey fromDirectoryName(Path dir) {
+  PartitionKey fromDirectoryName(Path dir) {
     final FieldPartitioner fp = partitionStrategy.getFieldPartitioners().get(0);
     final List<Object> values = Lists.newArrayList();
 
