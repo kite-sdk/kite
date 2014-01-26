@@ -680,7 +680,7 @@ The {{grok}} command ([source code|https://github.com/kite-sdk/kite/blob/master/
 
 This is well suited for syslog logs, apache, and other webserver logs, mysql logs, and in general, any log format that is generally written for humans and not computer consumption.
 
-A grok command can load zero or more dictionaries. A dictionary is a file or string that contains zero or more REGEX_NAME to REGEX mappings, one per line, separated by space. Here is an example dictionary:
+A grok command can load zero or more dictionaries. A dictionary is a file, file on the classpath, or string that contains zero or more REGEX_NAME to REGEX mappings, one per line, separated by space. Here is an example dictionary:
 
 {code}
 INT (?:[+-]?(?:[0-9]+))
@@ -697,7 +697,7 @@ and matches strings like "123", whereas the regex named "HOSTNAME" is associated
 {code}
 and matches strings like "www.cloudera.com".
 
-Morphlines ships with [several standard grok dictionaries|https://github.com/kite-sdk/kite/tree/master/kite-morphlines/kite-morphlines-core/src/test/resources/grok-dictionaries].
+Morphlines ships with [several standard grok dictionaries|https://github.com/kite-sdk/kite/tree/master/kite-morphlines/kite-morphlines-core/src/test/resources/grok-dictionaries]. Dictionaries may be loaded from a file or directory of files on the local filesystem (see "dictionaryFiles"), files found on the classpath (see "dictionaryResources"), or literal inline strings in the morphlines configuration file (see "dictionaryString").
 
 A grok command can contain zero or more grok expressions. Each grok expression refers to a record input field name and can contain zero or more grok patterns. The following is an example grok expression that refers to the input field named "message" and contains two grok patterns:
 
@@ -736,6 +736,7 @@ In addition, the grok command supports the following parameters:
 
 || Property Name || Default || Description ||
 | dictionaryFiles | \[\] | A list of zero or more local files or directory trees from which to load dictionaries. |
+| dictionaryResources | \[\] | A list of zero or more classpath resources (i.e. dictionary files on the classpath) from which to load dictionaries. Unlike "dictionaryFiles" it is not possible to specify directories. |
 | dictionaryString | null | An optional inline string from which to load a dictionary. |
 | extract | true | Can be "false", "true", or "inplace". Add the content of named capturing groups to the input record ("inplace"), to a copy of the input record ("true"), or to no record ("false"). |
 | numRequiredMatches | atLeastOnce | Indicates the minimum and maximum number of field values that must match a given grok expression for each input field name. Can be "atLeastOnce" (default), "once", or "all". |
@@ -795,7 +796,12 @@ grok {
 
 Even more example usage:
 {code}
-# Index a custom variant of syslog files where subfacility is optional
+# Index a custom variant of syslog files where subfacility is optional.
+#
+# Dictionaries in this example are loaded from three places:
+# * The my-jar-dictionaries/my-commands file found on the classpath.
+# * The local file kite-morphlines-core/src/test/resources/grok-dictionaries.
+# * The inline definition shown in dictionaryString.
 #
 # Example input line:
 #
@@ -811,6 +817,7 @@ Even more example usage:
 # syslog_message:%myproduct-3-mysubfacility-123456: Health probe failed
 #
 grok {
+  dictionaryResources : [my-jar-dictionaries/my-commands]
   dictionaryFiles : [kite-morphlines-core/src/test/resources/grok-dictionaries]
   dictionaryString : """
     MY_CUSTOM_TIMESTAMP %{MONTH} %{MONTHDAY} %{YEAR} %{TIME}

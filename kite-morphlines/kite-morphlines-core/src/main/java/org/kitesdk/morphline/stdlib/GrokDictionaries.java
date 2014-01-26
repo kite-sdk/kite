@@ -15,6 +15,17 @@
  */
 package org.kitesdk.morphline.stdlib;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
+import com.google.common.io.CharStreams;
+import com.google.common.io.Closeables;
+import com.typesafe.config.Config;
+import org.kitesdk.morphline.api.MorphlineCompilationException;
+import org.kitesdk.morphline.base.Configs;
+import org.kitesdk.morphline.shaded.com.google.code.regexp.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,22 +33,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.kitesdk.morphline.api.MorphlineCompilationException;
-import org.kitesdk.morphline.base.Configs;
-import org.kitesdk.morphline.shaded.com.google.code.regexp.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Joiner;
-import com.google.common.io.CharStreams;
-import com.google.common.io.Closeables;
-import com.typesafe.config.Config;
 
 /**
  * Utility that parses and resolves a set of grok dictionaries ala logstash.
@@ -56,15 +57,45 @@ final class GrokDictionaries {
   
   public GrokDictionaries(Config config, Configs configs) {
     this.config = config;
+
     try {
+      // Load dictionaries from the classpath.
+      ClassLoader classLoader = getClass().getClassLoader();
+
+      for (String dictionaryResource : configs.getStringList(config, "dictionaryResources", Collections.<String>emptyList())) {
+        URL resource = classLoader.getResource(dictionaryResource);
+
+        Preconditions.checkArgument(
+          resource != null,
+          "Can not find grok dictionary resource:%s (classLoader:%s)",
+          dictionaryResource,
+          classLoader
+        );
+
+        LOG.debug("Loading grok dictionary:{} source:classpath", dictionaryResource);
+        InputStreamReader inputStreamReader = new InputStreamReader(resource.openStream());
+        loadDictionary(inputStreamReader);
+        inputStreamReader.close();
+      }
+
+      // Load dictionaries from the filesystem.
       for (String dictionaryFile : configs.getStringList(config, "dictionaryFiles", Collections.EMPTY_LIST)) {
+        LOG.debug("Loading grok dictionary:{} source:filesystem", dictionaryFile);
         loadDictionaryFile(new File(dictionaryFile));
       }
+
+      // Load inline dictionary definitions.
       String dictionaryString = configs.getString(config, "dictionaryString", "");
+
+      if (LOG.isDebugEnabled() && !dictionaryString.isEmpty()) {
+        LOG.debug("Loading inline grok dictionary:{}", dictionaryString);
+      }
+
       loadDictionary(new StringReader(dictionaryString));
     } catch (IOException e) {
       throw new MorphlineCompilationException("Cannot compile grok dictionary", config, e);
     }
+
     resolveDictionaryExpressions();    
   }
   
