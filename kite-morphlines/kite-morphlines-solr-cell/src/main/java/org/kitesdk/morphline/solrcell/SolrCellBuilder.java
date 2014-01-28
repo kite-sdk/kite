@@ -17,7 +17,6 @@ package org.kitesdk.morphline.solrcell;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,7 +42,6 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
-import org.apache.tika.sax.TeeContentHandler;
 import org.apache.tika.sax.XHTMLContentHandler;
 import org.apache.tika.sax.xpath.Matcher;
 import org.apache.tika.sax.xpath.MatchingContentHandler;
@@ -66,8 +64,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.io.Closeables;
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import com.typesafe.config.Config;
 
 /**
@@ -236,12 +232,6 @@ public final class SolrCellBuilder implements CommandBuilder {
         inputStream = TikaInputStream.get(inputStream);
 
         ContentHandler parsingHandler = handler;
-        StringWriter debugWriter = null;
-        if (LOG.isTraceEnabled()) {
-          debugWriter = new StringWriter();
-          ContentHandler serializer = new XMLSerializer(debugWriter, new OutputFormat("XML", "UTF-8", true));
-          parsingHandler = new TeeContentHandler(parsingHandler, serializer);
-        }
 
         // String xpathExpr = "/xhtml:html/xhtml:body/xhtml:div/descendant:node()";
         if (xpathExpr != null) {
@@ -258,8 +248,6 @@ public final class SolrCellBuilder implements CommandBuilder {
         } catch (TikaException e) {
           throw new MorphlineRuntimeException("Cannot parse", e);
         }
-        
-        LOG.trace("debug XML doc: {}", debugWriter);
       } finally {
         if (inputStream != null) {
           Closeables.closeQuietly(inputStream);

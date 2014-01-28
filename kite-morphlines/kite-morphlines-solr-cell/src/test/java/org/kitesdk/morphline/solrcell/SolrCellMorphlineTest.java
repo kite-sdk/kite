@@ -175,6 +175,7 @@ public class SolrCellMorphlineTest extends AbstractSolrMorphlineTest {
         path + "sample-statuses-20120906-141433.gz",
         path + "sample-statuses-20120906-141433.bz2",
         path + "email.eml",
+        path + "mime.eml",
     };
     testDocumentTypesInternal(files, expectedRecords, expectedRecordContents);
   }
