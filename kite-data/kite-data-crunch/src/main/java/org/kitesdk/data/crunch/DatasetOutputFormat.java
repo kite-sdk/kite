@@ -20,16 +20,21 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.filesystem.impl.Accessor;
+
+import java.io.IOException;
+import java.net.URI;
 
 public class DatasetOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWritable> {
 
@@ -57,11 +62,73 @@ public class DatasetOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWritabl
     }
   }
 
+  static class NullOutputCommitter extends OutputCommitter {
+    @Override
+    public void setupJob(JobContext jobContext) { }
+
+    @Override
+    public void setupTask(TaskAttemptContext taskContext) { }
+
+    @Override
+    public boolean needsTaskCommit(TaskAttemptContext taskContext) {
+      return false;
+    }
+
+    @Override
+    public void commitTask(TaskAttemptContext taskContext) { }
+
+    @Override
+    public void abortTask(TaskAttemptContext taskContext) { }
+  }
+
+  static class DatasetOutputCommitter<E> extends OutputCommitter {
+    @Override
+    public void setupJob(JobContext jobContext) {
+      createJobDataset(jobContext);
+    }
+
+    @Override
+    public void commitJob(JobContext jobContext) throws IOException {
+      Dataset<E> dataset = loadDataset(jobContext);
+      Dataset<E> jobDataset = loadJobDataset(jobContext);
+      Accessor.getDefault().merge(dataset, jobDataset);
+      deleteJobDataset(jobContext);
+    }
+
+    @Override
+    public void abortJob(JobContext jobContext, JobStatus.State state) {
+      deleteJobDataset(jobContext);
+    }
+
+    @Override
+    public void setupTask(TaskAttemptContext taskContext) {
+      createTaskAttemptDataset(taskContext);
+    }
+
+    @Override
+    public boolean needsTaskCommit(TaskAttemptContext taskContext) {
+      return true;
+    }
+
+    @Override
+    public void commitTask(TaskAttemptContext taskContext) throws IOException {
+      Dataset<E> jobDataset = loadJobDataset(taskContext);
+      Dataset<E> taskAttemptDataset = loadTaskAttemptDataset(taskContext);
+      Accessor.getDefault().merge(jobDataset, taskAttemptDataset);
+      deleteTaskAttemptDataset(taskContext);
+    }
+
+    @Override
+    public void abortTask(TaskAttemptContext taskContext) {
+      deleteTaskAttemptDataset(taskContext);
+    }
+  }
+
   @Override
   public RecordWriter<AvroKey<E>, NullWritable> getRecordWriter(TaskAttemptContext taskAttemptContext) {
     Configuration conf = taskAttemptContext.getConfiguration();
-    DatasetRepository repo = DatasetRepositories.open(conf.get(KITE_REPOSITORY_URI));
-    Dataset<E> dataset = repo.load(conf.get(KITE_DATASET_NAME));
+    Dataset<E> dataset = loadTaskAttemptDataset(taskAttemptContext);
+
     String partitionDir = conf.get(KITE_PARTITION_DIR);
     if (dataset.getDescriptor().isPartitioned() && partitionDir != null) {
       PartitionKey key = Accessor.getDefault().fromDirectoryName(dataset, new Path(partitionDir));
@@ -74,19 +141,72 @@ public class DatasetOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWritabl
 
   @Override
   public void checkOutputSpecs(JobContext jobContext) {
-
+    // always run
   }
 
   @Override
   public OutputCommitter getOutputCommitter(TaskAttemptContext taskAttemptContext) {
-    return new OutputCommitter() {
-      public void abortTask(TaskAttemptContext taskContext) { }
-      public void commitTask(TaskAttemptContext taskContext) { }
-      public boolean needsTaskCommit(TaskAttemptContext taskContext) {
-        return false;
-      }
-      public void setupJob(JobContext jobContext) { }
-      public void setupTask(TaskAttemptContext taskContext) { }
-    };
+    return new DatasetOutputCommitter<E>();
   }
+
+  private static DatasetRepository getDatasetRepository(JobContext jobContext) {
+    Configuration conf = jobContext.getConfiguration();
+    return DatasetRepositories.open(conf.get(KITE_REPOSITORY_URI));
+  }
+
+  private static String getJobDatasetName(JobContext jobContext) {
+    Configuration conf = jobContext.getConfiguration();
+    return conf.get(KITE_DATASET_NAME) + "-" + jobContext.getJobID().toString();
+  }
+
+  private static String getTaskAttemptDatasetName(TaskAttemptContext taskContext) {
+    Configuration conf = taskContext.getConfiguration();
+    return conf.get(KITE_DATASET_NAME) + "-" + taskContext.getTaskAttemptID().toString();
+  }
+
+  private static <E> Dataset<E> loadDataset(JobContext jobContext) {
+    Configuration conf = jobContext.getConfiguration();
+    DatasetRepository repo = getDatasetRepository(jobContext);
+    return repo.load(conf.get(KITE_DATASET_NAME));
+  }
+
+  private static <E> Dataset<E> createJobDataset(JobContext jobContext) {
+    Dataset<Object> dataset = loadDataset(jobContext);
+    String jobDatasetName = getJobDatasetName(jobContext);
+    DatasetRepository repo = getDatasetRepository(jobContext);
+    return repo.create(jobDatasetName, copy(dataset.getDescriptor()));
+  }
+
+  private static <E> Dataset<E> loadJobDataset(JobContext jobContext) {
+    DatasetRepository repo = getDatasetRepository(jobContext);
+    return repo.load(getJobDatasetName(jobContext));
+  }
+
+  private static void deleteJobDataset(JobContext jobContext) {
+    DatasetRepository repo = getDatasetRepository(jobContext);
+    repo.delete(getJobDatasetName(jobContext));
+  }
+
+  private static <E> Dataset<E> createTaskAttemptDataset(TaskAttemptContext taskContext) {
+    Dataset<Object> dataset = loadDataset(taskContext);
+    String taskAttemptDatasetName = getTaskAttemptDatasetName(taskContext);
+    DatasetRepository repo = getDatasetRepository(taskContext);
+    return repo.create(taskAttemptDatasetName, copy(dataset.getDescriptor()));
+  }
+
+  private static <E> Dataset<E> loadTaskAttemptDataset(TaskAttemptContext taskContext) {
+    DatasetRepository repo = getDatasetRepository(taskContext);
+    return repo.load(getTaskAttemptDatasetName(taskContext));
+  }
+
+  private static void deleteTaskAttemptDataset(TaskAttemptContext taskContext) {
+    DatasetRepository repo = getDatasetRepository(taskContext);
+    repo.delete(getTaskAttemptDatasetName(taskContext));
+  }
+
+  private static DatasetDescriptor copy(DatasetDescriptor descriptor) {
+    // location must be null when creating a new dataset
+    return new DatasetDescriptor.Builder(descriptor).location((URI) null).build();
+  }
+
 }

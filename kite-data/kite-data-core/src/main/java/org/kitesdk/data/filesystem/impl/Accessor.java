@@ -77,4 +77,6 @@ public abstract class Accessor {
   public abstract void ensureExists(DatasetDescriptor descriptor, Configuration conf);
 
   public abstract <E> PartitionKey fromDirectoryName(Dataset<E> dataset, Path dir);
+
+  public abstract <E> void merge(Dataset<E> main, Dataset<E> update) throws IOException;
 }
