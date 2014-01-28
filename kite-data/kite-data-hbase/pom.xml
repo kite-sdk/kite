@@ -153,6 +153,19 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-dependencies</artifactId>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-test-dependencies</artifactId>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -169,16 +182,6 @@
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase</artifactId>
       <classifier>tests</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-        <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-minicluster</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

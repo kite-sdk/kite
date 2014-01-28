@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+~ Copyright 2013 Cloudera Inc.
+~
+~ Licensed under the Apache License, Version 2.0 (the "License");
+~ you may not use this file except in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~ http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing, software
+~ distributed under the License is distributed on an "AS IS" BASIS,
+~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~ See the License for the specific language governing permissions and
+~ limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>kite-hadoop-deps-parent</artifactId>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>hadoop1</module>
+    <module>hadoop1-test</module>
+    <module>default</module>
+    <module>default-test</module>
+  </modules>
+
+  <parent>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-parent</artifactId>
+    <version>0.11.1-SNAPSHOT</version>
+  </parent>
+
+  <name>Kite Hadoop Dependencies Module</name>
+  <description>
+    The Kite Hadoop Dependencies module aggregates Hadoop dependencies
+  </description>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+      </plugin>
+    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <compilerArgs>
+              <arg>-Werror</arg> <!-- fail on warnings -->
+              <arg>-Xlint:-options</arg> <!-- ignore cross-compilation warning -->
+              <arg>-Xlint:unchecked</arg>
+            </compilerArgs>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>
