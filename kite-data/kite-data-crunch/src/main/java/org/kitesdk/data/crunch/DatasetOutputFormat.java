@@ -31,6 +31,7 @@ import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.filesystem.impl.Accessor;
 
 import java.io.IOException;
@@ -127,8 +128,14 @@ public class DatasetOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWritabl
   @Override
   public RecordWriter<AvroKey<E>, NullWritable> getRecordWriter(TaskAttemptContext taskAttemptContext) {
     Configuration conf = taskAttemptContext.getConfiguration();
-    Dataset<E> dataset = loadTaskAttemptDataset(taskAttemptContext);
+    Dataset<E> dataset = loadDataset(taskAttemptContext);
 
+    if (!(dataset instanceof RandomAccessDataset)) {
+      // use per-task attempt datasets for filesystem datasets
+      dataset = loadTaskAttemptDataset(taskAttemptContext);
+    }
+
+    // TODO: the following should generalize with views
     String partitionDir = conf.get(KITE_PARTITION_DIR);
     if (dataset.getDescriptor().isPartitioned() && partitionDir != null) {
       PartitionKey key = Accessor.getDefault().fromDirectoryName(dataset, new Path(partitionDir));
@@ -136,6 +143,7 @@ public class DatasetOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWritabl
         dataset = dataset.getPartition(key, true);
       }
     }
+
     return new DatasetRecordWriter<E>(dataset);
   }
 
@@ -146,7 +154,9 @@ public class DatasetOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWritabl
 
   @Override
   public OutputCommitter getOutputCommitter(TaskAttemptContext taskAttemptContext) {
-    return new DatasetOutputCommitter<E>();
+    Dataset<E> dataset = loadDataset(taskAttemptContext);
+    return (dataset instanceof RandomAccessDataset) ?
+        new NullOutputCommitter() : new DatasetOutputCommitter<E>();
   }
 
   private static DatasetRepository getDatasetRepository(JobContext jobContext) {
