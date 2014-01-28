@@ -91,6 +91,18 @@
       <artifactId>kite-data-core</artifactId>
       <version>0.11.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-dependencies</artifactId>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-test-dependencies</artifactId>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.kitesdk</groupId>
@@ -125,11 +137,6 @@
       <artifactId>avro</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.apache.crunch</groupId>
       <artifactId>crunch-core</artifactId>
       <scope>provided</scope>
@@ -147,12 +154,6 @@
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
       <version>3.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-mapreduce-client-common</artifactId>
-      <version>${vers.hadoop}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

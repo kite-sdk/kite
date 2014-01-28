@@ -16,6 +16,10 @@
 
 package org.kitesdk.data.hcatalog;
 
+import java.io.File;
+import org.apache.hadoop.hive.conf.HiveConf;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
@@ -41,6 +45,15 @@ public class TestHiveURIs extends TestFileSystemURIs {
   public static void registerURIs() {
     new org.kitesdk.data.filesystem.impl.Loader().load();
     new org.kitesdk.data.hcatalog.impl.Loader().load();
+  }
+
+  @After
+  public void cleanHCatalog() {
+    // ensures all tables are removed
+    HCatalog hcat = new HCatalog(new HiveConf());
+    for (String tableName : hcat.getAllTables("default")) {
+      hcat.dropTable("default", tableName);
+    }
   }
 
   @Test

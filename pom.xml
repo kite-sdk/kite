@@ -23,10 +23,13 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>kite-hadoop-dependencies</module>
     <module>kite-data</module>
+    <!--
     <module>kite-maven-plugin</module>
     <module>kite-tools</module>
     <module>kite-morphlines</module>
+    -->
   </modules>
 
   <name>Kite Development Kit</name>
@@ -122,8 +125,10 @@
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.flume>1.4.0-cdh${cdh.version}</vers.flume>
     <vers.guava>11.0.2</vers.guava>
+    <vers.hadoop-deps>${project.version}</vers.hadoop-deps>
     <vers.hadoop>2.0.0-cdh${cdh.version}</vers.hadoop>
     <vers.hadoop-mr1>2.0.0-mr1-cdh${cdh.version}</vers.hadoop-mr1>
+    <vers.hadoop1>1.2.1</vers.hadoop1>
     <vers.hbase>0.94.6-cdh${cdh.version}</vers.hbase>
     <vers.hcatalog>0.5.0-cdh${cdh.version}</vers.hcatalog>
     <vers.hive>0.10.0-cdh${cdh.version}</vers.hive>
@@ -631,6 +636,22 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Hadoop dependencies -->
+      <dependency>
+        <groupId>org.kitesdk</groupId>
+        <artifactId>kite-hadoop-dependencies</artifactId>
+        <version>${vers.hadoop-deps}</version>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.kitesdk</groupId>
+        <artifactId>kite-hadoop-test-dependencies</artifactId>
+        <version>${vers.hadoop-deps}</version>
+        <type>pom</type>
+        <scope>test</scope>
+      </dependency>
+
+
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
@@ -933,57 +954,6 @@
   <profiles>
 
     <profile>
-      <id>hadoop-2</id>
-      <activation>
-        <property>
-          <name>!hadoop.profile</name>
-        </property>
-      </activation>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-            <version>${vers.hadoop}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-hdfs</artifactId>
-            <version>${vers.hadoop}</version>
-            <scope>test</scope>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-hdfs</artifactId>
-            <version>${vers.hadoop}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-minicluster</artifactId>
-            <version>${vers.hadoop-mr1}</version>
-            <scope>test</scope>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-client</artifactId>
-            <version>${vers.hadoop-mr1}</version>
-            <scope>provided</scope>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-test</artifactId>
-            <version>${vers.hadoop-mr1}</version>
-            <scope>test</scope>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-
-    <profile>
       <id>hadoop-1</id>
       <activation>
         <property>
@@ -992,23 +962,12 @@
         </property>
       </activation>
       <properties>
-        <vers.hadoop>1.2.1</vers.hadoop>
-        <vers.hadoop-mr1>1.2.1</vers.hadoop-mr1>
+        <vers.hadoop-deps>${project.version}-hadoop1</vers.hadoop-deps>
+        <vers.crunch>${vers.crunch-base}</vers.crunch>
+        <vers.hcatalog>0.5.0-incubating</vers.hcatalog>
+        <vers.hive>0.10.0</vers.hive>
+        <vers.hbase>0.94.6</vers.hbase>
       </properties>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <version>${vers.hadoop}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-test</artifactId>
-            <version>${vers.hadoop}</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
     </profile>
 
   </profiles>
