@@ -17,17 +17,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>kite-data-crunch</artifactId>
+  <artifactId>kite-data-mapreduce</artifactId>
 
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-data</artifactId>
-    <version>0.11.1-SNAPSHOT</version>
+    <version>0.10.1-SNAPSHOT</version>
   </parent>
 
-  <name>Kite Data Crunch Module</name>
+  <name>Kite Data MapReduce Module</name>
   <description>
-    The Kite Data Crunch module provides Crunch support for working with Kite datasets.
+    The Kite Data MapReduce module provides MapReduce support for working with Kite datasets.
   </description>
 
   <build>
@@ -89,33 +89,15 @@
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
-      <version>0.11.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-hadoop-dependencies</artifactId>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-hadoop-test-dependencies</artifactId>
-      <type>pom</type>
-      <scope>test</scope>
+      <version>0.10.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
-      <version>0.11.1-SNAPSHOT</version>
+      <version>0.10.1-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-mapreduce</artifactId>
-      <version>0.10.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -143,16 +125,14 @@
       <artifactId>avro</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.crunch</groupId>
-      <artifactId>crunch-core</artifactId>
-      <scope>provided</scope>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro-mapred</artifactId>
+      <classifier>hadoop2</classifier>
     </dependency>
-
-    <!-- needed by Crunch, but Parquet specifies 1.2 -->
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.4</version>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <!-- missing from Hadoop, and needed for local job runner -->
@@ -160,6 +140,12 @@
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
       <version>3.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapreduce-client-common</artifactId>
+      <version>${vers.hadoop}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

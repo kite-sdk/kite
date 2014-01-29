@@ -32,6 +32,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.mapreduce.DatasetOutputFormat;
 
 class DatasetTarget<E> implements MapReduceTarget {
 
