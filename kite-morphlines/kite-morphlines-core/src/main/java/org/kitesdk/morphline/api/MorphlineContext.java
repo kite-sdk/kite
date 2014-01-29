@@ -72,7 +72,11 @@ public class MorphlineContext {
   public void importCommandBuilders(Collection<String> importSpecs) {
     if (commandBuilders == Collections.EMPTY_MAP) { // intentionally effective no more than once
       commandBuilders = new HashMap();
-      LOG.info("Importing commands");
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Importing commands from Java classpath: {}", System.getProperty("java.class.path"));
+      } else {
+        LOG.info("Importing commands");
+      }
       Collection<Class<CommandBuilder>> builderClasses = getTopLevelClasses(importSpecs, CommandBuilder.class);
       for (Class<CommandBuilder> builderClass : builderClasses) {
         try {
