@@ -131,16 +131,8 @@ public class PackageAppMojo extends AbstractAppMojo {
       File outputDir = new File(mavenProject.getBuild().getDirectory(), applicationName);
       File workflowXml = new File(outputDir, "workflow.xml");
 
-      String hadoopFs = hadoopConfiguration.getProperty("fs.default.name");
-      if (hadoopFs == null) {
-        throw new MojoExecutionException("Missing property 'fs.default.name' in " +
-            "hadoopConfiguration");
-      }
-      String hadoopJobTracker = hadoopConfiguration.getProperty("mapred.job.tracker");
-      if (hadoopJobTracker == null) {
-        throw new MojoExecutionException("Missing property 'mapred.job.tracker' in " +
-            "hadoopConfiguration");
-      }
+      String hadoopFs = hadoopConfiguration.getProperty("fs.default.name", "${"+AbstractAppMojo.NAMENODE_PROPERTY+"}");
+      String hadoopJobTracker = hadoopConfiguration.getProperty("mapred.job.tracker", "${"+AbstractAppMojo.JOBTRACKER_PROPERTY+"}");
 
       List<Path> libJars = new ArrayList<Path>();
       if (addDependenciesToDistributedCache) {
