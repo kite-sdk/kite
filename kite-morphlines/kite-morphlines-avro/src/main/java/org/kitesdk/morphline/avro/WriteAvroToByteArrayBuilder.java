@@ -155,6 +155,7 @@ public final class WriteAvroToByteArrayBuilder implements CommandBuilder {
           Preconditions.checkNotNull(attachment);
           GenericContainer datum = (GenericContainer) attachment;
           schema = getSchema(datum, schema);
+          assert schema != null;
           datumWriter.setSchema(schema);
           if (encoder == null) { // init
             if (format == Format.containerlessJSON) {
@@ -162,6 +163,7 @@ public final class WriteAvroToByteArrayBuilder implements CommandBuilder {
             } else {
               encoder = EncoderFactory.get().binaryEncoder(dst, null);
             }          
+            assert encoder != null;
           } 
           datumWriter.write(datum, encoder);
         }
