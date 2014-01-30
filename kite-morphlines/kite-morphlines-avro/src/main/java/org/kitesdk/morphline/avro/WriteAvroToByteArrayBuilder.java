@@ -122,6 +122,7 @@ public final class WriteAvroToByteArrayBuilder implements CommandBuilder {
             Preconditions.checkNotNull(attachment);
             GenericContainer datum = (GenericContainer) attachment;
             schema = getSchema(datum, schema);
+            assert schema != null;
             if (dataFileWriter == null) { // init
               GenericDatumWriter datumWriter = new GenericDatumWriter(schema);
               dataFileWriter = new DataFileWriter(datumWriter);
