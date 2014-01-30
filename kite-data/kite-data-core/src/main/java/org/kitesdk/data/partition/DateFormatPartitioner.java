@@ -51,7 +51,22 @@ public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
    * @param format A String format for the {@link SimpleDateFormat} constructor
    */
   public DateFormatPartitioner(String sourceName, String name, String format) {
-    this(sourceName, name, format, 1095, TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
+    this(sourceName, name, format, 1095);
+  }
+
+  /**
+   * Construct a new {@link DateFormatPartitioner} for Universal Coordinated
+   * Time, UTC (+00:00), and cardinality 1095 (3 years, 1 day = 1 partition).
+   * @param sourceName Source field name (the field should be a long)
+   * @param name Partition name
+   * @param format A String format for the {@link SimpleDateFormat} constructor
+   * @param cardinality
+   *          A cardinality hint for the number of partitions that will be
+   *          created by this partitioner. For example, "MM-dd" produces about
+   *          365 partitions per year.
+   */
+  public DateFormatPartitioner(String sourceName, String name, String format, int cardinality) {
+    this(sourceName, name, format, cardinality, TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
   }
 
   /**

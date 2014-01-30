@@ -16,6 +16,7 @@
 package org.kitesdk.data;
 
 import org.kitesdk.data.partition.PartitionFunctions;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
@@ -27,10 +28,12 @@ import javax.annotation.concurrent.Immutable;
 import org.apache.avro.generic.GenericRecord;
 
 import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.partition.DateFormatPartitioner;
 import org.kitesdk.data.partition.HashFieldPartitioner;
 import org.kitesdk.data.partition.IdentityFieldPartitioner;
 import org.kitesdk.data.partition.IntRangeFieldPartitioner;
 import org.kitesdk.data.partition.RangeFieldPartitioner;
+import org.kitesdk.data.partition.YearFieldPartitioner;
 import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
@@ -325,6 +328,24 @@ public class PartitionStrategy {
     }
 
     /**
+     * Configure an identity partitioner for a given type.
+     *
+     * @param name
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param type
+     *          The type of the field. This must match the schema.
+     * @return An instance of the builder for method chaining.
+     * @see IdentityFieldPartitioner
+     * @since 0.8.0
+     */
+    @SuppressWarnings("unchecked")
+    public <S> Builder identity(String name, Class<S> type) {
+      fieldPartitioners.add(new IdentityFieldPartitioner(name, type));
+      return this;
+    }
+
+    /**
      * Configure a range partitioner with a set of {@code upperBounds}.
      * 
      * @param name
@@ -370,6 +391,26 @@ public class PartitionStrategy {
      */
     public Builder year(String sourceName, String name) {
       fieldPartitioners.add(PartitionFunctions.year(sourceName, name));
+      return this;
+    }
+
+    /**
+     * Configure a partitioner for extracting the year from a timestamp field.
+     * The UTC timezone is assumed.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param name
+     *          The entity field name of the partition.
+     * @param buckets
+     *          A hint as to the number of partitions that will be created (i.e.
+     *          the number of discrete years in the data).
+     * @return An instance of the builder for method chaining.
+     * @since 0.3.0
+     */
+    public Builder year(String sourceName, String name, int buckets) {
+      fieldPartitioners.add(new YearFieldPartitioner(sourceName, name, buckets));
       return this;
     }
 
@@ -526,6 +567,27 @@ public class PartitionStrategy {
      */
     public Builder dateFormat(String sourceName, String name, String format) {
       fieldPartitioners.add(PartitionFunctions.dateFormat(sourceName, name, format));
+      return this;
+    }
+
+    /**
+     * Configure a partitioner that applies a custom date format to a timestamp
+     * field. The UTC timezone is assumed.
+     *
+     * @param sourceName
+     *          The entity field name of the timestamp to format
+     * @param name
+     *          A name for the partitions created by the format (e.g. "day")
+     * @param format
+     *          A {@link java.text.SimpleDateFormat} format-string.
+     * @param buckets
+     *          A hint as to the number of partitions that will be created (i.e. "MM-dd" produces about
+     *          365 partitions per year.).
+     * @return This builder for method chaining.
+     * @since 0.9.0
+     */
+    public Builder dateFormat(String sourceName, String name, String format, int buckets) {
+      fieldPartitioners.add(new DateFormatPartitioner(sourceName, name, format, buckets));
       return this;
     }
 

@@ -26,6 +26,10 @@ import com.google.common.base.Objects;
         + " (e.g., TreeMaps) and use java serialization.")
 public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartitioner<S, S> {
 
+  public IdentityFieldPartitioner(String name, Class<S> type) {
+    this(name, type, 1);
+  }
+
   public IdentityFieldPartitioner(String name, Class<S> type, int buckets) {
     super(name, type, type, buckets);
     if (!(type.equals(Integer.class) || type.equals(Long.class) ||
