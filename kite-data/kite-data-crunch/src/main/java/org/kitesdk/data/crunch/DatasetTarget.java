@@ -28,7 +28,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
@@ -92,19 +91,18 @@ class DatasetTarget<E> implements MapReduceTarget {
   @SuppressWarnings("unchecked")
   public void configureForMapReduce(Job job, PType<?> ptype, Path outputPath, String name) {
 
-    FileOutputFormat.setOutputPath(job, outputPath); // needed despite using a different outputformat
-
     Converter converter = getConverter(ptype);
     Class<?> keyClass = converter.getKeyClass();
     Class<?> valueClass = NullWritable.class;
 
-    if (name == null) {
-      job.setOutputFormatClass(formatBundle.getFormatClass());
-      formatBundle.configure(job.getConfiguration());
+    if (name == null) { // doesn't happen since CRUNCH-82, but leaving for safety
       job.setOutputKeyClass(keyClass);
       job.setOutputValueClass(valueClass);
     } else {
       CrunchOutputs.addNamedOutput(job, name, formatBundle, keyClass, valueClass);
     }
+
+    job.setOutputFormatClass(formatBundle.getFormatClass());
+    formatBundle.configure(job.getConfiguration());
   }
 }
