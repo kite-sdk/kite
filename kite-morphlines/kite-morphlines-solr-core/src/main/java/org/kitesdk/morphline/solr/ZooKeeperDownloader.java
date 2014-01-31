@@ -32,6 +32,7 @@ import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
 
 /**
@@ -101,10 +102,10 @@ final class ZooKeeperDownloader {
   /**
    * Download and return the config directory from ZK
    */
-  public File downloadConfigDir(SolrZkClient zkClient, String configName)
+  public File downloadConfigDir(SolrZkClient zkClient, String configName, File dir)
   throws IOException, InterruptedException, KeeperException {
-    File dir = Files.createTempDir();
-    dir.deleteOnExit();
+    Preconditions.checkArgument(dir.exists());
+    Preconditions.checkArgument(dir.isDirectory());
     ZkController.downloadConfigDir(zkClient, configName, dir);
     File confDir = new File(dir, "conf");
     if (!confDir.isDirectory()) {
@@ -112,6 +113,7 @@ final class ZooKeeperDownloader {
       // necessary because of CDH-11188; solrctl does not generate nor accept directories with e.g.
       // conf/solrconfig.xml which is necessary for proper solr operation.  This should work
       // even if solrctl changes.
+      FileUtils.deleteDirectory(dir);
       confDir = new File(Files.createTempDir().getAbsolutePath(), "conf");
       confDir.getParentFile().deleteOnExit();
       Files.move(dir, confDir);
