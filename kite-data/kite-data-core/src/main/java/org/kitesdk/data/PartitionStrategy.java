@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data;
 
+import com.google.common.collect.ImmutableList;
 import org.kitesdk.data.partition.PartitionFunctions;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -67,9 +68,12 @@ public class PartitionStrategy {
 
   /**
    * Construct a partition strategy with a list of field partitioners.
+   *
+   * @deprecated will be removed in 0.12.0; use PartitionStrategy.Builder
    */
+  @Deprecated
   public PartitionStrategy(List<FieldPartitioner> partitioners) {
-    fieldPartitioners = Lists.newArrayList(partitioners);
+    this.fieldPartitioners = ImmutableList.copyOf(partitioners);
   }
 
   /**
@@ -82,7 +86,7 @@ public class PartitionStrategy {
    * </p>
    */
   public List<FieldPartitioner> getFieldPartitioners() {
-    return Lists.newArrayList(fieldPartitioners);
+    return fieldPartitioners;
   }
 
   /**
@@ -557,6 +561,7 @@ public class PartitionStrategy {
      * @return The configured instance of {@link PartitionStrategy}.
      * @since 0.9.0
      */
+    @SuppressWarnings("deprecated")
     public PartitionStrategy build() {
       return new PartitionStrategy(fieldPartitioners);
     }
