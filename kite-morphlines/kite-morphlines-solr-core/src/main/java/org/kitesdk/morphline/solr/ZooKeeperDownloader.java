@@ -113,7 +113,6 @@ final class ZooKeeperDownloader {
       // necessary because of CDH-11188; solrctl does not generate nor accept directories with e.g.
       // conf/solrconfig.xml which is necessary for proper solr operation.  This should work
       // even if solrctl changes.
-      FileUtils.deleteDirectory(dir);
       confDir = new File(Files.createTempDir().getAbsolutePath(), "conf");
       confDir.getParentFile().deleteOnExit();
       Files.move(dir, confDir);
