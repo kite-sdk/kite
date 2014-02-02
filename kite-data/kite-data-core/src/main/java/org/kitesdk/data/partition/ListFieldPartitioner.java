@@ -37,15 +37,12 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
   }
 
   private static <S> int cardinality(List<Set<S>> values) {
-    int c = 0;
-    for (Set<S> set : values) {
-      c += set.size();
-    }
-    return c;
+    return values.size(); // the number of sets
   }
 
   @Override
   public Integer apply(S value) {
+    // find the index of the set to which value belongs
     for (int i = 0; i < values.size(); i++) {
       if (values.get(i).contains(value)) {
         return i;
