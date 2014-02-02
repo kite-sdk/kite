@@ -37,18 +37,18 @@ import javax.annotation.Nonnull;
     justification="False positive due to generics.")
 class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
 
-  protected Calendar cal;
+  protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
   protected int calendarField;
 
   public CalendarFieldPartitioner(String sourceName, String name,
       int calendarField, int cardinality) {
     super(sourceName, name, Long.class, Integer.class, cardinality);
-    this.cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     this.calendarField = calendarField;
   }
 
   @Override
   public Integer apply(@Nonnull Long timestamp) {
+    Calendar cal = Calendar.getInstance(UTC);
     cal.setTimeInMillis(timestamp);
     return cal.get(calendarField);
   }

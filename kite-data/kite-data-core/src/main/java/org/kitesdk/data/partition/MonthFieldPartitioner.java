@@ -37,6 +37,7 @@ public class MonthFieldPartitioner extends CalendarFieldPartitioner {
 
   @Override
   public Integer apply(@Nonnull Long timestamp) {
+    Calendar cal = Calendar.getInstance(UTC);
     cal.setTimeInMillis(timestamp);
     return cal.get(calendarField) + 1; // Calendar month is 0-based
   }
