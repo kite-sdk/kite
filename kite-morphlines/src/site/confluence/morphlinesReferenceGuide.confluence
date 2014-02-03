@@ -2,6 +2,9 @@ h1. Morphlines Reference Guide
 
 Morphlines provides a set of frequently\-used high\-level transformation and I/O commands that can be combined in application specific ways. The following tables provide a short description of each available command and a link to the complete documentation.
 
+{anchor:Implementing\-your\-own\-Custom\-Command}
+\\
+\\
 h3. Implementing your own Custom Command
 
 Before we dive into the _currently available_ commands, it is worth noting again that perhaps the most important property of the Morphlines framework is how easy it is to add new transformations and I/O commands and integrate existing functionality and third party systems. If none of the existing commands match your use case, you can easily write your own command and plug it in. Simply implement the Java interface [Command|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/api/Command.java] or subclass [AbstractCommand|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/base/AbstractCommand.java], have it handle a [Record|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/api/Record.java] and add the resulting Java class to the classpath, along with a [CommandBuilder|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/api/CommandBuilder.java] implementation that defines the name(s) of the command and serves as a factory.
@@ -1751,6 +1754,32 @@ extractJsonPaths {
 }
 {code}
 
+Alternatively, if the [#extractJsonPaths] command doesn't fit your needs you can instead [implement your own Custom Morphline Command|#Implementing\-your\-own\-Custom\-Command] or script a [#java] command config that uses the [com.fasterxml.jackson.databind.JsonNode|http://wiki.fasterxml.com/JacksonTreeModel] Java API to arbitrarily traverse and process the Jackson Json tree that is emitted by the [#readJson] command. For example, along the following lines:
+
+{code}
+{ 
+  readJson { }
+}
+
+{
+  java { 
+    imports : """
+      import com.fasterxml.jackson.databind.JsonNode;
+      import org.kitesdk.morphline.base.Fields;
+      // import com.cloudera.cdk.morphline.base.Fields; // use this for CDK
+    """
+    code : """
+      JsonNode rootNode = (JsonNode) record.getFirstValue(Fields.ATTACHMENT_BODY);
+      String forwardLinks = rootNode.get("links").get("forward").asText(); // traverse via Jackson Tree API
+      record.put("forwardLinks", forwardLinks);
+      logger.debug("My output record: {}", record);
+      return child.process(record);
+    """
+    } 
+  }
+}
+{code}
+
 h1. kite\-morphlines\-hadoop\-core
 
 h2. downloadHdfsFile
@@ -2587,6 +2616,33 @@ screen_name:fake_user1
 myStatusCounts:11111
 text:Come, see new hot tub under Redwood Tree!
 greeting:hello world
+{code}
+
+More example usage:
+{code}
+xquery {
+  fragments : [
+    {
+      fragmentPath : "/"
+      queryString : """
+        (: Example xquery :)
+        for $req in /request
+        return
+          <fieldsToIndex>
+            <date> { string($req/data/agreementDate) } </date>
+            <tradeId> { string($req/trade/@tradeId) } </tradeId>              
+            <partyId>
+              {
+                for $keyword in $req/trade/keyWords/keyword 
+                  where $keyword/name = "memberId"
+                    return string($keyword/value)                  
+              }
+            </partyId> 
+        </fieldsToIndex>
+      """
+    }
+  ]
+}
 {code}
 
 More examples can be found in the [unit tests|https://github.com/kite-sdk/kite/tree/master/kite-morphlines/kite-morphlines-saxon/src/test/resources/test-morphlines].
