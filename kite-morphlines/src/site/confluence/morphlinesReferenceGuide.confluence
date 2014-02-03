@@ -877,6 +877,19 @@ if {
 }
 {code}
 
+More example usage \- Ignore all records that contain at least one value in the {{malformed}} field:
+{code}
+if {
+  conditions : [
+    { not { equals { malformed : [] } } }
+  ]
+  then : [
+    { logTrace { format : "Ignoring record containing at least one malformed value: {}", args : ["@{}"] } }
+    { dropRecord {} }    
+  ]
+}
+{code}
+
 h2. java
 
 The {{java}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/JavaBuilder.java]) provides scripting support for Java.  The command compiles and executes the given Java code block, wrapped into a Java method with a Boolean return type and several parameters, along with a Java class definition that contains the given import statements.
