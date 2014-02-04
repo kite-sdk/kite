@@ -60,9 +60,8 @@ final class GrokDictionaries {
 
     try {
       // Load dictionaries from the classpath.
-      ClassLoader classLoader = getClass().getClassLoader();
-
       for (String dictionaryResource : configs.getStringList(config, "dictionaryResources", Collections.<String>emptyList())) {
+        ClassLoader classLoader = getClass().getClassLoader();
         URL resource = classLoader.getResource(dictionaryResource);
 
         Preconditions.checkArgument(
