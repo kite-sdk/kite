@@ -57,6 +57,9 @@ dependencies yourself:
 * Kite Data HCatalog
  [Dependency Information](kite-data/kite-data-hcatalog/dependency-info.html),
  [Dependencies](kite-data/kite-data-hcatalog/dependencies.html)
+* Kite Data Morphlines
+ [Dependency Information](kite-data/kite-data-morphlines/dependency-info.html),
+ [Dependencies](kite-data/kite-data-morphlines/dependencies.html)
 
 ## Kite Morphlines Modules
 

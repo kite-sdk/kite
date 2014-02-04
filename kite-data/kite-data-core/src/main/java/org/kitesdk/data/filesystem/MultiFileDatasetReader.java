@@ -15,6 +15,12 @@
  */
 package org.kitesdk.data.filesystem;
 
+import java.lang.reflect.Constructor;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Format;
@@ -22,13 +28,9 @@ import org.kitesdk.data.Formats;
 import org.kitesdk.data.UnknownFormatException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.ReaderWriterState;
+
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
 
@@ -59,7 +61,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
 
     final Format format = descriptor.getFormat();
     if (!(Formats.AVRO.equals(format) || Formats.PARQUET.equals(format)
-        || Formats.CSV.equals(format))) {
+        || Formats.CSV.equals(format) || Formats.MORPHLINE.equals(format))) {
       throw new UnknownFormatException("Cannot open format:" + format.getName());
     }
 
@@ -73,6 +75,19 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
           descriptor.getSchema());
     } else if (Formats.CSV.equals(descriptor.getFormat())) {
       reader = new CSVFileReader<E>(fileSystem, filesIter.next(), descriptor);
+    } else if (Formats.MORPHLINE.equals(descriptor.getFormat())) {
+      //reader = new MorphlineDatasetReader<E>(fileSystem, filesIter.next(), descriptor);
+      // TODO: make the list of supported formats more dynamically pluggable 
+      // and extensible to formats contained in external maven modules?
+      try {
+        Class clazz = Class.forName("org.kitesdk.data.morphline.MorphlineDatasetReader");
+        Constructor ctor = clazz.getConstructor(FileSystem.class, Path.class, DatasetDescriptor.class);
+        reader = (DatasetReader<E>) ctor.newInstance(fileSystem, filesIter.next(), descriptor);
+      } catch (RuntimeException e) {
+        throw new UnknownFormatException("Cannot open format:" + descriptor.getFormat().getName(), e);
+      } catch (Exception e) {
+        throw new UnknownFormatException("Cannot open format:" + descriptor.getFormat().getName(), e);
+      }
     } else {
       reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
           descriptor.getSchema());

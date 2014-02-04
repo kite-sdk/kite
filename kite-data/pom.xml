@@ -28,6 +28,7 @@
     <module>kite-data-flume</module>
     <module>kite-data-hcatalog</module>
     <module>kite-data-hbase</module>
+    <module>kite-data-morphlines</module>
   </modules>
 
   <parent>
