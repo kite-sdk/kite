@@ -1331,6 +1331,38 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testSplitKeyValueWithLiteralSeparatorOfLength3() throws Exception {
+    morphline = createMorphline("test-morphlines/splitKeyValueWithLiteralSeparatorOfLength3");    
+    Record record = new Record();
+    record.put("params", "foo=+-x");
+    record.put("params", " foo =+- y ");
+    record.put("params", "foo ");
+    record.put("params", "fragment=+-z");
+    Record expected = new Record();
+    expected.getFields().putAll("params", record.get("params"));
+    expected.put("/foo", "x");
+    expected.put("/foo", "y");
+    expected.put("/fragment", "z");
+    processAndVerifySuccess(record, expected);
+  }
+  
+  @Test
+  public void testSplitKeyValueWithRegex() throws Exception {
+    morphline = createMorphline("test-morphlines/splitKeyValueWithRegex");    
+    Record record = new Record();
+    record.put("params", "foo=+-x");
+    record.put("params", " foo =+- y ");
+    record.put("params", "foo ");
+    record.put("params", "fragment=+-z");
+    Record expected = new Record();
+    expected.getFields().putAll("params", record.get("params"));
+    expected.put("/foo", "x");
+    expected.put("/ foo", "y ");
+    expected.put("/fragment", "z");
+    processAndVerifySuccess(record, expected);
+  }
+  
+  @Test
   public void testSplitKeyValueWithIPTables() throws Exception {
     morphline = createMorphline("test-morphlines/splitKeyValueWithIPTables");    
     Record record = new Record();

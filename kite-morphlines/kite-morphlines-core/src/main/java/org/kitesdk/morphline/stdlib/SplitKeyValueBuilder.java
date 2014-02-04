@@ -17,6 +17,7 @@ package org.kitesdk.morphline.stdlib;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.regex.Matcher;
 
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
@@ -52,7 +53,8 @@ public final class SplitKeyValueBuilder implements CommandBuilder {
 
     private final String inputFieldName;
     private final String outputFieldPrefix;
-    private final char separatorChar;
+    private final String separator;
+    private final Matcher regex;
     private final boolean addEmptyStrings;
     private final boolean trim;
     
@@ -60,11 +62,16 @@ public final class SplitKeyValueBuilder implements CommandBuilder {
       super(builder, config, parent, child, context);      
       this.inputFieldName = getConfigs().getString(config, "inputField");      
       this.outputFieldPrefix = getConfigs().getString(config, "outputFieldPrefix", "");
-      String separator = getConfigs().getString(config, "separator", "=");
-      if (separator.length() != 1) {
-        throw new MorphlineCompilationException("separator must be one character only: " + separator, config);
+      this.separator = getConfigs().getString(config, "separator", "=");
+      if (separator.length() == 0) {
+        throw new MorphlineCompilationException("separator must not be the empty string", config);
       }
-      this.separatorChar = separator.charAt(0);
+      if (getConfigs().getBoolean(config, "isRegex", false)) {
+        GrokDictionaries dict = new GrokDictionaries(config, getConfigs());
+        this.regex = dict.compileExpression(separator).pattern().matcher("");
+      } else {
+        this.regex = null;
+      }
       this.addEmptyStrings = getConfigs().getBoolean(config, "addEmptyStrings", false);      
       this.trim = getConfigs().getBoolean(config, "trim", true);
       validateArguments();
@@ -74,12 +81,29 @@ public final class SplitKeyValueBuilder implements CommandBuilder {
     protected boolean doProcess(Record record) {
       for (Object item : record.get(inputFieldName)) {
         String str = item.toString();
+        int start;
+        int end;
+        if (regex != null) {
+          if (regex.reset(str).find()) {
+            start = regex.start();
+            end = regex.end();
+          } else {
+            start = -1;
+            end = -1;
+          }   
+        } else if (separator.length() == 1) {
+          start = str.indexOf(separator.charAt(0));
+          end = start + 1;
+        } else {
+          start = str.indexOf(separator);
+          end = start + separator.length();
+        }
+        
         String key = str;
-        String value = "";
-        int i = str.indexOf(separatorChar);
-        if (i >= 0) {
-          key = str.substring(0, i);
-          value = str.substring(i + 1, str.length());
+        String value = "";        
+        if (start >= 0) { // found?
+          key = str.substring(0, start);
+          value = str.substring(end, str.length());
         }
         value = trim(value);        
         if (value.length() > 0 || addEmptyStrings) {

@@ -66,7 +66,7 @@ h3. kite\-morphlines\-core\-stdlib
 | [#separateAttachments] | Emits one separate output record for each attachment in the input record's list of attachments. |
 | [#setValues] | Assigns a given list of values (or the contents of another field) to a given field. |
 | [#split] | Divides a string into substrings, by recognizing a _separator_ (a.k.a. "delimiter") which can be expressed as a single character, literal string, regular expression, or grok pattern. |
-| [#splitKeyValue] | Splits key\-value pairs where the key and value are separated by the given separator character, and adds the pair's value to the record field named after the pair's key. |
+| [#splitKeyValue] | Splits key\-value pairs where the key and value are separated by the given separator, and adds the pair's value to the record field named after the pair's key. |
 | [#startReportingMetricsToCSV] | Starts periodically appending the metrics of all commands to a set of CSV files. |
 | [#startReportingMetricsToJMX] | Starts publishing the metrics of all commands to [JMX|http://en.wikipedia.org/wiki/Java_Management_Extensions]. |
 | [#startReportingMetricsToSLF4J] | Starts periodically logging the metrics of all morphline commands to [SLF4J|http://www.slf4j.org]. |
@@ -1143,14 +1143,17 @@ split {
 
 h2. splitKeyValue
 
-The {{splitKeyValue}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/SplitKeyValueBuilder.java]) iterates over the items in a given record input field, interprets each item as a key\-value pair where the key and value are separated by the given separator character, and adds the pair's value to the record field named after the pair's key. Typically, the input field items have been placed there by an upstream [#split] command with a single output field.
+The {{splitKeyValue}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/SplitKeyValueBuilder.java]) iterates over the items in a given record input field, interprets each item as a key\-value pair where the key and value are separated by the given separator, and adds the pair's value to the record field named after the pair's key. Typically, the input field items have been placed there by an upstream [#split] command with a single output field.
 
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | inputField | n/a | The name of the input field. |
 | outputFieldPrefix | "" | A string to be prepended to each output field name. |
-| separator | "=" | The character separating the key from the value. |
+| separator | "=" | The string separating the key from the value. |
+| isRegex | false | Whether or not to interpret the separator as a grok pattern (true) or string literal (false). |
+| dictionaryFiles | \[\] | A list of zero or more local files or directory trees from which to load dictionaries. Only applicable if {{isRegex}} is {{true}}. See [#grok] command. |
+| dictionaryString | null | An optional inline string from which to load a dictionary. Only applicable if {{isRegex}} is {{true}}. See [#grok] command. |
 | trim | true | Whether or not to apply the {{String.trim()}} method on the output keys and values to be added. |
 | addEmptyStrings | false | Whether or not to add zero length strings to the output field. |
 
@@ -1158,6 +1161,7 @@ h4. Example usage:
 {code}
 splitKeyValue { 
   inputField : params
+  separator : "="
   outputFieldPrefix : "/"
 }
 {code}
