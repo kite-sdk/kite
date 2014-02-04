@@ -104,8 +104,8 @@ public final class SplitKeyValueBuilder implements CommandBuilder {
         if (start >= 0) { // found?
           key = str.substring(0, start);
           value = str.substring(end, str.length());
+          value = trim(value);        
         }
-        value = trim(value);        
         if (value.length() > 0 || addEmptyStrings) {
           record.put(concat(outputFieldPrefix, trim(key)), value);
         }
