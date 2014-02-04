@@ -2650,7 +2650,8 @@ xquery {
                   where $keyword/name = "memberId"
                     return string($keyword/value)                  
               }
-            </partyId> 
+            </partyId>
+            <fullText> { $req } </fullText>
         </fieldsToIndex>
       """
     }
