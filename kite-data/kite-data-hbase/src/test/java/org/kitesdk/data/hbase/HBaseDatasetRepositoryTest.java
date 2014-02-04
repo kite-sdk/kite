@@ -18,7 +18,6 @@ package org.kitesdk.data.hbase;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.spi.Marker;
 import org.kitesdk.data.Key;
 import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.hbase.avro.AvroUtils;
@@ -122,8 +121,8 @@ public class HBaseDatasetRepositoryTest {
     for (int i = 0; i < 10; ++i) {
       String iStr = Long.toString(i);
       Key key = new Key.Builder(ds)
-          .add("part1", "part1_" + iStr)
-          .add("part2", "part2_" + iStr).build();
+          .add("part1", new Utf8("part1_" + iStr))
+          .add("part2", new Utf8("part2_" + iStr)).build();
       compareEntitiesWithUtf8(i, ds.get(key));
     }
 
@@ -147,8 +146,8 @@ public class HBaseDatasetRepositoryTest {
     // test a partial scan
     cnt = 3;
     reader = new DaoView<GenericRecord>(ds)
-        .from(new Marker.Builder().add("part1", "part1_3").add("part2", "part2_3").build())
-        .to(new Marker.Builder().add("part1", "part1_7").add("part2", "part2_7").build())
+        .from("part1", new Utf8("part1_3")).from("part2", new Utf8("part2_3"))
+        .to("part1", new Utf8("part1_7")).to("part2", new Utf8("part2_7"))
         .newReader();
     reader.open();
     try {
@@ -162,8 +161,8 @@ public class HBaseDatasetRepositoryTest {
     }
 
     Key key = new Key.Builder(ds)
-        .add("part1", "part1_5")
-        .add("part2", "part2_5").build();
+        .add("part1", new Utf8("part1_5"))
+        .add("part2", new Utf8("part2_5")).build();
 
     // test delete
     ds.delete(key);
@@ -277,10 +276,6 @@ public class HBaseDatasetRepositoryTest {
   /**
    * Creates a generic entity with the given schema, which must be migratable
    * from TestRecord. Data from TestRecord is filled in.
-   *
-   * @param uniqueIdx
-   * @param schemaString
-   * @return
    */
   private static GenericRecord createGenericEntity(long uniqueIdx, String schemaString) {
     String iStr = Long.toString(uniqueIdx);
@@ -410,12 +405,11 @@ public class HBaseDatasetRepositoryTest {
         .setSubfield2(1L).setSubfield3("subfield6").build();
     arrayRecordList.add(subRecord);
 
-    TestEntity entity = TestEntity.newBuilder()
+    return TestEntity.newBuilder()
         .setPart1("part1_" + iStr).setPart2("part2_" + iStr)
         .setField1("field1_" + iStr)
         .setField2("field2_" + iStr).setEnum$(TestEnum.ENUM3)
         .setField3(field3Map).setField4(embeddedRecord)
         .setField5(arrayRecordList).build();
-    return entity;
   }
 }

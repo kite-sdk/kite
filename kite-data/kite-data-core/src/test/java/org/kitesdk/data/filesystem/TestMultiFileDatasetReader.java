@@ -34,9 +34,11 @@ import org.junit.Test;
 import static org.kitesdk.data.filesystem.DatasetTestUtilities.*;
 import org.kitesdk.data.impl.Accessor;
 import org.apache.avro.generic.GenericData;
+import org.kitesdk.data.spi.Constraints;
 
 public class TestMultiFileDatasetReader extends TestDatasetReaders {
 
+  public static final Constraints CONSTRAINTS = new Constraints();
   public static final Path TEST_FILE = new Path(
       Resources.getResource("data/strings-100.avro").getFile());
   public static final RecordValidator<Record> VALIDATOR =
@@ -55,7 +57,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
     return new MultiFileDatasetReader<GenericData.Record>(
         FileSystem.get(new Configuration()),
         Lists.newArrayList(TEST_FILE, TEST_FILE),
-        DESCRIPTOR);
+        DESCRIPTOR, CONSTRAINTS);
   }
 
   @Override
@@ -77,7 +79,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
   @Test
   public void testEmptyPathList() throws IOException {
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, Lists.<Path>newArrayList(), DESCRIPTOR);
+        fileSystem, Lists.<Path>newArrayList(), DESCRIPTOR, CONSTRAINTS);
 
     checkReaderBehavior(reader, 0, VALIDATOR);
   }
@@ -85,33 +87,36 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
   @Test
   public void testSingleFile() throws IOException {
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, Lists.newArrayList(TEST_FILE), DESCRIPTOR);
+        fileSystem, Lists.newArrayList(TEST_FILE), DESCRIPTOR, CONSTRAINTS);
 
     checkReaderBehavior(reader, 100, VALIDATOR);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testRequriesFileSystem() throws IOException {
-    MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        null, Lists.newArrayList(TEST_FILE, TEST_FILE), DESCRIPTOR);
+    new MultiFileDatasetReader<Record>(
+        null, Lists.newArrayList(TEST_FILE, TEST_FILE), DESCRIPTOR,
+        CONSTRAINTS);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testRequriesFiles() throws IOException {
-    MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, null, DESCRIPTOR);
+    new MultiFileDatasetReader<Record>(
+        fileSystem, null, DESCRIPTOR, CONSTRAINTS);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testRequriesDescriptor() throws IOException {
-    MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, Lists.newArrayList(TEST_FILE, TEST_FILE), null);
+    new MultiFileDatasetReader<Record>(
+        fileSystem, Lists.newArrayList(TEST_FILE, TEST_FILE), null,
+        CONSTRAINTS);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testRejectsNullPaths() throws IOException {
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, Lists.newArrayList(null, TEST_FILE), DESCRIPTOR);
+        fileSystem, Lists.newArrayList(null, TEST_FILE), DESCRIPTOR,
+        CONSTRAINTS);
     reader.open();
     reader.hasNext();
   }
@@ -124,7 +129,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
         .build();
 
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, Lists.newArrayList(TEST_FILE), descriptor);
+        fileSystem, Lists.newArrayList(TEST_FILE), descriptor, CONSTRAINTS);
 
     try {
       reader.open();
@@ -147,7 +152,8 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
      */
 
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, Lists.newArrayList(missingFile, TEST_FILE), DESCRIPTOR);
+        fileSystem, Lists.newArrayList(missingFile, TEST_FILE), DESCRIPTOR,
+        CONSTRAINTS);
 
     try {
       try {
@@ -184,7 +190,8 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
 
     try {
       MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-          fileSystem, Lists.newArrayList(emptyFile, TEST_FILE), DESCRIPTOR);
+          fileSystem, Lists.newArrayList(emptyFile, TEST_FILE), DESCRIPTOR,
+          CONSTRAINTS);
 
       try {
         try {

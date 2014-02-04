@@ -16,7 +16,10 @@
 package org.kitesdk.data.partition;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Range;
 import java.util.Calendar;
+import org.kitesdk.data.spi.Predicates;
 
 @Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
@@ -26,5 +29,19 @@ import java.util.Calendar;
 public class YearFieldPartitioner extends CalendarFieldPartitioner {
   public YearFieldPartitioner(String sourceName, String name) {
     super(sourceName, name, Calendar.YEAR, 5); // arbitrary number of partitions
+  }
+
+  @Override
+  public Predicate<Integer> project(Predicate<Long> predicate) {
+    // year is the only time field that can be projected
+    if (predicate instanceof Predicates.Exists) {
+      return Predicates.exists();
+    } else if (predicate instanceof Predicates.In) {
+      return ((Predicates.In<Long>) predicate).transform(this);
+    } else if (predicate instanceof Range) {
+      return Predicates.transformClosed((Range<Long>) predicate, this);
+    } else {
+      return null;
+    }
   }
 }

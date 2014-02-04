@@ -19,11 +19,10 @@ package org.kitesdk.data.filesystem;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.StorageKey;
-import org.kitesdk.data.spi.MarkerRange;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -78,22 +77,6 @@ class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<Stor
   }
 
   /**
-   * Predicate to determine whether a {@link org.kitesdk.data.spi.StorageKey} is in a {@link MarkerRange}.
-   */
-  private static class InRange implements Predicate<StorageKey> {
-    private final MarkerRange range;
-
-    public InRange(MarkerRange range) {
-      this.range = range;
-    }
-
-    @Override
-    public boolean apply(StorageKey key) {
-      return range.contains(key);
-    }
-  }
-
-  /**
    * Conversion function to transform a List into a {@link org.kitesdk.data.spi.StorageKey}.
    */
   private static class MakeKey implements Function<List<String>, StorageKey> {
@@ -123,7 +106,8 @@ class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<Stor
   }
 
   FileSystemPartitionIterator(
-      FileSystem fs, Path root, PartitionStrategy strategy, MarkerRange range)
+      FileSystem fs, Path root, PartitionStrategy strategy,
+      final Constraints constraints)
       throws IOException {
     Preconditions.checkArgument(fs.isDirectory(root));
     this.fs = fs;
@@ -132,7 +116,7 @@ class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<Stor
         Iterators.transform(
             new FileSystemIterator(strategy.getFieldPartitioners().size()),
             new MakeKey(strategy)),
-        new InRange(range));
+        constraints.toKeyPredicate());
   }
 
   @Override

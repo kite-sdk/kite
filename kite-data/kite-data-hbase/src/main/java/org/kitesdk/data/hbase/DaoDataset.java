@@ -17,25 +17,15 @@ package org.kitesdk.data.hbase;
 
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Key;
-import org.kitesdk.data.spi.Marker;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.RandomAccessDataset;
-import org.kitesdk.data.View;
+import org.kitesdk.data.RefineableView;
 import org.kitesdk.data.hbase.impl.Dao;
 import org.kitesdk.data.spi.AbstractDataset;
-import com.google.common.base.Preconditions;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E> {
-
-  private static final Logger logger = LoggerFactory
-      .getLogger(DaoDataset.class);
 
   private String name;
   private Dao<E> dao;
@@ -79,51 +69,8 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   }
 
   @Override
-  public DatasetWriter<E> newWriter() {
-    logger.debug("Getting writer to dataset:{}", this);
-
-    return unbounded.newWriter();
-  }
-
-  @Override
-  public DatasetReader<E> newReader() {
-    logger.debug("Getting reader for dataset:{}", this);
-
-    return unbounded.newReader();
-  }
-
-  @Override
-  public Iterable<View<E>> getCoveringPartitions() {
-    Preconditions.checkState(descriptor.isPartitioned(),
-        "Attempt to get partitions on a non-partitioned dataset (name:%s)",
-        name);
-
-    return unbounded.getCoveringPartitions();
-  }
-
-  @Override
-  public DaoView<E> from(Marker start) {
-    return (DaoView<E>) unbounded.from(start);
-  }
-
-  @Override
-  public DaoView<E> fromAfter(Marker start) {
-    return (DaoView<E>) unbounded.fromAfter(start);
-  }
-
-  @Override
-  public DaoView<E> to(Marker end) {
-    return (DaoView<E>) unbounded.to(end);
-  }
-
-  @Override
-  public DaoView<E> toBefore(Marker end) {
-    return (DaoView<E>) unbounded.toBefore(end);
-  }
-
-  @Override
-  public DaoView<E> of(Marker partial) {
-    return (DaoView<E>) unbounded.of(partial);
+  protected RefineableView<E> asRefineableView() {
+    return unbounded;
   }
 
   @Override

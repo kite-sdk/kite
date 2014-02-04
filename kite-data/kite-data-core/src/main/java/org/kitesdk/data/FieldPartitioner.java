@@ -16,6 +16,7 @@
 package org.kitesdk.data;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import java.util.Comparator;
 import javax.annotation.concurrent.Immutable;
 
@@ -150,4 +151,15 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
   public Class<T> getType() {
     return type;
   }
+
+  /**
+   * Projects a source-data constraint {@link Predicate} into the image of the
+   * backing partition function.
+   *
+   * If the function cannot be projected exactly, the resulting predicate must
+   * be more permissive than the original predicate.
+   *
+   * @since 0.11.0
+   */
+  public abstract Predicate<T> project(Predicate<S> predicate);
 }

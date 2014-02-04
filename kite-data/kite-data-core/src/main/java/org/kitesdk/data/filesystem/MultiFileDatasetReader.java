@@ -15,12 +15,14 @@
  */
 package org.kitesdk.data.filesystem;
 
+import com.google.common.collect.Iterators;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.UnknownFormatException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
+import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.ReaderWriterState;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -34,20 +36,23 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
 
   private final FileSystem fileSystem;
   private final DatasetDescriptor descriptor;
+  private final Constraints constraints;
 
   private final Iterator<Path> filesIter;
   private DatasetReader<E> reader = null;
+  private Iterator<E> readerIterator = null;
 
   private ReaderWriterState state;
 
   public MultiFileDatasetReader(FileSystem fileSystem, Iterable<Path> files,
-      DatasetDescriptor descriptor) {
+      DatasetDescriptor descriptor, Constraints constraints) {
     Preconditions.checkArgument(fileSystem != null, "FileSystem cannot be null");
     Preconditions.checkArgument(descriptor != null, "Descriptor cannot be null");
-    Preconditions.checkArgument(files != null, "Descriptor cannot be null");
+    Preconditions.checkArgument(files != null, "Partition paths cannot be null");
 
     this.fileSystem = fileSystem;
     this.descriptor = descriptor;
+    this.constraints = constraints;
     this.filesIter = files.iterator();
     this.state = ReaderWriterState.NEW;
   }
@@ -69,15 +74,18 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   @SuppressWarnings("unchecked") // See https://github.com/Parquet/parquet-mr/issues/106
   private void openNextReader() {
     if (Formats.PARQUET.equals(descriptor.getFormat())) {
-      reader = new ParquetFileSystemDatasetReader(fileSystem, filesIter.next(),
-          descriptor.getSchema());
+      this.reader = new ParquetFileSystemDatasetReader(fileSystem,
+          filesIter.next(), descriptor.getSchema());
     } else if (Formats.CSV.equals(descriptor.getFormat())) {
-      reader = new CSVFileReader<E>(fileSystem, filesIter.next(), descriptor);
+      this.reader = new CSVFileReader<E>(fileSystem, filesIter.next(),
+          descriptor);
     } else {
-      reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
+      this.reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
           descriptor.getSchema());
     }
     reader.open();
+    this.readerIterator = Iterators.filter(reader,
+        constraints.toEntityPredicate());
   }
 
   @Override
@@ -86,16 +94,17 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
       "Attempt to read from a file in state:%s", state);
 
     while (true) {
-      if (reader == null) {
+      if (readerIterator == null) {
         if (filesIter.hasNext()) {
           openNextReader();
         } else {
           return false;
         }
       } else {
-        if (reader.hasNext()) {
+        if (readerIterator.hasNext()) {
           return true;
         } else {
+          readerIterator = null;
           reader.close();
           reader = null;
         }
@@ -109,7 +118,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
       "Attempt to read from a file in state:%s", state);
     if (hasNext()) {
       // if hasNext => true, then reader is guaranteed to be non-null
-      return reader.next();
+      return readerIterator.next();
     } else {
       throw new NoSuchElementException();
     }
@@ -119,7 +128,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   public void remove() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
         "Attempt to remove from a file in state:%s", state);
-    if (reader == null) {
+    if (readerIterator == null) {
       // If next succeeds, then reader cannot be null. If the reader is null,
       // then next did not succeed or hasNext has been used and the reader is
       // gone. We could keep track of the last reader that next returned a value
@@ -127,7 +136,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
       throw new IllegalStateException(
           "Remove can only be called after next() returns a value and before calling hasNext()");
     }
-    reader.remove();
+    readerIterator.remove();
   }
 
   @Override
@@ -137,6 +146,8 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
     }
     if (reader != null) {
       reader.close();
+      reader = null;
+      readerIterator = null;
     }
     state = ReaderWriterState.CLOSED;
   }

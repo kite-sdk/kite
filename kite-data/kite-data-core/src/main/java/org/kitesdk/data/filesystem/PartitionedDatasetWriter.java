@@ -84,17 +84,17 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
 
     DatasetWriter<E> writer = cachedWriters.getIfPresent(reusedKey);
     if (writer == null) {
+      // avoid checking in every whether the entity belongs in the view by only
+      // checking when a new writer is created
+      Preconditions.checkArgument(view.includes(entity),
+          "View {} does not include entity {}", view, entity);
       // get a new key because it is stored in the cache
       StorageKey key = StorageKey.copy(reusedKey);
       try {
         writer = cachedWriters.getUnchecked(key);
       } catch (UncheckedExecutionException ex) {
-        // catch & release: the correct exception is that the entity cannot be
-        // written because it isn't in the View. But to avoid checking in every
-        // write call, check when writers are created, catch the exception, and
-        // throw the correct one here.
         throw new IllegalArgumentException(
-            "View does not contain entity:" + entity, ex.getCause());
+            "Problem creating view for entity: " + entity, ex.getCause());
       }
     }
 
@@ -164,8 +164,6 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
 
     @Override
     public DatasetWriter<E> load(StorageKey key) throws Exception {
-      Preconditions.checkArgument(view.contains(key),
-          "View {} does not contain StorageKey {}", view, key);
       Preconditions.checkState(view.getDataset() instanceof FileSystemDataset,
           "FileSystemWriters cannot create writer for " + view.getDataset());
 
