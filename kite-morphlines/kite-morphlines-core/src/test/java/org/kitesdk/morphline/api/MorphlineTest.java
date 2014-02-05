@@ -1162,6 +1162,19 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testGrokWithEscaping() throws Exception {
+    morphline = createMorphline("test-morphlines/grokWithEscaping");
+    Record record = new Record();
+    record.put(Fields.MESSAGE, "{SystemSourceId}=foo");
+    assertTrue(morphline.process(record));
+    assertSame(record, collector.getFirstRecord());  
+    
+    record = new Record();
+    record.put(Fields.MESSAGE, "SystemSourceId}=foo"); // missing opening brace
+    assertFalse(morphline.process(record));
+  }
+  
+  @Test
   public void testConvertTimestamp() throws Exception {
     morphline = createMorphline("test-morphlines/convertTimestamp");    
     Record record = new Record();
