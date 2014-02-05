@@ -1637,6 +1637,33 @@ extractAvroPaths {
 }
 {code}
 
+Alternatively, if the [#extractAvroPaths] and [#extractAvroTree] commands don't fit your needs you can instead [implement your own Custom Morphline Command|#Implementing\-your\-own\-Custom\-Command] or script a [#java] command config that uses the [Generic Avro Java API|http://avro.apache.org/docs/current/gettingstartedjava.html] to arbitrarily traverse and process the Avro tree that is emitted by the [#readAvroContainer] and [#readAvro] commands. For example, along the following lines:
+
+{code}
+{ 
+  readAvroContainer { }
+}
+
+{
+  java { 
+    imports : """
+      import org.apache.avro.generic.GenericRecord;
+      import org.kitesdk.morphline.base.Fields;
+      // import com.cloudera.cdk.morphline.base.Fields; // use this for CDK
+    """
+    code : """
+      GenericRecord root = (GenericRecord) record.getFirstValue(Fields.ATTACHMENT_BODY);
+      GenericRecord links = (GenericRecord) root.get("links"); // traverse via Avro Tree API
+      String forwardLinks = links.get("forward").toString(); // traverse via Avro Tree API
+      record.put("forwardLinks", forwardLinks);
+      logger.debug("My output record: {}", record);
+      return child.process(record);
+    """
+    } 
+  }
+}
+{code}
+
 h2. toAvro
 
 The {{toAvro}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-avro/src/main/java/org/kitesdk/morphline/avro/ToAvroBuilder.java]) converts a morphline record to an Avro record of Java class {{org.apache.avro.generic.IndexedRecord}}.
