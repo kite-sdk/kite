@@ -33,21 +33,24 @@ import com.typesafe.config.Config;
 abstract class LogCommand extends AbstractCommand {
   
   private String format;
-  private String[] args;  
+  private FieldExpression[] expressions;  
   
   public LogCommand(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
     super(builder, config, parent, child, context);
     this.format = getConfigs().getString(config, "format");
     List<String> argList = getConfigs().getStringList(config, "args", Collections.EMPTY_LIST);
-    this.args = argList.toArray(new String[argList.size()]);      
+    this.expressions = new FieldExpression[argList.size()];
+    for (int i = 0; i < argList.size(); i++) {
+      this.expressions[i] = new FieldExpression(argList.get(i), getConfig()); 
+    }
     validateArguments();
   }
 
   @Override
   protected boolean doProcess(Record record) {
-    Object[] resolvedArgs = new Object[args.length];
-    for (int i = 0; i < args.length; i++) {
-      resolvedArgs[i] = new FieldExpression(args[i], getConfig()).evaluate(record);
+    Object[] resolvedArgs = new Object[expressions.length];
+    for (int i = 0; i < expressions.length; i++) {
+      resolvedArgs[i] = expressions[i].evaluate(record);
     }
     log(format, resolvedArgs);
     return super.doProcess(record);

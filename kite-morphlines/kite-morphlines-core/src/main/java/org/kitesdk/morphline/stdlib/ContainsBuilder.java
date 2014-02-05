@@ -60,6 +60,11 @@ public final class ContainsBuilder implements CommandBuilder {
     public Contains(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);      
       this.entrySet = new Configs().getEntrySet(config);
+      for (Map.Entry<String, Object> entry : entrySet) {
+        if (!(entry.getValue() instanceof Collection)) {
+          entry.setValue(new FieldExpression(entry.getValue().toString(), getConfig()));        
+        }
+      }
       this.renderedConfig = config.root().render();
     }
         
@@ -73,7 +78,7 @@ public final class ContainsBuilder implements CommandBuilder {
         if (entryValue instanceof Collection) {
           results = (Collection)entryValue;
         } else {
-          results = new FieldExpression(entryValue.toString(), getConfig()).evaluate(record);
+          results = ((FieldExpression) entryValue).evaluate(record);
         }
         boolean found = false;
         for (Object result : results) {

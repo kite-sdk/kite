@@ -39,6 +39,11 @@ abstract class AbstractAddValuesCommand extends AbstractCommand {
   public AbstractAddValuesCommand(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
     super(builder, config, parent, child, context);      
     entrySet = new Configs().getEntrySet(config);
+    for (Map.Entry<String, Object> entry : entrySet) {
+      if (!(entry.getValue() instanceof Collection)) {
+        entry.setValue(new FieldExpression(entry.getValue().toString(), getConfig()));        
+      }
+    }
   }
       
   @Override
@@ -51,7 +56,7 @@ abstract class AbstractAddValuesCommand extends AbstractCommand {
       if (entryValue instanceof Collection) {
         results = (Collection)entryValue;
       } else {
-        results = new FieldExpression(entryValue.toString(), getConfig()).evaluate(record);
+        results = ((FieldExpression) entryValue).evaluate(record);
       }
       putAll(record, fieldName, results);
     }
