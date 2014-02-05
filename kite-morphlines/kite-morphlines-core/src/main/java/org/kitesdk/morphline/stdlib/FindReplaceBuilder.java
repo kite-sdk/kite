@@ -17,11 +17,12 @@ package org.kitesdk.morphline.stdlib;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.regex.Matcher;
 
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineContext;
-import org.kitesdk.morphline.shaded.com.google.code.regexp.Matcher;
+import org.kitesdk.morphline.shaded.com.google.code.regexp.Pattern;
 
 import com.typesafe.config.Config;
 
@@ -57,15 +58,18 @@ public final class FindReplaceBuilder implements CommandBuilder {
     public FindReplace(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);      
       GrokDictionaries dict = new GrokDictionaries(config, getConfigs());
+      String replacementStr = getConfigs().getString(config, "replacement");
       String pattern = getConfigs().getString(config, "pattern");
       if (getConfigs().getBoolean(config, "isRegex", false)) {
-        this.matcher = dict.compileExpression(pattern).matcher("");
+        Pattern regex = dict.compileExpression(pattern);
+        this.matcher = regex.pattern().matcher("");
+        replacementStr = regex.replaceProperties(replacementStr);
         this.literalPattern = null;
       } else {
         this.matcher = null;
         this.literalPattern = pattern;
       }
-      this.replacement = getConfigs().getString(config, "replacement");
+      this.replacement = replacementStr;
       this.replaceFirst = getConfigs().getBoolean(config, "replaceFirst", false);
       validateArguments();
     }
