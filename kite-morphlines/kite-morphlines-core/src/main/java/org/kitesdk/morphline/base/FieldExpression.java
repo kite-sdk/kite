@@ -16,6 +16,7 @@
 package org.kitesdk.morphline.base;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.kitesdk.morphline.api.Record;
@@ -29,55 +30,103 @@ import com.typesafe.config.Config;
  */
 public final class FieldExpression {
   
-  private String expression;
+  private final List fields = new ArrayList();
   
   private static final String START_TOKEN = "@{";
   private static final char END_TOKEN = '}';
   
   public FieldExpression(String expression, Config config) {
     Preconditions.checkNotNull(expression);
-    this.expression = expression; // TODO: optimize by separating compilation and evaluation phase
-  }
-  
-  /** Returns the values of a {@link Record} referred to by the given field expression */
-  public List evaluate(Record record) {
-    ArrayList results = new ArrayList(1);
-    evaluate(0, record, new StringBuilder(), results);
-    return results;
-  }
-
-  private void evaluate(int from, Record record, StringBuilder buf, ArrayList results) {
-    int start = expression.indexOf(START_TOKEN, from);
-    if (start < 0) { // START_TOKEN not found
-      if (from == 0) {
-        results.add(expression); // fast path
-      } else {
-        buf.append(expression, from, expression.length());
-        results.add(buf.toString());
+    int from = 0;
+    int start;
+    while (from < expression.length() && (start = expression.indexOf(START_TOKEN, from)) >= 0) {
+      if (from != start) {
+        fields.add(expression.substring(from, start));
       }
-    } else { // START_TOKEN found
       int end = expression.indexOf(END_TOKEN, start + START_TOKEN.length());
       if (end < 0) {
         throw new IllegalArgumentException("Missing closing token: " + END_TOKEN);
       }
-      buf.append(expression, from, start);
       String ref = expression.substring(start + START_TOKEN.length(), end);
+      fields.add(new Field(ref));
+      from = end + 1;
+    }
+    
+    assert from <= expression.length();
+    if (from < expression.length() || fields.size() == 0) {
+      fields.add(expression.substring(from, expression.length()));
+    }
+    assert fields.size() > 0;
+  }
+  
+  /** Returns the values of a {@link Record} referred to by the given field expression */
+  public List evaluate(Record record) {
+    // fast path (not functionally necessary):
+    if (fields.size() == 1) {
+      Object first = fields.get(0);
+      if (first instanceof String) {
+        return Collections.singletonList(first);
+      } else {
+        String ref = ((Field) first).getName();
+        if (ref.length() != 0) {
+          List resolvedValues = record.get(ref);
+          return resolvedValues;
+        }
+      }
+    }
+
+    // slow path:
+    ArrayList results = new ArrayList(1);
+    evaluate2(0, record, new StringBuilder(), results);
+    return results;
+  }
+
+  private void evaluate2(int from, Record record, StringBuilder buf, ArrayList results) {
+    if (from >= fields.size()) {
+      results.add(buf.toString());
+      return;
+    }
+    
+    Object item = fields.get(from);
+    if (item instanceof String) {
+      buf.append(item);
+      evaluate2(from + 1, record, buf, results);
+    } else {
+      String ref = ((Field) item).getName();
       if (ref.length() == 0) {
         buf.append(record.toString()); // @{} means dump string representation of entire record
-        evaluate(end + 1, record, buf, results);
+        evaluate2(from + 1, record, buf, results);
       } else {
         List resolvedValues = record.get(ref);
-        if (start == 0 && end + 1 == expression.length()) { 
-          results.addAll(resolvedValues); // "@{first_name}" resolves to object list rather than string concat
-        } else {
-          for (Object value : resolvedValues) {
-            StringBuilder buf2 = new StringBuilder(buf);
-            buf2.append(value.toString());
-            evaluate(end + 1, record, buf2, results);
-          }
+        for (Object value : resolvedValues) {
+          StringBuilder buf2 = new StringBuilder(buf);
+          buf2.append(value.toString());
+          evaluate2(from + 1, record, buf2, results);
         }
       }
     }
   }
+    
   
+  ///////////////////////////////////////////////////////////////////////////////
+  // Nested classes:
+  ///////////////////////////////////////////////////////////////////////////////
+  private static final class Field {
+    
+    private final String name;
+    
+    public Field(String name) {
+      assert name != null;
+      this.name = name;
+    }
+    
+    public String getName() {
+      return name;
+    }
+    
+    @Override
+    public String toString() {
+      return "Field:" + getName();
+    }
+  }
 }
