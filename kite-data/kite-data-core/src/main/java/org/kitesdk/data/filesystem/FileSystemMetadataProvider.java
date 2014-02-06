@@ -18,6 +18,7 @@ package org.kitesdk.data.filesystem;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetExistsException;
+import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.impl.Accessor;
@@ -25,7 +26,6 @@ import org.kitesdk.data.spi.AbstractMetadataProvider;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
@@ -437,14 +437,13 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
    *
    * @param fs        A FileSystem where the metadata should be stored
    * @param location  The Path where the metadata should be stored
-   * @throws org.kitesdk.data.NoSuchDatasetException if the descriptor location is missing
+   * @throws org.kitesdk.data.DatasetNotFoundException if the descriptor location is missing
    * @throws MetadataProviderException  if any IOException is thrown
    */
-  @SuppressWarnings("deprecation")
   private static void checkExists(FileSystem fs, Path location) {
     try {
       if (!fs.exists(location)) {
-        throw new org.kitesdk.data.NoSuchDatasetException("Descriptor location is missing: " +
+        throw new DatasetNotFoundException("Descriptor location is missing: " +
             location);
       }
     } catch (IOException ex) {
@@ -457,7 +456,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
    * instances.
    * @since 0.8.0
    */
-  public static class Builder implements Supplier<FileSystemMetadataProvider> {
+  public static class Builder {
 
     private Path rootDirectory;
     private Configuration configuration;
@@ -479,15 +478,6 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     public Builder configuration(Configuration configuration) {
       this.configuration = configuration;
       return this;
-    }
-
-    /**
-     * @deprecated will be removed in 0.11.0
-     */
-    @Override
-    @Deprecated
-    public FileSystemMetadataProvider get() {
-      return build();
     }
 
     /**

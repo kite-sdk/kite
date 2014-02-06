@@ -72,12 +72,12 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     this.convert = new PathConversion();
 
     this.unbounded = new FileSystemView<E>(this);
-    // remove this.partitionKey for 0.11.0
+    // remove this.partitionKey for 0.12.0
     this.partitionKey = null;
   }
 
   /**
-   * @deprecated will be removed in 0.11.0
+   * @deprecated will be removed in 0.12.0
    */
   @Deprecated
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
@@ -98,7 +98,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
   }
 
   /**
-   * @deprecated will be removed in 0.11.0
+   * @deprecated will be removed in 0.12.0
    */
   @Deprecated
   PartitionKey getPartitionKey() {
@@ -243,21 +243,6 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
       .add("descriptor", descriptor).add("directory", directory)
       .add("dataDirectory", directory).add("partitionKey", partitionKey)
       .toString();
-  }
-
-  @Deprecated
-  void accumulateDatafilePaths(Path directory, List<Path> paths)
-    throws IOException {
-
-    for (FileStatus status : fileSystem.listStatus(directory,
-      PathFilters.notHidden())) {
-
-      if (status.isDirectory()) {
-        accumulateDatafilePaths(status.getPath(), paths);
-      } else {
-        paths.add(status.getPath());
-      }
-    }
   }
 
   @SuppressWarnings("unchecked")

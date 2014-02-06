@@ -21,7 +21,6 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
-import com.google.common.base.Supplier;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -112,7 +111,7 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
    * instances.
    * @since 0.3.0
    */
-  public static class Builder implements Supplier<DatasetRepository> {
+  public static class Builder {
 
     private Path rootDirectory;
     private Configuration configuration;
@@ -154,15 +153,6 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
     public Builder configuration(Configuration configuration) {
       this.configuration = configuration;
       return this;
-    }
-
-    /**
-     * @deprecated will be removed in 0.11.0
-     */
-    @Override
-    @Deprecated
-    public DatasetRepository get() {
-      return build();
     }
 
     /**

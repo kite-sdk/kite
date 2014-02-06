@@ -33,7 +33,6 @@ import org.kitesdk.data.partition.IdentityFieldPartitioner;
 import org.kitesdk.data.partition.IntRangeFieldPartitioner;
 import org.kitesdk.data.partition.RangeFieldPartitioner;
 import com.google.common.base.Objects;
-import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 
 /**
@@ -244,7 +243,7 @@ public class PartitionStrategy {
   /**
    * A fluent builder to aid in the construction of {@link PartitionStrategy}s.
    */
-  public static class Builder implements Supplier<PartitionStrategy> {
+  public static class Builder {
 
     private List<FieldPartitioner> fieldPartitioners = Lists.newArrayList();
 
@@ -531,25 +530,6 @@ public class PartitionStrategy {
     public Builder dateFormat(String sourceName, String name, String format) {
       fieldPartitioners.add(PartitionFunctions.dateFormat(sourceName, name, format));
       return this;
-    }
-
-    /**
-     * <p>
-     * Get the configured {@link PartitionStrategy} instance.
-     * </p>
-     * <p>
-     * This builder should be considered single use and discarded after a call
-     * to this method.
-     * </p>
-     *
-     * @return The configured instance of {@link PartitionStrategy}.
-     *
-     * @deprecated will be removed in 0.11.0
-     */
-    @Override
-    @Deprecated
-    public PartitionStrategy get() {
-      return build();
     }
 
     /**

@@ -43,18 +43,6 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefineableView<E
   }
 
   @Override
-  @Deprecated
-  public DatasetReader<E> getReader() {
-    return newReader();
-  }
-
-  @Override
-  @Deprecated
-  public DatasetWriter<E> getWriter() {
-    return newWriter();
-  }
-
-  @Override
   public DatasetWriter<E> newWriter() {
     logger.debug("Getting writer to dataset:{}", this);
 

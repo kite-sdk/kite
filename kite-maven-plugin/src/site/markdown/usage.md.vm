@@ -7,7 +7,7 @@ $h1 Usage
 
 $h2 Working with datasets
 
-The `kite:create-dataset` and `kite:drop-dataset` goals are for creating and dropping
+The `kite:create-dataset` and `kite:delete-dataset` goals are for creating and deleting
 datasets. Configure the Hadoop settings by declaring the plugin in your POM:
 
 ```xml
@@ -52,10 +52,10 @@ mvn kite:create-dataset \
 
 The `avroSchemaFile` property specifies a local file.
 
-To drop a dataset, run:
+To delete a dataset, run:
 
 ```bash
-mvn kite:drop-dataset \
+mvn kite:delete-dataset \
   -Dkite.rootDirectory=/tmp/data \
   -Dkite.datasetName=mydataset
 ```

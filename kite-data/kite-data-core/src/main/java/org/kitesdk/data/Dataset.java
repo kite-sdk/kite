@@ -83,46 +83,6 @@ public interface Dataset<E> extends RefineableView<E> {
 
   /**
    * <p>
-   * Get an appropriate {@link DatasetWriter} implementation based on the
-   * underlying {@code Dataset} implementation.
-   * </p>
-   * <p>
-   * Implementations are free to return different types of writers depending on
-   * the disposition of the data. For example, a partitioned dataset may use a
-   * different writer than that of a non-partitioned dataset. Clients should not
-   * make any assumptions about the returned implementations. {@link Dataset}
-   * implementations are free to change them at any time.
-   * </p>
-   *
-   * @throws DatasetException
-   *
-   * @deprecated will be removed in 0.11.0; use {@link #newWriter()}
-   */
-  @Deprecated
-  DatasetWriter<E> getWriter();
-
-  /**
-   * <p>
-   * Get an appropriate {@link DatasetReader} implementation based on the
-   * underlying {@code Dataset} implementation.
-   * </p>
-   * <p>
-   * Implementations are free to return different types of readers depending on
-   * the disposition of the data. For example, a partitioned dataset may use a
-   * different reader than that of a non-partitioned dataset. Clients should not
-   * make any assumptions about the returned implementations. {@code Dataset}
-   * implementations are free to change them at any time.
-   * </p>
-   *
-   * @throws DatasetException
-   *
-   * @deprecated will be removed in 0.11.0; use {@link #newReader()}
-   */
-  @Deprecated
-  DatasetReader<E> getReader();
-
-  /**
-   * <p>
    * Return partitions, if this dataset is partitioned.
    * </p>
    * <p>

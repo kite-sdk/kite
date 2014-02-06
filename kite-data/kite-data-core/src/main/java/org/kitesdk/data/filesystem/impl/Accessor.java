@@ -64,14 +64,6 @@ public abstract class Accessor {
   public abstract Path getDirectory(Dataset<?> dataset);
 
   /**
-   * @deprecated
-   *          will be removed in 0.11.0; use
-   *          {@link #getPathIterator(View)}
-   */
-  @Deprecated
-  public abstract void accumulateDatafilePaths(Dataset<?> dataset, Path directory, List<Path> paths) throws IOException;
-
-  /**
    * Returns an {@code Iterable} that will list all of the data files in the
    * given {@link View}.
    * @param view a {@code View}

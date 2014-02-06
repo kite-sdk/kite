@@ -53,7 +53,6 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
     return new Path(Files.createTempDir().getAbsolutePath()).toUri();
   }
 
-  @SuppressWarnings("deprecation")
   @Override
   public DatasetDescriptor load(String name) {
     Preconditions.checkArgument(name != null, "Name cannot be null");
@@ -61,7 +60,7 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
     if (descriptors.containsKey(name)) {
       return descriptors.get(name);
     } else {
-      throw new NoSuchDatasetException("Missing dataset:" + name);
+      throw new DatasetNotFoundException("Missing dataset:" + name);
     }
   }
 
@@ -100,7 +99,6 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
     return newDescriptor;
   }
 
-  @SuppressWarnings("deprecation")
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
     Preconditions.checkArgument(name != null, "Name cannot be null");
@@ -108,7 +106,7 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
         "Descriptor cannot be null");
 
     if (!descriptors.containsKey(name)) {
-      throw new NoSuchDatasetException("Missing dataset:" + name);
+      throw new DatasetNotFoundException("Missing dataset:" + name);
     }
 
     descriptors.put(name, descriptor);

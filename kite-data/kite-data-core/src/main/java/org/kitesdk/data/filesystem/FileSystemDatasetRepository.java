@@ -17,6 +17,7 @@ package org.kitesdk.data.filesystem;
 
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.IncompatibleSchemaException;
@@ -30,7 +31,6 @@ import org.kitesdk.data.spi.PartitionListener;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -227,7 +227,6 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     return ds;
   }
 
-  @SuppressWarnings("deprecation")
   @Override
   public boolean delete(String name) {
     Preconditions.checkArgument(name != null, "Name can not be null");
@@ -237,7 +236,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     final DatasetDescriptor descriptor;
     try {
       descriptor = metadataProvider.load(name);
-    } catch (org.kitesdk.data.NoSuchDatasetException ex) {
+    } catch (DatasetNotFoundException ex) {
       return false;
     }
 
@@ -403,7 +402,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    * instances.
    * @since 0.2.0
    */
-  public static class Builder implements Supplier<FileSystemDatasetRepository> {
+  public static class Builder {
 
     private Path rootDirectory;
     private FileSystem fileSystem;
@@ -473,15 +472,6 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     public Builder configuration(Configuration configuration) {
       this.configuration = configuration;
       return this;
-    }
-
-    /**
-     * @deprecated will be removed in 0.11.0
-     */
-    @Override
-    @Deprecated
-    public FileSystemDatasetRepository get() {
-      return build();
     }
 
     /**

@@ -19,6 +19,7 @@ package org.kitesdk.data.hcatalog;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.filesystem.impl.Accessor;
 import org.kitesdk.data.spi.AbstractMetadataProvider;
@@ -48,7 +49,6 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
     this.hcat = new HCatalog(conf);
   }
 
-  @SuppressWarnings("deprecation")
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
     Preconditions.checkArgument(name != null, "Name cannot be null");
@@ -56,7 +56,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
         "Descriptor cannot be null");
 
     if (!exists(name)) {
-      throw new org.kitesdk.data.NoSuchDatasetException("Table not found: " + name);
+      throw new DatasetNotFoundException("Table not found: " + name);
     }
 
     Table table = hcat.getTable(HiveUtils.DEFAULT_DB, name);

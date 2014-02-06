@@ -17,6 +17,7 @@ package org.kitesdk.data.hbase;
 
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.hbase.avro.AvroEntitySchema;
@@ -134,11 +135,10 @@ public class HBaseMetadataProvider extends AbstractMetadataProvider {
     return withPartitionStrategy(descriptor);
   }
 
-  @SuppressWarnings("deprecation")
   @Override
   public DatasetDescriptor load(String name) {
     if (!exists(name)) {
-      throw new org.kitesdk.data.NoSuchDatasetException("No such dataset: " + name);
+      throw new DatasetNotFoundException("No such dataset: " + name);
     }
     String tableName = getTableName(name);
     String entityName = getEntityName(name);

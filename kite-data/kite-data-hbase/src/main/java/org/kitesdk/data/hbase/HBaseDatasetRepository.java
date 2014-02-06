@@ -133,7 +133,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
     throw new UnsupportedOperationException();
   }
 
-  public static class Builder { // implements Supplier<HBaseDatasetRepository> {
+  public static class Builder {
 
     private Configuration configuration;
 

@@ -18,7 +18,6 @@ package org.kitesdk.data;
 import org.kitesdk.data.spi.URIPattern;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
@@ -234,7 +233,7 @@ public class DatasetDescriptor {
   /**
    * A fluent builder to aid in the construction of {@link DatasetDescriptor}s.
    */
-  public static class Builder implements Supplier<DatasetDescriptor> {
+  public static class Builder {
 
     // used to match resource:schema.avsc URIs
     private static final String RESOURCE_PATH = "resource-path";
@@ -558,18 +557,6 @@ public class DatasetDescriptor {
       @Nullable PartitionStrategy partitionStrategy) {
       this.partitionStrategy = partitionStrategy;
       return this;
-    }
-
-    /**
-     * Get an instance of the configured dataset descriptor. Subsequent calls
-     * will produce new instances that are similarly configured.
-     *
-     * @deprecated will be removed in 0.11.0
-     */
-    @Override
-    @Deprecated
-    public DatasetDescriptor get() {
-      return build();
     }
 
     /**

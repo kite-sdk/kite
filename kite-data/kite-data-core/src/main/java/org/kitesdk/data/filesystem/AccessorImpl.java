@@ -20,8 +20,6 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.filesystem.impl.Accessor;
-import java.io.IOException;
-import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
@@ -33,15 +31,6 @@ final class AccessorImpl extends Accessor {
       return ((FileSystemDataset<?>) dataset).getDirectory();
     }
     return null;
-  }
-
-  @Override
-  @Deprecated
-  public void accumulateDatafilePaths(Dataset<?> dataset, Path directory,
-      List<Path> paths) throws IOException {
-    if (dataset instanceof FileSystemDataset) {
-      ((FileSystemDataset<?>) dataset).accumulateDatafilePaths(directory, paths);
-    }
   }
 
   @Override

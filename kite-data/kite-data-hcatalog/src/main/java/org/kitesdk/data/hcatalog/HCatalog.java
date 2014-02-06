@@ -22,6 +22,7 @@ import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.AlreadyExistsException;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hcatalog.common.HCatUtil;
+import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.hcatalog.impl.Loader;
 import org.slf4j.Logger;
@@ -46,17 +47,16 @@ final class HCatalog {
     }
   }
 
-  @SuppressWarnings("deprecation")
   public Table getTable(String dbName, String tableName) {
     Table table;
     try {
       table = HCatUtil.getTable(client, dbName, tableName);
     } catch (Exception e) {
-      throw new org.kitesdk.data.NoSuchDatasetException("Hive table lookup exception", e);
+      throw new DatasetNotFoundException("Hive table lookup exception", e);
     }
     
     if (table == null) {
-      throw new org.kitesdk.data.NoSuchDatasetException("Could not find info for table: " + tableName);
+      throw new DatasetNotFoundException("Could not find info for table: " + tableName);
     }
     return table;
   }
