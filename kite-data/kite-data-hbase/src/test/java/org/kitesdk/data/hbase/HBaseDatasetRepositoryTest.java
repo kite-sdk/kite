@@ -53,6 +53,7 @@ public class HBaseDatasetRepositoryTest {
 
   private static final String testEntity;
   private static final String testGenericEntity;
+  private static final String testGenericEntity2;
   private static final String tableName = "testtable";
   private static final String managedTableName = "managed_schemas";
 
@@ -62,6 +63,8 @@ public class HBaseDatasetRepositoryTest {
           .getResourceAsStream("/TestEntity.avsc"));
       testGenericEntity = AvroUtils.inputStreamToString(HBaseDatasetRepositoryTest.class
           .getResourceAsStream("/TestGenericEntity.avsc"));
+      testGenericEntity2 = AvroUtils.inputStreamToString(HBaseDatasetRepositoryTest.class
+          .getResourceAsStream("/TestGenericEntity2.avsc"));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -88,13 +91,14 @@ public class HBaseDatasetRepositoryTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testGeneric() throws Exception {
+    String datasetName = tableName + ".TestGenericEntity";
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
         .configuration(HBaseTestUtils.getConf()).build();
     
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    DaoDataset<GenericRecord> ds = (DaoDataset) repo.create(tableName, descriptor);
+    DaoDataset<GenericRecord> ds = (DaoDataset) repo.create(datasetName, descriptor);
 
     // Create the new entities
     ds.put(createGenericEntity(0));
@@ -115,7 +119,7 @@ public class HBaseDatasetRepositoryTest {
     }
 
     // reload
-    ds = (DaoDataset) repo.load(tableName);
+    ds = (DaoDataset) repo.load(datasetName);
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
@@ -172,13 +176,14 @@ public class HBaseDatasetRepositoryTest {
 
   @Test
   public void testSpecific() throws Exception {
+    String datasetName = tableName + ".TestEntity";
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
         .configuration(HBaseTestUtils.getConf()).build();
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testEntity)
         .build();
-    RandomAccessDataset<TestEntity> ds = repo.create(tableName, descriptor);
+    RandomAccessDataset<TestEntity> ds = repo.create(datasetName, descriptor);
 
     // Create the new entities
     ds.put(createSpecificEntity(0));
@@ -231,13 +236,14 @@ public class HBaseDatasetRepositoryTest {
   @Test
   public void testDeleteDataset() throws Exception {
 
+    String datasetName = tableName + ".TestGenericEntity";
     HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
         .configuration(HBaseTestUtils.getConf()).build();
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    RandomAccessDataset<GenericRecord> ds = repo.create(tableName, descriptor);
+    RandomAccessDataset<GenericRecord> ds = repo.create(datasetName, descriptor);
 
     // Create a new entity
     ds.put(createGenericEntity(0));
@@ -250,21 +256,43 @@ public class HBaseDatasetRepositoryTest {
     compareEntitiesWithUtf8(0, ds.get(key));
 
     // delete dataset
-    boolean success = repo.delete(tableName);
-    assertTrue("table should have been successfully deleted", success);
+    boolean success = repo.delete(datasetName);
+    assertTrue("dataset should have been successfully deleted", success);
 
     // check that tables have no rows
     assertEquals(0, HBaseTestUtils.util.countRows(new HTable(HBaseTestUtils.getConf(), managedTableName)));
     assertEquals(0, HBaseTestUtils.util.countRows(new HTable(HBaseTestUtils.getConf(), tableName)));
 
     // create the dataset again
-    ds = repo.create(tableName, descriptor);
+    ds = repo.create(datasetName, descriptor);
 
     // Create a new entity
     ds.put(createGenericEntity(0));
 
     // Retrieve the entity
     compareEntitiesWithUtf8(0, ds.get(key));
+  }
+
+  @Test
+  public void testUpdateDataset() throws Exception {
+
+    String datasetName = tableName + ".TestGenericEntity";
+
+    HBaseDatasetRepository repo = new HBaseDatasetRepository.Builder()
+        .configuration(HBaseTestUtils.getConf()).build();
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaLiteral(testGenericEntity)
+        .build();
+    RandomAccessDataset<GenericRecord> ds = repo.create(datasetName, descriptor);
+
+    // Create a new entity
+    ds.put(createGenericEntity(0));
+
+    DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder()
+        .schemaLiteral(testGenericEntity2)
+        .build();
+    repo.update(datasetName, newDescriptor);
   }
 
   // TODO: remove duplication from ManagedDaoTest
