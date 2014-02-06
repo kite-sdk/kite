@@ -5,10 +5,17 @@ All past Kite releases are documented on this page. Upcoming release dates can b
 
 ## Version 0.11.0
 
-Release date: TBD
+Release date: February 6, 2014
 
 Version 0.11.0 has the following notable changes:
 
+* Views API. A new API for expressing a subset of a dataset using logical constraints
+  such as field matching or ranges. See the documentation for [RefineableView](http://kitesdk.org/docs/0.11.0/apidocs/org/kitesdk/data/RefineableView.html)
+  for details. The [HBase example](https://github.com/kite-sdk/kite-examples/tree/master/dataset-hbase)
+  has been extended to use a view for doing a partial scan of the table.
+* Dataset API. Removed APIs that were deprecated in 0.9.0. See the
+  [API Diffs](http://kitesdk.org/docs/0.11.0/jdiff/changes.html) for all the changes.
+* Upgrade to Crunch 0.9.0.
 * Morphlines Library
     * Added morphline command to read from Hadoop Avro Parquet Files: [readAvroParquetFile](kite-morphlines/morphlinesReferenceGuide.html#readAvroParquetFile)
     * Added support for multi-character separators as well as a regex separators to [splitKeyValue](kite-morphlines/morphlinesReferenceGuide.html#splitKeyValue) command.
@@ -18,6 +25,9 @@ Version 0.11.0 has the following notable changes:
     * Upgraded kite-morphlines-metrics-servlets module from jetty-8.1.13.v20130916 to jetty-8.1.14.v20131031.
     * Upgraded kite-morphlines-saxon module from Saxon-HE-9.5.1-3 to Saxon-HE-9.5.1-4.
     * Fixed CDK-282 `readRCFile` command is broken (Prasanna Rajaperumal via whoschek).
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10401)
+is available from JIRA.
 
 ## Version 0.10.1
 
@@ -34,6 +44,9 @@ Version 0.10.1 includes the following bug fixes:
 * Solr should fail fast if ZK has no solr configuration
 
 This patch release is fully-compatible with 0.9.1, which uses the deprecated CDK packages.
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10507)
+is available from JIRA.
 
 ## Version 0.10.0
 
