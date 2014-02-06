@@ -17,6 +17,9 @@ package org.kitesdk.morphline.stdlib;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
@@ -53,8 +56,20 @@ public final class AddValuesIfAbsentBuilder implements CommandBuilder {
     
     @Override
     protected void putAll(Record record, String key, Collection values) {
-      for (Object value : values) {
-        put(record, key, value);
+      List existingValues = record.get(key);
+      if (values.size() <= 3) { // fast path for small N
+        for (Object value : values) {
+          if (!existingValues.contains(value)) {
+            existingValues.add(value);
+          }
+        }
+      } else { // index avoids performance degradation for large N
+        Set index = new HashSet(existingValues);
+        for (Object value : values) {
+          if (index.add(value)) {
+            existingValues.add(value);
+          }
+        }
       }
     }
     

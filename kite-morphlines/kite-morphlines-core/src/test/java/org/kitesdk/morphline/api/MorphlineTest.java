@@ -312,6 +312,20 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
 
   @Test
+  public void testAddValuesIfAbsentWithLargeN() throws Exception {
+    morphline = createMorphline("test-morphlines/addValuesIfAbsentWithLargeN");    
+    Record record = new Record();
+    record.put("source_type", "tag2");
+    Record expected = new Record();
+    expected.put("source_type", "tag2");
+    expected.put("source_type", "tag1");
+    expected.put("source_type", "tag3");
+    expected.put("source_type", "tag4");
+    expected.put("source_type", "tag5");
+    processAndVerifySuccess(record, expected);
+  }
+
+  @Test
   public void testSetValues() throws Exception {
     morphline = createMorphline("test-morphlines/setValues");    
     Record record = new Record();
