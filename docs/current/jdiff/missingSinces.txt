@@ -1,3 +1,17 @@
+MISSING @SINCE TAG: org.kitesdk.data.partition.CalendarFieldPartitioner Class
+OK: org.kitesdk.data.RefineableView Interface
 NO DOC BLOCK: org.kitesdk.data.partition.DateFormatPartitioner Method equals(java.lang.Object)
 NO DOC BLOCK: org.kitesdk.data.partition.DateFormatPartitioner Method hashCode()
+OK: org.kitesdk.data.View Method includes(E)
+OK: org.kitesdk.data.FieldPartitioner Method project(com.google.common.base.Predicate<S>)
+NO DOC BLOCK: org.kitesdk.data.partition.DateFormatPartitioner Method project(com.google.common.base.Predicate<java.lang.Long>)
+NO DOC BLOCK: org.kitesdk.data.partition.HashFieldPartitioner Method project(com.google.common.base.Predicate<java.lang.Object>)
+NO DOC BLOCK: org.kitesdk.data.partition.IdentityFieldPartitioner Method project(com.google.common.base.Predicate<S>)
+NO DOC BLOCK: org.kitesdk.data.partition.IntRangeFieldPartitioner Method project(com.google.common.base.Predicate<java.lang.Integer>)
+NO DOC BLOCK: org.kitesdk.data.partition.ListFieldPartitioner Method project(com.google.common.base.Predicate<S>)
+NO DOC BLOCK: org.kitesdk.data.partition.RangeFieldPartitioner Method project(com.google.common.base.Predicate<java.lang.String>)
+NO DOC BLOCK: org.kitesdk.data.partition.YearFieldPartitioner Method project(com.google.common.base.Predicate<java.lang.Long>)
 NO DOC BLOCK: org.kitesdk.data.partition.PartitionFunctions Method toExpression(org.kitesdk.data.FieldPartitioner)
+OK: org.kitesdk.morphline.base.Notifications Field LIFE_CYCLE
+NO DOC BLOCK: org.kitesdk.morphline.base.Metrics Field NUM_CACHE_HITS
+NO DOC BLOCK: org.kitesdk.morphline.base.Metrics Field NUM_CACHE_MISSES

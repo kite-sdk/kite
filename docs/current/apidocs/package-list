@@ -8,6 +8,7 @@ org.kitesdk.morphline.api
 org.kitesdk.morphline.avro
 org.kitesdk.morphline.base
 org.kitesdk.morphline.hadoop.core
+org.kitesdk.morphline.hadoop.parquet.avro
 org.kitesdk.morphline.hadoop.rcfile
 org.kitesdk.morphline.hadoop.sequencefile
 org.kitesdk.morphline.json
