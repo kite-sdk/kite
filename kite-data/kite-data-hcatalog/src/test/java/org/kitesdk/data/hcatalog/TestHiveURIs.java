@@ -16,16 +16,17 @@
 
 package org.kitesdk.data.hcatalog;
 
+import org.apache.hadoop.conf.Configuration;
+import org.junit.After;
+import org.junit.Ignore;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.MetadataProvider;
-import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.filesystem.TestFileSystemURIs;
 import java.net.URI;
 import junit.framework.Assert;
-import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -43,8 +44,17 @@ public class TestHiveURIs extends TestFileSystemURIs {
     new org.kitesdk.data.hcatalog.impl.Loader().load();
   }
 
+  @After
+  public void cleanHCatalog() {
+    // ensures all tables are removed
+    HCatalog hcat = new HCatalog(new Configuration());
+    for (String tableName : hcat.getAllTables("default")) {
+      hcat.dropTable("default", tableName);
+    }
+  }
+
   @Test
-  public void testManagedURI() {
+  public void testManagedURI() throws Exception {
     DatasetRepository repo = DatasetRepositories.open("repo:hive");
 
     Assert.assertNotNull("Received a repository", repo);
@@ -54,13 +64,13 @@ public class TestHiveURIs extends TestFileSystemURIs {
         .getMetadataProvider();
     Assert.assertTrue("Repo is using a HCatalogManagedMetadataProvider",
         provider instanceof HCatalogManagedMetadataProvider);
+    Assert.assertEquals("Repository URI", new URI("repo:hive"), repo.getUri());
   }
 
   @Test
-  public void testManagedURIWithRootPath() {
+  public void testManagedURIWithRootPath() throws Exception {
     // URIs with "/" as the path should open managed repositories
-    DatasetRepository repo = DatasetRepositories.open(
-        "repo:hive:/");
+    DatasetRepository repo = DatasetRepositories.open("repo:hive:/");
 
     Assert.assertNotNull("Received a repository", repo);
     Assert.assertTrue("Repo should be a HCatalogDatasetRepository",
@@ -69,20 +79,36 @@ public class TestHiveURIs extends TestFileSystemURIs {
         .getMetadataProvider();
     Assert.assertTrue("Repo is using a HCatalogManagedMetadataProvider",
         provider instanceof HCatalogManagedMetadataProvider);
+    Assert.assertEquals("Repository URI", new URI("repo:hive"), repo.getUri());
   }
 
   @Test
+  @Ignore("URIPattern does not yet support this case. See CDK-317.")
   public void testManagedURIWithHostAndPort() {
-    try {
-      // This should cause a failure when trying to connect to meta-host
-      DatasetRepositories.open("repo:hive://meta-host:1234/");
-      Assert.fail("Failed to set the MetaStore host via repo URI");
-    } catch (RuntimeException ex) {
-      Assert.assertEquals(MetaException.class, ex.getCause().getClass());
-      // The exception isn't properly wrapped as a cause, but this will check
-      // that the hostname is used and in the exception message.
-      Assert.assertTrue(ex.getCause().getMessage().contains("meta-host"));
-    }
+    DatasetRepository repo = DatasetRepositories.open("repo:hive://meta-host:1234");
+    Assert.assertNotNull("Received a repository", repo);
+    Assert.assertTrue("Repo should be a HCatalogDatasetRepository",
+        repo instanceof HCatalogDatasetRepository);
+    MetadataProvider provider = ((HCatalogDatasetRepository) repo)
+        .getMetadataProvider();
+    Assert.assertTrue("Repo is using a HCatalogManagedMetadataProvider",
+        provider instanceof HCatalogManagedMetadataProvider);
+    Assert.assertEquals("Repository URI", URI.create("repo:hive://meta-host:1234"),
+        repo.getUri());
+  }
+
+  @Test
+  public void testManagedURIWithHostAndPortAndRootPath() {
+    DatasetRepository repo = DatasetRepositories.open("repo:hive://meta-host:1234/");
+    Assert.assertNotNull("Received a repository", repo);
+    Assert.assertTrue("Repo should be a HCatalogDatasetRepository",
+        repo instanceof HCatalogDatasetRepository);
+    MetadataProvider provider = ((HCatalogDatasetRepository) repo)
+        .getMetadataProvider();
+    Assert.assertTrue("Repo is using a HCatalogManagedMetadataProvider",
+        provider instanceof HCatalogManagedMetadataProvider);
+    Assert.assertEquals("Repository URI", URI.create("repo:hive://meta-host:1234/"),
+        repo.getUri());
   }
 
   @Test(expected=DatasetRepositoryException.class)
@@ -98,23 +124,20 @@ public class TestHiveURIs extends TestFileSystemURIs {
   @Test
   public void testExternalURI() {
     URI hdfsUri = getDFS().getUri();
-    DatasetRepository repo = DatasetRepositories.open(
-        "repo:hive:/tmp/hive-repo?hdfs-host=" + hdfsUri.getHost() +
+    URI repoUri = URI.create("repo:hive:/tmp/hive-repo?hdfs-host=" + hdfsUri.getHost() +
         "&hdfs-port=" + hdfsUri.getPort());
+    DatasetRepository repo = DatasetRepositories.open(repoUri);
 
     Assert.assertNotNull("Received a repository", repo);
-    org.junit.Assert.assertTrue("Repo is a FileSystem repo",
-        repo instanceof FileSystemDatasetRepository);
-    MetadataProvider provider = ((FileSystemDatasetRepository) repo)
-        .getMetadataProvider();
-    Assert.assertTrue("Repo is using a HCatalogExternalMetadataProvider",
-        provider instanceof HCatalogExternalMetadataProvider);
+    org.junit.Assert.assertTrue("Repo is a HCatalogExternalDatasetRepository",
+        repo instanceof HCatalogExternalDatasetRepository);
+    Assert.assertEquals("Repository URI", repoUri, repo.getUri());
 
     // verify location
-    DatasetDescriptor created = provider.create("test",
+    DatasetDescriptor created = repo.create("test",
         new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
-        .build());
+        .build()).getDescriptor();
     Assert.assertEquals("Location should be in HDFS",
         "hdfs", created.getLocation().getScheme());
     Assert.assertEquals("Location should have the correct HDFS host",
@@ -128,17 +151,13 @@ public class TestHiveURIs extends TestFileSystemURIs {
   @Test
   public void testExternalURIWithHostAndPort() {
     URI hdfsUri = getDFS().getUri();
-    try {
-      // This should cause a failure when trying to connect to meta-host
-      DatasetRepositories.open(
-          "repo:hive://meta-host:1234/tmp/data?hdfs-host=" + hdfsUri.getHost() +
-          "&hdfs-port=" + hdfsUri.getPort());
-      Assert.fail("Failed to set the MetaStore host via repo URI");
-    } catch (RuntimeException ex) {
-      Assert.assertEquals(MetaException.class, ex.getCause().getClass());
-      // The exception isn't properly wrapped as a cause, but this will check
-      // that the hostname is used and in the exception message.
-      Assert.assertTrue(ex.getCause().getMessage().contains("meta-host"));
-    }
+    URI repoUri = URI.create("repo:hive://meta-host:1234/tmp/data?hdfs-host=" +
+        hdfsUri.getHost() + "&hdfs-port=" + hdfsUri.getPort());
+    DatasetRepository repo = DatasetRepositories.open(repoUri);
+
+    Assert.assertNotNull("Received a repository", repo);
+    org.junit.Assert.assertTrue("Repo is a HCatalogExternalDatasetRepository",
+        repo instanceof HCatalogExternalDatasetRepository);
+    Assert.assertEquals("Repository URI", repoUri, repo.getUri());
   }
 }

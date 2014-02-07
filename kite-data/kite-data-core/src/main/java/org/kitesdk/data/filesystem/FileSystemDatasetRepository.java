@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.filesystem;
 
+import javax.annotation.Nullable;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
@@ -90,6 +91,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
   private final MetadataProvider metadataProvider;
   private final Configuration conf;
+  private final URI repositoryUri;
 
   /**
    * Construct a {@link FileSystemDatasetRepository} for the given
@@ -104,12 +106,19 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   @Deprecated
   public FileSystemDatasetRepository(
       Configuration conf, MetadataProvider metadataProvider) {
+    this(conf, metadataProvider, null);
+  }
+
+  FileSystemDatasetRepository(
+      Configuration conf, MetadataProvider metadataProvider,
+      @Nullable URI repositoryUri) {
     Preconditions.checkArgument(conf != null, "Configuration cannot be null");
     Preconditions.checkArgument(metadataProvider != null,
       "Metadata provider can not be null");
 
     this.conf = conf;
     this.metadataProvider = metadataProvider;
+    this.repositoryUri = repositoryUri;
   }
 
   @Override
@@ -282,6 +291,11 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   @Override
   public Collection<String> list() {
     return metadataProvider.list();
+  }
+
+  @Override
+  public URI getUri() {
+    return repositoryUri;
   }
 
   /**
@@ -490,6 +504,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         this.configuration = new Configuration();
       }
 
+      URI repositoryUri = null;
       if (metadataProvider == null) {
         Preconditions.checkState(this.rootDirectory != null,
             "No root directory defined");
@@ -498,10 +513,13 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
         if (fileSystem != null) {
           // if the FS doesn't match, this will throw IllegalArgumentException
+          Path qualifiedRootDirectory = fileSystem.makeQualified(rootDirectory);
+          repositoryUri = makeRepositoryUri(qualifiedRootDirectory);
           this.metadataProvider = new FileSystemMetadataProvider.Builder()
               .configuration(configuration)
-              .rootDirectory(fileSystem.makeQualified(rootDirectory)).build();
+              .rootDirectory(qualifiedRootDirectory).build();
         } else {
+          repositoryUri = makeRepositoryUri(rootDirectory);
           this.metadataProvider = new FileSystemMetadataProvider.Builder()
               .configuration(configuration)
               .rootDirectory(rootDirectory).build();
@@ -513,7 +531,16 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
             "File system is ignored when a MetadataProvider is set");
       }
 
-      return new FileSystemDatasetRepository(configuration, metadataProvider);
+      return new FileSystemDatasetRepository(configuration, metadataProvider,
+          repositoryUri);
+    }
+
+    private URI makeRepositoryUri(Path rootDirectory) {
+      try {
+        return new URI("repo:" + rootDirectory.toUri());
+      } catch (URISyntaxException e) {
+        throw new MetadataProviderException(e);
+      }
     }
   }
 }

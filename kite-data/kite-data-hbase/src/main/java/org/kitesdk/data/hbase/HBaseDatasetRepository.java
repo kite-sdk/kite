@@ -15,8 +15,12 @@
  */
 package org.kitesdk.data.hbase;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import org.apache.hadoop.hbase.HConstants;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepositoryException;
+import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.RandomAccessDatasetRepository;
 import org.kitesdk.data.hbase.avro.GenericAvroDao;
@@ -42,11 +46,13 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
   private HTablePool tablePool;
   private SchemaManager schemaManager;
   private HBaseMetadataProvider metadataProvider;
+  private final URI repositoryUri;
 
-  HBaseDatasetRepository(HBaseAdmin hBaseAdmin, HTablePool tablePool) {
+  HBaseDatasetRepository(HBaseAdmin hBaseAdmin, HTablePool tablePool, URI repositoryUri) {
     this.tablePool = tablePool;
     this.schemaManager = new DefaultSchemaManager(tablePool);
     this.metadataProvider = new HBaseMetadataProvider(hBaseAdmin, schemaManager);
+    this.repositoryUri = repositoryUri;
   }
 
   @Override
@@ -75,6 +81,11 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
       DatasetDescriptor descriptor = metadataProvider.load(name);
       return newDataset(name, descriptor);
     }
+  }
+
+  @Override
+  public URI getUri() {
+    return repositoryUri;
   }
 
   @SuppressWarnings("unchecked")
@@ -154,7 +165,17 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
         throw new DatasetRepositoryException(
             "Problem creating HBaseDatasetRepository.", e);
       }
-      return new HBaseDatasetRepository(admin, pool);
+      return new HBaseDatasetRepository(admin, pool, getRepositoryUri(configuration));
+    }
+
+    private URI getRepositoryUri(Configuration conf) {
+      try {
+        return new URI(String.format("repo:hbase:%s:%s",
+            conf.get(HConstants.ZOOKEEPER_QUORUM),
+            conf.get(HConstants.ZOOKEEPER_CLIENT_PORT)));
+      } catch (URISyntaxException e) {
+        throw new MetadataProviderException(e);
+      }
     }
   }
 }
