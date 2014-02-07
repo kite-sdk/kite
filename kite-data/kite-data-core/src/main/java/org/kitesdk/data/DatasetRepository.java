@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data;
 
+import java.net.URI;
 import java.util.Collection;
 import javax.annotation.concurrent.Immutable;
 
@@ -166,5 +167,7 @@ public interface DatasetRepository {
    * @since 0.7.0
    */
   Collection<String> list();
+
+  URI getUri();
 
 }

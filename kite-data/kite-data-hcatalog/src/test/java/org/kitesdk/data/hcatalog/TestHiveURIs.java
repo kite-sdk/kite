@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.hcatalog;
 
+import java.net.URISyntaxException;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
@@ -44,7 +45,7 @@ public class TestHiveURIs extends TestFileSystemURIs {
   }
 
   @Test
-  public void testManagedURI() {
+  public void testManagedURI() throws Exception {
     DatasetRepository repo = DatasetRepositories.open("repo:hive");
 
     Assert.assertNotNull("Received a repository", repo);
@@ -54,10 +55,11 @@ public class TestHiveURIs extends TestFileSystemURIs {
         .getMetadataProvider();
     Assert.assertTrue("Repo is using a HCatalogManagedMetadataProvider",
         provider instanceof HCatalogManagedMetadataProvider);
+    Assert.assertEquals("Repository URI", new URI("repo:hive"), repo.getUri());
   }
 
   @Test
-  public void testManagedURIWithRootPath() {
+  public void testManagedURIWithRootPath() throws Exception {
     // URIs with "/" as the path should open managed repositories
     DatasetRepository repo = DatasetRepositories.open(
         "repo:hive:/");
@@ -69,6 +71,7 @@ public class TestHiveURIs extends TestFileSystemURIs {
         .getMetadataProvider();
     Assert.assertTrue("Repo is using a HCatalogManagedMetadataProvider",
         provider instanceof HCatalogManagedMetadataProvider);
+    Assert.assertEquals("Repository URI", new URI("repo:hive"), repo.getUri());
   }
 
   @Test

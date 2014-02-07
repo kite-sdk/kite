@@ -40,7 +40,8 @@ public class TestFileSystemURIs extends MiniDFSTest {
 
   @Test
   public void testLocalRelative() throws URISyntaxException {
-    DatasetRepository repository = DatasetRepositories.open(new URI("repo:file:target/dsr-repo-test"));
+    URI repositoryUri = new URI("repo:file:target/dsr-repo-test");
+    DatasetRepository repository = DatasetRepositories.open(repositoryUri);
 
     // We only do the deeper implementation checks one per combination.
     Assert.assertNotNull("Received a repository", repository);
@@ -57,16 +58,22 @@ public class TestFileSystemURIs extends MiniDFSTest {
         new Path("target/dsr-repo-test"));
     Assert.assertEquals("Root directory should be the correct qualified path",
         expected, fsProvider.getRootDirectory());
+    Assert.assertEquals("Repository URI scheme", "repo", repository.getUri()
+        .getScheme());
+    Assert.assertEquals("Repository URI scheme", expected.toUri(),
+        new URI(repository.getUri().getSchemeSpecificPart()));
   }
 
   @Test
   public void testLocalAbsolute() throws URISyntaxException {
-    DatasetRepository repository = DatasetRepositories.open(new URI("repo:file:/tmp/dsr-repo-test"));
+    URI repositoryUri = new URI("repo:file:///tmp/dsr-repo-test");
+    DatasetRepository repository = DatasetRepositories.open(repositoryUri);
 
     FileSystemMetadataProvider provider = (FileSystemMetadataProvider)
         ((FileSystemDatasetRepository) repository).getMetadataProvider();
     Assert.assertEquals("Root directory should be the correct qualified path",
         new Path("file:/tmp/dsr-repo-test"), provider.getRootDirectory());
+    Assert.assertEquals("Repository URI", repositoryUri, repository.getUri());
   }
 
   @Test(expected = DatasetRepositoryException.class)
@@ -79,8 +86,8 @@ public class TestFileSystemURIs extends MiniDFSTest {
   @Test
   public void testHdfsAbsolute() throws URISyntaxException {
     URI hdfsUri = getDFS().getUri();
-    DatasetRepository repository = DatasetRepositories.open(
-        new URI("repo:hdfs://" + hdfsUri.getAuthority() + "/tmp/dsr-repo-test"));
+    URI repositoryUri = new URI("repo:hdfs://" + hdfsUri.getAuthority() + "/tmp/dsr-repo-test");
+    DatasetRepository repository = DatasetRepositories.open(repositoryUri);
 
     // We only do the deeper implementation checks one per combination.
     Assert.assertNotNull("Received a repository", repository);
@@ -97,6 +104,7 @@ public class TestFileSystemURIs extends MiniDFSTest {
         new Path("/tmp/dsr-repo-test"));
     Assert.assertEquals("Root directory should be the correct qualified path",
         expected, fsProvider.getRootDirectory());
+    Assert.assertEquals("Repository URI", repositoryUri, repository.getUri());
   }
 
 }

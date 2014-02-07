@@ -19,6 +19,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.MetadataProvider;
+import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 import java.net.URI;
@@ -54,14 +55,16 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
 
   private final MetadataProvider metadataProvider;
   private final FileSystemDatasetRepository fsRepository;
+  private final URI repositoryUri;
 
   /**
    * Create an HCatalog dataset repository with managed tables.
    */
-  HCatalogDatasetRepository(Configuration conf, MetadataProvider provider) {
+  HCatalogDatasetRepository(Configuration conf, MetadataProvider provider, URI repositoryUri) {
     this.metadataProvider = provider;
     this.fsRepository = new FileSystemDatasetRepository.Builder().configuration(conf)
         .metadataProvider(metadataProvider).build();
+    this.repositoryUri = repositoryUri;
   }
 
   @Override
@@ -95,6 +98,11 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
   @Override
   public Collection<String> list() {
     return metadataProvider.list();
+  }
+
+  @Override
+  public URI getUri() {
+    return repositoryUri;
   }
 
   /**
@@ -177,7 +185,13 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
         // managed
         HCatalogMetadataProvider metadataProvider =
             new HCatalogManagedMetadataProvider(configuration);
-        return new HCatalogDatasetRepository(configuration, metadataProvider);
+        URI repositoryUri;
+        try {
+          repositoryUri = new URI("repo:hive");
+        } catch (URISyntaxException e) {
+          throw new MetadataProviderException(e);
+        }
+        return new HCatalogDatasetRepository(configuration, metadataProvider, repositoryUri);
       }
     }
   }

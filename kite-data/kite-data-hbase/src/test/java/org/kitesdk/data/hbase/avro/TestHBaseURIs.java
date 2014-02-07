@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.hbase.avro;
 
+import java.net.URI;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.RandomAccessDatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepository;
@@ -63,14 +64,16 @@ public class TestHBaseURIs {
   }
 
   @Test
-  public void testHBaseURI() {
+  public void testHBaseURI() throws Exception {
     String zkQuorum = HBaseTestUtils.getConf().get(HConstants.ZOOKEEPER_QUORUM);
     String zkClientPort = HBaseTestUtils.getConf().get(HConstants.ZOOKEEPER_CLIENT_PORT);
     String zk = zkQuorum + ":" + zkClientPort; // OK since zkQuorum is a single host
-    RandomAccessDatasetRepository repo = DatasetRepositories.openRandomAccess("repo:hbase:" + zk);
+    URI repositoryUri = new URI("repo:hbase:" + zk);
+    RandomAccessDatasetRepository repo = DatasetRepositories.openRandomAccess(repositoryUri);
 
     Assert.assertNotNull("Received a repository", repo);
     assertTrue("Repo is a HBase repo", repo instanceof HBaseDatasetRepository);
+    assertEquals("Repository URI", repositoryUri, repo.getUri());
   }
 
 }
