@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.filesystem;
 
+import java.io.IOException;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
