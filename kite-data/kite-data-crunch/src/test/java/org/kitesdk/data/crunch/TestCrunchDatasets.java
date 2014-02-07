@@ -15,11 +15,13 @@
  */
 package org.kitesdk.data.crunch;
 
+import com.google.common.io.Files;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Formats;
-import org.kitesdk.data.MemoryMetadataProvider;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
@@ -49,8 +51,11 @@ public class TestCrunchDatasets {
   @Before
   public void setUp() throws IOException {
     this.conf = new Configuration();
+    FileSystem fileSystem = FileSystem.get(conf);
+    Path testDirectory = fileSystem.makeQualified(
+        new Path(Files.createTempDir().getAbsolutePath()));
     this.repo = new FileSystemDatasetRepository.Builder().configuration(conf)
-        .metadataProvider(new MemoryMetadataProvider(conf)).build();
+        .rootDirectory(testDirectory).build();
   }
 
   @Test

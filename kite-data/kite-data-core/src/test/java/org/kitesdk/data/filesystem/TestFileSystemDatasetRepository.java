@@ -42,6 +42,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public DatasetRepository newRepo(MetadataProvider provider) {
     // this purposely does not set the Configuration to test that the code
     // relies on filesystem URIs set in the DatasetDescriptor.
