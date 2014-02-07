@@ -32,10 +32,25 @@ import com.typesafe.config.Config;
 
 public class AbstractMorphlineTest extends Assert {
   
-  protected Collector collector;
+  /**
+   * Contains the list of all output records that the morphline emitted, available via
+   * {@link Collector#getRecords()}. This can be used to compare expected vs. actual results.
+   */
+  protected Collector collector; 
+  
+  /**
+   * The morphline to run for this unit test.
+   */
   protected Command morphline;
+  
+  /**
+   * The morphline context to use for this unit test.
+   */
   protected MorphlineContext morphContext;
   
+  /** 
+   * The directory in which morphline config files and sample input data files are located. 
+   */
   protected static final String RESOURCES_DIR = "target/test-classes";
   
   @Before
@@ -55,7 +70,7 @@ public class AbstractMorphlineTest extends Assert {
   }
 
   protected Command createMorphline(Config config) {
-    morphContext = createMorphlineContext();
+    morphContext = new MorphlineContext.Builder().setMetricRegistry(new MetricRegistry()).build();
     return new PipeBuilder().build(config, null, collector, morphContext);
   }
   
@@ -64,10 +79,6 @@ public class AbstractMorphlineTest extends Assert {
     config = config.getConfigList("morphlines").get(0);
     Preconditions.checkNotNull(config);
     return config;
-  }
-  
-  private MorphlineContext createMorphlineContext() {
-    return new MorphlineContext.Builder().setMetricRegistry(new MetricRegistry()).build();
   }
   
   protected void deleteAllDocuments() {
