@@ -13,14 +13,19 @@ h1. Usage in your Maven Project
 To use Morphlines in your Maven project, add the following repository to the {{<repositories>}} section of your pom.xml:
 
 {code}
-<repository>
-  <id>cdh.repo</id>
-  <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
-  <name>Cloudera Repositories</name>
-  <snapshots>
-    <enabled>false</enabled>
-  </snapshots>
-</repository>
+<project ...>
+...
+<repositories>
+  <repository>
+    <id>cdh.repo</id>
+    <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+    <name>Cloudera Repositories</name>
+    <snapshots>
+      <enabled>false</enabled>
+    </snapshots>
+  </repository>
+...
+</project>
 {code}
 
 Also, to pull in the minimum set of dependencies add the following dependency to the {{<dependencies>}} section of your pom.xml:
@@ -29,7 +34,7 @@ Also, to pull in the minimum set of dependencies add the following dependency to
 <dependency>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-core</artifactId>
-  <version>0.10.0</version> <!-- or whatever the latest version is -->
+  <version>0.11.0</version> <!-- or whatever the latest version is -->
 </dependency>
 {code}
 
@@ -39,7 +44,7 @@ Alternatively, to pull in the maximum set of dependencies (i.e. all available co
 <dependency>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-all</artifactId>
-  <version>0.10.0</version> <!-- or whatever the latest version is -->
+  <version>0.11.0</version> <!-- or whatever the latest version is -->
   <type>pom</type>
 </dependency>
 {code}
@@ -223,6 +228,30 @@ morphlines : [
 ]
 {code}
 
+h1. Unit Tests
+
+For effective rapid and reliable iterative development of morphline config files and custom morphline commands we recommend adding unit tests to your projects. Here are the ingredients:
+
+# A morphline config file, for example [extractJsonPaths.conf|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/test/resources/test-morphlines/extractJsonPaths.conf]
+# Sample input data, for example [complex.json|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-json/src/test/resources/test-documents/complex.json]
+# A Java class that runs the morphline config file against the given input data and compares expected vs. actual output. If you like you can reuse the little Java unit test framework that ships with morphlines. Simply subclass [AbstractMorphlineTest|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/test/java/org/kitesdk/morphline/api/AbstractMorphlineTest.java] and use it along the lines of the existing morphline unit tests, such as [MorphlineTest|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/test/java/org/kitesdk/morphline/api/MorphlineTest.java] and [JsonMorphlineTest|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-json/src/test/java/org/kitesdk/morphline/json/JsonMorphlineTest.java]. To pull in this unit test framework, add the following dependency to the {{<dependencies>}} section of your pom.xml:
+
+{code}
+<dependency>
+  <groupId>org.kitesdk</groupId>
+  <artifactId>kite-morphlines-core</artifactId>
+  <type>test-jar</type>
+  <scope>test</scope>
+  <version>0.11.0</version> <!-- or whatever the latest version is -->
+</dependency>
+{code}
+
+To print diagnostic information such as the content of records as they pass through the morphline commands, consider enabling TRACE log level, for example by adding the following line to your [log4j.properties|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/test/resources/log4j.properties] file:
+
+{code}
+log4j.logger.org.kitesdk.morphline=TRACE
+{code}
+
 h1. Example Driver Program
 
 This section provides a simple sample Java program that illustrates how to use the API to embed and execute a morphline in a host system ([full source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/test/java/org/kitesdk/morphline/api/MorphlineDemo.java]).
@@ -246,14 +275,6 @@ public static void main(String[] args) {
   }
   Notifications.notifyCommitTransaction(morphline);
 }
-{code}
-
-You can use this program to rapidly prototype ETL logic and try it with sample files. 
-
-To print diagnostic information such as the content of records as they pass through the morphline commands, consider enabling TRACE log level, for example by adding the following line to your log4j.properties file:
-
-{code}
-log4j.logger.org.kitesdk.morphline=TRACE
 {code}
 
 This code is, in essence, what production tools like [MapReduceIndexerTool|https://github.com/cloudera/search/tree/master_1.1.0/search-mr], [Apache Flume Morphline Solr Sink|http://flume.apache.org/FlumeUserGuide.html#morphlinesolrsink] and [Apache Flume MorphlineInterceptor|http://flume.apache.org/FlumeUserGuide.html#morphline-interceptor] and [Morphline Lily HBase Indexer|http://ngdata.github.io/hbase-indexer] are running as part of their operation, as outlined in the following figure:
