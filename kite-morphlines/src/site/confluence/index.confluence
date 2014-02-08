@@ -14,17 +14,18 @@ To use Morphlines in your Maven project, add the following repository to the {{<
 
 {code}
 <project ...>
-...
-<repositories>
-  <repository>
-    <id>cdh.repo</id>
-    <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
-    <name>Cloudera Repositories</name>
-    <snapshots>
-      <enabled>false</enabled>
-    </snapshots>
-  </repository>
-...
+  ...
+  <repositories>
+    <repository>
+      <id>cdh.repo</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+      <name>Cloudera Repositories</name>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  ...
 </project>
 {code}
 

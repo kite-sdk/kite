@@ -13,18 +13,18 @@ See [Online Documentation](http://kitesdk.org/docs/current/kite-morphlines/index
 
 ```xml
 <project ...>
-...
-<repositories>
-  <repository>
-    <id>cdh.repo</id>
-    <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
-    <name>Cloudera Repositories</name>
-    <snapshots>
-      <enabled>false</enabled>
-    </snapshots>
-  </repository>
-</repositories>
-...
+  ...
+  <repositories>
+    <repository>
+      <id>cdh.repo</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+      <name>Cloudera Repositories</name>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  ...
 </project>
 ```
 
