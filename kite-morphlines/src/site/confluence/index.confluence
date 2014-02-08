@@ -252,6 +252,8 @@ To print diagnostic information such as the content of records as they pass thro
 log4j.logger.org.kitesdk.morphline=TRACE
 {code}
 
+Putting it all together, you can download and run this working [example Maven project|https://github.com/kite-sdk/kite-examples/tree/master/kite-examples-morphlines] that demonstrates how to unit test Morphline config files and custom Morphline commands.
+
 h1. Example Driver Program
 
 This section provides a simple sample Java program that illustrates how to use the API to embed and execute a morphline in a host system ([full source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/test/java/org/kitesdk/morphline/api/MorphlineDemo.java]).
