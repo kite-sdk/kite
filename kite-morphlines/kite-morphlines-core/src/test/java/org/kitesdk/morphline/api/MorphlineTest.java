@@ -1805,6 +1805,17 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testImportSpecsWithOnlyFQCNs() {
+    List<String> importSpecs = Arrays.asList(getClass().getName());
+    for (Class clazz : new MorphlineContext().getTopLevelClasses(importSpecs, CommandBuilder.class)) {
+      //System.out.println("found " + clazz);
+    }
+    MorphlineContext ctx = new MorphlineContext.Builder().build(); 
+    ctx.importCommandBuilders(importSpecs);
+    ctx.importCommandBuilders(importSpecs);    
+  }
+  
+  @Test
   @Ignore
   public void testHugeImportSpecs() {
     long start = System.currentTimeMillis();

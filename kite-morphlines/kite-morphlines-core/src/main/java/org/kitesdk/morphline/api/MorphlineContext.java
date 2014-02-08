@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 /**
@@ -105,24 +106,22 @@ public class MorphlineContext {
    * Uses a shaded version of com.google.guava.reflect-14.0.1 to enable running with prior versions
    * of guava without issues.
    */
-  <T> Collection<Class<T>> getTopLevelClasses(Iterable<String> importSpecs, Class<T> iface) {    
+  @VisibleForTesting
+  <T> Collection<Class<T>> getTopLevelClasses(Collection<String> importSpecs, Class<T> iface) { 
+    // count number of FQCNs in importSpecs
+    int fqcnCount = 0;
+    for (String importSpec : importSpecs) {
+      if (!(importSpec.endsWith(".*") || importSpec.endsWith(".**"))) {
+        fqcnCount++;
+      }      
+    }
+    
     HashMap<String,Class<T>> classes = new LinkedHashMap();
     for (ClassLoader loader : getClassLoaders()) {
-      ClassPath classPath;
-      try {
-        classPath = ClassPath.from(loader);
-      } catch (IOException e) {
-        continue;
-      }
-      for (String importSpec : importSpecs) {
-        Set<ClassInfo> classInfos = null;
-        if (importSpec.endsWith(".**")) {
-          String packageName = importSpec.substring(0, importSpec.length() - ".**".length());
-          classInfos = classPath.getTopLevelClassesRecursive(packageName);
-        } else if (importSpec.endsWith(".*")) {
-          String packageName = importSpec.substring(0, importSpec.length() - ".*".length());
-          classInfos = classPath.getTopLevelClasses(packageName);
-        } else { // importSpec is assumed to be a fully qualified class name
+      if (importSpecs.size() == fqcnCount) { 
+        // importSpecs consists solely of FQCNs!
+        // Thus, we can omit the expensive ClassPath.from(loader) scan of the classpath.          
+        for (String importSpec : importSpecs) {  
           Class clazz;
           try {
             //clazz = Class.forName(importSpec, true, loader);
@@ -131,25 +130,52 @@ public class MorphlineContext {
             continue;
           }
           addClass(clazz, classes, iface);
+        }
+      } else {
+        // Need to scan the classpath via ClassPath.from(loader)
+        ClassPath classPath;
+        try {
+          classPath = ClassPath.from(loader);
+        } catch (IOException e) {
           continue;
         }
-        
-        for (ClassInfo info : classInfos) {
-          Class clazz;
-          try {
-            clazz = info.load();
-//            clazz = Class.forName(info.getName());
-          } catch (NoClassDefFoundError e) {
-            continue;
-          } catch (ExceptionInInitializerError e) {
-            continue;
-          } catch (UnsatisfiedLinkError e) {
+        for (String importSpec : importSpecs) {
+          Set<ClassInfo> classInfos = null;
+          if (importSpec.endsWith(".**")) {
+            String packageName = importSpec.substring(0, importSpec.length() - ".**".length());
+            classInfos = classPath.getTopLevelClassesRecursive(packageName);
+          } else if (importSpec.endsWith(".*")) {
+            String packageName = importSpec.substring(0, importSpec.length() - ".*".length());
+            classInfos = classPath.getTopLevelClasses(packageName);
+          } else { // importSpec is assumed to be a fully qualified class name
+            Class clazz;
+            try {
+              //clazz = Class.forName(importSpec, true, loader);
+              clazz = loader.loadClass(importSpec);
+            } catch (ClassNotFoundException e) {
+              continue;
+            }
+            addClass(clazz, classes, iface);
             continue;
           }
-          addClass(clazz, classes, iface);
+          
+          for (ClassInfo info : classInfos) {
+            Class clazz;
+            try {
+              clazz = info.load();
+  //            clazz = Class.forName(info.getName());
+            } catch (NoClassDefFoundError e) {
+              continue;
+            } catch (ExceptionInInitializerError e) {
+              continue;
+            } catch (UnsatisfiedLinkError e) {
+              continue;
+            }
+            addClass(clazz, classes, iface);
+          }
         }
-      }
-    }    
+      }    
+    }
     return classes.values();
   }
   
