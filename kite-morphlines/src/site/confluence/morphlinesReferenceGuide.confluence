@@ -1,6 +1,6 @@
 h1. Morphlines Reference Guide
 
-Morphlines provides a set of frequently\-used high\-level transformation and I/O commands that can be combined in application specific ways. The following tables provide a short description of each available command and a link to the complete documentation.
+Morphlines provides a set of frequently\-used high\-level transformation and I/O commands that can be combined in application specific ways, as described in the [Introduction|index.html]. The following tables provide a short description of each available command and a link to the complete documentation.
 
 {anchor:Implementing\-your\-own\-Custom\-Command}
 \\
