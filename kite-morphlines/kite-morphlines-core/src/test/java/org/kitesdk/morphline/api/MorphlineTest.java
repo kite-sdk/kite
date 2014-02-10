@@ -515,6 +515,59 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
 
   @Test
+  public void testHead() throws Exception {
+    morphline = createMorphline("test-morphlines/head");
+    int size = 5;
+    for (int i = 0; i < size; i++) {
+      assertTrue(morphline.process(new Record()));
+    }
+    assertEquals(3, collector.getRecords().size());    
+  }
+  
+  @Test
+  public void testHeadUnlimited() throws Exception {
+    morphline = createMorphline("test-morphlines/headUnlimited");
+    int size = 5;
+    for (int i = 0; i < size; i++) {
+      assertTrue(morphline.process(new Record()));
+    }
+    assertEquals(size, collector.getRecords().size());    
+  }
+  
+  @Test
+  public void testSampleWithSeed() throws Exception {
+    morphline = createMorphline("test-morphlines/sampleWithSeed");
+    int size = 10;
+    for (int i = 0; i < size; i++) {
+      assertTrue(morphline.process(new Record()));
+    }
+    assertEquals(9, collector.getRecords().size());    
+  }
+  
+  @Test
+  public void testSampleWithoutSeed() throws Exception {
+    morphline = createMorphline("test-morphlines/sampleWithoutSeed");
+    int size = 100;
+    for (int i = 0; i < size; i++) {
+      assertTrue(morphline.process(new Record()));
+    }
+    int actual = collector.getRecords().size();
+    double delta = 0.2;
+    assertTrue("actual: " + actual, actual >= Math.round(size * (0.9 - delta)));
+    assertTrue("actual: " + actual, actual <= Math.round(size * (0.9 + delta)));
+  }
+  
+  @Test
+  public void testSampleWithProbabilityOne() throws Exception {
+    morphline = createMorphline("test-morphlines/sampleWithProbabilityOne");
+    int size = 10;
+    for (int i = 0; i < size; i++) {
+      assertTrue(morphline.process(new Record()));
+    }
+    assertEquals(size, collector.getRecords().size());    
+  }
+  
+  @Test
   public void testSeparateAttachments() throws Exception {
     morphline = createMorphline("test-morphlines/separateAttachments");    
     Record record = new Record();

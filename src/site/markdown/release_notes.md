@@ -3,6 +3,18 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version 0.12.0
+
+Release date: TBD
+
+Version 0.12.0 has the following notable changes:
+
+* Morphlines Library
+    * Added a sampling command that forwards each input record with a given probability to its child command: [sample](kite-morphlines/morphlinesReferenceGuide.html#sample)
+    * Added a command that ignores all input records beyond the N-th record, akin to the Unix head command: [head](kite-morphlines/morphlinesReferenceGuide.html#head)
+    * Improved morphline import performance if all commands are specified via fully qualified class names.
+    * Added several performance enhancements.
+
 ## Version 0.11.0
 
 Release date: February 6, 2014
