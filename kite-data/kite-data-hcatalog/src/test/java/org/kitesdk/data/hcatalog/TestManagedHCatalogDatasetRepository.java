@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.hcatalog;
 
+import java.net.URI;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.filesystem.TestFileSystemDatasetRepository;
@@ -37,7 +38,7 @@ public class TestManagedHCatalogDatasetRepository extends TestFileSystemDatasetR
 
   @Override
   public DatasetRepository newRepo(MetadataProvider provider) {
-    return new HCatalogDatasetRepository(conf, provider);
+    return new HCatalogDatasetRepository(conf, provider, URI.create("repo:hive"));
   }
 
   @Override

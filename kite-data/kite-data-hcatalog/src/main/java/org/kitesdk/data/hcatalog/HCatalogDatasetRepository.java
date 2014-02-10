@@ -15,12 +15,13 @@
  */
 package org.kitesdk.data.hcatalog;
 
+import com.google.common.base.Preconditions;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.MetadataProvider;
-import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
+import org.kitesdk.data.hcatalog.impl.Loader;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -185,13 +186,26 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
         // managed
         HCatalogMetadataProvider metadataProvider =
             new HCatalogManagedMetadataProvider(configuration);
-        URI repositoryUri;
-        try {
-          repositoryUri = new URI("repo:hive");
-        } catch (URISyntaxException e) {
-          throw new MetadataProviderException(e);
-        }
+        URI repositoryUri = getRepositoryUri(configuration);
         return new HCatalogDatasetRepository(configuration, metadataProvider, repositoryUri);
+      }
+    }
+
+    private URI getRepositoryUri(Configuration conf) {
+      String hiveMetaStoreUriProperty = conf.get(Loader.HIVE_METASTORE_URI_PROP);
+      if (hiveMetaStoreUriProperty == null) {
+        return URI.create("repo:hive");
+      } else {
+        URI hiveMetaStoreUri = URI.create(hiveMetaStoreUriProperty);
+        Preconditions.checkArgument(hiveMetaStoreUri.getScheme().equals("thrift"),
+            "Metastore URI scheme must be 'thrift'.");
+        String host = hiveMetaStoreUri.getHost();
+        int port = hiveMetaStoreUri.getPort();
+        if (port == -1) {
+          return URI.create(String.format("repo:hive://%s/", host));
+        } else {
+          return URI.create(String.format("repo:hive://%s:%s/", host, port));
+        }
       }
     }
   }

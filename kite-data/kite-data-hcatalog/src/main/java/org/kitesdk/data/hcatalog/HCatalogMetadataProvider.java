@@ -41,12 +41,18 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
       .getLogger(HCatalogMetadataProvider.class);
 
   protected final Configuration conf;
-  final HCatalog hcat;
+  private HCatalog hcat;
 
   HCatalogMetadataProvider(Configuration conf) {
     Preconditions.checkArgument(conf != null, "Configuration cannot be null");
     this.conf = conf;
-    this.hcat = new HCatalog(conf);
+  }
+
+  protected synchronized HCatalog getHcat() {
+    if (hcat == null) {
+      hcat = new HCatalog(conf);
+    }
+    return hcat;
   }
 
   @Override
@@ -59,9 +65,9 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
       throw new DatasetNotFoundException("Table not found: " + name);
     }
 
-    Table table = hcat.getTable(HiveUtils.DEFAULT_DB, name);
+    Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
     HiveUtils.updateTableSchema(table, descriptor);
-    hcat.alterTable(table);
+    getHcat().alterTable(table);
     return descriptor;
   }
 
@@ -73,7 +79,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
     if (!exists(name)) {
       return false;
     }
-    hcat.dropTable(HiveUtils.DEFAULT_DB, name);
+    getHcat().dropTable(HiveUtils.DEFAULT_DB, name);
     return true;
   }
 
@@ -81,17 +87,17 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
   public boolean exists(String name) {
     Preconditions.checkArgument(name != null, "Name cannot be null");
 
-    return hcat.exists(HiveUtils.DEFAULT_DB, name);
+    return getHcat().exists(HiveUtils.DEFAULT_DB, name);
   }
 
   @Override
   public Collection<String> list() {
-    return hcat.getAllTables(HiveUtils.DEFAULT_DB);
+    return getHcat().getAllTables(HiveUtils.DEFAULT_DB);
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public void partitionAdded(String name, String path) {
-    hcat.addPartition(HiveUtils.DEFAULT_DB, name, path);
+    getHcat().addPartition(HiveUtils.DEFAULT_DB, name, path);
   }
 }
