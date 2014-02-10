@@ -38,7 +38,7 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
   public DatasetDescriptor load(String name) {
     Preconditions.checkArgument(name != null, "Name cannot be null");
 
-    final Table table = hcat.getTable(HiveUtils.DEFAULT_DB, name);
+    final Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
 
     if (!TableType.MANAGED_TABLE.equals(table.getTableType())) {
       throw new MetadataProviderException("Table is not managed");
@@ -65,10 +65,10 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
         name, descriptor, false /* managed table */);
 
     // create it
-    hcat.createTable(table);
+    getHcat().createTable(table);
 
     // load the created table to get the data location
-    final Table newTable = hcat.getTable(HiveUtils.DEFAULT_DB, name);
+    final Table newTable = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
 
     return new DatasetDescriptor.Builder(descriptor)
         .location(newTable.getDataLocation())

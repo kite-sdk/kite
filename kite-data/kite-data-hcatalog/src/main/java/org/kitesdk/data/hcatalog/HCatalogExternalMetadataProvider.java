@@ -53,7 +53,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
   public DatasetDescriptor load(String name) {
     Preconditions.checkArgument(name != null, "Name cannot be null");
 
-    final Table table = hcat.getTable(HiveUtils.DEFAULT_DB, name);
+    final Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
 
     if (!TableType.EXTERNAL_TABLE.equals(table.getTableType())) {
       throw new MetadataProviderException(
@@ -90,7 +90,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
         name, newDescriptor, true /* external table */ );
 
     // assign the location of the the table
-    hcat.createTable(table);
+    getHcat().createTable(table);
 
     return newDescriptor;
   }

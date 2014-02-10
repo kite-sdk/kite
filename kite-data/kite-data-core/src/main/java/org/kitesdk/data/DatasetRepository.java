@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data;
 
+import java.net.URI;
 import java.util.Collection;
 import javax.annotation.concurrent.Immutable;
 
@@ -166,5 +167,17 @@ public interface DatasetRepository {
    * @since 0.7.0
    */
   Collection<String> list();
+
+  /**
+   * Return the {@link URI} of this repository. When used with the {@link
+   * DatasetRepositories#open(java.net.URI)} (or {@link
+   * DatasetRepositories#openRandomAccess(java.net.URI)}) method,
+   * an equivalent {@code DatasetRepository} object to {@code this} will be returned.
+   *
+   * @return the {@link URI} of this repository
+   *
+   * @since 0.12.0
+   */
+  URI getUri();
 
 }
