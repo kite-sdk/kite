@@ -179,34 +179,51 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
         // external
         HCatalogMetadataProvider metadataProvider =
             new HCatalogExternalMetadataProvider(configuration, rootDirectory);
-        return new FileSystemDatasetRepository.Builder()
-            .configuration(configuration)
-            .metadataProvider(metadataProvider).build();
+        URI repositoryUri = getRepositoryUri(configuration, rootDirectory);
+        return new HCatalogExternalDatasetRepository(configuration, metadataProvider,
+            repositoryUri);
       } else {
         // managed
         HCatalogMetadataProvider metadataProvider =
             new HCatalogManagedMetadataProvider(configuration);
-        URI repositoryUri = getRepositoryUri(configuration);
+        URI repositoryUri = getRepositoryUri(configuration, null);
         return new HCatalogDatasetRepository(configuration, metadataProvider, repositoryUri);
       }
     }
 
-    private URI getRepositoryUri(Configuration conf) {
+    private URI getRepositoryUri(Configuration conf, Path rootDirectory) {
       String hiveMetaStoreUriProperty = conf.get(Loader.HIVE_METASTORE_URI_PROP);
-      if (hiveMetaStoreUriProperty == null) {
-        return URI.create("repo:hive");
-      } else {
+      StringBuilder uri = new StringBuilder("repo:hive");
+      if (hiveMetaStoreUriProperty != null) {
         URI hiveMetaStoreUri = URI.create(hiveMetaStoreUriProperty);
         Preconditions.checkArgument(hiveMetaStoreUri.getScheme().equals("thrift"),
             "Metastore URI scheme must be 'thrift'.");
         String host = hiveMetaStoreUri.getHost();
+        uri.append("://").append(host);
         int port = hiveMetaStoreUri.getPort();
-        if (port == -1) {
-          return URI.create(String.format("repo:hive://%s/", host));
-        } else {
-          return URI.create(String.format("repo:hive://%s:%s/", host, port));
+        if (port != -1) {
+          uri.append(":").append(port);
+        }
+        // workaround for bug where repo:hive://host:port (no trailing /) is not recognized
+        if (rootDirectory == null) {
+          uri.append("/");
         }
       }
+      if (rootDirectory != null) {
+        if (hiveMetaStoreUriProperty == null) {
+          uri.append(":");
+        }
+        URI rootUri = rootDirectory.toUri();
+        uri.append(rootUri.getPath());
+        if (rootUri.getHost() != null) {
+          uri.append("?").append("hdfs-host").append("=").append(rootUri.getHost());
+          if (rootUri.getPort() != -1) {
+            uri.append("&").append("hdfs-port").append("=").append(rootUri.getPort());
+
+          }
+        }
+      }
+      return URI.create(uri.toString());
     }
   }
 }
