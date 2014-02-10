@@ -58,6 +58,7 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
   /**
    * Create an HCatalog dataset repository with managed tables.
    */
+  @SuppressWarnings("deprecation")
   HCatalogDatasetRepository(Configuration conf, MetadataProvider provider) {
     this.metadataProvider = provider;
     this.fsRepository = new FileSystemDatasetRepository.Builder().configuration(conf)
@@ -160,6 +161,7 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
      *
      * @since 0.9.0
      */
+    @SuppressWarnings("deprecation")
     public DatasetRepository build() {
 
       if (configuration == null) {

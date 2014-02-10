@@ -37,7 +37,7 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HBaseMetadataProvider extends AbstractMetadataProvider {
+class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   private static final Logger logger = LoggerFactory
       .getLogger(HBaseMetadataProvider.class);

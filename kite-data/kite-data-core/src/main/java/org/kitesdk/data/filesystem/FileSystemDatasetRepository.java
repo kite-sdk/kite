@@ -99,7 +99,9 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    * @param metadataProvider the provider for metadata storage
    *
    * @since 0.8.0
+   * @deprecated will be removed from the public API in 0.13.0
    */
+  @Deprecated
   public FileSystemDatasetRepository(
       Configuration conf, MetadataProvider metadataProvider) {
     Preconditions.checkArgument(conf != null, "Configuration cannot be null");
@@ -355,7 +357,9 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   /**
    * @return the {@link MetadataProvider} being used by this repository.
    * @since 0.2.0
+   * @deprecated will be removed from the public API in 0.13.0
    */
+  @Deprecated
   public MetadataProvider getMetadataProvider() {
     return metadataProvider;
   }
@@ -458,7 +462,9 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     /**
      * The {@link MetadataProvider} for metadata storage (optional). If not
      * specified, a {@link FileSystemMetadataProvider} will be used.
+     * @deprecated will be removed from the public API in 0.13.0
      */
+    @Deprecated
     public Builder metadataProvider(MetadataProvider metadataProvider) {
       this.metadataProvider = metadataProvider;
       return this;

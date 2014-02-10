@@ -94,6 +94,7 @@ public class TestHiveURIs extends TestFileSystemURIs {
     // this will fail.
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testExternalURI() {
     URI hdfsUri = getDFS().getUri();

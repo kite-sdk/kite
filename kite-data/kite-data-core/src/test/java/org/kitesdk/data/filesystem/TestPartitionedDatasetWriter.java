@@ -42,7 +42,7 @@ public class TestPartitionedDatasetWriter {
   private PartitionedDatasetWriter<Object> writer;
 
   @Before
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "deprecation"})
   public void setUp() throws IOException {
     this.conf = new Configuration();
     this.fileSystem = FileSystem.get(conf);

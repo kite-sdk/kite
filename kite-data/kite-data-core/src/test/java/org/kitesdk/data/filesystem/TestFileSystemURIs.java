@@ -38,6 +38,7 @@ public class TestFileSystemURIs extends MiniDFSTest {
     new Loader().load();
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testLocalRelative() throws URISyntaxException {
     DatasetRepository repository = DatasetRepositories.open(new URI("repo:file:target/dsr-repo-test"));
@@ -59,6 +60,7 @@ public class TestFileSystemURIs extends MiniDFSTest {
         expected, fsProvider.getRootDirectory());
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testLocalAbsolute() throws URISyntaxException {
     DatasetRepository repository = DatasetRepositories.open(new URI("repo:file:/tmp/dsr-repo-test"));
@@ -76,6 +78,7 @@ public class TestFileSystemURIs extends MiniDFSTest {
     DatasetRepositories.open("repo:hdfs:/");
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testHdfsAbsolute() throws URISyntaxException {
     URI hdfsUri = getDFS().getUri();
