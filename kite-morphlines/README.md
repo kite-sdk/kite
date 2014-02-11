@@ -63,7 +63,7 @@ See [Online Documentation](http://kitesdk.org/docs/current/kite-morphlines/index
 
 ## Building
 
-This step builds the software from source.
+This step builds the software from source. It also runs the unit tests.
 
 ```bash
 git clone https://github.com/kite-sdk/kite.git
@@ -74,6 +74,24 @@ cd kite
 mvn clean package
 find kite-morphlines/kite-morphlines-core/target -name '*.jar'
 find kite-morphlines/kite-morphlines-all/target -name '*.jar'
+```
+
+## Using the Maven CLI to run test data through a morphline
+
+* This section describes how to use the mvn CLI to run test data through a morphline config file. 
+* Here we use the simple [MorphlineDemo](https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/test/java/org/kitesdk/morphline/api/MorphlineDemo.java) class.
+
+```bash
+cd kite/kite-morphlines/kite-morphlines-core
+mvn compile exec:java -Dexec.mainClass="org.kitesdk.morphline.api.MorphlineDemo" -Dexec.args="src/test/resources/test-morphlines/addValues.conf src/test/resources/test-documents/email.txt" -Dexec.classpathScope=test
+```
+
+* The first parameter in `exec.args` above is the morphline config file and the remaining parameters specify one or more data files to run over. At least one data file is required.
+* To print diagnostic information such as the content of records as they pass through the morphline commands, consider enabling TRACE log level, for example by adding the following line to your 
+`src/test/resources/log4j.properties' file:
+
+```
+log4j.logger.org.kitesdk.morphline=TRACE
 ```
 
 ## Integrating with Eclipse
