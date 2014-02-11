@@ -88,7 +88,7 @@ mvn compile exec:java -Dexec.mainClass="org.kitesdk.morphline.api.MorphlineDemo"
 
 * The first parameter in `exec.args` above is the morphline config file and the remaining parameters specify one or more data files to run over. At least one data file is required.
 * To print diagnostic information such as the content of records as they pass through the morphline commands, consider enabling TRACE log level, for example by adding the following line to your 
-`src/test/resources/log4j.properties' file:
+`src/test/resources/log4j.properties` file:
 
 ```
 log4j.logger.org.kitesdk.morphline=TRACE
