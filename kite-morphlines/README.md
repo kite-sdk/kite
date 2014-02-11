@@ -83,7 +83,7 @@ find kite-morphlines/kite-morphlines-all/target -name '*.jar'
 
 ```bash
 cd kite/kite-morphlines/kite-morphlines-core
-mvn compile exec:java -Dexec.mainClass="org.kitesdk.morphline.api.MorphlineDemo" -Dexec.args="src/test/resources/test-morphlines/addValues.conf src/test/resources/test-documents/email.txt" -Dexec.classpathScope=test
+mvn test -DskipTests exec:java -Dexec.mainClass="org.kitesdk.morphline.api.MorphlineDemo" -Dexec.args="src/test/resources/test-morphlines/addValues.conf src/test/resources/test-documents/email.txt" -Dexec.classpathScope=test
 ```
 
 * The first parameter in `exec.args` above is the morphline config file and the remaining parameters specify one or more data files to run over. At least one data file is required.
