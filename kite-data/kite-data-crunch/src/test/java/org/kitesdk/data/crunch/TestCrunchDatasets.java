@@ -103,9 +103,9 @@ public class TestCrunchDatasets {
         "username", 2).build();
 
     Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
-        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).property("repositoryUri", repoUri).build());
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
     Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
-        .schema(USER_SCHEMA).property("repositoryUri", repoUri).format(Formats.PARQUET).build());
+        .schema(USER_SCHEMA).format(Formats.PARQUET).build());
 
     writeTestUsers(inputDataset, 10);
 
