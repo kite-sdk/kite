@@ -25,8 +25,8 @@
   <modules>
     <module>kite-hadoop-dependencies</module>
     <module>kite-data</module>
-    <!--
     <module>kite-maven-plugin</module>
+    <!--
     <module>kite-tools</module>
     <module>kite-morphlines</module>
     -->

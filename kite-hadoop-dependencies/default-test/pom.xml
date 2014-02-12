@@ -67,11 +67,6 @@
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-hdfs</artifactId>
       <version>${vers.hadoop}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-hdfs</artifactId>
-      <version>${vers.hadoop}</version>
       <type>test-jar</type>
     </dependency>
     <dependency>
