@@ -124,6 +124,10 @@ public class URIPattern {
     } else if (!uri.isOpaque()) {
       addAuthority(uri, result);
 
+      if (pattern.getPath().isEmpty() && !uri.getPath().isEmpty()) {
+        return null;
+      }
+
       Iterator<String> parts = PATH_SPLITTER.split(uri.getPath()).iterator();
       for (String patternPart : PATH_SPLITTER.split(pattern.getPath())) {
         if (!addMatch(patternPart, parts, result)) {
