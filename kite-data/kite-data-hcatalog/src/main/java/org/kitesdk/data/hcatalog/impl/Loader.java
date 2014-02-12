@@ -32,6 +32,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import parquet.Preconditions;
 
 /**
  * A Loader implementation to register URIs for FileSystemDatasetRepositories.
@@ -42,6 +43,7 @@ public class Loader implements Loadable {
 
   public static final String HIVE_METASTORE_URI_PROP = "hive.metastore.uris";
   private static final int UNSPECIFIED_PORT = -1;
+  private static final String ALWAYS_REPLACED = "ALWAYS-REPLACED";
 
   /**
    * This class builds configured instances of
@@ -58,16 +60,14 @@ public class Loader implements Loadable {
 
     @Override
     public DatasetRepository getFromOptions(Map<String, String> match) {
-      logger.debug("External URI options: {}", match);
+      logger.info("External URI options: {}", match);
       final Path root;
       String path = match.get("path");
-      if (path == null || path.isEmpty()) {
-        root = new Path(".");
-      } else if (match.containsKey("absolute")
+      if (match.containsKey("absolute")
           && Boolean.valueOf(match.get("absolute"))) {
-        root = new Path("/", path);
+        root = path == null ? new Path("/") : new Path("/", path);
       } else {
-        root = new Path(path);
+        root = path == null ? new Path(".") : new Path(path);
       }
       final FileSystem fs;
       try {
@@ -100,6 +100,9 @@ public class Loader implements Loadable {
       logger.debug("Managed URI options: {}", match);
       // make a modifiable copy and setup the MetaStore URI
       Configuration conf = new Configuration(envConf);
+      // sanity check the URI
+      Preconditions.checkArgument(!ALWAYS_REPLACED.equals(match.get("host")),
+          "[BUG] URI matched but authority was not replaced.");
       setMetaStoreURI(conf, match);
       return new HCatalogDatasetRepository.Builder()
           .configuration(conf)
@@ -129,8 +132,11 @@ public class Loader implements Loadable {
         new ManagedBuilder(conf);
     Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create("hive")), managedBuilder);
+    // add a URI with no path to allow overriding the metastore authority
+    // the authority section is *always* a URI without it cannot match and one
+    // with a path (so missing authority) also cannot match
     Accessor.getDefault().registerDatasetRepository(
-        new URIPattern(URI.create("hive://" + hiveAuthority + "/")),
+        new URIPattern(URI.create("hive://" + ALWAYS_REPLACED)),
         managedBuilder);
 
     // external data sets
