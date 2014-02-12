@@ -201,10 +201,6 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
         Preconditions.checkArgument(hiveMetaStoreUri.getScheme().equals("thrift"),
             "Metastore URI scheme must be 'thrift'.");
         uri.append("://").append(hiveMetaStoreUri.getAuthority());
-        // workaround for bug where repo:hive://host:port (no trailing /) is not recognized
-        if (rootDirectory == null) {
-          uri.append("/");
-        }
       }
       if (rootDirectory != null) {
         if (hiveMetaStoreUriProperty == null) {

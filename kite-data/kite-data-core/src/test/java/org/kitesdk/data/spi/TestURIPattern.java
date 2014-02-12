@@ -88,6 +88,25 @@ public class TestURIPattern {
   }
 
   @Test
+  public void testEmptyPath() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("scheme://authority");
+    String uri = "scheme://real-authority";
+
+    Assert.assertTrue(pattern.matches(uri));
+
+    Map<String, String> actual = pattern.getMatch(uri);
+    expected.put("scheme", "scheme");
+    expected.put("host", "real-authority");
+    Assert.assertEquals(expected, actual);
+
+    // should not match any path element or fragment
+    Assert.assertFalse(pattern.matches(uri + "/"));
+    Assert.assertFalse(pattern.matches("scheme:/"));
+    Assert.assertFalse(pattern.matches(uri + "/abc"));
+    Assert.assertFalse(pattern.matches(uri + "#fragment"));
+  }
+
+  @Test
   public void testStaticPathStart() throws URISyntaxException {
     URIPattern pattern = new URIPattern("mysql:/required/:db/:table");
     String uri = "mysql:/required/myDB/myTable";

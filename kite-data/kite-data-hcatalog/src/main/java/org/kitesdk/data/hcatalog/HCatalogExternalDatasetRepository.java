@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.hcatalog;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.net.URI;
 import java.util.Collection;
 import org.apache.hadoop.conf.Configuration;
@@ -26,6 +27,7 @@ import org.kitesdk.data.spi.AbstractDatasetRepository;
 
 class HCatalogExternalDatasetRepository extends AbstractDatasetRepository {
 
+  private final MetadataProvider provider;
   private final FileSystemDatasetRepository fsRepository;
   private final URI repositoryUri;
 
@@ -34,6 +36,7 @@ class HCatalogExternalDatasetRepository extends AbstractDatasetRepository {
    */
   @SuppressWarnings("deprecation")
   HCatalogExternalDatasetRepository(Configuration conf, MetadataProvider provider, URI repositoryUri) {
+    this.provider = provider;
     this.fsRepository = new FileSystemDatasetRepository.Builder().configuration(conf)
         .metadataProvider(provider).build();
     this.repositoryUri = repositoryUri;
@@ -74,4 +77,8 @@ class HCatalogExternalDatasetRepository extends AbstractDatasetRepository {
     return repositoryUri;
   }
 
+  @VisibleForTesting
+  MetadataProvider getMetadataProvider() {
+    return provider;
+  }
 }
