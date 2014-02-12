@@ -15,6 +15,7 @@
  */
 package org.kitesdk.tools;
 
+import java.io.IOException;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepositories;
@@ -33,7 +34,7 @@ public class TestCombinedLogFormatConverter {
       .class.getName());
 
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
     FileUtil.fullyDelete(TEST_DIR);
   }
 
