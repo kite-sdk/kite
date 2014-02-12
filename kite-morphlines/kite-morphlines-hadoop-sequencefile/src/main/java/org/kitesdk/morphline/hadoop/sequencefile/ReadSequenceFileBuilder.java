@@ -21,13 +21,13 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.avro.file.SeekableInput;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PositionedReadable;
 import org.apache.hadoop.fs.Seekable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.SequenceFile.Reader.Option;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.kitesdk.morphline.api.Command;
@@ -80,13 +80,18 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
     }
   
     @Override
-    protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
-      FSDataInputStream fsInputStream = new FSDataInputStream(new ForwardOnlySeekable(in));
-      Option opt = SequenceFile.Reader.stream(fsInputStream);
+    protected boolean doProcess(Record inputRecord, final InputStream in) throws IOException {
       SequenceFile.Metadata sequenceFileMetaData = null;
       SequenceFile.Reader reader = null;
       try {
-        reader = new SequenceFile.Reader(conf, opt);   
+        // Need to pass valid FS and path, although overriding openFile means
+        // they will not be used.
+        reader = new SequenceFile.Reader(FileSystem.getLocal(conf), new Path("/"), conf) {
+          @Override
+          protected FSDataInputStream openFile(FileSystem fs, Path f, int sz, long l) throws IOException {
+            return new FSDataInputStream(new ForwardOnlySeekable(in));
+          }
+        };
         if (includeMetaData) {
           sequenceFileMetaData = reader.getMetadata();
         }
@@ -130,7 +135,6 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
     }
   }
 
-  
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
@@ -153,7 +157,7 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
     public void seek(long pos) throws IOException {
       fosInputStream.seek(pos);
     }
-    
+
     /**
      * Return the current offset from the start of the file
      */
@@ -175,7 +179,7 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
      * change the current offset of a file, and is thread-safe.
      */
     public int read(long position, byte[] buffer, int offset, int length)
-    throws IOException {
+        throws IOException {
       throw new UnsupportedOperationException("not implemented!");
     }
 
@@ -185,7 +189,7 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
      * change the current offset of a file, and is thread-safe.
      */
     public void readFully(long position, byte[] buffer, int offset, int length)
-    throws IOException {
+        throws IOException {
       throw new UnsupportedOperationException("not implemented!");
     }
 
@@ -205,30 +209,29 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
       return ret;
     }
   }
-  
-  
+
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
   /**
-   * A {@link SeekableInput} backed by an {@link InputStream} that can only advance
+   * A SeekableInput backed by an {@link java.io.InputStream} that can only advance
    * forward, not backwards.
    */
-  private static final class ForwardOnlySeekableInputStream implements SeekableInput {
-    
+  private static final class ForwardOnlySeekableInputStream { // implements SeekableInput {
+
     private final InputStream in;
     private long pos = 0;
-    
+
     public ForwardOnlySeekableInputStream(InputStream in) {
       this.in = in;
     }
 
-    @Override
+    //    @Override
     public long tell() throws IOException {
       return pos;
     }
-    
-    @Override
+
+    //    @Override
     public int read(byte b[], int off, int len) throws IOException {
       int n = in.read(b, off, len);
       if (n > 0) {
@@ -236,13 +239,13 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
       }
       return n;
     }
-    
-    @Override
+
+    //    @Override
     public long length() throws IOException {
       throw new UnsupportedOperationException("Random access is not supported");
     }
 
-    @Override
+    //    @Override
     public void seek(long p) throws IOException {
       long todo = p - pos;
       if (todo < 0) {
@@ -258,7 +261,7 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
       while (todo > 0) {
         long ret = in.skip(todo);
         if (ret == 0) {
-          // skip may return 0 even if we're not at EOF.  Luckily, we can 
+          // skip may return 0 even if we're not at EOF.  Luckily, we can
           // use the read() method to figure out if we're at the end.
           int b = in.read();
           if (b == -1) {
@@ -272,11 +275,11 @@ public final class ReadSequenceFileBuilder implements CommandBuilder {
       }
       return len;
     }
-    
-    @Override
+
+    //    @Override
     public void close() throws IOException {
       in.close();
     }
-    
+
   }
 }

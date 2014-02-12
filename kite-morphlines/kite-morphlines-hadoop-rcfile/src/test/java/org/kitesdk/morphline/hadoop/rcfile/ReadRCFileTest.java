@@ -55,7 +55,9 @@ public class ReadRCFileTest extends AbstractMorphlineTest {
   @BeforeClass
   public static void setupFS() throws IOException {
     final Configuration conf = new Configuration();
-    cluster = new MiniDFSCluster.Builder(conf).build();
+    cluster = new MiniDFSCluster(new Configuration(), 1, true, null);
+    // Builder is not compatible with hadoop1
+    //cluster = new MiniDFSCluster.Builder(conf).build();
     dfs = cluster.getFileSystem();
   }
 

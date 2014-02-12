@@ -30,14 +30,14 @@
       <artifactId>kite-morphlines-core</artifactId>
     </dependency>
 
-    <!-- kite root pom already declares it as "provided" but this doesn't actually work, 
-         perhaps because it declares MR1 but parquet-avro appears to be built against yarn -->
+    <!-- needed for parquet-avro -->
     <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-dependencies</artifactId>
+      <type>pom</type>
       <scope>provided</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>parquet-avro</artifactId>

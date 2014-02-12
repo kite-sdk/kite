@@ -120,6 +120,11 @@ public final class SingleStreamFileSystem extends FileSystem {
         + " is not found");
   }
 
+  @Override
+  public boolean delete(Path path) throws IOException {
+    throw new UnsupportedOperationException("not implemented!");
+  }
+
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
