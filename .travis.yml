@@ -6,4 +6,5 @@ env:
   - HADOOP_PROFILE=default
   - HADOOP_PROFILE=hadoop-1
 
+before_script: umask 0022
 script: mvn test -P $HADOOP_PROFILE
