@@ -61,6 +61,11 @@ public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
   }
 
   @Override
+  public Predicate<Integer> projectStrict(Predicate<Object> predicate) {
+    return null;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;

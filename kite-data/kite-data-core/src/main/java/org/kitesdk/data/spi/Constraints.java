@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -35,6 +36,8 @@ import javax.annotation.concurrent.Immutable;
 import org.apache.avro.generic.GenericRecord;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A set of simultaneous constraints.
@@ -43,6 +46,8 @@ import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
  */
 @Immutable
 public class Constraints {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Constraints.class);
 
   private final Map<String, Predicate> constraints;
 
@@ -64,8 +69,109 @@ public class Constraints {
    * @return a Predicate to test if entity objects satisfy this constraint set
    */
   public <E> Predicate<E> toEntityPredicate() {
-    // TODO: Filter constraints that are definitely satisfied by a StorageKey
     return new EntityPredicate<E>(constraints);
+  }
+
+  /**
+   * Get a {@link Predicate} for testing entity objects that match the given
+   * {@link StorageKey}.
+   *
+   * @param <E> The type of entities to be matched
+   * @param key a StorageKey for entities tested with the Predicate
+   * @return a Predicate to test if entity objects satisfy this constraint set
+   */
+  public <E> Predicate<E> toEntityPredicate(StorageKey key) {
+    if (key != null) {
+      return new EntityPredicate<E>(minimizeFor(key));
+    }
+    return toEntityPredicate();
+  }
+
+  @VisibleForTesting
+  @SuppressWarnings("unchecked")
+  Map<String, Predicate> minimizeFor(StorageKey key) {
+    Map<String, Predicate> unsatisfied = Maps.newHashMap(constraints);
+    PartitionStrategy strategy = key.getPartitionStrategy();
+    Set<String> timeFields = Sets.newHashSet();
+    int i = 0;
+    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+      String field = fp.getSourceName();
+      if (fp instanceof CalendarFieldPartitioner) {
+        // keep track of time fields to consider
+        timeFields.add(field);
+      }
+      // remove the field if it is satisfied by the StorageKey
+      Predicate original = unsatisfied.get(field);
+      if (original != null) {
+        Predicate isSatisfiedBy = fp.projectStrict(original);
+        LOG.debug("original: " + original + ", strict: " + isSatisfiedBy);
+        if ((isSatisfiedBy != null) && isSatisfiedBy.apply(key.get(i))) {
+          LOG.debug("removing " + field + " satisfied by " + key.get(i));
+          unsatisfied.remove(field);
+        }
+      }
+      i += 1;
+    }
+    // remove fields satisfied by the time predicates
+    for (String timeField : timeFields) {
+      Predicate<Long> original = unsatisfied.get(timeField);
+      if (original != null) {
+        Predicate<Marker> isSatisfiedBy = TimeDomain.get(strategy, timeField)
+            .projectStrict(original);
+        LOG.debug("original: " + original + ", strict: " + isSatisfiedBy);
+        if ((isSatisfiedBy != null) && isSatisfiedBy.apply(key)) {
+          LOG.debug("removing " + timeField + " satisfied by " + key);
+          unsatisfied.remove(timeField);
+        }
+      }
+    }
+    return ImmutableMap.copyOf(unsatisfied);
+  }
+
+  @VisibleForTesting
+  @SuppressWarnings("unchecked")
+  Map<String, Predicate> minimizeFor(
+      PartitionStrategy strategy, MarkerRange keyRange) {
+    Map<String, Predicate> unsatisfied = Maps.newHashMap(constraints);
+    Set<String> timeFields = Sets.newHashSet();
+    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+      String field = fp.getSourceName();
+      if (fp instanceof CalendarFieldPartitioner) {
+        // keep track of time fields to consider
+        timeFields.add(field);
+      }
+      String partitionName = fp.getName();
+      // add the non-time field if it is not satisfied by the MarkerRange
+      Predicate original = unsatisfied.get(field);
+      if (original != null) {
+        Predicate isSatisfiedBy = fp.projectStrict(original);
+        Marker start = keyRange.getStart().getBound();
+        Marker end = keyRange.getEnd().getBound();
+        // check both endpoints. this duplicates a lot of work because we are
+        // using Markers rather than the original predicates
+        if ((isSatisfiedBy != null) &&
+            !isSatisfiedBy.apply(start.get(partitionName)) &&
+            !isSatisfiedBy.apply(end.get(partitionName))) {
+          unsatisfied.remove(field);
+        }
+      }
+    }
+    // add any time predicates that aren't satisfied by the MarkerRange
+    for (String timeField : timeFields) {
+      Predicate<Long> original = unsatisfied.get(timeField);
+      if (original != null) {
+        Predicate<Marker> isSatisfiedBy = TimeDomain.get(strategy, timeField)
+            .projectStrict(original);
+        // check both endpoints. this duplicates a lot of work because we are
+        // using Markers rather than the original predicates
+        if ((isSatisfiedBy != null) &&
+            isSatisfiedBy.apply(keyRange.getStart().getBound()) &&
+            isSatisfiedBy.apply(keyRange.getEnd().getBound())) {
+          unsatisfied.remove(timeField);
+        }
+      }
+    }
+    return ImmutableMap.copyOf(unsatisfied);
   }
 
   /**
@@ -323,7 +429,7 @@ public class Constraints {
 
       // check multi-field time groups
       for (String sourceName : timeFields) {
-        Predicate<StorageKey> timePredicate = TimeDomain
+        Predicate<Marker> timePredicate = TimeDomain
             .get(strategy, sourceName)
             .project(predicates.get(sourceName));
         if (timePredicate != null && !timePredicate.apply(key)) {

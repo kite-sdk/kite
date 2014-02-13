@@ -16,7 +16,9 @@
 package org.kitesdk.data.spi.partition;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.DiscreteDomains;
 import com.google.common.collect.Range;
+import com.google.common.collect.Ranges;
 import java.util.Calendar;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.Predicates;
@@ -39,9 +41,59 @@ public class YearFieldPartitioner extends CalendarFieldPartitioner {
     } else if (predicate instanceof Predicates.In) {
       return ((Predicates.In<Long>) predicate).transform(this);
     } else if (predicate instanceof Range) {
-      return Predicates.transformClosed((Range<Long>) predicate, this);
+      return Predicates.transformClosed(
+          Predicates.adjustClosed(
+              (Range<Long>) predicate, DiscreteDomains.longs()),
+          this);
     } else {
       return null;
     }
+  }
+
+  @Override
+  public Predicate<Integer> projectStrict(Predicate<Long> predicate) {
+    if (predicate instanceof Predicates.Exists) {
+      return Predicates.exists();
+    } else if (predicate instanceof Predicates.In) {
+      // not enough information to make a judgement on behalf of the
+      // original predicate. the year may match when month does not
+      return null;
+    } else if (predicate instanceof Range) {
+      //return Predicates.transformClosedConservative(
+      //    (Range<Long>) predicate, this, DiscreteDomains.integers());
+      Range<Long> adjusted = Predicates.adjustClosed(
+          (Range<Long>) predicate, DiscreteDomains.longs());
+      if (adjusted.hasLowerBound()) {
+        long lower = adjusted.lowerEndpoint();
+        int lowerImage = apply(lower);
+        if (apply(lower - 1) == lowerImage) {
+          // at least one excluded value maps to the same lower endpoint
+          lowerImage += 1;
+        }
+        if (adjusted.hasUpperBound()) {
+          long upper = adjusted.upperEndpoint();
+          int upperImage = apply(upper);
+          if (apply(upper + 1) == upperImage) {
+            // at least one excluded value maps to the same upper endpoint
+            upperImage -= 1;
+          }
+          if (lowerImage <= upperImage) {
+            return Ranges.closed(lowerImage, upperImage);
+          }
+        } else {
+          return Ranges.atLeast(lowerImage);
+        }
+      } else if (adjusted.hasUpperBound()) {
+        long upper = adjusted.upperEndpoint();
+        int upperImage = apply(upper);
+        if (apply(upper + 1) == upperImage) {
+          // at least one excluded value maps to the same upper endpoint
+          upperImage -= 1;
+        }
+        return Ranges.atMost(upperImage);
+      }
+    }
+    // could not produce a satisfying predicate
+    return null;
   }
 }

@@ -16,9 +16,13 @@
 package org.kitesdk.data.spi.partition;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.DiscreteDomains;
 import com.google.common.collect.Range;
 import com.google.common.base.Objects;
+import com.google.common.collect.Ranges;
+import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
+import java.util.Set;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.Predicates;
@@ -63,10 +67,78 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
     } else if (predicate instanceof Range) {
       // must use a closed range:
       //   if this( 5 ) => 10 then this( 6 ) => 10, so 10 must be included
-      return Predicates.transformClosed((Range<Integer>) predicate, this);
+      return Predicates.transformClosed(
+          Predicates.adjustClosed((Range<Integer>) predicate,
+              DiscreteDomains.integers()), this);
     } else {
       return null;
     }
+  }
+
+  @Override
+  public Predicate<Integer> projectStrict(Predicate<Integer> predicate) {
+    if (predicate instanceof Predicates.Exists) {
+      return Predicates.exists();
+
+    } else if (predicate instanceof Predicates.In) {
+      // accumulate the bounds for which all inputs match the predicate
+      Set<Integer> possibleValues = Sets.newHashSet();
+      int end = upperBounds[upperBounds.length - 1];
+      int nextIndex = 1; // the first bound is always excluded
+      boolean matchedAll = true;
+      for (int i = upperBounds[0] + 1; i <= end; i += 1) {
+        matchedAll = matchedAll && predicate.apply(i);
+        // if at an upper bound, see if it should be added and reset
+        if (i == upperBounds[nextIndex]) {
+          if (matchedAll) {
+            possibleValues.add(nextIndex);
+          }
+          // reset for the next bound
+          matchedAll = true;
+          nextIndex += 1;
+        }
+      }
+      if (!possibleValues.isEmpty()) {
+        return Predicates.in(possibleValues);
+      }
+
+    } else if (predicate instanceof Range) {
+      Range<Integer> adjusted = Predicates.adjustClosed(
+          (Range<Integer>) predicate, DiscreteDomains.integers());
+      if (adjusted.hasLowerBound()) {
+        int lower = adjusted.lowerEndpoint();
+        int lowerIndex = apply(lower);
+        if ((lowerIndex == 0) || (upperBounds[lowerIndex - 1] < lower - 1)) {
+          // at least one value that maps to lowerIndex but is not included
+          lowerIndex += 1;
+        }
+        if (adjusted.hasUpperBound()) {
+          int upper = adjusted.upperEndpoint();
+          int upperIndex = apply(upper);
+          if (upperBounds[upperIndex] > upper + 1) {
+            // at least one value that maps to upperIndex but is not included
+            upperIndex -= 1;
+          }
+          if (lowerIndex <= upperIndex) {
+            return Ranges.closed(lowerIndex, upperIndex);
+          }
+        } else {
+          // while this includes values for which this function will throw
+          // IllegalArgumentException, this is a fair projection of the
+          // predicate. this is used assuming that apply succeeded.
+          return Ranges.atLeast(lowerIndex);
+        }
+      } else if (adjusted.hasUpperBound()) {
+        int upper = adjusted.upperEndpoint();
+        int upperIndex = apply(upper);
+        if (upperBounds[upperIndex] > upper + 1) {
+          // at least one value that maps to upperIndex but is not included
+          upperIndex -= 1;
+        }
+        return Ranges.atMost(upperIndex);
+      }
+    }
+    return null;
   }
 
   @Override
