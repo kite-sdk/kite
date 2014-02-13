@@ -1,3 +1,9 @@
 language: java
 jdk:
   - openjdk6
+
+env:
+  - HADOOP_PROFILE=default
+  - HADOOP_PROFILE=hadoop-1
+
+script: mvn test -P $HADOOP_PROFILE
