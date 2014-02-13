@@ -16,17 +16,16 @@
 
 package org.kitesdk.data.filesystem;
 
+import com.google.common.collect.Iterators;
+import java.util.Iterator;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractRefineableView;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.StorageKey;
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -35,7 +34,8 @@ import javax.annotation.concurrent.Immutable;
 import java.io.IOException;
 
 /**
- * FileSystem implementation of a range-based {@link View}.
+ * FileSystem implementation of a {@link org.kitesdk.data.spi.Constraints}-based
+ * {@link org.kitesdk.data.RefineableView}.
  *
  * @param <E> The type of records read and written by this view.
  */
@@ -79,34 +79,22 @@ class FileSystemView<E> extends AbstractRefineableView<E> {
 
   @Override
   public boolean deleteAll() {
-    PathConversion convert = new PathConversion();
     boolean deleted = false;
-    for (StorageKey partition : partitionIterator()) {
-      deleted = cleanlyDelete(fs, root, convert.fromKey(partition)) || deleted;
+    for (Pair<StorageKey, Path> partition : partitionIterator()) {
+      deleted = cleanlyDelete(fs, root, partition.second()) || deleted;
     }
     return deleted;
   }
 
   PathIterator pathIterator() {
-    final Iterable<Path> directories;
+    Iterator<Pair<StorageKey, Path>> directories;
     if (dataset.getDescriptor().isPartitioned()) {
-      directories = Iterables.transform(
-          partitionIterator(),
-          new Function<StorageKey, Path>() {
-            private final PathConversion convert = new PathConversion();
-            @Override
-            public Path apply(StorageKey key) {
-              if (key != null) {
-                return new Path(root, convert.fromKey(key));
-              } else {
-                throw new DatasetException("[BUG] Null partition");
-              }
-            }
-          });
+      directories = partitionIterator();
     } else {
-      directories = Lists.newArrayList(root);
+      directories = Iterators.singletonIterator(
+          Pair.of((StorageKey) null, root));
     }
-    return new PathIterator(fs, directories);
+    return new PathIterator(fs, root, directories);
   }
 
   private FileSystemPartitionIterator partitionIterator() {
