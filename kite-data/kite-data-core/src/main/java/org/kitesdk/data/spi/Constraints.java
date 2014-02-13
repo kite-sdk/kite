@@ -82,7 +82,11 @@ public class Constraints {
    */
   public <E> Predicate<E> toEntityPredicate(StorageKey key) {
     if (key != null) {
-      return new EntityPredicate<E>(minimizeFor(key));
+      Map<String, Predicate> predicates = minimizeFor(key);
+      if (predicates.isEmpty()) {
+        return com.google.common.base.Predicates.alwaysTrue();
+      }
+      return new EntityPredicate<E>(predicates);
     }
     return toEntityPredicate();
   }
