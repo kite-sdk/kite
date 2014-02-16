@@ -19,6 +19,7 @@ package org.kitesdk.data.spi;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
@@ -26,16 +27,37 @@ import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+
+import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.IndexedRecord;
+import org.apache.avro.io.DatumReader;
+import org.apache.avro.io.DatumWriter;
+import org.apache.avro.io.Decoder;
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.Encoder;
+import org.apache.avro.io.EncoderFactory;
 import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.partition.CalendarFieldPartitioner;
+import org.kitesdk.data.spi.Predicates.Exists;
+import org.kitesdk.data.spi.Predicates.In;
 
 /**
  * A set of simultaneous constraints.
@@ -43,9 +65,11 @@ import org.kitesdk.data.partition.CalendarFieldPartitioner;
  * This class accumulates and manages a set of logical constraints.
  */
 @Immutable
-public class Constraints {
+public class Constraints implements Serializable{
 
-  private final Map<String, Predicate> constraints;
+  private static final long serialVersionUID = -155119355851820161L;
+
+  private Map<String, Predicate> constraints;
 
   public Constraints() {
     this.constraints = ImmutableMap.of();
@@ -184,6 +208,228 @@ public class Constraints {
   @Override
   public String toString() {
     return Objects.toStringHelper(this).addValue(constraints).toString();
+  }
+
+  /**
+   * Writes out the {@link Constraints} using Java serialization.
+   */
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+    out.defaultWriteObject();
+    out.writeInt(constraints.size());
+    for(Entry<String, Predicate> entry: constraints.entrySet()){
+        out.writeUTF(entry.getKey());
+        writePredicate(entry.getValue(), out);
+    }
+  }
+
+  /**
+   * Writes out the individual {@link Predicate}.  Currently this only supports a {@code predicate} of one of the
+   * following types:
+   *
+   * <ul>
+   *     <li>{@link In}</li>
+   *     <li>{@link Exists}</li>
+   *     <li>{@link Range}</li>
+   * </ul>
+   * @param predicate The predicate to serialize.
+   * @param out the stream to write out the serialized predicate.
+   * @throws IOException error persisting the predicate.
+   */
+  private void writePredicate(Predicate predicate, ObjectOutputStream out) throws IOException{
+      if(predicate instanceof In){
+          writeInPredicate((In) predicate, out);
+      }else if(predicate instanceof Range){
+          writeRangePredicate((Range) predicate, out);
+      }else if(predicate instanceof Exists){
+          out.writeUTF(Exists.class.getName());
+      }
+  }
+
+  /**
+   * Reads in a predicate from the {@code in} stream.
+   * @param in the stream from which to read the serialized predicate.
+   * @return the serialized predicate.
+   * @throws IOException error reading the predicate
+   */
+  private Predicate readPredicate(ObjectInputStream in) throws IOException{
+      String className = in.readUTF();
+      if(className.equals(In.class.getName())){
+          return readInPredicate(in);
+      }else if(className.equals(Range.class.getName())){
+          return readRangePredicate(in);
+      }else if(className.equals(Exists.class.getName())){
+          return Predicates.exists();
+      }
+      throw new IOException("Unable to deserialize predicate of type "+className);
+  }
+
+
+  /**
+   * Serializes an {@link In} predicate to the stream {@code out}.
+   */
+  private void writeInPredicate(In in, ObjectOutputStream out) throws IOException{
+      out.writeUTF(In.class.getName());
+      Set values = in.getSet();
+      out.writeInt(values.size());
+      for(Object value: values){
+          writeValue(value, out);
+      }
+  }
+
+  /**
+   * Deserializes an {@link In} predicate from the stream {@code In}.
+   */
+  private In readInPredicate(ObjectInputStream in) throws IOException{
+      int numValues = in.readInt();
+      Set<Object> values = new HashSet<Object>();
+      for(int i = 0; i < numValues; i++){
+          values.add(readValue(in));
+      }
+      return Predicates.in(values);
+  }
+
+  /**
+   * Serializes an {@link Range} into the specified {@code out} stream.
+   */
+  private void writeRangePredicate(Range range, ObjectOutputStream out) throws IOException{
+      out.writeUTF(Range.class.getName());
+
+      out.writeUTF(range.lowerBoundType().name());
+      if(range.hasLowerBound()){
+          //Write that there is no lower bound
+          out.writeBoolean(false);
+      }else{
+          //write out that there is a lower endpoint and the value.
+          out.writeBoolean(true);
+          writeValue(range.lowerEndpoint(), out);
+      }
+
+      out.writeUTF(range.upperBoundType().name());
+      if(range.hasUpperBound()){
+          //write out that there is not an upper bound
+          out.writeBoolean(false);
+      }else{
+          out.writeBoolean(true);
+          //write out that there is a lower endpoint and the value.
+          writeValue(range.upperEndpoint(), out);
+      }
+  }
+
+  /**
+   * Deserializes an {@link Range} from the specified {@code in} stream.
+   */
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="NP_NULL_PARAM_DEREF", justification="Ranges accept null bounds")
+  private Range readRangePredicate(ObjectInputStream in) throws IOException{
+    boolean hasLowerBound = in.readBoolean();
+    BoundType lowerType = BoundType.valueOf(in.readUTF());
+    Comparable lowerBound = (Comparable)(hasLowerBound ? readValue(in) : null);
+
+    BoundType upperType = BoundType.valueOf(in.readUTF());
+    boolean hasUpperBound = in.readBoolean();
+    Comparable upperBound = (Comparable) (hasUpperBound ? readValue(in) : null);
+
+    return Ranges.range(lowerBound, lowerType, upperBound, upperType);
+  }
+
+  /**
+   * Serializes the {@code value} to the specified {@code out} stream.  The value is expected to be either
+   * {@link Serializable} or an Avro {@link IndexedRecord record}.
+   */
+  @SuppressWarnings("unchecked")
+  private void writeValue(Object value, ObjectOutputStream out) throws IOException{
+      if(value instanceof Serializable){
+          //write out that the value is not an Avro object
+          out.writeBoolean(false);
+          out.writeObject(value);
+      }else{
+          //write a true boolean indicating it is an avro object
+          out.writeBoolean(true);
+
+          out.writeUTF(value.getClass().getName());
+
+          IndexedRecord record = (IndexedRecord)value;
+
+          //write out the Schema
+          out.writeUTF(record.getSchema().toString());
+
+          //Write out the value
+          ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+          Encoder encoder = EncoderFactory.get().binaryEncoder(byteOutStream, null);
+          DatumWriter writer = new GenericDatumWriter(record.getSchema());
+          writer.write(value, encoder);
+          byte[] bytes = byteOutStream.toByteArray();
+          out.writeInt(bytes.length);
+          out.write(bytes);
+      }
+  }
+
+  /**
+   * Deserializes the {@code value} from the specified {@code in} stream.
+   */
+  @SuppressWarnings("unchecked")
+  private Object readValue(ObjectInputStream in) throws IOException {
+    boolean isAvro = in.readBoolean();
+    if(isAvro){
+      int numBytes = in.readInt();
+      byte[] bytes = new byte[numBytes];
+      int bytesRead = in.read(bytes);
+      assert numBytes == bytesRead;
+      String className = in.readUTF();
+
+      IndexedRecord record = createAvroTarget(className);
+
+      ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
+      Decoder decoder = DecoderFactory.get().binaryDecoder(byteInputStream, null);
+      DatumReader reader = new GenericDatumReader(record.getSchema());
+      reader.read(record, decoder);
+
+      return record;
+    }else{
+      try{
+        return in.readObject();
+      }catch(ClassNotFoundException cnfe){
+        throw new IOException();
+      }
+    }
+  }
+
+  /**
+   * Creates a target based on the {@code className} for Avro deserialization.
+   * @param className the name of an Avro class to use for deserialization.
+   * @return an instance of Avro class used for deserializing.
+   * @throws IOException error creating a target.
+   */
+  private IndexedRecord createAvroTarget(String className) throws IOException {
+      try{
+          Class c = Class.forName(className);
+          return (IndexedRecord) c.newInstance();
+      } catch (InstantiationException e) {
+          throw new IOException(e);
+      } catch (IllegalAccessException e) {
+          throw new IOException(e);
+      } catch (ClassNotFoundException e) {
+          throw new IOException(e);
+      }
+  }
+
+  /**
+   * Reads in the {@link Constraints} from the provided {@code in} stream.
+   * @param in the stream from which to deserialize the object.
+   * @throws IOException error deserializing the {@link Constraints}
+   * @throws ClassNotFoundException Unable to properly access values inside the {@link Constraints}
+  */
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
+    in.defaultReadObject();
+    int numPredicates = in.readInt();
+    Map<String, Predicate> predicates = new HashMap<String, Predicate>();
+    for(int i = 0; i < numPredicates; i++){
+      String name = in.readUTF();
+      Predicate predicate = readPredicate(in);
+      predicates.put(name, predicate);
+    }
+
+    constraints = ImmutableMap.copyOf(predicates);
   }
 
   @SuppressWarnings("unchecked")
