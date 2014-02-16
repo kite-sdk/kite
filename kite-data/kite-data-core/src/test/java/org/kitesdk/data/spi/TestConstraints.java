@@ -20,11 +20,21 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Range;
 import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
+
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
@@ -32,9 +42,13 @@ import org.junit.Test;
 import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.filesystem.DatasetTestUtilities;
 import org.kitesdk.data.partition.DateFormatPartitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 
 public class TestConstraints {
   private static final Logger LOG = LoggerFactory
@@ -488,4 +502,223 @@ public class TestConstraints {
     key.reuseFor(e);
     Assert.assertFalse("Should not match toBefore", c.toKeyPredicate().apply(key));
   }
+
+  @Test
+  public void testInSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+    Constraints inConstraint = new Constraints().with(propertyName, "abc");
+
+    Constraints newIn = serializeAndDeserialize(inConstraint);
+
+    Predicate predicate = newIn.get(propertyName);
+    assertThat(predicate, is(inConstraint.get(propertyName)));
+  }
+
+  @Test
+  public void testInAvroSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+
+    GenericRecordBuilder recordBuilder = new GenericRecordBuilder(new Schema.Parser().parse(new File(DatasetTestUtilities.USER_SCHEMA_URL)))
+        .set("username", "test").set("email", "email@example.com");
+    Constraints inConstraint = new Constraints().with(propertyName, recordBuilder.build());
+
+    Constraints newIn = serializeAndDeserialize(inConstraint);
+
+    Predicate predicate = newIn.get(propertyName);
+    assertThat(predicate, is(inConstraint.get(propertyName)));
+  }
+
+  @Test
+  public void testInAvroReflectSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+
+    SimpleUser user = new SimpleUser();
+    user.setEmail("john@example.com");
+    user.setName("John Doe");
+
+    Constraints inConstraint = new Constraints().with(propertyName, user);
+
+    Constraints newIn = serializeAndDeserialize(inConstraint);
+
+    Predicate predicate = newIn.get(propertyName);
+    assertThat(predicate, is(inConstraint.get(propertyName)));
+  }
+
+  @Test
+  public void testExistsSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+    Constraints exists = new Constraints().with(propertyName, new Object[0]);
+
+    Constraints newExists = serializeAndDeserialize(exists);
+
+    Predicate predicate = newExists.get(propertyName);
+    assertThat(predicate, is(exists.get(propertyName)));
+  }
+
+  @Test
+  public void testRangeAvroSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+
+    GenericRecordBuilder recordBuilder =
+        new GenericRecordBuilder(new Schema.Parser().parse(new File(DatasetTestUtilities.USER_SCHEMA_URL)))
+        .set("username", "test").set("email", "email@example.com");
+    Constraints rangeConstraint = new Constraints().from(propertyName, recordBuilder.build());
+
+    Constraints newIn = serializeAndDeserialize(rangeConstraint);
+
+    Predicate predicate = newIn.get(propertyName);
+    assertThat(predicate, is(rangeConstraint.get(propertyName)));
+  }
+
+  @Test
+  public void testRangeFromSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+    Constraints range = new Constraints().from(propertyName, 10L);
+
+    Constraints newRange = serializeAndDeserialize(range);
+
+    Predicate predicate = newRange.get(propertyName);
+    assertThat(predicate, is(range.get(propertyName)));
+  }
+
+  @Test
+  public void testRangeFromAfterSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+    Constraints range = new Constraints().fromAfter(propertyName, 10L);
+
+    Constraints newRange = serializeAndDeserialize(range);
+
+    Predicate predicate = newRange.get(propertyName);
+    assertThat(predicate, is(range.get(propertyName)));
+  }
+
+
+  @Test
+  public void testRangeToSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+    Constraints range = new Constraints().to(propertyName, 10L);
+
+    Constraints newRange = serializeAndDeserialize(range);
+
+    Predicate predicate = newRange.get(propertyName);
+    assertThat(predicate, is(range.get(propertyName)));
+  }
+
+  @Test
+  public void testRangeToBeforeSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+    Constraints range = new Constraints().toBefore(propertyName, 10L);
+
+    Constraints newRange = serializeAndDeserialize(range);
+
+    Predicate predicate = newRange.get(propertyName);
+    assertThat(predicate, is(range.get(propertyName)));
+  }
+
+  @Test
+  public void testFromToSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+    Constraints range = new Constraints().from(propertyName, 1L).to(propertyName, 10L);
+
+    Constraints newRange = serializeAndDeserialize(range);
+
+    Predicate predicate = newRange.get(propertyName);
+    assertThat(predicate, is(range.get(propertyName)));
+  }
+
+  @Test
+  public void testFromToBeforeSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+    Constraints range = new Constraints().from(propertyName, 1L).toBefore(propertyName, 10L);
+
+    Constraints newRange = serializeAndDeserialize(range);
+
+    Predicate predicate = newRange.get(propertyName);
+    assertThat(predicate, is(range.get(propertyName)));
+  }
+
+  @Test
+  public void testFromAfterToSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+    Constraints range = new Constraints().from(propertyName, 1L).to(propertyName, 10L);
+
+    Constraints newRange = serializeAndDeserialize(range);
+
+    Predicate predicate = newRange.get(propertyName);
+    assertThat(predicate, is(range.get(propertyName)));
+  }
+
+  @Test
+  public void testFromAfterToBeforeSerialization() throws IOException, ClassNotFoundException {
+    String propertyName = "name";
+    Constraints range = new Constraints().fromAfter(propertyName, 1L).toBefore(propertyName, 10L);
+
+    Constraints newRange = serializeAndDeserialize(range);
+
+    Predicate predicate = newRange.get(propertyName);
+    assertThat(predicate, is(range.get(propertyName)));
+  }
+
+  @Test
+  public void testMultiplePredicatesSerialization() throws IOException, ClassNotFoundException {
+    String rangeName = "rangeName";
+    Constraints constraints = new Constraints().fromAfter(rangeName, 1L).toBefore(rangeName, 10L);
+    String existsName = "existsName";
+    constraints = constraints.with(existsName);
+    String inName = "inName";
+    constraints = constraints.with(inName, "hello");
+
+    Constraints newConstraints = serializeAndDeserialize(constraints);
+    assertThat(newConstraints.get(rangeName), is(constraints.get(rangeName)));
+    assertThat(newConstraints.get(existsName), is(constraints.get(existsName)));
+    assertThat(newConstraints.get(inName), is(constraints.get(inName)));
+  }
+
+  public Constraints serializeAndDeserialize(Constraints constraints) throws IOException, ClassNotFoundException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ObjectOutputStream out = new ObjectOutputStream(baos);
+
+    out.writeObject(constraints);
+
+    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    ObjectInputStream in = new ObjectInputStream(bais);
+
+    return (Constraints) in.readObject();
+  }
+
+  public static class SimpleUser {
+
+    private String name;
+    private String email;
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(final String name) {
+      this.name = name;
+    }
+
+    public String getEmail() {
+      return email;
+    }
+
+    public void setEmail(final String email) {
+      this.email = email;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      SimpleUser that = (SimpleUser) o;
+      return this.email.equals(that.email) && this.name.equals(that.name);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = 31*email.hashCode();
+      result = 31*result+name.hashCode();
+      return result;
+    }
+  }
+
 }
