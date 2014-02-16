@@ -27,21 +27,25 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Range;
 import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
+import org.apache.avro.Schema.Parser;
 import org.apache.avro.generic.GenericRecord;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A set of simultaneous constraints.
@@ -49,12 +53,14 @@ import org.slf4j.LoggerFactory;
  * This class accumulates and manages a set of logical constraints.
  */
 @Immutable
-public class Constraints {
+public class Constraints implements Serializable{
+
+  private static final long serialVersionUID = -155119355851820161L;
 
   private static final Logger LOG = LoggerFactory.getLogger(Constraints.class);
 
-  private final Map<String, Predicate> constraints;
-  private final Schema schema;
+  private transient Schema schema;
+  private transient Map<String, Predicate> constraints;
 
   public Constraints(Schema schema) {
     this.schema = schema;
@@ -398,6 +404,28 @@ public class Constraints {
   @Override
   public String toString() {
     return Objects.toStringHelper(this).addValue(constraints).toString();
+  }
+
+  /**
+   * Writes out the {@link Constraints} using Java serialization.
+   */
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+    out.defaultWriteObject();
+    out.writeUTF(schema.toString());
+    ConstraintsSerialization.writeConstraints(schema, constraints, out);
+  }
+
+
+  /**
+   * Reads in the {@link Constraints} from the provided {@code in} stream.
+   * @param in the stream from which to deserialize the object.
+   * @throws IOException error deserializing the {@link Constraints}
+   * @throws ClassNotFoundException Unable to properly access values inside the {@link Constraints}
+  */
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
+    in.defaultReadObject();
+    schema = new Parser().parse(in.readUTF());
+    constraints = ImmutableMap.copyOf(ConstraintsSerialization.readConstraints(schema, in));
   }
 
   @SuppressWarnings("unchecked")
