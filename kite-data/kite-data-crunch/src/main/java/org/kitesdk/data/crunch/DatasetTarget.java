@@ -31,16 +31,16 @@ import org.apache.hadoop.mapreduce.Job;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.mapreduce.DatasetOutputFormat;
+import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
 
 class DatasetTarget<E> implements MapReduceTarget {
 
   FormatBundle formatBundle;
 
   public DatasetTarget(Dataset<E> dataset) {
-    this.formatBundle = FormatBundle.forOutput(DatasetOutputFormat.class);
-    formatBundle.set(DatasetOutputFormat.KITE_REPOSITORY_URI, getRepositoryUri(dataset));
-    formatBundle.set(DatasetOutputFormat.KITE_DATASET_NAME, dataset.getName());
+    this.formatBundle = FormatBundle.forOutput(DatasetKeyOutputFormat.class);
+    formatBundle.set(DatasetKeyOutputFormat.KITE_REPOSITORY_URI, getRepositoryUri(dataset));
+    formatBundle.set(DatasetKeyOutputFormat.KITE_DATASET_NAME, dataset.getName());
 
     // TODO: replace with View#getDataset to get the top-level dataset
     DatasetRepository repo = DatasetRepositories.open(getRepositoryUri(dataset));
@@ -49,7 +49,7 @@ class DatasetTarget<E> implements MapReduceTarget {
     if (topLevelDataset.getDescriptor().isPartitioned() &&
         topLevelDataset.getDescriptor().getLocation() != null &&
         !topLevelDataset.getDescriptor().getLocation().equals(dataset.getDescriptor().getLocation())) {
-      formatBundle.set(DatasetOutputFormat.KITE_PARTITION_DIR, dataset.getDescriptor().getLocation().toString());
+      formatBundle.set(DatasetKeyOutputFormat.KITE_PARTITION_DIR, dataset.getDescriptor().getLocation().toString());
     }
   }
 

@@ -120,9 +120,9 @@ public class TestMapReduce {
     Dataset<GenericData.Record> outputDataset = repo.create("out",
         new DatasetDescriptor.Builder().schema(STATS_SCHEMA).build());
 
-    job.setOutputFormatClass(DatasetOutputFormat.class);
-    DatasetOutputFormat.setRepositoryUri(job, repo.getUri());
-    DatasetOutputFormat.setDatasetName(job, outputDataset.getName());
+    job.setOutputFormatClass(DatasetKeyOutputFormat.class);
+    DatasetKeyOutputFormat.setRepositoryUri(job, repo.getUri());
+    DatasetKeyOutputFormat.setDatasetName(job, outputDataset.getName());
 
     Assert.assertTrue(job.waitForCompletion(true));
 

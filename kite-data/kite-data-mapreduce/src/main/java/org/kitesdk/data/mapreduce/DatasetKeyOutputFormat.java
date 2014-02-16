@@ -38,7 +38,15 @@ import org.kitesdk.data.filesystem.impl.Accessor;
 import java.io.IOException;
 import java.net.URI;
 
-public class DatasetOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWritable> {
+/**
+ * A MapReduce {@code OutputFormat} for writing to a {@link Dataset}.
+ *
+ * Since a {@code Dataset} only contains entities (not key/value pairs), this output
+ * format ignores the value.
+ *
+ * @param <E> The type of entities in the {@code Dataset}.
+ */
+public class DatasetKeyOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWritable> {
 
   public static final String KITE_REPOSITORY_URI = "kite.repositoryUri";
   public static final String KITE_DATASET_NAME = "kite.datasetName";
