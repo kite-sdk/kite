@@ -19,6 +19,7 @@ import org.apache.avro.mapred.AvroKey;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.mapreduce.OutputCommitter;
@@ -42,6 +43,14 @@ public class DatasetOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWritabl
   public static final String KITE_REPOSITORY_URI = "kite.repositoryUri";
   public static final String KITE_DATASET_NAME = "kite.datasetName";
   public static final String KITE_PARTITION_DIR = "kite.partitionDir";
+
+  public static void setRepositoryUri(Job job, URI uri) {
+    job.getConfiguration().set(KITE_REPOSITORY_URI, uri.toString());
+  }
+
+  public static void setDatasetName(Job job, String name) {
+    job.getConfiguration().set(KITE_DATASET_NAME, name);
+  }
 
   static class DatasetRecordWriter<E> extends RecordWriter<AvroKey<E>, NullWritable> {
 

@@ -47,6 +47,7 @@ class DatasetTarget<E> implements MapReduceTarget {
     // only set the partition dir for subpartitions
     Dataset<E> topLevelDataset = repo.load(dataset.getName());
     if (topLevelDataset.getDescriptor().isPartitioned() &&
+        topLevelDataset.getDescriptor().getLocation() != null &&
         !topLevelDataset.getDescriptor().getLocation().equals(dataset.getDescriptor().getLocation())) {
       formatBundle.set(DatasetOutputFormat.KITE_PARTITION_DIR, dataset.getDescriptor().getLocation().toString());
     }
