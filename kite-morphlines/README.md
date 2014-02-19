@@ -71,9 +71,11 @@ cd kite
 #git tag # list available releases
 #git checkout master
 #git checkout release-0.11.0 # or whatever the latest version is
+mvn clean install -DskipTests -DjavaVersion=1.7
+cd kite-morphlines
 mvn clean package
-find kite-morphlines/kite-morphlines-core/target -name '*.jar'
-find kite-morphlines/kite-morphlines-all/target -name '*.jar'
+find kite-morphlines-core/target -name '*.jar'
+find kite-morphlines-all/target -name '*.jar'
 ```
 
 ## Using the Maven CLI to run test data through a morphline
