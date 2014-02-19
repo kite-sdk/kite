@@ -25,7 +25,7 @@ import java.util.Calendar;
         + " (e.g., TreeMaps) and use java serialization.")
 public class YearFieldPartitioner extends CalendarFieldPartitioner {
   public YearFieldPartitioner(String sourceName, String name) {
-    this(sourceName, name, 5); // arbitrary number of partitions
+    super(sourceName, name, Calendar.YEAR);
   }
 
   public YearFieldPartitioner(String sourceName, String name, int cardinality) {

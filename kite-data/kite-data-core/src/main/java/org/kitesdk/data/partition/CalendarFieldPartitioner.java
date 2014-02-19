@@ -40,6 +40,10 @@ class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
   protected Calendar cal;
   protected int calendarField;
 
+  public CalendarFieldPartitioner(String sourceName, String name, int calendarField) {
+    this(sourceName, name, calendarField, -1);
+  }
+
   public CalendarFieldPartitioner(String sourceName, String name,
       int calendarField, int cardinality) {
     super(sourceName, name, Long.class, Integer.class, cardinality);

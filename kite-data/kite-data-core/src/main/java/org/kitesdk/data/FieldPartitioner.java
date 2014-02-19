@@ -58,6 +58,15 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
     this(name, name, sourceType, type, cardinality);
   }
 
+  protected FieldPartitioner(String name, Class<S> sourceType, Class<T> type) {
+    this(name, name, sourceType, type);
+  }
+
+  protected FieldPartitioner(String sourceName, String name,
+                             Class<S> sourceType, Class<T> type) {
+    this(sourceName, name, sourceType, type, -1);
+  }
+
   protected FieldPartitioner(String sourceName, String name,
       Class<S> sourceType, Class<T> type, int cardinality) {
     this.sourceName = sourceName;
