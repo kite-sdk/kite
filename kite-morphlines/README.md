@@ -103,7 +103,7 @@ log4j.logger.org.kitesdk.morphline=TRACE
 
 ```bash
 cd kite
-mvn eclipse:eclipse
+mvn eclipse:eclipse -DjavaVersion=1.7
 ```
 
 * `mvn eclipse:eclipse` creates several Eclipse projects, one for each maven submodule.
