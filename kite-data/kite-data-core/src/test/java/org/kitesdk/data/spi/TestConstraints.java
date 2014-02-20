@@ -531,6 +531,23 @@ public class TestConstraints {
   }
 
   @Test
+  public void testInAvroReflectSerialization() throws IOException, ClassNotFoundException {
+    Constraints inConstraint = new Constraints();
+    String propertyName = "name";
+
+    SimpleUser user = new SimpleUser();
+    user.setEmail("john@example.com");
+    user.setName("John Doe");
+
+    inConstraint.with(propertyName, user);
+
+    Constraints newIn = serializeAndDeserialize(inConstraint);
+
+    Predicate predicate = newIn.get(propertyName);
+    assertThat(predicate, is(inConstraint.get(propertyName)));
+  }
+
+  @Test
   public void testExistsSerialization() throws IOException, ClassNotFoundException {
     Constraints exists = new Constraints();
     String propertyName = "name";
@@ -682,4 +699,40 @@ public class TestConstraints {
 
     return (Constraints) in.readObject();
   }
+
+  public static class SimpleUser {
+
+    private String name;
+    private String email;
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(final String name) {
+      this.name = name;
+    }
+
+    public String getEmail() {
+      return email;
+    }
+
+    public void setEmail(final String email) {
+      this.email = email;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      SimpleUser that = (SimpleUser) o;
+      return this.email.equals(that.email) && this.name.equals(that.name);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = 31*email.hashCode();
+      result = 31*result+name.hashCode();
+      return result;
+    }
+  }
+
 }

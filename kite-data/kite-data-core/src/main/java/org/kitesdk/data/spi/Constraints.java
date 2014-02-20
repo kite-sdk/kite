@@ -43,6 +43,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
@@ -53,6 +54,9 @@ import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.reflect.ReflectData;
+import org.apache.avro.reflect.ReflectDatumReader;
+import org.apache.avro.reflect.ReflectDatumWriter;
 import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.partition.CalendarFieldPartitioner;
@@ -216,9 +220,9 @@ public class Constraints implements Serializable{
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
     out.defaultWriteObject();
     out.writeInt(constraints.size());
-    for(Entry<String, Predicate> entry: constraints.entrySet()){
-        out.writeUTF(entry.getKey());
-        writePredicate(entry.getValue(), out);
+    for (Entry<String, Predicate> entry: constraints.entrySet()) {
+      out.writeUTF(entry.getKey());
+      writePredicate(entry.getValue(), out);
     }
   }
 
@@ -236,12 +240,12 @@ public class Constraints implements Serializable{
    * @throws IOException error persisting the predicate.
    */
   private void writePredicate(Predicate predicate, ObjectOutputStream out) throws IOException{
-      if(predicate instanceof In){
-          writeInPredicate((In) predicate, out);
-      }else if(predicate instanceof Range){
-          writeRangePredicate((Range) predicate, out);
-      }else if(predicate instanceof Exists){
-          out.writeUTF(Exists.class.getName());
+      if (predicate instanceof In) {
+        writeInPredicate((In) predicate, out);
+      } else if (predicate instanceof Range) {
+        writeRangePredicate((Range) predicate, out);
+      } else if (predicate instanceof Exists) {
+        out.writeUTF(Exists.class.getName());
       }
   }
 
@@ -253,12 +257,12 @@ public class Constraints implements Serializable{
    */
   private Predicate readPredicate(ObjectInputStream in) throws IOException{
       String className = in.readUTF();
-      if(className.equals(In.class.getName())){
-          return readInPredicate(in);
-      }else if(className.equals(Range.class.getName())){
-          return readRangePredicate(in);
-      }else if(className.equals(Exists.class.getName())){
-          return Predicates.exists();
+      if (className.equals(In.class.getName())) {
+        return readInPredicate(in);
+      } else if (className.equals(Range.class.getName())) {
+        return readRangePredicate(in);
+      } else if (className.equals(Exists.class.getName())) {
+        return Predicates.exists();
       }
       throw new IOException("Unable to deserialize predicate of type "+className);
   }
@@ -271,8 +275,8 @@ public class Constraints implements Serializable{
       out.writeUTF(In.class.getName());
       Set values = in.getSet();
       out.writeInt(values.size());
-      for(Object value: values){
-          writeValue(value, out);
+      for (Object value: values) {
+         writeValue(value, out);
       }
   }
 
@@ -282,8 +286,8 @@ public class Constraints implements Serializable{
   private In readInPredicate(ObjectInputStream in) throws IOException{
       int numValues = in.readInt();
       Set<Object> values = new HashSet<Object>();
-      for(int i = 0; i < numValues; i++){
-          values.add(readValue(in));
+      for (int i = 0; i < numValues; i++) {
+        values.add(readValue(in));
       }
       return Predicates.in(values);
   }
@@ -295,23 +299,23 @@ public class Constraints implements Serializable{
       out.writeUTF(Range.class.getName());
 
       out.writeUTF(range.lowerBoundType().name());
-      if(range.hasLowerBound()){
-          //Write that there is no lower bound
-          out.writeBoolean(false);
-      }else{
-          //write out that there is a lower endpoint and the value.
-          out.writeBoolean(true);
-          writeValue(range.lowerEndpoint(), out);
+      if (range.hasLowerBound()) {
+        //Write that there is no lower bound
+        out.writeBoolean(false);
+      } else {
+        //write out that there is a lower endpoint and the value.
+        out.writeBoolean(true);
+        writeValue(range.lowerEndpoint(), out);
       }
 
       out.writeUTF(range.upperBoundType().name());
-      if(range.hasUpperBound()){
-          //write out that there is not an upper bound
-          out.writeBoolean(false);
-      }else{
-          out.writeBoolean(true);
-          //write out that there is a lower endpoint and the value.
-          writeValue(range.upperEndpoint(), out);
+      if (range.hasUpperBound()) {
+        //write out that there is not an upper bound
+        out.writeBoolean(false);
+      } else {
+        out.writeBoolean(true);
+        //write out that there is a lower endpoint and the value.
+        writeValue(range.upperEndpoint(), out);
       }
   }
 
@@ -338,29 +342,37 @@ public class Constraints implements Serializable{
    */
   @SuppressWarnings("unchecked")
   private void writeValue(Object value, ObjectOutputStream out) throws IOException{
-      if(value instanceof Serializable){
-          //write out that the value is not an Avro object
+      if (value instanceof Serializable) {
+        //write out that the value is not an Avro object
+        out.writeBoolean(false);
+        out.writeObject(value);
+      } else {
+        //write a true boolean indicating it is an avro object
+        out.writeBoolean(true);
+
+        out.writeUTF(value.getClass().getName());
+
+        DatumWriter writer = null;
+
+        if (value instanceof IndexedRecord) {
+          //write out false indicating to not use reflect
           out.writeBoolean(false);
-          out.writeObject(value);
-      }else{
-          //write a true boolean indicating it is an avro object
-          out.writeBoolean(true);
-
-          out.writeUTF(value.getClass().getName());
-
           IndexedRecord record = (IndexedRecord)value;
+          Schema schema = record.getSchema();
+          writer = new GenericDatumWriter(schema);
+        } else {
+          //write out true indicating reflect to use
+          out.writeBoolean(true);
+          writer = new ReflectDatumWriter(value.getClass());
+        }
 
-          //write out the Schema
-          out.writeUTF(record.getSchema().toString());
-
-          //Write out the value
-          ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
-          Encoder encoder = EncoderFactory.get().binaryEncoder(byteOutStream, null);
-          DatumWriter writer = new GenericDatumWriter(record.getSchema());
-          writer.write(value, encoder);
-          byte[] bytes = byteOutStream.toByteArray();
-          out.writeInt(bytes.length);
-          out.write(bytes);
+        //Write out the value
+        ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+        Encoder encoder = EncoderFactory.get().binaryEncoder(byteOutStream, null);
+        writer.write(value, encoder);
+        byte[] bytes = byteOutStream.toByteArray();
+        out.writeInt(bytes.length);
+        out.write(bytes);
       }
   }
 
@@ -370,21 +382,31 @@ public class Constraints implements Serializable{
   @SuppressWarnings("unchecked")
   private Object readValue(ObjectInputStream in) throws IOException {
     boolean isAvro = in.readBoolean();
-    if(isAvro){
+    if (isAvro) {
+      String className = in.readUTF();
+      boolean useReflect = in.readBoolean();
       int numBytes = in.readInt();
       byte[] bytes = new byte[numBytes];
       int bytesRead = in.read(bytes);
       assert numBytes == bytesRead;
-      String className = in.readUTF();
-
-      IndexedRecord record = createAvroTarget(className);
 
       ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
       Decoder decoder = DecoderFactory.get().binaryDecoder(byteInputStream, null);
-      DatumReader reader = new GenericDatumReader(record.getSchema());
-      reader.read(record, decoder);
+      Object avroTarget = createAvroTarget(className);
+      DatumReader reader = null;
+      if (useReflect) {
+        try{
+          reader = new ReflectDatumReader(Class.forName(className));
+        } catch (ClassNotFoundException cnfe) {
+          throw new IOException(cnfe);
+        }
+      } else {
+        reader = new GenericDatumReader(((IndexedRecord) avroTarget).getSchema());
+      }
 
-      return record;
+      reader.read(avroTarget, decoder);
+
+      return avroTarget;
     }else{
       try{
         return in.readObject();
@@ -400,16 +422,16 @@ public class Constraints implements Serializable{
    * @return an instance of Avro class used for deserializing.
    * @throws IOException error creating a target.
    */
-  private IndexedRecord createAvroTarget(String className) throws IOException {
+  private Object createAvroTarget(String className) throws IOException {
       try{
-          Class c = Class.forName(className);
-          return (IndexedRecord) c.newInstance();
+        Class c = Class.forName(className);
+        return c.newInstance();
       } catch (InstantiationException e) {
-          throw new IOException(e);
+        throw new IOException(e);
       } catch (IllegalAccessException e) {
-          throw new IOException(e);
+        throw new IOException(e);
       } catch (ClassNotFoundException e) {
-          throw new IOException(e);
+        throw new IOException(e);
       }
   }
 
