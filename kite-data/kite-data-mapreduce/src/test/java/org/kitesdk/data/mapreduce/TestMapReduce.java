@@ -23,12 +23,15 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -46,6 +49,7 @@ import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
+import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
 
 @RunWith(Parameterized.class)
@@ -62,6 +66,14 @@ public class TestMapReduce {
 
   private Format format;
 
+  public static final Schema STRING_SCHEMA =
+      new Schema.Parser().parse("{\n" +
+          "  \"name\": \"mystring\",\n" +
+          "  \"type\": \"record\",\n" +
+          "  \"fields\": [\n" +
+          "    { \"name\": \"text\", \"type\": \"string\" }\n" +
+          "  ]\n" +
+          "}\n");
   public static final Schema STATS_SCHEMA =
       new Schema.Parser().parse("{\"name\":\"stats\",\"type\":\"record\","
           + "\"fields\":[{\"name\":\"count\",\"type\":\"int\"},"
@@ -84,11 +96,12 @@ public class TestMapReduce {
   }
 
 
-  private static class LineCountMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+  private static class LineCountMapper extends Mapper<AvroKey<GenericData.Record>, NullWritable, Text, IntWritable> {
     @Override
-    protected void map(LongWritable offset, Text line, Context context)
+    protected void map(AvroKey<GenericData.Record> record, NullWritable value,
+        Context context)
         throws IOException, InterruptedException {
-      context.write(line, new IntWritable(1));
+      context.write(new Text(record.datum().get("text").toString()), new IntWritable(1));
     }
   }
 
@@ -113,10 +126,21 @@ public class TestMapReduce {
   public void testJob() throws Exception {
     Job job = new Job();
 
-    FileInputFormat.setInputPaths(job, new Path(getClass()
-        .getResource("/input.txt")
-        .toURI().toString()));
-    job.setInputFormatClass(TextInputFormat.class);
+    Dataset<GenericData.Record> inputDataset = repo.create("in",
+        new DatasetDescriptor.Builder().schema(STRING_SCHEMA).build());
+    DatasetWriter<GenericData.Record> writer = inputDataset.newWriter();
+    writer.open();
+    writer.write(newStringRecord("apple"));
+    writer.write(newStringRecord("banana"));
+    writer.write(newStringRecord("banana"));
+    writer.write(newStringRecord("carrot"));
+    writer.write(newStringRecord("apple"));
+    writer.write(newStringRecord("apple"));
+    writer.close();
+
+    job.setInputFormatClass(DatasetKeyInputFormat.class);
+    DatasetKeyInputFormat.setRepositoryUri(job, repo.getUri());
+    DatasetKeyInputFormat.setDatasetName(job, inputDataset.getName());
 
     job.setMapperClass(LineCountMapper.class);
     job.setMapOutputKeyClass(Text.class);
@@ -145,5 +169,9 @@ public class TestMapReduce {
     Assert.assertEquals(2, counts.get("banana").intValue());
     Assert.assertEquals(1, counts.get("carrot").intValue());
 
+  }
+
+  private GenericData.Record newStringRecord(String text) {
+    return new GenericRecordBuilder(STRING_SCHEMA).set("text", text).build();
   }
 }
