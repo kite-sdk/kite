@@ -29,6 +29,9 @@ import org.kitesdk.data.DatasetRepository;
 public abstract class AbstractDatasetRepository implements DatasetRepository {
 
   protected DatasetDescriptor addRepositoryUri(DatasetDescriptor descriptor) {
+    if (getUri() == null) {
+      return descriptor;
+    }
     return new DatasetDescriptor.Builder(descriptor)
         .property("repositoryUri", getUri().toString())
         .build();
