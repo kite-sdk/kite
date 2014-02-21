@@ -34,6 +34,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.kitesdk.data.filesystem.impl.Accessor;
 
 public class TestExternalHCatalogDatasetRepository extends TestFileSystemDatasetRepository {
 
@@ -89,20 +90,63 @@ public class TestExternalHCatalogDatasetRepository extends TestFileSystemDataset
     Assert.assertTrue("No partitions yet",
         client.listPartitionNames("default", NAME2, (short) 10).isEmpty());
 
-    PartitionKey key0 = partitionStrategy.partitionKey(0);
-    DatasetWriter<GenericRecord> writer = dataset.getPartition(key0, true).newWriter();
+    writeRecord(dataset, 0);
+
+    Assert.assertEquals("Should be one partition", 1,
+        client.listPartitionNames("default", NAME2, (short) 10).size());
+
+  }
+
+  @SuppressWarnings("deprecation")
+  @Test
+  public void testMerge() throws Exception {
+    final String NAME2 = "test2";
+    final String NAME3 = "test3";
+
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .hash("username", 2).build();
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(testSchema)
+        .partitionStrategy(partitionStrategy)
+        .build();
+
+    Dataset<GenericRecord> dataset = repo.create(NAME2, descriptor);
+
+    HiveTestUtils.assertTableExists(client, "default", NAME2);
+    HiveTestUtils.assertTableIsExternal(client, "default", NAME2);
+    Assert.assertTrue("No partitions yet",
+        client.listPartitionNames("default", NAME2, (short) 10).isEmpty());
+
+    writeRecord(dataset, 0);
+
+    Assert.assertEquals("Should be one partition", 1,
+        client.listPartitionNames("default", NAME2, (short) 10).size());
+
+    Dataset<GenericRecord> dsUpdate = repo.create(NAME3, descriptor);
+
+    writeRecord(dsUpdate, 1);
+
+    Accessor.getDefault().merge(dataset, dsUpdate);
+
+    Assert.assertEquals("Should be two partitions", 2,
+        client.listPartitionNames("default", NAME2, (short) 10).size());
+
+  }
+
+  private void writeRecord(Dataset<GenericRecord> dataset, int partition) {
+    PartitionKey key = dataset.getDescriptor()
+        .getPartitionStrategy().partitionKey(partition);
+    DatasetWriter<GenericRecord> writer = dataset.getPartition(key, true).newWriter();
     writer.open();
     try {
       GenericRecordBuilder recordBuilder = new GenericRecordBuilder(
           dataset.getDescriptor().getSchema())
-          .set("username", "0").set("email", "0@example.com");
+          .set("username", partition + "").set("email", partition + "@example.com");
       writer.write(recordBuilder.build());
     } finally {
       writer.close();
     }
-
-    Assert.assertEquals("Should be one partition", 1,
-        client.listPartitionNames("default", NAME2, (short) 10).size());
 
   }
 }

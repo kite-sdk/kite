@@ -273,6 +273,9 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
       URI relativePath = update.getDirectory().toUri().relativize(path.toUri());
       Path newPath = new Path(directory, new Path(relativePath));
       fileSystem.rename(path, newPath);
+      if (partitionListener != null) {
+        partitionListener.partitionAdded(name, newPath.getParent().toString());
+      }
     }
   }
 
