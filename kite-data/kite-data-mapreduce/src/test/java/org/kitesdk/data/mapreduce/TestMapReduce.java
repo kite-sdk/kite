@@ -50,6 +50,7 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Formats;
 import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
 
 @RunWith(Parameterized.class)
@@ -127,7 +128,7 @@ public class TestMapReduce {
     Job job = new Job();
 
     Dataset<GenericData.Record> inputDataset = repo.create("in",
-        new DatasetDescriptor.Builder().schema(STRING_SCHEMA).build());
+        new DatasetDescriptor.Builder().schema(STRING_SCHEMA).format(format).build());
     DatasetWriter<GenericData.Record> writer = inputDataset.newWriter();
     writer.open();
     writer.write(newStringRecord("apple"));

@@ -462,6 +462,7 @@
           <version>${vers.maven-surefire-plugin}</version>
           <configuration>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <argLine>-Xmx2048m</argLine>
           </configuration>
         </plugin>
         <plugin>

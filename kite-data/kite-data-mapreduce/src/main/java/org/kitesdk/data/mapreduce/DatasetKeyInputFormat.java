@@ -68,8 +68,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
     } else if (Formats.PARQUET.equals(format)) {
       List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(dataset));
       AvroParquetInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
-
-      // TODO: use later version of parquet
+      // TODO: use later version of parquet so we can set the schema correctly
       //AvroParquetInputFormat.setReadSchema(job, dataset.getDescriptor().getSchema());
       AvroParquetInputFormat delegate = new AvroParquetInputFormat();
       return delegate.getSplits(jobContext);
@@ -80,16 +79,17 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public RecordReader<AvroKey<E>, NullWritable> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     Dataset<E> dataset = loadDataset(taskAttemptContext);
     Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
       AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
       return delegate.createRecordReader(inputSplit, taskAttemptContext);
-//    } else if (Formats.PARQUET.equals(format)) {
-//      AvroParquetInputFormat delegate = new AvroParquetInputFormat();
-//      // TODO: wrap record reader to make types come out right
-//      return delegate.createRecordReader(inputSplit, taskAttemptContext);
+    } else if (Formats.PARQUET.equals(format)) {
+      AvroParquetInputFormat delegate = new AvroParquetInputFormat();
+      return new ParquetRecordReaderWrapper(
+          (RecordReader<Void, E>) delegate.createRecordReader(inputSplit, taskAttemptContext));
     } else {
       throw new UnsupportedOperationException(
           "Not a supported format: " + format);
@@ -105,5 +105,48 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
     Configuration conf = jobContext.getConfiguration();
     DatasetRepository repo = getDatasetRepository(jobContext);
     return repo.load(conf.get(KITE_DATASET_NAME));
+  }
+
+  private class ParquetRecordReaderWrapper extends RecordReader<AvroKey<E>, NullWritable> {
+
+    RecordReader<Void, E> delegate;
+    AvroKey<E> avroKey;
+
+    public ParquetRecordReaderWrapper(RecordReader<Void, E> delegate) {
+      this.delegate = delegate;
+      this.avroKey = new AvroKey<E>();
+    }
+
+    @Override
+    public void initialize(InputSplit inputSplit,
+        TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+      delegate.initialize(inputSplit, taskAttemptContext);
+    }
+
+    @Override
+    public boolean nextKeyValue() throws IOException, InterruptedException {
+      return delegate.nextKeyValue();
+    }
+
+    @Override
+    public AvroKey<E> getCurrentKey() throws IOException, InterruptedException {
+      avroKey.datum(delegate.getCurrentValue());
+      return avroKey;
+    }
+
+    @Override
+    public NullWritable getCurrentValue() throws IOException, InterruptedException {
+      return NullWritable.get();
+    }
+
+    @Override
+    public float getProgress() throws IOException, InterruptedException {
+      return delegate.getProgress();
+    }
+
+    @Override
+    public void close() throws IOException {
+      delegate.close();
+    }
   }
 }
