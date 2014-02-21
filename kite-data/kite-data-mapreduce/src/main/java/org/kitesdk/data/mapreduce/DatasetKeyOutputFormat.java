@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.mapreduce;
 
+import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
@@ -43,6 +44,7 @@ import org.kitesdk.data.spi.Mergeable;
  *
  * @param <E> The type of entities in the {@code Dataset}.
  */
+@Beta
 public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   public static final String KITE_REPOSITORY_URI = "kite.outputRepositoryUri";
@@ -146,8 +148,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     Configuration conf = taskAttemptContext.getConfiguration();
     Dataset<E> dataset = loadDataset(taskAttemptContext);
 
-    if (dataset instanceof Mergeable) {
-      // use per-task attempt datasets for filesystem datasets
+    if (usePerTaskAttemptDatasets(dataset)) {
       dataset = loadTaskAttemptDataset(taskAttemptContext);
     }
 
@@ -171,8 +172,17 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   @Override
   public OutputCommitter getOutputCommitter(TaskAttemptContext taskAttemptContext) {
     Dataset<E> dataset = loadDataset(taskAttemptContext);
-    return (dataset instanceof Mergeable) ?
+    return usePerTaskAttemptDatasets(dataset) ?
         new MergeOutputCommitter<E>() : new NullOutputCommitter();
+  }
+
+  private static <E> boolean usePerTaskAttemptDatasets(Dataset<E> dataset) {
+    // new API output committers are not called properly in Hadoop 1
+    return !isHadoop1() && dataset instanceof Mergeable;
+  }
+
+  private static boolean isHadoop1() {
+    return !JobContext.class.isInterface();
   }
 
   private static DatasetRepository getDatasetRepository(JobContext jobContext) {

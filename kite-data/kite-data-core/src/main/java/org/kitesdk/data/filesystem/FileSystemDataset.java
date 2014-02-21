@@ -17,6 +17,7 @@ package org.kitesdk.data.filesystem;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
@@ -300,6 +301,11 @@ class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeable<FileS
         }
       }
     }
+  }
+
+  @Override
+  public InputFormat<E, Void> getDelegateInputFormat() {
+    return new FileSystemDatasetKeyInputFormat<E>(this);
   }
 
   @SuppressWarnings("unchecked")
