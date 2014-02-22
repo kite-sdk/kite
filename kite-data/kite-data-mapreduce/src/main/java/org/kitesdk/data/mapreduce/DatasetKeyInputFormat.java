@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat;
@@ -45,10 +46,13 @@ import org.kitesdk.data.hbase.impl.BaseDao;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import parquet.avro.AvroParquetInputFormat;
 
-public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritable> {
+public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritable>
+    implements Configurable {
 
   public static final String KITE_REPOSITORY_URI = "kite.inputRepositoryUri";
   public static final String KITE_DATASET_NAME = "kite.inputDatasetName";
+
+  private Configuration conf;
 
   public static void setRepositoryUri(Job job, URI uri) {
     job.getConfiguration().set(KITE_REPOSITORY_URI, uri.toString());
@@ -128,6 +132,18 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
     Configuration conf = jobContext.getConfiguration();
     DatasetRepository repo = getDatasetRepository(jobContext);
     return repo.load(conf.get(KITE_DATASET_NAME));
+  }
+
+  @Override
+  public void setConf(Configuration conf) {
+    if (conf != null) {
+      this.conf = conf;
+    }
+  }
+
+  @Override
+  public Configuration getConf() {
+    return conf;
   }
 
   private class ParquetRecordReaderWrapper extends RecordReader<AvroKey<E>, NullWritable> {

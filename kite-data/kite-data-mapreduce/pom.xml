@@ -108,6 +108,14 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>0.11.1-SNAPSHOT</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
       <artifactId>kite-hadoop-dependencies</artifactId>
       <type>pom</type>
       <scope>provided</scope>
