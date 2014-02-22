@@ -16,7 +16,7 @@
 package org.kitesdk.data.partition;
 
 import java.util.List;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import com.google.common.annotations.Beta;
 
 /**

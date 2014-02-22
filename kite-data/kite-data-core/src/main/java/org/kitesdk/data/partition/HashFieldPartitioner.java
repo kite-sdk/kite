@@ -16,7 +16,7 @@
 package org.kitesdk.data.partition;
 
 import com.google.common.base.Predicate;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 
 import com.google.common.base.Objects;
 import org.kitesdk.data.spi.Predicates;
@@ -28,7 +28,7 @@ import org.kitesdk.data.spi.Predicates;
 public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
 
   public HashFieldPartitioner(String name, int buckets) {
-    super(name, Object.class, Integer.class, buckets);
+    super(name, name, Object.class, Integer.class, buckets);
   }
 
   public HashFieldPartitioner(String sourceName, String name, int buckets) {

@@ -18,7 +18,7 @@ package org.kitesdk.data.flume;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import java.net.URL;

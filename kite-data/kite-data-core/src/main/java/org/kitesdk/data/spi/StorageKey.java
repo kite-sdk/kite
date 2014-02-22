@@ -18,7 +18,6 @@ package org.kitesdk.data.spi;
 
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;

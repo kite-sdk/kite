@@ -33,7 +33,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.generic.GenericRecord;
-import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.partition.CalendarFieldPartitioner;
 

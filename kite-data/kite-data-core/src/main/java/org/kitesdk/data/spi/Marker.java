@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.spi;
 
-import org.kitesdk.data.FieldPartitioner;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;

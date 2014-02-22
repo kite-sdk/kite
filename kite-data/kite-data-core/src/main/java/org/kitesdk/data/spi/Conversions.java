@@ -21,7 +21,6 @@ import java.text.NumberFormat;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificData;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 
 /**

@@ -17,7 +17,7 @@
 package org.kitesdk.data.hcatalog;
 
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.MetadataProviderException;

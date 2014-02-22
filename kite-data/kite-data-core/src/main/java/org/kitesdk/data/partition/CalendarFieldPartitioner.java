@@ -17,7 +17,7 @@ package org.kitesdk.data.partition;
 
 import com.google.common.base.Predicate;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import java.util.Calendar;
@@ -25,7 +25,7 @@ import java.util.TimeZone;
 import javax.annotation.Nonnull;
 
 /**
- * A {@link org.kitesdk.data.FieldPartitioner} that extracts the value of a {@link Calendar} field,
+ * A {@link FieldPartitioner} that extracts the value of a {@link Calendar} field,
  * such as {@link Calendar#YEAR}. The UTC timezone is assumed.
  * See subclasses for convenience classes,
  * e.g. {@link YearFieldPartitioner}. Note that we don't use

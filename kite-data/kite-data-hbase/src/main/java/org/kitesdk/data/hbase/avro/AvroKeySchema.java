@@ -21,7 +21,7 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.hbase.impl.KeySchema;
 import org.kitesdk.data.hbase.impl.EntitySchema.FieldMapping;

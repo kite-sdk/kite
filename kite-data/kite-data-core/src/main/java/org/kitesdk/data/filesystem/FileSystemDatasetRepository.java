@@ -20,7 +20,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepositoryException;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.IncompatibleSchemaException;
 import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.MetadataProviderException;

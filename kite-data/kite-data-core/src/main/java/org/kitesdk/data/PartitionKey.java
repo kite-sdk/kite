@@ -27,7 +27,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  * </p>
  * <p>
  * A {@code PartitionKey} is a ordered sequence of values corresponding to the
- * {@link FieldPartitioner}s in a {@link PartitionStrategy}. A
+ * {@link org.kitesdk.data.spi.FieldPartitioner}s in a {@link PartitionStrategy}. A
  * {@link PartitionKey} may be obtained using
  * {@link PartitionStrategy#partitionKey(Object...)} or
  * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
@@ -38,7 +38,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  * </p>
  * 
  * @see PartitionStrategy
- * @see FieldPartitioner
+ * @see org.kitesdk.data.spi.FieldPartitioner
  * @see Dataset
  */
 @NotThreadSafe

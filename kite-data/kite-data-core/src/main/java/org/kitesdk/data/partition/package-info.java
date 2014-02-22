@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * Provides common implementations of {@link org.kitesdk.data.FieldPartitioner}.
+ * Provides common implementations of {@link org.kitesdk.data.spi.FieldPartitioner}.
  */
 @ParametersAreNonnullByDefault
 package org.kitesdk.data.partition;

@@ -16,7 +16,7 @@
 package org.kitesdk.data.partition;
 
 import com.google.common.base.Predicate;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
@@ -28,7 +28,7 @@ import com.google.common.base.Objects;
 public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartitioner<S, S> {
 
   public IdentityFieldPartitioner(String name, Class<S> type, int buckets) {
-    super(name, type, type, buckets);
+    super(name, name, type, type, buckets);
     if (!(type.equals(Integer.class) || type.equals(Long.class) ||
         type.equals(String.class))) {
       throw new IllegalArgumentException("Type not supported " + type);

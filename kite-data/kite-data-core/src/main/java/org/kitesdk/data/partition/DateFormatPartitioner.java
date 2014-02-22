@@ -25,7 +25,7 @@ import com.google.common.collect.Range;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.Predicates;
 
 /**

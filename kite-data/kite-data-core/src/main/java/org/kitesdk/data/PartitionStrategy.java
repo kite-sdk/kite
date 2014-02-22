@@ -34,6 +34,7 @@ import org.kitesdk.data.partition.IntRangeFieldPartitioner;
 import org.kitesdk.data.partition.RangeFieldPartitioner;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import org.kitesdk.data.spi.FieldPartitioner;
 
 /**
  * <p>

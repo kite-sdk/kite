@@ -17,7 +17,7 @@ package org.kitesdk.data.partition;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Range;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
@@ -34,7 +34,7 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
   private final int[] upperBounds;
 
   public IntRangeFieldPartitioner(String name, int... upperBounds) {
-    super(name, Integer.class, Integer.class, upperBounds.length);
+    super(name, name, Integer.class, Integer.class, upperBounds.length);
     this.upperBounds = upperBounds;
   }
 

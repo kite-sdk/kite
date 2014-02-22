@@ -16,7 +16,7 @@
 
 package org.kitesdk.data.filesystem;
 
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.partition.DayOfMonthFieldPartitioner;
 import org.kitesdk.data.partition.HourFieldPartitioner;
 import org.kitesdk.data.partition.MinuteFieldPartitioner;
