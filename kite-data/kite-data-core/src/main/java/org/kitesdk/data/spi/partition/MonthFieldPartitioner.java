@@ -13,30 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.partition;
+package org.kitesdk.data.spi.partition;
 
+import com.google.common.annotations.Beta;
 import java.text.NumberFormat;
-import javax.annotation.concurrent.Immutable;
+import java.util.Calendar;
+import javax.annotation.Nonnull;
 
-/**
- * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
- */
-@Deprecated
-@Immutable
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(
-    value={"EQ_DOESNT_OVERRIDE_EQUALS",
-           "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
-           "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"},
-    justification="Replaced by parent class")
-public class DayOfMonthFieldPartitioner extends
-    org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner {
+@Beta
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
+        "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+        "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", "EQ_DOESNT_OVERRIDE_EQUALS"},
+    justification="False positive due to generics. " +
+        "EQ: parent equals implementation checks child type")
+public class MonthFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 
-  public DayOfMonthFieldPartitioner(String sourceName, String name) {
-    super(sourceName, name);
+  public MonthFieldPartitioner(String sourceName, String name) {
+    super(sourceName, name, Calendar.MONTH, 12);
     format = NumberFormat.getIntegerInstance();
     format.setMinimumIntegerDigits(2);
     format.setMaximumIntegerDigits(2);
+  }
+
+  @Override
+  public Integer apply(@Nonnull Long timestamp) {
+    Calendar cal = Calendar.getInstance(UTC);
+    cal.setTimeInMillis(timestamp);
+    return cal.get(calendarField) + 1; // Calendar month is 0-based
   }
 
   @Override

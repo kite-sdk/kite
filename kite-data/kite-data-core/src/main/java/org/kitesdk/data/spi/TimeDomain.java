@@ -33,7 +33,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.partition.CalendarFieldPartitioner;
+import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
 
 @Immutable
 public class TimeDomain {

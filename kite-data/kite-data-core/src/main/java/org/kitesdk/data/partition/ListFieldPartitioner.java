@@ -15,102 +15,31 @@
  */
 package org.kitesdk.data.partition;
 
-import com.google.common.annotations.Beta;
-import com.google.common.base.Objects;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Range;
-import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
-import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.spi.Predicates;
 
-@Beta
+/**
+ * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+ */
+@Deprecated
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-    value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
-    justification="Implement if we intend to use in Serializable objects "
-        + " (e.g., TreeMaps) and use java serialization.")
-public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
+    value={"SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+           "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"},
+    justification="Replaced by parent class")
+public class ListFieldPartitioner<S> extends
+    org.kitesdk.data.spi.partition.ListFieldPartitioner<S> {
 
-  private final List<Set<S>> values;
-
+  /**
+   * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+   */
+  @Deprecated
   public ListFieldPartitioner(String name, List<Set<S>> values, Class<S> sourceType) {
-    super(name, name, sourceType, Integer.class, cardinality(values));
-    this.values = values;
-  }
-
-  private static <S> int cardinality(List<Set<S>> values) {
-    return values.size(); // the number of sets
-  }
-
-  @Override
-  public Integer apply(S value) {
-    // find the index of the set to which value belongs
-    for (int i = 0; i < values.size(); i++) {
-      if (values.get(i).contains(value)) {
-        return i;
-      }
-    }
-
-    throw new IllegalArgumentException(value + " is not in set");
+    super(name, values, sourceType);
   }
 
   @Override
   @Deprecated
   public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public Predicate<Integer> project(Predicate<S> predicate) {
-    if (predicate instanceof Predicates.Exists) {
-      return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
-      return ((Predicates.In<S>) predicate).transform(this);
-    } else if (predicate instanceof Range) {
-      Range range = (Range) predicate;
-      Set<Integer> possibleValues = Sets.newHashSet();
-      for (int i = 0; i < values.size(); i += 1) {
-        for (S item : values.get(i)) {
-          if (range.contains((Comparable) item)) {
-            possibleValues.add(i);
-            break; // no need to test additional items in this set
-          }
-        }
-      }
-      return Predicates.in(possibleValues);
-    } else {
-      return null;
-    }
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || !getClass().equals(o.getClass())) {
-      return false;
-    }
-    ListFieldPartitioner that = (ListFieldPartitioner) o;
-    return Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(this.values, that.values);
-  }
-
-  @Override
-  public int compare(Integer o1, Integer o2) {
-    return o1.compareTo(o2);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getName(), values);
-  }
-
-  @Override
-  public String toString() {
-    return Objects.toStringHelper(this).add("name", getName())
-        .add("values", values).toString();
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.partition;
+package org.kitesdk.data.spi.partition;
 
 import org.junit.Assert;
 import org.junit.Test;

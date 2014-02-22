@@ -15,33 +15,20 @@
  */
 package org.kitesdk.data.partition;
 
-import com.google.common.annotations.Beta;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Range;
-import java.util.Calendar;
-import org.kitesdk.data.spi.Predicates;
-
-@Beta
+/**
+ * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+ */
+@Deprecated
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-    value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
-    justification="Implement if we intend to use in Serializable objects "
-        + " (e.g., TreeMaps) and use java serialization.")
-public class YearFieldPartitioner extends CalendarFieldPartitioner {
+    value={"SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+           "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"},
+    justification="Replaced by parent class")
+public class YearFieldPartitioner extends org.kitesdk.data.spi.partition.YearFieldPartitioner {
+  /**
+   * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+   */
+  @Deprecated
   public YearFieldPartitioner(String sourceName, String name) {
-    super(sourceName, name, Calendar.YEAR, 5); // arbitrary number of partitions
-  }
-
-  @Override
-  public Predicate<Integer> project(Predicate<Long> predicate) {
-    // year is the only time field that can be projected
-    if (predicate instanceof Predicates.Exists) {
-      return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
-      return ((Predicates.In<Long>) predicate).transform(this);
-    } else if (predicate instanceof Range) {
-      return Predicates.transformClosed((Range<Long>) predicate, this);
-    } else {
-      return null;
-    }
+    super(sourceName, name);
   }
 }
