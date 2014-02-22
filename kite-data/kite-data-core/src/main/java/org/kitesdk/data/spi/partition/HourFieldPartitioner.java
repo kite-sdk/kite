@@ -13,27 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.partition;
+package org.kitesdk.data.spi.partition;
 
+import com.google.common.annotations.Beta;
 import java.text.NumberFormat;
-import javax.annotation.concurrent.Immutable;
+import java.util.Calendar;
 
-/**
- * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
- */
-@Deprecated
-@Immutable
+@Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-    value={"EQ_DOESNT_OVERRIDE_EQUALS",
-           "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
-           "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"},
-    justification="Replaced by parent class")
-public class DayOfMonthFieldPartitioner extends
-    org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner {
+    value={"SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", "EQ_DOESNT_OVERRIDE_EQUALS"},
+    justification="Implement if we intend to use in Serializable objects "
+        + " (e.g., TreeMaps) and use java serialization."
+        + "EQ: parent equals implementation checks child type")
+public class HourFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 
-  public DayOfMonthFieldPartitioner(String sourceName, String name) {
-    super(sourceName, name);
+  public HourFieldPartitioner(String sourceName, String name) {
+    super(sourceName, name, Calendar.HOUR_OF_DAY, 24);
     format = NumberFormat.getIntegerInstance();
     format.setMinimumIntegerDigits(2);
     format.setMaximumIntegerDigits(2);

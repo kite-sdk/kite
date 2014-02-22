@@ -31,7 +31,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
-import org.kitesdk.data.partition.DateFormatPartitioner;
+import org.kitesdk.data.spi.partition.DateFormatPartitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

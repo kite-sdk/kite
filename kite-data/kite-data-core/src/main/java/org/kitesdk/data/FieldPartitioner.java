@@ -43,9 +43,9 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 @Deprecated
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-    value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
-    justification="Implement if we intend to use in Serializable objects "
-        + " (e.g., TreeMaps) and use java serialization.")
+    value={"SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+           "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"},
+    justification="Replaced by parent class")
 public abstract class FieldPartitioner<S, T> extends org.kitesdk.data.spi.FieldPartitioner<S, T> {
   protected FieldPartitioner(String name, Class<S> sourceType, Class<T> type,
       int cardinality) {

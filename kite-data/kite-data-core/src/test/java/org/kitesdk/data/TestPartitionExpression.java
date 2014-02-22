@@ -16,9 +16,9 @@
 package org.kitesdk.data;
 
 import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.partition.HashFieldPartitioner;
-import org.kitesdk.data.partition.MinuteFieldPartitioner;
-import org.kitesdk.data.partition.YearFieldPartitioner;
+import org.kitesdk.data.spi.partition.HashFieldPartitioner;
+import org.kitesdk.data.spi.partition.MinuteFieldPartitioner;
+import org.kitesdk.data.spi.partition.YearFieldPartitioner;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;

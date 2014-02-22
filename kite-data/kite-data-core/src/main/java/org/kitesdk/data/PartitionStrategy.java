@@ -16,7 +16,7 @@
 package org.kitesdk.data;
 
 import com.google.common.collect.ImmutableList;
-import org.kitesdk.data.partition.PartitionFunctions;
+import org.kitesdk.data.spi.partition.PartitionFunctions;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
@@ -28,10 +28,10 @@ import javax.annotation.concurrent.Immutable;
 import org.apache.avro.generic.GenericRecord;
 
 import org.kitesdk.data.impl.Accessor;
-import org.kitesdk.data.partition.HashFieldPartitioner;
-import org.kitesdk.data.partition.IdentityFieldPartitioner;
-import org.kitesdk.data.partition.IntRangeFieldPartitioner;
-import org.kitesdk.data.partition.RangeFieldPartitioner;
+import org.kitesdk.data.spi.partition.HashFieldPartitioner;
+import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
+import org.kitesdk.data.spi.partition.IntRangeFieldPartitioner;
+import org.kitesdk.data.spi.partition.RangeFieldPartitioner;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import org.kitesdk.data.spi.FieldPartitioner;
@@ -353,7 +353,7 @@ public class PartitionStrategy {
      * @param upperBounds
      *          A variadic list of upper bounds of each partition.
      * @return An instance of the builder for method chaining.
-     * @see org.kitesdk.data.partition.RangeFieldPartitioner
+     * @see org.kitesdk.data.spi.partition.RangeFieldPartitioner
      */
     public Builder range(String name, String... upperBounds) {
       fieldPartitioners.add(new RangeFieldPartitioner(name, upperBounds));

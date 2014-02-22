@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import javax.annotation.Nullable;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.partition.CalendarFieldPartitioner;
+import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
 
 class KeyRangeIterable implements Iterable<MarkerRange> {
   private final Map<String, Predicate> predicates;
@@ -142,7 +142,7 @@ class KeyRangeIterable implements Iterable<MarkerRange> {
    * This method checks the projected constraints to ensure they are compatible
    * and can be used in a grouped iterator. The constraints that are not are
    * added as a separate {@code StackedIterator}. For example, constraints
-   * projected by {@link org.kitesdk.data.partition.ListFieldPartitioner} are
+   * projected by {@link org.kitesdk.data.spi.partition.ListFieldPartitioner} are
    * "in" constraints and can't be grouped with ranges.
    *
    * @param constraint A "range" constraint for the <em>source</em> values

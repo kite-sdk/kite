@@ -16,11 +16,11 @@
 package org.kitesdk.data.filesystem;
 
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.partition.DayOfMonthFieldPartitioner;
-import org.kitesdk.data.partition.HourFieldPartitioner;
-import org.kitesdk.data.partition.MinuteFieldPartitioner;
-import org.kitesdk.data.partition.MonthFieldPartitioner;
-import org.kitesdk.data.partition.YearFieldPartitioner;
+import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
+import org.kitesdk.data.spi.partition.HourFieldPartitioner;
+import org.kitesdk.data.spi.partition.MinuteFieldPartitioner;
+import org.kitesdk.data.spi.partition.MonthFieldPartitioner;
+import org.kitesdk.data.spi.partition.YearFieldPartitioner;
 import org.kitesdk.data.spi.StorageKey;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;

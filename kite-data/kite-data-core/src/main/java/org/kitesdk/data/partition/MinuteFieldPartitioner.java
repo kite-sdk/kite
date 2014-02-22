@@ -15,21 +15,27 @@
  */
 package org.kitesdk.data.partition;
 
-import com.google.common.annotations.Beta;
 import java.text.NumberFormat;
-import java.util.Calendar;
 
-@Beta
+/**
+ * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+ */
+@Deprecated
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-    value={"SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", "EQ_DOESNT_OVERRIDE_EQUALS"},
-    justification="Implement if we intend to use in Serializable objects "
-        + " (e.g., TreeMaps) and use java serialization."
-        + "EQ: parent equals implementation checks child type")
-public class MinuteFieldPartitioner extends CalendarFieldPartitioner {
+    value={"EQ_DOESNT_OVERRIDE_EQUALS",
+           "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+           "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"},
+    justification="Replaced by parent class")
+public class MinuteFieldPartitioner extends
+    org.kitesdk.data.spi.partition.MinuteFieldPartitioner {
   private final NumberFormat format;
 
+  /**
+   * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+   */
+  @Deprecated
   public MinuteFieldPartitioner(String sourceName, String name) {
-    super(sourceName, name, Calendar.MINUTE, 60);
+    super(sourceName, name);
     format = NumberFormat.getIntegerInstance();
     format.setMinimumIntegerDigits(2);
     format.setMaximumIntegerDigits(2);

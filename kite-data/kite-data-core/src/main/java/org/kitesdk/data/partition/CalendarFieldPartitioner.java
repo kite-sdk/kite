@@ -15,90 +15,39 @@
  */
 package org.kitesdk.data.partition;
 
-import com.google.common.base.Predicate;
-import javax.annotation.concurrent.NotThreadSafe;
-import org.kitesdk.data.spi.FieldPartitioner;
-import com.google.common.annotations.Beta;
-import com.google.common.base.Objects;
-import java.util.Calendar;
-import java.util.TimeZone;
-import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
 
 /**
- * A {@link FieldPartitioner} that extracts the value of a {@link Calendar} field,
- * such as {@link Calendar#YEAR}. The UTC timezone is assumed.
+ * A {@link org.kitesdk.data.spi.FieldPartitioner} that extracts the value of a {@link java.util.Calendar} field,
+ * such as {@link java.util.Calendar#YEAR}. The UTC timezone is assumed.
  * See subclasses for convenience classes,
- * e.g. {@link YearFieldPartitioner}. Note that we don't use
+ * e.g. {@link org.kitesdk.data.partition.YearFieldPartitioner}. Note that we don't use
  * {@link java.text.SimpleDateFormat} patterns since we want to keep the type information
  * (values are ints).
+ * @deprecated will be removed in 0.13.0; moved to spi.partition package
  */
-@Beta
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
-        "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
-        "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
-    justification="False positive due to generics.")
-@NotThreadSafe
-public class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
+@Deprecated
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+    value={"NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+           "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+           "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"},
+    justification="Replaced by parent class")
+@Immutable
+public class CalendarFieldPartitioner extends
+    org.kitesdk.data.spi.partition.CalendarFieldPartitioner {
 
-  protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-  protected int calendarField;
-
+  /**
+   * @deprecated will be removed in 0.13.0; moved to spi.partition package
+   */
+  @Deprecated
   public CalendarFieldPartitioner(String sourceName, String name,
       int calendarField, int cardinality) {
-    super(sourceName, name, Long.class, Integer.class, cardinality);
-    this.calendarField = calendarField;
-  }
-
-  @Override
-  public Integer apply(@Nonnull Long timestamp) {
-    Calendar cal = Calendar.getInstance(UTC);
-    cal.setTimeInMillis(timestamp);
-    return cal.get(calendarField);
-  }
-
-  @Override
-  public Predicate<Integer> project(Predicate<Long> predicate) {
-    return null;
-  }
-
-  public int getCalendarField() {
-    return calendarField;
+    super(sourceName, name, calendarField, cardinality);
   }
 
   @Override
   @Deprecated
   public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || !getClass().equals(o.getClass())) {
-      return false;
-    }
-    CalendarFieldPartitioner that = (CalendarFieldPartitioner) o;
-    return Objects.equal(this.getSourceName(), that.getSourceName()) &&
-        Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(this.getCardinality(), that.getCardinality());
-  }
-
-  @Override
-  public int compare(Integer o1, Integer o2) {
-    return o1.compareTo(o2);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getSourceName(), getName(), getCardinality());
-  }
-
-  @Override
-  public String toString() {
-    return Objects.toStringHelper(this).add("sourceName", getSourceName())
-        .add("name", getName())
-        .add("cardinality", getCardinality()).toString();
   }
 }

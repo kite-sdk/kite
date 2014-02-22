@@ -15,91 +15,29 @@
  */
 package org.kitesdk.data.partition;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Range;
-import java.util.Arrays;
-import java.util.List;
+/**
+ * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+ */
+@Deprecated
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+    value={"NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+           "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+           "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"},
+    justification="Replaced by parent class")
+public class RangeFieldPartitioner extends
+    org.kitesdk.data.spi.partition.RangeFieldPartitioner {
 
-import org.kitesdk.data.spi.FieldPartitioner;
-import com.google.common.annotations.Beta;
-import com.google.common.base.Objects;
-import org.kitesdk.data.spi.Predicates;
-
-@Beta
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
-        "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
-        "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
-    justification="False positive due to generics.")
-public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
-
-  private final List<String> upperBounds;
-
+  /**
+   * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+   */
+  @Deprecated
   public RangeFieldPartitioner(String name, String... upperBounds) {
-    super(name, name, String.class, String.class, upperBounds.length);
-    this.upperBounds = Arrays.asList(upperBounds);
-  }
-
-  @Override
-  public String apply(String value) {
-    for (String upper : upperBounds) {
-      if (value.compareTo(upper) <= 0) {
-        return upper;
-      }
-    }
-    throw new IllegalArgumentException(value + " is outside bounds");
+    super(name, upperBounds);
   }
 
   @Override
   @Deprecated
   public String valueFromString(String stringValue) {
     return stringValue;
-  }
-
-  @Override
-  public Predicate<String> project(Predicate<String> predicate) {
-    if (predicate instanceof Predicates.Exists) {
-      return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
-      return ((Predicates.In<String>) predicate).transform(this);
-    } else if (predicate instanceof Range) {
-      // must use a closed range:
-      //   if this( abc ) => b then this( acc ) => b, so b must be included
-      return Predicates.transformClosed((Range<String>) predicate, this);
-    } else {
-      return null;
-    }
-  }
-
-  public List<String> getUpperBounds() {
-    return upperBounds;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || !getClass().equals(o.getClass())) {
-      return false;
-    }
-    RangeFieldPartitioner that = (RangeFieldPartitioner) o;
-    return Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(this.upperBounds, that.upperBounds);
-  }
-
-  @Override
-  public int compare(String o1, String o2) {
-    return apply(o1).compareTo(apply(o2));
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getName(), upperBounds);
-  }
-
-  @Override
-  public String toString() {
-    return Objects.toStringHelper(this).add("name", getName())
-        .add("upperBounds", upperBounds).toString();
   }
 }

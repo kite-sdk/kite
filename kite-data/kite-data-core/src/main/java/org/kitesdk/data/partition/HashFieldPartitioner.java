@@ -15,77 +15,37 @@
  */
 package org.kitesdk.data.partition;
 
-import com.google.common.base.Predicate;
-import org.kitesdk.data.spi.FieldPartitioner;
+/**
+ * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+ */
+@Deprecated
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+    value={"NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+           "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+           "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"},
+    justification="Replaced by parent class")
+public class HashFieldPartitioner extends
+    org.kitesdk.data.spi.partition.HashFieldPartitioner {
 
-import com.google.common.base.Objects;
-import org.kitesdk.data.spi.Predicates;
-
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
-        "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
-        "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
-    justification="False positive due to generics.")
-public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
-
+  /**
+   * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+   */
+  @Deprecated
   public HashFieldPartitioner(String name, int buckets) {
-    super(name, name, Object.class, Integer.class, buckets);
+    super(name, buckets);
   }
 
+  /**
+   * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+   */
+  @Deprecated
   public HashFieldPartitioner(String sourceName, String name, int buckets) {
-    super(sourceName, name, Object.class, Integer.class, buckets);
-  }
-
-  @Override
-  public Integer apply(Object value) {
-    return (value.hashCode() & Integer.MAX_VALUE) % getCardinality();
+    super(sourceName, name, buckets);
   }
 
   @Override
   @Deprecated
   public Integer valueFromString(String stringValue) {
     return Integer.parseInt(stringValue);
-  }
-
-  @Override
-  public Predicate<Integer> project(Predicate<Object> predicate) {
-    if (predicate instanceof Predicates.Exists) {
-      return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
-      return ((Predicates.In<Object>) predicate).transform(this);
-    } else {
-      // cannot enumerate ranges and get the image
-      return null;
-    }
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || !getClass().equals(o.getClass())) {
-      return false;
-    }
-    HashFieldPartitioner that = (HashFieldPartitioner) o;
-    return Objects.equal(this.getSourceName(), that.getSourceName()) &&
-        Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(this.getCardinality(), that.getCardinality());
-  }
-
-  @Override
-  public int compare(Integer o1, Integer o2) {
-    return o1.compareTo(o2);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getSourceName(), getName(), getCardinality());
-  }
-
-  @Override
-  public String toString() {
-    return Objects.toStringHelper(this).add("sourceName", getSourceName())
-        .add("name", getName())
-        .add("cardinality", getCardinality()).toString();
   }
 }

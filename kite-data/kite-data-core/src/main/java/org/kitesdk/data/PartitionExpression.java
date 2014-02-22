@@ -15,7 +15,7 @@
  */
 package org.kitesdk.data;
 
-import org.kitesdk.data.partition.PartitionFunctions;
+import org.kitesdk.data.spi.partition.PartitionFunctions;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;

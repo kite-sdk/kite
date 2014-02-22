@@ -15,29 +15,23 @@
  */
 package org.kitesdk.data.partition;
 
-import com.google.common.base.Predicate;
-import org.kitesdk.data.spi.FieldPartitioner;
-import com.google.common.annotations.Beta;
-import com.google.common.base.Objects;
-
-@Beta
+/**
+ * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+ */
+@Deprecated
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-    value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
-    justification="Implement if we intend to use in Serializable objects "
-        + " (e.g., TreeMaps) and use java serialization.")
-public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartitioner<S, S> {
+    value={"SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+           "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"},
+    justification="Replaced by parent class")
+public class IdentityFieldPartitioner<S extends Comparable> extends
+    org.kitesdk.data.spi.partition.IdentityFieldPartitioner<S> {
 
+  /**
+   * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+   */
+  @Deprecated
   public IdentityFieldPartitioner(String name, Class<S> type, int buckets) {
-    super(name, name, type, type, buckets);
-    if (!(type.equals(Integer.class) || type.equals(Long.class) ||
-        type.equals(String.class))) {
-      throw new IllegalArgumentException("Type not supported " + type);
-    }
-  }
-
-  @Override
-  public S apply(S value) {
-    return value;
+    super(name, type, buckets);
   }
 
   @Override
@@ -52,40 +46,5 @@ public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartiti
       return (S) stringValue;
     }
     throw new IllegalArgumentException("Cannot convert string to type " + getType());
-  }
-
-  @Override
-  public Predicate<S> project(Predicate<S> predicate) {
-    return predicate;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || !getClass().equals(o.getClass())) {
-      return false;
-    }
-    IdentityFieldPartitioner that = (IdentityFieldPartitioner) o;
-    return Objects.equal(this.getName(), that.getName()) &&
-        Objects.equal(this.getCardinality(), that.getCardinality());
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public int compare(S o1, S o2) {
-    return o1.compareTo(o2);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getName(), getCardinality());
-  }
-
-  @Override
-  public String toString() {
-    return Objects.toStringHelper(this).add("name", getName())
-        .add("cardinality", getCardinality()).toString();
   }
 }

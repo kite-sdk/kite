@@ -34,7 +34,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.generic.GenericRecord;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.partition.CalendarFieldPartitioner;
+import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
 
 /**
  * A set of simultaneous constraints.

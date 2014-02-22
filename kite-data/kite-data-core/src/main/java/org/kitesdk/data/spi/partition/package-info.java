@@ -15,11 +15,8 @@
  */
 /**
  * Provides common implementations of {@link org.kitesdk.data.spi.FieldPartitioner}.
- * This package is deprecated will be removed in 0.13.0. The classes have been
- * moved to package org.kitesdk.data.spi.partition
  */
-@Deprecated
 @ParametersAreNonnullByDefault
-package org.kitesdk.data.partition;
+package org.kitesdk.data.spi.partition;
 
 import javax.annotation.ParametersAreNonnullByDefault;
