@@ -102,6 +102,12 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>0.11.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
       <artifactId>kite-hadoop-dependencies</artifactId>
       <type>pom</type>
       <scope>provided</scope>
@@ -137,6 +143,15 @@
     <dependency>
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hbase</groupId>
+      <artifactId>hbase</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hbase</groupId>
+      <artifactId>hbase</artifactId>
+      <classifier>tests</classifier>
     </dependency>
   </dependencies>
 

@@ -24,6 +24,7 @@ import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hbase.mapreduce.TableInputFormat;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -37,7 +38,11 @@ import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
+import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.filesystem.impl.Accessor;
+import org.kitesdk.data.hbase.DaoDataset;
+import org.kitesdk.data.hbase.impl.BaseDao;
+import org.kitesdk.data.hbase.impl.EntityMapper;
 import parquet.avro.AvroParquetInputFormat;
 
 public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritable> {
@@ -58,23 +63,31 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
       InterruptedException {
     Job job = new Job(jobContext.getConfiguration());
     Dataset<E> dataset = loadDataset(jobContext);
-    Format format = dataset.getDescriptor().getFormat();
-    if (Formats.AVRO.equals(format)) {
-      List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(dataset));
-      FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
-      AvroJob.setInputKeySchema(job, dataset.getDescriptor().getSchema());
-      AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
-      return delegate.getSplits(jobContext);
-    } else if (Formats.PARQUET.equals(format)) {
-      List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(dataset));
-      AvroParquetInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
-      // TODO: use later version of parquet so we can set the schema correctly
-      //AvroParquetInputFormat.setReadSchema(job, dataset.getDescriptor().getSchema());
-      AvroParquetInputFormat delegate = new AvroParquetInputFormat();
+    if (dataset instanceof RandomAccessDataset) {
+      TableInputFormat delegate = new TableInputFormat();
+      String tableName = dataset.getName(); // TODO: not always true
+      jobContext.getConfiguration().set(TableInputFormat.INPUT_TABLE, tableName);
+      // TODO: scan range
       return delegate.getSplits(jobContext);
     } else {
-      throw new UnsupportedOperationException(
-          "Not a supported format: " + format);
+      Format format = dataset.getDescriptor().getFormat();
+      if (Formats.AVRO.equals(format)) {
+        List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(dataset));
+        FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
+        AvroJob.setInputKeySchema(job, dataset.getDescriptor().getSchema());
+        AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
+        return delegate.getSplits(jobContext);
+      } else if (Formats.PARQUET.equals(format)) {
+        List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(dataset));
+        AvroParquetInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
+        // TODO: use later version of parquet so we can set the schema correctly
+        //AvroParquetInputFormat.setReadSchema(job, dataset.getDescriptor().getSchema());
+        AvroParquetInputFormat delegate = new AvroParquetInputFormat();
+        return delegate.getSplits(jobContext);
+      } else {
+        throw new UnsupportedOperationException(
+            "Not a supported format: " + format);
+      }
     }
   }
 
@@ -82,17 +95,27 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
   @SuppressWarnings("unchecked")
   public RecordReader<AvroKey<E>, NullWritable> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     Dataset<E> dataset = loadDataset(taskAttemptContext);
-    Format format = dataset.getDescriptor().getFormat();
-    if (Formats.AVRO.equals(format)) {
-      AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
-      return delegate.createRecordReader(inputSplit, taskAttemptContext);
-    } else if (Formats.PARQUET.equals(format)) {
-      AvroParquetInputFormat delegate = new AvroParquetInputFormat();
-      return new ParquetRecordReaderWrapper(
-          (RecordReader<Void, E>) delegate.createRecordReader(inputSplit, taskAttemptContext));
+    if (dataset instanceof RandomAccessDataset) {
+      TableInputFormat delegate = new TableInputFormat();
+      delegate.setConf(taskAttemptContext.getConfiguration());
+
+      // TODO: use Accessor to get the EntityMapper and fail gracefully
+      EntityMapper<E> entityMapper = ((BaseDao<E>) ((DaoDataset<E>) dataset).getDao()).getEntityMapper();
+      return new EntityMapperRecordReader<E>(delegate.createRecordReader(inputSplit,
+          taskAttemptContext), entityMapper);
     } else {
-      throw new UnsupportedOperationException(
-          "Not a supported format: " + format);
+      Format format = dataset.getDescriptor().getFormat();
+      if (Formats.AVRO.equals(format)) {
+        AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
+        return delegate.createRecordReader(inputSplit, taskAttemptContext);
+      } else if (Formats.PARQUET.equals(format)) {
+        AvroParquetInputFormat delegate = new AvroParquetInputFormat();
+        return new ParquetRecordReaderWrapper(
+            (RecordReader<Void, E>) delegate.createRecordReader(inputSplit, taskAttemptContext));
+      } else {
+        throw new UnsupportedOperationException(
+            "Not a supported format: " + format);
+      }
     }
   }
 
