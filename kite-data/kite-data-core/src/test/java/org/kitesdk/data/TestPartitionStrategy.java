@@ -17,8 +17,7 @@ package org.kitesdk.data;
 
 import static org.junit.Assert.assertEquals;
 
-import org.kitesdk.data.FieldPartitioner;
-import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.FieldPartitioner;
 import java.util.List;
 
 import org.junit.Assert;

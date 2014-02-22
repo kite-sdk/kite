@@ -22,7 +22,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.Predicates;
 
 @Beta
@@ -35,7 +35,7 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
   private final List<Set<S>> values;
 
   public ListFieldPartitioner(String name, List<Set<S>> values, Class<S> sourceType) {
-    super(name, sourceType, Integer.class, cardinality(values));
+    super(name, name, sourceType, Integer.class, cardinality(values));
     this.values = values;
   }
 

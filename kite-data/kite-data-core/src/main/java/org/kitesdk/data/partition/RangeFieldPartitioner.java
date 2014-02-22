@@ -20,7 +20,7 @@ import com.google.common.collect.Range;
 import java.util.Arrays;
 import java.util.List;
 
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import org.kitesdk.data.spi.Predicates;
@@ -35,7 +35,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
   private final List<String> upperBounds;
 
   public RangeFieldPartitioner(String name, String... upperBounds) {
-    super(name, String.class, String.class, upperBounds.length);
+    super(name, name, String.class, String.class, upperBounds.length);
     this.upperBounds = Arrays.asList(upperBounds);
   }
 

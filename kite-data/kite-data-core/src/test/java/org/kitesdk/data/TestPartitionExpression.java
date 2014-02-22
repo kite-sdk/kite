@@ -15,9 +15,7 @@
  */
 package org.kitesdk.data;
 
-import org.kitesdk.data.FieldPartitioner;
-import org.kitesdk.data.PartitionExpression;
-import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.partition.HashFieldPartitioner;
 import org.kitesdk.data.partition.MinuteFieldPartitioner;
 import org.kitesdk.data.partition.YearFieldPartitioner;

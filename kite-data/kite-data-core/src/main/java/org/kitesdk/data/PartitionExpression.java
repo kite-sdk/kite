@@ -15,16 +15,7 @@
  */
 package org.kitesdk.data;
 
-import org.kitesdk.data.partition.DateFormatPartitioner;
-import org.kitesdk.data.partition.DayOfMonthFieldPartitioner;
-import org.kitesdk.data.partition.HashFieldPartitioner;
-import org.kitesdk.data.partition.HourFieldPartitioner;
-import org.kitesdk.data.partition.IdentityFieldPartitioner;
-import org.kitesdk.data.partition.MinuteFieldPartitioner;
-import org.kitesdk.data.partition.MonthFieldPartitioner;
 import org.kitesdk.data.partition.PartitionFunctions;
-import org.kitesdk.data.partition.RangeFieldPartitioner;
-import org.kitesdk.data.partition.YearFieldPartitioner;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
@@ -33,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlEngine;
+import org.kitesdk.data.spi.FieldPartitioner;
 
 /**
  * Internal utility class for persisting partition strategies,

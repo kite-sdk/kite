@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
-import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 
 public class TestKeyRangeIterable {

@@ -17,7 +17,7 @@
 package org.kitesdk.data.filesystem;
 
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.StorageKey;

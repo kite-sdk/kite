@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.spi;
 
-import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import java.util.Comparator;
 import javax.annotation.concurrent.Immutable;

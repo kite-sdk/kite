@@ -22,7 +22,7 @@ import com.google.common.collect.UnmodifiableIterator;
 import java.util.Iterator;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.FieldPartitioner;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractRefineableView;

@@ -15,9 +15,6 @@
  */
 package org.kitesdk.data;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import java.util.Comparator;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -40,126 +37,23 @@ import javax.annotation.concurrent.Immutable;
  * @param <T> The type of the target field, which is the type of the return value of the
  *           partition function.
  * @see PartitionStrategy
+ * @see org.kitesdk.data.spi.FieldPartitioner
+ * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
  */
 @Immutable
+@Deprecated
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
     justification="Implement if we intend to use in Serializable objects "
         + " (e.g., TreeMaps) and use java serialization.")
-public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparator<T> {
-
-  private final String sourceName;
-  private final String name;
-  private final Class<S> sourceType;
-  private final Class<T> type;
-  private final int cardinality;
-
+public abstract class FieldPartitioner<S, T> extends org.kitesdk.data.spi.FieldPartitioner<S, T> {
   protected FieldPartitioner(String name, Class<S> sourceType, Class<T> type,
       int cardinality) {
-    this(name, name, sourceType, type, cardinality);
+    super(name, name, sourceType, type, cardinality);
   }
 
   protected FieldPartitioner(String sourceName, String name,
       Class<S> sourceType, Class<T> type, int cardinality) {
-    this.sourceName = sourceName;
-    this.name = name;
-    this.sourceType = sourceType;
-    this.type = type;
-    this.cardinality = cardinality;
+    super(sourceName, name, sourceType, type, cardinality);
   }
-
-  /**
-   * @return the name of the partition field. Note that the partition field is derived
-   * from {@link #getSourceName()} and does not appear in the dataset entity.
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * @return the name of the field from which the partition field is derived.
-   * @since 0.3.0
-   */
-  public String getSourceName() {
-    return sourceName;
-  }
-
-  /**
-   * @return the number of buckets in the partition.
-   */
-  public int getCardinality() {
-    return cardinality;
-  }
-
-  /**
-   * <p>
-   * Apply the partition function to the given {@code value}.
-   * </p>
-   * <p>
-   * The type of value must be compatible with the field partitioner
-   * implementation. Normally, this is validated at the time of initial
-   * configuration rather than at runtime.
-   * </p>
-   */
-  @Override
-  public abstract T apply(S value);
-
-  /**
-   * <p>
-   * Retrieve the value for the field from the string representation.
-   * </p>
-   * @since 0.3.0
-   *
-   * @deprecated will be removed in 0.12.0
-   */
-  @Deprecated
-  public abstract T valueFromString(String stringValue);
-
-  /**
-   * <p>
-   * Retrieve the value for the field formatted as a {@link String}. By default,
-   * this is the object's {@link Object#toString()} representation,
-   * but some {@link FieldPartitioner}s may choose to provide a different representation.
-   * </p>
-   * @since 0.4.0
-   *
-   * @deprecated will be removed in 0.12.0
-   */
-  @Deprecated
-  public String valueToString(T value) {
-    return value.toString();
-  }
-
-  /**
-   * <p>
-   * The type of the source field, which is the type of the type expected by
-   * the apply function.
-   * </p>
-   * @since 0.8.0
-   */
-  public Class<S> getSourceType() {
-    return sourceType;
-  }
-
-  /**
-   * <p>
-   * The type of the target field, which is the type of the return value of the
-   * partition function.
-   * </p>
-   * @since 0.8.0
-   */
-  public Class<T> getType() {
-    return type;
-  }
-
-  /**
-   * Projects a source-data constraint {@link Predicate} into the image of the
-   * backing partition function.
-   *
-   * If the function cannot be projected exactly, the resulting predicate must
-   * be more permissive than the original predicate.
-   *
-   * @since 0.11.0
-   */
-  public abstract Predicate<T> project(Predicate<S> predicate);
 }
