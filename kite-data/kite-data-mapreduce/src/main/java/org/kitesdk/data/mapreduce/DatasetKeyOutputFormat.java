@@ -48,9 +48,9 @@ import java.net.URI;
  */
 public class DatasetKeyOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWritable> {
 
-  public static final String KITE_REPOSITORY_URI = "kite.repositoryUri";
-  public static final String KITE_DATASET_NAME = "kite.datasetName";
-  public static final String KITE_PARTITION_DIR = "kite.partitionDir";
+  public static final String KITE_REPOSITORY_URI = "kite.outputRepositoryUri";
+  public static final String KITE_DATASET_NAME = "kite.outputDatasetName";
+  public static final String KITE_PARTITION_DIR = "kite.outputPartitionDir";
 
   public static void setRepositoryUri(Job job, URI uri) {
     job.getConfiguration().set(KITE_REPOSITORY_URI, uri.toString());
