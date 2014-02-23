@@ -84,7 +84,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
     Job job = new Job(jobContext.getConfiguration());
     if (view instanceof RandomAccessDataset) {
       TableInputFormat delegate = new TableInputFormat();
-      String tableName = view.getDataset().getName(); // TODO: not always true
+      String tableName = getTableName(view.getDataset().getName());
       jobContext.getConfiguration().set(TableInputFormat.INPUT_TABLE, tableName);
       delegate.setConf(jobContext.getConfiguration());
       // TODO: scan range
@@ -109,6 +109,14 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
             "Not a supported format: " + format);
       }
     }
+  }
+
+  // TODO: remove duplication from HBaseMetadataProvider, and see CDK-140
+  static String getTableName(String name) {
+    if (name.contains(".")) {
+      return name.substring(0, name.indexOf('.'));
+    }
+    return name;
   }
 
   @Override
