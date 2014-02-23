@@ -41,8 +41,6 @@ import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.filesystem.impl.Accessor;
-import org.kitesdk.data.hbase.DaoDataset;
-import org.kitesdk.data.hbase.impl.BaseDao;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import parquet.avro.AvroParquetInputFormat;
 
@@ -118,9 +116,12 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
     if (dataset instanceof RandomAccessDataset) {
       TableInputFormat delegate = new TableInputFormat();
       delegate.setConf(taskAttemptContext.getConfiguration());
-
-      // TODO: use Accessor to get the EntityMapper and fail gracefully
-      EntityMapper<E> entityMapper = ((BaseDao<E>) ((DaoDataset<E>) dataset).getDao()).getEntityMapper();
+      EntityMapper<E> entityMapper =
+          org.kitesdk.data.hbase.impl.Accessor.getDefault().getEntityMapper(dataset);
+      if (entityMapper == null) { // TODO: find entity mapper in setConf to fail early
+        throw new UnsupportedOperationException(
+            "Cannot find entity mapper for dataset: " + dataset);
+      }
       return new EntityMapperRecordReader<E>(delegate.createRecordReader(inputSplit,
           taskAttemptContext), entityMapper);
     } else {

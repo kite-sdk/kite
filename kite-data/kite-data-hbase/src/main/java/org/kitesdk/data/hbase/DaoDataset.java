@@ -25,8 +25,7 @@ import org.kitesdk.data.RefineableView;
 import org.kitesdk.data.hbase.impl.Dao;
 import org.kitesdk.data.spi.AbstractDataset;
 
-// TODO: this should not be public!
-public class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E> {
+class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E> {
 
   private String name;
   private Dao<E> dao;
