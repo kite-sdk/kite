@@ -53,6 +53,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
   public static final String KITE_DATASET_NAME = "kite.inputDatasetName";
 
   private Configuration conf;
+  private Dataset<E> dataset;
 
   public static void setRepositoryUri(Job job, URI uri) {
     job.getConfiguration().set(KITE_REPOSITORY_URI, uri.toString());
@@ -63,14 +64,30 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
   }
 
   @Override
+  public Configuration getConf() {
+    return conf;
+  }
+
+  @Override
+  public void setConf(Configuration configuration) {
+    conf = configuration;
+    dataset = loadDataset(configuration);
+  }
+
+  private static <E> Dataset<E> loadDataset(Configuration conf) {
+    DatasetRepository repo = DatasetRepositories.open(conf.get(KITE_REPOSITORY_URI));
+    return repo.load(conf.get(KITE_DATASET_NAME));
+  }
+
+  @Override
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
       InterruptedException {
     Job job = new Job(jobContext.getConfiguration());
-    Dataset<E> dataset = loadDataset(jobContext);
     if (dataset instanceof RandomAccessDataset) {
       TableInputFormat delegate = new TableInputFormat();
       String tableName = dataset.getName(); // TODO: not always true
       jobContext.getConfiguration().set(TableInputFormat.INPUT_TABLE, tableName);
+      delegate.setConf(jobContext.getConfiguration());
       // TODO: scan range
       return delegate.getSplits(jobContext);
     } else {
@@ -98,7 +115,6 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
   @Override
   @SuppressWarnings("unchecked")
   public RecordReader<AvroKey<E>, NullWritable> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-    Dataset<E> dataset = loadDataset(taskAttemptContext);
     if (dataset instanceof RandomAccessDataset) {
       TableInputFormat delegate = new TableInputFormat();
       delegate.setConf(taskAttemptContext.getConfiguration());
@@ -121,29 +137,6 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
             "Not a supported format: " + format);
       }
     }
-  }
-
-  private static DatasetRepository getDatasetRepository(JobContext jobContext) {
-    Configuration conf = jobContext.getConfiguration();
-    return DatasetRepositories.open(conf.get(KITE_REPOSITORY_URI));
-  }
-
-  private static <E> Dataset<E> loadDataset(JobContext jobContext) {
-    Configuration conf = jobContext.getConfiguration();
-    DatasetRepository repo = getDatasetRepository(jobContext);
-    return repo.load(conf.get(KITE_DATASET_NAME));
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    if (conf != null) {
-      this.conf = conf;
-    }
-  }
-
-  @Override
-  public Configuration getConf() {
-    return conf;
   }
 
   private class ParquetRecordReaderWrapper extends RecordReader<AvroKey<E>, NullWritable> {
