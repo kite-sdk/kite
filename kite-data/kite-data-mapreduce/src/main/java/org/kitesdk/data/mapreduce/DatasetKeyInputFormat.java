@@ -40,6 +40,7 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.RandomAccessDataset;
+import org.kitesdk.data.View;
 import org.kitesdk.data.filesystem.impl.Accessor;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import parquet.avro.AvroParquetInputFormat;
@@ -51,7 +52,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
   public static final String KITE_DATASET_NAME = "kite.inputDatasetName";
 
   private Configuration conf;
-  private Dataset<E> dataset;
+  private View<E> view;
 
   public static void setRepositoryUri(Job job, URI uri) {
     job.getConfiguration().set(KITE_REPOSITORY_URI, uri.toString());
@@ -69,7 +70,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
   @Override
   public void setConf(Configuration configuration) {
     conf = configuration;
-    dataset = loadDataset(configuration);
+    view = loadDataset(configuration); // TODO: load a view if specified
   }
 
   private static <E> Dataset<E> loadDataset(Configuration conf) {
@@ -81,26 +82,26 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
       InterruptedException {
     Job job = new Job(jobContext.getConfiguration());
-    if (dataset instanceof RandomAccessDataset) {
+    if (view instanceof RandomAccessDataset) {
       TableInputFormat delegate = new TableInputFormat();
-      String tableName = dataset.getName(); // TODO: not always true
+      String tableName = view.getDataset().getName(); // TODO: not always true
       jobContext.getConfiguration().set(TableInputFormat.INPUT_TABLE, tableName);
       delegate.setConf(jobContext.getConfiguration());
       // TODO: scan range
       return delegate.getSplits(jobContext);
     } else {
-      Format format = dataset.getDescriptor().getFormat();
+      Format format = view.getDataset().getDescriptor().getFormat();
       if (Formats.AVRO.equals(format)) {
-        List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(dataset));
+        List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(view));
         FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
-        AvroJob.setInputKeySchema(job, dataset.getDescriptor().getSchema());
+        AvroJob.setInputKeySchema(job, view.getDataset().getDescriptor().getSchema());
         AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
         return delegate.getSplits(jobContext);
       } else if (Formats.PARQUET.equals(format)) {
-        List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(dataset));
+        List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(view));
         AvroParquetInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
         // TODO: use later version of parquet so we can set the schema correctly
-        //AvroParquetInputFormat.setReadSchema(job, dataset.getDescriptor().getSchema());
+        //AvroParquetInputFormat.setReadSchema(job, view.getDescriptor().getSchema());
         AvroParquetInputFormat delegate = new AvroParquetInputFormat();
         return delegate.getSplits(jobContext);
       } else {
@@ -113,19 +114,19 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
   @Override
   @SuppressWarnings("unchecked")
   public RecordReader<AvroKey<E>, NullWritable> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-    if (dataset instanceof RandomAccessDataset) {
+    if (view instanceof RandomAccessDataset) {
       TableInputFormat delegate = new TableInputFormat();
       delegate.setConf(taskAttemptContext.getConfiguration());
       EntityMapper<E> entityMapper =
-          org.kitesdk.data.hbase.impl.Accessor.getDefault().getEntityMapper(dataset);
+          org.kitesdk.data.hbase.impl.Accessor.getDefault().getEntityMapper(view.getDataset());
       if (entityMapper == null) { // TODO: find entity mapper in setConf to fail early
         throw new UnsupportedOperationException(
-            "Cannot find entity mapper for dataset: " + dataset);
+            "Cannot find entity mapper for view: " + view);
       }
       return new EntityMapperRecordReader<E>(delegate.createRecordReader(inputSplit,
           taskAttemptContext), entityMapper);
     } else {
-      Format format = dataset.getDescriptor().getFormat();
+      Format format = view.getDataset().getDescriptor().getFormat();
       if (Formats.AVRO.equals(format)) {
         AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
         return delegate.createRecordReader(inputSplit, taskAttemptContext);
