@@ -15,21 +15,21 @@
  */
 package org.kitesdk.data.spi.partition;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.Predicates;
 
-@Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
     justification="Implement if we intend to use in Serializable objects "
         + " (e.g., TreeMaps) and use java serialization.")
+@Immutable
 public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
 
   private final List<Set<S>> values;

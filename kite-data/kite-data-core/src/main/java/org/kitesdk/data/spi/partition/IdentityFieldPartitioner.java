@@ -16,15 +16,15 @@
 package org.kitesdk.data.spi.partition;
 
 import com.google.common.base.Predicate;
+import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
-import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 
-@Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
     justification="Implement if we intend to use in Serializable objects "
         + " (e.g., TreeMaps) and use java serialization.")
+@Immutable
 public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartitioner<S, S> {
 
   public IdentityFieldPartitioner(String name, Class<S> type, int buckets) {

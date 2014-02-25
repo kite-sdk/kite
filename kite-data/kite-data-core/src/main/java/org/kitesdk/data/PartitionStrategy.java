@@ -353,7 +353,6 @@ public class PartitionStrategy {
      * @param upperBounds
      *          A variadic list of upper bounds of each partition.
      * @return An instance of the builder for method chaining.
-     * @see org.kitesdk.data.spi.partition.RangeFieldPartitioner
      */
     public Builder range(String name, String... upperBounds) {
       fieldPartitioners.add(new RangeFieldPartitioner(name, upperBounds));

@@ -296,7 +296,7 @@
               <useStandardDocletOptions>false</useStandardDocletOptions>
               <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
               <destDir>jdiff</destDir>
-              <excludePackageNames>org.kitesdk.data.event,org.kitesdk.data.hbase:org.kitesdk.maven.plugins,org.kitesdk.morphline.shaded.*,*.spi,*.impl,org.apache.*</excludePackageNames>
+              <excludePackageNames>org.kitesdk.data.event,org.kitesdk.data.hbase:org.kitesdk.maven.plugins,org.kitesdk.morphline.shaded.*,*.spi,*.spi.*,*.impl,org.apache.*</excludePackageNames>
             </configuration>
           </execution>
           <execution>
@@ -381,7 +381,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${vers.maven-javadoc-plugin}</version>
           <configuration>
-            <excludePackageNames>org.kitesdk.data.event,org.kitesdk.data.hbase:org.kitesdk.maven.plugins,org.kitesdk.morphline.shaded.*,*.spi,*.impl,org.apache.*</excludePackageNames>
+            <excludePackageNames>org.kitesdk.data.event,org.kitesdk.data.hbase:org.kitesdk.maven.plugins,org.kitesdk.morphline.shaded.*,*.spi,*.spi.*,*.impl,org.apache.*</excludePackageNames>
             <links>
               <link>http://avro.apache.org/docs/${vers.avro}/api/java/</link>
               <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
@@ -589,7 +589,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${vers.maven-javadoc-plugin}</version>
         <configuration>
-          <excludePackageNames>org.kitesdk.data.event,org.kitesdk.data.hbase:org.kitesdk.maven.plugins,org.kitesdk.morphline.shaded.*,*.spi,*.impl,org.apache.*</excludePackageNames>
+          <excludePackageNames>org.kitesdk.data.event,org.kitesdk.data.hbase:org.kitesdk.maven.plugins,org.kitesdk.morphline.shaded.*,*.spi,*.spi.*,*.impl,org.apache.*</excludePackageNames>
           <groups>
             <group>
               <title>Data Core</title>

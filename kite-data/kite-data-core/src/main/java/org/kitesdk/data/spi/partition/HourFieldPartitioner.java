@@ -15,16 +15,16 @@
  */
 package org.kitesdk.data.spi.partition;
 
-import com.google.common.annotations.Beta;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import javax.annotation.concurrent.Immutable;
 
-@Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value={"SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", "EQ_DOESNT_OVERRIDE_EQUALS"},
     justification="Implement if we intend to use in Serializable objects "
         + " (e.g., TreeMaps) and use java serialization."
         + "EQ: parent equals implementation checks child type")
+@Immutable
 public class HourFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 
