@@ -16,6 +16,7 @@
 package org.kitesdk.data.spi.partition;
 
 import com.google.common.base.Predicate;
+import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 
 import com.google.common.base.Objects;
@@ -25,6 +26,7 @@ import org.kitesdk.data.spi.Predicates;
         "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
         "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
     justification="False positive due to generics.")
+@Immutable
 public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
 
   public HashFieldPartitioner(String name, int buckets) {

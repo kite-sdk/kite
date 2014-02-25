@@ -15,17 +15,17 @@
  */
 package org.kitesdk.data.spi.partition;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Range;
 import java.util.Calendar;
+import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.Predicates;
 
-@Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
     justification="Implement if we intend to use in Serializable objects "
         + " (e.g., TreeMaps) and use java serialization.")
+@Immutable
 public class YearFieldPartitioner extends CalendarFieldPartitioner {
   public YearFieldPartitioner(String sourceName, String name) {
     super(sourceName, name, Calendar.YEAR, 5); // arbitrary number of partitions

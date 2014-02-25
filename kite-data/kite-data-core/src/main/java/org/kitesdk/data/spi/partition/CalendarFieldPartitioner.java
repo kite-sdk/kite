@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.spi.partition;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import java.util.Calendar;
@@ -32,7 +31,6 @@ import org.kitesdk.data.spi.FieldPartitioner;
  * {@link java.text.SimpleDateFormat} patterns since we want to keep the type information
  * (values are ints).
  */
-@Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
         "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
         "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},

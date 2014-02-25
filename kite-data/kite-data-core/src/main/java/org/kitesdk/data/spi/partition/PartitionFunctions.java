@@ -23,7 +23,6 @@ import com.google.common.annotations.Beta;
  * Convenience class so you can say, for example, <code>hash("username", 2)</code> in
  * JEXL.
  */
-@Beta
 @SuppressWarnings("unchecked")
 public class PartitionFunctions {
 

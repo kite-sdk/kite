@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.spi.partition;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -25,6 +24,7 @@ import com.google.common.collect.Range;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.Predicates;
 
@@ -35,11 +35,11 @@ import org.kitesdk.data.spi.Predicates;
  *
  * @since 0.9.0
  */
-@Beta
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
     "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
     "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"},
     justification="False positive due to generics.")
+@Immutable
 public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
 
   private static final String DEFAULT_TIME_ZONE = "UTC";
