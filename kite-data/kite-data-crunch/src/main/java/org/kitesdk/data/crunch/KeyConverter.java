@@ -17,9 +17,8 @@ package org.kitesdk.data.crunch;
 
 import org.apache.crunch.types.Converter;
 import org.apache.crunch.types.avro.AvroType;
-import org.apache.hadoop.io.NullWritable;
 
-class KeyConverter<E> implements Converter<E, NullWritable, E, Iterable<E>> {
+class KeyConverter<E> implements Converter<E, Void, E, Iterable<E>> {
 
   private AvroType<E> ptype;
 
@@ -28,12 +27,12 @@ class KeyConverter<E> implements Converter<E, NullWritable, E, Iterable<E>> {
   }
 
   @Override
-  public E convertInput(E entity, NullWritable nullWritable) {
+  public E convertInput(E entity, Void value) {
     return entity;
   }
 
   @Override
-  public Iterable<E> convertIterableInput(E entity, Iterable<NullWritable> nullWritables) {
+  public Iterable<E> convertIterableInput(E entity, Iterable<Void> values) {
     throw new UnsupportedOperationException("Should not be possible");
   }
 
@@ -43,8 +42,8 @@ class KeyConverter<E> implements Converter<E, NullWritable, E, Iterable<E>> {
   }
 
   @Override
-  public NullWritable outputValue(E entity) {
-    return NullWritable.get();
+  public Void outputValue(E entity) {
+    return null;
   }
 
   @Override
@@ -53,8 +52,8 @@ class KeyConverter<E> implements Converter<E, NullWritable, E, Iterable<E>> {
   }
 
   @Override
-  public Class<NullWritable> getValueClass() {
-    return NullWritable.class;
+  public Class<Void> getValueClass() {
+    return Void.class;
   }
 
   @Override

@@ -29,7 +29,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -98,7 +97,7 @@ public class TestMapReduce {
   }
 
   private static class GenericStatsReducer
-      extends Reducer<Text, IntWritable, GenericData.Record, NullWritable> {
+      extends Reducer<Text, IntWritable, GenericData.Record, Void> {
 
     @Override
     protected void reduce(Text line, Iterable<IntWritable> counts, Context context)
@@ -110,7 +109,7 @@ public class TestMapReduce {
       }
       record.put("name", new Utf8(line.toString()));
       record.put("count", new Integer(sum));
-      context.write(record, NullWritable.get());
+      context.write(record, null);
     }
   }
 

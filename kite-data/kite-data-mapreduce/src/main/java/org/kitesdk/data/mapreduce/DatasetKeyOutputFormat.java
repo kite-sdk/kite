@@ -17,7 +17,6 @@ package org.kitesdk.data.mapreduce;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.JobStatus;
@@ -45,7 +44,7 @@ import java.net.URI;
  *
  * @param <E> The type of entities in the {@code Dataset}.
  */
-public class DatasetKeyOutputFormat<E> extends OutputFormat<E, NullWritable> {
+public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   public static final String KITE_REPOSITORY_URI = "kite.outputRepositoryUri";
   public static final String KITE_DATASET_NAME = "kite.outputDatasetName";
@@ -59,7 +58,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, NullWritable> {
     job.getConfiguration().set(KITE_DATASET_NAME, name);
   }
 
-  static class DatasetRecordWriter<E> extends RecordWriter<E, NullWritable> {
+  static class DatasetRecordWriter<E> extends RecordWriter<E, Void> {
 
     private DatasetWriter<E> datasetWriter;
 
@@ -69,7 +68,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, NullWritable> {
     }
 
     @Override
-    public void write(E key, NullWritable v) {
+    public void write(E key, Void v) {
       datasetWriter.write(key);
     }
 
@@ -142,7 +141,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, NullWritable> {
   }
 
   @Override
-  public RecordWriter<E, NullWritable> getRecordWriter(TaskAttemptContext taskAttemptContext) {
+  public RecordWriter<E, Void> getRecordWriter(TaskAttemptContext taskAttemptContext) {
     Configuration conf = taskAttemptContext.getConfiguration();
     Dataset<E> dataset = loadDataset(taskAttemptContext);
 

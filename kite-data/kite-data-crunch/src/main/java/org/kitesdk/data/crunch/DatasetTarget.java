@@ -26,7 +26,6 @@ import org.apache.crunch.types.PType;
 import org.apache.crunch.types.avro.AvroType;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepositories;
@@ -95,7 +94,7 @@ class DatasetTarget<E> implements MapReduceTarget {
 
     Converter converter = getConverter(ptype);
     Class<?> keyClass = converter.getKeyClass();
-    Class<?> valueClass = NullWritable.class;
+    Class<?> valueClass = Void.class;
 
     if (name == null) { // doesn't happen since CRUNCH-82, but leaving for safety
       job.setOutputKeyClass(keyClass);
