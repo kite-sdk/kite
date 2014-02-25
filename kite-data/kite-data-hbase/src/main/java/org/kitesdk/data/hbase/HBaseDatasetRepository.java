@@ -58,12 +58,14 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
   @Override
   public <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor) {
     DatasetDescriptor newDescriptor = metadataProvider.create(name, descriptor);
+    newDescriptor = addRepositoryUri(newDescriptor);
     return newDataset(name, newDescriptor);
   }
 
   @Override
   public <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor) {
     DatasetDescriptor newDescriptor = metadataProvider.update(name, descriptor);
+    newDescriptor = addRepositoryUri(newDescriptor);
     return newDataset(name, newDescriptor);
   }
 
@@ -74,11 +76,14 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
     if (entityName.contains(".")) {
       List<DatasetDescriptor> descriptors = new ArrayList<DatasetDescriptor>();
       for (String subEntityName : entityName.split("\\.")) {
-        descriptors.add(metadataProvider.load(tableName + "." + subEntityName));
+        DatasetDescriptor descriptor = metadataProvider.load(tableName + "." + subEntityName);
+        descriptor = addRepositoryUri(descriptor);
+        descriptors.add(descriptor);
       }
       return newCompositeDataset(name, tableName, descriptors);
     } else {
       DatasetDescriptor descriptor = metadataProvider.load(name);
+      descriptor = addRepositoryUri(descriptor);
       return newDataset(name, descriptor);
     }
   }

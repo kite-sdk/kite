@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi;
 
+import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 
 /**
@@ -26,4 +27,13 @@ import org.kitesdk.data.DatasetRepository;
  * need to implement deprecated methods.
  */
 public abstract class AbstractDatasetRepository implements DatasetRepository {
+
+  protected DatasetDescriptor addRepositoryUri(DatasetDescriptor descriptor) {
+    if (getUri() == null) {
+      return descriptor;
+    }
+    return new DatasetDescriptor.Builder(descriptor)
+        .property("repositoryUri", getUri().toString())
+        .build();
+  }
 }

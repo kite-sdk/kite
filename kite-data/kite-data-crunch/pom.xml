@@ -113,6 +113,40 @@
     </dependency>
 
     <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>0.11.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>0.11.1-SNAPSHOT</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-mapreduce</artifactId>
+      <version>0.11.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-dependencies</artifactId>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-test-dependencies</artifactId>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
@@ -155,6 +189,15 @@
       <artifactId>commons-httpclient</artifactId>
       <version>3.1</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hbase</groupId>
+      <artifactId>hbase</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hbase</groupId>
+      <artifactId>hbase</artifactId>
+      <classifier>tests</classifier>
     </dependency>
   </dependencies>
 

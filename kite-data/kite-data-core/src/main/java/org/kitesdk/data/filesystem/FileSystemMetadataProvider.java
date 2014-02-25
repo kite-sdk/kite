@@ -73,6 +73,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   private static final String METADATA_VERSION = "1";
   private static final String FORMAT_FIELD_NAME = "format";
   private static final String LOCATION_FIELD_NAME = "location";
+  private static final String ROOT_DIRECTORY_FIELD_NAME = "rootDirectory";
 
   private static final Set<String> RESERVED_PROPERTIES = Sets.newHashSet(
       PARTITION_EXPRESSION_FIELD_NAME, VERSION_FIELD_NAME, FORMAT_FIELD_NAME,

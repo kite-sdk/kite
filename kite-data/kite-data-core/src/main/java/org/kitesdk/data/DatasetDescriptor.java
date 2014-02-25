@@ -501,7 +501,7 @@ public class DatasetDescriptor {
      *
      * @since 0.8.0
      */
-    public Builder location(URI uri) {
+    public Builder location(@Nullable URI uri) {
       // URI can be null if the descriptor is configuring a new Dataset
       Preconditions.checkArgument((uri == null) || (uri.getScheme() != null),
           "Location URIs must be fully-qualified and have a FS scheme.");
