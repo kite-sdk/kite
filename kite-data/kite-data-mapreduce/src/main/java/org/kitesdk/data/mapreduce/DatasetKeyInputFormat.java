@@ -79,6 +79,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
   }
 
   @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
+      justification="View field set by setConf")
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
       InterruptedException {
     Job job = new Job(jobContext.getConfiguration());
@@ -121,6 +123,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
 
   @Override
   @SuppressWarnings("unchecked")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
+      justification="View field set by setConf")
   public RecordReader<AvroKey<E>, NullWritable> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     if (view instanceof RandomAccessDataset) {
       TableInputFormat delegate = new TableInputFormat();
