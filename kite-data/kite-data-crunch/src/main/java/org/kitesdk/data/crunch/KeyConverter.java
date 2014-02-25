@@ -19,7 +19,8 @@ import org.apache.crunch.types.Converter;
 import org.apache.crunch.types.avro.AvroType;
 
 class KeyConverter<E> implements Converter<E, Void, E, Iterable<E>> {
-
+  private static final long serialVersionUID = 0;
+  
   private AvroType<E> ptype;
 
   public KeyConverter(AvroType<E> ptype) {

@@ -138,11 +138,6 @@
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro-mapred</artifactId>
-      <classifier>hadoop2</classifier>
-    </dependency>
 
     <!-- missing from Hadoop, and needed for local job runner -->
     <dependency>

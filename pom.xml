@@ -733,12 +733,6 @@
         <version>${vers.avro}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.avro</groupId>
-        <artifactId>avro-mapred</artifactId>
-        <classifier>hadoop2</classifier>
-        <version>${vers.avro}</version>
-      </dependency>
-      <dependency>
         <groupId>org.apache.hbase</groupId>
         <artifactId>hbase</artifactId>
         <version>${vers.hbase}</version>
