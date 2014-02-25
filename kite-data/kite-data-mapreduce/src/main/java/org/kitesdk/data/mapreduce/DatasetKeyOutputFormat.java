@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.mapreduce;
 
-import org.apache.avro.mapred.AvroKey;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -46,7 +45,7 @@ import java.net.URI;
  *
  * @param <E> The type of entities in the {@code Dataset}.
  */
-public class DatasetKeyOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWritable> {
+public class DatasetKeyOutputFormat<E> extends OutputFormat<E, NullWritable> {
 
   public static final String KITE_REPOSITORY_URI = "kite.outputRepositoryUri";
   public static final String KITE_DATASET_NAME = "kite.outputDatasetName";
@@ -60,7 +59,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWrit
     job.getConfiguration().set(KITE_DATASET_NAME, name);
   }
 
-  static class DatasetRecordWriter<E> extends RecordWriter<AvroKey<E>, NullWritable> {
+  static class DatasetRecordWriter<E> extends RecordWriter<E, NullWritable> {
 
     private DatasetWriter<E> datasetWriter;
 
@@ -70,8 +69,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWrit
     }
 
     @Override
-    public void write(AvroKey<E> key, NullWritable v) {
-      datasetWriter.write(key.datum());
+    public void write(E key, NullWritable v) {
+      datasetWriter.write(key);
     }
 
     @Override
@@ -143,7 +142,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<AvroKey<E>, NullWrit
   }
 
   @Override
-  public RecordWriter<AvroKey<E>, NullWritable> getRecordWriter(TaskAttemptContext taskAttemptContext) {
+  public RecordWriter<E, NullWritable> getRecordWriter(TaskAttemptContext taskAttemptContext) {
     Configuration conf = taskAttemptContext.getConfiguration();
     Dataset<E> dataset = loadDataset(taskAttemptContext);
 

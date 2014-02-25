@@ -79,8 +79,9 @@ class DatasetTarget<E> implements MapReduceTarget {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public Converter<?, ?, ?, ?> getConverter(PType<?> ptype) {
-    return ptype.getConverter();
+    return new KeyConverter<E>((AvroType<E>) ptype);
   }
 
   @Override

@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.mapred.AvroKey;
-import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -100,13 +98,7 @@ public class TestMapReduce {
   }
 
   private static class GenericStatsReducer
-      extends Reducer<Text, IntWritable, AvroKey<GenericData.Record>, NullWritable> {
-    private AvroKey<GenericData.Record> stats;
-
-    @Override
-    protected void setup(Context context) {
-      stats = new AvroKey<GenericData.Record>(null);
-    }
+      extends Reducer<Text, IntWritable, GenericData.Record, NullWritable> {
 
     @Override
     protected void reduce(Text line, Iterable<IntWritable> counts, Context context)
@@ -118,8 +110,7 @@ public class TestMapReduce {
       }
       record.put("name", new Utf8(line.toString()));
       record.put("count", new Integer(sum));
-      stats.datum(record);
-      context.write(stats, NullWritable.get());
+      context.write(record, NullWritable.get());
     }
   }
 
@@ -137,7 +128,6 @@ public class TestMapReduce {
     job.setMapOutputValueClass(IntWritable.class);
 
     job.setReducerClass(GenericStatsReducer.class);
-    AvroJob.setOutputKeySchema(job, STATS_SCHEMA);
 
     Dataset<GenericData.Record> outputDataset = repo.create("out",
         new DatasetDescriptor.Builder().schema(STATS_SCHEMA).format(format).build());
