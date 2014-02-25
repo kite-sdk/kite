@@ -17,6 +17,8 @@ package org.kitesdk.data.mapreduce;
 
 import com.google.common.io.Files;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.avro.Schema;
@@ -41,13 +43,29 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.Format;
+import org.kitesdk.data.Formats;
 import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
 
+@RunWith(Parameterized.class)
 public class TestMapReduce {
+
+  @Parameterized.Parameters
+  public static Collection<Object[]> data() {
+    Object[][] data = new Object[][] {
+      { Formats.AVRO },
+      { Formats.PARQUET }
+    };
+    return Arrays.asList(data);
+  }
+
+  private Format format;
 
   @Rule
   public TemporaryFolder tmpFolder = new TemporaryFolder();
@@ -57,6 +75,10 @@ public class TestMapReduce {
           + "{\"name\":\"name\",\"type\":\"string\"}]}");
 
   private DatasetRepository repo;
+
+  public TestMapReduce(Format format) {
+    this.format = format;
+  }
 
   @Before
   public void setUp() throws Exception {
@@ -118,7 +140,7 @@ public class TestMapReduce {
     AvroJob.setOutputKeySchema(job, STATS_SCHEMA);
 
     Dataset<GenericData.Record> outputDataset = repo.create("out",
-        new DatasetDescriptor.Builder().schema(STATS_SCHEMA).build());
+        new DatasetDescriptor.Builder().schema(STATS_SCHEMA).format(format).build());
 
     job.setOutputFormatClass(DatasetKeyOutputFormat.class);
     DatasetKeyOutputFormat.setRepositoryUri(job, repo.getUri());
