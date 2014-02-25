@@ -24,7 +24,6 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecordBuilder;
-import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -97,12 +96,12 @@ public class TestMapReduce {
   }
 
 
-  private static class LineCountMapper extends Mapper<AvroKey<GenericData.Record>, NullWritable, Text, IntWritable> {
+  private static class LineCountMapper extends Mapper<GenericData.Record, NullWritable, Text, IntWritable> {
     @Override
-    protected void map(AvroKey<GenericData.Record> record, NullWritable value,
+    protected void map(GenericData.Record record, NullWritable value,
         Context context)
         throws IOException, InterruptedException {
-      context.write(new Text(record.datum().get("text").toString()), new IntWritable(1));
+      context.write(new Text(record.get("text").toString()), new IntWritable(1));
     }
   }
 

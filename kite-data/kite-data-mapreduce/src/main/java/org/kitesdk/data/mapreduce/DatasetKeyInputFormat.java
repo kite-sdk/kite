@@ -45,7 +45,7 @@ import org.kitesdk.data.filesystem.impl.Accessor;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import parquet.avro.AvroParquetInputFormat;
 
-public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritable>
+public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     implements Configurable {
 
   public static final String KITE_REPOSITORY_URI = "kite.inputRepositoryUri";
@@ -125,7 +125,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
   @SuppressWarnings("unchecked")
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
       justification="View field set by setConf")
-  public RecordReader<AvroKey<E>, NullWritable> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+  public RecordReader<E, Void> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     if (view instanceof RandomAccessDataset) {
       TableInputFormat delegate = new TableInputFormat();
       delegate.setConf(taskAttemptContext.getConfiguration());
@@ -141,7 +141,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
       Format format = view.getDataset().getDescriptor().getFormat();
       if (Formats.AVRO.equals(format)) {
         AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
-        return delegate.createRecordReader(inputSplit, taskAttemptContext);
+        return new AvroRecordReaderWrapper(
+            delegate.createRecordReader(inputSplit, taskAttemptContext));
       } else if (Formats.PARQUET.equals(format)) {
         AvroParquetInputFormat delegate = new AvroParquetInputFormat();
         return new ParquetRecordReaderWrapper(
@@ -153,14 +154,12 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
     }
   }
 
-  private class ParquetRecordReaderWrapper extends RecordReader<AvroKey<E>, NullWritable> {
+  private class AvroRecordReaderWrapper extends RecordReader<E, Void> {
 
-    RecordReader<Void, E> delegate;
-    AvroKey<E> avroKey;
+    RecordReader<AvroKey<E>, NullWritable> delegate;
 
-    public ParquetRecordReaderWrapper(RecordReader<Void, E> delegate) {
+    public AvroRecordReaderWrapper(RecordReader<AvroKey<E>, NullWritable> delegate) {
       this.delegate = delegate;
-      this.avroKey = new AvroKey<E>();
     }
 
     @Override
@@ -175,14 +174,53 @@ public class DatasetKeyInputFormat<E> extends InputFormat<AvroKey<E>, NullWritab
     }
 
     @Override
-    public AvroKey<E> getCurrentKey() throws IOException, InterruptedException {
-      avroKey.datum(delegate.getCurrentValue());
-      return avroKey;
+    public E getCurrentKey() throws IOException, InterruptedException {
+      return delegate.getCurrentKey().datum();
     }
 
     @Override
-    public NullWritable getCurrentValue() throws IOException, InterruptedException {
-      return NullWritable.get();
+    public Void getCurrentValue() throws IOException, InterruptedException {
+      return null;
+    }
+
+    @Override
+    public float getProgress() throws IOException, InterruptedException {
+      return delegate.getProgress();
+    }
+
+    @Override
+    public void close() throws IOException {
+      delegate.close();
+    }
+  }
+
+  private class ParquetRecordReaderWrapper extends RecordReader<E, Void> {
+
+    RecordReader<Void, E> delegate;
+
+    public ParquetRecordReaderWrapper(RecordReader<Void, E> delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public void initialize(InputSplit inputSplit,
+        TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+      delegate.initialize(inputSplit, taskAttemptContext);
+    }
+
+    @Override
+    public boolean nextKeyValue() throws IOException, InterruptedException {
+      return delegate.nextKeyValue();
+    }
+
+    @Override
+    public E getCurrentKey() throws IOException, InterruptedException {
+      return delegate.getCurrentValue();
+    }
+
+    @Override
+    public Void getCurrentValue() throws IOException, InterruptedException {
+      return null;
     }
 
     @Override

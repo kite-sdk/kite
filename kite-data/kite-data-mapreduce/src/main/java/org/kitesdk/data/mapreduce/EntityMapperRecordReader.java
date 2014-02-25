@@ -17,27 +17,24 @@ package org.kitesdk.data.mapreduce;
 
 import java.io.IOException;
 
-import org.apache.avro.mapred.AvroKey;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 
-class EntityMapperRecordReader<E> extends RecordReader<AvroKey<E>, NullWritable> {
+class EntityMapperRecordReader<E> extends RecordReader<E, Void> {
 
   private final RecordReader<ImmutableBytesWritable, Result> tableRecordReader;
   private final EntityMapper<E> entityMapper;
-  private AvroKey<E> avroKey;
+  private E entity;
 
   public EntityMapperRecordReader(
       RecordReader<ImmutableBytesWritable, Result> recordReader,
       EntityMapper<E> entityMapper) {
     this.tableRecordReader = recordReader;
     this.entityMapper = entityMapper;
-    this.avroKey = new AvroKey<E>();
   }
 
   /**
@@ -78,8 +75,8 @@ class EntityMapperRecordReader<E> extends RecordReader<AvroKey<E>, NullWritable>
    * @throws InterruptedException
    *           When the job is aborted.
    */
-  public AvroKey<E> getCurrentKey() throws IOException, InterruptedException {
-    return avroKey;
+  public E getCurrentKey() throws IOException, InterruptedException {
+    return entity;
   }
 
   /**
@@ -91,8 +88,8 @@ class EntityMapperRecordReader<E> extends RecordReader<AvroKey<E>, NullWritable>
    * @throws InterruptedException
    *           When the job is aborted.
    */
-  public NullWritable getCurrentValue() throws IOException, InterruptedException {
-    return NullWritable.get();
+  public Void getCurrentValue() throws IOException, InterruptedException {
+    return null;
   }
 
   /**
@@ -110,8 +107,7 @@ class EntityMapperRecordReader<E> extends RecordReader<AvroKey<E>, NullWritable>
     boolean ret = tableRecordReader.nextKeyValue();
     if (ret) {
       Result result = tableRecordReader.getCurrentValue();
-      E entity = entityMapper.mapToEntity(result);
-      avroKey.datum(entity);
+      entity = entityMapper.mapToEntity(result);
     }
     return ret;
   }
