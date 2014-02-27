@@ -60,6 +60,11 @@ public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartiti
   }
 
   @Override
+  public Predicate<S> projectStrict(Predicate<S> predicate) {
+    return predicate;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;

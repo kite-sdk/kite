@@ -16,11 +16,15 @@
 
 package org.kitesdk.data.filesystem;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import javax.annotation.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.MarkerComparator;
 import com.google.common.collect.Lists;
@@ -142,8 +146,8 @@ public class TestFileSystemPartitionIteratorTolerance extends MiniDFSTest {
 
   @Test
   public void testUnbounded() throws Exception {
-    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
-        fileSystem, testDirectory, strategy, new Constraints());
+    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
+        fileSystem, testDirectory, strategy, new Constraints()));
 
     assertIterableEquals(keys, partitions);
   }
@@ -155,58 +159,67 @@ public class TestFileSystemPartitionIteratorTolerance extends MiniDFSTest {
 
   @Test
   public void testFrom() throws Exception {
-    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy,
-        new Constraints().from("timestamp", oct_24_2013));
+        new Constraints().from("timestamp", oct_24_2013)));
     assertIterableEquals(keys.subList(16, 24), partitions);
   }
 
   @Test
   public void testAfter() throws Exception {
-    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy,
-        new Constraints().fromAfter("timestamp", oct_24_2013_end));
+        new Constraints().fromAfter("timestamp", oct_24_2013_end)));
     assertIterableEquals(keys.subList(17, 24), partitions);
   }
 
   @Test
   public void testTo() throws Exception {
-    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy,
-        new Constraints().to("timestamp", oct_25_2012));
+        new Constraints().to("timestamp", oct_25_2012)));
     assertIterableEquals(keys.subList(0, 6), partitions);
   }
 
   @Test
   public void testBefore() throws Exception {
-    Iterable <StorageKey> partitions = new FileSystemPartitionIterator(
+    Iterable <StorageKey> partitions = firsts(new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy,
-        new Constraints().toBefore("timestamp", oct_25_2012));
+        new Constraints().toBefore("timestamp", oct_25_2012)));
     assertIterableEquals(keys.subList(0, 5), partitions);
   }
 
   @Test
   public void testWith() throws Exception {
-    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy,
-        new Constraints().with("timestamp", oct_24_2013));
+        new Constraints().with("timestamp", oct_24_2013)));
     assertIterableEquals(keys.subList(16, 17), partitions);
   }
 
   @Test
   public void testDayRange() throws Exception {
-    Iterable<StorageKey> partitions = new FileSystemPartitionIterator(
+    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy,
-        new Constraints().from("timestamp", oct_24_2013).to("timestamp", oct_24_2013_end));
+        new Constraints().from("timestamp", oct_24_2013).to("timestamp", oct_24_2013_end)));
     assertIterableEquals(keys.subList(16, 17), partitions);
   }
 
   @Test
   public void testLargerRange() throws Exception {
-    Iterable <StorageKey> partitions = new FileSystemPartitionIterator(
+    Iterable <StorageKey> partitions = firsts(new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy,
-        new Constraints().from("timestamp", oct_25_2012).to("timestamp", oct_24_2013));
+        new Constraints().from("timestamp", oct_25_2012).to("timestamp", oct_24_2013)));
     assertIterableEquals(keys.subList(5, 17), partitions);
+  }
+
+  public static <T> Iterable<T> firsts(Iterable<Pair<T, Path>> pairs) {
+    return Iterables.transform(pairs, new Function<Pair<T, Path>, T>() {
+      @Override
+      public T apply(@Nullable Pair<T, Path> pair) {
+        return pair.first();
+      }
+    });
   }
 
   public static <T> void assertIterableEquals(

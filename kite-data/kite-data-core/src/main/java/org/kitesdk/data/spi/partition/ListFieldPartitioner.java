@@ -72,17 +72,52 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
       Range range = (Range) predicate;
       Set<Integer> possibleValues = Sets.newHashSet();
       for (int i = 0; i < values.size(); i += 1) {
-        for (S item : values.get(i)) {
-          if (range.contains((Comparable) item)) {
-            possibleValues.add(i);
-            break; // no need to test additional items in this set
+        Set<S> items = values.get(i);
+        if (items.size() == Integer.MAX_VALUE) {
+          // items may not be finite, do not consider each item
+          possibleValues.add(i);
+        } else {
+          // check each item in the set
+          for (S item : items) {
+            if (range.contains((Comparable) item)) {
+              possibleValues.add(i);
+              break; // no need to test additional items in this set
+            }
           }
         }
       }
-      return Predicates.in(possibleValues);
-    } else {
-      return null;
+      if (!possibleValues.isEmpty()) {
+        return Predicates.in(possibleValues);
+      }
     }
+    return null;
+  }
+
+  @Override
+  public Predicate<Integer> projectStrict(Predicate<S> predicate) {
+    if (predicate instanceof Predicates.Exists) {
+      return Predicates.exists();
+    } else if (predicate instanceof Predicates.In ||
+        predicate instanceof Range) {
+      Set<Integer> possibleValues = Sets.newHashSet();
+      for (int i = 0; i < values.size(); i += 1) {
+        Set<S> items = values.get(i);
+        // only check items if the set is finite
+        if (items.size() != Integer.MAX_VALUE) {
+          boolean matchedAll = true;
+          for (S entry : items) {
+            matchedAll = matchedAll && predicate.apply(entry);
+          }
+          if (matchedAll) {
+            possibleValues.add(i);
+          }
+        }
+      }
+      if (!possibleValues.isEmpty()) {
+        return Predicates.in(possibleValues);
+      }
+    }
+    return null;
   }
 
   @Override

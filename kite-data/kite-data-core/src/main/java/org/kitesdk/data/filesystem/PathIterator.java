@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.filesystem;
 
-import org.kitesdk.data.DatasetException;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -26,18 +25,25 @@ import java.util.NoSuchElementException;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.spi.Pair;
+import org.kitesdk.data.spi.StorageKey;
 
 class PathIterator implements Iterator<Path>, Iterable<Path> {
   private final FileSystem fs;
-  private final Iterator<Path> directories;
+  private final Path root;
+  private final Iterator<Pair<StorageKey, Path>> directories;
+  private StorageKey key = null;
   private Iterator<Path> files = null;
 
-  public PathIterator(FileSystem fs, Iterable<Path> directories) {
+  public PathIterator(FileSystem fs, Path root,
+                      Iterator<Pair<StorageKey, Path>> directories) {
     Preconditions.checkArgument(directories != null,
         "Directories cannot be null");
 
     this.fs = fs;
-    this.directories = directories.iterator();
+    this.root = root;
+    this.directories = directories;
   }
 
   @Override
@@ -47,6 +53,17 @@ class PathIterator implements Iterator<Path>, Iterable<Path> {
     } else {
       return advance();
     }
+  }
+
+  /**
+   * Returns the StorageKey for the current file Path.
+   *
+   * Must be called after next().
+   *
+   * @return a StorageKey for the current file Path
+   */
+  public StorageKey getStorageKey() {
+    return key;
   }
 
   @Override
@@ -67,10 +84,12 @@ class PathIterator implements Iterator<Path>, Iterable<Path> {
   private boolean advance() {
     while (true) {
       if (directories.hasNext()) {
-        final Path directory = directories.next();
+        Pair<StorageKey, Path> pair = directories.next();
         try {
-          final FileStatus[] stats = fs.listStatus(directory, PathFilters.notHidden());
-          final List<Path> nextFileSet = Lists.newArrayListWithCapacity(stats.length);
+          FileStatus[] stats = fs.listStatus(
+              new Path(root, pair.second()), PathFilters.notHidden());
+          this.key = pair.first();
+          List<Path> nextFileSet = Lists.newArrayListWithCapacity(stats.length);
           for (FileStatus stat : stats) {
             if (!stat.isDir()) {
               nextFileSet.add(stat.getPath());
@@ -81,7 +100,7 @@ class PathIterator implements Iterator<Path>, Iterable<Path> {
             return true;
           }
         } catch (IOException ex) {
-          throw new DatasetException("Cannot list files in " + directory, ex);
+          throw new DatasetIOException("Cannot list files in " + pair.second(), ex);
         }
       } else {
         return false;

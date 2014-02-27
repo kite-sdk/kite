@@ -17,13 +17,10 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.Range;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Random;
-import java.util.TimeZone;
 import java.util.UUID;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -31,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
-import org.kitesdk.data.spi.partition.DateFormatPartitioner;
+import org.kitesdk.data.spi.partition.HashFieldPartitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,19 +66,6 @@ public class TestConstraints {
       .day("timestamp")
       .identity("id", String.class, 100000)
       .build();
-
-  @Test
-  public void testDateFormatProjection() {
-    // TODO: this belongs in a test for the DateFormatPartitioner
-    FieldPartitioner<Long, String> fp =
-        new DateFormatPartitioner("timestamp", "date", "yyyy-MM-dd");
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-    format.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-    Predicate<String> result = fp.project(Ranges.open(START, START + ONE_DAY_MILLIS));
-    Assert.assertEquals(format.format(new Date(START - 123)), ((Range) result).lowerEndpoint());
-    Assert.assertEquals(format.format(new Date(START + ONE_DAY_MILLIS + 123)), ((Range) result).upperEndpoint());
-  }
 
   @Test
   public void testEmptyConstraints() {
@@ -464,6 +448,45 @@ public class TestConstraints {
     Assert.assertFalse(timeAndUUID.toEntityPredicate().apply(e));
     Assert.assertFalse(time.toKeyPredicate().apply(key));
     Assert.assertFalse(timeAndUUID.toKeyPredicate().apply(key));
+  }
+
+  @Test
+  public void testBasicKeyMinimization() {
+    FieldPartitioner<Object, Integer> hash50 =
+        new HashFieldPartitioner("name", 50);
+
+    Constraints c = new Constraints()
+        .with("number", 7, 14, 21, 28, 35, 42, 49)
+        .with("color", "green", "orange")
+        .from("created_at",
+            new DateTime(2013, 1, 1, 0, 0, DateTimeZone.UTC).getMillis())
+        .toBefore("created_at",
+            new DateTime(2014, 1, 1, 0, 0, DateTimeZone.UTC).getMillis());
+
+    PartitionStrategy strategy = new PartitionStrategy.Builder()
+        .hash("color", "hash", 50)
+        .year("created_at").month("created_at").day("created_at")
+        .identity("color", String.class, 50000)
+        .build();
+
+    StorageKey key = new StorageKey(strategy);
+
+    key.replaceValues(Lists.<Object>newArrayList(
+        hash50.apply("green"), 2013, 9, 1, "green"));
+    Assert.assertEquals(Sets.newHashSet("number"),
+        c.minimizeFor(key).keySet());
+
+    // adjust the end time so that month is the last field checked
+    Constraints c2 = c.toBefore("created_at",
+        new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis());
+    Assert.assertEquals(Sets.newHashSet("number"),
+        c2.minimizeFor(key).keySet());
+
+    // adjust the end time so that not all entities in the key are matched
+    Constraints c3 = c.to("created_at",
+        new DateTime(2013, 9, 1, 12, 0, DateTimeZone.UTC).getMillis());
+    Assert.assertEquals(Sets.newHashSet("number", "created_at"),
+        c3.minimizeFor(key).keySet());
   }
 
   @Test

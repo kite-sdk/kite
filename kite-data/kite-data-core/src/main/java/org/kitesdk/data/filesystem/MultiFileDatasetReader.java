@@ -16,6 +16,7 @@
 package org.kitesdk.data.filesystem;
 
 import com.google.common.collect.Iterators;
+import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Format;
@@ -27,7 +28,6 @@ import org.kitesdk.data.spi.ReaderWriterState;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -39,6 +39,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   private final Constraints constraints;
 
   private final Iterator<Path> filesIter;
+  private final PathIterator pathIter;
   private DatasetReader<E> reader = null;
   private Iterator<E> readerIterator = null;
 
@@ -55,6 +56,11 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
     this.constraints = constraints;
     this.filesIter = files.iterator();
     this.state = ReaderWriterState.NEW;
+    if (files instanceof PathIterator) {
+      this.pathIter = (PathIterator) files;
+    } else {
+      this.pathIter = null;
+    }
   }
 
   @Override
@@ -85,7 +91,8 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
     }
     reader.open();
     this.readerIterator = Iterators.filter(reader,
-        constraints.toEntityPredicate());
+        constraints.toEntityPredicate(
+            pathIter != null ? pathIter.getStorageKey() : null));
   }
 
   @Override

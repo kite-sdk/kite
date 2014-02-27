@@ -16,10 +16,14 @@
 
 package org.kitesdk.data.filesystem;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
+import javax.annotation.Nullable;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.StorageKey;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
@@ -37,14 +41,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<StorageKey> {
+class FileSystemPartitionIterator implements
+    Iterator<Pair<StorageKey, Path>>, Iterable<Pair<StorageKey, Path>> {
 
   private static final Logger logger = LoggerFactory.getLogger(
       FileSystemPartitionIterator.class);
 
+  private static final Joiner PATH_JOINER = Joiner.on("/");
+
   private final FileSystem fs;
   private final Path rootDirectory;
-  private final Iterator<StorageKey> iterator;
+  private final Iterator<Pair<StorageKey, Path>> iterator;
 
   class FileSystemIterator extends MultiLevelIterator<String> {
     public FileSystemIterator(int depth) throws IOException {
@@ -79,7 +86,7 @@ class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<Stor
   /**
    * Conversion function to transform a List into a {@link org.kitesdk.data.spi.StorageKey}.
    */
-  private static class MakeKey implements Function<List<String>, StorageKey> {
+  private static class MakeKey implements Function<List<String>, Pair<StorageKey, Path>> {
     private final List<FieldPartitioner> partitioners;
     private final StorageKey reusableKey;
     private final PathConversion convert;
@@ -95,13 +102,32 @@ class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<Stor
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(
         value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
         justification="Non-null @Nullable parameter inherited from Function")
-    public StorageKey apply(List<String> dirs) {
+    public Pair<StorageKey, Path> apply(List<String> dirs) {
       List<Object> values = Lists.newArrayListWithCapacity(dirs.size());
       for (int i = 0, n = partitioners.size(); i < n; i += 1) {
         values.add(convert.valueForDirname(partitioners.get(i), dirs.get(i)));
       }
       reusableKey.replaceValues(values);
-      return reusableKey;
+      return Pair.of(reusableKey, new Path(PATH_JOINER.join(dirs)));
+    }
+  }
+
+  /**
+   * Predicate to apply a StorageKey Predicate to a pair.
+   */
+  private static class KeyPredicate implements Predicate<Pair<StorageKey, Path>> {
+    private final Predicate<StorageKey> predicate;
+
+    private KeyPredicate(Predicate<StorageKey> predicate) {
+      this.predicate = predicate;
+    }
+
+    @Override
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+        value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+        justification="Non-null @Nullable parameter inherited from Function")
+    public boolean apply(@Nullable Pair<StorageKey, Path> pair) {
+      return predicate.apply(pair.first());
     }
   }
 
@@ -117,7 +143,7 @@ class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<Stor
         Iterators.transform(
             new FileSystemIterator(strategy.getFieldPartitioners().size()),
             new MakeKey(strategy)),
-        constraints.toKeyPredicate());
+        new KeyPredicate(constraints.toKeyPredicate()));
   }
 
   @Override
@@ -126,7 +152,7 @@ class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<Stor
   }
 
   @Override
-  public StorageKey next() {
+  public Pair<StorageKey, Path> next() {
     return iterator.next();
   }
 
@@ -136,7 +162,7 @@ class FileSystemPartitionIterator implements Iterator<StorageKey>, Iterable<Stor
   }
 
   @Override
-  public Iterator<StorageKey> iterator() {
+  public Iterator<Pair<StorageKey, Path>> iterator() {
     return this;
   }
 

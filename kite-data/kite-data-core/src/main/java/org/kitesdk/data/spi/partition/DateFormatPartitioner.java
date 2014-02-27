@@ -108,6 +108,15 @@ public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
   }
 
   @Override
+  public Predicate<String> projectStrict(Predicate<Long> predicate) {
+    if (predicate instanceof Predicates.Exists) {
+      return Predicates.exists();
+    } else {
+      return null;
+    }
+  }
+
+  @Override
   public int compare(String o1, String o2) {
     return o1.compareTo(o2);
   }
