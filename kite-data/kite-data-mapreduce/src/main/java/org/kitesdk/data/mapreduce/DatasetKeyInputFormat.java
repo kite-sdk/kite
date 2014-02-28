@@ -137,7 +137,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
         throw new UnsupportedOperationException(
             "Cannot find entity mapper for view: " + view);
       }
-      return new EntityMapperRecordReader<E>(
+      return new HBaseRecordReaderWrapper<E>(
           delegate.createRecordReader(inputSplit, taskAttemptContext), entityMapper);
     } else {
       Format format = view.getDataset().getDescriptor().getFormat();
@@ -156,11 +156,11 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     }
   }
 
-  private static class AvroRecordReaderWrapper<E> extends RecordReader<E, Void> {
+  private abstract static class AbstractRecordReader<E, K, V> extends RecordReader<E, Void> {
 
-    RecordReader<AvroKey<E>, NullWritable> delegate;
+    protected RecordReader<K, V> delegate;
 
-    public AvroRecordReaderWrapper(RecordReader<AvroKey<E>, NullWritable> delegate) {
+    public AbstractRecordReader(RecordReader<K, V> delegate) {
       this.delegate = delegate;
     }
 
@@ -173,114 +173,58 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
       return delegate.nextKeyValue();
+    }
+
+    @Override
+    public Void getCurrentValue() throws IOException, InterruptedException {
+      return null;
+    }
+
+    @Override
+    public float getProgress() throws IOException, InterruptedException {
+      return delegate.getProgress();
+    }
+
+    @Override
+    public void close() throws IOException {
+      delegate.close();
+    }
+  }
+
+  private static class AvroRecordReaderWrapper<E> extends AbstractRecordReader<E, AvroKey<E>, NullWritable> {
+    public AvroRecordReaderWrapper(RecordReader<AvroKey<E>, NullWritable> delegate) {
+      super(delegate);
     }
 
     @Override
     public E getCurrentKey() throws IOException, InterruptedException {
       return delegate.getCurrentKey().datum();
     }
-
-    @Override
-    public Void getCurrentValue() throws IOException, InterruptedException {
-      return null;
-    }
-
-    @Override
-    public float getProgress() throws IOException, InterruptedException {
-      return delegate.getProgress();
-    }
-
-    @Override
-    public void close() throws IOException {
-      delegate.close();
-    }
   }
 
-  private static class ParquetRecordReaderWrapper<E> extends RecordReader<E, Void> {
-
-    RecordReader<Void, E> delegate;
-
+  private static class ParquetRecordReaderWrapper<E> extends AbstractRecordReader<E, Void, E> {
     public ParquetRecordReaderWrapper(RecordReader<Void, E> delegate) {
-      this.delegate = delegate;
-    }
-
-    @Override
-    public void initialize(InputSplit inputSplit,
-        TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-      delegate.initialize(inputSplit, taskAttemptContext);
-    }
-
-    @Override
-    public boolean nextKeyValue() throws IOException, InterruptedException {
-      return delegate.nextKeyValue();
+      super(delegate);
     }
 
     @Override
     public E getCurrentKey() throws IOException, InterruptedException {
       return delegate.getCurrentValue();
     }
-
-    @Override
-    public Void getCurrentValue() throws IOException, InterruptedException {
-      return null;
-    }
-
-    @Override
-    public float getProgress() throws IOException, InterruptedException {
-      return delegate.getProgress();
-    }
-
-    @Override
-    public void close() throws IOException {
-      delegate.close();
-    }
   }
 
-  private static class EntityMapperRecordReader<E> extends RecordReader<E, Void> {
-
-    private final RecordReader<ImmutableBytesWritable, Result> tableRecordReader;
+  private static class HBaseRecordReaderWrapper<E> extends AbstractRecordReader<E, ImmutableBytesWritable, Result> {
     private final EntityMapper<E> entityMapper;
-    private E entity;
 
-    public EntityMapperRecordReader(
-        RecordReader<ImmutableBytesWritable, Result> recordReader,
+    public HBaseRecordReaderWrapper(
+        RecordReader<ImmutableBytesWritable, Result> delegate,
         EntityMapper<E> entityMapper) {
-      this.tableRecordReader = recordReader;
+      super(delegate);
       this.entityMapper = entityMapper;
     }
 
-    @Override
-    public void close() throws IOException {
-      tableRecordReader.close();
-    }
-
-    @Override
-    public void initialize(InputSplit split, TaskAttemptContext context)
-        throws IOException, InterruptedException {
-      tableRecordReader.initialize(split, context);
-    }
-
     public E getCurrentKey() throws IOException, InterruptedException {
-      return entity;
-    }
-
-    public Void getCurrentValue() throws IOException, InterruptedException {
-      return null;
-    }
-
-    @Override
-    public boolean nextKeyValue() throws IOException, InterruptedException {
-      boolean ret = tableRecordReader.nextKeyValue();
-      if (ret) {
-        Result result = tableRecordReader.getCurrentValue();
-        entity = entityMapper.mapToEntity(result);
-      }
-      return ret;
-    }
-
-    @Override
-    public float getProgress() throws IOException, InterruptedException {
-      return tableRecordReader.getProgress();
+      return entityMapper.mapToEntity(delegate.getCurrentValue());
     }
   }
 }
