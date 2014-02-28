@@ -25,6 +25,8 @@ import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.InputFormat;
@@ -135,8 +137,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
         throw new UnsupportedOperationException(
             "Cannot find entity mapper for view: " + view);
       }
-      return new EntityMapperRecordReader<E>(delegate.createRecordReader(inputSplit,
-          taskAttemptContext), entityMapper);
+      return new EntityMapperRecordReader<E>(
+          delegate.createRecordReader(inputSplit, taskAttemptContext), entityMapper);
     } else {
       Format format = view.getDataset().getDescriptor().getFormat();
       if (Formats.AVRO.equals(format)) {
@@ -146,7 +148,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       } else if (Formats.PARQUET.equals(format)) {
         AvroParquetInputFormat delegate = new AvroParquetInputFormat();
         return new ParquetRecordReaderWrapper(
-            (RecordReader<Void, E>) delegate.createRecordReader(inputSplit, taskAttemptContext));
+            delegate.createRecordReader(inputSplit, taskAttemptContext));
       } else {
         throw new UnsupportedOperationException(
             "Not a supported format: " + format);
@@ -154,7 +156,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     }
   }
 
-  private class AvroRecordReaderWrapper extends RecordReader<E, Void> {
+  private static class AvroRecordReaderWrapper<E> extends RecordReader<E, Void> {
 
     RecordReader<AvroKey<E>, NullWritable> delegate;
 
@@ -194,7 +196,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     }
   }
 
-  private class ParquetRecordReaderWrapper extends RecordReader<E, Void> {
+  private static class ParquetRecordReaderWrapper<E> extends RecordReader<E, Void> {
 
     RecordReader<Void, E> delegate;
 
@@ -231,6 +233,54 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     @Override
     public void close() throws IOException {
       delegate.close();
+    }
+  }
+
+  private static class EntityMapperRecordReader<E> extends RecordReader<E, Void> {
+
+    private final RecordReader<ImmutableBytesWritable, Result> tableRecordReader;
+    private final EntityMapper<E> entityMapper;
+    private E entity;
+
+    public EntityMapperRecordReader(
+        RecordReader<ImmutableBytesWritable, Result> recordReader,
+        EntityMapper<E> entityMapper) {
+      this.tableRecordReader = recordReader;
+      this.entityMapper = entityMapper;
+    }
+
+    @Override
+    public void close() throws IOException {
+      tableRecordReader.close();
+    }
+
+    @Override
+    public void initialize(InputSplit split, TaskAttemptContext context)
+        throws IOException, InterruptedException {
+      tableRecordReader.initialize(split, context);
+    }
+
+    public E getCurrentKey() throws IOException, InterruptedException {
+      return entity;
+    }
+
+    public Void getCurrentValue() throws IOException, InterruptedException {
+      return null;
+    }
+
+    @Override
+    public boolean nextKeyValue() throws IOException, InterruptedException {
+      boolean ret = tableRecordReader.nextKeyValue();
+      if (ret) {
+        Result result = tableRecordReader.getCurrentValue();
+        entity = entityMapper.mapToEntity(result);
+      }
+      return ret;
+    }
+
+    @Override
+    public float getProgress() throws IOException, InterruptedException {
+      return tableRecordReader.getProgress();
     }
   }
 }
