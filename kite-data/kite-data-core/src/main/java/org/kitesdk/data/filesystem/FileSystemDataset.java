@@ -28,6 +28,7 @@ import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.RefineableView;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDataset;
+import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.PartitionListener;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -44,7 +45,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-class FileSystemDataset<E> extends AbstractDataset<E> {
+class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeable<FileSystemDataset<E>> {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemDataset.class);
@@ -250,7 +251,8 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
       .toString();
   }
 
-  public void merge(FileSystemDataset update) throws IOException {
+  @Override
+  public void merge(FileSystemDataset<E> update) {
     DatasetDescriptor updateDescriptor = update.getDescriptor();
 
     if (!updateDescriptor.getFormat().equals(descriptor.getFormat())) {
@@ -277,14 +279,18 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
       URI relativePath = update.getDirectory().toUri().relativize(path.toUri());
       Path newPath = new Path(directory, new Path(relativePath));
       Path newPartitionDirectory = newPath.getParent();
-      if (!fileSystem.exists(newPartitionDirectory)) {
-        fileSystem.mkdirs(newPartitionDirectory);
-      }
-      logger.debug("Renaming {} to {}", path, newPath);
-      boolean renameOk = fileSystem.rename(path, newPath);
-      if (!renameOk) {
-        throw new IOException("Dataset merge failed during rename of " + path +
-            "to " + newPath);
+      try {
+        if (!fileSystem.exists(newPartitionDirectory)) {
+          fileSystem.mkdirs(newPartitionDirectory);
+        }
+        logger.debug("Renaming {} to {}", path, newPath);
+        boolean renameOk = fileSystem.rename(path, newPath);
+        if (!renameOk) {
+          throw new DatasetException("Dataset merge failed during rename of " + path +
+              " to " + newPath);
+        }
+      } catch (IOException e) {
+        throw new DatasetIOException("Dataset merge failed", e);
       }
       if (partitionListener != null) {
         String partition = newPartitionDirectory.toString();

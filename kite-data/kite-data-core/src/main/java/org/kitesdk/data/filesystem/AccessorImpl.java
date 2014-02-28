@@ -61,10 +61,4 @@ final class AccessorImpl extends Accessor {
     return null;
   }
 
-  @Override
-  public <E> void merge(Dataset<E> main, Dataset<E> update) throws IOException {
-    if (main instanceof FileSystemDataset && update instanceof FileSystemDataset) {
-      ((FileSystemDataset<E>) main).merge((FileSystemDataset<E>) update);
-    }
-  }
 }

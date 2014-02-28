@@ -15,6 +15,8 @@
  */
 package org.kitesdk.data.mapreduce;
 
+import java.io.IOException;
+import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
@@ -30,11 +32,8 @@ import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionKey;
-import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.filesystem.impl.Accessor;
-
-import java.io.IOException;
-import java.net.URI;
+import org.kitesdk.data.spi.Mergeable;
 
 /**
  * A MapReduce {@code OutputFormat} for writing to a {@link Dataset}.
@@ -104,10 +103,11 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void commitJob(JobContext jobContext) throws IOException {
       Dataset<E> dataset = loadDataset(jobContext);
       Dataset<E> jobDataset = loadJobDataset(jobContext);
-      Accessor.getDefault().merge(dataset, jobDataset);
+      ((Mergeable<Dataset<E>>) dataset).merge(jobDataset);
       deleteJobDataset(jobContext);
     }
 
@@ -127,10 +127,11 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void commitTask(TaskAttemptContext taskContext) throws IOException {
       Dataset<E> jobDataset = loadJobDataset(taskContext);
       Dataset<E> taskAttemptDataset = loadTaskAttemptDataset(taskContext);
-      Accessor.getDefault().merge(jobDataset, taskAttemptDataset);
+      ((Mergeable<Dataset<E>>) jobDataset).merge(taskAttemptDataset);
       deleteTaskAttemptDataset(taskContext);
     }
 
@@ -145,7 +146,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     Configuration conf = taskAttemptContext.getConfiguration();
     Dataset<E> dataset = loadDataset(taskAttemptContext);
 
-    if (!(dataset instanceof RandomAccessDataset)) {
+    if (dataset instanceof Mergeable) {
       // use per-task attempt datasets for filesystem datasets
       dataset = loadTaskAttemptDataset(taskAttemptContext);
     }
@@ -170,8 +171,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   @Override
   public OutputCommitter getOutputCommitter(TaskAttemptContext taskAttemptContext) {
     Dataset<E> dataset = loadDataset(taskAttemptContext);
-    return (dataset instanceof RandomAccessDataset) ?
-        new NullOutputCommitter() : new MergeOutputCommitter<E>();
+    return (dataset instanceof Mergeable) ?
+        new MergeOutputCommitter<E>() : new NullOutputCommitter();
   }
 
   private static DatasetRepository getDatasetRepository(JobContext jobContext) {

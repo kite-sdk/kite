@@ -23,6 +23,7 @@ import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractRefineableView;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.StorageKey;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;

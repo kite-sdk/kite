@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.hcatalog;
 
+import org.apache.avro.generic.GenericData;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
@@ -35,6 +36,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.filesystem.impl.Accessor;
+import org.kitesdk.data.spi.Mergeable;
 
 public class TestExternalHCatalogDatasetRepository extends TestFileSystemDatasetRepository {
 
@@ -97,7 +99,7 @@ public class TestExternalHCatalogDatasetRepository extends TestFileSystemDataset
 
   }
 
-  @SuppressWarnings("deprecation")
+  @SuppressWarnings({"deprecation", "unchecked"})
   @Test
   public void testMerge() throws Exception {
     final String NAME2 = "test2";
@@ -127,7 +129,8 @@ public class TestExternalHCatalogDatasetRepository extends TestFileSystemDataset
 
     writeRecord(dsUpdate, 1);
 
-    Accessor.getDefault().merge(dataset, dsUpdate);
+    Assert.assertTrue(dataset instanceof Mergeable);
+    ((Mergeable<Dataset<GenericRecord>>) dataset).merge(dsUpdate);
 
     Assert.assertEquals("Should be two partitions", 2,
         client.listPartitionNames("default", NAME2, (short) 10).size());
