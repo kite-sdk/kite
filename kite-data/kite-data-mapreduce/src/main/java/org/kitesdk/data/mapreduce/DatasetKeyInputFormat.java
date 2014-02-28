@@ -41,6 +41,7 @@ import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
+import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.View;
 import org.kitesdk.data.filesystem.impl.Accessor;
@@ -52,9 +53,11 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
 
   public static final String KITE_REPOSITORY_URI = "kite.inputRepositoryUri";
   public static final String KITE_DATASET_NAME = "kite.inputDatasetName";
+  public static final String KITE_PARTITION_DIR = "kite.inputPartitionDir";
 
   private Configuration conf;
   private View<E> view;
+  private EntityMapper<E> entityMapper;
 
   public static void setRepositoryUri(Job job, URI uri) {
     job.getConfiguration().set(KITE_REPOSITORY_URI, uri.toString());
@@ -72,7 +75,27 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   @Override
   public void setConf(Configuration configuration) {
     conf = configuration;
-    view = loadDataset(configuration); // TODO: load a view if specified
+    Dataset<E> dataset = loadDataset(configuration);
+
+    if (dataset instanceof RandomAccessDataset) {
+      entityMapper = org.kitesdk.data.hbase.impl.Accessor.getDefault().getEntityMapper(dataset);
+      if (entityMapper == null) {
+        throw new UnsupportedOperationException(
+            "Cannot find entity mapper for dataset: " + dataset);
+      }
+    }
+
+    // TODO: the following should generalize with views
+    String partitionDir = conf.get(KITE_PARTITION_DIR);
+    if (dataset.getDescriptor().isPartitioned() && partitionDir != null) {
+      PartitionKey key = Accessor.getDefault().fromDirectoryName(dataset, new Path(partitionDir));
+      if (key != null) {
+        dataset = dataset.getPartition(key, true);
+      }
+    }
+
+    view = dataset;
+
   }
 
   private static <E> Dataset<E> loadDataset(Configuration conf) {
@@ -91,7 +114,6 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       String tableName = getTableName(view.getDataset().getName());
       jobContext.getConfiguration().set(TableInputFormat.INPUT_TABLE, tableName);
       delegate.setConf(jobContext.getConfiguration());
-      // TODO: scan range
       return delegate.getSplits(jobContext);
     } else {
       Format format = view.getDataset().getDescriptor().getFormat();
@@ -104,8 +126,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       } else if (Formats.PARQUET.equals(format)) {
         List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(view));
         AvroParquetInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
-        // TODO: use later version of parquet so we can set the schema correctly
-        //AvroParquetInputFormat.setReadSchema(job, view.getDescriptor().getSchema());
+        // TODO: use later version of parquet (with https://github.com/Parquet/parquet-mr/pull/282) so we can set the schema correctly
+        // AvroParquetInputFormat.setReadSchema(job, view.getDescriptor().getSchema());
         AvroParquetInputFormat delegate = new AvroParquetInputFormat();
         return delegate.getSplits(jobContext);
       } else {
@@ -131,12 +153,6 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     if (view instanceof RandomAccessDataset) {
       TableInputFormat delegate = new TableInputFormat();
       delegate.setConf(taskAttemptContext.getConfiguration());
-      EntityMapper<E> entityMapper =
-          org.kitesdk.data.hbase.impl.Accessor.getDefault().getEntityMapper(view.getDataset());
-      if (entityMapper == null) { // TODO: find entity mapper in setConf to fail early
-        throw new UnsupportedOperationException(
-            "Cannot find entity mapper for view: " + view);
-      }
       return new HBaseRecordReaderWrapper<E>(
           delegate.createRecordReader(inputSplit, taskAttemptContext), entityMapper);
     } else {
@@ -216,8 +232,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   private static class HBaseRecordReaderWrapper<E> extends AbstractRecordReader<E, ImmutableBytesWritable, Result> {
     private final EntityMapper<E> entityMapper;
 
-    public HBaseRecordReaderWrapper(
-        RecordReader<ImmutableBytesWritable, Result> delegate,
+    public HBaseRecordReaderWrapper(RecordReader<ImmutableBytesWritable, Result> delegate,
         EntityMapper<E> entityMapper) {
       super(delegate);
       this.entityMapper = entityMapper;
