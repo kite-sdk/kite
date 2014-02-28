@@ -20,6 +20,7 @@ import java.util.Set;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.FieldPartitioner;
 import org.kitesdk.data.PartitionKey;
@@ -275,9 +276,18 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
     for (Path path : update.pathIterator()) {
       URI relativePath = update.getDirectory().toUri().relativize(path.toUri());
       Path newPath = new Path(directory, new Path(relativePath));
-      fileSystem.rename(path, newPath);
+      Path newPartitionDirectory = newPath.getParent();
+      if (!fileSystem.exists(newPartitionDirectory)) {
+        fileSystem.mkdirs(newPartitionDirectory);
+      }
+      logger.debug("Renaming {} to {}", path, newPath);
+      boolean renameOk = fileSystem.rename(path, newPath);
+      if (!renameOk) {
+        throw new IOException("Dataset merge failed during rename of " + path +
+            "to " + newPath);
+      }
       if (partitionListener != null) {
-        String partition = newPath.getParent().toString();
+        String partition = newPartitionDirectory.toString();
         if (!addedPartitions.contains(partition)) {
           partitionListener.partitionAdded(name, partition);
           addedPartitions.add(partition);
