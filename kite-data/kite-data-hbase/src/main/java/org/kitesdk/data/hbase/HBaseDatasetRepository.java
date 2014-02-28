@@ -25,6 +25,7 @@ import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.RandomAccessDatasetRepository;
 import org.kitesdk.data.hbase.avro.GenericAvroDao;
 import org.kitesdk.data.hbase.avro.SpecificAvroDao;
+import org.kitesdk.data.hbase.impl.Accessor;
 import org.kitesdk.data.hbase.impl.Dao;
 import org.kitesdk.data.hbase.impl.SchemaManager;
 import org.kitesdk.data.hbase.manager.DefaultSchemaManager;
@@ -42,6 +43,10 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 
 public class HBaseDatasetRepository extends AbstractDatasetRepository implements RandomAccessDatasetRepository {
+
+  static {
+    Accessor.setDefault(new AccessorImpl());
+  }
 
   private HTablePool tablePool;
   private SchemaManager schemaManager;

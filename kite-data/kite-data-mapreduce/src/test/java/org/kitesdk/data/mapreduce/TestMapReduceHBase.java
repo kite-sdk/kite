@@ -16,15 +16,20 @@
 package org.kitesdk.data.mapreduce;
 
 import com.google.common.io.Files;
+import java.io.IOException;
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
+import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -116,9 +121,31 @@ public class TestMapReduceHBase {
     HBaseTestUtils.util.truncateTable(Bytes.toBytes(managedTableName));
   }
 
+  private static class AvroKeyWrapperMapper extends Mapper<GenericData.Record, Void,
+      AvroKey<GenericData.Record>, NullWritable> {
+    @Override
+    protected void map(GenericData.Record record, Void value,
+        Context context)
+        throws IOException, InterruptedException {
+      context.write(new AvroKey<GenericData.Record>(record), NullWritable.get());
+    }
+  }
+
+  private static class AvroKeyWrapperReducer
+      extends Reducer<AvroKey<GenericData.Record>, NullWritable, GenericData.Record, Void> {
+
+    @Override
+    protected void reduce(AvroKey<GenericData.Record> key,
+        Iterable<NullWritable> values,
+        Context context)
+        throws IOException, InterruptedException {
+      context.write(key.datum(), null);
+    }
+  }
+
   @Test
   public void testJob() throws Exception {
-    Job job = new Job();
+    Job job = new Job(HBaseTestUtils.getConf());
 
     String datasetName = tableName + ".TestGenericEntity";
 
@@ -146,11 +173,14 @@ public class TestMapReduceHBase {
     DatasetKeyInputFormat.setRepositoryUri(job, repo.getUri());
     DatasetKeyInputFormat.setDatasetName(job, inputDataset.getName());
 
-    job.setMapperClass(Mapper.class); // identity
+    job.setMapperClass(AvroKeyWrapperMapper.class);
     job.setMapOutputKeyClass(AvroKey.class);
     job.setMapOutputValueClass(NullWritable.class);
+    AvroJob.setMapOutputKeySchema(job, new Schema.Parser().parse(testGenericEntity));
 
-    job.setReducerClass(Reducer.class); // identity
+    job.setReducerClass(AvroKeyWrapperReducer.class);
+    job.setOutputKeyClass(GenericData.Record.class);
+    job.setOutputValueClass(Void.class);
     AvroJob.setOutputKeySchema(job, new Schema.Parser().parse(testGenericEntity));
 
     job.setOutputFormatClass(DatasetKeyOutputFormat.class);
@@ -169,6 +199,7 @@ public class TestMapReduceHBase {
       }
       assertEquals(10, cnt);
     } finally {
+      reader.close();
       assertFalse("Reader should be closed after calling close", reader.isOpen());
     }
 
