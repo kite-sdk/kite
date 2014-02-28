@@ -97,23 +97,6 @@ public class TestCrunchDatasetsHBase {
 
   @Test
   public void testGeneric() throws IOException {
-//    Dataset<Record> inputDataset = fsRepo.create("in", new DatasetDescriptor.Builder()
-//        .schema(USER_SCHEMA).build());
-//    Dataset<Record> outputDataset = hbaseRepo.create("out", new DatasetDescriptor.Builder()
-//        .schema(USER_SCHEMA).build());
-//
-//    // write two files, each of 5 records
-//    writeTestUsers(inputDataset, 5, 0);
-//    writeTestUsers(inputDataset, 5, 5);
-//
-//    Pipeline pipeline = new MRPipeline(TestCrunchDatasetsHBase.class);
-//    PCollection<Record> data = pipeline.read(
-//        CrunchDatasets.asSource(inputDataset, Record.class));
-//    pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
-//    pipeline.run();
-//
-//    checkTestUsers(outputDataset, 10);
-
     String datasetName = tableName + ".TestGenericEntity";
 
     Dataset<GenericRecord> inputDataset = fsRepo.create("in", new DatasetDescriptor.Builder()

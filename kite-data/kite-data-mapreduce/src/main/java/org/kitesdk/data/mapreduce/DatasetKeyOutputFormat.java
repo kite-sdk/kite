@@ -97,7 +97,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     public void abortTask(TaskAttemptContext taskContext) { }
   }
 
-  static class DatasetOutputCommitter<E> extends OutputCommitter {
+  static class MergeOutputCommitter<E> extends OutputCommitter {
     @Override
     public void setupJob(JobContext jobContext) {
       createJobDataset(jobContext);
@@ -171,7 +171,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   public OutputCommitter getOutputCommitter(TaskAttemptContext taskAttemptContext) {
     Dataset<E> dataset = loadDataset(taskAttemptContext);
     return (dataset instanceof RandomAccessDataset) ?
-        new NullOutputCommitter() : new DatasetOutputCommitter<E>();
+        new NullOutputCommitter() : new MergeOutputCommitter<E>();
   }
 
   private static DatasetRepository getDatasetRepository(JobContext jobContext) {

@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.crunch;
 
+import com.google.common.base.Preconditions;
 import org.apache.crunch.SourceTarget;
 import org.apache.crunch.Target;
 import org.apache.crunch.io.CrunchOutputs;
@@ -31,6 +32,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
+import org.kitesdk.data.spi.AbstractDatasetRepository;
 
 class DatasetTarget<E> implements MapReduceTarget {
 
@@ -53,7 +55,8 @@ class DatasetTarget<E> implements MapReduceTarget {
   }
 
   private String getRepositoryUri(Dataset<E> dataset) {
-    return dataset.getDescriptor().getProperty("repositoryUri");
+    return dataset.getDescriptor().getProperty(
+        AbstractDatasetRepository.REPOSITORY_URI_PROPERTY_NAME);
   }
 
   @Override
@@ -92,17 +95,13 @@ class DatasetTarget<E> implements MapReduceTarget {
   @SuppressWarnings("unchecked")
   public void configureForMapReduce(Job job, PType<?> ptype, Path outputPath, String name) {
 
+    Preconditions.checkNotNull(name, "Output name should not be null"); // see CRUNCH-82
+
     Converter converter = getConverter(ptype);
     Class<?> keyClass = converter.getKeyClass();
     Class<?> valueClass = Void.class;
 
-    if (name == null) { // doesn't happen since CRUNCH-82, but leaving for safety
-      job.setOutputKeyClass(keyClass);
-      job.setOutputValueClass(valueClass);
-    } else {
-      CrunchOutputs.addNamedOutput(job, name, formatBundle, keyClass, valueClass);
-    }
-
+    CrunchOutputs.addNamedOutput(job, name, formatBundle, keyClass, valueClass);
     job.setOutputFormatClass(formatBundle.getFormatClass());
     formatBundle.configure(job.getConfiguration());
   }

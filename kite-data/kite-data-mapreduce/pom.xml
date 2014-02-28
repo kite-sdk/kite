@@ -138,14 +138,6 @@
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
     </dependency>
-
-    <!-- missing from Hadoop, and needed for local job runner -->
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>3.1</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
 </project>

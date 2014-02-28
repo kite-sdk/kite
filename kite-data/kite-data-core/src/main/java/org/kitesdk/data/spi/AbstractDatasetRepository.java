@@ -28,12 +28,14 @@ import org.kitesdk.data.DatasetRepository;
  */
 public abstract class AbstractDatasetRepository implements DatasetRepository {
 
+  public static final String REPOSITORY_URI_PROPERTY_NAME = "repositoryUri";
+
   protected DatasetDescriptor addRepositoryUri(DatasetDescriptor descriptor) {
     if (getUri() == null) {
       return descriptor;
     }
     return new DatasetDescriptor.Builder(descriptor)
-        .property("repositoryUri", getUri().toString())
+        .property(REPOSITORY_URI_PROPERTY_NAME, getUri().toString())
         .build();
   }
 }

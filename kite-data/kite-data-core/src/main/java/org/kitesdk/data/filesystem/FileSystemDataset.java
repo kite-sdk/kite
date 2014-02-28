@@ -15,6 +15,8 @@
  */
 package org.kitesdk.data.filesystem;
 
+import com.google.common.collect.Sets;
+import java.util.Set;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
@@ -269,27 +271,17 @@ class FileSystemDataset<E> extends AbstractDataset<E> {
           updateDescriptor.getFormat() + " with schema " + descriptor.getFormat());
     }
 
+    Set<String> addedPartitions = Sets.newHashSet();
     for (Path path : update.pathIterator()) {
       URI relativePath = update.getDirectory().toUri().relativize(path.toUri());
       Path newPath = new Path(directory, new Path(relativePath));
       fileSystem.rename(path, newPath);
       if (partitionListener != null) {
-        partitionListener.partitionAdded(name, newPath.getParent().toString());
-      }
-    }
-  }
-
-  @Deprecated
-  void accumulateDatafilePaths(Path directory, List<Path> paths)
-    throws IOException {
-
-    for (FileStatus status : fileSystem.listStatus(directory,
-      PathFilters.notHidden())) {
-
-      if (status.isDirectory()) {
-        accumulateDatafilePaths(status.getPath(), paths);
-      } else {
-        paths.add(status.getPath());
+        String partition = newPath.getParent().toString();
+        if (!addedPartitions.contains(partition)) {
+          partitionListener.partitionAdded(name, partition);
+          addedPartitions.add(partition);
+        }
       }
     }
   }

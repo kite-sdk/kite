@@ -161,6 +161,7 @@ public class TestCrunchDatasets {
 
     PartitionKey key = partitionStrategy.partitionKey(0);
     Dataset<Record> inputPart0 = inputDataset.getPartition(key, false);
+    Dataset<Record> outputPart0 = outputDataset.getPartition(key, true);
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
@@ -168,6 +169,6 @@ public class TestCrunchDatasets {
     pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
     pipeline.run();
 
-    Assert.assertEquals(5, datasetSize(outputDataset));
+    Assert.assertEquals(5, datasetSize(outputPart0));
   }
 }

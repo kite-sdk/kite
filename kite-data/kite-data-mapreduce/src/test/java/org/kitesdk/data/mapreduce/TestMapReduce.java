@@ -37,9 +37,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.kitesdk.data.Dataset;
@@ -64,8 +62,6 @@ public class TestMapReduce {
 
   private Format format;
 
-  @Rule
-  public TemporaryFolder tmpFolder = new TemporaryFolder();
   public static final Schema STATS_SCHEMA =
       new Schema.Parser().parse("{\"name\":\"stats\",\"type\":\"record\","
           + "\"fields\":[{\"name\":\"count\",\"type\":\"int\"},"
