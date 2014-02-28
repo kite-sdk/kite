@@ -64,31 +64,26 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
 
   @Override
   public RefinableView<E> with(String name, Object... values) {
-    Conversions.checkTypeConsistency(getDescriptor(), name, values);
     return asRefinableView().with(name, values);
   }
 
   @Override
   public RefinableView<E> from(String name, Comparable value) {
-    Conversions.checkTypeConsistency(getDescriptor(), name, value);
     return asRefinableView().from(name, value);
   }
 
   @Override
   public RefinableView<E> fromAfter(String name, Comparable value) {
-    Conversions.checkTypeConsistency(getDescriptor(), name, value);
     return asRefinableView().fromAfter(name, value);
   }
 
   @Override
   public RefinableView<E> to(String name, Comparable value) {
-    Conversions.checkTypeConsistency(getDescriptor(), name, value);
     return asRefinableView().to(name, value);
   }
 
   @Override
   public RefinableView<E> toBefore(String name, Comparable value) {
-    Conversions.checkTypeConsistency(getDescriptor(), name, value);
     return asRefinableView().toBefore(name, value);
   }
 

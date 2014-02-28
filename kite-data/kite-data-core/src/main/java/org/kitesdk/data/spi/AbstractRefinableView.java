@@ -60,7 +60,7 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
       this.comparator = null;
       this.keys = null;
     }
-    this.constraints = new Constraints();
+    this.constraints = new Constraints(dataset.getDescriptor().getSchema());
     this.entityTest = constraints.toEntityPredicate();
   }
 
@@ -120,31 +120,26 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
 
   @Override
   public AbstractRefinableView<E> with(String name, Object... values) {
-    Conversions.checkTypeConsistency(dataset.getDescriptor(), name, values);
     return filter(constraints.with(name, values));
   }
 
   @Override
   public AbstractRefinableView<E> from(String name, Comparable value) {
-    Conversions.checkTypeConsistency(dataset.getDescriptor(), name, value);
     return filter(constraints.from(name, value));
   }
 
   @Override
   public AbstractRefinableView<E> fromAfter(String name, Comparable value) {
-    Conversions.checkTypeConsistency(dataset.getDescriptor(), name, value);
     return filter(constraints.fromAfter(name, value));
   }
 
   @Override
   public AbstractRefinableView<E> to(String name, Comparable value) {
-    Conversions.checkTypeConsistency(dataset.getDescriptor(), name, value);
     return filter(constraints.to(name, value));
   }
 
   @Override
   public AbstractRefinableView<E> toBefore(String name, Comparable value) {
-    Conversions.checkTypeConsistency(dataset.getDescriptor(), name, value);
     return filter(constraints.toBefore(name, value));
   }
 
