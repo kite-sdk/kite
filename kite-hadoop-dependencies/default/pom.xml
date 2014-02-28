@@ -67,6 +67,12 @@
       <artifactId>hadoop-hdfs</artifactId>
       <version>${vers.hadoop}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro-mapred</artifactId>
+      <classifier>hadoop2</classifier>
+      <version>${vers.avro}</version>
+    </dependency>
   </dependencies>
 
 </project>
