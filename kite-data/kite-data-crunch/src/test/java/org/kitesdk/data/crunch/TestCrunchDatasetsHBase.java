@@ -17,7 +17,6 @@ package org.kitesdk.data.crunch;
 
 import com.google.common.io.Files;
 import java.io.IOException;
-import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.crunch.PCollection;
 import org.apache.crunch.Pipeline;
@@ -56,7 +55,6 @@ public class TestCrunchDatasetsHBase {
       throw new RuntimeException(e);
     }
   }
-
 
   private DatasetRepository fsRepo;
   private DatasetRepository hbaseRepo;

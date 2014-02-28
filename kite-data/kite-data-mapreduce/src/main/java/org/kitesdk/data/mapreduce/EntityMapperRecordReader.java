@@ -37,71 +37,25 @@ class EntityMapperRecordReader<E> extends RecordReader<E, Void> {
     this.entityMapper = entityMapper;
   }
 
-  /**
-   * Closes the split.
-   * 
-   * @see org.apache.hadoop.mapreduce.RecordReader#close()
-   */
   @Override
   public void close() throws IOException {
     tableRecordReader.close();
   }
 
-  /**
-   * Initializes the reader.
-   * 
-   * @param split
-   *          The split to work with.
-   * @param context
-   *          The current task context.
-   * @throws IOException
-   *           When setting up the reader fails.
-   * @throws InterruptedException
-   *           When the job is aborted.
-   * @see org.apache.hadoop.mapreduce.RecordReader#initialize(org.apache.hadoop.mapreduce.InputSplit,
-   *      org.apache.hadoop.mapreduce.TaskAttemptContext)
-   */
   @Override
   public void initialize(InputSplit split, TaskAttemptContext context)
       throws IOException, InterruptedException {
     tableRecordReader.initialize(split, context);
   }
 
-  /**
-   * Returns the current key.
-   * 
-   * @return The current key.
-   * @throws IOException
-   * @throws InterruptedException
-   *           When the job is aborted.
-   */
   public E getCurrentKey() throws IOException, InterruptedException {
     return entity;
   }
 
-  /**
-   * Returns the current value.
-   * 
-   * @return The current value.
-   * @throws IOException
-   *           When the value is faulty.
-   * @throws InterruptedException
-   *           When the job is aborted.
-   */
   public Void getCurrentValue() throws IOException, InterruptedException {
     return null;
   }
 
-  /**
-   * Positions the record reader to the next record.
-   * 
-   * @return <code>true</code> if there was another record.
-   * @throws IOException
-   *           When reading the record failed.
-   * @throws InterruptedException
-   *           When the job was aborted.
-   * @see org.apache.hadoop.mapreduce.RecordReader#nextKeyValue()
-   */
   @Override
   public boolean nextKeyValue() throws IOException, InterruptedException {
     boolean ret = tableRecordReader.nextKeyValue();
@@ -112,12 +66,6 @@ class EntityMapperRecordReader<E> extends RecordReader<E, Void> {
     return ret;
   }
 
-  /**
-   * The current progress of the record reader through its data.
-   * 
-   * @return A number between 0.0 and 1.0, the fraction of the data read.
-   * @see org.apache.hadoop.mapreduce.RecordReader#getProgress()
-   */
   @Override
   public float getProgress() throws IOException, InterruptedException {
     return tableRecordReader.getProgress();

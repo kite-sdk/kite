@@ -15,21 +15,14 @@
  */
 package org.kitesdk.data.mapreduce;
 
-import com.google.common.io.Files;
 import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
-import org.apache.avro.util.Utf8;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -38,15 +31,12 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepositoryTest;
 import org.kitesdk.data.hbase.avro.AvroUtils;
@@ -68,23 +58,6 @@ public class TestMapReduceHBase {
     }
   }
 
-  @Rule
-  public TemporaryFolder tmpFolder = new TemporaryFolder();
-
-  public static final Schema STRING_SCHEMA =
-      new Schema.Parser().parse("{\n" +
-          "  \"name\": \"mystring\",\n" +
-          "  \"type\": \"record\",\n" +
-          "  \"fields\": [\n" +
-          "    { \"name\": \"text\", \"type\": \"string\" }\n" +
-          "  ]\n" +
-          "}\n");
-  public static final Schema STATS_SCHEMA =
-      new Schema.Parser().parse("{\"name\":\"stats\",\"type\":\"record\","
-          + "\"fields\":[{\"name\":\"count\",\"type\":\"int\"},"
-          + "{\"name\":\"name\",\"type\":\"string\"}]}");
-
-  private DatasetRepository fsRepo;
   private DatasetRepository repo;
 
   private static final String tableName = "testtable";
@@ -104,13 +77,6 @@ public class TestMapReduceHBase {
 
   @Before
   public void setUp() throws Exception {
-    Configuration conf = new Configuration();
-    FileSystem fileSystem = FileSystem.get(conf);
-    Path testDirectory = fileSystem.makeQualified(
-        new Path(Files.createTempDir().getAbsolutePath()));
-    this.fsRepo = new FileSystemDatasetRepository.Builder().configuration(conf)
-        .rootDirectory(testDirectory).build();
-
     this.repo = new HBaseDatasetRepository.Builder()
         .configuration(HBaseTestUtils.getConf()).build();
   }
