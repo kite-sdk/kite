@@ -15,16 +15,12 @@
  */
 package org.kitesdk.data.crunch;
 
-import com.google.common.io.Files;
 import java.io.IOException;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.crunch.PCollection;
 import org.apache.crunch.Pipeline;
 import org.apache.crunch.Target;
 import org.apache.crunch.impl.mr.MRPipeline;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -36,7 +32,6 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepositoryTest;
 import org.kitesdk.data.hbase.avro.AvroUtils;
@@ -49,16 +44,14 @@ public class TestCrunchDatasetsHBase {
 
   static {
     try {
-      testGenericEntity = AvroUtils.inputStreamToString(HBaseDatasetRepositoryTest.class
+      testGenericEntity = AvroUtils.inputStreamToString(TestCrunchDatasetsHBase.class
           .getResourceAsStream("/TestGenericEntity.avsc"));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-
-  private DatasetRepository fsRepo;
-  private DatasetRepository hbaseRepo;
+  private DatasetRepository repo;
 
   private static final String tableName = "testtable";
   private static final String managedTableName = "managed_schemas";
@@ -81,14 +74,7 @@ public class TestCrunchDatasetsHBase {
 
   @Before
   public void setUp() throws Exception {
-    Configuration conf = new Configuration();
-    FileSystem fileSystem = FileSystem.get(conf);
-    Path testDirectory = fileSystem.makeQualified(
-        new Path(Files.createTempDir().getAbsolutePath()));
-    this.fsRepo = new FileSystemDatasetRepository.Builder().configuration(conf)
-        .rootDirectory(testDirectory).build();
-
-    this.hbaseRepo = new HBaseDatasetRepository.Builder()
+    this.repo = new HBaseDatasetRepository.Builder()
         .configuration(HBaseTestUtils.getConf()).build();
   }
 
@@ -102,13 +88,14 @@ public class TestCrunchDatasetsHBase {
   public void testGeneric() throws IOException {
     String datasetName = tableName + ".TestGenericEntity";
 
-    Dataset<GenericRecord> inputDataset = fsRepo.create("in", new DatasetDescriptor.Builder()
-        .schemaLiteral(testGenericEntity).build());
+    Dataset<GenericRecord> inputDataset = repo.create("in",
+        new DatasetDescriptor.Builder()
+            .schemaLiteral(testGenericEntity).build());
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    Dataset<GenericRecord> outputDataset = hbaseRepo.create(datasetName, descriptor);
+    Dataset<GenericRecord> outputDataset = repo.create(datasetName, descriptor);
 
     DatasetWriter<GenericRecord> writer = inputDataset.newWriter();
     writer.open();
@@ -121,7 +108,7 @@ public class TestCrunchDatasetsHBase {
       writer.close();
     }
 
-    Pipeline pipeline = new MRPipeline(TestCrunchDatasetsHBase.class);
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasetsHBase.class, HBaseTestUtils.getConf());
     PCollection<GenericRecord> data = pipeline.read(
         CrunchDatasets.asSource(inputDataset, GenericRecord.class));
     pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);

@@ -15,21 +15,10 @@
  */
 package org.kitesdk.data.crunch;
 
-import org.kitesdk.data.Dataset;
-import org.kitesdk.data.Format;
-import org.kitesdk.data.Formats;
-import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import com.google.common.annotations.Beta;
-import com.google.common.collect.Lists;
-import java.util.List;
-import org.apache.avro.generic.GenericData;
 import org.apache.crunch.Target;
 import org.apache.crunch.io.ReadableSource;
-import org.apache.crunch.io.avro.AvroFileSource;
-import org.apache.crunch.io.parquet.AvroParquetFileSource;
-import org.apache.crunch.types.avro.AvroType;
-import org.apache.crunch.types.avro.Avros;
-import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.Dataset;
 
 /**
  * <p>
@@ -54,27 +43,7 @@ public class CrunchDatasets {
    */
   @SuppressWarnings("unchecked")
   public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
-    if (dataset instanceof FileSystemDataset) {
-      List<Path> paths = Lists.newArrayList(
-          ((FileSystemDataset) dataset).dirIterator());
-
-      AvroType<E> avroType;
-      if (type.isAssignableFrom(GenericData.Record.class)) {
-        avroType = (AvroType<E>) Avros.generics(dataset.getDescriptor().getSchema());
-      } else {
-        avroType = Avros.records(type);
-      }
-      final Format format = dataset.getDescriptor().getFormat();
-      if (Formats.PARQUET.equals(format)) {
-        return new AvroParquetFileSource(paths, avroType);
-      } else if (Formats.AVRO.equals(format)) {
-        return new AvroFileSource<E>(paths, avroType);
-      } else {
-        throw new UnsupportedOperationException(
-            "Not a supported format: " + format);
-      }
-    }
-    return null;
+    return new DatasetSourceTarget<E>(dataset, type);
   }
 
   /**
