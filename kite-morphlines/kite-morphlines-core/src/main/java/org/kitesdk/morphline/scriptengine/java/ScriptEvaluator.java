@@ -90,7 +90,7 @@ public class ScriptEvaluator<T> {
     }
     script += ") { " + javaCodeBlock + " }";     
     script += "\n }";
-    LOG.trace("Compiling script: {}", script);    
+    LOG.trace("Compiling script: \n{}", script);    
     
     FastJavaScriptEngine engine = new FastJavaScriptEngine();
     StringWriter errorWriter = new StringWriter();
