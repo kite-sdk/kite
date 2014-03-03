@@ -47,7 +47,7 @@ class DaoView<E> extends AbstractRefinableView<E> {
   }
 
   @Override
-  protected DaoView<E> filter(Constraints constraints) {
+  public DaoView<E> filter(Constraints constraints) {
     return new DaoView<E>(this, constraints);
   }
 

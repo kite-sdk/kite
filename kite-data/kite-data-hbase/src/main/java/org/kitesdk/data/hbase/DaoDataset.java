@@ -70,7 +70,7 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   }
 
   @Override
-  protected RefinableView<E> asRefinableView() {
+  public RefinableView<E> asRefinableView() {
     return unbounded;
   }
 

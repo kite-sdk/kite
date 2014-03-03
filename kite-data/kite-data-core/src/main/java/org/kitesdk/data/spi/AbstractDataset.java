@@ -36,7 +36,7 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
 
   private static final Logger logger = LoggerFactory.getLogger(AbstractDataset.class);
 
-  protected abstract RefinableView<E> asRefinableView();
+  public abstract RefinableView<E> asRefinableView();
 
   @Override
   public Dataset<E> getDataset() {

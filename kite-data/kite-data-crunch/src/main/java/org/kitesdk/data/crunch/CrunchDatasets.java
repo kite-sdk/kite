@@ -19,6 +19,7 @@ import com.google.common.annotations.Beta;
 import org.apache.crunch.Target;
 import org.apache.crunch.io.ReadableSource;
 import org.kitesdk.data.Dataset;
+import org.kitesdk.data.View;
 
 /**
  * <p>
@@ -44,6 +45,10 @@ public class CrunchDatasets {
   @SuppressWarnings("unchecked")
   public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
     return new DatasetSourceTarget<E>(dataset, type);
+  }
+
+  public static <E> ReadableSource<E> asSource(View<E> view, Class<E> type) {
+    return new DatasetSourceTarget<E>(view, type);
   }
 
   /**

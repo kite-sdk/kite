@@ -137,7 +137,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeabl
   }
 
   @Override
-  protected RefinableView<E> asRefinableView() {
+  public RefinableView<E> asRefinableView() {
     return unbounded;
   }
 
@@ -309,7 +309,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeabl
 
   @Override
   public InputFormat<E, Void> getDelegateInputFormat() {
-    return new FileSystemDatasetKeyInputFormat<E>(this);
+    return new FileSystemViewKeyInputFormat<E>(this);
   }
 
   @SuppressWarnings("unchecked")

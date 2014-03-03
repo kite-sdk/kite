@@ -36,9 +36,11 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.View;
 import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.slf4j.Logger;
@@ -49,7 +51,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   private static final Logger logger = LoggerFactory
       .getLogger(DatasetSourceTarget.class);
 
-  private Dataset<E> dataset;
+  private View<E> dataset;
   private FormatBundle formatBundle;
   private AvroType<E> avroType;
 
@@ -75,6 +77,33 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
 
     if (type.isAssignableFrom(GenericData.Record.class)) {
       this.avroType = (AvroType<E>) Avros.generics(dataset.getDescriptor().getSchema());
+    } else {
+      this.avroType = Avros.records(type);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public DatasetSourceTarget(View<E> view, Class<E> type) {
+    super(view.getDataset());
+
+    this.dataset = view;
+    this.formatBundle = FormatBundle.forInput(DatasetKeyInputFormat.class);
+    formatBundle.set(DatasetKeyInputFormat.KITE_REPOSITORY_URI, getRepositoryUri(view.getDataset()));
+    formatBundle.set(DatasetKeyInputFormat.KITE_DATASET_NAME, view.getDataset().getName());
+
+    Job temp = null;
+    try {
+      temp = new Job();
+    } catch (IOException e) {
+      throw new DatasetIOException("Error creating view", e);
+    }
+    DatasetKeyInputFormat.setView(temp, view);
+    formatBundle.set(DatasetKeyInputFormat.KITE_CONSTRAINTS,
+        temp.getConfiguration().get(DatasetKeyInputFormat.KITE_CONSTRAINTS));
+    formatBundle.set(RuntimeParameters.DISABLE_COMBINE_FILE, "true");
+
+    if (type.isAssignableFrom(GenericData.Record.class)) {
+      this.avroType = (AvroType<E>) Avros.generics(dataset.getDataset().getDescriptor().getSchema());
     } else {
       this.avroType = Avros.records(type);
     }
@@ -110,7 +139,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
       job.setInputFormatClass(formatBundle.getFormatClass());
       formatBundle.configure(conf);
     } else {
-      Path dummy = new Path("/dataset/" + dataset.getName());
+      Path dummy = new Path("/dataset/" + dataset.getDataset().getName());
       CrunchInputs.addInputPath(job, dummy, formatBundle, inputId);
     }
   }

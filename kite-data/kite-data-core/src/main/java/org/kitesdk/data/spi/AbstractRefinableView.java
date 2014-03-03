@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.base.Predicate;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import com.google.common.base.Objects;
@@ -73,7 +74,11 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     this.keys = view.keys;
   }
 
-  protected abstract AbstractRefinableView<E> filter(Constraints c);
+  public Constraints getConstraints() {
+    return constraints;
+  }
+
+  public abstract AbstractRefinableView<E> filter(Constraints c);
 
   @Override
   public Dataset<E> getDataset() {
@@ -141,6 +146,10 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
   @Override
   public AbstractRefinableView<E> toBefore(String name, Comparable value) {
     return filter(constraints.toBefore(name, value));
+  }
+
+  public InputFormat<E, Void> getDelegateInputFormat() {
+    throw new UnsupportedOperationException("No delegate input format defined.");
   }
 
   @Override

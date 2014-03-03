@@ -15,7 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
@@ -33,20 +33,20 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.kitesdk.compat.Hadoop;
-import org.kitesdk.data.Dataset;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
+import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
+import org.kitesdk.data.spi.AbstractRefinableView;
+import org.kitesdk.data.spi.Constraints;
 import parquet.avro.AvroParquetInputFormat;
 
-class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
+class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
-  private FileSystemDataset<E> dataset;
+  private RefinableView<E> view;
 
-  public FileSystemDatasetKeyInputFormat(Dataset<E> dataset) {
-    Preconditions.checkArgument(dataset instanceof FileSystemDataset,
-        "FileSystemDatasetKeyInputFormat requires a FileSystemDataset");
-    this.dataset = (FileSystemDataset<E>) dataset;
+  public FileSystemViewKeyInputFormat(RefinableView<E> view) {
+    this.view = view;
   }
 
   @Override
@@ -54,10 +54,10 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     Job job = new Job(conf);
-    Format format = dataset.getDescriptor().getFormat();
+    Format format = view.getDataset().getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
       setInputPaths(jobContext, job);
-      AvroJob.setInputKeySchema(job, dataset.getDescriptor().getSchema());
+      AvroJob.setInputKeySchema(job, view.getDataset().getDescriptor().getSchema());
       AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
       return delegate.getSplits(jobContext);
     } else if (Formats.PARQUET.equals(format)) {
@@ -77,7 +77,8 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
   }
 
   private void setInputPaths(JobContext jobContext, Job job) throws IOException {
-    List<Path> paths = Lists.newArrayList(dataset.dirIterator());
+    // TODO fix assumption about FileSystemView
+    List<Path> paths = Lists.newArrayList(((FileSystemView) view).dirIterator());
     FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
     // the following line is needed for Hadoop 1, otherwise the paths are not set
     Configuration contextConf = Hadoop.JobContext
@@ -91,7 +92,20 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
   @SuppressWarnings("unchecked")
   public RecordReader<E, Void> createRecordReader(InputSplit inputSplit,
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-    Format format = dataset.getDescriptor().getFormat();
+    RecordReader<E, Void> unfilteredRecordReader = createUnfilteredRecordReader
+        (inputSplit, taskAttemptContext);
+    if (view instanceof AbstractRefinableView) {
+      // use the constraints to filter out entities from the reader
+      return new FilteredRecordReader<E>(unfilteredRecordReader,
+          ((AbstractRefinableView) view).getConstraints());
+    }
+    return unfilteredRecordReader;
+  }
+
+  @SuppressWarnings("unchecked")
+  private RecordReader<E, Void> createUnfilteredRecordReader(InputSplit inputSplit,
+      TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+    Format format = view.getDataset().getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
       AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
       return new KeyReaderWrapper(
@@ -102,7 +116,7 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
           delegate.createRecordReader(inputSplit, taskAttemptContext));
     } else if (Formats.CSV.equals(format)) {
       CSVInputFormat<E> delegate = new CSVInputFormat<E>();
-      delegate.setDescriptor(dataset.getDescriptor());
+      delegate.setDescriptor(view.getDataset().getDescriptor());
       return delegate.createRecordReader(inputSplit, taskAttemptContext);
     } else {
       throw new UnsupportedOperationException(
@@ -131,6 +145,59 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
     @Override
     public E getCurrentKey() throws IOException, InterruptedException {
       return delegate.getCurrentValue();
+    }
+  }
+
+  private static class FilteredRecordReader<E> extends RecordReader<E, Void> {
+    private RecordReader<E, Void> unfiltered;
+    private Predicate<E> predicate;
+    private E current;
+
+    public FilteredRecordReader(RecordReader<E, Void> unfiltered, Constraints constraints) {
+      this.unfiltered = unfiltered;
+      this.predicate = constraints.toEntityPredicate(); // TODO: optimize with storage key
+    }
+
+    @Override
+    public void initialize(InputSplit inputSplit,
+        TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+      unfiltered.initialize(inputSplit, taskAttemptContext);
+    }
+
+    @Override
+    public boolean nextKeyValue() throws IOException, InterruptedException {
+      current = computeNextKey();
+      return current != null;
+    }
+
+    private E computeNextKey() throws IOException, InterruptedException {
+      while (unfiltered.nextKeyValue()) {
+        E element = unfiltered.getCurrentKey();
+        if (predicate.apply(element)) {
+          return element;
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public E getCurrentKey() throws IOException, InterruptedException {
+      return current;
+    }
+
+    @Override
+    public Void getCurrentValue() throws IOException, InterruptedException {
+      return unfiltered.getCurrentValue();
+    }
+
+    @Override
+    public float getProgress() throws IOException, InterruptedException {
+      return unfiltered.getProgress();
+    }
+
+    @Override
+    public void close() throws IOException {
+      unfiltered.close();
     }
   }
 }

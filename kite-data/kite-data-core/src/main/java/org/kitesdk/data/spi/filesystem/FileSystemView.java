@@ -19,6 +19,7 @@ package org.kitesdk.data.spi.filesystem;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
@@ -61,7 +62,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> {
   }
 
   @Override
-  protected FileSystemView<E> filter(Constraints c) {
+  public FileSystemView<E> filter(Constraints c) {
     return new FileSystemView<E>(this, c);
   }
 
@@ -93,6 +94,11 @@ class FileSystemView<E> extends AbstractRefinableView<E> {
           "Cannot cleanly delete view: " + this);
     }
     return deleteAllUnsafe();
+  }
+
+  @Override
+  public InputFormat<E, Void> getDelegateInputFormat() {
+    return new FileSystemViewKeyInputFormat<E>(this);
   }
 
   PathIterator pathIterator() {

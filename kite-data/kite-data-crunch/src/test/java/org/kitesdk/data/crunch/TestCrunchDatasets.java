@@ -32,6 +32,7 @@ import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.View;
 import junit.framework.Assert;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
@@ -211,5 +212,34 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     Dataset<Record> outputPart0 = outputDataset.getPartition(key, false);
     Assert.assertNotNull(outputPart0);
     Assert.assertEquals(5, datasetSize(outputPart0));
+  }
+
+  @Test
+  public void testSourceView() throws IOException {
+    // Parquet fails when testing with HDFS because
+    // parquet.hadoop.ParquetReader calls new Configuration(), which does
+    // not work with the mini-cluster (not set up through env).
+    Assume.assumeTrue(fileSystem instanceof LocalFileSystem);
+
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", 2).build();
+
+    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).format(Formats.PARQUET).build());
+
+    writeTestUsers(inputDataset, 10);
+
+    View<Record> inputView = inputDataset.with("username", "test-0");
+    Assert.assertEquals(1, datasetSize(inputView));
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputView, GenericData.Record.class));
+    pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
+    pipeline.run();
+
+    Assert.assertEquals(1, datasetSize(outputDataset));
   }
 }

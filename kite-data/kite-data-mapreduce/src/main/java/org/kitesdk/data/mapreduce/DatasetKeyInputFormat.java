@@ -16,10 +16,14 @@
 package org.kitesdk.data.mapreduce;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.util.List;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -30,11 +34,16 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.PartitionKey;
-import org.kitesdk.data.spi.filesystem.FileSystemDataset;
+import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
+import org.kitesdk.data.spi.AbstractRefinableView;
+import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 
 /**
  * A MapReduce {@code InputFormat} for reading from a {@link Dataset}.
@@ -51,6 +60,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   public static final String KITE_REPOSITORY_URI = "kite.inputRepositoryUri";
   public static final String KITE_DATASET_NAME = "kite.inputDatasetName";
   public static final String KITE_PARTITION_DIR = "kite.inputPartitionDir";
+  public static final String KITE_CONSTRAINTS = "kite.inputConstraints";
 
   private Configuration conf;
   private InputFormat<E, Void> delegate;
@@ -63,6 +73,36 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     job.getConfiguration().set(KITE_DATASET_NAME, name);
   }
 
+  public static <E> void setView(Job job, View<E> view) {
+    if (view instanceof AbstractRefinableView) {
+      job.getConfiguration().set(KITE_CONSTRAINTS, serialize((AbstractRefinableView) view));
+    }
+  }
+
+  private static String serialize(AbstractRefinableView view) {
+    try {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ObjectOutputStream out = new ObjectOutputStream(baos);
+      out.writeObject(view.getConstraints());
+      out.close();
+      return Base64.encodeBase64String(baos.toByteArray());
+    } catch (IOException e) {
+      throw new DatasetIOException("Cannot serialize view " + view, e);
+    }
+  }
+
+  private static Constraints deserialize(String s) {
+    try {
+      ByteArrayInputStream bais = new ByteArrayInputStream(Base64.decodeBase64(s));
+      ObjectInputStream in = new ObjectInputStream(bais);
+      return (Constraints) in.readObject();
+    } catch (IOException e) {
+      throw new DatasetIOException("Cannot deserialize constraints", e);
+    } catch (ClassNotFoundException e) {
+      throw new DatasetException("Cannot deserialize constraints", e);
+    }
+  }
+
   @Override
   public Configuration getConf() {
     return conf;
@@ -73,23 +113,53 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     conf = configuration;
     Dataset<E> dataset = loadDataset(configuration);
 
-    // TODO: the following should generalize with views
     String partitionDir = conf.get(KITE_PARTITION_DIR);
+    String constraintsString = conf.get(KITE_CONSTRAINTS);
     if (dataset.getDescriptor().isPartitioned() && partitionDir != null) {
-      Preconditions.checkArgument(dataset instanceof FileSystemDataset);
-      PartitionKey key = ((FileSystemDataset) dataset)
-          .keyFromDirectory(new Path(partitionDir));
-      if (key != null) {
-        dataset = dataset.getPartition(key, true);
+      delegate = getDelegateInputFormatForPartition(dataset, partitionDir);
+    } else if (constraintsString != null) {
+      delegate = getDelegateInputFormatForView(dataset, constraintsString);
+    } else {
+      delegate = getDelegateInputFormat(dataset);
+    }
+  }
+
+  private InputFormat<E, Void> getDelegateInputFormat(Dataset<E> dataset) {
+    if (dataset instanceof AbstractDataset) {
+      return ((AbstractDataset<E>) dataset).getDelegateInputFormat();
+    }
+    throw new UnsupportedOperationException("Incompatible Dataset: implementation " +
+          "does not provide InputFormat support. Dataset: " + dataset);
+  }
+
+  private InputFormat<E, Void> getDelegateInputFormatForPartition(Dataset<E> dataset,
+      String partitionDir) {
+    PartitionKey key = ((FileSystemDataset<E>) dataset).keyFromDirectory(new Path(partitionDir));
+    if (key != null) {
+      dataset = dataset.getPartition(key, true);
+      if (dataset instanceof AbstractDataset) {
+        return ((AbstractDataset<E>) dataset).getDelegateInputFormat();
+      } else {
+        throw new UnsupportedOperationException("Incompatible Dataset: implementation " +
+            "does not provide InputFormat support. Dataset: " + dataset);
       }
     }
+    throw new DatasetException("Cannot find partition " + partitionDir);
+  }
 
+  @SuppressWarnings("unchecked")
+  private InputFormat<E, Void> getDelegateInputFormatForView(Dataset<E> dataset,
+      String constraintsString) {
+    Constraints constraints = deserialize(constraintsString);
     if (dataset instanceof AbstractDataset) {
-      delegate = ((AbstractDataset<E>) dataset).getDelegateInputFormat();
-    } else {
-      throw new UnsupportedOperationException("Incompatible Dataset: implementation " +
-          "does not provide InputFormat support. Dataset: " + dataset);
+      View<E> view = ((AbstractDataset) dataset).asRefinableView();
+      if (view instanceof AbstractRefinableView) {
+        view = ((AbstractRefinableView) view).filter(constraints);
+        return ((AbstractRefinableView) view).getDelegateInputFormat();
+      }
     }
+    throw new UnsupportedOperationException("Incompatible Dataset View: implementation " +
+        "does not provide InputFormat support. Dataset: " + dataset);
   }
 
   private static <E> Dataset<E> loadDataset(Configuration conf) {
