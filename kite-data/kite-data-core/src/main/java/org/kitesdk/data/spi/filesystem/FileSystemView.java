@@ -19,6 +19,7 @@ package org.kitesdk.data.spi.filesystem;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
@@ -26,7 +27,10 @@ import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.InputFormatAccessor;
+import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.Pair;
+import org.kitesdk.data.spi.SizeAccessor;
 import org.kitesdk.data.spi.StorageKey;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -43,7 +47,8 @@ import java.io.IOException;
  * @param <E> The type of records read and written by this view.
  */
 @Immutable
-class FileSystemView<E> extends AbstractRefinableView<E> {
+class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatAccessor<E>,
+    LastModifiedAccessor, SizeAccessor {
 
   private final FileSystem fs;
   private final Path root;
@@ -93,6 +98,11 @@ class FileSystemView<E> extends AbstractRefinableView<E> {
           "Cannot cleanly delete view: " + this);
     }
     return deleteAllUnsafe();
+  }
+
+  @Override
+  public InputFormat<E, Void> getInputFormat() {
+    return new FileSystemViewKeyInputFormat<E>(this);
   }
 
   PathIterator pathIterator() {
@@ -172,5 +182,39 @@ class FileSystemView<E> extends AbstractRefinableView<E> {
     } catch (IOException ex) {
       throw new DatasetIOException("Could not cleanly delete path:" + dir, ex);
     }
+  }
+
+  @Override
+  public long getSize() {
+    long size = 0;
+    for (Iterator<Path> i = dirIterator(); i.hasNext(); ) {
+      Path dir = i.next();
+      try {
+        for (FileStatus st : fs.listStatus(dir)) {
+          size += st.getLen();
+        }
+      } catch (IOException e) {
+        throw new DatasetIOException("Cannot find size of " + dir, e);
+      }
+    }
+    return size;
+  }
+
+  @Override
+  public long getLastModified() {
+    long lastMod = -1;
+    for (Iterator<Path> i = dirIterator(); i.hasNext(); ) {
+      Path dir = i.next();
+      try {
+        for (FileStatus st : fs.listStatus(dir)) {
+          if (lastMod < st.getModificationTime()) {
+            lastMod = st.getModificationTime();
+          }
+        }
+      } catch (IOException e) {
+        throw new DatasetIOException("Cannot find last modified time of of " + dir, e);
+      }
+    }
+    return lastMod;
   }
 }

@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
@@ -33,20 +32,25 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.kitesdk.compat.Hadoop;
-import org.kitesdk.data.Dataset;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
+import org.kitesdk.data.spi.AbstractRefinableView;
+import org.kitesdk.data.spi.FilteredRecordReader;
 import parquet.avro.AvroParquetInputFormat;
 
-class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
+class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
   private FileSystemDataset<E> dataset;
+  private FileSystemView<E> view;
 
-  public FileSystemDatasetKeyInputFormat(Dataset<E> dataset) {
-    Preconditions.checkArgument(dataset instanceof FileSystemDataset,
-        "FileSystemDatasetKeyInputFormat requires a FileSystemDataset");
-    this.dataset = (FileSystemDataset<E>) dataset;
+  public FileSystemViewKeyInputFormat(FileSystemDataset<E> dataset) {
+    this.dataset = dataset;
+  }
+
+  public FileSystemViewKeyInputFormat(FileSystemView<E> view) {
+    this((FileSystemDataset<E>) view.getDataset());
+    this.view = view;
   }
 
   @Override
@@ -76,8 +80,10 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private void setInputPaths(JobContext jobContext, Job job) throws IOException {
-    List<Path> paths = Lists.newArrayList(dataset.dirIterator());
+    List<Path> paths =
+        Lists.newArrayList(view == null ? dataset.dirIterator() : view.dirIterator());
     FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
     // the following line is needed for Hadoop 1, otherwise the paths are not set
     Configuration contextConf = Hadoop.JobContext
@@ -88,8 +94,20 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public RecordReader<E, Void> createRecordReader(InputSplit inputSplit,
+      TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+    RecordReader<E, Void> unfilteredRecordReader = createUnfilteredRecordReader
+        (inputSplit, taskAttemptContext);
+    if (view != null) {
+      // use the constraints to filter out entities from the reader
+      return new FilteredRecordReader<E>(unfilteredRecordReader,
+          ((AbstractRefinableView) view).getConstraints());
+    }
+    return unfilteredRecordReader;
+  }
+
+  @SuppressWarnings("unchecked")
+  private RecordReader<E, Void> createUnfilteredRecordReader(InputSplit inputSplit,
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
@@ -133,4 +151,5 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
       return delegate.getCurrentValue();
     }
   }
+
 }

@@ -25,6 +25,8 @@ import javax.annotation.concurrent.Immutable;
 
 import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.View;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A common View base class to simplify implementations of Views created from ranges.
@@ -36,6 +38,8 @@ import org.kitesdk.data.View;
  */
 @Immutable
 public abstract class AbstractRefinableView<E> implements RefinableView<E> {
+
+  private static final Logger logger = LoggerFactory.getLogger(AbstractRefinableView.class);
 
   protected final Dataset<E> dataset;
   protected final MarkerComparator comparator;
@@ -71,6 +75,10 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     this.entityTest = constraints.toEntityPredicate();
     // thread-safe, so okay to reuse when views share a partition strategy
     this.keys = view.keys;
+  }
+
+  public Constraints getConstraints() {
+    return constraints;
   }
 
   protected abstract AbstractRefinableView<E> filter(Constraints c);

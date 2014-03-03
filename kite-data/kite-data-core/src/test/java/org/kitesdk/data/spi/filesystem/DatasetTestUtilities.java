@@ -32,6 +32,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.junit.Assert;
+import org.kitesdk.data.View;
 
 public class DatasetTestUtilities {
 
@@ -133,7 +134,7 @@ public class DatasetTestUtilities {
     Assert.assertTrue(usernames.isEmpty());
   }
 
-  public static <E> Set<E> materialize(Dataset<E> ds) {
+  public static <E> Set<E> materialize(View<E> ds) {
     Set<E> records = Sets.newHashSet();
     DatasetReader<E> reader = null;
     try {
@@ -150,7 +151,7 @@ public class DatasetTestUtilities {
     return records;
   }
 
-  public static <E> int datasetSize(Dataset<E> ds) {
+  public static <E> int datasetSize(View<E> ds) {
     return materialize(ds).size();
   }
 

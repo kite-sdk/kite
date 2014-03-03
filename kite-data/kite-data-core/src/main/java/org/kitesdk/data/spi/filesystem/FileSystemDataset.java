@@ -28,9 +28,13 @@ import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.RefinableView;
+import org.kitesdk.data.View;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDataset;
+import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.FieldPartitioner;
+import org.kitesdk.data.spi.InputFormatAccessor;
+import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.PartitionListener;
 import com.google.common.base.Objects;
@@ -40,6 +44,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.spi.SizeAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +53,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-public class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeable<FileSystemDataset<E>> {
+public class FileSystemDataset<E> extends AbstractDataset<E> implements
+    Mergeable<FileSystemDataset<E>>, InputFormatAccessor<E>, LastModifiedAccessor,
+    SizeAccessor {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemDataset.class);
@@ -139,6 +146,11 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeabl
   @Override
   protected RefinableView<E> asRefinableView() {
     return unbounded;
+  }
+
+  @Override
+  public FileSystemView<E> filter(Constraints c) {
+    return unbounded.filter(c);
   }
 
   @Override
@@ -308,8 +320,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeabl
   }
 
   @Override
-  public InputFormat<E, Void> getDelegateInputFormat() {
-    return new FileSystemDatasetKeyInputFormat<E>(this);
+  public InputFormat<E, Void> getInputFormat() {
+    return new FileSystemViewKeyInputFormat<E>(this);
   }
 
   @SuppressWarnings("unchecked")
@@ -342,6 +354,40 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeabl
     values.add(convert.valueForDirname(fp, dir.getName()));
 
     return Accessor.getDefault().newPartitionKey(values.toArray());
+  }
+
+  @Override
+  public long getSize() {
+    long size = 0;
+    for (Iterator<Path> i = dirIterator(); i.hasNext(); ) {
+      Path dir = i.next();
+      try {
+        for (FileStatus st : fileSystem.listStatus(dir)) {
+          size += st.getLen();
+        }
+      } catch (IOException e) {
+        throw new DatasetIOException("Cannot find size of " + dir, e);
+      }
+    }
+    return size;
+  }
+
+  @Override
+  public long getLastModified() {
+    long lastMod = -1;
+    for (Iterator<Path> i = dirIterator(); i.hasNext(); ) {
+      Path dir = i.next();
+      try {
+        for (FileStatus st : fileSystem.listStatus(dir)) {
+          if (lastMod < st.getModificationTime()) {
+            lastMod = st.getModificationTime();
+          }
+        }
+      } catch (IOException e) {
+        throw new DatasetIOException("Cannot find last modified time of of " + dir, e);
+      }
+    }
+    return lastMod;
   }
 
   public static class Builder {

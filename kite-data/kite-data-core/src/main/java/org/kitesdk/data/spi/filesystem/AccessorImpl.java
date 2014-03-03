@@ -19,7 +19,6 @@ import java.util.Iterator;
 
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.View;
 import org.apache.hadoop.fs.Path;
 
@@ -41,13 +40,6 @@ final class AccessorImpl {
       throw new DatasetException(
           "Underlying Dataset must be a FileSystemDataset");
     }
-  }
-
-  public <E> PartitionKey fromDirectoryName(Dataset<E> dataset, Path dir) {
-    if (dataset instanceof FileSystemDataset) {
-      return ((FileSystemDataset<E>) dataset).keyFromDirectory(dir);
-    }
-    return null;
   }
 
 }

@@ -43,6 +43,8 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
     return this;
   }
 
+  public abstract AbstractRefinableView<E> filter(Constraints c);
+
   @Override
   public DatasetWriter<E> newWriter() {
     logger.debug("Getting writer to dataset:{}", this);
@@ -85,10 +87,6 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
   @Override
   public RefinableView<E> toBefore(String name, Comparable value) {
     return asRefinableView().toBefore(name, value);
-  }
-
-  public InputFormat<E, Void> getDelegateInputFormat() {
-    throw new UnsupportedOperationException("No delegate input format defined.");
   }
 
   @Override

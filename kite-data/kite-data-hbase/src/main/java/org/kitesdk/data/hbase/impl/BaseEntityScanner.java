@@ -207,6 +207,10 @@ public class BaseEntityScanner<E> implements EntityScanner<E> {
     iterator.remove();
   }
 
+  public Scan getScan() {
+    return scan;
+  }
+
   /**
    * Scanner builder for BaseEntityScanner
    * 

@@ -20,19 +20,22 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
 import java.util.Iterator;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.hbase.impl.EntityScanner;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.Marker;
 import org.kitesdk.data.spi.MarkerRange;
 import java.util.List;
 
-class DaoView<E> extends AbstractRefinableView<E> {
+class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor<E> {
 
   private final DaoDataset<E> dataset;
 
@@ -51,15 +54,19 @@ class DaoView<E> extends AbstractRefinableView<E> {
     return new DaoView<E>(this, constraints);
   }
 
-  @Override
-  public DatasetReader<E> newReader() {
+  EntityScanner<E> newEntityScanner() {
     PartitionStrategy partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
     Iterable<MarkerRange> markerRanges = constraints.toKeyRanges(partitionStrategy);
     // TODO: combine all ranges into a single reader
     MarkerRange range = Iterables.getOnlyElement(markerRanges);
-    final DatasetReader<E> wrappedReader = dataset.getDao().getScanner(
+    return dataset.getDao().getScanner(
         toPartitionKey(range.getStart()), range.getStart().isInclusive(),
         toPartitionKey(range.getEnd()), range.getEnd().isInclusive());
+  }
+
+  @Override
+  public DatasetReader<E> newReader() {
+    final DatasetReader<E> wrappedReader = newEntityScanner();
     final UnmodifiableIterator<E> filteredIterator =
         Iterators.filter(wrappedReader.iterator(), constraints.toEntityPredicate());
     return new DatasetReader<E>() {
@@ -145,7 +152,7 @@ class DaoView<E> extends AbstractRefinableView<E> {
   }
 
   @SuppressWarnings("deprecation")
-  private PartitionKey toPartitionKey(MarkerRange.Boundary boundary) {
+  PartitionKey toPartitionKey(MarkerRange.Boundary boundary) {
     if (boundary == null || boundary.getBound() == null) {
       return null;
     }
@@ -166,5 +173,10 @@ class DaoView<E> extends AbstractRefinableView<E> {
     }
 
     return strategy.partitionKey(values);
+  }
+
+  @Override
+  public InputFormat<E, Void> getInputFormat() {
+    return new HBaseViewKeyInputFormat<E>(this);
   }
 }
