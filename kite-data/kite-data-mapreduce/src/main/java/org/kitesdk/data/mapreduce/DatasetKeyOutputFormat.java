@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.mapreduce;
 
+import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
@@ -43,6 +44,7 @@ import org.kitesdk.data.spi.Mergeable;
  *
  * @param <E> The type of entities in the {@code Dataset}.
  */
+@Beta
 public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   public static final String KITE_REPOSITORY_URI = "kite.outputRepositoryUri";

@@ -29,7 +29,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -92,9 +91,10 @@ public class TestMapReduce {
   }
 
 
-  private static class LineCountMapper extends Mapper<GenericData.Record, NullWritable, Text, IntWritable> {
+  private static class LineCountMapper
+      extends Mapper<GenericData.Record, Void, Text, IntWritable> {
     @Override
-    protected void map(GenericData.Record record, NullWritable value,
+    protected void map(GenericData.Record record, Void value,
         Context context)
         throws IOException, InterruptedException {
       context.write(new Text(record.get("text").toString()), new IntWritable(1));

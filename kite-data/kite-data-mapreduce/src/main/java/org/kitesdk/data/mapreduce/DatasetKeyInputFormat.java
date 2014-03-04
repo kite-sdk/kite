@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.mapreduce;
 
+import com.google.common.annotations.Beta;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
@@ -48,6 +49,15 @@ import org.kitesdk.data.filesystem.impl.Accessor;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import parquet.avro.AvroParquetInputFormat;
 
+/**
+ * A MapReduce {@code InputFormat} for reading from a {@link Dataset}.
+ *
+ * Since a {@code Dataset} only contains entities (not key/value pairs), this output
+ * format ignores the value.
+ *
+ * @param <E> The type of entities in the {@code Dataset}.
+ */
+@Beta
 public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     implements Configurable {
 
