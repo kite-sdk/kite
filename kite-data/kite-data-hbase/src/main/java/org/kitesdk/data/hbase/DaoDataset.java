@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.hbase;
 
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.Key;
@@ -39,7 +40,7 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
     this.unbounded = new DaoView<E>(this);
   }
 
-  public Dao<E> getDao() {
+  Dao<E> getDao() {
     return dao;
   }
 
@@ -111,5 +112,10 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
     }
 
     return strategy.partitionKey(values);
+  }
+
+  @Override
+  public InputFormat<E, Void> getDelegateInputFormat() {
+    return new HBaseDatasetKeyInputFormat<E>(this);
   }
 }

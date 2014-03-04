@@ -16,38 +16,24 @@
 package org.kitesdk.data.mapreduce;
 
 import com.google.common.annotations.Beta;
-import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import org.apache.avro.mapred.AvroKey;
-import org.apache.avro.mapreduce.AvroJob;
-import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
-import org.apache.hadoop.hbase.mapreduce.TableInputFormat;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.Format;
-import org.kitesdk.data.Formats;
 import org.kitesdk.data.PartitionKey;
-import org.kitesdk.data.RandomAccessDataset;
-import org.kitesdk.data.View;
 import org.kitesdk.data.filesystem.impl.Accessor;
-import org.kitesdk.data.hbase.impl.EntityMapper;
-import parquet.avro.AvroParquetInputFormat;
+import org.kitesdk.data.spi.AbstractDataset;
 
 /**
  * A MapReduce {@code InputFormat} for reading from a {@link Dataset}.
@@ -66,8 +52,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   public static final String KITE_PARTITION_DIR = "kite.inputPartitionDir";
 
   private Configuration conf;
-  private View<E> view;
-  private EntityMapper<E> entityMapper;
+  private InputFormat<E, Void> delegate;
 
   public static void setRepositoryUri(Job job, URI uri) {
     job.getConfiguration().set(KITE_REPOSITORY_URI, uri.toString());
@@ -87,14 +72,6 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     conf = configuration;
     Dataset<E> dataset = loadDataset(configuration);
 
-    if (dataset instanceof RandomAccessDataset) {
-      entityMapper = org.kitesdk.data.hbase.impl.Accessor.getDefault().getEntityMapper(dataset);
-      if (entityMapper == null) {
-        throw new UnsupportedOperationException(
-            "Cannot find entity mapper for dataset: " + dataset);
-      }
-    }
-
     // TODO: the following should generalize with views
     String partitionDir = conf.get(KITE_PARTITION_DIR);
     if (dataset.getDescriptor().isPartitioned() && partitionDir != null) {
@@ -104,8 +81,11 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       }
     }
 
-    view = dataset;
-
+    if (dataset instanceof AbstractDataset) {
+      delegate = ((AbstractDataset<E>) dataset).getDelegateInputFormat();
+    } else {
+      throw new UnsupportedOperationException("No input format for dataset " + dataset);
+    }
   }
 
   private static <E> Dataset<E> loadDataset(Configuration conf) {
@@ -115,141 +95,17 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
 
   @Override
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
-      justification="View field set by setConf")
+      justification="Delegate set by setConf")
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
       InterruptedException {
-    Job job = new Job(jobContext.getConfiguration());
-    if (view instanceof RandomAccessDataset) {
-      TableInputFormat delegate = new TableInputFormat();
-      String tableName = getTableName(view.getDataset().getName());
-      jobContext.getConfiguration().set(TableInputFormat.INPUT_TABLE, tableName);
-      delegate.setConf(jobContext.getConfiguration());
-      return delegate.getSplits(jobContext);
-    } else {
-      Format format = view.getDataset().getDescriptor().getFormat();
-      if (Formats.AVRO.equals(format)) {
-        List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(view));
-        FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
-        AvroJob.setInputKeySchema(job, view.getDataset().getDescriptor().getSchema());
-        AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
-        return delegate.getSplits(jobContext);
-      } else if (Formats.PARQUET.equals(format)) {
-        List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(view));
-        AvroParquetInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
-        // TODO: use later version of parquet (with https://github.com/Parquet/parquet-mr/pull/282) so we can set the schema correctly
-        // AvroParquetInputFormat.setReadSchema(job, view.getDescriptor().getSchema());
-        AvroParquetInputFormat delegate = new AvroParquetInputFormat();
-        return delegate.getSplits(jobContext);
-      } else {
-        throw new UnsupportedOperationException(
-            "Not a supported format: " + format);
-      }
-    }
-  }
-
-  // TODO: remove duplication from HBaseMetadataProvider, and see CDK-140
-  static String getTableName(String name) {
-    if (name.contains(".")) {
-      return name.substring(0, name.indexOf('.'));
-    }
-    return name;
+    return delegate.getSplits(jobContext);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
-      justification="View field set by setConf")
+      justification="Delegate set by setConf")
   public RecordReader<E, Void> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-    if (view instanceof RandomAccessDataset) {
-      TableInputFormat delegate = new TableInputFormat();
-      delegate.setConf(taskAttemptContext.getConfiguration());
-      return new HBaseRecordReaderWrapper<E>(
-          delegate.createRecordReader(inputSplit, taskAttemptContext), entityMapper);
-    } else {
-      Format format = view.getDataset().getDescriptor().getFormat();
-      if (Formats.AVRO.equals(format)) {
-        AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
-        return new AvroRecordReaderWrapper(
-            delegate.createRecordReader(inputSplit, taskAttemptContext));
-      } else if (Formats.PARQUET.equals(format)) {
-        AvroParquetInputFormat delegate = new AvroParquetInputFormat();
-        return new ParquetRecordReaderWrapper(
-            delegate.createRecordReader(inputSplit, taskAttemptContext));
-      } else {
-        throw new UnsupportedOperationException(
-            "Not a supported format: " + format);
-      }
-    }
+    return delegate.createRecordReader(inputSplit, taskAttemptContext);
   }
 
-  private abstract static class AbstractRecordReader<E, K, V> extends RecordReader<E, Void> {
-
-    protected RecordReader<K, V> delegate;
-
-    public AbstractRecordReader(RecordReader<K, V> delegate) {
-      this.delegate = delegate;
-    }
-
-    @Override
-    public void initialize(InputSplit inputSplit,
-        TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-      delegate.initialize(inputSplit, taskAttemptContext);
-    }
-
-    @Override
-    public boolean nextKeyValue() throws IOException, InterruptedException {
-      return delegate.nextKeyValue();
-    }
-
-    @Override
-    public Void getCurrentValue() throws IOException, InterruptedException {
-      return null;
-    }
-
-    @Override
-    public float getProgress() throws IOException, InterruptedException {
-      return delegate.getProgress();
-    }
-
-    @Override
-    public void close() throws IOException {
-      delegate.close();
-    }
-  }
-
-  private static class AvroRecordReaderWrapper<E> extends AbstractRecordReader<E, AvroKey<E>, NullWritable> {
-    public AvroRecordReaderWrapper(RecordReader<AvroKey<E>, NullWritable> delegate) {
-      super(delegate);
-    }
-
-    @Override
-    public E getCurrentKey() throws IOException, InterruptedException {
-      return delegate.getCurrentKey().datum();
-    }
-  }
-
-  private static class ParquetRecordReaderWrapper<E> extends AbstractRecordReader<E, Void, E> {
-    public ParquetRecordReaderWrapper(RecordReader<Void, E> delegate) {
-      super(delegate);
-    }
-
-    @Override
-    public E getCurrentKey() throws IOException, InterruptedException {
-      return delegate.getCurrentValue();
-    }
-  }
-
-  private static class HBaseRecordReaderWrapper<E> extends AbstractRecordReader<E, ImmutableBytesWritable, Result> {
-    private final EntityMapper<E> entityMapper;
-
-    public HBaseRecordReaderWrapper(RecordReader<ImmutableBytesWritable, Result> delegate,
-        EntityMapper<E> entityMapper) {
-      super(delegate);
-      this.entityMapper = entityMapper;
-    }
-
-    public E getCurrentKey() throws IOException, InterruptedException {
-      return entityMapper.mapToEntity(delegate.getCurrentValue());
-    }
-  }
 }

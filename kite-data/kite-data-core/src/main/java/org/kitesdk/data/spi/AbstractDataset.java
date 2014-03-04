@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi;
 
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
@@ -89,6 +90,10 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefineableView<E
   public RefineableView<E> toBefore(String name, Comparable value) {
     Conversions.checkTypeConsistency(getDescriptor(), name, value);
     return asRefineableView().toBefore(name, value);
+  }
+
+  public InputFormat<E, Void> getDelegateInputFormat() {
+    throw new UnsupportedOperationException("No delegate input format defined.");
   }
 
 }
