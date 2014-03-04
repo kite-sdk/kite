@@ -14,6 +14,8 @@ Version 0.12.0 has the following notable changes:
     * Added a command that ignores all input records beyond the N-th record, akin to the Unix head command: [head](kite-morphlines/morphlinesReferenceGuide.html#head)
     * Improved morphline import performance if all commands are specified via fully qualified class names.
     * Added several performance enhancements.
+    * Added an [example module](https://github.com/kite-sdk/kite-examples/tree/master/kite-examples-morphlines) that describes how to unit test Morphline config files and custom Morphline commands.
+    * Improved documentation.
 
 ## Version 0.11.0
 
