@@ -56,7 +56,7 @@ public class CrunchDatasets {
    * filesystem-based.
    */
   @SuppressWarnings("unchecked")
-  public static <E extends IndexedRecord> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
+  public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
     Path directory = Accessor.getDefault().getDirectory(dataset);
     if (directory != null) {
       List<Path> paths = Lists.newArrayList(
@@ -70,7 +70,7 @@ public class CrunchDatasets {
       }
       final Format format = dataset.getDescriptor().getFormat();
       if (Formats.PARQUET.equals(format)) {
-        return new AvroParquetFileSource<E>(paths, avroType);
+        return new AvroParquetFileSource(paths, avroType);
       } else if (Formats.AVRO.equals(format)) {
         return new AvroFileSource<E>(paths, avroType);
       } else {
