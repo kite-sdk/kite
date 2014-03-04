@@ -35,7 +35,7 @@ Also, to pull in the minimum set of dependencies add the following dependency to
 <dependency>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-core</artifactId>
-  <version>0.11.0</version> <!-- or whatever the latest version is -->
+  <version>0.12.0</version> <!-- or whatever the latest version is -->
 </dependency>
 {code}
 
@@ -45,7 +45,7 @@ Alternatively, to pull in the maximum set of dependencies (i.e. all available co
 <dependency>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-morphlines-all</artifactId>
-  <version>0.11.0</version> <!-- or whatever the latest version is -->
+  <version>0.12.0</version> <!-- or whatever the latest version is -->
   <type>pom</type>
 </dependency>
 {code}
@@ -243,7 +243,7 @@ For effective rapid and reliable iterative development of morphline config files
   <artifactId>kite-morphlines-core</artifactId>
   <type>test-jar</type>
   <scope>test</scope>
-  <version>0.11.0</version> <!-- or whatever the latest version is -->
+  <version>0.12.0</version> <!-- or whatever the latest version is -->
 </dependency>
 {code}
 
