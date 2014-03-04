@@ -128,14 +128,14 @@ public abstract class AbstractCommand implements Command {
   
   @Override
   public final void notify(Record notification) {
-    if (isMeasuringMetrics()) {
-      numNotifyCallsMeter.mark();
-    }
     beforeNotify(notification);
     doNotify(notification);
   }
 
   private void beforeNotify(Record notification) {
+    if (isMeasuringMetrics()) {
+      numNotifyCallsMeter.mark();
+    }
     if (LOG.isTraceEnabled()) {    
       LOG.trace("beforeNotify: {}", notification);
     } else {
@@ -152,9 +152,6 @@ public abstract class AbstractCommand implements Command {
   
   @Override
   public final boolean process(Record record) {
-    if (isMeasuringMetrics()) {
-      numProcessCallsMeter.mark();
-    }
     beforeProcess(record);
     boolean success = doProcess(record);
     if (!success) {
@@ -164,6 +161,9 @@ public abstract class AbstractCommand implements Command {
   }
   
   private void beforeProcess(Record record) {
+    if (isMeasuringMetrics()) {
+      numProcessCallsMeter.mark();
+    }
     if (LOG.isTraceEnabled()) {    
       LOG.trace("beforeProcess: {}", record);      
     } else {

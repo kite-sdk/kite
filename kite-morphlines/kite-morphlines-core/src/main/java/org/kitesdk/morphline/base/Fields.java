@@ -20,7 +20,6 @@ package org.kitesdk.morphline.base;
  */
 public final class Fields {
 
-  // logstash conventions:
   public static final String ID = "id";
   public static final String BASE_ID = "base_id";
   public static final String TIMESTAMP = "timestamp";
