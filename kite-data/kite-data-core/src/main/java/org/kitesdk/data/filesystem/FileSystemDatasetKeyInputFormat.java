@@ -50,14 +50,12 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
     Job job = new Job(jobContext.getConfiguration());
     Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
-      List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(dataset));
-      FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
+      setInputPaths(jobContext, job);
       AvroJob.setInputKeySchema(job, dataset.getDescriptor().getSchema());
       AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
       return delegate.getSplits(jobContext);
     } else if (Formats.PARQUET.equals(format)) {
-      List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(dataset));
-      AvroParquetInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
+      setInputPaths(jobContext, job);
       // TODO: use later version of parquet (with https://github.com/Parquet/parquet-mr/pull/282) so we can set the schema correctly
       // AvroParquetInputFormat.setReadSchema(job, view.getDescriptor().getSchema());
       AvroParquetInputFormat delegate = new AvroParquetInputFormat();
@@ -66,6 +64,13 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
       throw new UnsupportedOperationException(
           "Not a supported format: " + format);
     }
+  }
+
+  private void setInputPaths(JobContext jobContext, Job job) throws IOException {
+    List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(dataset));
+    FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
+    // the following line is needed for Hadoop 1, otherwise the paths are not set
+    jobContext.getConfiguration().set("mapred.input.dir", job.getConfiguration().get("mapred.input.dir"));
   }
 
   @Override

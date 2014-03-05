@@ -84,7 +84,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     if (dataset instanceof AbstractDataset) {
       delegate = ((AbstractDataset<E>) dataset).getDelegateInputFormat();
     } else {
-      throw new UnsupportedOperationException("No input format for dataset " + dataset);
+      throw new UnsupportedOperationException("Incompatible Dataset: implementation " +
+          "does not provide InputFormat support. Dataset: " + dataset);
     }
   }
 

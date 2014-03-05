@@ -59,6 +59,8 @@ class HBaseDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
   public RecordReader<E, Void> createRecordReader(InputSplit inputSplit,
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     TableInputFormat delegate = new TableInputFormat();
+    String tableName = HBaseMetadataProvider.getTableName(dataset.getName());
+    taskAttemptContext.getConfiguration().set(TableInputFormat.INPUT_TABLE, tableName);
     delegate.setConf(taskAttemptContext.getConfiguration());
     return new HBaseRecordReaderWrapper<E>(
         delegate.createRecordReader(inputSplit, taskAttemptContext), entityMapper);
