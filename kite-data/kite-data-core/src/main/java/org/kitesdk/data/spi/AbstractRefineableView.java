@@ -80,25 +80,10 @@ public abstract class AbstractRefineableView<E> implements RefineableView<E> {
     return dataset;
   }
 
-  /**
-   * Deletes the data in this {@link View} or throws an {@code Exception}.
-   *
-   * Implementations may choose to throw {@link UnsupportedOperationException}
-   * for deletes that cannot be easily satisfied by the implementation. For
-   * example, in a partitioned {@link Dataset}, the implementation may reject
-   * deletes that do not align with partition boundaries. Implementations must
-   * document what deletes are supported and under what conditions deletes will
-   * be rejected.
-   *
-   * @return true if any data was deleted; false if the view was already empty
-   * @throws UnsupportedOperationException
-   *          If the requested delete cannot be completed by the implementation
-   * @throws org.kitesdk.data.DatasetIOException
-   *          If the requested delete failed because of an IOException
-   */
+  @Override
   public boolean deleteAll() {
     throw new UnsupportedOperationException(
-        "This Dataset does not support deletion");
+        "This Dataset does not support bulk deletion");
   }
 
   /**

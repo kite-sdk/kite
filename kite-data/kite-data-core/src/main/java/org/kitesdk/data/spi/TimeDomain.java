@@ -144,8 +144,7 @@ public class TimeDomain {
   private class TimeRangePredicate extends TimeRangePredicateImpl {
     private TimeRangePredicate(Range<Long> timeRange) {
       // adjust the range end-points if exclusive to avoid extra partitions
-      super(Predicates.adjustClosed(timeRange, DiscreteDomains.longs()),
-          true /* accept end-points */ );
+      super(timeRange, true /* accept end-points */ );
     }
   }
 
@@ -163,25 +162,39 @@ public class TimeDomain {
    * A common implementation class for time-based range predicates.
    */
   private class TimeRangePredicateImpl implements Predicate<Marker> {
-    private final boolean hasLower;
-    private final boolean hasUpper;
-    private final long lower;
-    private final long upper;
+    private final Range<Long> range;
+    private final String[] names;
+    private final int[] lower;
+    private final int[] upper;
     private final boolean acceptEqual;
 
     private TimeRangePredicateImpl(Range<Long> timeRange, boolean acceptEqual) {
+      this.range = Predicates.adjustClosed(timeRange, DiscreteDomains.longs());
       this.acceptEqual = acceptEqual;
-      this.hasLower = timeRange.hasLowerBound();
-      if (hasLower) {
-        this.lower = timeRange.lowerEndpoint();
-      } else {
-        this.lower = 0;
+
+      int length = partitioners.size();
+      this.names = new String[length];
+      for (int i = 0; i < length; i += 1) {
+        names[i] = partitioners.get(i).getName();
       }
-      this.hasUpper = timeRange.hasUpperBound();
-      if (hasUpper) {
-        this.upper = timeRange.upperEndpoint();
+
+      if (range.hasLowerBound()) {
+        long start = range.lowerEndpoint() - (acceptEqual ? 0 : 1);
+        this.lower = new int[length];
+        for (int i = 0; i < length; i += 1) {
+          lower[i] = partitioners.get(i).apply(start);
+        }
       } else {
-        this.upper = 0;
+        this.lower = new int[0];
+      }
+      if (range.hasUpperBound()) {
+        long stop = range.upperEndpoint() + (acceptEqual ? 0 : 1);
+        this.upper = new int[length];
+        for (int i = 0; i < length; i += 1) {
+          upper[i] = partitioners.get(i).apply(stop);
+        }
+      } else {
+        this.upper = new int[0];
       }
     }
 
@@ -191,24 +204,23 @@ public class TimeDomain {
         return false;
       }
       boolean returnVal = true; // no bounds => accept
-      if (hasLower) {
-        returnVal = checkLower(key, lower);
+      if (lower.length > 0) {
+        returnVal = checkLower(key);
       }
-      if (returnVal && hasUpper) {
-        returnVal = checkUpper(key, upper);
+      if (returnVal && upper.length > 0) {
+        returnVal = checkUpper(key);
       }
       return returnVal;
     }
 
-    private boolean checkLower(Marker key, long timestamp) {
-      for (CalendarFieldPartitioner calField : partitioners) {
-        int value = (Integer) key.get(calField.getName());
-        int lower = calField.apply(timestamp);
-        if (value < lower) {
+    private boolean checkLower(Marker key) {
+      for (int i = 0; i < names.length; i += 1) {
+        int value = (Integer) key.get(names[i]);
+        if (value < lower[i]) {
           // strictly within range, so all other levels must be
           // example: 2013-4-10 to 2013-10-4 => 4 < month < 10 => accept
           return false;
-        } else if (value > lower) {
+        } else if (value > lower[i]) {
           // falls out of the range at this level
           return true;
         }
@@ -218,14 +230,13 @@ public class TimeDomain {
       return acceptEqual;
     }
 
-    private boolean checkUpper(Marker key, long timestamp) {
+    private boolean checkUpper(Marker key) {
       // same as checkLower, see comments there
-      for (CalendarFieldPartitioner calField : partitioners) {
-        int value = (Integer) key.get(calField.getName());
-        int upper = calField.apply(timestamp);
-        if (value > upper) {
+      for (int i = 0; i < names.length; i += 1) {
+        int value = (Integer) key.get(names[i]);
+        if (value > upper[i]) {
           return false;
-        } else if (value < upper) {
+        } else if (value < upper[i]) {
           return true;
         }
       }
@@ -233,12 +244,63 @@ public class TimeDomain {
     }
 
     @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null || !(obj instanceof TimeRangePredicateImpl)) {
+        return false;
+      }
+      TimeRangePredicateImpl that = (TimeRangePredicateImpl) obj;
+      if (!range.equals(that.range)) {
+        return false;
+      }
+      // both permissive or both strict
+      if (this.acceptEqual == that.acceptEqual) {
+        return true;
+      }
+      // one is strict and the other permissive. the only time the two agree is
+      // when the range aligns with a boundary in the partitions. we can detect
+      // a boundary when the values differ for the same range.
+      if (lower.length > 0) {
+        boolean differ = false;
+        for (int i = 0; i < lower.length; i += 1) {
+          if (lower[i] != that.lower[i]) {
+            differ = true;
+            break;
+          }
+        }
+        if (!differ) {
+          return false;
+        }
+      }
+      if (upper.length > 0) {
+        boolean differ = false;
+        for (int i = 0; i < upper.length; i += 1) {
+          if (upper[i] != that.upper[i]) {
+            differ = true;
+            break;
+          }
+        }
+        if (!differ) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(range, acceptEqual);
+    }
+
+    @Override
     public String toString() {
       Objects.ToStringHelper helper = Objects.toStringHelper(this);
-      if (hasLower) {
+      if (lower.length > 0) {
         helper.add("lower", lower);
       }
-      if (hasUpper) {
+      if (upper.length > 0) {
         helper.add("upper", upper);
       }
       return helper.toString();

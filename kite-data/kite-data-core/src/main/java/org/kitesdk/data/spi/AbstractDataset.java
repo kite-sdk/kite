@@ -96,4 +96,10 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefineableView<E
     throw new UnsupportedOperationException("No delegate input format defined.");
   }
 
+  @Override
+  public boolean deleteAll() {
+    throw new UnsupportedOperationException(
+        "This Dataset does not support bulk deletion");
+  }
+
 }
