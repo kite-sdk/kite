@@ -16,6 +16,7 @@
 package org.kitesdk.data.hbase;
 
 import com.google.common.base.Preconditions;
+import java.io.IOException;
 import java.net.URI;
 import org.apache.hadoop.hbase.HConstants;
 import org.kitesdk.data.DatasetDescriptor;
@@ -178,6 +179,9 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
         throw new DatasetRepositoryException(
             "Problem creating HBaseDatasetRepository.", e);
       } catch (ZooKeeperConnectionException e) {
+        throw new DatasetRepositoryException(
+            "Problem creating HBaseDatasetRepository.", e);
+      } catch (IOException e) {
         throw new DatasetRepositoryException(
             "Problem creating HBaseDatasetRepository.", e);
       }

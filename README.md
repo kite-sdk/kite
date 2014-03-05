@@ -56,3 +56,23 @@ repository at [https://github.com/kite-sdk/kite-examples](https://github.com/kit
 Kite is provided under the Apache Software License 2.0. See the file
 `LICENSE.txt` for more information.
 
+## Building
+
+To build using the default CDH dependencies use
+
+```
+mvn install
+```
+
+For Hadoop 2:
+
+```
+mvn install -Dhadoop.profile=2
+```
+
+For Hadoop 1:
+
+```
+mvn install -Dhadoop.profile=1 -Dthrift.version=0.9.0
+```
+

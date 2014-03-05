@@ -174,31 +174,33 @@ public class AvroEntityMapperTest {
     
     Put put = entityMapper.mapFromEntity(record).getPut();
 
-    List<KeyValue> field1 = put.get(stringToBytes("int"), stringToBytes("1"));
+    // Careful to support both KeyValue (from HBase 0.94) and Cell (from 0.96) in the
+    // rest of this method
+    List field1 = put.get(stringToBytes("int"), stringToBytes("1"));
     assertEquals(1, field1.size());
     assertArrayEquals(new byte[] { (byte) 0, (byte) 0, (byte) 0, (byte) 1 },
-        field1.get(0).getValue());
+        ((KeyValue) field1.get(0)).getValue());
 
-    List<KeyValue> field2 = put.get(stringToBytes("int"), stringToBytes("2"));
+    List field2 = put.get(stringToBytes("int"), stringToBytes("2"));
     assertEquals(1, field2.size());
     assertArrayEquals(new byte[] { (byte) 0, (byte) 0, (byte) 0, (byte) 2 },
-        field2.get(0).getValue());
+        ((KeyValue) field2.get(0)).getValue());
 
-    Map<byte[], List<KeyValue>> famMap = put.getFamilyMap();
+    Map famMap = put.getFamilyMap();
     assertArrayEquals(
-        concat(new byte[] { (byte) 14 }, stringToBytes("string3")),
-        famMap.get(stringToBytes("map")).get(0).getValue());
+        concat(new byte[]{(byte) 14}, stringToBytes("string3")),
+        ((KeyValue) ((List) famMap.get(stringToBytes("map"))).get(0)).getValue());
     assertArrayEquals(
-        concat(new byte[] { (byte) 14 }, stringToBytes("string2")),
-        famMap.get(stringToBytes("map")).get(1).getValue());
+        concat(new byte[]{(byte) 14}, stringToBytes("string2")),
+        ((KeyValue) ((List) famMap.get(stringToBytes("map"))).get(1)).getValue());
     assertArrayEquals(
-        concat(new byte[] { (byte) 14 }, stringToBytes("string1")),
-        famMap.get(stringToBytes("map")).get(2).getValue());
+        concat(new byte[]{(byte) 14}, stringToBytes("string1")),
+        ((KeyValue) ((List) famMap.get(stringToBytes("map"))).get(2)).getValue());
 
-    assertArrayEquals(new byte[] { 0x02 }, famMap.get(stringToBytes("record"))
-        .get(0).getValue());
-    assertArrayEquals(new byte[] { 0x04 }, famMap.get(stringToBytes("record"))
-        .get(1).getValue());
+    assertArrayEquals(new byte[]{0x02},
+        ((KeyValue) ((List) famMap.get(stringToBytes("record"))).get(0)).getValue());
+    assertArrayEquals(new byte[]{0x04},
+        ((KeyValue) ((List) famMap.get(stringToBytes("record"))).get(1)).getValue());
   }
 
   private byte[] stringToBytes(String str) throws UnsupportedEncodingException {
