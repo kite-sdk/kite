@@ -9,6 +9,9 @@ Release date: TBD
 
 Version 0.12.0 has the following notable changes:
 
+* Views API. There is an incompatible change in this release: RefineableView in the
+  org.kitesdk.data package has been renamed to RefinableView (no 'e'). Clients should
+  update and recompile.
 * Morphlines Library
     * Added a sampling command that forwards each input record with a given probability to its child command: [sample](kite-morphlines/morphlinesReferenceGuide.html#sample)
     * Added a command that ignores all input records beyond the N-th record, akin to the Unix head command: [head](kite-morphlines/morphlinesReferenceGuide.html#head)

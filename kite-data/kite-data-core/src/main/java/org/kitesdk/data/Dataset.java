@@ -46,7 +46,7 @@ import javax.annotation.concurrent.Immutable;
  * @see Schema
  */
 @Immutable
-public interface Dataset<E> extends RefineableView<E> {
+public interface Dataset<E> extends RefinableView<E> {
 
   /**
    * Get the name of a {@code Dataset}. No guarantees about the format of this

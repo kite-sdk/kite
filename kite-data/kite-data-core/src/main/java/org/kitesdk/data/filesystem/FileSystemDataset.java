@@ -25,7 +25,7 @@ import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.RefineableView;
+import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.FieldPartitioner;
@@ -134,7 +134,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeable<FileS
   }
 
   @Override
-  protected RefineableView<E> asRefineableView() {
+  protected RefinableView<E> asRefinableView() {
     return unbounded;
   }
 

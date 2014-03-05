@@ -18,16 +18,16 @@ package org.kitesdk.data;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * A {@code RefineableView} specifies a subset of a {@link Dataset} by one or more
+ * A {@code RefinableView} specifies a subset of a {@link Dataset} by one or more
  * logical constraints.
  *
  * @param <E>
  *      The type of entities stored in the {@code Dataset} underlying this
- *      {@code RefineableView}.
+ *      {@code RefinableView}.
  * @since 0.11.0
  */
 @Immutable
-public interface RefineableView<E> extends View<E> {
+public interface RefinableView<E> extends View<E> {
 
   /**
    * Creates a sub-{@code View}, restricted to entities whose <code>name</code> field is
@@ -38,7 +38,7 @@ public interface RefineableView<E> extends View<E> {
    * @param name the field name of the entity
    * @return the restricted view
    */
-  RefineableView<E> with(String name, Object... values);
+  RefinableView<E> with(String name, Object... values);
 
   /**
    * Creates a sub-{@code View}, restricted to entities whose <code>name</code> field
@@ -47,7 +47,7 @@ public interface RefineableView<E> extends View<E> {
    * @param name the field name of the entity
    * @return the restricted view
    */
-  RefineableView<E> from(String name, Comparable value);
+  RefinableView<E> from(String name, Comparable value);
 
   /**
    * Creates a sub-{@code View}, restricted to entities whose <code>name</code> field
@@ -56,7 +56,7 @@ public interface RefineableView<E> extends View<E> {
    * @param name the field name of the entity
    * @return the restricted view
    */
-  RefineableView<E> fromAfter(String name, Comparable value);
+  RefinableView<E> fromAfter(String name, Comparable value);
 
   /**
    * Creates a sub-{@code View}, restricted to entities whose <code>name</code> field
@@ -65,7 +65,7 @@ public interface RefineableView<E> extends View<E> {
    * @param name the field name of the entity
    * @return the restricted view
    */
-  RefineableView<E> to(String name, Comparable value);
+  RefinableView<E> to(String name, Comparable value);
 
   /**
    * Creates a sub-{@code View}, restricted to entities whose <code>name</code> field
@@ -74,6 +74,6 @@ public interface RefineableView<E> extends View<E> {
    * @param name the field name of the entity
    * @return the restricted view
    */
-  RefineableView<E> toBefore(String name, Comparable value);
+  RefinableView<E> toBefore(String name, Comparable value);
 
 }

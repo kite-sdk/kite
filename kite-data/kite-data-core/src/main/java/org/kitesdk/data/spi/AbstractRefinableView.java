@@ -23,7 +23,7 @@ import com.google.common.base.Objects;
 
 import javax.annotation.concurrent.Immutable;
 
-import org.kitesdk.data.RefineableView;
+import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.View;
 
 /**
@@ -35,7 +35,7 @@ import org.kitesdk.data.View;
  * @since 0.9.0
  */
 @Immutable
-public abstract class AbstractRefineableView<E> implements RefineableView<E> {
+public abstract class AbstractRefinableView<E> implements RefinableView<E> {
 
   protected final Dataset<E> dataset;
   protected final MarkerComparator comparator;
@@ -45,7 +45,7 @@ public abstract class AbstractRefineableView<E> implements RefineableView<E> {
   // This class is Immutable and must be thread-safe
   protected final ThreadLocal<StorageKey> keys;
 
-  protected AbstractRefineableView(Dataset<E> dataset) {
+  protected AbstractRefinableView(Dataset<E> dataset) {
     this.dataset = dataset;
     final DatasetDescriptor descriptor = dataset.getDescriptor();
     if (descriptor.isPartitioned()) {
@@ -64,7 +64,7 @@ public abstract class AbstractRefineableView<E> implements RefineableView<E> {
     this.entityTest = constraints.toEntityPredicate();
   }
 
-  protected AbstractRefineableView(AbstractRefineableView<E> view, Constraints constraints) {
+  protected AbstractRefinableView(AbstractRefinableView<E> view, Constraints constraints) {
     this.dataset = view.dataset;
     this.comparator = view.comparator;
     this.constraints = constraints;
@@ -73,7 +73,7 @@ public abstract class AbstractRefineableView<E> implements RefineableView<E> {
     this.keys = view.keys;
   }
 
-  protected abstract AbstractRefineableView<E> filter(Constraints c);
+  protected abstract AbstractRefinableView<E> filter(Constraints c);
 
   @Override
   public Dataset<E> getDataset() {
@@ -119,31 +119,31 @@ public abstract class AbstractRefineableView<E> implements RefineableView<E> {
   }
 
   @Override
-  public AbstractRefineableView<E> with(String name, Object... values) {
+  public AbstractRefinableView<E> with(String name, Object... values) {
     Conversions.checkTypeConsistency(dataset.getDescriptor(), name, values);
     return filter(constraints.with(name, values));
   }
 
   @Override
-  public AbstractRefineableView<E> from(String name, Comparable value) {
+  public AbstractRefinableView<E> from(String name, Comparable value) {
     Conversions.checkTypeConsistency(dataset.getDescriptor(), name, value);
     return filter(constraints.from(name, value));
   }
 
   @Override
-  public AbstractRefineableView<E> fromAfter(String name, Comparable value) {
+  public AbstractRefinableView<E> fromAfter(String name, Comparable value) {
     Conversions.checkTypeConsistency(dataset.getDescriptor(), name, value);
     return filter(constraints.fromAfter(name, value));
   }
 
   @Override
-  public AbstractRefineableView<E> to(String name, Comparable value) {
+  public AbstractRefinableView<E> to(String name, Comparable value) {
     Conversions.checkTypeConsistency(dataset.getDescriptor(), name, value);
     return filter(constraints.to(name, value));
   }
 
   @Override
-  public AbstractRefineableView<E> toBefore(String name, Comparable value) {
+  public AbstractRefinableView<E> toBefore(String name, Comparable value) {
     Conversions.checkTypeConsistency(dataset.getDescriptor(), name, value);
     return filter(constraints.toBefore(name, value));
   }
@@ -158,7 +158,7 @@ public abstract class AbstractRefineableView<E> implements RefineableView<E> {
       return false;
     }
 
-    AbstractRefineableView that = (AbstractRefineableView) o;
+    AbstractRefinableView that = (AbstractRefinableView) o;
     return (Objects.equal(this.dataset, that.dataset) &&
         Objects.equal(this.constraints, that.constraints));
   }

@@ -82,7 +82,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
   protected FileSystem fs;
   protected PartitionStrategy strategy = null;
   protected DatasetDescriptor testDescriptor = null;
-  protected RefineableView<StandardEvent> unbounded = null;
+  protected RefinableView<StandardEvent> unbounded = null;
 
   @Before
   public void setup() throws Exception {
@@ -175,7 +175,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
   public void testLimitedWriter() {
     long start = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
     long end = new DateTime(2013, 11, 14, 0, 0, DateTimeZone.UTC).getMillis();
-    final RefineableView<StandardEvent> range = unbounded
+    final RefinableView<StandardEvent> range = unbounded
         .from("timestamp", start).toBefore("timestamp", end);
 
     DatasetWriter<StandardEvent> writer = range.newWriter();
@@ -218,7 +218,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
 
   @Test
   public void testLimitedWriterForNonPartitionedField() {
-    final RefineableView<StandardEvent> view = unbounded.with("user_id", 0L);
+    final RefinableView<StandardEvent> view = unbounded.with("user_id", 0L);
 
     DatasetWriter<StandardEvent> writer = view.newWriter();
     try {
@@ -250,7 +250,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
     long instant = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
     long later = instant + 1;
     final long earlier = instant - 1;
-    final RefineableView<StandardEvent> fromOctober =
+    final RefinableView<StandardEvent> fromOctober =
         unbounded.from("timestamp", instant);
 
     // test events
@@ -326,7 +326,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
     final long instant = new DateTime(2013, 9, 30, 12, 59, 59, 999, DateTimeZone.UTC).getMillis();
     long later = instant + 1;
     final long earlier = instant - 1;
-    final RefineableView<StandardEvent> afterSep =
+    final RefinableView<StandardEvent> afterSep =
         unbounded.fromAfter("timestamp", instant);
 
     // test events
@@ -407,7 +407,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
     final long instant = new DateTime(2013, 9, 30, 12, 59, 59, 999, DateTimeZone.UTC).getMillis();
     final long later = instant + 1;
     long earlier = instant - 1;
-    final RefineableView<StandardEvent> toOct =
+    final RefinableView<StandardEvent> toOct =
         unbounded.to("timestamp", instant);
 
     // test events
@@ -483,7 +483,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
     final long instant = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
     final long later = instant + 1;
     long earlier = instant - 1;
-    final RefineableView<StandardEvent> beforeOct =
+    final RefinableView<StandardEvent> beforeOct =
         unbounded.toBefore("timestamp", instant);
 
     // test events
@@ -564,7 +564,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
     final long instant = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
     final long later = instant + 1;
     final long earlier = instant - 1;
-    final RefineableView<StandardEvent> withSpecificTimestamp =
+    final RefinableView<StandardEvent> withSpecificTimestamp =
         unbounded.with("timestamp", instant);
 
     Assert.assertNotNull("from(same instant) should succeed",
@@ -618,7 +618,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
     final long later = end + 1;
     final long earlier = start - 1;
     long included = octEvent.getTimestamp();
-    final RefineableView<StandardEvent> oct = unbounded
+    final RefinableView<StandardEvent> oct = unbounded
         .from("timestamp", start).to("timestamp", end);
 
     // test events
