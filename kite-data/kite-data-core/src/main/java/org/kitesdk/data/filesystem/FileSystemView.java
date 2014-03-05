@@ -22,7 +22,7 @@ import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.spi.AbstractRefineableView;
+import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.StorageKey;
@@ -35,12 +35,12 @@ import java.io.IOException;
 
 /**
  * FileSystem implementation of a {@link org.kitesdk.data.spi.Constraints}-based
- * {@link org.kitesdk.data.RefineableView}.
+ * {@link org.kitesdk.data.RefinableView}.
  *
  * @param <E> The type of records read and written by this view.
  */
 @Immutable
-class FileSystemView<E> extends AbstractRefineableView<E> {
+class FileSystemView<E> extends AbstractRefinableView<E> {
 
   private final FileSystem fs;
   private final Path root;

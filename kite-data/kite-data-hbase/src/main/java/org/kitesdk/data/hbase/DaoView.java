@@ -25,14 +25,14 @@ import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.spi.AbstractRefineableView;
+import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.Marker;
 import org.kitesdk.data.spi.MarkerRange;
 import java.util.List;
 
-class DaoView<E> extends AbstractRefineableView<E> {
+class DaoView<E> extends AbstractRefinableView<E> {
 
   private final DaoDataset<E> dataset;
 
