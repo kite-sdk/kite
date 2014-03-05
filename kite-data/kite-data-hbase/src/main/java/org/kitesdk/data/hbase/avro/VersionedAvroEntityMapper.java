@@ -309,11 +309,11 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
     KeySerDe keySerDe = new KeySerDe() {
       @Override
       public byte[] serialize(PartitionKey partitionKey) {
-        return new byte[0];
+        return new byte[] { (byte) 0 }; // single 0 byte since HBase 2 requires length > 0
       }
       @Override
       public byte[] serialize(Object... keyPartValues) {
-        return new byte[0];
+        return new byte[] { (byte) 0 }; // single 0 byte since HBase 2 requires length > 0
       }
       @Override
       public PartitionKey deserialize(byte[] keyBytes) {

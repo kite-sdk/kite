@@ -110,6 +110,7 @@ public class TestMapReduceHBase {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testJob() throws Exception {
     Job job = new Job(HBaseTestUtils.getConf());
 

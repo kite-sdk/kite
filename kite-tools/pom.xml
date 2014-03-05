@@ -38,8 +38,6 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <compilerArgs>
-            <arg>-Werror</arg> <!-- fail on warnings -->
-            <arg>-Xlint:-options</arg> <!-- ignore cross-compilation warning -->
             <arg>-Xlint:unchecked</arg>
           </compilerArgs>
         </configuration>

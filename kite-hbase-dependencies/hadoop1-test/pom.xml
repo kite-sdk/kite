@@ -17,28 +17,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>kite-hadoop-deps-parent</artifactId>
+  <artifactId>kite-hbase1-test-dependencies</artifactId>
   <packaging>pom</packaging>
-
-  <modules>
-    <module>hadoop1</module>
-    <module>hadoop1-test</module>
-    <module>hadoop2</module>
-    <module>hadoop2-test</module>
-    <module>default</module>
-    <module>default-test</module>
-  </modules>
+  <version>0.12.2-SNAPSHOT</version>
 
   <parent>
     <groupId>org.kitesdk</groupId>
-    <artifactId>kite-parent</artifactId>
+    <artifactId>kite-hbase-deps-parent</artifactId>
     <version>0.12.2-SNAPSHOT</version>
   </parent>
 
-  <name>Kite Hadoop Dependencies Module</name>
+  <name>Kite HBase Hadoop-1 Test Dependencies Module</name>
   <description>
-    The Kite Hadoop Dependencies module aggregates Hadoop dependencies
+    The Kite HBase Dependencies module aggregates HBase Hadoop-1 dependencies
   </description>
+
+  <properties>
+    <vers.hadoop>1.2.1</vers.hadoop>
+  </properties>
 
   <build>
     <plugins>
@@ -63,5 +59,14 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.hbase</groupId>
+      <artifactId>hbase</artifactId>
+      <version>${vers.hbase1}</version>
+      <classifier>tests</classifier>
+    </dependency>
+  </dependencies>
 
 </project>

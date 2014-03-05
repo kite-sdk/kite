@@ -137,8 +137,9 @@
       <artifactId>oozie-client</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.hbase</groupId>
-      <artifactId>hbase</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${artifact.hbase-deps}</artifactId>
+      <type>pom</type>
       <scope>runtime</scope> <!-- plugin acts as a Hadoop container -->
     </dependency>
     <dependency>

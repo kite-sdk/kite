@@ -25,6 +25,7 @@
   <modules>
     <module>kite-hadoop-dependencies</module>
     <module>kite-hadoop-compatibility</module>
+    <module>kite-hbase-dependencies</module>
     <module>kite-data</module>
     <module>kite-maven-plugin</module>
     <module>kite-tools</module>
@@ -118,6 +119,8 @@
     <!-- artifacts that depend on profiles -->
     <artifact.hadoop-deps>kite-hadoop-dependencies</artifact.hadoop-deps>
     <artifact.hadoop-test-deps>kite-hadoop-test-dependencies</artifact.hadoop-test-deps>
+    <artifact.hbase-deps>kite-hbase-dependencies</artifact.hbase-deps>
+    <artifact.hbase-test-deps>kite-hbase-test-dependencies</artifact.hbase-test-deps>
 
     <!-- Library versions -->
     <vers.avro>1.7.5</vers.avro>
@@ -129,10 +132,13 @@
     <vers.flume>1.4.0-cdh${cdh.version}</vers.flume>
     <vers.guava>11.0.2</vers.guava>
     <vers.hadoop-deps>0.12.2-SNAPSHOT</vers.hadoop-deps> <!-- needs to be hardcoded, see CDK-363 -->
+    <vers.hbase-deps>0.12.2-SNAPSHOT</vers.hbase-deps> <!-- needs to be hardcoded, see CDK-363 -->
     <vers.hadoop>2.0.0-cdh${cdh.version}</vers.hadoop>
     <vers.hadoop-mr1>2.0.0-mr1-cdh${cdh.version}</vers.hadoop-mr1>
     <vers.hadoop1>1.2.1</vers.hadoop1>
     <vers.hbase>0.94.6-cdh${cdh.version}</vers.hbase>
+    <vers.hbase1>0.94.6</vers.hbase1>
+    <vers.hbase2>0.96.1.1-hadoop2</vers.hbase2>
     <vers.hcatalog>0.5.0-cdh${cdh.version}</vers.hcatalog>
     <vers.hive>0.10.0-cdh${cdh.version}</vers.hive>
     <vers.jetty>8.1.14.v20131031</vers.jetty>
@@ -685,6 +691,20 @@
         <version>${project.version}</version>
       </dependency>
 
+      <!-- HBase dependencies -->
+      <dependency>
+        <groupId>org.kitesdk</groupId>
+        <artifactId>${artifact.hbase-deps}</artifactId>
+        <version>${vers.hbase-deps}</version>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.kitesdk</groupId>
+        <artifactId>${artifact.hbase-test-deps}</artifactId>
+        <version>${vers.hbase-deps}</version>
+        <type>pom</type>
+        <scope>test</scope>
+      </dependency>
 
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -762,25 +782,6 @@
         <artifactId>avro</artifactId>
         <version>${vers.avro}</version>
       </dependency>
-      <dependency>
-        <groupId>org.apache.hbase</groupId>
-        <artifactId>hbase</artifactId>
-        <version>${vers.hbase}</version>
-        <scope>provided</scope>
-        <exclusions>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.hbase</groupId>
-        <artifactId>hbase</artifactId>
-        <version>${vers.hbase}</version>
-        <classifier>tests</classifier>
-        <scope>provided</scope>
-      </dependency>      
       <dependency>
         <groupId>org.apache.hcatalog</groupId>
         <artifactId>hcatalog-core</artifactId>
@@ -1061,10 +1062,31 @@
         <maven.main.skip>true</maven.main.skip>
         <artifact.hadoop-deps>kite-hadoop1-dependencies</artifact.hadoop-deps>
         <artifact.hadoop-test-deps>kite-hadoop1-test-dependencies</artifact.hadoop-test-deps>
+        <artifact.hbase-deps>kite-hbase1-dependencies</artifact.hbase-deps>
+        <artifact.hbase-test-deps>kite-hbase1-test-dependencies</artifact.hbase-test-deps>
         <vers.crunch>${vers.crunch-base}</vers.crunch>
         <vers.hcatalog>0.5.0-incubating</vers.hcatalog>
         <vers.hive>0.10.0</vers.hive>
-        <vers.hbase>0.94.6</vers.hbase>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>hadoop-2</id>
+      <activation>
+        <property>
+          <name>hadoop.profile</name>
+          <value>2</value>
+        </property>
+      </activation>
+      <properties>
+        <artifact.hadoop-deps>kite-hadoop2-dependencies</artifact.hadoop-deps>
+        <artifact.hadoop-test-deps>kite-hadoop2-test-dependencies</artifact.hadoop-test-deps>
+        <artifact.hbase-deps>kite-hbase2-dependencies</artifact.hbase-deps>
+        <artifact.hbase-test-deps>kite-hbase2-test-dependencies</artifact.hbase-test-deps>
+        <vers.flume>1.4.0</vers.flume>
+        <vers.hadoop>2.2.0</vers.hadoop>
+        <vers.hcatalog>0.5.0-incubating</vers.hcatalog>
+        <vers.hive>0.10.0</vers.hive>
       </properties>
     </profile>
 

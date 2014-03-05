@@ -120,6 +120,7 @@ public class TestMapReduce {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testJob() throws Exception {
     Job job = new Job();
 
