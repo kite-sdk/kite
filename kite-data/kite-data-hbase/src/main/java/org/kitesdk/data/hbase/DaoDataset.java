@@ -22,7 +22,7 @@ import org.kitesdk.data.Key;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.RandomAccessDataset;
-import org.kitesdk.data.RefineableView;
+import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.hbase.impl.Dao;
 import org.kitesdk.data.spi.AbstractDataset;
 
@@ -70,7 +70,7 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   }
 
   @Override
-  protected RefineableView<E> asRefineableView() {
+  protected RefinableView<E> asRefinableView() {
     return unbounded;
   }
 
