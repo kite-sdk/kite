@@ -41,7 +41,12 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
   private RangeDomain domain;
 
   public RangeFieldPartitioner(String name, String... upperBounds) {
-    super(name, name, String.class, String.class, upperBounds.length);
+    this(name, name + "_bound", upperBounds);
+  }
+
+  public RangeFieldPartitioner(String sourceName, String name,
+                               String... upperBounds) {
+    super(sourceName, name, String.class, String.class, upperBounds.length);
     this.upperBounds = Arrays.asList(upperBounds);
   }
 

@@ -31,7 +31,7 @@ public class IdentityFieldPartitioner<S extends Comparable> extends
    */
   @Deprecated
   public IdentityFieldPartitioner(String name, Class<S> type, int buckets) {
-    super(name, type, buckets);
+    super(name, name + "_copy", type, buckets);
   }
 
   @Override

@@ -26,24 +26,24 @@ import org.kitesdk.data.PartitionStrategy;
 
 public class TestKeyRangeIterable {
   public static final PartitionStrategy id = new PartitionStrategy.Builder()
-      .identity("component", String.class, 50)
+      .identity("component", "id_component", String.class, 50)
       .build();
   public static final MarkerComparator idCmp = new MarkerComparator(id);
 
   public static final PartitionStrategy hash = new PartitionStrategy.Builder()
-      .hash("id", "id-hash", 64)
-      .identity("id", String.class, 50)
+      .hash("id", "id_hash", 64)
+      .identity("id", "id_copy", String.class, 50)
       .build();
   public static final MarkerComparator hashCmp = new MarkerComparator(hash);
 
   public static final PartitionStrategy num = new PartitionStrategy.Builder()
-      .identity("number", Integer.class, 50)
+      .identity("number", "id_number", Integer.class, 50)
       .build();
   public static final MarkerComparator numCmp = new MarkerComparator(num);
 
   public static final PartitionStrategy num2 = new PartitionStrategy.Builder()
-      .identity("number", Integer.class, 50)
-      .identity("number2", Integer.class, 50)
+      .identity("number", "id_number", Integer.class, 50)
+      .identity("number2", "id_number2", Integer.class, 50)
       .build();
   public static final MarkerComparator num2Cmp = new MarkerComparator(num2);
 
@@ -52,10 +52,10 @@ public class TestKeyRangeIterable {
   public static final MarkerComparator timeCmp = new MarkerComparator(time);
 
   public static final PartitionStrategy strategy = new PartitionStrategy.Builder()
-      .hash("id", "id-hash", 64)
+      .hash("id", "id_hash", 64)
       .year("timestamp").month("timestamp").day("timestamp")
-      .identity("component", String.class, 50)
-      .identity("id", String.class, 50)
+      .identity("component", "id_component", String.class, 50)
+      .identity("id", "id_copy", String.class, 50)
       .build();
   public static final MarkerComparator cmp = new MarkerComparator(strategy);
 
@@ -71,7 +71,7 @@ public class TestKeyRangeIterable {
   public void testSingleSet() {
     Constraints c = new Constraints().with("component", "com.company.Main");
 
-    Marker main = new Marker.Builder("component", "com.company.Main").build();
+    Marker main = new Marker.Builder("id_component", "com.company.Main").build();
     MarkerRange actual = Iterables.getOnlyElement(c.toKeyRanges(id));
     Assert.assertEquals(main, actual.getStart().getBound());
     Assert.assertEquals(main, actual.getEnd().getBound());
@@ -79,7 +79,7 @@ public class TestKeyRangeIterable {
 
     c = new Constraints().with("component",
         "com.company.Main", "com.company.SomeClass");
-    Marker sc = new Marker.Builder("component", "com.company.SomeClass").build();
+    Marker sc = new Marker.Builder("id_component", "com.company.SomeClass").build();
     assertIterableEquals(
         Sets.newHashSet(
             new MarkerRange(idCmp).of(main),
@@ -97,14 +97,14 @@ public class TestKeyRangeIterable {
     Constraints c = new Constraints().with("id", ids[0]);
 
     Marker marker0 = new Marker.Builder()
-        .add("id-hash", hashFunc.apply(ids[0])).add("id", ids[0]).build();
+        .add("id_hash", hashFunc.apply(ids[0])).add("id_copy", ids[0]).build();
     MarkerRange actual = Iterables.getOnlyElement(c.toKeyRanges(hash));
     Assert.assertEquals(marker0, actual.getStart().getBound());
     Assert.assertEquals(marker0, actual.getEnd().getBound());
 
     c = new Constraints().with("id", (Object[]) ids);
     Marker marker1 = new Marker.Builder()
-        .add("id-hash", hashFunc.apply(ids[1])).add("id", ids[1]).build();
+        .add("id_hash", hashFunc.apply(ids[1])).add("id_copy", ids[1]).build();
     assertIterableEquals(
         Sets.newHashSet(
             new MarkerRange(hashCmp).of(marker0),
@@ -117,8 +117,8 @@ public class TestKeyRangeIterable {
     Constraints c = new Constraints()
         .from("number", 5).toBefore("number", 18)
         .to("number2", 9);
-    Marker start = new Marker.Builder("number", 5).build();
-    Marker stop = new Marker.Builder().add("number", 18).add("number2", 9).build();
+    Marker start = new Marker.Builder("id_number", 5).build();
+    Marker stop = new Marker.Builder().add("id_number", 18).add("id_number2", 9).build();
 
     Assert.assertEquals(
         new MarkerRange(num2Cmp).from(start).to(stop),
@@ -129,8 +129,8 @@ public class TestKeyRangeIterable {
   public void testHashRange() {
     Constraints c = new Constraints().from("id", "0000").toBefore("id", "0001");
     // note the lack of a hash field -- ranges cannot be projected through hash
-    Marker start = new Marker.Builder("id", "0000").build();
-    Marker stop = new Marker.Builder("id", "0001").build();
+    Marker start = new Marker.Builder("id_copy", "0000").build();
+    Marker stop = new Marker.Builder("id_copy", "0001").build();
 
     Assert.assertEquals(
         new MarkerRange(hashCmp).from(start).to(stop),
@@ -140,8 +140,8 @@ public class TestKeyRangeIterable {
   @Test
   public void testGroupRange() {
     Constraints c = new Constraints().from("number", 5).toBefore("number", 18);
-    Marker start = new Marker.Builder("number", 5).build();
-    Marker stop = new Marker.Builder("number", 18).build();
+    Marker start = new Marker.Builder("id_number", 5).build();
+    Marker stop = new Marker.Builder("id_number", 18).build();
 
     Assert.assertEquals(
         new MarkerRange(numCmp).from(start).to(stop),
@@ -206,20 +206,20 @@ public class TestKeyRangeIterable {
     // first range
     Marker sep0 = new Marker.Builder()
         .add("year", 2013).add("month", 9).add("day", 12)
-        .add("id-hash", hashFunc.apply(ids[0])).add("id", ids[0])
+        .add("id_hash", hashFunc.apply(ids[0])).add("id_copy", ids[0])
         .build();
     Marker nov0 = new Marker.Builder()
         .add("year", 2013).add("month", 11).add("day", 11)
-        .add("id-hash", hashFunc.apply(ids[0])).add("id", ids[0])
+        .add("id_hash", hashFunc.apply(ids[0])).add("id_copy", ids[0])
         .build();
     // second range
     Marker sep1 = new Marker.Builder()
         .add("year", 2013).add("month", 9).add("day", 12)
-        .add("id-hash", hashFunc.apply(ids[1])).add("id", ids[1])
+        .add("id_hash", hashFunc.apply(ids[1])).add("id_copy", ids[1])
         .build();
     Marker nov1 = new Marker.Builder()
         .add("year", 2013).add("month", 11).add("day", 11)
-        .add("id-hash", hashFunc.apply(ids[1])).add("id", ids[1])
+        .add("id_hash", hashFunc.apply(ids[1])).add("id_copy", ids[1])
         .build();
     assertIterableEquals(Sets.newHashSet(
         new MarkerRange(cmp).from(sep0).to(nov0),
@@ -229,43 +229,43 @@ public class TestKeyRangeIterable {
     // more complication
     Marker sep2 = new Marker.Builder()
         .add("year", 2013).add("month", 9).add("day", 12)
-        .add("id-hash", hashFunc.apply(ids[0])).add("id", ids[0])
-        .add("component", "com.company.Main")
+        .add("id_hash", hashFunc.apply(ids[0])).add("id_copy", ids[0])
+        .add("id_component", "com.company.Main")
         .build();
     Marker nov2 = new Marker.Builder()
         .add("year", 2013).add("month", 11).add("day", 11)
-        .add("id-hash", hashFunc.apply(ids[0])).add("id", ids[0])
-        .add("component", "com.company.Main")
+        .add("id_hash", hashFunc.apply(ids[0])).add("id_copy", ids[0])
+        .add("id_component", "com.company.Main")
         .build();
     Marker sep3 = new Marker.Builder()
         .add("year", 2013).add("month", 9).add("day", 12)
-        .add("id-hash", hashFunc.apply(ids[1])).add("id", ids[1])
-        .add("component", "com.company.Main")
+        .add("id_hash", hashFunc.apply(ids[1])).add("id_copy", ids[1])
+        .add("id_component", "com.company.Main")
         .build();
     Marker nov3 = new Marker.Builder()
         .add("year", 2013).add("month", 11).add("day", 11)
-        .add("id-hash", hashFunc.apply(ids[1])).add("id", ids[1])
-        .add("component", "com.company.Main")
+        .add("id_hash", hashFunc.apply(ids[1])).add("id_copy", ids[1])
+        .add("id_component", "com.company.Main")
         .build();
     Marker sep4 = new Marker.Builder()
         .add("year", 2013).add("month", 9).add("day", 12)
-        .add("id-hash", hashFunc.apply(ids[0])).add("id", ids[0])
-        .add("component", "com.company.SomeClass")
+        .add("id_hash", hashFunc.apply(ids[0])).add("id_copy", ids[0])
+        .add("id_component", "com.company.SomeClass")
         .build();
     Marker nov4 = new Marker.Builder()
         .add("year", 2013).add("month", 11).add("day", 11)
-        .add("id-hash", hashFunc.apply(ids[0])).add("id", ids[0])
-        .add("component", "com.company.SomeClass")
+        .add("id_hash", hashFunc.apply(ids[0])).add("id_copy", ids[0])
+        .add("id_component", "com.company.SomeClass")
         .build();
     Marker sep5 = new Marker.Builder()
         .add("year", 2013).add("month", 9).add("day", 12)
-        .add("id-hash", hashFunc.apply(ids[1])).add("id", ids[1])
-        .add("component", "com.company.SomeClass")
+        .add("id_hash", hashFunc.apply(ids[1])).add("id_copy", ids[1])
+        .add("id_component", "com.company.SomeClass")
         .build();
     Marker nov5 = new Marker.Builder()
         .add("year", 2013).add("month", 11).add("day", 11)
-        .add("id-hash", hashFunc.apply(ids[1])).add("id", ids[1])
-        .add("component", "com.company.SomeClass")
+        .add("id_hash", hashFunc.apply(ids[1])).add("id_copy", ids[1])
+        .add("id_component", "com.company.SomeClass")
         .build();
     assertIterableEquals(Sets.newHashSet(
         new MarkerRange(cmp).from(sep2).to(nov2),

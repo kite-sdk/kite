@@ -18,6 +18,8 @@ package org.kitesdk.data.spi.partition;
 import java.util.List;
 import org.kitesdk.data.spi.FieldPartitioner;
 import com.google.common.annotations.Beta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convenience class so you can say, for example, <code>hash("username", 2)</code> in
@@ -25,6 +27,7 @@ import com.google.common.annotations.Beta;
  */
 @SuppressWarnings("unchecked")
 public class PartitionFunctions {
+  private static final Logger LOG = LoggerFactory.getLogger(PartitionFunctions.class);
 
   public static FieldPartitioner<Object, Integer> hash(String name, int buckets) {
     return new HashFieldPartitioner(name, buckets);
@@ -35,16 +38,27 @@ public class PartitionFunctions {
   }
 
   /**
-   * @deprecated Use {@link #identity(String, Class, int)}.
+   * @deprecated Use {@link #identity(String, String, int)}.
    */
   @Deprecated
   public static FieldPartitioner identity(String name, int buckets) {
-    return new IdentityFieldPartitioner(name, String.class, buckets);
+    // TODO: find out how to update old serialized strategies and add a warning
+    return new IdentityFieldPartitioner(name, name + "_copy", String.class, buckets);
   }
 
+  /**
+   * @deprecated Use {@link #identity(String, String, int)}
+   */
+  @Deprecated
   public static <S> FieldPartitioner<S, S> identity(String name, Class<S> type,
       int buckets) {
-    return new IdentityFieldPartitioner(name, type, buckets);
+    // TODO: find out how to update old serialized strategies and add a warning
+    // this probably isn't used because #toExpression doesn't use generate it
+    return new IdentityFieldPartitioner(name, name + "_copy", type, buckets);
+  }
+
+  public static FieldPartitioner identity(String sourceName, String name, int buckets) {
+    return new IdentityFieldPartitioner(sourceName, name, String.class, buckets);
   }
 
   @Beta
@@ -53,8 +67,18 @@ public class PartitionFunctions {
   }
 
   @Beta
+  public static FieldPartitioner<Integer, Integer> range(String sourceName, String name, int... upperBounds) {
+    return new IntRangeFieldPartitioner(sourceName, name, upperBounds);
+  }
+
+  @Beta
   public static FieldPartitioner<String, String> range(String name, String... upperBounds) {
     return new RangeFieldPartitioner(name, upperBounds);
+  }
+
+  @Beta
+  public static FieldPartitioner<String, String> range(String sourceName, String name, String... upperBounds) {
+    return new RangeFieldPartitioner(sourceName, name, upperBounds);
   }
 
   @Beta
@@ -94,7 +118,8 @@ public class PartitionFunctions {
       return String.format("hash(\"%s\", \"%s\", %s)", fieldPartitioner.getSourceName(),
           fieldPartitioner.getName(), fieldPartitioner.getCardinality());
     } else if (fieldPartitioner instanceof IdentityFieldPartitioner) {
-      return String.format("identity(\"%s\", %s)", fieldPartitioner.getName(),
+      return String.format("identity(\"%s\", \"%s\", %s)",
+          fieldPartitioner.getSourceName(), fieldPartitioner.getName(),
           fieldPartitioner.getCardinality());
     } else if (fieldPartitioner instanceof RangeFieldPartitioner) {
       List<String> upperBounds = ((RangeFieldPartitioner) fieldPartitioner)
@@ -109,7 +134,7 @@ public class PartitionFunctions {
         builder.append("\"").append(bound).append("\"");
       }
 
-      return String.format("range(\"%s\", %s", fieldPartitioner.getName(),
+      return String.format("range(\"%s\", %s)", fieldPartitioner.getName(),
           builder.toString());
     } else if (fieldPartitioner instanceof DateFormatPartitioner) {
       return String.format("dateFormat(\"%s\", \"%s\", \"%s\")",

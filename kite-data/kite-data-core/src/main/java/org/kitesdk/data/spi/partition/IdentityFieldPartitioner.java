@@ -27,8 +27,9 @@ import com.google.common.base.Objects;
 @Immutable
 public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartitioner<S, S> {
 
-  public IdentityFieldPartitioner(String name, Class<S> type, int buckets) {
-    super(name, name, type, type, buckets);
+  public IdentityFieldPartitioner(String sourceName, String name, Class<S> type,
+                                  int buckets) {
+    super(sourceName, name, type, type, buckets);
     if (!(type.equals(Integer.class) || type.equals(Long.class) ||
         type.equals(String.class))) {
       throw new IllegalArgumentException("Type not supported " + type);

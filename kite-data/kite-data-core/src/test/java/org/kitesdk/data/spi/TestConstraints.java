@@ -64,7 +64,7 @@ public class TestConstraints {
       .year("timestamp")
       .month("timestamp")
       .day("timestamp")
-      .identity("id", String.class, 100000)
+      .identity("id", "id_copy", String.class, 100000)
       .build();
 
   @Test
@@ -466,7 +466,7 @@ public class TestConstraints {
     PartitionStrategy strategy = new PartitionStrategy.Builder()
         .hash("color", "hash", 50)
         .year("created_at").month("created_at").day("created_at")
-        .identity("color", String.class, 50000)
+        .identity("color", "id_color", String.class, 50000)
         .build();
 
     StorageKey key = new StorageKey(strategy);
@@ -499,7 +499,7 @@ public class TestConstraints {
         .year("timestamp")
         .month("timestamp")
         .day("timestamp")
-        .identity("id", String.class, -1)
+        .identity("id", "id_copy", String.class, -1)
         .build();
 
     Constraints c = new Constraints().with("id", "a", "b", "c");

@@ -30,7 +30,8 @@ import org.kitesdk.data.spi.Predicates;
 public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
 
   public HashFieldPartitioner(String name, int buckets) {
-    super(name, name, Object.class, Integer.class, buckets);
+    // create a new field name from the source name
+    super(name, name + "_hash", Object.class, Integer.class, buckets);
   }
 
   public HashFieldPartitioner(String sourceName, String name, int buckets) {

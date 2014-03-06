@@ -183,7 +183,7 @@ public class TestPartitionerProjection {
   @Test
   public void testIdentityFieldPartitionerRangePredicate() {
     FieldPartitioner<String, String> fp =
-        new IdentityFieldPartitioner<String>("str", String.class, 50);
+        new IdentityFieldPartitioner<String>("str", "str_copy", String.class, 50);
     Range<String> r = Ranges.openClosed("a", "b");
     Assert.assertEquals(r, fp.project(r));
     Assert.assertEquals(r, fp.projectStrict(r));
@@ -192,7 +192,7 @@ public class TestPartitionerProjection {
   @Test
   public void testIdentityFieldPartitionerSetPredicate() {
     FieldPartitioner<String, String> fp =
-        new IdentityFieldPartitioner<String>("str", String.class, 50);
+        new IdentityFieldPartitioner<String>("str", "str_copy", String.class, 50);
     Predicates.In<String> s = Predicates.in("a", "b");
     Assert.assertEquals(s, fp.project(s));
     Assert.assertEquals(s, fp.projectStrict(s));
@@ -271,7 +271,7 @@ public class TestPartitionerProjection {
   @Test
   public void testRangeFieldPartitionerRangePredicate() {
     final FieldPartitioner<String, String> fp =
-        new RangeFieldPartitioner("str", "a", "b", "c");
+        new RangeFieldPartitioner("str", "str_bound", new String[]{"a", "b", "c"});
     // projected to sets because the range ["a", "b"] includes "aa", etc.
     Assert.assertEquals(Predicates.in("a"),
         fp.project(Ranges.atMost("a")));
@@ -312,7 +312,7 @@ public class TestPartitionerProjection {
   @Test
   public void testRangeFieldPartitionerSetPredicate() {
     final FieldPartitioner<String, String> fp =
-        new RangeFieldPartitioner("str", "a", "b", "c");
+        new RangeFieldPartitioner("str", new String[]{"a", "b", "c"});
     Assert.assertEquals(Predicates.in("a"), fp.project(Predicates.in("0")));
     Assert.assertEquals(Predicates.in("a"), fp.project(Predicates.in("a")));
     Assert.assertEquals(Predicates.in("b"), fp.project(Predicates.in("aa")));
