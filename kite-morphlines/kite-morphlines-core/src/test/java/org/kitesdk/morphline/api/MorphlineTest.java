@@ -1914,6 +1914,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
   // via log4j.logger.org.kitesdk.morphline=INFO in log4j.properties
   public void benchmark() throws Exception {
     String morphlineConfigFile = "test-morphlines/readCSVWithoutQuoting";
+    //String morphlineConfigFile = "test-morphlines/readCSVWithoutQuotingUsingSplit";
     //String morphlineConfigFile = "test-morphlines/grokEmail";
     //String morphlineConfigFile = "test-morphlines/grokSyslogNgCisco";
     long durationSecs = 20;
