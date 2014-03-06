@@ -77,4 +77,23 @@ public interface View<E> {
    */
   boolean includes(E entity);
 
+  /**
+   * Deletes the entities included in this {@link View} or throws an
+   * {@link UnsupportedOperationException}.
+   *
+   * Implementations are allowed to throw {@code UnsupportedOperationException}
+   * if the {@code View} could require additional work to delete. For example,
+   * if some but not all of the data in an underlying data file must be removed,
+   * then the implementation is allowed to reject the deletion rather than
+   * copy the remaining records to a new file. Implementations must  document
+   * what deletes are supported and under what conditions deletes will be
+   * rejected.
+   *
+   * @return true if any data was deleted, false if the View was already empty
+   * @throws UnsupportedOperationException
+   *          If the requested delete cannot be completed by the implementation
+   * @throws DatasetIOException
+   *          If the requested delete failed because of an IOException
+   */
+  public boolean deleteAll();
 }

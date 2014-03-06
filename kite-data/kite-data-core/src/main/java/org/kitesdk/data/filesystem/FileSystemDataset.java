@@ -125,7 +125,8 @@ class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeable<FileS
   }
 
   public boolean deleteAll() {
-    return unbounded.deleteAll();
+    // no constraints, so delete is always aligned to partition boundaries
+    return unbounded.deleteAllUnsafe();
   }
 
   PathIterator pathIterator() {

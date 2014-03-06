@@ -20,14 +20,17 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Range;
 import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -204,6 +207,97 @@ public class Constraints {
    */
   public Iterable<MarkerRange> toKeyRanges(PartitionStrategy strategy) {
     return new KeyRangeIterable(strategy, constraints);
+  }
+
+  /**
+   * If this returns true, the entities selected by this set of constraints
+   * align to partition boundaries.
+   *
+   * For example, for a partition strategy [hash(num), identity(num)],
+   * any constraint on the "num" field will be correctly enforced by the
+   * partition predicate for this constraint set. However, a "color" field
+   * wouldn't be satisfied by considering partition values alone and would
+   * require further checks.
+   *
+   * An alternate explanation: This returns whether the key {@link Predicate}
+   * from {@link #toKeyPredicate()} is equivalent to this set of constraints
+   * under the given {@link PartitionStrategy}. The key predicate must accept a
+   * key if that key's partition might include entities matched by this
+   * constraint set. If this method returns true, then all entities in the
+   * partitions it matches are guaranteed to match this constraint set. So, the
+   * partitions are equivalent to the constraints.
+   *
+   * @param strategy a {@link PartitionStrategy}
+   * @return true if this constraint set is satisfied by partitioning
+   */
+  @SuppressWarnings("unchecked")
+  public boolean alignedWithBoundaries(PartitionStrategy strategy) {
+    Multimap<String, FieldPartitioner> partitioners = HashMultimap.create();
+    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+      partitioners.put(fp.getSourceName(), fp);
+    }
+
+    // The key predicate is equivalent to a constraint set when the permissive
+    // projection for each predicate can be used in its place. This happens if
+    // fp.project(predicate) == fp.projectStrict(predicate):
+    //
+    // let D = some value domain
+    // let pred : D -> {0, 1}
+    // let D_{pred} = {x \in D | pred(x) == 1} (a subset of D selected by pred)
+    //
+    // let fp : D -> S (also a value domain)
+    // let fp.strict(pred) = pred_{fp.strict} : S -> {0, 1}    (project strict)
+    //      s.t. pred_{fp.strict}(fp(x)) == 1 => pred(x) == 1
+    // let fp.project(pred) = pred_{fp.project} : S -> {0, 1}         (project)
+    //      s.t. pred(x) == 1 => pred_{fp.project}(fp(x)) == 1
+    //
+    // lemma. {x \in D | pred_{fp.strict}(fp(x))} is a subset of D_{pred}
+    //     pred_{fp.strict}(fp(x)) == 1 => pred(x) == 1 => x \in D_{pred}
+    //
+    // theorem. (pred_{fp.project}(s) => pred_{fp.strict}(s)) =>
+    //                D_{pred} == {x \in D | pred_{fp.strict}(fp(x))}
+    //
+    //  => let x \in D_{pred}. then pred_{fp.project}(fp(x)) == 1 by def
+    //                         then pred_{fp.strict(fp(x)) == 1 by premise
+    //     therefore {x \in D | pred_{fp.strict}(fp(x))} \subsetOf D_{pred}
+    //  <= by previous lemma
+    //
+    // Note: if projectStrict is too conservative or project is too permissive,
+    // then this logic cannot determine that that the original predicate is
+    // satisfied
+    for (Map.Entry<String, Predicate> entry : constraints.entrySet()) {
+      Collection<FieldPartitioner> fps = partitioners.get(entry.getKey());
+      if (fps.isEmpty()) {
+        return false;
+      }
+
+      Predicate predicate = entry.getValue();
+      if (!(predicate instanceof Predicates.Exists)) {
+        boolean satisfied = false;
+        for (FieldPartitioner fp : fps) {
+          if (fp instanceof CalendarFieldPartitioner) {
+            TimeDomain domain = TimeDomain.get(strategy, entry.getKey());
+            Predicate strict = domain.projectStrict(predicate);
+            Predicate permissive = domain.project(predicate);
+            satisfied = strict != null && strict.equals(permissive);
+            break;
+          } else {
+            Predicate strict = fp.projectStrict(predicate);
+            Predicate permissive = fp.project(predicate);
+            if (strict != null && strict.equals(permissive)) {
+              satisfied = true;
+              break;
+            }
+          }
+        }
+        // this predicate cannot be satisfied by the partition information
+        if (!satisfied) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   @SuppressWarnings("unchecked")

@@ -490,6 +490,50 @@ public class TestConstraints {
   }
 
   @Test
+  public void testAlignedWithPartitionBoundaries() {
+    PartitionStrategy hashStrategy = new PartitionStrategy.Builder()
+        .hash("id", "bucket", 32)
+        .build();
+    PartitionStrategy withColor = new PartitionStrategy.Builder()
+        .range("color", "blue", "green", "red")
+        .year("timestamp")
+        .month("timestamp")
+        .day("timestamp")
+        .identity("id", String.class, -1)
+        .build();
+
+    Constraints c = new Constraints().with("id", "a", "b", "c");
+
+    // if the data is not partitioned by a field, then the partitioning cannot
+    // be used to satisfy constraints for that field
+    Assert.assertFalse("Cannot be satisfied by partition unless partitioned",
+        c.with("color", "orange").alignedWithBoundaries(strategy));
+    // even if partitioned, lacking a strict projection means that we cannot
+    // reason about what the predicate would accept given the partition data
+    Assert.assertFalse("Cannot be satisfied by hash partition filtering",
+        c.alignedWithBoundaries(hashStrategy));
+    Assert.assertFalse("Cannot be satisfied by time filtering for timestamp",
+        c.with("timestamp",
+            new DateTime(2013, 9, 1, 12, 0, DateTimeZone.UTC).getMillis())
+            .alignedWithBoundaries(strategy));
+    // if there is a strict projection, we can only use it if it is equivalent
+    // to the permissive projection. if we can't tell or if the strict
+    // projection is too conservative, we can't use the partition data
+    Assert.assertFalse("Cannot be satisfied because equality doesn't hold",
+        c.with("color", "green", "brown")
+            .alignedWithBoundaries(withColor));
+    Assert.assertFalse("Cannot be satisfied because equality doesn't hold",
+        c.fromAfter("color", "blue").to("color", "red")
+            .alignedWithBoundaries(withColor));
+
+    // if the strict projection and permissive projections are identical, then
+    // we can conclude that the information in the partitions is sufficient to
+    // satisfy the original predicate.
+    Assert.assertTrue("Should be satisfied by partition filtering on id",
+        c.alignedWithBoundaries(strategy));
+  }
+
+  @Test
   public void testTimeRangeEdgeCases() {
     final long oct_24_2013 = new DateTime(2013, 10, 24, 0, 0, DateTimeZone.UTC).getMillis();
     final long oct_25_2013 = new DateTime(2013, 10, 25, 0, 0, DateTimeZone.UTC).getMillis();

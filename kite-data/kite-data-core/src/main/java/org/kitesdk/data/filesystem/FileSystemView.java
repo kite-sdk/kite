@@ -18,6 +18,7 @@ package org.kitesdk.data.filesystem;
 
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
+import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetReader;
@@ -79,11 +80,17 @@ class FileSystemView<E> extends AbstractRefineableView<E> {
 
   @Override
   public boolean deleteAll() {
-    boolean deleted = false;
-    for (Pair<StorageKey, Path> partition : partitionIterator()) {
-      deleted = cleanlyDelete(fs, root, partition.second()) || deleted;
+    DatasetDescriptor descriptor = getDataset().getDescriptor();
+    if (!descriptor.isPartitioned()) {
+      // at least one constraint, but not partitioning to satisfy it
+      throw new UnsupportedOperationException(
+          "Cannot cleanly delete view: " + this);
     }
-    return deleted;
+    if (!constraints.alignedWithBoundaries(descriptor.getPartitionStrategy())) {
+      throw new UnsupportedOperationException(
+          "Cannot cleanly delete view: " + this);
+    }
+    return deleteAllUnsafe();
   }
 
   PathIterator pathIterator() {
@@ -105,6 +112,14 @@ class FileSystemView<E> extends AbstractRefineableView<E> {
     } catch (IOException ex) {
       throw new DatasetException("Cannot list partitions in view:" + this, ex);
     }
+  }
+
+  boolean deleteAllUnsafe() {
+    boolean deleted = false;
+    for (Pair<StorageKey, Path> partition : partitionIterator()) {
+      deleted = cleanlyDelete(fs, root, partition.second()) || deleted;
+    }
+    return deleted;
   }
 
   private static boolean cleanlyDelete(FileSystem fs, Path root, Path dir) {
