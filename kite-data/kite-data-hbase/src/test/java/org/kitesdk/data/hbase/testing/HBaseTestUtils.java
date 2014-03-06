@@ -62,6 +62,8 @@ public class HBaseTestUtils {
         if (conf == null) {
           conf = util.getConfiguration();
           conf.set("hadoop.log.dir", conf.get("hadoop.tmp.dir"));
+          // don't run the regionserver UI (bind errors)
+          conf.set("hbase.master.info.port", "-1");
         }
       }
     }
