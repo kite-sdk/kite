@@ -94,6 +94,7 @@ public interface View<E> {
    *          If the requested delete cannot be completed by the implementation
    * @throws DatasetIOException
    *          If the requested delete failed because of an IOException
+   * @since 0.12.0
    */
   public boolean deleteAll();
 }
