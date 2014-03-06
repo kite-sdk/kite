@@ -732,6 +732,42 @@ _Example: Avro field declared as an OCC check field_
 If an Avro entity has a mapping declared with a mapping type `occVersion`,
 operations will always use OCC on that entity.
 
+### Working with Datasets
+
+These are some practical examples of using Kite tools when working with Datasets.
+
+#### Creating Dataset Views
+
+Views apply logical constraints that allow you to work with a subset of a dataset.
+
+Views provide a collection of methods that you can implement to process and analyze a subset of `Entity` objects from an existing `Dataset`. It provides functionality similar to SQL constraints.
+
+For example, the following code snippet constrains a dataset to users whose favorite color is orange (this is an equality constraint).
+
+ View<User> orange = users.with(“favoriteColor”, “orange”)
+
+The following snippet demonstrates how you define a View by taking an existing Dataset (or an existing View) and adding another constraint to refine it. You can chain additional methods to get to the final View. In this case, the code takes a subset of the `events` view from (greater than or equal to) October 4, to (less than or equal to) April 10.
+
+ long OCT_4 = new org.joda.time.DateTime(2012, 10, 4, 0, 0).getMillis();
+
+ long APR_10 = new org.joda.time.DateTime(2013, 4, 10, 0, 0).getMillis();
+
+ View<Event> v = events.from(“timestamp”, OCT_4).to(“timestamp”, APR_10);
+
+The `fromAfter` and `toBefore` methods are similar to `from` and `to`, but do not contain the end point values.
+
+The [RefinableView interface][refin] defines these methods.
+
+[refin]: http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/RefineableView.html "RefinableView interface"
+
+#### Using Datasets in MapReduce
+
+You can use the `DatasetKeyOutputFormat` class to write to a dataset from a MapReduce job.
+
+The `DatasetKeyOutputFormat` uses the key argument to pass an Entity to store in the dataset. The Value argument can only be null, because the output value type parameter is `Void`.
+
+**Note**: Input and output formats are experimental and do not currently support Views.
+
 ## Entities
 
 _Summary_
