@@ -166,7 +166,7 @@ public class TestDatasetSink {
   public void testPartitionedData() throws EventDeliveryException {
     REPO.create("partitioned", new DatasetDescriptor.Builder(DESCRIPTOR)
         .partitionStrategy(new PartitionStrategy.Builder()
-            .identity("id", String.class, 10) // partition by id
+            .identity("id", "id_copy", String.class, 10) // partition by id
             .build())
         .build());
 
@@ -191,12 +191,11 @@ public class TestDatasetSink {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testMiniClusterStore()
       throws EventDeliveryException, IOException {
     // setup a minicluster
-    MiniDFSCluster cluster = new MiniDFSCluster
-        .Builder(new Configuration())
-        .build();
+    MiniDFSCluster cluster = new MiniDFSCluster(new Configuration(), 1, true, null);
     DatasetRepository hdfsRepo = null;
     try {
       FileSystem dfs = cluster.getFileSystem();
