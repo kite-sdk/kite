@@ -49,7 +49,6 @@ class PartitionExpression {
     this.isStrict = isStrict;
   }
 
-  @SuppressWarnings("deprecation")
   public PartitionStrategy evaluate() {
     Object object = expression.evaluate(null);
     if (object instanceof FieldPartitioner) {

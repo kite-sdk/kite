@@ -68,11 +68,8 @@ public class PartitionStrategy {
 
   /**
    * Construct a partition strategy with a list of field partitioners.
-   *
-   * @deprecated will be removed in 0.12.0; use PartitionStrategy.Builder
    */
-  @Deprecated
-  public PartitionStrategy(List<FieldPartitioner> partitioners) {
+  PartitionStrategy(List<FieldPartitioner> partitioners) {
     this.fieldPartitioners = ImmutableList.copyOf(partitioners);
   }
 
@@ -541,7 +538,6 @@ public class PartitionStrategy {
      * @return The configured instance of {@link PartitionStrategy}.
      * @since 0.9.0
      */
-    @SuppressWarnings("deprecated")
     public PartitionStrategy build() {
       return new PartitionStrategy(fieldPartitioners);
     }
