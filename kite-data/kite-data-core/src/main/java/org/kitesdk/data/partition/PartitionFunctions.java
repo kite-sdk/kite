@@ -44,20 +44,21 @@ public class PartitionFunctions {
 
   /**
    * @deprecated will be removed in 0.13.0; use
-   * {@link org.kitesdk.data.spi.partition.PartitionFunctions#identity(String, Class, int)}.
+   * {@link org.kitesdk.data.spi.partition.PartitionFunctions#identity(String, String, String, int)}
    */
   @Deprecated
   public static FieldPartitioner identity(String name, int buckets) {
-    return org.kitesdk.data.spi.partition.PartitionFunctions.identity(name, String.class, buckets);
+    return new org.kitesdk.data.spi.partition.IdentityFieldPartitioner(name, name + "_copy", String.class, buckets);
   }
 
   /**
-   * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
+   * @deprecated will be removed in 0.13.0; use
+   * {@link org.kitesdk.data.spi.partition.PartitionFunctions#identity(String, String, String, int)}
    */
   @Deprecated
   public static <S> FieldPartitioner<S, S> identity(String name, Class<S> type,
       int buckets) {
-    return org.kitesdk.data.spi.partition.PartitionFunctions.identity(name, type, buckets);
+    return new org.kitesdk.data.spi.partition.IdentityFieldPartitioner(name, name + "_copy", type, buckets);
   }
 
   /**
@@ -65,7 +66,7 @@ public class PartitionFunctions {
    */
   @Deprecated
   public static FieldPartitioner<Integer, Integer> range(String name, int... upperBounds) {
-    return org.kitesdk.data.spi.partition.PartitionFunctions.range(name, upperBounds);
+    return org.kitesdk.data.spi.partition.PartitionFunctions.range(name, name + "_bound", upperBounds);
   }
 
   /**
@@ -73,7 +74,7 @@ public class PartitionFunctions {
    */
   @Deprecated
   public static FieldPartitioner<String, String> range(String name, String... upperBounds) {
-    return org.kitesdk.data.spi.partition.PartitionFunctions.range(name, upperBounds);
+    return org.kitesdk.data.spi.partition.PartitionFunctions.range(name, name + "_bound", upperBounds);
   }
 
   /**

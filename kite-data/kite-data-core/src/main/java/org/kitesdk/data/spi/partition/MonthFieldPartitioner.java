@@ -29,8 +29,8 @@ import javax.annotation.concurrent.Immutable;
 public class MonthFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 
-  public MonthFieldPartitioner(String name) {
-    this(name, "month");
+  public MonthFieldPartitioner(String sourceName) {
+    this(sourceName, "month");
   }
 
   public MonthFieldPartitioner(String sourceName, String name) {

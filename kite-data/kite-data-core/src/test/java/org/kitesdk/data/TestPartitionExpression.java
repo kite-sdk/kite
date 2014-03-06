@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data;
 
+import org.junit.Ignore;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.partition.HashFieldPartitioner;
 import org.kitesdk.data.spi.partition.MinuteFieldPartitioner;
@@ -87,4 +88,44 @@ public class TestPartitionExpression {
     Assert.assertEquals(expr, PartitionExpression.toExpression(strategy));
   }
 
+  @Test
+  public void testRange() {
+    PartitionStrategy rangeStrategy = new PartitionStrategy.Builder()
+        .range("color", "blue", "green", "orange", "red", "white")
+        .build();
+    PartitionStrategy copy = new PartitionExpression(
+        PartitionExpression.toExpression(rangeStrategy), true).evaluate();
+    Assert.assertEquals(rangeStrategy, copy);
+  }
+
+  @Test
+  public void testIntRange() {
+    PartitionStrategy intRangeStrategy = new PartitionStrategy.Builder()
+        .range("intField", 5, 10, 15, 20, 25)
+        .build();
+    PartitionStrategy copy = new PartitionExpression(
+        PartitionExpression.toExpression(intRangeStrategy), true).evaluate();
+    Assert.assertEquals(intRangeStrategy, copy);
+  }
+
+  @Test
+  public void testIntIdentity() {
+    PartitionStrategy intIdStrategy = new PartitionStrategy.Builder()
+        .identity("intField", "intField_copy", Integer.class, -1)
+        .build();
+    PartitionStrategy copy = new PartitionExpression(
+        PartitionExpression.toExpression(intIdStrategy), true).evaluate();
+    Assert.assertEquals(intIdStrategy, copy);
+  }
+
+  @Test
+  @Ignore
+  public void testList() {
+    PartitionStrategy listStrategy = new PartitionStrategy.Builder()
+        // TODO: can't use a LitFieldPartitioner yet
+        .build();
+    PartitionStrategy copy = new PartitionExpression(
+        PartitionExpression.toExpression(listStrategy), true).evaluate();
+    Assert.assertEquals(listStrategy, copy);
+  }
 }

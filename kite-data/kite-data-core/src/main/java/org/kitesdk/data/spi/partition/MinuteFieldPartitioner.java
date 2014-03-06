@@ -28,8 +28,8 @@ import javax.annotation.concurrent.Immutable;
 public class MinuteFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 
-  public MinuteFieldPartitioner(String name) {
-    this(name, "minute");
+  public MinuteFieldPartitioner(String sourceName) {
+    this(sourceName, "minute");
   }
 
   public MinuteFieldPartitioner(String sourceName, String name) {

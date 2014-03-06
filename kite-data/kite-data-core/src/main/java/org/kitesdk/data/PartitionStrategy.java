@@ -254,15 +254,18 @@ public class PartitionStrategy {
      * Configure a hash partitioner with the specified number of {@code buckets}
      * .
      *
-     * @param name
+     * The partition name will be the source field name with a "_hash" suffix.
+     * For example, hash("color", 34) will create "color_hash" partitions.
+     *
+     * @param sourceName
      *          The entity field name from which to get values to be
      *          partitioned.
      * @param buckets
      *          The number of buckets into which data is to be partitioned.
      * @return An instance of the builder for method chaining.
      */
-    public Builder hash(String name, int buckets) {
-      fieldPartitioners.add(new HashFieldPartitioner(name, buckets));
+    public Builder hash(String sourceName, int buckets) {
+      fieldPartitioners.add(new HashFieldPartitioner(sourceName, buckets));
       return this;
     }
 
@@ -289,7 +292,11 @@ public class PartitionStrategy {
      * Configure an identity partitioner for a given type with a cardinality hint of
      * {@code buckets} size.
      *
-     * @param name
+     * The partition name will be the source field name with a "_copy" suffix.
+     * For example, identity("color", String.class, 34) will create "color_copy"
+     * partitions.
+     *
+     * @param sourceName
      *          The entity field name from which to get values to be
      *          partitioned.
      * @param type
@@ -306,9 +313,9 @@ public class PartitionStrategy {
      */
     @Deprecated
     @SuppressWarnings("unchecked")
-    public <S> Builder identity(String name, Class<S> type, int buckets) {
-      fieldPartitioners.add(
-          new IdentityFieldPartitioner(name, name + "_copy", type, buckets));
+    public <S> Builder identity(String sourceName, Class<S> type, int buckets) {
+      fieldPartitioners.add(new IdentityFieldPartitioner(
+          sourceName, sourceName + "_copy", type, buckets));
       return this;
     }
 
@@ -341,8 +348,12 @@ public class PartitionStrategy {
 
     /**
      * Configure a range partitioner with a set of {@code upperBounds}.
-     * 
-     * @param name
+     *
+     * The partition name will be the source field name with a "_bound" suffix.
+     * For example, range("number", 5, 10) will create "number_bound"
+     * partitions.
+     *
+     * @param sourceName
      *          The entity field name from which to get values to be
      *          partitioned.
      * @param upperBounds
@@ -350,23 +361,27 @@ public class PartitionStrategy {
      * @return An instance of the builder for method chaining.
      * @see IntRangeFieldPartitioner
      */
-    public Builder range(String name, int... upperBounds) {
-      fieldPartitioners.add(new IntRangeFieldPartitioner(name, upperBounds));
+    public Builder range(String sourceName, int... upperBounds) {
+      fieldPartitioners.add(new IntRangeFieldPartitioner(sourceName, upperBounds));
       return this;
     }
 
     /**
      * Configure a range partitioner for strings with a set of {@code upperBounds}.
-     * 
-     * @param name
+     *
+     * The partition name will be the source field name with a "_bound" suffix.
+     * For example, range("color", "blue", "green") will create "color_bound"
+     * partitions.
+     *
+     * @param sourceName
      *          The entity field name from which to get values to be
      *          partitioned.
      * @param upperBounds
      *          A variadic list of upper bounds of each partition.
      * @return An instance of the builder for method chaining.
      */
-    public Builder range(String name, String... upperBounds) {
-      fieldPartitioners.add(new RangeFieldPartitioner(name, upperBounds));
+    public Builder range(String sourceName, String... upperBounds) {
+      fieldPartitioners.add(new RangeFieldPartitioner(sourceName, upperBounds));
       return this;
     }
 

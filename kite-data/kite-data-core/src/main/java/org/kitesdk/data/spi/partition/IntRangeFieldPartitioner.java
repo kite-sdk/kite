@@ -36,8 +36,8 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
 
   private final int[] upperBounds;
 
-  public IntRangeFieldPartitioner(String name, int... upperBounds) {
-    this(name, name + "_bound", upperBounds);
+  public IntRangeFieldPartitioner(String sourceName, int... upperBounds) {
+    this(sourceName, sourceName + "_bound", upperBounds);
   }
 
   public IntRangeFieldPartitioner(String sourceName, String name, int... upperBounds) {
@@ -143,6 +143,10 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
       }
     }
     return null;
+  }
+
+  int[] getUpperBounds() {
+    return upperBounds;
   }
 
   @Override

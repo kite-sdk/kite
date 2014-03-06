@@ -29,9 +29,9 @@ import org.kitesdk.data.spi.Predicates;
 @Immutable
 public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
 
-  public HashFieldPartitioner(String name, int buckets) {
+  public HashFieldPartitioner(String sourceName, int buckets) {
     // create a new field name from the source name
-    super(name, name + "_hash", Object.class, Integer.class, buckets);
+    super(sourceName, sourceName + "_hash", Object.class, Integer.class, buckets);
   }
 
   public HashFieldPartitioner(String sourceName, String name, int buckets) {

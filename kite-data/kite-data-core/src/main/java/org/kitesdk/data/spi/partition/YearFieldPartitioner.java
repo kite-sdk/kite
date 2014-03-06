@@ -30,8 +30,8 @@ import org.kitesdk.data.spi.Predicates;
 @Immutable
 public class YearFieldPartitioner extends CalendarFieldPartitioner {
 
-  public YearFieldPartitioner(String name) {
-    this(name, "year");
+  public YearFieldPartitioner(String sourceName) {
+    this(sourceName, "year");
   }
 
   public YearFieldPartitioner(String sourceName, String name) {
