@@ -28,6 +28,10 @@ import javax.annotation.concurrent.Immutable;
 public class DayOfMonthFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 
+  public DayOfMonthFieldPartitioner(String sourceName) {
+    this(sourceName, "day");
+  }
+
   public DayOfMonthFieldPartitioner(String sourceName, String name) {
     super(sourceName, name, Calendar.DAY_OF_MONTH, 31);
     format = NumberFormat.getIntegerInstance();

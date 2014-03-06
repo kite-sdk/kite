@@ -132,9 +132,9 @@ public class TestFileSystemDataset extends MiniDFSTest {
 
     writeTestUsers(ds, 10);
     Assert.assertTrue("Partitioned directory 0 exists",
-      fileSystem.exists(new Path(testDirectory, "username=0")));
+      fileSystem.exists(new Path(testDirectory, "username_hash=0")));
     Assert.assertTrue("Partitioned directory 1 exists",
-      fileSystem.exists(new Path(testDirectory, "username=1")));
+      fileSystem.exists(new Path(testDirectory, "username_hash=1")));
     checkTestUsers(ds, 10);
     PartitionKey key0 = partitionStrategy.partitionKey(0);
     PartitionKey key1 = partitionStrategy.partitionKey(1);
@@ -179,14 +179,14 @@ public class TestFileSystemDataset extends MiniDFSTest {
     checkTestUsers(ds, 10);
     PartitionKey key0 = Accessor.getDefault().newPartitionKey(0);
     PartitionKey key1 = Accessor.getDefault().newPartitionKey(1);
-    int total = readTestUsersInPartition(ds, key0, "email")
-      + readTestUsersInPartition(ds, key0, "email");
+    int total = readTestUsersInPartition(ds, key0, "email_hash")
+      + readTestUsersInPartition(ds, key0, "email_hash");
     Assert.assertEquals(10, total);
 
     total = 0;
     for (int i1 = 0; i1 < 2; i1++) {
       for (int i2 = 0; i2 < 3; i2++) {
-        String part = "username=" + i1 + "/email=" + i2;
+        String part = "username_hash=" + i1 + "/email_hash=" + i2;
         Assert.assertTrue("Partitioned directory " + part + " exists",
           fileSystem.exists(new Path(testDirectory, part)));
         total += readTestUsersInPartition(ds,
@@ -251,8 +251,8 @@ public class TestFileSystemDataset extends MiniDFSTest {
 
     writeTestUsers(userPartition, 1);
     Assert.assertTrue("Partitioned directory exists",
-      fileSystem.exists(new Path(testDirectory, "username_part=1/email=2")));
-    Assert.assertEquals(1, readTestUsersInPartition(ds, key, "email"));
+      fileSystem.exists(new Path(testDirectory, "username_part=1/email_hash=2")));
+    Assert.assertEquals(1, readTestUsersInPartition(ds, key, "email_hash"));
   }
 
   @Test
@@ -275,17 +275,17 @@ public class TestFileSystemDataset extends MiniDFSTest {
     writeTestUsers(ds, 10);
 
     Assert.assertTrue(
-      fileSystem.isDirectory(new Path(testDirectory, "username=0")));
+      fileSystem.isDirectory(new Path(testDirectory, "username_hash=0")));
     Assert.assertTrue(
-      fileSystem.isDirectory(new Path(testDirectory, "username=1")));
+      fileSystem.isDirectory(new Path(testDirectory, "username_hash=1")));
 
     ds.dropPartition(partitionStrategy.partitionKey(0));
     Assert.assertFalse(
-      fileSystem.isDirectory(new Path(testDirectory, "username=0")));
+      fileSystem.isDirectory(new Path(testDirectory, "username_hash=0")));
 
     ds.dropPartition(partitionStrategy.partitionKey(1));
     Assert.assertFalse(
-      fileSystem.isDirectory(new Path(testDirectory, "username=1")));
+      fileSystem.isDirectory(new Path(testDirectory, "username_hash=1")));
 
     DatasetException caught = null;
 

@@ -27,8 +27,9 @@ import com.google.common.base.Objects;
 @Immutable
 public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartitioner<S, S> {
 
-  public IdentityFieldPartitioner(String name, Class<S> type, int buckets) {
-    super(name, name, type, type, buckets);
+  public IdentityFieldPartitioner(String sourceName, String name, Class<S> type,
+                                  int buckets) {
+    super(sourceName, name, type, type, buckets);
     if (!(type.equals(Integer.class) || type.equals(Long.class) ||
         type.equals(String.class))) {
       throw new IllegalArgumentException("Type not supported " + type);
@@ -73,7 +74,9 @@ public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartiti
       return false;
     }
     IdentityFieldPartitioner that = (IdentityFieldPartitioner) o;
-    return Objects.equal(this.getName(), that.getName()) &&
+    return Objects.equal(this.getSourceName(), that.getSourceName()) &&
+        Objects.equal(this.getName(), that.getName()) &&
+        Objects.equal(this.getType(), that.getType()) &&
         Objects.equal(this.getCardinality(), that.getCardinality());
   }
 
@@ -85,12 +88,16 @@ public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartiti
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getName(), getCardinality());
+    return Objects.hashCode(
+        getSourceName(), getName(), getType(), getCardinality());
   }
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("name", getName())
+    return Objects.toStringHelper(this)
+        .add("sourceName", getSourceName())
+        .add("name", getName())
+        .add("type", getType())
         .add("cardinality", getCardinality()).toString();
   }
 }

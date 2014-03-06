@@ -34,8 +34,12 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
 
   private final List<Set<S>> values;
 
-  public ListFieldPartitioner(String name, List<Set<S>> values, Class<S> sourceType) {
-    super(name, name, sourceType, Integer.class, cardinality(values));
+  public ListFieldPartitioner(String sourceName, List<Set<S>> values, Class<S> sourceType) {
+    this(sourceName, sourceName + "_set", values, sourceType);
+  }
+
+  public ListFieldPartitioner(String sourceName, String name, List<Set<S>> values, Class<S> sourceType) {
+    super(sourceName, name, sourceType, Integer.class, cardinality(values));
     this.values = values;
   }
 

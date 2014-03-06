@@ -54,7 +54,7 @@ public class TestPartitionStrategy {
   @Test
   public void test() throws Exception {
     final PartitionStrategy p = new PartitionStrategy.Builder()
-        .identity("month", Integer.class, 12)
+        .identity("month", "month_ordinal", Integer.class, 12)
         .hash("userId", 7)
         .build();
 
@@ -62,11 +62,11 @@ public class TestPartitionStrategy {
     Assert.assertEquals(2, fieldPartitioners.size());
 
     FieldPartitioner fp0 = fieldPartitioners.get(0);
-    assertEquals("month", fp0.getName());
+    assertEquals("month_ordinal", fp0.getName());
     assertEquals(12, fp0.getCardinality());
 
     FieldPartitioner fp1 = fieldPartitioners.get(1);
-    assertEquals("userId", fp1.getName());
+    assertEquals("userId_hash", fp1.getName());
     assertEquals(7, fp1.getCardinality());
 
     assertEquals(12 * 7, p.getCardinality()); // useful for writers

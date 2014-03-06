@@ -16,8 +16,11 @@
 package org.kitesdk.data.spi.partition;
 
 import java.util.List;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import com.google.common.annotations.Beta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convenience class so you can say, for example, <code>hash("username", 2)</code> in
@@ -25,36 +28,42 @@ import com.google.common.annotations.Beta;
  */
 @SuppressWarnings("unchecked")
 public class PartitionFunctions {
+  private static final Logger LOG = LoggerFactory.getLogger(PartitionFunctions.class);
 
+  @Beta
   public static FieldPartitioner<Object, Integer> hash(String name, int buckets) {
     return new HashFieldPartitioner(name, buckets);
   }
 
+  @Beta
   public static FieldPartitioner<Object, Integer> hash(String sourceName, String name, int buckets) {
     return new HashFieldPartitioner(sourceName, name, buckets);
   }
 
-  /**
-   * @deprecated Use {@link #identity(String, Class, int)}.
-   */
-  @Deprecated
-  public static FieldPartitioner identity(String name, int buckets) {
-    return new IdentityFieldPartitioner(name, String.class, buckets);
-  }
-
-  public static <S> FieldPartitioner<S, S> identity(String name, Class<S> type,
-      int buckets) {
-    return new IdentityFieldPartitioner(name, type, buckets);
+  @Beta
+  public static FieldPartitioner identity(String sourceName, int buckets) {
+    return new IdentityFieldPartitioner(sourceName, sourceName + "_copy", String.class, buckets);
   }
 
   @Beta
-  public static FieldPartitioner<Integer, Integer> range(String name, int... upperBounds) {
-    return new IntRangeFieldPartitioner(name, upperBounds);
+  public static FieldPartitioner identity(String sourceName, String name, String className, int buckets) {
+    Class<?> typeClass;
+    try {
+      typeClass = Class.forName(className);
+    } catch (ClassNotFoundException e) {
+      throw new DatasetException("Cannot find class: " + className, e);
+    }
+    return new IdentityFieldPartitioner(sourceName, name, typeClass, buckets);
   }
 
   @Beta
-  public static FieldPartitioner<String, String> range(String name, String... upperBounds) {
-    return new RangeFieldPartitioner(name, upperBounds);
+  public static FieldPartitioner<Integer, Integer> range(String sourceName, String name, int... upperBounds) {
+    return new IntRangeFieldPartitioner(sourceName, name, upperBounds);
+  }
+
+  @Beta
+  public static FieldPartitioner<String, String> range(String sourceName, String name, String... upperBounds) {
+    return new RangeFieldPartitioner(sourceName, name, upperBounds);
   }
 
   @Beta
@@ -94,7 +103,9 @@ public class PartitionFunctions {
       return String.format("hash(\"%s\", \"%s\", %s)", fieldPartitioner.getSourceName(),
           fieldPartitioner.getName(), fieldPartitioner.getCardinality());
     } else if (fieldPartitioner instanceof IdentityFieldPartitioner) {
-      return String.format("identity(\"%s\", %s)", fieldPartitioner.getName(),
+      return String.format("identity(\"%s\", \"%s\", \"%s\", %s)",
+          fieldPartitioner.getSourceName(), fieldPartitioner.getName(),
+          fieldPartitioner.getType().getName(),
           fieldPartitioner.getCardinality());
     } else if (fieldPartitioner instanceof RangeFieldPartitioner) {
       List<String> upperBounds = ((RangeFieldPartitioner) fieldPartitioner)
@@ -109,7 +120,21 @@ public class PartitionFunctions {
         builder.append("\"").append(bound).append("\"");
       }
 
-      return String.format("range(\"%s\", %s", fieldPartitioner.getName(),
+      return String.format("range(\"%s\", \"%s\", %s)",
+          fieldPartitioner.getSourceName(), fieldPartitioner.getName(),
+          builder.toString());
+    } else if (fieldPartitioner instanceof IntRangeFieldPartitioner) {
+      StringBuilder builder = new StringBuilder();
+
+      for (int bound : ((IntRangeFieldPartitioner) fieldPartitioner).getUpperBounds()) {
+        if (builder.length() > 0) {
+          builder.append(", ");
+        }
+        builder.append(bound);
+      }
+
+      return String.format("range(\"%s\", \"%s\", %s)",
+          fieldPartitioner.getSourceName(), fieldPartitioner.getName(),
           builder.toString());
     } else if (fieldPartitioner instanceof DateFormatPartitioner) {
       return String.format("dateFormat(\"%s\", \"%s\", \"%s\")",
@@ -133,7 +158,7 @@ public class PartitionFunctions {
           fieldPartitioner.getName());
     }
 
-    throw new IllegalArgumentException("Unrecognized PartitionStrategy: "
+    throw new IllegalArgumentException("Unrecognized partition function: "
         + fieldPartitioner);
   }
 }

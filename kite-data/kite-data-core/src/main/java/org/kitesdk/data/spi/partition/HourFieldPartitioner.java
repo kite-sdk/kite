@@ -28,6 +28,10 @@ import javax.annotation.concurrent.Immutable;
 public class HourFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 
+  public HourFieldPartitioner(String sourceName) {
+    this(sourceName, "hour");
+  }
+
   public HourFieldPartitioner(String sourceName, String name) {
     super(sourceName, name, Calendar.HOUR_OF_DAY, 24);
     format = NumberFormat.getIntegerInstance();

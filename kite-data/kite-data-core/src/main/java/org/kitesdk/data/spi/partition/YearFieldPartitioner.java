@@ -29,6 +29,11 @@ import org.kitesdk.data.spi.Predicates;
         + " (e.g., TreeMaps) and use java serialization.")
 @Immutable
 public class YearFieldPartitioner extends CalendarFieldPartitioner {
+
+  public YearFieldPartitioner(String sourceName) {
+    this(sourceName, "year");
+  }
+
   public YearFieldPartitioner(String sourceName, String name) {
     super(sourceName, name, Calendar.YEAR, 5); // arbitrary number of partitions
   }

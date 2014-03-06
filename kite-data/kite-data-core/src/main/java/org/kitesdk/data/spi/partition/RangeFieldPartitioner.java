@@ -40,8 +40,13 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
   // lazily constructed DiscreteDomain for upper bounds; use domain()
   private RangeDomain domain;
 
-  public RangeFieldPartitioner(String name, String... upperBounds) {
-    super(name, name, String.class, String.class, upperBounds.length);
+  public RangeFieldPartitioner(String sourceName, String... upperBounds) {
+    this(sourceName, sourceName + "_bound", upperBounds);
+  }
+
+  public RangeFieldPartitioner(String sourceName, String name,
+                               String... upperBounds) {
+    super(sourceName, name, String.class, String.class, upperBounds.length);
     this.upperBounds = Arrays.asList(upperBounds);
   }
 
