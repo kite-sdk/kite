@@ -49,7 +49,11 @@ public final class HCatalog {
   public Table getTable(String dbName, String tableName) {
     Table table;
     try {
-      table = HCatUtil.getTable(client, dbName, tableName);
+      synchronized(client) {
+        table = HCatUtil.getTable(client, dbName, tableName);
+      }
+    } catch (RuntimeException e) {
+        throw new RuntimeException("Hive metastore exception", e);
     } catch (Exception e) {
       throw new DatasetNotFoundException("Hive table lookup exception", e);
     }
@@ -62,7 +66,9 @@ public final class HCatalog {
   
   public boolean tableExists(String dbName, String tableName) {
     try {
-      return client.tableExists(dbName, tableName);
+      synchronized(client) {
+        return client.tableExists(dbName, tableName);
+      }
     } catch (Exception e) {
       throw new RuntimeException("Hive metastore exception", e);
     }
@@ -70,7 +76,9 @@ public final class HCatalog {
   
   public void createTable(Table tbl) {
     try {
-      client.createTable(tbl.getTTable());
+      synchronized(client) {
+        client.createTable(tbl.getTTable());
+      }
     } catch (Exception e) {
       throw new RuntimeException("Hive table creation exception", e);
     }
@@ -78,7 +86,11 @@ public final class HCatalog {
 
   public void alterTable(Table tbl) {
     try {
-      client.alter_table(tbl.getDbName(), tbl.getTableName(), tbl.getTTable());
+      synchronized(client) {
+        client.alter_table(tbl.getDbName(), tbl.getTableName(), tbl.getTTable());
+      }
+    } catch (RuntimeException e) {
+        throw new RuntimeException("Hive metastore exception", e);
     } catch (Exception e) {
       throw new RuntimeException("Hive alter table exception", e);
     }
@@ -86,8 +98,12 @@ public final class HCatalog {
   
   public void dropTable(String dbName, String tableName) {
     try {
-      client.dropTable(dbName, tableName, true /* deleteData */,
+      synchronized(client) {
+        client.dropTable(dbName, tableName, true /* deleteData */,
           true /* ignoreUnknownTable */);
+      }
+    } catch (RuntimeException e) {
+        throw new RuntimeException("Hive metastore exception", e);
     } catch (Exception e) {
       throw new RuntimeException("Hive metastore exception", e);
     }
@@ -98,7 +114,9 @@ public final class HCatalog {
       // purposely don't check if the partition already exists because
       // getPartition(db, table, path) will throw an exception to indicate the
       // partition doesn't exist also. this way, it's only one call.
-      client.appendPartition(dbName, tableName, path);
+      synchronized(client) {
+        client.appendPartition(dbName, tableName, path);
+      }
     } catch (AlreadyExistsException e) {
       // this is okay
     } catch (RuntimeException e) {
@@ -110,7 +128,9 @@ public final class HCatalog {
 
   public boolean exists(String dbName, String tableName) {
     try {
-      return client.tableExists(dbName, tableName);
+      synchronized(client) {
+        return client.tableExists(dbName, tableName);
+      }
     } catch (Exception e) {
       throw new MetadataProviderException("Hive metastore exception", e);
     }
@@ -118,7 +138,9 @@ public final class HCatalog {
 
   public List<String> getAllTables(String dbName) {
     try {
-      return client.getAllTables(dbName);
+      synchronized(client) {
+        return client.getAllTables(dbName);
+      }
     } catch (Exception e) {
       throw new MetadataProviderException("Hive metastore exception", e);
     }
