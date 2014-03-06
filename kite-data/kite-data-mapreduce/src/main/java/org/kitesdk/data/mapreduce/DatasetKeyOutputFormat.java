@@ -192,12 +192,12 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   private static String getJobDatasetName(JobContext jobContext) {
     Configuration conf = jobContext.getConfiguration();
-    return conf.get(KITE_DATASET_NAME) + "-" + jobContext.getJobID().toString();
+    return conf.get(KITE_DATASET_NAME) + "_" + jobContext.getJobID().toString();
   }
 
   private static String getTaskAttemptDatasetName(TaskAttemptContext taskContext) {
     Configuration conf = taskContext.getConfiguration();
-    return conf.get(KITE_DATASET_NAME) + "-" + taskContext.getTaskAttemptID().toString();
+    return conf.get(KITE_DATASET_NAME) + "_" + taskContext.getTaskAttemptID().toString();
   }
 
   private static <E> Dataset<E> loadDataset(JobContext jobContext) {
