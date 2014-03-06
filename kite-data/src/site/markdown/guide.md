@@ -517,13 +517,6 @@ made by one another if they share the same configuration. This is an incredibly
 powerful concept, allowing systems to become immediately aware of data as soon
 as it's committed to storage.
 
-### Dataset Key Output Format
-
-You can use the `DatasetKeyOutputFormat` class to create a MapReduce output format for writing to a dataset. 
-
-The `DatasetRecordWriter` implementation in the class creates an output file with data keys for the named entities, but `Void` objects for values. The output contains only the entities and ignores the values.
-
-
 ### Partitioned Datasets
 
 _Summary_
@@ -634,7 +627,7 @@ _Example: Creation of a dataset partitioned by multiple attributes_
             .build()
         ).build()
 
-The order in which you define partition functions is important. This
+The order in which you add partition functions is important. This
 controls the way the data is physically partitioned in certain implementations
 of the Data APIs. Depending on the implementation, this can drastically change
 the execution speed of data access by different methods.
@@ -738,21 +731,6 @@ _Example: Avro field declared as an OCC check field_
 
 If an Avro entity has a mapping declared with a mapping type `occVersion`,
 operations will always use OCC on that entity.
-### RefineableView
-The `RefineableView` interface provides methods that you can implement to process and analyze a subset of `Entities` from an existing `Dataset`. It provides functionality similar to SQL queries.
-
-`RefineableView` defines the methods described in the table below.
-
-Method | Arguments | Description
------- | ------- |-----
-with | `String name, Object... value` | Creates a sub-view, restricted to entities with a `name` field equal to any of the given `values`.
-from | `String name, Comparable value` | Creates a sub-view, restricted to entities with a `name` field greater than or equal to the given `value`.
-to   | `String name, Comparable value` | Creates a sub-view, restricted to entities with a `name` field less than or equal to the given `value`.
-fromAfter | `String name, Comparable value` | Creates a sub-view, restricted to entities with a `name` field greater than the given `value`.
-toBefore | `String name, Comparable value` | Creates a sub-view, restricted to entities with a `name` field less than the given `value`.
-
-This gives you the flexibility to work with an existing subset of data without having to construct a second dataset specific to your query. 
-
 
 ## Entities
 
