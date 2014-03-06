@@ -140,4 +140,9 @@ public class TestCrunchDatasetsHBase {
 
   }
 
+  @AfterClass
+  public static void delayForHadoop1() throws InterruptedException {
+    Thread.sleep(5);
+  }
+
 }
