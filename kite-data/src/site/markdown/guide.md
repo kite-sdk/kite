@@ -272,7 +272,7 @@ _Summary_
     * is stored as Snappy-compressed Avro data files by default,
     or optionally in the column-oriented Parquet file format
     * is made up of zero or more files in a directory.
-* You can work with a subset of Dataset Entities using the `RefineableView` class.
+* You can work with a subset of Dataset Entities using the `Views` API.
 
 A dataset is a collection of zero or more entities. All datasets
 have a name and an associated _dataset descriptor_. The dataset descriptor, as
