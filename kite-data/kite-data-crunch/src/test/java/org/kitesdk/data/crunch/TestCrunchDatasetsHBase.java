@@ -31,6 +31,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -45,6 +46,7 @@ import org.kitesdk.data.hbase.testing.HBaseTestUtils;
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore
 public class TestCrunchDatasetsHBase {
   private static final String testGenericEntity;
 
