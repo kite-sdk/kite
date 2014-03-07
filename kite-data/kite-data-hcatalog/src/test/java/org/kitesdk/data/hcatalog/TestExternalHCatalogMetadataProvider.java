@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.hcatalog;
 
+import java.net.URI;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.TestMetadataProviders;
@@ -37,7 +38,8 @@ public class TestExternalHCatalogMetadataProvider extends TestMetadataProviders 
   @Override
   public MetadataProvider newProvider(Configuration conf) {
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    return new HCatalogExternalMetadataProvider(conf, testDirectory);
+    return new HCatalogExternalMetadataProvider(conf, testDirectory,
+        URI.create("repo:hive:" + testDirectory.toUri().getPath()));
   }
 
   @After

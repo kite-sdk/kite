@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.hcatalog;
 
+import java.net.URI;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.MetadataProviderException;
@@ -30,8 +31,8 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
   private static final Logger logger = LoggerFactory
       .getLogger(HCatalogManagedMetadataProvider.class);
 
-  public HCatalogManagedMetadataProvider(Configuration conf) {
-    super(conf);
+  public HCatalogManagedMetadataProvider(Configuration conf, URI repositoryUri) {
+    super(conf, repositoryUri);
   }
 
   @Override
@@ -44,7 +45,7 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
       throw new MetadataProviderException("Table is not managed");
     }
 
-    return HiveUtils.descriptorForTable(conf, table);
+    return addRepositoryUri(HiveUtils.descriptorForTable(conf, table));
   }
 
   @Override
@@ -70,8 +71,8 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
     // load the created table to get the data location
     final Table newTable = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
 
-    return new DatasetDescriptor.Builder(descriptor)
+    return addRepositoryUri(new DatasetDescriptor.Builder(descriptor)
         .location(newTable.getDataLocation())
-        .build();
+        .build());
   }
 }

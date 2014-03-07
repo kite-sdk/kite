@@ -179,16 +179,16 @@ public class HCatalogDatasetRepository extends AbstractDatasetRepository {
 
       if (rootDirectory != null) {
         // external
-        HCatalogMetadataProvider metadataProvider =
-            new HCatalogExternalMetadataProvider(configuration, rootDirectory);
         URI repositoryUri = getRepositoryUri(configuration, rootDirectory);
+        HCatalogMetadataProvider metadataProvider =
+            new HCatalogExternalMetadataProvider(configuration, rootDirectory, repositoryUri);
         return new HCatalogExternalDatasetRepository(configuration, metadataProvider,
             repositoryUri);
       } else {
         // managed
-        HCatalogMetadataProvider metadataProvider =
-            new HCatalogManagedMetadataProvider(configuration);
         URI repositoryUri = getRepositoryUri(configuration, null);
+        HCatalogMetadataProvider metadataProvider =
+            new HCatalogManagedMetadataProvider(configuration, repositoryUri);
         return new HCatalogDatasetRepository(configuration, metadataProvider, repositoryUri);
       }
     }

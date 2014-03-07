@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.hcatalog;
 
+import java.net.URI;
 import org.apache.avro.generic.GenericData;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -46,7 +47,8 @@ public class TestExternalHCatalogDatasetRepository extends TestFileSystemDataset
 
   @Override
   public MetadataProvider newProvider(Configuration conf) {
-    return new HCatalogExternalMetadataProvider(conf, testDirectory);
+    return new HCatalogExternalMetadataProvider(conf, testDirectory,
+        URI.create("repo:hive:" + testDirectory.toUri().getPath()));
   }
 
   private HiveMetaStoreClient client;
