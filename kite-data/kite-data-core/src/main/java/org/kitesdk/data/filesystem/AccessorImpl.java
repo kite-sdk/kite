@@ -15,7 +15,8 @@
  */
 package org.kitesdk.data.filesystem;
 
-import java.io.IOException;
+import java.util.Iterator;
+
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
@@ -36,11 +37,11 @@ final class AccessorImpl extends Accessor {
   }
 
   @Override
-  public Iterable<Path> getPathIterator(View view) {
+  public Iterator<Path> getDirectoryIterator(View view) {
     if (view instanceof FileSystemView) {
-      return ((FileSystemView) view).pathIterator();
+      return ((FileSystemView<?>) view).dirIterator();
     } else if (view instanceof FileSystemDataset) {
-      return ((FileSystemDataset) view).pathIterator();
+      return ((FileSystemDataset<?>) view).dirIterator();
     } else {
       throw new DatasetException(
           "Underlying Dataset must be a FileSystemDataset");

@@ -16,6 +16,8 @@
 package org.kitesdk.data.filesystem;
 
 import com.google.common.collect.Sets;
+
+import java.util.Iterator;
 import java.util.Set;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.Dataset;
@@ -131,6 +133,15 @@ class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeable<FileS
 
   PathIterator pathIterator() {
     return unbounded.pathIterator();
+  }
+
+  /**
+   * Returns an iterator that provides all leaf-level directories in this view.
+   *
+   * @return leaf-directory iterator
+   */
+  Iterator<Path> dirIterator() {
+    return unbounded.dirIterator();
   }
 
   @Override

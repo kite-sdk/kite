@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.filesystem;
 
+import com.google.common.collect.Lists;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
@@ -408,6 +409,55 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .build())
         .build();
     ds.merge(dsUpdate);
+  }
+
+  @Test
+  public void testPathIterator_Directory() {
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
+        .name("users")
+        .configuration(getConfiguration())
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(USER_SCHEMA)
+            .format(format)
+            .location(testDirectory)
+            .build())
+        .build();
+
+    List<Path> dirPaths = Lists.newArrayList(ds.dirIterator());
+    Assert.assertEquals("dirIterator for non-partitioned dataset should yield a single path.", 1, dirPaths.size());
+    Assert.assertEquals("dirIterator should yield absolute paths.", testDirectory, dirPaths.get(0));
+  }
+
+  @Test
+  public void testPathIterator_Partition_Directory() {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
+        .hash("username", 2).hash("email", 3).build();
+
+    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
+        .name("partitioned-users")
+        .configuration(getConfiguration())
+        .descriptor(new DatasetDescriptor.Builder()
+            .schema(USER_SCHEMA)
+            .format(format)
+            .location(testDirectory)
+            .partitionStrategy(partitionStrategy)
+            .build())
+        .build();
+
+    Assert.assertTrue("Dataset is partitioned", ds.getDescriptor()
+        .isPartitioned());
+    Assert.assertEquals(partitionStrategy, ds.getDescriptor()
+        .getPartitionStrategy());
+
+    writeTestUsers(ds, 10);
+    checkTestUsers(ds, 10);
+
+    List<Path> dirPaths = Lists.newArrayList(ds.dirIterator());
+
+    // 2 user directories * 3 email directories
+    Assert.assertEquals(6, dirPaths.size());
+
+    Assert.assertTrue("dirIterator should yield absolute paths.", dirPaths.get(0).isAbsolute());
   }
 
   @SuppressWarnings("deprecation")

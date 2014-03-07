@@ -60,7 +60,7 @@ public class CrunchDatasets {
     Path directory = Accessor.getDefault().getDirectory(dataset);
     if (directory != null) {
       List<Path> paths = Lists.newArrayList(
-          Accessor.getDefault().getPathIterator(dataset));
+          Accessor.getDefault().getDirectoryIterator(dataset));
 
       AvroType<E> avroType;
       if (type.isAssignableFrom(GenericData.Record.class)) {

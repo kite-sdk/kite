@@ -21,6 +21,7 @@ import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.View;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -65,14 +66,14 @@ public abstract class Accessor {
   public abstract Path getDirectory(Dataset<?> dataset);
 
   /**
-   * Returns an {@code Iterable} that will list all of the data files in the
+   * Returns an {@code Iterator} that will list all of the leaf-level directories in the
    * given {@link View}.
    * @param view a {@code View}
-   * @return An Iterable of all data file paths in the given {@code View}
+   * @return An {@code Iterator} of all leaf-level directory paths in the given {@code View}
    *
-   * @since 0.9.0
+   * @since 0.12.1
    */
-  public abstract Iterable<Path> getPathIterator(View view);
+  public abstract Iterator<Path> getDirectoryIterator(View view);
 
   public abstract void ensureExists(DatasetDescriptor descriptor, Configuration conf);
 
