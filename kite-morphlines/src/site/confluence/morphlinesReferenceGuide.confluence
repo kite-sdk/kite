@@ -195,7 +195,7 @@ The command provides the following configuration options:
 || Property Name || Default || Description ||
 | supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
 | charset | null | The character encoding to use, for example, UTF\-8. If none is specified the charset specified in the \_attachment\_charset input field is used instead. |
-| destination | message | Name of the output field where the line will be stored. |
+| outputField | message | Name of the output field where the line will be stored. |
 
 Example usage:
 {code}
