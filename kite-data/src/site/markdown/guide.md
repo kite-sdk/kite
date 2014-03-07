@@ -239,7 +239,7 @@ following table lists the supported URI formats. See the
 | --- | --- |
 | Local filesystem | `repo:file:[path]` |
 | HDFS | `repo:hdfs://[host]:[port]/[path]` |
-| Hive/HCatalog with managed tables | `repo:hive` or `repo:hive://[metastore-host]:[metastore-port]/` |
+| Hive/HCatalog with managed tables | `repo:hive` or `repo:hive://[metastore-host]:[metastore-port]` |
 | Hive/HCatalog with external tables | `repo:hive://[ms-host]:[ms-port]/[path]?hdfs-host=[host]&hdfs-port=[port]` |
 | HBase (random access) | `repo:hbase:[zookeeper-host1],[zookeeper-host2],[zookeeper-host3]` |
 
@@ -738,23 +738,21 @@ These are some practical examples of using Kite tools when working with Datasets
 
 #### Creating Dataset Views
 
-Views apply logical constraints that allow you to work with a subset of a dataset.
+Views represent subsets of the `Entity` objects in a `Dataset`. A `View` has the same type parameter as the `Dataset` it is a subset of, and can produce `DatasetReader` and `DatasetWriter` instances for its subset. The readers for a View will not return any entites that are not included in it. Similarly, the writer for a View will reject any entities that are not included.
 
-Views provide a collection of methods that you can implement to process and analyze a subset of `Entity` objects from an existing `Dataset`. It provides functionality similar to SQL constraints.
+You build a View by calling methods that add a logical constraint to an existing View, starting with a `Dataset` as a `View` of all its entities. By chaining these method calls, you build views with more constraints that entities must satisfy to be included. This provides functionality similar to SQL constraints.
 
 For example, the following code snippet constrains a dataset to users whose favorite color is orange (this is an equality constraint).
 
- View<User> orange = users.with(“favoriteColor”, “orange”)
+    View<User> orange = users.with(“favoriteColor”, “orange”)
 
-The following snippet demonstrates how you define a View by taking an existing Dataset (or an existing View) and adding another constraint to refine it. You can chain additional methods to get to the final View. In this case, the code takes a subset of the `events` view from (greater than or equal to) October 4, to (less than or equal to) April 10.
+The next snippet demonstrates how you define a View by taking an existing Dataset (or an existing View) and chaining another constraint to refine it. Any View can be further refined using the constraint methods. In this case, the code takes a subset of the `events` view from (greater than or equal to) October 4, to (less than or equal to) April 10.
 
- long OCT_4 = new org.joda.time.DateTime(2012, 10, 4, 0, 0).getMillis();
+    long OCT_4 = new org.joda.time.DateTime(2012, 10, 4, 0, 0).getMillis();
+    long APR_10 = new org.joda.time.DateTime(2013, 4, 10, 0, 0).getMillis();
+    View<Event> v = events.from(“timestamp”, OCT_4).to(“timestamp”, APR_10);
 
- long APR_10 = new org.joda.time.DateTime(2013, 4, 10, 0, 0).getMillis();
-
- View<Event> v = events.from(“timestamp”, OCT_4).to(“timestamp”, APR_10);
-
-The `fromAfter` and `toBefore` methods are similar to `from` and `to`, but do not contain the end point values.
+The `fromAfter` and `toBefore` methods are similar to `from` and `to`, but do not contain the end point values (strict less than and strict greater than).
 
 The [RefinableView interface][refin] defines these methods.
 
