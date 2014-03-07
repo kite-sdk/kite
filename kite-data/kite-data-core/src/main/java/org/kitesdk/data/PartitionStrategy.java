@@ -16,6 +16,8 @@
 package org.kitesdk.data;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
+import java.util.Set;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
 import org.kitesdk.data.spi.partition.HourFieldPartitioner;
 import org.kitesdk.data.spi.partition.MinuteFieldPartitioner;
@@ -40,6 +42,8 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.partition.YearFieldPartitioner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -64,6 +68,8 @@ import org.kitesdk.data.spi.partition.YearFieldPartitioner;
  */
 @Immutable
 public class PartitionStrategy {
+
+  private static final Logger LOG = LoggerFactory.getLogger(PartitionStrategy.class);
 
   private final List<FieldPartitioner> fieldPartitioners;
 
@@ -248,7 +254,8 @@ public class PartitionStrategy {
    */
   public static class Builder {
 
-    private List<FieldPartitioner> fieldPartitioners = Lists.newArrayList();
+    private final List<FieldPartitioner> fieldPartitioners = Lists.newArrayList();
+    private final Set<String> names = Sets.newHashSet();
 
     /**
      * Configure a hash partitioner with the specified number of {@code buckets}
@@ -265,7 +272,7 @@ public class PartitionStrategy {
      * @return An instance of the builder for method chaining.
      */
     public Builder hash(String sourceName, int buckets) {
-      fieldPartitioners.add(new HashFieldPartitioner(sourceName, buckets));
+      add(new HashFieldPartitioner(sourceName, buckets));
       return this;
     }
 
@@ -284,7 +291,7 @@ public class PartitionStrategy {
      * @since 0.3.0
      */
     public Builder hash(String sourceName, String name, int buckets) {
-      fieldPartitioners.add(new HashFieldPartitioner(sourceName, name, buckets));
+      add(new HashFieldPartitioner(sourceName, name, buckets));
       return this;
     }
 
@@ -314,7 +321,7 @@ public class PartitionStrategy {
     @Deprecated
     @SuppressWarnings("unchecked")
     public <S> Builder identity(String sourceName, Class<S> type, int buckets) {
-      fieldPartitioners.add(new IdentityFieldPartitioner(
+      add(new IdentityFieldPartitioner(
           sourceName, sourceName + "_copy", type, buckets));
       return this;
     }
@@ -341,8 +348,7 @@ public class PartitionStrategy {
     @SuppressWarnings("unchecked")
     public <S> Builder identity(String sourceName, String name, Class<S> type,
                                 int buckets) {
-      fieldPartitioners.add(
-          new IdentityFieldPartitioner(sourceName, name, type, buckets));
+      add(new IdentityFieldPartitioner(sourceName, name, type, buckets));
       return this;
     }
 
@@ -362,7 +368,7 @@ public class PartitionStrategy {
      * @see IntRangeFieldPartitioner
      */
     public Builder range(String sourceName, int... upperBounds) {
-      fieldPartitioners.add(new IntRangeFieldPartitioner(sourceName, upperBounds));
+      add(new IntRangeFieldPartitioner(sourceName, upperBounds));
       return this;
     }
 
@@ -381,7 +387,7 @@ public class PartitionStrategy {
      * @return An instance of the builder for method chaining.
      */
     public Builder range(String sourceName, String... upperBounds) {
-      fieldPartitioners.add(new RangeFieldPartitioner(sourceName, upperBounds));
+      add(new RangeFieldPartitioner(sourceName, upperBounds));
       return this;
     }
 
@@ -398,7 +404,7 @@ public class PartitionStrategy {
      * @since 0.3.0
      */
     public Builder year(String sourceName, String name) {
-      fieldPartitioners.add(new YearFieldPartitioner(sourceName, name));
+      add(new YearFieldPartitioner(sourceName, name));
       return this;
     }
 
@@ -413,7 +419,7 @@ public class PartitionStrategy {
      * @since 0.8.0
      */
     public Builder year(String sourceName) {
-      fieldPartitioners.add(new YearFieldPartitioner(sourceName));
+      add(new YearFieldPartitioner(sourceName));
       return this;
     }
 
@@ -430,7 +436,7 @@ public class PartitionStrategy {
      * @since 0.3.0
      */
     public Builder month(String sourceName, String name) {
-      fieldPartitioners.add(new MonthFieldPartitioner(sourceName, name));
+      add(new MonthFieldPartitioner(sourceName, name));
       return this;
     }
 
@@ -445,7 +451,7 @@ public class PartitionStrategy {
      * @since 0.8.0
      */
     public Builder month(String sourceName) {
-      fieldPartitioners.add(new MonthFieldPartitioner(sourceName));
+      add(new MonthFieldPartitioner(sourceName));
       return this;
     }
 
@@ -462,7 +468,7 @@ public class PartitionStrategy {
      * @since 0.3.0
      */
     public Builder day(String sourceName, String name) {
-      fieldPartitioners.add(new DayOfMonthFieldPartitioner(sourceName, name));
+      add(new DayOfMonthFieldPartitioner(sourceName, name));
       return this;
     }
 
@@ -477,7 +483,7 @@ public class PartitionStrategy {
      * @since 0.8.0
      */
     public Builder day(String sourceName) {
-      fieldPartitioners.add(new DayOfMonthFieldPartitioner(sourceName));
+      add(new DayOfMonthFieldPartitioner(sourceName));
       return this;
     }
 
@@ -494,7 +500,7 @@ public class PartitionStrategy {
      * @since 0.3.0
      */
     public Builder hour(String sourceName, String name) {
-      fieldPartitioners.add(new HourFieldPartitioner(sourceName, name));
+      add(new HourFieldPartitioner(sourceName, name));
       return this;
     }
 
@@ -509,7 +515,7 @@ public class PartitionStrategy {
      * @since 0.8.0
      */
     public Builder hour(String sourceName) {
-      fieldPartitioners.add(new HourFieldPartitioner(sourceName));
+      add(new HourFieldPartitioner(sourceName));
       return this;
     }
 
@@ -526,7 +532,7 @@ public class PartitionStrategy {
      * @since 0.3.0
      */
     public Builder minute(String sourceName, String name) {
-      fieldPartitioners.add(new MinuteFieldPartitioner(sourceName, name));
+      add(new MinuteFieldPartitioner(sourceName, name));
       return this;
     }
 
@@ -541,7 +547,7 @@ public class PartitionStrategy {
      * @since 0.8.0
      */
     public Builder minute(String sourceName) {
-      fieldPartitioners.add(new MinuteFieldPartitioner(sourceName));
+      add(new MinuteFieldPartitioner(sourceName));
       return this;
     }
 
@@ -559,7 +565,7 @@ public class PartitionStrategy {
      * @since 0.9.0
      */
     public Builder dateFormat(String sourceName, String name, String format) {
-      fieldPartitioners.add(PartitionFunctions.dateFormat(sourceName, name, format));
+      add(PartitionFunctions.dateFormat(sourceName, name, format));
       return this;
     }
 
@@ -574,6 +580,25 @@ public class PartitionStrategy {
      */
     public PartitionStrategy build() {
       return new PartitionStrategy(fieldPartitioners);
+    }
+
+    private void add(FieldPartitioner fp) {
+      // in 0.14.0, change to a Precondition
+      //Preconditions.checkArgument(!names.contains(fp.getSourceName()),
+      //    "Source name conflicts with an existing field or partition name");
+      //Preconditions.checkArgument(!names.contains(fp.getName()),
+      //    "Partition name conflicts with an existing field or partition name");
+      if (names.contains(fp.getSourceName())) {
+        LOG.warn(
+            "Source name conflicts with an existing field or partition name");
+      }
+      if (names.contains(fp.getName())) {
+        LOG.warn(
+            "Partition name conflicts with an existing field or partition name");
+      }
+      fieldPartitioners.add(fp);
+      names.add(fp.getSourceName());
+      names.add(fp.getName());
     }
   }
 
