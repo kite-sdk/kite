@@ -29,6 +29,7 @@ import java.net.URI;
 import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.kitesdk.data.hcatalog.impl.HCatalog;
 
 /**
  * This verifies that the URI system returns correctly configured repositories.
