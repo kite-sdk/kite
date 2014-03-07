@@ -29,6 +29,7 @@ import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.kitesdk.data.hcatalog.impl.HCatalog;
 
 public class TestManagedHCatalogDatasetRepository extends TestFileSystemDatasetRepository {
 

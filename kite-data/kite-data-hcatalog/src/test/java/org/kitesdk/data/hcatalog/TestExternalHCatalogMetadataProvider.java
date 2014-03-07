@@ -26,6 +26,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Test;
+import org.kitesdk.data.hcatalog.impl.HCatalog;
 
 public class TestExternalHCatalogMetadataProvider extends TestMetadataProviders {
 

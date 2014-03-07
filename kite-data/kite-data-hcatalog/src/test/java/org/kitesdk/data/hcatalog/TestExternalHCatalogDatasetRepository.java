@@ -17,7 +17,6 @@
 package org.kitesdk.data.hcatalog;
 
 import java.net.URI;
-import org.apache.avro.generic.GenericData;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
@@ -36,7 +35,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.kitesdk.data.filesystem.impl.Accessor;
+import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.Mergeable;
 
 public class TestExternalHCatalogDatasetRepository extends TestFileSystemDatasetRepository {

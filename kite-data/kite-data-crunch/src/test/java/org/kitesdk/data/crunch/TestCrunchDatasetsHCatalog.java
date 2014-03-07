@@ -1,11 +1,11 @@
-/*
- * Copyright 2013 Cloudera.
+/**
+ * Copyright 2014 Cloudera Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,34 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.kitesdk.data.crunch;
 
-package org.kitesdk.data.hcatalog;
-
-import java.net.URI;
-import org.kitesdk.data.MetadataProvider;
-import org.kitesdk.data.TestMetadataProviders;
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.junit.After;
+import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
+import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
 
-public class TestManagedHCatalogMetadataProvider extends TestMetadataProviders {
-
-  public TestManagedHCatalogMetadataProvider(boolean distributed) {
-    super(distributed);
+public class TestCrunchDatasetsHCatalog extends TestCrunchDatasets {
+  public TestCrunchDatasetsHCatalog(FileSystem fs) {
+    super(fs);
   }
 
   @Override
-  public MetadataProvider newProvider(Configuration conf) {
-    return new HCatalogManagedMetadataProvider(conf, URI.create("repo:hive"));
+  public DatasetRepository newRepo() {
+    return new HCatalogDatasetRepository.Builder()
+        .configuration(fileSystem.getConf())
+        .rootDirectory(testDirectory).build();
   }
 
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    HCatalog hcat = new HCatalog(conf);
+    HCatalog hcat = new HCatalog(fileSystem.getConf());
     for (String tableName : hcat.getAllTables("default")) {
       hcat.dropTable("default", tableName);
     }
   }
-
 }
