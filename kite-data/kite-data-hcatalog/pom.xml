@@ -108,11 +108,6 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- TODO: this move into Hive, change when updating versions -->
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>parquet-hive</artifactId>
-    </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
