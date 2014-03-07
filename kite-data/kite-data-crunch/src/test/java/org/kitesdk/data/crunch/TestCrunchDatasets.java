@@ -45,6 +45,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
 
 import static org.kitesdk.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
 import static org.kitesdk.data.filesystem.DatasetTestUtilities.checkTestUsers;
@@ -123,6 +124,35 @@ public class TestCrunchDatasets extends MiniDFSTest {
     pipeline.run();
 
     checkTestUsers(outputDataset, 10);
+  }
+
+  @Test
+  public void testHive() throws IOException {
+    Path testDirectory = fileSystem.makeQualified(
+        new Path(Files.createTempDir().getAbsolutePath()));
+    DatasetRepository hiveRepo = new HCatalogDatasetRepository.Builder()
+        .configuration(fileSystem.getConf())
+        .rootDirectory(testDirectory).build();
+
+    Dataset<Record> inputDataset = hiveRepo.create("in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+    Dataset<Record> outputDataset = hiveRepo.create("out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+
+    // write two files, each of 5 records
+    writeTestUsers(inputDataset, 5, 0);
+    writeTestUsers(inputDataset, 5, 5);
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputDataset, GenericData.Record.class));
+    pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
+    pipeline.run();
+
+    checkTestUsers(outputDataset, 10);
+
+    hiveRepo.delete("in");
+    hiveRepo.delete("out");
   }
 
   @Test
