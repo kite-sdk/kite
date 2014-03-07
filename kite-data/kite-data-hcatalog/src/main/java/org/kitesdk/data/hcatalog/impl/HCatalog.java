@@ -53,7 +53,7 @@ public final class HCatalog {
         table = HCatUtil.getTable(client, dbName, tableName);
       }
     } catch (RuntimeException e) {
-        throw new RuntimeException("Hive metastore exception", e);
+        throw e;
     } catch (Exception e) {
       throw new DatasetNotFoundException("Hive table lookup exception", e);
     }
@@ -90,7 +90,7 @@ public final class HCatalog {
         client.alter_table(tbl.getDbName(), tbl.getTableName(), tbl.getTTable());
       }
     } catch (RuntimeException e) {
-        throw new RuntimeException("Hive metastore exception", e);
+        throw e;
     } catch (Exception e) {
       throw new RuntimeException("Hive alter table exception", e);
     }
@@ -103,7 +103,7 @@ public final class HCatalog {
           true /* ignoreUnknownTable */);
       }
     } catch (RuntimeException e) {
-        throw new RuntimeException("Hive metastore exception", e);
+        throw e;
     } catch (Exception e) {
       throw new RuntimeException("Hive metastore exception", e);
     }
@@ -120,7 +120,7 @@ public final class HCatalog {
     } catch (AlreadyExistsException e) {
       // this is okay
     } catch (RuntimeException e) {
-      throw new RuntimeException("Hive metastore exception", e);
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException("Hive metastore exception", e);
     }
