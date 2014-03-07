@@ -188,13 +188,14 @@ This maven module contains standard I/O commands for tasks such as acting on sin
 
 h2. readClob
 
-The {{readClob}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdio/ReadClobBuilder.java]) converts bytes to a string. It emits one record for the entire input stream of the first attachment, interpreting the stream as a Character Large Object (CLOB). The line is put as a string into the {{message}} output field.
+The {{readClob}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdio/ReadClobBuilder.java]) converts bytes to a string. It emits one record for the entire input stream of the first attachment, interpreting the stream as a Character Large Object (CLOB). The line is put as a string into the {{message}} output field by default.
 
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
 | charset | null | The character encoding to use, for example, UTF\-8. If none is specified the charset specified in the \_attachment\_charset input field is used instead. |
+| destination | message | Name of the output field where the line will be stored. |
 
 Example usage:
 {code}

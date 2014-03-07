@@ -53,13 +53,17 @@ public final class ReadClobBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class ReadClob extends AbstractParser {
 
+    private final static String DEFAULT_DESTINATION_FIELD = Fields.MESSAGE;
+
     private final Charset charset;
+    private final String destination;
     private final char[] buffer = new char[8192];
     private StringBuilder clob; 
     private int counter = 0;
   
     public ReadClob(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);
+      this.destination = getConfigs().getString(config, "destination", DEFAULT_DESTINATION_FIELD);
       this.charset = getConfigs().getCharset(config, "charset", null);
       validateArguments();
     }
@@ -79,7 +83,7 @@ public final class ReadClobBuilder implements CommandBuilder {
       }
       Record outputRecord = inputRecord.copy();
       removeAttachments(outputRecord);
-      outputRecord.replaceValues(Fields.MESSAGE, clob.toString());
+      outputRecord.replaceValues(destination, clob.toString());
         
       // pass record to next command in chain:
       return getChild().process(outputRecord);
