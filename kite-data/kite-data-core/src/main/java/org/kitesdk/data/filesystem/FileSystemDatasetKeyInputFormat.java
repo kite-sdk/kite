@@ -67,7 +67,7 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
   }
 
   private void setInputPaths(JobContext jobContext, Job job) throws IOException {
-    List<Path> paths = Lists.newArrayList(Accessor.getDefault().getPathIterator(dataset));
+    List<Path> paths = Lists.newArrayList(Accessor.getDefault().getDirectoryIterator(dataset));
     FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
     // the following line is needed for Hadoop 1, otherwise the paths are not set
     jobContext.getConfiguration().set("mapred.input.dir", job.getConfiguration().get("mapred.input.dir"));

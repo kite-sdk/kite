@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.filesystem;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
 import org.kitesdk.data.DatasetDescriptor;
@@ -31,6 +32,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.IOException;
 
@@ -102,6 +104,27 @@ class FileSystemView<E> extends AbstractRefinableView<E> {
           Pair.of((StorageKey) null, root));
     }
     return new PathIterator(fs, root, directories);
+  }
+
+  /**
+   * Returns an iterator that provides all leaf-level directories in this view.
+   *
+   * @return leaf-directory iterator
+   */
+  Iterator<Path> dirIterator() {
+    if (dataset.getDescriptor().isPartitioned()) {
+      return Iterators.transform(partitionIterator(), new Function<Pair<StorageKey, Path>, Path>() {
+        @Override
+        @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+            value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+            justification="False positive, initialized above as non-null.")
+        public Path apply(@Nullable Pair<StorageKey, Path> input) {
+          return new Path(root, input.second());
+        }
+      });
+    } else {
+      return Iterators.singletonIterator(root);
+    }
   }
 
   private FileSystemPartitionIterator partitionIterator() {
