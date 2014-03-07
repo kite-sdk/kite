@@ -71,7 +71,7 @@ public class Loader implements Loadable {
       }
       final FileSystem fs;
       try {
-        fs = FileSystem.get(fileSystemURI("hdfs", match), envConf);
+        fs = FileSystem.get(fileSystemURI(match), envConf);
       } catch (IOException ex) {
         throw new DatasetRepositoryException(
             "Could not get a FileSystem", ex);
@@ -165,7 +165,7 @@ public class Loader implements Loadable {
         new URIPattern(URI.create("hive:*path")), externalBuilder);
   }
 
-  private static URI fileSystemURI(String scheme, Map<String, String> match) {
+  private static URI fileSystemURI(Map<String, String> match) {
     final String userInfo;
     if (match.containsKey("username")) {
       if (match.containsKey("password")) {
@@ -178,16 +178,20 @@ public class Loader implements Loadable {
       userInfo = null;
     }
     try {
-      int port = UNSPECIFIED_PORT;
-      if (match.containsKey("hdfs-port")) {
-        try {
-          port = Integer.parseInt(match.get("hdfs-port"));
-        } catch (NumberFormatException e) {
-          port = UNSPECIFIED_PORT;
+      if (match.containsKey("hdfs-host")) {
+        int port = UNSPECIFIED_PORT;
+        if (match.containsKey("hdfs-port")) {
+          try {
+            port = Integer.parseInt(match.get("hdfs-port"));
+          } catch (NumberFormatException e) {
+            port = UNSPECIFIED_PORT;
+          }
         }
+        return new URI("hdfs", userInfo, match.get("hdfs-host"),
+            port, "/", null, null);
+      } else {
+        return new URI("file", userInfo, "", UNSPECIFIED_PORT, "/", null, null);
       }
-      return new URI(scheme, userInfo, match.get("hdfs-host"),
-          port, "/", null, null);
     } catch (URISyntaxException ex) {
       throw new DatasetRepositoryException("Could not build FS URI", ex);
     }
