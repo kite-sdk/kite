@@ -29,6 +29,7 @@ import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.kitesdk.data.hcatalog.impl.HCatalog;
 
 public class TestManagedHCatalogDatasetRepository extends TestFileSystemDatasetRepository {
 
@@ -43,7 +44,7 @@ public class TestManagedHCatalogDatasetRepository extends TestFileSystemDatasetR
 
   @Override
   public MetadataProvider newProvider(Configuration conf) {
-    return new HCatalogManagedMetadataProvider(conf);
+    return new HCatalogManagedMetadataProvider(conf, URI.create("repo:hive"));
   }
 
   private HiveMetaStoreClient client;

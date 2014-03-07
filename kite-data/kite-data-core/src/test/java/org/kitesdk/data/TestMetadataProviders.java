@@ -283,21 +283,19 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
         .build();
 
     DatasetDescriptor created = provider.create(NAME, descriptorWithProp);
-    junit.framework.Assert.assertTrue("Should have custom property",
+    Assert.assertTrue("Should have custom property",
         created.hasProperty(propName));
-    junit.framework.Assert.assertEquals(
-        "Should have correct custom property value",
+    Assert.assertEquals("Should have correct custom property value",
         propValue, created.getProperty(propName));
-    junit.framework.Assert.assertEquals("Should correctly list property names",
-        Sets.newHashSet(propName), created.listProperties());
+    Assert.assertTrue("List should contain property name",
+        created.listProperties().contains(propName));
 
     DatasetDescriptor loaded = provider.load(NAME);
-    junit.framework.Assert.assertTrue("Should have custom property",
+    Assert.assertTrue("Should have custom property",
         loaded.hasProperty(propName));
-    junit.framework.Assert.assertEquals(
-        "Should have correct custom property value",
+    Assert.assertEquals("Should have correct custom property value",
         propValue, loaded.getProperty(propName));
-    junit.framework.Assert.assertEquals("Should correctly list property names",
-        Sets.newHashSet(propName), loaded.listProperties());
+    Assert.assertTrue("List should contain property name",
+        created.listProperties().contains(propName));
   }
 }

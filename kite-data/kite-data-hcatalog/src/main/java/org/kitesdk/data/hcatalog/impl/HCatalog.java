@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.hcatalog.impl;
 
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
@@ -24,11 +24,10 @@ import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hcatalog.common.HCatUtil;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.MetadataProviderException;
-import org.kitesdk.data.hcatalog.impl.Loader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class HCatalog {
+public final class HCatalog {
 
   private static final Logger LOG = LoggerFactory.getLogger(HCatalog.class);
 

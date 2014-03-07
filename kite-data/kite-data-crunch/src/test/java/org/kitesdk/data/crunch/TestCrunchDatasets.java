@@ -21,6 +21,7 @@ import java.util.Collection;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.After;
 import org.junit.Assume;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -29,6 +30,7 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
+import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
@@ -45,6 +47,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
 
 import static org.kitesdk.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
 import static org.kitesdk.data.filesystem.DatasetTestUtilities.checkTestUsers;
@@ -52,7 +55,7 @@ import static org.kitesdk.data.filesystem.DatasetTestUtilities.datasetSize;
 import static org.kitesdk.data.filesystem.DatasetTestUtilities.writeTestUsers;
 
 @RunWith(Parameterized.class)
-public class TestCrunchDatasets extends MiniDFSTest {
+public abstract class TestCrunchDatasets extends MiniDFSTest {
 
   @Parameterized.Parameters
   public static Collection<Object[]> data() throws IOException {
@@ -64,20 +67,26 @@ public class TestCrunchDatasets extends MiniDFSTest {
     return Arrays.asList(data);
   }
 
-  private FileSystem fileSystem;
+  protected FileSystem fileSystem;
+  protected Path testDirectory;
   private DatasetRepository repo;
 
   public TestCrunchDatasets(FileSystem fs) {
     this.fileSystem = fs;
+    testDirectory = fileSystem.makeQualified(
+        new Path(Files.createTempDir().getAbsolutePath()));
   }
+
+  abstract public DatasetRepository newRepo();
 
   @Before
   public void setUp() throws Exception {
-    Path testDirectory = fileSystem.makeQualified(
-        new Path(Files.createTempDir().getAbsolutePath()));
-    this.repo = new FileSystemDatasetRepository.Builder()
-        .configuration(fileSystem.getConf())
-        .rootDirectory(testDirectory).build();
+    this.repo = newRepo();
+  }
+
+  @After
+  public void tearDown() throws IOException {
+    fileSystem.delete(testDirectory, true);
   }
 
   @Test

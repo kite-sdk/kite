@@ -128,6 +128,13 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hcatalog</artifactId>
+      <version>0.11.1-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-mapreduce</artifactId>
       <version>0.11.1-SNAPSHOT</version>
     </dependency>
@@ -184,6 +191,12 @@
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase</artifactId>
       <classifier>tests</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hcatalog</groupId>
+      <artifactId>hcatalog-core</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

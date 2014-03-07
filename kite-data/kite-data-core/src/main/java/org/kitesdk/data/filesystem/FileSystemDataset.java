@@ -294,7 +294,7 @@ class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeable<FileS
       } catch (IOException e) {
         throw new DatasetIOException("Dataset merge failed", e);
       }
-      if (partitionListener != null) {
+      if (descriptor.isPartitioned() && partitionListener != null) {
         String partition = newPartitionDirectory.toString();
         if (!addedPartitions.contains(partition)) {
           partitionListener.partitionAdded(name, partition);
