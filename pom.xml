@@ -462,7 +462,7 @@
           <version>${vers.maven-surefire-plugin}</version>
           <configuration>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
-            <argLine>-Xmx256m</argLine>
+            <argLine>-Xmx256m -XX:MaxPermSize=128m</argLine>
           </configuration>
         </plugin>
         <plugin>
