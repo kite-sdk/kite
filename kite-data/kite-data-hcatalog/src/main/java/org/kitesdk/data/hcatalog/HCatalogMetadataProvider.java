@@ -17,11 +17,14 @@
 package org.kitesdk.data.hcatalog;
 
 import com.google.common.base.Preconditions;
+import java.net.URI;
 import java.util.Collection;
+import javax.management.Descriptor;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
+import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.kitesdk.data.spi.AbstractMetadataProvider;
 import org.kitesdk.data.spi.PartitionListener;
 import org.slf4j.Logger;
@@ -34,11 +37,14 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
       .getLogger(HCatalogMetadataProvider.class);
 
   protected final Configuration conf;
+  private final URI repositoryUri;
   private HCatalog hcat;
 
-  HCatalogMetadataProvider(Configuration conf) {
-    Preconditions.checkArgument(conf != null, "Configuration cannot be null");
+  HCatalogMetadataProvider(Configuration conf, URI repositoryUri) {
+    Preconditions.checkNotNull(conf, "Configuration cannot be null");
+    Preconditions.checkNotNull(repositoryUri, "Repository URI cannot be null");
     this.conf = conf;
+    this.repositoryUri = repositoryUri;
   }
 
   protected HCatalog getHcat() {
@@ -46,6 +52,16 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
       hcat = new HCatalog(conf);
     }
     return hcat;
+  }
+
+  protected DatasetDescriptor addRepositoryUri(DatasetDescriptor descriptor) {
+    if (repositoryUri == null) {
+      return descriptor;
+    }
+    return new DatasetDescriptor.Builder(descriptor)
+        .property(AbstractDatasetRepository.REPOSITORY_URI_PROPERTY_NAME,
+            repositoryUri.toString())
+        .build();
   }
 
   @Override
@@ -61,7 +77,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
     Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
     HiveUtils.updateTableSchema(table, descriptor);
     getHcat().alterTable(table);
-    return descriptor;
+    return addRepositoryUri(descriptor);
   }
 
   @Override

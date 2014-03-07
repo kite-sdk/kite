@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.hcatalog;
 
+import java.net.URI;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.MetadataProviderException;
@@ -36,8 +37,8 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
   private final Path rootDirectory;
   private final FileSystem rootFileSystem;
 
-  public HCatalogExternalMetadataProvider(Configuration conf, Path rootDirectory) {
-    super(conf);
+  public HCatalogExternalMetadataProvider(Configuration conf, Path rootDirectory, URI repositoryUri) {
+    super(conf, repositoryUri);
     Preconditions.checkArgument(rootDirectory != null, "Root cannot be null");
 
     try {
@@ -60,7 +61,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
           "Table is not external, type:" + table.getTableType());
     }
 
-    return HiveUtils.descriptorForTable(conf, table);
+    return addRepositoryUri(HiveUtils.descriptorForTable(conf, table));
   }
 
   @Override
@@ -92,7 +93,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
     // assign the location of the the table
     getHcat().createTable(table);
 
-    return newDescriptor;
+    return addRepositoryUri(newDescriptor);
   }
 
   private Path pathForDataset(String name) {
