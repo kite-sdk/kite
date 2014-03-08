@@ -74,7 +74,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> {
     if (dataset.getDescriptor().isPartitioned()) {
       return new PartitionedDatasetWriter<E>(this);
     } else {
-      return FileSystemWriters.newFileWriter(fs, root, dataset.getDescriptor());
+      return new FileSystemWriter<E>(fs, root, dataset.getDescriptor());
     }
   }
 

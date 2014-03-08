@@ -169,7 +169,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
 
       FileSystemDataset dataset = (FileSystemDataset) view.getDataset();
       Path partition = convert.fromKey(key);
-      DatasetWriter<E> writer = FileSystemWriters.newFileWriter(
+      DatasetWriter<E> writer = new FileSystemWriter<E>(
           dataset.getFileSystem(),
           new Path(dataset.getDirectory(), partition),
           dataset.getDescriptor());

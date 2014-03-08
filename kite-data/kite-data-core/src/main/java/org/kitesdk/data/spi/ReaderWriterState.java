@@ -22,5 +22,5 @@ package org.kitesdk.data.spi;
  * @since 0.9.0
  */
 public enum ReaderWriterState {
-  NEW, OPEN, CLOSED
+  NEW, OPEN, CLOSED, ERROR
 }
