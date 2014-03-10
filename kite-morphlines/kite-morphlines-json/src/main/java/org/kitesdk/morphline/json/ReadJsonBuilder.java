@@ -102,15 +102,16 @@ public final class ReadJsonBuilder implements CommandBuilder {
 
     @Override
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
+      Record template = inputRecord.copy();
+      removeAttachments(template);
       MappingIterator iter = reader.readValues(in);
       try {
         while (iter.hasNextValue()) {
           Object rootNode = iter.nextValue();
           incrementNumRecords();
-          LOG.debug("jsonObject: {}", rootNode);
+          LOG.trace("jsonObject: {}", rootNode);
           
-          Record outputRecord = inputRecord.copy();
-          removeAttachments(outputRecord);
+          Record outputRecord = template.copy();
           outputRecord.put(Fields.ATTACHMENT_BODY, rootNode);
           outputRecord.put(Fields.ATTACHMENT_MIME_TYPE, MIME_TYPE);
   
