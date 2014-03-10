@@ -49,6 +49,7 @@ class FileSystemWriter<E> implements DatasetWriter<E> {
   private Path tempPath;
   private Path finalPath;
   private ReaderWriterState state;
+  private int count = 0;
 
   public FileSystemWriter(FileSystem fs, Path path, DatasetDescriptor descriptor) {
     Preconditions.checkNotNull(fs, "File system is not defined");
@@ -85,6 +86,8 @@ class FileSystemWriter<E> implements DatasetWriter<E> {
       throw new DatasetIOException("Failed to open appender " + appender, e);
     }
 
+    this.count = 0;
+
     LOG.debug("Opened appender {} for {}", appender, finalPath);
 
     this.state = ReaderWriterState.OPEN;
@@ -97,6 +100,7 @@ class FileSystemWriter<E> implements DatasetWriter<E> {
 
     try {
       appender.append(entity);
+      count += 1;
     } catch (IOException e) {
       this.state = ReaderWriterState.ERROR;
       throw new DatasetIOException(
@@ -126,17 +130,35 @@ class FileSystemWriter<E> implements DatasetWriter<E> {
         throw new DatasetIOException("Failed to close appender " + appender, e);
       }
 
-      try {
-        if (!fs.rename(tempPath, finalPath)) {
+      if (count > 0) {
+        // commit the temp file
+        try {
+          if (!fs.rename(tempPath, finalPath)) {
+            this.state = ReaderWriterState.ERROR;
+            throw new DatasetWriterException(
+                "Failed to move " + tempPath + " to " + finalPath);
+          }
+        } catch (IOException e) {
           this.state = ReaderWriterState.ERROR;
-          throw new DatasetWriterException(
-              "Failed to move " + tempPath + " to " + finalPath);
+          throw new DatasetIOException("Failed to commit " + finalPath, e);
         }
-      } catch (IOException e) {
-        this.state = ReaderWriterState.ERROR;
-        throw new DatasetIOException("Failed to commit " + finalPath, e);
+
+        LOG.debug("Committed {} for appender {}", finalPath, appender);
+      } else {
+        // discard the temp file
+        try {
+          if (!fs.delete(tempPath, true)) {
+            this.state = ReaderWriterState.ERROR;
+            throw new DatasetWriterException("Failed to delete " + tempPath);
+          }
+        } catch (IOException e) {
+          this.state = ReaderWriterState.ERROR;
+          throw new DatasetIOException(
+              "Failed to remove temporary file " + tempPath, e);
+        }
+
+        LOG.debug("Discarded {} ({} entities)", tempPath, count);
       }
-      LOG.debug("Committed {} for appender {}", finalPath, appender);
       this.state = ReaderWriterState.CLOSED;
 
     } else if (state.equals(ReaderWriterState.ERROR)) {
