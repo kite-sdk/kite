@@ -120,7 +120,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
     @Override
     public void setupTask(TaskAttemptContext taskContext) {
-      createTaskAttemptDataset(taskContext);
+      // do nothing: the task attempt dataset is created in getRecordWriter
     }
 
     @Override
@@ -131,10 +131,12 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     @Override
     @SuppressWarnings("unchecked")
     public void commitTask(TaskAttemptContext taskContext) throws IOException {
-      Dataset<E> jobDataset = loadJobDataset(taskContext);
       Dataset<E> taskAttemptDataset = loadTaskAttemptDataset(taskContext);
-      ((Mergeable<Dataset<E>>) jobDataset).merge(taskAttemptDataset);
-      deleteTaskAttemptDataset(taskContext);
+      if (taskAttemptDataset != null) {
+        Dataset<E> jobDataset = loadJobDataset(taskContext);
+        ((Mergeable<Dataset<E>>) jobDataset).merge(taskAttemptDataset);
+        deleteTaskAttemptDataset(taskContext);
+      }
     }
 
     @Override
@@ -149,7 +151,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     Dataset<E> dataset = loadDataset(taskAttemptContext);
 
     if (usePerTaskAttemptDatasets(dataset)) {
-      dataset = loadTaskAttemptDataset(taskAttemptContext);
+      dataset = loadOrCreateTaskAttemptDataset(taskAttemptContext);
     }
 
     // TODO: the following should generalize with views
@@ -223,21 +225,32 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     repo.delete(getJobDatasetName(jobContext));
   }
 
-  private static <E> Dataset<E> createTaskAttemptDataset(TaskAttemptContext taskContext) {
+  private static <E> Dataset<E> loadOrCreateTaskAttemptDataset(TaskAttemptContext taskContext) {
     Dataset<Object> dataset = loadDataset(taskContext);
     String taskAttemptDatasetName = getTaskAttemptDatasetName(taskContext);
     DatasetRepository repo = getDatasetRepository(taskContext);
-    return repo.create(taskAttemptDatasetName, copy(dataset.getDescriptor()));
+    if (repo.exists(taskAttemptDatasetName)) {
+      return repo.load(taskAttemptDatasetName);
+    } else {
+      return repo.create(taskAttemptDatasetName, copy(dataset.getDescriptor()));
+    }
   }
 
   private static <E> Dataset<E> loadTaskAttemptDataset(TaskAttemptContext taskContext) {
     DatasetRepository repo = getDatasetRepository(taskContext);
-    return repo.load(getTaskAttemptDatasetName(taskContext));
+    String taskAttemptDatasetName = getTaskAttemptDatasetName(taskContext);
+    if (repo.exists(taskAttemptDatasetName)) {
+      return repo.load(taskAttemptDatasetName);
+    }
+    return null;
   }
 
   private static void deleteTaskAttemptDataset(TaskAttemptContext taskContext) {
     DatasetRepository repo = getDatasetRepository(taskContext);
-    repo.delete(getTaskAttemptDatasetName(taskContext));
+    String taskAttemptDatasetName = getTaskAttemptDatasetName(taskContext);
+    if (repo.exists(taskAttemptDatasetName)) {
+      repo.delete(taskAttemptDatasetName);
+    }
   }
 
   private static DatasetDescriptor copy(DatasetDescriptor descriptor) {
