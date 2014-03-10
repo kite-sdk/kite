@@ -5,10 +5,12 @@ All past Kite releases are documented on this page. Upcoming release dates can b
 
 ## Version 0.12.0
 
-Release date: TBD
+Release date: March 10, 2014
 
 Version 0.12.0 has the following notable changes:
 
+* MapReduce support for Datasets. New input and output formats (DatasetKeyInputFormat
+  and DatasetKeyOutputFormat) make it possible to use Datasets with MapReduce.
 * Views API. There is an incompatible change in this release: RefineableView in the
   org.kitesdk.data package has been renamed to RefinableView (no 'e'). Clients should
   update and recompile.
@@ -19,6 +21,9 @@ Version 0.12.0 has the following notable changes:
     * Added several performance enhancements.
     * Added an [example module](https://github.com/kite-sdk/kite-examples/tree/master/kite-examples-morphlines) that describes how to unit test Morphline config files and custom Morphline commands.
     * Improved documentation.
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10509)
+is available from JIRA.
 
 ## Version 0.11.0
 
