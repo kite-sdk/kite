@@ -114,6 +114,10 @@
       <artifactId>parquet-hive</artifactId>
       <exclusions>
         <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-core</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>org.apache.hive</groupId>
           <artifactId>hive-serde</artifactId>
         </exclusion>
