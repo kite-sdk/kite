@@ -17,7 +17,6 @@ package org.kitesdk.data.crunch;
 
 import com.google.common.io.Files;
 import java.io.IOException;
-import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.crunch.PCollection;
 import org.apache.crunch.Pipeline;
@@ -74,6 +73,10 @@ public class TestCrunchDatasetsHBase {
   @AfterClass
   public static void afterClass() throws Exception {
     HBaseTestUtils.util.deleteTable(Bytes.toBytes(tableName));
+    if (HBaseTestUtils.getMiniCluster() != null) {
+      HBaseTestUtils.util.shutdownMiniHBaseCluster();
+      HBaseTestUtils.util.shutdownMiniDFSCluster();
+    }
   }
 
   @Before
