@@ -21,8 +21,13 @@
   <packaging>pom</packaging>
 
   <modules>
+    <!-- remove Hadoop 1 modules during release, since the new generated artifact
+         coordinates are not unique
+    -->
+    <!--
     <module>hadoop1</module>
     <module>hadoop1-test</module>
+    -->
     <module>default</module>
     <module>default-test</module>
   </modules>
