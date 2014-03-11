@@ -123,7 +123,7 @@
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.flume>1.4.0-cdh${cdh.version}</vers.flume>
     <vers.guava>11.0.2</vers.guava>
-    <vers.hadoop-deps>${project.version}</vers.hadoop-deps>
+    <vers.hadoop-deps>0.12.0</vers.hadoop-deps>
     <vers.hadoop>2.0.0-cdh${cdh.version}</vers.hadoop>
     <vers.hadoop-mr1>2.0.0-mr1-cdh${cdh.version}</vers.hadoop-mr1>
     <vers.hadoop1>1.2.1</vers.hadoop1>
