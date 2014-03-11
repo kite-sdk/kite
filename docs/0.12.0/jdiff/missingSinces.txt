@@ -1,0 +1,9 @@
+MISSING @SINCE TAG: org.kitesdk.morphline.stdlib.HeadBuilder Class
+OK: org.kitesdk.data.RefinableView Interface
+MISSING @SINCE TAG: org.kitesdk.morphline.stdlib.SampleBuilder Class
+NO DOC BLOCK: org.kitesdk.morphline.hadoop.rcfile.SingleStreamFileSystem Method delete(org.apache.hadoop.fs.Path)
+OK: org.kitesdk.data.View Method deleteAll()
+OK: org.kitesdk.data.DatasetRepository Method getUri()
+NO DOC BLOCK: org.kitesdk.data.filesystem.FileSystemDatasetRepository Method getUri()
+NO DOC BLOCK: org.kitesdk.data.hcatalog.HCatalogDatasetRepository Method getUri()
+OK: org.kitesdk.data.PartitionStrategy.Builder Method identity(java.lang.String, java.lang.String, java.lang.Class<S>, int)
