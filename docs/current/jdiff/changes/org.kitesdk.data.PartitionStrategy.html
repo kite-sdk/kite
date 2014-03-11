@@ -18,7 +18,7 @@ org.kitesdk.data.PartitionStrategy
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.11.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.12.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -37,7 +37,7 @@ org.kitesdk.data.PartitionStrategy
   &nbsp;<A HREF="org.kitesdk.data.PartitionStrategy.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell3"><FONT SIZE="-2"> DETAIL: &nbsp;
 <a href="#constructors">CONSTRUCTORS</a>&nbsp;|&nbsp;
-METHODS&nbsp;|&nbsp;
+<a href="#methods">METHODS</a>&nbsp;|&nbsp;
 FIELDS
   </FONT></TD>
 </TR>
@@ -49,24 +49,40 @@ Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy
 </H2>
 <a NAME="constructors"></a>
 <p>
-<a NAME="Changed"></a>
-<TABLE summary="Changed Constructors" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Constructors" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Constructors</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Constructors</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionStrategy.ctor_changed(java.util.List<org.kitesdk.data.FieldPartitioner>)"></A>
-  <nobr><A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html#PartitionStrategy(java.util.List<org.kitesdk.data.FieldPartitioner>)" target="_top"><tt>PartitionStrategy</tt></A>(<code>List&lt;FieldPartitioner&gt;</code>)  </nobr>
+  <A NAME="org.kitesdk.data.PartitionStrategy.ctor_removed(java.util.List<org.kitesdk.data.FieldPartitioner>)"></A>
+  <nobr>PartitionStrategy(<code>List&lt;FieldPartitioner&gt;</code>)</nobr>
   </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.12.0; use PartitionStrategy.Builder</TD>
+  <TD VALIGN="TOP">Construct a partition strategy with a list of field partitioners.</TD>
 </TR>
 </TABLE>
 &nbsp;
 <a NAME="methods"></a>
+<p>
+<a NAME="Changed"></a>
+<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.PartitionStrategy.getFieldPartitioners_changed()"></A>
+  <nobr><code>List&lt;FieldPartitioner&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html#getFieldPartitioners()" target="_top"><tt>getFieldPartitioners</tt></A>()  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from <code>java.util.List<org.kitesdk.data.FieldPartitioner></code> to <code>java.util.List<org.kitesdk.data.spi.FieldPartitioner></code>.<br>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ Get the list of field partitioners used for partitioning.</TD>
+</TR>
+</TABLE>
+&nbsp;
 <a NAME="fields"></a>
 <HR>
 <!-- Start of nav bar -->
@@ -75,7 +91,7 @@ Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.11.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.12.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>

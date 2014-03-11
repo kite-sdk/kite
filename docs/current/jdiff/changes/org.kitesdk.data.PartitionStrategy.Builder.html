@@ -18,7 +18,7 @@ org.kitesdk.data.PartitionStrategy.Builder
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.Builder.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.11.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.Builder.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.12.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -47,7 +47,6 @@ FIELDS
 <H2>
 Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.Builder.html" target="_top"><tt>PartitionStrategy.Builder</tt></A>
 </H2>
-<p><font size="+1">Removed interface <code>com.google.common.base.Supplier<org.kitesdk.data.PartitionStrategy></code>.<br></font>
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
@@ -58,11 +57,45 @@ Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionStrategy.Builder.get_removed()"></A>
-  <nobr><code>PartitionStrategy</code>&nbsp;get()</nobr>
+  <A NAME="org.kitesdk.data.PartitionStrategy.Builder.identity_removed(java.lang.String, int)"></A>
+  <nobr><code>Builder</code>&nbsp;identity(<code>String,</nobr> int<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP"><p>
- Get the configured <A HREF="../../apidocs/PartitionStrategy.html"><TT>PartitionStrategy</TT></A> instance.</TD>
+  <TD VALIGN="TOP">Configure an identity partitioner for strings with a cardinality hint of
+ {@code buckets} size.</TD>
+</TR>
+</TABLE>
+&nbsp;
+<p>
+<a NAME="Added"></a>
+<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.PartitionStrategy.Builder.identity_added(java.lang.String, java.lang.String, java.lang.Class<S>, int)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.Builder.html#identity(java.lang.String, java.lang.String, java.lang.Class<S>, int)" target="_top"><tt>identity</tt></A>(<code>String,</nobr> String<nobr>,</nobr> Class&lt;S&gt;<nobr>,</nobr> int<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Configure an identity partitioner for a given type with a cardinality hint of
+ {@code buckets} size.</TD>
+</TR>
+</TABLE>
+&nbsp;
+<p>
+<a NAME="Changed"></a>
+<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.PartitionStrategy.Builder.identity_changed(java.lang.String, java.lang.Class<S>, int)"></A>
+  <nobr><code>Builder</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.Builder.html#identity(java.lang.String, java.lang.Class<S>, int)" target="_top"><tt>identity</tt></A>(<code>String,</nobr> Class&lt;S&gt;<nobr>,</nobr> int<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+<b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.14.0;           use {@link #identity(String, String, Class, int)}</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -74,7 +107,7 @@ Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.Builder.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.11.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.Builder.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.12.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>

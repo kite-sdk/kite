@@ -18,7 +18,7 @@ org.kitesdk.data.partition.ListFieldPartitioner
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/partition/ListFieldPartitioner.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.11.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/partition/ListFieldPartitioner.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.12.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.partition.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -31,12 +31,12 @@ org.kitesdk.data.partition.ListFieldPartitioner
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<A HREF="org.kitesdk.data.partition.IntRangeFieldPartitioner.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="org.kitesdk.data.partition.PartitionFunctions.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.partition.MinuteFieldPartitioner.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="org.kitesdk.data.partition.ListFieldPartitioner.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell3"><FONT SIZE="-2"> DETAIL: &nbsp;
-CONSTRUCTORS&nbsp;|&nbsp;
+<a href="#constructors">CONSTRUCTORS</a>&nbsp;|&nbsp;
 <a href="#methods">METHODS</a>&nbsp;|&nbsp;
 FIELDS
   </FONT></TD>
@@ -47,18 +47,73 @@ FIELDS
 <H2>
 Class org.kitesdk.data.partition.<A HREF="../../apidocs/org/kitesdk/data/partition/ListFieldPartitioner.html" target="_top"><tt>ListFieldPartitioner</tt></A>
 </H2>
+<p><font size="+1">The superclass changed from <code>org.kitesdk.data.FieldPartitioner<S, java.lang.Integer></code> to <code>org.kitesdk.data.spi.partition.ListFieldPartitioner<S></code>.<br></font>
+<p><font size="+1"><b>Now deprecated</b>.<br></font>
 <a NAME="constructors"></a>
-<a NAME="methods"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Changed"></a>
+<TABLE summary="Changed Constructors" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Constructors</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.partition.ListFieldPartitioner.project_added(com.google.common.base.Predicate<S>)"></A>
-  <nobr><code>Predicate&lt;Integer&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/ListFieldPartitioner.html#project(com.google.common.base.Predicate<S>)" target="_top"><tt>project</tt></A>(<code>Predicate&lt;S&gt;</code>)</nobr>
+  <A NAME="org.kitesdk.data.partition.ListFieldPartitioner.ctor_changed(java.lang.String, java.util.List<java.util.Set<S>>, java.lang.Class<S>)"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/data/partition/ListFieldPartitioner.html#ListFieldPartitioner(java.lang.String, java.util.List<java.util.Set<S>>, java.lang.Class<S>)" target="_top"><tt>ListFieldPartitioner</tt></A>(<code>String,</nobr> List&lt;Set&lt;S&gt;&gt;<nobr>,</nobr> Class&lt;S&gt;<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+<b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
+</TR>
+</TABLE>
+&nbsp;
+<a NAME="methods"></a>
+<p>
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.ListFieldPartitioner.apply_removed(S)"></A>
+  <nobr><code>Integer</code>&nbsp;apply(<code>S</code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.ListFieldPartitioner.compare_removed(java.lang.Integer, java.lang.Integer)"></A>
+  <nobr><code>int</code>&nbsp;compare(<code>Integer,</nobr> Integer<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.ListFieldPartitioner.equals_removed(java.lang.Object)"></A>
+  <nobr><code>boolean</code>&nbsp;equals(<code>Object</code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.ListFieldPartitioner.hashCode_removed()"></A>
+  <nobr><code>int</code>&nbsp;hashCode()</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.ListFieldPartitioner.project_removed(com.google.common.base.Predicate<S>)"></A>
+  <nobr><code>Predicate&lt;Integer&gt;</code>&nbsp;project(<code>Predicate&lt;S&gt;</code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.ListFieldPartitioner.toString_removed()"></A>
+  <nobr><code>String</code>&nbsp;toString()</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
@@ -72,7 +127,7 @@ Class org.kitesdk.data.partition.<A HREF="../../apidocs/org/kitesdk/data/partiti
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/partition/ListFieldPartitioner.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.11.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/partition/ListFieldPartitioner.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.12.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.partition.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -85,7 +140,7 @@ Class org.kitesdk.data.partition.<A HREF="../../apidocs/org/kitesdk/data/partiti
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<A HREF="org.kitesdk.data.partition.IntRangeFieldPartitioner.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="org.kitesdk.data.partition.PartitionFunctions.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.partition.MinuteFieldPartitioner.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="org.kitesdk.data.partition.ListFieldPartitioner.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

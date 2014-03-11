@@ -18,7 +18,7 @@ org.kitesdk.data.partition.PartitionFunctions
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.11.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.12.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.partition.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -30,7 +30,7 @@ org.kitesdk.data.partition.PartitionFunctions
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.partition.ListFieldPartitioner.html"><B>PREV CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.partition.MonthFieldPartitioner.html"><B>PREV CLASS</B></A>
 &nbsp;<A HREF="org.kitesdk.data.partition.RangeFieldPartitioner.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
@@ -47,20 +47,156 @@ FIELDS
 <H2>
 Class org.kitesdk.data.partition.<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html" target="_top"><tt>PartitionFunctions</tt></A>
 </H2>
+<p><font size="+1"><b>Now deprecated</b>.<br></font>
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Changed"></a>
+<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.partition.PartitionFunctions.toExpression_added(org.kitesdk.data.FieldPartitioner)"></A>
-  <nobr><code>String</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#toExpression(org.kitesdk.data.FieldPartitioner)" target="_top"><tt>toExpression</tt></A>(<code>FieldPartitioner</code>)</nobr>
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.dateFormat_changed(java.lang.String, java.lang.String, java.lang.String)"></A>
+  <nobr><code>FieldPartitioner&lt;Long, String&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#dateFormat(java.lang.String, java.lang.String, java.lang.String)" target="_top"><tt>dateFormat</tt></A>(<code>String,</nobr> String<nobr>,</nobr> String<nobr><nobr></code>)  </nobr>
   </TD>
-  <TD>&nbsp;</TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from (<code>org.kitesdk.data.FieldPartitioner<java.lang.Long, java.lang.String></code>) to (<code>org.kitesdk.data.spi.FieldPartitioner<java.lang.Long, java.lang.String></code>).<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.day_changed(java.lang.String, java.lang.String)"></A>
+  <nobr><code>FieldPartitioner&lt;Long, Integer&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#day(java.lang.String, java.lang.String)" target="_top"><tt>day</tt></A>(<code>String,</nobr> String<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from (<code>org.kitesdk.data.FieldPartitioner<java.lang.Long, java.lang.Integer></code>) to (<code>org.kitesdk.data.spi.FieldPartitioner<java.lang.Long, java.lang.Integer></code>).<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.hour_changed(java.lang.String, java.lang.String)"></A>
+  <nobr><code>FieldPartitioner&lt;Long, Integer&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#hour(java.lang.String, java.lang.String)" target="_top"><tt>hour</tt></A>(<code>String,</nobr> String<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from (<code>org.kitesdk.data.FieldPartitioner<java.lang.Long, java.lang.Integer></code>) to (<code>org.kitesdk.data.spi.FieldPartitioner<java.lang.Long, java.lang.Integer></code>).<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.minute_changed(java.lang.String, java.lang.String)"></A>
+  <nobr><code>FieldPartitioner&lt;Long, Integer&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#minute(java.lang.String, java.lang.String)" target="_top"><tt>minute</tt></A>(<code>String,</nobr> String<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from (<code>org.kitesdk.data.FieldPartitioner<java.lang.Long, java.lang.Integer></code>) to (<code>org.kitesdk.data.spi.FieldPartitioner<java.lang.Long, java.lang.Integer></code>).<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.month_changed(java.lang.String, java.lang.String)"></A>
+  <nobr><code>FieldPartitioner&lt;Long, Integer&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#month(java.lang.String, java.lang.String)" target="_top"><tt>month</tt></A>(<code>String,</nobr> String<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from (<code>org.kitesdk.data.FieldPartitioner<java.lang.Long, java.lang.Integer></code>) to (<code>org.kitesdk.data.spi.FieldPartitioner<java.lang.Long, java.lang.Integer></code>).<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.toExpression_changed(org.kitesdk.data.spi.FieldPartitioner)"></A>
+  <nobr><code>String</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#toExpression(org.kitesdk.data.spi.FieldPartitioner)" target="_top"><tt>toExpression</tt></A>(<code>FieldPartitioner</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in signature from <code>org.kitesdk.data.FieldPartitioner</code> to <code>org.kitesdk.data.spi.FieldPartitioner</code>.<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.year_changed(java.lang.String, java.lang.String)"></A>
+  <nobr><code>FieldPartitioner&lt;Long, Integer&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#year(java.lang.String, java.lang.String)" target="_top"><tt>year</tt></A>(<code>String,</nobr> String<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from (<code>org.kitesdk.data.FieldPartitioner<java.lang.Long, java.lang.Integer></code>) to (<code>org.kitesdk.data.spi.FieldPartitioner<java.lang.Long, java.lang.Integer></code>).<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.hash_changed(java.lang.String, int)"></A>
+  <nobr><code>FieldPartitioner&lt;Object, Integer&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#hash(java.lang.String, int)" target="_top"><tt>hash</tt></A>(<code>String,</nobr> int<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from (<code>org.kitesdk.data.FieldPartitioner<java.lang.Object, java.lang.Integer></code>) to (<code>org.kitesdk.data.spi.FieldPartitioner<java.lang.Object, java.lang.Integer></code>).<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.hash_changed(java.lang.String, java.lang.String, int)"></A>
+  <nobr><code>FieldPartitioner&lt;Object, Integer&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#hash(java.lang.String, java.lang.String, int)" target="_top"><tt>hash</tt></A>(<code>String,</nobr> String<nobr>,</nobr> int<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from (<code>org.kitesdk.data.FieldPartitioner<java.lang.Object, java.lang.Integer></code>) to (<code>org.kitesdk.data.spi.FieldPartitioner<java.lang.Object, java.lang.Integer></code>).<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.identity_changed(java.lang.String, int)"></A>
+  <nobr><code>FieldPartitioner</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#identity(java.lang.String, int)" target="_top"><tt>identity</tt></A>(<code>String,</nobr> int<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from <code>org.kitesdk.data.FieldPartitioner</code> to <code>org.kitesdk.data.spi.FieldPartitioner</code>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; use  {@link org.kitesdk.data.spi.partition.PartitionFunctions#identity(String, String, String, int)}</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.identity_changed(java.lang.String, java.lang.Class<S>, int)"></A>
+  <nobr><code>FieldPartitioner&lt;S, S&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#identity(java.lang.String, java.lang.Class<S>, int)" target="_top"><tt>identity</tt></A>(<code>String,</nobr> Class&lt;S&gt;<nobr>,</nobr> int<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from (<code>org.kitesdk.data.FieldPartitioner<S, S></code>) to (<code>org.kitesdk.data.spi.FieldPartitioner<S, S></code>).<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; use  {@link org.kitesdk.data.spi.partition.PartitionFunctions#identity(String, String, String, int)}</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.range_changed(java.lang.String, int[])"></A>
+  <nobr><code>FieldPartitioner&lt;Integer, Integer&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#range(java.lang.String, int[])" target="_top"><tt>range</tt></A>(<code>String,</nobr> int[]<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from (<code>org.kitesdk.data.FieldPartitioner<java.lang.Integer, java.lang.Integer></code>) to (<code>org.kitesdk.data.spi.FieldPartitioner<java.lang.Integer, java.lang.Integer></code>).<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.partition.PartitionFunctions.range_changed(java.lang.String, java.lang.String[])"></A>
+  <nobr><code>FieldPartitioner&lt;String, String&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html#range(java.lang.String, java.lang.String[])" target="_top"><tt>range</tt></A>(<code>String,</nobr> String[]<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Change in return type from (<code>org.kitesdk.data.FieldPartitioner<java.lang.String, java.lang.String></code>) to (<code>org.kitesdk.data.spi.FieldPartitioner<java.lang.String, java.lang.String></code>).<br>
+ <b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.13.0; moved to package org.kitesdk.data.spi</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -72,7 +208,7 @@ Class org.kitesdk.data.partition.<A HREF="../../apidocs/org/kitesdk/data/partiti
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.11.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/partition/PartitionFunctions.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.12.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.partition.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -84,7 +220,7 @@ Class org.kitesdk.data.partition.<A HREF="../../apidocs/org/kitesdk/data/partiti
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.partition.ListFieldPartitioner.html"><B>PREV CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.partition.MonthFieldPartitioner.html"><B>PREV CLASS</B></A>
 &nbsp;<A HREF="org.kitesdk.data.partition.RangeFieldPartitioner.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
