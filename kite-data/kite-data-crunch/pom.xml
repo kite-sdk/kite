@@ -193,6 +193,14 @@
       <classifier>tests</classifier>
     </dependency>
 
+    <!-- fix hbase/hive thrift version conflict -->
+    <dependency>
+      <groupId>org.apache.thrift</groupId>
+      <artifactId>libthrift</artifactId>
+      <version>0.9.0</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.hcatalog</groupId>
       <artifactId>hcatalog-core</artifactId>
