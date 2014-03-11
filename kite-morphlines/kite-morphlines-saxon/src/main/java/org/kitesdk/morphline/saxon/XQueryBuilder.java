@@ -187,7 +187,7 @@ public final class XQueryBuilder implements CommandBuilder {
     }
 
     // extract fields from query result sequence
-    protected boolean addRecordValues(XdmNode node, Axis axis, XdmNodeKind nodeTest, Record record) {
+    private boolean addRecordValues(XdmNode node, Axis axis, XdmNodeKind nodeTest, Record record) {
       boolean isEmpty = true;
       XdmSequenceIterator iter = node.axisIterator(axis); 
       while (iter.hasNext()) {
