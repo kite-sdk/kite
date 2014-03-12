@@ -93,9 +93,14 @@ public final class ExtractURIComponentsBuilder implements CommandBuilder {
     
     private void addValue(Record record, String name, Object value) {
       if (value != null) {
-        record.put(outputFieldPrefix + name, value);
+        record.put(concat(outputFieldPrefix, name), value);
       }
     }
+    
+    private String concat(String x, String y) {
+      return x.length() == 0 ? y : x + y;
+    }
+
   }
   
 }

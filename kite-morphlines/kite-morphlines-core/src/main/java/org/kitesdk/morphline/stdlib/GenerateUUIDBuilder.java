@@ -93,21 +93,23 @@ public final class GenerateUUIDBuilder implements CommandBuilder {
       } else {
         record.replaceValues(fieldName, generateUUID());
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
 
-    protected String getPrefix() {
-      return prefix;
-    }
-
-    protected String generateUUID() {
+    private String generateUUID() {
       UUID uuid;
       if (prng == null) {
         uuid = UUID.randomUUID(); // secure & slow
       } else {
         uuid = new UUID(prng.nextLong(), prng.nextLong()); // non-secure & fast
       }
-      return getPrefix() + uuid.toString();
+      return concat(prefix, uuid.toString());
+    }
+
+    private String concat(String x, String y) {
+      return x.length() == 0 ? y : x + y;
     }
 
   }

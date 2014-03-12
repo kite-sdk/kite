@@ -90,6 +90,8 @@ public final class SanitizeUnknownSolrFieldsBuilder implements CommandBuilder {
           values.clear(); // implicitly removes key from record
         }
       }
+      
+      // pass record to next command in chain:
       return super.doProcess(record);
     }
     
