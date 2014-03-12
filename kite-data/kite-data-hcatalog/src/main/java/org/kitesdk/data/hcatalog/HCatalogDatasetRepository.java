@@ -16,19 +16,16 @@
 package org.kitesdk.data.hcatalog;
 
 import com.google.common.base.Preconditions;
+import java.net.URI;
+import java.net.URISyntaxException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.MetadataProvider;
-import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.hcatalog.impl.Loader;
-import org.kitesdk.data.spi.AbstractDatasetRepository;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 
 /**
  * <p>
@@ -52,68 +49,27 @@ import org.apache.hadoop.fs.Path;
  * @see DatasetRepository
  * @see Dataset
  */
-public class HCatalogDatasetRepository extends AbstractDatasetRepository {
-
-  private final MetadataProvider metadataProvider;
-  private final FileSystemDatasetRepository fsRepository;
-  private final URI repositoryUri;
+public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository {
 
   /**
    * Create an HCatalog dataset repository with managed tables.
    */
   @SuppressWarnings("deprecation")
   HCatalogDatasetRepository(Configuration conf, MetadataProvider provider, URI repositoryUri) {
-    this.metadataProvider = provider;
-    this.fsRepository = new FileSystemDatasetRepository.Builder().configuration(conf)
-        .metadataProvider(metadataProvider).build();
-    this.repositoryUri = repositoryUri;
+    super(conf, provider, repositoryUri);
   }
 
   @Override
   public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
     // avoids calling fsRepository.create, which creates the data path
-    metadataProvider.create(name, descriptor);
-    return fsRepository.load(name);
-  }
-
-  @Override
-  public <E> Dataset<E> update(String name, DatasetDescriptor descriptor) {
-    return fsRepository.update(name, descriptor);
-  }
-
-  @Override
-  public <E> Dataset<E> load(String name) {
-    return fsRepository.load(name);
+    getMetadataProvider().create(name, descriptor);
+    return load(name);
   }
 
   @Override
   public boolean delete(String name) {
     // avoids calling fsRepository.delete, which deletes the data path
-    return metadataProvider.delete(name);
-  }
-
-  @Override
-  public boolean exists(String name) {
-    return metadataProvider.exists(name);
-  }
-
-  @Override
-  public Collection<String> list() {
-    return metadataProvider.list();
-  }
-
-  @Override
-  public URI getUri() {
-    return repositoryUri;
-  }
-
-  /**
-   * Returns the {@link MetadataProvider} used by this repository.
-   *
-   * @return the MetadataProvider used by this repository.
-   */
-  MetadataProvider getMetadataProvider() {
-    return metadataProvider;
+    return getMetadataProvider().delete(name);
   }
 
   /**
