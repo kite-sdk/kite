@@ -584,14 +584,8 @@ public class PartitionStrategy {
 
     private void add(FieldPartitioner fp) {
       // in 0.14.0, change to a Precondition
-      //Preconditions.checkArgument(!names.contains(fp.getSourceName()),
-      //    "Source name conflicts with an existing field or partition name");
       //Preconditions.checkArgument(!names.contains(fp.getName()),
       //    "Partition name conflicts with an existing field or partition name");
-      if (names.contains(fp.getSourceName())) {
-        LOG.warn(
-            "Source name conflicts with an existing field or partition name");
-      }
       if (names.contains(fp.getName())) {
         LOG.warn(
             "Partition name conflicts with an existing field or partition name");
