@@ -16,13 +16,13 @@
 
 package org.kitesdk.data.spi;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.apache.avro.Schema;
 import org.kitesdk.data.DatasetDescriptor;
 import org.slf4j.Logger;
@@ -38,11 +38,8 @@ public abstract class Compatibility {
   // https://github.com/apache/hive/blob/trunk/ql/src/java/org/apache/hadoop/hive/ql/parse/HiveLexer.g#L426
   // The above reference includes a comment that states column names can be
   // quoted strings with any character, but this is not the case in practice.
-  private static CharMatcher TABLE_NAME_START = CharMatcher.DIGIT
-      .or(CharMatcher.inRange('a', 'z'))
-      .or(CharMatcher.inRange('A', 'Z'));
-  private static CharMatcher TABLE_NAME_CHARS = TABLE_NAME_START
-      .or(CharMatcher.is('_'));
+  private static Pattern hiveCompatible = Pattern
+      .compile("[a-zA-Z0-9][a-zA-Z0-9_]*");
 
   /**
    * Checks the name and descriptor for known compatibility issues and warns.
@@ -142,8 +139,7 @@ public abstract class Compatibility {
    * @return true if the name is compatible, false if known to be incompatible
    */
   public static boolean isCompatibleName(String name) {
-    return (TABLE_NAME_START.matches(name.charAt(0)) &&
-        TABLE_NAME_CHARS.matchesAllOf(name));
+    return hiveCompatible.matcher(name).matches();
   }
 
   /**

@@ -575,8 +575,7 @@ public class DatasetDescriptor {
           schema, schemaUrl, format, location, properties, partitionStrategy);
     }
 
-
-    public static void checkPartitionStrategy(Schema schema, PartitionStrategy strategy) {
+    private static void checkPartitionStrategy(Schema schema, PartitionStrategy strategy) {
       if (strategy == null) {
         return;
       }
