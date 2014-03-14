@@ -61,7 +61,7 @@ public class TestDescriptorValidation {
   @Test
   public void testRejectsNullSchema() {
     TestHelpers.assertThrows("Should reject null schema",
-        IllegalStateException.class, new Runnable() {
+        NullPointerException.class, new Runnable() {
       @Override
       public void run() {
         new DatasetDescriptor.Builder()

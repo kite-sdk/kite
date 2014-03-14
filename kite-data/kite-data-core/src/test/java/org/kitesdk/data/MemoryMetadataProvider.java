@@ -35,7 +35,7 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
   private transient final FileSystem fs;
 
   public MemoryMetadataProvider(Configuration conf) {
-    Preconditions.checkArgument(conf != null, "Configuration cannot be null");
+    Preconditions.checkNotNull(conf, "Configuration cannot be null");
 
     this.conf = conf;
     try {
@@ -55,7 +55,7 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor load(String name) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Preconditions.checkNotNull(name, "Name cannot be null");
 
     if (descriptors.containsKey(name)) {
       return descriptors.get(name);
@@ -66,9 +66,8 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
-    Preconditions.checkArgument(descriptor != null,
-        "Descriptor cannot be null");
+    Preconditions.checkNotNull(name, "Name cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
     if (descriptors.containsKey(name)) {
       throw new DatasetExistsException(
@@ -101,9 +100,8 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
-    Preconditions.checkArgument(descriptor != null,
-        "Descriptor cannot be null");
+    Preconditions.checkNotNull(name, "Name cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
     if (!descriptors.containsKey(name)) {
       throw new DatasetNotFoundException("Missing dataset:" + name);
@@ -115,7 +113,7 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean delete(String name) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Preconditions.checkNotNull(name, "Name cannot be null");
 
     if (descriptors.containsKey(name)) {
       descriptors.remove(name);
@@ -127,7 +125,7 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean exists(String name) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Preconditions.checkNotNull(name, "Name cannot be null");
 
     return descriptors.containsKey(name);
   }

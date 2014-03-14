@@ -86,8 +86,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   private transient final FileSystem rootFileSystem;
 
   public FileSystemMetadataProvider(Configuration conf, Path rootDirectory) {
-    Preconditions.checkArgument(conf != null, "Configuration cannot be null");
-    Preconditions.checkArgument(rootDirectory != null, "Root cannot be null");
+    Preconditions.checkNotNull(conf, "Configuration cannot be null");
+    Preconditions.checkNotNull(rootDirectory, "Root directory cannot be null");
 
     this.conf = conf;
     try {
@@ -101,7 +101,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor load(String name) {
-    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     logger.debug("Loading dataset metadata name:{}", name);
 
@@ -168,9 +168,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
-    Preconditions.checkArgument(descriptor != null,
-        "Descriptor cannot be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
     Compatibility.checkAndWarn(name, descriptor);
 
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
@@ -212,9 +211,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
-    Preconditions.checkArgument(descriptor != null,
-        "Descriptor cannot be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
     Compatibility.checkAndWarn(name, descriptor);
 
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
@@ -228,7 +226,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean delete(String name) {
-    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     logger.debug("Deleting dataset metadata name:{}", name);
 
@@ -254,7 +252,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean exists(String name) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     final Path potentialPath = pathForMetadata(name);
     try {

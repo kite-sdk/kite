@@ -67,7 +67,7 @@ public abstract class Compatibility {
    * @param name a String name
    */
   public static void checkDatasetName(String name) {
-    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkArgument(Compatibility.isCompatibleName(name),
         "Hive incompatible: Dataset name {} is not alphanumeric (plus '_')",
         name);
@@ -79,8 +79,7 @@ public abstract class Compatibility {
    * @param schema an avro {@code Schema}
    */
   public static void checkSchema(Schema schema) {
-    Preconditions.checkState(schema != null,
-        "Descriptor schema is required and cannot be null");
+    Preconditions.checkNotNull(schema, "Schema cannot be null");
     List<String> incompatible = getIncompatibleNames(schema);
     Preconditions.checkState(incompatible.isEmpty(),
         "Hive incompatible: field names are not alphanumeric (plus '_'): {}",
@@ -93,8 +92,7 @@ public abstract class Compatibility {
    * @param descriptor a {@link DatasetDescriptor}
    */
   public static void checkDescriptor(DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(descriptor != null,
-        "Descriptor cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
     Schema schema = descriptor.getSchema();
     checkSchema(schema);

@@ -147,12 +147,12 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     provider.create(NAME, anotherDescriptor);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testCreateFailsNullName() {
     provider.create(null, testDescriptor);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testCreateFailsNullDescriptor() {
     provider.create(NAME, null);
   }
@@ -178,7 +178,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     provider.load(NAME);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testLoadFailsNullName() {
     provider.load(null);
   }
@@ -209,12 +209,12 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     provider.update(NAME, testDescriptor);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testUpdateFailsNullName() {
     provider.update(null, testDescriptor);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testUpdateFailsNullDescriptor() {
     provider.update(NAME, null);
   }
@@ -229,7 +229,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     Assert.assertFalse("Delete non-existent descriptor should return false", result);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testDeleteFailsNullName() {
     provider.delete(null);
   }
@@ -245,7 +245,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     Assert.assertFalse(provider.exists(NAME));
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testExistsNullName() {
     provider.exists(null);
   }

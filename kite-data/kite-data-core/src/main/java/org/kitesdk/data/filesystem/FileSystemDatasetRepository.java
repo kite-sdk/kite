@@ -112,9 +112,9 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   FileSystemDatasetRepository(
       Configuration conf, MetadataProvider metadataProvider,
       @Nullable URI repositoryUri) {
-    Preconditions.checkArgument(conf != null, "Configuration cannot be null");
-    Preconditions.checkArgument(metadataProvider != null,
-      "Metadata provider can not be null");
+    Preconditions.checkNotNull(conf, "Configuration cannot be null");
+    Preconditions.checkNotNull(metadataProvider,
+      "Metadata provider cannot be null");
 
     this.conf = conf;
     this.metadataProvider = metadataProvider;
@@ -123,10 +123,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
-
-    Preconditions.checkArgument(name != null, "Name can not be null");
-    Preconditions.checkArgument(descriptor != null,
-        "Descriptor can not be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
     Preconditions.checkArgument(descriptor.getLocation() == null,
         "Descriptor location cannot be set; " +
         "it is assigned by the MetadataProvider");
@@ -159,9 +157,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public <E> Dataset<E> update(String name, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
-    Preconditions.checkArgument(descriptor != null,
-        "DatasetDescriptro cannot be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
     DatasetDescriptor oldDescriptor = metadataProvider.load(name);
 
@@ -217,7 +214,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public <E> Dataset<E> load(String name) {
-    Preconditions.checkArgument(name != null, "Name can not be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     logger.debug("Loading dataset:{}", name);
 
@@ -241,7 +238,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public boolean delete(String name) {
-    Preconditions.checkArgument(name != null, "Name can not be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     logger.debug("Deleting dataset:{}", name);
 
@@ -286,7 +283,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
   @Override
   public boolean exists(String name) {
-    Preconditions.checkArgument(name != null, "Name can not be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
     return metadataProvider.exists(name);
   }
 
@@ -393,7 +390,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    */
   static void ensureExists(
       DatasetDescriptor descriptor, Configuration conf) {
-    Preconditions.checkArgument(descriptor.getLocation() != null,
+    Preconditions.checkNotNull(descriptor.getLocation(),
         "Cannot get FileSystem for a descriptor with no location");
     final Path dataPath = new Path(descriptor.getLocation());
 

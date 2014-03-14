@@ -128,12 +128,12 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
     Assert.assertTrue("Sanity check", testProvider.exists(NAME));
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testCreateNullName() {
     repo.create(null, testDescriptor);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testCreateNullDescriptor() {
     repo.create(NAME, null);
   }
@@ -183,14 +183,14 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
     repo.update(NAME, testDescriptor);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testUpdateNullName() {
     ensureCreated();
 
     repo.update(null, testDescriptor);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testUpdateNullDescriptor() {
     ensureCreated();
 
@@ -239,7 +239,7 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
     Assert.assertFalse(repo.exists("test1"));
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testExistsNullName() {
     repo.exists(null);
   }
@@ -264,7 +264,7 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
     Dataset dataset = repo.load(NAME);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected=NullPointerException.class)
   public void testLoadNullName() {
     repo.load(null);
   }

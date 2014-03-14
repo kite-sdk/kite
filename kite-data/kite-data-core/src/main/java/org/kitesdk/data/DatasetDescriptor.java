@@ -280,6 +280,7 @@ public class DatasetDescriptor {
      * @return An instance of the builder for method chaining.
      */
     public Builder schema(Schema schema) {
+      Preconditions.checkNotNull(schema, "Schema cannot be null");
       this.schema = schema;
       return this;
     }

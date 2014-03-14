@@ -65,7 +65,7 @@ public class TestCompatibilityChecks {
   @Test
   public void testNullDescriptor() {
     TestHelpers.assertThrows("Should reject null descriptor",
-        IllegalArgumentException.class, new Runnable() {
+        NullPointerException.class, new Runnable() {
       @Override
       public void run() {
         Compatibility.checkDescriptor(null);
