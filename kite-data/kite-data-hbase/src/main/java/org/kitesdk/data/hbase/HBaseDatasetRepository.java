@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.hbase;
 
+import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.hadoop.hbase.HConstants;
@@ -57,6 +58,9 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
 
   @Override
   public <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor) {
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
+
     DatasetDescriptor newDescriptor = metadataProvider.create(name, descriptor);
     newDescriptor = addRepositoryUri(newDescriptor);
     return newDataset(name, newDescriptor);
@@ -64,6 +68,9 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
 
   @Override
   public <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor) {
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
+
     DatasetDescriptor newDescriptor = metadataProvider.update(name, descriptor);
     newDescriptor = addRepositoryUri(newDescriptor);
     return newDataset(name, newDescriptor);
@@ -71,6 +78,8 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
 
   @Override
   public <E> RandomAccessDataset<E> load(String name) {
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+
     String tableName = HBaseMetadataProvider.getTableName(name);
     String entityName = HBaseMetadataProvider.getEntityName(name);
     if (entityName.contains(".")) {
@@ -136,11 +145,15 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
 
   @Override
   public boolean delete(String name) {
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+
     return metadataProvider.delete(name);
   }
 
   @Override
   public boolean exists(String name) {
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+
     return metadataProvider.exists(name);
   }
 

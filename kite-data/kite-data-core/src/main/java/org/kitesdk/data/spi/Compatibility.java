@@ -62,6 +62,26 @@ public abstract class Compatibility {
   }
 
   /**
+   * Checks the name and schema for known compatibility issues and warns.
+   *
+   * If the column names are not compatible across components, this will warn
+   * the user.
+   *
+   * @param datasetName a String dataset name
+   * @param schema a {@link Schema}
+   */
+  public static void checkAndWarn(String datasetName, Schema schema) {
+    try {
+      checkDatasetName(datasetName);
+      checkSchema(schema);
+    } catch (IllegalArgumentException e) {
+      LOG.warn(e.getMessage());
+    } catch (IllegalStateException e) {
+      LOG.warn(e.getMessage());
+    }
+  }
+
+  /**
    * Precondition-style validation that a dataset name is compatible.
    *
    * @param name a String name
