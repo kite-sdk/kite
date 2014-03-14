@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.ql.metadata.Table;
+import org.kitesdk.data.spi.Compatibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
 
   @Override
   public DatasetDescriptor load(String name) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Compatibility.checkDatasetName(name);
 
     final Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
 
@@ -66,9 +67,8 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
 
   @Override
   public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
-    Preconditions.checkArgument(descriptor != null,
-        "Descriptor cannot be null");
+    Compatibility.checkDatasetName(name);
+    Compatibility.checkDescriptor(descriptor);
 
     if (exists(name)) {
       throw new DatasetExistsException(

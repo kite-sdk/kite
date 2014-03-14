@@ -33,6 +33,7 @@ import java.io.FileNotFoundException;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.spi.Compatibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +101,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor load(String name) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
 
     logger.debug("Loading dataset metadata name:{}", name);
 
@@ -167,9 +168,10 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
     Preconditions.checkArgument(descriptor != null,
         "Descriptor cannot be null");
+    Compatibility.checkAndWarn(name, descriptor);
 
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
         descriptor);
@@ -210,9 +212,10 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
     Preconditions.checkArgument(descriptor != null,
         "Descriptor cannot be null");
+    Compatibility.checkAndWarn(name, descriptor);
 
     logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
       descriptor);
@@ -225,7 +228,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean delete(String name) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
 
     logger.debug("Deleting dataset metadata name:{}", name);
 
@@ -275,8 +278,6 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
             rootFileSystem.exists(new Path(entry.getPath(), ".metadata"))) {
           // may want to add a check: !RESERVED_NAMES.contains(name)
           datasets.add(entry.getPath().getName());
-        } else {
-          continue;
         }
       }
     } catch (FileNotFoundException ex) {

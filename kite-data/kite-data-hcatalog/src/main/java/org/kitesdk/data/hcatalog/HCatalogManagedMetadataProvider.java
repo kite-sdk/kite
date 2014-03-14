@@ -19,10 +19,10 @@ import java.net.URI;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.MetadataProviderException;
-import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.ql.metadata.Table;
+import org.kitesdk.data.spi.Compatibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +33,12 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
 
   public HCatalogManagedMetadataProvider(Configuration conf, URI repositoryUri) {
     super(conf, repositoryUri);
+    logger.info("Default FS: " + conf.get("fs.defaultFS"));
   }
 
   @Override
   public DatasetDescriptor load(String name) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Compatibility.checkDatasetName(name);
 
     final Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
 
@@ -50,9 +51,8 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
 
   @Override
   public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
-    Preconditions.checkArgument(descriptor != null,
-        "Descriptor cannot be null");
+    Compatibility.checkDatasetName(name);
+    Compatibility.checkDescriptor(descriptor);
 
     if (exists(name)) {
       throw new DatasetExistsException(
