@@ -142,7 +142,7 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
   public void testCreatePartitioned() throws IOException {
     DatasetDescriptor requested = new DatasetDescriptor.Builder(testDescriptor)
         .partitionStrategy(
-            new PartitionStrategy.Builder().hash("name", 3).build())
+            new PartitionStrategy.Builder().hash("username", 3).build())
         .build();
     Assert.assertFalse("Sanity check", testProvider.exists("test2"));
 
