@@ -16,9 +16,13 @@
 package org.kitesdk.data.hcatalog;
 
 import java.util.List;
+import org.apache.avro.SchemaBuilder;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.junit.Assert;
 import org.junit.Test;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetRepositories;
+import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.PartitionStrategy;
 
 public class TestHivePartitioning {
@@ -34,7 +38,39 @@ public class TestHivePartitioning {
       .identity("timestamp", "time_copy", Long.class, -1)
       .range("group", 5, 10, 15, 20)
       .range("id", "0", "a")
-      .dateFormat("timestamp", "date", "yyyyMMdd")
+      .dateFormat("timestamp", "date", "yyyy-MM-dd")
+      .build();
+
+  private static final DatasetDescriptor descriptor = new DatasetDescriptor
+      .Builder()
+      .schema(SchemaBuilder.record("Record").fields()
+          .requiredString("message")
+          .requiredBoolean("bool")
+          .requiredLong("timestamp")
+          .requiredInt("number")
+          .requiredDouble("double")
+          .requiredFloat("float")
+          .requiredBytes("payload")
+          .endRecord())
+      .partitionStrategy(new PartitionStrategy.Builder()
+          .year("timestamp")
+          .month("timestamp")
+          .day("timestamp")
+          .hour("timestamp")
+          .minute("timestamp")
+          .identity("message", "message_copy", String.class, -1)
+          .identity("timestamp", "ts", Long.class, -1)
+          .identity("number", "num", Integer.class, -1)
+          .hash("message", 48)
+          .hash("timestamp", 48)
+          .hash("number", 48)
+          .hash("payload", 48)
+          .hash("float", 48)
+          .hash("double", 48)
+          .hash("bool", 48)
+          .range("number", 5, 10, 15, 20)
+          .range("message", "m", "z", "M", "Z")
+          .build())
       .build();
 
   @Test
@@ -67,6 +103,22 @@ public class TestHivePartitioning {
     Assert.assertEquals("int", columns.get(8).getType());
     Assert.assertEquals("string", columns.get(9).getType());
     Assert.assertEquals("string", columns.get(10).getType());
+  }
+
+  @Test
+  public void testManagedDatasetCreation() {
+    DatasetRepository repo = DatasetRepositories.open("repo:hive");
+    repo.delete("records"); // ensure it does not already exist
+    repo.create("records", descriptor);
+    repo.delete("records"); // clean up
+  }
+
+  @Test
+  public void testExternalDatasetCreation() {
+    DatasetRepository repo = DatasetRepositories.open("repo:hive:target/");
+    repo.delete("records"); // ensure it does not already exist
+    repo.create("records", descriptor);
+    repo.delete("records"); // clean up
   }
 
 }
