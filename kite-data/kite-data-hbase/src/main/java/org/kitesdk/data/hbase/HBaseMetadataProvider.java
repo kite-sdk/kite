@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.hbase;
 
+import com.google.common.base.Preconditions;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetNotFoundException;
@@ -34,6 +35,7 @@ import java.util.Set;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.kitesdk.data.spi.Compatibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +54,11 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
+    Compatibility.checkAndWarn(
+        HBaseMetadataProvider.getEntityName(name),
+        descriptor.getSchema());
 
     try {
       String managedSchemaName = "managed_schemas"; // TODO: allow table to be specified
@@ -121,6 +128,12 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
+    Compatibility.checkAndWarn(
+        HBaseMetadataProvider.getEntityName(name),
+        descriptor.getSchema());
+
     String tableName = getTableName(name);
     String entityName = getEntityName(name);
     schemaManager.refreshManagedSchemaCache(tableName, entityName);
@@ -137,6 +150,8 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public DatasetDescriptor load(String name) {
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+
     if (!exists(name)) {
       throw new DatasetNotFoundException("No such dataset: " + name);
     }
@@ -147,6 +162,8 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean delete(String name) {
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+
     DatasetDescriptor descriptor = load(name);
     String tableName = getTableName(name);
     String entityName = getEntityName(name);
@@ -177,6 +194,8 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean exists(String name) {
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
+
     String tableName = getTableName(name);
     String entityName = getEntityName(name);
     schemaManager.refreshManagedSchemaCache(tableName, entityName);
