@@ -70,6 +70,7 @@ public class TestHivePartitioning {
           .hash("bool", 48)
           .range("number", 5, 10, 15, 20)
           .range("message", "m", "z", "M", "Z")
+          .dateFormat("timestamp", "date", "yyyy-MM-dd")
           .build())
       .build();
 
