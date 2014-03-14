@@ -178,8 +178,7 @@ public class TestSchemaConversion {
         TypeInfoFactory.stringTypeInfo, type);
   }
 
-  // TODO: this should throw an IllegalArgumentException instead
-  @Test(expected=StackOverflowError.class)
+  @Test(expected=IllegalStateException.class)
   public void testRecursiveRecord() {
     Schema recursiveRecord = SchemaBuilder.record("RecursiveRecord").fields()
         .name("name").type().stringType().noDefault()

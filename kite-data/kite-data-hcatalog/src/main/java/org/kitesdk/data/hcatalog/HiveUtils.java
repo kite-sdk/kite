@@ -50,6 +50,7 @@ import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
+import org.kitesdk.data.spi.SchemaUtil;
 
 class HiveUtils {
   static final String DEFAULT_DB = "default";
@@ -320,97 +321,65 @@ class HiveUtils {
     return columns;
   }
 
-  static TypeInfo convert(Schema avroSchema) {
-    // TODO: throw an error on recursive types
-    switch (avroSchema.getType()) {
-      case RECORD:
-        return convertRecord(avroSchema);
-      case UNION:
-        return convertUnion(avroSchema);
-      case ARRAY:
-        return convertArray(avroSchema);
-      case MAP:
-        return convertMap(avroSchema);
-      default:
-        return convertPrimitive(avroSchema);
-    }
+  public static TypeInfo convert(Schema schema) {
+    return SchemaUtil.visit(schema, new Converter());
   }
 
-  static TypeInfo convertRecord(Schema avroRecord) {
-    Preconditions.checkArgument(
-        Schema.Type.RECORD.equals(avroRecord.getType()),
-        "Avro Schema must be a Record");
+  static class Converter extends SchemaUtil.SchemaVisitor<TypeInfo> {
+    static final ImmutableMap<Schema.Type, TypeInfo> TYPE_TO_TYPEINFO =
+        ImmutableMap.<Schema.Type, TypeInfo>builder()
+            .put(Schema.Type.BOOLEAN, TypeInfoFactory.booleanTypeInfo)
+            .put(Schema.Type.INT, TypeInfoFactory.intTypeInfo)
+            .put(Schema.Type.LONG, TypeInfoFactory.longTypeInfo)
+            .put(Schema.Type.FLOAT, TypeInfoFactory.floatTypeInfo)
+            .put(Schema.Type.DOUBLE, TypeInfoFactory.doubleTypeInfo)
+            .put(Schema.Type.STRING, TypeInfoFactory.stringTypeInfo)
+            .put(Schema.Type.ENUM, TypeInfoFactory.stringTypeInfo)
+            .put(Schema.Type.BYTES, TypeInfoFactory.binaryTypeInfo)
+            .put(Schema.Type.FIXED, TypeInfoFactory.binaryTypeInfo)
+            .build();
 
-    final List<Field> fields = avroRecord.getFields();
-    final List<String> names = Lists.newArrayListWithExpectedSize(fields.size());
-    final List<TypeInfo> types = Lists.newArrayListWithExpectedSize(fields.size());
-    for (Field field : fields) {
-      names.add(field.name());
-      types.add(convert(field.schema()));
+    public TypeInfo record(Schema record, List<String> names, List<TypeInfo> types) {
+      return TypeInfoFactory.getStructTypeInfo(names, types);
     }
 
-    return TypeInfoFactory.getStructTypeInfo(names, types);
-  }
-
-  static TypeInfo convertUnion(Schema avroUnion) {
-    Preconditions.checkArgument(
-        Schema.Type.UNION.equals(avroUnion.getType()),
-        "Avro Schema must be a Union");
-
-    final List<TypeInfo> nonNullTypes = Lists.newArrayList();
-    for (Schema schema : avroUnion.getTypes()) {
-      if (!Schema.Type.NULL.equals(schema.getType())) {
-        nonNullTypes.add(convert(schema));
+    @Override
+    public TypeInfo union(Schema union, List<TypeInfo> options) {
+      boolean nullable = false;
+      List<TypeInfo> nonNullTypes = Lists.newArrayList();
+      for (TypeInfo type : options) {
+        if (type != null) {
+          nonNullTypes.add(type);
+        } else {
+          nullable = true;
+        }
       }
-    }
 
-    // check for a single, possible nullable field
-    if (nonNullTypes.size() == 1) {
+      // handle a single field in the union
+      if (nonNullTypes.size() == 1) {
+        return nonNullTypes.get(0);
+      }
+
       // TODO: where does nullability get passed?
-      // nullable if avroUnion.getTypes().size() == 2
-      return nonNullTypes.get(0);
+
+      return TypeInfoFactory.getUnionTypeInfo(nonNullTypes);
     }
 
-    return TypeInfoFactory.getUnionTypeInfo(nonNullTypes);
-  }
+    @Override
+    public TypeInfo array(Schema array, TypeInfo element) {
+      return TypeInfoFactory.getListTypeInfo(element);
+    }
 
-  static TypeInfo convertArray(Schema avroArray) {
-    Preconditions.checkArgument(
-        Schema.Type.ARRAY.equals(avroArray.getType()),
-        "Avro Schema must be an Array");
+    @Override
+    public TypeInfo map(Schema map, TypeInfo value) {
+      return TypeInfoFactory.getMapTypeInfo(
+          TypeInfoFactory.stringTypeInfo, value);
+    }
 
-    return TypeInfoFactory.getListTypeInfo(convert(avroArray.getElementType()));
-  }
-
-  static TypeInfo convertMap(Schema avroMap) {
-    Preconditions.checkArgument(
-        Schema.Type.MAP.equals(avroMap.getType()),
-        "Avro Schema must be a Map");
-
-    return TypeInfoFactory.getMapTypeInfo(
-        TypeInfoFactory.stringTypeInfo, convert(avroMap.getValueType()));
-  }
-
-  static final ImmutableMap<Schema.Type, TypeInfo> TYPE_TO_TYPEINFO =
-      ImmutableMap.<Schema.Type, TypeInfo>builder()
-          .put(Schema.Type.BOOLEAN, TypeInfoFactory.booleanTypeInfo)
-          .put(Schema.Type.INT, TypeInfoFactory.intTypeInfo)
-          .put(Schema.Type.LONG, TypeInfoFactory.longTypeInfo)
-          .put(Schema.Type.FLOAT, TypeInfoFactory.floatTypeInfo)
-          .put(Schema.Type.DOUBLE, TypeInfoFactory.doubleTypeInfo)
-          .put(Schema.Type.STRING, TypeInfoFactory.stringTypeInfo)
-          .put(Schema.Type.ENUM, TypeInfoFactory.stringTypeInfo)
-          .put(Schema.Type.BYTES, TypeInfoFactory.binaryTypeInfo)
-          .put(Schema.Type.FIXED, TypeInfoFactory.binaryTypeInfo)
-          .build();
-
-  static TypeInfo convertPrimitive(Schema avroPrimitive) {
-    TypeInfo type = TYPE_TO_TYPEINFO.get(avroPrimitive.getType());
-
-    Preconditions.checkArgument(type != null,
-        "Avro Schema must be a primitive type, not " + avroPrimitive.getType());
-
-    return type;
+    @Override
+    public TypeInfo primitive(Schema primitive) {
+      return TYPE_TO_TYPEINFO.get(primitive.getType());
+    }
   }
 
 }
