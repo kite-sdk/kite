@@ -15,15 +15,15 @@
  */
 package org.kitesdk.data;
 
-import static org.junit.Assert.assertEquals;
-
-import org.kitesdk.data.spi.FieldPartitioner;
 import java.util.List;
-
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertEquals;
 
 public class TestPartitionStrategy {
 
@@ -70,6 +70,25 @@ public class TestPartitionStrategy {
     assertEquals(7, fp1.getCardinality());
 
     assertEquals(12 * 7, p.getCardinality()); // useful for writers
+  }
+
+  @Test
+  @Ignore
+  public void testDuplicateFieldNames() {
+    Assert.assertNotNull("Should allow duplicate source fields",
+        new PartitionStrategy.Builder()
+            .year("timestamp").month("timestamp")
+            .build());
+    TestHelpers.assertThrows("Should reject duplicate partition fields",
+        IllegalStateException.class, new Runnable() {
+      @Override
+      public void run() {
+        new PartitionStrategy.Builder()
+            .identity("number", "num", Integer.class, 48)
+            .identity("number2", "num", Integer.class, 48)
+            .build();
+      }
+    });
   }
 
 }

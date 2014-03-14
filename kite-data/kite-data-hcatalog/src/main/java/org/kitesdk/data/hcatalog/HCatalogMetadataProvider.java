@@ -26,6 +26,7 @@ import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.kitesdk.data.spi.AbstractMetadataProvider;
+import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.PartitionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,9 +67,8 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
 
   @Override
   public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
-    Preconditions.checkArgument(descriptor != null,
-        "Descriptor cannot be null");
+    Compatibility.checkDatasetName(name);
+    Compatibility.checkDescriptor(descriptor);
 
     if (!exists(name)) {
       throw new DatasetNotFoundException("Table not found: " + name);
@@ -82,7 +82,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
 
   @Override
   public boolean delete(String name) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Compatibility.checkDatasetName(name);
 
     // TODO: when switching off of HCatalog, this may need to be moved
     if (!exists(name)) {
@@ -94,7 +94,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
 
   @Override
   public boolean exists(String name) {
-    Preconditions.checkArgument(name != null, "Name cannot be null");
+    Compatibility.checkDatasetName(name);
 
     return getHcat().exists(HiveUtils.DEFAULT_DB, name);
   }
@@ -109,4 +109,6 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
   public void partitionAdded(String name, String path) {
     getHcat().addPartition(HiveUtils.DEFAULT_DB, name, path);
   }
+
+
 }

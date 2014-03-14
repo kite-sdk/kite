@@ -41,6 +41,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
+import org.kitesdk.data.spi.SchemaUtil;
 
 /**
  * <p>
@@ -568,11 +569,30 @@ public class DatasetDescriptor {
     public DatasetDescriptor build() {
       Preconditions.checkState(schema != null,
           "Descriptor schema is required and cannot be null");
+      checkPartitionStrategy(schema, partitionStrategy);
 
       return new DatasetDescriptor(
           schema, schemaUrl, format, location, properties, partitionStrategy);
     }
 
+    private static void checkPartitionStrategy(Schema schema, PartitionStrategy strategy) {
+      if (strategy == null) {
+        return;
+      }
+      Preconditions.checkState(schema.getType() == Schema.Type.RECORD,
+          "Cannot partition non-records: " + schema);
+      for (org.kitesdk.data.spi.FieldPartitioner fp : strategy.getFieldPartitioners()) {
+        // the source name should be a field in the schema, but not necessarily
+        // the record.
+        Schema.Field field = schema.getField(fp.getSourceName());
+        Preconditions.checkState(field != null,
+            "Cannot partition on {} (missing from schema)", fp.getSourceName());
+        Preconditions.checkState(
+            SchemaUtil.checkType(field.schema().getType(), fp.getSourceType()),
+            "Field type {} does not match partitioner {}",
+            field.schema().getType(), fp);
+      }
+    }
   }
 
 }

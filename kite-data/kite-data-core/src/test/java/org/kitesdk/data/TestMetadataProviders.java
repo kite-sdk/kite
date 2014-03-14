@@ -25,6 +25,7 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
 import org.junit.Before;
@@ -66,7 +67,10 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
         new Configuration());
     this.testDescriptor = new DatasetDescriptor.Builder()
         .format(Formats.AVRO)
-        .schemaUri(USER_SCHEMA_URL)
+        .schema(SchemaBuilder.record("Event").fields()
+            .requiredLong("timestamp")
+            .requiredString("message")
+            .endRecord())
         .partitionStrategy(new PartitionStrategy.Builder()
             .year("timestamp")
             .month("timestamp")
@@ -76,7 +80,10 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     // something completely different
     this.anotherDescriptor = new DatasetDescriptor.Builder()
         .format(Formats.PARQUET)
-        .schema(Schema.createArray(Schema.create(Schema.Type.FLOAT)))
+        .schema(SchemaBuilder.record("Record").fields()
+            .requiredBytes("some_field")
+            .requiredString("another_field")
+            .endRecord())
         .partitionStrategy(new PartitionStrategy.Builder()
             .hash("some_field", 20000)
             .build())
