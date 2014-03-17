@@ -20,6 +20,7 @@ import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.SchemaNotFoundException;
 import org.kitesdk.data.hbase.avro.AvroEntitySchema;
 import org.kitesdk.data.hbase.avro.AvroKeyEntitySchemaParser;
 import org.kitesdk.data.hbase.impl.Constants;
@@ -147,7 +148,13 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
 
   @Override
   public boolean delete(String name) {
-    DatasetDescriptor descriptor = load(name);
+    DatasetDescriptor descriptor;
+    try {
+      descriptor = load(name);
+    } catch (DatasetNotFoundException e) {
+      return false;
+    }
+
     String tableName = getTableName(name);
     String entityName = getEntityName(name);
 

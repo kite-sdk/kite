@@ -126,15 +126,19 @@ public interface DatasetRepository {
   <E> Dataset<E> update(String name, DatasetDescriptor descriptor);
 
   /**
-   * Delete the named {@link Dataset}. If no dataset with the
-   * provided {@code name} exists, a {@link DatasetNotFoundException} is thrown.
+   * Delete data for the {@link Dataset} named {@code name} and remove its
+   * {@link DatasetDescriptor} from the underlying metadata provider.
    *
-   * @param name The name of the dataset.
-   * @return {@code true} if the dataset was successfully deleted, false if the
-   *         dataset does not exist.
+   * After this method is called, there will be no {@code Dataset} with the
+   * given {@code name}, unless an exception has been thrown. If either data or
+   * metadata was removed, this method will return {@code true}. If there was
+   * no {@code Dataset} corresponding to the given {@code name} then this
+   * method will not make any changes and will return {@code false}.
+   *
+   * @param name The name of the dataset to delete.
+   * @return {@code true} if any data or metadata has been removed,
+   *         {@code false} if no action was taken.
    * @throws IllegalArgumentException If {@code name} is null
-   * @throws DatasetNotFoundException If the {@code Dataset} location cannot be
-   *                                  determined because no metadata exists.
    * @throws ConcurrentSchemaModificationException
    *                                  If the {@code Dataset}
    *                                  schema is updated concurrently.

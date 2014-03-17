@@ -91,9 +91,15 @@ public interface MetadataProvider {
   /**
    * Delete all metadata associated with the dataset named {@code name}.
    *
+   * After this method is called, there will be no {@code DatasetDescriptor}
+   * stored for the given {@code name}, unless an exception has been thrown. If
+   * metadata was removed, this method will return {@code true}. If there was
+   * no {@code DatasetDescriptor} corresponding to the given name, then this
+   * method will not make any changes and will return {@code false}.
+   *
    * @param name The fully qualified name of a dataset.
-   * @return True if the dataset is successfully deleted, false if the dataset
-   *         doesn't exist.
+   * @return {@code true} if the metadata is successfully deleted,
+   *         {@code false} if no action was taken.
    * @throws MetadataProviderException If the dataset metadata exists but can
    *                                   not be deleted.
    */

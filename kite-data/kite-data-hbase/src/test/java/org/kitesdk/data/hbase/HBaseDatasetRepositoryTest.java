@@ -259,6 +259,8 @@ public class HBaseDatasetRepositoryTest {
     boolean success = repo.delete(datasetName);
     assertTrue("dataset should have been successfully deleted", success);
 
+    assertFalse("second delete should return false", repo.delete(datasetName));
+
     // check that tables have no rows
     assertEquals(0, HBaseTestUtils.util.countRows(new HTable(HBaseTestUtils.getConf(), managedTableName)));
     assertEquals(0, HBaseTestUtils.util.countRows(new HTable(HBaseTestUtils.getConf(), tableName)));
