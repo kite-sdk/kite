@@ -179,17 +179,27 @@ public class DefaultSchemaManager implements SchemaManager {
   @Override
   public int getEntityVersion(String tableName, String entityName,
       EntitySchema schema) {
-    KeyEntitySchemaParser<?, ?> schemaParser = getSchemaParser(getManagedSchema(
-        tableName, entityName).getSchemaType());
-    for (Entry<Integer, String> entry : getManagedSchemaVersions(tableName,
-        entityName).entrySet()) {
-      EntitySchema managedSchema = schemaParser.parseEntitySchema(entry
-          .getValue());
-      if (schema.equals(managedSchema)) {
+    for (Entry<Integer, EntitySchema> entry :
+        getEntitySchemas(tableName, entityName).entrySet()) {
+      if (schema.equals(entry.getValue())) {
         return entry.getKey();
       }
     }
-    return -1;
+    String msg = "Could not find managed version for " + tableName + ", " +
+        entityName + " that matches " + schema;
+    LOG.error(msg);
+    throw new SchemaNotFoundException(msg);
+  }
+
+  @Override
+  public boolean hasSchemaVersion(String tableName, String entityName, EntitySchema schema) {
+    for (Entry<Integer, EntitySchema> entry :
+        getEntitySchemas(tableName, entityName).entrySet()) {
+      if (entry.getValue().equals(schema)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
@@ -252,12 +262,10 @@ public class DefaultSchemaManager implements SchemaManager {
     KeySchema newKeySchema = schemaParser.parseKeySchema(newSchemaStr);
 
     // verify that the newSchema isn't a duplicate of a previous schema version.
-    int existingVersion = getEntityVersion(tableName, entityName,
-        newEntitySchema);
-    if (existingVersion != -1) {
+    if (hasSchemaVersion(tableName, entityName, newEntitySchema)) {
       throw new IncompatibleSchemaException(
           "Schema already exists as version: "
-              + Integer.toString(existingVersion));
+              + getEntityVersion(tableName, entityName, newEntitySchema));
     }
 
     // validate that, for each version of the schema, this schema is
