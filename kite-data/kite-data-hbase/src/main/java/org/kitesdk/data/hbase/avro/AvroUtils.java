@@ -304,6 +304,9 @@ public class AvroUtils {
     } else if (schema1.getType() == Schema.Type.RECORD) {
       // Compare record fields that match in name by comparing their schemas
       // recursively calling this method.
+      if (schema1.getFields().size() != schema2.getFields().size()) {
+        return false;
+      }
       for (Field field1 : schema1.getFields()) {
         Field field2 = schema2.getField(field1.name());
         if (field2 == null) {
