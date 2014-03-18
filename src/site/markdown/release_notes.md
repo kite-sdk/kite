@@ -3,6 +3,23 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version 0.12.1
+
+Release date: March 18, 2014
+
+Version 0.12.1 is a bug-fix release with the following notable changes:
+
+* Fixed slow job setup for crunch when using large Datasets (thanks Gabriel Reid!)
+* Fixed CDK-328, Hive metastore concurrent access bug (thanks Karel Vervaeke!)
+* Clarified documentation for deleting datasets
+* Added more better checking to catch errors earlier
+    * Catch partition strategies that rely on missing data fields
+    * Catch Hive-incompatible table, column, and partition names
+* Added warnings when creating FS or HBase datasets that are incompatible with Hive
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&version=10517)
+is available from JIRA.
+
 ## Version 0.12.0
 
 Release date: March 10, 2014
