@@ -241,7 +241,7 @@ public class SchemaTool {
         LOG.error(msg);
         throw new SchemaValidationException(msg);
       }
-      if (schemaManager.getEntityVersion(tableName, entityName, entitySchema) == -1) {
+      if (!schemaManager.hasSchemaVersion(tableName, entityName, entitySchema)) {
         LOG.info("Migrating Schema: (" + tableName + ", " + entityName + ")");
         schemaManager.migrateSchema(tableName, entityName, entitySchemaString);
       } else {

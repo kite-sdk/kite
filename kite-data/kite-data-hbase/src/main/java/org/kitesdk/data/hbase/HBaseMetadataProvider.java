@@ -141,7 +141,7 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
     String schemaString = descriptor.getSchema().toString();
     AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
     EntitySchema entitySchema = parser.parseEntitySchema(schemaString);
-    if (schemaManager.getEntityVersion(tableName, entityName, entitySchema) == -1) {
+    if (!schemaManager.hasSchemaVersion(tableName, entityName, entitySchema)) {
       schemaManager.migrateSchema(tableName, entityName, schemaString);
     } else {
       logger.info("Schema hasn't changed, not migrating: (" + name + ")");

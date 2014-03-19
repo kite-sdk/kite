@@ -106,6 +106,27 @@ public interface SchemaManager {
   public int getEntityVersion(String tableName, String entityName,
       EntitySchema schema);
 
+
+  /**
+   * Checks whether the given {@link EntitySchema} is already managed as a
+   * version for the given {@code tableName} and {@code entityName}.
+   *
+   * This checks the current schema manager state and does not refresh the
+   * cached schemas.
+   *
+   * @param tableName
+   *          The table name of the managed schema.
+   * @param entityName
+   *          The entity name of the managed schema.
+   * @param version
+   *          The entity schema that may already be managed.
+   * @return {@code true} if the given {@code EntitySchema} is a known version,
+   *         {@code false} otherwise
+   * @see #refreshManagedSchemaCache(String, String)
+   */
+  public boolean hasSchemaVersion(String tableName, String entityName,
+                                  EntitySchema version);
+
   /**
    * Refresh the underlying ManagedSchema cache for a specific table name,
    * entity name pair. This will ensure that calls to get key or entity schemas
