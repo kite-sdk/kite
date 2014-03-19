@@ -63,7 +63,7 @@ final class AccessorImpl extends Accessor {
    * @param e a {@code DatasetException} to wrap and throw
    */
   @SuppressWarnings("deprecation")
-  public MetadataProviderException providerExceptionFor(DatasetException e) {
+  public DatasetException providerExceptionFor(DatasetException e) {
     return new MetadataProviderException(e);
   }
 }
