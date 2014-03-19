@@ -17,7 +17,7 @@ package org.kitesdk.data.hcatalog;
 
 import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
-import org.kitesdk.data.MetadataProvider;
+import org.kitesdk.data.spi.MetadataProvider;
 
 class HCatalogExternalDatasetRepository extends HCatalogAbstractDatasetRepository {
 

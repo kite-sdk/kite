@@ -22,11 +22,11 @@ import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.IncompatibleSchemaException;
-import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
+import org.kitesdk.data.spi.MetadataProvider;
 import org.kitesdk.data.spi.PartitionListener;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -51,17 +51,17 @@ import org.slf4j.LoggerFactory;
  * A {@link org.kitesdk.data.DatasetRepository} that stores data in a Hadoop {@link FileSystem}.
  * </p>
  * <p>
- * Given a {@link FileSystem}, a root directory, and a {@link org.kitesdk.data.MetadataProvider},
+ * Given a {@link FileSystem}, a root directory, and a {@link MetadataProvider},
  * this {@link org.kitesdk.data.DatasetRepository} implementation can load and store
- * {@link org.kitesdk.data.Dataset}s on both local filesystems as well as the Hadoop Distributed
+ * {@link Dataset}s on both local filesystems as well as the Hadoop Distributed
  * FileSystem (HDFS). Users may directly instantiate this class with the three
  * dependencies above and then perform dataset-related operations using any of
  * the provided methods. The primary methods of interest will be
- * {@link #create(String, org.kitesdk.data.DatasetDescriptor)},
+ * {@link #create(String, DatasetDescriptor)},
  * {@link #load(String)}, and
  * {@link #delete(String)} which create a new dataset, load an existing
  * dataset, or delete an existing dataset, respectively. Once a dataset has been created
- * or loaded, users can invoke the appropriate {@link org.kitesdk.data.Dataset} methods to get a reader
+ * or loaded, users can invoke the appropriate {@link Dataset} methods to get a reader
  * or writer as needed.
  * </p>
  * <p>
@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
  * @see org.kitesdk.data.Dataset
  * @see org.kitesdk.data.DatasetDescriptor
  * @see org.kitesdk.data.PartitionStrategy
- * @see org.kitesdk.data.MetadataProvider
+ * @see org.kitesdk.data.spi.MetadataProvider
  */
 public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 

@@ -18,7 +18,6 @@ package org.kitesdk.data.hcatalog;
 
 import java.net.URI;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.spi.filesystem.TestFileSystemDatasetRepository;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
@@ -30,6 +29,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
+import org.kitesdk.data.spi.MetadataProvider;
 
 public class TestManagedHCatalogDatasetRepository extends TestFileSystemDatasetRepository {
 

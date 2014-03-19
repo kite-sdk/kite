@@ -20,12 +20,12 @@ package org.kitesdk.data;
  * Exception thrown for metadata provider-related failures.
  * </p>
  * <p>
- * Implementations of the {@link MetadataProvider} interface throw this
+ * Implementations of the {@link org.kitesdk.data.spi.MetadataProvider} interface throw this
  * exception if any of their operations fail. This is a runtime (unchecked)
  * exception.
  * </p>
  *
- * @see MetadataProvider
+ * @see org.kitesdk.data.spi.MetadataProvider
  * @since 0.2.0
  */
 public class MetadataProviderException extends DatasetException {

@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data;
+package org.kitesdk.data.spi;
 
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetExistsException;
+import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.spi.AbstractMetadataProvider;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -41,7 +45,7 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
     try {
       this.fs = FileSystem.get(conf);
     } catch (IOException ex) {
-      throw new MetadataProviderException("Could not get default FileSystem");
+      throw new DatasetIOException("Could not get default FileSystem", ex);
     }
   }
 
@@ -74,19 +78,10 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
           "Dataset already exists for name:" + name);
     }
 
-    final DatasetDescriptor newDescriptor;
+    DatasetDescriptor newDescriptor;
     if (descriptor.getLocation() == null) {
-      final Path location = fs.makeQualified(new Path(newLocation(name)));
-      final String fsUri;
-      try {
-        fsUri = location.getFileSystem(conf).getUri().toString();
-      } catch (IOException ex) {
-        throw new MetadataProviderException(
-            "Cannot get FS for location" + location);
-      }
-
       newDescriptor = new DatasetDescriptor.Builder(descriptor)
-          .location(location)
+          .location(fs.makeQualified(new Path(newLocation(name))))
           .build();
     } else {
       // don't need to modify it

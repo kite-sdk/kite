@@ -20,7 +20,6 @@ import java.net.URI;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.filesystem.TestFileSystemDatasetRepository;
@@ -37,6 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.Mergeable;
+import org.kitesdk.data.spi.MetadataProvider;
 
 public class TestExternalHCatalogDatasetRepository extends TestFileSystemDatasetRepository {
 

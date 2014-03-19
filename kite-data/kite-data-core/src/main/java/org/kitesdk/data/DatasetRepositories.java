@@ -89,7 +89,7 @@ public class DatasetRepositories {
    * </p>
    * <p>
    * This method provides a simpler way to connect to a {@link DatasetRepository}
-   * while providing information about the appropriate {@link MetadataProvider}
+   * while providing information about the appropriate {@link org.kitesdk.data.spi.MetadataProvider}
    * and other options to use. For almost all cases, this is the preferred method
    * of retrieving an instance of a {@link DatasetRepository}.
    * </p>

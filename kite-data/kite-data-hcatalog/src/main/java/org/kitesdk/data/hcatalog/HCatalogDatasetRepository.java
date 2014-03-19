@@ -24,8 +24,8 @@ import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.hcatalog.impl.Loader;
+import org.kitesdk.data.spi.MetadataProvider;
 
 /**
  * <p>

@@ -24,12 +24,12 @@ import org.junit.After;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.MetadataProvider;
 import java.net.URI;
 import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
+import org.kitesdk.data.spi.MetadataProvider;
 
 /**
  * This verifies that the URI system returns correctly configured repositories.

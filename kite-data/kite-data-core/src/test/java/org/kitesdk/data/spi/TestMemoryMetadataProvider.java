@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data;
+package org.kitesdk.data.spi;
 
 import org.apache.hadoop.conf.Configuration;
 
