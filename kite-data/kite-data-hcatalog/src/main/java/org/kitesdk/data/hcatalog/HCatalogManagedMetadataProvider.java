@@ -32,8 +32,8 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
   private static final Logger logger = LoggerFactory
       .getLogger(HCatalogManagedMetadataProvider.class);
 
-  public HCatalogManagedMetadataProvider(Configuration conf, URI repositoryUri) {
-    super(conf, repositoryUri);
+  public HCatalogManagedMetadataProvider(Configuration conf) {
+    super(conf);
     logger.info("Default FS: " + conf.get("fs.defaultFS"));
   }
 
@@ -48,7 +48,7 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
           new DatasetException("Table is not managed"));
     }
 
-    return addRepositoryUri(HiveUtils.descriptorForTable(conf, table));
+    return HiveUtils.descriptorForTable(conf, table);
   }
 
   @Override
@@ -73,8 +73,8 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
     // load the created table to get the data location
     final Table newTable = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
 
-    return addRepositoryUri(new DatasetDescriptor.Builder(descriptor)
+    return new DatasetDescriptor.Builder(descriptor)
         .location(newTable.getDataLocation())
-        .build());
+        .build();
   }
 }

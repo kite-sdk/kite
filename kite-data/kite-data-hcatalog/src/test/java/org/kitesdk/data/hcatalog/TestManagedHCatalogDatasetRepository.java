@@ -39,12 +39,13 @@ public class TestManagedHCatalogDatasetRepository extends TestFileSystemDatasetR
 
   @Override
   public DatasetRepository newRepo(MetadataProvider provider) {
-    return new HCatalogDatasetRepository(conf, provider, URI.create("repo:hive"));
+    // use null URI because TestDatasetRepositories expects no URI
+    return new HCatalogDatasetRepository(conf, provider, null);
   }
 
   @Override
   public MetadataProvider newProvider(Configuration conf) {
-    return new HCatalogManagedMetadataProvider(conf, URI.create("repo:hive"));
+    return new HCatalogManagedMetadataProvider(conf);
   }
 
   private HiveMetaStoreClient client;

@@ -40,8 +40,8 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
   private final Path rootDirectory;
   private final FileSystem rootFileSystem;
 
-  public HCatalogExternalMetadataProvider(Configuration conf, Path rootDirectory, URI repositoryUri) {
-    super(conf, repositoryUri);
+  public HCatalogExternalMetadataProvider(Configuration conf, Path rootDirectory) {
+    super(conf);
     Preconditions.checkArgument(rootDirectory != null, "Root cannot be null");
 
     try {
@@ -64,7 +64,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
           new DatasetException("Table is not external"));
     }
 
-    return addRepositoryUri(HiveUtils.descriptorForTable(conf, table));
+    return HiveUtils.descriptorForTable(conf, table);
   }
 
   @Override
@@ -95,7 +95,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
     // assign the location of the the table
     getHcat().createTable(table);
 
-    return addRepositoryUri(newDescriptor);
+    return newDescriptor;
   }
 
   private Path pathForDataset(String name) {
