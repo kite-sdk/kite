@@ -17,7 +17,7 @@ Version 0.12.1 is a bug-fix release with the following notable changes:
     * Catch Hive-incompatible table, column, and partition names
 * Added warnings when creating FS or HBase datasets that are incompatible with Hive
 
-The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&version=10517)
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10517)
 is available from JIRA.
 
 ## Version 0.12.0
