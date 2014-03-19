@@ -1,0 +1,811 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<comments
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xsi:noNamespaceSchemaLocation='comments.xsd'
+  name="Kite_SDK_0.11.0_to_Kite_SDK_0.12.1"
+  jdversion="1.1.1">
+
+<!-- This file contains comments for a JDiff report. -->
+<!-- It is used only in generating the report, and does not need to ship with the final report. -->
+
+<!-- The id attribute in an identifier element identifies the change as noted in the report. -->
+<!-- An id has the form package[.class[.[ctor|method|field].signature]], where [] indicates optional text. -->
+<!-- A comment element can have multiple identifier elements, which will -->
+<!-- will cause the same text to appear at each place in the report, but -->
+<!-- will be converted to separate comments when the comments file is used. -->
+<!-- HTML tags in the text field will appear in the report. -->
+<!-- You also need to close p HTML elements, used for paragraphs - see the top-level documentation. -->
+<comment>
+  <identifier id="org.kitesdk.data"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.Dataset"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.DatasetRepository"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.DatasetRepository.getUri_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.FieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.FieldPartitioner.apply_removed(S)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.FieldPartitioner.getCardinality_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.FieldPartitioner.getName_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.FieldPartitioner.getSourceName_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.FieldPartitioner.getSourceType_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.FieldPartitioner.getType_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.FieldPartitioner.project_removed(com.google.common.base.Predicate&lt;S&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.FieldPartitioner.valueFromString_removed(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.FieldPartitioner.valueToString_removed(T)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.PartitionStrategy"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.PartitionStrategy.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.PartitionStrategy.Builder.identity_added(java.lang.String, java.lang.String, java.lang.Class&lt;S&gt;, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.PartitionStrategy.Builder.identity_changed(java.lang.String, java.lang.Class&lt;S&gt;, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.PartitionStrategy.Builder.identity_removed(java.lang.String, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.PartitionStrategy.ctor_removed(java.util.List&lt;org.kitesdk.data.FieldPartitioner&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.PartitionStrategy.getFieldPartitioners_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.RefinableView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.RefineableView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.View"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.View.deleteAll_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.crunch"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.crunch.CrunchDatasets"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.crunch.CrunchDatasets.asTarget_changed(org.kitesdk.data.Dataset&lt;E&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.filesystem"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.filesystem.FileSystemDatasetRepository"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.filesystem.FileSystemDatasetRepository.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.filesystem.FileSystemDatasetRepository.Builder.metadataProvider_changed(org.kitesdk.data.MetadataProvider)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.filesystem.FileSystemDatasetRepository.ctor_changed(org.apache.hadoop.conf.Configuration, org.kitesdk.data.MetadataProvider)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.filesystem.FileSystemDatasetRepository.getMetadataProvider_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.filesystem.FileSystemDatasetRepository.getUri_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.hcatalog"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.hcatalog.HCatalogDatasetRepository"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.hcatalog.HCatalogDatasetRepository.getUri_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.mapreduce"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.CalendarFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.CalendarFieldPartitioner.UTC"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.CalendarFieldPartitioner.apply_removed(java.lang.Long)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.CalendarFieldPartitioner.calendarField"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.CalendarFieldPartitioner.compare_removed(java.lang.Integer, java.lang.Integer)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.CalendarFieldPartitioner.ctor_changed(java.lang.String, java.lang.String, int, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.CalendarFieldPartitioner.equals_removed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.CalendarFieldPartitioner.getCalendarField_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.CalendarFieldPartitioner.hashCode_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.CalendarFieldPartitioner.project_removed(com.google.common.base.Predicate&lt;java.lang.Long&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.CalendarFieldPartitioner.toString_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.DateFormatPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.DateFormatPartitioner.apply_removed(java.lang.Long)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.DateFormatPartitioner.compare_removed(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.DateFormatPartitioner.ctor_changed(java.lang.String, java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.DateFormatPartitioner.ctor_changed(java.lang.String, java.lang.String, java.lang.String, int, java.util.TimeZone)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.DateFormatPartitioner.equals_removed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.DateFormatPartitioner.hashCode_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.DateFormatPartitioner.project_removed(com.google.common.base.Predicate&lt;java.lang.Long&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.DayOfMonthFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.HashFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.HashFieldPartitioner.apply_removed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.HashFieldPartitioner.compare_removed(java.lang.Integer, java.lang.Integer)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.HashFieldPartitioner.ctor_changed(java.lang.String, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.HashFieldPartitioner.ctor_changed(java.lang.String, java.lang.String, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.HashFieldPartitioner.equals_removed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.HashFieldPartitioner.hashCode_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.HashFieldPartitioner.project_removed(com.google.common.base.Predicate&lt;java.lang.Object&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.HashFieldPartitioner.toString_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.HourFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.HourFieldPartitioner.ctor_changed(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IdentityFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IdentityFieldPartitioner.apply_removed(S extends java.lang.Comparable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IdentityFieldPartitioner.compare_removed(S extends java.lang.Comparable, S extends java.lang.Comparable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IdentityFieldPartitioner.ctor_changed(java.lang.String, java.lang.Class&lt;S&gt;, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IdentityFieldPartitioner.equals_removed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IdentityFieldPartitioner.hashCode_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IdentityFieldPartitioner.project_removed(com.google.common.base.Predicate&lt;S&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IdentityFieldPartitioner.toString_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IntRangeFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IntRangeFieldPartitioner.apply_removed(java.lang.Integer)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IntRangeFieldPartitioner.compare_removed(java.lang.Integer, java.lang.Integer)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IntRangeFieldPartitioner.ctor_changed(java.lang.String, int[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IntRangeFieldPartitioner.equals_removed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IntRangeFieldPartitioner.hashCode_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IntRangeFieldPartitioner.project_removed(com.google.common.base.Predicate&lt;java.lang.Integer&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.IntRangeFieldPartitioner.toString_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.ListFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.ListFieldPartitioner.apply_removed(S)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.ListFieldPartitioner.compare_removed(java.lang.Integer, java.lang.Integer)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.ListFieldPartitioner.ctor_changed(java.lang.String, java.util.List&lt;java.util.Set&lt;S&gt;&gt;, java.lang.Class&lt;S&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.ListFieldPartitioner.equals_removed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.ListFieldPartitioner.hashCode_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.ListFieldPartitioner.project_removed(com.google.common.base.Predicate&lt;S&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.ListFieldPartitioner.toString_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.MinuteFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.MinuteFieldPartitioner.ctor_changed(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.MonthFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.MonthFieldPartitioner.apply_removed(java.lang.Long)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.MonthFieldPartitioner.ctor_changed(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.dateFormat_changed(java.lang.String, java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.day_changed(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.hash_changed(java.lang.String, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.hash_changed(java.lang.String, java.lang.String, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.hour_changed(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.identity_changed(java.lang.String, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.identity_changed(java.lang.String, java.lang.Class&lt;S&gt;, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.minute_changed(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.month_changed(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.range_changed(java.lang.String, int[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.range_changed(java.lang.String, java.lang.String[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.toExpression_changed(org.kitesdk.data.spi.FieldPartitioner)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.PartitionFunctions.year_changed(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.RangeFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.RangeFieldPartitioner.apply_removed(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.RangeFieldPartitioner.compare_removed(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.RangeFieldPartitioner.ctor_changed(java.lang.String, java.lang.String[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.RangeFieldPartitioner.equals_removed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.RangeFieldPartitioner.getUpperBounds_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.RangeFieldPartitioner.hashCode_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.RangeFieldPartitioner.project_removed(com.google.common.base.Predicate&lt;java.lang.String&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.RangeFieldPartitioner.toString_removed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.YearFieldPartitioner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.YearFieldPartitioner.ctor_changed(java.lang.String, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.data.partition.YearFieldPartitioner.project_removed(com.google.common.base.Predicate&lt;java.lang.Long&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.morphline.hadoop.rcfile"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.morphline.hadoop.rcfile.SingleStreamFileSystem"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.morphline.hadoop.rcfile.SingleStreamFileSystem.delete_added(org.apache.hadoop.fs.Path)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.morphline.stdlib"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.morphline.stdlib.HeadBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="org.kitesdk.morphline.stdlib.SampleBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+
+</comments>
