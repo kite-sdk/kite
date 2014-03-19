@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import org.apache.hadoop.conf.Configuration;
 import org.kitesdk.data.TestDatasetRepositories;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -46,9 +47,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   public DatasetRepository newRepo(MetadataProvider provider) {
     // this purposely does not set the Configuration to test that the code
     // relies on filesystem URIs set in the DatasetDescriptor.
-    return new FileSystemDatasetRepository.Builder()
-        .metadataProvider(provider)
-        .build();
+    return new FileSystemDatasetRepository(new Configuration(), provider);
   }
 
   @Test

@@ -96,9 +96,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    * @param metadataProvider the provider for metadata storage
    *
    * @since 0.8.0
-   * @deprecated will be removed from the public API in 0.13.0
    */
-  @Deprecated
   public FileSystemDatasetRepository(
       Configuration conf, MetadataProvider metadataProvider) {
     this(conf, metadataProvider, null);
@@ -365,10 +363,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   /**
    * @return the {@link MetadataProvider} being used by this repository.
    * @since 0.2.0
-   * @deprecated will be removed from the public API in 0.13.0
    */
-  @Deprecated
-  public MetadataProvider getMetadataProvider() {
+  MetadataProvider getMetadataProvider() {
     return metadataProvider;
   }
 
@@ -395,7 +391,6 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
     private Path rootDirectory;
     private FileSystem fileSystem;
-    private MetadataProvider metadataProvider;
     private Configuration configuration;
 
     /**
@@ -445,17 +440,6 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
 
     /**
-     * The {@link MetadataProvider} for metadata storage (optional). If not
-     * specified, a {@link FileSystemMetadataProvider} will be used.
-     * @deprecated will be removed from the public API in 0.13.0
-     */
-    @Deprecated
-    public Builder metadataProvider(MetadataProvider metadataProvider) {
-      this.metadataProvider = metadataProvider;
-      return this;
-    }
-
-    /**
      * The {@link Configuration} used to find the {@link FileSystem} (optional).
      * If not specified, the default configuration will be used.
      * @since 0.3.0
@@ -471,33 +455,28 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
      * @since 0.9.0
      */
     public FileSystemDatasetRepository build() {
+      URI repositoryUri = null;
+      MetadataProvider metadataProvider = null;
+
       if (configuration == null) {
         this.configuration = new Configuration();
       }
 
-      URI repositoryUri = null;
-      if (metadataProvider == null) {
-        Preconditions.checkState(this.rootDirectory != null,
-            "No root directory defined");
+      Preconditions.checkState(this.rootDirectory != null,
+          "No root directory defined");
 
-        // the rootDirectory can have a scheme/authority that overrides
+      // the rootDirectory can have a scheme/authority that overrides
 
-        if (fileSystem != null) {
-          // if the FS doesn't match, this will throw IllegalArgumentException
-          Path qualifiedRootDirectory = fileSystem.makeQualified(rootDirectory);
-          repositoryUri = makeRepositoryUri(qualifiedRootDirectory);
-          this.metadataProvider = new FileSystemMetadataProvider(
-              configuration, qualifiedRootDirectory);
-        } else {
-          repositoryUri = makeRepositoryUri(rootDirectory);
-          this.metadataProvider = new FileSystemMetadataProvider(
-              configuration, rootDirectory);
-        }
+      if (fileSystem != null) {
+        // if the FS doesn't match, this will throw IllegalArgumentException
+        Path qualifiedRootDirectory = fileSystem.makeQualified(rootDirectory);
+        repositoryUri = makeRepositoryUri(qualifiedRootDirectory);
+        metadataProvider = new FileSystemMetadataProvider(
+            configuration, qualifiedRootDirectory);
       } else {
-        Preconditions.checkState(rootDirectory == null,
-            "Root directory is ignored when a MetadataProvider is set");
-        Preconditions.checkState(fileSystem == null,
-            "File system is ignored when a MetadataProvider is set");
+        repositoryUri = makeRepositoryUri(rootDirectory);
+        metadataProvider = new FileSystemMetadataProvider(
+            configuration, rootDirectory);
       }
 
       return new FileSystemDatasetRepository(configuration, metadataProvider,

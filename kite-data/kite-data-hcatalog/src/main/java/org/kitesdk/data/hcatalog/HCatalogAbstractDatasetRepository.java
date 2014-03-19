@@ -17,66 +17,20 @@ package org.kitesdk.data.hcatalog;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.net.URI;
-import java.util.Collection;
 import org.apache.hadoop.conf.Configuration;
-import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
-import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
 
-class HCatalogAbstractDatasetRepository extends AbstractDatasetRepository {
+class HCatalogAbstractDatasetRepository extends FileSystemDatasetRepository {
 
   private final MetadataProvider provider;
-  private final FileSystemDatasetRepository fsRepository;
-  private final URI repositoryUri;
 
   /**
    * Create an HCatalog dataset repository with external tables.
    */
-  @SuppressWarnings("deprecation")
   HCatalogAbstractDatasetRepository(Configuration conf, MetadataProvider provider, URI repositoryUri) {
+    super(conf, provider, repositoryUri);
     this.provider = provider;
-    this.fsRepository = new FileSystemDatasetRepository.Builder()
-        .configuration(conf)
-        .metadataProvider(provider)
-        .build();
-    this.repositoryUri = repositoryUri;
-  }
-
-  @Override
-  public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
-    return fsRepository.create(name, descriptor);
-  }
-
-  @Override
-  public <E> Dataset<E> update(String name, DatasetDescriptor descriptor) {
-    return fsRepository.update(name, descriptor);
-  }
-
-  @Override
-  public <E> Dataset<E> load(String name) {
-    return fsRepository.load(name);
-  }
-
-  @Override
-  public boolean delete(String name) {
-    return fsRepository.delete(name);
-  }
-
-  @Override
-  public boolean exists(String name) {
-    return fsRepository.exists(name);
-  }
-
-  @Override
-  public Collection<String> list() {
-    return fsRepository.list();
-  }
-
-  @Override
-  public URI getUri() {
-    return repositoryUri;
   }
 
   @VisibleForTesting
