@@ -17,9 +17,11 @@ package org.kitesdk.data.hcatalog;
 
 import java.net.URI;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetExistsException;
-import org.kitesdk.data.MetadataProviderException;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.filesystem.FileSystemUtil;
+import org.kitesdk.data.DatasetIOException;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
@@ -46,8 +48,8 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
       this.rootFileSystem = rootDirectory.getFileSystem(conf);
       this.rootDirectory = rootFileSystem.makeQualified(rootDirectory);
     } catch (IOException ex) {
-      throw new MetadataProviderException(
-          "Could not get FileSystem for root path", ex);
+      throw Accessor.getDefault().providerExceptionFor(
+          new DatasetIOException("Could not get FileSystem for root path", ex));
     }
   }
 
@@ -58,8 +60,8 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
     final Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
 
     if (!TableType.EXTERNAL_TABLE.equals(table.getTableType())) {
-      throw new MetadataProviderException(
-          "Table is not external, type:" + table.getTableType());
+      throw Accessor.getDefault().providerExceptionFor(
+          new DatasetException("Table is not external"));
     }
 
     return addRepositoryUri(HiveUtils.descriptorForTable(conf, table));

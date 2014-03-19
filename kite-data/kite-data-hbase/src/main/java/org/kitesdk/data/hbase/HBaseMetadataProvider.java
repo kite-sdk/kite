@@ -18,6 +18,7 @@ package org.kitesdk.data.hbase;
 import com.google.common.base.Preconditions;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.PartitionStrategy;
@@ -27,6 +28,7 @@ import org.kitesdk.data.hbase.avro.AvroKeyEntitySchemaParser;
 import org.kitesdk.data.hbase.impl.Constants;
 import org.kitesdk.data.hbase.impl.EntitySchema;
 import org.kitesdk.data.hbase.impl.SchemaManager;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractMetadataProvider;
 
 import java.io.IOException;
@@ -193,7 +195,8 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
           hbaseAdmin.enableTable(tableName);
         }
       } catch (IOException e) {
-        throw new MetadataProviderException(e);
+        throw Accessor.getDefault().providerExceptionFor(
+            new DatasetIOException("Cannot delete " + name, e));
       }
     }
     return true;

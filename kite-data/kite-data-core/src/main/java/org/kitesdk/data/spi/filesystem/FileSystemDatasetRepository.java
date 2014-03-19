@@ -18,11 +18,11 @@ package org.kitesdk.data.spi.filesystem;
 import javax.annotation.Nullable;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.IncompatibleSchemaException;
-import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
@@ -250,7 +250,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
       // don't care about the return value here -- if it already doesn't exist
       // we still need to delete the data directory
       changed = metadataProvider.delete(name);
-    } catch (MetadataProviderException ex) {
+    } catch (DatasetException ex) {
       throw new DatasetRepositoryException(
           "Failed to delete descriptor for name:" + name, ex);
     }
@@ -505,11 +505,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
 
     private URI makeRepositoryUri(Path rootDirectory) {
-      try {
-        return new URI("repo:" + rootDirectory.toUri());
-      } catch (URISyntaxException e) {
-        throw new MetadataProviderException(e);
-      }
+      return URI.create("repo:" + rootDirectory.toUri());
     }
   }
 }

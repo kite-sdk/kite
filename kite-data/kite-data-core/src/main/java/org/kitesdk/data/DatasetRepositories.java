@@ -88,9 +88,9 @@ public class DatasetRepositories {
    * Open a {@link DatasetRepository} for the given URI.
    * </p>
    * <p>
-   * This method provides a simpler way to connect to a {@link DatasetRepository}
-   * while providing information about the appropriate {@link org.kitesdk.data.spi.MetadataProvider}
-   * and other options to use. For almost all cases, this is the preferred method
+   * This method provides a simple way to connect to a {@link DatasetRepository}
+   * while providing configuration options to use. For almost all cases, this
+   * is the preferred method
    * of retrieving an instance of a {@link DatasetRepository}.
    * </p>
    * <p>
