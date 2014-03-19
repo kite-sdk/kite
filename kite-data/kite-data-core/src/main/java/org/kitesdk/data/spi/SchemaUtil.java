@@ -23,6 +23,9 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.avro.Schema;
+import org.apache.avro.specific.SpecificData;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.PartitionStrategy;
 
 public class SchemaUtil {
 
@@ -37,9 +40,63 @@ public class SchemaUtil {
           .put(Schema.Type.BYTES, ByteBuffer.class)
           .build();
 
-  public static boolean checkType(Schema.Type type, Class<?> expectedClass) {
+  /**
+   * Checks that a schema type should produce an object of the expected class.
+   *
+   * This check uses {@link Class#isAssignableFrom(Class)}.
+   *
+   * @param type an avro Schema.Type
+   * @param expectedClass a java class
+   * @return {@code true} if the type produces objects assignable to the class,
+   *         {@code false} if the class is not assignable from the avro type.
+   */
+  public static boolean isConsistentWithExpectedType(Schema.Type type,
+                                                     Class<?> expectedClass) {
     Class<?> typeClass = TYPE_TO_CLASS.get(type);
     return typeClass != null && expectedClass.isAssignableFrom(typeClass);
+  }
+
+  /**
+   * Checks that the type of each of {@code values} is consistent with the type of
+   * field {@code fieldName} declared in the Avro schema (from {@code descriptor}).
+   */
+  public static void checkTypeConsistency(Schema schema, String fieldName,
+      Object... values) {
+
+    Preconditions.checkArgument(hasField(schema, fieldName),
+        "No field '%s' in schema %s", fieldName, schema);
+
+    Schema.Field field = schema.getField(fieldName);
+
+    for (Object value : values) {
+      // SpecificData#validate checks consistency for generic, reflect,
+      // and specific models.
+      Preconditions.checkArgument(SpecificData.get().validate(field.schema(), value),
+          "Value '%s' of type '%s' inconsistent with field %s.", value, value.getClass(),
+          field);
+    }
+  }
+
+  private static boolean hasField(Schema schema, String fieldName) {
+    return (schema.getField(fieldName) != null);
+  }
+
+  public static void checkPartitionedBy(DatasetDescriptor descriptor,
+                                         String fieldName) {
+    Preconditions.checkArgument(descriptor.isPartitioned(),
+        "Descriptor %s is not partitioned", descriptor);
+    Preconditions.checkArgument(isPartitionedBy(descriptor, fieldName),
+        "Descriptor %s is not partitioned by '%s'", descriptor, fieldName);
+  }
+
+  private static boolean isPartitionedBy(DatasetDescriptor descriptor, String fieldName) {
+    PartitionStrategy partitionStrategy = descriptor.getPartitionStrategy();
+    for (FieldPartitioner<?, ?> fp : partitionStrategy.getFieldPartitioners()) {
+      if (fp.getSourceName().equals(fieldName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public abstract static class SchemaVisitor<T> {

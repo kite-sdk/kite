@@ -38,9 +38,9 @@ import org.kitesdk.data.spi.Constraints;
 
 public class TestMultiFileDatasetReader extends TestDatasetReaders {
 
-  public static final Constraints CONSTRAINTS = new Constraints();
   public static final Path TEST_FILE = new Path(
       Resources.getResource("data/strings-100.avro").getFile());
+  public static final Constraints CONSTRAINTS = new Constraints(STRING_SCHEMA);
   public static final RecordValidator<Record> VALIDATOR =
       new RecordValidator<Record>() {
       @Override

@@ -22,6 +22,8 @@ import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
 import java.util.Random;
 import java.util.UUID;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
@@ -33,6 +35,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestConstraints {
+  private static final Constraints emptyConstraints = new Constraints(
+      SchemaBuilder.record("Event").fields()
+          .requiredString("id")
+          .requiredLong("timestamp")
+          .requiredString("color")
+          .optionalInt("year")
+          .endRecord());
+
   private static final Logger LOG = LoggerFactory
       .getLogger(TestConstraints.class);
 
@@ -69,9 +79,7 @@ public class TestConstraints {
 
   @Test
   public void testEmptyConstraints() {
-    Constraints empty = new Constraints();
-
-    Predicate<StorageKey> keyPredicate = empty.toKeyPredicate();
+    Predicate<StorageKey> keyPredicate = emptyConstraints.toKeyPredicate();
     Assert.assertNotNull("Empty constraints should produce a key predicate",
         keyPredicate);
     // TODO: these should be in their own tests
@@ -82,19 +90,19 @@ public class TestConstraints {
         keyPredicate.apply(new StorageKey(strategy)));
 
     Assert.assertNotNull("Empty constraints should produce an entity predicate",
-        empty.toEntityPredicate());
+        emptyConstraints.toEntityPredicate());
     Assert.assertTrue("Should match event",
-        empty.toEntityPredicate().apply(new GenericEvent()));
+        emptyConstraints.toEntityPredicate().apply(new GenericEvent()));
     Assert.assertFalse("Should not match null",
-        empty.toEntityPredicate().apply(null));
+        emptyConstraints.toEntityPredicate().apply(null));
 
     Assert.assertNotNull("Should produce an unbound key range",
-        empty.toKeyRanges(strategy));
+        emptyConstraints.toKeyRanges(strategy));
   }
 
   @Test
   public void testExists() {
-    Constraints exists = new Constraints().with("id");
+    Constraints exists = emptyConstraints.with("id");
 
     Assert.assertEquals("Should be Predicates.exists()",
         Predicates.exists(), exists.get("id"));
@@ -115,7 +123,7 @@ public class TestConstraints {
 
   @Test
   public void testExistsRefinement() {
-    Constraints exists = new Constraints().with("id");
+    Constraints exists = emptyConstraints.with("id");
 
     String id = UUID.randomUUID().toString();
     Assert.assertNotNull("Refine with exists should work",
@@ -146,13 +154,13 @@ public class TestConstraints {
 
   @Test(expected=NullPointerException.class)
   public void testWithNull() {
-    new Constraints().with("id", (Object) null);
+    emptyConstraints.with("id", (Object) null);
   }
 
   @Test
   public void testWithSingle() {
     String id = UUID.randomUUID().toString();
-    Constraints withSingle = new Constraints().with("id", id);
+    Constraints withSingle = emptyConstraints.with("id", id);
 
     Assert.assertNotNull(withSingle);
     Assert.assertEquals("Should produce In(single)",
@@ -172,7 +180,7 @@ public class TestConstraints {
     String[] ids = new String[] {
         UUID.randomUUID().toString(),
         UUID.randomUUID().toString()};
-    Constraints withMultiple = new Constraints().with("id", (Object[]) ids);
+    Constraints withMultiple = emptyConstraints.with("id", (Object[]) ids);
 
     Assert.assertNotNull(withMultiple);
     Assert.assertEquals("Should produce In(id0, id1)",
@@ -194,7 +202,7 @@ public class TestConstraints {
   public void testWithRefinementUsingRange() {
     String[] ids = new String[] {
         "a", "b", "c"};
-    final Constraints with = new Constraints().with("id", (Object[]) ids);
+    final Constraints with = emptyConstraints.with("id", (Object[]) ids);
 
     Assert.assertNotNull(with);
 
@@ -232,7 +240,7 @@ public class TestConstraints {
   public void testWithRefinementUsingWith() {
     String[] ids = new String[] {
         "a", "b", "c"};
-    final Constraints with = new Constraints().with("id", (Object[]) ids);
+    final Constraints with = emptyConstraints.with("id", (Object[]) ids);
 
     Assert.assertNotNull(with);
     Assert.assertEquals("Exists should not change constraints",
@@ -262,28 +270,28 @@ public class TestConstraints {
         NullPointerException.class, new Runnable() {
       @Override
       public void run() {
-        new Constraints().from("id", null);
+        emptyConstraints.from("id", null);
       }
     });
     TestHelpers.assertThrows("fromAfter should fail with null value",
         NullPointerException.class, new Runnable() {
       @Override
       public void run() {
-        new Constraints().fromAfter("id", null);
+        emptyConstraints.fromAfter("id", null);
       }
     });
     TestHelpers.assertThrows("to should fail with null value",
         NullPointerException.class, new Runnable() {
       @Override
       public void run() {
-        new Constraints().to("id", null);
+        emptyConstraints.to("id", null);
       }
     });
     TestHelpers.assertThrows("toBefore should fail with null value",
         NullPointerException.class, new Runnable() {
       @Override
       public void run() {
-        new Constraints().toBefore("id", null);
+        emptyConstraints.toBefore("id", null);
       }
     });
   }
@@ -294,50 +302,50 @@ public class TestConstraints {
     // test how it matches events
     Assert.assertEquals("Should be closed to pos-infinity",
         Ranges.atLeast(2013),
-        new Constraints().from("year", 2013).get("year"));
+        emptyConstraints.from("year", 2013).get("year"));
     Assert.assertEquals("Should be open to pos-infinity",
         Ranges.greaterThan(2013),
-        new Constraints().fromAfter("year", 2013).get("year"));
+        emptyConstraints.fromAfter("year", 2013).get("year"));
     Assert.assertEquals("Should be neg-infinity to closed",
         Ranges.atMost(2013),
-        new Constraints().to("year", 2013).get("year"));
+        emptyConstraints.to("year", 2013).get("year"));
     Assert.assertEquals("Should be neg-infinity to open",
         Ranges.lessThan(2013),
-        new Constraints().toBefore("year", 2013).get("year"));
+        emptyConstraints.toBefore("year", 2013).get("year"));
   }
 
   @Test
   public void testBasicRangeRefinement() {
     Assert.assertEquals("Should be closed to closed",
         Ranges.closed(2012, 2014),
-        new Constraints().from("year", 2012).to("year", 2014).get("year"));
+        emptyConstraints.from("year", 2012).to("year", 2014).get("year"));
     Assert.assertEquals("Should be closed to closed",
         Ranges.closed(2012, 2014),
-        new Constraints().to("year", 2014).from("year", 2012).get("year"));
+        emptyConstraints.to("year", 2014).from("year", 2012).get("year"));
     Assert.assertEquals("Should be closed to open",
         Ranges.closedOpen(2012, 2014),
-        new Constraints().from("year", 2012).toBefore("year", 2014).get("year"));
+        emptyConstraints.from("year", 2012).toBefore("year", 2014).get("year"));
     Assert.assertEquals("Should be closed to open",
         Ranges.closedOpen(2012, 2014),
-        new Constraints().toBefore("year", 2014).from("year", 2012).get("year"));
+        emptyConstraints.toBefore("year", 2014).from("year", 2012).get("year"));
     Assert.assertEquals("Should be open to open",
         Ranges.open(2012, 2014),
-        new Constraints().fromAfter("year", 2012).toBefore("year", 2014).get("year"));
+        emptyConstraints.fromAfter("year", 2012).toBefore("year", 2014).get("year"));
     Assert.assertEquals("Should be open to open",
         Ranges.open(2012, 2014),
-        new Constraints().toBefore("year", 2014).fromAfter("year", 2012).get("year"));
+        emptyConstraints.toBefore("year", 2014).fromAfter("year", 2012).get("year"));
     Assert.assertEquals("Should be open to closed",
         Ranges.openClosed(2012, 2014),
-        new Constraints().fromAfter("year", 2012).to("year", 2014).get("year"));
+        emptyConstraints.fromAfter("year", 2012).to("year", 2014).get("year"));
     Assert.assertEquals("Should be open to closed",
         Ranges.openClosed(2012, 2014),
-        new Constraints().to("year", 2014).fromAfter("year", 2012).get("year"));
+        emptyConstraints.to("year", 2014).fromAfter("year", 2012).get("year"));
   }
 
   @Test
   public void testRangeEndpointRefinementUsingRange() {
     // using the current end-points
-    final Constraints startRange = new Constraints().from("year", 2012).to("year", 2014);
+    final Constraints startRange = emptyConstraints.from("year", 2012).to("year", 2014);
     Assert.assertEquals(Ranges.closed(2012, 2014),
         startRange.to("year", 2014).get("year"));
     Assert.assertEquals(Ranges.closedOpen(2012, 2014),
@@ -364,7 +372,7 @@ public class TestConstraints {
 
   @Test
   public void testRangeMidpointRefinementUsingRange() {
-    final Constraints startRange = new Constraints()
+    final Constraints startRange = emptyConstraints
         .from("year", 2012).toBefore("year", 2014);
 
     // any method can be used with a valid midpoint to limit the range
@@ -384,7 +392,7 @@ public class TestConstraints {
 
   @Test
   public void testRangeRefinementUsingWith() {
-    final Constraints startRange = new Constraints()
+    final Constraints startRange = emptyConstraints
         .from("year", 2012).toBefore("year", 2014);
 
     // Can only refine using a subset
@@ -403,7 +411,7 @@ public class TestConstraints {
 
   @Test
   public void testRangeRefinementUsingExists() {
-    final Constraints startRange = new Constraints()
+    final Constraints startRange = emptyConstraints
         .from("year", 2012).toBefore("year", 2014);
     Assert.assertEquals(startRange, startRange.with("year"));
   }
@@ -413,7 +421,7 @@ public class TestConstraints {
     GenericEvent e = new GenericEvent();
     StorageKey key = new StorageKey(strategy).reuseFor(e);
 
-    Constraints time = new Constraints()
+    Constraints time = emptyConstraints
         .from("timestamp", START)
         .to("timestamp", START + 100000);
     Predicate<StorageKey> matchKeys = time.toKeyPredicate();
@@ -452,10 +460,15 @@ public class TestConstraints {
 
   @Test
   public void testBasicKeyMinimization() {
+    Schema schema = SchemaBuilder.record("TestRecord").fields()
+        .requiredLong("created_at")
+        .requiredString("color")
+        .optionalInt("number")
+        .endRecord();
     FieldPartitioner<Object, Integer> hash50 =
         new HashFieldPartitioner("name", 50);
 
-    Constraints c = new Constraints()
+    Constraints c = new Constraints(schema)
         .with("number", 7, 14, 21, 28, 35, 42, 49)
         .with("color", "green", "orange")
         .from("created_at",
@@ -502,7 +515,7 @@ public class TestConstraints {
         .identity("id", "id_copy", String.class, -1)
         .build();
 
-    Constraints c = new Constraints().with("id", "a", "b", "c");
+    Constraints c = emptyConstraints.with("id", "a", "b", "c");
 
     // if the data is not partitioned by a field, then the partitioning cannot
     // be used to satisfy constraints for that field
@@ -544,10 +557,10 @@ public class TestConstraints {
     e.timestamp = oct_25_2013;
     StorageKey key = new StorageKey(timeOnly).reuseFor(e);
 
-    Constraints c = new Constraints().with("timestamp", oct_24_2013);
+    Constraints c = emptyConstraints.with("timestamp", oct_24_2013);
     Assert.assertFalse("Should not match", c.toKeyPredicate().apply(key));
 
-    c = new Constraints().toBefore("timestamp", oct_24_2013_end);
+    c = emptyConstraints.toBefore("timestamp", oct_24_2013_end);
     LOG.info("Constraints: {}", c);
 
     e.timestamp = oct_25_2013;

@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
@@ -53,13 +54,16 @@ public class Constraints {
   private static final Logger LOG = LoggerFactory.getLogger(Constraints.class);
 
   private final Map<String, Predicate> constraints;
+  private final Schema schema;
 
-  public Constraints() {
+  public Constraints(Schema schema) {
+    this.schema = schema;
     this.constraints = ImmutableMap.of();
   }
 
-  private Constraints(Map<String, Predicate> constraints,
+  private Constraints(Schema schema, Map<String, Predicate> constraints,
                       String name, Predicate predicate) {
+    this.schema = schema;
     Map<String, Predicate> copy = Maps.newHashMap(constraints);
     copy.put(name, predicate);
     this.constraints = ImmutableMap.copyOf(copy);
@@ -302,14 +306,16 @@ public class Constraints {
 
   @SuppressWarnings("unchecked")
   public Constraints with(String name, Object... values) {
+    SchemaUtil.checkTypeConsistency(schema, name, values);
     if (values.length > 0) {
       checkContained(name, values);
       // this is the most specific constraint and is idempotent under "and"
-      return new Constraints(constraints, name, new Predicates.In<Object>(values));
+      return new Constraints(schema, constraints, name,
+          new Predicates.In<Object>(values));
     } else {
       if (!constraints.containsKey(name)) {
         // no other constraint => add the exists
-        return new Constraints(constraints, name, Predicates.exists());
+        return new Constraints(schema, constraints, name, Predicates.exists());
       } else {
         // satisfied by an existing constraint
         return this;
@@ -318,46 +324,50 @@ public class Constraints {
   }
 
   public Constraints from(String name, Comparable value) {
+    SchemaUtil.checkTypeConsistency(schema, name, value);
     checkContained(name, value);
     Range added = Ranges.atLeast(value);
     if (constraints.containsKey(name)) {
-      return new Constraints(constraints, name,
+      return new Constraints(schema, constraints, name,
           and(constraints.get(name), added));
     } else {
-      return new Constraints(constraints, name, added);
+      return new Constraints(schema, constraints, name, added);
     }
   }
 
   public Constraints fromAfter(String name, Comparable value) {
+    SchemaUtil.checkTypeConsistency(schema, name, value);
     checkContained(name, value);
     Range added = Ranges.greaterThan(value);
     if (constraints.containsKey(name)) {
-      return new Constraints(constraints, name,
+      return new Constraints(schema, constraints, name,
           and(constraints.get(name), added));
     } else {
-      return new Constraints(constraints, name, added);
+      return new Constraints(schema, constraints, name, added);
     }
   }
 
   public Constraints to(String name, Comparable value) {
+    SchemaUtil.checkTypeConsistency(schema, name, value);
     checkContained(name, value);
     Range added = Ranges.atMost(value);
     if (constraints.containsKey(name)) {
-      return new Constraints(constraints, name,
+      return new Constraints(schema, constraints, name,
           and(constraints.get(name), added));
     } else {
-      return new Constraints(constraints, name, added);
+      return new Constraints(schema, constraints, name, added);
     }
   }
 
   public Constraints toBefore(String name, Comparable value) {
+    SchemaUtil.checkTypeConsistency(schema, name, value);
     checkContained(name, value);
     Range added = Ranges.lessThan(value);
     if (constraints.containsKey(name)) {
-      return new Constraints(constraints, name,
+      return new Constraints(schema, constraints, name,
           and(constraints.get(name), added));
     } else {
-      return new Constraints(constraints, name, added);
+      return new Constraints(schema, constraints, name, added);
     }
   }
 
@@ -369,6 +379,7 @@ public class Constraints {
    * @param name a String field name
    * @return a Predicate for the given field, or null if none is set
    */
+  @VisibleForTesting
   Predicate get(String name) {
     return constraints.get(name);
   }
