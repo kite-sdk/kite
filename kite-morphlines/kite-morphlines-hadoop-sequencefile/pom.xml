@@ -39,7 +39,7 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>kite-hadoop-dependencies</artifactId>
+      <artifactId>${artifact.hadoop-deps}</artifactId>
       <type>pom</type>
       <scope>provided</scope>
     </dependency>
