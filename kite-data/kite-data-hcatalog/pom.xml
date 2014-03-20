@@ -97,13 +97,13 @@
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>kite-hadoop-dependencies</artifactId>
+      <artifactId>${artifact.hadoop-deps}</artifactId>
       <type>pom</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>kite-hadoop-test-dependencies</artifactId>
+      <artifactId>${artifact.hadoop-test-deps}</artifactId>
       <type>pom</type>
       <scope>test</scope>
     </dependency>

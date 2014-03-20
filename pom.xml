@@ -114,6 +114,10 @@
 
     <cdh.version>4.4.0</cdh.version>
 
+    <!-- artifacts that depend on profiles -->
+    <artifact.hadoop-deps>kite-hadoop-dependencies</artifact.hadoop-deps>
+    <artifact.hadoop-test-deps>kite-hadoop-test-dependencies</artifact.hadoop-test-deps>
+
     <!-- Library versions -->
     <vers.avro>1.7.5</vers.avro>
     <vers.commons-codec>1.4</vers.commons-codec>
@@ -643,14 +647,14 @@
       <!-- Hadoop dependencies -->
       <dependency>
         <groupId>org.kitesdk</groupId>
-        <artifactId>kite-hadoop-dependencies</artifactId>
-        <version>${vers.hadoop-deps}</version>
+        <artifactId>${artifact.hadoop-deps}</artifactId>
+        <version>${project.version}</version>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.kitesdk</groupId>
-        <artifactId>kite-hadoop-test-dependencies</artifactId>
-        <version>${vers.hadoop-deps}</version>
+        <artifactId>${artifact.hadoop-test-deps}</artifactId>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>test</scope>
       </dependency>
@@ -1019,7 +1023,8 @@
         </property>
       </activation>
       <properties>
-        <vers.hadoop-deps>${project.version}-hadoop1</vers.hadoop-deps>
+        <artifact.hadoop-deps>kite-hadoop1-dependencies</artifact.hadoop-deps>
+        <artifact.hadoop-test-deps>kite-hadoop1-test-dependencies</artifact.hadoop-test-deps>
         <vers.crunch>${vers.crunch-base}</vers.crunch>
         <vers.hcatalog>0.5.0-incubating</vers.hcatalog>
         <vers.hive>0.10.0</vers.hive>
