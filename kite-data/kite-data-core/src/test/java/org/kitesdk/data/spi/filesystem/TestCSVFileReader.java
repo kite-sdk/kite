@@ -79,7 +79,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
   public static Schema BEAN_SCHEMA = SchemaBuilder.record(TestBean.class.getName())
       .fields()
-      .name("myString").type().stringType().noDefault()
+      .name("myStr").type().stringType().noDefault()
       .name("myInt").type().intType().intDefault(0)
       .name("myFloat").type().floatType().noDefault()
       .name("myBool").type().booleanType().booleanDefault(false)
