@@ -38,7 +38,7 @@ abstract class LogCommand extends AbstractCommand {
   public LogCommand(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
     super(builder, config, parent, child, context);
     this.format = getConfigs().getString(config, "format");
-    List<String> argList = getConfigs().getStringList(config, "args", Collections.EMPTY_LIST);
+    List<String> argList = getConfigs().getStringList(config, "args", Collections.<String>emptyList());
     this.expressions = new FieldExpression[argList.size()];
     for (int i = 0; i < argList.size(); i++) {
       this.expressions[i] = new FieldExpression(argList.get(i), getConfig()); 

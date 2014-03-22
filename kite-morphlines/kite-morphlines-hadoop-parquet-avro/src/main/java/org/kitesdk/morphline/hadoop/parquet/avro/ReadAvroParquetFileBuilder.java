@@ -92,7 +92,7 @@ public final class ReadAvroParquetFileBuilder implements CommandBuilder {
       if (defaultFileSystemUri != null) {
         FileSystem.setDefaultUri(conf, defaultFileSystemUri); // see Hadoop's GenericOptionsParser
       }
-      for (String value : getConfigs().getStringList(config, "conf", Collections.EMPTY_LIST)) {
+      for (String value : getConfigs().getStringList(config, "conf", Collections.<String>emptyList())) {
         conf.addResource(new Path(value)); // see Hadoop's GenericOptionsParser
       }
       

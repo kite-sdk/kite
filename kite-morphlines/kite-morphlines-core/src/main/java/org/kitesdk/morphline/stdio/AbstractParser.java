@@ -51,7 +51,7 @@ public abstract class AbstractParser extends AbstractCommand {
 
   protected AbstractParser(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
     super(builder, config, parent, child, context);      
-    List<String> mimeTypes = getConfigs().getStringList(config, SUPPORTED_MIME_TYPES, Collections.EMPTY_LIST);
+    List<String> mimeTypes = getConfigs().getStringList(config, SUPPORTED_MIME_TYPES, Collections.<String>emptyList());
     for (String mimeType : mimeTypes) {
       addSupportedMimeType(mimeType);
     }
@@ -62,7 +62,7 @@ public abstract class AbstractParser extends AbstractCommand {
   @Deprecated
   protected AbstractParser(Config config, Command parent, Command child, MorphlineContext context) {
     super(config, parent, child, context);      
-    List<String> mimeTypes = getConfigs().getStringList(config, SUPPORTED_MIME_TYPES, Collections.EMPTY_LIST);
+    List<String> mimeTypes = getConfigs().getStringList(config, SUPPORTED_MIME_TYPES, Collections.<String>emptyList());
     for (String mimeType : mimeTypes) {
       addSupportedMimeType(mimeType);
     }

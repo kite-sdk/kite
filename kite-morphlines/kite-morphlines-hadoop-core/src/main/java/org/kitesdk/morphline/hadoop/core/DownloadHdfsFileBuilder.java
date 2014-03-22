@@ -69,14 +69,14 @@ public final class DownloadHdfsFileBuilder implements CommandBuilder {
         throws IOException {
       
       super(builder, config, parent, child, context);
-      List<String> uris = getConfigs().getStringList(config, "inputFiles", Collections.EMPTY_LIST); 
+      List<String> uris = getConfigs().getStringList(config, "inputFiles", Collections.<String>emptyList()); 
       File dstRootDir = new File(getConfigs().getString(config, "outputDir", "."));
       Configuration conf = new Configuration();
       String defaultFileSystemUri = getConfigs().getString(config, "fs", null);
       if (defaultFileSystemUri != null) {
         FileSystem.setDefaultUri(conf, defaultFileSystemUri); // see Hadoop's GenericOptionsParser
       }
-      for (String value : getConfigs().getStringList(config, "conf", Collections.EMPTY_LIST)) {
+      for (String value : getConfigs().getStringList(config, "conf", Collections.<String>emptyList())) {
         conf.addResource(new Path(value)); // see Hadoop's GenericOptionsParser
       }
       validateArguments();

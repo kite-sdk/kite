@@ -78,7 +78,7 @@ final class GrokDictionaries {
       }
 
       // Load dictionaries from the filesystem.
-      for (String dictionaryFile : configs.getStringList(config, "dictionaryFiles", Collections.EMPTY_LIST)) {
+      for (String dictionaryFile : configs.getStringList(config, "dictionaryFiles", Collections.<String>emptyList())) {
         LOG.debug("Loading grok dictionary:{} source:filesystem", dictionaryFile);
         loadDictionaryFile(new File(dictionaryFile));
       }

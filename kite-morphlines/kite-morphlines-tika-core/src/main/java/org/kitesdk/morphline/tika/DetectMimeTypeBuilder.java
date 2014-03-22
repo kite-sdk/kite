@@ -97,7 +97,7 @@ public final class DetectMimeTypeBuilder implements CommandBuilder {
           InputStream in = new BufferedInputStream(coreURL.openStream());
           inputStreams.add(in);
         }
-        for (String mimeTypesFile : getConfigs().getStringList(config, "mimeTypesFiles", Collections.EMPTY_LIST)) {
+        for (String mimeTypesFile : getConfigs().getStringList(config, "mimeTypesFiles", Collections.<String>emptyList())) {
           InputStream in = new BufferedInputStream(new FileInputStream(new File(mimeTypesFile)));
           inputStreams.add(in);
         }

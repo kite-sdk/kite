@@ -235,7 +235,7 @@ public abstract class AbstractCommand implements Command {
     Preconditions.checkNotNull(rootConfig);
     Preconditions.checkNotNull(configKey);
     Preconditions.checkNotNull(finalChild);
-    List<? extends Config> commandConfigs = new Configs().getConfigList(rootConfig, configKey, Collections.EMPTY_LIST);
+    List<? extends Config> commandConfigs = new Configs().getConfigList(rootConfig, configKey, Collections.<Config>emptyList());
     List<Command> commands = new ArrayList();
     Command currentParent = this;
     Connector lastConnector = null;        
