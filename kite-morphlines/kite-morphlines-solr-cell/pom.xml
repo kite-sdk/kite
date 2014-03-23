@@ -120,6 +120,7 @@
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <systemPropertyVariables>
             <solr.expected.version>${solr.expected.version}</solr.expected.version>
+            <java.awt.headless>true</java.awt.headless>
           </systemPropertyVariables>
         </configuration>
       </plugin>
