@@ -151,7 +151,7 @@ public final class ReadCSVBuilder implements CommandBuilder {
     private boolean isTrimmedLineEmpty(String line) {
 //      return line.trim().length() == 0; // slow
       int len = line.length();
-      for (int i = 0; i < len; i++) {
+      for (int i = len; --i >= 0; ) {
         if (line.charAt(i) > ' ') {
           return false;
         }
