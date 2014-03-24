@@ -17,6 +17,7 @@ package org.kitesdk.data.hbase;
 
 import java.io.IOException;
 import java.util.List;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat;
@@ -30,8 +31,19 @@ import org.kitesdk.data.hbase.impl.BaseDao;
 import org.kitesdk.data.hbase.impl.Dao;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
+import org.kitesdk.data.spi.DynMethods;
 
 class HBaseDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
+
+  private static DynMethods.UnboundMethod getConfigurationJC = new DynMethods
+      .Builder("getConfiguration")
+      .impl(JobContext.class)
+      .build();
+
+  private static DynMethods.UnboundMethod getConfigurationTAC = new DynMethods
+      .Builder("getConfiguration")
+      .impl(TaskAttemptContext.class)
+      .build();
 
   private Dataset<E> dataset;
   private EntityMapper<E> entityMapper;
@@ -50,8 +62,9 @@ class HBaseDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
       InterruptedException {
     TableInputFormat delegate = new TableInputFormat();
     String tableName = HBaseMetadataProvider.getTableName(dataset.getName());
-    jobContext.getConfiguration().set(TableInputFormat.INPUT_TABLE, tableName);
-    delegate.setConf(jobContext.getConfiguration());
+    Configuration conf = getConfigurationJC.invoke(jobContext);
+    conf.set(TableInputFormat.INPUT_TABLE, tableName);
+    delegate.setConf(conf);
     return delegate.getSplits(jobContext);
   }
 
@@ -60,8 +73,9 @@ class HBaseDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     TableInputFormat delegate = new TableInputFormat();
     String tableName = HBaseMetadataProvider.getTableName(dataset.getName());
-    taskAttemptContext.getConfiguration().set(TableInputFormat.INPUT_TABLE, tableName);
-    delegate.setConf(taskAttemptContext.getConfiguration());
+    Configuration conf = getConfigurationTAC.invoke(taskAttemptContext);
+    conf.set(TableInputFormat.INPUT_TABLE, tableName);
+    delegate.setConf(conf);
     return new HBaseRecordReaderWrapper<E>(
         delegate.createRecordReader(inputSplit, taskAttemptContext), entityMapper);
   }
