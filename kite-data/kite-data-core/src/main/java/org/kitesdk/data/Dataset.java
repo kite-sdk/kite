@@ -26,10 +26,10 @@ import javax.annotation.concurrent.Immutable;
  * <p>
  * Logically, all datasets have two generic properties: a name, and a descriptor
  * that holds information such as the dataset's schema and its partitioning
- * information. Concrete implementations of {@code Dataset} may support
+ * information. Concrete implementations of {@code Dataset} can support
  * additional properties, mandatory or otherwise, as needed. {@code Dataset}s
- * are not normally instantiated directly, but managed by a repository (also
- * implementation-specific).
+ * are not normally instantiated directly, but rather managed by a repository
+ * (also implementation-specific).
  * </p>
  * <p>
  * Implementations of {@link Dataset} are immutable.
@@ -49,8 +49,8 @@ import javax.annotation.concurrent.Immutable;
 public interface Dataset<E> extends RefineableView<E> {
 
   /**
-   * Get the name of a {@code Dataset}. No guarantees about the format of this
-   * name are made.
+   * Get the name of a {@code Dataset}. There are no guarantees about the format
+   * of this name.
    */
   String getName();
 
@@ -66,7 +66,8 @@ public interface Dataset<E> extends RefineableView<E> {
    * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
    *
    * @param key        The key used to look up the partition.
-   * @param autoCreate If true, automatically create the partition if doesn't exist,
+   * @param autoCreate If true, automatically create the partition if it
+   *                   doesn't exist.
    * @throws DatasetException
    */
   Dataset<E> getPartition(PartitionKey key, boolean autoCreate);
