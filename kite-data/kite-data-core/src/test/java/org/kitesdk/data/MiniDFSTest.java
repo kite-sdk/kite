@@ -21,7 +21,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.kitesdk.data.spi.DynMethods;
+import org.kitesdk.compat.DynMethods;
 
 /**
  * Provides setup/teardown of a MiniDFSCluster for tests that need one.

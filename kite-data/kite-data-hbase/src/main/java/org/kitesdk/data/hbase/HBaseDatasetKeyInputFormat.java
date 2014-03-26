@@ -26,24 +26,14 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.hbase.impl.BaseDao;
 import org.kitesdk.data.hbase.impl.Dao;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
-import org.kitesdk.data.spi.DynMethods;
 
 class HBaseDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
-
-  private static DynMethods.UnboundMethod getConfigurationJC = new DynMethods
-      .Builder("getConfiguration")
-      .impl(JobContext.class)
-      .build();
-
-  private static DynMethods.UnboundMethod getConfigurationTAC = new DynMethods
-      .Builder("getConfiguration")
-      .impl(TaskAttemptContext.class)
-      .build();
 
   private Dataset<E> dataset;
   private EntityMapper<E> entityMapper;
@@ -62,7 +52,7 @@ class HBaseDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
       InterruptedException {
     TableInputFormat delegate = new TableInputFormat();
     String tableName = HBaseMetadataProvider.getTableName(dataset.getName());
-    Configuration conf = getConfigurationJC.invoke(jobContext);
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     conf.set(TableInputFormat.INPUT_TABLE, tableName);
     delegate.setConf(conf);
     return delegate.getSplits(jobContext);
@@ -73,7 +63,8 @@ class HBaseDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     TableInputFormat delegate = new TableInputFormat();
     String tableName = HBaseMetadataProvider.getTableName(dataset.getName());
-    Configuration conf = getConfigurationTAC.invoke(taskAttemptContext);
+    Configuration conf = Hadoop.TaskAttemptContext
+        .getConfiguration.invoke(taskAttemptContext);
     conf.set(TableInputFormat.INPUT_TABLE, tableName);
     delegate.setConf(conf);
     return new HBaseRecordReaderWrapper<E>(

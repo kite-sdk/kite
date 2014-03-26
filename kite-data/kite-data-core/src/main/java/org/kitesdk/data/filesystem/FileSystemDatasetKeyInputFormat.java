@@ -31,20 +31,15 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.filesystem.impl.Accessor;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
-import org.kitesdk.data.spi.DynMethods;
 import parquet.avro.AvroParquetInputFormat;
 
 class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
-
-  private static DynMethods.UnboundMethod getConfiguration = new DynMethods
-      .Builder("getConfiguration")
-      .impl(JobContext.class)
-      .build();
 
   private Dataset<E> dataset;
 
@@ -54,7 +49,7 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
 
   @Override
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
-    Configuration conf = getConfiguration.invoke(jobContext);
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     Job job = new Job(conf);
     Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
@@ -78,8 +73,10 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
     List<Path> paths = Lists.newArrayList(Accessor.getDefault().getDirectoryIterator(dataset));
     FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
     // the following line is needed for Hadoop 1, otherwise the paths are not set
-    Configuration contextConf = getConfiguration.invoke(jobContext);
-    Configuration jobConf = getConfiguration.invoke(job);
+    Configuration contextConf = Hadoop.JobContext
+        .getConfiguration.invoke(jobContext);
+    Configuration jobConf = Hadoop.JobContext
+        .getConfiguration.invoke(job);
     contextConf.set("mapred.input.dir", jobConf.get("mapred.input.dir"));
   }
 

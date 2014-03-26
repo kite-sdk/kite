@@ -24,6 +24,7 @@
 
   <modules>
     <module>kite-hadoop-dependencies</module>
+    <module>kite-hadoop-compatibility</module>
     <module>kite-data</module>
     <module>kite-maven-plugin</module>
     <module>kite-tools</module>
@@ -657,6 +658,11 @@
         <version>${project.version}</version>
         <type>pom</type>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.kitesdk</groupId>
+        <artifactId>kite-hadoop-compatibility</artifactId>
+        <version>${project.version}</version>
       </dependency>
 
 

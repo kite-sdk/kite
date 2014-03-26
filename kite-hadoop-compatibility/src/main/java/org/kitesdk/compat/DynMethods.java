@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.spi;
+package org.kitesdk.compat;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;

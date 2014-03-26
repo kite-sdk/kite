@@ -102,6 +102,11 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-compatibility</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-hbase</artifactId>
       <version>0.12.2-SNAPSHOT</version>
     </dependency>
