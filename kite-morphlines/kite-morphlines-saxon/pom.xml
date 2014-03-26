@@ -29,7 +29,7 @@
     <dependency>
 	  <groupId>net.sf.saxon</groupId>
 	  <artifactId>Saxon-HE</artifactId>
-	  <version>9.5.1-4</version>
+	  <version>9.5.1-5</version>
       <exclusions>
         <exclusion>
           <groupId>dom4j</groupId>

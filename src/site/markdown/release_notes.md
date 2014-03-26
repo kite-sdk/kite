@@ -3,6 +3,15 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version TBD
+
+Release date: TBD
+
+Version TBD has the following notable changes:
+
+* Morphlines Library
+    * Upgraded kite-morphlines-saxon module from Saxon-HE-9.5.1-4 to Saxon-HE-9.5.1-5
+
 ## Version 0.12.1
 
 Release date: March 18, 2014
