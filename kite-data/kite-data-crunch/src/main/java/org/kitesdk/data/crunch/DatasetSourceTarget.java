@@ -41,6 +41,7 @@ import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.View;
+import org.kitesdk.data.filesystem.impl.Accessor;
 import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.slf4j.Logger;
@@ -146,13 +147,28 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
 
   @Override
   public long getSize(Configuration configuration) {
-    // TODO: compute if file based
-    return 1000L * 1000L * 1000L;
+    try {
+      long size = Accessor.getDefault().getSize(dataset);
+      if (size != -1) {
+        return size;
+      }
+    } catch (IOException e) {
+      // fall through
+    }
+    logger.warn("Cannot determine size for source: " + toString());
+    return 1000L * 1000L * 1000L; // fallback to HBase default size
   }
 
   @Override
   public long getLastModifiedAt(Configuration configuration) {
-    // TODO: compute if file based
+    try {
+      long lastMod = Accessor.getDefault().getLastModified(dataset);
+      if (lastMod != -1) {
+        return lastMod;
+      }
+    } catch (IOException e) {
+      // fall through
+    }
     logger.warn("Cannot determine last modified time for source: " + toString());
     return -1;
   }
