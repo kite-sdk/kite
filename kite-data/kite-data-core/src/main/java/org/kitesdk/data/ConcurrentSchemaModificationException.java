@@ -17,7 +17,7 @@ package org.kitesdk.data;
 
 /**
  * <p>
- * Exception thrown when a schema modification collided with
+ * Exception thrown when a schema modification collides with
  * another client trying to modify the schema of the same
  * dataset.
  * <p>
