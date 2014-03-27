@@ -89,7 +89,7 @@ public abstract class Compatibility {
   public static void checkDatasetName(String name) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkArgument(Compatibility.isCompatibleName(name),
-        "Hive incompatible: Dataset name {} is not alphanumeric (plus '_')",
+        "Hive incompatible: Dataset name %s is not alphanumeric (plus '_')",
         name);
   }
 
@@ -102,7 +102,7 @@ public abstract class Compatibility {
     Preconditions.checkNotNull(schema, "Schema cannot be null");
     List<String> incompatible = getIncompatibleNames(schema);
     Preconditions.checkState(incompatible.isEmpty(),
-        "Hive incompatible: field names are not alphanumeric (plus '_'): {}",
+        "Hive incompatible: field names are not alphanumeric (plus '_'): %s",
         Joiner.on(", ").join(incompatible));
   }
 
@@ -141,10 +141,10 @@ public abstract class Compatibility {
         }
       }
       Preconditions.checkState(incompatible.isEmpty(),
-          "Hive incompatible: partition names are not alphanumeric (plus '_'): {}",
+          "Hive incompatible: partition names are not alphanumeric (plus '_'): %s",
           Joiner.on(", ").join(incompatible));
       Preconditions.checkState(duplicates.isEmpty(),
-          "Hive incompatible: partition names duplicate data fields: {}",
+          "Hive incompatible: partition names duplicate data fields: %s",
           Joiner.on(", ").join(duplicates));
     }
   }

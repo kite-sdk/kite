@@ -587,11 +587,11 @@ public class DatasetDescriptor {
         // the record.
         Schema.Field field = schema.getField(fp.getSourceName());
         Preconditions.checkState(field != null,
-            "Cannot partition on {} (missing from schema)", fp.getSourceName());
+            "Cannot partition on %s (missing from schema)", fp.getSourceName());
         Preconditions.checkState(
             SchemaUtil.isConsistentWithExpectedType(
                 field.schema().getType(), fp.getSourceType()),
-            "Field type {} does not match partitioner {}",
+            "Field type %s does not match partitioner %s",
             field.schema().getType(), fp);
       }
     }
