@@ -68,6 +68,20 @@ public class URIPattern {
     this(new URI(uri));
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    URIPattern that = (URIPattern) o;
+    return Objects.equal(this.pattern, that.pattern);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(pattern);
+  }
+
   /**
    * Returns true if the {@link java.net.URI} matches this pattern.
    *
