@@ -141,6 +141,7 @@
     <vers.junit>4.10</vers.junit>
     <vers.log4j>1.2.16</vers.log4j>
     <vers.maven>2.0.6</vers.maven>
+    <vers.mockito>1.9.5</vers.mockito>
     <vers.mojo-executor>1.5</vers.mojo-executor>
     <vers.oozie>3.3.2-cdh${cdh.version}</vers.oozie>
     <vers.parquet>1.2.5</vers.parquet>
@@ -155,10 +156,12 @@
     <vers.jackson>2.3.1</vers.jackson>
     <vers.opencsv>2.3</vers.opencsv>
     <vers.jodatime>2.3</vers.jodatime>
+    <vers.jcommander>1.35</vers.jcommander>
 
     <!-- Plugin versions -->
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
     <vers.doxia-module-confluence>1.4</vers.doxia-module-confluence>
+    <vers.build-helper-maven-plugin>1.8</vers.build-helper-maven-plugin>
     <vers.findbugs-maven-plugin>2.5.2</vers.findbugs-maven-plugin>
     <vers.github-site-maven-plugin>0.8</vers.github-site-maven-plugin>
     <vers.maven-compiler-plugin>3.1</vers.maven-compiler-plugin>
@@ -168,11 +171,13 @@
     <vers.maven-plugin-plugin>3.1</vers.maven-plugin-plugin>
     <vers.maven-project-info-reports-plugin>2.7</vers.maven-project-info-reports-plugin>
     <vers.maven-release-plugin>2.4.1</vers.maven-release-plugin>
+    <vers.maven-shade-plugin>2.1</vers.maven-shade-plugin>
     <vers.maven-site-plugin>3.3</vers.maven-site-plugin>
     <vers.maven-source-plugin>2.2.1</vers.maven-source-plugin>
     <vers.maven-surefire-plugin>2.14.1</vers.maven-surefire-plugin>
     <vers.maven-antrun-plugin>1.7</vers.maven-antrun-plugin>
     <vers.maven-jar-plugin>2.4</vers.maven-jar-plugin>
+    <vers.really-executable-jar-maven-plugin>1.1.0</vers.really-executable-jar-maven-plugin>
 
     <url.cloudera>http://www.cloudera.com</url.cloudera>
     <url.project>http://kitesdk.org/</url.project>
@@ -541,6 +546,11 @@
           </executions>
         </plugin>
         <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>${vers.build-helper-maven-plugin}</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
           <version>${vers.maven-release-plugin}</version>
@@ -551,11 +561,21 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>${vers.maven-shade-plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>${vers.maven-project-info-reports-plugin}</version>
           <configuration>
             <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.skife.maven</groupId>
+          <artifactId>really-executable-jar-maven-plugin</artifactId>
+          <version>${vers.really-executable-jar-maven-plugin}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -675,7 +695,6 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>
         <version>${vers.slf4j}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -789,7 +808,11 @@
         <version>${vers.crunch}</version>
         <scope>provided</scope>
       </dependency>
-
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>${vers.mockito}</version>
+      </dependency>
       <dependency>
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
@@ -898,6 +921,11 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-compress</artifactId>
         <version>${vers.compress}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.beust</groupId>
+        <artifactId>jcommander</artifactId>
+        <version>${vers.jcommander}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
