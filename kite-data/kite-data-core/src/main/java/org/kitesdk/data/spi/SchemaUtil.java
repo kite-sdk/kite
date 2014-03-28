@@ -129,7 +129,7 @@ public class SchemaUtil {
         // check to make sure this hasn't been visited before
         String name = schema.getFullName();
         Preconditions.checkState(!visitor.recordLevels.contains(name),
-            "Cannot process recursive Avro record {}", name);
+            "Cannot process recursive Avro record %s", name);
 
         visitor.recordLevels.push(name);
 
