@@ -37,7 +37,8 @@ public class DocumentLoaderFactory {
    *
    * @return
    */
-  public DocumentLoader getClient(String clientType, Config config) throws IllegalArgumentException {
+  public DocumentLoader getClient(String clientType, Config config)
+          throws IllegalArgumentException, MorphlineRuntimeException {
     List<String> hostNames = config.getStringList(HOSTS_FIELD);
 
     if (hostNames == null) {

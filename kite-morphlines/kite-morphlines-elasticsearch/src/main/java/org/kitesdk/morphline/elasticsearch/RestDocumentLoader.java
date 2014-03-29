@@ -82,13 +82,11 @@ public class RestDocumentLoader implements DocumentLoader {
   public void commitTransaction() throws Exception {
     int statusCode = 0, triesCount = 0;
     HttpResponse response = null;
-    LOGGER.info("Sending bulk request to elasticsearch cluster");
+    LOGGER.debug("Sending bulk request to elasticsearch cluster");
 
     String entity;
-    synchronized (bulkBuilder) {
-      entity = bulkBuilder.toString();
-      bulkBuilder = new StringBuilder();
-    }
+    entity = bulkBuilder.toString();
+    bulkBuilder = new StringBuilder();
 
     while (statusCode != HttpStatus.SC_OK && triesCount < serversList.size()) {
       triesCount++;
@@ -98,7 +96,7 @@ public class RestDocumentLoader implements DocumentLoader {
       httpRequest.setEntity(new StringEntity(entity));
       response = httpClient.execute(httpRequest);
       statusCode = response.getStatusLine().getStatusCode();
-      LOGGER.info("Status code from elasticsearch: " + statusCode);
+      LOGGER.debug("Status code from elasticsearch: " + statusCode);
       if (response.getEntity() != null) {
         LOGGER.debug("Status message from elasticsearch: " + EntityUtils.toString(response.getEntity(), "UTF-8"));
       }
@@ -129,18 +127,14 @@ public class RestDocumentLoader implements DocumentLoader {
     }
     parameters.put(INDEX_OPERATION_NAME, indexParameters);
 
-    XContentBuilder documentBuilder = jsonBuilder().value(parameters);
-    synchronized (bulkBuilder) {
-      bulkBuilder.append(documentBuilder.bytes().toUtf8());
-      bulkBuilder.append("\n");
-      bulkBuilder.append(document.toBytesArray().toUtf8());
-      bulkBuilder.append("\n");
-    }
+    bulkBuilder.append(jsonBuilder().value(parameters).bytes().toUtf8());
+    bulkBuilder.append("\n");
+    bulkBuilder.append(document.toBytesArray().toUtf8());
+    bulkBuilder.append("\n");
   }
 
   @Override
   public void shutdown() throws Exception {
     bulkBuilder = null;
   }
-
 }

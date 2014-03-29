@@ -73,7 +73,7 @@ public class TransportDocumentLoader implements DocumentLoader {
 
   @Override
   public void beginTransaction() throws IOException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    bulkRequestBuilder = client.prepareBulk();
   }
 
   @Override
