@@ -42,7 +42,7 @@ public class DocumentLoaderFactoryTest {
   }
   
   @Test
-  public void testGetTransportClient() throws NoSuchDocumentLoaderException {
+  public void testGetTransportClient() throws IllegalArgumentException {
     when(config.getStringList(DocumentLoaderFactory.HOSTS_FIELD)).thenReturn(Arrays.asList("test123"));
     when(config.getString(DocumentLoaderFactory.CLUSTER_NAME_FIELD)).thenReturn("cluster");
     DocumentLoader client = factory.getClient(DocumentLoaderFactory.TRANSPORT_DOCUMENT_LOADER, config);
@@ -51,27 +51,27 @@ public class DocumentLoaderFactoryTest {
   }
 
   @Test
-  public void testGetRestClient() throws NoSuchDocumentLoaderException {
+  public void testGetRestClient() throws IllegalArgumentException {
     when(config.getStringList(any(String.class))).thenReturn(Arrays.asList("test123"));
     DocumentLoader client = factory.getClient(DocumentLoaderFactory.REST_DOCUMENT_LOADER, config);
     assertNotNull(client);
     assertTrue(client instanceof RestDocumentLoader);
   }
 
-  @Test(expected = NoSuchDocumentLoaderException.class)
-  public void testThrowsNoSuchDocumentLoaderException() throws NoSuchDocumentLoaderException {
+  @Test(expected = IllegalArgumentException.class)
+  public void testThrowsNoSuchDocumentLoaderException() throws IllegalArgumentException {
     when(config.getStringList(any(String.class))).thenReturn(Arrays.asList(""));
     DocumentLoader client = factory.getClient("test123123", config);
   }
 
   @Test(expected = MorphlineRuntimeException.class)
-  public void testNoParameterHostnamesSet() throws NoSuchDocumentLoaderException {
+  public void testNoParameterHostnamesSet() throws IllegalArgumentException {
     when(config.getStringList(any(String.class))).thenReturn(null);
     DocumentLoader client = factory.getClient(DocumentLoaderFactory.TRANSPORT_DOCUMENT_LOADER, config);
   }
 
   @Test(expected = MorphlineRuntimeException.class)
-  public void testNoParameterClusternameSet() throws NoSuchDocumentLoaderException {
+  public void testNoParameterClusternameSet() throws IllegalArgumentException {
     when(config.getStringList(DocumentLoaderFactory.HOSTS_FIELD)).thenReturn(Arrays.asList("test123"));
     when(config.getString(DocumentLoaderFactory.CLUSTER_NAME_FIELD)).thenReturn(null);
     DocumentLoader client = factory.getClient(DocumentLoaderFactory.TRANSPORT_DOCUMENT_LOADER, config);

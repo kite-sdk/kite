@@ -37,7 +37,7 @@ public class DocumentLoaderFactory {
    *
    * @return
    */
-  public DocumentLoader getClient(String clientType, Config config) throws NoSuchDocumentLoaderException {
+  public DocumentLoader getClient(String clientType, Config config) throws IllegalArgumentException {
     List<String> hostNames = config.getStringList(HOSTS_FIELD);
 
     if (hostNames == null) {
@@ -53,7 +53,7 @@ public class DocumentLoaderFactory {
     } else if (clientType.equalsIgnoreCase(REST_DOCUMENT_LOADER)) {
       return new RestDocumentLoader(hostNames);
     }
-    throw new NoSuchDocumentLoaderException();
+    throw new IllegalArgumentException("There is no such a client. " + clientType);
   }
 
   /**
@@ -63,12 +63,12 @@ public class DocumentLoaderFactory {
    *
    * @return Local elastic search instance client
    */
-  public DocumentLoader getLocalClient(String clientType) throws NoSuchDocumentLoaderException {
+  public DocumentLoader getLocalClient(String clientType) throws IllegalArgumentException {
     if (clientType.equalsIgnoreCase(TRANSPORT_DOCUMENT_LOADER)) {
       return new TransportDocumentLoader();
     } else if (clientType.equalsIgnoreCase(REST_DOCUMENT_LOADER)) {
       return new RestDocumentLoader();
     }
-    throw new NoSuchDocumentLoaderException();
+    throw new IllegalArgumentException("There is no such a client. " + clientType);
   }
 }

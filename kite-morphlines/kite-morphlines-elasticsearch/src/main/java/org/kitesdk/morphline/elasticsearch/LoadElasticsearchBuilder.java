@@ -35,8 +35,6 @@ import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Metrics;
 import org.kitesdk.morphline.base.Notifications;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A command that loads a record into an Elasticsearch server.
@@ -64,25 +62,25 @@ public class LoadElasticsearchBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class LoadElasticsearch extends AbstractCommand {
     private DocumentLoader loader;
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoadElasticsearch.class);
     private final Timer elapsedTime;
     private final String indexName;
     private final String indexType;
     private final int ttl;
 
     LoadElasticsearch(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
-      super(config, parent, child, context);
+      super(builder, config, parent, child, context);
       elapsedTime = getTimer(Metrics.ELAPSED_TIME);
       Config elasticsearchConfig = getConfigs().getConfig(config, ELASTICSEARCH_CONFIGURATION);
-      String loaderType = config.getString(DOCUMENT_LOADER_TYPE);
-      indexName = config.getString(COLLECTION);
-      indexType = config.getString(TYPE);
-      ttl = config.getInt(TTL);
+      String loaderType = getConfigs().getString(config, DOCUMENT_LOADER_TYPE);
+      indexName = getConfigs().getString(config, COLLECTION);
+      indexType = getConfigs().getString(config, TYPE);
+      ttl = getConfigs().getInt(config, TTL);
+      validateArguments();
 
       DocumentLoaderFactory documentLoaderFactory = new DocumentLoaderFactory();
       try {
         loader = documentLoaderFactory.getClient(loaderType, elasticsearchConfig);
-      } catch (NoSuchDocumentLoaderException e) {
+      } catch (IllegalArgumentException e) {
         throw new MorphlineRuntimeException(e);
       }
     }
@@ -141,7 +139,6 @@ public class LoadElasticsearchBuilder implements CommandBuilder {
         documentBuilder.endObject();
         loader.addDocument(documentBuilder.bytes(), indexName, indexType, ttl);
       } catch (Exception e) {
-        LOGGER.warn(null);
         throw new MorphlineRuntimeException(e);
       } finally {
         timerContext.stop();
