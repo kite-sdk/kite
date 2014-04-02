@@ -27,6 +27,7 @@ import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepositories;
@@ -147,7 +148,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   @Override
   public RecordWriter<E, Void> getRecordWriter(TaskAttemptContext taskAttemptContext) {
-    Configuration conf = taskAttemptContext.getConfiguration();
+    Configuration conf = Hadoop.TaskAttemptContext
+        .getConfiguration.invoke(taskAttemptContext);
     Dataset<E> dataset = loadDataset(taskAttemptContext);
 
     if (usePerTaskAttemptDatasets(dataset)) {
@@ -188,22 +190,23 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   }
 
   private static DatasetRepository getDatasetRepository(JobContext jobContext) {
-    Configuration conf = jobContext.getConfiguration();
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     return DatasetRepositories.open(conf.get(KITE_REPOSITORY_URI));
   }
 
   private static String getJobDatasetName(JobContext jobContext) {
-    Configuration conf = jobContext.getConfiguration();
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     return conf.get(KITE_DATASET_NAME) + "_" + jobContext.getJobID().toString();
   }
 
   private static String getTaskAttemptDatasetName(TaskAttemptContext taskContext) {
-    Configuration conf = taskContext.getConfiguration();
+    Configuration conf = Hadoop.TaskAttemptContext
+        .getConfiguration.invoke(taskContext);
     return conf.get(KITE_DATASET_NAME) + "_" + taskContext.getTaskAttemptID().toString();
   }
 
   private static <E> Dataset<E> loadDataset(JobContext jobContext) {
-    Configuration conf = jobContext.getConfiguration();
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     DatasetRepository repo = getDatasetRepository(jobContext);
     return repo.load(conf.get(KITE_DATASET_NAME));
   }

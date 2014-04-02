@@ -20,11 +20,9 @@ import com.google.common.io.Closeables;
 import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.compress.SnappyCodec;
-import org.kitesdk.data.spi.DynMethods;
+import org.kitesdk.compat.Hadoop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parquet.avro.AvroParquetWriter;
@@ -36,12 +34,6 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
   private static final Logger logger = LoggerFactory
     .getLogger(ParquetAppender.class);
   private static final int DEFAULT_BLOCK_SIZE = 50 * 1024 * 1024;
-
-  private static final DynMethods.StaticMethod isSnappyNative =
-      new DynMethods.Builder("SnappyCodec.isNativeCodeLoaded")
-      .impl(SnappyCodec.class, "isNativeCodeLoaded")
-      .impl(SnappyCodec.class, "isNativeSnappyLoaded", Configuration.class)
-      .buildStatic();
 
   private final Path path;
   private final Schema schema;
@@ -62,7 +54,7 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
   public void open() throws IOException {
     CompressionCodecName codecName = CompressionCodecName.UNCOMPRESSED;
     if (enableCompression) {
-      if ((Boolean) isSnappyNative.invoke(fileSystem.getConf())) {
+      if (Hadoop.SnappyCodec.isSnappyNative.<Boolean>invoke(fileSystem.getConf())) {
         codecName = CompressionCodecName.SNAPPY;
       } else {
         logger.warn("Compression enabled, but Snappy native code not loaded. " +

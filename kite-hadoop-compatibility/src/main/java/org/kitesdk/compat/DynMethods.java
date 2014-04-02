@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.spi;
+package org.kitesdk.compat;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -45,12 +45,13 @@ public class DynMethods {
           method.getParameterTypes().length;
     }
 
-    public Object invokeChecked(Object target, Object... args) throws Exception {
+    @SuppressWarnings("unchecked")
+    public <R> R invokeChecked(Object target, Object... args) throws Exception {
       try {
         if (argLength < 0) {
-          return method.invoke(target, args);
+          return (R) method.invoke(target, args);
         } else {
-          return method.invoke(target, Arrays.copyOfRange(args, 0, argLength));
+          return (R) method.invoke(target, Arrays.copyOfRange(args, 0, argLength));
         }
 
       } catch (InvocationTargetException e) {
@@ -61,9 +62,9 @@ public class DynMethods {
       }
     }
 
-    public Object invoke(Object target, Object... args) {
+    public <R> R invoke(Object target, Object... args) {
       try {
-        return invokeChecked(target, args);
+        return this.<R>invokeChecked(target, args);
       } catch (Exception e) {
         throw Throwables.propagate(e);
       }
@@ -118,7 +119,7 @@ public class DynMethods {
      */
     private static UnboundMethod NOOP = new UnboundMethod(null, "NOOP") {
       @Override
-      public Object invokeChecked(Object target, Object... args) {
+      public <R> R invokeChecked(Object target, Object... args) throws Exception {
         return null;
       }
 
@@ -155,11 +156,11 @@ public class DynMethods {
       this.receiver = receiver;
     }
 
-    public Object invokeChecked(Object... args) throws Exception {
+    public <R> R invokeChecked(Object... args) throws Exception {
       return method.invokeChecked(receiver, args);
     }
 
-    public Object invoke(Object... args) {
+    public <R> R invoke(Object... args) {
       return method.invoke(receiver, args);
     }
   }
@@ -171,11 +172,11 @@ public class DynMethods {
       this.method = method;
     }
 
-    public Object invokeChecked(Object... args) throws Exception {
+    public <R> R invokeChecked(Object... args) throws Exception {
       return method.invokeChecked(null, args);
     }
 
-    public Object invoke(Object... args) {
+    public <R> R invoke(Object... args) {
       return method.invoke(args);
     }
   }

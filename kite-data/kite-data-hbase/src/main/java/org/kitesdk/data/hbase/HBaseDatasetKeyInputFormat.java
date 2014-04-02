@@ -17,6 +17,7 @@ package org.kitesdk.data.hbase;
 
 import java.io.IOException;
 import java.util.List;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat;
@@ -25,6 +26,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.hbase.impl.BaseDao;
 import org.kitesdk.data.hbase.impl.Dao;
@@ -50,8 +52,9 @@ class HBaseDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
       InterruptedException {
     TableInputFormat delegate = new TableInputFormat();
     String tableName = HBaseMetadataProvider.getTableName(dataset.getName());
-    jobContext.getConfiguration().set(TableInputFormat.INPUT_TABLE, tableName);
-    delegate.setConf(jobContext.getConfiguration());
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
+    conf.set(TableInputFormat.INPUT_TABLE, tableName);
+    delegate.setConf(conf);
     return delegate.getSplits(jobContext);
   }
 
@@ -60,8 +63,10 @@ class HBaseDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     TableInputFormat delegate = new TableInputFormat();
     String tableName = HBaseMetadataProvider.getTableName(dataset.getName());
-    taskAttemptContext.getConfiguration().set(TableInputFormat.INPUT_TABLE, tableName);
-    delegate.setConf(taskAttemptContext.getConfiguration());
+    Configuration conf = Hadoop.TaskAttemptContext
+        .getConfiguration.invoke(taskAttemptContext);
+    conf.set(TableInputFormat.INPUT_TABLE, tableName);
+    delegate.setConf(conf);
     return new HBaseRecordReaderWrapper<E>(
         delegate.createRecordReader(inputSplit, taskAttemptContext), entityMapper);
   }

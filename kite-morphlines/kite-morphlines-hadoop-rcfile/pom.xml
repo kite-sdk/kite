@@ -44,6 +44,12 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- for dynamic hadoop methods (hadoop 1 and 2 compatible) -->
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-compatibility</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-exec</artifactId>

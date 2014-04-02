@@ -26,20 +26,9 @@ import org.apache.avro.reflect.ReflectDatumWriter;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.kitesdk.data.spi.DynMethods;
+import org.kitesdk.compat.Hadoop;
 
 class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
-
-  private static DynMethods.UnboundMethod hflush = new DynMethods.Builder("hflush")
-      .impl(FSDataOutputStream.class, "hflush")
-      .impl(FSDataOutputStream.class, "sync")
-      .build();
-
-  // for CDK-203
-//  private static DynMethods.UnboundMethod hsync = new DynMethods.Builder("hsync")
-//      .impl(FSDataOutputStream.class, "hsync")
-//      .defaultNoop() // no hadoop-1 equivalent
-//      .build();
 
   private final Schema schema;
   private final FileSystem fileSystem;
@@ -83,7 +72,7 @@ class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
   @Override
   public void flush() throws IOException {
     dataFileWriter.flush();
-    hflush.invoke(out);
+    Hadoop.FSDataOutputStream.hflush.invoke(out);
   }
 
   @Override
