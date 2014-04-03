@@ -20,12 +20,17 @@ import com.beust.jcommander.Parameters;
 import java.io.IOException;
 import java.util.List;
 import org.kitesdk.data.DatasetRepository;
+import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Delete a dataset and its metadata")
 public class DeleteDatasetCommand extends BaseDatasetCommand {
 
   @Parameter(description = "<dataset names>")
   List<String> datasetNames;
+
+  public DeleteDatasetCommand(Logger console) {
+    super(console);
+  }
 
   @Override
   public int run() throws IOException {
@@ -37,6 +42,7 @@ public class DeleteDatasetCommand extends BaseDatasetCommand {
 
     for (String datasetName : datasetNames) {
       repo.delete(datasetName);
+      console.debug("Deleted dataset {}", datasetName);
     }
 
     return 0;

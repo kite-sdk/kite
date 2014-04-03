@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import org.kitesdk.cli.Command;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
+import org.slf4j.Logger;
 
 abstract class BaseDatasetCommand implements Command {
   @Parameter(names = {"-d", "--directory"},
@@ -42,6 +43,12 @@ abstract class BaseDatasetCommand implements Command {
       description = "If set, use the local filesystem.")
   boolean local = false;
 
+  protected final Logger console;
+
+  public BaseDatasetCommand(Logger console) {
+    this.console = console;
+  }
+
   DatasetRepository getDatasetRepository() {
     return DatasetRepositories.open(buildRepoURI());
   }
@@ -55,12 +62,16 @@ abstract class BaseDatasetCommand implements Command {
         return "repo:" + repoURI;
       }
     }
+    String uri;
     if (hcatalog) {
-      return "repo:hive" + (directory != null ? ":" + directory : "");
+      uri = "repo:hive" + (directory != null ? ":" + directory : "");
+    } else {
+      Preconditions.checkArgument(directory != null,
+          "--directory is required when not using Hive");
+      uri = "repo:" + (local ? "file" : "hdfs") + ":" + directory;
     }
-    Preconditions.checkArgument(directory != null,
-        "--directory is required when not using Hive");
-    return "repo:" + (local ? "file" : "hdfs") + ":" + directory;
+    console.trace("Repository URI: " + uri);
+    return uri;
   }
 
 }

@@ -160,6 +160,11 @@ public class CSVProperties {
       return this;
     }
 
+    public Builder hasHeader(boolean hasHeader) {
+      this.useHeader = hasHeader;
+      return this;
+    }
+
     public Builder orderByHeader() {
       this.orderByHeader = true;
       return this;

@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.URIPattern;
+import org.slf4j.Logger;
 
 import static org.mockito.Mockito.*;
 
@@ -34,6 +35,7 @@ public class TestDeleteDatasetCommand {
   private static Map<String, DatasetRepository> repos = Maps.newHashMap();
   private String id;
   private DeleteDatasetCommand command;
+  private Logger console;
 
   @BeforeClass
   public static void addMockRepoBuilder() throws Exception {
@@ -51,7 +53,8 @@ public class TestDeleteDatasetCommand {
   @Before
   public void setUp() {
     this.id = Integer.toString(ids.addAndGet(1));
-    this.command = new DeleteDatasetCommand();
+    this.console = mock(Logger.class);
+    this.command = new DeleteDatasetCommand(console);
     this.command.repoURI = "repo:mock:" + id;
   }
 
@@ -64,6 +67,7 @@ public class TestDeleteDatasetCommand {
     command.datasetNames = Lists.newArrayList("users");
     command.run();
     verify(getMockRepo()).delete("users");
+    verify(console).debug(contains("Deleted"), eq("users"));
   }
 
   @Test
@@ -71,7 +75,9 @@ public class TestDeleteDatasetCommand {
     command.datasetNames = Lists.newArrayList("users", "moreusers");
     command.run();
     verify(getMockRepo()).delete("users");
+    verify(console).debug(contains("Deleted"), eq("users"));
     verify(getMockRepo()).delete("moreusers");
+    verify(console).debug(contains("Deleted"), eq("moreusers"));
   }
 
 }

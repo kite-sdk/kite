@@ -16,36 +16,85 @@ package org.kitesdk.cli;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterDescription;
 import com.beust.jcommander.Parameters;
 import com.google.common.collect.Lists;
 import java.util.List;
-import java.util.Map;
+import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Retrieves details on the functions of other commands")
 public class Help {
   @Parameter(description = "Commands")
   List<String> helpCommands = Lists.newArrayList();
 
-  public int usage(JCommander jc, Map<String, Command> cmds) {
+  private final JCommander jc;
+  private final Logger console;
+
+  public Help(JCommander jc, Logger console) {
+    this.jc = jc;
+    this.console = console;
+  }
+
+  public int run() {
     if (helpCommands.isEmpty()) {
-      System.out.println("Usage: " + Main.PROGRAM_NAME +
-          " [options] [command] [command options]\n");
-      System.out.println("The following commands are available:");
-      for (Map.Entry<String, Command> e : cmds.entrySet()) {
-        Parameters parameters = e.getValue().getClass().getAnnotation(Parameters.class);
-        if (parameters != null) {
-          System.out.println(String.format("   %s\t\t\t%s", e.getKey(),
-              parameters.commandDescription()));
-        }
+      console.info(
+          "Usage: {} [options] [command] [command options]",
+          Main.PROGRAM_NAME);
+      console.info("\n  Options:");
+      for (ParameterDescription param : jc.getParameters()) {
+        printOption(console, param);
       }
-      System.out.println(
-          "\nSee '" + Main.PROGRAM_NAME + " help <command>' for more " +
-          "information on a specific command.");
+      console.info("\n  Commands:");
+      for (String command : jc.getCommands().keySet()) {
+        console.info("    {}\n\t{}",
+            command, jc.getCommandDescription(command));
+      }
+      console.info("\n  See '{} help <command>' for more information on a " +
+          "specific command.", Main.PROGRAM_NAME);
+
     } else {
       for (String cmd : helpCommands) {
-        jc.usage(cmd);
+        JCommander commander = jc.getCommands().get(cmd);
+        if (commander == null) {
+          console.error("Unknown command: {}", cmd);
+          return 1;
+        }
+
+        console.info(jc.getCommandDescription(cmd));
+        console.info("Usage: {} [general options] {} [command options] {}",
+            new Object[] {
+                Main.PROGRAM_NAME, cmd,
+                commander.getMainParameterDescription()});
+        console.info("\n  Command options:");
+        for (ParameterDescription param : commander.getParameters()) {
+          printOption(console, param);
+        }
+        // add an extra newline in case there are more commands
+        console.info("");
       }
+
+      console.info("  * = required\n");
     }
     return 0;
+  }
+
+  private void printOption(Logger console, ParameterDescription param) {
+    if (!param.getParameter().hidden()) {
+      console.info("  {} {}\n\t{}{}", new Object[]{
+          param.getParameter().required() ? "*" : " ",
+          param.getNames().trim(),
+          param.getDescription(),
+          formatDefault(param)});
+    }
+  }
+
+  private String formatDefault(ParameterDescription param) {
+    Object defaultValue = param.getDefault();
+    if (defaultValue == null) {
+      return "";
+    }
+    return " (default: " + ((defaultValue instanceof String) ?
+        "\"" + defaultValue + "\"" :
+        defaultValue.toString()) + ")";
   }
 }
