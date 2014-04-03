@@ -15,8 +15,6 @@
  */
 package org.kitesdk.data.spi;
 
-import org.kitesdk.data.MetadataProvider;
-
 /**
  * A common DatasetRepository base class to simplify implementation.
  *

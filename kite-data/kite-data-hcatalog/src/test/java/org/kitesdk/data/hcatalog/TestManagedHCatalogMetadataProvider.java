@@ -16,12 +16,11 @@
 
 package org.kitesdk.data.hcatalog;
 
-import java.net.URI;
-import org.kitesdk.data.MetadataProvider;
-import org.kitesdk.data.TestMetadataProviders;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.After;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
+import org.kitesdk.data.spi.MetadataProvider;
+import org.kitesdk.data.spi.TestMetadataProviders;
 
 public class TestManagedHCatalogMetadataProvider extends TestMetadataProviders {
 
@@ -31,7 +30,7 @@ public class TestManagedHCatalogMetadataProvider extends TestMetadataProviders {
 
   @Override
   public MetadataProvider newProvider(Configuration conf) {
-    return new HCatalogManagedMetadataProvider(conf, URI.create("repo:hive"));
+    return new HCatalogManagedMetadataProvider(conf);
   }
 
   @After

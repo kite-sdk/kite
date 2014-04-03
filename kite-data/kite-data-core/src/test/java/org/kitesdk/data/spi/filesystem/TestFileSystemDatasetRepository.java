@@ -15,14 +15,15 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import org.apache.hadoop.conf.Configuration;
 import org.kitesdk.data.TestDatasetRepositories;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.Formats;
-import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.MetadataProvider;
 import java.io.IOException;
 import java.net.URI;
 import org.apache.avro.Schema;
@@ -46,9 +47,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   public DatasetRepository newRepo(MetadataProvider provider) {
     // this purposely does not set the Configuration to test that the code
     // relies on filesystem URIs set in the DatasetDescriptor.
-    return new FileSystemDatasetRepository.Builder()
-        .metadataProvider(provider)
-        .build();
+    return new FileSystemDatasetRepository(new Configuration(), provider);
   }
 
   @Test

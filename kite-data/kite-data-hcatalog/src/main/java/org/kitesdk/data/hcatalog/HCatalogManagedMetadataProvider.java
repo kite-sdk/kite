@@ -17,11 +17,12 @@ package org.kitesdk.data.hcatalog;
 
 import java.net.URI;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetExistsException;
-import org.kitesdk.data.MetadataProviderException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.ql.metadata.Table;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.Compatibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +32,8 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
   private static final Logger logger = LoggerFactory
       .getLogger(HCatalogManagedMetadataProvider.class);
 
-  public HCatalogManagedMetadataProvider(Configuration conf, URI repositoryUri) {
-    super(conf, repositoryUri);
+  public HCatalogManagedMetadataProvider(Configuration conf) {
+    super(conf);
     logger.info("Default FS: " + conf.get("fs.defaultFS"));
   }
 
@@ -43,10 +44,11 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
     final Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
 
     if (!TableType.MANAGED_TABLE.equals(table.getTableType())) {
-      throw new MetadataProviderException("Table is not managed");
+      throw Accessor.getDefault().providerExceptionFor(
+          new DatasetException("Table is not managed"));
     }
 
-    return addRepositoryUri(HiveUtils.descriptorForTable(conf, table));
+    return HiveUtils.descriptorForTable(conf, table);
   }
 
   @Override
@@ -71,8 +73,8 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
     // load the created table to get the data location
     final Table newTable = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
 
-    return addRepositoryUri(new DatasetDescriptor.Builder(descriptor)
+    return new DatasetDescriptor.Builder(descriptor)
         .location(newTable.getDataLocation())
-        .build());
+        .build();
   }
 }

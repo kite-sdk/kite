@@ -17,11 +17,9 @@ package org.kitesdk.data.hbase;
 
 import com.google.common.base.Preconditions;
 import java.net.URI;
-import java.net.URISyntaxException;
 import org.apache.hadoop.hbase.HConstants;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepositoryException;
-import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.RandomAccessDatasetRepository;
 import org.kitesdk.data.hbase.avro.GenericAvroDao;
@@ -187,13 +185,9 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
     }
 
     private URI getRepositoryUri(Configuration conf) {
-      try {
-        return new URI(String.format("repo:hbase:%s:%s",
-            conf.get(HConstants.ZOOKEEPER_QUORUM),
-            conf.get(HConstants.ZOOKEEPER_CLIENT_PORT)));
-      } catch (URISyntaxException e) {
-        throw new MetadataProviderException(e);
-      }
+      return URI.create(String.format("repo:hbase:%s:%s",
+          conf.get(HConstants.ZOOKEEPER_QUORUM),
+          conf.get(HConstants.ZOOKEEPER_CLIENT_PORT)));
     }
   }
 }

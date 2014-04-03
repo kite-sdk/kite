@@ -19,8 +19,8 @@ package org.kitesdk.data.hcatalog;
 import java.net.URI;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.filesystem.TestFileSystemDatasetRepository;
@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.Mergeable;
+import org.kitesdk.data.spi.MetadataProvider;
 
 public class TestExternalHCatalogDatasetRepository extends TestFileSystemDatasetRepository {
 
@@ -45,9 +46,14 @@ public class TestExternalHCatalogDatasetRepository extends TestFileSystemDataset
   }
 
   @Override
+  public DatasetRepository newRepo(MetadataProvider provider) {
+    // use null URI because TestDatasetRepositories expects no URI
+    return new HCatalogExternalDatasetRepository(conf, provider, null);
+  }
+
+  @Override
   public MetadataProvider newProvider(Configuration conf) {
-    return new HCatalogExternalMetadataProvider(conf, testDirectory,
-        URI.create("repo:hive:" + testDirectory.toUri().getPath()));
+    return new HCatalogExternalMetadataProvider(conf, testDirectory);
   }
 
   private HiveMetaStoreClient client;

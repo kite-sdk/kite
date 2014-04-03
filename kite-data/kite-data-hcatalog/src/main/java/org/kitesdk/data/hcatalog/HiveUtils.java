@@ -17,10 +17,11 @@
 package org.kitesdk.data.hcatalog;
 
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
-import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.UnknownFormatException;
 import org.kitesdk.data.impl.Accessor;
@@ -119,12 +120,11 @@ class HiveUtils {
     String schemaUrlString = table.getProperty(AVRO_SCHEMA_URL_PROPERTY_NAME);
     if (schemaUrlString != null) {
       try {
-        builder.schemaUri(new URI(schemaUrlString));
+        // URI.create is safe because this library wrote the URI
+        builder.schemaUri(URI.create(schemaUrlString));
       } catch (IOException e) {
-        throw new MetadataProviderException("Could not read schema", e);
-      } catch (URISyntaxException e) {
-        // this library sets the URI, so it should always be valid
-        throw new MetadataProviderException("[BUG] Invalid schema URI", e);
+        throw Accessor.getDefault().providerExceptionFor(
+            new DatasetIOException("Could not read schema", e));
       }
     }
 
@@ -135,8 +135,9 @@ class HiveUtils {
 
     try {
       return builder.build();
-    }  catch (IllegalStateException ex) {
-      throw new MetadataProviderException("Cannot find schema: missing metadata");
+    } catch (IllegalStateException ex) {
+      throw Accessor.getDefault().providerExceptionFor(
+          new DatasetException("Cannot find schema: missing metadata"));
     }
   }
 
@@ -186,9 +187,9 @@ class HiveUtils {
         table.setInputFormatClass(FORMAT_TO_INPUT_FORMAT.get(format));
         table.setOutputFormatClass(FORMAT_TO_OUTPUT_FORMAT.get(format));
       } catch (HiveException ex) {
-        throw new MetadataProviderException(
+        throw Accessor.getDefault().providerExceptionFor(new DatasetException(
             "Failed to set input/output formats for format:" +
-            format.getName(), ex);
+            format.getName(), ex));
       }
     } else {
       throw new UnknownFormatException(
@@ -237,16 +238,18 @@ class HiveUtils {
           descriptor.getSchema().toString());
     } else if (table.getProperty(AVRO_SCHEMA_URL_PROPERTY_NAME) != null) {
       if (descriptor.getSchemaUrl() == null) {
-        throw new MetadataProviderException("Cannot update " +
-            AVRO_SCHEMA_URL_PROPERTY_NAME + " since descriptor schema URL is not set.");
+        throw Accessor.getDefault().providerExceptionFor(new DatasetException(
+            "Cannot update " + AVRO_SCHEMA_URL_PROPERTY_NAME +
+            " since descriptor schema URL is not set."));
       }
       table.setProperty(
           AVRO_SCHEMA_URL_PROPERTY_NAME,
           descriptor.getSchemaUrl().toExternalForm());
     } else {
-      throw new MetadataProviderException("Cannot update Avro schema since neither " +
-          AVRO_SCHEMA_LITERAL_PROPERTY_NAME + " nor " + AVRO_SCHEMA_URL_PROPERTY_NAME +
-          " is set.");
+      throw Accessor.getDefault().providerExceptionFor(new DatasetException(
+          "Cannot update Avro schema since neither " +
+          AVRO_SCHEMA_LITERAL_PROPERTY_NAME + " nor " +
+          AVRO_SCHEMA_URL_PROPERTY_NAME + " is set."));
     }
   }
 
@@ -254,24 +257,8 @@ class HiveUtils {
     try {
       return path.getFileSystem(conf);
     } catch (IOException ex) {
-      throw new MetadataProviderException(
-          "Cannot access FileSystem for uri:" + path, ex);
-    }
-  }
-
-  static FileSystem fsForPath(Configuration conf, String fsUri, Path path) {
-    try {
-      if (fsUri == null) {
-        return path.getFileSystem(conf);
-      } else {
-        return FileSystem.get(new URI(fsUri), conf);
-      }
-    } catch (IOException ex) {
-      throw new MetadataProviderException(
-          "Cannot access FileSystem for path:" + path, ex);
-    } catch (URISyntaxException ex) {
-      throw new MetadataProviderException(
-          "Cannot access FileSystem for uri:" + fsUri, ex);
+      throw Accessor.getDefault().providerExceptionFor(new DatasetIOException(
+          "Cannot access FileSystem for uri:" + path, ex));
     }
   }
 
@@ -302,7 +289,8 @@ class HiveUtils {
   private static String getHiveType(Class<?> type) {
     String typeName = PrimitiveObjectInspectorUtils.getTypeNameFromPrimitiveJava(type);
     if (typeName == null) {
-      throw new MetadataProviderException("Unsupported FieldPartitioner type: " + type);
+      throw Accessor.getDefault().providerExceptionFor(
+          new DatasetException("Unsupported FieldPartitioner type: " + type));
     }
     return typeName;
   }

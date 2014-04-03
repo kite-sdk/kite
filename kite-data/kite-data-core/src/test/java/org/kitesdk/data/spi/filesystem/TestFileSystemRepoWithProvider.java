@@ -16,7 +16,7 @@
 
 package org.kitesdk.data.spi.filesystem;
 
-import org.kitesdk.data.MetadataProvider;
+import org.kitesdk.data.spi.MetadataProvider;
 import org.apache.hadoop.conf.Configuration;
 
 public class TestFileSystemRepoWithProvider extends TestFileSystemDatasetRepository {

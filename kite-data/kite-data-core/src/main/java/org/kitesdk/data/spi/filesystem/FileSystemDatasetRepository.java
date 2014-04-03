@@ -18,15 +18,15 @@ package org.kitesdk.data.spi.filesystem;
 import javax.annotation.Nullable;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.IncompatibleSchemaException;
-import org.kitesdk.data.MetadataProvider;
-import org.kitesdk.data.MetadataProviderException;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
+import org.kitesdk.data.spi.MetadataProvider;
 import org.kitesdk.data.spi.PartitionListener;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -51,17 +51,17 @@ import org.slf4j.LoggerFactory;
  * A {@link org.kitesdk.data.DatasetRepository} that stores data in a Hadoop {@link FileSystem}.
  * </p>
  * <p>
- * Given a {@link FileSystem}, a root directory, and a {@link org.kitesdk.data.MetadataProvider},
+ * Given a {@link FileSystem}, a root directory, and a {@link MetadataProvider},
  * this {@link org.kitesdk.data.DatasetRepository} implementation can load and store
- * {@link org.kitesdk.data.Dataset}s on both local filesystems as well as the Hadoop Distributed
+ * {@link Dataset}s on both local filesystems as well as the Hadoop Distributed
  * FileSystem (HDFS). Users may directly instantiate this class with the three
  * dependencies above and then perform dataset-related operations using any of
  * the provided methods. The primary methods of interest will be
- * {@link #create(String, org.kitesdk.data.DatasetDescriptor)},
+ * {@link #create(String, DatasetDescriptor)},
  * {@link #load(String)}, and
  * {@link #delete(String)} which create a new dataset, load an existing
  * dataset, or delete an existing dataset, respectively. Once a dataset has been created
- * or loaded, users can invoke the appropriate {@link org.kitesdk.data.Dataset} methods to get a reader
+ * or loaded, users can invoke the appropriate {@link Dataset} methods to get a reader
  * or writer as needed.
  * </p>
  * <p>
@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
  * @see org.kitesdk.data.Dataset
  * @see org.kitesdk.data.DatasetDescriptor
  * @see org.kitesdk.data.PartitionStrategy
- * @see org.kitesdk.data.MetadataProvider
+ * @see org.kitesdk.data.spi.MetadataProvider
  */
 public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
@@ -96,9 +96,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
    * @param metadataProvider the provider for metadata storage
    *
    * @since 0.8.0
-   * @deprecated will be removed from the public API in 0.13.0
    */
-  @Deprecated
   public FileSystemDatasetRepository(
       Configuration conf, MetadataProvider metadataProvider) {
     this(conf, metadataProvider, null);
@@ -250,7 +248,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
       // don't care about the return value here -- if it already doesn't exist
       // we still need to delete the data directory
       changed = metadataProvider.delete(name);
-    } catch (MetadataProviderException ex) {
+    } catch (DatasetException ex) {
       throw new DatasetRepositoryException(
           "Failed to delete descriptor for name:" + name, ex);
     }
@@ -365,10 +363,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   /**
    * @return the {@link MetadataProvider} being used by this repository.
    * @since 0.2.0
-   * @deprecated will be removed from the public API in 0.13.0
    */
-  @Deprecated
-  public MetadataProvider getMetadataProvider() {
+  MetadataProvider getMetadataProvider() {
     return metadataProvider;
   }
 
@@ -395,7 +391,6 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
     private Path rootDirectory;
     private FileSystem fileSystem;
-    private MetadataProvider metadataProvider;
     private Configuration configuration;
 
     /**
@@ -445,17 +440,6 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
 
     /**
-     * The {@link MetadataProvider} for metadata storage (optional). If not
-     * specified, a {@link FileSystemMetadataProvider} will be used.
-     * @deprecated will be removed from the public API in 0.13.0
-     */
-    @Deprecated
-    public Builder metadataProvider(MetadataProvider metadataProvider) {
-      this.metadataProvider = metadataProvider;
-      return this;
-    }
-
-    /**
      * The {@link Configuration} used to find the {@link FileSystem} (optional).
      * If not specified, the default configuration will be used.
      * @since 0.3.0
@@ -471,33 +455,28 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
      * @since 0.9.0
      */
     public FileSystemDatasetRepository build() {
+      URI repositoryUri = null;
+      MetadataProvider metadataProvider = null;
+
       if (configuration == null) {
         this.configuration = new Configuration();
       }
 
-      URI repositoryUri = null;
-      if (metadataProvider == null) {
-        Preconditions.checkState(this.rootDirectory != null,
-            "No root directory defined");
+      Preconditions.checkState(this.rootDirectory != null,
+          "No root directory defined");
 
-        // the rootDirectory can have a scheme/authority that overrides
+      // the rootDirectory can have a scheme/authority that overrides
 
-        if (fileSystem != null) {
-          // if the FS doesn't match, this will throw IllegalArgumentException
-          Path qualifiedRootDirectory = fileSystem.makeQualified(rootDirectory);
-          repositoryUri = makeRepositoryUri(qualifiedRootDirectory);
-          this.metadataProvider = new FileSystemMetadataProvider(
-              configuration, qualifiedRootDirectory);
-        } else {
-          repositoryUri = makeRepositoryUri(rootDirectory);
-          this.metadataProvider = new FileSystemMetadataProvider(
-              configuration, rootDirectory);
-        }
+      if (fileSystem != null) {
+        // if the FS doesn't match, this will throw IllegalArgumentException
+        Path qualifiedRootDirectory = fileSystem.makeQualified(rootDirectory);
+        repositoryUri = makeRepositoryUri(qualifiedRootDirectory);
+        metadataProvider = new FileSystemMetadataProvider(
+            configuration, qualifiedRootDirectory);
       } else {
-        Preconditions.checkState(rootDirectory == null,
-            "Root directory is ignored when a MetadataProvider is set");
-        Preconditions.checkState(fileSystem == null,
-            "File system is ignored when a MetadataProvider is set");
+        repositoryUri = makeRepositoryUri(rootDirectory);
+        metadataProvider = new FileSystemMetadataProvider(
+            configuration, rootDirectory);
       }
 
       return new FileSystemDatasetRepository(configuration, metadataProvider,
@@ -505,11 +484,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
 
     private URI makeRepositoryUri(Path rootDirectory) {
-      try {
-        return new URI("repo:" + rootDirectory.toUri());
-      } catch (URISyntaxException e) {
-        throw new MetadataProviderException(e);
-      }
+      return URI.create("repo:" + rootDirectory.toUri());
     }
   }
 }

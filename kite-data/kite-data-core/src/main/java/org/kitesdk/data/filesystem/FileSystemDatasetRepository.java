@@ -17,14 +17,14 @@
 package org.kitesdk.data.filesystem;
 
 import org.apache.hadoop.conf.Configuration;
-import org.kitesdk.data.MetadataProvider;
+import org.kitesdk.data.spi.MetadataProvider;
 
 /**
  * <p>
  * A {@link org.kitesdk.data.DatasetRepository} that stores data in a Hadoop {@link org.apache.hadoop.fs.FileSystem}.
  * </p>
  * <p>
- * Given a {@link org.apache.hadoop.fs.FileSystem}, a root directory, and a {@link org.kitesdk.data.MetadataProvider},
+ * Given a {@link org.apache.hadoop.fs.FileSystem}, a root directory, and a {@link org.kitesdk.data.spi.MetadataProvider},
  * this {@link org.kitesdk.data.DatasetRepository} implementation can load and store
  * {@link org.kitesdk.data.Dataset}s on both local filesystems as well as the Hadoop Distributed
  * FileSystem (HDFS). Users may directly instantiate this class with the three
@@ -50,7 +50,6 @@ import org.kitesdk.data.MetadataProvider;
  * @see org.kitesdk.data.Dataset
  * @see org.kitesdk.data.DatasetDescriptor
  * @see org.kitesdk.data.PartitionStrategy
- * @see org.kitesdk.data.MetadataProvider
  */
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value="NM_SAME_SIMPLE_NAME_AS_SUPERCLASS",

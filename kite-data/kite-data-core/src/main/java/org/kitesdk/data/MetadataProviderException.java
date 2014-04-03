@@ -27,7 +27,9 @@ package org.kitesdk.data;
  *
  * @see MetadataProvider
  * @since 0.2.0
+ * @deprecated will be removed in 0.14.0; use {@link DatasetException} instead.
  */
+@Deprecated
 public class MetadataProviderException extends DatasetException {
 
   public MetadataProviderException() {

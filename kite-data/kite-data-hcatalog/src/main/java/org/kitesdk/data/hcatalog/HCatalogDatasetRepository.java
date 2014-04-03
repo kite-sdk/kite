@@ -24,8 +24,8 @@ import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.hcatalog.impl.Loader;
+import org.kitesdk.data.spi.MetadataProvider;
 
 /**
  * <p>
@@ -54,7 +54,6 @@ public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository
   /**
    * Create an HCatalog dataset repository with managed tables.
    */
-  @SuppressWarnings("deprecation")
   HCatalogDatasetRepository(Configuration conf, MetadataProvider provider, URI repositoryUri) {
     super(conf, provider, repositoryUri);
   }
@@ -137,14 +136,14 @@ public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository
         // external
         URI repositoryUri = getRepositoryUri(configuration, rootDirectory);
         HCatalogMetadataProvider metadataProvider =
-            new HCatalogExternalMetadataProvider(configuration, rootDirectory, repositoryUri);
+            new HCatalogExternalMetadataProvider(configuration, rootDirectory);
         return new HCatalogExternalDatasetRepository(configuration, metadataProvider,
             repositoryUri);
       } else {
         // managed
         URI repositoryUri = getRepositoryUri(configuration, null);
         HCatalogMetadataProvider metadataProvider =
-            new HCatalogManagedMetadataProvider(configuration, repositoryUri);
+            new HCatalogManagedMetadataProvider(configuration);
         return new HCatalogDatasetRepository(configuration, metadataProvider, repositoryUri);
       }
     }

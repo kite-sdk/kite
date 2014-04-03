@@ -16,8 +16,8 @@
 package org.kitesdk.data.spi.filesystem;
 
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.MetadataProvider;
-import org.kitesdk.data.TestMetadataProviders;
+import org.kitesdk.data.spi.MetadataProvider;
+import org.kitesdk.data.spi.TestMetadataProviders;
 import com.google.common.io.Files;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;

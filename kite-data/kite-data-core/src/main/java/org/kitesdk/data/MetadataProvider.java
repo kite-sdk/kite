@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data;
 
-import java.util.Collection;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -31,102 +30,13 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Implementations of {@link MetadataProvider} are typically not thread-safe; that is,
  * the behavior when accessing a single instance from multiple threads is undefined.
  * </p>
+ *
+ * @deprecated will be moved in 0.14.0; moved to service provider interface.
  */
+@Deprecated
 @NotThreadSafe
-public interface MetadataProvider {
-
-  /**
-   * Load the dataset descriptor for the dataset {@code name}.
-   *
-   * @param name The fully qualified name of an existing dataset.
-   * @return A dataset descriptor.
-   * @throws DatasetNotFoundException  If there is no descriptor for {@code name}
-   * @throws MetadataProviderException If the dataset doesn't exist or the descriptor can not be loaded.
-   */
-  DatasetDescriptor load(String name);
-
-  /**
-   * Create a {@code DatasetDescriptor} for the dataset named {@code name}.
-   *
-   * The descriptor will be stored for the named data set in this provider's
-   * metadata store. It is illegal to create more than one descriptor for a
-   * named data set, and an exception will be thrown.
-   *
-   * @param name       The fully qualified name of a dataset.
-   * @param descriptor A dataset descriptor.
-   * @return The descriptor as persisted to the Metadata store.
-   * @throws DatasetExistsException     If a {@code DatasetDescriptor} already
-   *                                    exists for {@code name}
-   * @throws MetadataProviderException  If the {@code DatasetDescriptor} can not
-   *                                    be saved
-   *
-   * @since 0.7.0
-   */
-  DatasetDescriptor create(String name, DatasetDescriptor descriptor);
-
-  /**
-   * Update a {@code DatasetDescriptor} for the dataset named {@code name}.
-   *
-   * The new descriptor will be stored for the named data set in this provider's
-   * metadata store, replacing the previous descriptor. The named dataset must
-   * already exist or an error will be thrown.
-   *
-   * This method is optional.
-   *
-   * @param name       The fully qualified name of a dataset.
-   * @param descriptor A dataset descriptor.
-   * @return The descriptor as persisted to the Metadata store.
-   *
-   * @throws DatasetNotFoundException      If there is no descriptor for
-   *                                       {@code name}
-   * @throws UnsupportedOperationException If descriptor updates are not
-   *                                       supported by the implementation.
-   * @throws MetadataProviderException     If the dataset descriptor can not be
-   *                                       updated.
-   *
-   * @since 0.7.0
-   */
-  DatasetDescriptor update(String name, DatasetDescriptor descriptor);
-
-  /**
-   * Delete all metadata associated with the dataset named {@code name}.
-   *
-   * After this method is called, there will be no {@code DatasetDescriptor}
-   * stored for the given {@code name}, unless an exception has been thrown. If
-   * metadata was removed, this method will return {@code true}. If there was
-   * no {@code DatasetDescriptor} corresponding to the given name, then this
-   * method will not make any changes and will return {@code false}.
-   *
-   * @param name The fully qualified name of a dataset.
-   * @return {@code true} if the metadata is successfully deleted,
-   *         {@code false} if no action was taken.
-   * @throws MetadataProviderException If the dataset metadata exists but can
-   *                                   not be deleted.
-   */
-  boolean delete(String name);
-
-  /**
-   * Checks if there is a {@link DatasetDescriptor} for the dataset named
-   * {@code name}.
-   *
-   * @param name a {@code Dataset} name to check the existence of
-   * @return true if {@code name} exists, false otherwise
-   * @throws MetadataProviderException
-   *
-   * @since 0.7.0
-   */
-  boolean exists(String name);
-
-
-  /**
-   * List the names of the {@link Dataset}s managed by this
-   * {@code MetadataProvider}. If there is not at least one {@code Dataset}, an
-   * empty list will be returned.
-   *
-   * @return a {@link Collection} of Dataset names ({@link String}s)
-   * @throws MetadataProviderException
-   *
-   * @since 0.8.0
-   */
-  Collection<String> list();
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+    value="NM_SAME_SIMPLE_NAME_AS_INTERFACE",
+    justification="Replaced by parent interface")
+public interface MetadataProvider extends org.kitesdk.data.spi.MetadataProvider {
 }

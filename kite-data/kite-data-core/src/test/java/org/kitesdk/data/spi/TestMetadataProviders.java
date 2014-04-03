@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data;
+package org.kitesdk.data.spi;
 
 import com.google.common.collect.ImmutableMultiset;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,6 +28,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetExistsException;
+import org.kitesdk.data.DatasetNotFoundException;
+import org.kitesdk.data.Formats;
+import org.kitesdk.data.MiniDFSTest;
+import org.kitesdk.data.PartitionStrategy;
 
 @RunWith(Parameterized.class)
 public abstract class TestMetadataProviders extends MiniDFSTest {
@@ -120,7 +125,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     final DatasetDescriptor created;
     try {
       created = provider.create(NAME, requested);
-    } catch (MetadataProviderException ex) {
+    } catch (UnsupportedOperationException ex) {
       // this is expected if the provider doesn't support requested locations
       return;
     }

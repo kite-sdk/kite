@@ -16,10 +16,7 @@
 
 package org.kitesdk.data.hcatalog;
 
-import java.net.URI;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.MetadataProvider;
-import org.kitesdk.data.TestMetadataProviders;
 import com.google.common.io.Files;
 import junit.framework.Assert;
 import org.apache.hadoop.conf.Configuration;
@@ -27,6 +24,8 @@ import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Test;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
+import org.kitesdk.data.spi.MetadataProvider;
+import org.kitesdk.data.spi.TestMetadataProviders;
 
 public class TestExternalHCatalogMetadataProvider extends TestMetadataProviders {
 
@@ -39,8 +38,7 @@ public class TestExternalHCatalogMetadataProvider extends TestMetadataProviders 
   @Override
   public MetadataProvider newProvider(Configuration conf) {
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    return new HCatalogExternalMetadataProvider(conf, testDirectory,
-        URI.create("repo:hive:" + testDirectory.toUri().getPath()));
+    return new HCatalogExternalMetadataProvider(conf, testDirectory);
   }
 
   @After

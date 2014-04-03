@@ -16,8 +16,8 @@
 package org.kitesdk.data.spi.filesystem;
 
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.MetadataProvider;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import java.io.IOException;
@@ -48,8 +48,7 @@ public class TestPartitionedDatasetWriter {
     this.fileSystem = FileSystem.get(conf);
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
     this.testProvider = new FileSystemMetadataProvider(conf, testDirectory);
-    this.repo = new FileSystemDatasetRepository.Builder().configuration(conf)
-        .metadataProvider(testProvider).build();
+    this.repo = new FileSystemDatasetRepository(conf, testProvider);
 
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", 2).build();

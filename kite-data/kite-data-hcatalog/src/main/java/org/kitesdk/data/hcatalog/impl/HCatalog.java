@@ -22,8 +22,9 @@ import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.AlreadyExistsException;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hcatalog.common.HCatUtil;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.MetadataProviderException;
+import org.kitesdk.data.impl.Accessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +133,8 @@ public final class HCatalog {
         return client.tableExists(dbName, tableName);
       }
     } catch (Exception e) {
-      throw new MetadataProviderException("Hive metastore exception", e);
+      throw Accessor.getDefault().providerExceptionFor(
+          new DatasetException("Hive metastore exception", e));
     }
   }
 
@@ -142,7 +144,8 @@ public final class HCatalog {
         return client.getAllTables(dbName);
       }
     } catch (Exception e) {
-      throw new MetadataProviderException("Hive metastore exception", e);
+      throw Accessor.getDefault().providerExceptionFor(
+          new DatasetException("Hive metastore exception", e));
     }
   }
 
