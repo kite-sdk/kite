@@ -486,14 +486,12 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
           // if the FS doesn't match, this will throw IllegalArgumentException
           Path qualifiedRootDirectory = fileSystem.makeQualified(rootDirectory);
           repositoryUri = makeRepositoryUri(qualifiedRootDirectory);
-          this.metadataProvider = new FileSystemMetadataProvider.Builder()
-              .configuration(configuration)
-              .rootDirectory(qualifiedRootDirectory).build();
+          this.metadataProvider = new FileSystemMetadataProvider(
+              configuration, qualifiedRootDirectory);
         } else {
           repositoryUri = makeRepositoryUri(rootDirectory);
-          this.metadataProvider = new FileSystemMetadataProvider.Builder()
-              .configuration(configuration)
-              .rootDirectory(rootDirectory).build();
+          this.metadataProvider = new FileSystemMetadataProvider(
+              configuration, rootDirectory);
         }
       } else {
         Preconditions.checkState(rootDirectory == null,

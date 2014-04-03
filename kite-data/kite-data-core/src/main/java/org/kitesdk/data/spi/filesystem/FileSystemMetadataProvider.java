@@ -451,44 +451,4 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     }
   }
 
-  /**
-   * A fluent builder to aid in the construction of {@link FileSystemMetadataProvider}
-   * instances.
-   * @since 0.8.0
-   */
-  public static class Builder {
-
-    private Path rootDirectory;
-    private Configuration configuration;
-
-    /**
-     * The root directory for metadata files.
-     *
-     * @param path a Path to a FileSystem location
-     * @return this Builder for method chaining.
-     */
-    public Builder rootDirectory(Path path) {
-      this.rootDirectory = path;
-      return this;
-    }
-
-    /**
-     * The {@link Configuration} used to find the {@link FileSystem}.
-     */
-    public Builder configuration(Configuration configuration) {
-      this.configuration = configuration;
-      return this;
-    }
-
-    /**
-     * Build an instance of the configured {@link FileSystemMetadataProvider}.
-     *
-     * @since 0.9.0
-     */
-    @SuppressWarnings("deprecation")
-    public FileSystemMetadataProvider build() {
-      return new FileSystemMetadataProvider(configuration, rootDirectory);
-    }
-  }
-
 }

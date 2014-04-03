@@ -47,8 +47,7 @@ public class TestPartitionedDatasetWriter {
     this.conf = new Configuration();
     this.fileSystem = FileSystem.get(conf);
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    this.testProvider = new FileSystemMetadataProvider.Builder().configuration(conf)
-        .rootDirectory(testDirectory).build();
+    this.testProvider = new FileSystemMetadataProvider(conf, testDirectory);
     this.repo = new FileSystemDatasetRepository.Builder().configuration(conf)
         .metadataProvider(testProvider).build();
 
