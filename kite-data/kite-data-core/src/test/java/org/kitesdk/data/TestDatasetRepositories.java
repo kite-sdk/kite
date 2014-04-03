@@ -15,7 +15,7 @@
  */
 package org.kitesdk.data;
 
-import org.kitesdk.data.filesystem.DatasetTestUtilities;
+import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.io.Files;
 import java.io.IOException;

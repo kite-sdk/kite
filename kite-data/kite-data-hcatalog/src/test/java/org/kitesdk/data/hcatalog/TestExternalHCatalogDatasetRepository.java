@@ -23,7 +23,7 @@ import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.filesystem.TestFileSystemDatasetRepository;
+import org.kitesdk.data.spi.filesystem.TestFileSystemDatasetRepository;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;

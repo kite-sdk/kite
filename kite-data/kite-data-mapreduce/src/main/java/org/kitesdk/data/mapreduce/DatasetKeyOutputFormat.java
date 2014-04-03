@@ -34,8 +34,8 @@ import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionKey;
-import org.kitesdk.data.filesystem.impl.Accessor;
 import org.kitesdk.data.spi.Mergeable;
+import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 
 /**
  * A MapReduce {@code OutputFormat} for writing to a {@link Dataset}.
@@ -159,7 +159,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     // TODO: the following should generalize with views
     String partitionDir = conf.get(KITE_PARTITION_DIR);
     if (dataset.getDescriptor().isPartitioned() && partitionDir != null) {
-      PartitionKey key = Accessor.getDefault().fromDirectoryName(dataset, new Path(partitionDir));
+      PartitionKey key = ((FileSystemDataset) dataset)
+          .keyFromDirectory(new Path(partitionDir));
       if (key != null) {
         dataset = dataset.getPartition(key, true);
       }

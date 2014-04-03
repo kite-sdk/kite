@@ -36,7 +36,7 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
+import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepositoryTest;
 import org.kitesdk.data.hbase.avro.AvroUtils;

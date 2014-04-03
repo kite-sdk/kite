@@ -45,7 +45,7 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
+import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 
 @RunWith(Parameterized.class)
 public class TestMapReduce {

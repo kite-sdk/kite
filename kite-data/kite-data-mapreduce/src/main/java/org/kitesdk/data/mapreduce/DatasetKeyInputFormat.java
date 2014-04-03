@@ -16,6 +16,7 @@
 package org.kitesdk.data.mapreduce;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -32,7 +33,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.PartitionKey;
-import org.kitesdk.data.filesystem.impl.Accessor;
+import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.kitesdk.data.spi.AbstractDataset;
 
 /**
@@ -75,7 +76,9 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     // TODO: the following should generalize with views
     String partitionDir = conf.get(KITE_PARTITION_DIR);
     if (dataset.getDescriptor().isPartitioned() && partitionDir != null) {
-      PartitionKey key = Accessor.getDefault().fromDirectoryName(dataset, new Path(partitionDir));
+      Preconditions.checkArgument(dataset instanceof FileSystemDataset);
+      PartitionKey key = ((FileSystemDataset) dataset)
+          .keyFromDirectory(new Path(partitionDir));
       if (key != null) {
         dataset = dataset.getPartition(key, true);
       }

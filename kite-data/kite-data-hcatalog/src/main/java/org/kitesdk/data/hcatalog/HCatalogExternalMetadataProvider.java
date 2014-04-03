@@ -19,7 +19,7 @@ import java.net.URI;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.MetadataProviderException;
-import org.kitesdk.data.filesystem.impl.Accessor;
+import org.kitesdk.data.spi.filesystem.FileSystemUtil;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
@@ -84,7 +84,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
         .build();
 
     // create the data directory first so it is owned by the current user, not Hive
-    Accessor.getDefault().ensureExists(newDescriptor, conf);
+    FileSystemUtil.ensureLocationExists(newDescriptor, conf);
 
     // this object will be the table metadata
     final Table table = HiveUtils.tableForDescriptor(

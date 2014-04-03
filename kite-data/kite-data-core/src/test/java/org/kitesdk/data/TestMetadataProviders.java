@@ -15,16 +15,13 @@
  */
 package org.kitesdk.data;
 
-import static org.kitesdk.data.filesystem.DatasetTestUtilities.*;
 import com.google.common.collect.ImmutableMultiset;
-import com.google.common.collect.Sets;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
-import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;

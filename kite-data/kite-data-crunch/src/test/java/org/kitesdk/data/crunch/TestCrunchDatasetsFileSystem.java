@@ -15,11 +15,9 @@
  */
 package org.kitesdk.data.crunch;
 
-import com.google.common.io.Files;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
+import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 
 public class TestCrunchDatasetsFileSystem extends TestCrunchDatasets {
   public TestCrunchDatasetsFileSystem(FileSystem fs) {
