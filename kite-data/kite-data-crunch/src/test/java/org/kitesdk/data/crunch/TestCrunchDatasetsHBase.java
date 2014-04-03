@@ -16,7 +16,10 @@
 package org.kitesdk.data.crunch;
 
 import java.io.IOException;
+import junit.framework.Assert;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
 import org.apache.crunch.PCollection;
 import org.apache.crunch.Pipeline;
 import org.apache.crunch.Target;
@@ -32,12 +35,14 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.View;
 import org.kitesdk.data.hbase.HBaseDatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepositoryTest;
 import org.kitesdk.data.hbase.avro.AvroUtils;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;
 
 import static org.junit.Assert.assertEquals;
+import static org.kitesdk.data.filesystem.DatasetTestUtilities.datasetSize;
 
 public class TestCrunchDatasetsHBase {
   private static final String testGenericEntity;
@@ -103,7 +108,34 @@ public class TestCrunchDatasetsHBase {
     pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
     pipeline.run();
 
-    checkRecords(outputDataset, 10);
+    checkRecords(outputDataset, 10, 0);
+  }
+
+  @Test
+  public void testSourceView() throws IOException {
+    String datasetName = tableName + ".TestGenericEntity";
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaLiteral(testGenericEntity)
+        .build();
+
+    Dataset<GenericRecord> inputDataset = repo.create("in", descriptor);
+    Dataset<GenericRecord> outputDataset = repo.create(datasetName, descriptor);
+
+    writeRecords(inputDataset, 10);
+
+    View<GenericRecord> inputView = inputDataset
+        .from("part1", new Utf8("part1_2")).to("part1", new Utf8("part1_7"))
+        .from("part2", new Utf8("part2_2")).to("part2", new Utf8("part2_7"));
+    Assert.assertEquals(6, datasetSize(inputView));
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasetsHBase.class, HBaseTestUtils.getConf());
+    PCollection<GenericRecord> data = pipeline.read(
+        CrunchDatasets.asSource(inputView, GenericRecord.class));
+    pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
+    pipeline.run();
+
+    checkRecords(outputDataset, 6, 2);
   }
 
   private void writeRecords(Dataset<GenericRecord> dataset, int count) {
@@ -119,8 +151,8 @@ public class TestCrunchDatasetsHBase {
     }
   }
 
-  private void checkRecords(Dataset<GenericRecord> dataset, int count) {
-    int cnt = 0;
+  private void checkRecords(Dataset<GenericRecord> dataset, int count, int start) {
+    int cnt = start;
     DatasetReader<GenericRecord> reader = dataset.newReader();
     reader.open();
     try {
@@ -128,7 +160,7 @@ public class TestCrunchDatasetsHBase {
         HBaseDatasetRepositoryTest.compareEntitiesWithUtf8(cnt, entity);
         cnt++;
       }
-      assertEquals(count, cnt);
+      assertEquals(count, cnt - start);
     } finally {
       reader.close();
     }
