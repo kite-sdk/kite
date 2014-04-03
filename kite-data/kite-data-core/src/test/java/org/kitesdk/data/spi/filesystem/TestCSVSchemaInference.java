@@ -39,8 +39,11 @@ public class TestCSVSchemaInference {
   @Test
   public void testSchemaInference() throws Exception {
     InputStream stream = new ByteArrayInputStream(csvLines.getBytes("utf8"));
-    Schema schema = CSVUtil.inferSchema(stream,
+    Schema schema = CSVUtil.inferSchema("TestRecord", stream,
         new CSVProperties.Builder().hasHeader().build());
+
+    Assert.assertEquals("Should use name", "TestRecord", schema.getName());
+    Assert.assertNull("Should not have namespace", schema.getNamespace());
 
     Assert.assertNotNull(schema.getField("long"));
     Assert.assertNotNull(schema.getField("float"));
@@ -66,7 +69,7 @@ public class TestCSVSchemaInference {
   @Test
   public void testSchemaInferenceWithoutHeader() throws Exception {
     InputStream stream = new ByteArrayInputStream(csvLines.getBytes("utf8"));
-    Schema schema = CSVUtil.inferSchema(stream,
+    Schema schema = CSVUtil.inferSchema("TestRecord", stream,
         new CSVProperties.Builder().build());
 
     Assert.assertNull(schema.getField("long"));
@@ -100,7 +103,7 @@ public class TestCSVSchemaInference {
   @Test
   public void testSchemaInferenceSkipHeader() throws Exception {
     InputStream stream = new ByteArrayInputStream(csvLines.getBytes("utf8"));
-    Schema schema = CSVUtil.inferSchema(stream,
+    Schema schema = CSVUtil.inferSchema("TestRecord", stream,
         new CSVProperties.Builder().linesToSkip(1).build());
 
     Assert.assertNull(schema.getField("long"));
@@ -135,7 +138,7 @@ public class TestCSVSchemaInference {
   public void testSchemaInferenceMissingExample() throws Exception {
     InputStream stream = new ByteArrayInputStream(
         "\none,two\n34,\n".getBytes("utf8"));
-    Schema schema = CSVUtil.inferSchema(stream,
+    Schema schema = CSVUtil.inferSchema("TestRecord", stream,
         new CSVProperties.Builder().linesToSkip(1).hasHeader().build());
 
     Assert.assertNotNull(schema.getField("one"));
@@ -145,5 +148,16 @@ public class TestCSVSchemaInference {
         nullable(Schema.Type.LONG), schema.getField("one").schema());
     Assert.assertEquals("Should default to a string",
         nullable(Schema.Type.STRING), schema.getField("two").schema());
+  }
+
+  @Test
+  public void testSchemaNamespace() throws Exception {
+    InputStream stream = new ByteArrayInputStream(csvLines.getBytes("utf8"));
+    Schema schema = CSVUtil.inferSchema("com.example.TestRecord", stream,
+        new CSVProperties.Builder().hasHeader().build());
+
+    Assert.assertEquals("Should use name", "TestRecord", schema.getName());
+    Assert.assertEquals("Should set namespace",
+        "com.example", schema.getNamespace());
   }
 }

@@ -73,7 +73,7 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
     }
 
     repo.create(datasetNames.get(0), descriptorBuilder.build());
-    console.debug("Created dataset {}", "users");
+    console.debug("Created dataset {}", datasetNames.get(0));
 
     return 0;
   }

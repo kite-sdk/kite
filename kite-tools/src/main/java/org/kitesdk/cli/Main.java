@@ -22,6 +22,7 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.log4j.Level;
+import org.kitesdk.cli.commands.CSVSchemaCommand;
 import org.kitesdk.cli.commands.CreateDatasetCommand;
 import org.kitesdk.cli.commands.DeleteDatasetCommand;
 import com.google.common.collect.ImmutableSet;
@@ -31,6 +32,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.kitesdk.cli.commands.SchemaCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +62,8 @@ public class Main extends Configured implements Tool {
     jc.addCommand("help", help, "-h", "-help", "--help");
     jc.addCommand("create", new CreateDatasetCommand(console));
     jc.addCommand("delete", new DeleteDatasetCommand(console));
+    jc.addCommand("schema", new SchemaCommand(console));
+    jc.addCommand("csv-schema", new CSVSchemaCommand(console));
   }
 
   @Override
@@ -72,7 +76,8 @@ public class Main extends Configured implements Tool {
     } catch (ParameterException e) {
       String cmd = jc.getParsedCommand();
       if (args.length == 1) { // i.e., just the command (missing required arguments)
-        jc.usage(cmd);
+        help.helpCommands.add(cmd);
+        help.run();
         return 1;
       } else { // check for variants like 'cmd --help' etc.
         for (String arg : args) {

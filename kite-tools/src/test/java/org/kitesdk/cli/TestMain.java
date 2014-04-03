@@ -109,6 +109,8 @@ public class TestMain {
     verify(console).info(anyString(), eq("create"), anyString());
     verify(console).info(anyString(), eq("delete"), anyString());
     verify(console).info(anyString(), eq("help"), anyString());
+    verify(console).info(anyString(), eq("schema"), anyString());
+    verify(console).info(anyString(), eq("csv-schema"), anyString());
     verify(console).info(anyString(), eq("test"), eq("Test description"));
     verify(console).info(
         contains("See '{} help <command>' for more information"),

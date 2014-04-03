@@ -55,18 +55,25 @@ public class TestBaseCommand {
   @Test
   public void testDefaults() {
     Assert.assertEquals("repo:hive", command.buildRepoURI());
-    verifyZeroInteractions(console);
+    verify(console).trace(contains("repo:hive"));
   }
 
   @Test
   public void testManagedHiveRepo() {
     command.hcatalog = true;
     command.directory = null;
-    command.local = true;
-    Assert.assertEquals("repo:hive", command.buildRepoURI());
     command.local = false;
     Assert.assertEquals("repo:hive", command.buildRepoURI());
-    verifyZeroInteractions(console);
+    verify(console).trace(contains("repo:hive"));
+  }
+
+  @Test
+  public void testManagedHiveRepoLocal() {
+    command.hcatalog = true;
+    command.directory = null;
+    command.local = true;
+    Assert.assertEquals("repo:hive", command.buildRepoURI());
+    verify(console).trace(contains("repo:hive"));
   }
 
   @Test
@@ -74,7 +81,7 @@ public class TestBaseCommand {
     command.hcatalog = true;
     command.directory = "/tmp/data";
     Assert.assertEquals("repo:hive:/tmp/data", command.buildRepoURI());
-    verifyZeroInteractions(console);
+    verify(console).trace(contains("repo:hive:/tmp/data"));
   }
 
   @Test
@@ -82,7 +89,7 @@ public class TestBaseCommand {
     command.hcatalog = true;
     command.directory = "data";
     Assert.assertEquals("repo:hive:data", command.buildRepoURI());
-    verifyZeroInteractions(console);
+    verify(console).trace(contains("repo:hive:data"));
   }
 
   @Test
@@ -90,7 +97,7 @@ public class TestBaseCommand {
     command.hcatalog = false;
     command.directory = "/tmp/data";
     Assert.assertEquals("repo:hdfs:/tmp/data", command.buildRepoURI());
-    verifyZeroInteractions(console);
+    verify(console).trace(contains("repo:hdfs:/tmp/data"));
   }
 
   @Test
@@ -99,7 +106,7 @@ public class TestBaseCommand {
     command.local = true;
     command.directory = "/tmp/data";
     Assert.assertEquals("repo:file:/tmp/data", command.buildRepoURI());
-    verifyZeroInteractions(console);
+    verify(console).trace(contains("repo:file:/tmp/data"));
   }
 
   @Test
