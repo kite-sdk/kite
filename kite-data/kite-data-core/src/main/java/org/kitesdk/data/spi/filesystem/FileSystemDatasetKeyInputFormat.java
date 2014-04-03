@@ -50,6 +50,7 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     Job job = new Job(conf);
@@ -65,6 +66,10 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
       // AvroParquetInputFormat.setReadSchema(job, view.getDescriptor().getSchema());
       AvroParquetInputFormat delegate = new AvroParquetInputFormat();
       return delegate.getSplits(jobContext);
+    } else if (Formats.CSV.equals(format)) {
+      setInputPaths(jobContext, job);
+      // this generates an unchecked cast exception?
+      return new CSVInputFormat().getSplits(jobContext);
     } else {
       throw new UnsupportedOperationException(
           "Not a supported format: " + format);
@@ -89,21 +94,25 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
     Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
       AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
-      return new AvroRecordReaderWrapper(
+      return new KeyReaderWrapper(
           delegate.createRecordReader(inputSplit, taskAttemptContext));
     } else if (Formats.PARQUET.equals(format)) {
       AvroParquetInputFormat delegate = new AvroParquetInputFormat();
-      return new ParquetRecordReaderWrapper(
+      return new ValueReaderWrapper(
           delegate.createRecordReader(inputSplit, taskAttemptContext));
+    } else if (Formats.CSV.equals(format)) {
+      CSVInputFormat<E> delegate = new CSVInputFormat<E>();
+      delegate.setDescriptor(dataset.getDescriptor());
+      return delegate.createRecordReader(inputSplit, taskAttemptContext);
     } else {
       throw new UnsupportedOperationException(
           "Not a supported format: " + format);
     }
   }
 
-  private static class AvroRecordReaderWrapper<E> extends
+  private static class KeyReaderWrapper<E> extends
       AbstractKeyRecordReaderWrapper<E, AvroKey<E>, NullWritable> {
-    public AvroRecordReaderWrapper(RecordReader<AvroKey<E>, NullWritable> delegate) {
+    public KeyReaderWrapper(RecordReader<AvroKey<E>, NullWritable> delegate) {
       super(delegate);
     }
 
@@ -113,9 +122,9 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
     }
   }
 
-  private static class ParquetRecordReaderWrapper<E> extends
+  private static class ValueReaderWrapper<E> extends
       AbstractKeyRecordReaderWrapper<E, Void, E> {
-    public ParquetRecordReaderWrapper(RecordReader<Void, E> delegate) {
+    public ValueReaderWrapper(RecordReader<Void, E> delegate) {
       super(delegate);
     }
 

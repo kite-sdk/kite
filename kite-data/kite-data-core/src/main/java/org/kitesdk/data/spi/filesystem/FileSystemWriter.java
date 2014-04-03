@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.UUID;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetWriter;
@@ -187,9 +189,28 @@ class FileSystemWriter<E> implements DatasetWriter<E> {
           fs, temp, descriptor.getSchema(), true);
     } else if (Formats.AVRO.equals(format)) {
       return new AvroAppender<E>(fs, temp, descriptor.getSchema(), true);
+    } else if (Formats.CSV.equals(format) && descriptor.hasProperty("kite.allow.csv")) {
+      return new CSVAppender<E>(fs, temp, descriptor);
     } else {
       this.state = ReaderWriterState.ERROR;
-      throw new DatasetWriterException("Unknown format " + format);
+      throw new DatasetWriterException("Unknown format " + descriptor);
+    }
+  }
+
+  public RecordWriter<E, Void> asRecordWriter() {
+    return new KiteRecordWriter();
+  }
+
+  private class KiteRecordWriter extends RecordWriter<E, Void> {
+    @Override
+    public void write(E e, Void aVoid) throws IOException, InterruptedException {
+      FileSystemWriter.this.write(e);
+    }
+
+    @Override
+    public void close(TaskAttemptContext context)
+        throws IOException, InterruptedException {
+      FileSystemWriter.this.close();
     }
   }
 }

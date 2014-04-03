@@ -54,7 +54,8 @@ public class TestMapReduce {
   public static Collection<Object[]> data() {
     Object[][] data = new Object[][] {
       { Formats.AVRO },
-      { Formats.PARQUET }
+      { Formats.PARQUET },
+      { Formats.CSV }
     };
     return Arrays.asList(data);
   }
@@ -123,7 +124,11 @@ public class TestMapReduce {
     Job job = new Job();
 
     Dataset<GenericData.Record> inputDataset = repo.create("in",
-        new DatasetDescriptor.Builder().schema(STRING_SCHEMA).format(format).build());
+        new DatasetDescriptor.Builder()
+            .property("kite.allow.csv", "true")
+            .schema(STRING_SCHEMA)
+            .format(format)
+            .build());
     DatasetWriter<GenericData.Record> writer = inputDataset.newWriter();
     writer.open();
     writer.write(newStringRecord("apple"));
@@ -145,7 +150,11 @@ public class TestMapReduce {
     job.setReducerClass(GenericStatsReducer.class);
 
     Dataset<GenericData.Record> outputDataset = repo.create("out",
-        new DatasetDescriptor.Builder().schema(STATS_SCHEMA).format(format).build());
+        new DatasetDescriptor.Builder()
+            .property("kite.allow.csv", "true")
+            .schema(STATS_SCHEMA)
+            .format(format)
+            .build());
 
     job.setOutputFormatClass(DatasetKeyOutputFormat.class);
     DatasetKeyOutputFormat.setRepositoryUri(job, repo.getUri());

@@ -17,6 +17,9 @@
 package org.kitesdk.data.spi.filesystem;
 
 import au.com.bytecode.opencsv.CSVReader;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReaderException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
@@ -34,13 +37,7 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.Charset;
-import java.util.Locale;
 import java.util.NoSuchElementException;
 
 class CSVFileReader<E> extends AbstractDatasetReader<E> {
@@ -48,38 +45,18 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
   private static final Logger logger = LoggerFactory
       .getLogger(CSVFileReader.class);
 
-  public static final String CHARSET_PROPERTY = "kite.csv.charset";
-  public static final String DELIMITER_PROPERTY = "kite.csv.delimiter";
-  public static final String QUOTE_CHAR_PROPERTY = "kite.csv.quote-char";
-  public static final String ESCAPE_CHAR_PROPERTY = "kite.csv.escape-char";
-  public static final String LINES_TO_SKIP_PROPERTY = "kite.csv.lines-to-skip";
-
-  // old properties
-  public static final String OLD_CHARSET_PROPERTY = "cdk.csv.charset";
-  public static final String OLD_DELIMITER_PROPERTY = "cdk.csv.delimiter";
-  public static final String OLD_QUOTE_CHAR_PROPERTY = "cdk.csv.quote-char";
-  public static final String OLD_ESCAPE_CHAR_PROPERTY = "cdk.csv.escape-char";
-  public static final String OLD_LINES_TO_SKIP_PROPERTY = "cdk.csv.lines-to-skip";
-
-  public static final String DEFAULT_CHARSET = "utf8";
-  public static final String DEFAULT_DELIMITER = ",";
-  public static final String DEFAULT_QUOTE = "\"";
-  public static final String DEFAULT_ESCAPE = "\\";
-  public static final int DEFAULT_LINES_TO_SKIP = 0;
-
+  private final CSVProperties props;
   private final FileSystem fs;
   private final Path path;
   private final Schema schema;
 
-  // configuration
-  private final String charset;
-  private final String delimiter;
-  private final String quote;
-  private final String escape;
-  private final int linesToSkip;
   private Class<E> recordClass = null;
 
   private CSVReader reader = null;
+
+  // progress reporting
+  private long size = 0;
+  private FSDataInputStream incoming = null;
 
   // state
   private ReaderWriterState state = ReaderWriterState.NEW;
@@ -91,54 +68,12 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
     this.path = path;
     this.schema = descriptor.getSchema();
     this.state = ReaderWriterState.NEW;
+    this.props = CSVProperties.fromDescriptor(descriptor);
 
     Schema schema = descriptor.getSchema();
     Preconditions.checkArgument(Schema.Type.RECORD.equals(schema.getType()),
         "Schemas for CSV files must be records of primitive types");
 
-    this.charset = coalesce(
-        descriptor.getProperty(CHARSET_PROPERTY),
-        descriptor.getProperty(OLD_CHARSET_PROPERTY),
-        DEFAULT_CHARSET);
-    this.delimiter= coalesce(
-        descriptor.getProperty(DELIMITER_PROPERTY),
-        descriptor.getProperty(OLD_DELIMITER_PROPERTY),
-        DEFAULT_DELIMITER);
-    this.quote = coalesce(
-        descriptor.getProperty(QUOTE_CHAR_PROPERTY),
-        descriptor.getProperty(OLD_QUOTE_CHAR_PROPERTY),
-        DEFAULT_QUOTE);
-    this.escape = coalesce(
-        descriptor.getProperty(ESCAPE_CHAR_PROPERTY),
-        descriptor.getProperty(OLD_ESCAPE_CHAR_PROPERTY),
-        DEFAULT_ESCAPE);
-    final String linesToSkipString = coalesce(
-        descriptor.getProperty(LINES_TO_SKIP_PROPERTY),
-        descriptor.getProperty(OLD_LINES_TO_SKIP_PROPERTY));
-    int lines = DEFAULT_LINES_TO_SKIP;
-    if (linesToSkipString != null) {
-      try {
-        lines = Integer.valueOf(linesToSkipString);
-      } catch (NumberFormatException ex) {
-        logger.debug("Defaulting lines to skip, failed to parse: {}",
-            linesToSkipString);
-        // lines remains set to the default
-      }
-    }
-    this.linesToSkip = lines;
-  }
-
-  /**
-   * Returns the first non-null value from the sequence or null if there is no
-   * non-null value.
-   */
-  private static <T> T coalesce(T... values) {
-    for (T value : values) {
-      if (value != null) {
-        return value;
-      }
-    }
-    return null;
   }
 
   @Override
@@ -150,18 +85,14 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
     // may be null if not using specific records
     this.recordClass = SpecificData.get().getClass(schema);
 
-    FSDataInputStream incoming;
     try {
-      incoming =  fs.open(path);
+      this.incoming =  fs.open(path);
+      this.size = fs.getFileStatus(path).getLen();
     } catch (IOException ex) {
       throw new DatasetReaderException("Cannot open path: " + path, ex);
     }
 
-    this.reader = new CSVReader(
-        new InputStreamReader(incoming, Charset.forName(charset)),
-        delimiter.charAt(0), quote.charAt(0), escape.charAt(0), linesToSkip,
-        false /* strict quotes off: don't ignore unquoted strings */,
-        true /* ignore leading white-space */ );
+    this.reader = CSVUtil.newReader(incoming, props);
 
     // initialize by reading the first record
     this.hasNext = advance();
@@ -266,29 +197,10 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
   private static void fillReflect(Object record, String[] data, Schema schema) {
     for (int i = 0, n = schema.getFields().size(); i < n; i += 1) {
-      final Schema.Field field = schema.getFields().get(i);
-      final Object value = makeValue(i < data.length ? data[i] : null, field);
-      try {
-        final PropertyDescriptor propertyDescriptor = new PropertyDescriptor(
-                field.name(), record.getClass(), null, setter(field.name()));
-        propertyDescriptor.getWriteMethod().invoke(record, value);
-      } catch (IntrospectionException ex) {
-        throw new IllegalStateException("Cannot set property " + field.name() +
-            " on " + record.getClass().getName(), ex);
-      } catch (InvocationTargetException ex) {
-        throw new IllegalStateException("Cannot set property " + field.name() +
-            " on " + record.getClass().getName(), ex);
-      } catch (IllegalAccessException ex) {
-        throw new IllegalStateException("Cannot set property " + field.name() +
-            " on " + record.getClass().getName(), ex);
-      }
+      Schema.Field field = schema.getFields().get(i);
+      Object value = makeValue(i < data.length ? data[i] : null, field);
+      ReflectData.get().setField(record, field.name(), i, value);
     }
-  }
-
-  private static String setter(String name) {
-    return "set" +
-        name.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-        name.substring(1);
   }
 
   private static Object makeValue(String string, Schema.Field field) {
@@ -377,5 +289,50 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
       }
     }
     return false;
+  }
+
+  public RecordReader<E, Void> asRecordReader() {
+    return new CSVRecordReader();
+  }
+
+  public class CSVRecordReader extends RecordReader<E, Void> {
+    private E current;
+
+    @Override
+    public void initialize(InputSplit split, TaskAttemptContext context)
+        throws IOException, InterruptedException {
+      if (!isOpen()) {
+        open();
+      }
+    }
+
+    @Override
+    public boolean nextKeyValue() throws IOException, InterruptedException {
+      if (hasNext()) {
+        this.current = next();
+        return true;
+      }
+      return false;
+    }
+
+    @Override
+    public E getCurrentKey() throws IOException, InterruptedException {
+      return current;
+    }
+
+    @Override
+    public Void getCurrentValue() throws IOException, InterruptedException {
+      return null;
+    }
+
+    @Override
+    public float getProgress() throws IOException, InterruptedException {
+      return ((float) incoming.getPos()) / size;
+    }
+
+    @Override
+    public void close() throws IOException {
+      CSVFileReader.this.close();
+    }
   }
 }

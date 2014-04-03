@@ -23,20 +23,4 @@ public class TestBean {
   Boolean myBool = null;
 
   public TestBean() {}
-
-  public void setMyString(String myStr) {
-    this.myStr = myStr;
-  }
-
-  public void setMyInt(Integer myInt) {
-    this.myInt = myInt;
-  }
-
-  public void setMyFloat(Float myFloat) {
-    this.myFloat = myFloat;
-  }
-
-  public void setMyBool(Boolean myBool) {
-    this.myBool = myBool;
-  }
 }
