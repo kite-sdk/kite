@@ -247,11 +247,8 @@ class ConstraintsSerialization {
 
       ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
       Decoder decoder = DecoderFactory.get().binaryDecoder(byteInputStream, null);
-      Object avroTarget = SpecificData.get().newRecord(new Object(), fieldSchema);
       DatumReader reader = new ReflectDatumReader(fieldSchema);
-      reader.read(avroTarget, decoder);
-
-      return avroTarget;
+      return reader.read(null, decoder);
     }
     else{
       try{
