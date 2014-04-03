@@ -20,6 +20,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
 import java.util.Iterator;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.spi.FieldPartitioner;
@@ -166,5 +167,10 @@ class DaoView<E> extends AbstractRefinableView<E> {
     }
 
     return strategy.partitionKey(values);
+  }
+
+  @Override
+  public InputFormat<E, Void> getDelegateInputFormat() {
+    return new HBaseDatasetKeyInputFormat<E>(dataset);
   }
 }
