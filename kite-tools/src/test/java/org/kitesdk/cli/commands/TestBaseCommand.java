@@ -18,7 +18,13 @@ package org.kitesdk.cli.commands;
 
 import java.io.IOException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.kitesdk.data.TestHelpers;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+
+import static org.mockito.Mockito.*;
 
 /**
  * This tests that the base command correctly builds a repository URI from the
@@ -27,78 +33,108 @@ import org.junit.Test;
 public class TestBaseCommand {
 
   public static class TestCommand extends BaseDatasetCommand {
+    public TestCommand(Logger console) {
+      super(console);
+    }
+
     @Override
     public int run() throws IOException {
       return 0;
     }
   }
 
+  private Logger console = null;
+  private BaseDatasetCommand command = null;
+
+  @Before
+  public void createCommand() {
+    this.console = mock(Logger.class);
+    this.command = new TestCommand(console);
+  }
+
   @Test
   public void testDefaults() {
-    BaseDatasetCommand command = new TestCommand();
     Assert.assertEquals("repo:hive", command.buildRepoURI());
+    verifyZeroInteractions(console);
   }
 
   @Test
   public void testManagedHiveRepo() {
-    BaseDatasetCommand command = new TestCommand();
     command.hcatalog = true;
     command.directory = null;
     command.local = true;
     Assert.assertEquals("repo:hive", command.buildRepoURI());
     command.local = false;
     Assert.assertEquals("repo:hive", command.buildRepoURI());
+    verifyZeroInteractions(console);
   }
 
   @Test
   public void testExternalHiveRepo() {
-    BaseDatasetCommand command = new TestCommand();
     command.hcatalog = true;
     command.directory = "/tmp/data";
     Assert.assertEquals("repo:hive:/tmp/data", command.buildRepoURI());
+    verifyZeroInteractions(console);
   }
 
   @Test
   public void testRelativeExternalHiveRepo() {
-    BaseDatasetCommand command = new TestCommand();
     command.hcatalog = true;
     command.directory = "data";
     Assert.assertEquals("repo:hive:data", command.buildRepoURI());
+    verifyZeroInteractions(console);
   }
 
   @Test
   public void testHDFSRepo() {
-    BaseDatasetCommand command = new TestCommand();
     command.hcatalog = false;
     command.directory = "/tmp/data";
     Assert.assertEquals("repo:hdfs:/tmp/data", command.buildRepoURI());
+    verifyZeroInteractions(console);
   }
 
   @Test
   public void testLocalRepo() {
-    BaseDatasetCommand command = new TestCommand();
     command.hcatalog = false;
     command.local = true;
     command.directory = "/tmp/data";
     Assert.assertEquals("repo:file:/tmp/data", command.buildRepoURI());
+    verifyZeroInteractions(console);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testHDFSRepoRejectsNullPath() {
-    final BaseDatasetCommand command = new TestCommand();
     command.hcatalog = false;
-    command.local = true;
+    command.local = false;
     command.directory = null;
-    command.buildRepoURI();
+    TestHelpers.assertThrows(
+        "Should reject null directory for HDFS, non-Hive",
+        IllegalArgumentException.class,
+        new Runnable() {
+          @Override
+          public void run() {
+            command.buildRepoURI();
+          }
+        }
+    );
+    verifyZeroInteractions(console);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testLocalRepoRejectsNullPath() {
-    final BaseDatasetCommand command = new TestCommand();
     command.hcatalog = false;
     command.local = true;
     command.directory = null;
-    command.buildRepoURI();
+    TestHelpers.assertThrows(
+        "Should reject null directory for local, non-Hive",
+        IllegalArgumentException.class,
+        new Runnable() {
+          @Override
+          public void run() {
+            command.buildRepoURI();
+          }
+        });
+    verifyZeroInteractions(console);
   }
 
 }

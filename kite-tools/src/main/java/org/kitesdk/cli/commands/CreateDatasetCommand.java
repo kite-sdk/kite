@@ -24,6 +24,7 @@ import java.util.List;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Formats;
+import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Create an empty dataset")
 public class CreateDatasetCommand extends BaseDatasetCommand {
@@ -38,6 +39,10 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
   @Parameter(names = {"-f", "--format"},
       description = "The file format (avro or parquet).")
   String format = Formats.AVRO.getName();
+
+  public CreateDatasetCommand(Logger console) {
+    super(console);
+  }
 
   @Override
   public int run() throws IOException {
@@ -68,6 +73,7 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
     }
 
     repo.create(datasetNames.get(0), descriptorBuilder.build());
+    console.debug("Created dataset {}", "users");
 
     return 0;
   }

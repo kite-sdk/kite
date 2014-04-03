@@ -15,93 +15,175 @@
  */
 package org.kitesdk.cli;
 
-import com.google.common.base.Splitter;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
+import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.kitesdk.cli.Main;
+import org.slf4j.Logger;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
 
 public class TestMain {
 
-  private PrintStream sysout, syserr;
-  private ByteArrayOutputStream out, err;
+  private static class SomeException extends RuntimeException {
+    private SomeException(String message) {
+      super(message);
+    }
+  }
+
+  @Parameters(commandDescription = "Test description")
+  static class TestCommand implements Command {
+    @Parameter(description = "<test dataset names>")
+    List<String> datasets;
+
+    @Parameter(names = "--throw-arg",
+        description = "Causes an IllegalArugmentException")
+    boolean throwArg = false;
+
+    @Parameter(names = "--throw-state",
+        description = "Causes an IllegalStateException")
+    boolean throwState = false;
+
+    @Parameter(names = "--throw-unknown",
+        description = "Causes an unknown exception")
+    boolean throwUnknown = false;
+
+    @Override
+    public int run() throws IOException {
+      Preconditions.checkArgument(!throwArg, "--throw-arg was set");
+      Preconditions.checkState(!throwState, "--throw-state was set");
+      if (throwUnknown) {
+        throw new SomeException("--throw-unknown was set");
+      }
+      return 0;
+    }
+  }
+
+  private Logger console;
+  private Main main;
 
   @Before
-  public void setUp() {
-    sysout = System.out;
-    out = new ByteArrayOutputStream();
-    System.setOut(new PrintStream(out, true));
-
-    syserr = System.err;
-    err = new ByteArrayOutputStream();
-    System.setErr(new PrintStream(err, true));
+  public void initializeMain() {
+    this.console = mock(Logger.class);
+    this.main = new Main(console);
+    Command test = new TestCommand();
+    main.jc.addCommand("test", test);
   }
 
   @After
   public void tearDown() {
-    System.setOut(sysout);
-    System.setErr(syserr);
-
-    String outString = out.toString();
-    for (String line : Splitter.on("\n").split(outString)) {
-      assertTrue("Line should be no more than 80 chars: " + line,
-          line.replace("\t", "        ").length() <= 80);
-    }
+    // TODO: check line lengths < 80
   }
 
   @Test
   public void testNoArgs() throws Exception {
     int rc = run();
-    String outString = out.toString();
-    assertTrue(outString, outString.startsWith(
-        "Usage: " + Main.PROGRAM_NAME +
-        " [options] [command] [command options]"));
+    verify(console).info(
+        startsWith("Usage: {} [options] [command] [command options]"),
+        eq(Main.PROGRAM_NAME));
     assertEquals(1, rc);
   }
 
   @Test
   public void testUnrecognizedCommand() throws Exception {
     int rc = run("unrecognizedcommand");
-    String errString = err.toString();
-    assertTrue(errString, errString.startsWith(
-        "Expected a command, got unrecognizedcommand"));
+    verify(console).error(startsWith("Expected a command, got unrecognizedcommand"));
     assertEquals(1, rc);
   }
 
   @Test
   public void testHelp() throws Exception {
     int rc = run("help");
-    String outString = out.toString();
-    assertTrue(outString, outString.startsWith(
-        "Usage: " + Main.PROGRAM_NAME +
-        " [options] [command] [command options]"));
+    verify(console).info(
+        startsWith("Usage: {} [options] [command] [command options]"),
+        eq(Main.PROGRAM_NAME));
+    verify(console).info(contains("Options"));
+    verify(console).info(anyString(), any(Object[].class)); // -v
+    verify(console).info(contains("Commands"));
+    verify(console).info(anyString(), eq("create"), anyString());
+    verify(console).info(anyString(), eq("delete"), anyString());
+    verify(console).info(anyString(), eq("help"), anyString());
+    verify(console).info(anyString(), eq("test"), eq("Test description"));
+    verify(console).info(
+        contains("See '{} help <command>' for more information"),
+        eq(Main.PROGRAM_NAME));
     assertEquals(0, rc);
   }
 
   @Test
   public void testHelpCommand() throws Exception {
-    int rc = run("help", "create");
-    String outString = out.toString();
-    assertTrue(outString, outString.startsWith(
-        "Create an empty dataset\nUsage: create [options] <dataset name>"));
+    int rc = run("help", "test");
+    verify(console).info(startsWith("Test description"));
+    verify(console).info(
+        "Usage: {} [general options] {} [command options] {}",
+        new Object[]{ "dataset", "test", "<test dataset names>" });
+    verify(console).info(contains("Command options"));
     assertEquals(0, rc);
   }
 
   @Test
   public void testCommandHelp() throws Exception {
-    int rc = run("create", "--help");
-    String outString = out.toString();
-    assertTrue(outString, outString.startsWith(
-        "Create an empty dataset\nUsage: create [options] <dataset name>"));
+    int rc = run("test", "--help");
+    verify(console).info(startsWith("Test description"));
+    verify(console).info(
+        "Usage: {} [general options] {} [command options] {}",
+        new Object[]{ "dataset", "test", "<test dataset names>" });
+    verify(console).info(contains("Command options"));
     assertEquals(0, rc);
   }
 
+  @Test
+  public void testUnknownCommand() throws Exception {
+    int rc = run("help", "unknown");
+    verify(console).error(
+        contains("Unknown command"),
+        eq("unknown"));
+    assertEquals(1, rc);
+  }
+
+  @Test
+  public void testIllegalArguments() throws Exception {
+    int rc = run("test", "--throw-arg");
+    verify(console).error(
+        startsWith("Argument error"),
+        eq("--throw-arg was set"));
+    assertEquals(1, rc);
+  }
+
+  @Test
+  public void testIllegalState() throws Exception {
+    int rc = run("test", "--throw-state");
+    verify(console).error(
+        startsWith("State error"),
+        eq("--throw-state was set"));
+    assertEquals(1, rc);
+  }
+
+  @Test
+  public void testUnexpectedException() throws Exception {
+    int rc = run("test", "--throw-unknown");
+    verify(console).error(
+        startsWith("Unknown error"),
+        eq("--throw-unknown was set"));
+    assertEquals(1, rc);
+  }
+
+  @Test
+  public void testUnexpectedExceptionWithDebug() throws Exception {
+    int rc = run("--debug", "test", "--throw-unknown");
+    verify(console).error(
+        startsWith("Unknown error"),
+        isA(SomeException.class));
+    assertEquals(1, rc);
+  }
+
   private int run(String... args) throws Exception {
-    return new Main().run(args);
+    return main.run(args);
   }
 }

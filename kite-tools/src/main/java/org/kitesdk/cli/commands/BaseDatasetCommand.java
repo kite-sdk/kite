@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import org.kitesdk.cli.Command;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
+import org.slf4j.Logger;
 
 abstract class BaseDatasetCommand implements Command {
   @Parameter(names = {"-d", "--directory"},
@@ -41,6 +42,12 @@ abstract class BaseDatasetCommand implements Command {
   @Parameter(names = {"--local"}, hidden = true,
       description = "If set, use the local filesystem.")
   boolean local = false;
+
+  protected final Logger console;
+
+  public BaseDatasetCommand(Logger console) {
+    this.console = console;
+  }
 
   DatasetRepository getDatasetRepository() {
     return DatasetRepositories.open(buildRepoURI());
