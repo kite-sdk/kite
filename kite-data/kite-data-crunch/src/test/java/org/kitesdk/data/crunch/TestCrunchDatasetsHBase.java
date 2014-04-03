@@ -88,25 +88,14 @@ public class TestCrunchDatasetsHBase {
   public void testGeneric() throws IOException {
     String datasetName = tableName + ".TestGenericEntity";
 
-    Dataset<GenericRecord> inputDataset = repo.create("in",
-        new DatasetDescriptor.Builder()
-            .schemaLiteral(testGenericEntity).build());
-
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
+
+    Dataset<GenericRecord> inputDataset = repo.create("in", descriptor);
     Dataset<GenericRecord> outputDataset = repo.create(datasetName, descriptor);
 
-    DatasetWriter<GenericRecord> writer = inputDataset.newWriter();
-    writer.open();
-    try {
-      for (int i = 0; i < 10; ++i) {
-        GenericRecord entity = HBaseDatasetRepositoryTest.createGenericEntity(i);
-        writer.write(entity);
-      }
-    } finally {
-      writer.close();
-    }
+    writeRecords(inputDataset, 10);
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasetsHBase.class, HBaseTestUtils.getConf());
     PCollection<GenericRecord> data = pipeline.read(
@@ -114,20 +103,35 @@ public class TestCrunchDatasetsHBase {
     pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
     pipeline.run();
 
-    // ensure the new entities are what we expect with scan operations
+    checkRecords(outputDataset, 10);
+  }
+
+  private void writeRecords(Dataset<GenericRecord> dataset, int count) {
+    DatasetWriter<GenericRecord> writer = dataset.newWriter();
+    writer.open();
+    try {
+      for (int i = 0; i < count; ++i) {
+        GenericRecord entity = HBaseDatasetRepositoryTest.createGenericEntity(i);
+        writer.write(entity);
+      }
+    } finally {
+      writer.close();
+    }
+  }
+
+  private void checkRecords(Dataset<GenericRecord> dataset, int count) {
     int cnt = 0;
-    DatasetReader<GenericRecord> reader = outputDataset.newReader();
+    DatasetReader<GenericRecord> reader = dataset.newReader();
     reader.open();
     try {
       for (GenericRecord entity : reader) {
         HBaseDatasetRepositoryTest.compareEntitiesWithUtf8(cnt, entity);
         cnt++;
       }
-      assertEquals(10, cnt);
+      assertEquals(count, cnt);
     } finally {
       reader.close();
     }
-
   }
 
 }
