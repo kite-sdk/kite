@@ -26,6 +26,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.DatasetDescriptor;
 
 class CSVInputFormat<E> extends FileInputFormat<E, Void> {
@@ -49,7 +50,8 @@ class CSVInputFormat<E> extends FileInputFormat<E, Void> {
   public RecordReader<E, Void> createRecordReader(InputSplit split,
                                                   TaskAttemptContext context)
       throws IOException, InterruptedException {
-    Configuration conf = context.getConfiguration();
+    Configuration conf = Hadoop.TaskAttemptContext
+        .getConfiguration.invoke(context);
     Path path = ((FileSplit) split).getPath();
     return new CSVFileReader<E>(path.getFileSystem(conf), path, descriptor)
         .asRecordReader();
