@@ -15,11 +15,10 @@
  */
 package org.kitesdk.data.crunch;
 
-import org.apache.avro.generic.IndexedRecord;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
-import org.kitesdk.data.filesystem.impl.Accessor;
+import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.Lists;
 import java.util.List;
@@ -27,9 +26,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.crunch.Target;
 import org.apache.crunch.io.ReadableSource;
 import org.apache.crunch.io.avro.AvroFileSource;
-import org.apache.crunch.io.avro.AvroFileTarget;
 import org.apache.crunch.io.parquet.AvroParquetFileSource;
-import org.apache.crunch.io.parquet.AvroParquetFileTarget;
 import org.apache.crunch.types.avro.AvroType;
 import org.apache.crunch.types.avro.Avros;
 import org.apache.hadoop.fs.Path;
@@ -57,10 +54,9 @@ public class CrunchDatasets {
    */
   @SuppressWarnings("unchecked")
   public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
-    Path directory = Accessor.getDefault().getDirectory(dataset);
-    if (directory != null) {
+    if (dataset instanceof FileSystemDataset) {
       List<Path> paths = Lists.newArrayList(
-          Accessor.getDefault().getDirectoryIterator(dataset));
+          ((FileSystemDataset) dataset).dirIterator());
 
       AvroType<E> avroType;
       if (type.isAssignableFrom(GenericData.Record.class)) {

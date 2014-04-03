@@ -18,7 +18,7 @@ package org.kitesdk.maven.plugins;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
+import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Resources;

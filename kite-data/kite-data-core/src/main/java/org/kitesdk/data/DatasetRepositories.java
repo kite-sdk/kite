@@ -15,7 +15,7 @@
  */
 package org.kitesdk.data;
 
-import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
+import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.URIPattern;

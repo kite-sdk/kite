@@ -26,7 +26,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.Test;
 
-import static org.kitesdk.data.filesystem.DatasetTestUtilities.*;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.*;
 
 public class TestDatasetDescriptor extends MiniDFSTest {
 

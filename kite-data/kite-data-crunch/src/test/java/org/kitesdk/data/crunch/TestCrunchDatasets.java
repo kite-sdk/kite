@@ -28,13 +28,10 @@ import org.junit.runners.Parameterized;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
-import org.kitesdk.data.MetadataProvider;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
 import junit.framework.Assert;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
@@ -42,17 +39,15 @@ import org.apache.crunch.PCollection;
 import org.apache.crunch.Pipeline;
 import org.apache.crunch.Target;
 import org.apache.crunch.impl.mr.MRPipeline;
-import org.apache.hadoop.conf.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
 
-import static org.kitesdk.data.filesystem.DatasetTestUtilities.USER_SCHEMA;
-import static org.kitesdk.data.filesystem.DatasetTestUtilities.checkTestUsers;
-import static org.kitesdk.data.filesystem.DatasetTestUtilities.datasetSize;
-import static org.kitesdk.data.filesystem.DatasetTestUtilities.writeTestUsers;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.datasetSize;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.writeTestUsers;
 
 @RunWith(Parameterized.class)
 public abstract class TestCrunchDatasets extends MiniDFSTest {

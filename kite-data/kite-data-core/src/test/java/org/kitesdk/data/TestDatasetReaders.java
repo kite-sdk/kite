@@ -21,9 +21,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.kitesdk.data.filesystem.DatasetTestUtilities.RecordValidator;
-import static org.kitesdk.data.filesystem.DatasetTestUtilities.checkReaderBehavior;
-import static org.kitesdk.data.filesystem.DatasetTestUtilities.checkReaderIteration;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.RecordValidator;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkReaderBehavior;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkReaderIteration;
 
 /**
  * Tests for all DatasetReader implementations.

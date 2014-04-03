@@ -19,7 +19,7 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.TestDatasetReaders;
-import org.kitesdk.data.filesystem.DatasetTestUtilities;
+import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 import org.kitesdk.data.hbase.HBaseDatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepositoryTest;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;

@@ -22,7 +22,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.MetadataProvider;
-import org.kitesdk.data.filesystem.FileSystemDatasetRepository;
+import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 
 class HCatalogAbstractDatasetRepository extends AbstractDatasetRepository {

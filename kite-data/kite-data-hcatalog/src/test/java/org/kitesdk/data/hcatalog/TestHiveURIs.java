@@ -16,14 +16,14 @@
 
 package org.kitesdk.data.hcatalog;
 
-import org.kitesdk.data.filesystem.TestFileSystemURIs;
+import org.kitesdk.data.spi.filesystem.Loader;
+import org.kitesdk.data.spi.filesystem.TestFileSystemURIs;
 
 import org.apache.hadoop.conf.Configuration;
 import org.junit.After;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.MetadataProvider;
 import java.net.URI;
 import junit.framework.Assert;
@@ -41,7 +41,7 @@ public class TestHiveURIs extends TestFileSystemURIs {
 
   @BeforeClass
   public static void registerURIs() {
-    new org.kitesdk.data.filesystem.impl.Loader().load();
+    new Loader().load();
     new org.kitesdk.data.hcatalog.impl.Loader().load();
   }
 

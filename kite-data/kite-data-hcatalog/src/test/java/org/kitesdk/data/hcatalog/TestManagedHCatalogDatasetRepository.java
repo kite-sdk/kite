@@ -19,7 +19,7 @@ package org.kitesdk.data.hcatalog;
 import java.net.URI;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.MetadataProvider;
-import org.kitesdk.data.filesystem.TestFileSystemDatasetRepository;
+import org.kitesdk.data.spi.filesystem.TestFileSystemDatasetRepository;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;

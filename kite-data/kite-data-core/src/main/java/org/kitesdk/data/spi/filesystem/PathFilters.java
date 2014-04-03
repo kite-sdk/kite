@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Cloudera Inc.
+ * Copyright 2013 Cloudera Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.crunch;
+package org.kitesdk.data.spi.filesystem;
 
-import org.apache.hadoop.fs.FileSystem;
-import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 
-public class TestCrunchDatasetsFileSystem extends TestCrunchDatasets {
-  public TestCrunchDatasetsFileSystem(FileSystem fs) {
-    super(fs);
+public abstract class PathFilters {
+
+  public static PathFilter notHidden() {
+    return new PathFilter() {
+
+      @Override
+      public boolean accept(Path path) {
+        return !(path.getName().startsWith(".") || path.getName().startsWith(
+            "_"));
+      }
+    };
   }
 
-  @Override
-  public DatasetRepository newRepo() {
-    return new FileSystemDatasetRepository.Builder()
-        .configuration(fileSystem.getConf())
-        .rootDirectory(testDirectory).build();
-  }
 }
