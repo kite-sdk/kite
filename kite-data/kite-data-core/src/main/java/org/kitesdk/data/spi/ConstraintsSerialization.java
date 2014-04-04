@@ -18,19 +18,15 @@ package org.kitesdk.data.spi;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.BoundType;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Range;
 import com.google.common.collect.Ranges;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.reflect.ReflectDatumReader;
-import org.apache.avro.specific.SpecificData;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -42,6 +38,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.avro.specific.SpecificDatumWriter;
 
 /**
  * Serialization Utils for serializing {@link Constraints}
@@ -220,7 +218,7 @@ class ConstraintsSerialization {
       //write a true boolean indicating it is an avro object
       out.writeBoolean(true);
 
-      DatumWriter writer = new GenericDatumWriter(fieldSchema);
+      DatumWriter writer = new SpecificDatumWriter(fieldSchema);
 
       //Write out the value
       ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
@@ -247,7 +245,7 @@ class ConstraintsSerialization {
 
       ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
       Decoder decoder = DecoderFactory.get().binaryDecoder(byteInputStream, null);
-      DatumReader reader = new ReflectDatumReader(fieldSchema);
+      DatumReader reader = new SpecificDatumReader(fieldSchema);
       return reader.read(null, decoder);
     }
     else{

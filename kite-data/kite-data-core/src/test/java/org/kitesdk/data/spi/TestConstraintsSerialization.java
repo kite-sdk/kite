@@ -20,6 +20,7 @@ import com.google.common.base.Predicate;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.util.Utf8;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -73,6 +74,19 @@ public class TestConstraintsSerialization {
     Predicate predicate = newIn.get(propertyName);
     assertThat(predicate, equalTo(inConstraint.get(propertyName)));
   }
+
+  @Test
+  public void testInUtf8Serialization() throws IOException, ClassNotFoundException {
+    String propertyName = "id";
+    Constraints inConstraint = new Constraints(SCHEMA).with(propertyName,
+        new Utf8("abc"));
+
+    Constraints newIn = serializeAndDeserialize(inConstraint);
+
+    Predicate predicate = newIn.get(propertyName);
+    assertThat(predicate, equalTo(inConstraint.get(propertyName)));
+  }
+
 
   @Test
   public void testExistsSerialization() throws IOException, ClassNotFoundException {
