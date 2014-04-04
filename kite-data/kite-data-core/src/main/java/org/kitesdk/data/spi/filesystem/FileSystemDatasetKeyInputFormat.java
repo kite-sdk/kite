@@ -50,8 +50,7 @@ class FileSystemDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  @SuppressWarnings("deprecation")
+  @SuppressWarnings({"unchecked", "deprecation"})
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     Job job = new Job(conf);

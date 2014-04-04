@@ -1058,7 +1058,7 @@
         </property>
       </activation>
       <properties>
-        <!-- test hadoop-1 with the same jars that were produced for hadoop-2 -->
+        <!-- test hadoop-1 with the same jars that were produced for default profile -->
         <maven.main.skip>true</maven.main.skip>
         <artifact.hadoop-deps>kite-hadoop1-dependencies</artifact.hadoop-deps>
         <artifact.hadoop-test-deps>kite-hadoop1-test-dependencies</artifact.hadoop-test-deps>
@@ -1079,6 +1079,8 @@
         </property>
       </activation>
       <properties>
+        <!-- explicitly test hadoop-2 with its own jars for the time being -->
+        <maven.main.skip>false</maven.main.skip>
         <artifact.hadoop-deps>kite-hadoop2-dependencies</artifact.hadoop-deps>
         <artifact.hadoop-test-deps>kite-hadoop2-test-dependencies</artifact.hadoop-test-deps>
         <artifact.hbase-deps>kite-hbase2-dependencies</artifact.hbase-deps>
