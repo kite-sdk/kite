@@ -478,7 +478,7 @@
           <version>${vers.maven-surefire-plugin}</version>
           <configuration>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
-            <argLine>-Xmx256m -XX:MaxPermSize=128m</argLine>
+            <argLine>-Xmx512m -XX:MaxPermSize=128m</argLine> <!-- 512MB needed for HBase 2 -->
           </configuration>
         </plugin>
         <plugin>
