@@ -5,6 +5,7 @@ jdk:
 env:
   - HADOOP_PROFILE=default
   - HADOOP_PROFILE=hadoop-1
+  - HADOOP_PROFILE=hadoop-2
 
 install: mvn install -DskipTests=true
 before_script: umask 0022

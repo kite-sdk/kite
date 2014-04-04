@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import org.apache.hadoop.hbase.HConstants;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.RandomAccessDatasetRepository;
@@ -182,7 +183,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
         throw new DatasetRepositoryException(
             "Problem creating HBaseDatasetRepository.", e);
       } catch (IOException e) {
-        throw new DatasetRepositoryException(
+        throw new DatasetIOException(
             "Problem creating HBaseDatasetRepository.", e);
       }
       return new HBaseDatasetRepository(admin, pool, getRepositoryUri(configuration));

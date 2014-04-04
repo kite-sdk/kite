@@ -38,6 +38,9 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <compilerArgs>
+            <!-- commented out due to org.apache.hadoop.filecache.DistributedCache deprecations in Hadoop 2 -->
+            <!-- <arg>-Werror</arg> --> <!-- fail on warnings -->
+            <!-- <arg>-Xlint:-options</arg> --> <!-- ignore cross-compilation warning -->
             <arg>-Xlint:unchecked</arg>
           </compilerArgs>
         </configuration>
