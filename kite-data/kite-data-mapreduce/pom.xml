@@ -82,14 +82,6 @@
           <skip>true</skip> <!-- javadoc is aggregated by parent -->
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${vers.maven-surefire-plugin}</version>
-        <configuration>
-          <argLine>-Xmx512m -XX:MaxPermSize=128m</argLine> <!-- 512MB needed for HBase 2 -->
-        </configuration>
-      </plugin>
     </plugins>
   </reporting>
 
