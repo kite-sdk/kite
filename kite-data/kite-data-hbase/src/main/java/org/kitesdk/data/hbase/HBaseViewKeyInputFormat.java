@@ -19,27 +19,35 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat;
+import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
+import org.apache.hadoop.hbase.mapreduce.TableMapper;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.compat.Hadoop;
-import org.kitesdk.data.Dataset;
 import org.kitesdk.data.hbase.impl.BaseDao;
+import org.kitesdk.data.hbase.impl.BaseEntityScanner;
 import org.kitesdk.data.hbase.impl.Dao;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
 
-class HBaseDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
+import static org.apache.hadoop.hbase.mapreduce.TableInputFormat.SCAN;
 
-  private Dataset<E> dataset;
+class HBaseViewKeyInputFormat<E> extends InputFormat<E, Void> {
+
+  private DaoDataset<E> dataset;
+  private DaoView<E> view;
   private EntityMapper<E> entityMapper;
 
-  public HBaseDatasetKeyInputFormat(DaoDataset<E> dataset) {
+  public HBaseViewKeyInputFormat(DaoDataset<E> dataset) {
     this.dataset = dataset;
+    this.view = null;
     Dao<E> dao = dataset.getDao();
     if (!(dao instanceof BaseDao)) {
       throw new UnsupportedOperationException("Only BaseDao subclasses supported.");
@@ -47,28 +55,40 @@ class HBaseDatasetKeyInputFormat<E> extends InputFormat<E, Void> {
     this.entityMapper = ((BaseDao<E>) dao).getEntityMapper();
   }
 
+  public HBaseViewKeyInputFormat(DaoView<E> view) {
+    this((DaoDataset<E>) view.getDataset());
+    this.view = view;
+  }
+
   @Override
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
-      InterruptedException {
-    TableInputFormat delegate = new TableInputFormat();
-    String tableName = HBaseMetadataProvider.getTableName(dataset.getName());
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
-    conf.set(TableInputFormat.INPUT_TABLE, tableName);
-    delegate.setConf(conf);
-    return delegate.getSplits(jobContext);
+    return getDelegate(conf).getSplits(jobContext);
   }
 
   @Override
   public RecordReader<E, Void> createRecordReader(InputSplit inputSplit,
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-    TableInputFormat delegate = new TableInputFormat();
-    String tableName = HBaseMetadataProvider.getTableName(dataset.getName());
     Configuration conf = Hadoop.TaskAttemptContext
         .getConfiguration.invoke(taskAttemptContext);
-    conf.set(TableInputFormat.INPUT_TABLE, tableName);
-    delegate.setConf(conf);
+    TableInputFormat delegate = getDelegate(conf);
     return new HBaseRecordReaderWrapper<E>(
         delegate.createRecordReader(inputSplit, taskAttemptContext), entityMapper);
+  }
+
+  private TableInputFormat getDelegate(Configuration conf) throws IOException {
+    TableInputFormat delegate = new TableInputFormat();
+    String tableName = HBaseMetadataProvider.getTableName(dataset.getName());
+    conf.set(TableInputFormat.INPUT_TABLE, tableName);
+    if (view != null) {
+      Job tempJob = new Job();
+      Scan scan = ((BaseEntityScanner) view.newEntityScanner()).getScan();
+      TableMapReduceUtil.initTableMapperJob(tableName, scan, TableMapper.class, null,
+          null, tempJob);
+      conf.set(SCAN, tempJob.getConfiguration().get(SCAN)); // TODO: use Hadoop compat
+    }
+    delegate.setConf(conf);
+    return delegate;
   }
 
   private static class HBaseRecordReaderWrapper<E> extends

@@ -116,6 +116,6 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
 
   @Override
   public InputFormat<E, Void> getDelegateInputFormat() {
-    return new HBaseDatasetKeyInputFormat<E>(this);
+    return new HBaseViewKeyInputFormat<E>(this);
   }
 }
