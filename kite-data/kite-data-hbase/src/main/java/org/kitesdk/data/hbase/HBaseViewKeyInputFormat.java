@@ -36,6 +36,8 @@ import org.kitesdk.data.hbase.impl.BaseEntityScanner;
 import org.kitesdk.data.hbase.impl.Dao;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
+import org.kitesdk.data.spi.AbstractRefinableView;
+import org.kitesdk.data.spi.FilteredRecordReader;
 
 import static org.apache.hadoop.hbase.mapreduce.TableInputFormat.SCAN;
 
@@ -72,8 +74,14 @@ class HBaseViewKeyInputFormat<E> extends InputFormat<E, Void> {
     Configuration conf = Hadoop.TaskAttemptContext
         .getConfiguration.invoke(taskAttemptContext);
     TableInputFormat delegate = getDelegate(conf);
-    return new HBaseRecordReaderWrapper<E>(
+    RecordReader<E, Void> unfilteredRecordReader = new HBaseRecordReaderWrapper<E>(
         delegate.createRecordReader(inputSplit, taskAttemptContext), entityMapper);
+    if (view != null && view instanceof AbstractRefinableView) {
+      // use the constraints to filter out entities from the reader
+      return new FilteredRecordReader<E>(unfilteredRecordReader,
+          ((AbstractRefinableView) view).getConstraints());
+    }
+    return unfilteredRecordReader;
   }
 
   private TableInputFormat getDelegate(Configuration conf) throws IOException {

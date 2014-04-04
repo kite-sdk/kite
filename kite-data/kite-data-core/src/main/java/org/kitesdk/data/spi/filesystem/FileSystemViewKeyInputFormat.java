@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
@@ -38,7 +37,7 @@ import org.kitesdk.data.Formats;
 import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
 import org.kitesdk.data.spi.AbstractRefinableView;
-import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.FilteredRecordReader;
 import parquet.avro.AvroParquetInputFormat;
 
 class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
@@ -148,56 +147,4 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     }
   }
 
-  private static class FilteredRecordReader<E> extends RecordReader<E, Void> {
-    private RecordReader<E, Void> unfiltered;
-    private Predicate<E> predicate;
-    private E current;
-
-    public FilteredRecordReader(RecordReader<E, Void> unfiltered, Constraints constraints) {
-      this.unfiltered = unfiltered;
-      this.predicate = constraints.toEntityPredicate(); // TODO: optimize with storage key
-    }
-
-    @Override
-    public void initialize(InputSplit inputSplit,
-        TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-      unfiltered.initialize(inputSplit, taskAttemptContext);
-    }
-
-    @Override
-    public boolean nextKeyValue() throws IOException, InterruptedException {
-      current = computeNextKey();
-      return current != null;
-    }
-
-    private E computeNextKey() throws IOException, InterruptedException {
-      while (unfiltered.nextKeyValue()) {
-        E element = unfiltered.getCurrentKey();
-        if (predicate.apply(element)) {
-          return element;
-        }
-      }
-      return null;
-    }
-
-    @Override
-    public E getCurrentKey() throws IOException, InterruptedException {
-      return current;
-    }
-
-    @Override
-    public Void getCurrentValue() throws IOException, InterruptedException {
-      return unfiltered.getCurrentValue();
-    }
-
-    @Override
-    public float getProgress() throws IOException, InterruptedException {
-      return unfiltered.getProgress();
-    }
-
-    @Override
-    public void close() throws IOException {
-      unfiltered.close();
-    }
-  }
 }
