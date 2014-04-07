@@ -34,7 +34,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
-import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.FilteredRecordReader;
@@ -42,9 +41,15 @@ import parquet.avro.AvroParquetInputFormat;
 
 class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
-  private RefinableView<E> view;
+  private FileSystemDataset<E> dataset;
+  private FileSystemView<E> view;
 
-  public FileSystemViewKeyInputFormat(RefinableView<E> view) {
+  public FileSystemViewKeyInputFormat(FileSystemDataset<E> dataset) {
+    this.dataset = dataset;
+  }
+
+  public FileSystemViewKeyInputFormat(FileSystemView<E> view) {
+    this((FileSystemDataset<E>) view.getDataset());
     this.view = view;
   }
 
@@ -53,10 +58,10 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     Job job = new Job(conf);
-    Format format = view.getDataset().getDescriptor().getFormat();
+    Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
       setInputPaths(jobContext, job);
-      AvroJob.setInputKeySchema(job, view.getDataset().getDescriptor().getSchema());
+      AvroJob.setInputKeySchema(job, dataset.getDescriptor().getSchema());
       AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
       return delegate.getSplits(jobContext);
     } else if (Formats.PARQUET.equals(format)) {
@@ -75,9 +80,10 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private void setInputPaths(JobContext jobContext, Job job) throws IOException {
-    // TODO fix assumption about FileSystemView
-    List<Path> paths = Lists.newArrayList(((FileSystemView) view).dirIterator());
+    List<Path> paths =
+        Lists.newArrayList(view == null ? dataset.dirIterator() : view.dirIterator());
     FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
     // the following line is needed for Hadoop 1, otherwise the paths are not set
     Configuration contextConf = Hadoop.JobContext
@@ -88,12 +94,11 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public RecordReader<E, Void> createRecordReader(InputSplit inputSplit,
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     RecordReader<E, Void> unfilteredRecordReader = createUnfilteredRecordReader
         (inputSplit, taskAttemptContext);
-    if (view instanceof AbstractRefinableView) {
+    if (view != null) {
       // use the constraints to filter out entities from the reader
       return new FilteredRecordReader<E>(unfilteredRecordReader,
           ((AbstractRefinableView) view).getConstraints());
@@ -104,7 +109,7 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
   @SuppressWarnings("unchecked")
   private RecordReader<E, Void> createUnfilteredRecordReader(InputSplit inputSplit,
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-    Format format = view.getDataset().getDescriptor().getFormat();
+    Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
       AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
       return new KeyReaderWrapper(
@@ -115,7 +120,7 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
           delegate.createRecordReader(inputSplit, taskAttemptContext));
     } else if (Formats.CSV.equals(format)) {
       CSVInputFormat<E> delegate = new CSVInputFormat<E>();
-      delegate.setDescriptor(view.getDataset().getDescriptor());
+      delegate.setDescriptor(dataset.getDescriptor());
       return delegate.createRecordReader(inputSplit, taskAttemptContext);
     } else {
       throw new UnsupportedOperationException(

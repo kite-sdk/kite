@@ -28,6 +28,7 @@ import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.RefinableView;
+import org.kitesdk.data.View;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.FieldPartitioner;
@@ -342,6 +343,40 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeabl
     values.add(convert.valueForDirname(fp, dir.getName()));
 
     return Accessor.getDefault().newPartitionKey(values.toArray());
+  }
+
+  @Override
+  public long getSize() {
+    long size = 0;
+    for (Iterator<Path> i = dirIterator(); i.hasNext(); ) {
+      Path dir = i.next();
+      try {
+        for (FileStatus st : fileSystem.listStatus(dir)) {
+          size += st.getLen();
+        }
+      } catch (IOException e) {
+        throw new DatasetIOException("Cannot find size of " + dir, e);
+      }
+    }
+    return size;
+  }
+
+  @Override
+  public long getLastModified() {
+    long lastMod = -1;
+    for (Iterator<Path> i = dirIterator(); i.hasNext(); ) {
+      Path dir = i.next();
+      try {
+        for (FileStatus st : fileSystem.listStatus(dir)) {
+          if (lastMod < st.getModificationTime()) {
+            lastMod = st.getModificationTime();
+          }
+        }
+      } catch (IOException e) {
+        throw new DatasetIOException("Cannot find last modified time of of " + dir, e);
+      }
+    }
+    return lastMod;
   }
 
   public static class Builder {

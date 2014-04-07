@@ -46,45 +46,4 @@ final class AccessorImpl {
     }
   }
 
-  public <E> PartitionKey fromDirectoryName(Dataset<E> dataset, Path dir) {
-    if (dataset instanceof FileSystemDataset) {
-      return ((FileSystemDataset<E>) dataset).keyFromDirectory(dir);
-    }
-    return null;
-  }
-
-  @Override
-  public <E> long getSize(View<E> view) throws IOException {
-    if (view instanceof FileSystemView || view instanceof FileSystemDataset) {
-      FileSystem fs = ((FileSystemDataset) view.getDataset()).getFileSystem();
-      long size = 0;
-      for (Iterator<Path> i = getDirectoryIterator(view); i.hasNext(); ) {
-        Path dir = i.next();
-        for (FileStatus st : fs.listStatus(dir)) {
-          size += st.getLen();
-        }
-      }
-      return size;
-    }
-    return -1;
-  }
-
-  @Override
-  public <E> long getLastModified(View<E> view) throws IOException {
-    if (view instanceof FileSystemView || view instanceof FileSystemDataset) {
-      FileSystem fs = ((FileSystemDataset) view.getDataset()).getFileSystem();
-      long lastMod = -1;
-      for (Iterator<Path> i = getDirectoryIterator(view); i.hasNext(); ) {
-        Path dir = i.next();
-        for (FileStatus st : fs.listStatus(dir)) {
-          if (lastMod < st.getModificationTime()) {
-            lastMod = st.getModificationTime();
-          }
-        }
-      }
-      return lastMod;
-    }
-    return -1;
-  }
-
 }

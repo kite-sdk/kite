@@ -26,6 +26,8 @@ import javax.annotation.concurrent.Immutable;
 
 import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.View;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A common View base class to simplify implementations of Views created from ranges.
@@ -37,6 +39,8 @@ import org.kitesdk.data.View;
  */
 @Immutable
 public abstract class AbstractRefinableView<E> implements RefinableView<E> {
+
+  private static final Logger logger = LoggerFactory.getLogger(AbstractRefinableView.class);
 
   protected final Dataset<E> dataset;
   protected final MarkerComparator comparator;
@@ -150,6 +154,14 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
 
   public InputFormat<E, Void> getDelegateInputFormat() {
     throw new UnsupportedOperationException("No delegate input format defined.");
+  }
+
+  public long getSize() {
+    throw new UnsupportedOperationException("Size of view not defined.");
+  }
+
+  public long getLastModified() {
+    throw new UnsupportedOperationException("Last modified time of view not defined.");
   }
 
   @Override

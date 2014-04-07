@@ -22,10 +22,6 @@ import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.URIPattern;
-import org.kitesdk.data.Dataset;
-import org.kitesdk.data.View;
-import java.io.IOException;
-import org.apache.hadoop.fs.Path;
 
 /**
  * <p>
@@ -76,10 +72,4 @@ public abstract class Accessor {
   public abstract void registerDatasetRepository(URIPattern pattern, OptionBuilder<DatasetRepository> builder);
 
   public abstract DatasetException providerExceptionFor(DatasetException e);
-
-  public abstract <E> PartitionKey fromDirectoryName(Dataset<E> dataset, Path dir);
-
-  public abstract <E> long getSize(View<E> view) throws IOException;
-
-  public abstract <E> long getLastModified(View<E> view) throws IOException;
 }

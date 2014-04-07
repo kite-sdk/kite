@@ -17,7 +17,6 @@ package org.kitesdk.data.crunch;
 
 import java.io.IOException;
 import junit.framework.Assert;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.crunch.PCollection;
@@ -42,7 +41,7 @@ import org.kitesdk.data.hbase.avro.AvroUtils;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;
 
 import static org.junit.Assert.assertEquals;
-import static org.kitesdk.data.filesystem.DatasetTestUtilities.datasetSize;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.datasetSize;
 
 public class TestCrunchDatasetsHBase {
   private static final String testGenericEntity;

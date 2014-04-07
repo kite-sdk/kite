@@ -179,4 +179,38 @@ class FileSystemView<E> extends AbstractRefinableView<E> {
       throw new DatasetIOException("Could not cleanly delete path:" + dir, ex);
     }
   }
+
+  @Override
+  public long getSize() {
+    long size = 0;
+    for (Iterator<Path> i = dirIterator(); i.hasNext(); ) {
+      Path dir = i.next();
+      try {
+        for (FileStatus st : fs.listStatus(dir)) {
+          size += st.getLen();
+        }
+      } catch (IOException e) {
+        throw new DatasetIOException("Cannot find size of " + dir, e);
+      }
+    }
+    return size;
+  }
+
+  @Override
+  public long getLastModified() {
+    long lastMod = -1;
+    for (Iterator<Path> i = dirIterator(); i.hasNext(); ) {
+      Path dir = i.next();
+      try {
+        for (FileStatus st : fs.listStatus(dir)) {
+          if (lastMod < st.getModificationTime()) {
+            lastMod = st.getModificationTime();
+          }
+        }
+      } catch (IOException e) {
+        throw new DatasetIOException("Cannot find last modified time of of " + dir, e);
+      }
+    }
+    return lastMod;
+  }
 }

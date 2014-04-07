@@ -97,4 +97,12 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
         "This Dataset does not support bulk deletion");
   }
 
+  public long getSize() {
+    throw new UnsupportedOperationException("Size of dataset not defined.");
+  }
+
+  public long getLastModified() {
+    throw new UnsupportedOperationException("Last modified time of dataset not defined.");
+  }
+
 }

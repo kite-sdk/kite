@@ -41,9 +41,10 @@ import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.View;
-import org.kitesdk.data.filesystem.impl.Accessor;
 import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
+import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
+import org.kitesdk.data.spi.AbstractRefinableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +67,6 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     formatBundle.set(DatasetKeyInputFormat.KITE_DATASET_NAME, dataset.getName());
     formatBundle.set(RuntimeParameters.DISABLE_COMBINE_FILE, "true");
 
-    // TODO: replace with View#getDataset to get the top-level dataset
     DatasetRepository repo = DatasetRepositories.open(getRepositoryUri(dataset));
     // only set the partition dir for subpartitions
     Dataset<E> topLevelDataset = repo.load(dataset.getName());
@@ -148,25 +148,27 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   @Override
   public long getSize(Configuration configuration) {
     try {
-      long size = Accessor.getDefault().getSize(dataset);
-      if (size != -1) {
-        return size;
+      if (dataset instanceof AbstractRefinableView) {
+        return ((AbstractRefinableView) dataset).getSize();
+      } else if (dataset instanceof AbstractDataset) {
+        return ((AbstractDataset) dataset).getSize();
       }
-    } catch (IOException e) {
+    } catch (UnsupportedOperationException e) {
       // fall through
     }
-    logger.warn("Cannot determine size for source: " + toString());
+    logger.warn("Cannot determine size for dataset: " + toString());
     return 1000L * 1000L * 1000L; // fallback to HBase default size
   }
 
   @Override
   public long getLastModifiedAt(Configuration configuration) {
     try {
-      long lastMod = Accessor.getDefault().getLastModified(dataset);
-      if (lastMod != -1) {
-        return lastMod;
+      if (dataset instanceof AbstractRefinableView) {
+        return ((AbstractRefinableView) dataset).getLastModified();
+      } else if (dataset instanceof AbstractDataset) {
+        return ((AbstractDataset) dataset).getLastModified();
       }
-    } catch (IOException e) {
+    } catch (UnsupportedOperationException e) {
       // fall through
     }
     logger.warn("Cannot determine last modified time for source: " + toString());

@@ -63,7 +63,7 @@ class HBaseViewKeyInputFormat<E> extends InputFormat<E, Void> {
   }
 
   @Override
-  public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
+  public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     return getDelegate(conf).getSplits(jobContext);
   }
@@ -93,7 +93,8 @@ class HBaseViewKeyInputFormat<E> extends InputFormat<E, Void> {
       Scan scan = ((BaseEntityScanner) view.newEntityScanner()).getScan();
       TableMapReduceUtil.initTableMapperJob(tableName, scan, TableMapper.class, null,
           null, tempJob);
-      conf.set(SCAN, tempJob.getConfiguration().get(SCAN)); // TODO: use Hadoop compat
+      Configuration tempConf = Hadoop.JobContext.getConfiguration.invoke(tempJob);
+      conf.set(SCAN, tempConf.get(SCAN));
     }
     delegate.setConf(conf);
     return delegate;
