@@ -18,24 +18,27 @@ package org.kitesdk.cli.commands;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.URIPattern;
+import org.slf4j.Logger;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class TestCreateDatasetCommand {
 
   private static final AtomicInteger ids = new AtomicInteger(0);
   private static final Map<String, DatasetRepository> repos = Maps.newHashMap();
-  private String id;
-  private CreateDatasetCommand command;
+  private String id = null;
+  private CreateDatasetCommand command = null;
+  private Logger console;
 
   @BeforeClass
   public static void addMockRepoBuilder() throws Exception {
@@ -44,9 +47,6 @@ public class TestCreateDatasetCommand {
           @Override
           public DatasetRepository getFromOptions(Map<String, String> options) {
             DatasetRepository repo = mock(DatasetRepository.class);
-            String id = options.get("id");
-            System.out.println("Repo map: " + repos);
-            System.out.println("Id: " + String.valueOf(id) + ":" + id.getClass());
             repos.put(options.get("id"), repo);
             return repo;
           }
@@ -56,7 +56,8 @@ public class TestCreateDatasetCommand {
   @Before
   public void setUp() {
     this.id = Integer.toString(ids.addAndGet(1));
-    this.command = new CreateDatasetCommand();
+    this.console = mock(Logger.class);
+    this.command = new CreateDatasetCommand(console);
     this.command.repoURI = "repo:mock:" + id;
   }
 
@@ -75,6 +76,7 @@ public class TestCreateDatasetCommand {
         .build();
 
     verify(getMockRepo()).create("users", expectedDescriptor);
+    verify(console).debug(contains("Created"), eq("users"));
   }
 
   @Test
@@ -90,28 +92,53 @@ public class TestCreateDatasetCommand {
         .build();
 
     verify(getMockRepo()).create("users", expectedDescriptor);
+    verify(console).debug(contains("Created"), eq("users"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testUnrecognizedFormat() throws Exception {
     command.avroSchemaFile = "user.avsc";
     command.datasetNames = Lists.newArrayList("users");
     command.format = "nosuchformat";
-    command.run();
+    TestHelpers.assertThrows("Should fail on invalid format",
+        IllegalArgumentException.class, new Callable() {
+          @Override
+          public Void call() throws Exception {
+            command.run();
+            return null;
+          }
+        });
+    verifyZeroInteractions(console);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNonExistentAvroSchemaFile() throws Exception {
     command.avroSchemaFile = "nonexistent.avsc";
     command.datasetNames = Lists.newArrayList("users");
-    command.run();
+    TestHelpers.assertThrows("Should fail on missing schema",
+        IllegalArgumentException.class, new Callable() {
+          @Override
+          public Void call() throws Exception {
+            command.run();
+            return null;
+          }
+        });
+    verifyZeroInteractions(console);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testMultipleDatasets() throws Exception {
     command.avroSchemaFile = "user.avsc";
     command.datasetNames = Lists.newArrayList("users", "moreusers");
-    command.run();
+    TestHelpers.assertThrows("Should reject multiple dataset names",
+        IllegalArgumentException.class, new Callable() {
+          @Override
+          public Void call() throws Exception {
+            command.run();
+            return null;
+          }
+        });
+    verifyZeroInteractions(console);
   }
 
 }
