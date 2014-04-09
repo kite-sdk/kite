@@ -18,76 +18,67 @@ package org.kitesdk.cli.commands;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-import com.google.common.io.Resources;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.util.concurrent.Callable;
 import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.hadoop.conf.Configuration;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
 import org.kitesdk.data.TestHelpers;
+import org.mockito.Matchers;
 import org.slf4j.Logger;
 
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-public class TestSchemaCommand {
+public class TestCSVSchemaCommand {
 
+  private static String sample = null;
   private static Schema schema = null;
   private Logger console = null;
-  private SchemaCommand command;
+  private CSVSchemaCommand command;
 
   @BeforeClass
-  public static void parseUserSchema() throws Exception {
-    schema = new Schema.Parser().parse(
-        Resources.getResource("schema/user.avsc").openStream());
+  public static void buildUserSchema() throws Exception {
+    sample = "target/users.csv";
+    BufferedWriter writer = Files.newWriter(
+        new File(sample), CSVSchemaCommand.SCHEMA_CHARSET);
+    writer.append("id, username, email\n");
+    writer.append("1, test, test@example.com\n");
+    writer.close();
+
+    schema = SchemaBuilder.record("User").fields()
+        .optionalLong("id")
+        .optionalString("username")
+        .optionalString("email")
+        .endRecord();
   }
 
   @Before
   public void setup() throws Exception {
-    TestUtil.run("create", "users", "--schema", "schema/user.avsc");
     this.console = mock(Logger.class);
-    this.command = new SchemaCommand(console);
+    this.command = new CSVSchemaCommand(console);
     command.setConf(new Configuration());
-  }
-
-  @After
-  public void removeDatasets() throws Exception {
-    TestUtil.run("delete", "users");
-    TestUtil.run("delete", "users_2");
   }
 
   @Test
   public void testSchemaStdout() throws Exception {
-    command.datasetNames = Lists.newArrayList("users");
+    command.samplePaths = Lists.newArrayList("target/users.csv");
+    command.recordName = "User";
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);
     verify(console).info(argThat(TestUtil.matchesSchema(schema)));
-    verify(console).trace(contains("repo:hive"));
-    verifyNoMoreInteractions(console);
-  }
-
-  @Test
-  public void testMultipleSchemasStdout() throws Exception {
-    TestUtil.run("create", "users_2", "--schema", "schema/user.avsc");
-    command.datasetNames = Lists.newArrayList("users", "users_2");
-    int rc = command.run();
-    Assert.assertEquals("Should return success code", 0, rc);
-    verify(console).info(anyString(),
-        eq("users"), argThat(TestUtil.matchesSchema(schema)));
-    verify(console).info(anyString(),
-        eq("users_2"), argThat(TestUtil.matchesSchema(schema)));
-    verify(console).trace(contains("repo:hive"));
     verifyNoMoreInteractions(console);
   }
 
   @Test
   public void testSchemaToFile() throws Exception {
-    command.datasetNames = Lists.newArrayList("users");
+    command.samplePaths = Lists.newArrayList("target/users.csv");
+    command.recordName = "User";
     command.outputPath = "target/user.avsc";
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);
@@ -96,47 +87,46 @@ public class TestSchemaCommand {
         SchemaCommand.SCHEMA_CHARSET);
     Assert.assertTrue("File should contain pretty printed schema",
         TestUtil.matchesSchema(schema).matches(fileContent));
-    verify(console).trace(contains("repo:hive"));
     verifyNoMoreInteractions(console);
   }
 
   @Test
-  public void testMultipleSchemasToFileFails() throws Exception {
-    command.datasetNames = Lists.newArrayList("users", "users_2");
-    command.outputPath = "target/user_schemas.avsc";
+  public void testMultipleSamplesFail() throws Exception {
+    command.samplePaths = Lists.newArrayList(sample, "target/sample2.csv");
     TestHelpers.assertThrows("Should reject saving multiple schemas in a file",
         IllegalArgumentException.class, new Callable<Void>() {
-      @Override
-      public Void call() throws Exception {
-        command.run();
-        return null;
-      }
-    });
-    verify(console).trace(contains("repo:hive"));
+          @Override
+          public Void call() throws Exception {
+            command.run();
+            return null;
+          }
+        }
+    );
     verifyNoMoreInteractions(console);
   }
 
   @Test
   public void testMinimize() throws Exception {
-    command.datasetNames = Lists.newArrayList("users");
+    command.samplePaths = Lists.newArrayList("target/users.csv");
+    command.recordName = "User";
     command.minimize = true;
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);
     verify(console).info(argThat(TestUtil.matchesMinimizedSchema(schema)));
-    verify(console).trace(contains("repo:hive"));
     verifyNoMoreInteractions(console);
   }
 
   @Test
-  public void testMissingDatasetName() {
-    TestHelpers.assertThrows("Should complain when no dataset name is given",
+  public void testMissingSamplePath() {
+    TestHelpers.assertThrows("Should complain when no sample csv is given",
         IllegalArgumentException.class, new Callable<Void>() {
-      @Override
-      public Void call() throws Exception {
-        command.run();
-        return null;
-      }
-    });
+          @Override
+          public Void call() throws Exception {
+            command.run();
+            return null;
+          }
+        });
     verifyZeroInteractions(console);
   }
+
 }

@@ -19,6 +19,7 @@ package org.kitesdk.cli.commands;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.internal.Lists;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -36,7 +37,9 @@ import org.slf4j.Logger;
 @Parameters(commandDescription="Build a schema from a CSV data sample")
 public class CSVSchemaCommand implements Configurable, Command {
 
-  private static final Charset SCHEMA_CHARSET = Charset.forName("utf8");
+  @VisibleForTesting
+  static final Charset SCHEMA_CHARSET = Charset.forName("utf8");
+
   private final Logger console;
   private Configuration conf;
 
@@ -56,7 +59,7 @@ public class CSVSchemaCommand implements Configurable, Command {
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="UWF_NULL_FIELD",
       justification = "Field set by JCommander")
-  @Parameter(names={"--class", "--record-name"},
+  @Parameter(names={"--class", "--record-name"}, required = true,
       description="A name or class for the result schema")
   String recordName = null;
 
