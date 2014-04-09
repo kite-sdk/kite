@@ -145,12 +145,12 @@ public class ObjectSchemaCommand implements Configurable, Command {
   @Override
   public List<String> getExamples() {
     return Lists.newArrayList(
-        "# Create a schema for Kite's Format class:",
-        "org.kitesdk.data.Format",
+        "# Create a schema for an example User class:",
+        "org.kitesdk.cli.example.User",
         "# Create a schema for a class in a jar:",
         "com.example.MyRecord --jar my-application.jar",
-        "# Save the schema for Kite's Format class to format.avsc:",
-        "org.kitesdk.data.Format -o format.avsc"
+        "# Save the schema for the example User class to user.avsc:",
+        "org.kitesdk.cli.example.User -o user.avsc"
     );
   }
 
