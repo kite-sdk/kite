@@ -17,6 +17,7 @@ package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
 import org.kitesdk.data.DatasetRepository;
@@ -47,4 +48,13 @@ public class DeleteDatasetCommand extends BaseDatasetCommand {
 
     return 0;
   }
+
+  @Override
+  public List<String> getExamples() {
+    return Lists.newArrayList(
+        "# Delete all data and metadata for the dataset \"users\":",
+        "users"
+    );
+  }
+
 }

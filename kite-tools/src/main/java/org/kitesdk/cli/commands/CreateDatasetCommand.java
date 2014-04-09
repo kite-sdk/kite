@@ -17,6 +17,7 @@ package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
   String avroSchemaFile;
 
   @Parameter(names = {"-f", "--format"},
-      description = "The file format (avro or parquet).")
+      description = "The file format: avro or parquet.")
   String format = Formats.AVRO.getName();
 
   public CreateDatasetCommand(Logger console) {
@@ -76,6 +77,16 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
     console.debug("Created dataset {}", datasetNames.get(0));
 
     return 0;
+  }
+
+  @Override
+  public List<String> getExamples() {
+    return Lists.newArrayList(
+        "# Create dataset \"users\" in Hive:",
+        "users --schema user.avsc",
+        "# Create dataset \"users\" using parquet:",
+        "users --schema user.avsc --format parquet"
+    );
   }
 
 }

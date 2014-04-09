@@ -17,6 +17,7 @@
 package org.kitesdk.cli.commands;
 
 import java.io.IOException;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +41,11 @@ public class TestBaseCommand {
     @Override
     public int run() throws IOException {
       return 0;
+    }
+
+    @Override
+    public List<String> getExamples() {
+      return null;
     }
   }
 

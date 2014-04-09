@@ -18,7 +18,9 @@ package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -33,7 +35,9 @@ import org.slf4j.Logger;
 @Parameters(commandDescription = "Show the schema for a Dataset")
 public class SchemaCommand extends BaseDatasetCommand implements Configurable {
 
-  private static final Charset SCHEMA_CHARSET = Charset.forName("utf8");
+  @VisibleForTesting
+  static final Charset SCHEMA_CHARSET = Charset.forName("utf8");
+
   private Configuration conf;
 
   @Parameter(description = "<dataset name>")
@@ -83,10 +87,20 @@ public class SchemaCommand extends BaseDatasetCommand implements Configurable {
         console.info("Dataset \"{}\" schema: {}", name, repo.load(name)
             .getDescriptor()
             .getSchema()
-            .toString());
+            .toString(!minimize));
       }
     }
     return 0;
+  }
+
+  @Override
+  public List<String> getExamples() {
+    return Lists.newArrayList(
+        "# Print the schema for dataset \"users\" to standard out:",
+        "users",
+        "# Save the schema for dataset \"users\" to user.avsc:",
+        "users -o user.avsc"
+    );
   }
 
   @Override

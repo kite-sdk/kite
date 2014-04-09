@@ -1,11 +1,11 @@
-/**
+/*
  * Copyright 2013 Cloudera Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.cli;
 
-import java.io.IOException;
-import java.util.List;
+package org.kitesdk.cli.example;
 
-public interface Command {
-  /**
-   * Runs this {@code Command}.
-   *
-   * @return a return code for the process, 0 indicates success.
-   * @throws IOException
-   */
-  int run() throws IOException;
+public class User {
+  private String username = null;
+  private String email = null;
 
-  /**
-   * Returns a list of example uses. Lines starting with '#' will not have the
-   * executable name added when formatting.
-   *
-   * @return a list of String examples
-   */
-  List<String> getExamples();
+  public User(String username, String email) {
+    this.username = username;
+    this.email = email;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public String getEmail() {
+    return email;
+  }
 }

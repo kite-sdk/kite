@@ -62,7 +62,7 @@ public class CSVUtil {
     if (props.useHeader) {
       // read the header and then the first line
       header = reader.readNext();
-      Preconditions.checkNotNull(header, "No header content");
+      checkHeader(header);
       line = reader.readNext();
       Preconditions.checkNotNull(line, "No content to infer schema");
 
@@ -99,8 +99,14 @@ public class CSVUtil {
     // types may be missing, but fieldSchema will return a nullable string
     List<Schema.Field> fields = Lists.newArrayList();
     for (int i = 0; i < header.length; i += 1) {
+      if (header[i] == null) {
+        throw new RuntimeException("Bad header for field " + i + ": null");
+      } else if (header[i].trim().isEmpty()) {
+        throw new RuntimeException(
+            "Bad header for field " + i + ": \"" + header[i] + "\"");
+      }
       fields.add(new Schema.Field(
-          header[i], nullableSchema(types[i]),
+          header[i].trim(), nullableSchema(types[i]),
           "Type inferred from \"" + String.valueOf(values[i]) + "\"", null));
     }
 
@@ -135,5 +141,17 @@ public class CSVUtil {
       return Schema.Type.FLOAT;
     }
     return Schema.Type.STRING;
+  }
+
+  private static void checkHeader(String[] header) {
+    Preconditions.checkNotNull(header, "No header content");
+    for (int i = 0; i < header.length; i += 1) {
+      if (header[i] == null) {
+        throw new RuntimeException("Bad header for field " + i + ": null");
+      } else if (header[i].trim().isEmpty()) {
+        throw new RuntimeException(
+            "Bad header for field " + i + ": \"" + header[i] + "\"");
+      }
+    }
   }
 }
