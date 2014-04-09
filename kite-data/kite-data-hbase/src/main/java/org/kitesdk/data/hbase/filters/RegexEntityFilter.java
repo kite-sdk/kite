@@ -15,6 +15,10 @@
  */
 package org.kitesdk.data.hbase.filters;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.hbase.impl.EntitySchema;
 import org.kitesdk.data.hbase.impl.EntitySchema.FieldMapping;
@@ -23,7 +27,6 @@ import org.kitesdk.data.hbase.impl.MappingType;
 
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
-import org.apache.hadoop.hbase.filter.RegexStringComparator;
 
 /**
  * An EntityFilter that will perform a regular expression filter on an entity's
@@ -42,13 +45,35 @@ public class RegexEntityFilter implements EntityFilter {
           "SingleColumnValueFilter only compatible with COLUMN mapping types.");
     }
 
+    this.filter = constructFilter(regex, isEqual, fieldMapping);
+  }
+
+  private Filter constructFilter(String regex, boolean isEqual, FieldMapping fieldMapping) {
     byte[] family = fieldMapping.getFamily();
     byte[] qualifier = fieldMapping.getQualifier();
 
-    this.filter = new org.apache.hadoop.hbase.filter.SingleColumnValueFilter(
-        family, qualifier, isEqual ? CompareFilter.CompareOp.EQUAL
-            : CompareFilter.CompareOp.NOT_EQUAL, new RegexStringComparator(
-            regex));
+    try {
+      // To work we both HBase 0.94 and 0.96 we have to use reflection to construct a
+      // SingleColumnValueFilter (and a RegexStringComparator) since
+      // WritableByteArrayComparable (which RegexStringComparator extends) was renamed
+      // to ByteArrayComparable in HBase 0.95 (HBASE-6658)
+      Class<?> c = Class.forName("org.apache.hadoop.hbase.filter.SingleColumnValueFilter");
+      for (Constructor<?> cons : c.getConstructors()) {
+        if (cons.getParameterTypes().length == 4 &&
+            !cons.getParameterTypes()[3].isArray()) { // not byte[] as the fourth arg
+          Object regexStringComparator = Class.forName(
+              "org.apache.hadoop.hbase.filter.RegexStringComparator")
+              .getConstructor(String.class).newInstance(regex);
+          return (Filter) cons.newInstance(family, qualifier,
+              isEqual ? CompareFilter.CompareOp.EQUAL
+              : CompareFilter.CompareOp.NOT_EQUAL, regexStringComparator);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new DatasetException("Cannot create RegexEntityFilter.", e);
+    }
+    throw new DatasetException("Cannot create RegexEntityFilter (no constructor found).");
   }
 
   public RegexEntityFilter(EntitySchema entitySchema,

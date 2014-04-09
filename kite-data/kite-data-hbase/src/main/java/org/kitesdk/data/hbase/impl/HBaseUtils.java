@@ -66,11 +66,9 @@ public class HBaseUtils {
       Map<byte[], List<KeyValue>> familyMap = putToMerge.getFamilyMap();
       for (List<KeyValue> keyValueList : familyMap.values()) {
         for (KeyValue keyValue : keyValueList) {
-          try {
-            put.add(new KeyValue(keyBytes, keyValue.getFamily(), keyValue.getQualifier(), keyValue.getTimestamp(), keyValue.getValue()));
-          } catch (IOException e) {
-            throw new DatasetIOException("Could not add KeyValue to put", e);
-          }
+          // don't use put.add(KeyValue) since it doesn't work with HBase 0.96 onwards
+          put.add(keyValue.getFamily(), keyValue.getQualifier(),
+              keyValue.getTimestamp(), keyValue.getValue());
         }
       }
     }
@@ -101,27 +99,6 @@ public class HBaseUtils {
     }
     Put put = mergePuts(keyBytes, putsToMerge);
     return new PutAction(put, checkAction);
-  }
-
-  /**
-   * For each value in put2, add it to put1.
-   * 
-   * @param put1
-   *          The put to modify
-   * @param put2
-   *          The put to add to put1
-   */
-  public static void addToPut(Put put1, Put put2) {
-    Map<byte[], List<KeyValue>> familyMap = put2.getFamilyMap();
-    for (List<KeyValue> keyValueList : familyMap.values()) {
-      for (KeyValue keyValue : keyValueList) {
-        try {
-          put1.add(keyValue);
-        } catch (IOException e) {
-          throw new DatasetIOException("Could not add KeyValue to put", e);
-        }
-      }
-    }
   }
 
   /**

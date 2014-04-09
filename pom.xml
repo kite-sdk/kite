@@ -1079,8 +1079,8 @@
         </property>
       </activation>
       <properties>
-        <!-- explicitly test hadoop-2 with its own jars for the time being -->
-        <maven.main.skip>false</maven.main.skip>
+        <!-- test hadoop-2 with the same jars that were produced for default profile -->
+        <maven.main.skip>true</maven.main.skip>
         <artifact.hadoop-deps>kite-hadoop2-dependencies</artifact.hadoop-deps>
         <artifact.hadoop-test-deps>kite-hadoop2-test-dependencies</artifact.hadoop-test-deps>
         <artifact.hbase-deps>kite-hbase2-dependencies</artifact.hbase-deps>
