@@ -144,7 +144,9 @@ public class TestUtil {
 
     @Override
     public int compare(List<T> l1, List<T> l2) {
-      int cmp = Integer.compare(l1.size(), l2.size());
+      int s1 = l1.size();
+      int s2 = l2.size();
+      int cmp = (s1 < s2) ? -1 : ((s1 == s2) ? 0 : 1);
       if (cmp != 0) {
         return cmp;
       }
