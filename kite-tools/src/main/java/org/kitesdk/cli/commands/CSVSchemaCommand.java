@@ -18,6 +18,7 @@ package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -113,6 +114,16 @@ public class CSVSchemaCommand implements Configurable, Command {
     }
 
     return 0;
+  }
+
+  @Override
+  public List<String> getExamples() {
+    return Lists.newArrayList(
+        "# Print the schema to standard out:",
+        "sample.csv",
+        "# Write schema to sample-schema.avsc:",
+        "sample.csv -o sample-schema.avsc"
+    );
   }
 
   @Override

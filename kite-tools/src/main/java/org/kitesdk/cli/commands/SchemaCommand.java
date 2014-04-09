@@ -19,6 +19,7 @@ package org.kitesdk.cli.commands;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -87,6 +88,16 @@ public class SchemaCommand extends BaseDatasetCommand implements Configurable {
       }
     }
     return 0;
+  }
+
+  @Override
+  public List<String> getExamples() {
+    return Lists.newArrayList(
+        "# Print the schema for dataset \"users\" to standard out:",
+        "users",
+        "# Save the schema for dataset \"users\" to user.avsc:",
+        "users -o user.avsc"
+    );
   }
 
   @Override

@@ -36,19 +36,27 @@ public class Help {
   }
 
   public int run() {
+    boolean hasRequired = false;
+
     if (helpCommands.isEmpty()) {
       console.info(
-          "Usage: {} [options] [command] [command options]",
+          "\nUsage: {} [options] [command] [command options]",
           Main.PROGRAM_NAME);
-      console.info("\n  Options:");
+      console.info("\n  Options:\n");
       for (ParameterDescription param : jc.getParameters()) {
-        printOption(console, param);
+        hasRequired = printOption(console, param) || hasRequired;
       }
-      console.info("\n  Commands:");
+      if (hasRequired) {
+        console.info("\n  * = required");
+      }
+      console.info("\n  Commands:\n");
       for (String command : jc.getCommands().keySet()) {
         console.info("    {}\n\t{}",
             command, jc.getCommandDescription(command));
       }
+      console.info("\n  Examples:");
+      console.info("\n    # print information for create\n    {} help create",
+          Main.PROGRAM_NAME);
       console.info("\n  See '{} help <command>' for more information on a " +
           "specific command.", Main.PROGRAM_NAME);
 
@@ -60,32 +68,49 @@ public class Help {
           return 1;
         }
 
-        console.info(jc.getCommandDescription(cmd));
-        console.info("Usage: {} [general options] {} [command options] {}",
+        console.info("\nUsage: {} [general options] {} {} [command options]",
             new Object[] {
                 Main.PROGRAM_NAME, cmd,
                 commander.getMainParameterDescription()});
-        console.info("\n  Command options:");
+        console.info("\n  Description:");
+        console.info("\n    {}", jc.getCommandDescription(cmd));
+        console.info("\n  Command options:\n");
         for (ParameterDescription param : commander.getParameters()) {
-          printOption(console, param);
+          hasRequired = printOption(console, param) || hasRequired;
+        }
+        if (hasRequired) {
+          console.info("\n  * = required");
+        }
+        List<String> examples = ((Command) commander.getObjects().get(0)).getExamples();
+        if (examples != null) {
+          console.info("\n  Examples:");
+          for (String example : examples) {
+            if (example.startsWith("#")) {
+              // comment
+              console.info("\n    {}", example);
+            } else {
+              console.info("    {} {} {}",
+                  new Object[] {Main.PROGRAM_NAME, cmd, example});
+            }
+          }
         }
         // add an extra newline in case there are more commands
         console.info("");
       }
-
-      console.info("  * = required\n");
     }
     return 0;
   }
 
-  private void printOption(Logger console, ParameterDescription param) {
+  private boolean printOption(Logger console, ParameterDescription param) {
+    boolean required = param.getParameter().required();
     if (!param.getParameter().hidden()) {
       console.info("  {} {}\n\t{}{}", new Object[]{
-          param.getParameter().required() ? "*" : " ",
+          required ? "*" : " ",
           param.getNames().trim(),
           param.getDescription(),
           formatDefault(param)});
     }
+    return required;
   }
 
   private String formatDefault(ParameterDescription param) {

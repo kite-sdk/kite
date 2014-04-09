@@ -16,7 +16,22 @@
 package org.kitesdk.cli;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface Command {
+  /**
+   * Runs this {@code Command}.
+   *
+   * @return a return code for the process, 0 indicates success.
+   * @throws IOException
+   */
   int run() throws IOException;
+
+  /**
+   * Returns a list of example uses. Lines starting with '#' will not have the
+   * executable name added when formatting.
+   *
+   * @return a list of String examples
+   */
+  List<String> getExamples();
 }

@@ -18,6 +18,7 @@ package org.kitesdk.cli;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
 import org.junit.After;
@@ -43,15 +44,15 @@ public class TestMain {
     List<String> datasets;
 
     @Parameter(names = "--throw-arg",
-        description = "Causes an IllegalArugmentException")
+        description = "Causes an IllegalArugmentException", hidden = true)
     boolean throwArg = false;
 
     @Parameter(names = "--throw-state",
-        description = "Causes an IllegalStateException")
+        description = "Causes an IllegalStateException", hidden = true)
     boolean throwState = false;
 
     @Parameter(names = "--throw-unknown",
-        description = "Causes an unknown exception")
+        description = "Causes an unknown exception", hidden = true)
     boolean throwUnknown = false;
 
     @Override
@@ -62,6 +63,11 @@ public class TestMain {
         throw new SomeException("--throw-unknown was set");
       }
       return 0;
+    }
+
+    @Override
+    public List<String> getExamples() {
+      return Lists.newArrayList("# this is a comment", "test dataset-name");
     }
   }
 
@@ -85,7 +91,7 @@ public class TestMain {
   public void testNoArgs() throws Exception {
     int rc = run();
     verify(console).info(
-        startsWith("Usage: {} [options] [command] [command options]"),
+        contains("Usage: {} [options] [command] [command options]"),
         eq(Main.PROGRAM_NAME));
     assertEquals(1, rc);
   }
@@ -101,7 +107,7 @@ public class TestMain {
   public void testHelp() throws Exception {
     int rc = run("help");
     verify(console).info(
-        startsWith("Usage: {} [options] [command] [command options]"),
+        contains("Usage: {} [options] [command] [command options]"),
         eq(Main.PROGRAM_NAME));
     verify(console).info(contains("Options"));
     verify(console).info(anyString(), any(Object[].class)); // -v
@@ -112,6 +118,8 @@ public class TestMain {
     verify(console).info(anyString(), eq("schema"), anyString());
     verify(console).info(anyString(), eq("csv-schema"), anyString());
     verify(console).info(anyString(), eq("test"), eq("Test description"));
+    verify(console).info(contains("Examples"));
+    verify(console).info(contains("{} help create"), eq(Main.PROGRAM_NAME));
     verify(console).info(
         contains("See '{} help <command>' for more information"),
         eq(Main.PROGRAM_NAME));
@@ -121,22 +129,32 @@ public class TestMain {
   @Test
   public void testHelpCommand() throws Exception {
     int rc = run("help", "test");
-    verify(console).info(startsWith("Test description"));
     verify(console).info(
-        "Usage: {} [general options] {} [command options] {}",
+        "\nUsage: {} [general options] {} {} [command options]",
         new Object[]{ "dataset", "test", "<test dataset names>" });
+    verify(console).info(contains("Description"));
+    verify(console).info(anyString(), contains("Test description"));
     verify(console).info(contains("Command options"));
+    verify(console).info(contains("Examples"));
+    verify(console).info(anyString(), contains("# this is a comment"));
+    verify(console).info(anyString(),
+        eq(new Object[] {Main.PROGRAM_NAME, "test", "test dataset-name"}));
     assertEquals(0, rc);
   }
 
   @Test
   public void testCommandHelp() throws Exception {
     int rc = run("test", "--help");
-    verify(console).info(startsWith("Test description"));
     verify(console).info(
-        "Usage: {} [general options] {} [command options] {}",
+        "\nUsage: {} [general options] {} {} [command options]",
         new Object[]{ "dataset", "test", "<test dataset names>" });
+    verify(console).info(contains("Description"));
+    verify(console).info(anyString(), contains("Test description"));
     verify(console).info(contains("Command options"));
+    verify(console).info(contains("Examples"));
+    verify(console).info(anyString(), contains("this is a comment"));
+    verify(console).info(anyString(),
+        eq(new Object[] {Main.PROGRAM_NAME, "test", "test dataset-name"}));
     assertEquals(0, rc);
   }
 
