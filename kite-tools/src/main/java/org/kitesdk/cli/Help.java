@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Retrieves details on the functions of other commands")
 public class Help implements Command {
-  @Parameter(description = "Commands")
+  @Parameter(description = "<commands>")
   List<String> helpCommands = Lists.newArrayList();
 
   private final JCommander jc;
@@ -75,12 +75,14 @@ public class Help implements Command {
                 commander.getMainParameterDescription()});
         console.info("\n  Description:");
         console.info("\n    {}", jc.getCommandDescription(cmd));
-        console.info("\n  Command options:\n");
-        for (ParameterDescription param : commander.getParameters()) {
-          hasRequired = printOption(console, param) || hasRequired;
-        }
-        if (hasRequired) {
-          console.info("\n  * = required");
+        if (!commander.getParameters().isEmpty()) {
+          console.info("\n  Command options:\n");
+          for (ParameterDescription param : commander.getParameters()) {
+            hasRequired = printOption(console, param) || hasRequired;
+          }
+          if (hasRequired) {
+            console.info("\n  * = required");
+          }
         }
         List<String> examples = ((Command) commander.getObjects().get(0)).getExamples();
         if (examples != null) {
