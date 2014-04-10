@@ -22,7 +22,7 @@ import org.apache.avro.io.parsing.ResolvingGrammarGenerator;
 import org.apache.avro.io.parsing.Symbol;
 
 // TODO: replace with AVRO-1315 when generally available
-class SchemaValidationUtil {
+public class SchemaValidationUtil {
 
   public static boolean canRead(Schema writtenWith, Schema readUsing) {
     try {

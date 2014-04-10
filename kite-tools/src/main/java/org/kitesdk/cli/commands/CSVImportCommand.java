@@ -23,7 +23,9 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Iterator;
 import java.util.List;
+import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -33,8 +35,11 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.spi.SchemaUtil;
 import org.kitesdk.data.spi.filesystem.CSVProperties;
+import org.kitesdk.data.spi.filesystem.CSVUtil;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
+import org.kitesdk.data.spi.filesystem.SchemaValidationUtil;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription="Copy CSV records into a Dataset")
@@ -75,6 +80,9 @@ public class CSVImportCommand
 
     Path sourcePath = new Path(targets.get(0));
     FileSystem sourceFS = sourcePath.getFileSystem(conf);
+    Preconditions.checkArgument(sourceFS.exists(sourcePath),
+        "CSV path does not exist: " + sourcePath);
+
     CSVProperties props = new CSVProperties.Builder()
         .delimiter(delimiter)
         .escape(escape)
@@ -88,8 +96,8 @@ public class CSVImportCommand
 
     DatasetRepository targetRepo = getDatasetRepository();
     Dataset<Object> target = targetRepo.load(datasetName);
+    Schema datasetSchema = target.getDescriptor().getSchema();
 
-    // TODO: verify compatibility of CSV
     // TODO: replace this with a temporary Dataset from a FS repo
     // TODO: CDK-92: always use GenericRecord?
 
@@ -97,15 +105,28 @@ public class CSVImportCommand
         .name("temporary")
         .configuration(conf)
         .descriptor(props.addToDescriptor(new DatasetDescriptor.Builder()
-            .schema(target.getDescriptor().getSchema())
             .location(sourceFS.makeQualified(sourcePath))
+            .schema(datasetSchema)
             .format("csv")
             .build()))
         .build();
 
-    console.debug("Temporary CSV dataset: " + csvSourceAsDataset);
-    console.debug("Target dataset: " + target);
+    Iterator<Path> iter = csvSourceAsDataset.pathIterator().iterator();
+    Preconditions.checkArgument(iter.hasNext(),
+        "CSV path has no data files: " + sourcePath);
+    Schema csvSchema = CSVUtil.inferSchema(
+        datasetSchema.getFullName(), sourceFS.open(iter.next()), props);
 
+    Preconditions.checkArgument(
+        SchemaValidationUtil.canRead(csvSchema, datasetSchema),
+        "Incompatible schemas\nCSV: %s\nDataset: %s",
+        csvSchema.toString(true), datasetSchema.toString(true));
+    // TODO: add support for orderByHeaders
+    Preconditions.checkArgument(verifyFieldOrder(csvSchema, datasetSchema),
+        "Incompatible schema field order\nCSV: %s\nDataset: %s",
+        csvSchema.toString(true), datasetSchema.toString(true));
+
+    int count = 0;
     boolean threw = true;
     DatasetReader<Object> reader = csvSourceAsDataset.newReader();
     DatasetWriter<Object> writer = target.newWriter();
@@ -115,11 +136,15 @@ public class CSVImportCommand
       writer.open();
       for (Object record : reader) {
         writer.write(record);
+        count += 1;
       }
 
       threw = false;
 
     } finally {
+      if (count > 0) {
+        console.info("Added {} records to dataset \"{}\"", count, datasetName);
+      }
       boolean readerThrew = true;
       try {
         Closeables.close(reader, threw);
@@ -151,4 +176,26 @@ public class CSVImportCommand
     return conf;
   }
 
+  /**
+   * Validates that field names are in the same order because the datasetSchema
+   * ordering will be used when reading CSV. Types are assumed to match.
+   *
+   * @param csvSchema
+   * @param datasetSchema
+   * @return
+   */
+  public boolean verifyFieldOrder(Schema csvSchema, Schema datasetSchema) {
+    List<Schema.Field> csvFields = csvSchema.getFields();
+    List<Schema.Field> datasetFields = datasetSchema.getFields();
+    for (int i = 0; i < csvFields.size(); i += 1) {
+      // don't check generated field names (no header info)
+      if (csvFields.get(i).name().startsWith("field_")) {
+        continue;
+      }
+      if (!csvFields.get(i).name().equals(datasetFields.get(i).name())) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

@@ -20,12 +20,15 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.concurrent.Callable;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
+import org.kitesdk.data.DatasetNotFoundException;
+import org.kitesdk.data.TestHelpers;
 import org.slf4j.Logger;
 
 import static org.mockito.Mockito.*;
@@ -36,8 +39,9 @@ public class TestShowRecordsCommand {
   private ShowRecordsCommand command;
 
   @BeforeClass
-  public static void buildUserSchema() throws Exception {
+  public static void createDatasetFromCSV() throws Exception {
     String sample = "target/users.csv";
+    String avsc = "target/user.avsc";
     BufferedWriter writer = Files.newWriter(
         new File(sample), CSVSchemaCommand.SCHEMA_CHARSET);
     writer.append("id,username,email\n");
@@ -45,11 +49,10 @@ public class TestShowRecordsCommand {
     writer.append("2,user,user@example.com\n");
     writer.close();
 
-    TestUtil.run("-v", "csv-schema", "target/users.csv",
-        "-o", "target/user.avsc", "--class", "User");
+    TestUtil.run("-v", "csv-schema", sample, "-o", avsc, "--class", "User");
     TestUtil.run("-v", "create", "users",
-        "--local", "-d", "target/data", "-s", "target/user.avsc");
-    TestUtil.run("-v", "csv-import", "target/users.csv",
+        "--local", "-d", "target/data", "-s", avsc);
+    TestUtil.run("-v", "csv-import", sample,
         "--local", "-d", "target/data", "users");
   }
 
@@ -105,6 +108,22 @@ public class TestShowRecordsCommand {
     command.datasetNames = Lists.newArrayList("users");
     command.numRecords = -1;
     command.run();
+    verify(console).trace(contains("repo:file:target/data"));
+    verifyNoMoreInteractions(console);
+  }
+
+  @Test
+  public void testMissingDataset() throws Exception {
+    command.datasetNames= Lists.newArrayList("notadataset");
+    TestHelpers.assertThrows("Should complain about missing dataset",
+        DatasetNotFoundException.class, new Callable() {
+          @Override
+          public Object call() throws Exception {
+            command.run();
+            return null;
+          }
+        }
+    );
     verify(console).trace(contains("repo:file:target/data"));
     verifyNoMoreInteractions(console);
   }

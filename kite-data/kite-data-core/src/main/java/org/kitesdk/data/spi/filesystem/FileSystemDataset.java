@@ -131,7 +131,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeabl
     return unbounded.deleteAllUnsafe();
   }
 
-  PathIterator pathIterator() {
+  public PathIterator pathIterator() {
     return unbounded.pathIterator();
   }
 

@@ -29,7 +29,7 @@ import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.StorageKey;
 
-class PathIterator implements Iterator<Path>, Iterable<Path> {
+public class PathIterator implements Iterator<Path>, Iterable<Path> {
   private final FileSystem fs;
   private final Path root;
   private final Iterator<Pair<StorageKey, Path>> directories;
