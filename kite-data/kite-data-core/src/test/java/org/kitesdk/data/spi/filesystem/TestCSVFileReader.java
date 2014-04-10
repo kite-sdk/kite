@@ -116,7 +116,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
   @Override
   public DatasetReader<GenericData.Record> newReader() throws IOException {
     final DatasetDescriptor desc = new DatasetDescriptor.Builder()
-        .property("kite.csv.lines-to-skip", "1")
+        .property("kite.csv.has-header", "true")
         .schema(VALIDATOR_SCHEMA)
         .build();
     return new CSVFileReader<GenericData.Record>(localfs, validatorFile, desc);

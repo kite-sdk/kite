@@ -30,7 +30,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
 import org.kitesdk.data.TestHelpers;
-import org.mockito.Matchers;
 import org.slf4j.Logger;
 
 import static org.mockito.Mockito.*;

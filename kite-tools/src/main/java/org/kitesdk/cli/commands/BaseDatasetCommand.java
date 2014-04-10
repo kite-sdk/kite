@@ -63,12 +63,16 @@ abstract class BaseDatasetCommand implements Command {
       }
     }
     String uri;
-    if (hcatalog) {
+    if (local) {
+      Preconditions.checkArgument(directory != null,
+          "--directory is required when using --local");
+      uri = "repo:file:" + directory;
+    } else if (hcatalog) {
       uri = "repo:hive" + (directory != null ? ":" + directory : "");
     } else {
       Preconditions.checkArgument(directory != null,
           "--directory is required when not using Hive");
-      uri = "repo:" + (local ? "file" : "hdfs") + ":" + directory;
+      uri = "repo:hdfs:" + directory;
     }
     console.trace("Repository URI: " + uri);
     return uri;

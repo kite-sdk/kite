@@ -74,12 +74,12 @@ public class TestBaseCommand {
   }
 
   @Test
-  public void testManagedHiveRepoLocal() {
+  public void testLocalOverridesHive() {
     command.hcatalog = true;
-    command.directory = null;
+    command.directory = "/tmp/data";
     command.local = true;
-    Assert.assertEquals("repo:hive", command.buildRepoURI());
-    verify(console).trace(contains("repo:hive"));
+    Assert.assertEquals("repo:file:/tmp/data", command.buildRepoURI());
+    verify(console).trace(contains("repo:file:/tmp/data"));
   }
 
   @Test

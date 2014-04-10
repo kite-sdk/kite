@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import java.util.Comparator;
 import java.util.List;
 import org.apache.avro.Schema;
+import org.apache.hadoop.conf.Configuration;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
@@ -33,7 +34,9 @@ public class TestUtil {
   }
 
   public static int run(Logger console, String... args) throws Exception {
-    return new Main(console).run(args);
+    Main main = new Main(console);
+    main.setConf(new Configuration());
+    return main.run(args);
   }
 
   public static Matcher<String> matchesMinimizedSchema(Schema schema) {

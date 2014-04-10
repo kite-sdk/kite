@@ -23,7 +23,7 @@ import java.util.List;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Retrieves details on the functions of other commands")
-public class Help {
+public class Help implements Command {
   @Parameter(description = "Commands")
   List<String> helpCommands = Lists.newArrayList();
 
@@ -35,6 +35,7 @@ public class Help {
     this.console = console;
   }
 
+  @Override
   public int run() {
     boolean hasRequired = false;
 
@@ -121,5 +122,10 @@ public class Help {
     return " (default: " + ((defaultValue instanceof String) ?
         "\"" + defaultValue + "\"" :
         defaultValue.toString()) + ")";
+  }
+
+  @Override
+  public List<String> getExamples() {
+    return null;
   }
 }

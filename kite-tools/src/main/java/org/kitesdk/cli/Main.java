@@ -22,6 +22,7 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.log4j.Level;
+import org.kitesdk.cli.commands.CSVImportCommand;
 import org.kitesdk.cli.commands.CSVSchemaCommand;
 import org.kitesdk.cli.commands.CreateDatasetCommand;
 import org.kitesdk.cli.commands.DeleteDatasetCommand;
@@ -34,6 +35,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.kitesdk.cli.commands.ObjectSchemaCommand;
 import org.kitesdk.cli.commands.SchemaCommand;
+import org.kitesdk.cli.commands.ShowRecordsCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +66,9 @@ public class Main extends Configured implements Tool {
     jc.addCommand("create", new CreateDatasetCommand(console));
     jc.addCommand("delete", new DeleteDatasetCommand(console));
     jc.addCommand("schema", new SchemaCommand(console));
+    jc.addCommand("show", new ShowRecordsCommand(console));
     jc.addCommand("csv-schema", new CSVSchemaCommand(console));
+    jc.addCommand("csv-import", new CSVImportCommand(console));
     jc.addCommand("obj-schema", new ObjectSchemaCommand(console));
   }
 

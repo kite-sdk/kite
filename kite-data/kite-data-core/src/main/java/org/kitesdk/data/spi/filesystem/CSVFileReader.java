@@ -93,6 +93,11 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
     }
 
     this.reader = CSVUtil.newReader(incoming, props);
+    // header is determined by the schema, so skip the file header
+    // TODO: support the orderByHeader property
+    if (props.useHeader) {
+      this.hasNext = advance();
+    }
 
     // initialize by reading the first record
     this.hasNext = advance();
@@ -261,6 +266,8 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
               return value;
             }
           }
+          return null;
+        case NULL:
           return null;
         default:
           // FIXED, BYTES, MAP, ARRAY, RECORD are not supported

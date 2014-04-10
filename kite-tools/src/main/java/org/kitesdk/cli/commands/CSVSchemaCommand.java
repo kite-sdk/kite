@@ -69,6 +69,9 @@ public class CSVSchemaCommand implements Configurable, Command {
   @Parameter(names="--delimiter", description="Delimiter character")
   String delimiter = ",";
 
+  @Parameter(names="--escape", description="Escape character")
+  String escape = "\\";
+
   @Parameter(names="--quote", description="Quote character")
   String quote = "\"";
 
@@ -93,6 +96,7 @@ public class CSVSchemaCommand implements Configurable, Command {
 
     CSVProperties props = new CSVProperties.Builder()
         .delimiter(delimiter)
+        .escape(escape)
         .quote(quote)
         .hasHeader(!noHeader)
         .linesToSkip(linesToSkip)
