@@ -38,6 +38,7 @@ h3. Table of Contents
 \\
 \\
 h3. kite\-morphlines\-core\-stdio
+| [#readBlob] | Converts an InputStream to a byte array in main memory. |
 | [#readClob] | Converts a byte stream to a string. |
 | [#readCSV] | Extracts zero or more records from the input stream of bytes representing a Comma Separated Values (CSV) file. |
 | [#readLine] | Emits one record per line in the input stream. |
@@ -185,6 +186,21 @@ h3. kite\-morphlines\-useragent
 h1. kite\-morphlines\-core\-stdio
 
 This maven module contains standard I/O commands for tasks such as acting on single\-line records, multi\-line records, CSV files, and for converting bytes to strings.
+
+h2. readBlob
+
+The {{readBlob}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdio/ReadBlobBuilder.java]) converts an InputStream to a byte array in main memory. It emits one record for the entire input stream of the first attachment, interpreting the stream as a Binary Large Object (BLOB), i.e. emits a corresponding Java byte array. The BLOB is put as a Java byte array into the \_attachment\_body output field by default.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
+| outputField | \_attachment\_body | Name of the output field where the BLOB will be stored. |
+
+Example usage:
+{code}
+readBlob {}
+{code}
 
 h2. readClob
 

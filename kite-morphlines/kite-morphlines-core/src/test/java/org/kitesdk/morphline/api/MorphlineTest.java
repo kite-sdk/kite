@@ -744,6 +744,41 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testReadBlob() throws Exception {
+    morphline = createMorphline("test-morphlines/readBlob");    
+    for (int i = 0; i < 3; i++) {
+      Record record = new Record();
+      byte[] bytes = "foo".getBytes("UTF-8");
+      record.put(Fields.ATTACHMENT_BODY, bytes);
+      collector.reset();
+      startSession();
+      assertEquals(1, collector.getNumStartEvents());
+      assertTrue(morphline.process(record));
+      assertSame(record, collector.getFirstRecord());
+      assertNotSame(bytes, record.getFirstValue(Fields.ATTACHMENT_BODY)); 
+      assertArrayEquals(bytes, (byte[])record.getFirstValue(Fields.ATTACHMENT_BODY)); 
+    }
+  }
+  
+  @Test
+  public void testReadBlobWithDestination() throws IOException {
+    morphline = createMorphline("test-morphlines/readBlobWithOutputField");
+    for (int i = 0; i < 3; i++) {
+      Record record = new Record();
+      byte[] bytes = "foo".getBytes("UTF-8");
+      record.put(Fields.ATTACHMENT_BODY, bytes);
+      collector.reset();
+      startSession();
+      assertEquals(1, collector.getNumStartEvents());
+      assertTrue(morphline.process(record));
+      assertSame(record, collector.getFirstRecord());
+      assertSame(bytes, record.getFirstValue(Fields.ATTACHMENT_BODY)); 
+      assertNotSame(bytes, record.getFirstValue("myAwesomeDestination")); 
+      assertArrayEquals(bytes, (byte[])record.getFirstValue("myAwesomeDestination")); 
+    }
+  }
+  
+  @Test
   public void testReadClob() throws Exception {
     morphline = createMorphline("test-morphlines/readClob");    
     for (int i = 0; i < 3; i++) {
