@@ -118,7 +118,7 @@ public class Help implements Command {
 
   private String formatDefault(ParameterDescription param) {
     Object defaultValue = param.getDefault();
-    if (defaultValue == null) {
+    if (defaultValue == null || param.getParameter().arity() < 1) {
       return "";
     }
     return " (default: " + ((defaultValue instanceof String) ?
