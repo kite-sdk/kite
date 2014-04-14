@@ -10,6 +10,8 @@ Release date: TBD
 Version TBD has the following notable changes:
 
 * Morphlines Library
+    * Added morphline command that opens an HDFS file for read and returns a corresponding Java InputStream: [openHdfsFile](kite-morphlines/morphlinesReferenceGuide.html#openHdfsFile)
+    * Added morphline command that converts an InputStream to a byte array in main memory: [readBlob](kite-morphlines/morphlinesReferenceGuide.html#readBlob)
     * Upgraded kite-morphlines-saxon module from Saxon-HE-9.5.1-4 to Saxon-HE-9.5.1-5
 
 ## Version 0.12.1
