@@ -106,6 +106,7 @@ h3. kite\-morphlines\-json
 \\
 h3. kite\-morphlines\-hadoop\-core
 | [#downloadHdfsFile] | Downloads, on startup, zero or more files or directory trees from HDFS to the local file system. |
+| [#openHdfsFile] | Opens an HDFS file for read and returns a corresponding Java InputStream. |
 
 {anchor:kite\-morphlines\-hadoop\-parquet\-avro}
 \\
@@ -1905,6 +1906,19 @@ downloadHdfsFile {
   inputFiles : ["hdfs://c2202.mycompany.com/user/foo/configs/sample-schema.avsc"]
   outputDir : "myconfigs"
 }
+{code}
+
+h2. openHdfsFile
+
+The {{openHdfsFile}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-hadoop-core/src/main/java/org/kitesdk/morphline/hadoop/core/OpenHdfsFileBuilder.java]) opens an HDFS file for read and returns a corresponding Java InputStream. 
+
+The morphline record input field \_attachment\_body  must contain the HDFS Path of the file to read. The command replaces the HDFS Path in this field with the corresponding Java InputStream. Said InputStream can then be parsed with other commands, such as [#readLine] or similar.
+
+The command automatically handles gzip files if the file path ends with the ".gz" file name extensions.
+
+Example usage:
+{code}
+openHdfsFile {}
 {code}
 
 h1. kite\-morphlines\-hadoop\-parquet\-avro
