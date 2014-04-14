@@ -23,8 +23,8 @@ import java.util.List;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Retrieves details on the functions of other commands")
-public class Help {
-  @Parameter(description = "Commands")
+public class Help implements Command {
+  @Parameter(description = "<commands>")
   List<String> helpCommands = Lists.newArrayList();
 
   private final JCommander jc;
@@ -35,6 +35,7 @@ public class Help {
     this.console = console;
   }
 
+  @Override
   public int run() {
     boolean hasRequired = false;
 
@@ -74,12 +75,14 @@ public class Help {
                 commander.getMainParameterDescription()});
         console.info("\n  Description:");
         console.info("\n    {}", jc.getCommandDescription(cmd));
-        console.info("\n  Command options:\n");
-        for (ParameterDescription param : commander.getParameters()) {
-          hasRequired = printOption(console, param) || hasRequired;
-        }
-        if (hasRequired) {
-          console.info("\n  * = required");
+        if (!commander.getParameters().isEmpty()) {
+          console.info("\n  Command options:\n");
+          for (ParameterDescription param : commander.getParameters()) {
+            hasRequired = printOption(console, param) || hasRequired;
+          }
+          if (hasRequired) {
+            console.info("\n  * = required");
+          }
         }
         List<String> examples = ((Command) commander.getObjects().get(0)).getExamples();
         if (examples != null) {
@@ -115,11 +118,16 @@ public class Help {
 
   private String formatDefault(ParameterDescription param) {
     Object defaultValue = param.getDefault();
-    if (defaultValue == null) {
+    if (defaultValue == null || param.getParameter().arity() < 1) {
       return "";
     }
     return " (default: " + ((defaultValue instanceof String) ?
         "\"" + defaultValue + "\"" :
         defaultValue.toString()) + ")";
+  }
+
+  @Override
+  public List<String> getExamples() {
+    return null;
   }
 }

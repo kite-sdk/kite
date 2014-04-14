@@ -57,7 +57,8 @@ public class ObjectSchemaCommand implements Configurable, Command {
   @Parameter(names={"-o", "--output"}, description="Save schema avsc to path")
   String outputPath = null;
 
-  @Parameter(names="--minimize", description="Minimize schema file size")
+  @Parameter(names="--minimize",
+      description="Minimize schema file size by eliminating white space")
   boolean minimize=false;
 
   @Parameter(names="--jar",

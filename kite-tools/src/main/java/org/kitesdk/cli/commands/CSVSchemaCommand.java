@@ -63,11 +63,15 @@ public class CSVSchemaCommand implements Configurable, Command {
       description="A name or class for the result schema")
   String recordName = null;
 
-  @Parameter(names="--minimize", description="Minimize schema file size")
+  @Parameter(names="--minimize",
+      description="Minimize schema file size by eliminating white space")
   boolean minimize=false;
 
   @Parameter(names="--delimiter", description="Delimiter character")
   String delimiter = ",";
+
+  @Parameter(names="--escape", description="Escape character")
+  String escape = "\\";
 
   @Parameter(names="--quote", description="Quote character")
   String quote = "\"";
@@ -93,6 +97,7 @@ public class CSVSchemaCommand implements Configurable, Command {
 
     CSVProperties props = new CSVProperties.Builder()
         .delimiter(delimiter)
+        .escape(escape)
         .quote(quote)
         .hasHeader(!noHeader)
         .linesToSkip(linesToSkip)
@@ -122,10 +127,10 @@ public class CSVSchemaCommand implements Configurable, Command {
   @Override
   public List<String> getExamples() {
     return Lists.newArrayList(
-        "# Print the schema to standard out:",
-        "sample.csv",
-        "# Write schema to sample-schema.avsc:",
-        "sample.csv -o sample-schema.avsc"
+        "# Print the schema for samples.csv to standard out:",
+        "samples.csv --record-name Sample",
+        "# Write schema to sample.avsc:",
+        "samples.csv -o sample.avsc --record-name Sample"
     );
   }
 

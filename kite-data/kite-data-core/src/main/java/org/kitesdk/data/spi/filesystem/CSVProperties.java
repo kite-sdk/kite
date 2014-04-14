@@ -122,6 +122,17 @@ public class CSVProperties {
     return null;
   }
 
+  public DatasetDescriptor addToDescriptor(DatasetDescriptor descriptor) {
+    return new DatasetDescriptor.Builder(descriptor)
+        .property(CHARSET_PROPERTY, charset)
+        .property(DELIMITER_PROPERTY, delimiter)
+        .property(ESCAPE_CHAR_PROPERTY, escape)
+        .property(QUOTE_CHAR_PROPERTY, quote)
+        .property(HAS_HEADER_PROPERTY, Boolean.toString(useHeader))
+        .property(LINES_TO_SKIP_PROPERTY, Integer.toString(linesToSkip))
+        .build();
+  }
+
   public static CSVProperties fromDescriptor(DatasetDescriptor descriptor) {
     return new CSVProperties(descriptor);
   }
