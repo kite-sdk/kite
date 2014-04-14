@@ -26,12 +26,11 @@ import org.slf4j.Logger;
 abstract class BaseDatasetCommand implements Command {
   @Parameter(names = {"-d", "--directory"},
       description = "The root directory of the dataset repository. Optional if using " +
-          "HCatalog for metadata storage.")
+          "Hive for metadata storage.")
   String directory = null;
 
-  @Parameter(names = {"--use-hcatalog"}, arity = 1,
-      description = "If true, store dataset metadata in HCatalog, " +
-          "otherwise store it on the filesystem.")
+  @Parameter(names = {"--use-hive"}, arity = 1,
+      description = "Whether to store metadata in the Hive MetaStore, otherwise stored in the filesystem.")
   boolean hcatalog = true;
 
   @VisibleForTesting
