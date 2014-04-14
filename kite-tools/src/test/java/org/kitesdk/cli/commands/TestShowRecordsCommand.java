@@ -21,7 +21,6 @@ import com.google.common.io.Files;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.util.concurrent.Callable;
-import org.apache.hadoop.conf.Configuration;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -65,7 +64,6 @@ public class TestShowRecordsCommand {
   public void setup() throws Exception {
     this.console = mock(Logger.class);
     this.command = new ShowRecordsCommand(console);
-    command.setConf(new Configuration());
     // set the test repository information
     command.local = true;
     command.directory = "target/data";

@@ -18,27 +18,18 @@ package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
-import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepository;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Print the first n records in a Dataset")
-public class ShowRecordsCommand extends BaseDatasetCommand implements Configurable {
-
-  private Configuration conf;
+public class ShowRecordsCommand extends BaseDatasetCommand {
 
   @Parameter(description = "<dataset name>")
   List<String> datasetNames;
@@ -93,13 +84,4 @@ public class ShowRecordsCommand extends BaseDatasetCommand implements Configurab
     );
   }
 
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
-  }
-
-  @Override
-  public Configuration getConf() {
-    return conf;
-  }
 }
