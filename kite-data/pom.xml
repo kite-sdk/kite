@@ -29,6 +29,7 @@
     <module>kite-data-hcatalog</module>
     <module>kite-data-hbase</module>
     <module>kite-data-mapreduce</module>
+    <module>kite-data-crunch-morphlines</module>
   </modules>
 
   <parent>
