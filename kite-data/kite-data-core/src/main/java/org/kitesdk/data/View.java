@@ -20,7 +20,7 @@ import javax.annotation.concurrent.Immutable;
 /**
  * A {@code View} is a subset of a {@link Dataset}.
  *
- * A {@code View} defines a space of potential storage keys, or a partition
+ * A {@code View} defines a space of potential storage keys or a partition
  * space. Views can be created from ranges, partial keys, or the union of other
  * views.
  *
@@ -33,7 +33,8 @@ import javax.annotation.concurrent.Immutable;
 public interface View<E> {
 
   /**
-   * Returns the underlying {@link org.kitesdk.data.Dataset} that this is a {@code View} of.
+   * Returns the underlying {@link org.kitesdk.data.Dataset} for the
+   * {@code View}.
    *
    * @return the underlying {@code Dataset}
    */
@@ -43,11 +44,11 @@ public interface View<E> {
    * Get an appropriate {@link DatasetReader} implementation based on this
    * {@code View} of the underlying {@code Dataset} implementation.
    *
-   * Implementations are free to return different types of readers depending on
-   * the disposition of the data. For example, a partitioned dataset may use a
+   * Implementations are free to return different types of readers, depending on
+   * the disposition of the data. For example, a partitioned dataset can use a
    * different reader than that of a non-partitioned dataset. Clients should not
-   * make any assumptions about the returned implementations. Implementations
-   * are free to change them at any time.
+   * make any assumptions about the returned implementations: implementations
+   * are free to change their internal structure at any time.
    *
    * @throws DatasetException
    */
@@ -60,8 +61,8 @@ public interface View<E> {
    * Implementations are free to return different types of writers depending on
    * the disposition of the data. For example, a partitioned dataset may use a
    * different writer than that of a non-partitioned dataset. Clients should not
-   * make any assumptions about the returned implementations. Implementations
-   * are free to change them at any time.
+   * make any assumptions about the returned implementations: implementations
+   * are free to change their internal structure at any time.
    *
    * @throws DatasetException
    */
@@ -86,14 +87,13 @@ public interface View<E> {
    * if some but not all of the data in an underlying data file must be removed,
    * then the implementation is allowed to reject the deletion rather than
    * copy the remaining records to a new file. Implementations must  document
-   * what deletes are supported and under what conditions deletes will be
-   * rejected.
-   *
+   * what deletes are supported and under what conditions deletes are rejected.
+   * 
    * @return true if any data was deleted, false if the View was already empty
    * @throws UnsupportedOperationException
-   *          If the requested delete cannot be completed by the implementation
+   *          if the requested delete cannot be completed by the implementation
    * @throws DatasetIOException
-   *          If the requested delete failed because of an IOException
+   *          if the requested delete failed because of an IOException
    * @since 0.12.0
    */
   public boolean deleteAll();
