@@ -21,17 +21,17 @@ import org.apache.hadoop.fs.Path;
 
 /**
  * <p>
- * A {@link org.kitesdk.data.MetadataProvider} that stores dataset metadata in a Hadoop
- * {@link org.apache.hadoop.fs.FileSystem}.
+ * A {@link org.kitesdk.data.MetadataProvider} that stores dataset metadata in a 
+ * Hadoop {@link org.apache.hadoop.fs.FileSystem}.
  * </p>
  * <p>
  * When configured with a root directory, this implementation serializes the
- * information within a {@link org.kitesdk.data.DatasetDescriptor} on the provided
- * {@link org.apache.hadoop.fs.FileSystem}. The descriptor is serialized as an Avro object and stored
- * in a directory named after the dataset name. For example, if the dataset name
- * is {@code logs}, the directory {@code rootDirectory/logs/} will be created,
- * if it doesn't exist, and the serialized descriptor will be stored in the file
- * {@code descriptor.avro}.
+ * information within a {@link org.kitesdk.data.DatasetDescriptor} on the 
+ * provided {@link org.apache.hadoop.fs.FileSystem}. The descriptor is 
+ * serialized as an Avro object and stored in a directory named after the 
+ * dataset name. For example, if the dataset name is {@code logs}, the directory 
+ * {@code rootDirectory/logs/} is created if it doesn't exist, and the 
+ * serialized descriptor is stored in the file {@code descriptor.avro}.
  * </p>
  * @deprecated will be removed in 0.14.0; moved to SPI.
  */
@@ -46,8 +46,8 @@ public class FileSystemMetadataProvider extends
   }
 
   /**
-   * A fluent builder to aid in the construction of {@link FileSystemMetadataProvider}
-   * instances.
+   * A fluent builder to aid in the construction of 
+   * {@link FileSystemMetadataProvider} instances.
    * @since 0.8.0
    * @deprecated will be removed in 0.14.0
    */
@@ -70,7 +70,8 @@ public class FileSystemMetadataProvider extends
     }
 
     /**
-     * The {@link Configuration} used to find the {@link org.apache.hadoop.fs.FileSystem}.
+     * The {@link Configuration} used to find the
+     * {@link org.apache.hadoop.fs.FileSystem}.
      */
     @SuppressWarnings("deprecation")
     public Builder configuration(Configuration configuration) {
