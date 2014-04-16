@@ -22,13 +22,14 @@ import javax.annotation.concurrent.NotThreadSafe;
  * A service provider interface for metadata system plugins.
  * </p>
  * <p>
- * Implementations of {@link DatasetRepository} are written against this
+ * You write implementations of {@link DatasetRepository} against this
  * interface and, by extension, can store dataset metadata information contained
- * in the {@link DatasetDescriptor} in a system of the user's choosing.
+ * in the {@link DatasetDescriptor} in a system of your choosing.
  * </p>
  * <p>
- * Implementations of {@link MetadataProvider} are typically not thread-safe; that is,
- * the behavior when accessing a single instance from multiple threads is undefined.
+ * Implementations of {@link MetadataProvider} typically are not thread-safe;
+ * that is, the behavior when accessing a single instance from multiple threads
+ * is undefined.
  * </p>
  *
  * @deprecated will be moved in 0.14.0; moved to service provider interface.
