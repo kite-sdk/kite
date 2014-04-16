@@ -26,19 +26,19 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * A stream-oriented dataset reader.
  * </p>
  * <p>
- * Subsystem-specific implementations of this interface are used to read data
- * from a {@link Dataset}. Readers are use-once objects that produce entities of
- * type {@code E}. Normally, users are not expected to instantiate
+ * Use subsystem-specific implementations of this interface  to read data from a
+ * {@link Dataset}. Readers are use-once objects that produce entities of
+ * type {@code E}. Normally, you are not expected to instantiate
  * implementations directly. Instead, use the containing dataset's
  * {@link Dataset#getReader()} method to get an appropriate implementation.
- * Normally, users receive an instance of this interface from a dataset, call
+ * Normally, you receive an instance of this interface from a dataset, call
  * {@link #open()} to prepare for IO operations, invoke {@link #hasNext()} and
  * {@link #next()} as necessary, and {@link #close()} when they are done or no
  * more data exists.
  * </p>
  * <p>
- * Implementations may hold system resources until the {@link #close()} method
- * is called, so users <strong>must</strong> follow the normal try / finally
+ * Implementations can hold system resources until the {@link #close()} method
+ * is called, so you <strong>must</strong> follow the normal try / finally
  * pattern to ensure these resources are properly freed when the reader is
  * exhausted or no longer useful. Do not rely on implementations automatically
  * invoking the {@code close()} method upon object finalization (although
@@ -48,11 +48,12 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * </p>
  * <p>
  * If any method throws an exception, the reader is no longer valid, and the
- * only method that may be subsequently called is {@code close()}.
+ * only method that can be subsequently called is {@code close()}.
  * </p>
  * <p>
- * Implementations of {@link DatasetReader} are typically not thread-safe; that is,
- * the behavior when accessing a single instance from multiple threads is undefined.
+ * Implementations of {@link DatasetReader} are typically not thread-safe; that
+ * is, the behavior when accessing a single instance from multiple threads is
+ * undefined.
  * </p>
  *
  * @param <E> The type of entity produced by this reader.
@@ -89,9 +90,9 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    * Fetch the next entity from the reader.
    * </p>
    * <p>
-   * Calling this method when no additional data exists is illegal; users should
+   * Calling this method when no additional data exists is illegal; you should
    * use {@link #hasNext()} to test if a call to {@code read()} will succeed.
-   * Implementations of this method may block.
+   * Implementations of this method can block.
    * </p>
    *
    * @return An entity of type {@code E}.
@@ -125,7 +126,7 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    * </p>
    * <p>
    * No further operations of this interface (other than additional calls of
-   * this method) may be performed, however implementations may choose to permit
+   * this method) can be performed, however implementations can choose to permit
    * other method calls. See implementation documentation for details.
    * </p>
    *
