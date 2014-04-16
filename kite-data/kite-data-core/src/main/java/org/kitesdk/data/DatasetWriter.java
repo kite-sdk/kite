@@ -24,19 +24,19 @@ import javax.annotation.concurrent.NotThreadSafe;
  * A stream-oriented dataset writer.
  * </p>
  * <p>
- * Subsystem-specific implementations of this interface are used to write data
+ * Use ubsystem-specific implementations of this interface to write data
  * to a {@link Dataset}. Writers are use-once objects that serialize entities of
- * type {@code E} and write them to the underlying system. Normally, users are
+ * type {@code E} and write them to the underlying system. Normally, you are
  * not expected to instantiate implementations directly. Instead, use the
  * containing dataset's {@link Dataset#getWriter()} method to get an appropriate
- * implementation. Users should receive an instance of this interface from a
+ * implementation. You should receive an instance of this interface from a
  * dataset, call {@link #open()} to prepare for IO operations, invoke
  * {@link #write(Object)} and {@link #flush()} as necessary, and
  * {@link #close()} when they are done, or no more data exists.
  * </p>
  * <p>
- * Implementations may hold system resources until the {@link #close()} method
- * is called, so users <strong>must</strong> follow the normal try / finally
+ * Implementations can hold system resources until the {@link #close()} method
+ * is called, so you <strong>must</strong> follow the normal try / finally
  * pattern to ensure these resources are properly freed when the writer is no
  * longer needed. Do not rely on implementations automatically invoking the
  * {@code close()} method upon object finalization (implementations must not do
@@ -45,11 +45,12 @@ import javax.annotation.concurrent.NotThreadSafe;
  * </p>
  * <p>
  * If any method throws an exception, the writer is no longer valid, and the
- * only method that may be subsequently called is {@code close()}.
+ * only method that can be subsequently called is {@code close()}.
  * </p>
  * <p>
- * Implementations of {@link DatasetWriter} are typically not thread-safe; that is,
- * the behavior when accessing a single instance from multiple threads is undefined.
+ * Implementations of {@link DatasetWriter} are typically not thread-safe; that
+ * is, the behavior when accessing a single instance from multiple threads is
+ * undefined.
  * </p>
  *
  * @param <E> The type of entity accepted by this writer.
@@ -73,13 +74,13 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
 
   /**
    * <p>
-   * Writer an entity of type {@code E} to the associated dataset.
+   * Write an entity of type {@code E} to the associated dataset.
    * </p>
    * <p>
-   * Implementations may buffer entities internally (see the {@link #flush()}
+   * Implementations can buffer entities internally (see the {@link #flush()}
    * method). All instances of {@code entity} must conform to the dataset's
-   * schema and partition. If they don't, implementations should throw an exception,
-   * although this is not required.
+   * schema and partition. If they don't, implementations should throw an
+   * exception, although this is not required.
    * </p>
    *
    * @param entity The entity to write
@@ -106,8 +107,8 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
    * </p>
    * <p>
    * No further operations of this interface (other than additional calls to
-   * this method) may be performed, however implementations may choose to permit
-   * other method calls. See implementation documentation for details.
+   * this method) can be performed; however, implementations can choose to 
+   * permit other method calls. See implementation documentation for details.
    * </p>
    *
    * @throws DatasetWriterException
