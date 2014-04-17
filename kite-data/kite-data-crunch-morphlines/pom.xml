@@ -25,10 +25,17 @@
 
   <properties>
     <argparse4j.version>0.4.3</argparse4j.version>
-    <httpclient.version>4.2.5</httpclient.version>
+    <httpclient.version>4.2.6</httpclient.version>
+    <httpcore.version>4.2.5</httpcore.version>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-test-framework</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-crunch</artifactId>
@@ -100,12 +107,7 @@
       <groupId>org.apache.hcatalog</groupId>
       <artifactId>hcatalog-core</artifactId>
       <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-test-framework</artifactId>
-      <scope>test</scope>
+      <!--<scope>provided</scope>-->
     </dependency>
 
     <dependency>
@@ -160,6 +162,13 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    
   </dependencies>
 
   <dependencyManagement>
@@ -200,7 +209,7 @@
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore</artifactId>
-        <version>${httpclient.version}</version> <!-- required for solr tests -->
+        <version>${httpcore.version}</version> <!-- required for solr tests -->
       </dependency>
       
       <!--
@@ -261,6 +270,24 @@
             <phase>package</phase>
             <goals>
               <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>myMessage</id>
+            <phase>compile</phase>
+            <configuration>
+              <target>
+                <echo message="Compiling kite-data-crunch-morphlines with ${artifact.hadoop-deps}" />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
             </goals>
           </execution>
         </executions>
