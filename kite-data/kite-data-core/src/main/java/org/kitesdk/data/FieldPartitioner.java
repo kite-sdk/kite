@@ -23,19 +23,19 @@ import javax.annotation.concurrent.Immutable;
  * </p>
  * <p>
  * Used by a {@link PartitionStrategy} to calculate which partition an entity
- * belongs in, based on the value of a given field, called the source field. A field
- * partitioner can, in some cases, provide meaningful cardinality hints to query
- * systems. A good example of this is a hash partitioner which always knows the number of
- * buckets produced by the function.
+ * belongs in, based on the value of a given field called the source field. A 
+ * field partitioner can, in some cases, provide meaningful cardinality hints to 
+ * query systems. A good example of this is a hash partitioner that always knows
+ * the number of buckets produced by the function.
  * </p>
  * <p>
  * Implementations of {@link FieldPartitioner} are immutable.
  * </p>
  *
- * @param <S> The type of the source field in the entity. The partition function must
- *           accept values of this type.
- * @param <T> The type of the target field, which is the type of the return value of the
- *           partition function.
+ * @param <S> The type of the source field in the entity. The partition function 
+ *            must accept values of this type.
+ * @param <T> The type of the target field, which is the type of the return 
+ *            value of the partition function.
  * @see PartitionStrategy
  * @see org.kitesdk.data.spi.FieldPartitioner
  * @deprecated will be removed in 0.13.0; moved to package org.kitesdk.data.spi
