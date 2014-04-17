@@ -88,10 +88,10 @@ public class DatasetRepositories {
    * Open a {@link DatasetRepository} for the given URI.
    * </p>
    * <p>
-   * This method provides a simple way to connect to a {@link DatasetRepository}
-   * while providing configuration options to use. For almost all cases, this
-   * is the preferred method
-   * of retrieving an instance of a {@link DatasetRepository}.
+   * This method provides a way to connect to a {@link DatasetRepository}
+   * while providing configuration options. For almost all cases, this
+   * is the preferred method for retrieving an instance of a 
+   * {@link DatasetRepository}.
    * </p>
    * <p>
    * The format of a repository URI is as follows.
@@ -108,11 +108,11 @@ public class DatasetRepositories {
    * filesystem path to be used as the dataset repository root directory in which
    * to store dataset data. When specifying an absolute path, the
    * <q>null authority</q> (i.e. <code>file:///my/path</code>)
-   * form may be used. Alternatively, the authority section may be omitted
+   * form can be used. Alternatively, the authority section can be omitted
    * entirely (e.g. <code>file:/my/path</code>). Either way, it is illegal to
    * provide an authority (i.e.
    * <code>file://this-part-is-illegal/my/path</code>). This storage backend
-   * will produce a {@link DatasetRepository} that stores both data and metadata
+   * produces a {@link DatasetRepository} that stores both data and metadata
    * on the local operating system filesystem. See
    * {@link FileSystemDatasetRepository} for more information.
    * </p>
@@ -121,24 +121,24 @@ public class DatasetRepositories {
    * <code>hdfs://[host]:[port]/[path]</code> where <code>[host]</code> and
    * <code>[port]</code> indicate the location of the Hadoop NameNode, and
    * <code>[path]</code> is the dataset repository root directory in which to
-   * store dataset data. This form will load the Hadoop configuration
-   * information per the usual methods (i.e. searching the process's classpath
-   * for the various configuration files). This storage backend will produce a
-   * {@link DatasetRepository} that stores both data and metadata in HDFS. See
-   * {@link FileSystemDatasetRepository} for more information.
+   * store dataset data. This form loads the Hadoop configuration
+   * information per the usual methods (that is, searching the process's 
+   * classpath for the various configuration files). This storage backend 
+   * produces a {@link DatasetRepository} that stores both data and metadata in
+   * HDFS. See {@link FileSystemDatasetRepository} for more information.
    * </p>
    * <h1>Hive/HCatalog URIs</h1>
    * <p>
    * <code>hive</code> and
-   * <code>hive://[metastore-host]:[metastore-port]/</code> will connect to the
-   * Hive MetaStore.  Dataset locations will be determined by Hive as managed
+   * <code>hive://[metastore-host]:[metastore-port]/</code> connects to the
+   * Hive MetaStore.  Dataset locations are determined by Hive as managed
    * tables.
    * </p>
    * <p>
    * <code>hive:/[path]</code> and
-   * <code>hive://[metastore-host]:[metastore-port]/[path]</code> will also
-   * connect to the Hive MetaStore, but tables will be external and stored
-   * under <code>[path]</code>. The repository storage layout will be the same
+   * <code>hive://[metastore-host]:[metastore-port]/[path]</code> also
+   * connect to the Hive MetaStore, but tables are external and stored
+   * under <code>[path]</code>. The repository storage layout is the same
    * as <code>hdfs</code> and <code>file</code> repositories. HDFS connection
    * options can be supplied by adding <code>hdfs-host</code> and
    * <code>hdfs-port</code> query options to the URI (see examples).
@@ -146,7 +146,7 @@ public class DatasetRepositories {
    * <h1>HBase URIs</h1>
    * <p>
    * <code>repo:hbase:[zookeeper-host1]:[zk-port],[zookeeper-host2],...
-   * </code> will open a HBase-backed DatasetRepository. This URI may also be
+   * </code> opens an HBase-backed DatasetRepository. This URI can also be
    * instantiated with {@link #openRandomAccess(URI)} to instantiate a {@link
    * RandomAccessDatasetRepository}
    * </p>
@@ -175,7 +175,7 @@ public class DatasetRepositories {
    * <td><code>repo:hive://meta-host:9083/</code></td>
    * <td>Connects to the Hive MetaStore at <code>thrift://meta-host:9083</code>,
    * and creates managed tables. This only matches when the path is
-   * <code>/</code></td>. Any non-root path will match the external Hive URIs.
+   * <code>/</code></td>. Any non-root path matches the external Hive URIs.
    * </tr>
    * <tr>
    * <td><code>repo:hive:/path?hdfs-host=localhost&hdfs-port=8020</code></td>
@@ -201,7 +201,7 @@ public class DatasetRepositories {
    * <code>repo:hbase:zk1,zk2,zk3</code>
    * </td>
    * <td>
-   * Connects to HBase via the given zookeeper quorum nodes.
+   * Connects to HBase via the given Zookeeper quorum nodes.
    * </td>
    * </tr>
    * </table>
@@ -251,13 +251,15 @@ public class DatasetRepositories {
   
   /**
    * <p>
-   * Synonym for {@link #open(java.net.URI)} for {@link RandomAccessDatasetRepository}s
+   * Synonym for {@link #open(java.net.URI)} for
+   * {@link RandomAccessDatasetRepository}s
    * </p>
    * <p>
-   * This method provides a simpler way to connect to a {@link DatasetRepository} the same
-   * way {@link #open(java.net.URI)} does, but instead returns an implementation of type
-   * {@link RandomAccessDatasetRepository}. This method should be used when one needs to
-   * access {@link RandomAccessDataset}s to take advantage of the random access methods.
+   * This method provides a way to connect to a {@link DatasetRepository} the 
+   * same way {@link #open(java.net.URI)} does, but instead returns an
+   * implementation of type {@link RandomAccessDatasetRepository}.
+   * You should use this method when you need to access
+   * {@link RandomAccessDataset}s to take advantage of the random access methods.
    * </p>
    * </>
    * The format of a repository URI is as follows.
@@ -271,7 +273,7 @@ public class DatasetRepositories {
    * <h1>HBase URIs</h1>
    * <p>
    * <code>repo:hbase:[zookeeper-host1]:[zk-port],[zookeeper-host2],...
-   * </code> will open a HBase-backed DatasetRepository. This URI may also be
+   * </code> will open a HBase-backed DatasetRepository. This URI can also be
    * instantiated with {@link #openRandomAccess(URI)} to instantiate a {@link
    * RandomAccessDatasetRepository}
    * </p>
@@ -285,7 +287,7 @@ public class DatasetRepositories {
    * </code>
    * </td>
    * <td>
-   * Connects to HBase via the given zookeeper quorum nodes.
+   * Connects to HBase via the given Zookeeper quorum nodes.
    * </td>
    * </tr>
    * </table>

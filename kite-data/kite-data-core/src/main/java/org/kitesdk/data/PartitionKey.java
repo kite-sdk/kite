@@ -26,15 +26,16 @@ import javax.annotation.concurrent.NotThreadSafe;
  * A key for retrieving partitions from a {@link Dataset}.
  * </p>
  * <p>
- * A {@code PartitionKey} is a ordered sequence of values corresponding to the
- * {@link org.kitesdk.data.spi.FieldPartitioner}s in a {@link PartitionStrategy}. A
- * {@link PartitionKey} may be obtained using
+ * A {@code PartitionKey} is an ordered sequence of values corresponding to the
+ * {@link org.kitesdk.data.spi.FieldPartitioner}s in a
+ * {@link PartitionStrategy}. You can obtain a {@link PartitionKey} using
  * {@link PartitionStrategy#partitionKey(Object...)} or
  * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
  * </p>
  * <p>
- * Implementations of {@link PartitionKey} are typically not thread-safe; that is,
- * the behavior when accessing a single instance from multiple threads is undefined.
+ * Implementations of {@link PartitionKey} are typically not thread-safe; that 
+ * is, the behavior when accessing a single instance from multiple threads is
+ * undefined.
  * </p>
  * 
  * @see PartitionStrategy

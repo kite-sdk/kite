@@ -49,8 +49,8 @@ import org.kitesdk.data.spi.SchemaUtil;
  * </p>
  * <p>
  * Each {@code Dataset} has an associated {@link Schema} and optional
- * {@link PartitionStrategy} defined at the time of creation. Instances of this
- * class are used to hold this information. Users are strongly encouraged to use
+ * {@link PartitionStrategy} defined at the time of creation. You use instances
+ * of this class to hold this information. You are strongly encouraged to use
  * the inner {@link Builder} to create new instances.
  * </p>
  */
@@ -91,8 +91,8 @@ public class DatasetDescriptor {
 
   /**
    * Get the associated {@link Schema}. Depending on the underlying storage
-   * system, this schema may be simple (i.e. records made up of only scalar
-   * types) or complex (i.e. containing other records, lists, and so on).
+   * system, this schema can be simple (that is, records made up of only scalar
+   * types) or complex (that is, containing other records, lists, and so on).
    * Validation of the supported schemas is performed by the managing
    * repository, not the dataset or descriptor itself.
    *
@@ -103,11 +103,11 @@ public class DatasetDescriptor {
   }
 
   /**
-   * Get a URL from which the {@link Schema} may be retrieved (optional). This
-   * method may return {@code null} if the schema is not stored at a persistent
-   * URL, e.g. if it was constructed from a literal string.
+   * Get a URL from which the {@link Schema} can be retrieved (optional). This
+   * method might return {@code null} if the schema is not stored at a persistent
+   * URL (for example, if it were constructed from a literal string).
    *
-   * @return a URL from which the schema may be retrieved
+   * @return a URL from which the schema can be retrieved
    * @since 0.3.0
    */
   @Nullable
@@ -116,7 +116,7 @@ public class DatasetDescriptor {
   }
 
   /**
-   * Get the associated {@link Format} that the data is stored in.
+   * Get the associated {@link Format} the data is stored in.
    *
    * @return the format
    * @since 0.2.0
@@ -273,7 +273,7 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the dataset's schema. A schema is required, and may be set
+     * Configure the dataset's schema. A schema is required, and can be set
      * using one of the methods: {@code schema}, {@code schemaLiteral},
      * {@code schemaUri}, or {@code schemaFromAvroDataFile}.
      *
@@ -287,7 +287,7 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema from a {@link File}. A schema is required,
-     * and may be set using one of the methods: {@code schema},
+     * and can be set using one of the methods {@code schema},
      * {@code schemaLiteral}, {@code schemaUri}, or
      * {@code schemaFromAvroDataFile}.
      *
@@ -302,7 +302,7 @@ public class DatasetDescriptor {
     /**
      * Configure the dataset's schema from an {@link InputStream}. It is the
      * caller's responsibility to close the {@link InputStream}. A schema is
-     * required, and may be set using one of the methods: {@code schema},
+     * required, and can be set using one of the methods {@code schema},
      * {@code schemaLiteral}, {@code schemaUri}, or
      * {@code schemaFromAvroDataFile}.
      *
@@ -315,7 +315,7 @@ public class DatasetDescriptor {
 
     /**
      * Configure the {@link Dataset}'s schema from a URI. A schema is required,
-     * and may be set using one of the methods: {@code schema},
+     * and can be set using one of the methods {@code schema},
      * {@code schemaLiteral}, {@code schemaUri}, or
      * {@code schemaFromAvroDataFile}.
      *
@@ -349,7 +349,7 @@ public class DatasetDescriptor {
 
     /**
      * Configure the {@link Dataset}'s schema from a String URI. A schema is
-     * required, and may be set using one of the methods: {@code schema},
+     * required, and can be set using one of the methods {@code schema},
      * {@code schemaLiteral}, {@code schemaUri}, or
      * {@code schemaFromAvroDataFile}.
      *
@@ -377,7 +377,7 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema from a {@link String}. A schema is
-     * required, and may be set using one of the methods: {@code schema},
+     * required, and can be set using one of the methods {@code schema},
      * {@code schemaLiteral}, {@code schemaUri}, or
      * {@code schemaFromAvroDataFile}.
      *
@@ -392,7 +392,7 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema via a Java class type. A schema is
-     * required, and may be set using one of the methods: {@code schema},
+     * required, and can be set using one of the methods {@code schema},
      * {@code schemaLiteral}, {@code schemaUri}, or
      * {@code schemaFromAvroDataFile}.
      *
@@ -406,7 +406,7 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema by using the schema from an existing Avro
-     * data file. A schema is required, and may be set using one of the methods:
+     * data file. A schema is required, and can be set using one of the methods 
      * {@code schema}, {@code schemaLiteral}, {@code schemaUri}, or
      * {@code schemaFromAvroDataFile}.
      *
@@ -429,8 +429,8 @@ public class DatasetDescriptor {
     /**
      * Configure the dataset's schema by using the schema from an existing Avro
      * data file. It is the caller's responsibility to close the
-     * {@link InputStream}. A schema is required, and may be set using one of
-     * the methods: {@code schema},  {@code schemaLiteral}, {@code schemaUri},
+     * {@link InputStream}. A schema is required, and can be set using one of
+     * the methods  {@code schema},  {@code schemaLiteral}, {@code schemaUri},
      * or {@code schemaFromAvroDataFile}.
      *
      * @return An instance of the builder for method chaining.
@@ -451,7 +451,7 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema by using the schema from an existing Avro
-     * data file. A schema is required, and may be set using one of the methods:
+     * data file. A schema is required, and can be set using one of the methods 
      * {@code schema}, {@code schemaLiteral}, {@code schemaUri}, or
      * {@code schemaFromAvroDataFile}.
      *
@@ -483,7 +483,7 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's format from a format name String (optional). If
-     * not specified, {@link Formats#AVRO} will be used.
+     * not specified, {@link Formats#AVRO} is used by default.
      *
      * @param formatName a String format name
      * @return An instance of the builder for method chaining.
@@ -563,7 +563,7 @@ public class DatasetDescriptor {
 
     /**
      * Build an instance of the configured dataset descriptor. Subsequent calls
-     * will produce new instances that are similarly configured.
+     * produce new instances that are similarly configured.
      *
      * @since 0.9.0
      */

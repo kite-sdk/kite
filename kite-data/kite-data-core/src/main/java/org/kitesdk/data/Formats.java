@@ -17,8 +17,8 @@ package org.kitesdk.data;
 
 /**
  * <p>
- * Contains constant definitions for the standard {@link Format} instances supported
- * by the library. {@link #AVRO} is the default format.
+ * Contains constant definitions for the standard {@link Format} instances
+ * supported by the library. {@link #AVRO} is the default format.
  * </p>
  *
  * @since 0.2.0
@@ -30,8 +30,8 @@ public class Formats {
 
   /**
    * AVRO: the
-   * <a href="http://avro.apache.org/docs/current/spec.html#Object+Container+Files">Avro
-   * row-oriented format</a>
+   * <a href="http://avro.apache.org/docs/current/spec.html#Object+Container+Files">
+   * Avro row-oriented format</a>
    */
   public static final Format AVRO = new Format("avro");
 
@@ -48,10 +48,10 @@ public class Formats {
   public static final Format CSV = new Format("csv");
 
   /**
-   * Return a {@link Format} for the format name specified. If {@code formatName}
-   * is not a valid name, an IllegalArgumentException is thrown. Currently the
-   * formats <q>avro</q>, <q>csv</q>, and <q>parquet</q> are supported. Format names are
-   * case sensitive.
+   * Return a {@link Format} for the format name specified. If
+   * {@code formatName} is not a valid name, an IllegalArgumentException is
+   * thrown. Currently the formats <q>avro</q>, <q>csv</q>, and <q>parquet</q>
+   * are supported. Format names are case sensitive.
    *
    * @since 0.9.0
    * @return an appropriate instance of Format

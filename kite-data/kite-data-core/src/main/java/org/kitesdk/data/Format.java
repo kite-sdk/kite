@@ -20,12 +20,13 @@ import javax.annotation.concurrent.Immutable;
 
 /**
  * <p>
- * The data format used for encoding the data in a {@link Dataset} when stored in a
- * {@link DatasetRepository}.
+ * The data format used for encoding the data in a {@link Dataset} when stored 
+ * in a {@link DatasetRepository}.
  * </p>
  * <p>
- * There are a small number of formats provided, the default is {@link Formats#AVRO},
- * which will be used when no format is explicitly configured.
+ * There are a small number of formats provided. The default is 
+ * {@link Formats#AVRO}, which is used when you do not explicitly configure a
+ * format.
  * </p>
  *
  * @since 0.2.0
@@ -47,8 +48,8 @@ public class Format {
   }
 
   /**
-   * Get the extension for use in filenames. A dot is not included as a part of the
-   * extension.
+   * Get the extension for use in filenames. The extension does not include a
+   * dot.
    * @return the extension
    */
   public String getExtension() {
