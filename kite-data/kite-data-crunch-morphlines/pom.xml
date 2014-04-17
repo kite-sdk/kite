@@ -31,6 +31,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-test-framework</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-crunch</artifactId>
       <version>0.12.2-SNAPSHOT</version>
@@ -102,12 +108,6 @@
       <artifactId>hcatalog-core</artifactId>
       <scope>compile</scope>
       <!--<scope>provided</scope>-->
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-test-framework</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
