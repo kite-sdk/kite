@@ -244,6 +244,7 @@
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <systemProperties>
             <java.awt.headless>true</java.awt.headless>
+            <tests.locale>en_us</tests.locale>
             <property>
               <!-- Make sure derby.log goes to target/ subdir
                    when running tests involving Hive -->
