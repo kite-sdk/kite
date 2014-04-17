@@ -17,7 +17,7 @@ package org.kitesdk.data;
 
 /**
  * <p>
- * Exception thrown to indicate that there was a problem
+ * Exception thrown to indicate that there is a problem
  * parsing or validating a schema.
  * <p>
  * @since 0.9.0
