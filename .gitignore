@@ -10,5 +10,7 @@ test-output
 .DS_Store
 kite-data/kite-data-hcatalog/metastore_db
 kite-data/kite-data-hcatalog/derby.log
+kite-morphlines/kite-morphlines-crunch-tool/metastore_db
+kite-morphlines/kite-morphlines-crunch-tool/derby.log
 .idea
 *.iml
