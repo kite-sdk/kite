@@ -588,7 +588,7 @@ final class MorphlineCrunchToolArgumentParser {
         .choices(new RangeArgumentChoice(-1, Integer.MAX_VALUE)) // TODO: also support X% syntax where X is an integer
         .setDefault(-1)
         .help("Tuning knob that indicates the maximum number of MR mapper tasks to use. -1 indicates use all map slots " +
-            "available on the cluster. This parameter only applies to non-splitable input files");
+            "available on the cluster. This parameter only applies to non-splitable input files.");
 
     Argument pipelineTypeArg = optionalGroup.addArgument("--pipeline-type")
         .metavar("STRING")
