@@ -1935,13 +1935,13 @@ For each Avro datum, the command emits a morphline record containing the datum a
 
 The Avro schema that was used to write the Avro data is retrieved from the parquet container. Optionally, an Avro schema that shall be used for projecting parquet columns can be supplied with a configuration option.
 
-Note: The current implementation requires that the parquet file contains an explicit Avro schema, e.g. as written by {{parquet.avro.AvroParquetWriter}}. This limitation might be removed in a future release.
-
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | projectionSchemaFile | null | An optional Avro schema file in JSON format on the local file system to use for projection. This Avro schema is converted to a parquet schema before applying the projection. |
 | projectionSchemaString | null | An optional Avro schema in JSON format given inline to use for projection. This Avro schema is converted to a parquet schema before applying the projection. |
+| readerSchemaFile | null | This parameter is available in CDH 5.0 and beyond. This optional parameter specifies an Avro schema file in JSON format on the local file system to use for reading. For Parquet files that were not written with the {{parquet.avro}} package (e.g. Impala Parquet files) there is no Avro write schema stored in the Parquet file metadata. To read such files using the {{readAvroParquetFile}} command you must either provide an Avro reader schema via this {{readerSchemaFile}} parameter, or a default Avro schema will be derived using the [standard mapping specification|https://github.com/Parquet/parquet-mr/blob/master/parquet-avro/src/main/java/parquet/avro/package-info.java]. Prior to CDH 5.0 the implementation required that the parquet file contains an explicit Avro schema, e.g. as written by the {{parquet.avro.AvroParquetWriter}} class.
+| readerSchemaString | null | This parameter is available in CDH 5.0 and beyond. This optional parameter specifies an optional Avro schema in JSON format given inline to use for reading. Has identical behaviour as the {{readerSchemaFile}} parameter described above. |
 
 Example usage:
 {code}
