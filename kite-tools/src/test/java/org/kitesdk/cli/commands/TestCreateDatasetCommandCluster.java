@@ -1,11 +1,11 @@
-/**
+/*
  * Copyright 2013 Cloudera Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,23 +17,32 @@ package org.kitesdk.cli.commands;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Resources;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.URIPattern;
 import org.slf4j.Logger;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.contains;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
-public class TestCreateDatasetCommand {
+public class TestCreateDatasetCommandCluster extends MiniDFSTest {
 
   private static final AtomicInteger ids = new AtomicInteger(0);
   private static final Map<String, DatasetRepository> repos = Maps.newHashMap();
@@ -59,7 +68,7 @@ public class TestCreateDatasetCommand {
     this.id = Integer.toString(ids.addAndGet(1));
     this.console = mock(Logger.class);
     this.command = new CreateDatasetCommand(console);
-    this.command.setConf(new Configuration());
+    this.command.setConf(getConfiguration());
     this.command.repoURI = "repo:mock:" + id;
   }
 
@@ -82,15 +91,18 @@ public class TestCreateDatasetCommand {
   }
 
   @Test
-  public void testParquetFormat() throws Exception {
-    command.avroSchemaFile = "user.avsc";
+  public void testBasicUseLocalSchema() throws Exception {
+    String avsc = "target/localUser.avsc";
+    FSDataOutputStream out = getFS()
+        .create(new Path(avsc), true /* overwrite */ );
+    ByteStreams.copy(Resources.getResource("user.avsc").openStream(), out);
+    out.close();
+    command.avroSchemaFile = avsc;
     command.datasetNames = Lists.newArrayList("users");
-    command.format = "parquet";
     command.run();
 
     DatasetDescriptor expectedDescriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:user.avsc")
-        .format("parquet")
         .build();
 
     verify(getMockRepo()).create("users", expectedDescriptor);
@@ -98,49 +110,22 @@ public class TestCreateDatasetCommand {
   }
 
   @Test
-  public void testUnrecognizedFormat() throws Exception {
-    command.avroSchemaFile = "user.avsc";
+  public void testBasicUseHDFSSchema() throws Exception {
+    String avsc = "hdfs:/tmp/schemas/hdfsUser.avsc";
+    FSDataOutputStream out = getDFS()
+        .create(new Path(avsc), true /* overwrite */ );
+    ByteStreams.copy(Resources.getResource("user.avsc").openStream(), out);
+    out.close();
+    command.avroSchemaFile = avsc;
     command.datasetNames = Lists.newArrayList("users");
-    command.format = "nosuchformat";
-    TestHelpers.assertThrows("Should fail on invalid format",
-        IllegalArgumentException.class, new Callable() {
-          @Override
-          public Void call() throws Exception {
-            command.run();
-            return null;
-          }
-        });
-    verifyZeroInteractions(console);
-  }
+    command.run();
 
-  @Test
-  public void testNonExistentAvroSchemaFile() throws Exception {
-    command.avroSchemaFile = "nonexistent.avsc";
-    command.datasetNames = Lists.newArrayList("users");
-    TestHelpers.assertThrows("Should fail on missing schema",
-        IllegalArgumentException.class, new Callable() {
-          @Override
-          public Void call() throws Exception {
-            command.run();
-            return null;
-          }
-        });
-    verifyZeroInteractions(console);
-  }
+    DatasetDescriptor expectedDescriptor = new DatasetDescriptor.Builder()
+        .schemaUri("resource:user.avsc")
+        .build();
 
-  @Test
-  public void testMultipleDatasets() throws Exception {
-    command.avroSchemaFile = "user.avsc";
-    command.datasetNames = Lists.newArrayList("users", "moreusers");
-    TestHelpers.assertThrows("Should reject multiple dataset names",
-        IllegalArgumentException.class, new Callable() {
-          @Override
-          public Void call() throws Exception {
-            command.run();
-            return null;
-          }
-        });
-    verifyZeroInteractions(console);
+    verify(getMockRepo()).create("users", expectedDescriptor);
+    verify(console).debug(contains("Created"), eq("users"));
   }
 
 }

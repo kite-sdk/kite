@@ -120,7 +120,11 @@ public class ObjectSchemaCommand implements Configurable, Command {
     if (outputPath == null || "-".equals(outputPath)) {
       console.info(schema);
     } else {
-      Path out = new Path(outputPath);
+      // use local FS to make qualified paths rather than the default FS
+      FileSystem localFS = FileSystem.getLocal(getConf());
+      Path cwd = localFS.makeQualified(new Path("."));
+
+      Path out = new Path(outputPath).makeQualified(localFS.getUri(), cwd);
       FileSystem outFS = out.getFileSystem(conf);
       FSDataOutputStream outgoing = outFS.create(out, true /* overwrite */ );
       try {

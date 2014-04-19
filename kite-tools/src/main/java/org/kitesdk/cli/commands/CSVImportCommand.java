@@ -43,10 +43,7 @@ import org.kitesdk.data.spi.filesystem.SchemaValidationUtil;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription="Copy CSV records into a Dataset")
-public class CSVImportCommand
-    extends BaseDatasetCommand implements Configurable {
-
-  private Configuration conf;
+public class CSVImportCommand extends BaseDatasetCommand {
 
   public CSVImportCommand(Logger console) {
     super(console);
@@ -78,8 +75,14 @@ public class CSVImportCommand
     Preconditions.checkArgument(targets != null && targets.size() == 2,
         "CSV path and target dataset name are required.");
 
-    Path sourcePath = new Path(targets.get(0));
-    FileSystem sourceFS = sourcePath.getFileSystem(conf);
+    // use local FS to make qualified paths rather than the default FS
+    FileSystem localFS = FileSystem.getLocal(getConf());
+    Path cwd = localFS.makeQualified(new Path("."));
+
+    Path sourcePath = new Path(targets.get(0))
+        .makeQualified(localFS.getUri(), cwd);
+    // even though it was qualified using the local FS, it may not be local
+    FileSystem sourceFS = sourcePath.getFileSystem(getConf());
     Preconditions.checkArgument(sourceFS.exists(sourcePath),
         "CSV path does not exist: " + sourcePath);
 
@@ -103,7 +106,7 @@ public class CSVImportCommand
 
     FileSystemDataset<Object> csvSourceAsDataset = new FileSystemDataset.Builder()
         .name("temporary")
-        .configuration(conf)
+        .configuration(getConf())
         .descriptor(props.addToDescriptor(new DatasetDescriptor.Builder()
             .location(sourceFS.makeQualified(sourcePath))
             .schema(datasetSchema)
@@ -164,16 +167,6 @@ public class CSVImportCommand
         "# Copy the records from sample.csv to Dataset \"sample\"",
         "csv-import path/to/sample.csv sample"
     );
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
-  }
-
-  @Override
-  public Configuration getConf() {
-    return conf;
   }
 
   /**

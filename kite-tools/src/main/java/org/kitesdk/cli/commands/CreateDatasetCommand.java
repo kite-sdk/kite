@@ -22,6 +22,8 @@ import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Formats;
@@ -51,9 +53,17 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
 
     DatasetDescriptor.Builder descriptorBuilder = new DatasetDescriptor.Builder();
 
-    File avroSchema = new File(avroSchemaFile);
-    if (avroSchema.exists()) {
-      descriptorBuilder.schema(avroSchema);
+    // use local FS to make qualified paths rather than the default FS
+    FileSystem localFS = FileSystem.getLocal(getConf());
+    Path cwd = localFS.makeQualified(new Path("."));
+
+    Path schemaPath = new Path(avroSchemaFile)
+        .makeQualified(localFS.getUri(), cwd);
+    // even though it was qualified using the local FS, it may not be local
+    FileSystem schemaFS = schemaPath.getFileSystem(getConf());
+
+    if (schemaFS.exists(schemaPath)) {
+      descriptorBuilder.schema(schemaFS.open(schemaPath));
     } else {
       descriptorBuilder.schema(Resources.getResource(avroSchemaFile).openStream());
     }

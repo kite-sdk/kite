@@ -33,12 +33,10 @@ import org.kitesdk.data.DatasetRepository;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Show the schema for a Dataset")
-public class SchemaCommand extends BaseDatasetCommand implements Configurable {
+public class SchemaCommand extends BaseDatasetCommand {
 
   @VisibleForTesting
   static final Charset SCHEMA_CHARSET = Charset.forName("utf8");
-
-  private Configuration conf;
 
   @Parameter(description = "<dataset name>")
   List<String> datasetNames;
@@ -71,8 +69,12 @@ public class SchemaCommand extends BaseDatasetCommand implements Configurable {
       if (outputPath == null || "-".equals(outputPath)) {
         console.info(schema);
       } else {
-        Path out = new Path(outputPath);
-        FileSystem outFS = out.getFileSystem(conf);
+        // use local FS to make qualified paths rather than the default FS
+        FileSystem localFS = FileSystem.getLocal(getConf());
+        Path cwd = localFS.makeQualified(new Path("."));
+
+        Path out = new Path(outputPath).makeQualified(localFS.getUri(), cwd);
+        FileSystem outFS = out.getFileSystem(getConf());
         FSDataOutputStream outgoing = outFS.create(out, true /* overwrite */ );
         try {
           outgoing.write(schema.getBytes(SCHEMA_CHARSET));
@@ -104,13 +106,4 @@ public class SchemaCommand extends BaseDatasetCommand implements Configurable {
     );
   }
 
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
-  }
-
-  @Override
-  public Configuration getConf() {
-    return conf;
-  }
 }

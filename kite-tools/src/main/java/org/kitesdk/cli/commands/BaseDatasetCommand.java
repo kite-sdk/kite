@@ -18,12 +18,17 @@ package org.kitesdk.cli.commands;
 import com.beust.jcommander.Parameter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.kitesdk.cli.Command;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.slf4j.Logger;
 
-abstract class BaseDatasetCommand implements Command {
+abstract class BaseDatasetCommand implements Command, Configurable {
+
+  private Configuration conf;
+
   @Parameter(names = {"-d", "--directory"},
       description = "The root directory of the dataset repository. Optional if using " +
           "Hive for metadata storage.")
@@ -75,6 +80,16 @@ abstract class BaseDatasetCommand implements Command {
     }
     console.trace("Repository URI: " + uri);
     return uri;
+  }
+
+  @Override
+  public void setConf(Configuration conf) {
+    this.conf = conf;
+  }
+
+  @Override
+  public Configuration getConf() {
+    return conf;
   }
 
 }

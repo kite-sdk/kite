@@ -92,7 +92,12 @@ public class CSVSchemaCommand implements Configurable, Command {
     Preconditions.checkArgument(samplePaths.size() == 1,
         "Only one CSV sample can be given");
 
-    Path sample = new Path(samplePaths.get(0));
+    // use local FS to make qualified paths rather than the default FS
+    FileSystem localFS = FileSystem.getLocal(getConf());
+    Path cwd = localFS.makeQualified(new Path("."));
+
+    Path sample = new Path(samplePaths.get(0))
+        .makeQualified(localFS.getUri(), cwd);
     FileSystem sampleFS = sample.getFileSystem(conf);
 
     CSVProperties props = new CSVProperties.Builder()
@@ -111,7 +116,7 @@ public class CSVSchemaCommand implements Configurable, Command {
     if (outputPath == null || "-".equals(outputPath)) {
       console.info(sampleSchema);
     } else {
-      Path out = new Path(outputPath);
+      Path out = new Path(outputPath).makeQualified(localFS.getUri(), cwd);
       FileSystem outFS = out.getFileSystem(conf);
       FSDataOutputStream outgoing = outFS.create(out, true /* overwrite */ );
       try {
