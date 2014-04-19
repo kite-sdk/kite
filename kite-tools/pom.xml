@@ -94,20 +94,27 @@
       </plugin>
       <!-- make a chmod +x style executable from the jar -->
       <plugin>
-        <groupId>org.skife.maven</groupId>
-        <artifactId>really-executable-jar-maven-plugin</artifactId>
-        <configuration>
-          <flags>-Xmx1G</flags>
-          <programFile>dataset</programFile>
-        </configuration>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
         <executions>
           <execution>
             <phase>package</phase>
             <goals>
-              <goal>really-executable-jar</goal>
+              <goal>exec</goal>
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <executable>/bin/sh</executable>
+          <arguments>
+            <argument>src/main/sh/build-executable.sh</argument>
+            <argument>src/main/sh/dataset.sh</argument>
+            <argument>target/${project.artifactId}-${project.version}.jar</argument>
+            <argument>target/dataset</argument>
+          </arguments>
+          <!-- this option doesn't work :(
+          <outputFile>dataset</outputFile> -->
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -195,13 +202,7 @@
       <artifactId>kite-data-crunch</artifactId>
       <version>0.12.2-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-core</artifactId>
-      <version>${project.parent.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -209,6 +210,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -226,15 +228,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
     </dependency>
@@ -244,37 +237,57 @@
       <type>pom</type>
       <scope>compile</scope>
     </dependency>
+
     <!-- TODO: merge this into kite-hadoop-deps
     <dependency> for web hdfs client
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-hdfs</artifactId>
       <scope>compile</scope>
     </dependency> -->
+
     <dependency>
       <groupId>org.apache.crunch</groupId>
       <artifactId>crunch-core</artifactId>
       <scope>compile</scope>
     </dependency>
+
     <dependency>
       <groupId>org.apache.hcatalog</groupId>
       <artifactId>hcatalog-core</artifactId>
     </dependency>
+
     <dependency>
       <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>
     </dependency>
+
+    <!-- Test dependencies -->
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${artifact.hadoop-test-deps}</artifactId>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
-    </dependency>
-
-    <!-- missing from Hadoop, and needed for local job runner -->
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>3.1</version>
-      <scope>runtime</scope>
     </dependency>
   </dependencies>
 

@@ -183,7 +183,7 @@
     <vers.maven-surefire-plugin>2.14.1</vers.maven-surefire-plugin>
     <vers.maven-antrun-plugin>1.7</vers.maven-antrun-plugin>
     <vers.maven-jar-plugin>2.4</vers.maven-jar-plugin>
-    <vers.really-executable-jar-maven-plugin>1.1.0</vers.really-executable-jar-maven-plugin>
+    <vers.maven-exec-plugin>1.2.1</vers.maven-exec-plugin>
 
     <url.cloudera>http://www.cloudera.com</url.cloudera>
     <url.project>http://kitesdk.org/</url.project>
@@ -579,9 +579,9 @@
           </configuration>
         </plugin>
         <plugin>
-          <groupId>org.skife.maven</groupId>
-          <artifactId>really-executable-jar-maven-plugin</artifactId>
-          <version>${vers.really-executable-jar-maven-plugin}</version>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>${vers.maven-exec-plugin}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
