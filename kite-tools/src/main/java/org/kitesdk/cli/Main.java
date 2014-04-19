@@ -21,7 +21,11 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.Resources;
+import java.util.Properties;
 import org.apache.log4j.Level;
+import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.spi.Configurator;
 import org.kitesdk.cli.commands.CSVImportCommand;
 import org.kitesdk.cli.commands.CSVSchemaCommand;
 import org.kitesdk.cli.commands.CreateDatasetCommand;
@@ -98,8 +102,8 @@ public class Main extends Configured implements Tool {
       return 1;
     }
 
+    // configure log4j
     if (debug) {
-      // This cannot be configured through SLF4J
       org.apache.log4j.Logger console = org.apache.log4j.Logger.getLogger(Main.class);
       console.setLevel(Level.DEBUG);
     }
@@ -148,6 +152,9 @@ public class Main extends Configured implements Tool {
   }
 
   public static void main(String[] args) throws Exception {
+    // reconfigure logging with the kite CLI configuration
+    PropertyConfigurator.configure(
+        Main.class.getResource("/kite-cli-logging.properties"));
     Logger console = LoggerFactory.getLogger(Main.class);
     int rc = ToolRunner.run(new Configuration(), new Main(console), args);
     System.exit(rc);
