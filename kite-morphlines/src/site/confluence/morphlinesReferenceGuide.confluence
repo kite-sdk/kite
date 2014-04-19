@@ -190,7 +190,7 @@ This maven module contains standard I/O commands for tasks such as acting on sin
 
 h2. readBlob
 
-The {{readBlob}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdio/ReadBlobBuilder.java]) converts an InputStream to a byte array in main memory. It emits one record for the entire input stream of the first attachment, interpreting the stream as a Binary Large Object (BLOB), i.e. emits a corresponding Java byte array. The BLOB is put as a Java byte array into the \_attachment\_body output field by default.
+The {{readBlob}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdio/ReadBlobBuilder.java]) converts a byte stream to a byte array in main memory. It emits one record for the entire input stream of the first attachment, interpreting the stream as a Binary Large Object (BLOB), i.e. emits a corresponding Java byte array. The BLOB is put as a Java byte array into the \_attachment\_body output field by default.
 
 The command provides the following configuration options:
 
