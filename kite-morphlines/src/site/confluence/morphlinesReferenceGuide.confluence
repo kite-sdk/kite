@@ -38,7 +38,7 @@ h3. Table of Contents
 \\
 \\
 h3. kite\-morphlines\-core\-stdio
-| [#readBlob] | Converts an InputStream to a byte array in main memory. |
+| [#readBlob] | Converts a byte stream to a byte array in main memory. |
 | [#readClob] | Converts a byte stream to a string. |
 | [#readCSV] | Extracts zero or more records from the input stream of bytes representing a Comma Separated Values (CSV) file. |
 | [#readLine] | Emits one record per line in the input stream. |
