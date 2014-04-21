@@ -1,0 +1,19 @@
+Message-ID: <12345.6789.JavaMail.foo@bar>
+Date: Wed, 6 Feb 2012 06:06:05 -0800 (PST)
+From: foo@bar.com
+To: baz@bazoo.com
+Subject: WEDNESDAY WEATHER HEADLINES
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+X-From: Foo Bar <foo@bar.com>@xxx
+X-To: 'Weather News Distribution' <wfoo@bar.com>
+X-cc: 
+X-bcc: 
+X-Folder: \ExMerge - foo, bar\Market
+X-Origin: FOO-J
+X-FileName: FOOX BARX 6-25-02.PST
+
+
+Average 1 to 3- degrees above normal: Mid-Atlantic, Southern Plains..
+Average 4 to 6-degrees above normal: Ohio Valley, Rockies, Central Plains

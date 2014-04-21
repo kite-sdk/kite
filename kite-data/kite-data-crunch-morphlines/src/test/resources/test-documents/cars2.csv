@@ -1,0 +1,11 @@
+Age,Color,Extras,Type,Used
+2,blue,GPS,"Gas, with electric",""
+#This is a comment line, it is ignored. Empty lines are ignored as well.
+10,green,Lab"eled ""Vintage, 1913""",,yes
+    
+
+100,red,Labeled ""Vintage 1913"",yes
+5,orange,none,"This is a
+multi, line text",no""
+6,white,many,"
+Another multi, line text",maybe

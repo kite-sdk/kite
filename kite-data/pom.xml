@@ -43,6 +43,40 @@
     datasets in Hadoop platforms.
   </description>
 
+  <!-- Exclude kite-data-crunch-morphlines for hadoop-1 because hadoop-1 isn't supported -->
+  <profiles>
+    <profile>
+      <id>hadoop-1</id>
+      <activation>
+        <property>
+          <name>artifact.hadoop-deps</name>
+          <value>kite-hadoop1-dependencies</value>
+        </property>
+      </activation>
+    </profile>
+    <profile>
+      <id>hadoop-2</id>
+      <activation>
+        <property>
+          <name>artifact.hadoop-deps</name>
+          <value>kite-hadoop2-dependencies</value>
+        </property>
+      </activation>
+      <modules>
+        <module>kite-data-crunch-morphlines</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>kite-data-crunch-morphlines</module>
+      </modules>
+    </profile>
+  </profiles>
+  
   <build>
     <plugins>
       <plugin>

@@ -1,0 +1,52 @@
+Received: from foo.org ([10.11.12.13])
+          by WTSDSNPT (JAMES SMTP Server 2.3.2) with SMTP ID 255
+          for <bar@baz.com>;
+          Fri, 26 Apr 2010 11:35:28 -0500 (CDT)
+Content-Type: multipart/mixed;
+boundary="_8aed6914-a803-4ea5-923f-65b26c36d352_"
+Subject: Task Request
+To: fellow@foo.org
+From: alice@goo.org
+Sender:
+	<MicrosoftExchange929e71ec88ae4615bbc36ab6ce41109e@foo.org>
+Message-ID: <4c8cf5a8-b4e5-428b-b042-10b373dad2b8@xxxx>
+Date: Fri, 26 Apr 2010 17:35:28 +0000
+X-MS-Journal-Report:
+Keywords:
+MIME-Version: 1.0
+Return-Path: <>
+
+xtest0
+
+--_8aed6914-a803-4ea5-923f-65b26c36d352_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+
+Sender: hell@foo.org
+Subject: Task Request: Task is assigned to you
+Message-Id: <7D1E31C333DEEF489ED002579969EAA70E24B50B@FOO.ORG>
+To: robo@foo.com
+
+xtest1
+
+--_8aed6914-a803-4ea5-923f-65b26c36d352_
+Content-Type: message/rfc822
+
+Received: from FOO.ORG ([1.2.3.4])
+ by FOO.ORG ([1.2.3.4]) with mapi id
+ 14.03.0123.003; Fri, 26 Apr 2010 11:35:28 -0500
+From: sun@foo.org
+To: earth@foo.org
+Subject: Task Request: Task is assigned to you
+Thread-Topic: Task is assigned to you
+Thread-Index: Ab5CnA4jU8R1Uc/ZTJ+2O01jGBfGpw==
+Importance: high
+X-Priority: 1
+Date: Fri, 26 Apr 2003 16:35:26 +0000
+Message-ID: <7D1E31C333DEEF489ED002579969EAA70E24B50B@FOO.ORG>
+Accept-Language: en-US
+Content-Language: en-US
+
+xtest2
+
+--_8aed6914-a803-4ea5-923f-65b26c36d352_--

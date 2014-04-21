@@ -62,6 +62,12 @@
       <artifactId>hbase</artifactId>
       <version>${vers.hbase}</version>
       <classifier>tests</classifier>
+      <exclusions>
+        <exclusion>
+          <groupId>stax</groupId>
+          <artifactId>stax-api</artifactId> <!-- only needed for java5 -->
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 

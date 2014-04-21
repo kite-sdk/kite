@@ -64,7 +64,11 @@
       <exclusions>
         <exclusion>
           <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
+          <artifactId>slf4j-log4j12</artifactId> <!-- defer binding to impl -->
+        </exclusion>
+        <exclusion>
+          <groupId>stax</groupId>
+          <artifactId>stax-api</artifactId> <!-- only needed for java5 -->
         </exclusion>
       </exclusions>
     </dependency>
