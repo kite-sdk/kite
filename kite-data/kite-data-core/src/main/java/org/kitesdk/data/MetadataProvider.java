@@ -22,7 +22,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  * A service provider interface for metadata system plugins.
  * </p>
  * <p>
- * You write implementations of {@link DatasetRepository} against this
+ * You can write implementations of {@link DatasetRepository} against this
  * interface and, by extension, can store dataset metadata information contained
  * in the {@link DatasetDescriptor} in a system of your choosing.
  * </p>

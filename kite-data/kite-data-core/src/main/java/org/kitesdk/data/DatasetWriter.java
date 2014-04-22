@@ -24,11 +24,11 @@ import javax.annotation.concurrent.NotThreadSafe;
  * A stream-oriented dataset writer.
  * </p>
  * <p>
- * Use ubsystem-specific implementations of this interface to write data
- * to a {@link Dataset}. Writers are use-once objects that serialize entities of
- * type {@code E} and write them to the underlying system. Normally, you are
+ * Implementations of this interface write data to a {@link Dataset}.
+ * Writers are use-once objects that serialize entities of type {@code E} and
+ * write them to the underlying storage system. Normally, you are
  * not expected to instantiate implementations directly. Instead, use the
- * containing dataset's {@link Dataset#getWriter()} method to get an appropriate
+ * containing dataset's {@link Dataset#newWriter()} method to get an appropriate
  * implementation. You should receive an instance of this interface from a
  * dataset, call {@link #open()} to prepare for IO operations, invoke
  * {@link #write(Object)} and {@link #flush()} as necessary, and
@@ -79,8 +79,8 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
    * <p>
    * Implementations can buffer entities internally (see the {@link #flush()}
    * method). All instances of {@code entity} must conform to the dataset's
-   * schema and partition. If they don't, implementations should throw an
-   * exception, although this is not required.
+   * schema. If they don't, implementations should throw an exception, although
+   * this is not required.
    * </p>
    *
    * @param entity The entity to write

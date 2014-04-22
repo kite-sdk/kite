@@ -88,7 +88,7 @@ public class DatasetRepositories {
    * Open a {@link DatasetRepository} for the given URI.
    * </p>
    * <p>
-   * This method provides a way to connect to a {@link DatasetRepository}
+   * This method provides a way to open to a {@link DatasetRepository}
    * while providing configuration options. For almost all cases, this
    * is the preferred method for retrieving an instance of a 
    * {@link DatasetRepository}.
@@ -258,8 +258,9 @@ public class DatasetRepositories {
    * This method provides a way to connect to a {@link DatasetRepository} the 
    * same way {@link #open(java.net.URI)} does, but instead returns an
    * implementation of type {@link RandomAccessDatasetRepository}.
-   * You should use this method when you need to access
-   * {@link RandomAccessDataset}s to take advantage of the random access methods.
+   * You should use this method when you need to access a
+   * {@link RandomAccessDataset} to use random access methods, such as
+   * {@link RandomAccessDataset#put(Object)}.
    * </p>
    * </>
    * The format of a repository URI is as follows.

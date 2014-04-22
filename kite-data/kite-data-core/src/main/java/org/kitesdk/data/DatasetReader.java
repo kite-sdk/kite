@@ -26,11 +26,12 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * A stream-oriented dataset reader.
  * </p>
  * <p>
- * Use subsystem-specific implementations of this interface  to read data from a
- * {@link Dataset}. Readers are use-once objects that produce entities of
- * type {@code E}. Normally, you are not expected to instantiate
- * implementations directly. Instead, use the containing dataset's
- * {@link Dataset#getReader()} method to get an appropriate implementation.
+ * Implementations of this interface read data from a {@link Dataset}.
+ * Readers are use-once objects that read from the underlying storage system to
+ * produce deserialized entities of type {@code E}. Normally, you are not
+ * expected to instantiate implementations directly.
+ * Instead, use the containing dataset's
+ * {@link Dataset#newReader()} method to get an appropriate implementation.
  * Normally, you receive an instance of this interface from a dataset, call
  * {@link #open()} to prepare for IO operations, invoke {@link #hasNext()} and
  * {@link #next()} as necessary, and {@link #close()} when they are done or no
@@ -51,9 +52,9 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * only method that can be subsequently called is {@code close()}.
  * </p>
  * <p>
- * Implementations of {@link DatasetReader} are typically not thread-safe; that
- * is, the behavior when accessing a single instance from multiple threads is
- * undefined.
+ * Implementations of {@link DatasetReader} are not required to be thread-safe;
+ * that is, the behavior when accessing a single instance from multiple threads
+ * is undefined.
  * </p>
  *
  * @param <E> The type of entity produced by this reader.
