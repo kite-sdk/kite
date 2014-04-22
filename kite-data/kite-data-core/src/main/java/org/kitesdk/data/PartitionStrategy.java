@@ -52,13 +52,13 @@ import org.slf4j.LoggerFactory;
  * <p>
  * A {@code PartitionStrategy} is configured with one or more
  * {@link FieldPartitioner}s upon creation. When a {@link Dataset} is configured
- * with a partition strategy, we say that data is partitioned. Any entities
+ * with a partition strategy, that data is considered partitioned. Any entities
  * written to a partitioned dataset are evaluated with its
  * {@code PartitionStrategy} which, in turn, produces a {@link PartitionKey}
  * that is used by the dataset implementation to select the proper partition.
  * </p>
  * <p>
- * Users should use the inner {@link Builder} to create new instances.
+ * You should use the inner {@link Builder} to create new instances.
  * </p>
  * 
  * @see FieldPartitioner
@@ -102,16 +102,16 @@ public class PartitionStrategy {
    * Return the cardinality produced by the contained field partitioners.
    * </p>
    * <p>
-   * This can be used to aid in calculating resource usage used during certain
-   * operations. For example, when writing data to a partitioned dataset, this
-   * method can be used to estimate (or discover exactly, depending on the
+   * This can be used to aid in calculating resource usage during certain
+   * operations. For example, when writing data to a partitioned dataset, you
+   * can use this method to estimate (or discover exactly, depending on the
    * partition functions) how many leaf partitions exist.
    * </p>
    * <p>
    * <strong>Warning:</strong> This method is allowed to lie and should be
-   * treated only as a hint. Some partition functions are fixed (e.g. hash
-   * modulo number of buckets), while others are open-ended (e.g. discrete
-   * value) and depend on the input data.
+   * treated only as a hint. Some partition functions are fixed (for example, 
+   * hash modulo number of buckets), while others are open-ended (for
+   * example, discrete value) and depend on the input data.
    * </p>
    * 
    * @return The estimated (or possibly concrete) number of leaf partitions.
@@ -147,7 +147,7 @@ public class PartitionStrategy {
    * Construct a partition key for the given entity.
    * </p>
    * <p>
-   * This is a convenient way to find the partition that a given entity would be
+   * This is a convenient way to find the partition that a given entity is
    * written to, or to find a partition using objects from the entity domain.
    * </p>
    */
@@ -157,11 +157,11 @@ public class PartitionStrategy {
 
   /**
    * <p>
-   * Construct a partition key for the given entity, reusing the supplied key if not
-   * null.
+   * Construct a partition key for the given entity, reusing the supplied key if 
+   * not null.
    * </p>
    * <p>
-   * This is a convenient way to find the partition that a given entity would be
+   * This is a convenient way to find the partition that a given entity is
    * written to, or to find a partition using objects from the entity domain.
    * </p>
    */
@@ -198,7 +198,7 @@ public class PartitionStrategy {
   }
 
   /**
-   * Constructs a new {@code PartitionKey} that can be used with this
+   * Constructs a new {@code PartitionKey} that you can use with this
    * {@code PartitionStrategy}.
    *
    * @return a new {@code PartitionKey}
@@ -261,8 +261,8 @@ public class PartitionStrategy {
      * Configure a hash partitioner with the specified number of {@code buckets}
      * .
      *
-     * The partition name will be the source field name with a "_hash" suffix.
-     * For example, hash("color", 34) will create "color_hash" partitions.
+     * The partition name is the source field name with a "_hash" suffix.
+     * For example, hash("color", 34) creates "color_hash" partitions.
      *
      * @param sourceName
      *          The entity field name from which to get values to be
@@ -296,11 +296,11 @@ public class PartitionStrategy {
     }
 
     /**
-     * Configure an identity partitioner for a given type with a cardinality hint of
-     * {@code buckets} size.
+     * Configure an identity partitioner for a given type with a cardinality 
+     * hint of {@code buckets} size.
      *
-     * The partition name will be the source field name with a "_copy" suffix.
-     * For example, identity("color", String.class, 34) will create "color_copy"
+     * The partition name is the source field name with a "_copy" suffix.
+     * For example, identity("color", String.class, 34) creates "color_copy"
      * partitions.
      *
      * @param sourceName
@@ -356,7 +356,7 @@ public class PartitionStrategy {
      * Configure a range partitioner with a set of {@code upperBounds}.
      *
      * The partition name will be the source field name with a "_bound" suffix.
-     * For example, range("number", 5, 10) will create "number_bound"
+     * For example, range("number", 5, 10) creates "number_bound"
      * partitions.
      *
      * @param sourceName
@@ -376,7 +376,7 @@ public class PartitionStrategy {
      * Configure a range partitioner for strings with a set of {@code upperBounds}.
      *
      * The partition name will be the source field name with a "_bound" suffix.
-     * For example, range("color", "blue", "green") will create "color_bound"
+     * For example, range("color", "blue", "green") creates "color_bound"
      * partitions.
      *
      * @param sourceName
@@ -410,7 +410,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a partitioner for extracting the year from a timestamp field.
-     * The UTC timezone is assumed. The partition entity name will be "year".
+     * The UTC timezone is assumed. The partition entity name is "year".
      *
      * @param sourceName
      *          The entity field name from which to get values to be
@@ -442,7 +442,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a partitioner for extracting the month from a timestamp field.
-     * The UTC timezone is assumed. The partition entity name will be "month".
+     * The UTC timezone is assumed. The partition entity name is "month".
      *
      * @param sourceName
      *          The entity field name from which to get values to be
@@ -474,7 +474,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a partitioner for extracting the day from a timestamp field.
-     * The UTC timezone is assumed. The partition entity name will be "day".
+     * The UTC timezone is assumed. The partition entity name is "day".
      *
      * @param sourceName
      *          The entity field name from which to get values to be
@@ -506,7 +506,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a partitioner for extracting the hour from a timestamp field.
-     * The UTC timezone is assumed. The partition entity name will be "hour".
+     * The UTC timezone is assumed. The partition entity name is "hour".
      *
      * @param sourceName
      *          The entity field name from which to get values to be
@@ -538,7 +538,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a partitioner for extracting the minute from a timestamp field.
-     * The UTC timezone is assumed. The partition entity name will be "minute".
+     * The UTC timezone is assumed. The partition entity name is "minute".
      *
      * @param sourceName
      *          The entity field name from which to get values to be

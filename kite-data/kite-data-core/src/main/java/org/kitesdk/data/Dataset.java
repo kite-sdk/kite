@@ -26,7 +26,7 @@ import javax.annotation.concurrent.Immutable;
  * <p>
  * Logically, all datasets have two generic properties: a name, and a descriptor
  * that holds information such as the dataset's schema and its partitioning
- * information. Concrete implementations of {@code Dataset} may support
+ * information. Concrete implementations of {@code Dataset} can support
  * additional properties, mandatory or otherwise, as needed. {@code Dataset}s
  * are not normally instantiated directly, but managed by a repository (also
  * implementation-specific).
@@ -49,8 +49,8 @@ import javax.annotation.concurrent.Immutable;
 public interface Dataset<E> extends RefinableView<E> {
 
   /**
-   * Get the name of a {@code Dataset}. No guarantees about the format of this
-   * name are made.
+   * Get the name of a {@code Dataset}. No guarantees are made about the format 
+   * of this name.
    */
   String getName();
 
@@ -60,13 +60,15 @@ public interface Dataset<E> extends RefinableView<E> {
   DatasetDescriptor getDescriptor();
 
   /**
-   * Get a partition for a {@link PartitionKey}, possibly creating the partition
-   * if it doesn't already exist. A {@link PartitionKey} may be obtained using
+   * Get a partition for a {@link PartitionKey}, optionally creating the
+   * partition if it doesn't already exist. You can obtain the
+   * {@link PartitionKey} using
    * {@link PartitionStrategy#partitionKey(Object...)} or
    * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
    *
    * @param key        The key used to look up the partition.
-   * @param autoCreate If true, automatically create the partition if doesn't exist,
+   * @param autoCreate If true, automatically creates the partition if it
+   * doesn't exist.
    * @throws DatasetException
    */
   Dataset<E> getPartition(PartitionKey key, boolean autoCreate);
@@ -86,7 +88,7 @@ public interface Dataset<E> extends RefinableView<E> {
    * Return partitions, if this dataset is partitioned.
    * </p>
    * <p>
-   * Note that, depending on the implementation, the returned iterable may hold
+   * Note that, depending on the implementation, the returned iterable can hold
    * system resources until exhausted and/or finalized.
    * </p>
    *

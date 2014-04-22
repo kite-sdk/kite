@@ -61,7 +61,7 @@ public interface RandomAccessDataset<E> extends Dataset<E> {
    *          The key of the entity to increment
    * @param fieldName
    *          The name of the field on the entity to increment. If the fieldName
-   *          doesn't exist, an exception will be thrown.
+   *          doesn't exist, an exception is thrown.
    * @param amount
    *          The amount to increment the field by
    * @return The new field amount.
@@ -78,15 +78,15 @@ public interface RandomAccessDataset<E> extends Dataset<E> {
 
   /**
    * Deletes the entity passed to this method in the dataset.
-   * If that entity has a checkConflict field, then the delete will only be performed if
-   * the entity in the dataset has the same value as the one in the
+   * If that entity has a checkConflict field, then the delete is performed only 
+   * if the entity in the dataset has the same value as the one in the
    * passed <code>entity</code> object.
    *.
    * @param entity
-   *          The entity, whose checkConflict field may be validated before the
-   *          delete is performed.
-   * @return True if the delete succeeded, false if the delete failed due to an update
-   *         conflict
+   *          The entity, whose checkConflict field can be validated before the
+   *          delete is performed
+   * @return True if the delete succeeded, false if the delete failed due to an 
+   *         update conflict
    */
   public boolean delete(E entity);
 }

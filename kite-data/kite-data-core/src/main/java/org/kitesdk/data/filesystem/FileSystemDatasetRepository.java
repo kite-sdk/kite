@@ -21,29 +21,31 @@ import org.kitesdk.data.spi.MetadataProvider;
 
 /**
  * <p>
- * A {@link org.kitesdk.data.DatasetRepository} that stores data in a Hadoop {@link org.apache.hadoop.fs.FileSystem}.
+ * A {@link org.kitesdk.data.DatasetRepository} that stores data in a Hadoop
+ * {@link org.apache.hadoop.fs.FileSystem}.
  * </p>
  * <p>
- * Given a {@link org.apache.hadoop.fs.FileSystem}, a root directory, and a {@link org.kitesdk.data.spi.MetadataProvider},
- * this {@link org.kitesdk.data.DatasetRepository} implementation can load and store
- * {@link org.kitesdk.data.Dataset}s on both local filesystems as well as the Hadoop Distributed
- * FileSystem (HDFS). Users may directly instantiate this class with the three
- * dependencies above and then perform dataset-related operations using any of
- * the provided methods. The primary methods of interest will be
+ * Given a {@link org.apache.hadoop.fs.FileSystem}, a root directory, and a
+ * {@link org.kitesdk.data.spi.MetadataProvider},
+ * {@link org.kitesdk.data.DatasetRepository} loads and stores
+ * {@link org.kitesdk.data.Dataset}s on both local filesystems and the Hadoop
+ * Distributed FileSystem (HDFS). You can  instantiate this class directly with 
+ * the three dependencies above, then perform dataset-related operations using 
+ * any of the provided methods. The primary methods of interest are
  * {@link #create(String, org.kitesdk.data.DatasetDescriptor)},
  * {@link #load(String)}, and
  * {@link #delete(String)} which create a new dataset, load an existing
- * dataset, or delete an existing dataset, respectively. Once a dataset has been created
- * or loaded, users can invoke the appropriate {@link org.kitesdk.data.Dataset} methods to get a reader
- * or writer as needed.
+ * dataset, or delete an existing dataset, respectively. Once you create or load
+ *  a dataset, you can invoke the appropriate {@link org.kitesdk.data.Dataset} 
+ * methods to get a reader or writer as needed.
  * </p>
  * <p>
  * {@link org.kitesdk.data.DatasetWriter} instances returned from this
- * implementation have the following <code>flush()</code> method semantics. For Avro
- * files, <code>flush()</code> will invoke HDFS <code>hflush</code>,
- * which guarantees that client buffers are flushed, so new readers will see all
- * entries written up to that point. For Parquet files, <code>flush()</code> has no
- * effect.
+ * implementation have the following <code>flush()</code> method semantics.
+ * For Avro files, <code>flush()</code> invokes HDFS <code>hflush</code>,
+ * which guarantees that client buffers are flushed, so new readers see all
+ * entries written up to that point. For Parquet files, <code>flush()</code> 
+ * has no effect.
  * </p>
  *
  * @see org.kitesdk.data.DatasetRepository
@@ -75,3 +77,4 @@ public class FileSystemDatasetRepository extends
       org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository.Builder {
   }
 }
+

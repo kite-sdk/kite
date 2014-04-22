@@ -26,7 +26,7 @@ import javax.annotation.concurrent.Immutable;
  * <p>
  * Implementations of {@code DatasetRepository} are storage systems that contain
  * zero or more {@link Dataset}s. A repository acts as a factory, as well as a
- * registry, of datasets. Users can {@link #create(String, DatasetDescriptor)} a
+ * registry, of datasets. You can {@link #create(String, DatasetDescriptor)} a
  * new {@link Dataset} with a name and schema, or retrieve a handle to an
  * existing dataset, by name, by way of the {@link #load(String)} method. While
  * not expressly forbidden, most repositories are expected to support only a
@@ -53,7 +53,7 @@ public interface DatasetRepository {
    * provided {@code name} exists, a {@link DatasetNotFoundException} is thrown.
    *
    * @param name The name of the dataset.
-   * @throws DatasetNotFoundException If there is no data set named {@code name}
+   * @throws DatasetNotFoundException if there is no data set named {@code name}
    * @throws DatasetRepositoryException
    *
    * @since 0.7.0
@@ -62,62 +62,62 @@ public interface DatasetRepository {
 
   /**
    * Create a {@link Dataset} with the supplied {@code descriptor}. Depending on
-   * the underlying dataset storage, some schemas types or configurations may
-   * not be supported. If an illegal schema is supplied, an exception will be
-   * thrown by the implementing class. It is illegal to create a more than one
-   * dataset with a given name. If a duplicate name is provided, an exception is
-   * thrown.
+   * the underlying dataset storage, some schema types or configurations might
+   * not be supported. If you supply an illegal schema, the implementing class
+   * throws an exception. It is illegal to create more than one dataset with the
+   * same name. If you provide a duplicate name, the implementing class throws
+   * an exception.
    *
    * @param name        The fully qualified dataset name
    * @param descriptor  A descriptor that describes the schema and other
    *                    properties of the dataset
    * @return The newly created dataset
-   * @throws IllegalArgumentException   If {@code name} or {@code descriptor}
+   * @throws IllegalArgumentException   if {@code name} or {@code descriptor}
    *                                    is {@code null}
-   * @throws DatasetExistsException     If a {@code Dataset} named {@code name}
+   * @throws DatasetExistsException     if a {@code Dataset} named {@code name}
    *                                    already exists.
    * @throws ConcurrentSchemaModificationException
-   *                                    If the {@code Dataset}
+   *                                    if the {@code Dataset}
    *                                    schema is updated
    *                                    concurrently.
    * @throws IncompatibleSchemaException
-   *                                    If the schema is not
+   *                                    if the schema is not
    *                                    compatible with existing
    *                                    datasets with shared
-   *                                    storage (e.g. in the
+   *                                    storage (for example, in the
    *                                    same HBase table).
    * @throws DatasetRepositoryException
    */
   <E> Dataset<E> create(String name, DatasetDescriptor descriptor);
 
   /**
-   * Update an existing {@link Dataset} to reflect the supplied {@code descriptor}. The
-   * common case is updating a dataset schema. Depending on
-   * the underlying dataset storage, some updates may not be supported,
-   * such as a change in format or partition strategy.
-   * Any attempt to make an unsupported or incompatible update will result in an
-   * exception being thrown and no change being made to the dataset.
+   * Update an existing {@link Dataset} to reflect the supplied
+   * {@code descriptor}. The common case is updating a dataset schema. Depending
+   * on the underlying dataset storage, some updates might not be supported,
+   * such as a change in format or partition strategy. Any attempt to make an
+   * unsupported or incompatible update results in an exception being thrown 
+   * and no changes made to the dataset.
    *
    * @param name       The fully qualified dataset name
-   * @param descriptor A descriptor that describes the schema and other properties of the
-   *                   dataset
+   * @param descriptor A descriptor that describes the schema and other
+   *                   properties of the dataset
    * @return The updated dataset
-   * @throws IllegalArgumentException      If {@code name} is null
-   * @throws DatasetNotFoundException      If there is no data set named
+   * @throws IllegalArgumentException      if {@code name} is null
+   * @throws DatasetNotFoundException      if there is no data set named
    *                                       {@code name}
-   * @throws UnsupportedOperationException If descriptor updates are not
-   *                                       supported by the implementation.
+   * @throws UnsupportedOperationException if descriptor updates are not
+   *                                       supported by the implementation
    * @throws ConcurrentSchemaModificationException
-   *                                       If the {@code Dataset}
+   *                                       if the {@code Dataset}
    *                                       schema is updated
-   *                                       concurrently.
+   *                                       concurrently
    * @throws IncompatibleSchemaException
-   *                                    If the schema is not
+   *                                    if the schema is not
    *                                    compatible with
    *                                    previous schemas,
    *                                    or with existing
    *                                    datasets with shared
-   *                                    storage (e.g. in the
+   *                                    storage (for example, in the
    *                                    same HBase table).
    * @throws DatasetRepositoryException
    *
@@ -129,18 +129,18 @@ public interface DatasetRepository {
    * Delete data for the {@link Dataset} named {@code name} and remove its
    * {@link DatasetDescriptor} from the underlying metadata provider.
    *
-   * After this method is called, there will be no {@code Dataset} with the
-   * given {@code name}, unless an exception has been thrown. If either data or
-   * metadata was removed, this method will return {@code true}. If there was
-   * no {@code Dataset} corresponding to the given {@code name} then this
-   * method will not make any changes and will return {@code false}.
+   * After this method is called, there is no {@code Dataset} with the given
+   * {@code name}, unless an exception is thrown. If either data or metadata
+   * are removed, this method returns {@code true}. If there is no
+   * {@code Dataset} corresponding to the given {@code name}, this
+   * method makes no changes and returns {@code false}.
    *
    * @param name The name of the dataset to delete.
-   * @return {@code true} if any data or metadata has been removed,
-   *         {@code false} if no action was taken.
-   * @throws IllegalArgumentException If {@code name} is null
+   * @return {@code true} if any data or metadata is removed,
+   *         {@code false} if no action is taken.
+   * @throws IllegalArgumentException if {@code name} is null
    * @throws ConcurrentSchemaModificationException
-   *                                  If the {@code Dataset}
+   *                                  if the {@code Dataset}
    *                                  schema is updated concurrently.
    * @throws DatasetRepositoryException
    *
@@ -153,7 +153,7 @@ public interface DatasetRepository {
    *
    * @param name a {@code Dataset} name to check the existence of
    * @return true if a Dataset named {@code name} exists, false otherwise
-   * @throws IllegalArgumentException If {@code name} is null
+   * @throws IllegalArgumentException if {@code name} is null
    * @throws DatasetRepositoryException
    *
    * @since 0.7.0
@@ -163,7 +163,7 @@ public interface DatasetRepository {
   /**
    * List the names of the {@link Dataset}s in this {@code DatasetRepository}.
    * If there is not at least one {@code Dataset} in this repository, an empty
-   * list will be returned.
+   * list is returned.
    *
    * @return a {@link Collection} of Dataset names ({@link String}s)
    * @throws DatasetRepositoryException
@@ -176,7 +176,7 @@ public interface DatasetRepository {
    * Return the {@link URI} of this repository. When used with the {@link
    * DatasetRepositories#open(java.net.URI)} (or {@link
    * DatasetRepositories#openRandomAccess(java.net.URI)}) method,
-   * an equivalent {@code DatasetRepository} object to {@code this} will be returned.
+   * an equivalent {@code DatasetRepository} object to {@code this} is returned.
    *
    * @return the {@link URI} of this repository
    *
