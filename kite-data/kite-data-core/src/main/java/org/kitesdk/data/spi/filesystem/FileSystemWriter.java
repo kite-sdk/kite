@@ -145,7 +145,8 @@ class FileSystemWriter<E> implements DatasetWriter<E> {
           throw new DatasetIOException("Failed to commit " + finalPath, e);
         }
 
-        LOG.debug("Committed {} for appender {}", finalPath, appender);
+        LOG.debug("Committed {} for appender {} ({} entities)",
+            new Object[]{finalPath, appender, count});
       } else {
         // discard the temp file
         try {

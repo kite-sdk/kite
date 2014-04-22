@@ -150,7 +150,7 @@
     <vers.mockito>1.9.5</vers.mockito>
     <vers.mojo-executor>1.5</vers.mojo-executor>
     <vers.oozie>3.3.2-cdh${cdh.version}</vers.oozie>
-    <vers.parquet>1.2.5</vers.parquet>
+    <vers.parquet>1.4.1</vers.parquet>
     <vers.plexus-utils>3.0</vers.plexus-utils>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
@@ -839,7 +839,7 @@
       </dependency>
       <dependency>
         <groupId>com.twitter</groupId>
-        <artifactId>parquet-hive</artifactId>
+        <artifactId>parquet-hive-bundle</artifactId>
         <version>${vers.parquet}</version>
         <exclusions>
           <exclusion>
