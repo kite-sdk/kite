@@ -100,6 +100,7 @@
   </reporting>
 
   <dependencies>
+    <!-- Kite -->
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
@@ -107,54 +108,74 @@
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>${artifact.hadoop-deps}</artifactId>
-      <type>pom</type>
-      <scope>provided</scope>
+      <artifactId>kite-data-mapreduce</artifactId>
+      <version>0.12.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>${artifact.hadoop-test-deps}</artifactId>
+      <artifactId>kite-data-hcatalog</artifactId>
+      <version>0.12.2-SNAPSHOT</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>0.12.2-SNAPSHOT</version>
+      <optional>true</optional>
+    </dependency>
+
+    <!-- Hadoop -->
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${artifact.hadoop-deps}</artifactId>
       <type>pom</type>
-      <scope>test</scope>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <!-- conflicts with jetty included with HBase -->
+          <groupId>tomcat</groupId>
+          <artifactId>jasper-runtime</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${artifact.hbase-deps}</artifactId>
+      <type>pom</type>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-hadoop-compatibility</artifactId>
     </dependency>
 
+    <!-- Crunch -->
     <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-core</artifactId>
-      <version>0.12.2-SNAPSHOT</version>
-      <type>test-jar</type>
-      <scope>test</scope>
+      <groupId>org.apache.crunch</groupId>
+      <artifactId>crunch-core</artifactId>
     </dependency>
 
+    <!-- Formats -->
     <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-hbase</artifactId>
-      <version>0.12.2-SNAPSHOT</version>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
     </dependency>
 
+    <!-- These should be compile-dependencies of kite-data-hcatalog
+         But, hive-exec includes classes from other modules at Hive-specific
+         versions, including avro's Schema. This causes errors in this and
+         other modules, so these are marked provided.
+         -->
     <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-hbase</artifactId>
-      <version>0.12.2-SNAPSHOT</version>
-      <type>test-jar</type>
-      <scope>test</scope>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-exec</artifactId>
+      <scope>provided</scope>
     </dependency>
-
     <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-hcatalog</artifactId>
-      <version>0.12.2-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-mapreduce</artifactId>
-      <version>0.12.2-SNAPSHOT</version>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-serde</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -172,41 +193,35 @@
       <artifactId>annotations</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <!-- Test Dependencies -->
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.crunch</groupId>
-      <artifactId>crunch-core</artifactId>
-      <scope>provided</scope>
-    </dependency>
 
-    <!-- needed by Crunch, but Parquet specifies 1.2 -->
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.4</version>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
+      <version>0.12.2-SNAPSHOT</version>
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
-
-    <!-- missing from Hadoop, and needed for local job runner -->
     <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>3.1</version>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>0.12.2-SNAPSHOT</version>
+      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>${artifact.hbase-deps}</artifactId>
+      <artifactId>${artifact.hadoop-test-deps}</artifactId>
       <type>pom</type>
-      <scope>provided</scope>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
@@ -223,11 +238,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.apache.hcatalog</groupId>
-      <artifactId>hcatalog-core</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
 </project>

@@ -126,6 +126,8 @@
     <vers.avro>1.7.5</vers.avro>
     <vers.commons-codec>1.4</vers.commons-codec>
     <vers.commons-io>2.1</vers.commons-io>
+    <vers.commons-logging>1.1.1</vers.commons-logging>
+    <vers.commons-lang>2.5</vers.commons-lang>
     <vers.crunch-base>0.9.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-hadoop2</vers.crunch>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
@@ -478,6 +480,7 @@
           <version>${vers.maven-surefire-plugin}</version>
           <configuration>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <!-- to debug class loading, add -verbose:class -->
             <argLine>-Xmx512m -XX:MaxPermSize=128m</argLine> <!-- 512MB needed for HBase 2 -->
           </configuration>
         </plugin>
@@ -706,119 +709,44 @@
         <scope>test</scope>
       </dependency>
 
+      <!-- Hive dependencies -->
       <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${vers.slf4j}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-        <version>${vers.slf4j}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>jcl-over-slf4j</artifactId>
-        <version>${vers.slf4j}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${vers.guava}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.code.findbugs</groupId>
-        <artifactId>jsr305</artifactId>
-        <version>${vers.findbugs.jsr305}</version>
-        <scope>provided</scope>
-        <optional>true</optional>
-      </dependency>
-      <dependency>
-        <groupId>com.google.code.findbugs</groupId>
-        <artifactId>annotations</artifactId>
-        <version>${vers.findbugs.jsr305}</version>
-        <scope>provided</scope>
+        <groupId>org.apache.hcatalog</groupId>
+        <artifactId>hcatalog-core</artifactId>
+        <version>${vers.hcatalog}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.hive</groupId>
         <artifactId>hive-exec</artifactId>
         <version>${vers.hive}</version>
-        <scope>provided</scope>
       </dependency>
       <dependency>
-        <groupId>com.twitter</groupId>
-        <artifactId>parquet-hive</artifactId>
-        <version>${vers.parquet}</version>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-serde</artifactId>
+        <version>${vers.hive}</version>
         <exclusions>
           <exclusion>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
+            <!-- included in kite-hadoop-dependencies -->
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro-mapred</artifactId>
           </exclusion>
           <exclusion>
-            <groupId>org.apache.hive</groupId>
-            <artifactId>hive-exec</artifactId>
+            <!-- included in all modules -->
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
-      <dependency>
-        <groupId>com.twitter</groupId>
-        <artifactId>parquet-avro</artifactId>
-        <version>${vers.parquet}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${vers.junit}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.avro</groupId>
-        <artifactId>avro</artifactId>
-        <version>${vers.avro}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.hcatalog</groupId>
-        <artifactId>hcatalog-core</artifactId>
-        <version>${vers.hcatalog}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>commons-codec</groupId>
-        <artifactId>commons-codec</artifactId>
-        <version>${vers.commons-codec}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>${vers.commons-io}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-jexl</artifactId>
-        <version>${vers.jexl}</version>
-      </dependency>
+
+      <!-- Crunch -->
       <dependency>
         <groupId>org.apache.crunch</groupId>
         <artifactId>crunch-core</artifactId>
         <version>${vers.crunch}</version>
         <scope>provided</scope>
       </dependency>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-all</artifactId>
-        <version>${vers.mockito}</version>
-      </dependency>
-      <dependency>
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
-        <version>${vers.log4j}</version>
-      </dependency>
+
+      <!-- Flume -->
       <dependency>
         <groupId>org.apache.flume</groupId>
         <artifactId>flume-ng-sdk</artifactId>
@@ -834,11 +762,148 @@
         <artifactId>flume-ng-configuration</artifactId>
         <version>${vers.flume}</version>
       </dependency>
+
+      <!-- Oozie -->
       <dependency>
         <groupId>org.apache.oozie</groupId>
         <artifactId>oozie-client</artifactId>
         <version>${vers.oozie}</version>
       </dependency>
+
+      <!-- Misc -->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${vers.guava}</version>
+      </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>${vers.jodatime}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-jexl</artifactId>
+        <version>${vers.jexl}</version>
+      </dependency>
+
+      <!-- Logging -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${vers.slf4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${vers.slf4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>${vers.log4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>${vers.slf4j}</version>
+      </dependency>
+
+      <!-- Findbugs annotations -->
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>${vers.findbugs.jsr305}</version>
+        <scope>provided</scope>
+        <optional>true</optional>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>annotations</artifactId>
+        <version>${vers.findbugs.jsr305}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <!-- Data formats -->
+      <dependency>
+        <groupId>org.apache.avro</groupId>
+        <artifactId>avro</artifactId>
+        <version>${vers.avro}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.twitter</groupId>
+        <artifactId>parquet-hive</artifactId>
+        <version>${vers.parquet}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-core</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>com.twitter</groupId>
+        <artifactId>parquet-avro</artifactId>
+        <version>${vers.parquet}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-core</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>net.sf.opencsv</groupId>
+        <artifactId>opencsv</artifactId>
+        <version>${vers.opencsv}</version>
+      </dependency>
+
+
+      <!-- Apache commons artifacts
+           These entries may not be used directly, but can control the scope of
+           a transitive dependency.
+           -->
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${vers.commons-codec}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>${vers.compress}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${vers.commons-io}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>${vers.commons-logging}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>${vers.commons-lang}</version>
+      </dependency>
+
+      <!-- Testing -->
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${vers.junit}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>${vers.mockito}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- Morphlines deps -->
       <dependency>
         <groupId>com.codahale.metrics</groupId>
         <artifactId>metrics-core</artifactId>
@@ -919,11 +984,6 @@
         <version>${vers.tika}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-compress</artifactId>
-        <version>${vers.compress}</version>
-      </dependency>
-      <dependency>
         <groupId>com.beust</groupId>
         <artifactId>jcommander</artifactId>
         <version>${vers.jcommander}</version>
@@ -933,6 +993,8 @@
         <artifactId>jackson-databind</artifactId>
         <version>${vers.jackson}</version>
       </dependency>
+
+      <!-- Maven plugin -->
       <dependency>
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-project</artifactId>
@@ -964,16 +1026,6 @@
         <groupId>org.twdata.maven</groupId>
         <artifactId>mojo-executor</artifactId>
         <version>${vers.mojo-executor}</version>
-      </dependency>
-      <dependency>
-        <groupId>net.sf.opencsv</groupId>
-        <artifactId>opencsv</artifactId>
-        <version>${vers.opencsv}</version>
-      </dependency>
-      <dependency>
-        <groupId>joda-time</groupId>
-        <artifactId>joda-time</artifactId>
-        <version>${vers.jodatime}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -1067,6 +1119,7 @@
         <vers.crunch>${vers.crunch-base}</vers.crunch>
         <vers.hcatalog>0.5.0-incubating</vers.hcatalog>
         <vers.hive>0.10.0</vers.hive>
+        <vers.commons-lang>2.4</vers.commons-lang>
       </properties>
     </profile>
 

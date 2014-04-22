@@ -78,6 +78,37 @@
                 </transformer>
               </transformers>
               <createDependencyReducedPom>false</createDependencyReducedPom>
+              <!-- <minimizeJar>true</minimizeJar> -->
+              <artifactSet>
+                <includes>
+                  <include>org.kitesdk:kite-data-core</include>
+                  <include>org.kitesdk:kite-data-hcatalog</include>
+                  <include>com.twitter:parquet-avro</include>
+                  <include>com.twitter:parquet-column</include>
+                  <include>com.twitter:parquet-common</include>
+                  <include>com.twitter:parquet-encoding</include>
+                  <include>com.twitter:parquet-generator</include>
+                  <include>com.twitter:parquet-hadoop</include>
+                  <include>com.twitter:parquet-format</include>
+                  <include>net.sf.opencsv:opencsv</include>
+                  <include>org.apache.commons:commons-jexl</include>
+                  <include>org.kitesdk:kite-data-hbase</include>
+                  <include>org.kitesdk:kite-data-hcatalog</include>
+                  <include>com.twitter:parquet-hive</include>
+                  <include>org.kitesdk:kite-data-mapreduce</include>
+                  <include>org.kitesdk:kite-data-crunch</include>
+                  <include>org.kitesdk:kite-hadoop-compatibility</include>
+                  <include>com.beust:jcommander</include>
+                  <include>org.slf4j:slf4j-api</include>
+                  <include>org.apache.crunch:crunch-core</include>
+                  <include>org.javassist:javassist</include>
+                  <include>com.google.code.findbugs:jsr305</include>
+                  <include>com.google.code.findbugs:annotations</include>
+                </includes>
+                <!-- <excludes>
+                  <exclude>*:*</exclude>
+                </excludes> -->
+              </artifactSet>
               <filters>
                 <filter>
                   <artifact>*:*</artifact>
@@ -182,86 +213,207 @@
   </reporting>
 
   <dependencies>
+
+    <!-- Kite dependencies -->
+
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
-      <version>0.12.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-hbase</artifactId>
-      <version>0.12.2-SNAPSHOT</version>
-    </dependency>
+
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-hcatalog</artifactId>
-      <version>0.12.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-mapreduce</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-crunch</artifactId>
-      <version>0.12.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>annotations</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>${artifact.hadoop-deps}</artifactId>
-      <type>pom</type>
-      <scope>compile</scope>
+      <artifactId>kite-hadoop-compatibility</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
-    <!-- TODO: merge this into kite-hadoop-deps
-    <dependency> for web hdfs client
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-hdfs</artifactId>
-      <scope>compile</scope>
-    </dependency> -->
-
-    <dependency>
-      <groupId>org.apache.crunch</groupId>
-      <artifactId>crunch-core</artifactId>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.hcatalog</groupId>
-      <artifactId>hcatalog-core</artifactId>
-    </dependency>
+    <!-- Direct dependencies (bundled) -->
 
     <dependency>
       <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>
     </dependency>
 
-    <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <!-- already on cluster -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Bundled dependencies -->
+
+    <dependency>
+      <!-- not usually provided -->
+      <groupId>org.apache.crunch</groupId>
+      <artifactId>crunch-core</artifactId>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <!-- Avro is provided
+               This is excluded because this pulls in the hadoop1 version
+               because the crunch pom selects the dependency using a profile
+               -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro-mapred</artifactId>
+        </exclusion>
+        <exclusion>
+          <!-- kite doesn't use trevni -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>trevni-avro</artifactId>
+        </exclusion>
+        <exclusion>
+          <!-- kite doesn't use trevni -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>trevni-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <!-- avoid warnings by bundling annotations -->
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <!-- avoid warnings by bundling annotations -->
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Hadoop-provided dependencies (not bundled) -->
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${artifact.hadoop-deps}</artifactId>
+      <type>pom</type>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <!-- conflicts with jetty included with HBase -->
+          <groupId>tomcat</groupId>
+          <artifactId>jasper-runtime</artifactId>
+        </exclusion>
+      </exclusions>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${artifact.hbase-deps}</artifactId>
+      <type>pom</type>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hcatalog</groupId>
+      <artifactId>hcatalog-core</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-exec</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-serde</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <!-- Change scopes for Hadoop-provided libraries
+         These entries update the dependency scope when these artifacts are
+         transitive dependencies.
+         -->
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <!-- avro dep -->
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <!-- commons-jexl dep -->
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <!-- parquet-hive dep -->
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+
+    <!-- Test dependencies (not bundled) -->
 
     <dependency>
       <groupId>junit</groupId>
@@ -279,7 +431,22 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
       <artifactId>${artifact.hadoop-test-deps}</artifactId>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${artifact.hbase-test-deps}</artifactId>
       <type>pom</type>
       <scope>test</scope>
     </dependency>
@@ -289,6 +456,7 @@
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 
 </project>
