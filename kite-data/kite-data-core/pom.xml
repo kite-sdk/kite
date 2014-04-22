@@ -114,6 +114,7 @@
   </reporting>
 
   <dependencies>
+    <!-- Hadoop -->
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>${artifact.hadoop-deps}</artifactId>
@@ -122,22 +123,33 @@
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>${artifact.hadoop-test-deps}</artifactId>
-      <type>pom</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.kitesdk</groupId>
       <artifactId>kite-hadoop-compatibility</artifactId>
     </dependency>
+
+    <!-- Formats -->
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>parquet-avro</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.opencsv</groupId>
+      <artifactId>opencsv</artifactId>
+    </dependency>
+
+    <!-- Partition expression parsing -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-jexl</artifactId>
+    </dependency>
+
+    <!-- Misc -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -154,33 +166,24 @@
       <artifactId>annotations</artifactId>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>com.twitter</groupId>
-      <artifactId>parquet-avro</artifactId>
-      <exclusions>
-        <exclusion>
-          <!-- exclude incompatibility with hadoop1 -->
-          <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-client</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+
+    <!-- Test Dependencies -->
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${artifact.hadoop-test-deps}</artifactId>
+      <type>pom</type>
+      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-jexl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.opencsv</groupId>
-      <artifactId>opencsv</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>joda-time</groupId>

@@ -86,51 +86,54 @@
   </reporting>
 
   <dependencies>
+    <!-- Kite -->
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
       <version>0.12.2-SNAPSHOT</version>
     </dependency>
-
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-core</artifactId>
+      <artifactId>kite-data-hcatalog</artifactId>
       <version>0.12.2-SNAPSHOT</version>
-      <type>test-jar</type>
-      <scope>test</scope>
+      <optional>true</optional>
     </dependency>
-
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-hadoop-compatibility</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-hbase</artifactId>
       <version>0.12.2-SNAPSHOT</version>
+      <optional>true</optional>
     </dependency>
 
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-hbase</artifactId>
-      <version>0.12.2-SNAPSHOT</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-
+    <!-- Hadoop and HBase -->
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>${artifact.hadoop-deps}</artifactId>
       <type>pom</type>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <!-- conflicts with jetty included with HBase -->
+          <groupId>tomcat</groupId>
+          <artifactId>jasper-runtime</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-    
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>${artifact.hadoop-test-deps}</artifactId>
+      <artifactId>${artifact.hbase-deps}</artifactId>
       <type>pom</type>
-      <scope>test</scope>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-compatibility</artifactId>
+    </dependency>
+
+    <!-- Formats -->
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
     </dependency>
 
     <dependency>
@@ -148,21 +151,37 @@
       <artifactId>annotations</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <!-- Test Dependencies -->
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+
     <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
+      <version>0.12.2-SNAPSHOT</version>
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>${artifact.hbase-deps}</artifactId>
-      <type>pom</type>
-      <scope>provided</scope>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>0.12.2-SNAPSHOT</version>
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${artifact.hadoop-test-deps}</artifactId>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>${artifact.hbase-test-deps}</artifactId>
