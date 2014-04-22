@@ -480,6 +480,7 @@
           <version>${vers.maven-surefire-plugin}</version>
           <configuration>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <!-- to debug class loading, add -verbose:class -->
             <argLine>-Xmx512m -XX:MaxPermSize=128m</argLine> <!-- 512MB needed for HBase 2 -->
           </configuration>
         </plugin>
@@ -723,6 +724,18 @@
         <groupId>org.apache.hive</groupId>
         <artifactId>hive-serde</artifactId>
         <version>${vers.hive}</version>
+        <exclusions>
+          <exclusion>
+            <!-- included in kite-hadoop-dependencies -->
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro-mapred</artifactId>
+          </exclusion>
+          <exclusion>
+            <!-- included in all modules -->
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <!-- Crunch -->
