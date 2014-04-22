@@ -97,7 +97,7 @@
                   <include>com.fasterxml.jackson.core:jackson-core</include>
                   <include>org.kitesdk:kite-data-hbase</include>
                   <include>org.kitesdk:kite-data-hcatalog</include>
-                  <include>com.twitter:parquet-hive</include>
+                  <include>com.twitter:parquet-hive-bundle</include>
                   <include>org.kitesdk:kite-data-mapreduce</include>
                   <include>org.kitesdk:kite-data-crunch</include>
                   <include>org.kitesdk:kite-hadoop-compatibility</include>

@@ -63,7 +63,8 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
     }
     avroParquetWriter = new AvroParquetWriter<E>(fileSystem.makeQualified(path),
         schema, codecName, DEFAULT_BLOCK_SIZE,
-        ParquetWriter.DEFAULT_PAGE_SIZE);
+        ParquetWriter.DEFAULT_PAGE_SIZE,
+        ParquetWriter.DEFAULT_IS_DICTIONARY_ENABLED, fileSystem.getConf());
   }
 
   @Override

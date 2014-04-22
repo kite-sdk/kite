@@ -110,7 +110,7 @@
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>parquet-hive</artifactId>
+      <artifactId>parquet-hive-bundle</artifactId>
       <exclusions>
         <exclusion>
           <groupId>org.apache.hadoop</groupId>

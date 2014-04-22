@@ -19,10 +19,8 @@ import com.google.common.io.Files;
 import java.util.Arrays;
 import java.util.Collection;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
-import org.junit.Assume;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.kitesdk.data.Dataset;
@@ -107,11 +105,6 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
   @Test
   public void testGenericParquet() throws IOException {
-    // Parquet fails when testing with HDFS because
-    // parquet.hadoop.ParquetReader calls new Configuration(), which does
-    // not work with the mini-cluster (not set up through env).
-    Assume.assumeTrue(fileSystem instanceof LocalFileSystem);
-
     Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).format(Formats.PARQUET).build());
     Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
@@ -132,11 +125,6 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
   @Test
   public void testPartitionedSource() throws IOException {
-    // Parquet fails when testing with HDFS because
-    // parquet.hadoop.ParquetReader calls new Configuration(), which does
-    // not work with the mini-cluster (not set up through env).
-    Assume.assumeTrue(fileSystem instanceof LocalFileSystem);
-
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
 
@@ -216,11 +204,6 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
   @Test
   public void testSourceView() throws IOException {
-    // Parquet fails when testing with HDFS because
-    // parquet.hadoop.ParquetReader calls new Configuration(), which does
-    // not work with the mini-cluster (not set up through env).
-    Assume.assumeTrue(fileSystem instanceof LocalFileSystem);
-
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
 

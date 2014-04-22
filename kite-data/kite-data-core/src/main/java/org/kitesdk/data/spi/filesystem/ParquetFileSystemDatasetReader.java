@@ -64,7 +64,8 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDa
     logger.debug("Opening reader on path:{}", path);
 
     try {
-      reader = new AvroParquetReader<E>(fileSystem.makeQualified(path));
+      reader = new AvroParquetReader<E>(
+          fileSystem.getConf(), fileSystem.makeQualified(path));
     } catch (IOException e) {
       throw new DatasetReaderException("Unable to create reader path:" + path, e);
     }
