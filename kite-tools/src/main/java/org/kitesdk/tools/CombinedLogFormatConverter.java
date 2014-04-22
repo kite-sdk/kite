@@ -39,9 +39,11 @@ import org.apache.hadoop.util.ToolRunner;
  * A tool for converting files in
  * <a href="http://en.wikipedia.org/wiki/Common_Log_Format">Combined Log Format</a> to a
  * {@link org.kitesdk.data.Dataset}.
+ * @deprecated will be removed in 0.14.0
  */
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SE_NO_SERIALVERSIONID",
     justification = "Serialization not needed between different versions of this class")
+@Deprecated
 public class CombinedLogFormatConverter extends CrunchTool {
 
   private static final String LOG_PATTERN = "^(\\S+) (\\S+) (\\S+) \\[" +
