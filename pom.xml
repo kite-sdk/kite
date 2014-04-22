@@ -126,6 +126,8 @@
     <vers.avro>1.7.5</vers.avro>
     <vers.commons-codec>1.4</vers.commons-codec>
     <vers.commons-io>2.1</vers.commons-io>
+    <vers.commons-logging>1.1.1</vers.commons-logging>
+    <vers.commons-lang>2.5</vers.commons-lang>
     <vers.crunch-base>0.9.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-hadoop2</vers.crunch>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
@@ -863,6 +865,16 @@
         <artifactId>commons-io</artifactId>
         <version>${vers.commons-io}</version>
       </dependency>
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>${vers.commons-logging}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>${vers.commons-lang}</version>
+      </dependency>
 
       <!-- Testing -->
       <dependency>
@@ -1094,6 +1106,7 @@
         <vers.crunch>${vers.crunch-base}</vers.crunch>
         <vers.hcatalog>0.5.0-incubating</vers.hcatalog>
         <vers.hive>0.10.0</vers.hive>
+        <vers.commons-lang>2.4</vers.commons-lang>
       </properties>
     </profile>
 
