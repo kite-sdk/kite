@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-data</artifactId>
-    <version>0.12.2-SNAPSHOT</version>
+    <version>0.13.0</version>
   </parent>
 
   <name>Kite Data Core Module</name>
