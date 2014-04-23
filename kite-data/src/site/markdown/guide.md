@@ -95,7 +95,7 @@ The Kite Data module supports URI-based instantiation to build `DatasetRepositor
     // get a repository with data stored in hdfs:/data
     DatasetRepository hdfsRepo = DatasetRepositories.open("repo:hdfs:/data");
 
-For more information, see [the repository URI section](#Dataset Repository URIs).
+For more information, see [the repository URI section](#Dataset_Repository_URIs).
 
 Instantiating `FileSystemDatasetRepository` using its builder is also
 straightforward, and supports additional options such as supplying a specific
@@ -163,6 +163,7 @@ HCatalog, the storage system represented by the `DatasetRepository`
 implementation, and the format in which the data is written. As it turns out,
 that's a pretty tall order. In keeping with Kite's goal of reducing
 rather than adding options, you are encouraged to
+
  1. use HCatalog
  2. allow this library to default to Snappy-compressed Avro data files
  3. use systems that also integrate with HCatalog (directly or indirectly).
@@ -313,6 +314,7 @@ data in the configured Hadoop `FileSystem` as Snappy-compressed Avro data files,
 or optionally as Parquet files.
 
 Avro data files were selected as the default because they:
+
 * are supported by all components of CDH
 * are language agnostic
 * support block compression
@@ -713,7 +715,7 @@ different mapping types and their definitions:
 | column | Store the field in the family:qualifier given by the value | `{"type": "column", "value": "fam:qual"}` |
 | keyAsColumn | Store a map or record with the value as the column family and key/field names as qualifiers | `{"type": "keyAsColumn", "value": "fam:"}` |
 | counter | Like column, but can be incremented (cannot be used with OCC) | `{"type": "counter", "value": "fam:qual"}` |
-| occVersion | Use OCC (see below) | `{"type": "counter"}` |
+| occVersion | Use OCC (see below) | `{"type": "occVersion"}` |
 
 _Optimistic Concurrency_
 
@@ -756,7 +758,7 @@ The `fromAfter` and `toBefore` methods are similar to `from` and `to`, but do no
 
 The [RefinableView interface][refin] defines these methods.
 
-[refin]: http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/RefineableView.html "RefinableView interface"
+[refin]: http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/RefineableView.html "RefineableView interface"
 
 #### Using Datasets in MapReduce
 
