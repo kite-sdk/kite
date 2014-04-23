@@ -130,6 +130,12 @@
     <dependency>
       <groupId>com.twitter</groupId>
       <artifactId>parquet-avro</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>net.sf.opencsv</groupId>
