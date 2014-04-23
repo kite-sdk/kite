@@ -133,8 +133,6 @@
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.flume>1.4.0-cdh${cdh.version}</vers.flume>
     <vers.guava>11.0.2</vers.guava>
-    <vers.hadoop-deps>0.12.2-SNAPSHOT</vers.hadoop-deps> <!-- needs to be hardcoded, see CDK-363 -->
-    <vers.hbase-deps>0.12.2-SNAPSHOT</vers.hbase-deps> <!-- needs to be hardcoded, see CDK-363 -->
     <vers.hadoop>2.0.0-cdh${cdh.version}</vers.hadoop>
     <vers.hadoop-mr1>2.0.0-mr1-cdh${cdh.version}</vers.hadoop-mr1>
     <vers.hadoop1>1.2.1</vers.hadoop1>
@@ -699,13 +697,13 @@
       <dependency>
         <groupId>org.kitesdk</groupId>
         <artifactId>${artifact.hbase-deps}</artifactId>
-        <version>${vers.hbase-deps}</version>
+        <version>${project.version}</version>
         <type>pom</type>
       </dependency>
       <dependency>
         <groupId>org.kitesdk</groupId>
         <artifactId>${artifact.hbase-test-deps}</artifactId>
-        <version>${vers.hbase-deps}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>test</scope>
       </dependency>
