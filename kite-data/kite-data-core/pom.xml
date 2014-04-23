@@ -64,7 +64,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
-          <skip>true</skip> <!-- jdiff is aggregated by parent -->
           <excludePackageNames>org.kitesdk.data.spi.*</excludePackageNames>
         </configuration>
       </plugin>
@@ -106,9 +105,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <skip>true</skip> <!-- javadoc is aggregated by parent -->
-        </configuration>
       </plugin>
     </plugins>
   </reporting>

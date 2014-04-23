@@ -7,6 +7,6 @@ env:
   - HADOOP_PROFILE=hadoop-1
   - HADOOP_PROFILE=hadoop-2
 
-install: mvn -q install -DskipTests=true
+install: mvn -q install -DskipTests=true -Dmaven.javadoc.skip=true -Dsource.skip=true
 before_script: umask 0022
 script: mvn test -P $HADOOP_PROFILE
