@@ -3,12 +3,16 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
-## Version TBD
+## Version 0.13.0
 
-Release date: TBD
+Release date: April 23, 2014
 
-Version TBD has the following notable changes:
+Version 0.13.0 has the following notable changes:
 
+* Added datasets command-line interface
+    * Build avro schemas from CSV data samples and java classes
+    * Create, view, and delete Kite datasets
+    * Import CSV data into a dataset
 * Morphlines Library
     * Added morphline command that opens an HDFS file for read and returns a corresponding Java InputStream: [openHdfsFile](kite-morphlines/morphlinesReferenceGuide.html#openHdfsFile)
     * Added morphline command that converts an InputStream to a byte array in main memory: [readBlob](kite-morphlines/morphlinesReferenceGuide.html#readBlob)
