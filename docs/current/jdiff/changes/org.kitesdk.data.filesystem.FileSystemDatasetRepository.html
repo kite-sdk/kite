@@ -18,7 +18,7 @@ org.kitesdk.data.filesystem.FileSystemDatasetRepository
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/filesystem/FileSystemDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.12.1</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/filesystem/FileSystemDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.13.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.filesystem.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -47,56 +47,101 @@ FIELDS
 <H2>
 Class org.kitesdk.data.filesystem.<A HREF="../../apidocs/org/kitesdk/data/filesystem/FileSystemDatasetRepository.html" target="_top"><tt>FileSystemDatasetRepository</tt></A>
 </H2>
+<p><font size="+1">The superclass changed from <code>org.kitesdk.data.spi.AbstractDatasetRepository</code> to <code>org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository</code>.<br></font>
 <a NAME="constructors"></a>
 <p>
-<a NAME="Changed"></a>
-<TABLE summary="Changed Constructors" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Constructors" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Constructors</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Constructors</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.ctor_changed(org.apache.hadoop.conf.Configuration, org.kitesdk.data.MetadataProvider)"></A>
-  <nobr><A HREF="../../apidocs/org/kitesdk/data/filesystem/FileSystemDatasetRepository.html#FileSystemDatasetRepository(org.apache.hadoop.conf.Configuration, org.kitesdk.data.MetadataProvider)" target="_top"><tt>FileSystemDatasetRepository</tt></A>(<code>Configuration,</nobr> MetadataProvider<nobr><nobr></code>)  </nobr>
+  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.ctor_removed(org.apache.hadoop.conf.Configuration, org.kitesdk.data.MetadataProvider)"></A>
+  <nobr>FileSystemDatasetRepository(<code>Configuration,</nobr> MetadataProvider<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed from the public API in 0.13.0</TD>
+  <TD VALIGN="TOP">Construct a <A HREF="../../apidocs/FileSystemDatasetRepository.html"><TT>FileSystemDatasetRepository</TT></A> for the given
+ <A HREF="../../apidocs/MetadataProvider.html"><TT>MetadataProvider</TT></A> for metadata storage.</TD>
 </TR>
 </TABLE>
 &nbsp;
 <a NAME="methods"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.getUri_added()"></A>
-  <nobr><code>URI</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/filesystem/FileSystemDatasetRepository.html#getUri()" target="_top"><tt>getUri</tt></A>()</nobr>
+  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.create_removed(java.lang.String, org.kitesdk.data.DatasetDescriptor)"></A>
+  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;create(<code>String,</nobr> DatasetDescriptor<nobr><nobr></code>)</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
-</TABLE>
-&nbsp;
-<p>
-<a NAME="Changed"></a>
-<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
-<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.delete_removed(java.lang.String)"></A>
+  <nobr><code>boolean</code>&nbsp;delete(<code>String</code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.getMetadataProvider_changed()"></A>
-  <nobr><code>MetadataProvider</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/filesystem/FileSystemDatasetRepository.html#getMetadataProvider()" target="_top"><tt>getMetadataProvider</tt></A>()  </nobr>
+  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.exists_removed(java.lang.String)"></A>
+  <nobr><code>boolean</code>&nbsp;exists(<code>String</code>)</nobr>
   </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.getMetadataProvider_removed()"></A>
+  <nobr><code>MetadataProvider</code>&nbsp;getMetadataProvider()</nobr>
   </TD>
-  <TD VALIGN="TOP">will be removed from the public API in 0.13.0</TD>
+  <TD VALIGN="TOP">@return the <A HREF="../../apidocs/MetadataProvider.html"><TT>MetadataProvider</TT></A> being used by this repository.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.getUri_removed()"></A>
+  <nobr><code>URI</code>&nbsp;getUri()</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.list_removed()"></A>
+  <nobr><code>Collection&lt;String&gt;</code>&nbsp;list()</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.load_removed(java.lang.String)"></A>
+  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;load(<code>String</code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.partitionKeyForPath_removed(org.kitesdk.data.Dataset, java.net.URI)"></A>
+  <nobr><code>PartitionKey</code>&nbsp;partitionKeyForPath(<code>Dataset,</nobr> URI<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Get a <A HREF="../../apidocs/org/kitesdk/data/PartitionKey.html"><TT>org.kitesdk.data.PartitionKey</TT></A> corresponding to a partition's filesystem path
+ represented as a <A HREF="../../apidocs/URI.html"><TT>URI</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.toString_removed()"></A>
+  <nobr><code>String</code>&nbsp;toString()</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.filesystem.FileSystemDatasetRepository.update_removed(java.lang.String, org.kitesdk.data.DatasetDescriptor)"></A>
+  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;update(<code>String,</nobr> DatasetDescriptor<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -108,7 +153,7 @@ Class org.kitesdk.data.filesystem.<A HREF="../../apidocs/org/kitesdk/data/filesy
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/filesystem/FileSystemDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.12.1</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/filesystem/FileSystemDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.13.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.filesystem.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>

@@ -7,7 +7,7 @@
 <meta name="description" content="JDiff is a Javadoc doclet which generates an HTML report of all the packages, classes, constructors, methods, and fields which have been removed, added or changed in any way, including their documentation, when two APIs are compared.">
 <meta name="keywords" content="diff, jdiff, javadiff, java diff, java difference, API difference, difference between two APIs, API diff, Javadoc, doclet">
 <TITLE>
-API Differences between Kite SDK 0.11.0 and Kite SDK 0.12.1
+API Differences between Kite SDK 0.12.0 and Kite SDK 0.13.0
 </TITLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="../stylesheet-jdiff.css" TITLE="Style">
 </HEAD>
@@ -18,7 +18,7 @@ API Differences between Kite SDK 0.11.0 and Kite SDK 0.12.1
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/index.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.12.1</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/index.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.13.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Overview</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Package</FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -34,8 +34,8 @@ API Differences between Kite SDK 0.11.0 and Kite SDK 0.12.1
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="changes-summary.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell3"><FONT SIZE="-2"> DETAIL: &nbsp;
-REMOVED&nbsp;|&nbsp;
-<a href="#Added">ADDED</a>&nbsp;|&nbsp;
+<a href="#Removed">REMOVED</a>&nbsp;|&nbsp;
+ADDED&nbsp;|&nbsp;
 <a href="#Changed">CHANGED</a>
   </FONT></TD>
 </TR>
@@ -46,19 +46,18 @@ REMOVED&nbsp;|&nbsp;
 <H1>API Differences</H1>
 </center>
 <center>
-<H2>Between Kite SDK 0.11.0 and Kite SDK 0.12.1</H2>
+<H2>Between Kite SDK 0.12.0 and Kite SDK 0.13.0</H2>
 </center>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Packages" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Packages" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Packages</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Packages</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.mapreduce"></A>
-  <nobr><A HREF="../../apidocs/org/kitesdk/data/mapreduce/package-summary.html" target="_top"><tt>org.kitesdk.data.mapreduce</tt></A></nobr>
-  </TD>
+  <A NAME="org.kitesdk.data.partition"></A>
+  org.kitesdk.data.partition  </TD>
   <TD>&nbsp;</TD>
 </TR>
 </TABLE>
@@ -78,13 +77,6 @@ REMOVED&nbsp;|&nbsp;
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.crunch"></A>
-  <nobr><A HREF="pkg_org.kitesdk.data.crunch.html">org.kitesdk.data.crunch</A></nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="org.kitesdk.data.filesystem"></A>
   <nobr><A HREF="pkg_org.kitesdk.data.filesystem.html">org.kitesdk.data.filesystem</A></nobr>
   </TD>
@@ -99,22 +91,22 @@ REMOVED&nbsp;|&nbsp;
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.partition"></A>
-  <nobr><A HREF="pkg_org.kitesdk.data.partition.html">org.kitesdk.data.partition</A></nobr>
+  <A NAME="org.kitesdk.morphline.hadoop.core"></A>
+  <nobr><A HREF="pkg_org.kitesdk.morphline.hadoop.core.html">org.kitesdk.morphline.<br>hadoop.core</A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.morphline.hadoop.rcfile"></A>
-  <nobr><A HREF="pkg_org.kitesdk.morphline.hadoop.rcfile.html">org.kitesdk.morphline.<br>hadoop.rcfile</A></nobr>
+  <A NAME="org.kitesdk.morphline.stdio"></A>
+  <nobr><A HREF="pkg_org.kitesdk.morphline.stdio.html">org.kitesdk.morphline.stdio</A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.morphline.stdlib"></A>
-  <nobr><A HREF="pkg_org.kitesdk.morphline.stdlib.html">org.kitesdk.morphline.stdlib</A></nobr>
+  <A NAME="org.kitesdk.tools"></A>
+  <nobr><A HREF="pkg_org.kitesdk.tools.html">org.kitesdk.tools</A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
