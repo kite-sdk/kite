@@ -758,7 +758,7 @@ The `fromAfter` and `toBefore` methods are similar to `from` and `to`, but do no
 
 The [RefinableView interface][refin] defines these methods.
 
-[refin]: http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/RefineableView.html "RefineableView interface"
+[refin]: http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/RefinableView.html "RefinableView interface"
 
 #### Using Datasets in MapReduce
 
