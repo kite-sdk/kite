@@ -81,14 +81,10 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeabl
     this.convert = new PathConversion();
 
     this.unbounded = new FileSystemView<E>(this);
-    // remove this.partitionKey for 0.13.0
+    // remove this.partitionKey for 0.14.0
     this.partitionKey = null;
   }
 
-  /**
-   * @deprecated will be removed in 0.13.0
-   */
-  @Deprecated
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
     DatasetDescriptor descriptor, @Nullable PartitionKey partitionKey,
     @Nullable PartitionListener partitionListener) {
@@ -106,10 +102,6 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeabl
     return descriptor;
   }
 
-  /**
-   * @deprecated will be removed in 0.13.0
-   */
-  @Deprecated
   PartitionKey getPartitionKey() {
     return partitionKey;
   }
