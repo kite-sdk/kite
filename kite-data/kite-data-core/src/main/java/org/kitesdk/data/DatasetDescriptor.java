@@ -15,23 +15,12 @@
  */
 package org.kitesdk.data;
 
-import org.kitesdk.data.spi.URIPattern;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
-import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileReader;
-import org.apache.avro.file.DataFileStream;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.reflect.ReflectData;
-import org.apache.hadoop.fs.Path;
-
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +30,18 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileReader;
+import org.apache.avro.file.DataFileStream;
+import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.reflect.ReflectData;
+import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.URIPattern;
 
 /**
  * <p>
@@ -181,10 +181,10 @@ public class DatasetDescriptor {
    */
   public PartitionStrategy getPartitionStrategy() {
     Preconditions
-      .checkState(
-        isPartitioned(),
-        "Attempt to retrieve the partition strategy on a non-partitioned descriptor:%s",
-        this);
+        .checkState(
+            isPartitioned(),
+            "Attempt to retrieve the partition strategy on a non-partitioned descriptor:%s",
+            this);
 
     return partitionStrategy;
   }
@@ -204,7 +204,7 @@ public class DatasetDescriptor {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(@Nullable Object obj) {
     if (obj == null) {
       return false;
     }
@@ -222,13 +222,13 @@ public class DatasetDescriptor {
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this)
+    Objects.ToStringHelper helper = Objects.toStringHelper(this)
         .add("format", format)
         .add("schema", schema)
         .add("location", location)
         .add("properties", properties)
-        .add("partitionStrategy", partitionStrategy)
-        .toString();
+        .add("partitionStrategy", partitionStrategy);
+    return helper.toString();
   }
 
   /**
@@ -496,7 +496,7 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the {@link Dataset}'s location (optional).
+     * Configure the dataset's location (optional).
      *
      * @param uri A URI location
      * @return An instance of the builder for method chaining.
@@ -512,7 +512,7 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the {@link Dataset}'s location (optional).
+     * Configure the dataset's location (optional).
      *
      * @param uri A location Path
      * @return An instance of the builder for method chaining.
@@ -524,7 +524,7 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the {@link Dataset}'s location (optional).
+     * Configure the dataset's location (optional).
      *
      * @param uri A location String URI
      * @return An instance of the builder for method chaining.
@@ -556,9 +556,106 @@ public class DatasetDescriptor {
      * @return An instance of the builder for method chaining.
      */
     public Builder partitionStrategy(
-      @Nullable PartitionStrategy partitionStrategy) {
+        @Nullable PartitionStrategy partitionStrategy) {
       this.partitionStrategy = partitionStrategy;
       return this;
+    }
+
+    /**
+     * Configure the dataset's partition strategy from a File.
+     *
+     * The File contents must be a JSON-formatted partition strategy that is
+     * produced by {@link PartitionStrategy#toString()}.
+     *
+     * @param file
+     *          The File
+     * @return
+     *          An instance of the builder for method chaining.
+     * @throws ValidationException
+     *          If the file does not contain a valid JSON-encoded partition
+     *          strategy
+     * @throws DatasetIOException
+     *          If there is an IOException accessing the file contents
+     */
+    public Builder partitionStrategy(File file) {
+      this.partitionStrategy = new PartitionStrategyParser().parse(file);
+      return this;
+    }
+
+    /**
+     * Configure the dataset's partition strategy from an InputStream.
+     *
+     * The InputStream contents must be a JSON-formatted partition strategy
+     * that is produced by {@link PartitionStrategy#toString()}.
+     *
+     * @param in
+     *          The input stream
+     * @return An instance of the builder for method chaining.
+     * @throws ValidationException
+     *          If the stream does not contain a valid JSON-encoded partition
+     *          strategy
+     * @throws DatasetIOException
+     *          If there is an IOException accessing the InputStream contents
+     */
+    public Builder partitionStrategy(InputStream in) {
+      this.partitionStrategy = new PartitionStrategyParser().parse(in);
+      return this;
+    }
+
+    /**
+     * Configure the dataset's partition strategy from a String literal.
+     *
+     * The String literal is a JSON-formatted partition strategy that is
+     * produced by {@link PartitionStrategy#toString()}.
+     *
+     * @param literal
+     *          A partition strategy String literal
+     * @return This builder for method chaining.
+     * @throws ValidationException
+     *          If the literal is not a valid JSON-encoded partition strategy
+     */
+    public Builder partitionStrategyLiteral(String literal) {
+      this.partitionStrategy = new PartitionStrategyParser().parse(literal);
+      return this;
+    }
+
+    /**
+     * Configure the Dataset's partition strategy from a URI.
+     *
+     * @param uri
+     *          A URI to a partition strategy JSON file.
+     * @return This builder for method chaining.
+     */
+    public Builder partitionStrategyUri(URI uri) throws IOException {
+      // special support for resource URIs
+      Map<String, String> match = RESOURCE_URI_PATTERN.getMatch(uri);
+      if (match != null) {
+        return partitionStrategy(
+            Resources.getResource(match.get(RESOURCE_PATH)).openStream());
+      }
+
+      InputStream in = null;
+      boolean threw = true;
+      try {
+        in = toURL(uri).openStream();
+        threw = false;
+        return partitionStrategy(in);
+      } finally {
+        Closeables.close(in, threw);
+      }
+    }
+
+    /**
+     * Configure the dataset's partition strategy from a String URI.
+     *
+     * @param uri
+     *          A String URI to a partition strategy JSON file.
+     * @return This builder for method chaining.
+     * @throws URISyntaxException if {@code uri} is not a valid URI
+     */
+    public Builder partitionStrategyUri(String uri)
+        throws URISyntaxException, IOException {
+      return partitionStrategyUri(new URI(uri));
     }
 
     /**
@@ -570,6 +667,15 @@ public class DatasetDescriptor {
     public DatasetDescriptor build() {
       Preconditions.checkState(schema != null,
           "Descriptor schema is required and cannot be null");
+
+      // if no partition strategy is defined, check for one in the schema
+      if (partitionStrategy == null) {
+        PartitionStrategyParser parser = new PartitionStrategyParser();
+        if (parser.hasEmbeddedStrategy(schema)) {
+          this.partitionStrategy = parser.parseFromSchema(schema);
+        }
+      }
+
       checkPartitionStrategy(schema, partitionStrategy);
 
       return new DatasetDescriptor(

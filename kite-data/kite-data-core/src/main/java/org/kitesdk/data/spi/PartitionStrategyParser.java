@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Iterator;
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Type;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.ValidationException;
@@ -55,18 +54,15 @@ import org.kitesdk.data.spi.partition.YearFieldPartitioner;
  */
 public class PartitionStrategyParser {
 
+  // name of the json node when embedded in a schema
+  private static final String PARTITIONS = "partitions";
+
   // property constants
   private static final String TYPE = "type";
   private static final String SOURCE = "source";
   private static final String NAME = "name";
   private static final String BUCKETS = "buckets";
   private static final String FORMAT = "format";
-
-  private final Schema schema;
-
-  public PartitionStrategyParser(Schema schema) {
-    this.schema = schema;
-  }
 
   /**
    * Parses a PartitionStrategy from a JSON string.
@@ -132,6 +128,15 @@ public class PartitionStrategyParser {
     }
   }
 
+  public boolean hasEmbeddedStrategy(Schema schema) {
+    return schema.getJsonProp(PARTITIONS) != null;
+  }
+
+  public PartitionStrategy parseFromSchema(Schema schema) {
+    // parse the String because Avro uses com.codehaus.jackson
+    return parse(schema.getJsonProp(PARTITIONS).toString());
+  }
+
   private PartitionStrategy buildPartitionStrategy(JsonNode node) {
     PartitionStrategy.Builder builder = new PartitionStrategy.Builder();
     ValidationException.check(node.isArray(),
@@ -157,8 +162,7 @@ public class PartitionStrategyParser {
       if (type.equals("identity")) {
         ValidationException.check(name != null,
             "Identity partitioner %s must have a %s.", source, NAME);
-        Class<?> sourceClass = getSchemaType(schema.getField(source).schema());
-        builder.identity(source, name, sourceClass, -1);
+        builder.identity(source, name, Object.class, -1);
       } else if (type.equals("hash")) {
         ValidationException.check(fieldPartitioner.has(BUCKETS),
             "Hash partitioner %s must have attribute %s.",
@@ -237,28 +241,6 @@ public class PartitionStrategyParser {
       throw new DatasetIOException("Cannot write to JSON generator", e);
     }
     return writer.toString();
-  }
-
-  private Class<?> getSchemaType(Schema s) {
-    Type schemaType = s.getType();
-    if (schemaType == Type.INT) {
-      return Integer.class;
-    } else if (schemaType == Type.LONG) {
-      return Long.class;
-    } else if (schemaType == Type.FLOAT) {
-      return Float.class;
-    } else if (schemaType == Type.DOUBLE) {
-      return Double.class;
-    } else if (schemaType == Type.BOOLEAN) {
-      return Boolean.class;
-    } else if (schemaType == Type.BYTES) {
-      return byte[].class;
-    } else if (schemaType == Type.STRING) {
-      return String.class;
-    } else {
-      throw new ValidationException("Invalid partitioner type: "
-          + schemaType.toString());
-    }
   }
 
 }

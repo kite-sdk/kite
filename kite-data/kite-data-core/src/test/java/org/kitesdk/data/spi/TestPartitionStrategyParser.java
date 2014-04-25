@@ -19,8 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -35,12 +33,7 @@ public class TestPartitionStrategyParser {
 
   @BeforeClass
   public static void setupParser() throws IOException {
-    Schema schema = SchemaBuilder.record("User").fields()
-        .requiredLong("id")
-        .requiredString("username")
-        .optionalString("email")
-        .endRecord();
-    parser = new PartitionStrategyParser(schema);
+    parser = new PartitionStrategyParser();
   }
 
   public static void checkParser(PartitionStrategy expected, String json) {
@@ -55,7 +48,7 @@ public class TestPartitionStrategyParser {
   public void testIdentity() {
     // right now, the field type is taken from the Schema
     checkParser(new PartitionStrategy.Builder()
-            .identity("username", "id", String.class, -1)
+            .identity("username", "id", Object.class, -1)
             .build(),
         "[ {\"type\": \"identity\", " +
             "\"source\": \"username\", " +
@@ -183,7 +176,7 @@ public class TestPartitionStrategyParser {
   public void testMultipleFields() {
     checkParser(new PartitionStrategy.Builder()
             .hash("username", 64)
-            .identity("username", "u", String.class, -1)
+            .identity("username", "u", Object.class, -1)
             .year("time")
             .month("time")
             .day("time")

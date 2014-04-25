@@ -63,4 +63,33 @@ public class TestDatasetDescriptor extends MiniDFSTest {
     Assert.assertNotNull(descriptor);
     Assert.assertNotNull(descriptor.getSchema());
   }
+
+  @Test
+  public void testEmbeddedPartitionStrategy() {
+    Schema schema = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"partitions\": [" +
+        "    {\"type\": \"hash\", \"source\": \"username\", \"buckets\": 16}," +
+        "    {\"type\": \"identity\", \"source\": \"username\", \"name\": \"u\"}" +
+        "  ]," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\"}," +
+        "    {\"name\": \"username\", \"type\": \"string\"}," +
+        "    {\"name\": \"real_name\", \"type\": \"string\"}" +
+        "  ]" +
+        "}");
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(schema)
+        .build();
+    Assert.assertTrue("Descriptor should have partition strategy",
+        descriptor.isPartitioned());
+
+    PartitionStrategy expected = new PartitionStrategy.Builder()
+        .hash("username", 16)
+        .identity("username", "u", Object.class, -1)
+        .build();
+    Assert.assertEquals(expected, descriptor.getPartitionStrategy());
+  }
 }

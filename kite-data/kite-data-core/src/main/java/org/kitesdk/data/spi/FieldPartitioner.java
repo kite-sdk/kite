@@ -114,7 +114,25 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
    * @deprecated will be removed in 0.14.0
    */
   @Deprecated
-  public abstract T valueFromString(String stringValue);
+  public T valueFromString(String stringValue, Class<? extends T> expectedType) {
+    Preconditions.checkArgument(getType().isAssignableFrom(expectedType),
+        "Bad expected type: " + expectedType);
+    return valueFromString(stringValue);
+  }
+
+  /**
+   * <p>
+   * Retrieve the value for the field from the string representation.
+   * </p>
+   * @since 0.3.0
+   *
+   * @deprecated will be removed in 0.13.0
+   */
+  @Deprecated
+  protected T valueFromString(String stringValue) {
+    throw new UnsupportedOperationException(
+        "Implementation did not override valueFromString: " + getClass());
+  }
 
   /**
    * <p>
