@@ -20,6 +20,7 @@ import com.google.common.base.Predicate;
 import java.util.Calendar;
 import java.util.TimeZone;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 
@@ -75,7 +76,7 @@ public class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;
     }

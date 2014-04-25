@@ -16,6 +16,7 @@
 package org.kitesdk.data.spi.partition;
 
 import com.google.common.base.Predicate;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 
@@ -31,11 +32,13 @@ public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
 
   public HashFieldPartitioner(String sourceName, int buckets) {
     // create a new field name from the source name
-    super(sourceName, sourceName + "_hash", Object.class, Integer.class, buckets);
+    this(sourceName, null, buckets);
   }
 
-  public HashFieldPartitioner(String sourceName, String name, int buckets) {
-    super(sourceName, name, Object.class, Integer.class, buckets);
+  public HashFieldPartitioner(String sourceName, @Nullable String name,
+                              int buckets) {
+    super(sourceName, (name == null ? sourceName + "_hash" : name),
+        Object.class, Integer.class, buckets);
   }
 
   @Override
@@ -67,7 +70,7 @@ public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;
     }

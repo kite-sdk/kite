@@ -75,7 +75,7 @@ public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
     this.format.setTimeZone(zone);
   }
 
-  String getPattern() {
+  public String getPattern() {
     return format.toPattern();
   }
 

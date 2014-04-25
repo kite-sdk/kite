@@ -23,6 +23,7 @@ import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 import java.util.Set;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.Predicates;
@@ -37,11 +38,13 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
   private final int[] upperBounds;
 
   public IntRangeFieldPartitioner(String sourceName, int... upperBounds) {
-    this(sourceName, sourceName + "_bound", upperBounds);
+    this(sourceName, null, upperBounds);
   }
 
-  public IntRangeFieldPartitioner(String sourceName, String name, int... upperBounds) {
-    super(sourceName, name, Integer.class, Integer.class, upperBounds.length);
+  public IntRangeFieldPartitioner(String sourceName, @Nullable String name,
+                                  int... upperBounds) {
+    super(sourceName, (name == null ? sourceName + "_bound" : name),
+        Integer.class, Integer.class, upperBounds.length);
     this.upperBounds = upperBounds;
   }
 
@@ -150,7 +153,7 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;
     }

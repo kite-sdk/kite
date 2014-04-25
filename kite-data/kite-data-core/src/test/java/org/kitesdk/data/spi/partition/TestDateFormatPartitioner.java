@@ -23,7 +23,7 @@ import java.util.TimeZone;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.impl.Accessor;
 
-public class DateFormatPartitionerTest {
+public class TestDateFormatPartitioner {
   @Test
   public void testApply() {
     long time = 1384912178434L;

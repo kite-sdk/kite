@@ -17,6 +17,7 @@ package org.kitesdk.data.spi.partition;
 
 import java.text.NumberFormat;
 import java.util.Calendar;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
@@ -29,11 +30,12 @@ public class HourFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 
   public HourFieldPartitioner(String sourceName) {
-    this(sourceName, "hour");
+    this(sourceName, null);
   }
 
-  public HourFieldPartitioner(String sourceName, String name) {
-    super(sourceName, name, Calendar.HOUR_OF_DAY, 24);
+  public HourFieldPartitioner(String sourceName, @Nullable String name) {
+    super(sourceName, (name == null ? "hour" : name),
+        Calendar.HOUR_OF_DAY, 24);
     format = NumberFormat.getIntegerInstance();
     format.setMinimumIntegerDigits(2);
     format.setMaximumIntegerDigits(2);

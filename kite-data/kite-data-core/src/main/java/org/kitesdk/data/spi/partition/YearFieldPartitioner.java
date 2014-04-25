@@ -20,6 +20,7 @@ import com.google.common.collect.DiscreteDomains;
 import com.google.common.collect.Range;
 import com.google.common.collect.Ranges;
 import java.util.Calendar;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.Predicates;
 
@@ -31,11 +32,11 @@ import org.kitesdk.data.spi.Predicates;
 public class YearFieldPartitioner extends CalendarFieldPartitioner {
 
   public YearFieldPartitioner(String sourceName) {
-    this(sourceName, "year");
+    this(sourceName, null);
   }
 
-  public YearFieldPartitioner(String sourceName, String name) {
-    super(sourceName, name, Calendar.YEAR, 5); // arbitrary number of partitions
+  public YearFieldPartitioner(String sourceName, @Nullable String name) {
+    super(sourceName, (name == null ? "year" : name), Calendar.YEAR, 5); // arbitrary number of partitions
   }
 
   @Override
