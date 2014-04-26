@@ -138,18 +138,19 @@ public class PartitionStrategyParser {
   }
 
   private PartitionStrategy buildPartitionStrategy(JsonNode node) {
-    PartitionStrategy.Builder builder = new PartitionStrategy.Builder();
     ValidationException.check(node.isArray(),
         "A partition strategy must be a JSON array of partitioners");
+
+    PartitionStrategy.Builder builder = new PartitionStrategy.Builder();
     for (Iterator<JsonNode> it = node.elements(); it.hasNext();) {
       JsonNode fieldPartitioner = it.next();
       ValidationException.check(fieldPartitioner.isObject(),
           "A partitioner must be a JSON record");
-
       ValidationException.check(fieldPartitioner.has(TYPE),
-          "Partitioners must have a %s.", TYPE);
+          "Partitioners must have a %s", TYPE);
       ValidationException.check(fieldPartitioner.has(SOURCE),
-          "Partitioners must have a %s.", SOURCE);
+          "Partitioners must have a %s", SOURCE);
+
       String type = fieldPartitioner.get(TYPE).asText();
       String source = fieldPartitioner.get(SOURCE).asText();
 
@@ -161,11 +162,11 @@ public class PartitionStrategyParser {
       // Note: string range, int range, and list partitioners are not supported
       if (type.equals("identity")) {
         ValidationException.check(name != null,
-            "Identity partitioner %s must have a %s.", source, NAME);
+            "Identity partitioner %s must have a %s", source, NAME);
         builder.identity(source, name, Object.class, -1);
       } else if (type.equals("hash")) {
         ValidationException.check(fieldPartitioner.has(BUCKETS),
-            "Hash partitioner %s must have attribute %s.",
+            "Hash partitioner %s must have attribute %s",
             name == null ? source : name, BUCKETS);
         int buckets = fieldPartitioner.get(BUCKETS).asInt();
         ValidationException.check(buckets > 0,
@@ -229,7 +230,7 @@ public class PartitionStrategyParser {
               ((DateFormatPartitioner) fp).getPattern());
         } else {
           throw new ValidationException(
-              "Unknown partitioner class: " + fp.getClass().getName());
+              "Unknown partitioner class: " + fp.getClass());
         }
         gen.writeStringField(SOURCE, fp.getSourceName());
         gen.writeStringField(NAME, fp.getName());

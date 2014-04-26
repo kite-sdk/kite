@@ -26,7 +26,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.Test;
 
-import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.*;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.STRING_SCHEMA;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA_URL;
 
 public class TestDatasetDescriptor extends MiniDFSTest {
 
@@ -91,5 +93,45 @@ public class TestDatasetDescriptor extends MiniDFSTest {
         .identity("username", "u", Object.class, -1)
         .build();
     Assert.assertEquals(expected, descriptor.getPartitionStrategy());
+  }
+
+  @Test
+  public void testEmbeddedColumnMapping() {
+    Schema schema = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"partitions\": [" +
+        "    {\"type\": \"identity\", \"source\": \"id\", \"name\": \"id_copy\"}" +
+        "  ]," +
+        "  \"mapping\": [" +
+        "    {\"type\": \"key\", \"source\": \"id\"}," +
+        "    {\"type\": \"column\"," +
+        "     \"source\": \"username\"," +
+        "     \"family\": \"u\"," +
+        "     \"qualifier\": \"username\"}," +
+        "    {\"type\": \"column\"," +
+        "     \"source\": \"real_name\"," +
+        "     \"family\": \"u\"," +
+        "     \"qualifier\": \"name\"}" +
+        "  ]," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\"}," +
+        "    {\"name\": \"username\", \"type\": \"string\"}," +
+        "    {\"name\": \"real_name\", \"type\": \"string\"}" +
+        "  ]" +
+        "}");
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(schema)
+        .build();
+    Assert.assertTrue("Descriptor should have partition strategy",
+        descriptor.isPartitioned());
+
+    ColumnMappingDescriptor expected = new ColumnMappingDescriptor.Builder()
+        .key("id")
+        .column("username", "u", "username")
+        .column("real_name", "u", "name")
+        .build();
+    Assert.assertEquals(expected, descriptor.getColumnMappingDescriptor());
   }
 }

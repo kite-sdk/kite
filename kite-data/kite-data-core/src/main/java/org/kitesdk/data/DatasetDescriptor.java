@@ -15,10 +15,12 @@
  */
 package org.kitesdk.data;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
 import java.io.File;
@@ -30,6 +32,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
@@ -39,9 +42,8 @@ import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.reflect.ReflectData;
 import org.apache.hadoop.fs.Path;
-import org.kitesdk.data.spi.PartitionStrategyParser;
-import org.kitesdk.data.spi.SchemaUtil;
-import org.kitesdk.data.spi.URIPattern;
+import org.kitesdk.data.spi.*;
+import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 
 /**
  * <p>
@@ -63,6 +65,7 @@ public class DatasetDescriptor {
   private final URI location;
   private final Map<String, String> properties;
   private final PartitionStrategy partitionStrategy;
+  private final ColumnMappingDescriptor columnMappings;
 
   /**
    * Create an instance of this class with the supplied {@link Schema},
@@ -72,6 +75,20 @@ public class DatasetDescriptor {
   public DatasetDescriptor(Schema schema, @Nullable URL schemaUrl, Format format,
       @Nullable URI location, @Nullable Map<String, String> properties,
       @Nullable PartitionStrategy partitionStrategy) {
+    this(schema, schemaUrl, format, location, properties, partitionStrategy,
+        null);
+  }
+
+  /**
+   * Create an instance of this class with the supplied {@link Schema}, optional
+   * URL, {@link Format}, optional location URL, optional
+   * {@link PartitionStrategy}, and optional {@link ColumnMappingDescriptor}.
+   */
+  public DatasetDescriptor(Schema schema, @Nullable URL schemaUrl,
+      Format format, @Nullable URI location,
+      @Nullable Map<String, String> properties,
+      @Nullable PartitionStrategy partitionStrategy,
+      @Nullable ColumnMappingDescriptor columnMappingDescriptor) {
     // URI can be null if the descriptor is configuring a new Dataset
     Preconditions.checkArgument(
         (location == null) || (location.getScheme() != null),
@@ -87,6 +104,7 @@ public class DatasetDescriptor {
       this.properties = ImmutableMap.of();
     }
     this.partitionStrategy = partitionStrategy;
+    this.columnMappings = columnMappingDescriptor;
   }
 
   /**
@@ -190,6 +208,15 @@ public class DatasetDescriptor {
   }
 
   /**
+   * Get the {@link ColumnMappingDescriptor}.
+   *
+   * @return ColumnMappingDescriptor
+   */
+  public ColumnMappingDescriptor getColumnMappingDescriptor() {
+    return columnMappings;
+  }
+
+  /**
    * Returns true if an associated dataset is partitioned (that is, has an
    * associated {@link PartitionStrategy}), false otherwise.
    */
@@ -197,10 +224,18 @@ public class DatasetDescriptor {
     return partitionStrategy != null;
   }
 
+  /**
+   * Returns true if an associated dataset is column mapped (that is, has an
+   * associated {@link ColumnMappingDescriptor}), false otherwise.
+   */
+  public boolean isColumnMapped() {
+    return columnMappings != null;
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hashCode(
-        schema, format, location, properties, partitionStrategy);
+    return Objects.hashCode(schema, format, location, properties,
+        partitionStrategy, columnMappings);
   }
 
   @Override
@@ -217,7 +252,8 @@ public class DatasetDescriptor {
         Objects.equal(format, other.format) &&
         Objects.equal(location, other.location) &&
         Objects.equal(properties, other.properties) &&
-        Objects.equal(partitionStrategy, other.partitionStrategy));
+        Objects.equal(partitionStrategy, other.partitionStrategy) &&
+        Objects.equal(columnMappings, columnMappings));
   }
 
   @Override
@@ -228,6 +264,9 @@ public class DatasetDescriptor {
         .add("location", location)
         .add("properties", properties)
         .add("partitionStrategy", partitionStrategy);
+    if (isColumnMapped()) {
+      helper.add("columnMappings", columnMappings);
+    }
     return helper.toString();
   }
 
@@ -247,6 +286,7 @@ public class DatasetDescriptor {
     private URI location;
     private Map<String, String> properties;
     private PartitionStrategy partitionStrategy;
+    private ColumnMappingDescriptor columnMappings;
 
     public Builder() {
       this.properties = Maps.newHashMap();
@@ -605,7 +645,7 @@ public class DatasetDescriptor {
     /**
      * Configure the dataset's partition strategy from a String literal.
      *
-     * The String literal is a JSON-formatted partition strategy that is
+     * The String literal is a JSON-formatted partition strategy that can be
      * produced by {@link PartitionStrategy#toString()}.
      *
      * @param literal
@@ -620,11 +660,13 @@ public class DatasetDescriptor {
     }
 
     /**
-     * Configure the Dataset's partition strategy from a URI.
+     * Configure the dataset's partition strategy from a URI.
      *
      * @param uri
      *          A URI to a partition strategy JSON file.
      * @return This builder for method chaining.
+     * @throws ValidationException
+     *          If the literal is not a valid JSON-encoded partition strategy
      */
     public Builder partitionStrategyUri(URI uri) throws IOException {
       // special support for resource URIs
@@ -651,11 +693,129 @@ public class DatasetDescriptor {
      * @param uri
      *          A String URI to a partition strategy JSON file.
      * @return This builder for method chaining.
+     * @throws ValidationException
+     *          If the literal is not a valid JSON-encoded partition strategy
      * @throws URISyntaxException if {@code uri} is not a valid URI
      */
     public Builder partitionStrategyUri(String uri)
         throws URISyntaxException, IOException {
       return partitionStrategyUri(new URI(uri));
+    }
+
+    /**
+     * Configure the dataset's column mapping descriptor (optional)
+     *
+     * @param columnMappings
+     *          A ColumnMappingDescriptor
+     * @return This builder for method chaining
+     */
+    public Builder columnMappingDescriptor(
+        @Nullable ColumnMappingDescriptor columnMappings) {
+      this.columnMappings = columnMappings;
+      return this;
+    }
+
+    /**
+     * Configure the dataset's column mapping descriptor from a File.
+     *
+     * The File contents must be a JSON-formatted column mapping. This format
+     * can produced by {@link ColumnMappingDescriptor#toString()}.
+     *
+     * @param file
+     *          The file
+     * @return This builder for method chaining
+     * @throws ValidationException
+     *          If the literal is not valid JSON-encoded column mappings
+     * @throws DatasetIOException
+     *          If there is an IOException accessing the file contents
+     */
+    public Builder columnMappingDescriptor(File file) {
+      this.columnMappings = new ColumnMappingDescriptorParser().parse(file);
+      return this;
+    }
+
+    /**
+     * Configure the dataset's column mapping descriptor from an InputStream.
+     *
+     * The InputStream contents must be a JSON-formatted column mapping. This
+     * format can produced by {@link ColumnMappingDescriptor#toString()}.
+     *
+     * @param in
+     *          The input stream
+     * @return This builder for method chaining
+     * @throws ValidationException
+     *          If the literal is not valid JSON-encoded column mappings
+     * @throws DatasetIOException
+     *          If there is an IOException accessing the InputStream contents
+     */
+    public Builder columnMappingDescriptor(InputStream in) {
+      this.columnMappings = new ColumnMappingDescriptorParser().parse(in);
+      return this;
+    }
+
+    /**
+     * Configure the dataset's column mappings from a String literal.
+     *
+     * The String literal is a JSON-formatted representation that can be
+     * produced by {@link ColumnMappingDescriptor#toString()}.
+     *
+     * @param literal
+     *          A column mapping String literal
+     * @return This builder for method chaining
+     * @throws ValidationException
+     *          If the literal is not valid JSON-encoded column mappings
+     */
+    public Builder columnMappingDescriptorLiteral(String literal) {
+      this.columnMappings = new ColumnMappingDescriptorParser().parse(literal);
+      return this;
+    }
+
+    /**
+     * Configure the dataset's column mappings from a URI.
+     *
+     * @param uri
+     *          A URI to a column mapping JSON file
+     * @return This builder for method chaining
+     * @throws ValidationException
+     *          If the literal is not valid JSON-encoded column mappings
+     * @throws java.io.IOException
+     *          If accessing the URI results in an IOException
+     */
+    public Builder columnMappingDescriptorUri(URI uri) throws IOException {
+      // special support for resource URIs
+      Map<String, String> match = RESOURCE_URI_PATTERN.getMatch(uri);
+      if (match != null) {
+        return columnMappingDescriptor(
+            Resources.getResource(match.get(RESOURCE_PATH)).openStream());
+      }
+
+      InputStream in = null;
+      boolean threw = true;
+      try {
+        in = toURL(uri).openStream();
+        threw = false;
+        return columnMappingDescriptor(in);
+      } finally {
+        Closeables.close(in, threw);
+      }
+    }
+
+    /**
+     * Configure the dataset's column mappings from a String URI.
+     *
+     * @param uri
+     *          A String URI to a column mapping JSON file
+     * @return This builder for method chaining
+     * @throws ValidationException
+     *          If the literal is not valid JSON-encoded column mappings
+     * @throws java.io.IOException
+     *          If accessing the URI results in an IOException
+     * @throws URISyntaxException
+     *          If {@code uri} is not a valid URI
+     */
+    public Builder columnMappingDescriptorUri(String uri)
+        throws URISyntaxException, IOException {
+      return columnMappingDescriptorUri(new URI(uri));
     }
 
     /**
@@ -678,8 +838,19 @@ public class DatasetDescriptor {
 
       checkPartitionStrategy(schema, partitionStrategy);
 
+      // if no column mappings are present, check for them in the schema
+      if (columnMappings == null) {
+        ColumnMappingDescriptorParser parser = new ColumnMappingDescriptorParser();
+        if (parser.hasEmbeddedColumnMappings(schema)) {
+          this.columnMappings = parser.parseFromSchema(schema);
+        }
+      }
+
+      checkColumnMappings(schema, partitionStrategy, columnMappings);
+
       return new DatasetDescriptor(
-          schema, schemaUrl, format, location, properties, partitionStrategy);
+          schema, schemaUrl, format, location, properties, partitionStrategy,
+          columnMappings);
     }
 
     private static void checkPartitionStrategy(Schema schema, PartitionStrategy strategy) {
@@ -700,6 +871,44 @@ public class DatasetDescriptor {
             "Field type %s does not match partitioner %s",
             field.schema().getType(), fp);
       }
+    }
+  }
+
+  private static void checkColumnMappings(Schema schema,
+                                          PartitionStrategy strategy,
+                                          ColumnMappingDescriptor mappings) {
+    if (mappings == null) {
+      return;
+    }
+    Preconditions.checkState(schema.getType() == Schema.Type.RECORD,
+        "Cannot map non-records: " + schema);
+    Set<String> keyMappedFields = Sets.newHashSet();
+    for (FieldMapping fm : mappings.getFieldMappings()) {
+      Schema.Field field = schema.getField(fm.getFieldName());
+      ValidationException.check(field != null,
+          "Cannot map field %s (missing from schema)", fm.getFieldName());
+      ValidationException.check(
+          SchemaUtil.isConsistentWithMappingType(
+              field.schema().getType(), fm.getMappingType()),
+          "Field type %s is not compatible with mapping %s",
+          field.schema().getType(), fm);
+      if (FieldMapping.MappingType.KEY == fm.getMappingType()) {
+        keyMappedFields.add(fm.getFieldName());
+      }
+    }
+    // verify that all key mapped fields have a corresponding id partitioner
+    if (strategy != null) {
+      for (org.kitesdk.data.spi.FieldPartitioner fp : strategy.getFieldPartitioners()) {
+        if (fp instanceof IdentityFieldPartitioner) {
+          keyMappedFields.remove(fp.getSourceName());
+        }
+      }
+    }
+    // any remaining keyMappedFields are invalid
+    if (keyMappedFields.size() > 0) {
+      throw new ValidationException(
+          "Fields are key-mapped without identity partitioners: " +
+          Joiner.on(", ").join(keyMappedFields));
     }
   }
 
