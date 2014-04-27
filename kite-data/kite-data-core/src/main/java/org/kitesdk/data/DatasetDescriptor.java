@@ -845,12 +845,15 @@ public class DatasetDescriptor {
       // if no column mappings are present, check for them in the schema
       if (columnMapping == null) {
         ColumnMappingParser parser = new ColumnMappingParser();
-        if (parser.hasEmbeddedColumnMappings(schema)) {
+        if (parser.hasEmbeddedColumnMapping(schema)) {
           this.columnMapping = parser.parseFromSchema(schema);
+        } else if (parser.hasEmbeddedFieldMappings(schema)) {
+          this.columnMapping = parser.parseFromSchemaFields(schema);
         }
       }
 
       checkColumnMappings(schema, partitionStrategy, columnMapping);
+      // TODO: verify that all fields have a mapping?
 
       return new DatasetDescriptor(
           schema, schemaUrl, format, location, properties, partitionStrategy,

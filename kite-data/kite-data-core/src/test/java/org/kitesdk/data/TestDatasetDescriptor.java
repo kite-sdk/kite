@@ -155,6 +155,41 @@ public class TestDatasetDescriptor {
   }
 
   @Test
+  public void testEmbeddedFieldMappings() {
+    Schema schema = new Schema.Parser().parse("{\n" +
+        "  \"type\": \"record\",\n" +
+        "  \"name\": \"User\",\n" +
+        "  \"partitions\": [\n" +
+        "    {\"type\": \"identity\", \"source\": \"id\", \"name\": \"id\"}\n" +
+        "  ],\n" +
+        "  \"fields\": [\n" +
+        "    {\"name\": \"id\", \"type\": \"long\", \"mapping\": {\n" +
+        "        \"type\": \"key\"\n" +
+        "      } },\n" +
+        "    {\"name\": \"username\", \"type\": \"string\", \"mapping\": {\n" +
+        "        \"type\": \"column\", \"family\": \"u\",\n" +
+        "        \"qualifier\": \"username\"\n" +
+        "      } },\n" +
+        "    {\"name\": \"real_name\", \"type\": \"string\", \"mapping\": {\n" +
+        "        \"type\": \"column\", \"value\": \"u:name\"\n" +
+        "      } }\n" +
+        "  ]\n" +
+        "}\n");
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(schema)
+        .build();
+    Assert.assertTrue("Descriptor should have partition strategy",
+        descriptor.isPartitioned());
+
+    ColumnMapping expected = new ColumnMapping.Builder()
+        .key("id")
+        .column("username", "u", "username")
+        .column("real_name", "u", "name")
+        .build();
+    Assert.assertEquals(expected, descriptor.getColumnMappingDescriptor());
+  }
+
+  @Test
   public void testPartitionSourceMustBeSchemaField() {
     TestHelpers.assertThrows("Should reject partition source not in schema",
         IllegalStateException.class, new Runnable() {

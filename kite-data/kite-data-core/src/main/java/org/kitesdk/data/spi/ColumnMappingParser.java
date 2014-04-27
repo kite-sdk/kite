@@ -125,13 +125,50 @@ public class ColumnMappingParser {
     }
   }
 
-  public boolean hasEmbeddedColumnMappings(Schema schema) {
+  public boolean hasEmbeddedColumnMapping(Schema schema) {
     return schema.getJsonProp(MAPPING) != null;
   }
 
   public ColumnMapping parseFromSchema(Schema schema) {
     // parse the String because Avro uses com.codehaus.jackson
     return parse(schema.getJsonProp(MAPPING).toString());
+  }
+
+  public boolean hasEmbeddedFieldMappings(Schema schema) {
+    if (Schema.Type.RECORD == schema.getType()) {
+      for (Schema.Field field : schema.getFields()) {
+        if (field.getJsonProp(MAPPING) != null) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public ColumnMapping parseFromSchemaFields(Schema schema) {
+    if (Schema.Type.RECORD == schema.getType()) {
+      ObjectMapper mapper = new ObjectMapper();
+      ColumnMapping.Builder builder = new ColumnMapping.Builder();
+      for (Schema.Field field : schema.getFields()) {
+        if (field.getJsonProp(MAPPING) != null) {
+          try {
+            // parse the String because Avro uses com.codehaus.jackson
+            builder.fieldMapping(parseFieldMapping(field.name(),
+                mapper.readValue(field.getJsonProp(MAPPING).toString(),
+                    JsonNode.class)));
+          } catch (JsonParseException e) {
+            throw new ValidationException("Invalid JSON", e);
+          } catch (JsonMappingException e) {
+            throw new ValidationException("Invalid JSON", e);
+          } catch (IOException e) {
+            throw new DatasetIOException("Cannot initialize JSON parser", e);
+          }
+        }
+      }
+      return builder.build();
+    }
+    throw new IllegalArgumentException(
+        "Cannot parse field-level mappings from non-Record");
   }
 
   /**
