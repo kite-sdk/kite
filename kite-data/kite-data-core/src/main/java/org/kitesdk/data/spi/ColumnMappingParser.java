@@ -178,6 +178,7 @@ public class ColumnMappingParser {
 
     String family = null;
     String qualifier = null;
+    String prefix = null;
 
     // for backward-compatibility, check for "value": "fam:qual"
     if (mappingNode.has(VALUE)) {
@@ -188,7 +189,11 @@ public class ColumnMappingParser {
         family = values.next();
       }
       if (values.hasNext()) {
-        qualifier = values.next();
+        if ("keyAsColumn".equals(type)) {
+          prefix = values.next();
+        } else {
+          qualifier = values.next();
+        }
       }
     }
 
@@ -201,26 +206,29 @@ public class ColumnMappingParser {
     }
 
     if ("column".equals(type)) {
-      ValidationException.check(family != null,
+      ValidationException.check(family != null && !family.isEmpty(),
           "Column mapping %s must have a %s", source, FAMILY);
-      ValidationException.check(qualifier != null,
+      ValidationException.check(qualifier != null && !qualifier.isEmpty(),
           "Column mapping %s must have a %s", source, QUALIFIER);
       return FieldMapping.column(source, family, qualifier);
 
     } else if ("keyAsColumn".equals(type)) {
+      ValidationException.check(family != null && !family.isEmpty(),
+          "Column mapping %s must have a %s", source, FAMILY);
       ValidationException.check(qualifier == null,
           "Key-as-column mapping %s cannot have a %s", source, QUALIFIER);
       if (mappingNode.has(PREFIX)) {
-        String prefix = mappingNode.get(PREFIX).asText();
-        return FieldMapping.keyAsColumn(source, family, prefix);
-      } else {
-        return FieldMapping.keyAsColumn(source, family);
+        prefix = mappingNode.get(PREFIX).asText();
+        if (prefix.isEmpty()) {
+          prefix = null;
+        }
       }
+      return FieldMapping.keyAsColumn(source, family, prefix);
 
     } else if ("counter".equals(type)) {
-      ValidationException.check(family != null,
+      ValidationException.check(family != null && !family.isEmpty(),
           "Counter mapping %s must have a %s", source, FAMILY);
-      ValidationException.check(qualifier != null,
+      ValidationException.check(qualifier != null && !qualifier.isEmpty(),
           "Counter mapping %s must have a %s", source, QUALIFIER);
       return FieldMapping.counter(source, family, qualifier);
 
