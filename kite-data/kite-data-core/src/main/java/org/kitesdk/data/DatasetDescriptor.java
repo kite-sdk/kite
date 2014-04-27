@@ -216,7 +216,7 @@ public class DatasetDescriptor {
    *
    * @return ColumnMapping
    */
-  public ColumnMapping getColumnMappingDescriptor() {
+  public ColumnMapping getColumnMapping() {
     return columnMappings;
   }
 

@@ -151,7 +151,7 @@ public class TestDatasetDescriptor {
         .column("username", "u", "username")
         .column("real_name", "u", "name")
         .build();
-    Assert.assertEquals(expected, descriptor.getColumnMappingDescriptor());
+    Assert.assertEquals(expected, descriptor.getColumnMapping());
   }
 
   @Test
@@ -186,7 +186,7 @@ public class TestDatasetDescriptor {
         .column("username", "u", "username")
         .column("real_name", "u", "name")
         .build();
-    Assert.assertEquals(expected, descriptor.getColumnMappingDescriptor());
+    Assert.assertEquals(expected, descriptor.getColumnMapping());
   }
 
   @Test
@@ -202,7 +202,8 @@ public class TestDatasetDescriptor {
                     .build())
                 .build();
           }
-        });
+        }
+    );
   }
 
   @Test
@@ -256,7 +257,8 @@ public class TestDatasetDescriptor {
                     .build())
                 .build();
           }
-        });
+        }
+    );
   }
 
   @Test
@@ -316,7 +318,8 @@ public class TestDatasetDescriptor {
                     .build())
                 .build();
           }
-        });
+        }
+    );
   }
 
   @Test
