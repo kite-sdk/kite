@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.net.URI;
 import junit.framework.Assert;
 import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
+import org.apache.commons.math.stat.inference.TestUtils;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -31,6 +33,14 @@ import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA_URL;
 
 public class TestDatasetDescriptor extends MiniDFSTest {
+
+  private static final Schema USER_SCHEMA = SchemaBuilder.record("User")
+      .fields()
+      .requiredLong("id")
+      .requiredString("name")
+      .requiredString("email")
+      .requiredLong("version")
+      .endRecord();
 
   @Test
   public void testSchemaFromHdfs() throws IOException {
@@ -127,11 +137,25 @@ public class TestDatasetDescriptor extends MiniDFSTest {
     Assert.assertTrue("Descriptor should have partition strategy",
         descriptor.isPartitioned());
 
-    ColumnMappingDescriptor expected = new ColumnMappingDescriptor.Builder()
+    ColumnMapping expected = new ColumnMapping.Builder()
         .key("id")
         .column("username", "u", "username")
         .column("real_name", "u", "name")
         .build();
     Assert.assertEquals(expected, descriptor.getColumnMappingDescriptor());
+  }
+
+  @Test
+  public void testPartitionSourceMustBeSchemaFields() {
+    TestHelpers.assertThrows("Should reject partition source not from schema",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            new DatasetDescriptor.Builder()
+                .schema(USER_SCHEMA)
+                .
+                .build();
+          }
+        });
   }
 }

@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import org.kitesdk.data.spi.ColumnMappingDescriptorParser;
+import org.kitesdk.data.spi.ColumnMappingParser;
 import org.kitesdk.data.spi.FieldMapping;
 
 /**
@@ -31,11 +31,11 @@ import org.kitesdk.data.spi.FieldMapping;
  * maps to a columnar store.
  */
 @Immutable
-public class ColumnMappingDescriptor {
+public class ColumnMapping {
 
   private final Collection<FieldMapping> fieldMappings;
 
-  private ColumnMappingDescriptor(Collection<FieldMapping> mappings) {
+  private ColumnMapping(Collection<FieldMapping> mappings) {
     fieldMappings = ImmutableList.copyOf(mappings);
   }
 
@@ -60,12 +60,7 @@ public class ColumnMappingDescriptor {
   public Set<String> getRequiredColumns() {
     Set<String> set = new HashSet<String>();
     for (FieldMapping fieldMapping : fieldMappings) {
-      if (FieldMapping.MappingType.KEY == fieldMapping.getMappingType()) {
-        continue;
-      } else if (FieldMapping.MappingType.KEY_AS_COLUMN == fieldMapping.getMappingType()) {
-        String family = fieldMapping.getFamilyAsString() + ":";
-        set.add(family);
-      } else {
+      if (FieldMapping.MappingType.KEY != fieldMapping.getMappingType()) {
         set.add(fieldMapping.getFamilyAsString() + ":"
             + fieldMapping.getQualifierAsString());
       }
@@ -80,9 +75,9 @@ public class ColumnMappingDescriptor {
    */
   public Set<String> getRequiredColumnFamilies() {
     Set<String> set = new HashSet<String>();
-    Set<String> columnSet = getRequiredColumns();
-    for (String column : columnSet) {
-      set.add(column.split(":")[0]);
+    for (FieldMapping mapping : fieldMappings) {
+      if (FieldMapping.MappingType.KEY != mapping.getMappingType())
+      set.add(mapping.getFamilyAsString());
     }
     return set;
   }
@@ -91,7 +86,7 @@ public class ColumnMappingDescriptor {
   public boolean equals(@Nullable Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ColumnMappingDescriptor that = (ColumnMappingDescriptor) o;
+    ColumnMapping that = (ColumnMapping) o;
     return Objects.equal(fieldMappings, that.fieldMappings);
   }
 
@@ -102,15 +97,15 @@ public class ColumnMappingDescriptor {
 
   @Override
   public String toString() {
-    return ColumnMappingDescriptorParser.toString(this, false);
+    return ColumnMappingParser.toString(this, false);
   }
 
   public String toString(boolean pretty) {
-    return ColumnMappingDescriptorParser.toString(this, true);
+    return ColumnMappingParser.toString(this, true);
   }
 
   /**
-   * A fluent builder to aid in constructing a {@link ColumnMappingDescriptor}.
+   * A fluent builder to aid in constructing a {@link ColumnMapping}.
    */
   public static class Builder {
     boolean hasOCCVersion = false;
@@ -263,13 +258,13 @@ public class ColumnMappingDescriptor {
     }
 
     /**
-     * Builds and returns a {@link ColumnMappingDescriptor} from the fields
+     * Builds and returns a {@link ColumnMapping} from the fields
      * mappings added to this builder.
      *
-     * @return a ColumnMappingDescriptor
+     * @return a ColumnMapping
      */
-    public ColumnMappingDescriptor build() {
-      return new ColumnMappingDescriptor(fieldMappings);
+    public ColumnMapping build() {
+      return new ColumnMapping(fieldMappings);
     }
 
     /**

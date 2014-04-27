@@ -28,15 +28,15 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Iterator;
 import org.apache.avro.Schema;
-import org.kitesdk.data.ColumnMappingDescriptor;
+import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.ValidationException;
 
 /**
- * Parser for ColumnMappingDescriptor. Will parse the mapping annotation from
- * Avro schemas, and will parse the ColumnMappingDescriptor JSON format. An
+ * Parser for {@link ColumnMapping}. Will parse the mapping annotation from
+ * Avro schemas, and will parse the ColumnMapping JSON format. An
  * example of that is:
- * 
+ *
  * <pre>
  * [
  *   { "source": "field1", "type": "column", "value": "cf:field1" },
@@ -44,12 +44,12 @@ import org.kitesdk.data.ValidationException;
  *   { "source": "field3", "type": "occVersion" }
  * ]
  * </pre>
- * 
+ *
  */
-public class ColumnMappingDescriptorParser {
+public class ColumnMappingParser {
 
   // name of the json node when embedded in a schema
-  private static final String MAPPINGS = "mapping";
+  private static final String MAPPING = "mapping";
 
   // property constants
   private static final String TYPE = "type";
@@ -66,13 +66,13 @@ public class ColumnMappingDescriptorParser {
    * 
    * @param mappingDescriptor
    *          The mapping descriptor as a JSON string
-   * @return ColumnMappingDescriptor
+   * @return ColumnMapping
    */
-  public ColumnMappingDescriptor parse(String mappingDescriptor) {
+  public ColumnMapping parse(String mappingDescriptor) {
     ObjectMapper mapper = new ObjectMapper();
     try {
       JsonNode node = mapper.readValue(mappingDescriptor, JsonNode.class);
-      return buildColumnMappingDescriptor(node);
+      return buildColumnMapping(node);
     } catch (JsonParseException e) {
       throw new ValidationException("Invalid JSON", e);
     } catch (JsonMappingException e) {
@@ -87,13 +87,13 @@ public class ColumnMappingDescriptorParser {
    *
    * @param file
    *          The File that contains the Mapping Descriptor in JSON format.
-   * @return ColumnMappingDescriptor.
+   * @return ColumnMapping.
    */
-  public ColumnMappingDescriptor parse(File file) {
+  public ColumnMapping parse(File file) {
     ObjectMapper mapper = new ObjectMapper();
     try {
       JsonNode node = mapper.readValue(file, JsonNode.class);
-      return buildColumnMappingDescriptor(node);
+      return buildColumnMapping(node);
     } catch (JsonParseException e) {
       throw new ValidationException("Invalid JSON", e);
     } catch (JsonMappingException e) {
@@ -109,13 +109,13 @@ public class ColumnMappingDescriptorParser {
    * @param in
    *          The input stream that contains the Mapping Descriptor in JSON
    *          format.
-   * @return ColumnMappingDescriptor.
+   * @return ColumnMapping.
    */
-  public ColumnMappingDescriptor parse(InputStream in) {
+  public ColumnMapping parse(InputStream in) {
     ObjectMapper mapper = new ObjectMapper();
     try {
       JsonNode node = mapper.readValue(in, JsonNode.class);
-      return buildColumnMappingDescriptor(node);
+      return buildColumnMapping(node);
     } catch (JsonParseException e) {
       throw new ValidationException("Invalid JSON", e);
     } catch (JsonMappingException e) {
@@ -126,12 +126,12 @@ public class ColumnMappingDescriptorParser {
   }
 
   public boolean hasEmbeddedColumnMappings(Schema schema) {
-    return schema.getJsonProp(MAPPINGS) != null;
+    return schema.getJsonProp(MAPPING) != null;
   }
 
-  public ColumnMappingDescriptor parseFromSchema(Schema schema) {
+  public ColumnMapping parseFromSchema(Schema schema) {
     // parse the String because Avro uses com.codehaus.jackson
-    return parse(schema.getJsonProp(MAPPINGS).toString());
+    return parse(schema.getJsonProp(MAPPING).toString());
   }
 
   /**
@@ -145,13 +145,29 @@ public class ColumnMappingDescriptorParser {
     ValidationException.check(mappingNode.isObject(),
         "A column mapping must be a JSON record");
 
-    ValidationException.check(mappingNode.has(TYPE),
-        "Column mappings must have a %s.", TYPE);
     ValidationException.check(mappingNode.has(SOURCE),
         "Partitioners must have a %s.", SOURCE);
-
-    String type = mappingNode.get(TYPE).asText();
     String source = mappingNode.get("source").asText();
+
+    return parseFieldMapping(source, mappingNode);
+  }
+
+  /**
+   * Parses the FieldMapping from an annotated schema field.
+   *
+   * @param source
+   *          The source field name for this mapping
+   * @param mappingNode
+   *          The value of the "mapping" node
+   * @return FieldMapping
+   */
+  public FieldMapping parseFieldMapping(String source, JsonNode mappingNode) {
+    ValidationException.check(mappingNode.isObject(),
+        "A column mapping must be a JSON record");
+
+    ValidationException.check(mappingNode.has(TYPE),
+        "Column mappings must have a %s.", TYPE);
+    String type = mappingNode.get(TYPE).asText();
 
     // return easy cases
     if ("occVersion".equals(type)) {
@@ -213,18 +229,18 @@ public class ColumnMappingDescriptorParser {
     }
   }
 
-  private ColumnMappingDescriptor buildColumnMappingDescriptor(JsonNode node) {
+  private ColumnMapping buildColumnMapping(JsonNode node) {
     ValidationException.check(node.isArray(),
         "Must be a JSON array of column mappings");
 
-    ColumnMappingDescriptor.Builder builder = new ColumnMappingDescriptor.Builder();
+    ColumnMapping.Builder builder = new ColumnMapping.Builder();
     for (Iterator<JsonNode> it = node.elements(); it.hasNext();) {
       builder.fieldMapping(parseFieldMapping(it.next()));
     }
     return builder.build();
   }
 
-  public static String toString(ColumnMappingDescriptor mappings, boolean pretty) {
+  public static String toString(ColumnMapping mappings, boolean pretty) {
     StringWriter writer = new StringWriter();
     JsonGenerator gen;
     try {
@@ -235,14 +251,13 @@ public class ColumnMappingDescriptorParser {
       gen.writeStartArray();
       for (FieldMapping fm : mappings.getFieldMappings()) {
         gen.writeStartObject();
+        gen.writeStringField(SOURCE, fm.getFieldName());
         switch (fm.getMappingType()) {
           case KEY:
             gen.writeStringField(TYPE, "key");
-            gen.writeStringField(SOURCE, fm.getFieldName());
             break;
           case KEY_AS_COLUMN:
             gen.writeStringField(TYPE, "keyAsColumn");
-            gen.writeStringField(SOURCE, fm.getFieldName());
             gen.writeStringField(FAMILY, fm.getFamilyAsString());
             if (fm.getPrefix() != null) {
               gen.writeStringField(PREFIX, fm.getPrefix());
@@ -250,19 +265,16 @@ public class ColumnMappingDescriptorParser {
             break;
           case COLUMN:
             gen.writeStringField(TYPE, "column");
-            gen.writeStringField(SOURCE, fm.getFieldName());
             gen.writeStringField(FAMILY, fm.getFamilyAsString());
             gen.writeStringField(QUALIFIER, fm.getQualifierAsString());
             break;
           case COUNTER:
             gen.writeStringField(TYPE, "counter");
-            gen.writeStringField(SOURCE, fm.getFieldName());
             gen.writeStringField(FAMILY, fm.getFamilyAsString());
             gen.writeStringField(QUALIFIER, fm.getQualifierAsString());
             break;
           case OCC_VERSION:
             gen.writeStringField(TYPE, "occVersion");
-            gen.writeStringField(SOURCE, fm.getFieldName());
             break;
           default:
             throw new ValidationException(

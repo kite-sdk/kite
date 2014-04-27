@@ -100,9 +100,17 @@ public class FieldMapping {
     this.mappingType = mappingType;
     this.prefix = prefix;
     this.familyString = family;
-    this.family = encodeUtf8(family);
+    if (family != null) {
+      this.family = encodeUtf8(family);
+    } else {
+      this.family = null;
+    }
     this.qualifierString = qualifier;
-    this.qualifier = encodeUtf8(qualifier);
+    if (qualifier != null) {
+      this.qualifier = encodeUtf8(qualifier);
+    } else {
+      this.qualifier = null;
+    }
   }
 
   public String getFieldName() {
@@ -117,6 +125,9 @@ public class FieldMapping {
     return prefix;
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="EI_EXPOSE_REP",
+      justification="Defensive copy is needlessly expensive")
   public byte[] getFamily() {
     return family;
   }
@@ -125,6 +136,9 @@ public class FieldMapping {
     return familyString;
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="EI_EXPOSE_REP",
+      justification="Defensive copy is needlessly expensive")
   public byte[] getQualifier() {
     return qualifier;
   }
@@ -135,7 +149,7 @@ public class FieldMapping {
 
   private static byte[] encodeUtf8(String str) {
     if (str == null) {
-      return null;
+      return new byte[0];
     }
     try {
       return str.getBytes("UTF-8");

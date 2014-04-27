@@ -42,7 +42,11 @@ import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.reflect.ReflectData;
 import org.apache.hadoop.fs.Path;
-import org.kitesdk.data.spi.*;
+import org.kitesdk.data.spi.ColumnMappingParser;
+import org.kitesdk.data.spi.FieldMapping;
+import org.kitesdk.data.spi.PartitionStrategyParser;
+import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.URIPattern;
 import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 
 /**
@@ -65,7 +69,7 @@ public class DatasetDescriptor {
   private final URI location;
   private final Map<String, String> properties;
   private final PartitionStrategy partitionStrategy;
-  private final ColumnMappingDescriptor columnMappings;
+  private final ColumnMapping columnMappings;
 
   /**
    * Create an instance of this class with the supplied {@link Schema},
@@ -82,13 +86,13 @@ public class DatasetDescriptor {
   /**
    * Create an instance of this class with the supplied {@link Schema}, optional
    * URL, {@link Format}, optional location URL, optional
-   * {@link PartitionStrategy}, and optional {@link ColumnMappingDescriptor}.
+   * {@link PartitionStrategy}, and optional {@link ColumnMapping}.
    */
   public DatasetDescriptor(Schema schema, @Nullable URL schemaUrl,
       Format format, @Nullable URI location,
       @Nullable Map<String, String> properties,
       @Nullable PartitionStrategy partitionStrategy,
-      @Nullable ColumnMappingDescriptor columnMappingDescriptor) {
+      @Nullable ColumnMapping columnMapping) {
     // URI can be null if the descriptor is configuring a new Dataset
     Preconditions.checkArgument(
         (location == null) || (location.getScheme() != null),
@@ -104,7 +108,7 @@ public class DatasetDescriptor {
       this.properties = ImmutableMap.of();
     }
     this.partitionStrategy = partitionStrategy;
-    this.columnMappings = columnMappingDescriptor;
+    this.columnMappings = columnMapping;
   }
 
   /**
@@ -208,11 +212,11 @@ public class DatasetDescriptor {
   }
 
   /**
-   * Get the {@link ColumnMappingDescriptor}.
+   * Get the {@link ColumnMapping}.
    *
-   * @return ColumnMappingDescriptor
+   * @return ColumnMapping
    */
-  public ColumnMappingDescriptor getColumnMappingDescriptor() {
+  public ColumnMapping getColumnMappingDescriptor() {
     return columnMappings;
   }
 
@@ -226,7 +230,7 @@ public class DatasetDescriptor {
 
   /**
    * Returns true if an associated dataset is column mapped (that is, has an
-   * associated {@link ColumnMappingDescriptor}), false otherwise.
+   * associated {@link ColumnMapping}), false otherwise.
    */
   public boolean isColumnMapped() {
     return columnMappings != null;
@@ -265,7 +269,7 @@ public class DatasetDescriptor {
         .add("properties", properties)
         .add("partitionStrategy", partitionStrategy);
     if (isColumnMapped()) {
-      helper.add("columnMappings", columnMappings);
+      helper.add("columnMapping", columnMappings);
     }
     return helper.toString();
   }
@@ -286,7 +290,7 @@ public class DatasetDescriptor {
     private URI location;
     private Map<String, String> properties;
     private PartitionStrategy partitionStrategy;
-    private ColumnMappingDescriptor columnMappings;
+    private ColumnMapping columnMapping;
 
     public Builder() {
       this.properties = Maps.newHashMap();
@@ -706,12 +710,12 @@ public class DatasetDescriptor {
      * Configure the dataset's column mapping descriptor (optional)
      *
      * @param columnMappings
-     *          A ColumnMappingDescriptor
+     *          A ColumnMapping
      * @return This builder for method chaining
      */
-    public Builder columnMappingDescriptor(
-        @Nullable ColumnMappingDescriptor columnMappings) {
-      this.columnMappings = columnMappings;
+    public Builder columnMapping(
+        @Nullable ColumnMapping columnMappings) {
+      this.columnMapping = columnMappings;
       return this;
     }
 
@@ -719,7 +723,7 @@ public class DatasetDescriptor {
      * Configure the dataset's column mapping descriptor from a File.
      *
      * The File contents must be a JSON-formatted column mapping. This format
-     * can produced by {@link ColumnMappingDescriptor#toString()}.
+     * can produced by {@link ColumnMapping#toString()}.
      *
      * @param file
      *          The file
@@ -729,8 +733,8 @@ public class DatasetDescriptor {
      * @throws DatasetIOException
      *          If there is an IOException accessing the file contents
      */
-    public Builder columnMappingDescriptor(File file) {
-      this.columnMappings = new ColumnMappingDescriptorParser().parse(file);
+    public Builder columnMapping(File file) {
+      this.columnMapping = new ColumnMappingParser().parse(file);
       return this;
     }
 
@@ -738,7 +742,7 @@ public class DatasetDescriptor {
      * Configure the dataset's column mapping descriptor from an InputStream.
      *
      * The InputStream contents must be a JSON-formatted column mapping. This
-     * format can produced by {@link ColumnMappingDescriptor#toString()}.
+     * format can produced by {@link ColumnMapping#toString()}.
      *
      * @param in
      *          The input stream
@@ -748,8 +752,8 @@ public class DatasetDescriptor {
      * @throws DatasetIOException
      *          If there is an IOException accessing the InputStream contents
      */
-    public Builder columnMappingDescriptor(InputStream in) {
-      this.columnMappings = new ColumnMappingDescriptorParser().parse(in);
+    public Builder columnMapping(InputStream in) {
+      this.columnMapping = new ColumnMappingParser().parse(in);
       return this;
     }
 
@@ -757,7 +761,7 @@ public class DatasetDescriptor {
      * Configure the dataset's column mappings from a String literal.
      *
      * The String literal is a JSON-formatted representation that can be
-     * produced by {@link ColumnMappingDescriptor#toString()}.
+     * produced by {@link ColumnMapping#toString()}.
      *
      * @param literal
      *          A column mapping String literal
@@ -765,8 +769,8 @@ public class DatasetDescriptor {
      * @throws ValidationException
      *          If the literal is not valid JSON-encoded column mappings
      */
-    public Builder columnMappingDescriptorLiteral(String literal) {
-      this.columnMappings = new ColumnMappingDescriptorParser().parse(literal);
+    public Builder columnMappingLiteral(String literal) {
+      this.columnMapping = new ColumnMappingParser().parse(literal);
       return this;
     }
 
@@ -781,11 +785,11 @@ public class DatasetDescriptor {
      * @throws java.io.IOException
      *          If accessing the URI results in an IOException
      */
-    public Builder columnMappingDescriptorUri(URI uri) throws IOException {
+    public Builder columnMappingUri(URI uri) throws IOException {
       // special support for resource URIs
       Map<String, String> match = RESOURCE_URI_PATTERN.getMatch(uri);
       if (match != null) {
-        return columnMappingDescriptor(
+        return columnMapping(
             Resources.getResource(match.get(RESOURCE_PATH)).openStream());
       }
 
@@ -794,7 +798,7 @@ public class DatasetDescriptor {
       try {
         in = toURL(uri).openStream();
         threw = false;
-        return columnMappingDescriptor(in);
+        return columnMapping(in);
       } finally {
         Closeables.close(in, threw);
       }
@@ -813,9 +817,9 @@ public class DatasetDescriptor {
      * @throws URISyntaxException
      *          If {@code uri} is not a valid URI
      */
-    public Builder columnMappingDescriptorUri(String uri)
+    public Builder columnMappingUri(String uri)
         throws URISyntaxException, IOException {
-      return columnMappingDescriptorUri(new URI(uri));
+      return columnMappingUri(new URI(uri));
     }
 
     /**
@@ -839,18 +843,18 @@ public class DatasetDescriptor {
       checkPartitionStrategy(schema, partitionStrategy);
 
       // if no column mappings are present, check for them in the schema
-      if (columnMappings == null) {
-        ColumnMappingDescriptorParser parser = new ColumnMappingDescriptorParser();
+      if (columnMapping == null) {
+        ColumnMappingParser parser = new ColumnMappingParser();
         if (parser.hasEmbeddedColumnMappings(schema)) {
-          this.columnMappings = parser.parseFromSchema(schema);
+          this.columnMapping = parser.parseFromSchema(schema);
         }
       }
 
-      checkColumnMappings(schema, partitionStrategy, columnMappings);
+      checkColumnMappings(schema, partitionStrategy, columnMapping);
 
       return new DatasetDescriptor(
           schema, schemaUrl, format, location, properties, partitionStrategy,
-          columnMappings);
+          columnMapping);
     }
 
     private static void checkPartitionStrategy(Schema schema, PartitionStrategy strategy) {
@@ -876,7 +880,7 @@ public class DatasetDescriptor {
 
   private static void checkColumnMappings(Schema schema,
                                           PartitionStrategy strategy,
-                                          ColumnMappingDescriptor mappings) {
+                                          ColumnMapping mappings) {
     if (mappings == null) {
       return;
     }

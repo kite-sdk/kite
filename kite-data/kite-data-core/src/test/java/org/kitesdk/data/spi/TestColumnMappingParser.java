@@ -18,27 +18,27 @@ package org.kitesdk.data.spi;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
-import org.kitesdk.data.ColumnMappingDescriptor;
+import org.kitesdk.data.ColumnMapping;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestColumnMappingDescriptorParser {
+public class TestColumnMappingParser {
   
-  private ColumnMappingDescriptorParser parser;
+  private ColumnMappingParser parser;
   
   @Before
   public void before() throws IOException {
-    parser = new ColumnMappingDescriptorParser();
+    parser = new ColumnMappingParser();
   }
   
   @Test
   public void testBasic() {
-    ColumnMappingDescriptor desc = parser.parse("[\n" +
+    ColumnMapping desc = parser.parse("[\n" +
         "  { \"source\": \"username\", \"type\": \"column\", \"value\": \"meta:username\" },\n" +
         "  { \"source\": \"email\", \"type\": \"column\", \"value\": \"meta:email\" }\n" +
         "]");
 
-    ColumnMappingDescriptor expected = new ColumnMappingDescriptor.Builder()
+    ColumnMapping expected = new ColumnMapping.Builder()
         .column("username", "meta", "username")
         .column("email", "meta", "email")
         .build();
