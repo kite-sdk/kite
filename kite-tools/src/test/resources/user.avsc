@@ -9,6 +9,10 @@
     {
       "type": "string",
       "name": "email"
+    },
+    {
+      "type": "long",
+      "name": "created_at"
     }
   ]
 }
