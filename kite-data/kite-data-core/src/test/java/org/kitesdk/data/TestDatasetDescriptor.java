@@ -160,7 +160,7 @@ public class TestDatasetDescriptor {
         "  \"type\": \"record\",\n" +
         "  \"name\": \"User\",\n" +
         "  \"partitions\": [\n" +
-        "    {\"type\": \"identity\", \"source\": \"id\", \"name\": \"id\"}\n" +
+        "    {\"type\": \"identity\", \"source\": \"id\", \"name\": \"id_copy\"}\n" +
         "  ],\n" +
         "  \"fields\": [\n" +
         "    {\"name\": \"id\", \"type\": \"long\", \"mapping\": {\n" +

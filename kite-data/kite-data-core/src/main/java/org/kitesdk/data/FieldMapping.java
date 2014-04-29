@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.spi;
+package org.kitesdk.data;
 
 import com.google.common.base.Objects;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import org.kitesdk.data.DatasetIOException;
 
 @Immutable
 public class FieldMapping {
@@ -68,7 +68,7 @@ public class FieldMapping {
   }
 
   public static FieldMapping keyAsColumn(String name, String family,
-                                         String qualifierPrefix) {
+                                         @Nullable String qualifierPrefix) {
     return new FieldMapping(
         name, MappingType.KEY_AS_COLUMN, family, null, qualifierPrefix);
   }
@@ -95,7 +95,8 @@ public class FieldMapping {
   private final byte[] qualifier;
 
   private FieldMapping(String fieldName, MappingType mappingType,
-      String family, String qualifier, String prefix) {
+      @Nullable String family, @Nullable String qualifier,
+      @Nullable String prefix) {
     this.fieldName = fieldName;
     this.mappingType = mappingType;
     this.prefix = prefix;

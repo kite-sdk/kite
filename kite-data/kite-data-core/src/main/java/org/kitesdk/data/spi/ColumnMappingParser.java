@@ -30,6 +30,7 @@ import java.util.Iterator;
 import org.apache.avro.Schema;
 import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.ValidationException;
 
 /**

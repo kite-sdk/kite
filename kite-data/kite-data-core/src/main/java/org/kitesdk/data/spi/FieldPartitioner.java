@@ -111,7 +111,7 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
    * </p>
    * @since 0.3.0
    *
-   * @deprecated will be removed in 0.14.0
+   * @deprecated will be removed with the partition API
    */
   @Deprecated
   public T valueFromString(String stringValue, Class<? extends T> expectedType) {
@@ -126,7 +126,7 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
    * </p>
    * @since 0.3.0
    *
-   * @deprecated will be removed in 0.13.0
+   * @deprecated will be removed with the partition API
    */
   @Deprecated
   protected T valueFromString(String stringValue) {

@@ -24,7 +24,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.ColumnMappingParser;
-import org.kitesdk.data.spi.FieldMapping;
 
 /**
  * A descriptor for an entity's column mappings, which defines how an entity

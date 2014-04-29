@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificData;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.PartitionStrategy;
 
 public class SchemaUtil {
