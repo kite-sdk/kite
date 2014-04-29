@@ -74,8 +74,12 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   }
 
   public static <E> void setView(Job job, View<E> view) {
+    setView(job.getConfiguration(), view);
+  }
+
+  public static <E> void setView(Configuration conf, View<E> view) {
     if (view instanceof AbstractRefinableView) {
-      job.getConfiguration().set(KITE_CONSTRAINTS, serialize((AbstractRefinableView) view));
+      conf.set(KITE_CONSTRAINTS, serialize((AbstractRefinableView) view));
     }
   }
 

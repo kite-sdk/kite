@@ -36,7 +36,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
@@ -83,7 +82,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     }
   }
 
-  @SuppressWarnings({"unchecked", "deprecation"})
+  @SuppressWarnings("unchecked")
   public DatasetSourceTarget(View<E> view, Class<E> type) {
     super(view.getDataset());
 
@@ -92,15 +91,10 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     formatBundle.set(DatasetKeyInputFormat.KITE_REPOSITORY_URI, getRepositoryUri(view.getDataset()));
     formatBundle.set(DatasetKeyInputFormat.KITE_DATASET_NAME, view.getDataset().getName());
 
-    Job temp = null;
-    try {
-      temp = new Job();
-    } catch (IOException e) {
-      throw new DatasetIOException("Error creating view", e);
-    }
-    DatasetKeyInputFormat.setView(temp, view);
+    Configuration conf = new Configuration();
+    DatasetKeyInputFormat.setView(conf, view);
     formatBundle.set(DatasetKeyInputFormat.KITE_CONSTRAINTS,
-        temp.getConfiguration().get(DatasetKeyInputFormat.KITE_CONSTRAINTS));
+        conf.get(DatasetKeyInputFormat.KITE_CONSTRAINTS));
     formatBundle.set(RuntimeParameters.DISABLE_COMBINE_FILE, "true");
 
     if (type.isAssignableFrom(GenericData.Record.class)) {
