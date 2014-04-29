@@ -83,7 +83,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "deprecation"})
   public DatasetSourceTarget(View<E> view, Class<E> type) {
     super(view.getDataset());
 
