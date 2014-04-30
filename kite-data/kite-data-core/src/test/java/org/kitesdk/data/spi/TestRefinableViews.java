@@ -760,7 +760,9 @@ public abstract class TestRefinableViews extends MiniDFSTest {
   @Test
   public void testNotPartitioned() throws Exception {
     final DatasetDescriptor flatDescriptor = new DatasetDescriptor
-        .Builder(testDescriptor).partitionStrategy(null).build();
+        .Builder(testDescriptor)
+        .partitionStrategy((PartitionStrategy) null)
+        .build();
     final Dataset<StandardEvent> notPartitioned =
         repo.create("flat", flatDescriptor);
 

@@ -16,6 +16,7 @@
 package org.kitesdk.data.spi.partition;
 
 import java.util.List;
+import javax.annotation.Nullable;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import com.google.common.annotations.Beta;
@@ -36,7 +37,7 @@ public class PartitionFunctions {
   }
 
   @Beta
-  public static FieldPartitioner<Object, Integer> hash(String sourceName, String name, int buckets) {
+  public static FieldPartitioner<Object, Integer> hash(String sourceName, @Nullable String name, int buckets) {
     return new HashFieldPartitioner(sourceName, name, buckets);
   }
 
@@ -57,37 +58,37 @@ public class PartitionFunctions {
   }
 
   @Beta
-  public static FieldPartitioner<Integer, Integer> range(String sourceName, String name, int... upperBounds) {
+  public static FieldPartitioner<Integer, Integer> range(String sourceName, @Nullable String name, int... upperBounds) {
     return new IntRangeFieldPartitioner(sourceName, name, upperBounds);
   }
 
   @Beta
-  public static FieldPartitioner<String, String> range(String sourceName, String name, String... upperBounds) {
+  public static FieldPartitioner<String, String> range(String sourceName, @Nullable String name, String... upperBounds) {
     return new RangeFieldPartitioner(sourceName, name, upperBounds);
   }
 
   @Beta
-  public static FieldPartitioner<Long, Integer> year(String sourceName, String name) {
+  public static FieldPartitioner<Long, Integer> year(String sourceName, @Nullable String name) {
     return new YearFieldPartitioner(sourceName, name);
   }
 
   @Beta
-  public static FieldPartitioner<Long, Integer> month(String sourceName, String name) {
+  public static FieldPartitioner<Long, Integer> month(String sourceName, @Nullable String name) {
     return new MonthFieldPartitioner(sourceName, name);
   }
 
   @Beta
-  public static FieldPartitioner<Long, Integer> day(String sourceName, String name) {
+  public static FieldPartitioner<Long, Integer> day(String sourceName, @Nullable String name) {
     return new DayOfMonthFieldPartitioner(sourceName, name);
   }
 
   @Beta
-  public static FieldPartitioner<Long, Integer> hour(String sourceName, String name) {
+  public static FieldPartitioner<Long, Integer> hour(String sourceName, @Nullable String name) {
     return new HourFieldPartitioner(sourceName, name);
   }
 
   @Beta
-  public static FieldPartitioner<Long, Integer> minute(String sourceName, String name) {
+  public static FieldPartitioner<Long, Integer> minute(String sourceName, @Nullable String name) {
     return new MinuteFieldPartitioner(sourceName, name);
   }
 

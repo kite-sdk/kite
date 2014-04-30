@@ -17,6 +17,7 @@ package org.kitesdk.data.spi.partition;
 
 import java.text.NumberFormat;
 import java.util.Calendar;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
@@ -29,11 +30,11 @@ public class DayOfMonthFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 
   public DayOfMonthFieldPartitioner(String sourceName) {
-    this(sourceName, "day");
+    this(sourceName, null);
   }
 
-  public DayOfMonthFieldPartitioner(String sourceName, String name) {
-    super(sourceName, name, Calendar.DAY_OF_MONTH, 31);
+  public DayOfMonthFieldPartitioner(String sourceName, @Nullable String name) {
+    super(sourceName, (name == null ? "day" : name), Calendar.DAY_OF_MONTH, 31);
     format = NumberFormat.getIntegerInstance();
     format.setMinimumIntegerDigits(2);
     format.setMaximumIntegerDigits(2);

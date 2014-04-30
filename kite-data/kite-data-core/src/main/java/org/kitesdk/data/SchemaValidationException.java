@@ -21,8 +21,10 @@ package org.kitesdk.data;
  * parsing or validating a schema.
  * <p>
  * @since 0.9.0
+ * @deprecated will be removed in 0.15.0; use {@link ValidationException}.
  */
-public class SchemaValidationException extends DatasetException {
+@Deprecated
+public class SchemaValidationException extends ValidationException {
   
   public SchemaValidationException(String msg) {
     super(msg);

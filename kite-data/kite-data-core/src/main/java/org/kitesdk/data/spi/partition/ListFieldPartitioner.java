@@ -21,6 +21,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.Predicates;
@@ -35,11 +36,13 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
   private final List<Set<S>> values;
 
   public ListFieldPartitioner(String sourceName, List<Set<S>> values, Class<S> sourceType) {
-    this(sourceName, sourceName + "_set", values, sourceType);
+    this(sourceName, null, values, sourceType);
   }
 
-  public ListFieldPartitioner(String sourceName, String name, List<Set<S>> values, Class<S> sourceType) {
-    super(sourceName, name, sourceType, Integer.class, cardinality(values));
+  public ListFieldPartitioner(String sourceName, @Nullable String name,
+                              List<Set<S>> values, Class<S> sourceType) {
+    super(sourceName, (name == null ? sourceName + "_set" : name), sourceType,
+        Integer.class, cardinality(values));
     this.values = values;
   }
 
@@ -125,7 +128,7 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;
     }

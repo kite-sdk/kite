@@ -18,6 +18,7 @@ package org.kitesdk.data.spi.partition;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
@@ -30,11 +31,11 @@ public class MonthFieldPartitioner extends CalendarFieldPartitioner {
   private final NumberFormat format;
 
   public MonthFieldPartitioner(String sourceName) {
-    this(sourceName, "month");
+    this(sourceName, null);
   }
 
-  public MonthFieldPartitioner(String sourceName, String name) {
-    super(sourceName, name, Calendar.MONTH, 12);
+  public MonthFieldPartitioner(String sourceName, @Nullable String name) {
+    super(sourceName, (name == null ? "month" : name), Calendar.MONTH, 12);
     format = NumberFormat.getIntegerInstance();
     format.setMinimumIntegerDigits(2);
     format.setMaximumIntegerDigits(2);

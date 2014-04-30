@@ -23,6 +23,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.Ranges;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 import com.google.common.base.Objects;
@@ -41,12 +42,13 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
   private RangeDomain domain;
 
   public RangeFieldPartitioner(String sourceName, String... upperBounds) {
-    this(sourceName, sourceName + "_bound", upperBounds);
+    this(sourceName, null, upperBounds);
   }
 
-  public RangeFieldPartitioner(String sourceName, String name,
+  public RangeFieldPartitioner(String sourceName, @Nullable String name,
                                String... upperBounds) {
-    super(sourceName, name, String.class, String.class, upperBounds.length);
+    super(sourceName, (name == null ? sourceName + "_bound" : name),
+        String.class, String.class, upperBounds.length);
     this.upperBounds = Arrays.asList(upperBounds);
   }
 
@@ -112,7 +114,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;
     }
