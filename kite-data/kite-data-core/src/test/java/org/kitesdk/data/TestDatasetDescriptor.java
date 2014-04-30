@@ -25,6 +25,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 
@@ -115,6 +116,7 @@ public class TestDatasetDescriptor {
   }
 
   @Test
+  @Ignore
   public void testEmbeddedColumnMapping() {
     Schema schema = new Schema.Parser().parse("{" +
         "  \"type\": \"record\"," +
@@ -155,6 +157,7 @@ public class TestDatasetDescriptor {
   }
 
   @Test
+  @Ignore
   public void testEmbeddedFieldMappings() {
     Schema schema = new Schema.Parser().parse("{\n" +
         "  \"type\": \"record\",\n" +
@@ -306,7 +309,8 @@ public class TestDatasetDescriptor {
                     .build())
                 .build();
           }
-        });
+        }
+    );
     TestHelpers.assertThrows("Should reject list mapping source",
         ValidationException.class, new Runnable() {
           @Override
@@ -379,7 +383,8 @@ public class TestDatasetDescriptor {
                     .build())
                 .build();
           }
-        });
+        }
+    );
   }
 
   @Test
@@ -422,7 +427,8 @@ public class TestDatasetDescriptor {
                     .build())
                 .build();
           }
-        });
+        }
+    );
     TestHelpers.assertThrows("Should reject list mapping source",
         ValidationException.class, new Runnable() {
           @Override
@@ -434,6 +440,7 @@ public class TestDatasetDescriptor {
                     .build())
                 .build();
           }
-        });
+        }
+    );
   }
 }

@@ -842,14 +842,15 @@ public class DatasetDescriptor {
       checkPartitionStrategy(schema, partitionStrategy);
 
       // if no column mappings are present, check for them in the schema
-      if (columnMapping == null) {
-        ColumnMappingParser parser = new ColumnMappingParser();
-        if (parser.hasEmbeddedColumnMapping(schema)) {
-          this.columnMapping = parser.parseFromSchema(schema);
-        } else if (parser.hasEmbeddedFieldMappings(schema)) {
-          this.columnMapping = parser.parseFromSchemaFields(schema);
-        }
-      }
+      // temporarily disabled to avoid breaking HBase before it is ported
+//      if (columnMapping == null) {
+//        ColumnMappingParser parser = new ColumnMappingParser();
+//        if (parser.hasEmbeddedColumnMapping(schema)) {
+//          this.columnMapping = parser.parseFromSchema(schema);
+//        } else if (parser.hasEmbeddedFieldMappings(schema)) {
+//          this.columnMapping = parser.parseFromSchemaFields(schema);
+//        }
+//      }
 
       checkColumnMappings(schema, partitionStrategy, columnMapping);
       // TODO: verify that all fields have a mapping?
