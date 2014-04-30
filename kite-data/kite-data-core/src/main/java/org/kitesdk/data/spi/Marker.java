@@ -51,13 +51,13 @@ import javax.annotation.concurrent.Immutable;
  * Marker partial = new Marker.Builder()
  *    .add("shard", id.hashCode())
  *    .add("timestamp", System.getTimeMillis())
- *    .get();
+ *    .build();
  *
  * // a Marker that represents a particular object
- * Marker concrete = new Marker.Builder(partial).add("id", id).get();
+ * Marker concrete = new Marker.Builder(partial).add("id", id).build();
  *
  * // a partial Marker for approx time, for all shards
- * new Marker.Builder("timestamp", System.getTimeMillis()).get();
+ * new Marker.Builder("timestamp", System.getTimeMillis()).build();
  * </pre>
  *
  * @since 0.9.0
@@ -206,7 +206,7 @@ public abstract class Marker {
      *
      * <pre>
      * // this makes sense when using only Calendar partition fields
-     * Marker end = new Marker.Builder("timestamp", System.currentTimeMillis()).get();
+     * Marker end = new Marker.Builder("timestamp", System.currentTimeMillis()).build();
      * </pre>
      *
      * @param name a String name
