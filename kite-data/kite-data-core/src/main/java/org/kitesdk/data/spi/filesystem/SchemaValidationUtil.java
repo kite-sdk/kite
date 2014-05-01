@@ -16,7 +16,6 @@
 package org.kitesdk.data.spi.filesystem;
 
 import java.io.IOException;
-import java.util.Arrays;
 import org.apache.avro.Schema;
 import org.apache.avro.io.parsing.ResolvingGrammarGenerator;
 import org.apache.avro.io.parsing.Symbol;
@@ -40,18 +39,17 @@ public class SchemaValidationUtil {
   private static boolean hasErrors(Symbol symbol) {
     switch(symbol.kind) {
       case ALTERNATIVE:
-        return hasErrors(((Symbol.Alternative) symbol).symbols);
+        return hasErrors(symbol, ((Symbol.Alternative) symbol).symbols);
       case EXPLICIT_ACTION:
         return false;
       case IMPLICIT_ACTION:
         return symbol instanceof Symbol.ErrorAction;
       case REPEATER:
         Symbol.Repeater r = (Symbol.Repeater) symbol;
-        return hasErrors(r.end) || hasErrors(r.production);
+        return hasErrors(r.end) || hasErrors(symbol, r.production);
       case ROOT:
-        return hasErrors(Arrays.copyOfRange(symbol.production, 1, symbol.production.length));
       case SEQUENCE:
-        return hasErrors(symbol.production);
+        return hasErrors(symbol, symbol.production);
       case TERMINAL:
         return false;
       default:
@@ -59,9 +57,12 @@ public class SchemaValidationUtil {
     }
   }
 
-  private static boolean hasErrors(Symbol[] symbols) {
+  private static boolean hasErrors(Symbol root, Symbol[] symbols) {
     if(null != symbols) {
       for(Symbol s: symbols) {
+        if (s == root) {
+          continue;
+        }
         if (hasErrors(s)) {
           return true;
         }
