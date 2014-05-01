@@ -873,7 +873,7 @@ The command provides the following configuration options:
 Example usage:
 {code}
 # emit only the first 10 records
-sample {
+head {
   limit : 10
 }
 {code}
