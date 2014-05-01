@@ -98,7 +98,7 @@ public class PackageAppMojo extends AbstractAppMojo {
   /**
    * The name of the workflow.
    */
-  @Parameter(property = "kite.workflowName")
+  @Parameter(property = "kite.workflowName", defaultValue = "${project.build.finalName}")
   private String workflowName;
 
   /**
@@ -146,7 +146,7 @@ public class PackageAppMojo extends AbstractAppMojo {
           libJars.add(libJarPath);
         }
       }
-      Workflow workflow = new Workflow(workflowXml, schemaVersion, workflowName != null ? workflowName : applicationName,
+      Workflow workflow = new Workflow(workflowXml, schemaVersion, workflowName,
           toolClass, args, hadoopConfiguration, hadoopFs, hadoopJobTracker, libJars);
       WorkflowXmlWriter workflowXmlWriter = new WorkflowXmlWriter(encoding);
       workflowXmlWriter.write(workflow);
