@@ -104,7 +104,7 @@ public class ColumnMapping {
   }
 
   public String toString(boolean pretty) {
-    return ColumnMappingParser.toString(this, true);
+    return ColumnMappingParser.toString(this, pretty);
   }
 
   /**

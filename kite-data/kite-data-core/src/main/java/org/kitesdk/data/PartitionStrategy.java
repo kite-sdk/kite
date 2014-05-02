@@ -250,7 +250,7 @@ public class PartitionStrategy {
   }
 
   public String toString(boolean pretty) {
-    return PartitionStrategyParser.toString(this, true);
+    return PartitionStrategyParser.toString(this, pretty);
   }
 
   /**
