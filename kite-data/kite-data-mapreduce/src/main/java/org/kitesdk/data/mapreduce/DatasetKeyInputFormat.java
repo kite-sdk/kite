@@ -79,19 +79,19 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
 
   public static <E> void setView(Configuration conf, View<E> view) {
     if (view instanceof AbstractRefinableView) {
-      conf.set(KITE_CONSTRAINTS, serialize((AbstractRefinableView) view));
+      conf.set(KITE_CONSTRAINTS, serialize(((AbstractRefinableView) view).getConstraints()));
     }
   }
 
-  private static String serialize(AbstractRefinableView view) {
+  private static String serialize(Constraints constraints) {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       ObjectOutputStream out = new ObjectOutputStream(baos);
-      out.writeObject(view.getConstraints());
+      out.writeObject(constraints);
       out.close();
       return Base64.encodeBase64String(baos.toByteArray());
     } catch (IOException e) {
-      throw new DatasetIOException("Cannot serialize view " + view, e);
+      throw new DatasetIOException("Cannot serialize constraints " + constraints, e);
     }
   }
 
