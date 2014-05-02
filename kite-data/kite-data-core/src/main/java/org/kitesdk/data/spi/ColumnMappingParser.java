@@ -251,6 +251,9 @@ public class ColumnMappingParser {
       if (values.hasNext()) {
         if ("keyAsColumn".equals(type)) {
           prefix = values.next();
+          if (prefix.isEmpty()) {
+            prefix = null;
+          }
         } else {
           qualifier = values.next();
         }
