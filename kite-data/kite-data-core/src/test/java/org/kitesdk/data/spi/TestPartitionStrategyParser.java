@@ -48,15 +48,10 @@ public class TestPartitionStrategyParser {
             "\"source\": \"username\", " +
             "\"name\": \"id\"} ]"
     );
-
-    TestHelpers.assertThrows("Should reject missing name",
-        ValidationException.class, new Runnable() {
-          @Override
-          public void run() {
-            PartitionStrategyParser.parse(
-                "[ { \"type\": \"identity\", \"source\": \"username\" } ]");
-          }
-        }
+    checkParser(new PartitionStrategy.Builder()
+            .identity("username", "username_copy", Object.class, -1)
+            .build(),
+        "[ {\"type\": \"identity\", \"source\": \"username\"} ]"
     );
   }
 

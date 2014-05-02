@@ -282,7 +282,7 @@ public class PartitionStrategy {
 
     /**
      * Configure a hash partitioner with the specified number of
-     * {@code buckets}. If name is null, the partiiton name will be the source
+     * {@code buckets}. If name is null, the partition name will be the source
      * field name with a "_hash" suffix. For example, hash("color", null, 34)
      * will create "color_hash" partitions.
      *
@@ -321,20 +321,18 @@ public class PartitionStrategy {
      * @return An instance of the builder for method chaining.
      * @see IdentityFieldPartitioner
      * @since 0.8.0
-     * @deprecated will be removed in 0.14.0;
-     *          use {@link #identity(String, String, Class, int)}
      */
-    @Deprecated
     @SuppressWarnings("unchecked")
     public <S> Builder identity(String sourceName, Class<S> type, int buckets) {
-      add(new IdentityFieldPartitioner(
-          sourceName, sourceName + "_copy", type, buckets));
+      add(new IdentityFieldPartitioner(sourceName, type, buckets));
       return this;
     }
 
     /**
      * Configure an identity partitioner for a given type with a cardinality hint of
-     * {@code buckets} size.
+     * {@code buckets} size. If name is null, the partition name will be the source
+     * field name with a "_copy" suffix. For example, identity("color", null, ...)
+     * will create "color_copy" partitions.
      *
      * @param sourceName
      *          The entity field name from which to get values to be

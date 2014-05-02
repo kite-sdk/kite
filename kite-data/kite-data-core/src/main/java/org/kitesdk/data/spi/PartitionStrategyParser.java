@@ -184,8 +184,6 @@ public class PartitionStrategyParser {
 
       // Note: string range, int range, and list partitioners are not supported
       if (type.equals("identity")) {
-        ValidationException.check(name != null,
-            "Identity partitioner %s must have a %s", source, NAME);
         builder.identity(source, name, Object.class, -1);
       } else if (type.equals("hash")) {
         ValidationException.check(fieldPartitioner.has(BUCKETS),

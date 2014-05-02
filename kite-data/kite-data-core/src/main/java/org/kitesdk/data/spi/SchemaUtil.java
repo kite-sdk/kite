@@ -30,7 +30,7 @@ import org.kitesdk.data.PartitionStrategy;
 
 public class SchemaUtil {
 
-  public static final ImmutableMap<Schema.Type, Class<?>> TYPE_TO_CLASS =
+  private static final ImmutableMap<Schema.Type, Class<?>> TYPE_TO_CLASS =
       ImmutableMap.<Schema.Type, Class<?>>builder()
           .put(Schema.Type.BOOLEAN, Boolean.class)
           .put(Schema.Type.INT, Integer.class)
@@ -40,6 +40,23 @@ public class SchemaUtil {
           .put(Schema.Type.STRING, String.class)
           .put(Schema.Type.BYTES, ByteBuffer.class)
           .build();
+
+  public static Class<?> getClassForType(Schema.Type type) {
+    return TYPE_TO_CLASS.get(type);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <S> Class<? extends S> getSourceType(FieldPartitioner<S, ?> fp, Schema schema) {
+    return (Class<S>) getClassForType(
+        schema.getField(fp.getSourceName()).schema().getType());
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <S, T> Class<? extends T> getPartitionType(FieldPartitioner<S, T> fp, Schema schema) {
+    Class<? extends S> inputType = (Class<S>) getClassForType(
+        schema.getField(fp.getSourceName()).schema().getType());
+    return fp.getType(inputType);
+  }
 
   /**
    * Checks that a schema type should produce an object of the expected class.

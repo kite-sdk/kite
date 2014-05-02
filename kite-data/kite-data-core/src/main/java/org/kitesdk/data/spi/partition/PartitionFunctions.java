@@ -43,7 +43,7 @@ public class PartitionFunctions {
 
   @Beta
   public static FieldPartitioner identity(String sourceName, int buckets) {
-    return new IdentityFieldPartitioner(sourceName, sourceName + "_copy", String.class, buckets);
+    return new IdentityFieldPartitioner(sourceName, Object.class, buckets);
   }
 
   @Beta

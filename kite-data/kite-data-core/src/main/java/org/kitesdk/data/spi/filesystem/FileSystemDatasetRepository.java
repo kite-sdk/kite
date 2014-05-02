@@ -44,7 +44,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.spi.SchemaUtil;
-import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -350,13 +349,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
       }
       String stringValue = split.next();
 
-      if (fp instanceof IdentityFieldPartitioner) {
-        Class<? extends Object> expected = SchemaUtil.TYPE_TO_CLASS.get(
-            schema.getField(fp.getSourceName()).schema().getType());
-        values.add(fp.valueFromString(stringValue, expected));
-      } else {
-        values.add(fp.valueFromString(stringValue, fp.getType()));
-      }
+      values.add(fp.valueFromString(stringValue,
+          SchemaUtil.getPartitionType(fp, schema)));
     }
     return org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey(
         values.toArray(new Object[values.size()]));
