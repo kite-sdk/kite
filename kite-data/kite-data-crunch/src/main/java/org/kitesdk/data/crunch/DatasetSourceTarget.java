@@ -41,9 +41,7 @@ import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.View;
 import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
-import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
-import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.SizeAccessor;
 import org.slf4j.Logger;
@@ -54,7 +52,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   private static final Logger logger = LoggerFactory
       .getLogger(DatasetSourceTarget.class);
 
-  private View<E> dataset;
+  private View<E> view;
   private FormatBundle formatBundle;
   private AvroType<E> avroType;
 
@@ -62,7 +60,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   public DatasetSourceTarget(Dataset<E> dataset, Class<E> type) {
     super(dataset);
 
-    this.dataset = dataset;
+    this.view = dataset;
     this.formatBundle = FormatBundle.forInput(DatasetKeyInputFormat.class);
     formatBundle.set(DatasetKeyInputFormat.KITE_REPOSITORY_URI, getRepositoryUri(dataset));
     formatBundle.set(DatasetKeyInputFormat.KITE_DATASET_NAME, dataset.getName());
@@ -88,7 +86,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   public DatasetSourceTarget(View<E> view, Class<E> type) {
     super(view.getDataset());
 
-    this.dataset = view;
+    this.view = view;
     this.formatBundle = FormatBundle.forInput(DatasetKeyInputFormat.class);
     formatBundle.set(DatasetKeyInputFormat.KITE_REPOSITORY_URI, getRepositoryUri(view.getDataset()));
     formatBundle.set(DatasetKeyInputFormat.KITE_DATASET_NAME, view.getDataset().getName());
@@ -100,7 +98,8 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     formatBundle.set(RuntimeParameters.DISABLE_COMBINE_FILE, "true");
 
     if (type.isAssignableFrom(GenericData.Record.class)) {
-      this.avroType = (AvroType<E>) Avros.generics(dataset.getDataset().getDescriptor().getSchema());
+      this.avroType = (AvroType<E>) Avros.generics(this.view.getDataset().getDescriptor()
+          .getSchema());
     } else {
       this.avroType = Avros.records(type);
     }
@@ -136,24 +135,24 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
       job.setInputFormatClass(formatBundle.getFormatClass());
       formatBundle.configure(conf);
     } else {
-      Path dummy = new Path("/dataset/" + dataset.getDataset().getName());
+      Path dummy = new Path("/view/" + view.getDataset().getName());
       CrunchInputs.addInputPath(job, dummy, formatBundle, inputId);
     }
   }
 
   @Override
   public long getSize(Configuration configuration) {
-    if (dataset instanceof SizeAccessor) {
-      return ((SizeAccessor) dataset).getSize();
+    if (view instanceof SizeAccessor) {
+      return ((SizeAccessor) view).getSize();
     }
-    logger.warn("Cannot determine size for dataset: " + toString());
+    logger.warn("Cannot determine size for view: " + toString());
     return 1000L * 1000L * 1000L; // fallback to HBase default size
   }
 
   @Override
   public long getLastModifiedAt(Configuration configuration) {
-    if (dataset instanceof LastModifiedAccessor) {
-      return ((LastModifiedAccessor) dataset).getLastModified();
+    if (view instanceof LastModifiedAccessor) {
+      return ((LastModifiedAccessor) view).getLastModified();
     }
     logger.warn("Cannot determine last modified time for source: " + toString());
     return -1;
@@ -161,8 +160,8 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
 
   @Override
   public Iterable<E> read(Configuration configuration) throws IOException {
-    // TODO: what to do with Configuration? create new dataset?
-    DatasetReader<E> reader = dataset.newReader();
+    // TODO: what to do with Configuration? create new view?
+    DatasetReader<E> reader = view.newReader();
     reader.open();
     return reader; // TODO: who calls close?
   }
@@ -183,7 +182,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
 
       @Override
       public Iterable<E> read(TaskInputOutputContext<?, ?, ?, ?> context) throws IOException {
-        DatasetReader<E> reader = dataset.newReader();
+        DatasetReader<E> reader = view.newReader();
         reader.open();
         return reader;
       }
