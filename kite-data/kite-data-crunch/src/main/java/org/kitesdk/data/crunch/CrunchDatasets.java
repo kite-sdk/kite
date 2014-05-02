@@ -33,20 +33,24 @@ public class CrunchDatasets {
   /**
    * Expose the given {@link Dataset} as a Crunch {@link ReadableSource}.
    *
-   * Only the FileSystem {@code Dataset} implementation is supported and the
-   * file format must be {@code Formats.PARQUET} or {@code Formats.AVRO}.
-   *
    * @param dataset the dataset to read from
    * @param type    the Java type of the entities in the dataset
    * @param <E>     the type of entity produced by the source
-   * @return the {@link ReadableSource}, or <code>null</code> if the dataset is not
-   * filesystem-based.
+   * @return a {@link ReadableSource} for the dataset
    */
   @SuppressWarnings("unchecked")
   public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
     return new DatasetSourceTarget<E>(dataset, type);
   }
 
+  /**
+   * Expose the given {@link View} as a Crunch {@link ReadableSource}.
+   *
+   * @param view the view to read from
+   * @param type    the Java type of the entities in the dataset
+   * @param <E>     the type of entity produced by the source
+   * @return a {@link ReadableSource} for the view
+   */
   public static <E> ReadableSource<E> asSource(View<E> view, Class<E> type) {
     return new DatasetSourceTarget<E>(view, type);
   }
