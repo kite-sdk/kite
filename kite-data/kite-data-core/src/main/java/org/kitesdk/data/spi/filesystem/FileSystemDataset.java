@@ -31,6 +31,7 @@ import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.View;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDataset;
+import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.Mergeable;
@@ -143,6 +144,11 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   @Override
   public RefinableView<E> asRefinableView() {
     return unbounded;
+  }
+
+  @Override
+  public FileSystemView<E> filter(Constraints c) {
+    return unbounded.filter(c);
   }
 
   @Override

@@ -25,6 +25,7 @@ import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.hbase.impl.Dao;
 import org.kitesdk.data.spi.AbstractDataset;
+import org.kitesdk.data.spi.Constraints;
 
 class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E> {
 
@@ -72,6 +73,11 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   @Override
   public RefinableView<E> asRefinableView() {
     return unbounded;
+  }
+
+  @Override
+  public DaoView<E> filter(Constraints c) {
+    return unbounded.filter(c);
   }
 
   @Override

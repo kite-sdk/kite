@@ -156,11 +156,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       String constraintsString) {
     Constraints constraints = deserialize(constraintsString);
     if (dataset instanceof AbstractDataset) {
-      View<E> view = ((AbstractDataset) dataset).asRefinableView();
-      if (view instanceof AbstractRefinableView) {
-        view = ((AbstractRefinableView) view).filter(constraints);
-        return ((AbstractRefinableView) view).getDelegateInputFormat();
-      }
+      AbstractRefinableView<E> view = ((AbstractDataset) dataset).filter(constraints);
+      return view.getDelegateInputFormat();
     }
     throw new UnsupportedOperationException("Incompatible Dataset View: implementation " +
         "does not provide InputFormat support. Dataset: " + dataset);
