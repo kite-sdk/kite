@@ -20,6 +20,10 @@
 #
 # This is based on the Sqoop startup script (ASL 2.0)
 
+function debug() {
+  [ -n "$debug" ] && echo "$0 debug: $@"
+}
+
 bin="$1"
 
 if [ -z "${bin}" ]; then
@@ -35,10 +39,12 @@ if [ -z "${HADOOP_COMMON_HOME}" ]; then
   else
     if [ -d "/usr/lib/hadoop" ]; then
       HADOOP_COMMON_HOME=/usr/lib/hadoop
-    # more guesses can go here...
+    elif [ -d "/opt/cloudera/parcels/CDH/lib/hadoop" ]; then
+      HADOOP_COMMON_HOME=/opt/cloudera/parcels/CDH/lib/hadoop
     fi
   fi
 fi
+debug "Using HADOOP_COMMON_HOME=${HADOOP_COMMON_HOME}"
 
 if [ -z "${HADOOP_MAPRED_HOME}" ]; then
   HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce
@@ -67,6 +73,16 @@ if [ -z "${HBASE_HOME}" ]; then
     HBASE_HOME=${HADOOP_COMMON_HOME}/../hbase
   fi
 fi
+
+if [ -z "${HIVE_HOME}" ]; then
+  if [ -d "/usr/lib/hive" ]; then
+    HIVE_HOME=/usr/lib/hive
+  else
+    HIVE_HOME=${HADOOP_COMMON_HOME}/../hive
+  fi
+fi
+export HIVE_HOME
+
 if [ -z "${HCAT_HOME}" ]; then
   if [ -d "/usr/lib/hive-hcatalog" ]; then
     HCAT_HOME=/usr/lib/hive-hcatalog
@@ -83,6 +99,7 @@ fi
 # Check: If we can't find our dependencies, give up here.
 if [ ! -d "${HADOOP_COMMON_HOME}" ]; then
   echo "WARNING: Cannot find Hadoop installation!"
+  echo "You can fix this warning by setting HADOOP_HOME"
 fi
 # if [ ! -d "${HADOOP_MAPRED_HOME}" ]; then
 #   echo "Error: $HADOOP_MAPRED_HOME does not exist!"
@@ -111,6 +128,11 @@ fi
 # Add HCatalog to dependency list
 if [ -e "${HCAT_HOME}/bin/hcat" ]; then
   TMP_KITE_CLASSPATH=${KITE_CLASSPATH}:`${HCAT_HOME}/bin/hcat -classpath`
+  if [ 0 -ne $? ]; then
+    echo "WARNING: Cannot configure the Hive classpath!"
+    echo "Try setting HIVE_HOME to fix this warning"
+    debug "HCat output: " `${HCAT_HOME}/bin/hcat -classpath`
+  fi
   if [ -z "${HIVE_CONF_DIR}" ]; then
     TMP_KITE_CLASSPATH=${TMP_KITE_CLASSPATH}:${HIVE_CONF_DIR}
   fi
