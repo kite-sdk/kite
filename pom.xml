@@ -508,6 +508,7 @@
               <exclude>**/*.avro</exclude>
               <exclude>**/*.avsc</exclude>
               <exclude>**/*.avdl</exclude>
+              <exclude>**/*.json</exclude> <!-- some test fixtures are json -->
               <exclude>**/*.iml</exclude>
               <exclude>**/*.log</exclude>
               <exclude>**/*.md</exclude>
