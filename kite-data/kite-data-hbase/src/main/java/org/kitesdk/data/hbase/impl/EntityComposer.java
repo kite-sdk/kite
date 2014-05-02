@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.hbase.impl;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,7 +54,7 @@ public interface EntityComposer<E> {
    * 
    * @param fieldName
    *          The name of the keyAsColumn field.
-   * @param value
+   * @param fieldValue
    *          The value of the entities field specified by field name. The value
    *          can be any type the implementation supports for keyAsColumn fields
    * @return The keyAsColumn field value as a map
@@ -76,8 +75,6 @@ public interface EntityComposer<E> {
    */
   public Object buildKeyAsColumnField(String fieldName,
       Map<CharSequence, Object> keyAsColumnValues);
-  
-  public List<Object> getPartitionKeyParts(E entity);
 
   /**
    * An interface for entity builders.

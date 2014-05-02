@@ -32,8 +32,6 @@ import org.kitesdk.data.hbase.filters.SingleFieldEntityFilter;
  * An abstract class that EntityScanner implementations should extend to offer a
  * builder interface. Implementations only need to implement the build method.
  * 
- * @param <K>
- *          The underlying key record type
  * @param <E>
  *          The entity type this canner scans
  */
@@ -58,11 +56,6 @@ public abstract class EntityScannerBuilder<E> {
    * information to create a scanner. It's also easier to add more options later
    * to the scanner, this will be the preferred method for users to create
    * scanners.
-   * 
-   * @param <K>
-   *          The underlying key record type.
-   * @param <E>
-   *          The entity type this scanner scans.
    */
   public EntityScannerBuilder(HTablePool tablePool, String tableName,
       EntityMapper<E> entityMapper) {
@@ -213,7 +206,7 @@ public abstract class EntityScannerBuilder<E> {
    *          The name of the column you want to apply the filter on
    * @param filterValue
    *          The value for comparison
-   * @return ScannerBuilder
+   * @return EntityScannerBuilder
    */
   public EntityScannerBuilder<E> addEqualFilter(String fieldName,
       Object filterValue) {

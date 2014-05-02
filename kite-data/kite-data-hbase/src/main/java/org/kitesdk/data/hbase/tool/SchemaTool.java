@@ -16,7 +16,7 @@
 package org.kitesdk.data.hbase.tool;
 
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.SchemaValidationException;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.hbase.avro.AvroEntitySchema;
 import org.kitesdk.data.hbase.avro.AvroKeyEntitySchemaParser;
 import org.kitesdk.data.hbase.avro.AvroKeySchema;
@@ -133,7 +133,7 @@ public class SchemaTool {
           if (tableKeySchemaMap.containsKey(table)) {
             String msg = "Multiple keys for table: " + table;
             LOG.error(msg);
-            throw new SchemaValidationException(msg);
+            throw new ValidationException(msg);
           }
           LOG.debug("Adding key to tableKeySchemaMap for table: " + table
               + ". " + schemaString);
@@ -163,7 +163,7 @@ public class SchemaTool {
       if (entitySchemas.size() == 0) {
         String msg = "StorageKey, but no entity schemas for Table: " + table;
         LOG.error(msg);
-        throw new SchemaValidationException(msg);
+        throw new ValidationException(msg);
       }
       for (String entitySchema : entry.getValue()) {
         createOrMigrateSchema(table, entitySchema, createTableAndFamilies);
@@ -239,7 +239,7 @@ public class SchemaTool {
             + currentKeySchema.getRawSchema() + " New: "
             + keySchema.getRawSchema();
         LOG.error(msg);
-        throw new SchemaValidationException(msg);
+        throw new ValidationException(msg);
       }
       if (!schemaManager.hasSchemaVersion(tableName, entityName, entitySchema)) {
         LOG.info("Migrating Schema: (" + tableName + ", " + entityName + ")");
@@ -252,7 +252,8 @@ public class SchemaTool {
       }
     } else {
       LOG.info("Creating Schema: (" + tableName + ", " + entityName + ")");
-      parser.parseEntitySchema(entitySchemaString).getRequiredColumnFamilies();
+      parser.parseEntitySchema(entitySchemaString).getColumnMappingDescriptor()
+          .getRequiredColumnFamilies();
       schemaManager.createSchema(tableName, entityName, entitySchemaString,
           "org.kitesdk.data.hbase.avro.AvroKeyEntitySchemaParser",
           "org.kitesdk.data.hbase.avro.AvroKeySerDe",
@@ -265,12 +266,14 @@ public class SchemaTool {
           HTableDescriptor desc = new HTableDescriptor(tableName);
           desc.addFamily(new HColumnDescriptor(Constants.SYS_COL_FAMILY));
           desc.addFamily(new HColumnDescriptor(Constants.OBSERVABLE_COL_FAMILY));
-          for (String columnFamily : entitySchema.getRequiredColumnFamilies()) {
+          for (String columnFamily : entitySchema.getColumnMappingDescriptor()
+              .getRequiredColumnFamilies()) {
             desc.addFamily(new HColumnDescriptor(columnFamily));
           }
           hbaseAdmin.createTable(desc);
         } else {
-          Set<String> familiesToAdd = entitySchema.getRequiredColumnFamilies();
+          Set<String> familiesToAdd = entitySchema.getColumnMappingDescriptor()
+              .getRequiredColumnFamilies();
           familiesToAdd.add(new String(Constants.SYS_COL_FAMILY));
           familiesToAdd.add(new String(Constants.OBSERVABLE_COL_FAMILY));
           HTableDescriptor desc = hbaseAdmin.getTableDescriptor(tableName
@@ -339,9 +342,9 @@ public class SchemaTool {
       }
       return result;
     } catch (JsonParseException e) {
-      throw new SchemaValidationException(e);
+      throw new ValidationException(e);
     } catch (IOException e) {
-      throw new SchemaValidationException(e);
+      throw new ValidationException(e);
     }
   }
 
@@ -355,9 +358,9 @@ public class SchemaTool {
       }
       return node.get("name").getTextValue();
     } catch (JsonParseException e) {
-      throw new SchemaValidationException(e);
+      throw new ValidationException(e);
     } catch (IOException e) {
-      throw new SchemaValidationException(e);
+      throw new ValidationException(e);
     }
   }
 

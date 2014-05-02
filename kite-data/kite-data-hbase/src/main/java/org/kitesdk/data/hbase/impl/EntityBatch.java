@@ -20,12 +20,10 @@ import org.kitesdk.data.DatasetWriter;
 public interface EntityBatch<E> extends DatasetWriter<E> {
 
   /**
-   * Put the entity into the HBase table with K key. Since this is a part of a
-   * batch operation, this entity will not be committed to the table until the
+   * Put the entity into the HBase table. Since this is a part of a batch
+   * operation, this entity will not be committed to the table until the
    * writeBuffer has reached capacity.
    *
-   * @param key
-   *          The key for this entity
    * @param entity
    *          The entity to store
    */

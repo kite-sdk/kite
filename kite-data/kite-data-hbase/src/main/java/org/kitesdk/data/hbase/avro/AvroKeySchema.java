@@ -21,10 +21,11 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.hbase.impl.KeySchema;
-import org.kitesdk.data.hbase.impl.EntitySchema.FieldMapping;
+import org.kitesdk.data.spi.SchemaUtil;
 
 /**
  * A KeySchema implementation powered by Avro.
@@ -33,33 +34,27 @@ public class AvroKeySchema extends KeySchema {
 
   private final Schema schema;
 
-  /**
-   * Constructor for the AvroKeySchema.
-   * 
-   * @param schema
-   *          The Avro Schema that underlies this KeySchema implementation
-   * @param rawSchema
-   *          The Avro Schema as a string that underlies the KeySchema
-   *          implementation
-   */
-  public AvroKeySchema(Schema schema, String rawSchema,
-      List<FieldMapping> keyFieldMappings) {
-    super(rawSchema, keyFieldMappings);
+  public AvroKeySchema(Schema entitySchema,
+      PartitionStrategy partitionStrategy) {
+    super(null, partitionStrategy);
     List<Field> fieldsPartOfKey = new ArrayList<Field>();
-    for (Field field : schema.getFields()) {
-      for (FieldMapping fieldMapping : keyFieldMappings) {
-        if (field.name().equals(fieldMapping.getFieldName())) {
-          fieldsPartOfKey.add(AvroUtils.cloneField(field));
-        }
+    for (FieldPartitioner<?, ?> fieldPartitioner : partitionStrategy.getFieldPartitioners()) {
+      Class<?> fieldType = SchemaUtil.getPartitionType(fieldPartitioner, entitySchema);
+      Schema fieldSchema;
+      if (fieldType == Integer.class) {
+        fieldSchema = Schema.create(Schema.Type.INT);
+      } else if (fieldType == Long.class) {
+        fieldSchema = Schema.create(Schema.Type.LONG);
+      } else if (fieldType == String.class) {
+        fieldSchema = Schema.create(Schema.Type.STRING);
+      } else {
+        throw new ValidationException(
+            "Cannot encode partition " + fieldPartitioner.getName() +
+                " with type " + fieldPartitioner.getSourceType());
       }
+      fieldsPartOfKey.add(new Field(fieldPartitioner.getSourceName(), fieldSchema, null, null));
     }
     this.schema = Schema.createRecord(fieldsPartOfKey);
-  }
-
-  public AvroKeySchema(Schema schema, String rawSchema,
-      PartitionStrategy partitionStrategy) {
-    super(rawSchema, partitionStrategy);
-    this.schema = schema;
   }
 
   @Override
@@ -72,6 +67,11 @@ public class AvroKeySchema extends KeySchema {
       return false;
     }
     return AvroUtils.avroSchemaTypesEqual(schema, ((AvroKeySchema)keySchema).schema);
+  }
+
+  @Override
+  public String getRawSchema() {
+    return getAvroSchema().toString();
   }
 
   /**

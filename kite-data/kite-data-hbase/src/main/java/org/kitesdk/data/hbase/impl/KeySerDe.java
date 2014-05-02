@@ -20,8 +20,6 @@ import org.kitesdk.data.PartitionKey;
 /**
  * This class handles key serialization and deserialization.
  * 
- * @param <K>
- *          The type of the key
  */
 public interface KeySerDe {
 
@@ -33,7 +31,14 @@ public interface KeySerDe {
    * @return The byte array
    */
   public byte[] serialize(PartitionKey partitionKey);
-  
+
+  /**
+   * Serialize the key parts to bytes
+   *
+   * @param keyPartValues
+   *          The array of key parts.
+   * @return The byte array
+   */
   public byte[] serialize(Object... keyPartValues);
 
   /**

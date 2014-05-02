@@ -16,9 +16,6 @@
 package org.kitesdk.data.hbase.impl;
 
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.hbase.impl.EntitySchema.FieldMapping;
-
-import java.util.Collection;
 
 /**
  * The KeySchema type.
@@ -28,29 +25,16 @@ public class KeySchema {
   private final String rawSchema;
   private final PartitionStrategy partitionStrategy;
 
-  /**
-   * @param rawSchema
-   *          The raw schema
-   */
-  public KeySchema(String rawSchema, Collection<FieldMapping> fieldMappings) {
-    this.rawSchema = rawSchema;
-    PartitionStrategy.Builder strategyBuilder = new PartitionStrategy.Builder();
-    for (FieldMapping fieldMapping : fieldMappings) {
-      strategyBuilder.identity(fieldMapping.getFieldName(), String.class, 1);
-    }
-    partitionStrategy = strategyBuilder.build();
-  }
-  
   public KeySchema(String rawSchema, PartitionStrategy partitionStrategy) {
     this.rawSchema = rawSchema;
     this.partitionStrategy = partitionStrategy;
   }
-  
+
   /**
-   * Method meant to determine if two KeySchemas are compatible with each
-   * other for schema migration purposes. Classes that inherit KeySchema
-   * should override this implementation, since this implementation isn't able
-   * to make that determination.
+   * Method meant to determine if two KeySchemas are compatible with each other
+   * for schema migration purposes. Classes that inherit KeySchema should
+   * override this implementation, since this implementation isn't able to make
+   * that determination.
    * 
    * TODO: Figure out a base set of properties that all key schema
    * implementations should share in their implementation of determining

@@ -15,9 +15,6 @@
  */
 package org.kitesdk.data.hbase.impl;
 
-import org.kitesdk.data.SchemaValidationException;
-import org.kitesdk.data.hbase.impl.EntitySchema.FieldMapping;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +23,9 @@ import java.util.Map.Entry;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.kitesdk.data.FieldMapping;
+import org.kitesdk.data.FieldMapping.MappingType;
+import org.kitesdk.data.ValidationException;
 
 /**
  * This class handles entity serialization and deserialization. It's able to
@@ -70,7 +70,7 @@ public abstract class EntitySerDe<E> {
     } else if (fieldMapping.getMappingType() == MappingType.OCC_VERSION) {
       serializeOCCColumn(fieldValue, putAction);
     } else {
-      throw new SchemaValidationException(
+      throw new ValidationException(
           "Invalid field mapping for field with name: "
               + fieldMapping.getFieldName());
     }
@@ -99,7 +99,7 @@ public abstract class EntitySerDe<E> {
     } else if (mappingType == MappingType.OCC_VERSION) {
       return deserializeOCCColumn(result);
     } else {
-      throw new SchemaValidationException(
+      throw new ValidationException(
           "Invalid field mapping for field with name: " + fieldName);
     }
   }
@@ -168,7 +168,7 @@ public abstract class EntitySerDe<E> {
    * @return The keyAsColumn value pointed to by key.
    */
   public abstract Object deserializeKeyAsColumnValueFromBytes(String fieldName,
-      byte[] columKeyBytes, byte[] columnValueBytes);
+      byte[] columnKeyBytes, byte[] columnValueBytes);
 
   /**
    * Deserialize the keyAsColumn key from the qualifier.
@@ -181,6 +181,16 @@ public abstract class EntitySerDe<E> {
    */
   public abstract CharSequence deserializeKeyAsColumnKeyFromBytes(
       String fieldName, byte[] columnKeyBytes);
+
+  /**
+   * If a field has a default value, returns the default value. Otherwise,
+   * returns null.
+   *
+   * @param fieldName
+   *          The name of the field to return the default value for.
+   * @return The default value.
+   */
+  public abstract Object getDefaultValue(String fieldName);
 
   /**
    * Get the EntityComposer this EntitySerDe uses to compose entity fields.
@@ -292,7 +302,7 @@ public abstract class EntitySerDe<E> {
       byte[] qualifier, Result result) {
     byte[] bytes = result.getValue(family, qualifier);
     if (bytes == null) {
-      return null;
+      return getDefaultValue(fieldName);
     } else {
       return deserializeColumnValueFromBytes(fieldName, bytes);
     }

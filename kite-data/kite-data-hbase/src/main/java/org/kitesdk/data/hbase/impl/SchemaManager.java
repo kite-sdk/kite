@@ -154,7 +154,7 @@ public interface SchemaManager {
    * @throws org.kitesdk.data.IncompatibleSchemaException
    *           if a previous schema exists
    * @throws org.kitesdk.data.ConcurrentSchemaModificationException
-   * @throws org.kitesdk.data.SchemaValidationException
+   * @throws org.kitesdk.data.ValidationException
    */
   public void createSchema(String tableName, String entityName,
       String entitySchemaStr, String schemaType,
@@ -173,7 +173,7 @@ public interface SchemaManager {
    * @throws org.kitesdk.data.SchemaNotFoundException
    * @throws org.kitesdk.data.IncompatibleSchemaException
    * @throws org.kitesdk.data.ConcurrentSchemaModificationException
-   * @throws org.kitesdk.data.SchemaValidationException
+   * @throws org.kitesdk.data.ValidationException
    */
   public void migrateSchema(String tableName, String entityName,
       String newSchema);

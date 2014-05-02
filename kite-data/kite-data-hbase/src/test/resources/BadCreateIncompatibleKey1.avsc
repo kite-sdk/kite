@@ -2,10 +2,17 @@
   "type": "record",
   "name": "OtherTestRecord",
   "namespace": "org.kitesdk.data.hbase.avro.entities",
+
+  "partitions": [
+    { "type": "identity", "source": "keyPart1" },
+    { "type": "identity", "source": "keyPart2" },
+    { "type": "identity", "source": "keyPart3" }
+  ],
+
   "fields": [
-    { "name": "keyPart1", "type": "string", "mapping": { "type": "key", "value": "0" } },
-    { "name": "keyPart2", "type": "string", "mapping": { "type": "key", "value": "1" } },
-    { "name": "keyPart3", "type": "string", "mapping": { "type": "key", "value": "2" } },
+    { "name": "keyPart1", "type": "string", "mapping": { "type": "column", "value": "meta:part1" } },
+    { "name": "keyPart2", "type": "string", "mapping": { "type": "column", "value": "meta:part2" } },
+    { "name": "keyPart3", "type": "string", "mapping": { "type": "column", "value": "meta:part3" } },
     { "name": "field", "type": "string", "mapping":
       { "type": "column", "value": "meta:otherfield" }
     }

@@ -15,11 +15,6 @@
  */
 package org.kitesdk.data.hbase.impl;
 
-import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.PartitionKey;
-import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.hbase.impl.EntitySchema.FieldMapping;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -29,6 +24,11 @@ import java.util.Set;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
+import org.kitesdk.data.ColumnMapping;
+import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.FieldMapping;
+import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.PartitionStrategy;
 
 /**
  * Base implementation of the CompositeDao interface. Internally managed
@@ -133,13 +133,14 @@ public abstract class CompositeBaseDao<E, S> implements CompositeDao<E, S> {
 
     @Override
     public EntitySchema getEntitySchema() {
-      List<String> tables = new ArrayList<String>();
       List<FieldMapping> fieldMappings = new ArrayList<FieldMapping>();
       for (EntityMapper<?> entityMapper : entityMappers) {
-        tables.addAll(entityMapper.getEntitySchema().getTables());
-        fieldMappings.addAll(entityMapper.getEntitySchema().getFieldMappings());
+        fieldMappings.addAll(entityMapper.getEntitySchema()
+            .getColumnMappingDescriptor().getFieldMappings());
       }
-      return new EntitySchema(tables, null, null, fieldMappings);
+      ColumnMapping mappingDescriptor = new ColumnMapping.Builder()
+          .fieldMappings(fieldMappings).build();
+      return new EntitySchema(null, null, mappingDescriptor);
     }
 
     @Override
@@ -207,7 +208,7 @@ public abstract class CompositeBaseDao<E, S> implements CompositeDao<E, S> {
   public EntityScanner<E> getScanner(PartitionKey startKey, PartitionKey stopKey) {
     return baseDao.getScanner(startKey, stopKey);
   }
-  
+
   @Override
   public EntityScanner<E> getScanner(PartitionKey startKey,
       boolean startInclusive, PartitionKey stopKey, boolean stopInclusive) {
