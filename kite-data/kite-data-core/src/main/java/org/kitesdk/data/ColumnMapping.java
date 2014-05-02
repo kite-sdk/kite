@@ -59,7 +59,11 @@ public class ColumnMapping {
   public Set<String> getRequiredColumns() {
     Set<String> set = new HashSet<String>();
     for (FieldMapping fieldMapping : fieldMappings) {
-      if (FieldMapping.MappingType.KEY != fieldMapping.getMappingType()) {
+      if (FieldMapping.MappingType.KEY == fieldMapping.getMappingType()) {
+        continue;
+      } else if (FieldMapping.MappingType.KEY_AS_COLUMN == fieldMapping.getMappingType()) {
+        set.add(fieldMapping.getFamilyAsString() + ":");
+      } else {
         set.add(fieldMapping.getFamilyAsString() + ":"
             + fieldMapping.getQualifierAsString());
       }
