@@ -16,12 +16,7 @@
 
 package org.kitesdk.data.spi;
 
-import com.google.common.base.Preconditions;
 import java.text.NumberFormat;
-import org.apache.avro.Schema;
-import org.apache.avro.specific.SpecificData;
-import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.PartitionStrategy;
 
 /**
  * Static helper methods for converting between types.
@@ -31,7 +26,9 @@ import org.kitesdk.data.PartitionStrategy;
 public class Conversions {
 
   public static <T> T convert(Object obj, Class<T> returnType) {
-    if (returnType.isAssignableFrom(Long.class)) {
+    if (returnType == Object.class) {
+      return returnType.cast(obj);
+    } else if (returnType.isAssignableFrom(Long.class)) {
       return returnType.cast(makeLong(obj));
     } else if (returnType.isAssignableFrom(Integer.class)) {
       return returnType.cast(makeInteger(obj));
@@ -41,8 +38,6 @@ public class Conversions {
       return returnType.cast(makeDouble(obj));
     } else if (returnType.isAssignableFrom(Float.class)) {
       return returnType.cast(makeFloat(obj));
-    } else if (returnType.isAssignableFrom(Object.class)) {
-      return returnType.cast(obj);
     } else {
       throw new ClassCastException(
           "Cannot convert to unknown return type:" + returnType.getName());
