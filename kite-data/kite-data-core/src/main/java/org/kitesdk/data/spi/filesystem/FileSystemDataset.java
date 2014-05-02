@@ -33,6 +33,7 @@ import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.FieldPartitioner;
+import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.PartitionListener;
@@ -53,7 +54,8 @@ import java.net.URI;
 import java.util.List;
 
 public class FileSystemDataset<E> extends AbstractDataset<E> implements
-    Mergeable<FileSystemDataset<E>>, LastModifiedAccessor, SizeAccessor {
+    Mergeable<FileSystemDataset<E>>, InputFormatAccessor<E>, LastModifiedAccessor,
+    SizeAccessor {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemDataset.class);
@@ -318,7 +320,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   }
 
   @Override
-  public InputFormat<E, Void> getDelegateInputFormat() {
+  public InputFormat<E, Void> getInputFormat() {
     return new FileSystemViewKeyInputFormat<E>(this);
   }
 

@@ -152,10 +152,6 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     return filter(constraints.toBefore(name, value));
   }
 
-  public InputFormat<E, Void> getDelegateInputFormat() {
-    throw new UnsupportedOperationException("No delegate input format defined.");
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {

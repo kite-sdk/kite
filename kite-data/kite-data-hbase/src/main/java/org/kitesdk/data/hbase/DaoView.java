@@ -29,12 +29,13 @@ import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.Marker;
 import org.kitesdk.data.spi.MarkerRange;
 import java.util.List;
 
-class DaoView<E> extends AbstractRefinableView<E> {
+class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor<E> {
 
   private final DaoDataset<E> dataset;
 
@@ -175,7 +176,7 @@ class DaoView<E> extends AbstractRefinableView<E> {
   }
 
   @Override
-  public InputFormat<E, Void> getDelegateInputFormat() {
+  public InputFormat<E, Void> getInputFormat() {
     return new HBaseViewKeyInputFormat<E>(this);
   }
 }

@@ -27,6 +27,7 @@ import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.SizeAccessor;
@@ -46,7 +47,7 @@ import java.io.IOException;
  * @param <E> The type of records read and written by this view.
  */
 @Immutable
-class FileSystemView<E> extends AbstractRefinableView<E> implements
+class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatAccessor<E>,
     LastModifiedAccessor, SizeAccessor {
 
   private final FileSystem fs;
@@ -100,7 +101,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements
   }
 
   @Override
-  public InputFormat<E, Void> getDelegateInputFormat() {
+  public InputFormat<E, Void> getInputFormat() {
     return new FileSystemViewKeyInputFormat<E>(this);
   }
 

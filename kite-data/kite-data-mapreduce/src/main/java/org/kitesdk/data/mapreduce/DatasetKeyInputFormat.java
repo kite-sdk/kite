@@ -43,6 +43,7 @@ import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 
 /**
@@ -128,25 +129,20 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     }
   }
 
-  private InputFormat<E, Void> getDelegateInputFormat(Dataset<E> dataset) {
-    if (dataset instanceof AbstractDataset) {
-      return ((AbstractDataset<E>) dataset).getDelegateInputFormat();
+  @SuppressWarnings("unchecked")
+  private InputFormat<E, Void> getDelegateInputFormat(View<E> view) {
+    if (view instanceof InputFormatAccessor) {
+      return ((InputFormatAccessor<E>) view).getInputFormat();
     }
-    throw new UnsupportedOperationException("Incompatible Dataset: implementation " +
-          "does not provide InputFormat support. Dataset: " + dataset);
+    throw new UnsupportedOperationException("Implementation " +
+          "does not provide InputFormat support. View: " + view);
   }
 
   private InputFormat<E, Void> getDelegateInputFormatForPartition(Dataset<E> dataset,
       String partitionDir) {
     PartitionKey key = ((FileSystemDataset<E>) dataset).keyFromDirectory(new Path(partitionDir));
     if (key != null) {
-      dataset = dataset.getPartition(key, true);
-      if (dataset instanceof AbstractDataset) {
-        return ((AbstractDataset<E>) dataset).getDelegateInputFormat();
-      } else {
-        throw new UnsupportedOperationException("Incompatible Dataset: implementation " +
-            "does not provide InputFormat support. Dataset: " + dataset);
-      }
+      return getDelegateInputFormat(dataset.getPartition(key, true));
     }
     throw new DatasetException("Cannot find partition " + partitionDir);
   }
@@ -156,11 +152,9 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       String constraintsString) {
     Constraints constraints = deserialize(constraintsString);
     if (dataset instanceof AbstractDataset) {
-      AbstractRefinableView<E> view = ((AbstractDataset) dataset).filter(constraints);
-      return view.getDelegateInputFormat();
+      return getDelegateInputFormat(((AbstractDataset) dataset).filter(constraints));
     }
-    throw new UnsupportedOperationException("Incompatible Dataset View: implementation " +
-        "does not provide InputFormat support. Dataset: " + dataset);
+    throw new DatasetException("Cannot find view from constraints for " + dataset);
   }
 
   private static <E> Dataset<E> loadDataset(Configuration conf) {

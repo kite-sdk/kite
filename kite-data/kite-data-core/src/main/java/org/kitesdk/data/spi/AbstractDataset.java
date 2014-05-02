@@ -89,10 +89,6 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
     return asRefinableView().toBefore(name, value);
   }
 
-  public InputFormat<E, Void> getDelegateInputFormat() {
-    throw new UnsupportedOperationException("No delegate input format defined.");
-  }
-
   @Override
   public boolean deleteAll() {
     throw new UnsupportedOperationException(
