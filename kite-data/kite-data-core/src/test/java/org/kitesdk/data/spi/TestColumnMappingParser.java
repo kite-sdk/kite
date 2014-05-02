@@ -18,10 +18,12 @@ package org.kitesdk.data.spi;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import org.apache.avro.Schema;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.ValidationException;
 
@@ -547,5 +549,70 @@ public class TestColumnMappingParser {
           }
         }
     );
+  }
+
+  @Test
+  public void testAddEmbeddedPartitionStrategy() {
+    ColumnMapping mapping = new ColumnMapping.Builder()
+        .key("id")
+        .column("username", "u", "username")
+        .column("real_name", "u", "name")
+        .build();
+    Schema original = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"partitions\": [" +
+        "    {\"type\": \"identity\", \"source\": \"id\", \"name\": \"id_copy\"}" +
+        "  ]," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\"}," +
+        "    {\"name\": \"username\", \"type\": \"string\"}," +
+        "    {\"name\": \"real_name\", \"type\": \"string\"}" +
+        "  ]" +
+        "}");
+
+    Schema embedded = parser.embedColumnMapping(original, mapping);
+
+    junit.framework.Assert.assertTrue(parser.hasEmbeddedColumnMapping(embedded));
+    junit.framework.Assert.assertEquals(mapping, parser.parseFromSchema(embedded));
+  }
+
+  @Test
+  public void testReplaceEmbeddedPartitionStrategy() {
+    ColumnMapping mapping = new ColumnMapping.Builder()
+        .key("id")
+        .column("username", "u", "username")
+        .column("real_name", "u", "name")
+        .build();
+    Schema original = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"partitions\": [" +
+        "    {\"type\": \"identity\", \"source\": \"id\", \"name\": \"id_copy\"}" +
+        "  ]," +
+        "  \"mapping\": [" +
+        "    {\"type\": \"occVersion\", \"source\": \"id\"}," +
+        "    {\"type\": \"column\"," +
+        "     \"source\": \"username\"," +
+        "     \"family\": \"meta\"," +
+        "     \"qualifier\": \"u\"}," +
+        "    {\"type\": \"column\"," +
+        "     \"source\": \"real_name\"," +
+        "     \"family\": \"meta\"," +
+        "     \"qualifier\": \"r\"}" +
+        "  ]," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\"}," +
+        "    {\"name\": \"username\", \"type\": \"string\"}," +
+        "    {\"name\": \"real_name\", \"type\": \"string\"}" +
+        "  ]" +
+        "}");
+    Assert.assertTrue(parser.hasEmbeddedColumnMapping(original));
+    Assert.assertFalse(parser.parseFromSchema(original).equals(mapping));
+
+    Schema embedded = parser.embedColumnMapping(original, mapping);
+
+    Assert.assertTrue(parser.hasEmbeddedColumnMapping(embedded));
+    Assert.assertEquals(mapping, parser.parseFromSchema(embedded));
   }
 }

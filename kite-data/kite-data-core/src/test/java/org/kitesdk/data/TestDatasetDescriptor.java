@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 
 public class TestDatasetDescriptor {
@@ -113,6 +114,16 @@ public class TestDatasetDescriptor {
         .identity("username", "u", Object.class, -1)
         .build();
     Assert.assertEquals(expected, descriptor.getPartitionStrategy());
+
+    // check that strategies set on the builder override those in the schema
+    expected = new PartitionStrategy.Builder()
+        .identity("real_name", "n", Object.class, -1)
+        .build();
+    DatasetDescriptor override = new DatasetDescriptor.Builder()
+        .schema(schema)
+        .partitionStrategy(expected)
+        .build();
+    Assert.assertEquals(expected, override.getPartitionStrategy());
   }
 
   @Test

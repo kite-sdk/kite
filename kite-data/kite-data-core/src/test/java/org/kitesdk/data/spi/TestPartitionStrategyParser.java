@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.avro.Schema;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -334,5 +335,54 @@ public class TestPartitionStrategyParser {
           }
         }
     );
+  }
+
+  @Test
+  public void testAddEmbeddedPartitionStrategy() {
+    PartitionStrategy strategy = new PartitionStrategy.Builder()
+        .hash("username", 16)
+        .identity("username", "u", Object.class, -1)
+        .build();
+    Schema original = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\"}," +
+        "    {\"name\": \"username\", \"type\": \"string\"}," +
+        "    {\"name\": \"real_name\", \"type\": \"string\"}" +
+        "  ]" +
+        "}");
+    Schema embedded = parser.embedPartitionStrategy(original, strategy);
+
+    Assert.assertTrue(parser.hasEmbeddedStrategy(embedded));
+    Assert.assertEquals(strategy, parser.parseFromSchema(embedded));
+  }
+
+  @Test
+  public void testReplaceEmbeddedPartitionStrategy() {
+    PartitionStrategy strategy = new PartitionStrategy.Builder()
+        .hash("username", 16)
+        .identity("username", "u", Object.class, -1)
+        .build();
+    Schema original = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"partitions\": [" +
+        "    {\"type\": \"hash\", \"source\": \"real_name\", \"buckets\": 64}," +
+        "    {\"type\": \"identity\", \"source\": \"real_name\", \"name\": \"r\"}" +
+        "  ]," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\"}," +
+        "    {\"name\": \"username\", \"type\": \"string\"}," +
+        "    {\"name\": \"real_name\", \"type\": \"string\"}" +
+        "  ]" +
+        "}");
+    Assert.assertTrue(parser.hasEmbeddedStrategy(original));
+    Assert.assertFalse(parser.parseFromSchema(original).equals(strategy));
+
+    Schema embedded = parser.embedPartitionStrategy(original, strategy);
+
+    Assert.assertTrue(parser.hasEmbeddedStrategy(embedded));
+    Assert.assertEquals(strategy, parser.parseFromSchema(embedded));
   }
 }

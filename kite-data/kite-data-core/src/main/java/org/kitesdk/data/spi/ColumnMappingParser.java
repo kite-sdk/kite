@@ -21,6 +21,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Splitter;
 import java.io.File;
 import java.io.IOException;
@@ -172,6 +176,24 @@ public class ColumnMappingParser {
         "Cannot parse field-level mappings from non-Record");
   }
 
+  public Schema embedColumnMapping(Schema schema, ColumnMapping mapping) {
+    // Avro considers Props read-only and uses an older Jackson version
+    // TODO: avoid embedding mappings in the schema
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      // parse the Schema as a String because Avro uses com.codehaus.jackson
+      ObjectNode schemaJson = mapper.readValue(schema.toString(), ObjectNode.class);
+      schemaJson.set(MAPPING, toJson(mapping));
+      return new Schema.Parser().parse(schemaJson.toString());
+    } catch (JsonParseException e) {
+      throw new ValidationException("Invalid JSON", e);
+    } catch (JsonMappingException e) {
+      throw new ValidationException("Invalid JSON", e);
+    } catch (IOException e) {
+      throw new DatasetIOException("Cannot initialize JSON parser", e);
+    }
+  }
+
   /**
    * Parses the FieldMapping from an annotated schema field.
    *
@@ -286,7 +308,45 @@ public class ColumnMappingParser {
     return builder.build();
   }
 
-  public static String toString(ColumnMapping mappings, boolean pretty) {
+  private static JsonNode toJson(ColumnMapping mapping) {
+    ArrayNode mappingJson = JsonNodeFactory.instance.arrayNode();
+    for (FieldMapping fm : mapping.getFieldMappings()) {
+      ObjectNode fieldMapping = JsonNodeFactory.instance.objectNode();
+      fieldMapping.set(SOURCE, TextNode.valueOf(fm.getFieldName()));
+      switch (fm.getMappingType()) {
+        case KEY:
+          fieldMapping.set(TYPE, TextNode.valueOf("key"));
+          break;
+        case KEY_AS_COLUMN:
+          fieldMapping.set(TYPE, TextNode.valueOf("keyAsColumn"));
+          fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
+          if (fm.getPrefix() != null) {
+            fieldMapping.set(PREFIX, TextNode.valueOf(fm.getPrefix()));
+          }
+          break;
+        case COLUMN:
+          fieldMapping.set(TYPE, TextNode.valueOf("column"));
+          fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
+          fieldMapping.set(QUALIFIER, TextNode.valueOf(fm.getQualifierAsString()));
+          break;
+        case COUNTER:
+          fieldMapping.set(TYPE, TextNode.valueOf("counter"));
+          fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
+          fieldMapping.set(QUALIFIER, TextNode.valueOf(fm.getQualifierAsString()));
+          break;
+        case OCC_VERSION:
+          fieldMapping.set(TYPE, TextNode.valueOf("occVersion"));
+          break;
+        default:
+          throw new ValidationException(
+              "Unknown mapping type: " + fm.getMappingType());
+      }
+      mappingJson.add(fieldMapping);
+    }
+    return mappingJson;
+  }
+
+  public static String toString(ColumnMapping mapping, boolean pretty) {
     StringWriter writer = new StringWriter();
     JsonGenerator gen;
     try {
@@ -294,41 +354,8 @@ public class ColumnMappingParser {
       if (pretty) {
         gen.useDefaultPrettyPrinter();
       }
-      gen.writeStartArray();
-      for (FieldMapping fm : mappings.getFieldMappings()) {
-        gen.writeStartObject();
-        gen.writeStringField(SOURCE, fm.getFieldName());
-        switch (fm.getMappingType()) {
-          case KEY:
-            gen.writeStringField(TYPE, "key");
-            break;
-          case KEY_AS_COLUMN:
-            gen.writeStringField(TYPE, "keyAsColumn");
-            gen.writeStringField(FAMILY, fm.getFamilyAsString());
-            if (fm.getPrefix() != null) {
-              gen.writeStringField(PREFIX, fm.getPrefix());
-            }
-            break;
-          case COLUMN:
-            gen.writeStringField(TYPE, "column");
-            gen.writeStringField(FAMILY, fm.getFamilyAsString());
-            gen.writeStringField(QUALIFIER, fm.getQualifierAsString());
-            break;
-          case COUNTER:
-            gen.writeStringField(TYPE, "counter");
-            gen.writeStringField(FAMILY, fm.getFamilyAsString());
-            gen.writeStringField(QUALIFIER, fm.getQualifierAsString());
-            break;
-          case OCC_VERSION:
-            gen.writeStringField(TYPE, "occVersion");
-            break;
-          default:
-            throw new ValidationException(
-                "Unknown mapping type: " + fm.getMappingType());
-        }
-        gen.writeEndObject();
-      }
-      gen.writeEndArray();
+      gen.setCodec(new ObjectMapper());
+      gen.writeTree(toJson(mapping));
       gen.close();
     } catch (IOException e) {
       throw new DatasetIOException("Cannot write to JSON generator", e);
