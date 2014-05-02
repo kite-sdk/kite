@@ -32,6 +32,7 @@ import org.kitesdk.data.View;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.FieldPartitioner;
+import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.PartitionListener;
 import com.google.common.base.Objects;
@@ -41,6 +42,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.spi.SizeAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +51,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-public class FileSystemDataset<E> extends AbstractDataset<E> implements Mergeable<FileSystemDataset<E>> {
+public class FileSystemDataset<E> extends AbstractDataset<E> implements
+    Mergeable<FileSystemDataset<E>>, LastModifiedAccessor, SizeAccessor {
 
   private static final Logger logger = LoggerFactory
     .getLogger(FileSystemDataset.class);

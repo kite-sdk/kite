@@ -156,14 +156,6 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     throw new UnsupportedOperationException("No delegate input format defined.");
   }
 
-  public long getSize() {
-    throw new UnsupportedOperationException("Size of view not defined.");
-  }
-
-  public long getLastModified() {
-    throw new UnsupportedOperationException("Last modified time of view not defined.");
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {

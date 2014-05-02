@@ -27,7 +27,9 @@ import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.Pair;
+import org.kitesdk.data.spi.SizeAccessor;
 import org.kitesdk.data.spi.StorageKey;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -44,7 +46,8 @@ import java.io.IOException;
  * @param <E> The type of records read and written by this view.
  */
 @Immutable
-class FileSystemView<E> extends AbstractRefinableView<E> {
+class FileSystemView<E> extends AbstractRefinableView<E> implements
+    LastModifiedAccessor, SizeAccessor {
 
   private final FileSystem fs;
   private final Path root;

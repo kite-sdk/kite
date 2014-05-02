@@ -44,6 +44,8 @@ import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.kitesdk.data.spi.AbstractRefinableView;
+import org.kitesdk.data.spi.LastModifiedAccessor;
+import org.kitesdk.data.spi.SizeAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,14 +143,8 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
 
   @Override
   public long getSize(Configuration configuration) {
-    try {
-      if (dataset instanceof AbstractRefinableView) {
-        return ((AbstractRefinableView) dataset).getSize();
-      } else if (dataset instanceof AbstractDataset) {
-        return ((AbstractDataset) dataset).getSize();
-      }
-    } catch (UnsupportedOperationException e) {
-      // fall through
+    if (dataset instanceof SizeAccessor) {
+      return ((SizeAccessor) dataset).getSize();
     }
     logger.warn("Cannot determine size for dataset: " + toString());
     return 1000L * 1000L * 1000L; // fallback to HBase default size
@@ -156,14 +152,8 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
 
   @Override
   public long getLastModifiedAt(Configuration configuration) {
-    try {
-      if (dataset instanceof AbstractRefinableView) {
-        return ((AbstractRefinableView) dataset).getLastModified();
-      } else if (dataset instanceof AbstractDataset) {
-        return ((AbstractDataset) dataset).getLastModified();
-      }
-    } catch (UnsupportedOperationException e) {
-      // fall through
+    if (dataset instanceof LastModifiedAccessor) {
+      return ((LastModifiedAccessor) dataset).getLastModified();
     }
     logger.warn("Cannot determine last modified time for source: " + toString());
     return -1;
