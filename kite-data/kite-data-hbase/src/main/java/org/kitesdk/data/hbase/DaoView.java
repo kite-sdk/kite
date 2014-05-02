@@ -50,7 +50,7 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
   }
 
   @Override
-  public DaoView<E> filter(Constraints constraints) {
+  protected DaoView<E> filter(Constraints constraints) {
     return new DaoView<E>(this, constraints);
   }
 

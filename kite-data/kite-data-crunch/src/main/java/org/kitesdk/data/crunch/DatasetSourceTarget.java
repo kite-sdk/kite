@@ -64,6 +64,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     this.formatBundle = FormatBundle.forInput(DatasetKeyInputFormat.class);
     formatBundle.set(DatasetKeyInputFormat.KITE_REPOSITORY_URI, getRepositoryUri(dataset));
     formatBundle.set(DatasetKeyInputFormat.KITE_DATASET_NAME, dataset.getName());
+    // the following is only needed for input splits that are not instances of FileSplit
     formatBundle.set(RuntimeParameters.DISABLE_COMBINE_FILE, "true");
 
     DatasetRepository repo = DatasetRepositories.open(getRepositoryUri(dataset));

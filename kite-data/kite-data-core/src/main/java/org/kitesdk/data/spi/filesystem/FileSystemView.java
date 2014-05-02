@@ -66,7 +66,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
   }
 
   @Override
-  public FileSystemView<E> filter(Constraints c) {
+  protected FileSystemView<E> filter(Constraints c) {
     return new FileSystemView<E>(this, c);
   }
 

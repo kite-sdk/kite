@@ -17,7 +17,6 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.base.Predicate;
-import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import com.google.common.base.Objects;
@@ -82,7 +81,7 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     return constraints;
   }
 
-  public abstract AbstractRefinableView<E> filter(Constraints c);
+  protected abstract AbstractRefinableView<E> filter(Constraints c);
 
   @Override
   public Dataset<E> getDataset() {

@@ -144,7 +144,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   }
 
   @Override
-  public RefinableView<E> asRefinableView() {
+  protected RefinableView<E> asRefinableView() {
     return unbounded;
   }
 
