@@ -621,7 +621,7 @@ public class DatasetDescriptor {
      *          If there is an IOException accessing the file contents
      */
     public Builder partitionStrategy(File file) {
-      this.partitionStrategy = new PartitionStrategyParser().parse(file);
+      this.partitionStrategy = PartitionStrategyParser.parse(file);
       return this;
     }
 
@@ -641,7 +641,7 @@ public class DatasetDescriptor {
      *          If there is an IOException accessing the InputStream contents
      */
     public Builder partitionStrategy(InputStream in) {
-      this.partitionStrategy = new PartitionStrategyParser().parse(in);
+      this.partitionStrategy = PartitionStrategyParser.parse(in);
       return this;
     }
 
@@ -658,7 +658,7 @@ public class DatasetDescriptor {
      *          If the literal is not a valid JSON-encoded partition strategy
      */
     public Builder partitionStrategyLiteral(String literal) {
-      this.partitionStrategy = new PartitionStrategyParser().parse(literal);
+      this.partitionStrategy = PartitionStrategyParser.parse(literal);
       return this;
     }
 
@@ -733,7 +733,7 @@ public class DatasetDescriptor {
      *          If there is an IOException accessing the file contents
      */
     public Builder columnMapping(File file) {
-      this.columnMapping = new ColumnMappingParser().parse(file);
+      this.columnMapping = ColumnMappingParser.parse(file);
       return this;
     }
 
@@ -752,7 +752,7 @@ public class DatasetDescriptor {
      *          If there is an IOException accessing the InputStream contents
      */
     public Builder columnMapping(InputStream in) {
-      this.columnMapping = new ColumnMappingParser().parse(in);
+      this.columnMapping = ColumnMappingParser.parse(in);
       return this;
     }
 
@@ -769,7 +769,7 @@ public class DatasetDescriptor {
      *          If the literal is not valid JSON-encoded column mappings
      */
     public Builder columnMappingLiteral(String literal) {
-      this.columnMapping = new ColumnMappingParser().parse(literal);
+      this.columnMapping = ColumnMappingParser.parse(literal);
       return this;
     }
 
@@ -833,9 +833,8 @@ public class DatasetDescriptor {
 
       // if no partition strategy is defined, check for one in the schema
       if (partitionStrategy == null) {
-        PartitionStrategyParser parser = new PartitionStrategyParser();
-        if (parser.hasEmbeddedStrategy(schema)) {
-          this.partitionStrategy = parser.parseFromSchema(schema);
+        if (PartitionStrategyParser.hasEmbeddedStrategy(schema)) {
+          this.partitionStrategy = PartitionStrategyParser.parseFromSchema(schema);
         }
       }
 
@@ -843,11 +842,10 @@ public class DatasetDescriptor {
 
       // if no column mappings are present, check for them in the schema
       if (columnMapping == null) {
-        ColumnMappingParser parser = new ColumnMappingParser();
-        if (parser.hasEmbeddedColumnMapping(schema)) {
-          this.columnMapping = parser.parseFromSchema(schema);
-        } else if (parser.hasEmbeddedFieldMappings(schema)) {
-          this.columnMapping = parser.parseFromSchemaFields(schema);
+        if (ColumnMappingParser.hasEmbeddedColumnMapping(schema)) {
+          this.columnMapping = ColumnMappingParser.parseFromSchema(schema);
+        } else if (ColumnMappingParser.hasEmbeddedFieldMappings(schema)) {
+          this.columnMapping = ColumnMappingParser.parseFromSchemaFields(schema);
         }
       }
 

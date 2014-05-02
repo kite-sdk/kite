@@ -32,10 +32,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Iterator;
 import org.apache.avro.Schema;
-import org.codehaus.jackson.node.IntNode;
-import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetIOException;
-import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.partition.DateFormatPartitioner;
@@ -79,7 +76,7 @@ public class PartitionStrategyParser {
    *          The JSON string
    * @return The PartitionStrategy.
    */
-  public PartitionStrategy parse(String json) {
+  public static PartitionStrategy parse(String json) {
     ObjectMapper mapper = new ObjectMapper();
     try {
       JsonNode node = mapper.readValue(json, JsonNode.class);
@@ -100,7 +97,7 @@ public class PartitionStrategyParser {
    *          The File that contains the PartitionStrategy in JSON format.
    * @return The PartitionStrategy.
    */
-  public PartitionStrategy parse(File file) {
+  public static PartitionStrategy parse(File file) {
     ObjectMapper mapper = new ObjectMapper();
     try {
       JsonNode node = mapper.readValue(file, JsonNode.class);
@@ -122,7 +119,7 @@ public class PartitionStrategyParser {
    *          format.
    * @return The PartitionStrategy.
    */
-  public PartitionStrategy parse(InputStream in) {
+  public static PartitionStrategy parse(InputStream in) {
     ObjectMapper mapper = new ObjectMapper();
     try {
       JsonNode node = mapper.readValue(in, JsonNode.class);
@@ -136,16 +133,16 @@ public class PartitionStrategyParser {
     }
   }
 
-  public boolean hasEmbeddedStrategy(Schema schema) {
+  public static boolean hasEmbeddedStrategy(Schema schema) {
     return schema.getJsonProp(PARTITIONS) != null;
   }
 
-  public PartitionStrategy parseFromSchema(Schema schema) {
+  public static PartitionStrategy parseFromSchema(Schema schema) {
     // parse the String because Avro uses com.codehaus.jackson
     return parse(schema.getJsonProp(PARTITIONS).toString());
   }
 
-  public Schema embedPartitionStrategy(Schema schema, PartitionStrategy strategy) {
+  public static Schema embedPartitionStrategy(Schema schema, PartitionStrategy strategy) {
     // Avro considers Props read-only and uses an older Jackson version
     // TODO: avoid embedding mappings in the schema
     ObjectMapper mapper = new ObjectMapper();
@@ -163,7 +160,7 @@ public class PartitionStrategyParser {
     }
   }
 
-  private PartitionStrategy buildPartitionStrategy(JsonNode node) {
+  private static PartitionStrategy buildPartitionStrategy(JsonNode node) {
     ValidationException.check(node.isArray(),
         "A partition strategy must be a JSON array of partitioners");
 

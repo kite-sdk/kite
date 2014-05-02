@@ -23,19 +23,16 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetIOException;
-import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.ValidationException;
 
 public class TestColumnMappingParser {
 
-  private static ColumnMappingParser parser = new ColumnMappingParser();
-
   public static void checkParser(ColumnMapping expected, String json) {
-    ColumnMapping parsed = parser.parse(json);
+    ColumnMapping parsed = ColumnMappingParser.parse(json);
     Assert.assertEquals(expected, parsed);
 
-    parsed = parser.parse(expected.toString());
+    parsed = ColumnMappingParser.parse(expected.toString());
     Assert.assertEquals("Should reparse properly", expected, parsed);
   }
 
@@ -84,7 +81,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[" +
+            ColumnMappingParser.parse("[" +
                 "{\"source\": \"v\", \"type\": \"occVersion\"}," +
                 "{\"source\": \"c\", \"type\": \"counter\", \"value\": \"f:q\"}" +
                 "]");
@@ -95,7 +92,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[" +
+            ColumnMappingParser.parse("[" +
                 "{\"source\": \"v\", \"type\": \"occVersion\"}," +
                 "{\"source\": \"v2\", \"type\": \"occVersion\"}" +
                 "]");
@@ -114,7 +111,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\": \"key\"} ]");
+            ColumnMappingParser.parse("[ {\"type\": \"key\"} ]");
           }
         }
     );
@@ -142,7 +139,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\": \"column\", \"family\": \"f\"," +
+            ColumnMappingParser.parse("[ {\"type\": \"column\", \"family\": \"f\"," +
                 "\"qualifier\": \"q\"} ]");
           }
         }
@@ -151,7 +148,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", " +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", " +
                 "\"type\": \"column\", \"value\": \"f\"} ]");
           }
         }
@@ -160,7 +157,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", " +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", " +
                 "\"type\": \"column\", \"value\": \"f:\"} ]");
           }
         }
@@ -169,7 +166,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", " +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", " +
                 "\"type\": \"column\", \"family\": \"f\"} ]");
           }
         }
@@ -178,7 +175,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"column\"," +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"column\"," +
                 "\"family\": \"f\", \"qualifier\": \"\"} ]");
           }
         }
@@ -187,7 +184,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"column\"} ]");
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"column\"} ]");
           }
         }
     );
@@ -195,7 +192,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"column\"" +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"column\"" +
                 "\"value\": \"\"} ]");
           }
         }
@@ -204,7 +201,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"column\"" +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"column\"" +
                 "\"value\": \":\"} ]");
           }
         }
@@ -213,7 +210,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"column\"" +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"column\"" +
                 "\"family\": \"\"} ]");
           }
         }
@@ -259,7 +256,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\": \"keyAsColumn\", \"family\": \"f\"} ]");
+            ColumnMappingParser.parse("[ {\"type\": \"keyAsColumn\", \"family\": \"f\"} ]");
           }
         }
     );
@@ -267,7 +264,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"keyAsColumn\"} ]");
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"keyAsColumn\"} ]");
           }
         }
     );
@@ -275,7 +272,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"keyAsColumn\"" +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"keyAsColumn\"" +
                 "\"value\": \"\"} ]");
           }
         }
@@ -284,7 +281,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"keyAsColumn\"" +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"keyAsColumn\"" +
                 "\"family\": \"\"} ]");
           }
         }
@@ -293,7 +290,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"keyAsColumn\"" +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"keyAsColumn\"" +
                 "\"value\": \":\"} ]");
           }
         }
@@ -302,7 +299,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"keyAsColumn\"," +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"keyAsColumn\"," +
                 "\"family\": \"f\", \"qualifier\": \"\"} ]");
           }
         }
@@ -332,7 +329,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\": \"counter\", \"family\": \"f\"," +
+            ColumnMappingParser.parse("[ {\"type\": \"counter\", \"family\": \"f\"," +
                 "\"qualifier\": \"q\"} ]");
           }
         }
@@ -341,7 +338,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", " +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", " +
                 "\"type\": \"counter\", \"value\": \"f\"} ]");
           }
         }
@@ -350,7 +347,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", " +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", " +
                 "\"type\": \"counter\", \"value\": \"f:\"} ]");
           }
         }
@@ -359,7 +356,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", " +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", " +
                 "\"type\": \"counter\", \"family\": \"f\"} ]");
           }
         }
@@ -368,7 +365,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"counter\"," +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"counter\"," +
                 "\"family\": \"f\", \"qualifier\": \"\"} ]");
           }
         }
@@ -377,7 +374,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"counter\"} ]");
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"counter\"} ]");
           }
         }
     );
@@ -385,7 +382,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"counter\"" +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"counter\"" +
                 "\"value\": \"\"} ]");
           }
         }
@@ -394,7 +391,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"counter\"" +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"counter\"" +
                 "\"value\": \":\"} ]");
           }
         }
@@ -403,7 +400,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"s\", \"type\": \"counter\"" +
+            ColumnMappingParser.parse("[ {\"source\": \"s\", \"type\": \"counter\"" +
                 "\"family\": \"\"} ]");
           }
         }
@@ -424,7 +421,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\": \"occVersion\"} ]");
+            ColumnMappingParser.parse("[ {\"type\": \"occVersion\"} ]");
           }
         }
     );
@@ -443,7 +440,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"banana\"} ]");
+            ColumnMappingParser.parse("[ {\"source\": \"banana\"} ]");
           }
         }
     );
@@ -455,7 +452,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\": \"cats\", \"source\": \"banana\"} ]");
+            ColumnMappingParser.parse("[ {\"type\": \"cats\", \"source\": \"banana\"} ]");
           }
         }
     );
@@ -467,7 +464,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("{\"type\": \"year\", \"source\": \"banana\"}");
+            ColumnMappingParser.parse("{\"type\": \"year\", \"source\": \"banana\"}");
           }
         }
     );
@@ -479,7 +476,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ " +
+            ColumnMappingParser.parse("[ " +
                 "{\"type\": \"key\", \"source\": \"id\"}," +
                 "\"cheese!\"" +
                 " ]");
@@ -490,7 +487,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ " +
+            ColumnMappingParser.parse("[ " +
                 "{\"type\": \"key\", \"source\": \"id\"}," +
                 "34" +
                 " ]");
@@ -501,7 +498,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ " +
+            ColumnMappingParser.parse("[ " +
                 "{\"type\": \"key\", \"source\": \"id\"}," +
                 "[ 1, 2, 3 ]" +
                 " ]");
@@ -516,7 +513,7 @@ public class TestColumnMappingParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\", \"key\", \"source\": \"banana\"} ]");
+            ColumnMappingParser.parse("[ {\"type\", \"key\", \"source\": \"banana\"} ]");
           }
         }
     );
@@ -528,7 +525,7 @@ public class TestColumnMappingParser {
         DatasetIOException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse(new InputStream() {
+            ColumnMappingParser.parse(new InputStream() {
               @Override
               public int read() throws IOException {
                 throw new IOException("InputStream angry.");
@@ -545,7 +542,7 @@ public class TestColumnMappingParser {
         DatasetIOException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse(new File("target/missing.json"));
+            ColumnMappingParser.parse(new File("target/missing.json"));
           }
         }
     );
@@ -571,10 +568,10 @@ public class TestColumnMappingParser {
         "  ]" +
         "}");
 
-    Schema embedded = parser.embedColumnMapping(original, mapping);
+    Schema embedded = ColumnMappingParser.embedColumnMapping(original, mapping);
 
-    junit.framework.Assert.assertTrue(parser.hasEmbeddedColumnMapping(embedded));
-    junit.framework.Assert.assertEquals(mapping, parser.parseFromSchema(embedded));
+    junit.framework.Assert.assertTrue(ColumnMappingParser.hasEmbeddedColumnMapping(embedded));
+    junit.framework.Assert.assertEquals(mapping, ColumnMappingParser.parseFromSchema(embedded));
   }
 
   @Test
@@ -607,12 +604,12 @@ public class TestColumnMappingParser {
         "    {\"name\": \"real_name\", \"type\": \"string\"}" +
         "  ]" +
         "}");
-    Assert.assertTrue(parser.hasEmbeddedColumnMapping(original));
-    Assert.assertFalse(parser.parseFromSchema(original).equals(mapping));
+    Assert.assertTrue(ColumnMappingParser.hasEmbeddedColumnMapping(original));
+    Assert.assertFalse(ColumnMappingParser.parseFromSchema(original).equals(mapping));
 
-    Schema embedded = parser.embedColumnMapping(original, mapping);
+    Schema embedded = ColumnMappingParser.embedColumnMapping(original, mapping);
 
-    Assert.assertTrue(parser.hasEmbeddedColumnMapping(embedded));
-    Assert.assertEquals(mapping, parser.parseFromSchema(embedded));
+    Assert.assertTrue(ColumnMappingParser.hasEmbeddedColumnMapping(embedded));
+    Assert.assertEquals(mapping, ColumnMappingParser.parseFromSchema(embedded));
   }
 }

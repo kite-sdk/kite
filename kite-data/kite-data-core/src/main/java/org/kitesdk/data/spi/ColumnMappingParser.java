@@ -73,7 +73,7 @@ public class ColumnMappingParser {
    *          The mapping descriptor as a JSON string
    * @return ColumnMapping
    */
-  public ColumnMapping parse(String mappingDescriptor) {
+  public static ColumnMapping parse(String mappingDescriptor) {
     ObjectMapper mapper = new ObjectMapper();
     try {
       JsonNode node = mapper.readValue(mappingDescriptor, JsonNode.class);
@@ -94,7 +94,7 @@ public class ColumnMappingParser {
    *          The File that contains the Mapping Descriptor in JSON format.
    * @return ColumnMapping.
    */
-  public ColumnMapping parse(File file) {
+  public static ColumnMapping parse(File file) {
     ObjectMapper mapper = new ObjectMapper();
     try {
       JsonNode node = mapper.readValue(file, JsonNode.class);
@@ -116,7 +116,7 @@ public class ColumnMappingParser {
    *          format.
    * @return ColumnMapping.
    */
-  public ColumnMapping parse(InputStream in) {
+  public static ColumnMapping parse(InputStream in) {
     ObjectMapper mapper = new ObjectMapper();
     try {
       JsonNode node = mapper.readValue(in, JsonNode.class);
@@ -130,16 +130,16 @@ public class ColumnMappingParser {
     }
   }
 
-  public boolean hasEmbeddedColumnMapping(Schema schema) {
+  public static boolean hasEmbeddedColumnMapping(Schema schema) {
     return schema.getJsonProp(MAPPING) != null;
   }
 
-  public ColumnMapping parseFromSchema(Schema schema) {
+  public static ColumnMapping parseFromSchema(Schema schema) {
     // parse the String because Avro uses com.codehaus.jackson
     return parse(schema.getJsonProp(MAPPING).toString());
   }
 
-  public boolean hasEmbeddedFieldMappings(Schema schema) {
+  public static boolean hasEmbeddedFieldMappings(Schema schema) {
     if (Schema.Type.RECORD == schema.getType()) {
       for (Schema.Field field : schema.getFields()) {
         if (field.getJsonProp(MAPPING) != null) {
@@ -150,7 +150,7 @@ public class ColumnMappingParser {
     return false;
   }
 
-  public ColumnMapping parseFromSchemaFields(Schema schema) {
+  public static ColumnMapping parseFromSchemaFields(Schema schema) {
     if (Schema.Type.RECORD == schema.getType()) {
       ObjectMapper mapper = new ObjectMapper();
       ColumnMapping.Builder builder = new ColumnMapping.Builder();
@@ -176,7 +176,7 @@ public class ColumnMappingParser {
         "Cannot parse field-level mappings from non-Record");
   }
 
-  public Schema embedColumnMapping(Schema schema, ColumnMapping mapping) {
+  public static Schema embedColumnMapping(Schema schema, ColumnMapping mapping) {
     // Avro considers Props read-only and uses an older Jackson version
     // TODO: avoid embedding mappings in the schema
     ObjectMapper mapper = new ObjectMapper();
@@ -201,7 +201,7 @@ public class ColumnMappingParser {
    *          The value of the "mapping" node
    * @return FieldMapping
    */
-  public FieldMapping parseFieldMapping(JsonNode mappingNode) {
+  public static FieldMapping parseFieldMapping(JsonNode mappingNode) {
     ValidationException.check(mappingNode.isObject(),
         "A column mapping must be a JSON record");
 
@@ -221,7 +221,7 @@ public class ColumnMappingParser {
    *          The value of the "mapping" node
    * @return FieldMapping
    */
-  public FieldMapping parseFieldMapping(String source, JsonNode mappingNode) {
+  public static FieldMapping parseFieldMapping(String source, JsonNode mappingNode) {
     ValidationException.check(mappingNode.isObject(),
         "A column mapping must be a JSON record");
 
@@ -297,7 +297,7 @@ public class ColumnMappingParser {
     }
   }
 
-  private ColumnMapping buildColumnMapping(JsonNode node) {
+  private static ColumnMapping buildColumnMapping(JsonNode node) {
     ValidationException.check(node.isArray(),
         "Must be a JSON array of column mappings");
 

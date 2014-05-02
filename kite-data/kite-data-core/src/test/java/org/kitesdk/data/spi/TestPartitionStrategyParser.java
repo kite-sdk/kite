@@ -30,18 +30,11 @@ import org.kitesdk.data.ValidationException;
 
 public class TestPartitionStrategyParser {
 
-  private static PartitionStrategyParser parser;
-
-  @BeforeClass
-  public static void setupParser() throws IOException {
-    parser = new PartitionStrategyParser();
-  }
-
   public static void checkParser(PartitionStrategy expected, String json) {
-    PartitionStrategy parsed = parser.parse(json);
+    PartitionStrategy parsed = PartitionStrategyParser.parse(json);
     Assert.assertEquals(expected, parsed);
 
-    parsed = parser.parse(expected.toString());
+    parsed = PartitionStrategyParser.parse(expected.toString());
     Assert.assertEquals("Should reparse properly", expected, parsed);
   }
 
@@ -60,7 +53,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse(
+            PartitionStrategyParser.parse(
                 "[ { \"type\": \"identity\", \"source\": \"username\" } ]");
           }
         }
@@ -82,7 +75,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\": \"hash\", " +
+            PartitionStrategyParser.parse("[ {\"type\": \"hash\", " +
                 "\"source\": \"id\", " +
                 "\"name\": \"h\"} ]");
           }
@@ -92,7 +85,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\": \"hash\", " +
+            PartitionStrategyParser.parse("[ {\"type\": \"hash\", " +
                 "\"source\": \"id\", " +
                 "\"name\": \"h\", " +
                 "\"buckets\": \"green\"} ]");
@@ -115,7 +108,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\": \"dateFormat\", " +
+            PartitionStrategyParser.parse("[ {\"type\": \"dateFormat\", " +
                 "\"source\": \"time\", " +
                 "\"name\": \"date\"} ]");
           }
@@ -125,7 +118,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\": \"dateFormat\", " +
+            PartitionStrategyParser.parse("[ {\"type\": \"dateFormat\", " +
                 "\"source\": \"time\", " +
                 "\"format\": \"yyyyMMdd\"} ]");
           }
@@ -216,7 +209,7 @@ public class TestPartitionStrategyParser {
           ValidationException.class, new Runnable() {
             @Override
             public void run() {
-              parser.parse("[ {\"type\": \"" + type + "\"} ]");
+              PartitionStrategyParser.parse("[ {\"type\": \"" + type + "\"} ]");
             }
           }
       );
@@ -229,7 +222,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"source\": \"banana\"} ]");
+            PartitionStrategyParser.parse("[ {\"source\": \"banana\"} ]");
           }
         }
     );
@@ -241,7 +234,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\": \"cats\", \"source\": \"banana\"} ]");
+            PartitionStrategyParser.parse("[ {\"type\": \"cats\", \"source\": \"banana\"} ]");
           }
         }
     );
@@ -253,7 +246,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("{\"type\": \"year\", \"source\": \"banana\"}");
+            PartitionStrategyParser.parse("{\"type\": \"year\", \"source\": \"banana\"}");
           }
         }
     );
@@ -265,7 +258,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ " +
+            PartitionStrategyParser.parse("[ " +
                 "{\"type\": \"year\", \"source\": \"time\"}," +
                 "\"cheese!\"" +
                 " ]");
@@ -276,7 +269,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ " +
+            PartitionStrategyParser.parse("[ " +
                 "{\"type\": \"year\", \"source\": \"time\"}," +
                 "34" +
                 " ]");
@@ -287,7 +280,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ " +
+            PartitionStrategyParser.parse("[ " +
                 "{\"type\": \"year\", \"source\": \"time\"}," +
                 "[ 1, 2, 3 ]" +
                 " ]");
@@ -302,7 +295,7 @@ public class TestPartitionStrategyParser {
         ValidationException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse("[ {\"type\", \"year\", \"source\": \"banana\"} ]");
+            PartitionStrategyParser.parse("[ {\"type\", \"year\", \"source\": \"banana\"} ]");
           }
         }
     );
@@ -314,7 +307,7 @@ public class TestPartitionStrategyParser {
         DatasetIOException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse(new InputStream() {
+            PartitionStrategyParser.parse(new InputStream() {
               @Override
               public int read() throws IOException {
                 throw new IOException("InputStream angry.");
@@ -331,7 +324,7 @@ public class TestPartitionStrategyParser {
         DatasetIOException.class, new Runnable() {
           @Override
           public void run() {
-            parser.parse(new File("target/missing.json"));
+            PartitionStrategyParser.parse(new File("target/missing.json"));
           }
         }
     );
@@ -352,10 +345,10 @@ public class TestPartitionStrategyParser {
         "    {\"name\": \"real_name\", \"type\": \"string\"}" +
         "  ]" +
         "}");
-    Schema embedded = parser.embedPartitionStrategy(original, strategy);
+    Schema embedded = PartitionStrategyParser.embedPartitionStrategy(original, strategy);
 
-    Assert.assertTrue(parser.hasEmbeddedStrategy(embedded));
-    Assert.assertEquals(strategy, parser.parseFromSchema(embedded));
+    Assert.assertTrue(PartitionStrategyParser.hasEmbeddedStrategy(embedded));
+    Assert.assertEquals(strategy, PartitionStrategyParser.parseFromSchema(embedded));
   }
 
   @Test
@@ -377,12 +370,12 @@ public class TestPartitionStrategyParser {
         "    {\"name\": \"real_name\", \"type\": \"string\"}" +
         "  ]" +
         "}");
-    Assert.assertTrue(parser.hasEmbeddedStrategy(original));
-    Assert.assertFalse(parser.parseFromSchema(original).equals(strategy));
+    Assert.assertTrue(PartitionStrategyParser.hasEmbeddedStrategy(original));
+    Assert.assertFalse(PartitionStrategyParser.parseFromSchema(original).equals(strategy));
 
-    Schema embedded = parser.embedPartitionStrategy(original, strategy);
+    Schema embedded = PartitionStrategyParser.embedPartitionStrategy(original, strategy);
 
-    Assert.assertTrue(parser.hasEmbeddedStrategy(embedded));
-    Assert.assertEquals(strategy, parser.parseFromSchema(embedded));
+    Assert.assertTrue(PartitionStrategyParser.hasEmbeddedStrategy(embedded));
+    Assert.assertEquals(strategy, PartitionStrategyParser.parseFromSchema(embedded));
   }
 }
