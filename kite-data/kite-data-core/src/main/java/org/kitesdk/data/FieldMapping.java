@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import org.kitesdk.data.spi.ColumnMappingParser;
 
 @Immutable
 public class FieldMapping {
@@ -186,4 +187,8 @@ public class FieldMapping {
         Objects.equal(prefix, other.prefix));
   }
 
+  @Override
+  public String toString() {
+    return ColumnMappingParser.toString(this);
+  }
 }

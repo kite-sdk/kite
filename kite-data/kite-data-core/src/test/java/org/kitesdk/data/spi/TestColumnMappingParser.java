@@ -15,14 +15,17 @@
  */
 package org.kitesdk.data.spi;
 
+import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import org.apache.avro.Schema;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.ValidationException;
 
@@ -549,7 +552,7 @@ public class TestColumnMappingParser {
   }
 
   @Test
-  public void testAddEmbeddedPartitionStrategy() {
+  public void testAddEmbeddedColumnMapping() {
     ColumnMapping mapping = new ColumnMapping.Builder()
         .key("id")
         .column("username", "u", "username")
@@ -612,4 +615,28 @@ public class TestColumnMappingParser {
     Assert.assertTrue(ColumnMappingParser.hasEmbeddedColumnMapping(embedded));
     Assert.assertEquals(mapping, ColumnMappingParser.parseFromSchema(embedded));
   }
+
+  @Test
+  public void testGetKeyMappingsFromSchemaFields() {
+    Schema schema = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\", \"mapping\":" +
+        "      {\"type\": \"key\", \"value\": \"1\"} }," +
+        "    {\"name\": \"username\", \"type\": \"string\", \"mapping\":" +
+        "      {\"type\": \"key\", \"value\": \"0\"} }," +
+        "    {\"name\": \"real_name\", \"type\": \"string\", \"mapping\":" +
+        "      {\"type\": \"column\", \"value\": \"m:name\"} }" +
+        "  ]" +
+        "}");
+    Map<Integer, FieldMapping> keys = ColumnMappingParser
+        .parseKeyMappingsFromSchemaFields(schema);
+    ImmutableMap expected = ImmutableMap.builder()
+        .put(0, FieldMapping.key("username"))
+        .put(1, FieldMapping.key("id"))
+        .build();
+    Assert.assertEquals(expected, keys);
+  }
+
 }

@@ -33,6 +33,9 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
@@ -838,17 +841,22 @@ public class DatasetDescriptor {
         }
       }
 
-      checkPartitionStrategy(schema, partitionStrategy);
-
       // if no column mappings are present, check for them in the schema
       if (columnMapping == null) {
         if (ColumnMappingParser.hasEmbeddedColumnMapping(schema)) {
           this.columnMapping = ColumnMappingParser.parseFromSchema(schema);
         } else if (ColumnMappingParser.hasEmbeddedFieldMappings(schema)) {
           this.columnMapping = ColumnMappingParser.parseFromSchemaFields(schema);
+          if (partitionStrategy == null) {
+            // For backward-compatibility, build a strategy from key values
+            // TODO: warn that this should be fixed before 1.0
+            this.partitionStrategy = buildPartitionStrategyForKeyMappings(
+                ColumnMappingParser.parseKeyMappingsFromSchemaFields(schema));
+          }
         }
       }
 
+      checkPartitionStrategy(schema, partitionStrategy);
       checkColumnMappings(schema, partitionStrategy, columnMapping);
       // TODO: verify that all fields have a mapping?
 
@@ -916,4 +924,12 @@ public class DatasetDescriptor {
     }
   }
 
+  private static PartitionStrategy buildPartitionStrategyForKeyMappings(
+      Map<Integer, FieldMapping> keyMappings) {
+    PartitionStrategy.Builder builder = new PartitionStrategy.Builder();
+    for (Integer index : new TreeSet<Integer>(keyMappings.keySet())) {
+      builder.identity(keyMappings.get(index).getFieldName(), Object.class, -1);
+    }
+    return builder.build();
+  }
 }

@@ -26,11 +26,13 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Iterator;
+import java.util.Map;
 import org.apache.avro.Schema;
 import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetIOException;
@@ -74,10 +76,13 @@ public class ColumnMappingParser {
    * @return ColumnMapping
    */
   public static ColumnMapping parse(String mappingDescriptor) {
+    return buildColumnMapping(parseJson(mappingDescriptor));
+  }
+
+  private static JsonNode parseJson(String json) {
     ObjectMapper mapper = new ObjectMapper();
     try {
-      JsonNode node = mapper.readValue(mappingDescriptor, JsonNode.class);
-      return buildColumnMapping(node);
+      return mapper.readValue(json, JsonNode.class);
     } catch (JsonParseException e) {
       throw new ValidationException("Invalid JSON", e);
     } catch (JsonMappingException e) {
@@ -152,22 +157,12 @@ public class ColumnMappingParser {
 
   public static ColumnMapping parseFromSchemaFields(Schema schema) {
     if (Schema.Type.RECORD == schema.getType()) {
-      ObjectMapper mapper = new ObjectMapper();
       ColumnMapping.Builder builder = new ColumnMapping.Builder();
       for (Schema.Field field : schema.getFields()) {
         if (field.getJsonProp(MAPPING) != null) {
-          try {
-            // parse the String because Avro uses com.codehaus.jackson
-            builder.fieldMapping(parseFieldMapping(field.name(),
-                mapper.readValue(field.getJsonProp(MAPPING).toString(),
-                    JsonNode.class)));
-          } catch (JsonParseException e) {
-            throw new ValidationException("Invalid JSON", e);
-          } catch (JsonMappingException e) {
-            throw new ValidationException("Invalid JSON", e);
-          } catch (IOException e) {
-            throw new DatasetIOException("Cannot initialize JSON parser", e);
-          }
+          // parse the String because Avro uses com.codehaus.jackson
+          builder.fieldMapping(parseFieldMapping(field.name(),
+              parseJson(field.getJsonProp(MAPPING).toString())));
         }
       }
       return builder.build();
@@ -192,6 +187,29 @@ public class ColumnMappingParser {
     } catch (IOException e) {
       throw new DatasetIOException("Cannot initialize JSON parser", e);
     }
+  }
+
+  public static Map<Integer, FieldMapping> parseKeyMappingsFromSchemaFields(
+      Schema schema) {
+    Map<Integer, FieldMapping> keyMappings = Maps.newHashMap();
+    if (Schema.Type.RECORD == schema.getType()) {
+      for (Schema.Field field : schema.getFields()) {
+        if (field.getJsonProp(MAPPING) != null) {
+          // parse the String because Avro uses com.codehaus.jackson
+          JsonNode mappingNode = parseJson(
+              field.getJsonProp(MAPPING).toString());
+          FieldMapping fm = parseFieldMapping(field.name(), mappingNode);
+          if (FieldMapping.MappingType.KEY == fm.getMappingType() &&
+              mappingNode.has(VALUE)) {
+            Integer index = mappingNode.get(VALUE).asInt();
+            keyMappings.put(index, fm);
+          }
+        }
+      }
+      return keyMappings;
+    }
+    throw new IllegalArgumentException(
+        "Cannot parse field-level mappings from non-Record");
   }
 
   /**
@@ -311,40 +329,58 @@ public class ColumnMappingParser {
     return builder.build();
   }
 
+  private static JsonNode toJson(FieldMapping fm) {
+    ObjectNode fieldMapping = JsonNodeFactory.instance.objectNode();
+    fieldMapping.set(SOURCE, TextNode.valueOf(fm.getFieldName()));
+    switch (fm.getMappingType()) {
+      case KEY:
+        fieldMapping.set(TYPE, TextNode.valueOf("key"));
+        break;
+      case KEY_AS_COLUMN:
+        fieldMapping.set(TYPE, TextNode.valueOf("keyAsColumn"));
+        fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
+        if (fm.getPrefix() != null) {
+          fieldMapping.set(PREFIX, TextNode.valueOf(fm.getPrefix()));
+        }
+        break;
+      case COLUMN:
+        fieldMapping.set(TYPE, TextNode.valueOf("column"));
+        fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
+        fieldMapping.set(QUALIFIER, TextNode.valueOf(fm.getQualifierAsString()));
+        break;
+      case COUNTER:
+        fieldMapping.set(TYPE, TextNode.valueOf("counter"));
+        fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
+        fieldMapping.set(QUALIFIER, TextNode.valueOf(fm.getQualifierAsString()));
+        break;
+      case OCC_VERSION:
+        fieldMapping.set(TYPE, TextNode.valueOf("occVersion"));
+        break;
+      default:
+        throw new ValidationException(
+            "Unknown mapping type: " + fm.getMappingType());
+    }
+    return fieldMapping;
+  }
+
+  public static String toString(FieldMapping mapping) {
+    StringWriter writer = new StringWriter();
+    JsonGenerator gen;
+    try {
+      gen = new JsonFactory().createGenerator(writer);
+      gen.setCodec(new ObjectMapper());
+      gen.writeTree(toJson(mapping));
+      gen.close();
+    } catch (IOException e) {
+      throw new DatasetIOException("Cannot write to JSON generator", e);
+    }
+    return writer.toString();
+  }
+
   private static JsonNode toJson(ColumnMapping mapping) {
     ArrayNode mappingJson = JsonNodeFactory.instance.arrayNode();
     for (FieldMapping fm : mapping.getFieldMappings()) {
-      ObjectNode fieldMapping = JsonNodeFactory.instance.objectNode();
-      fieldMapping.set(SOURCE, TextNode.valueOf(fm.getFieldName()));
-      switch (fm.getMappingType()) {
-        case KEY:
-          fieldMapping.set(TYPE, TextNode.valueOf("key"));
-          break;
-        case KEY_AS_COLUMN:
-          fieldMapping.set(TYPE, TextNode.valueOf("keyAsColumn"));
-          fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
-          if (fm.getPrefix() != null) {
-            fieldMapping.set(PREFIX, TextNode.valueOf(fm.getPrefix()));
-          }
-          break;
-        case COLUMN:
-          fieldMapping.set(TYPE, TextNode.valueOf("column"));
-          fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
-          fieldMapping.set(QUALIFIER, TextNode.valueOf(fm.getQualifierAsString()));
-          break;
-        case COUNTER:
-          fieldMapping.set(TYPE, TextNode.valueOf("counter"));
-          fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
-          fieldMapping.set(QUALIFIER, TextNode.valueOf(fm.getQualifierAsString()));
-          break;
-        case OCC_VERSION:
-          fieldMapping.set(TYPE, TextNode.valueOf("occVersion"));
-          break;
-        default:
-          throw new ValidationException(
-              "Unknown mapping type: " + fm.getMappingType());
-      }
-      mappingJson.add(fieldMapping);
+      mappingJson.add(toJson(fm));
     }
     return mappingJson;
   }

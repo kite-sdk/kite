@@ -27,7 +27,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 
 public class TestDatasetDescriptor {
@@ -453,5 +452,29 @@ public class TestDatasetDescriptor {
           }
         }
     );
+  }
+
+  @Test
+  public void testBackwardCompatibleMappingToPartitionStrategy() {
+    Schema schema = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\", \"mapping\":" +
+        "      {\"type\": \"key\", \"value\": \"1\"} }," +
+        "    {\"name\": \"username\", \"type\": \"string\", \"mapping\":" +
+        "      {\"type\": \"key\", \"value\": \"0\"} }," +
+        "    {\"name\": \"real_name\", \"type\": \"string\", \"mapping\":" +
+        "      {\"type\": \"column\", \"value\": \"m:name\"} }" +
+        "  ]" +
+        "}");
+    PartitionStrategy expected = new PartitionStrategy.Builder()
+        .identity("username", Object.class, -1)
+        .identity("id", Object.class, -1)
+        .build();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(schema)
+        .build();
+    Assert.assertEquals(expected, descriptor.getPartitionStrategy());
   }
 }
