@@ -81,6 +81,9 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   public static <E> void setView(Configuration conf, View<E> view) {
     if (view instanceof AbstractRefinableView) {
       conf.set(KITE_CONSTRAINTS, serialize(((AbstractRefinableView) view).getConstraints()));
+    } else {
+      throw new UnsupportedOperationException("Implementation " +
+          "does not provide InputFormat support. View: " + view);
     }
   }
 

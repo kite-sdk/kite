@@ -15,14 +15,10 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
-import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.View;
 import org.apache.hadoop.fs.Path;
 
