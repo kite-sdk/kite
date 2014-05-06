@@ -17,8 +17,6 @@ package org.kitesdk.data.spi;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -76,20 +74,7 @@ public class ColumnMappingParser {
    * @return ColumnMapping
    */
   public static ColumnMapping parse(String mappingDescriptor) {
-    return buildColumnMapping(parseJson(mappingDescriptor));
-  }
-
-  private static JsonNode parseJson(String json) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      return mapper.readValue(json, JsonNode.class);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+    return buildColumnMapping(JsonUtil.parse(mappingDescriptor));
   }
 
   /**
@@ -100,17 +85,7 @@ public class ColumnMappingParser {
    * @return ColumnMapping.
    */
   public static ColumnMapping parse(File file) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readValue(file, JsonNode.class);
-      return buildColumnMapping(node);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+    return buildColumnMapping(JsonUtil.parse(file));
   }
 
   /**
@@ -122,21 +97,20 @@ public class ColumnMappingParser {
    * @return ColumnMapping.
    */
   public static ColumnMapping parse(InputStream in) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readValue(in, JsonNode.class);
-      return buildColumnMapping(node);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+    return buildColumnMapping(JsonUtil.parse(in));
   }
 
   public static boolean hasEmbeddedColumnMapping(Schema schema) {
     return schema.getJsonProp(MAPPING) != null;
+  }
+
+  public static Schema removeEmbeddedMapping(Schema schema) {
+    // TODO: avoid embedding mappings in the schema
+    // Avro considers Props read-only and uses an older Jackson version
+    // Parse the Schema as a String because Avro uses com.codehaus.jackson
+    ObjectNode schemaJson = JsonUtil.parse(schema.toString(), ObjectNode.class);
+    schemaJson.remove(MAPPING);
+    return new Schema.Parser().parse(schemaJson.toString());
   }
 
   public static ColumnMapping parseFromSchema(Schema schema) {
@@ -162,7 +136,7 @@ public class ColumnMappingParser {
         if (field.getJsonProp(MAPPING) != null) {
           // parse the String because Avro uses com.codehaus.jackson
           builder.fieldMapping(parseFieldMapping(field.name(),
-              parseJson(field.getJsonProp(MAPPING).toString())));
+              JsonUtil.parse(field.getJsonProp(MAPPING).toString())));
         }
       }
       return builder.build();
@@ -172,21 +146,12 @@ public class ColumnMappingParser {
   }
 
   public static Schema embedColumnMapping(Schema schema, ColumnMapping mapping) {
-    // Avro considers Props read-only and uses an older Jackson version
     // TODO: avoid embedding mappings in the schema
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      // parse the Schema as a String because Avro uses com.codehaus.jackson
-      ObjectNode schemaJson = mapper.readValue(schema.toString(), ObjectNode.class);
-      schemaJson.set(MAPPING, toJson(mapping));
-      return new Schema.Parser().parse(schemaJson.toString());
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+    // Avro considers Props read-only and uses an older Jackson version
+    // Parse the Schema as a String because Avro uses com.codehaus.jackson
+    ObjectNode schemaJson = JsonUtil.parse(schema.toString(), ObjectNode.class);
+    schemaJson.set(MAPPING, toJson(mapping));
+    return new Schema.Parser().parse(schemaJson.toString());
   }
 
   public static Map<Integer, FieldMapping> parseKeyMappingsFromSchemaFields(
@@ -196,7 +161,7 @@ public class ColumnMappingParser {
       for (Schema.Field field : schema.getFields()) {
         if (field.getJsonProp(MAPPING) != null) {
           // parse the String because Avro uses com.codehaus.jackson
-          JsonNode mappingNode = parseJson(
+          JsonNode mappingNode = JsonUtil.parse(
               field.getJsonProp(MAPPING).toString());
           FieldMapping fm = parseFieldMapping(field.name(), mappingNode);
           if (FieldMapping.MappingType.KEY == fm.getMappingType() &&

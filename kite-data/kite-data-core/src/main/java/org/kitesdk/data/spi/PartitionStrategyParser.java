@@ -77,17 +77,7 @@ public class PartitionStrategyParser {
    * @return The PartitionStrategy.
    */
   public static PartitionStrategy parse(String json) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readValue(json, JsonNode.class);
-      return buildPartitionStrategy(node);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+    return buildPartitionStrategy(JsonUtil.parse(json));
   }
 
   /**
@@ -98,17 +88,7 @@ public class PartitionStrategyParser {
    * @return The PartitionStrategy.
    */
   public static PartitionStrategy parse(File file) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readValue(file, JsonNode.class);
-      return buildPartitionStrategy(node);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+    return buildPartitionStrategy(JsonUtil.parse(file));
   }
 
   /**
@@ -120,17 +100,7 @@ public class PartitionStrategyParser {
    * @return The PartitionStrategy.
    */
   public static PartitionStrategy parse(InputStream in) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readValue(in, JsonNode.class);
-      return buildPartitionStrategy(node);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+      return buildPartitionStrategy(JsonUtil.parse(in));
   }
 
   public static boolean hasEmbeddedStrategy(Schema schema) {
@@ -142,22 +112,22 @@ public class PartitionStrategyParser {
     return parse(schema.getJsonProp(PARTITIONS).toString());
   }
 
-  public static Schema embedPartitionStrategy(Schema schema, PartitionStrategy strategy) {
+  public static Schema removeEmbeddedStrategy(Schema schema) {
+    // TODO: avoid embedding strategies in the schema
     // Avro considers Props read-only and uses an older Jackson version
-    // TODO: avoid embedding mappings in the schema
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      // parse the Schema as a String because Avro uses com.codehaus.jackson
-      ObjectNode schemaJson = mapper.readValue(schema.toString(), ObjectNode.class);
-      schemaJson.set(PARTITIONS, toJson(strategy));
-      return new Schema.Parser().parse(schemaJson.toString());
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+    // Parse the Schema as a String because Avro uses com.codehaus.jackson
+    ObjectNode schemaJson = JsonUtil.parse(schema.toString(), ObjectNode.class);
+    schemaJson.remove(PARTITIONS);
+    return new Schema.Parser().parse(schemaJson.toString());
+  }
+
+  public static Schema embedPartitionStrategy(Schema schema, PartitionStrategy strategy) {
+    // TODO: avoid embedding strategies in the schema
+    // Avro considers Props read-only and uses an older Jackson version
+    // Parse the Schema as a String because Avro uses com.codehaus.jackson
+    ObjectNode schemaJson = JsonUtil.parse(schema.toString(), ObjectNode.class);
+    schemaJson.set(PARTITIONS, toJson(strategy));
+    return new Schema.Parser().parse(schemaJson.toString());
   }
 
   private static PartitionStrategy buildPartitionStrategy(JsonNode node) {
