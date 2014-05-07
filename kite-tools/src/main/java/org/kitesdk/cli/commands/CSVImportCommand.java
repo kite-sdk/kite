@@ -26,8 +26,6 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.avro.Schema;
-import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.Dataset;
@@ -35,7 +33,8 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.ColumnMappingParser;
+import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.filesystem.CSVProperties;
 import org.kitesdk.data.spi.filesystem.CSVUtil;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
@@ -109,7 +108,8 @@ public class CSVImportCommand extends BaseDatasetCommand {
         .configuration(getConf())
         .descriptor(props.addToDescriptor(new DatasetDescriptor.Builder()
             .location(sourceFS.makeQualified(sourcePath))
-            .schema(datasetSchema)
+            .schema(ColumnMappingParser.removeEmbeddedMapping(
+                PartitionStrategyParser.removeEmbeddedStrategy(datasetSchema)))
             .format("csv")
             .build()))
         .build();
@@ -145,9 +145,6 @@ public class CSVImportCommand extends BaseDatasetCommand {
       threw = false;
 
     } finally {
-      if (count > 0) {
-        console.info("Added {} records to dataset \"{}\"", count, datasetName);
-      }
       boolean readerThrew = true;
       try {
         Closeables.close(reader, threw);
@@ -155,6 +152,10 @@ public class CSVImportCommand extends BaseDatasetCommand {
       } finally {
         Closeables.close(writer, threw || readerThrew);
       }
+    }
+
+    if (count > 0) {
+      console.info("Added {} records to dataset \"{}\"", count, datasetName);
     }
 
     // in the future use: Jobs.copy(conf, csvSourceAsDataset, target) ? 0 : 1;
