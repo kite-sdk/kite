@@ -16,14 +16,9 @@
 package org.kitesdk.data.mapreduce;
 
 import com.google.common.annotations.Beta;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.util.List;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -35,7 +30,6 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.PartitionKey;
@@ -80,34 +74,11 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
 
   public static <E> void setView(Configuration conf, View<E> view) {
     if (view instanceof AbstractRefinableView) {
-      conf.set(KITE_CONSTRAINTS, serialize(((AbstractRefinableView) view).getConstraints()));
+      conf.set(KITE_CONSTRAINTS,
+          Constraints.serialize(((AbstractRefinableView) view).getConstraints()));
     } else {
       throw new UnsupportedOperationException("Implementation " +
           "does not provide InputFormat support. View: " + view);
-    }
-  }
-
-  private static String serialize(Constraints constraints) {
-    try {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ObjectOutputStream out = new ObjectOutputStream(baos);
-      out.writeObject(constraints);
-      out.close();
-      return Base64.encodeBase64String(baos.toByteArray());
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot serialize constraints " + constraints, e);
-    }
-  }
-
-  private static Constraints deserialize(String s) {
-    try {
-      ByteArrayInputStream bais = new ByteArrayInputStream(Base64.decodeBase64(s));
-      ObjectInputStream in = new ObjectInputStream(bais);
-      return (Constraints) in.readObject();
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot deserialize constraints", e);
-    } catch (ClassNotFoundException e) {
-      throw new DatasetException("Cannot deserialize constraints", e);
     }
   }
 
@@ -153,7 +124,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   @SuppressWarnings("unchecked")
   private InputFormat<E, Void> getDelegateInputFormatForView(Dataset<E> dataset,
       String constraintsString) {
-    Constraints constraints = deserialize(constraintsString);
+    Constraints constraints = Constraints.deserialize(constraintsString);
     if (dataset instanceof AbstractDataset) {
       return getDelegateInputFormat(((AbstractDataset) dataset).filter(constraints));
     }
