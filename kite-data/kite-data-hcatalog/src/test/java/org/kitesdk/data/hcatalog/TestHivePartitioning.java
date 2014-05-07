@@ -16,6 +16,7 @@
 package org.kitesdk.data.hcatalog;
 
 import java.util.List;
+import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.junit.Assert;
@@ -27,15 +28,21 @@ import org.kitesdk.data.PartitionStrategy;
 
 public class TestHivePartitioning {
 
+  private static final Schema schema = SchemaBuilder.record("Record").fields()
+      .requiredLong("timestamp")
+      .requiredInt("group")
+      .requiredString("id")
+      .endRecord();
+
   private static final PartitionStrategy strategy = new PartitionStrategy.Builder()
       .year("timestamp")
       .month("timestamp")
       .day("timestamp")
       .hour("timestamp")
       .hash("id", 64)
-      .identity("group", "group_copy", Integer.class, -1)
-      .identity("id", "id_copy", String.class, -1)
-      .identity("timestamp", "time_copy", Long.class, -1)
+      .identity("group", "group_copy", Object.class, -1)
+      .identity("id", "id_copy", Object.class, -1)
+      .identity("timestamp", "time_copy", Object.class, -1)
       .range("group", 5, 10, 15, 20)
       .range("id", "0", "a")
       .dateFormat("timestamp", "date", "yyyy-MM-dd")
@@ -76,7 +83,7 @@ public class TestHivePartitioning {
 
   @Test
   public void testNames() {
-    List<FieldSchema> columns = HiveUtils.partitionColumns(strategy);
+    List<FieldSchema> columns = HiveUtils.partitionColumns(strategy, schema);
     Assert.assertEquals("year", columns.get(0).getName());
     Assert.assertEquals("month", columns.get(1).getName());
     Assert.assertEquals("day", columns.get(2).getName());
@@ -92,7 +99,7 @@ public class TestHivePartitioning {
 
   @Test
   public void testTypeMapping() {
-    List<FieldSchema> columns = HiveUtils.partitionColumns(strategy);
+    List<FieldSchema> columns = HiveUtils.partitionColumns(strategy, schema);
     Assert.assertEquals("int", columns.get(0).getType());
     Assert.assertEquals("int", columns.get(1).getType());
     Assert.assertEquals("int", columns.get(2).getType());
