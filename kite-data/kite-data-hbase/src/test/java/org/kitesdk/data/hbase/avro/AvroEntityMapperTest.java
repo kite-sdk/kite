@@ -42,6 +42,10 @@ public class AvroEntityMapperTest {
   private static final AvroKeyEntitySchemaParser schemaParser = new AvroKeyEntitySchemaParser();
 
   private final String schemaString = "{ \"name\": \"test\", \"type\": \"record\", "
+      + "\"partitions\": ["
+      + "    {\"source\": \"keyPart1\", \"type\": \"identity\"},"
+      + "    {\"source\": \"keyPart2\", \"type\": \"identity\"}"
+      + "],"
       + "\"fields\": [ "
       + "{ \"name\": \"keyPart1\", \"type\": \"int\", \"mapping\": "
       + "    { \"type\": \"key\", \"value\": \"0\" } "

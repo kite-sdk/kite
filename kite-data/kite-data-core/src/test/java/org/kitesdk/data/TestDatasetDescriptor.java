@@ -113,6 +113,16 @@ public class TestDatasetDescriptor {
         .identity("username", "u", Object.class, -1)
         .build();
     Assert.assertEquals(expected, descriptor.getPartitionStrategy());
+
+    // check that strategies set on the builder override those in the schema
+    expected = new PartitionStrategy.Builder()
+        .identity("real_name", "n", Object.class, -1)
+        .build();
+    DatasetDescriptor override = new DatasetDescriptor.Builder()
+        .schema(schema)
+        .partitionStrategy(expected)
+        .build();
+    Assert.assertEquals(expected, override.getPartitionStrategy());
   }
 
   @Test
@@ -442,5 +452,29 @@ public class TestDatasetDescriptor {
           }
         }
     );
+  }
+
+  @Test
+  public void testBackwardCompatibleMappingToPartitionStrategy() {
+    Schema schema = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\", \"mapping\":" +
+        "      {\"type\": \"key\", \"value\": \"1\"} }," +
+        "    {\"name\": \"username\", \"type\": \"string\", \"mapping\":" +
+        "      {\"type\": \"key\", \"value\": \"0\"} }," +
+        "    {\"name\": \"real_name\", \"type\": \"string\", \"mapping\":" +
+        "      {\"type\": \"column\", \"value\": \"m:name\"} }" +
+        "  ]" +
+        "}");
+    PartitionStrategy expected = new PartitionStrategy.Builder()
+        .identity("username", Object.class, -1)
+        .identity("id", Object.class, -1)
+        .build();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(schema)
+        .build();
+    Assert.assertEquals(expected, descriptor.getPartitionStrategy());
   }
 }

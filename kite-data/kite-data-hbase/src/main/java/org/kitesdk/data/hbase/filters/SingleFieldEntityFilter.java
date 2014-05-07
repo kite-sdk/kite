@@ -15,15 +15,14 @@
  */
 package org.kitesdk.data.hbase.filters;
 
-import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.hbase.impl.EntitySchema;
-import org.kitesdk.data.hbase.impl.EntitySchema.FieldMapping;
-import org.kitesdk.data.hbase.impl.EntitySerDe;
-import org.kitesdk.data.hbase.impl.MappingType;
-
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
+import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.FieldMapping;
+import org.kitesdk.data.FieldMapping.MappingType;
+import org.kitesdk.data.hbase.impl.EntitySchema;
+import org.kitesdk.data.hbase.impl.EntitySerDe;
 
 /**
  * An EntityFilter that will perform an equality filter on a single entity
@@ -42,7 +41,8 @@ public class SingleFieldEntityFilter implements EntityFilter {
   public SingleFieldEntityFilter(EntitySchema entitySchema,
       EntitySerDe<?> entitySerDe, String fieldName, Object filterValue,
       CompareFilter.CompareOp equalityOperator) {
-    FieldMapping fieldMapping = entitySchema.getFieldMapping(fieldName);
+    FieldMapping fieldMapping = entitySchema.getColumnMappingDescriptor()
+        .getFieldMapping(fieldName);
     if (fieldMapping.getMappingType() != MappingType.COLUMN) {
       throw new DatasetException(
           "SingleColumnValueFilter only compatible with COLUMN mapping types.");

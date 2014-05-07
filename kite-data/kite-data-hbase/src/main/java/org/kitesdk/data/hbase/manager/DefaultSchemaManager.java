@@ -15,20 +15,10 @@
  */
 package org.kitesdk.data.hbase.manager;
 
-import org.kitesdk.data.ConcurrentSchemaModificationException;
-import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.IncompatibleSchemaException;
-import org.kitesdk.data.SchemaNotFoundException;
-import org.kitesdk.data.hbase.impl.EntitySchema;
-import org.kitesdk.data.hbase.impl.EntitySchema.FieldMapping;
-import org.kitesdk.data.hbase.impl.KeyEntitySchemaParser;
-import org.kitesdk.data.hbase.impl.KeySchema;
-import org.kitesdk.data.hbase.impl.MappingType;
-import org.kitesdk.data.hbase.impl.SchemaManager;
-import org.kitesdk.data.hbase.manager.generated.ManagedSchema;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +28,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.hadoop.hbase.client.HTablePool;
+import org.kitesdk.data.ConcurrentSchemaModificationException;
+import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.FieldMapping;
+import org.kitesdk.data.FieldMapping.MappingType;
+import org.kitesdk.data.IncompatibleSchemaException;
+import org.kitesdk.data.SchemaNotFoundException;
+import org.kitesdk.data.hbase.impl.EntitySchema;
+import org.kitesdk.data.hbase.impl.KeyEntitySchemaParser;
+import org.kitesdk.data.hbase.impl.KeySchema;
+import org.kitesdk.data.hbase.impl.SchemaManager;
+import org.kitesdk.data.hbase.manager.generated.ManagedSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -284,7 +285,9 @@ public class DefaultSchemaManager implements SchemaManager {
       EntitySchema entitySchema = schemaParser.parseEntitySchema(schemaString);
       if (!newKeySchema.compatible(keySchema)) {
         String msg = "StorageKey fields of entity schema not compatible with version "
-            + Integer.toString(version) + ": Old schema: " + schemaString
+            + Integer.toString(version)
+            + ": Old schema: "
+            + schemaString
             + " New schema: " + newEntitySchema.getRawSchema();
         throw new IncompatibleSchemaException(msg);
       }
@@ -383,7 +386,8 @@ public class DefaultSchemaManager implements SchemaManager {
    * the managedSchemaDao.
    */
   private void populateManagedSchemaMap() {
-    for (ManagedSchema managedSchema : managedSchemaDao.getManagedSchemas()) {
+    Collection<ManagedSchema> schemas = managedSchemaDao.getManagedSchemas();
+    for (ManagedSchema managedSchema : schemas) {
       getManagedSchemaMap().put(
           getManagedSchemaMapKey(managedSchema.getTable(),
               managedSchema.getName()), managedSchema);
@@ -574,15 +578,13 @@ public class DefaultSchemaManager implements SchemaManager {
     // against the second schema.
     Set<String> entitySchema1Columns = new HashSet<String>();
     List<String> entitySchema1KeyAsColumns = new ArrayList<String>();
-    for (FieldMapping fieldMapping1 : entitySchema1.getFieldMappings()) {
-      if (fieldMapping1.getMappingType() == MappingType.COLUMN) {
-        entitySchema1Columns.add(fieldMapping1.getMappingValue());
+    for (FieldMapping fieldMapping1 : entitySchema1
+        .getColumnMappingDescriptor().getFieldMappings()) {
+      if (fieldMapping1.getMappingType() == MappingType.COLUMN ||
+          fieldMapping1.getMappingType() == MappingType.COUNTER) {
+        entitySchema1Columns.add(getColumnValue(fieldMapping1));
       } else if (fieldMapping1.getMappingType() == MappingType.KEY_AS_COLUMN) {
-        String value = fieldMapping1.getMappingValue();
-        if (fieldMapping1.getPrefix() != null) {
-          value += fieldMapping1.getPrefix();
-        }
-        entitySchema1KeyAsColumns.add(value);
+        entitySchema1KeyAsColumns.add(getColumnValue(fieldMapping1));
       }
     }
 
@@ -603,9 +605,11 @@ public class DefaultSchemaManager implements SchemaManager {
     // the first schema's keyAsColumn mappings, and one of the first
     // schema's mappings isn't a prefix of this schema's keyAsColumn
     // mappings.
-    for (FieldMapping fieldMapping2 : entitySchema2.getFieldMappings()) {
-      if (fieldMapping2.getMappingType() == MappingType.COLUMN) {
-        String value = fieldMapping2.getMappingValue();
+    for (FieldMapping fieldMapping2 : entitySchema2
+        .getColumnMappingDescriptor().getFieldMappings()) {
+      if (fieldMapping2.getMappingType() == MappingType.COLUMN ||
+          fieldMapping2.getMappingType() == MappingType.COUNTER) {
+        String value = getColumnValue(fieldMapping2);
         if (entitySchema1Columns.contains(value)) {
           LOG.warn("Field: " + fieldMapping2.getFieldName()
               + " has a table column conflict with a column mapped field in "
@@ -622,10 +626,7 @@ public class DefaultSchemaManager implements SchemaManager {
           }
         }
       } else if (fieldMapping2.getMappingType() == MappingType.KEY_AS_COLUMN) {
-        String entitySchema2KeyAsColumn = fieldMapping2.getMappingValue();
-        if (fieldMapping2.getPrefix() != null) {
-          entitySchema2KeyAsColumn += fieldMapping2.getPrefix();
-        }
+        String entitySchema2KeyAsColumn = getColumnValue(fieldMapping2);
         for (String entitySchema1KeyAsColumn : entitySchema1KeyAsColumns) {
           if (entitySchema1KeyAsColumn.startsWith(entitySchema2KeyAsColumn)) {
             LOG.warn("Field "
@@ -649,6 +650,19 @@ public class DefaultSchemaManager implements SchemaManager {
     return true;
   }
 
+  private static String getColumnValue(FieldMapping fm) {
+    switch (fm.getMappingType()) {
+      case COLUMN:
+      case COUNTER:
+        return fm.getFamilyAsString() + ":" + fm.getQualifierAsString();
+      case KEY_AS_COLUMN:
+        return fm.getFamilyAsString() + ":" +
+            (fm.getPrefix() == null ? "" : fm.getPrefix());
+      default:
+        return null;
+    }
+  }
+
   /**
    * Only one schema for a table should contain an OCCVersion field mapping.
    * This method will compare two schemas and return true if only one has an
@@ -663,14 +677,16 @@ public class DefaultSchemaManager implements SchemaManager {
   private boolean validateCompatibleWithTableOccVersion(
       EntitySchema entitySchema1, EntitySchema entitySchema2) {
     boolean foundOccMapping = false;
-    for (FieldMapping fieldMapping : entitySchema1.getFieldMappings()) {
+    for (FieldMapping fieldMapping : entitySchema1.getColumnMappingDescriptor()
+        .getFieldMappings()) {
       if (fieldMapping.getMappingType() == MappingType.OCC_VERSION) {
         foundOccMapping = true;
         break;
       }
     }
     if (foundOccMapping) {
-      for (FieldMapping fieldMapping : entitySchema2.getFieldMappings()) {
+      for (FieldMapping fieldMapping : entitySchema2
+          .getColumnMappingDescriptor().getFieldMappings()) {
         if (fieldMapping.getMappingType() == MappingType.OCC_VERSION) {
           LOG.warn("Field: " + fieldMapping.getFieldName() + " in schema "
               + entitySchema2.getName()

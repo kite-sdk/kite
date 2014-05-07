@@ -21,6 +21,11 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.LongNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,18 +76,8 @@ public class PartitionStrategyParser {
    *          The JSON string
    * @return The PartitionStrategy.
    */
-  public PartitionStrategy parse(String json) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readValue(json, JsonNode.class);
-      return buildPartitionStrategy(node);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+  public static PartitionStrategy parse(String json) {
+    return buildPartitionStrategy(JsonUtil.parse(json));
   }
 
   /**
@@ -92,18 +87,8 @@ public class PartitionStrategyParser {
    *          The File that contains the PartitionStrategy in JSON format.
    * @return The PartitionStrategy.
    */
-  public PartitionStrategy parse(File file) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readValue(file, JsonNode.class);
-      return buildPartitionStrategy(node);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+  public static PartitionStrategy parse(File file) {
+    return buildPartitionStrategy(JsonUtil.parse(file));
   }
 
   /**
@@ -114,30 +99,38 @@ public class PartitionStrategyParser {
    *          format.
    * @return The PartitionStrategy.
    */
-  public PartitionStrategy parse(InputStream in) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readValue(in, JsonNode.class);
-      return buildPartitionStrategy(node);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+  public static PartitionStrategy parse(InputStream in) {
+      return buildPartitionStrategy(JsonUtil.parse(in));
   }
 
-  public boolean hasEmbeddedStrategy(Schema schema) {
+  public static boolean hasEmbeddedStrategy(Schema schema) {
     return schema.getJsonProp(PARTITIONS) != null;
   }
 
-  public PartitionStrategy parseFromSchema(Schema schema) {
+  public static PartitionStrategy parseFromSchema(Schema schema) {
     // parse the String because Avro uses com.codehaus.jackson
     return parse(schema.getJsonProp(PARTITIONS).toString());
   }
 
-  private PartitionStrategy buildPartitionStrategy(JsonNode node) {
+  public static Schema removeEmbeddedStrategy(Schema schema) {
+    // TODO: avoid embedding strategies in the schema
+    // Avro considers Props read-only and uses an older Jackson version
+    // Parse the Schema as a String because Avro uses com.codehaus.jackson
+    ObjectNode schemaJson = JsonUtil.parse(schema.toString(), ObjectNode.class);
+    schemaJson.remove(PARTITIONS);
+    return new Schema.Parser().parse(schemaJson.toString());
+  }
+
+  public static Schema embedPartitionStrategy(Schema schema, PartitionStrategy strategy) {
+    // TODO: avoid embedding strategies in the schema
+    // Avro considers Props read-only and uses an older Jackson version
+    // Parse the Schema as a String because Avro uses com.codehaus.jackson
+    ObjectNode schemaJson = JsonUtil.parse(schema.toString(), ObjectNode.class);
+    schemaJson.set(PARTITIONS, toJson(strategy));
+    return new Schema.Parser().parse(schemaJson.toString());
+  }
+
+  private static PartitionStrategy buildPartitionStrategy(JsonNode node) {
     ValidationException.check(node.isArray(),
         "A partition strategy must be a JSON array of partitioners");
 
@@ -161,8 +154,6 @@ public class PartitionStrategyParser {
 
       // Note: string range, int range, and list partitioners are not supported
       if (type.equals("identity")) {
-        ValidationException.check(name != null,
-            "Identity partitioner %s must have a %s", source, NAME);
         builder.identity(source, name, Object.class, -1);
       } else if (type.equals("hash")) {
         ValidationException.check(fieldPartitioner.has(BUCKETS),
@@ -198,6 +189,40 @@ public class PartitionStrategyParser {
     return builder.build();
   }
 
+  private static JsonNode toJson(PartitionStrategy strategy) {
+    ArrayNode strategyJson = JsonNodeFactory.instance.arrayNode();
+    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+      ObjectNode partitioner = JsonNodeFactory.instance.objectNode();
+      partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
+      if (fp instanceof IdentityFieldPartitioner) {
+        partitioner.set(TYPE, TextNode.valueOf("identity"));
+      } else if (fp instanceof HashFieldPartitioner) {
+        partitioner.set(TYPE, TextNode.valueOf("hash"));
+        partitioner.set(BUCKETS, LongNode.valueOf(fp.getCardinality()));
+      } else if (fp instanceof YearFieldPartitioner) {
+        partitioner.set(TYPE, TextNode.valueOf("year"));
+      } else if (fp instanceof MonthFieldPartitioner) {
+        partitioner.set(TYPE, TextNode.valueOf("month"));
+      } else if (fp instanceof DayOfMonthFieldPartitioner) {
+        partitioner.set(TYPE, TextNode.valueOf("day"));
+      } else if (fp instanceof HourFieldPartitioner) {
+        partitioner.set(TYPE, TextNode.valueOf("hour"));
+      } else if (fp instanceof MinuteFieldPartitioner) {
+        partitioner.set(TYPE, TextNode.valueOf("minute"));
+      } else if (fp instanceof DateFormatPartitioner) {
+        partitioner.set(TYPE, TextNode.valueOf("dateFormat"));
+        partitioner.set(FORMAT,
+            TextNode.valueOf(((DateFormatPartitioner) fp).getPattern()));
+      } else {
+        throw new ValidationException(
+            "Unknown partitioner class: " + fp.getClass());
+      }
+      partitioner.set(NAME, TextNode.valueOf(fp.getName()));
+      strategyJson.add(partitioner);
+    }
+    return strategyJson;
+  }
+
   public static String toString(PartitionStrategy strategy, boolean pretty) {
     StringWriter writer = new StringWriter();
     JsonGenerator gen;
@@ -206,37 +231,8 @@ public class PartitionStrategyParser {
       if (pretty) {
         gen.useDefaultPrettyPrinter();
       }
-      gen.writeStartArray();
-      for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
-        gen.writeStartObject();
-        if (fp instanceof IdentityFieldPartitioner) {
-          gen.writeStringField(TYPE, "identity");
-        } else if (fp instanceof HashFieldPartitioner) {
-          gen.writeStringField(TYPE, "hash");
-          gen.writeNumberField(BUCKETS, fp.getCardinality());
-        } else if (fp instanceof YearFieldPartitioner) {
-          gen.writeStringField(TYPE, "year");
-        } else if (fp instanceof MonthFieldPartitioner) {
-          gen.writeStringField(TYPE, "month");
-        } else if (fp instanceof DayOfMonthFieldPartitioner) {
-          gen.writeStringField(TYPE, "day");
-        } else if (fp instanceof HourFieldPartitioner) {
-          gen.writeStringField(TYPE, "hour");
-        } else if (fp instanceof MinuteFieldPartitioner) {
-          gen.writeStringField(TYPE, "minute");
-        } else if (fp instanceof DateFormatPartitioner) {
-          gen.writeStringField(TYPE, "dateFormat");
-          gen.writeStringField(FORMAT,
-              ((DateFormatPartitioner) fp).getPattern());
-        } else {
-          throw new ValidationException(
-              "Unknown partitioner class: " + fp.getClass());
-        }
-        gen.writeStringField(SOURCE, fp.getSourceName());
-        gen.writeStringField(NAME, fp.getName());
-        gen.writeEndObject();
-      }
-      gen.writeEndArray();
+      gen.setCodec(new ObjectMapper());
+      gen.writeTree(toJson(strategy));
       gen.close();
     } catch (IOException e) {
       throw new DatasetIOException("Cannot write to JSON generator", e);

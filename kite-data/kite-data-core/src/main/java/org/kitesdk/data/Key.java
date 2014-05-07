@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data;
 
+import org.apache.avro.Schema;
 import org.kitesdk.data.spi.Conversions;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -25,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.kitesdk.data.spi.FieldPartitioner;
+import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 
 /**
  * <p>
@@ -77,6 +80,7 @@ public class Key {
    */
   public static class Builder {
 
+    private Schema schema;
     private PartitionStrategy strategy;
     private Set<String> fieldNames;
     private final Map<String, Object> values;
@@ -85,6 +89,7 @@ public class Key {
      * Construct a {@link Builder} for a {@link RandomAccessDataset}.
      */
     public Builder(RandomAccessDataset dataset) {
+      this.schema = dataset.getDescriptor().getSchema();
       this.strategy = dataset.getDescriptor().getPartitionStrategy();
       this.fieldNames = Sets.newHashSet();
       for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
@@ -123,14 +128,15 @@ public class Key {
       return new Key(content);
     }
 
+    @SuppressWarnings("unchecked")
     private <S, T> T valueFor(FieldPartitioner<S, T> fp) {
       if (values.containsKey(fp.getName())) {
-        return Conversions.convert(values.get(fp.getName()), fp.getType());
+        return Conversions.convert(values.get(fp.getName()),
+            SchemaUtil.getPartitionType(fp, schema));
 
       } else if (values.containsKey(fp.getSourceName())) {
-        return fp.apply(Conversions.convert(
-            values.get(fp.getSourceName()),
-            fp.getSourceType()));
+        return fp.apply(Conversions.convert(values.get(fp.getSourceName()),
+            SchemaUtil.getSourceType(fp, schema)));
 
       } else {
         throw new IllegalStateException(

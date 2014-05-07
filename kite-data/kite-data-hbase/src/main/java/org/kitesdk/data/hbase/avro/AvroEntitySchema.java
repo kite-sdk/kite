@@ -15,20 +15,18 @@
  */
 package org.kitesdk.data.hbase.avro;
 
-import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.SchemaValidationException;
-import org.kitesdk.data.hbase.impl.EntitySchema;
 import com.google.common.base.Objects;
 
 import java.io.IOException;
-import java.util.Collection;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.io.parsing.ResolvingGrammarGenerator;
 import org.apache.avro.io.parsing.Symbol;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.kitesdk.data.ColumnMapping;
+import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.hbase.impl.EntitySchema;
+import org.kitesdk.data.FieldMapping;
 
 /**
  * An EntitySchema implementation powered by Avro.
@@ -40,20 +38,18 @@ public class AvroEntitySchema extends EntitySchema {
   /**
    * Constructor for the AvroEntitySchema.
    * 
-   * @param tables
-   *          The tables this EntitySchema can be persisted to
    * @param schema
    *          The Avro Schema that underlies this EntitySchema implementation
    * @param rawSchema
    *          The Avro Schema as a string that underlies the EntitySchema
    *          implementation
-   * @param fieldMappings
+   * @param columnMapping
    *          The list of FieldMappings that specify how each field maps to an
    *          HBase row
    */
-  public AvroEntitySchema(Collection<String> tables, Schema schema,
-      String rawSchema, Collection<FieldMapping> fieldMappings) {
-    super(tables, schema.getName(), rawSchema, fieldMappings);
+  public AvroEntitySchema(Schema schema, String rawSchema,
+      ColumnMapping columnMapping) {
+    super(schema.getName(), rawSchema, columnMapping);
     this.schema = schema;
   }
 
@@ -64,10 +60,6 @@ public class AvroEntitySchema extends EntitySchema {
    */
   public Schema getAvroSchema() {
     return schema;
-  }
-  
-  public Schema getKeyAvroSchema() {
-    return null;
   }
 
   @Override
@@ -97,8 +89,12 @@ public class AvroEntitySchema extends EntitySchema {
       for (Field field : schema.getFields()) {
         Field entitySchemaField = other.getAvroSchema().getFields()
             .get(field.pos());
-        if (!fieldsEqual(field, getFieldMapping(field.name()),
-            entitySchemaField, other.getFieldMapping(entitySchemaField.name()))) {
+        if (!fieldsEqual(
+            field,
+            this.getColumnMappingDescriptor().getFieldMapping(field.name()),
+            entitySchemaField,
+            other.getColumnMappingDescriptor().getFieldMapping(
+                entitySchemaField.name()))) {
           return false;
         }
       }
@@ -108,7 +104,7 @@ public class AvroEntitySchema extends EntitySchema {
 
   @Override
   public boolean compatible(EntitySchema entitySchema) {
-    if (!mappingCompatible(getRawSchema(), entitySchema.getRawSchema())) {
+    if (!mappingCompatible(this, entitySchema)) {
       return false;
     }
     AvroEntitySchema avroEntitySchema = (AvroEntitySchema) entitySchema;
@@ -124,37 +120,22 @@ public class AvroEntitySchema extends EntitySchema {
   }
 
   /**
-   * Ensure that the field mappings haven't changed between the oldSchemaString
-   * and the newSchemaString.
+   * Ensure that the column mappings for the shared fields between the old and
+   * new schema haven't changed.
    * 
-   * @param oldSchemaString
-   * @param newSchemaString
+   * @param oldSchema
+   * @param newSchema
    * @return true if the mappings are compatible, false if not.
    */
-  private static boolean mappingCompatible(String oldSchemaString,
-      String newSchemaString) {
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode oldSchema;
-    JsonNode newSchema;
-    try {
-      oldSchema = mapper.readValue(oldSchemaString, JsonNode.class);
-      newSchema = mapper.readValue(newSchemaString, JsonNode.class);
-    } catch (IOException e) {
-      throw new SchemaValidationException(
-          "Schemas not proper JSON in mappingCompatible", e);
-    }
-
-    JsonNode oldSchemaFields = oldSchema.get("fields");
-    JsonNode newSchemaFields = newSchema.get("fields");
-    for (JsonNode oldSchemaField : oldSchemaFields) {
-      String oldSchemaFieldName = oldSchemaField.get("name").getTextValue();
-      for (JsonNode newSchemaField : newSchemaFields) {
-        if (oldSchemaFieldName
-            .equals(newSchemaField.get("name").getTextValue())) {
-          if (!oldSchemaField.get("mapping").equals(
-              newSchemaField.get("mapping"))) {
-            return false;
-          }
+  private static boolean mappingCompatible(EntitySchema oldSchema,
+      EntitySchema newSchema) {
+    for (FieldMapping oldFieldMapping : oldSchema.getColumnMappingDescriptor()
+        .getFieldMappings()) {
+      FieldMapping newFieldMapping = newSchema.getColumnMappingDescriptor()
+          .getFieldMapping(oldFieldMapping.getFieldName());
+      if (newFieldMapping != null) {
+        if (!oldFieldMapping.equals(newFieldMapping)) {
+          return false;
         }
       }
     }
@@ -178,7 +159,7 @@ public class AvroEntitySchema extends EntitySchema {
       ResolvingGrammarGenerator g = new ResolvingGrammarGenerator();
       rootSymbol = g.generate(writer, reader);
     } catch (IOException e) {
-      throw new DatasetException("IOException while generating grammar.", e);
+      throw new DatasetIOException("IOException while generating grammar.", e);
     }
 
     return !hasErrorSymbol(rootSymbol);

@@ -17,16 +17,20 @@ package org.kitesdk.data.spi;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Iterator;
+import java.util.Map;
 import org.apache.avro.Schema;
 import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetIOException;
@@ -69,18 +73,8 @@ public class ColumnMappingParser {
    *          The mapping descriptor as a JSON string
    * @return ColumnMapping
    */
-  public ColumnMapping parse(String mappingDescriptor) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readValue(mappingDescriptor, JsonNode.class);
-      return buildColumnMapping(node);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+  public static ColumnMapping parse(String mappingDescriptor) {
+    return buildColumnMapping(JsonUtil.parse(mappingDescriptor));
   }
 
   /**
@@ -90,18 +84,8 @@ public class ColumnMappingParser {
    *          The File that contains the Mapping Descriptor in JSON format.
    * @return ColumnMapping.
    */
-  public ColumnMapping parse(File file) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readValue(file, JsonNode.class);
-      return buildColumnMapping(node);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+  public static ColumnMapping parse(File file) {
+    return buildColumnMapping(JsonUtil.parse(file));
   }
 
   /**
@@ -112,30 +96,29 @@ public class ColumnMappingParser {
    *          format.
    * @return ColumnMapping.
    */
-  public ColumnMapping parse(InputStream in) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      JsonNode node = mapper.readValue(in, JsonNode.class);
-      return buildColumnMapping(node);
-    } catch (JsonParseException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (JsonMappingException e) {
-      throw new ValidationException("Invalid JSON", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot initialize JSON parser", e);
-    }
+  public static ColumnMapping parse(InputStream in) {
+    return buildColumnMapping(JsonUtil.parse(in));
   }
 
-  public boolean hasEmbeddedColumnMapping(Schema schema) {
+  public static boolean hasEmbeddedColumnMapping(Schema schema) {
     return schema.getJsonProp(MAPPING) != null;
   }
 
-  public ColumnMapping parseFromSchema(Schema schema) {
+  public static Schema removeEmbeddedMapping(Schema schema) {
+    // TODO: avoid embedding mappings in the schema
+    // Avro considers Props read-only and uses an older Jackson version
+    // Parse the Schema as a String because Avro uses com.codehaus.jackson
+    ObjectNode schemaJson = JsonUtil.parse(schema.toString(), ObjectNode.class);
+    schemaJson.remove(MAPPING);
+    return new Schema.Parser().parse(schemaJson.toString());
+  }
+
+  public static ColumnMapping parseFromSchema(Schema schema) {
     // parse the String because Avro uses com.codehaus.jackson
     return parse(schema.getJsonProp(MAPPING).toString());
   }
 
-  public boolean hasEmbeddedFieldMappings(Schema schema) {
+  public static boolean hasEmbeddedFieldMappings(Schema schema) {
     if (Schema.Type.RECORD == schema.getType()) {
       for (Schema.Field field : schema.getFields()) {
         if (field.getJsonProp(MAPPING) != null) {
@@ -146,27 +129,49 @@ public class ColumnMappingParser {
     return false;
   }
 
-  public ColumnMapping parseFromSchemaFields(Schema schema) {
+  public static ColumnMapping parseFromSchemaFields(Schema schema) {
     if (Schema.Type.RECORD == schema.getType()) {
-      ObjectMapper mapper = new ObjectMapper();
       ColumnMapping.Builder builder = new ColumnMapping.Builder();
       for (Schema.Field field : schema.getFields()) {
         if (field.getJsonProp(MAPPING) != null) {
-          try {
-            // parse the String because Avro uses com.codehaus.jackson
-            builder.fieldMapping(parseFieldMapping(field.name(),
-                mapper.readValue(field.getJsonProp(MAPPING).toString(),
-                    JsonNode.class)));
-          } catch (JsonParseException e) {
-            throw new ValidationException("Invalid JSON", e);
-          } catch (JsonMappingException e) {
-            throw new ValidationException("Invalid JSON", e);
-          } catch (IOException e) {
-            throw new DatasetIOException("Cannot initialize JSON parser", e);
-          }
+          // parse the String because Avro uses com.codehaus.jackson
+          builder.fieldMapping(parseFieldMapping(field.name(),
+              JsonUtil.parse(field.getJsonProp(MAPPING).toString())));
         }
       }
       return builder.build();
+    }
+    throw new IllegalArgumentException(
+        "Cannot parse field-level mappings from non-Record");
+  }
+
+  public static Schema embedColumnMapping(Schema schema, ColumnMapping mapping) {
+    // TODO: avoid embedding mappings in the schema
+    // Avro considers Props read-only and uses an older Jackson version
+    // Parse the Schema as a String because Avro uses com.codehaus.jackson
+    ObjectNode schemaJson = JsonUtil.parse(schema.toString(), ObjectNode.class);
+    schemaJson.set(MAPPING, toJson(mapping));
+    return new Schema.Parser().parse(schemaJson.toString());
+  }
+
+  public static Map<Integer, FieldMapping> parseKeyMappingsFromSchemaFields(
+      Schema schema) {
+    Map<Integer, FieldMapping> keyMappings = Maps.newHashMap();
+    if (Schema.Type.RECORD == schema.getType()) {
+      for (Schema.Field field : schema.getFields()) {
+        if (field.getJsonProp(MAPPING) != null) {
+          // parse the String because Avro uses com.codehaus.jackson
+          JsonNode mappingNode = JsonUtil.parse(
+              field.getJsonProp(MAPPING).toString());
+          FieldMapping fm = parseFieldMapping(field.name(), mappingNode);
+          if (FieldMapping.MappingType.KEY == fm.getMappingType() &&
+              mappingNode.has(VALUE)) {
+            Integer index = mappingNode.get(VALUE).asInt();
+            keyMappings.put(index, fm);
+          }
+        }
+      }
+      return keyMappings;
     }
     throw new IllegalArgumentException(
         "Cannot parse field-level mappings from non-Record");
@@ -179,7 +184,7 @@ public class ColumnMappingParser {
    *          The value of the "mapping" node
    * @return FieldMapping
    */
-  public FieldMapping parseFieldMapping(JsonNode mappingNode) {
+  public static FieldMapping parseFieldMapping(JsonNode mappingNode) {
     ValidationException.check(mappingNode.isObject(),
         "A column mapping must be a JSON record");
 
@@ -199,7 +204,7 @@ public class ColumnMappingParser {
    *          The value of the "mapping" node
    * @return FieldMapping
    */
-  public FieldMapping parseFieldMapping(String source, JsonNode mappingNode) {
+  public static FieldMapping parseFieldMapping(String source, JsonNode mappingNode) {
     ValidationException.check(mappingNode.isObject(),
         "A column mapping must be a JSON record");
 
@@ -229,6 +234,9 @@ public class ColumnMappingParser {
       if (values.hasNext()) {
         if ("keyAsColumn".equals(type)) {
           prefix = values.next();
+          if (prefix.isEmpty()) {
+            prefix = null;
+          }
         } else {
           qualifier = values.next();
         }
@@ -275,7 +283,7 @@ public class ColumnMappingParser {
     }
   }
 
-  private ColumnMapping buildColumnMapping(JsonNode node) {
+  private static ColumnMapping buildColumnMapping(JsonNode node) {
     ValidationException.check(node.isArray(),
         "Must be a JSON array of column mappings");
 
@@ -286,7 +294,63 @@ public class ColumnMappingParser {
     return builder.build();
   }
 
-  public static String toString(ColumnMapping mappings, boolean pretty) {
+  private static JsonNode toJson(FieldMapping fm) {
+    ObjectNode fieldMapping = JsonNodeFactory.instance.objectNode();
+    fieldMapping.set(SOURCE, TextNode.valueOf(fm.getFieldName()));
+    switch (fm.getMappingType()) {
+      case KEY:
+        fieldMapping.set(TYPE, TextNode.valueOf("key"));
+        break;
+      case KEY_AS_COLUMN:
+        fieldMapping.set(TYPE, TextNode.valueOf("keyAsColumn"));
+        fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
+        if (fm.getPrefix() != null) {
+          fieldMapping.set(PREFIX, TextNode.valueOf(fm.getPrefix()));
+        }
+        break;
+      case COLUMN:
+        fieldMapping.set(TYPE, TextNode.valueOf("column"));
+        fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
+        fieldMapping.set(QUALIFIER, TextNode.valueOf(fm.getQualifierAsString()));
+        break;
+      case COUNTER:
+        fieldMapping.set(TYPE, TextNode.valueOf("counter"));
+        fieldMapping.set(FAMILY, TextNode.valueOf(fm.getFamilyAsString()));
+        fieldMapping.set(QUALIFIER, TextNode.valueOf(fm.getQualifierAsString()));
+        break;
+      case OCC_VERSION:
+        fieldMapping.set(TYPE, TextNode.valueOf("occVersion"));
+        break;
+      default:
+        throw new ValidationException(
+            "Unknown mapping type: " + fm.getMappingType());
+    }
+    return fieldMapping;
+  }
+
+  public static String toString(FieldMapping mapping) {
+    StringWriter writer = new StringWriter();
+    JsonGenerator gen;
+    try {
+      gen = new JsonFactory().createGenerator(writer);
+      gen.setCodec(new ObjectMapper());
+      gen.writeTree(toJson(mapping));
+      gen.close();
+    } catch (IOException e) {
+      throw new DatasetIOException("Cannot write to JSON generator", e);
+    }
+    return writer.toString();
+  }
+
+  private static JsonNode toJson(ColumnMapping mapping) {
+    ArrayNode mappingJson = JsonNodeFactory.instance.arrayNode();
+    for (FieldMapping fm : mapping.getFieldMappings()) {
+      mappingJson.add(toJson(fm));
+    }
+    return mappingJson;
+  }
+
+  public static String toString(ColumnMapping mapping, boolean pretty) {
     StringWriter writer = new StringWriter();
     JsonGenerator gen;
     try {
@@ -294,41 +358,8 @@ public class ColumnMappingParser {
       if (pretty) {
         gen.useDefaultPrettyPrinter();
       }
-      gen.writeStartArray();
-      for (FieldMapping fm : mappings.getFieldMappings()) {
-        gen.writeStartObject();
-        gen.writeStringField(SOURCE, fm.getFieldName());
-        switch (fm.getMappingType()) {
-          case KEY:
-            gen.writeStringField(TYPE, "key");
-            break;
-          case KEY_AS_COLUMN:
-            gen.writeStringField(TYPE, "keyAsColumn");
-            gen.writeStringField(FAMILY, fm.getFamilyAsString());
-            if (fm.getPrefix() != null) {
-              gen.writeStringField(PREFIX, fm.getPrefix());
-            }
-            break;
-          case COLUMN:
-            gen.writeStringField(TYPE, "column");
-            gen.writeStringField(FAMILY, fm.getFamilyAsString());
-            gen.writeStringField(QUALIFIER, fm.getQualifierAsString());
-            break;
-          case COUNTER:
-            gen.writeStringField(TYPE, "counter");
-            gen.writeStringField(FAMILY, fm.getFamilyAsString());
-            gen.writeStringField(QUALIFIER, fm.getQualifierAsString());
-            break;
-          case OCC_VERSION:
-            gen.writeStringField(TYPE, "occVersion");
-            break;
-          default:
-            throw new ValidationException(
-                "Unknown mapping type: " + fm.getMappingType());
-        }
-        gen.writeEndObject();
-      }
-      gen.writeEndArray();
+      gen.setCodec(new ObjectMapper());
+      gen.writeTree(toJson(mapping));
       gen.close();
     } catch (IOException e) {
       throw new DatasetIOException("Cannot write to JSON generator", e);

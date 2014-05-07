@@ -41,9 +41,6 @@ import org.apache.avro.io.Encoder;
 /**
  * Avro implementation of the KeySerDe interface. This will serialize Keys and
  * PartialKeys to a special ordered memcmp-able avro encoding.
- * 
- * @param <K>
- *          The StorageKey type.
  */
 public class AvroKeySerDe implements KeySerDe {
 

@@ -1,0 +1,10 @@
+[
+  { "source": "part1", "type": "column", "value": "alt:part1" },
+  { "source": "field1", "type": "column", "value": "alt:field1" },
+  { "source": "field2", "type": "column", "value": "alt:field2" },
+  { "source": "enum", "type": "column", "value": "alt:enum" },
+  { "source": "field3", "type": "keyAsColumn", "value": "altstring:" },
+  { "source": "field4", "type": "column", "value": "alt:field4" },
+  { "source": "field5", "type": "column", "value": "alt:field5" },
+  { "source": "version", "type": "counter", "value": "alt:counter" }
+]

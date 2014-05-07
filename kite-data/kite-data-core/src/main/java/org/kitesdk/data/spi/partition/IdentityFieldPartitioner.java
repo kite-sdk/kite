@@ -28,9 +28,14 @@ import com.google.common.base.Objects;
 @Immutable
 public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartitioner<S, S> {
 
-  public IdentityFieldPartitioner(String sourceName, String name, Class<S> type,
-                                  int buckets) {
-    super(sourceName, name, type, type, buckets);
+  public IdentityFieldPartitioner(String sourceName, Class<S> type, int buckets) {
+    this(sourceName, null, type, buckets);
+  }
+
+  public IdentityFieldPartitioner(String sourceName, @Nullable String name,
+                                  Class<S> type, int buckets) {
+    super(sourceName, (name == null ? sourceName + "_copy" : name),
+        type, type, buckets);
   }
 
   @Override
@@ -60,6 +65,11 @@ public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartiti
   @Override
   public Predicate<S> projectStrict(Predicate<S> predicate) {
     return predicate;
+  }
+
+  @Override
+  public Class<? extends S> getType(Class<? extends S> sourceType) {
+    return sourceType;
   }
 
   @Override

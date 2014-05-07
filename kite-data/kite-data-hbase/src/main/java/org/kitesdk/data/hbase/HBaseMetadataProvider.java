@@ -16,28 +16,27 @@
 package org.kitesdk.data.hbase;
 
 import com.google.common.base.Preconditions;
-import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.DatasetIOException;
-import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.MetadataProviderException;
-import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.SchemaNotFoundException;
-import org.kitesdk.data.hbase.avro.AvroEntitySchema;
-import org.kitesdk.data.hbase.avro.AvroKeyEntitySchemaParser;
-import org.kitesdk.data.hbase.impl.Constants;
-import org.kitesdk.data.hbase.impl.EntitySchema;
-import org.kitesdk.data.hbase.impl.SchemaManager;
-import org.kitesdk.data.impl.Accessor;
-import org.kitesdk.data.spi.AbstractMetadataProvider;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Set;
 
+import org.apache.avro.Schema;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.DatasetNotFoundException;
+import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.spi.ColumnMappingParser;
+import org.kitesdk.data.hbase.avro.AvroEntitySchema;
+import org.kitesdk.data.hbase.impl.Constants;
+import org.kitesdk.data.hbase.impl.EntitySchema;
+import org.kitesdk.data.hbase.impl.SchemaManager;
+import org.kitesdk.data.spi.PartitionStrategyParser;
+import org.kitesdk.data.spi.AbstractMetadataProvider;
 import org.kitesdk.data.spi.Compatibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +61,8 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
     Compatibility.checkAndWarn(
         HBaseMetadataProvider.getEntityName(name),
         descriptor.getSchema());
+    Preconditions.checkArgument(descriptor.isColumnMapped(),
+        "Cannot create dataset %s: missing column mapping", name);
 
     try {
       String managedSchemaName = "managed_schemas"; // TODO: allow table to be specified
@@ -69,24 +70,23 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
         HTableDescriptor table = new HTableDescriptor(managedSchemaName);
         table.addFamily(new HColumnDescriptor("meta"));
         table.addFamily(new HColumnDescriptor("schema"));
-        table.addFamily(new HColumnDescriptor("_s"));
+        table.addFamily(new HColumnDescriptor(Constants.SYS_COL_FAMILY));
         hbaseAdmin.createTable(table);
       }
     } catch (IOException e) {
-      throw new DatasetException(e);
+      throw new DatasetIOException("Cannot open schema table", e);
     }
 
-    String entitySchemaString = descriptor.getSchema().toString(true);
-
-    AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
-    AvroEntitySchema entitySchema = parser.parseEntitySchema(entitySchemaString);
+    Schema schema = getEmbeddedSchema(descriptor);
+    String entitySchemaString = schema.toString(true);
+    AvroEntitySchema entitySchema = new AvroEntitySchema(
+        schema, entitySchemaString, descriptor.getColumnMapping());
 
     String tableName = getTableName(name);
     String entityName = getEntityName(name);
 
     schemaManager.refreshManagedSchemaCache(tableName, entityName);
-    schemaManager.createSchema(tableName, entityName,
-        entitySchemaString,
+    schemaManager.createSchema(tableName, entityName, entitySchemaString,
         "org.kitesdk.data.hbase.avro.AvroKeyEntitySchemaParser",
         "org.kitesdk.data.hbase.avro.AvroKeySerDe",
         "org.kitesdk.data.hbase.avro.AvroEntitySerDe");
@@ -96,12 +96,14 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
         HTableDescriptor desc = new HTableDescriptor(tableName);
         desc.addFamily(new HColumnDescriptor(Constants.SYS_COL_FAMILY));
         desc.addFamily(new HColumnDescriptor(Constants.OBSERVABLE_COL_FAMILY));
-        for (String columnFamily : entitySchema.getRequiredColumnFamilies()) {
+        for (String columnFamily : entitySchema.getColumnMappingDescriptor()
+            .getRequiredColumnFamilies()) {
           desc.addFamily(new HColumnDescriptor(columnFamily));
         }
         hbaseAdmin.createTable(desc);
       } else {
-        Set<String> familiesToAdd = entitySchema.getRequiredColumnFamilies();
+        Set<String> familiesToAdd = entitySchema.getColumnMappingDescriptor()
+            .getRequiredColumnFamilies();
         familiesToAdd.add(new String(Constants.SYS_COL_FAMILY));
         familiesToAdd.add(new String(Constants.OBSERVABLE_COL_FAMILY));
         HTableDescriptor desc = hbaseAdmin.getTableDescriptor(tableName
@@ -124,9 +126,9 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
         }
       }
     } catch (IOException e) {
-      throw new DatasetException(e);
+      throw new DatasetIOException("Cannot prepare table: " + name, e);
     }
-    return withPartitionStrategy(descriptor);
+    return getDatasetDescriptor(schema, descriptor.getLocation());
   }
 
   @Override
@@ -136,19 +138,25 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
     Compatibility.checkAndWarn(
         HBaseMetadataProvider.getEntityName(name),
         descriptor.getSchema());
+    Preconditions.checkArgument(descriptor.isColumnMapped(),
+        "Cannot update dataset %s: missing column mapping", name);
 
     String tableName = getTableName(name);
     String entityName = getEntityName(name);
     schemaManager.refreshManagedSchemaCache(tableName, entityName);
-    String schemaString = descriptor.getSchema().toString();
-    AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
-    EntitySchema entitySchema = parser.parseEntitySchema(schemaString);
+
+    Schema newSchema = getEmbeddedSchema(descriptor);
+
+    String schemaString = newSchema.toString(true);
+    EntitySchema entitySchema = new AvroEntitySchema(
+        newSchema, schemaString, descriptor.getColumnMapping());
+
     if (!schemaManager.hasSchemaVersion(tableName, entityName, entitySchema)) {
       schemaManager.migrateSchema(tableName, entityName, schemaString);
     } else {
       logger.info("Schema hasn't changed, not migrating: (" + name + ")");
     }
-    return withPartitionStrategy(descriptor);
+    return getDatasetDescriptor(newSchema, descriptor.getLocation());
   }
 
   @Override
@@ -160,7 +168,10 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
     }
     String tableName = getTableName(name);
     String entityName = getEntityName(name);
-    return getDatasetDescriptor(schemaManager.getEntitySchema(tableName, entityName).getRawSchema());
+    return new DatasetDescriptor.Builder()
+        .schemaLiteral(schemaManager.getEntitySchema(tableName, entityName)
+            .getRawSchema())
+        .build();
   }
 
   @Override
@@ -173,20 +184,17 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
     } catch (DatasetNotFoundException e) {
       return false;
     }
+    Preconditions.checkState(descriptor.isColumnMapped(),
+        "[BUG] Existing descriptor has no column mapping");
 
     String tableName = getTableName(name);
     String entityName = getEntityName(name);
 
     schemaManager.deleteSchema(tableName, entityName);
 
-    String entitySchemaString = descriptor.getSchema().toString(true);
-
-    AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
-    AvroEntitySchema entitySchema = parser.parseEntitySchema(entitySchemaString);
-
     // TODO: this may delete columns for other entities if they share column families
     // TODO: https://issues.cloudera.org/browse/CDK-145, https://issues.cloudera.org/browse/CDK-146
-    for (String columnFamily : entitySchema.getRequiredColumnFamilies()) {
+    for (String columnFamily : descriptor.getColumnMapping().getRequiredColumnFamilies()) {
       try {
         hbaseAdmin.disableTable(tableName);
         try {
@@ -228,25 +236,26 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
     return name.substring(name.indexOf('.') + 1);
   }
 
-  private static DatasetDescriptor getDatasetDescriptor(String schemaString) {
-    AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
-    PartitionStrategy partitionStrategy = parser.parseKeySchema(schemaString)
-        .getPartitionStrategy();
-    return new DatasetDescriptor.Builder()
-        .schemaLiteral(schemaString)
-        .partitionStrategy(partitionStrategy)
-        .build();
+  private static Schema getEmbeddedSchema(DatasetDescriptor descriptor) {
+    // the SchemaManager stores schemas, so this embeds the column mapping and
+    // partition strategy in the schema. the result is parsed by
+    // AvroKeyEntitySchemaParser
+    Schema schema = descriptor.getSchema();
+    if (descriptor.isColumnMapped()) {
+      schema = ColumnMappingParser
+          .embedColumnMapping(schema, descriptor.getColumnMapping());
+    }
+    if (descriptor.isPartitioned()) {
+      schema = PartitionStrategyParser
+          .embedPartitionStrategy(schema, descriptor.getPartitionStrategy());
+    }
+    return schema;
   }
 
-  // TODO: move the logic of parsing keys to DatasetDescriptor itself
-  private static DatasetDescriptor withPartitionStrategy(DatasetDescriptor descriptor) {
-    AvroKeyEntitySchemaParser parser = new AvroKeyEntitySchemaParser();
-    PartitionStrategy partitionStrategy = parser.parseKeySchema(descriptor.getSchema().toString())
-        .getPartitionStrategy();
+  private static DatasetDescriptor getDatasetDescriptor(Schema schema, URI location) {
     return new DatasetDescriptor.Builder()
-        .schema(descriptor.getSchema())
-        .partitionStrategy(partitionStrategy)
-        .location(descriptor.getLocation())
+        .schema(schema)
+        .location(location)
         .build();
   }
 

@@ -172,6 +172,17 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
   }
 
   /**
+   * <p>
+   * The type of the target field, which is the type of the return value of the
+   * partition function.
+   * </p>
+   * @since 0.8.0
+   */
+  public Class<? extends T> getType(Class<? extends S> sourceType) {
+    return getType();
+  }
+
+  /**
    * Projects a source-data constraint {@link Predicate} into the image of the
    * backing partition function.
    *

@@ -18,7 +18,7 @@ package org.kitesdk.data.hbase.avro;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.SchemaNotFoundException;
-import org.kitesdk.data.SchemaValidationException;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.hbase.impl.BaseEntityMapper;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import org.kitesdk.data.hbase.impl.EntitySchema;
@@ -52,7 +52,6 @@ import org.slf4j.LoggerFactory;
  * version of each row, and uses that schema to properly deserialize the row.
  * Writing to tables is tied to a single schema.
  * 
- * @param <KEY>
  * @param <ENTITY>
  */
 public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
@@ -303,24 +302,6 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
    * metadata in each row to a ManagedSchemaEntityVersion record.
    */
   private void initializeEntityVersionEntityMapper() {
-    // Create a special key serde that doesn't try to serialize/deserialize
-    // the key for the ManagedSchemaEntityVersion record. This schema
-    // doesn't have any key mapping types since it's added to every table.
-    KeySerDe keySerDe = new KeySerDe() {
-      @Override
-      public byte[] serialize(PartitionKey partitionKey) {
-        return new byte[] { (byte) 0 }; // single 0 byte since HBase 2 requires length > 0
-      }
-      @Override
-      public byte[] serialize(Object... keyPartValues) {
-        return new byte[] { (byte) 0 }; // single 0 byte since HBase 2 requires length > 0
-      }
-      @Override
-      public PartitionKey deserialize(byte[] keyBytes) {
-        return null;
-      }
-    };
-    
     AvroEntitySchema avroEntitySchema = schemaParser
         .parseEntitySchema(managedSchemaEntityVersionSchema);
     avroEntitySchema = AvroUtils.mergeSpecificStringTypes(
@@ -330,7 +311,7 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
     AvroEntitySerDe<ManagedSchemaEntityVersion> entitySerDe = new AvroEntitySerDe<ManagedSchemaEntityVersion>(
         entityComposer, avroEntitySchema, avroEntitySchema, true);
     this.managedSchemaEntityVersionEntityMapper = new BaseEntityMapper<ManagedSchemaEntityVersion>(
-        keySchema, avroEntitySchema, keySerDe, entitySerDe);
+        avroEntitySchema, entitySerDe);
   }
 
   /**
@@ -401,7 +382,7 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
     try {
       avroRecordSchemaJson = mapper.readValue(rawSchema, JsonNode.class);
     } catch (IOException e) {
-      throw new SchemaValidationException(
+      throw new ValidationException(
           "Could not parse the avro record as JSON.", e);
     }
     return avroRecordSchemaJson;

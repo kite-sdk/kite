@@ -223,8 +223,7 @@ public class AvroUtils {
         keySchema.getAvroSchema().getDoc(), keySchema.getAvroSchema()
             .getNamespace(), keySchema.getAvroSchema().isError());
     schema.setFields(fields);
-    return new AvroKeySchema(schema, keySchema.getRawSchema(),
-        keySchema.getPartitionStrategy());
+    return new AvroKeySchema(schema, keySchema.getPartitionStrategy());
   }
 
   private static Schema.Field copy(Schema.Field f) {
@@ -251,8 +250,8 @@ public class AvroUtils {
     } catch (NoSuchFieldException e) {
       throw new DatasetException(e);
     }
-    return new AvroEntitySchema(entitySchema.getTables(), schemaField,
-        entitySchema.getRawSchema(), entitySchema.getFieldMappings());
+    return new AvroEntitySchema(schemaField,
+        entitySchema.getRawSchema(), entitySchema.getColumnMappingDescriptor());
   }
 
   /**

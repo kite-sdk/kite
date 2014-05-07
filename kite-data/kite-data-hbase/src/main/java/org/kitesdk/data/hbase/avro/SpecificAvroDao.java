@@ -17,7 +17,7 @@ package org.kitesdk.data.hbase.avro;
 
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.SchemaNotFoundException;
-import org.kitesdk.data.SchemaValidationException;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.hbase.impl.BaseDao;
 import org.kitesdk.data.hbase.impl.BaseEntityMapper;
 import org.kitesdk.data.hbase.impl.CompositeBaseDao;
@@ -44,8 +44,6 @@ import org.slf4j.LoggerFactory;
  * underlying key record type, and the entity type are SpecificRecords. This Dao
  * allows us to persist and fetch these SpecificRecords to and from HBase.
  * 
- * @param <K>
- *          The StorageKey's underlying record type.
  * @param <E>
  *          The entity type.
  */
@@ -150,7 +148,7 @@ public class SpecificAvroDao<E extends SpecificRecord> extends BaseDao<E> {
    *          The class of the SpecificRecord this DAO will persist and fetch.
    * @return The CompositeDao instance.
    * @throws SchemaNotFoundException
-   * @throws SchemaValidationException
+   * @throws ValidationException
    */
   @SuppressWarnings("unchecked")
   public static <E extends SpecificRecord, S extends SpecificRecord> Dao<E> buildCompositeDao(
@@ -194,7 +192,7 @@ public class SpecificAvroDao<E extends SpecificRecord> extends BaseDao<E> {
    *          dao will fetch.
    * @return The CompositeDao instance.
    * @throws SchemaNotFoundException
-   * @throws SchemaValidationException
+   * @throws ValidationException
    */
   @SuppressWarnings("unchecked")
   public static <K extends SpecificRecord, S extends SpecificRecord> Dao<
@@ -243,7 +241,7 @@ public class SpecificAvroDao<E extends SpecificRecord> extends BaseDao<E> {
    *          The class of the SpecificRecord this DAO will persist and fetch.
    * @return The CompositeDao instance.
    * @throws SchemaNotFoundException
-   * @throws SchemaValidationException
+   * @throws ValidationException
    */
   public static <E extends SpecificRecord, S extends SpecificRecord> Dao<E> buildCompositeDaoWithInputStream(
       HTablePool tablePool, String tableName,

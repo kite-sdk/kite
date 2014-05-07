@@ -15,21 +15,20 @@
  */
 package org.kitesdk.data.hbase.impl;
 
-import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.PartitionKey;
-import org.kitesdk.data.hbase.impl.EntitySchema.FieldMapping;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
+import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.FieldMapping;
+import org.kitesdk.data.FieldMapping.MappingType;
+import org.kitesdk.data.PartitionKey;
 
 /**
  * A base implementation of EntityMapper, that uses the provided EntitySerDe and
- * KeySerDe to map entities to HBase puts, and HBase results to
- * Entities
+ * KeySerDe to map entities to HBase puts, and HBase results to Entities
  * 
  * @param <E>
  *          The entity type
@@ -40,6 +39,10 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
   private final EntitySchema entitySchema;
   private final KeySerDe keySerDe;
   private final EntitySerDe<E> entitySerDe;
+
+  public BaseEntityMapper(EntitySchema entitySchema, EntitySerDe<E> entitySerDe) {
+    this(null, entitySchema, null, entitySerDe);
+  }
 
   public BaseEntityMapper(KeySchema keySchema, EntitySchema entitySchema,
       KeySerDe keySerDe, EntitySerDe<E> entitySerDe) {
@@ -52,13 +55,30 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
   @Override
   public E mapToEntity(Result result) {
     boolean allNull = true;
-    PartitionKey partitionKey = keySerDe.deserialize(result.getRow());
+    PartitionKey partitionKey;
+    if (keySerDe == null) {
+      partitionKey = null;
+    } else {
+      partitionKey = keySerDe.deserialize(result.getRow());
+    }
     EntityComposer.Builder<E> builder = getEntityComposer().getBuilder();
-    for (FieldMapping fieldMapping : entitySchema.getFieldMappings()) {
+    int currentKeyPos = 0;
+    for (FieldMapping fieldMapping : entitySchema.getColumnMappingDescriptor()
+        .getFieldMappings()) {
       Object fieldValue;
       if (fieldMapping.getMappingType() == MappingType.KEY) {
-        fieldValue = partitionKey.get(Integer.parseInt(fieldMapping
-            .getMappingValue()));
+        if (partitionKey != null) {
+          // KEY field mappings are always identity mappers, so just get the
+          // value from the key.
+          fieldValue = partitionKey.get(currentKeyPos);
+          currentKeyPos++;
+        } else {
+          // TODO: This should never happen. The partitionKey is null only when
+          // a keySerDe hasn't been set, which indicates we have an entity
+          // without a key. That means there should be no KEY mapping types, but
+          // we somehow got here. Should we throw an exception here?
+          fieldValue = null;
+        }
       } else {
         fieldValue = entitySerDe.deserialize(fieldMapping, result);
       }
@@ -70,9 +90,6 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
         if (fieldMapping.getMappingType() != MappingType.KEY) {
           allNull = false;
         }
-      } else if (fieldMapping.getDefaultValue() != null) {
-        builder
-            .put(fieldMapping.getFieldName(), fieldMapping.getDefaultValue());
       }
     }
 
@@ -101,12 +118,16 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
   @Override
   public PutAction mapFromEntity(E entity) {
     List<PutAction> putActionList = new ArrayList<PutAction>();
-    List<Object> keyParts = entitySerDe.getEntityComposer()
-        .getPartitionKeyParts(entity);
-    PartitionKey partitionKey = keySchema.getPartitionStrategy().partitionKey(
-        keyParts.toArray());
-    byte[] keyBytes = keySerDe.serialize(partitionKey);
-    for (FieldMapping fieldMapping : entitySchema.getFieldMappings()) {
+    byte[] keyBytes;
+    if (keySchema == null || keySerDe == null) {
+      keyBytes = new byte[] { (byte) 0 };
+    } else {
+      PartitionKey partitionKey = keySchema.getPartitionStrategy()
+          .partitionKeyForEntity(entity);
+      keyBytes = keySerDe.serialize(partitionKey);
+    }
+    for (FieldMapping fieldMapping : entitySchema.getColumnMappingDescriptor()
+        .getFieldMappings()) {
       if (fieldMapping.getMappingType() == MappingType.KEY) {
         continue;
       }
@@ -124,7 +145,8 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
   @Override
   public Increment mapToIncrement(PartitionKey key, String fieldName,
       long amount) {
-    FieldMapping fieldMapping = entitySchema.getFieldMapping(fieldName);
+    FieldMapping fieldMapping = entitySchema.getColumnMappingDescriptor()
+        .getFieldMapping(fieldName);
     if (fieldMapping == null) {
       throw new DatasetException("Unknown field in the schema: "
           + fieldName);
@@ -134,7 +156,12 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
           + fieldName);
     }
 
-    byte[] keyBytes = keySerDe.serialize(key);
+    byte[] keyBytes;
+    if (keySerDe == null) {
+      keyBytes = new byte[] { (byte) 0 };
+    } else {
+      keyBytes = keySerDe.serialize(key);
+    }
     Increment increment = new Increment(keyBytes);
     increment.addColumn(fieldMapping.getFamily(), fieldMapping.getQualifier(),
         amount);
@@ -143,7 +170,8 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
 
   @Override
   public long mapFromIncrementResult(Result result, String fieldName) {
-    FieldMapping fieldMapping = entitySchema.getFieldMapping(fieldName);
+    FieldMapping fieldMapping = entitySchema.getColumnMappingDescriptor()
+        .getFieldMapping(fieldName);
     if (fieldMapping == null) {
       throw new DatasetException("Unknown field in the schema: "
           + fieldName);
@@ -157,12 +185,13 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
 
   @Override
   public Set<String> getRequiredColumns() {
-    return entitySchema.getRequiredColumns();
+    return entitySchema.getColumnMappingDescriptor().getRequiredColumns();
   }
 
   @Override
   public Set<String> getRequiredColumnFamilies() {
-    return entitySchema.getRequiredColumnFamilies();
+    return entitySchema.getColumnMappingDescriptor()
+        .getRequiredColumnFamilies();
   }
 
   @Override
