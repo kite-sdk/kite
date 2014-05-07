@@ -31,6 +31,8 @@ import org.apache.hadoop.mapreduce.Job;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.View;
+import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 
@@ -52,6 +54,17 @@ class DatasetTarget<E> implements MapReduceTarget {
         !topLevelDataset.getDescriptor().getLocation().equals(dataset.getDescriptor().getLocation())) {
       formatBundle.set(DatasetKeyOutputFormat.KITE_PARTITION_DIR, dataset.getDescriptor().getLocation().toString());
     }
+  }
+
+  public DatasetTarget(View<E> view) {
+    this.formatBundle = FormatBundle.forOutput(DatasetKeyOutputFormat.class);
+    formatBundle.set(DatasetKeyOutputFormat.KITE_REPOSITORY_URI, getRepositoryUri(view.getDataset()));
+    formatBundle.set(DatasetKeyOutputFormat.KITE_DATASET_NAME, view.getDataset().getName());
+
+    Configuration conf = new Configuration();
+    DatasetKeyOutputFormat.setView(conf, view);
+    formatBundle.set(DatasetKeyOutputFormat.KITE_CONSTRAINTS,
+        conf.get(DatasetKeyOutputFormat.KITE_CONSTRAINTS));
   }
 
   private String getRepositoryUri(Dataset<E> dataset) {

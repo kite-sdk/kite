@@ -58,19 +58,22 @@ public class CrunchDatasets {
   /**
    * Expose the given {@link Dataset} as a Crunch {@link Target}.
    *
-   * Only the FileSystem {@code Dataset} implementation is supported and the
-   * file format must be {@code Formats.PARQUET} or {@code Formats.AVRO}. In
-   * addition, the given {@code Dataset} must not be partitioned,
-   * <strong>or</strong> must be a leaf partition in the partition hierarchy.
-   *
-   * <strong>The {@code Target} returned by this method will not write to
-   * sub-partitions.</strong>
-   *
    * @param dataset the dataset to write to
-   * @return the {@link Target}, or <code>null</code> if the dataset is not
-   * filesystem-based.
+   * @param <E>     the type of entity stored in the dataset
+   * @return a {@link Target} for the dataset
    */
   public static <E> Target asTarget(Dataset<E> dataset) {
     return new DatasetTarget<E>(dataset);
+  }
+
+  /**
+   * Expose the given {@link View} as a Crunch {@link Target}.
+   *
+   * @param view the view to write to
+   * @param <E>  the type of entity stored in the view
+   * @return a {@link Target} for the view
+   */
+  public static <E> Target asTarget(View<E> view) {
+    return new DatasetTarget<E>(view);
   }
 }

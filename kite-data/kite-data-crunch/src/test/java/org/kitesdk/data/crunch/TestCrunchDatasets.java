@@ -225,4 +225,29 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     Assert.assertEquals(1, datasetSize(outputDataset));
   }
+
+  @Test
+  public void testTargetView() throws IOException {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", 2).build();
+
+    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+
+    writeTestUsers(inputDataset, 10);
+
+    View<Record> inputView = inputDataset.with("username", "test-0");
+    Assert.assertEquals(1, datasetSize(inputView));
+    View<Record> outputView = outputDataset.with("username", "test-0");
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputView, GenericData.Record.class));
+    pipeline.write(data, CrunchDatasets.asTarget(outputView), Target.WriteMode.APPEND);
+    pipeline.run();
+
+    Assert.assertEquals(1, datasetSize(outputDataset));
+  }
 }
