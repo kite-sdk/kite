@@ -16,6 +16,7 @@
 package org.kitesdk.data.hbase;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
@@ -120,6 +121,8 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
     // Return a dataset writer that checks on write that an entity is within the
     // range of the view
     return new DatasetWriter<E>() {
+      private Predicate<StorageKey> keyPredicate = constraints.toKeyPredicate();
+
       @Override
       public void open() {
         wrappedWriter.open();
@@ -128,7 +131,7 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
       @Override
       public void write(E entity) {
         StorageKey key = partitionStratKey.reuseFor(entity);
-        if (!constraints.toKeyPredicate().apply(key)) {
+        if (!keyPredicate.apply(key)) {
           throw new IllegalArgumentException("View does not contain entity: " + entity);
         }
         wrappedWriter.write(entity);
