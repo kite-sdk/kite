@@ -54,7 +54,7 @@ public class TestPartitionStrategy {
   @Test
   public void test() throws Exception {
     final PartitionStrategy p = new PartitionStrategy.Builder()
-        .identity("month", "month_ordinal", Integer.class, 12)
+        .identity("month", "month_ordinal", 12)
         .hash("userId", 7)
         .build();
 
@@ -84,8 +84,8 @@ public class TestPartitionStrategy {
       @Override
       public void run() {
         new PartitionStrategy.Builder()
-            .identity("number", "num", Integer.class, 48)
-            .identity("number2", "num", Integer.class, 48)
+            .identity("number", "num")
+            .identity("number2", "num")
             .build();
       }
     });

@@ -110,13 +110,13 @@ public class TestDatasetDescriptor {
 
     PartitionStrategy expected = new PartitionStrategy.Builder()
         .hash("username", 16)
-        .identity("username", "u", Object.class, -1)
+        .identity("username", "u")
         .build();
     Assert.assertEquals(expected, descriptor.getPartitionStrategy());
 
     // check that strategies set on the builder override those in the schema
     expected = new PartitionStrategy.Builder()
-        .identity("real_name", "n", Object.class, -1)
+        .identity("real_name", "n")
         .build();
     DatasetDescriptor override = new DatasetDescriptor.Builder()
         .schema(schema)
@@ -249,7 +249,7 @@ public class TestDatasetDescriptor {
         .schema(USER_SCHEMA)
         .partitionStrategy(new PartitionStrategy.Builder()
             .hash("id", 16)
-            .identity("id", "id_copy", Long.class, -1)
+            .identity("id")
             .build())
         .columnMapping(new ColumnMapping.Builder()
             .key("id")
@@ -469,8 +469,8 @@ public class TestDatasetDescriptor {
         "  ]" +
         "}");
     PartitionStrategy expected = new PartitionStrategy.Builder()
-        .identity("username", Object.class, -1)
-        .identity("id", Object.class, -1)
+        .identity("username")
+        .identity("id")
         .build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(schema)

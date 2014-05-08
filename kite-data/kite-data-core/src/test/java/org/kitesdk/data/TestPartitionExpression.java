@@ -109,6 +109,7 @@ public class TestPartitionExpression {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testIntIdentity() {
     PartitionStrategy intIdStrategy = new PartitionStrategy.Builder()
         .identity("intField", "intField_copy", Integer.class, -1)
