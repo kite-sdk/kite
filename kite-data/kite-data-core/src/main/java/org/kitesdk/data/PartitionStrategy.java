@@ -120,6 +120,9 @@ public class PartitionStrategy {
   public int getCardinality() {
     int cardinality = 1;
     for (FieldPartitioner fieldPartitioner : fieldPartitioners) {
+      if (fieldPartitioner.getCardinality() == FieldPartitioner.UNKNOWN_CARDINALITY) {
+        return FieldPartitioner.UNKNOWN_CARDINALITY;
+      }
       cardinality *= fieldPartitioner.getCardinality();
     }
     return cardinality;
@@ -302,6 +305,98 @@ public class PartitionStrategy {
     }
 
     /**
+     * Configure an identity partitioner for a given type with a cardinality
+     * hint of {@code buckets} size.
+     *
+     * The partition name is the source field name with a "_copy" suffix.
+     * For example, identity("color", String.class, 34) creates "color_copy"
+     * partitions.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @return An instance of the builder for method chaining.
+     * @see IdentityFieldPartitioner
+     * @since 0.14.0
+     */
+    @SuppressWarnings("unchecked")
+    public Builder identity(String sourceName) {
+      add(new IdentityFieldPartitioner(sourceName, Object.class));
+      return this;
+    }
+
+    /**
+     * Configure an identity partitioner for a given type with a cardinality hint of
+     * {@code buckets} size. If name is null, the partition name will be the source
+     * field name with a "_copy" suffix. For example, identity("color", null, ...)
+     * will create "color_copy" partitions.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param name
+     *          A name for the partition field
+     * @return An instance of the builder for method chaining.
+     * @see IdentityFieldPartitioner
+     * @since 0.14.0
+     */
+    @SuppressWarnings("unchecked")
+    public Builder identity(String sourceName, String name) {
+      add(new IdentityFieldPartitioner(sourceName, name, Object.class));
+      return this;
+    }
+
+    /**
+     * Configure an identity partitioner for a given type with a cardinality
+     * hint of {@code buckets} size.
+     *
+     * The partition name is the source field name with a "_copy" suffix.
+     * For example, identity("color", String.class, 34) creates "color_copy"
+     * partitions.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param cardinalityHint
+     *          A hint as to the number of partitions that will be created (i.e.
+     *          the number of discrete values for the field {@code name} in the
+     *          data).
+     * @return An instance of the builder for method chaining.
+     * @see IdentityFieldPartitioner
+     * @since 0.14.0
+     */
+    @SuppressWarnings("unchecked")
+    public Builder identity(String sourceName, int cardinalityHint) {
+      add(new IdentityFieldPartitioner(sourceName, Object.class, cardinalityHint));
+      return this;
+    }
+
+    /**
+     * Configure an identity partitioner for a given type with a cardinality hint of
+     * {@code buckets} size. If name is null, the partition name will be the source
+     * field name with a "_copy" suffix. For example, identity("color", null, ...)
+     * will create "color_copy" partitions.
+     *
+     * @param sourceName
+     *          The entity field name from which to get values to be
+     *          partitioned.
+     * @param name
+     *          A name for the partition field
+     * @param cardinalityHint
+     *          A hint as to the number of partitions that will be created (i.e.
+     *          the number of discrete values for the field {@code name} in the
+     *          data).
+     * @return An instance of the builder for method chaining.
+     * @see IdentityFieldPartitioner
+     * @since 0.14.0
+     */
+    @SuppressWarnings("unchecked")
+    public Builder identity(String sourceName, String name, int cardinalityHint) {
+      add(new IdentityFieldPartitioner(sourceName, name, Object.class, cardinalityHint));
+      return this;
+    }
+
+    /**
      * Configure an identity partitioner for a given type with a cardinality 
      * hint of {@code buckets} size.
      *
@@ -321,7 +416,9 @@ public class PartitionStrategy {
      * @return An instance of the builder for method chaining.
      * @see IdentityFieldPartitioner
      * @since 0.8.0
+     * @deprecated will be removed  in 0.15.0
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public <S> Builder identity(String sourceName, Class<S> type, int buckets) {
       add(new IdentityFieldPartitioner(sourceName, type, buckets));
@@ -348,7 +445,9 @@ public class PartitionStrategy {
      * @return An instance of the builder for method chaining.
      * @see IdentityFieldPartitioner
      * @since 0.8.0
+     * @deprecated will be removed in 0.15.0
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public <S> Builder identity(String sourceName, String name, Class<S> type,
                                 int buckets) {

@@ -18,6 +18,7 @@ package org.kitesdk.data.spi.filesystem;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.PartitionListener;
 import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.ReaderWriterState;
@@ -38,6 +39,8 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   private static final Logger logger = LoggerFactory
     .getLogger(PartitionedDatasetWriter.class);
 
+  private static final int MAX_FILE_WRITERS = 10;
+
   private FileSystemView<E> view;
   private int maxWriters;
 
@@ -55,7 +58,11 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
 
     this.view = view;
     this.partitionStrategy = descriptor.getPartitionStrategy();
-    this.maxWriters = Math.min(10, partitionStrategy.getCardinality());
+    if (partitionStrategy.getCardinality() == FieldPartitioner.UNKNOWN_CARDINALITY) {
+      this.maxWriters = MAX_FILE_WRITERS;
+    } else {
+      this.maxWriters = Math.min(MAX_FILE_WRITERS, partitionStrategy.getCardinality());
+    }
     this.state = ReaderWriterState.NEW;
     this.reusedKey = new StorageKey(partitionStrategy);
   }

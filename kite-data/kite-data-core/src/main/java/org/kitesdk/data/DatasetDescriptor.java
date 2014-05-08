@@ -928,7 +928,7 @@ public class DatasetDescriptor {
       Map<Integer, FieldMapping> keyMappings) {
     PartitionStrategy.Builder builder = new PartitionStrategy.Builder();
     for (Integer index : new TreeSet<Integer>(keyMappings.keySet())) {
-      builder.identity(keyMappings.get(index).getFieldName(), Object.class, -1);
+      builder.identity(keyMappings.get(index).getFieldName());
     }
     return builder.build();
   }

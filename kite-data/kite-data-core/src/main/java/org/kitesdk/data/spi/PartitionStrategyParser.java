@@ -17,8 +17,6 @@ package org.kitesdk.data.spi;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -154,7 +152,7 @@ public class PartitionStrategyParser {
 
       // Note: string range, int range, and list partitioners are not supported
       if (type.equals("identity")) {
-        builder.identity(source, name, Object.class, -1);
+        builder.identity(source, name);
       } else if (type.equals("hash")) {
         ValidationException.check(fieldPartitioner.has(BUCKETS),
             "Hash partitioner %s must have attribute %s",

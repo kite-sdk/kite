@@ -42,14 +42,14 @@ public class TestPartitionStrategyParser {
   public void testIdentity() {
     // right now, the field type is taken from the Schema
     checkParser(new PartitionStrategy.Builder()
-            .identity("username", "id", Object.class, -1)
+            .identity("username", "id")
             .build(),
         "[ {\"type\": \"identity\", " +
             "\"source\": \"username\", " +
             "\"name\": \"id\"} ]"
     );
     checkParser(new PartitionStrategy.Builder()
-            .identity("username", "username_copy", Object.class, -1)
+            .identity("username", "username_copy")
             .build(),
         "[ {\"type\": \"identity\", \"source\": \"username\"} ]"
     );
@@ -165,7 +165,7 @@ public class TestPartitionStrategyParser {
   public void testMultipleFields() {
     checkParser(new PartitionStrategy.Builder()
             .hash("username", 64)
-            .identity("username", "u", Object.class, -1)
+            .identity("username", "u")
             .year("time")
             .month("time")
             .day("time")
@@ -329,7 +329,7 @@ public class TestPartitionStrategyParser {
   public void testAddEmbeddedPartitionStrategy() {
     PartitionStrategy strategy = new PartitionStrategy.Builder()
         .hash("username", 16)
-        .identity("username", "u", Object.class, -1)
+        .identity("username", "u")
         .build();
     Schema original = new Schema.Parser().parse("{" +
         "  \"type\": \"record\"," +
@@ -350,7 +350,7 @@ public class TestPartitionStrategyParser {
   public void testReplaceEmbeddedPartitionStrategy() {
     PartitionStrategy strategy = new PartitionStrategy.Builder()
         .hash("username", 16)
-        .identity("username", "u", Object.class, -1)
+        .identity("username", "u")
         .build();
     Schema original = new Schema.Parser().parse("{" +
         "  \"type\": \"record\"," +
