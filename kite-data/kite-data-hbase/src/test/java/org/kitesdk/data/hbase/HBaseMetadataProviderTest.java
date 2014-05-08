@@ -55,13 +55,13 @@ public class HBaseMetadataProviderTest {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    Configuration conf = HBaseTestUtils.getMiniCluster().getConf();
+    HTablePool tablePool = HBaseTestUtils.startHBaseAndGetPool();
+
     // managed table should be created by HBaseDatasetRepository
     HBaseTestUtils.util.deleteTable(Bytes.toBytes(managedTableName));
 
-    HTablePool tablePool = new HTablePool(conf, 10);
     SchemaManager schemaManager = new DefaultSchemaManager(tablePool);
-    HBaseAdmin admin = new HBaseAdmin(conf);
+    HBaseAdmin admin = new HBaseAdmin(HBaseTestUtils.getConf());
     provider = new HBaseMetadataProvider(admin, schemaManager);
   }
 
