@@ -21,11 +21,8 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.Resources;
-import java.util.Properties;
 import org.apache.log4j.Level;
 import org.apache.log4j.PropertyConfigurator;
-import org.apache.log4j.spi.Configurator;
 import org.kitesdk.cli.commands.CSVImportCommand;
 import org.kitesdk.cli.commands.CSVSchemaCommand;
 import org.kitesdk.cli.commands.CreateDatasetCommand;
@@ -41,6 +38,9 @@ import org.apache.hadoop.util.ToolRunner;
 import org.kitesdk.cli.commands.ObjectSchemaCommand;
 import org.kitesdk.cli.commands.SchemaCommand;
 import org.kitesdk.cli.commands.ShowRecordsCommand;
+import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.DatasetNotFoundException;
+import org.kitesdk.data.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,6 +141,28 @@ public class Main extends Configured implements Tool {
         console.error("State error", e);
       } else {
         console.error("State error: {}", e.getMessage());
+      }
+      return 1;
+    } catch (ValidationException e) {
+      if (debug) {
+        console.error("Validation error", e);
+      } else {
+        console.error("Validation error: {}", e.getMessage());
+      }
+      return 1;
+    } catch (DatasetNotFoundException e) {
+      if (debug) {
+        console.error("Cannot find dataset", e);
+      } else {
+        // the error message already contains "No such dataset: <name>"
+        console.error(e.getMessage());
+      }
+      return 1;
+    } catch (DatasetIOException e) {
+      if (debug) {
+        console.error("IO error", e);
+      } else {
+        console.error("IO error: {}", e.getMessage());
       }
       return 1;
     } catch (Exception e) {
