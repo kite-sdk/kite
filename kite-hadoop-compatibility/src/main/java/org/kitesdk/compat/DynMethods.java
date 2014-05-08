@@ -177,7 +177,7 @@ public class DynMethods {
     }
 
     public <R> R invoke(Object... args) {
-      return method.invoke(args);
+      return method.invoke(null, args);
     }
   }
 

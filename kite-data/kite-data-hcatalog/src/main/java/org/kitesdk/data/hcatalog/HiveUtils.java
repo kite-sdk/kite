@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.hcatalog;
 
+import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
@@ -315,17 +316,22 @@ class HiveUtils {
   }
 
   static class Converter extends SchemaUtil.SchemaVisitor<TypeInfo> {
+    private static DynMethods.StaticMethod hiveTypeForName =
+        new DynMethods.Builder("getPrimitiveTypeInfo")
+            .impl(TypeInfoFactory.class, String.class)
+            .buildStatic();
+
     static final ImmutableMap<Schema.Type, TypeInfo> TYPE_TO_TYPEINFO =
         ImmutableMap.<Schema.Type, TypeInfo>builder()
-            .put(Schema.Type.BOOLEAN, TypeInfoFactory.booleanTypeInfo)
-            .put(Schema.Type.INT, TypeInfoFactory.intTypeInfo)
-            .put(Schema.Type.LONG, TypeInfoFactory.longTypeInfo)
-            .put(Schema.Type.FLOAT, TypeInfoFactory.floatTypeInfo)
-            .put(Schema.Type.DOUBLE, TypeInfoFactory.doubleTypeInfo)
-            .put(Schema.Type.STRING, TypeInfoFactory.stringTypeInfo)
-            .put(Schema.Type.ENUM, TypeInfoFactory.stringTypeInfo)
-            .put(Schema.Type.BYTES, TypeInfoFactory.binaryTypeInfo)
-            .put(Schema.Type.FIXED, TypeInfoFactory.binaryTypeInfo)
+            .put(Schema.Type.BOOLEAN, hiveTypeForName.<TypeInfo>invoke("boolean"))
+            .put(Schema.Type.INT, hiveTypeForName.<TypeInfo>invoke("int"))
+            .put(Schema.Type.LONG, hiveTypeForName.<TypeInfo>invoke("bigint"))
+            .put(Schema.Type.FLOAT, hiveTypeForName.<TypeInfo>invoke("float"))
+            .put(Schema.Type.DOUBLE, hiveTypeForName.<TypeInfo>invoke("double"))
+            .put(Schema.Type.STRING, hiveTypeForName.<TypeInfo>invoke("string"))
+            .put(Schema.Type.ENUM, hiveTypeForName.<TypeInfo>invoke("string"))
+            .put(Schema.Type.BYTES, hiveTypeForName.<TypeInfo>invoke("binary"))
+            .put(Schema.Type.FIXED, hiveTypeForName.<TypeInfo>invoke("binary"))
             .build();
 
     public TypeInfo record(Schema record, List<String> names, List<TypeInfo> types) {
