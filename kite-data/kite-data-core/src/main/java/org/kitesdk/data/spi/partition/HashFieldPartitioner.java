@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi.partition;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -39,6 +40,8 @@ public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
                               int buckets) {
     super(sourceName, (name == null ? sourceName + "_hash" : name),
         Object.class, Integer.class, buckets);
+    Preconditions.checkArgument(buckets > 0,
+        "Number of hash buckets is negative: %s", buckets);
   }
 
   @Override

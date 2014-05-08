@@ -28,6 +28,15 @@ import com.google.common.base.Objects;
 @Immutable
 public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartitioner<S, S> {
 
+  public IdentityFieldPartitioner(String sourceName, Class<S> type) {
+    this(sourceName, null, type, UNKNOWN_CARDINALITY);
+  }
+
+  public IdentityFieldPartitioner(String sourceName, @Nullable String name,
+                                  Class<S> type) {
+    this(sourceName, name, type, UNKNOWN_CARDINALITY);
+  }
+
   public IdentityFieldPartitioner(String sourceName, Class<S> type, int buckets) {
     this(sourceName, null, type, buckets);
   }

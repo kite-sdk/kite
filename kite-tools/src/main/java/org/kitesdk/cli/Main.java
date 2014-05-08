@@ -29,6 +29,7 @@ import org.apache.log4j.spi.Configurator;
 import org.kitesdk.cli.commands.CSVImportCommand;
 import org.kitesdk.cli.commands.CSVSchemaCommand;
 import org.kitesdk.cli.commands.CreateDatasetCommand;
+import org.kitesdk.cli.commands.CreatePartitionStrategyCommand;
 import org.kitesdk.cli.commands.DeleteDatasetCommand;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
@@ -74,6 +75,7 @@ public class Main extends Configured implements Tool {
     jc.addCommand("csv-schema", new CSVSchemaCommand(console));
     jc.addCommand("csv-import", new CSVImportCommand(console));
     jc.addCommand("obj-schema", new ObjectSchemaCommand(console));
+    jc.addCommand("partition-config", new CreatePartitionStrategyCommand(console));
   }
 
   @Override

@@ -17,7 +17,6 @@ package org.kitesdk.data.hbase;
 
 import java.io.InputStream;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;

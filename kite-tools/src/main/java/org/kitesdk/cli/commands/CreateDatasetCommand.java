@@ -19,8 +19,10 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 import java.util.List;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -39,6 +41,10 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
       description = "The file containing the Avro schema.")
   String avroSchemaFile;
 
+  @Parameter(names = {"-p", "--partition-by"},
+      description = "The file containing a JSON-formatted partition strategy.")
+  String partitionStrategyFile;
+
   @Parameter(names = {"-f", "--format"},
       description = "The file format: avro or parquet.")
   String format = Formats.AVRO.getName();
@@ -55,17 +61,23 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
 
     // use local FS to make qualified paths rather than the default FS
     FileSystem localFS = FileSystem.getLocal(getConf());
-    Path cwd = localFS.makeQualified(new Path("."));
 
-    Path schemaPath = new Path(avroSchemaFile)
-        .makeQualified(localFS.getUri(), cwd);
-    // even though it was qualified using the local FS, it may not be local
-    FileSystem schemaFS = schemaPath.getFileSystem(getConf());
-
-    if (schemaFS.exists(schemaPath)) {
-      descriptorBuilder.schema(schemaFS.open(schemaPath));
+    InputStream schemaIn = open(localFS, avroSchemaFile);
+    if (schemaIn != null) {
+      descriptorBuilder.schema(schemaIn);
     } else {
-      descriptorBuilder.schema(Resources.getResource(avroSchemaFile).openStream());
+      throw new IllegalArgumentException(
+          "Missing schema file: " + avroSchemaFile);
+    }
+
+    if (partitionStrategyFile != null) {
+      InputStream psIn = open(localFS, partitionStrategyFile);
+      if (psIn != null) {
+        descriptorBuilder.partitionStrategy(psIn);
+      } else {
+        throw new IllegalArgumentException(
+            "Missing partition config file: " + partitionStrategyFile);
+      }
     }
 
     if (format.equals(Formats.AVRO.getName())) {
@@ -89,13 +101,32 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
     return 0;
   }
 
+  public InputStream open(FileSystem defaultFS, String filename)
+      throws IOException {
+    Path cwd = defaultFS.makeQualified(new Path("."));
+    Path filePath = new Path(filename).makeQualified(defaultFS.getUri(), cwd);
+    // even though it was qualified using the local FS, it may not be local
+    FileSystem fs = filePath.getFileSystem(getConf());
+    if (fs.exists(filePath)) {
+      return fs.open(filePath);
+    } else {
+      URL resource = Resources.getResource(filename);
+      if (resource != null) {
+        return resource.openStream();
+      }
+    }
+    return null;
+  }
+
   @Override
   public List<String> getExamples() {
     return Lists.newArrayList(
         "# Create dataset \"users\" in Hive:",
         "users --schema user.avsc",
         "# Create dataset \"users\" using parquet:",
-        "users --schema user.avsc --format parquet"
+        "users --schema user.avsc --format parquet",
+        "# Create dataset \"users\" partitioned by JSON configuration:",
+        "users --schema user.avsc --partition-by user_part.json"
     );
   }
 

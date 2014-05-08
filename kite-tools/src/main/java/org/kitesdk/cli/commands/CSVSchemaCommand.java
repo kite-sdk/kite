@@ -109,8 +109,9 @@ public class CSVSchemaCommand implements Configurable, Command {
         .charset(charsetName)
         .build();
 
+    // assume fields are nullable by default, users can easily change this
     String sampleSchema = CSVUtil
-        .inferSchema(recordName, sampleFS.open(sample), props)
+        .inferNullableSchema(recordName, sampleFS.open(sample), props)
         .toString(!minimize);
 
     if (outputPath == null || "-".equals(outputPath)) {

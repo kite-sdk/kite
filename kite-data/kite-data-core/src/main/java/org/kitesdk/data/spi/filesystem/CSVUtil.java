@@ -51,9 +51,22 @@ public class CSVUtil {
   private static final Pattern LONG = Pattern.compile("\\d+");
   private static final Pattern DOUBLE = Pattern.compile("\\d*\\.\\d*[dD]?");
   private static final Pattern FLOAT = Pattern.compile("\\d*\\.\\d*[fF]?");
+  private static final int DEFAULT_INFER_LINES = 25;
+
+  public static Schema inferNullableSchema(String name, InputStream incoming,
+                                   CSVProperties props)
+      throws IOException {
+    return inferSchemaInternal(name, incoming, props, true);
+  }
 
   public static Schema inferSchema(String name, InputStream incoming,
-                                   CSVProperties props)
+                                           CSVProperties props)
+      throws IOException {
+    return inferSchemaInternal(name, incoming, props, false);
+  }
+
+  private static Schema inferSchemaInternal(String name, InputStream incoming,
+                                   CSVProperties props, boolean makeNullable)
       throws IOException {
     CSVReader reader = newReader(incoming, props);
 
@@ -78,22 +91,26 @@ public class CSVUtil {
 
     Schema.Type[] types = new Schema.Type[header.length];
     String[] values = new String[header.length];
+    boolean[] nullable = new boolean[header.length];
 
-    boolean missing = true; // tracks whether a type is missing
-    while (missing && line != null) {
-      missing = false;
+    for (int processed = 0; processed < DEFAULT_INFER_LINES; processed += 1) {
       for (int i = 0; i < header.length; i += 1) {
         if (types[i] == null) {
           types[i] = inferFieldType(line[i]);
           if (types[i] == null) {
-            missing = true; // still need to find a value
+            nullable[i] = true;
           } else {
             // keep track of the value used
             values[i] = line[i];
           }
+        } else if (line[i] == null || line[i].isEmpty()) {
+          nullable[i] = true;
         }
       }
       line = reader.readNext();
+      if (line == null) {
+        break;
+      }
     }
 
     // types may be missing, but fieldSchema will return a nullable string
@@ -106,7 +123,7 @@ public class CSVUtil {
             "Bad header for field " + i + ": \"" + header[i] + "\"");
       }
       fields.add(new Schema.Field(
-          header[i].trim(), nullableSchema(types[i]),
+          header[i].trim(), schema(types[i], makeNullable || nullable[i]),
           "Type inferred from \"" + String.valueOf(values[i]) + "\"", null));
     }
 
@@ -117,17 +134,22 @@ public class CSVUtil {
   }
 
   /**
-   * Create a nullable {@link Schema} for the given type. If the type is null,
-   * the schema will be a nullable String.
+   * Create a {@link Schema} for the given type. If the type is null,
+   * the schema will be a nullable String. If isNullable is true, the returned
+   * schema will be nullable.
    *
    * @param type a {@link Schema.Type} compatible with {@code Schema.create}
-   * @return a nullable {@code Schema} for the given {@code Schema.Type}
+   * @param makeNullable If {@code true}, the return type will be nullable
+   * @return a {@code Schema} for the given {@code Schema.Type}
    * @see Schema#create(org.apache.avro.Schema.Type)
    */
-  private static Schema nullableSchema(Schema.Type type) {
-    return Schema.createUnion(Lists.newArrayList(
-        Schema.create(Schema.Type.NULL), // always nullable
-        Schema.create(type == null ? Schema.Type.STRING : type)));
+  private static Schema schema(Schema.Type type, boolean makeNullable) {
+    Schema schema = Schema.create(type == null ? Schema.Type.STRING : type);
+    if (makeNullable || type == null) {
+      schema = Schema.createUnion(Lists.newArrayList(
+          Schema.create(Schema.Type.NULL), schema));
+    }
+    return schema;
   }
 
   private static Schema.Type inferFieldType(String example) {

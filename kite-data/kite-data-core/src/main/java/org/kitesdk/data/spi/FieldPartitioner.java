@@ -52,11 +52,24 @@ import org.slf4j.LoggerFactory;
 public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparator<T> {
   private static final Logger LOG = LoggerFactory.getLogger(FieldPartitioner.class);
 
+  public static final int UNKNOWN_CARDINALITY = -1;
+
   private final String sourceName;
   private final String name;
   private final Class<S> sourceType;
   private final Class<T> type;
   private final int cardinality;
+
+  protected FieldPartitioner(String sourceName, String name,
+                             Class<S> sourceType, Class<T> type) {
+    Preconditions.checkArgument(!sourceName.equals(name),
+        "Source name and partition name cannot be the same");
+    this.sourceName = sourceName;
+    this.name = name;
+    this.sourceType = sourceType;
+    this.type = type;
+    this.cardinality = UNKNOWN_CARDINALITY;
+  }
 
   protected FieldPartitioner(String sourceName, String name,
       Class<S> sourceType, Class<T> type, int cardinality) {
