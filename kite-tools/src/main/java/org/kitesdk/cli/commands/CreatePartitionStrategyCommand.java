@@ -90,8 +90,7 @@ public class CreatePartitionStrategyCommand implements Configurable, Command {
               "Missing number of hash partitions: %s:hash[?]", fieldName);
           strategyBuilder.hash(fieldName, Integer.valueOf(width));
         } else if ("copy".equals(m.group(2))) {
-          strategyBuilder.identity(
-              fieldName, fieldName + "_copy", Object.class, -1);
+          strategyBuilder.identity(fieldName);
         } else if ("year".equals(m.group(2))) {
           strategyBuilder.year(fieldName);
         } else if ("month".equals(m.group(2))) {
