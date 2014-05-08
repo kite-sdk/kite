@@ -15,8 +15,6 @@
  */
 package org.kitesdk.data.hbase;
 
-import java.io.InputStream;
-
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -26,7 +24,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.hbase.avro.AvroUtils;
 import org.kitesdk.data.hbase.impl.SchemaManager;
@@ -85,31 +82,4 @@ public class HBaseMetadataProviderTest {
     assertEquals(2, partStrat.getFieldPartitioners().size());
   }
 
-  @Test
-  public void testOverride() {
-    InputStream partStratIn = HBaseMetadataProviderTest.class
-        .getResourceAsStream("/partition_strategy/AlternateTestEntity.json");
-    InputStream columnMappingIn = HBaseMetadataProviderTest.class
-        .getResourceAsStream("/column_mapping/AlternateTestEntity.json");
-
-    DatasetDescriptor desc = provider.create(
-        tableName + ".AlternateTestEntity", new DatasetDescriptor.Builder()
-            .schemaLiteral(testEntity).partitionStrategy(partStratIn)
-            .columnMapping(columnMappingIn).build());
-
-    ColumnMapping columnMapping = desc.getColumnMapping();
-    PartitionStrategy partStrat = desc.getPartitionStrategy();
-
-    assertEquals(1, partStrat.getFieldPartitioners().size());
-    assertEquals(8, columnMapping.getFieldMappings().size());
-
-    assertEquals("alt", columnMapping.getFieldMapping("field1")
-        .getFamilyAsString());
-    assertEquals("field1", columnMapping.getFieldMapping("field1")
-        .getQualifierAsString());
-    assertEquals("altstring", columnMapping.getFieldMapping("field3")
-        .getFamilyAsString());
-    assertEquals(FieldMapping.MappingType.COLUMN, columnMapping.getFieldMapping("field4")
-        .getMappingType());
-  }
 }
