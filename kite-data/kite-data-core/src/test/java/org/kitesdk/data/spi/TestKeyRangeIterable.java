@@ -36,24 +36,24 @@ public class TestKeyRangeIterable {
           .endRecord());
 
   public static final PartitionStrategy id = new PartitionStrategy.Builder()
-      .identity("component", "id_component", String.class, 50)
+      .identity("component", "id_component")
       .build();
   public static final MarkerComparator idCmp = new MarkerComparator(id);
 
   public static final PartitionStrategy hash = new PartitionStrategy.Builder()
-      .hash("id", "id_hash", 64)
-      .identity("id", "id_copy", String.class, 50)
+      .hash("id", 64)
+      .identity("id")
       .build();
   public static final MarkerComparator hashCmp = new MarkerComparator(hash);
 
   public static final PartitionStrategy num = new PartitionStrategy.Builder()
-      .identity("number", "id_number", Integer.class, 50)
+      .identity("number", "id_number")
       .build();
   public static final MarkerComparator numCmp = new MarkerComparator(num);
 
   public static final PartitionStrategy num2 = new PartitionStrategy.Builder()
-      .identity("number", "id_number", Integer.class, 50)
-      .identity("number2", "id_number2", Integer.class, 50)
+      .identity("number", "id_number")
+      .identity("number2", "id_number2")
       .build();
   public static final MarkerComparator num2Cmp = new MarkerComparator(num2);
 
@@ -64,8 +64,8 @@ public class TestKeyRangeIterable {
   public static final PartitionStrategy strategy = new PartitionStrategy.Builder()
       .hash("id", "id_hash", 64)
       .year("timestamp").month("timestamp").day("timestamp")
-      .identity("component", "id_component", String.class, 50)
-      .identity("id", "id_copy", String.class, 50)
+      .identity("component", "id_component")
+      .identity("id")
       .build();
   public static final MarkerComparator cmp = new MarkerComparator(strategy);
 

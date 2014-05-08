@@ -42,9 +42,9 @@ public class TestDescriptorValidation {
                 .day("timestamp")
                 .hour("timestamp")
                 .minute("timestamp")
-                .identity("message", "message_copy", String.class, -1)
-                .identity("timestamp", "ts", Long.class, -1)
-                .identity("number", "num", Integer.class, -1)
+                .identity("message", "message_copy")
+                .identity("timestamp", "ts")
+                .identity("number", "num")
                 .hash("message", 48)
                 .hash("timestamp", 48)
                 .hash("number", 48)
@@ -128,6 +128,7 @@ public class TestDescriptorValidation {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testRejectsSchemaPartitionerTypeMismatch() {
     // obvious type mismatches
     TestHelpers.assertThrows("Should reject int for long partitioner",
