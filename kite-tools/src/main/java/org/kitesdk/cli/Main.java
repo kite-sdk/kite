@@ -75,7 +75,7 @@ public class Main extends Configured implements Tool {
     jc.addCommand("csv-schema", new CSVSchemaCommand(console));
     jc.addCommand("csv-import", new CSVImportCommand(console));
     jc.addCommand("obj-schema", new ObjectSchemaCommand(console));
-    jc.addCommand("partition-by", new CreatePartitionStrategyCommand(console));
+    jc.addCommand("partition-config", new CreatePartitionStrategyCommand(console));
   }
 
   @Override
