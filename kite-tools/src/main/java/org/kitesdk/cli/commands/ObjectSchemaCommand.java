@@ -24,25 +24,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
-import org.apache.avro.reflect.ReflectData;
-import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.kitesdk.cli.Command;
+import org.kitesdk.data.DatasetDescriptor;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Build a schema from a java class")
-public class ObjectSchemaCommand implements Configurable, Command {
+public class ObjectSchemaCommand extends BaseCommand {
 
-  private static final Charset SCHEMA_CHARSET = Charset.forName("utf8");
   private final Logger console;
-  private Configuration conf;
 
   public ObjectSchemaCommand(Logger console) {
     this.console = console;
@@ -115,36 +106,14 @@ public class ObjectSchemaCommand implements Configurable, Command {
       throw new IllegalArgumentException("Cannot find class: " + className, e);
     }
 
-    String schema = ReflectData.get().getSchema(recordClass).toString(!minimize);
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(recordClass)
+        .build();
+    String schema = descriptor.getSchema().toString(!minimize);
 
-    if (outputPath == null || "-".equals(outputPath)) {
-      console.info(schema);
-    } else {
-      // use local FS to make qualified paths rather than the default FS
-      FileSystem localFS = FileSystem.getLocal(getConf());
-      Path cwd = localFS.makeQualified(new Path("."));
-
-      Path out = new Path(outputPath).makeQualified(localFS.getUri(), cwd);
-      FileSystem outFS = out.getFileSystem(conf);
-      FSDataOutputStream outgoing = outFS.create(out, true /* overwrite */ );
-      try {
-        outgoing.write(schema.getBytes(SCHEMA_CHARSET));
-      } finally {
-        outgoing.close();
-      }
-    }
+    output(schema, console, outputPath);
 
     return 0;
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
-  }
-
-  @Override
-  public Configuration getConf() {
-    return conf;
   }
 
   @Override

@@ -18,36 +18,23 @@ package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.google.common.io.Resources;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.kitesdk.cli.Command;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.ValidationException;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription="Builds a partition strategy for a schema")
-public class CreatePartitionStrategyCommand implements Configurable, Command {
-
-  @VisibleForTesting
-  static final Charset CHARSET = Charset.forName("utf8");
+public class CreatePartitionStrategyCommand extends BaseCommand {
 
   private static final Pattern PARTITION_FIELD = Pattern.compile(
       "(\\w+):(\\w+)(?:\\[(\\d+)\\])?");
 
   private final Logger console;
-  private Configuration conf;
 
   @Parameter(description="<field:type pairs>")
   List<String> partitions;
@@ -72,11 +59,6 @@ public class CreatePartitionStrategyCommand implements Configurable, Command {
 
   @Override
   public int run() throws IOException {
-
-    // use local FS to make qualified paths rather than the default FS
-    FileSystem localFS = FileSystem.getLocal(getConf());
-    Path cwd = localFS.makeQualified(new Path("."));
-
     PartitionStrategy.Builder strategyBuilder = new PartitionStrategy.Builder();
     for (String partition : partitions) {
       Matcher m = PARTITION_FIELD.matcher(partition);
@@ -111,35 +93,15 @@ public class CreatePartitionStrategyCommand implements Configurable, Command {
       }
     }
 
-    Path schemaPath = new Path(avroSchemaFile)
-        .makeQualified(localFS.getUri(), cwd);
-    // even though it was qualified using the local FS, it may not be local
-    FileSystem schemaFS = schemaPath.getFileSystem(getConf());
-
-    DatasetDescriptor.Builder descBuilder = new DatasetDescriptor.Builder();
-    descBuilder.partitionStrategy(strategyBuilder.build());
-    if (schemaFS.exists(schemaPath)) {
-      descBuilder.schema(schemaFS.open(schemaPath));
-    } else {
-      descBuilder.schema(Resources.getResource(avroSchemaFile).openStream());
-    }
-
     // building the descriptor validates the schema and strategy
-    DatasetDescriptor descriptor = descBuilder.build();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .partitionStrategy(strategyBuilder.build())
+        .schema(open(avroSchemaFile))
+        .build();
+
     String strategy = descriptor.getPartitionStrategy().toString(!minimize);
 
-    if (outputPath == null || "-".equals(outputPath)) {
-      console.info(strategy);
-    } else {
-      Path out = new Path(outputPath).makeQualified(localFS.getUri(), cwd);
-      FileSystem outFS = out.getFileSystem(conf);
-      FSDataOutputStream outgoing = outFS.create(out, true /* overwrite */ );
-      try {
-        outgoing.write(strategy.getBytes(CHARSET));
-      } finally {
-        outgoing.close();
-      }
-    }
+    output(strategy, console, outputPath);
 
     return 0;
   }
@@ -152,16 +114,6 @@ public class CreatePartitionStrategyCommand implements Configurable, Command {
         "# Partition by created_at time's year, month, and day",
         "created_at:year created_at:month created_at:day -s event.avsc"
     );
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
-  }
-
-  @Override
-  public Configuration getConf() {
-    return conf;
   }
 
 }

@@ -24,18 +24,14 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
-import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.kitesdk.cli.Command;
 import org.kitesdk.data.spi.filesystem.CSVProperties;
 import org.kitesdk.data.spi.filesystem.CSVUtil;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription="Build a schema from a CSV data sample")
-public class CSVSchemaCommand implements Configurable, Command {
+public class CSVSchemaCommand extends BaseCommand {
 
   @VisibleForTesting
   static final Charset SCHEMA_CHARSET = Charset.forName("utf8");
@@ -92,14 +88,6 @@ public class CSVSchemaCommand implements Configurable, Command {
     Preconditions.checkArgument(samplePaths.size() == 1,
         "Only one CSV sample can be given");
 
-    // use local FS to make qualified paths rather than the default FS
-    FileSystem localFS = FileSystem.getLocal(getConf());
-    Path cwd = localFS.makeQualified(new Path("."));
-
-    Path sample = new Path(samplePaths.get(0))
-        .makeQualified(localFS.getUri(), cwd);
-    FileSystem sampleFS = sample.getFileSystem(conf);
-
     CSVProperties props = new CSVProperties.Builder()
         .delimiter(delimiter)
         .escape(escape)
@@ -111,21 +99,10 @@ public class CSVSchemaCommand implements Configurable, Command {
 
     // assume fields are nullable by default, users can easily change this
     String sampleSchema = CSVUtil
-        .inferNullableSchema(recordName, sampleFS.open(sample), props)
+        .inferNullableSchema(recordName, open(samplePaths.get(0)), props)
         .toString(!minimize);
 
-    if (outputPath == null || "-".equals(outputPath)) {
-      console.info(sampleSchema);
-    } else {
-      Path out = new Path(outputPath).makeQualified(localFS.getUri(), cwd);
-      FileSystem outFS = out.getFileSystem(conf);
-      FSDataOutputStream outgoing = outFS.create(out, true /* overwrite */ );
-      try {
-        outgoing.write(sampleSchema.getBytes(SCHEMA_CHARSET));
-      } finally {
-        outgoing.close();
-      }
-    }
+    output(sampleSchema, console, outputPath);
 
     return 0;
   }

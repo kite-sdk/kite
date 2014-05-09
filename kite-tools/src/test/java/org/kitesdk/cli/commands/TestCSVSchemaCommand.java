@@ -82,8 +82,7 @@ public class TestCSVSchemaCommand {
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);
     String fileContent = Files.toString(
-        new File("target/user.avsc"),
-        SchemaCommand.SCHEMA_CHARSET);
+        new File("target/user.avsc"), BaseCommand.UTF8);
     Assert.assertTrue("File should contain pretty printed schema",
         TestUtil.matchesSchema(schema).matches(fileContent));
     verifyNoMoreInteractions(console);

@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
@@ -74,16 +75,10 @@ public class CSVImportCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(targets != null && targets.size() == 2,
         "CSV path and target dataset name are required.");
 
-    // use local FS to make qualified paths rather than the default FS
-    FileSystem localFS = FileSystem.getLocal(getConf());
-    Path cwd = localFS.makeQualified(new Path("."));
-
-    Path sourcePath = new Path(targets.get(0))
-        .makeQualified(localFS.getUri(), cwd);
-    // even though it was qualified using the local FS, it may not be local
-    FileSystem sourceFS = sourcePath.getFileSystem(getConf());
-    Preconditions.checkArgument(sourceFS.exists(sourcePath),
-        "CSV path does not exist: " + sourcePath);
+    Path source = qualifiedPath(targets.get(0));
+    FileSystem sourceFS = source.getFileSystem(getConf());
+    Preconditions.checkArgument(sourceFS.exists(source),
+        "CSV path does not exist: " + source);
 
     CSVProperties props = new CSVProperties.Builder()
         .delimiter(delimiter)
@@ -107,7 +102,7 @@ public class CSVImportCommand extends BaseDatasetCommand {
         .name("temporary")
         .configuration(getConf())
         .descriptor(props.addToDescriptor(new DatasetDescriptor.Builder()
-            .location(sourceFS.makeQualified(sourcePath))
+            .location(source.toUri())
             .schema(ColumnMappingParser.removeEmbeddedMapping(
                 PartitionStrategyParser.removeEmbeddedStrategy(datasetSchema)))
             .format("csv")
@@ -116,7 +111,7 @@ public class CSVImportCommand extends BaseDatasetCommand {
 
     Iterator<Path> iter = csvSourceAsDataset.pathIterator().iterator();
     Preconditions.checkArgument(iter.hasNext(),
-        "CSV path has no data files: " + sourcePath);
+        "CSV path has no data files: " + source);
     Schema csvSchema = CSVUtil.inferSchema(
         datasetSchema.getFullName(), sourceFS.open(iter.next()), props);
 
