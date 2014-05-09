@@ -130,7 +130,7 @@ public class DatasetRepositories {
    * <h1>Hive/HCatalog URIs</h1>
    * <p>
    * <code>hive</code> and
-   * <code>hive://[metastore-host]:[metastore-port]/</code> connects to the
+   * <code>hive://[metastore-host]:[metastore-port]</code> connects to the
    * Hive MetaStore.  Dataset locations are determined by Hive as managed
    * tables.
    * </p>
@@ -172,10 +172,9 @@ public class DatasetRepositories {
    * <td>Connects to the Hive MetaStore and creates managed tables.</td>
    * </tr>
    * <tr>
-   * <td><code>repo:hive://meta-host:9083/</code></td>
+   * <td><code>repo:hive://meta-host:9083</code></td>
    * <td>Connects to the Hive MetaStore at <code>thrift://meta-host:9083</code>,
-   * and creates managed tables. This only matches when the path is
-   * <code>/</code></td>. Any non-root path matches the external Hive URIs.
+   * and creates managed tables.
    * </tr>
    * <tr>
    * <td><code>repo:hive:/path?hdfs-host=localhost&hdfs-port=8020</code></td>
