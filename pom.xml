@@ -139,7 +139,6 @@
     <vers.hbase>0.94.6-cdh${cdh.version}</vers.hbase>
     <vers.hbase1>0.94.6</vers.hbase1>
     <vers.hbase2>0.96.1.1-hadoop2</vers.hbase2>
-    <vers.hcatalog>0.5.0-cdh${cdh.version}</vers.hcatalog>
     <vers.hive>0.10.0-cdh${cdh.version}</vers.hive>
     <vers.jetty>8.1.14.v20131031</vers.jetty>
     <vers.jexl>2.1.1</vers.jexl>
@@ -719,11 +718,6 @@
 
       <!-- Hive dependencies -->
       <dependency>
-        <groupId>org.apache.hcatalog</groupId>
-        <artifactId>hcatalog-core</artifactId>
-        <version>${vers.hcatalog}</version>
-      </dependency>
-      <dependency>
         <groupId>org.apache.hive</groupId>
         <artifactId>hive-exec</artifactId>
         <version>${vers.hive}</version>
@@ -1125,7 +1119,6 @@
         <artifact.hbase-deps>kite-hbase1-dependencies</artifact.hbase-deps>
         <artifact.hbase-test-deps>kite-hbase1-test-dependencies</artifact.hbase-test-deps>
         <vers.crunch>${vers.crunch-base}</vers.crunch>
-        <vers.hcatalog>0.5.0-incubating</vers.hcatalog>
         <vers.hive>0.10.0</vers.hive>
         <vers.commons-lang>2.4</vers.commons-lang>
       </properties>
@@ -1148,7 +1141,6 @@
         <artifact.hbase-test-deps>kite-hbase2-test-dependencies</artifact.hbase-test-deps>
         <vers.flume>1.4.0</vers.flume>
         <vers.hadoop>2.2.0</vers.hadoop>
-        <vers.hcatalog>0.5.0-incubating</vers.hcatalog>
         <vers.hive>0.10.0</vers.hive>
       </properties>
     </profile>

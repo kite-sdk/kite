@@ -16,7 +16,6 @@
 package org.kitesdk.data.hcatalog.impl;
 
 import com.google.common.collect.ImmutableList;
-import java.io.IOException;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
@@ -28,10 +27,8 @@ import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.UnknownDBException;
 import org.apache.hadoop.hive.ql.metadata.Table;
-import org.apache.hcatalog.common.HCatUtil;
 import org.apache.thrift.TException;
 import org.kitesdk.data.DatasetExistsException;
-import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.slf4j.Logger;
@@ -75,11 +72,9 @@ public final class HCatalog {
     }
     try {
       hiveConf = new HiveConf(conf, HiveConf.class);
-      client = HCatUtil.getHiveClient(hiveConf);
+      client = new HiveMetaStoreClient(hiveConf);
     } catch (TException e) {
       throw new DatasetRepositoryException("Hive metastore exception", e);
-    } catch (IOException e) {
-      throw new DatasetIOException("Hive metastore exception", e);
     }
   }
 
@@ -88,7 +83,7 @@ public final class HCatalog {
         new ClientAction<Table>() {
           @Override
           public Table call() throws TException {
-            return HCatUtil.getTable(client, dbName, tableName);
+            return new Table(client.getTable(dbName, tableName));
           }
         };
 
