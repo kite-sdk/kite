@@ -1145,6 +1145,32 @@
       </properties>
     </profile>
 
+    <profile>
+      <id>cdh5</id>
+      <activation>
+        <property>
+          <name>hadoop.profile</name>
+          <value>cdh5</value>
+        </property>
+      </activation>
+      <properties>
+        <!-- test cdh5 with the same jars that were produced for default profile -->
+        <maven.main.skip>true</maven.main.skip>
+        <artifact.hadoop-deps>kite-hadoop-dependencies</artifact.hadoop-deps>
+        <artifact.hadoop-test-deps>kite-hadoop-test-dependencies</artifact.hadoop-test-deps>
+        <artifact.hbase-deps>kite-hbase2-dependencies</artifact.hbase-deps>
+        <artifact.hbase-test-deps>kite-hbase2-test-dependencies</artifact.hbase-test-deps>
+        <cdh.version>5.0.0</cdh.version>
+        <vers.flume>1.4.0-cdh${cdh.version}</vers.flume>
+        <vers.hadoop>2.3.0-cdh${cdh.version}</vers.hadoop>
+        <vers.hadoop-mr1>2.3.0-mr1-cdh${cdh.version}</vers.hadoop-mr1>
+        <vers.hbase>0.94.6</vers.hbase> <!-- not used, but needed to satisfy build -->
+        <vers.hbase2>0.96.1.1-cdh${cdh.version}</vers.hbase2>
+        <vers.hive>0.12.0-cdh${cdh.version}</vers.hive>
+        <vers.oozie>4.0.0-cdh${cdh.version}</vers.oozie>
+      </properties>
+    </profile>
+
   </profiles>
 
 </project>
