@@ -50,9 +50,9 @@ public class TestShowRecordsCommand {
 
     TestUtil.run("-v", "csv-schema", sample, "-o", avsc, "--class", "User");
     TestUtil.run("-v", "create", "users",
-        "--local", "-d", "target/data", "-s", avsc);
+        "--use-local", "-d", "target/data", "-s", avsc);
     TestUtil.run("-v", "csv-import", sample,
-        "--local", "-d", "target/data", "users");
+        "--use-local", "-d", "target/data", "users");
   }
 
   @AfterClass

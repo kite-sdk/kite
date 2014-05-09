@@ -84,7 +84,7 @@ public class TestCSVImportCommand {
   @Before
   public void setup() throws Exception {
     TestUtil.run("-v", "create", datasetName,
-        "--local", "-d", "target/data", "-s", avsc);
+        "--use-local", "-d", "target/data", "-s", avsc);
     this.dataset = DatasetRepositories.open("repo:file:target/data")
         .load(datasetName);
     this.console = mock(Logger.class);

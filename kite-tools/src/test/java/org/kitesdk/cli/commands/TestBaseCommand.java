@@ -16,13 +16,13 @@
 
 package org.kitesdk.cli.commands;
 
+import com.beust.jcommander.internal.Lists;
 import java.io.IOException;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.TestHelpers;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 
 import static org.mockito.Mockito.*;
@@ -66,25 +66,15 @@ public class TestBaseCommand {
 
   @Test
   public void testManagedHiveRepo() {
-    command.hcatalog = true;
+    command.hive = true;
     command.directory = null;
-    command.local = false;
     Assert.assertEquals("repo:hive", command.buildRepoURI());
     verify(console).trace(contains("repo:hive"));
   }
 
   @Test
-  public void testLocalOverridesHive() {
-    command.hcatalog = true;
-    command.directory = "/tmp/data";
-    command.local = true;
-    Assert.assertEquals("repo:file:/tmp/data", command.buildRepoURI());
-    verify(console).trace(contains("repo:file:/tmp/data"));
-  }
-
-  @Test
   public void testExternalHiveRepo() {
-    command.hcatalog = true;
+    command.hive = true;
     command.directory = "/tmp/data";
     Assert.assertEquals("repo:hive:/tmp/data", command.buildRepoURI());
     verify(console).trace(contains("repo:hive:/tmp/data"));
@@ -92,7 +82,7 @@ public class TestBaseCommand {
 
   @Test
   public void testRelativeExternalHiveRepo() {
-    command.hcatalog = true;
+    command.hive = true;
     command.directory = "data";
     Assert.assertEquals("repo:hive:data", command.buildRepoURI());
     verify(console).trace(contains("repo:hive:data"));
@@ -100,28 +90,18 @@ public class TestBaseCommand {
 
   @Test
   public void testHDFSRepo() {
-    command.hcatalog = false;
+    command.hdfs = true;
     command.directory = "/tmp/data";
     Assert.assertEquals("repo:hdfs:/tmp/data", command.buildRepoURI());
     verify(console).trace(contains("repo:hdfs:/tmp/data"));
   }
 
   @Test
-  public void testLocalRepo() {
-    command.hcatalog = false;
-    command.local = true;
-    command.directory = "/tmp/data";
-    Assert.assertEquals("repo:file:/tmp/data", command.buildRepoURI());
-    verify(console).trace(contains("repo:file:/tmp/data"));
-  }
-
-  @Test
   public void testHDFSRepoRejectsNullPath() {
-    command.hcatalog = false;
-    command.local = false;
+    command.hdfs = true;
     command.directory = null;
     TestHelpers.assertThrows(
-        "Should reject null directory for HDFS, non-Hive",
+        "Should reject null directory for HDFS",
         IllegalArgumentException.class,
         new Runnable() {
           @Override
@@ -134,12 +114,46 @@ public class TestBaseCommand {
   }
 
   @Test
+  public void testLocalRepo() {
+    command.local = true;
+    command.directory = "/tmp/data";
+    Assert.assertEquals("repo:file:/tmp/data", command.buildRepoURI());
+    verify(console).trace(contains("repo:file:/tmp/data"));
+  }
+
+  @Test
   public void testLocalRepoRejectsNullPath() {
-    command.hcatalog = false;
+    command.hive = false;
     command.local = true;
     command.directory = null;
     TestHelpers.assertThrows(
-        "Should reject null directory for local, non-Hive",
+        "Should reject null directory for local",
+        IllegalArgumentException.class,
+        new Runnable() {
+          @Override
+          public void run() {
+            command.buildRepoURI();
+          }
+        }
+    );
+    verifyZeroInteractions(console);
+  }
+
+  @Test
+  public void testHBaseRepo() {
+    command.hbase = true;
+    command.zookeeper = Lists.newArrayList("zk1:1234", "zk2");
+    Assert.assertEquals("repo:hbase:zk1:1234,zk2", command.buildRepoURI());
+    verify(console).trace(contains("repo:hbase:zk1:1234,zk2"));
+  }
+
+  @Test
+  public void testHbaseRepoRejectsNullZooKeeper() {
+    command.hive = false;
+    command.local = true;
+    command.directory = null;
+    TestHelpers.assertThrows(
+        "Should reject null ZooKeeper for local, non-Hive",
         IllegalArgumentException.class,
         new Runnable() {
           @Override
@@ -148,6 +162,76 @@ public class TestBaseCommand {
           }
         });
     verifyZeroInteractions(console);
+  }
+
+  @Test
+  public void testRejectsMultipleStorageSchemes() {
+    command.hive = true;
+    command.local = true;
+    TestHelpers.assertThrows(
+        "Should reject multiple storage: Hive and local",
+        IllegalArgumentException.class,
+        new Runnable() {
+          @Override
+          public void run() {
+            command.buildRepoURI();
+          }
+        });
+    command.local = false;
+    command.hdfs = true;
+    TestHelpers.assertThrows(
+        "Should reject multiple storage: Hive and HDFS",
+        IllegalArgumentException.class,
+        new Runnable() {
+          @Override
+          public void run() {
+            command.buildRepoURI();
+          }
+        });
+    command.hdfs = false;
+    command.hbase = true;
+    TestHelpers.assertThrows(
+        "Should reject multiple storage: Hive and HBase",
+        IllegalArgumentException.class,
+        new Runnable() {
+          @Override
+          public void run() {
+            command.buildRepoURI();
+          }
+        });
+    command.hive = false;
+    command.local = true;
+    TestHelpers.assertThrows(
+        "Should reject multiple storage: HBase and local",
+        IllegalArgumentException.class,
+        new Runnable() {
+          @Override
+          public void run() {
+            command.buildRepoURI();
+          }
+        });
+    command.local = false;
+    command.hdfs = true;
+    TestHelpers.assertThrows(
+        "Should reject multiple storage: HBase and HDFS",
+        IllegalArgumentException.class,
+        new Runnable() {
+          @Override
+          public void run() {
+            command.buildRepoURI();
+          }
+        });
+    command.hbase = false;
+    command.local = true;
+    TestHelpers.assertThrows(
+        "Should reject multiple storage: HDFS and local",
+        IllegalArgumentException.class,
+        new Runnable() {
+          @Override
+          public void run() {
+            command.buildRepoURI();
+          }
+        });
   }
 
 }

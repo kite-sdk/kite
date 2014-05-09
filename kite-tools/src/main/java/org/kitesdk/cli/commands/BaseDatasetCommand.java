@@ -16,8 +16,11 @@
 package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.internal.Lists;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import java.util.List;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.kitesdk.cli.Command;
@@ -30,22 +33,33 @@ abstract class BaseDatasetCommand implements Command, Configurable {
   private Configuration conf;
 
   @Parameter(names = {"-d", "--directory"},
-      description = "The root directory of the dataset repository. Optional if using " +
-          "Hive for metadata storage.")
+      description = "Storage directory for datasets, required for HDFS")
   String directory = null;
 
-  @Parameter(names = {"--use-hive"}, arity = 1,
-      description = "Whether to store metadata in the Hive MetaStore, otherwise stored in the filesystem.")
-  boolean hcatalog = true;
+  @Parameter(names = {"--use-local"}, hidden = true,
+      description = "Store data in local files")
+  boolean local = false;
+
+  @Parameter(names = {"--use-hdfs"},
+      description = "Store data in HDFS files")
+  boolean hdfs = false;
+
+  @Parameter(names = {"--use-hive"},
+      description = "Store data in Hive managed tables (default)")
+  boolean hive = false;
+
+  @Parameter(names = {"--use-hbase"},
+      description = "Store data in HBase tables")
+  boolean hbase = false;
+
+  @Parameter(names = {"--zookeeper", "--zk"},
+      description = "ZooKeeper host list as host or host:port")
+  List<String> zookeeper = Lists.newArrayList("localhost");
 
   @VisibleForTesting
   @Parameter(names = {"-r", "--repo"}, hidden = true,
       description="The repository URI to open")
   String repoURI = null;
-
-  @Parameter(names = {"--local"}, hidden = true,
-      description = "If set, use the local filesystem.")
-  boolean local = false;
 
   protected final Logger console;
 
@@ -68,15 +82,25 @@ abstract class BaseDatasetCommand implements Command, Configurable {
     }
     String uri;
     if (local) {
+      Preconditions.checkArgument(!(hdfs || hive || hbase),
+          "Only one storage implementation can be selected");
       Preconditions.checkArgument(directory != null,
-          "--directory is required when using --local");
+          "--directory is required when using local files");
       uri = "repo:file:" + directory;
-    } else if (hcatalog) {
-      uri = "repo:hive" + (directory != null ? ":" + directory : "");
-    } else {
+    } else if (hdfs) {
+      Preconditions.checkArgument(!(hive || hbase),
+          "Only one storage implementation can be selected");
       Preconditions.checkArgument(directory != null,
-          "--directory is required when not using Hive");
+          "--directory is required when using HDFS");
       uri = "repo:hdfs:" + directory;
+    } else if (hbase) {
+      Preconditions.checkArgument(!hive,
+          "Only one storage implementation can be selected");
+      Preconditions.checkArgument(zookeeper != null && !zookeeper.isEmpty(),
+          "--zookeeper is required when using HBase");
+      uri = "repo:hbase:" + Joiner.on(",").join(zookeeper);
+    } else {
+      uri = "repo:hive" + (directory != null ? ":" + directory : "");
     }
     console.trace("Repository URI: " + uri);
     return uri;
