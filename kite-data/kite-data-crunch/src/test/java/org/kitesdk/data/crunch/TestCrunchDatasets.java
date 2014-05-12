@@ -16,11 +16,23 @@
 package org.kitesdk.data.crunch;
 
 import com.google.common.io.Files;
+import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericData.Record;
+import org.apache.crunch.CrunchRuntimeException;
+import org.apache.crunch.PCollection;
+import org.apache.crunch.Pipeline;
+import org.apache.crunch.Target;
+import org.apache.crunch.impl.mr.MRPipeline;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.kitesdk.data.Dataset;
@@ -33,18 +45,9 @@ import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.View;
+import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.URIBuilder;
-import junit.framework.Assert;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericData.Record;
-import org.apache.crunch.PCollection;
-import org.apache.crunch.Pipeline;
-import org.apache.crunch.Target;
-import org.apache.crunch.impl.mr.MRPipeline;
-import org.junit.Before;
-import org.junit.Test;
-import java.io.IOException;
-import java.net.URI;
+
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.datasetSize;
@@ -264,7 +267,6 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     Assert.assertEquals(1, datasetSize(outputDataset));
   }
   
-  
   @Test
   public void testViewUris() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
@@ -316,5 +318,85 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     pipeline.run();
 
     Assert.assertEquals(10, datasetSize(outputDataset));
+  }
+
+  @Test(expected = CrunchRuntimeException.class)
+  public void testWriteModeDefaultFailsWithExisting() throws IOException {
+    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+
+    writeTestUsers(inputDataset, 1, 0);
+    writeTestUsers(outputDataset, 1, 0);
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputDataset));
+    pipeline.write(data, CrunchDatasets.asTarget((View<Record>) outputDataset));
+  }
+
+  @Test
+  public void testWriteModeOverwrite() throws IOException {
+    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+
+    writeTestUsers(inputDataset, 1, 0);
+    writeTestUsers(outputDataset, 1, 1);
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputDataset));
+    pipeline.write(data, CrunchDatasets.asTarget((View<Record>) outputDataset),
+        Target.WriteMode.OVERWRITE);
+
+    pipeline.run();
+
+    checkTestUsers(outputDataset, 1);
+  }
+
+  @Test
+  public void testWriteModeCheckpoint() throws Exception {
+    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+
+    writeTestUsers(inputDataset, 1, 0);
+
+    Thread.sleep(1000); // ensure output is newer than input on local filesystems with 1s granularity
+    runCheckpointPipeline(inputDataset, outputDataset);
+
+    checkTestUsers(outputDataset, 1);
+
+    long lastModified = ((LastModifiedAccessor) outputDataset).getLastModified();
+
+    // re-run without changing input and output should not change
+    runCheckpointPipeline(inputDataset, outputDataset);
+    checkTestUsers(outputDataset, 1);
+    Assert.assertEquals(lastModified, ((LastModifiedAccessor) outputDataset).getLastModified());
+
+    // re-write input then re-run and output should be re-written
+    Thread.sleep(1000); // ensure new input is newer than output
+    repo.delete("in");
+    inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+    writeTestUsers(inputDataset, 1, 0);
+    runCheckpointPipeline(inputDataset, outputDataset);
+
+    checkTestUsers(outputDataset, 1);
+    Assert.assertTrue(((LastModifiedAccessor) outputDataset).getLastModified() > lastModified);
+  }
+
+  private void runCheckpointPipeline(Dataset<Record> inputDataset,
+      Dataset<Record> outputDataset) {
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputDataset));
+    pipeline.write(data, CrunchDatasets.asTarget((View<Record>) outputDataset),
+        Target.WriteMode.CHECKPOINT);
+    pipeline.done();
   }
 }

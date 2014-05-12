@@ -110,9 +110,11 @@ public class DatasetTestUtilities {
         new RecordValidator<GenericData.Record>() {
           @Override
           public void validate(GenericData.Record record, int recordNum) {
-            Assert.assertTrue(usernames.remove(record.get("username").toString()));
+            String username = record.get("username").toString();
+            Assert.assertTrue("Username not found: " + username, usernames.remove(username));
             for (String field : fields) {
-              Assert.assertNotNull(record.get(field));
+              Assert.assertNotNull("Field is null: " + field + ", record: " + record,
+                  record.get(field));
             }
           }
         });

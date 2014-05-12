@@ -64,9 +64,18 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
 
   @SuppressWarnings("unchecked")
   public DatasetSourceTarget(View<E> view, Class<E> type) {
+    this(view, toAvroType(view, type));
+  }
+
+  public DatasetSourceTarget(URI uri, Class<E> type) {
+    this(Datasets.load(uri, type));
+  }
+
+  public DatasetSourceTarget(View<E> view, AvroType<E> avroType) {
     super(view);
 
     this.view = view;
+    this.avroType = avroType;
 
     Configuration temp = new Configuration(false /* use an empty conf */ );
     DatasetKeyInputFormat.configure(temp).readFrom(view);
@@ -79,17 +88,20 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     boolean isAvroOrParquetFile = (dataset instanceof FileSystemDataset)
         && (Formats.AVRO.equals(format) || Formats.PARQUET.equals(format));
     formatBundle.set(RuntimeParameters.DISABLE_COMBINE_FILE, Boolean.toString(!isAvroOrParquetFile));
-
-    if (type.isAssignableFrom(GenericData.Record.class)) {
-      this.avroType = (AvroType<E>) Avros.generics(
-          dataset.getDescriptor().getSchema());
-    } else {
-      this.avroType = Avros.records(type);
-    }
   }
 
-  public DatasetSourceTarget(URI uri, Class<E> type) {
-    this(Datasets.<E, View<E>>load(uri, type));
+  public DatasetSourceTarget(URI uri, AvroType<E> avroType) {
+    this(Datasets.load(uri, avroType.getTypeClass()), avroType);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <E> AvroType<E> toAvroType(View<E> view, Class<E> type) {
+    if (type.isAssignableFrom(GenericData.Record.class)) {
+      return (AvroType<E>) Avros.generics(
+        view.getDataset().getDescriptor().getSchema());
+    } else {
+      return Avros.records(type);
+    }
   }
 
   @Override
