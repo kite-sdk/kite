@@ -22,6 +22,9 @@ import com.google.common.base.Throwables;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 
 public class DynMethods {
@@ -316,6 +319,89 @@ public class DynMethods {
     }
 
     /**
+     * Checks for an implementation, first finding the given class by name.
+     *
+     * @param className name of a class
+     * @param methodName name of a method (different from constructor)
+     * @param argClasses argument classes for the method
+     * @return this Builder for method chaining
+     * @see {@link java.lang.Class#forName(String)}
+     * @see {@link java.lang.Class#getMethod(String, Class[])}
+     */
+    public Builder hiddenImpl(String className, String methodName, Class<?>... argClasses) {
+      // don't do any work if an implementation has been found
+      if (method != null) {
+        return this;
+      }
+
+      try {
+        Class<?> targetClass = Class.forName(className);
+        hiddenImpl(targetClass, methodName, argClasses);
+      } catch (ClassNotFoundException e) {
+        // not the right implementation
+      }
+      return this;
+    }
+
+    /**
+     * Checks for an implementation, first finding the given class by name.
+     *
+     * The name passed to the constructor is the method name used.
+     *
+     * @param className name of a class
+     * @param argClasses argument classes for the method
+     * @return this Builder for method chaining
+     * @see {@link java.lang.Class#forName(String)}
+     * @see {@link java.lang.Class#getMethod(String, Class[])}
+     */
+    public Builder hiddenImpl(String className, Class<?>... argClasses) {
+      hiddenImpl(className, name, argClasses);
+      return this;
+    }
+
+    /**
+     * Checks for a method implementation.
+     *
+     * @param methodName name of a method (different from constructor)
+     * @param argClasses argument classes for the method
+     * @return this Builder for method chaining
+     * @see {@link java.lang.Class#forName(String)}
+     * @see {@link java.lang.Class#getMethod(String, Class[])}
+     */
+    public Builder hiddenImpl(Class<?> targetClass, String methodName, Class<?>... argClasses) {
+      // don't do any work if an implementation has been found
+      if (method != null) {
+        return this;
+      }
+
+      try {
+        Method hidden = targetClass.getDeclaredMethod(methodName, argClasses);
+        AccessController.doPrivileged(new MakeAccessible(hidden));
+        this.method = new UnboundMethod(hidden, name);
+      } catch (SecurityException e) {
+        // unusable
+      } catch (NoSuchMethodException e) {
+        // not the right implementation
+      }
+      return this;
+    }
+
+    /**
+     * Checks for a method implementation.
+     *
+     * The name passed to the constructor is the method name used.
+     *
+     * @param argClasses argument classes for the method
+     * @return this Builder for method chaining
+     * @see {@link java.lang.Class#forName(String)}
+     * @see {@link java.lang.Class#getMethod(String, Class[])}
+     */
+    public Builder hiddenImpl(Class<?> targetClass, Class<?>... argClasses) {
+      hiddenImpl(targetClass, name, argClasses);
+      return this;
+    }
+
+    /**
      * Returns the first valid implementation as a UnboundMethod or throws a
      * NoSuchMethodException if there is none.
      *
@@ -395,6 +481,21 @@ public class DynMethods {
      */
     public StaticMethod buildStatic() {
       return build().asStatic();
+    }
+
+  }
+
+  private static class MakeAccessible implements PrivilegedAction<Void> {
+    private Method hidden;
+
+    public MakeAccessible(Method hidden) {
+      this.hidden = hidden;
+    }
+
+    @Override
+    public Void run() {
+      hidden.setAccessible(true);
+      return null;
     }
   }
 }
