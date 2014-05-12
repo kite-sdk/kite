@@ -14,6 +14,8 @@ applications
 * __Provides smart defaults__ for platform choices
 * __Supports gradual adoption__ via loosely-coupled modules
 
+[Kite Documentation](kite/overview.html)
+
 ## Modules
 
 * [__Kite Data__](kite-data/index.html) The data module provides logical abstractions on
