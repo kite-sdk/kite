@@ -18,6 +18,7 @@ package org.kitesdk.data.crunch;
 import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.Map;
+import org.apache.crunch.CrunchRuntimeException;
 import org.apache.crunch.SourceTarget;
 import org.apache.crunch.Target;
 import org.apache.crunch.io.CrunchOutputs;
@@ -30,15 +31,24 @@ import org.apache.crunch.types.avro.AvroType;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
+import org.kitesdk.data.DatasetNotFoundException;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.View;
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
+import org.kitesdk.data.spi.LastModifiedAccessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class DatasetTarget<E> implements MapReduceTarget {
 
-  FormatBundle formatBundle;
-  private URI uri;
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetTarget.class);
+
+  private View view;
+  private final URI uri;
+  private final FormatBundle formatBundle;
 
   public DatasetTarget(View<E> view) {
+    this.view = view;
     Configuration temp = emptyConf();
     DatasetKeyOutputFormat.configure(temp).writeTo(view);
     this.formatBundle = outputBundle(temp);
@@ -46,10 +56,10 @@ class DatasetTarget<E> implements MapReduceTarget {
   }
 
   public DatasetTarget(URI uri) {
+    this.uri = uri;
     Configuration temp = emptyConf();
     DatasetKeyOutputFormat.configure(temp).writeTo(uri);
     this.formatBundle = outputBundle(temp);
-    this.uri = uri;
   }
 
   @Override
@@ -59,9 +69,71 @@ class DatasetTarget<E> implements MapReduceTarget {
   }
 
   @Override
-  public boolean handleExisting(WriteMode writeMode, long l, Configuration entries) {
-    // currently don't check for existing outputs
-    return false;
+  @SuppressWarnings("unchecked")
+  public boolean handleExisting(WriteMode writeMode, long lastModForSource,
+      Configuration entries) {
+
+    if (view == null) {
+      try {
+        view = Datasets.load(uri);
+      } catch (DatasetNotFoundException e) {
+        LOG.info("Writing to new dataset/view: " + uri);
+        return true;
+      }
+    }
+
+    boolean exists = !view.isEmpty();
+    if (exists) {
+      switch (writeMode) {
+        case DEFAULT:
+          LOG.error("Dataset/view " + view + " already exists!");
+          throw new CrunchRuntimeException("Dataset/view already exists: " + view);
+        case OVERWRITE:
+          LOG.info("Deleting all data from: " + view);
+          delete(view);
+          break;
+        case APPEND:
+          LOG.info("Writing to existing dataset/view: " + view);
+          break;
+        case CHECKPOINT:
+          boolean ready = true; // dataset.isReady(); // TODO: add when CDK-451 is ready
+          long lastModForTarget = -1;
+          if (view instanceof LastModifiedAccessor) {
+            lastModForTarget = ((LastModifiedAccessor) view).getLastModified();
+          }
+          if (ready && lastModForTarget > lastModForSource) {
+            LOG.info("Re-starting pipeline from checkpoint dataset/view: " + view);
+            break;
+          } else {
+            if (!ready) {
+              LOG.info("Checkpoint is not ready. Deleting data from existing " +
+                  "checkpoint dataset/view: " + view);
+            } else {
+              LOG.info("Source data has recent updates. Deleting data from existing " +
+                  "checkpoint dataset/view: " + view);
+            }
+            delete(view);
+            return false;
+          }
+        default:
+          throw new CrunchRuntimeException("Unknown WriteMode:  " + writeMode);
+      }
+    } else {
+      LOG.info("Writing to empty dataset/view: " + view);
+    }
+    return exists;
+  }
+
+  private void delete(View view) {
+    try {
+      boolean deleted = view.deleteAll();
+      if (!deleted) {
+        LOG.warn("No data was deleted.");
+      }
+    } catch (UnsupportedOperationException e) {
+      LOG.error("Dataset view " + view + " cannot be deleted!");
+      throw new CrunchRuntimeException("Dataset view cannot be deleted:" + view, e);
+    }
   }
 
   @Override
@@ -80,7 +152,15 @@ class DatasetTarget<E> implements MapReduceTarget {
   }
 
   @Override
-  public <T> SourceTarget<T> asSourceTarget(PType<T> tpType) {
+  @SuppressWarnings("unchecked")
+  public <T> SourceTarget<T> asSourceTarget(PType<T> ptype) {
+    if (ptype instanceof AvroType) {
+      if (view != null) {
+        return new DatasetSourceTarget(view, (AvroType) ptype);
+      } else if (uri != null) {
+        return new DatasetSourceTarget(uri, (AvroType) ptype);
+      }
+    }
     return null;
   }
 

@@ -37,6 +37,7 @@ import org.apache.crunch.Pair;
 import org.apache.crunch.Pipeline;
 import org.apache.crunch.PipelineResult;
 import org.apache.crunch.PipelineResult.StageResult;
+import org.apache.crunch.Target;
 import org.apache.crunch.impl.mem.MemPipeline;
 import org.apache.crunch.impl.mr.MRPipeline;
 import org.apache.crunch.types.PTableType;
@@ -127,7 +128,7 @@ public class CopyTask<E> extends Configured {
             to.getDataset().getDescriptor(), numWriters);
       }
 
-      pipeline.write(collection, CrunchDatasets.asTarget(to));
+      pipeline.write(collection, CrunchDatasets.asTarget(to), Target.WriteMode.APPEND);
 
       PipelineResult result = pipeline.done();
 
