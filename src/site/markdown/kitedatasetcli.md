@@ -184,9 +184,21 @@ Show the schema for a dataset.
 
 The root directory of the dataset repository. Optional if you are using Hive for metadata storage.
 
+`--use-hbase`
+
+Store data in HBase tables.
+
+`--use-hdfs`
+
+Store data in HDFS files.
+
 `--use-hive`
 
-By default, dataset metadata is stored in the file system. Use this switch to store dataset metadata in Hive.
+Store data in Hive managed tables (default).
+
+`--zookeeper`
+
+ZooKeeper host list as host or host:port.
 
 `--minimize`
 
@@ -222,9 +234,21 @@ Copy CSV records into a dataset.
 
 The root directory of the dataset repository. Optional if using Hive for metadata storage.
 
+`--use-hbase`
+
+Store data in HBase tables.
+
+`--use-hdfs`
+
+Store data in HDFS files.
+
 `--use-hive`
 
-By default, dataset metadata is stored in Hive. Use this switch to store the dataset metadata in the file system.
+Store data in Hive managed tables (default).
+
+`--zookeeper`
+
+ZooKeeper host list as host or host:port.
 
 `--escape`
 
@@ -271,9 +295,21 @@ Print the first *n* records in a dataset.
 
 The root directory of the dataset repository. Optional if using Hive for metadata storage.
 
+`--use-hbase`
+
+Store data in HBase tables.
+
+`--use-hdfs`
+
+Store data in HDFS files.
+
 `--use-hive`
 
-By default, dataset metadata is stored in Hive. Set this switch to false to use the file system (`--use-hive false`).
+Store data in Hive managed tables (default).
+
+`--zookeeper`
+
+ZooKeeper host list as host or host:port.
 
 `-n, --num-records`
 
@@ -305,9 +341,21 @@ Delete one or more datasets and related metadata.
 
 The root directory of the dataset repository. Optional if using Hive for metadata storage.
 
+`--use-hbase`
+
+Store data in HBase tables.
+
+`--use-hdfs`
+
+Store data in HDFS files.
+
 `--use-hive`
 
-By default, metadata is stored in Hive. Set this value to false to store the metadata in the file system (`--use-hive false`).
+Store data in Hive managed tables (default).
+
+`--zookeeper`
+
+ZooKeeper host list as host or host:port.
 
 ###Examples
 
