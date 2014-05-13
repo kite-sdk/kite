@@ -3,14 +3,14 @@ This is the anchor page for Kite SDK documentation. You can link to the current 
 
 #What Is Kite, and Why Is It Awesome?
 
-You can learn about why Kite is awesome by watching this <a href="http://www.youtube.com/watch?feature=player_embedded&v=JXAm3aasI6c" target="_blank">Kite Overview video</a>.
+You can learn about why Kite is awesome by watching this <a href="http://www.youtube.com/watch?feature=player_embedded&amp;v=JXAm3aasI6c" target="_blank">Kite Overview video</a>.
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=JXAm3aasI6c" target="_blank"><img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/kiteOverviewStillImage.png" 
+<a href="http://www.youtube.com/watch?feature=player_embedded&amp;v=JXAm3aasI6c" target="_blank"><img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/kiteOverviewStillImage.png" 
 alt="Kite Overview Video" width="240" height="180" border="10" align="right" title="Link to Kite Overview Video"/></a>
 
 Kite is an open source set of libraries, references, tutorials, and code samples for building data-oriented systems and applications. 
 
-CDH and Cloudera Manager provide a data platform and data management platform, but they aren't enough. You need higher-level tools, APIs, documentation, and examples to get working quickly.
+CDH and Cloudera Manager provide a data platform and data management platform, but they aren&apos;t enough. You need higher-level tools, APIs, documentation, and examples to get working quickly.
 
 Generally, everyone agrees that Hadoop is an incredibly powerful platform. It provides the infrastructure needed to process and store data at scale. 
 
@@ -33,8 +33,7 @@ Kite is immediately accessible to developers who speak Java. Other languages wil
 
 Kite provides higher-level APIs atop existing components of CDH. It doesn’t replace, reimplement, or compete with Hive, Oozie, HDFS or HBase. All of these technologies work and play well with Kite. Kite APIs are the next level up the stack. 
 
-The ultimate goal is to provide an API that is closer to how developers think about their data model; a higher-level API that provides Hadoop’s flexibility and performance, but lets developers focus on their business problems.
+The ultimate goal is to provide an API that is closer to how developers think about their data model; a higher-level API that provides Hadoop&apos;s flexibility and performance, but lets developers focus on their business problems.
 
 Kite supports piecemeal adoption via loosely coupled modules. You can pick and choose the parts that make sense for you and your solution, without requiring you to use parts that don’t apply, or forcing you to follow a particular programming paradigm.
 
-#

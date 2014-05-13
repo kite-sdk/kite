@@ -1,6 +1,8 @@
+# Using Kite CLI to create a dataset
+
 Kite provides a set of tools that handle the basic legwork for creating a dataset, allowing you to focus on the specifics of the business problem you want to solve. This short tutorial walks you through the process of creating a dataset and viewing the results using the command line interface (CLI).
 
-#Preparation
+##Preparation
 
 If you have not done so already, download the Kite [command-line interface jar](https://repository.cloudera.com/artifactory/libs-release-local/org/kitesdk/kite-tools/0.13.0/kite-tools-0.13.0-binary.jar). This jar is the executable that runs the command-line interface, so save it as `dataset`. To download with curl, run:
 
@@ -9,18 +11,19 @@ curl https://repository.cloudera.com/artifactory/libs-release-local/org/kitesdk/
 chmod +x dataset
 ```
 
-##Create a CSV Data File
+###Create a CSV Data File
 
-If you have a CSV file sitting around waiting to be used, you can substitute your file for the one that follows. The truth is, it doesn't matter if you have 100 columns or 2 columns, the process is the same. Larger datasets are only larger, not more complex.
+If you have a CSV file sitting around waiting to be used, you can substitute your file for the one that follows. The truth is, it doesn&apos;t matter if you have 100 columns or 2 columns, the process is the same. Larger datasets are only larger, not more complex.
 
-If you don't have a CSV file handy, you can copy the next code snippet and save it as a plain text file named *sandwiches.csv*.
+If you don&apos;t have a CSV file handy, you can copy the next code snippet and save it as a plain text file named *sandwiches.csv*.
 
-```
+```text
 name, description
 Reuben, Pastrami and sauerkraut on toasted rye with Russian dressing.
 PBJ, Peanut butter and grape jelly on white bread.
 ```
-#Infer the Schema
+
+##Infer the Schema
 
 All right. Now we get to use the CLI. Start by inferring an Avro schema file from the *sandwiches.csv* file you just created. Enter the following command to create an Avro schema file named *sandwich.avsc* with the class name *Sandwich*. The schema details are based on the headings and data in *sandwiches.csv*.
 
@@ -45,7 +48,7 @@ If you open *sandwich.avsc* in a text editor, it looks something like the code b
 }
 ```
 
-#Create the Dataset
+##Create the Dataset
 
 With a schema, you can create a new dataset. Enter the following command.
 
@@ -57,9 +60,9 @@ Just for giggles, you can reverse the process you just completed and look at the
 
 `dataset schema sandwiches`
 
-You'll get the same schema back, but this time, trust me, it's coming from the Hive repository. Honest.
+You&apos;ll get the same schema back, but this time, trust me, it&apos;s coming from the Hive repository. Honest.
 
-```
+```json
 {
   "type" : "record",
   "name" : "Sandwich",
@@ -75,17 +78,17 @@ You'll get the same schema back, but this time, trust me, it's coming from the H
   } ]
 }
 ```
-#Import the CSV Data
-You've created a dataset in the Hive repository, which is the container, but not the information itself. Next, you might want to add some data so that you can run some queries. Use the following command to import the sandwiches in your CSV file.
+##Import the CSV Data
+You&apos;ve created a dataset in the Hive repository, which is the container, but not the information itself. Next, you might want to add some data so that you can run some queries. Use the following command to import the sandwiches in your CSV file.
 
 `dataset csv-import sandwiches.csv sandwiches`
 
 The method returns a record count. 
-`Added 2 records to dataset "sandwiches"`
+`Added 2 records to dataset &quot;sandwiches&quot;`
 
 But can you believe that? Inquiring minds want to verify that the information is actually in the dataset.
 
-#Show the Results
+##Show the Results
 
 You can list records from your newly created dataset using the `show` command.
 
@@ -93,7 +96,7 @@ You can list records from your newly created dataset using the `show` command.
 
 By default, CLI retrieves up to the first 10 records from your dataset.
 
-```
+```json
 {"name": "Reuben", "description": " Pastrami and sauerkraut on toasted rye with Russian dressing."}
 {"name": "PBJ", "description": " Peanut butter and grape jelly on white bread."}
 ```
@@ -104,19 +107,22 @@ If you find that number of sandwiches overwhelming, you can change the number of
 
 This time only the first record prints to screen.
 
-`{"name": "Reuben", "description": " Pastrami and sauerkraut on toasted rye with Russian dressing."}`
+```json
+{"name": "Reuben", "description": " Pastrami and sauerkraut on toasted rye with Russian dressing."}
+```
 
 You can import additional records to the database and use Hive or Impala to query the results.
 
-#Delete the Dataset
+##Delete the Dataset
 
-Given the ease with which you just created the sandwiches dataset, it seems a shame to destroy it out of hand. Keep in mind that this was only an example, and not something you were meant to treasure. I suppose you don't have to delete it, you might want to keep it around as a souvenir, like the first dollar earned or something like that. If so, create a dataset you hate, and prepare to annihilate it using this unassuming command.
+Given the ease with which you just created the sandwiches dataset, it seems a shame to destroy it out of hand. Keep in mind that this was only an example, and not something you were meant to treasure. I suppose you don&apos;t have to delete it, you might want to keep it around as a souvenir, like the first dollar earned or something like that. If so, create a dataset you hate, and prepare to annihilate it using this unassuming command.
 
 `dataset delete sandwiches`
 
 There they go. Reuben and PBJ are gone. But you can create them again, or any other dataset you choose, using the CLI.
 
-***
-[Kite Command Line Interface](2. Kite Dataset Command Line Interface)
+---
 
-Back to the [Kite Documentation](https://github.com/kite-sdk/kite/wiki/0.-Kite-SDK-Documentation) page.
+[Kite Command Line Interface](kitedatasetcli.html)
+
+Back to the [Kite Documentation](overview.html) page.
