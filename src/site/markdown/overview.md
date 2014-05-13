@@ -33,7 +33,7 @@ Best practices are to define the output for your system, identifying all of the 
 
 ##Schemas
 
-A schema defines the field names and datatypes for a dataset. Kite relies on an Apache Avro schema definition for each dataset. For example, this is the schema definition for a table listing movies from the [put in all the disclaimers and stuff] dataset.
+A schema defines the field names and datatypes for a dataset. Kite relies on an Apache Avro schema definition for each dataset. For example, this is the schema definition for a table listing movies from the `movies.csv` dataset.*
 
 ```json
 {
@@ -197,4 +197,7 @@ You can load comma separated value data into a dataset repository using the comm
 
 Datasets you create Kite are no different than any other Hadoop dataset in your system, once created. You can query the data with Hive or view it using Impala.
 
-For quick verification that your data has loaded properly, you can view the top _n_ records in your dataset using the command line interface function [show](kitedatasetcli.html#show). 
+For quick verification that your data has loaded properly, you can view the top _n_ records in your dataset using the command line interface function [show](kitedatasetcli.html#show).
+
+---
+*The MovieLens data set was created by the GroupLens Research Group at the University of Minnesota and is available at <a href="http://grouplens.org/datasets/movielens/">http://grouplens.org/datasets/movielens/</a> .

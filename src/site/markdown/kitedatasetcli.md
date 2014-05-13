@@ -123,9 +123,21 @@ After you have generated an Avro schema, you can use `create` to make an empty d
 
 The root directory of the dataset repository. Optional if using Hive for metadata storage.
 
+`--use-hbase`
+
+Store data in HBase tables.
+
+`--use-hdfs`
+
+Store data in HDFS files.
+
 `--use-hive`
 
-The dataset is stored in the filesystem by default. Set this switch to false to store the dataset in the file system.
+Store data in Hive managed tables (default).
+
+`--zookeeper`
+
+ZooKeeper host list as host or host:port.
 
 `-s, --schema`
 
