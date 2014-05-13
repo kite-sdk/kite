@@ -25,7 +25,7 @@ While, in theory, any implementation of Hadoop’s FileSystem abstract class is 
 
 ##Entities
 
-An entity is a single record in a dataset. The name _entity_ is a better term than _record_, because _record_ sounds as if it is a simple list of primitives, while _entity_ sounds more like a Plain Old Java Object you would find in a JPA class (see [JPA Entity](https://en.wikipedia.org/wiki/Java_Persistence_API#Entities) in Wikipedia.org). That said, _entity_ and _record_ are often used interchangeably when talking about datasets. 
+An entity is a single record in a dataset. The name _entity_ is a better term than _record_, because _record_ sounds as if it is a simple list of primitives, while _entity_ sounds more like a Plain Old Java Object, or POJO, (see [POJO](http://en.wikipedia.org/wiki/Plain_Old_Java_Object) in Wikipedia) that could contain maps, lists, or other POJOs. That said, _entity_ and _record_ are often used interchangeably when talking about datasets. 
 
 Entities can be simple types, representing data structures with a few string attributes, or as complex as required.
 
@@ -33,7 +33,7 @@ Best practices are to define the output for your system, identifying all of the 
 
 ##Schemas
 
-A schema defines the field names and datatypes for a dataset. Kite relies on an Apache Avro schema definition for each dataset. For example, this is the schema definition for a table listing movies from the `movies.csv` dataset.*
+A schema defines the field names and datatypes for a dataset. Kite relies on an Apache Avro schema definition for each dataset. For example, this is the schema definition for a table listing movies from the `movies.csv` dataset.<sup>1</sup>
 
 ```json
 {
@@ -156,11 +156,11 @@ While HDFS writes files into statically configured partitions, HBase dynamically
 
 Data cells are organized by column family, and then column qualifier. The cells form columns and groups of columns in a table structure. For example, a user&apos;s data can be stored using the e-mail address for a key, then a &quot;name&quot; column family with &quot;first&quot; and &quot;last&quot; qualifiers. We end up with a view that looks like this:
 
-```
-|  key           | name family      |
-| (e-mail)       | first|   last    |
-| -------------- | -----| --------- |
-| buzz@pixar.com | Buzz | Lightyear |
+```text
+|  key           |  name (family)    |
+| (e-mail)       | first | last      |
+| -------------- | ----- | --------- |
+| buzz@pixar.com | Buzz  | Lightyear |
 ```
 
 ## HBase partitioning
@@ -200,4 +200,5 @@ Datasets you create Kite are no different than any other Hadoop dataset in your 
 For quick verification that your data has loaded properly, you can view the top _n_ records in your dataset using the command line interface function [show](kitedatasetcli.html#show).
 
 ---
-*The MovieLens data set was created by the GroupLens Research Group at the University of Minnesota and is available at <a href="http://grouplens.org/datasets/movielens/">http://grouplens.org/datasets/movielens/</a> .
+
+1. The MovieLens data set was created by the GroupLens Research Group at the University of Minnesota and is available at <a href="http://grouplens.org/datasets/movielens/"> http://grouplens.org/datasets/movielens/ </a>.
