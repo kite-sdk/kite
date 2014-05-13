@@ -20,6 +20,8 @@ package org.kitesdk.data;
  * Exception thrown to indicate that there was a problem
  * parsing or validating a schema, partition strategy, or column mapping.
  * <p>
+ *
+ * @since 0.14.0
  */
 public class ValidationException extends DatasetException {
 

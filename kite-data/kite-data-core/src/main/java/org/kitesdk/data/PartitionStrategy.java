@@ -252,6 +252,10 @@ public class PartitionStrategy {
     return PartitionStrategyParser.toString(this, false);
   }
 
+  /**
+   * @param pretty {@code true} to indent and format JSON
+   * @return this PartitionStrategy as its JSON representation
+   */
   public String toString(boolean pretty) {
     return PartitionStrategyParser.toString(this, pretty);
   }
@@ -305,8 +309,7 @@ public class PartitionStrategy {
     }
 
     /**
-     * Configure an identity partitioner for a given type with a cardinality
-     * hint of {@code buckets} size.
+     * Configure an identity partitioner.
      *
      * The partition name is the source field name with a "_copy" suffix.
      * For example, identity("color", String.class, 34) creates "color_copy"
@@ -326,10 +329,9 @@ public class PartitionStrategy {
     }
 
     /**
-     * Configure an identity partitioner for a given type with a cardinality hint of
-     * {@code buckets} size. If name is null, the partition name will be the source
-     * field name with a "_copy" suffix. For example, identity("color", null, ...)
-     * will create "color_copy" partitions.
+     * Configure an identity partitioner. If name is null, the partition name
+     * will be the source field name with a "_copy" suffix. For example,
+     * identity("color", null, ...) will create "color_copy" partitions.
      *
      * @param sourceName
      *          The entity field name from which to get values to be
@@ -347,8 +349,8 @@ public class PartitionStrategy {
     }
 
     /**
-     * Configure an identity partitioner for a given type with a cardinality
-     * hint of {@code buckets} size.
+     * Configure an identity partitioner with a cardinality hint of
+     * {@code cardinalityHint}.
      *
      * The partition name is the source field name with a "_copy" suffix.
      * For example, identity("color", String.class, 34) creates "color_copy"
@@ -372,8 +374,8 @@ public class PartitionStrategy {
     }
 
     /**
-     * Configure an identity partitioner for a given type with a cardinality hint of
-     * {@code buckets} size. If name is null, the partition name will be the source
+     * Configure an identity partitioner with a cardinality hint of
+     * {@code cardinalityHint}. If name is null, the partition name will be the source
      * field name with a "_copy" suffix. For example, identity("color", null, ...)
      * will create "color_copy" partitions.
      *

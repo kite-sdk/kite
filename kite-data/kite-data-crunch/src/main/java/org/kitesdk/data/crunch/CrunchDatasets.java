@@ -50,6 +50,8 @@ public class CrunchDatasets {
    * @param type    the Java type of the entities in the dataset
    * @param <E>     the type of entity produced by the source
    * @return a {@link ReadableSource} for the view
+   *
+   * @since 0.14.0
    */
   public static <E> ReadableSource<E> asSource(View<E> view, Class<E> type) {
     return new DatasetSourceTarget<E>(view, type);
@@ -72,6 +74,8 @@ public class CrunchDatasets {
    * @param view the view to write to
    * @param <E>  the type of entity stored in the view
    * @return a {@link Target} for the view
+   *
+   * @since 0.14.0
    */
   public static <E> Target asTarget(View<E> view) {
     return new DatasetTarget<E>(view);

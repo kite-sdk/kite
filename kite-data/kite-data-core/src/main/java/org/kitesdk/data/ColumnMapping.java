@@ -28,6 +28,8 @@ import org.kitesdk.data.spi.ColumnMappingParser;
 /**
  * A descriptor for an entity's column mappings, which defines how an entity
  * maps to a columnar store.
+ *
+ * @since 0.14.0
  */
 @Immutable
 public class ColumnMapping {
@@ -109,6 +111,8 @@ public class ColumnMapping {
 
   /**
    * A fluent builder to aid in constructing a {@link ColumnMapping}.
+   *
+   * @since 0.14.0
    */
   public static class Builder {
     boolean hasOCCVersion = false;

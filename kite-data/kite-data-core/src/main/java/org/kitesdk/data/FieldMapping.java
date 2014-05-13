@@ -22,12 +22,19 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.ColumnMappingParser;
 
+/**
+ * Represents how to store a Schema field.
+ *
+ * @since 0.14.0
+ */
 @Immutable
 public class FieldMapping {
 
   /**
    * The supported Mapping Types, which control how an entity field maps to
    * columns in an HBase table.
+   *
+   * @since 0.14.0
    */
   public static enum MappingType {
 

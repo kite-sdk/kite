@@ -89,6 +89,8 @@ public class DatasetDescriptor {
    * Create an instance of this class with the supplied {@link Schema}, optional
    * URL, {@link Format}, optional location URL, optional
    * {@link PartitionStrategy}, and optional {@link ColumnMapping}.
+   *
+   * @since 0.14.0
    */
   public DatasetDescriptor(Schema schema, @Nullable URL schemaUrl,
       Format format, @Nullable URI location,
@@ -217,6 +219,8 @@ public class DatasetDescriptor {
    * Get the {@link ColumnMapping}.
    *
    * @return ColumnMapping
+   *
+   * @since 0.14.0
    */
   public ColumnMapping getColumnMapping() {
     return columnMappings;
@@ -233,6 +237,8 @@ public class DatasetDescriptor {
   /**
    * Returns true if an associated dataset is column mapped (that is, has an
    * associated {@link ColumnMapping}), false otherwise.
+   *
+   * @since 0.14.0
    */
   public boolean isColumnMapped() {
     return columnMappings != null;
@@ -622,6 +628,8 @@ public class DatasetDescriptor {
      *          strategy
      * @throws DatasetIOException
      *          If there is an IOException accessing the file contents
+     *
+     * @since 0.14.0
      */
     public Builder partitionStrategy(File file) {
       this.partitionStrategy = PartitionStrategyParser.parse(file);
@@ -642,6 +650,8 @@ public class DatasetDescriptor {
      *          strategy
      * @throws DatasetIOException
      *          If there is an IOException accessing the InputStream contents
+     *
+     * @since 0.14.0
      */
     public Builder partitionStrategy(InputStream in) {
       this.partitionStrategy = PartitionStrategyParser.parse(in);
@@ -659,6 +669,8 @@ public class DatasetDescriptor {
      * @return This builder for method chaining.
      * @throws ValidationException
      *          If the literal is not a valid JSON-encoded partition strategy
+     *
+     * @since 0.14.0
      */
     public Builder partitionStrategyLiteral(String literal) {
       this.partitionStrategy = PartitionStrategyParser.parse(literal);
@@ -673,6 +685,8 @@ public class DatasetDescriptor {
      * @return This builder for method chaining.
      * @throws ValidationException
      *          If the literal is not a valid JSON-encoded partition strategy
+     *
+     * @since 0.14.0
      */
     public Builder partitionStrategyUri(URI uri) throws IOException {
       // special support for resource URIs
@@ -702,6 +716,8 @@ public class DatasetDescriptor {
      * @throws ValidationException
      *          If the literal is not a valid JSON-encoded partition strategy
      * @throws URISyntaxException if {@code uri} is not a valid URI
+     *
+     * @since 0.14.0
      */
     public Builder partitionStrategyUri(String uri)
         throws URISyntaxException, IOException {
@@ -714,6 +730,8 @@ public class DatasetDescriptor {
      * @param columnMappings
      *          A ColumnMapping
      * @return This builder for method chaining
+     *
+     * @since 0.14.0
      */
     public Builder columnMapping(
         @Nullable ColumnMapping columnMappings) {
@@ -734,6 +752,8 @@ public class DatasetDescriptor {
      *          If the literal is not valid JSON-encoded column mappings
      * @throws DatasetIOException
      *          If there is an IOException accessing the file contents
+     *
+     * @since 0.14.0
      */
     public Builder columnMapping(File file) {
       this.columnMapping = ColumnMappingParser.parse(file);
@@ -753,6 +773,8 @@ public class DatasetDescriptor {
      *          If the literal is not valid JSON-encoded column mappings
      * @throws DatasetIOException
      *          If there is an IOException accessing the InputStream contents
+     *
+     * @since 0.14.0
      */
     public Builder columnMapping(InputStream in) {
       this.columnMapping = ColumnMappingParser.parse(in);
@@ -770,6 +792,8 @@ public class DatasetDescriptor {
      * @return This builder for method chaining
      * @throws ValidationException
      *          If the literal is not valid JSON-encoded column mappings
+     *
+     * @since 0.14.0
      */
     public Builder columnMappingLiteral(String literal) {
       this.columnMapping = ColumnMappingParser.parse(literal);
@@ -786,6 +810,8 @@ public class DatasetDescriptor {
      *          If the literal is not valid JSON-encoded column mappings
      * @throws java.io.IOException
      *          If accessing the URI results in an IOException
+     *
+     * @since 0.14.0
      */
     public Builder columnMappingUri(URI uri) throws IOException {
       // special support for resource URIs
@@ -818,6 +844,8 @@ public class DatasetDescriptor {
      *          If accessing the URI results in an IOException
      * @throws URISyntaxException
      *          If {@code uri} is not a valid URI
+     *
+     * @since 0.14.0
      */
     public Builder columnMappingUri(String uri)
         throws URISyntaxException, IOException {
