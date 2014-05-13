@@ -4,10 +4,10 @@ Kite provides a set of tools that handle the basic legwork for creating a datase
 
 ##Preparation
 
-If you have not done so already, download the Kite [command-line interface jar](https://repository.cloudera.com/artifactory/libs-release-local/org/kitesdk/kite-tools/0.13.0/kite-tools-0.13.0-binary.jar). This jar is the executable that runs the command-line interface, so save it as `dataset`. To download with curl, run:
+If you have not done so already, download the Kite [command-line interface jar](https://repository.cloudera.com/artifactory/libs-release-local/org/kitesdk/kite-tools/0.14.0/kite-tools-0.14.0-binary.jar). This jar is the executable that runs the command-line interface, so save it as `dataset`. To download with curl, run:
 
 ```
-curl https://repository.cloudera.com/artifactory/libs-release-local/org/kitesdk/kite-tools/0.13.0/kite-tools-0.13.0-binary.jar -o dataset
+curl https://repository.cloudera.com/artifactory/libs-release-local/org/kitesdk/kite-tools/0.14.0/kite-tools-0.14.0-binary.jar -o dataset
 chmod +x dataset
 ```
 
