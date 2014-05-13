@@ -175,10 +175,6 @@ Good performance comes from being able to ignore as much of a dataset as possibl
 
 For example, storing events in HDFS by year, then month, and then day, allows Kite to ignore files that can&apos;t have data in a given time range. A similar partition strategy for HBase would include the entire timestamp, because the region boundaries are not statically set ahead of time and might be small.
 
-### Balancing keys
-
-TBD
-
 #Dataset Repository
 
 A _dataset repository_ is a physical storage location for datasets. Keeping with the relational database analogy, a dataset repository is the equivalent of a database of tables.
