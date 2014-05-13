@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -48,6 +49,7 @@ public class TestShowRecordsCommand {
     writer.append("2,user,user@example.com\n");
     writer.close();
 
+    TestUtil.run("delete", "users", "--use-local", "-d", "target/data");
     TestUtil.run("-v", "csv-schema", sample, "-o", avsc, "--class", "User");
     TestUtil.run("-v", "create", "users",
         "--use-local", "-d", "target/data", "-s", avsc);
@@ -57,7 +59,7 @@ public class TestShowRecordsCommand {
 
   @AfterClass
   public static void removeData() throws Exception {
-    TestUtil.run("delete", "users", "--local", "-d", "target/data");
+    TestUtil.run("delete", "users", "--use-local", "-d", "target/data");
   }
 
   @Before
