@@ -3,6 +3,34 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version 0.14.0
+
+Release date: 13 May 2014
+
+Version 0.14.0 has the following notable additions:
+
+* Added View support to Kite [MapReduce](http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/mapreduce/package-summary.html) and [Crunch](http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/crunch/CrunchDatasets.html)
+* Added more [documentation on kitesdk.org](http://kitesdk.org/docs/current/overview.html)
+    * [Kite command-line interface tutorial](http://kitesdk.org/docs/current/usingkiteclicreatedataset.html) and [reference](http://kitesdk.org/docs/current/kitedatasetcli.html)
+* Added HBase storage option to the CLI, `--use-hbase` (experimental)
+* Added a new JSON configuration format for partition strategies
+    * Supports hash, identity, year, month, day, hour, minute parititoners
+    * [Partition strategy documentation](http://kitesdk.org/docs/current/overview.html#Defining_a_Partitioning_Strategy)
+* Added partition strategy support to the CLI
+    * Create and validate partition strategies using [partition-config](kitedatasetcli.html#partition-config)
+    * Create partitioned datasets with [create](kitedatasetcli.html#create)
+* Added a builder and JSON configuration format for HBase column mappings
+    * Supports column, counter, keyAsColumn, key, and version mappings
+* Updated to parquet 1.4.1
+
+And the following bug fixes:
+
+* Updated CLI environment setup for CDH5.0 QuickStart VM
+* Fixed compatibility with CDH5 Hive, [CDK-416](https://issues.cloudera.org/browse/CDK-416)
+* Fixed schema update validation bug, [CDK-410](https://issues.cloudera.org/browse/CDK-410)
+* Added reconnect support when Hive connections drop, [CDK-415](https://issues.cloudera.org/browse/CDK-415)
+
+
 ## Version 0.13.0
 
 Release date: April 23, 2014
