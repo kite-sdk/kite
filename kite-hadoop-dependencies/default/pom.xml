@@ -19,12 +19,12 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>kite-hadoop-dependencies</artifactId>
   <packaging>pom</packaging>
-  <version>0.13.1-SNAPSHOT</version>
+  <version>0.14.0</version>
 
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-hadoop-deps-parent</artifactId>
-    <version>0.13.1-SNAPSHOT</version>
+    <version>0.14.0</version>
   </parent>
 
   <name>Kite Hadoop Default Dependencies Module</name>
