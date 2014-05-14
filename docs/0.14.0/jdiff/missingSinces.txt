@@ -1,0 +1,33 @@
+OK: org.kitesdk.data.ColumnMapping Class
+OK: org.kitesdk.data.ColumnMapping.Builder Class
+OK: org.kitesdk.data.FieldMapping Class
+OK: org.kitesdk.data.FieldMapping.MappingType Class
+OK: org.kitesdk.data.ValidationException Class
+OK: org.kitesdk.data.DatasetDescriptor Constructor (org.apache.avro.Schema, java.net.URL, org.kitesdk.data.Format, java.net.URI, java.util.Map<java.lang.String, java.lang.String>, org.kitesdk.data.PartitionStrategy, org.kitesdk.data.ColumnMapping)
+OK: org.kitesdk.data.crunch.CrunchDatasets Method asSource(org.kitesdk.data.View<E>, java.lang.Class<E>)
+OK: org.kitesdk.data.crunch.CrunchDatasets Method asTarget(org.kitesdk.data.View<E>)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method columnMapping(java.io.File)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method columnMapping(java.io.InputStream)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method columnMapping(org.kitesdk.data.ColumnMapping)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method columnMappingLiteral(java.lang.String)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method columnMappingUri(java.net.URI)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method columnMappingUri(java.lang.String)
+OK: org.kitesdk.data.DatasetDescriptor Method getColumnMapping()
+OK: org.kitesdk.data.PartitionStrategy.Builder Method identity(java.lang.String)
+OK: org.kitesdk.data.PartitionStrategy.Builder Method identity(java.lang.String, int)
+OK: org.kitesdk.data.PartitionStrategy.Builder Method identity(java.lang.String, java.lang.String)
+OK: org.kitesdk.data.PartitionStrategy.Builder Method identity(java.lang.String, java.lang.String, int)
+OK: org.kitesdk.data.PartitionStrategy.Builder Method identity(java.lang.String, java.lang.String, java.lang.Class<S>, int)
+OK: org.kitesdk.data.DatasetDescriptor Method isColumnMapped()
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method partitionStrategy(java.io.File)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method partitionStrategy(java.io.InputStream)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method partitionStrategyLiteral(java.lang.String)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method partitionStrategyUri(java.net.URI)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method partitionStrategyUri(java.lang.String)
+NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyInputFormat Method setView(org.apache.hadoop.conf.Configuration, org.kitesdk.data.View<E>)
+NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyInputFormat Method setView(org.apache.hadoop.mapreduce.Job, org.kitesdk.data.View<E>)
+NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat Method setView(org.apache.hadoop.conf.Configuration, org.kitesdk.data.View<E>)
+NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat Method setView(org.apache.hadoop.mapreduce.Job, org.kitesdk.data.View<E>)
+MISSING @SINCE TAG: org.kitesdk.data.PartitionStrategy Method toString(boolean)
+NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyInputFormat Field KITE_CONSTRAINTS
+NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat Field KITE_CONSTRAINTS
