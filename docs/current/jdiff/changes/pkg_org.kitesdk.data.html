@@ -18,7 +18,7 @@ org.kitesdk.data
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.13.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.14.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -31,13 +31,13 @@ org.kitesdk.data
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV PACKAGE</B>&nbsp;
-&nbsp;<A HREF="pkg_org.kitesdk.data.filesystem.html"><B>NEXT PACKAGE</B></A>
+&nbsp;<A HREF="pkg_org.kitesdk.data.crunch.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="pkg_org.kitesdk.data.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell3"><FONT SIZE="-2"> DETAIL: &nbsp;
-<a href="#Removed">REMOVED</a>&nbsp;|&nbsp;
-ADDED&nbsp;|&nbsp;
+REMOVED&nbsp;|&nbsp;
+<a href="#Added">ADDED</a>&nbsp;|&nbsp;
 <a href="#Changed">CHANGED</a>
   </FONT></TD>
 </TR>
@@ -48,41 +48,96 @@ ADDED&nbsp;|&nbsp;
 Package <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><tt>org.kitesdk.data</tt></A>
 </H2>
 <p>
-<a NAME="Removed"></a>
-<TABLE summary="Removed Classes" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Added"></a>
+<TABLE summary="Added Classes" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Classes</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Classes</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="FieldPartitioner"></A>
-  FieldPartitioner
+  <A NAME="ColumnMapping"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/data/ColumnMapping.html" target="_top"><tt>ColumnMapping</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A descriptor for an entity's column mappings, which defines how an entity
+ maps to a columnar store.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ColumnMapping.Builder"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/data/ColumnMapping.Builder.html" target="_top"><tt>ColumnMapping.Builder</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A fluent builder to aid in constructing a <A HREF="../../apidocs/org/kitesdk/data/ColumnMapping/Builder/ColumnMapping.html"><TT>ColumnMapping</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="FieldMapping"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/data/FieldMapping.html" target="_top"><tt>FieldMapping</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Represents how to store a Schema field.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="FieldMapping.MappingType"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/data/FieldMapping.MappingType.html" target="_top"><tt>FieldMapping.MappingType</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">The supported Mapping Types, which control how an entity field maps to
+ columns in an HBase table.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ValidationException"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/data/ValidationException.html" target="_top"><tt>ValidationException</tt></A></nobr>
   </TD>
   <TD VALIGN="TOP"><p>
- Partitions values for a named field.</TD>
+ Exception thrown to indicate that there was a problem
+ parsing or validating a schema, partition strategy, or column mapping.</TD>
 </TR>
 </TABLE>
 &nbsp;
 <p>
 <a NAME="Changed"></a>
-<TABLE summary="Changed Classes and Interfaces" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TABLE summary="Changed Classes" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes and Interfaces</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="MetadataProvider"></A>
-  <nobr><A HREF="org.kitesdk.data.MetadataProvider.html"><I>MetadataProvider</I></A></nobr>
-  </TD>
-  <TD VALIGN="TOP">will be moved in 0.14.0; moved to service provider interface.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="MetadataProviderException"></A>
-  <nobr><A HREF="org.kitesdk.data.MetadataProviderException.html">MetadataProviderException</A></nobr>
+  <A NAME="DatasetDescriptor"></A>
+  <nobr><A HREF="org.kitesdk.data.DatasetDescriptor.html">DatasetDescriptor</A></nobr>
   </TD>
   <TD VALIGN="TOP"><p>
- Exception thrown for metadata provider-related failures.</TD>
+ The structural definition of a <A HREF="../../apidocs/org/kitesdk/data/DatasetDescriptor/Dataset.html"><TT>Dataset</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="DatasetDescriptor.Builder"></A>
+  <nobr><A HREF="org.kitesdk.data.DatasetDescriptor.Builder.html">DatasetDescriptor.Builder</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A fluent builder to aid in the construction of <A HREF="../../apidocs/org/kitesdk/data/DatasetDescriptor/Builder/DatasetDescriptor.html"><TT>DatasetDescriptor</TT></A>s.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="PartitionStrategy"></A>
+  <nobr><A HREF="org.kitesdk.data.PartitionStrategy.html">PartitionStrategy</A></nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ The strategy used to determine how a dataset is partitioned.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="PartitionStrategy.Builder"></A>
+  <nobr><A HREF="org.kitesdk.data.PartitionStrategy.Builder.html">PartitionStrategy.Builder</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A fluent builder to aid in the construction of <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy/Builder/PartitionStrategy.html"><TT>PartitionStrategy</TT></A>s.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="SchemaValidationException"></A>
+  <nobr><A HREF="org.kitesdk.data.SchemaValidationException.html">SchemaValidationException</A></nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ Exception thrown to indicate that there is a problem
+ parsing or validating a schema.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -93,7 +148,7 @@ Package <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_t
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.13.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.14.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -106,7 +161,7 @@ Package <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_t
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV PACKAGE</B>&nbsp;
-&nbsp;<A HREF="pkg_org.kitesdk.data.filesystem.html"><B>NEXT PACKAGE</B></A>
+&nbsp;<A HREF="pkg_org.kitesdk.data.crunch.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="pkg_org.kitesdk.data.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
