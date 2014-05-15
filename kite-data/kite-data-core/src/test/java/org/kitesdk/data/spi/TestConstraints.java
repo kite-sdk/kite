@@ -547,6 +547,31 @@ public class TestConstraints {
   }
 
   @Test
+  public void testTimeAlignedWithPartitionBoundaries() {
+    Constraints c = emptyConstraints;
+    Assert.assertFalse("Cannot be satisfied because timestamp is in middle of partition",
+        c.from("timestamp", new DateTime(2013, 9, 1, 12, 0, DateTimeZone.UTC).getMillis())
+            .alignedWithBoundaries(strategy));
+    Assert.assertTrue("Should be satisfied because 'from' timestamp is on inclusive partition boundary",
+        c.from("timestamp", new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis())
+            .alignedWithBoundaries(strategy));
+    Assert.assertFalse("Cannot be satisfied because 'from' timestamp is on exclusive partition boundary",
+        c.fromAfter("timestamp", new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis())
+            .alignedWithBoundaries(strategy));
+    Assert.assertTrue("Should be satisfied because 'to' timestamp is on exclusive partition boundary",
+        c.toBefore("timestamp", new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis())
+            .alignedWithBoundaries(strategy));
+    Assert.assertFalse("Cannot be satisfied because 'to' timestamp is on inclusive partition boundary",
+        c.to("timestamp", new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis())
+            .alignedWithBoundaries(strategy));
+    Assert.assertTrue("Should be satisfied because 'from' timestamp is on inclusive " +
+            "partition boundary and 'to' timestamp is on exclusive partition boundary",
+        c.from("timestamp", new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis())
+            .toBefore("timestamp", new DateTime(2013, 9, 2, 0, 0, DateTimeZone.UTC).getMillis())
+            .alignedWithBoundaries(strategy));
+  }
+
+  @Test
   public void testTimeRangeEdgeCases() {
     final long oct_24_2013 = new DateTime(2013, 10, 24, 0, 0, DateTimeZone.UTC).getMillis();
     final long oct_25_2013 = new DateTime(2013, 10, 25, 0, 0, DateTimeZone.UTC).getMillis();
