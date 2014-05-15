@@ -285,6 +285,7 @@ public class Constraints implements Serializable{
     for (Map.Entry<String, Predicate> entry : constraints.entrySet()) {
       Collection<FieldPartitioner> fps = partitioners.get(entry.getKey());
       if (fps.isEmpty()) {
+        LOG.debug("No field partitioners for key {}", entry.getKey());
         return false;
       }
 
@@ -296,6 +297,8 @@ public class Constraints implements Serializable{
             TimeDomain domain = TimeDomain.get(strategy, entry.getKey());
             Predicate strict = domain.projectStrict(predicate);
             Predicate permissive = domain.project(predicate);
+            LOG.debug("Time predicate strict: {}", strict);
+            LOG.debug("Time predicate permissive: {}", permissive);
             satisfied = strict != null && strict.equals(permissive);
             break;
           } else {
@@ -309,6 +312,7 @@ public class Constraints implements Serializable{
         }
         // this predicate cannot be satisfied by the partition information
         if (!satisfied) {
+          LOG.debug("Predicate not satisfied: {}", predicate);
           return false;
         }
       }
@@ -600,6 +604,7 @@ public class Constraints implements Serializable{
         Predicate<Marker> timePredicate = TimeDomain
             .get(strategy, sourceName)
             .project(predicates.get(sourceName));
+        LOG.debug("Time predicate: {}", timePredicate);
         if (timePredicate != null && !timePredicate.apply(key)) {
           return false;
         }

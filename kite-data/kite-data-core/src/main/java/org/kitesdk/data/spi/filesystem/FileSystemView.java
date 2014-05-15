@@ -39,6 +39,8 @@ import org.apache.hadoop.fs.Path;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * FileSystem implementation of a {@link org.kitesdk.data.spi.Constraints}-based
@@ -49,6 +51,8 @@ import java.io.IOException;
 @Immutable
 class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatAccessor<E>,
     LastModifiedAccessor, SizeAccessor {
+
+  private static final Logger LOG = LoggerFactory.getLogger(FileSystemView.class);
 
   private final FileSystem fs;
   private final Path root;
@@ -159,10 +163,12 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     try {
       boolean deleted;
       if (dir.isAbsolute()) {
+        LOG.debug("Deleting path {}", dir);
         deleted = fs.delete(dir, true /* include any files */ );
       } else {
         // the path should be treated as relative to the root path
         Path absolute = new Path(root, dir);
+        LOG.debug("Deleting path {}", absolute);
         deleted = fs.delete(absolute, true /* include any files */ );
         // iterate up to the root, removing empty directories
         for (Path current = absolute.getParent();
@@ -171,6 +177,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
           final FileStatus[] stats = fs.listStatus(current);
           if (stats == null || stats.length == 0) {
             // dir is empty and should be removed
+            LOG.debug("Deleting empty path {}", current);
             deleted = fs.delete(current, true) || deleted;
           } else {
             // all parent directories will be non-empty
