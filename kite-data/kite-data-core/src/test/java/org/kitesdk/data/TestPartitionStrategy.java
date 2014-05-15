@@ -48,7 +48,7 @@ public class TestPartitionStrategy {
     }
   }
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
       .getLogger(TestPartitionStrategy.class);
 
   @Test

@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 @Mojo(name = "update-dataset", requiresProject = false, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class UpdateDatasetMojo extends AbstractDatasetMojo {
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
       .getLogger(UpdateDatasetMojo.class);
 
   /**

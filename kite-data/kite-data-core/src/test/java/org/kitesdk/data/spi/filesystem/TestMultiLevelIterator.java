@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class TestMultiLevelIterator {
 
-  public static final Logger logger = LoggerFactory.getLogger(TestMultiLevelIterator.class);
+  public static final Logger LOG = LoggerFactory.getLogger(TestMultiLevelIterator.class);
 
   public static class RecursiveMapIterator extends MultiLevelIterator<String> {
     private final Map<String, Map> map;
@@ -51,10 +51,10 @@ public class TestMultiLevelIterator {
         }
       } catch (Exception ex) {
         // Should be NPE or ClassCastException
-        logger.debug("Returning empty set for {}", current);
+        LOG.debug("Returning empty set for {}", current);
         return Sets.newHashSet();
       }
-      logger.debug("Returning {} for {}", currentLevel.keySet(), current);
+      LOG.debug("Returning {} for {}", currentLevel.keySet(), current);
       return currentLevel.keySet();
     }
   }

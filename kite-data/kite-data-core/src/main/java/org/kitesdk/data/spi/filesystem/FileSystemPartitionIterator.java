@@ -44,7 +44,7 @@ import java.util.Set;
 class FileSystemPartitionIterator implements
     Iterator<Pair<StorageKey, Path>>, Iterable<Pair<StorageKey, Path>> {
 
-  private static final Logger logger = LoggerFactory.getLogger(
+  private static final Logger LOG = LoggerFactory.getLogger(
       FileSystemPartitionIterator.class);
 
   private static final Joiner PATH_JOINER = Joiner.on("/");
@@ -119,7 +119,7 @@ class FileSystemPartitionIterator implements
     private final Predicate<StorageKey> predicate;
 
     private KeyPredicate(Predicate<StorageKey> predicate) {
-      logger.debug("StorageKey predicate: {}", predicate);
+      LOG.debug("StorageKey predicate: {}", predicate);
       this.predicate = predicate;
     }
 
@@ -128,7 +128,7 @@ class FileSystemPartitionIterator implements
         value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
         justification="Non-null @Nullable parameter inherited from Function")
     public boolean apply(@Nullable Pair<StorageKey, Path> pair) {
-      logger.debug("Applying predicate {} to key {}", predicate, pair.first());
+      LOG.debug("Applying predicate {} to key {}", predicate, pair.first());
       return predicate.apply(pair.first());
     }
   }

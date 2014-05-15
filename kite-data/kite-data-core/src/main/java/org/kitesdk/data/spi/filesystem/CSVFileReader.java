@@ -42,7 +42,7 @@ import java.util.NoSuchElementException;
 
 class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
       .getLogger(CSVFileReader.class);
 
   private final CSVProperties props;
@@ -144,7 +144,7 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
       return;
     }
 
-    logger.debug("Closing reader on path:{}", path);
+    LOG.debug("Closing reader on path:{}", path);
 
     try {
       reader.close();

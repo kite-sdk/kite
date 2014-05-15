@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
       .getLogger(HCatalogExternalMetadataProvider.class);
   private final Path rootDirectory;
   private final FileSystem rootFileSystem;
@@ -77,7 +77,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
           "Metadata already exists for dataset:" + name);
     }
 
-    logger.info("Creating an external Hive table named: " + name);
+    LOG.info("Creating an external Hive table named: " + name);
 
     // create a new descriptor with the dataset's location
     final DatasetDescriptor newDescriptor =

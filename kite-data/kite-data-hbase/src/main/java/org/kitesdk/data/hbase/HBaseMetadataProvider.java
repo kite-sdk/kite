@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 class HBaseMetadataProvider extends AbstractMetadataProvider {
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
       .getLogger(HBaseMetadataProvider.class);
 
   private HBaseAdmin hbaseAdmin;
@@ -154,7 +154,7 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
     if (!schemaManager.hasSchemaVersion(tableName, entityName, entitySchema)) {
       schemaManager.migrateSchema(tableName, entityName, schemaString);
     } else {
-      logger.info("Schema hasn't changed, not migrating: (" + name + ")");
+      LOG.info("Schema hasn't changed, not migrating: (" + name + ")");
     }
     return getDatasetDescriptor(newSchema, descriptor.getLocation());
   }

@@ -39,7 +39,7 @@ import parquet.Preconditions;
  */
 public class Loader implements Loadable {
 
-  private static final Logger logger = LoggerFactory.getLogger(Loader.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Loader.class);
 
   public static final String HIVE_METASTORE_URI_PROP = "hive.metastore.uris";
   private static final int UNSPECIFIED_PORT = -1;
@@ -60,7 +60,7 @@ public class Loader implements Loadable {
 
     @Override
     public DatasetRepository getFromOptions(Map<String, String> match) {
-      logger.debug("External URI options: {}", match);
+      LOG.debug("External URI options: {}", match);
       final Path root;
       String path = match.get("path");
       if (match.containsKey("absolute")
@@ -97,7 +97,7 @@ public class Loader implements Loadable {
 
     @Override
     public DatasetRepository getFromOptions(Map<String, String> match) {
-      logger.debug("Managed URI options: {}", match);
+      LOG.debug("Managed URI options: {}", match);
       // make a modifiable copy and setup the MetaStore URI
       Configuration conf = new Configuration(envConf);
       // sanity check the URI
@@ -151,7 +151,7 @@ public class Loader implements Loadable {
       hdfsAuthority = "&hdfs-host=" + hdfs.getHost() +
           "&hdfs-port=" + hdfs.getPort();
     } catch (IOException ex) {
-      logger.warn(
+      LOG.warn(
           "Could not locate HDFS, hdfs-host and hdfs-port " +
           "will not be set by default for Hive repositories.");
       hdfsAuthority = "";

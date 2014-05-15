@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
     .getLogger(PartitionedDatasetWriter.class);
 
   private static final int MAX_FILE_WRITERS = 10;
@@ -72,7 +72,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
       "Unable to open a writer from state:%s", state);
 
-    logger.debug("Opening partitioned dataset writer w/strategy:{}",
+    LOG.debug("Opening partitioned dataset writer w/strategy:{}",
       partitionStrategy);
 
     cachedWriters = CacheBuilder.newBuilder().maximumSize(maxWriters)
@@ -113,7 +113,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to write to a writer in state:%s", state);
 
-    logger.debug("Flushing all cached writers for view:{}", view);
+    LOG.debug("Flushing all cached writers for view:{}", view);
 
     /*
      * There's a potential for flushing entries that are created by other
@@ -123,7 +123,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
      * partitions to prevent cached writer contention.
      */
     for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
-      logger.debug("Flushing partition writer:{}", writer);
+      LOG.debug("Flushing partition writer:{}", writer);
       writer.flush();
     }
   }
@@ -132,10 +132,10 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   public void close() {
     if (state.equals(ReaderWriterState.OPEN)) {
 
-      logger.debug("Closing all cached writers for view:{}", view);
+      LOG.debug("Closing all cached writers for view:{}", view);
 
       for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
-        logger.debug("Closing partition writer:{}", writer);
+        LOG.debug("Closing partition writer:{}", writer);
         writer.close();
       }
 
@@ -202,7 +202,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
 
       DatasetWriter<E> writer = notification.getValue();
 
-      logger.debug("Closing writer:{} for partition:{}", writer,
+      LOG.debug("Closing writer:{} for partition:{}", writer,
         notification.getKey());
 
       writer.close();

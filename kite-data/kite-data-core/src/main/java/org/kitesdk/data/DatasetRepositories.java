@@ -36,7 +36,7 @@ import java.util.ServiceLoader;
  */
 public class DatasetRepositories {
 
-  private static final Logger logger = LoggerFactory.getLogger(DatasetRepositories.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetRepositories.class);
 
   private static final URIPattern BASE_PATTERN = new URIPattern(
       URI.create("repo:*storage-uri"));
@@ -62,10 +62,10 @@ public class DatasetRepositories {
         ServiceLoader.load(Loadable.class);
     for (Loadable loader : impls) {
       // the ServiceLoader is lazy, so this iteration forces service loading
-      logger.debug("Loading: " + loader.getClass().getName());
+      LOG.debug("Loading: " + loader.getClass().getName());
       loader.load();
     }
-    logger.debug(
+    LOG.debug(
         "Registered repository URIs: " +
         Joiner.on(", ").join(REGISTRY.keySet()));
   }
@@ -225,7 +225,7 @@ public class DatasetRepositories {
       if (match != null) {
         final OptionBuilder<DatasetRepository> builder = REGISTRY.get(pattern);
         final DatasetRepository repo = builder.getFromOptions(match);
-        logger.debug(
+        LOG.debug(
             "Connected to repository:{} using uri:{}", repo, repositoryUri);
 
         return repo;

@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 @Immutable
 public abstract class AbstractRefinableView<E> implements RefinableView<E> {
 
-  private static final Logger logger = LoggerFactory.getLogger(AbstractRefinableView.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractRefinableView.class);
 
   protected final Dataset<E> dataset;
   protected final MarkerComparator comparator;

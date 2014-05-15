@@ -92,7 +92,7 @@ import com.google.common.base.Charsets;
  */
 public class JobClasspathHelper {
 
-  private static final Logger logger = LoggerFactory.getLogger(JobClasspathHelper.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JobClasspathHelper.class);
 
   /**
    * 
@@ -131,7 +131,7 @@ public class JobClasspathHelper {
               Closeables.close(in, threw);
             }
           } else {
-            logger.info("Ignoring {}, since it looks like it's from Hadoop's core libs", localJarPath);
+            LOG.info("Ignoring {}, since it looks like it's from Hadoop's core libs", localJarPath);
           }
         }
       }
@@ -141,7 +141,7 @@ public class JobClasspathHelper {
       Path localJarPath = new Path(entry.getKey());
       String jarFilename = localJarPath.getName();
       String localMd5sum = entry.getValue();
-      logger.info("Jar {}. MD5 : [{}]", localJarPath, localMd5sum);
+      LOG.info("Jar {}. MD5 : [{}]", localJarPath, localMd5sum);
 
       Path remoteJarPath = new Path(libDir, jarFilename);
       Path remoteMd5Path = new Path(libDir, jarFilename + ".md5");
@@ -169,10 +169,10 @@ public class JobClasspathHelper {
         }
 
         if (localMd5sum.equals(remoteMd5sum)) {
-          logger.info("Jar {} already exists [{}] and md5sum are equals", jarFilename, remoteJarPath.toUri()
+          LOG.info("Jar {} already exists [{}] and md5sum are equals", jarFilename, remoteJarPath.toUri()
               .toASCIIString());
         } else {
-          logger.info("Jar {} already exists [{}] and md5sum are different!", jarFilename, remoteJarPath
+          LOG.info("Jar {} already exists [{}] and md5sum are different!", jarFilename, remoteJarPath
               .toUri().toASCIIString());
           copyJarToHDFS(fs, localJarPath, localMd5sum, remoteJarPath, remoteMd5Path);
         }
@@ -202,7 +202,7 @@ public class JobClasspathHelper {
   private void copyJarToHDFS(FileSystem fs, Path localJarPath, String md5sum, Path remoteJarPath, Path remoteMd5Path)
       throws IOException {
 
-    logger.info("Copying {} to {}", localJarPath.toUri().toASCIIString(), remoteJarPath.toUri().toASCIIString());
+    LOG.info("Copying {} to {}", localJarPath.toUri().toASCIIString(), remoteJarPath.toUri().toASCIIString());
     fs.copyFromLocalFile(localJarPath, remoteJarPath);
     // create the MD5 file for this jar.
     createMd5SumFile(fs, md5sum, remoteMd5Path);
@@ -235,7 +235,7 @@ public class JobClasspathHelper {
       os.writeBytes(md5sum);
       os.flush();
     } catch (Exception e) {
-      logger.error("{}", e);
+      LOG.error("{}", e);
     } finally {
       if (os != null) {
         os.close();

@@ -57,7 +57,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     Mergeable<FileSystemDataset<E>>, InputFormatAccessor<E>, LastModifiedAccessor,
     SizeAccessor {
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
     .getLogger(FileSystemDataset.class);
 
   private final FileSystem fileSystem;
@@ -161,7 +161,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       "Attempt to get a partition on a non-partitioned dataset (name:%s)",
       name);
 
-    logger.debug("Loading partition for key {}, allowCreate:{}", new Object[] {
+    LOG.debug("Loading partition for key {}, allowCreate:{}", new Object[] {
       key, allowCreate });
 
     Path partitionDirectory = fileSystem.makeQualified(
@@ -207,7 +207,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       name);
     Preconditions.checkArgument(key != null, "Partition key may not be null");
 
-    logger.debug("Dropping partition with key:{} dataset:{}", key, name);
+    LOG.debug("Dropping partition with key:{} dataset:{}", key, name);
 
     Path partitionDirectory = toDirectoryName(directory, key);
 
@@ -300,7 +300,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
         if (!fileSystem.exists(newPartitionDirectory)) {
           fileSystem.mkdirs(newPartitionDirectory);
         }
-        logger.debug("Renaming {} to {}", path, newPath);
+        LOG.debug("Renaming {} to {}", path, newPath);
         boolean renameOk = fileSystem.rename(path, newPath);
         if (!renameOk) {
           throw new DatasetException("Dataset merge failed during rename of " + path +

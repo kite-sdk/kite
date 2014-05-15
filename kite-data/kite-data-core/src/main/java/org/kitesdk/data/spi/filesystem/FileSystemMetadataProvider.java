@@ -63,7 +63,7 @@ import org.apache.hadoop.fs.FileStatus;
  */
 public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
     .getLogger(FileSystemMetadataProvider.class);
 
   private static final String METADATA_DIRECTORY = ".metadata";
@@ -103,7 +103,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   public DatasetDescriptor load(String name) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    logger.debug("Loading dataset metadata name:{}", name);
+    LOG.debug("Loading dataset metadata name:{}", name);
 
     final Path metadataPath = pathForMetadata(name);
     checkExists(rootFileSystem, metadataPath);
@@ -175,7 +175,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
     Compatibility.checkAndWarn(name, descriptor);
 
-    logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
+    LOG.debug("Saving dataset metadata name:{} descriptor:{}", name,
         descriptor);
 
     final Path dataLocation;
@@ -218,7 +218,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
     Compatibility.checkAndWarn(name, descriptor);
 
-    logger.debug("Saving dataset metadata name:{} descriptor:{}", name,
+    LOG.debug("Saving dataset metadata name:{} descriptor:{}", name,
       descriptor);
 
     writeDescriptor(
@@ -231,7 +231,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   public boolean delete(String name) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    logger.debug("Deleting dataset metadata name:{}", name);
+    LOG.debug("Deleting dataset metadata name:{}", name);
 
     final Path metadataDirectory = pathForMetadata(name);
 

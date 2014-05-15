@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 @Immutable
 public class CSVProperties {
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
       .getLogger(CSVProperties.class);
 
   public static final String CHARSET_PROPERTY = "kite.csv.charset";
@@ -101,7 +101,7 @@ public class CSVProperties {
       try {
         lines = Integer.valueOf(linesToSkipString);
       } catch (NumberFormatException ex) {
-        logger.debug("Defaulting lines to skip, failed to parse: {}",
+        LOG.debug("Defaulting lines to skip, failed to parse: {}",
             linesToSkipString);
         // lines remains set to the default
       }
