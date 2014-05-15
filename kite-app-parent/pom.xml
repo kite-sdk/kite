@@ -39,6 +39,9 @@
     <kite.hcatalog.version>0.5.0-cdh4.4.0</kite.hcatalog.version>
     <kite.findbugs.version>2.0.1</kite.findbugs.version>
 
+    <!-- other properties to help apps -->
+    <hadoop.guava.version>11.0.2</hadoop.guava.version>
+
     <!-- internal properties -->
     <private.hadoop-deps.artifact>kite-hadoop${kite.hadoop.profile}-dependencies</private.hadoop-deps.artifact>
     <private.hadoop-test-deps.artifact>kite-hadoop${kite.hadoop.profile}-test-dependencies</private.hadoop-test-deps.artifact>
@@ -75,6 +78,13 @@
         <version>0.9</version>
         <!-- ensure this project is checked, but don't include for children -->
         <inherited>false</inherited>
+      </plugin>
+
+      <!-- Inherited plugins -->
+      <plugin>
+        <groupId>org.kitesdk</groupId>
+        <artifactId>kite-maven-plugin</artifactId>
+        <version>${kite.version}</version>
       </plugin>
     </plugins>
   </build>
