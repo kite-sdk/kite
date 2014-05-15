@@ -124,7 +124,9 @@ public class PackageAppMojo extends AbstractAppMojo {
             version("2.3")),
         goal("single"),
         configuration(element("descriptors",
-            element("descriptor", "${project.build.directory}/assembly/oozie-app.xml"))),
+                              element("descriptor", "${project.build.directory}/assembly/oozie-app.xml")),
+                      element("finalName", applicationName),
+                      element("appendAssemblyId", "false")),
         executionEnvironment(mavenProject, mavenSession, pluginManager));
 
     if (generateWorkflowXml) {

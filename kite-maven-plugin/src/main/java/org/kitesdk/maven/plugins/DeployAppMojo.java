@@ -37,8 +37,7 @@ public class DeployAppMojo extends AbstractAppMojo {
   /**
    * The local directory of the application to deploy.
    */
-  @Parameter(property = "kite.localApplicationFile",
-      defaultValue = "${project.build.directory}/${project.build.finalName}-app")
+  @Parameter(property = "kite.localApplicationFile")
   private File localApplicationFile;
 
   /**
@@ -60,7 +59,9 @@ public class DeployAppMojo extends AbstractAppMojo {
     try {
       Configuration conf = new Configuration();
       Path appPath = getAppPath();
-      getLog().info("Deploying " + localApplicationFile +  " to " +  appPath);
+      File appFile = localApplicationFile != null ? localApplicationFile
+          : new File(mavenProject.getBuild().getDirectory(), applicationName);
+      getLog().info("Deploying " + appFile +  " to " +  appPath);
 
       FileSystem destFileSystem = FileSystem.get(new URI(deployFileSystem), conf);
       if (destFileSystem.exists(appPath)) {
@@ -74,7 +75,7 @@ public class DeployAppMojo extends AbstractAppMojo {
               appPath);
         }
       }
-      boolean success = FileUtil.copy(localApplicationFile, destFileSystem, appPath, false, conf);
+      boolean success = FileUtil.copy(appFile, destFileSystem, appPath, false, conf);
       if (!success) {
         throw new MojoExecutionException("Error creating parent directories " +
             "for deploying Oozie application");
