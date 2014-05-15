@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Loader implements Loadable {
 
-  private static final Logger logger = LoggerFactory.getLogger(Loader.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Loader.class);
   private static final int UNSPECIFIED_PORT = -1;
 
   /**
@@ -97,7 +97,7 @@ public class Loader implements Loadable {
       final URI hdfs = FileSystem.get(URI.create("hdfs:/"), conf).getUri();
       hdfsAuthority = hdfs.getAuthority();
     } catch (IOException ex) {
-      logger.warn(
+      LOG.warn(
           "Could not locate HDFS, host and port will not be set by default.");
       hdfsAuthority = "";
     }

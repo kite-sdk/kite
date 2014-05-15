@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 abstract class HCatalogMetadataProvider extends AbstractMetadataProvider implements
     PartitionListener {
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
       .getLogger(HCatalogMetadataProvider.class);
 
   protected final Configuration conf;

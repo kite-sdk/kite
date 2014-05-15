@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceTarget<E> {
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
       .getLogger(DatasetSourceTarget.class);
 
   private View<E> view;
@@ -146,7 +146,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     if (view instanceof SizeAccessor) {
       return ((SizeAccessor) view).getSize();
     }
-    logger.warn("Cannot determine size for view: " + toString());
+    LOG.warn("Cannot determine size for view: " + toString());
     return 1000L * 1000L * 1000L; // fallback to HBase default size
   }
 
@@ -155,7 +155,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     if (view instanceof LastModifiedAccessor) {
       return ((LastModifiedAccessor) view).getLastModified();
     }
-    logger.warn("Cannot determine last modified time for source: " + toString());
+    LOG.warn("Cannot determine last modified time for source: " + toString());
     return -1;
   }
 

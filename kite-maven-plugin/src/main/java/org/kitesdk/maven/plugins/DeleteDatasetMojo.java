@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 @Mojo(name = "delete-dataset", requiresProject = false)
 public class DeleteDatasetMojo extends AbstractDatasetMojo {
 
-  private static final Logger logger = LoggerFactory.getLogger(DeleteDatasetMojo.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DeleteDatasetMojo.class);
 
   /**
    * The name of the dataset to drop.

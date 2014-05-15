@@ -39,7 +39,7 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
   private ReaderWriterState state;
   private DataFileReader<E> reader;
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
     .getLogger(FileSystemDatasetReader.class);
 
   public FileSystemDatasetReader(FileSystem fileSystem, Path path, Schema schema) {
@@ -59,7 +59,7 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
       "A reader may not be opened more than once - current state:%s", state);
 
-    logger.debug("Opening reader on path:{}", path);
+    LOG.debug("Opening reader on path:{}", path);
 
     try {
       reader = new DataFileReader<E>(new AvroFSInput(fileSystem.open(path),
@@ -93,7 +93,7 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
       return;
     }
 
-    logger.debug("Closing reader on path:{}", path);
+    LOG.debug("Closing reader on path:{}", path);
 
     try {
       reader.close();

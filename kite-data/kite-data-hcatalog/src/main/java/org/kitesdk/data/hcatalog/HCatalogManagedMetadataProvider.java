@@ -29,12 +29,12 @@ import org.slf4j.LoggerFactory;
 
 class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
       .getLogger(HCatalogManagedMetadataProvider.class);
 
   public HCatalogManagedMetadataProvider(Configuration conf) {
     super(conf);
-    logger.info("Default FS: " + conf.get("fs.defaultFS"));
+    LOG.info("Default FS: " + conf.get("fs.defaultFS"));
   }
 
   @Override
@@ -61,7 +61,7 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
           "Metadata already exists for dataset:" + name);
     }
 
-    logger.info("Creating a managed Hive table named: " + name);
+    LOG.info("Creating a managed Hive table named: " + name);
 
     // construct the table metadata from a descriptor
     final Table table = HiveUtils.tableForDescriptor(

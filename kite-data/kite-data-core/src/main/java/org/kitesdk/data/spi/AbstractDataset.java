@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 @Immutable
 public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E> {
 
-  private static final Logger logger = LoggerFactory.getLogger(AbstractDataset.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractDataset.class);
 
   protected abstract RefinableView<E> asRefinableView();
 
@@ -47,14 +47,14 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
 
   @Override
   public DatasetWriter<E> newWriter() {
-    logger.debug("Getting writer to dataset:{}", this);
+    LOG.debug("Getting writer to dataset:{}", this);
 
     return asRefinableView().newWriter();
   }
 
   @Override
   public DatasetReader<E> newReader() {
-    logger.debug("Getting reader for dataset:{}", this);
+    LOG.debug("Getting reader for dataset:{}", this);
 
     return asRefinableView().newReader();
   }

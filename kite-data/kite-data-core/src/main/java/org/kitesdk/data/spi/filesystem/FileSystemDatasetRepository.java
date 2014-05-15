@@ -82,7 +82,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
-  private static final Logger logger = LoggerFactory
+  private static final Logger LOG = LoggerFactory
     .getLogger(FileSystemDatasetRepository.class);
 
   private final MetadataProvider metadataProvider;
@@ -135,7 +135,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
 
     FileSystemUtil.ensureLocationExists(newDescriptor, conf);
 
-    logger.debug("Created dataset:{} schema:{} datasetPath:{}", new Object[] {
+    LOG.debug("Created dataset:{} schema:{} datasetPath:{}", new Object[] {
         name, newDescriptor.getSchema(), location.toString() });
 
     return new FileSystemDataset.Builder()
@@ -191,7 +191,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     DatasetDescriptor updatedDescriptor = metadataProvider.update(name, descriptor);
     updatedDescriptor = addRepositoryUri(updatedDescriptor);
 
-    logger.debug("Updated dataset:{} schema:{} datasetPath:{}", new Object[] {
+    LOG.debug("Updated dataset:{} schema:{} datasetPath:{}", new Object[] {
         name, updatedDescriptor.getSchema(),
         updatedDescriptor.getLocation().toString() });
 
@@ -210,7 +210,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   public <E> Dataset<E> load(String name) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    logger.debug("Loading dataset:{}", name);
+    LOG.debug("Loading dataset:{}", name);
 
     DatasetDescriptor descriptor = metadataProvider.load(name);
     descriptor = addRepositoryUri(descriptor);
@@ -225,7 +225,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         .partitionListener(getPartitionListener())
         .build();
 
-    logger.debug("Loaded dataset:{}", ds);
+    LOG.debug("Loaded dataset:{}", ds);
 
     return ds;
   }
@@ -234,7 +234,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   public boolean delete(String name) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    logger.debug("Deleting dataset:{}", name);
+    LOG.debug("Deleting dataset:{}", name);
 
     DatasetDescriptor descriptor;
     try {

@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  */
 abstract class MultiLevelIterator<T> implements Iterator<List<T>>, Iterable<List<T>> {
 
-  public static final Logger logger = LoggerFactory.getLogger(MultiLevelIterator.class);
+  public static final Logger LOG = LoggerFactory.getLogger(MultiLevelIterator.class);
 
   private final int depth;
   private final LinkedList<T> current;
