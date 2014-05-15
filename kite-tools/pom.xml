@@ -335,13 +335,6 @@
       <artifactId>${artifact.hadoop-deps}</artifactId>
       <type>pom</type>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <!-- conflicts with jetty included with HBase -->
-          <groupId>tomcat</groupId>
-          <artifactId>jasper-runtime</artifactId>
-        </exclusion>
-      </exclusions>
       <optional>true</optional>
     </dependency>
 
