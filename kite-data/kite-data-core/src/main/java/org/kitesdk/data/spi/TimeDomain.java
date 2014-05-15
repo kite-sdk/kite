@@ -75,10 +75,11 @@ public class TimeDomain {
     for (int field : order) {
       // if there is no partition for the next field, then all are included
       // example: yyyy/mm/dd partitioning accepts when field is hour
-      if (!mapping.containsKey(field)) {
+      if (mapping.containsKey(field)) {
+        partitioners.add(mapping.get(field));
+      } else if (!partitioners.isEmpty()) {
         break;
       }
-      partitioners.add(mapping.get(field));
     }
   }
 
