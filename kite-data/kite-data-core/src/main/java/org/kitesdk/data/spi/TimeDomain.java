@@ -26,6 +26,7 @@ import com.google.common.collect.DiscreteDomains;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -298,10 +299,10 @@ public class TimeDomain {
     public String toString() {
       Objects.ToStringHelper helper = Objects.toStringHelper(this);
       if (lower.length > 0) {
-        helper.add("lower", lower);
+        helper.add("lower", Arrays.toString(lower));
       }
       if (upper.length > 0) {
-        helper.add("upper", upper);
+        helper.add("upper", Arrays.toString(upper));
       }
       return helper.toString();
     }

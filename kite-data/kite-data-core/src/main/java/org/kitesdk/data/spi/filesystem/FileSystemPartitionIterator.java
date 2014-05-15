@@ -119,6 +119,7 @@ class FileSystemPartitionIterator implements
     private final Predicate<StorageKey> predicate;
 
     private KeyPredicate(Predicate<StorageKey> predicate) {
+      logger.debug("StorageKey predicate: {}", predicate);
       this.predicate = predicate;
     }
 
@@ -127,6 +128,7 @@ class FileSystemPartitionIterator implements
         value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
         justification="Non-null @Nullable parameter inherited from Function")
     public boolean apply(@Nullable Pair<StorageKey, Path> pair) {
+      logger.debug("Applying predicate {} to key {}", predicate, pair.first());
       return predicate.apply(pair.first());
     }
   }
