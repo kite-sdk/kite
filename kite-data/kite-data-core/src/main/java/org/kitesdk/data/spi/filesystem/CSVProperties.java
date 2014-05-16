@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import com.fasterxml.jackson.core.io.CharacterEscapes;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.DatasetDescriptor;
 import org.slf4j.Logger;
@@ -152,7 +153,12 @@ public class CSVProperties {
     }
 
     public Builder delimiter(String delimiter) {
-      this.delimiter = delimiter;
+      // handle tab
+      if ("\\t".equals(delimiter)) {
+        this.delimiter = "\t";
+      } else {
+        this.delimiter = delimiter;
+      }
       return this;
     }
 
