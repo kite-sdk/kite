@@ -53,6 +53,7 @@
     <repository>
       <id>com.cloudera.releases</id>
       <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+      <name>Cloudera Repositories</name>
       <releases>
         <enabled>true</enabled>
       </releases>
@@ -70,7 +71,48 @@
     </repository>
   </repositories>
 
+  <pluginRepositories>
+    <pluginRepository>
+      <id>com.cloudera.plugin.releases</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+      <name>Cloudera Repositories</name>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
   <build>
+    <pluginManagement>
+      <!-- Inherited plugins -->
+      <plugins>
+        <plugin>
+          <groupId>org.kitesdk</groupId>
+          <artifactId>kite-maven-plugin</artifactId>
+          <version>${kite.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro-maven-plugin</artifactId>
+          <version>${kite.avro.version}</version>
+          <configuration>
+            <stringType>String</stringType>
+            <createSetters>false</createSetters>
+            <fieldVisibility>private</fieldVisibility>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>schema</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
         <groupId>org.apache.rat</groupId>
@@ -78,13 +120,6 @@
         <version>0.9</version>
         <!-- ensure this project is checked, but don't include for children -->
         <inherited>false</inherited>
-      </plugin>
-
-      <!-- Inherited plugins -->
-      <plugin>
-        <groupId>org.kitesdk</groupId>
-        <artifactId>kite-maven-plugin</artifactId>
-        <version>${kite.version}</version>
       </plugin>
     </plugins>
   </build>
