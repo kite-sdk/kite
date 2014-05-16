@@ -124,7 +124,7 @@ public class CSVUtil {
       }
       fields.add(new Schema.Field(
           header[i].trim(), schema(types[i], makeNullable || nullable[i]),
-          "Type inferred from \"" + String.valueOf(values[i]) + "\"", null));
+          "Type inferred from '" + String.valueOf(values[i]) + "'", null));
     }
 
     Schema record = Schema.createRecord(
