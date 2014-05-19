@@ -37,20 +37,27 @@ import org.kitesdk.data.Formats;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.FilteredRecordReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import parquet.avro.AvroParquetInputFormat;
 
 class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
+
+  private static final Logger LOG =
+      LoggerFactory.getLogger(FileSystemViewKeyInputFormat.class);
 
   private FileSystemDataset<E> dataset;
   private FileSystemView<E> view;
 
   public FileSystemViewKeyInputFormat(FileSystemDataset<E> dataset) {
     this.dataset = dataset;
+    LOG.debug("Dataset: {}", dataset);
   }
 
   public FileSystemViewKeyInputFormat(FileSystemView<E> view) {
     this((FileSystemDataset<E>) view.getDataset());
     this.view = view;
+    LOG.debug("View: {}", view);
   }
 
   @Override
@@ -84,6 +91,7 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
   private void setInputPaths(JobContext jobContext, Job job) throws IOException {
     List<Path> paths =
         Lists.newArrayList(view == null ? dataset.dirIterator() : view.dirIterator());
+    LOG.debug("Input paths: {}", paths);
     FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
     // the following line is needed for Hadoop 1, otherwise the paths are not set
     Configuration contextConf = Hadoop.JobContext
