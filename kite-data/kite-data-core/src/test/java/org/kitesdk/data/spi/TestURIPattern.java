@@ -166,6 +166,62 @@ public class TestURIPattern {
   }
 
   @Test
+  public void testPathVariablesAfterGlob() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("file:/*path/:ns/:ds");
+    String uri = "file:/a/b/c/namespace/dataset";
+    Assert.assertTrue(pattern.matches(uri));
+
+    Map<String, String> actual = pattern.getMatch(uri);
+    expected.put("scheme", "file");
+    expected.put("ns", "namespace");
+    expected.put("ds", "dataset");
+    expected.put("path", "a/b/c");
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testOpaquePathVariablesAfterGlob() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("file:*path/:ns/:ds");
+    String uri = "file:a/b/c/namespace/dataset";
+    Assert.assertTrue(pattern.matches(uri));
+
+    Map<String, String> actual = pattern.getMatch(uri);
+    expected.put("scheme", "file");
+    expected.put("ns", "namespace");
+    expected.put("ds", "dataset");
+    expected.put("path", "a/b/c");
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testPathVariablesBeforeAndAfterGlob() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("file:/:ns/*path/:ds");
+    String uri = "file:/namespace/a/b/c/dataset";
+    Assert.assertTrue(pattern.matches(uri));
+
+    Map<String, String> actual = pattern.getMatch(uri);
+    expected.put("scheme", "file");
+    expected.put("ns", "namespace");
+    expected.put("ds", "dataset");
+    expected.put("path", "a/b/c");
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testOpaquePathVariablesBeforeAndAfterGlob() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("file::ns/*path/:ds");
+    String uri = "file:namespace/a/b/c/dataset";
+    Assert.assertTrue(pattern.matches(uri));
+
+    Map<String, String> actual = pattern.getMatch(uri);
+    expected.put("scheme", "file");
+    expected.put("ns", "namespace");
+    expected.put("ds", "dataset");
+    expected.put("path", "a/b/c");
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
   public void testDefaultAuthority() throws URISyntaxException {
     URIPattern pattern = new URIPattern("scheme://user:pass:w0rd@host:3434/*path");
     String uri = "scheme:/path/to/data.avro";

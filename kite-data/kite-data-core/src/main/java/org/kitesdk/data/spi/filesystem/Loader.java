@@ -16,8 +16,10 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetRepositoryException;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.URIPattern;
@@ -71,30 +73,52 @@ public class Loader implements Loadable {
         throw new DatasetRepositoryException(
             "Could not get a FileSystem", ex);
       }
-      return (DatasetRepository) new FileSystemDatasetRepository.Builder()
+      return new FileSystemDatasetRepository.Builder()
           .configuration(new Configuration(envConf)) // make a modifiable copy
           .rootDirectory(fs.makeQualified(root))
           .build();
     }
   }
 
+  private static class DatasetBuilder implements OptionBuilder<Dataset> {
+    private final OptionBuilder<DatasetRepository> repoBuilder;
+
+    public DatasetBuilder(OptionBuilder<DatasetRepository> repoBuilder) {
+      this.repoBuilder = repoBuilder;
+    }
+
+    @Override
+    public Dataset getFromOptions(Map<String, String> options) {
+      DatasetRepository repo = repoBuilder.getFromOptions(options);
+      return repo.load(options.get("name"));
+    }
+  }
+
   @Override
   public void load() {
     // get a default Configuration to configure defaults (so it's okay!)
-    final Configuration conf = new Configuration();
-    final OptionBuilder<DatasetRepository> builder =
+    Configuration conf = new Configuration();
+    OptionBuilder<DatasetRepository> builder =
         new URIBuilder(conf);
+    OptionBuilder<Dataset> datasetBuilder = new DatasetBuilder(builder);
 
     org.kitesdk.data.impl.Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create("file:/*path?absolute=true")), builder);
     org.kitesdk.data.impl.Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create("file:*path")), builder);
 
+    Datasets.register(
+        new URIPattern(URI.create("file:/*path/:name?absolute=true")),
+        datasetBuilder);
+    Datasets.register(
+        new URIPattern(URI.create("file:*path/:name")),
+        datasetBuilder);
+
     String hdfsAuthority;
     try {
       // Use a HDFS URI with no authority and the environment's configuration
       // to find the default HDFS information
-      final URI hdfs = FileSystem.get(URI.create("hdfs:/"), conf).getUri();
+      URI hdfs = FileSystem.get(URI.create("hdfs:/"), conf).getUri();
       hdfsAuthority = hdfs.getAuthority();
     } catch (IOException ex) {
       LOG.warn(
@@ -108,6 +132,14 @@ public class Loader implements Loadable {
         builder);
     org.kitesdk.data.impl.Accessor.getDefault().registerDatasetRepository(
         new URIPattern(URI.create("hdfs:*path")), builder);
+
+    // register Dataset builder
+    Datasets.register(
+        new URIPattern(URI.create("hdfs:/*path/:name?absolute=true")),
+        datasetBuilder);
+    Datasets.register(
+        new URIPattern(URI.create("hdfs:*path/:name")),
+        datasetBuilder);
   }
 
   private static URI fileSystemURI(Map<String, String> match) {

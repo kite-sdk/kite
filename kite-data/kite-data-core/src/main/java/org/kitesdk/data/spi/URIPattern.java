@@ -21,10 +21,11 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -130,10 +131,13 @@ public class URIPattern {
     Map<String, String> result = Maps.newHashMap(defaults);
 
     if (pattern.isOpaque()) {
-      addComplexMatch(
+      // TODO: Add support for query params in opaque URIs
+      if (!addPath(
           pattern.getSchemeSpecificPart(),
           uri.getSchemeSpecificPart(),
-          result);
+          result)) {
+        return null;
+      }
 
     } else if (!uri.isOpaque()) {
       addAuthority(uri, result);
@@ -142,12 +146,8 @@ public class URIPattern {
         return null;
       }
 
-      Iterator<String> parts = PATH_SPLITTER.split(uri.getPath()).iterator();
-      for (String patternPart : PATH_SPLITTER.split(pattern.getPath())) {
-        if (!addMatch(patternPart, parts, result)) {
-          // abort if the pattern doesn't account for an entry
-          return null;
-        }
+      if (!addPath(pattern.getPath(), uri.getPath(), result)) {
+        return null;
       }
 
       addQuery(uri, result);
@@ -197,30 +197,53 @@ public class URIPattern {
         .toString();
   }
 
-  private boolean addMatch(
-      String pattern, Iterator<String> parts, Map<String, String> storage) {
-    // this assumes pattern will be (?:\:\w+\??)|(?:\*\w+)
-    if (pattern.startsWith("*")) {
-      final String joined = PATH_JOINER.join(parts);
-      if (!joined.isEmpty()) {
-        storage.put(pattern.substring(1), joined);
+  private static boolean addPath(String pattern, String path,
+                                 Map<String, String> storage) {
+    LinkedList<String> patternParts = Lists.newLinkedList(
+        PATH_SPLITTER.split(pattern));
+    LinkedList<String> parts = Lists.newLinkedList(PATH_SPLITTER.split(path));
+
+    // consume URI parts moving forward until exhausted or a glob pattern
+    String globPattern = null;
+    while (!patternParts.isEmpty()) {
+      String patternPart = patternParts.removeFirst();
+      if (patternPart.startsWith("*")) {
+        globPattern = patternPart;
+        break;
       }
-      return true;
-    } else if (pattern.endsWith("?")) {
-      // TODO: this doesn't currently hit because the ? is consumed by query
-      if (parts.hasNext()) {
-        return addComplexMatch(
-            pattern.substring(0, pattern.length()-1), parts.next(), storage);
-      } else {
-        return true;
+      if (parts.isEmpty() ||
+          !addComplexMatch(patternPart, parts.removeFirst(), storage)) {
+        // abort if the pattern doesn't account for an entry
+        return false;
       }
-    } else if (parts.hasNext()) {
-      return addComplexMatch(pattern, parts.next(), storage);
     }
-    return false;
+
+    // consume URI parts moving backward until exhausted
+    while (!patternParts.isEmpty()) {
+      String patternPart = patternParts.removeLast();
+      if (patternPart.startsWith("*")) {
+        // globPattern must be non-null because patternParts is not empty
+        throw new RuntimeException("Cannot use multiple glob patterns");
+      }
+      if (parts.isEmpty() ||
+          !addComplexMatch(patternPart, parts.removeLast(), storage)) {
+        // abort if the pattern doesn't account for an entry
+        return false;
+      }
+    }
+
+    // see if there was a glob that matched
+    if (globPattern != null && !parts.isEmpty()) {
+      final String joined = PATH_JOINER.join(parts);
+      storage.put(globPattern.substring(1), joined);
+      return true; // all remaining parts are consumed
+    }
+
+    // only successful if there are no unmatched parts
+    return parts.isEmpty();
   }
 
-  private boolean addComplexMatch(
+  private static boolean addComplexMatch(
       String pattern, String part, Map<String, String> storage) {
     // TODO: extend this to match more complicated patterns, like:
     // ":doc.:fmt?" and "index.html" => {"doc" => "index", "fmt" => "html"}
@@ -238,7 +261,7 @@ public class URIPattern {
     }
   }
 
-  private boolean addSimpleMatch(
+  private static boolean addSimpleMatch(
       String pattern, String part, Map<String, String> storage) {
     if (VAR_START.matches(pattern.charAt(0))) {
       storage.put(pattern.substring(1), part);
