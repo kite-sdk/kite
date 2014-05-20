@@ -241,7 +241,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
     for (FileStatus stat : fileStatuses) {
       Path p = fileSystem.makeQualified(stat.getPath());
-      PartitionKey key = keyFromDirectory(p);
+      PartitionKey key = keyFromDirectory(p.getName());
       PartitionStrategy subPartitionStrategy = Accessor.getDefault()
           .getSubpartitionStrategy(partitionStrategy, 1);
       Builder builder = new FileSystemDataset.Builder()
@@ -343,7 +343,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   }
 
   @SuppressWarnings("unchecked")
-  public PartitionKey keyFromDirectory(Path dir) {
+  private PartitionKey keyFromDirectory(String name) {
     final FieldPartitioner fp = partitionStrategy.getFieldPartitioners().get(0);
     final List<Object> values = Lists.newArrayList();
 
@@ -351,7 +351,37 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       values.addAll(partitionKey.getValues());
     }
 
-    values.add(convert.valueForDirname(fp, dir.getName()));
+    values.add(convert.valueForDirname(fp, name));
+
+    return Accessor.getDefault().newPartitionKey(values.toArray());
+  }
+
+  @SuppressWarnings("unchecked")
+  public PartitionKey keyFromDirectory(Path dir) {
+
+    Path relDir = new Path(directory.toUri().relativize(dir.toUri()));
+    Preconditions.checkState(!relDir.equals(dir), "Partition directory %s is not " +
+        "relative to dataset directory %s", dir, directory);
+
+    List<String> pathComponents = Lists.newArrayList();
+    while (relDir != null && !relDir.getName().equals("")) {
+      pathComponents.add(0, relDir.getName());
+      relDir = relDir.getParent();
+    }
+
+    List<FieldPartitioner> fps = partitionStrategy.getFieldPartitioners();
+    Preconditions.checkState(pathComponents.size() <= fps.size(),
+        "Number of components in partition directory %s (%s) exceeds number of field " +
+            "partitioners %s", dir, pathComponents, partitionStrategy);
+
+    List<Object> values = Lists.newArrayList();
+    for (int i = 0; i < pathComponents.size(); i++) {
+      values.add(convert.valueForDirname(fps.get(i), pathComponents.get(i)));
+    }
+
+    if (partitionKey != null) {
+      values.addAll(0, partitionKey.getValues());
+    }
 
     return Accessor.getDefault().newPartitionKey(values.toArray());
   }

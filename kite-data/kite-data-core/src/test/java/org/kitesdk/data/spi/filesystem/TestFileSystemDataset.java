@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -43,6 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.kitesdk.data.TestHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -429,11 +431,12 @@ public class TestFileSystemDataset extends MiniDFSTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testPathIterator_Partition_Directory() {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", 2).hash("email", 3).build();
 
-    FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
+    final FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -458,6 +461,33 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertEquals(6, dirPaths.size());
 
     Assert.assertTrue("dirIterator should yield absolute paths.", dirPaths.get(0).isAbsolute());
+
+    FileSystemDataset<Record> partition = (FileSystemDataset<Record>)
+        ds.getPartition(partitionStrategy.partitionKey(1, 2), false);
+    List<Path> leafPaths = Lists.newArrayList(partition.dirIterator());
+    Assert.assertEquals(1, leafPaths.size());
+    final Path leafPath = leafPaths.get(0);
+    Assert.assertTrue("dirIterator should yield absolute paths.", leafPath.isAbsolute());
+
+    Assert.assertEquals(partitionStrategy.partitionKey(1, 2), ds.keyFromDirectory(leafPath));
+    Assert.assertEquals(partitionStrategy.partitionKey(1), ds.keyFromDirectory(leafPath.getParent()));
+    Assert.assertEquals(partitionStrategy.partitionKey(), ds.keyFromDirectory(leafPath.getParent().getParent()));
+
+    TestHelpers.assertThrows("Path with too many components",
+        IllegalStateException.class, new Runnable() {
+      @Override
+      public void run() {
+        ds.keyFromDirectory(new Path(leafPath, "extra_dir"));
+      }
+    });
+
+    TestHelpers.assertThrows("Non-relative path",
+        IllegalStateException.class, new Runnable() {
+      @Override
+      public void run() {
+        ds.keyFromDirectory(new Path("hdfs://different_host/"));
+      }
+    });
   }
 
   @SuppressWarnings("deprecation")

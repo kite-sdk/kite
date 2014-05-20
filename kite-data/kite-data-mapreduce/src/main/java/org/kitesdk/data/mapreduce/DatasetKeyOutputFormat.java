@@ -171,16 +171,20 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   public RecordWriter<E, Void> getRecordWriter(TaskAttemptContext taskAttemptContext) {
     Configuration conf = Hadoop.TaskAttemptContext
         .getConfiguration.invoke(taskAttemptContext);
-    Dataset<E> dataset = loadDataset(taskAttemptContext);
+    Dataset<E> originalDataset = loadDataset(taskAttemptContext);
+    Dataset<E> dataset;
 
-    if (usePerTaskAttemptDatasets(dataset)) {
+    if (usePerTaskAttemptDatasets(originalDataset)) {
       dataset = loadOrCreateTaskAttemptDataset(taskAttemptContext);
+    } else {
+      dataset = originalDataset;
     }
 
     String partitionDir = conf.get(KITE_PARTITION_DIR);
     String constraintsString = conf.get(KITE_CONSTRAINTS);
     if (dataset.getDescriptor().isPartitioned() && partitionDir != null) {
-      PartitionKey key = ((FileSystemDataset) dataset).keyFromDirectory(new Path(partitionDir));
+      PartitionKey key = ((FileSystemDataset) originalDataset).keyFromDirectory(
+          new Path(partitionDir));
       if (key != null) {
         dataset = dataset.getPartition(key, true);
       }

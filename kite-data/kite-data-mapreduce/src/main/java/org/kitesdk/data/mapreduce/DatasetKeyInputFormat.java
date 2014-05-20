@@ -39,6 +39,8 @@ import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A MapReduce {@code InputFormat} for reading from a {@link Dataset}.
@@ -51,6 +53,9 @@ import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 @Beta
 public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     implements Configurable {
+
+  private static final Logger LOG =
+      LoggerFactory.getLogger(DatasetKeyInputFormat.class);
 
   public static final String KITE_REPOSITORY_URI = "kite.inputRepositoryUri";
   public static final String KITE_DATASET_NAME = "kite.inputDatasetName";
@@ -114,9 +119,14 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
 
   private InputFormat<E, Void> getDelegateInputFormatForPartition(Dataset<E> dataset,
       String partitionDir) {
+    LOG.debug("Getting delegate input format for dataset {} with partition directory {}",
+        dataset, partitionDir);
     PartitionKey key = ((FileSystemDataset<E>) dataset).keyFromDirectory(new Path(partitionDir));
+    LOG.debug("Partition key: {}", key);
     if (key != null) {
-      return getDelegateInputFormat(dataset.getPartition(key, true));
+      Dataset<E> partition = dataset.getPartition(key, false);
+      LOG.debug("Partition: {}", partition);
+      return getDelegateInputFormat(partition);
     }
     throw new DatasetException("Cannot find partition " + partitionDir);
   }
