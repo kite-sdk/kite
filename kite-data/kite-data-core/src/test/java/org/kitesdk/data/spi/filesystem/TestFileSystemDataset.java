@@ -462,11 +462,9 @@ public class TestFileSystemDataset extends MiniDFSTest {
 
     Assert.assertTrue("dirIterator should yield absolute paths.", dirPaths.get(0).isAbsolute());
 
-    FileSystemDataset<Record> firstPartition = (FileSystemDataset<Record>) Iterables
-        .get(ds.getPartitions(), 1);
-    FileSystemDataset<Record> secondPartition = (FileSystemDataset<Record>) Iterables
-        .get(firstPartition.getPartitions(), 2);
-    List<Path> leafPaths = Lists.newArrayList(secondPartition.dirIterator());
+    FileSystemDataset<Record> partition = (FileSystemDataset<Record>)
+        ds.getPartition(partitionStrategy.partitionKey(1, 2), false);
+    List<Path> leafPaths = Lists.newArrayList(partition.dirIterator());
     Assert.assertEquals(1, leafPaths.size());
     final Path leafPath = leafPaths.get(0);
     Assert.assertTrue("dirIterator should yield absolute paths.", leafPath.isAbsolute());
@@ -474,7 +472,6 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertEquals(partitionStrategy.partitionKey(1, 2), ds.keyFromDirectory(leafPath));
     Assert.assertEquals(partitionStrategy.partitionKey(1), ds.keyFromDirectory(leafPath.getParent()));
     Assert.assertEquals(partitionStrategy.partitionKey(), ds.keyFromDirectory(leafPath.getParent().getParent()));
-
 
     TestHelpers.assertThrows("Path with too many components",
         IllegalStateException.class, new Runnable() {
