@@ -171,28 +171,32 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   public RecordWriter<E, Void> getRecordWriter(TaskAttemptContext taskAttemptContext) {
     Configuration conf = Hadoop.TaskAttemptContext
         .getConfiguration.invoke(taskAttemptContext);
-    Dataset<E> dataset = loadDataset(taskAttemptContext);
+    Dataset<E> target = loadDataset(taskAttemptContext);
+    Dataset<E> working;
 
-    if (usePerTaskAttemptDatasets(dataset)) {
-      dataset = loadOrCreateTaskAttemptDataset(taskAttemptContext);
+    if (usePerTaskAttemptDatasets(target)) {
+      working = loadOrCreateTaskAttemptDataset(taskAttemptContext);
+    } else {
+      working = target;
     }
 
     String partitionDir = conf.get(KITE_PARTITION_DIR);
     String constraintsString = conf.get(KITE_CONSTRAINTS);
-    if (dataset.getDescriptor().isPartitioned() && partitionDir != null) {
-      PartitionKey key = ((FileSystemDataset) dataset).keyFromDirectory(new Path(partitionDir));
+    if (working.getDescriptor().isPartitioned() && partitionDir != null) {
+      PartitionKey key = ((FileSystemDataset) target).keyFromDirectory(
+          new Path(partitionDir));
       if (key != null) {
-        dataset = dataset.getPartition(key, true);
+        working = working.getPartition(key, true);
       }
-      return new DatasetRecordWriter<E>(dataset);
+      return new DatasetRecordWriter<E>(working);
     } else if (constraintsString != null) {
       Constraints constraints = Constraints.deserialize(constraintsString);
-      if (dataset instanceof AbstractDataset) {
-        return new DatasetRecordWriter<E>(((AbstractDataset) dataset).filter(constraints));
+      if (working instanceof AbstractDataset) {
+        return new DatasetRecordWriter<E>(((AbstractDataset) working).filter(constraints));
       }
-      throw new DatasetException("Cannot find view from constraints for " + dataset);
+      throw new DatasetException("Cannot find view from constraints for " + working);
     } else {
-      return new DatasetRecordWriter<E>(dataset);
+      return new DatasetRecordWriter<E>(working);
     }
   }
 
