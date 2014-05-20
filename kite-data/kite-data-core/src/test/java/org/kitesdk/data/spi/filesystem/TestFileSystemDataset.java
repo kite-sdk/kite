@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -64,10 +63,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Object[][] data = new Object[][] {
         { Formats.AVRO, getDFS() },
         { Formats.AVRO, getFS() },
-        // Parquet fails when testing with HDFS because
-        // parquet.hadoop.ParquetReader calls new Configuration(), which does
-        // not work with the mini-cluster (not set up through env).
-        //{ Formats.PARQUET, getDFS() },
+        { Formats.PARQUET, getDFS() },
         { Formats.PARQUET, getFS() } };
     return Arrays.asList(data);
   }
