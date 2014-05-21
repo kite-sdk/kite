@@ -35,9 +35,6 @@ import org.slf4j.Logger;
 @Parameters(commandDescription = "Show the schema for a Dataset")
 public class SchemaCommand extends BaseDatasetCommand {
 
-  @VisibleForTesting
-  static final Charset SCHEMA_CHARSET = Charset.forName("utf8");
-
   @Parameter(description = "<dataset name>")
   List<String> datasetNames;
 
@@ -66,22 +63,7 @@ public class SchemaCommand extends BaseDatasetCommand {
           .getDescriptor()
           .getSchema()
           .toString(!minimize);
-      if (outputPath == null || "-".equals(outputPath)) {
-        console.info(schema);
-      } else {
-        // use local FS to make qualified paths rather than the default FS
-        FileSystem localFS = FileSystem.getLocal(getConf());
-        Path cwd = localFS.makeQualified(new Path("."));
-
-        Path out = new Path(outputPath).makeQualified(localFS.getUri(), cwd);
-        FileSystem outFS = out.getFileSystem(getConf());
-        FSDataOutputStream outgoing = outFS.create(out, true /* overwrite */ );
-        try {
-          outgoing.write(schema.getBytes(SCHEMA_CHARSET));
-        } finally {
-          outgoing.close();
-        }
-      }
+      output(schema, console, outputPath);
 
     } else {
       Preconditions.checkArgument(outputPath == null,

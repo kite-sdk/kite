@@ -28,9 +28,7 @@ import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.slf4j.Logger;
 
-abstract class BaseDatasetCommand implements Command, Configurable {
-
-  private Configuration conf;
+abstract class BaseDatasetCommand extends BaseCommand {
 
   @Parameter(names = {"-d", "--directory"},
       description = "Storage directory for datasets, required for HDFS")
@@ -104,16 +102,6 @@ abstract class BaseDatasetCommand implements Command, Configurable {
     }
     console.trace("Repository URI: " + uri);
     return uri;
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
-  }
-
-  @Override
-  public Configuration getConf() {
-    return conf;
   }
 
 }

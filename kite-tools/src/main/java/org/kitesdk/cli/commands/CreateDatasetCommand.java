@@ -18,14 +18,8 @@ package org.kitesdk.cli.commands;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.collect.Lists;
-import com.google.common.io.Resources;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
 import java.util.List;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Formats;
@@ -55,30 +49,14 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
 
   @Override
   public int run() throws IOException {
+    if (datasetNames == null || datasetNames.size() != 1) {
+      throw new IllegalArgumentException(
+          "Exactly one dataset name must be specified.");
+    }
+
     DatasetRepository repo = getDatasetRepository();
 
     DatasetDescriptor.Builder descriptorBuilder = new DatasetDescriptor.Builder();
-
-    // use local FS to make qualified paths rather than the default FS
-    FileSystem localFS = FileSystem.getLocal(getConf());
-
-    InputStream schemaIn = open(localFS, avroSchemaFile);
-    if (schemaIn != null) {
-      descriptorBuilder.schema(schemaIn);
-    } else {
-      throw new IllegalArgumentException(
-          "Missing schema file: " + avroSchemaFile);
-    }
-
-    if (partitionStrategyFile != null) {
-      InputStream psIn = open(localFS, partitionStrategyFile);
-      if (psIn != null) {
-        descriptorBuilder.partitionStrategy(psIn);
-      } else {
-        throw new IllegalArgumentException(
-            "Missing partition config file: " + partitionStrategyFile);
-      }
-    }
 
     if (format.equals(Formats.AVRO.getName())) {
       descriptorBuilder.format(Formats.AVRO);
@@ -88,34 +66,16 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
       throw new IllegalArgumentException("Unrecognized format: " + format);
     }
 
-    // TODO: Add partition strategy after format is finalized
+    descriptorBuilder.schema(open(avroSchemaFile));
 
-    if (datasetNames == null || datasetNames.size() != 1) {
-      throw new IllegalArgumentException(
-          "Exactly one dataset name must be specified.");
+    if (partitionStrategyFile != null) {
+      descriptorBuilder.partitionStrategy(open(partitionStrategyFile));
     }
 
     repo.create(datasetNames.get(0), descriptorBuilder.build());
     console.debug("Created dataset {}", datasetNames.get(0));
 
     return 0;
-  }
-
-  public InputStream open(FileSystem defaultFS, String filename)
-      throws IOException {
-    Path cwd = defaultFS.makeQualified(new Path("."));
-    Path filePath = new Path(filename).makeQualified(defaultFS.getUri(), cwd);
-    // even though it was qualified using the local FS, it may not be local
-    FileSystem fs = filePath.getFileSystem(getConf());
-    if (fs.exists(filePath)) {
-      return fs.open(filePath);
-    } else {
-      URL resource = Resources.getResource(filename);
-      if (resource != null) {
-        return resource.openStream();
-      }
-    }
-    return null;
   }
 
   @Override
