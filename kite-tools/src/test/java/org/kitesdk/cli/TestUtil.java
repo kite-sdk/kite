@@ -28,14 +28,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestUtil {
+  private static Logger newConsole() {
+    return LoggerFactory.getLogger(Main.class);
+  }
+
   public static int run(String... args) throws Exception {
-    Logger console = LoggerFactory.getLogger(Main.class);
-    return run(console, args);
+    return run(newConsole(), args);
   }
 
   public static int run(Logger console, String... args) throws Exception {
+    return run(console, new Configuration(), args);
+  }
+
+  public static int run(Configuration conf, String... args) throws Exception {
+    return run(newConsole(), conf, args);
+  }
+
+  public static int run(Logger console, Configuration conf, String... args)
+      throws Exception {
     Main main = new Main(console);
-    main.setConf(new Configuration());
+    main.setConf(conf);
     return main.run(args);
   }
 
