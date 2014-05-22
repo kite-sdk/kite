@@ -69,12 +69,12 @@ public class TestCreateDatasetCommand {
 
   @Test
   public void testBasicUse() throws Exception {
-    command.avroSchemaFile = "user.avsc";
+    command.avroSchemaFile = "test-schemas/user.avsc";
     command.datasetNames = Lists.newArrayList("users");
     command.run();
 
     DatasetDescriptor expectedDescriptor = new DatasetDescriptor.Builder()
-        .schemaUri("resource:user.avsc")
+        .schemaUri("resource:test-schemas/user.avsc")
         .build();
 
     verify(getMockRepo()).create("users", expectedDescriptor);
@@ -83,13 +83,13 @@ public class TestCreateDatasetCommand {
 
   @Test
   public void testParquetFormat() throws Exception {
-    command.avroSchemaFile = "user.avsc";
+    command.avroSchemaFile = "test-schemas/user.avsc";
     command.datasetNames = Lists.newArrayList("users");
     command.format = "parquet";
     command.run();
 
     DatasetDescriptor expectedDescriptor = new DatasetDescriptor.Builder()
-        .schemaUri("resource:user.avsc")
+        .schemaUri("resource:test-schemas/user.avsc")
         .format("parquet")
         .build();
 
@@ -99,7 +99,7 @@ public class TestCreateDatasetCommand {
 
   @Test
   public void testUnrecognizedFormat() throws Exception {
-    command.avroSchemaFile = "user.avsc";
+    command.avroSchemaFile = "test-schemas/user.avsc";
     command.datasetNames = Lists.newArrayList("users");
     command.format = "nosuchformat";
     TestHelpers.assertThrows("Should fail on invalid format",
@@ -130,7 +130,7 @@ public class TestCreateDatasetCommand {
 
   @Test
   public void testMultipleDatasets() throws Exception {
-    command.avroSchemaFile = "user.avsc";
+    command.avroSchemaFile = "test-schemas/user.avsc";
     command.datasetNames = Lists.newArrayList("users", "moreusers");
     TestHelpers.assertThrows("Should reject multiple dataset names",
         IllegalArgumentException.class, new Callable() {
