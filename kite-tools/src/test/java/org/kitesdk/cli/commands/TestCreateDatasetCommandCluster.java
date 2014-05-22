@@ -20,9 +20,7 @@ import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Resources;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 import org.junit.Before;
@@ -31,7 +29,6 @@ import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.MiniDFSTest;
-import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.URIPattern;
 import org.slf4j.Logger;
@@ -40,7 +37,6 @@ import static org.mockito.Mockito.contains;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class TestCreateDatasetCommandCluster extends MiniDFSTest {
 
@@ -78,12 +74,12 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
 
   @Test
   public void testBasicUse() throws Exception {
-    command.avroSchemaFile = "user.avsc";
+    command.avroSchemaFile = "test-schemas/user.avsc";
     command.datasetNames = Lists.newArrayList("users");
     command.run();
 
     DatasetDescriptor expectedDescriptor = new DatasetDescriptor.Builder()
-        .schemaUri("resource:user.avsc")
+        .schemaUri("resource:test-schemas/user.avsc")
         .build();
 
     verify(getMockRepo()).create("users", expectedDescriptor);
@@ -95,14 +91,14 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
     String avsc = "target/localUser.avsc";
     FSDataOutputStream out = getFS()
         .create(new Path(avsc), true /* overwrite */ );
-    ByteStreams.copy(Resources.getResource("user.avsc").openStream(), out);
+    ByteStreams.copy(Resources.getResource("test-schemas/user.avsc").openStream(), out);
     out.close();
     command.avroSchemaFile = avsc;
     command.datasetNames = Lists.newArrayList("users");
     command.run();
 
     DatasetDescriptor expectedDescriptor = new DatasetDescriptor.Builder()
-        .schemaUri("resource:user.avsc")
+        .schemaUri("resource:test-schemas/user.avsc")
         .build();
 
     verify(getMockRepo()).create("users", expectedDescriptor);
@@ -114,14 +110,14 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
     String avsc = "hdfs:/tmp/schemas/hdfsUser.avsc";
     FSDataOutputStream out = getDFS()
         .create(new Path(avsc), true /* overwrite */ );
-    ByteStreams.copy(Resources.getResource("user.avsc").openStream(), out);
+    ByteStreams.copy(Resources.getResource("test-schemas/user.avsc").openStream(), out);
     out.close();
     command.avroSchemaFile = avsc;
     command.datasetNames = Lists.newArrayList("users");
     command.run();
 
     DatasetDescriptor expectedDescriptor = new DatasetDescriptor.Builder()
-        .schemaUri("resource:user.avsc")
+        .schemaUri("resource:test-schemas/user.avsc")
         .build();
 
     verify(getMockRepo()).create("users", expectedDescriptor);
