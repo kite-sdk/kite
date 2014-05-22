@@ -26,6 +26,7 @@ import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.hbase.impl.KeySchema;
 import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 
 /**
  * A KeySchema implementation powered by Avro.
@@ -39,18 +40,26 @@ public class AvroKeySchema extends KeySchema {
     super(null, partitionStrategy);
     List<Field> fieldsPartOfKey = new ArrayList<Field>();
     for (FieldPartitioner<?, ?> fieldPartitioner : partitionStrategy.getFieldPartitioners()) {
-      Class<?> fieldType = SchemaUtil.getPartitionType(fieldPartitioner, entitySchema);
       Schema fieldSchema;
-      if (fieldType == Integer.class) {
-        fieldSchema = Schema.create(Schema.Type.INT);
-      } else if (fieldType == Long.class) {
-        fieldSchema = Schema.create(Schema.Type.LONG);
-      } else if (fieldType == String.class) {
-        fieldSchema = Schema.create(Schema.Type.STRING);
+      if (fieldPartitioner instanceof IdentityFieldPartitioner) {
+        // copy the schema directly from the entity to preserve annotations
+        fieldSchema = entitySchema
+            .getField(fieldPartitioner.getSourceName()).schema();
       } else {
-        throw new ValidationException(
-            "Cannot encode partition " + fieldPartitioner.getName() +
-                " with type " + fieldPartitioner.getSourceType());
+        Class<?> fieldType = SchemaUtil
+            .getPartitionType(fieldPartitioner, entitySchema);
+        if (fieldType == Integer.class) {
+          fieldSchema = Schema.create(Schema.Type.INT);
+        } else if (fieldType == Long.class) {
+          fieldSchema = Schema.create(Schema.Type.LONG);
+        } else if (fieldType == String.class) {
+          fieldSchema = Schema.create(Schema.Type.STRING);
+        } else {
+          throw new ValidationException(
+              "Cannot encode partition " + fieldPartitioner.getName() +
+                  " with type " + fieldPartitioner.getSourceType()
+          );
+        }
       }
       fieldsPartOfKey.add(new Field(fieldPartitioner.getSourceName(), fieldSchema, null, null));
     }
