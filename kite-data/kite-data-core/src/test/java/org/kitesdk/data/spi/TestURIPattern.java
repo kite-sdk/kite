@@ -268,9 +268,37 @@ public class TestURIPattern {
   }
 
   @Test
+  public void testOpaqueDefaultQueryArgs() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("scheme:*path?custom-option=true&use-ssl=false");
+    String uri = "scheme:path/to/data.avro";
+    Assert.assertTrue(pattern.matches(uri));
+
+    Map<String, String> actual = pattern.getMatch(uri);
+    expected.put("scheme", "scheme");
+    expected.put("path", "path/to/data.avro");
+    expected.put("custom-option", "true");
+    expected.put("use-ssl", "false");
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
   public void testOverrideQueryArgs() throws URISyntaxException {
     URIPattern pattern = new URIPattern("scheme:/*path?custom-option=true&use-ssl=false");
     String uri = "scheme:/path/to/data.avro?use-ssl=true";
+    Assert.assertTrue(pattern.matches(uri));
+
+    Map<String, String> actual = pattern.getMatch(uri);
+    expected.put("scheme", "scheme");
+    expected.put("path", "path/to/data.avro");
+    expected.put("custom-option", "true");
+    expected.put("use-ssl", "true");
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testOpaqueOverrideQueryArgs() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("scheme:*path?custom-option=true&use-ssl=false");
+    String uri = "scheme:path/to/data.avro?use-ssl=true";
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);

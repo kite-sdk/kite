@@ -21,10 +21,12 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -43,6 +45,7 @@ public class URIPattern {
 
   private static final Splitter PATH_SPLITTER = Splitter.on('/');
   private static final Joiner PATH_JOINER = Joiner.on('/');
+  private static final Splitter PATH_QUERY_SPLITTER = Splitter.on('?');
   private static final Splitter.MapSplitter QUERY_SPLITTER =
       Splitter.on('&').withKeyValueSeparator(Splitter.on('='));
 
@@ -50,6 +53,7 @@ public class URIPattern {
   private static final CharMatcher VAR_START = CharMatcher.anyOf(":*");
 
   private URI pattern;
+  private String patternPath;
   private Map<String, String> defaults;
   private Map<String, String> lastMatch;
 
@@ -57,8 +61,16 @@ public class URIPattern {
     this.pattern = uri;
 
     Map<String, String> accumulator = Maps.newHashMap();
-    addQuery(pattern, accumulator);
-    addAuthority(pattern, accumulator);
+    if (pattern.isOpaque()) {
+      Iterator<String> pathQuery = PATH_QUERY_SPLITTER
+          .split(pattern.getSchemeSpecificPart()).iterator();
+      this.patternPath = Iterators.getNext(pathQuery, null);
+      addQuery(Iterators.getNext(pathQuery, null), accumulator);
+    } else {
+      patternPath = pattern.getPath();
+      addQuery(pattern.getQuery(), accumulator);
+      addAuthority(pattern, accumulator);
+    }
     if (pattern.getScheme() != null) {
       accumulator.put(SCHEME, pattern.getScheme());
     }
@@ -131,26 +143,28 @@ public class URIPattern {
     Map<String, String> result = Maps.newHashMap(defaults);
 
     if (pattern.isOpaque()) {
-      // TODO: Add support for query params in opaque URIs
-      if (!addPath(
-          pattern.getSchemeSpecificPart(),
-          uri.getSchemeSpecificPart(),
-          result)) {
+      Iterator<String> pathQuery = PATH_QUERY_SPLITTER
+          .split(uri.getSchemeSpecificPart()).iterator();
+
+      if (!addPath(patternPath, Iterators.getNext(pathQuery, null), result)) {
         return null;
       }
+
+      addQuery(Iterators.getNext(pathQuery, null), result);
 
     } else if (!uri.isOpaque()) {
       addAuthority(uri, result);
 
-      if (pattern.getPath().isEmpty() && !uri.getPath().isEmpty()) {
+      if (patternPath.isEmpty() && !uri.getPath().isEmpty()) {
         return null;
       }
 
-      if (!addPath(pattern.getPath(), uri.getPath(), result)) {
+      if (!addPath(patternPath, uri.getPath(), result)) {
         return null;
       }
 
-      addQuery(uri, result);
+      addQuery(uri.getQuery(), result);
+
     } else {
       return null;
     }
@@ -293,8 +307,7 @@ public class URIPattern {
     }
   }
 
-  private static void addQuery(URI uri, Map<String, String> storage) {
-    String query = uri.getQuery();
+  private static void addQuery(String query, Map<String, String> storage) {
     if (query != null) {
       storage.putAll(QUERY_SPLITTER.split(query));
     }
