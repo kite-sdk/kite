@@ -3,6 +3,21 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version 0.14.1
+
+Release date: 23 May 2014
+
+Version 0.14.1 is a bug-fix release with the following notable changes:
+
+* Usability improvements for the CLI, [CDK-424](https://issues.cloudera.org/browse/CDK-424)
+* Fixed Dataset examples: [dataset-hbase](https://github.com/kite-sdk/kite-examples/tree/master/dataset-hbase),
+[dataset-staging](https://github.com/kite-sdk/kite-examples/tree/master/dataset-staging),
+[dataset-compatibility](https://github.com/kite-sdk/kite-examples/tree/master/dataset-compatibility)
+* Fixed a bug in the Kite Maven Plugin, [CDK-406](https://issues.cloudera.org/browse/CDK-406)
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10518)
+is available from JIRA.
+
 ## Version 0.14.0
 
 Release date: 13 May 2014
@@ -30,6 +45,8 @@ And the following bug fixes:
 * Fixed schema update validation bug, [CDK-410](https://issues.cloudera.org/browse/CDK-410)
 * Added reconnect support when Hive connections drop, [CDK-415](https://issues.cloudera.org/browse/CDK-415)
 
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10515)
+is available from JIRA.
 
 ## Version 0.13.0
 
@@ -45,6 +62,9 @@ Version 0.13.0 has the following notable changes:
     * Added morphline command that opens an HDFS file for read and returns a corresponding Java InputStream: [openHdfsFile](kite-morphlines/morphlinesReferenceGuide.html#openHdfsFile)
     * Added morphline command that converts an InputStream to a byte array in main memory: [readBlob](kite-morphlines/morphlinesReferenceGuide.html#readBlob)
     * Upgraded kite-morphlines-saxon module from Saxon-HE-9.5.1-4 to Saxon-HE-9.5.1-5
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10510)
+is available from JIRA.
 
 ## Version 0.12.1
 
