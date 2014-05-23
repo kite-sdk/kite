@@ -112,7 +112,7 @@
     <javaVersion>1.6</javaVersion>
     <targetJavaVersion>1.6</targetJavaVersion>
 
-    <previous.project.version>0.14.0</previous.project.version> <!-- used by jdiff, semver rule -->
+    <previous.project.version>0.14.1</previous.project.version> <!-- used by jdiff, semver rule -->
 
     <cdh.version>4.4.0</cdh.version>
 
