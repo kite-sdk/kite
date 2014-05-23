@@ -46,11 +46,6 @@ final class AccessorImpl extends Accessor {
     return new PartitionExpression(partitionExpression, true).evaluate();
   }
 
-  @Override
-  public void registerDatasetRepository(URIPattern pattern, OptionBuilder<DatasetRepository> builder) {
-    DatasetRepositories.register(pattern, builder);
-  }
-
   /**
    * Returns the given {@link DatasetException} wrapped in a deprecated
    * {@link MetadataProviderException}. Users should switch to catching the

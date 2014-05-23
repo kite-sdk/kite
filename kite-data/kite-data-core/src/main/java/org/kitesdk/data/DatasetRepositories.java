@@ -15,19 +15,12 @@
  */
 package org.kitesdk.data;
 
-import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
-import org.kitesdk.data.spi.Loadable;
-import org.kitesdk.data.spi.OptionBuilder;
-import org.kitesdk.data.spi.URIPattern;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.URI;
 import java.util.Map;
-import java.util.ServiceLoader;
+import org.kitesdk.data.spi.Registration;
+import org.kitesdk.data.spi.URIPattern;
+import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 
 /**
  * <p>Convenience methods for working with {@link DatasetRepository} instances.</p>
@@ -36,39 +29,8 @@ import java.util.ServiceLoader;
  */
 public class DatasetRepositories {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DatasetRepositories.class);
-
   private static final URIPattern BASE_PATTERN = new URIPattern(
       URI.create("repo:*storage-uri"));
-  private static final Map<URIPattern, OptionBuilder<DatasetRepository>>
-      REGISTRY = Maps.newLinkedHashMap();
-
-  /**
-   * Registers a {@link URIPattern} and an {@link OptionBuilder} to create
-   * instances of DatasetRepository from the pattern's match options.
-   *
-   * @param pattern a URIPattern
-   * @param builder an OptionBuilder that expects options defined by
-   *                {@code pattern} and builds DatasetRepository instances.
-   */
-  static void register(
-      URIPattern pattern, OptionBuilder<DatasetRepository> builder) {
-    REGISTRY.put(pattern, builder);
-  }
-
-  static {
-    // load implementations, which will register themselves
-    ServiceLoader<Loadable> impls =
-        ServiceLoader.load(Loadable.class);
-    for (Loadable loader : impls) {
-      // the ServiceLoader is lazy, so this iteration forces service loading
-      LOG.debug("Loading: " + loader.getClass().getName());
-      loader.load();
-    }
-    LOG.debug(
-        "Registered repository URIs: " +
-        Joiner.on(", ").join(REGISTRY.keySet()));
-  }
 
   /**
    * Synonym for {@link #open(java.net.URI)} for String URIs.
@@ -78,7 +40,7 @@ public class DatasetRepositories {
    * @throws IllegalArgumentException If the String cannot be parsed into a
    *                                  valid {@link java.net.URI}.
    */
-  public static DatasetRepository open(String uri) {
+  public static <R extends DatasetRepository> R open(String uri) {
     // uses of URI.create throw IllegalArgumentException if the URI is invalid
     return open(URI.create(uri));
   }
@@ -146,9 +108,8 @@ public class DatasetRepositories {
    * <h1>HBase URIs</h1>
    * <p>
    * <code>repo:hbase:[zookeeper-host1]:[zk-port],[zookeeper-host2],...
-   * </code> opens an HBase-backed DatasetRepository. This URI can also be
-   * instantiated with {@link #openRandomAccess(URI)} to instantiate a {@link
-   * RandomAccessDatasetRepository}
+   * </code> opens an HBase-backed DatasetRepository. This URI will return a
+   * {@link RandomAccessDatasetRepository}
    * </p>
    * <h1>Examples</h1>
    * <p>
@@ -210,29 +171,14 @@ public class DatasetRepositories {
    * @return An appropriate implementation of {@link DatasetRepository}
    * @since 0.8.0
    */
-  public static DatasetRepository open(URI repositoryUri) {
+  public static <R extends DatasetRepository> R open(URI repositoryUri) {
     final Map<String, String> baseMatch = BASE_PATTERN.getMatch(repositoryUri);
 
     Preconditions.checkArgument(baseMatch != null,
-        "Invalid dataset repository URI:%s - scheme must be `repo:`",
+        "Invalid repository URI \"%s\": scheme must be \"repo\"",
         repositoryUri);
 
-    final URI storage = URI.create(baseMatch.get("storage-uri"));
-    Map<String, String> match;
-
-    for (URIPattern pattern : REGISTRY.keySet()) {
-      match = pattern.getMatch(storage);
-      if (match != null) {
-        final OptionBuilder<DatasetRepository> builder = REGISTRY.get(pattern);
-        final DatasetRepository repo = builder.getFromOptions(match);
-        LOG.debug(
-            "Connected to repository:{} using uri:{}", repo, repositoryUri);
-
-        return repo;
-      }
-    }
-
-    throw new IllegalArgumentException("Unknown storage URI:" + storage);
+    return Registration.open(URI.create(baseMatch.get("storage-uri")));
   }
 
   /**

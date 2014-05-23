@@ -16,12 +16,9 @@
 package org.kitesdk.data.impl;
 
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Format;
-import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.PartitionKey;
-import org.kitesdk.data.spi.OptionBuilder;
-import org.kitesdk.data.spi.URIPattern;
+import org.kitesdk.data.PartitionStrategy;
 
 /**
  * <p>
@@ -68,8 +65,6 @@ public abstract class Accessor {
   public abstract String toExpression(PartitionStrategy partitionStrategy);
 
   public abstract PartitionStrategy fromExpression(String partitionExpression);
-
-  public abstract void registerDatasetRepository(URIPattern pattern, OptionBuilder<DatasetRepository> builder);
 
   public abstract DatasetException providerExceptionFor(DatasetException e);
 }

@@ -19,9 +19,9 @@ package org.kitesdk.data.spi.filesystem;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetRepositoryException;
-import org.kitesdk.data.Datasets;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
+import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.URIPattern;
 import java.io.IOException;
 import java.net.URI;
@@ -102,15 +102,15 @@ public class Loader implements Loadable {
         new URIBuilder(conf);
     OptionBuilder<Dataset> datasetBuilder = new DatasetBuilder(builder);
 
-    org.kitesdk.data.impl.Accessor.getDefault().registerDatasetRepository(
+    Registration.registerRepoURI(
         new URIPattern(URI.create("file:/*path?absolute=true")), builder);
-    org.kitesdk.data.impl.Accessor.getDefault().registerDatasetRepository(
+    Registration.registerRepoURI(
         new URIPattern(URI.create("file:*path")), builder);
 
-    Datasets.register(
+    Registration.registerDatasetURI(
         new URIPattern(URI.create("file:/*path/:name?absolute=true")),
         datasetBuilder);
-    Datasets.register(
+    Registration.registerDatasetURI(
         new URIPattern(URI.create("file:*path/:name")),
         datasetBuilder);
 
@@ -126,18 +126,18 @@ public class Loader implements Loadable {
       hdfsAuthority = "";
     }
 
-    org.kitesdk.data.impl.Accessor.getDefault().registerDatasetRepository(
+    Registration.registerRepoURI(
         new URIPattern(URI.create(
             "hdfs://" + hdfsAuthority + "/*path?absolute=true")),
         builder);
-    org.kitesdk.data.impl.Accessor.getDefault().registerDatasetRepository(
+    Registration.registerRepoURI(
         new URIPattern(URI.create("hdfs:*path")), builder);
 
     // register Dataset builder
-    Datasets.register(
+    Registration.registerDatasetURI(
         new URIPattern(URI.create("hdfs:/*path/:name?absolute=true")),
         datasetBuilder);
-    Datasets.register(
+    Registration.registerDatasetURI(
         new URIPattern(URI.create("hdfs:*path/:name")),
         datasetBuilder);
   }
