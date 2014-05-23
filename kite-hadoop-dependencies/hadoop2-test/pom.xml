@@ -19,12 +19,12 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>kite-hadoop2-test-dependencies</artifactId>
   <packaging>pom</packaging>
-  <version>0.14.1-SNAPSHOT</version>
+  <version>0.14.1</version>
 
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-hadoop-deps-parent</artifactId>
-    <version>0.14.1-SNAPSHOT</version>
+    <version>0.14.1</version>
   </parent>
 
   <name>Kite Hadoop-2 Test Dependencies Module</name>
