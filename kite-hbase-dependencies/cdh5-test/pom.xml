@@ -17,29 +17,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>kite-hbase-deps-parent</artifactId>
+  <artifactId>kite-hbase-cdh5-test-dependencies</artifactId>
   <packaging>pom</packaging>
-
-  <modules>
-    <module>hadoop1</module>
-    <module>hadoop1-test</module>
-    <module>hadoop2</module>
-    <module>hadoop2-test</module>
-    <module>default</module>
-    <module>default-test</module>
-    <module>cdh5</module>
-    <module>cdh5-test</module>
-  </modules>
+  <version>0.14.2-SNAPSHOT</version>
 
   <parent>
     <groupId>org.kitesdk</groupId>
-    <artifactId>kite-parent</artifactId>
+    <artifactId>kite-hbase-deps-parent</artifactId>
     <version>0.14.2-SNAPSHOT</version>
   </parent>
 
-  <name>Kite HBase Dependencies Module</name>
+  <name>Kite HBase CDH5 Test Dependencies Module</name>
   <description>
-    The Kite HBase Dependencies module aggregates HBase dependencies
+    The Kite HBase Dependencies module aggregates CDH5 HBase dependencies
   </description>
 
   <build>
@@ -65,5 +55,13 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.hbase</groupId>
+      <artifactId>hbase-testing-util</artifactId>
+      <version>${vers.hbase2}</version>
+    </dependency>
+  </dependencies>
 
 </project>
