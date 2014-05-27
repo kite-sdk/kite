@@ -368,7 +368,7 @@ class HiveUtils {
     @Override
     public TypeInfo map(Schema map, TypeInfo value) {
       return TypeInfoFactory.getMapTypeInfo(
-          TypeInfoFactory.stringTypeInfo, value);
+          TYPE_TO_TYPEINFO.get(Schema.Type.STRING), value);
     }
 
     @Override

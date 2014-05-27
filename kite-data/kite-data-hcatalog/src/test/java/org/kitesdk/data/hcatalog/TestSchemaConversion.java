@@ -67,6 +67,14 @@ public class TestSchemaConversion {
         }
       };
 
+  private static final TypeInfo BOOLEAN_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.BOOLEAN);
+  private static final TypeInfo INT_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.INT);
+  private static final TypeInfo LONG_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.LONG);
+  private static final TypeInfo FLOAT_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.FLOAT);
+  private static final TypeInfo DOUBLE_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.DOUBLE);
+  private static final TypeInfo STRING_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.STRING);
+  private static final TypeInfo BINARY_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.BYTES);
+
   @Test
   public void testConvertSchemaWithPrimitive() {
     Schema primitiveSchema = SchemaBuilder.builder().stringType();
@@ -76,7 +84,7 @@ public class TestSchemaConversion {
     Assert.assertEquals("Should be named \"column\"",
         "column", fields.get(0).getName());
     Assert.assertEquals("Should be named \"column\"",
-        TypeInfoFactory.stringTypeInfo.toString(), fields.get(0).getType());
+        STRING_TYPE_INFO.toString(), fields.get(0).getType());
   }
 
   @Test
@@ -89,8 +97,8 @@ public class TestSchemaConversion {
         Lists.transform(fields, GET_NAMES));
     Assert.assertEquals("Field types should match",
         Lists.newArrayList(
-            TypeInfoFactory.intTypeInfo.toString(),
-            TypeInfoFactory.stringTypeInfo.toString()),
+            INT_TYPE_INFO.toString(),
+            STRING_TYPE_INFO.toString()),
         Lists.transform(fields, GET_TYPE_STRINGS));
   }
 
@@ -104,13 +112,13 @@ public class TestSchemaConversion {
         Lists.transform(fields, GET_NAMES));
     Assert.assertEquals("Field types should match",
         Lists.newArrayList(
-            TypeInfoFactory.stringTypeInfo.toString(),
+            STRING_TYPE_INFO.toString(),
             TypeInfoFactory.getListTypeInfo(
                 TypeInfoFactory.getStructTypeInfo(
                     Lists.newArrayList("id", "name"),
                     Lists.newArrayList(
-                        TypeInfoFactory.intTypeInfo,
-                        TypeInfoFactory.stringTypeInfo))).toString()),
+                        INT_TYPE_INFO,
+                        STRING_TYPE_INFO))).toString()),
         Lists.transform(fields, GET_TYPE_STRINGS));
   }
 
@@ -125,8 +133,8 @@ public class TestSchemaConversion {
         ((StructTypeInfo) type).getAllStructFieldNames());
     Assert.assertEquals("Field types should match",
         Lists.newArrayList(
-            TypeInfoFactory.intTypeInfo,
-            TypeInfoFactory.stringTypeInfo),
+            INT_TYPE_INFO,
+            STRING_TYPE_INFO),
         ((StructTypeInfo) type).getAllStructFieldTypeInfos());
   }
 
@@ -136,7 +144,7 @@ public class TestSchemaConversion {
         .items().floatType());
 
     Assert.assertEquals("Array should be converted to list",
-        TypeInfoFactory.getListTypeInfo(TypeInfoFactory.floatTypeInfo),
+        TypeInfoFactory.getListTypeInfo(FLOAT_TYPE_INFO),
         type);
   }
 
@@ -146,8 +154,7 @@ public class TestSchemaConversion {
         .values().booleanType());
 
     Assert.assertEquals("Map should be converted to map",
-        TypeInfoFactory.getMapTypeInfo(
-            TypeInfoFactory.stringTypeInfo, TypeInfoFactory.booleanTypeInfo),
+        TypeInfoFactory.getMapTypeInfo(STRING_TYPE_INFO, BOOLEAN_TYPE_INFO),
         type);
   }
 
@@ -162,10 +169,10 @@ public class TestSchemaConversion {
 
     Assert.assertEquals("Union should be converted to union",
         TypeInfoFactory.getUnionTypeInfo(Lists.newArrayList(
-            TypeInfoFactory.binaryTypeInfo,
-            TypeInfoFactory.binaryTypeInfo,
-            TypeInfoFactory.doubleTypeInfo,
-            TypeInfoFactory.longTypeInfo)),
+            BINARY_TYPE_INFO,
+            BINARY_TYPE_INFO,
+            DOUBLE_TYPE_INFO,
+            LONG_TYPE_INFO)),
         type);
   }
 
@@ -175,7 +182,7 @@ public class TestSchemaConversion {
         .enumeration("TestEnum").symbols("a", "b", "c"));
 
     Assert.assertEquals("Enum should be converted to string",
-        TypeInfoFactory.stringTypeInfo, type);
+        STRING_TYPE_INFO, type);
   }
 
   @Test(expected=IllegalStateException.class)
