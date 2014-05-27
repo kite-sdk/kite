@@ -1154,12 +1154,12 @@
         </property>
       </activation>
       <properties>
-        <!-- compile against CDH5 jars -->
-        <maven.main.skip>false</maven.main.skip>
-        <artifact.hadoop-deps>kite-hadoop-dependencies</artifact.hadoop-deps>
-        <artifact.hadoop-test-deps>kite-hadoop-test-dependencies</artifact.hadoop-test-deps>
-        <artifact.hbase-deps>kite-hbase2-dependencies</artifact.hbase-deps>
-        <artifact.hbase-test-deps>kite-hbase2-test-dependencies</artifact.hbase-test-deps>
+        <!-- test cdh5 with the same jars that were produced for default profile -->
+        <maven.main.skip>true</maven.main.skip>
+        <artifact.hadoop-deps>kite-hadoop-cdh5-dependencies</artifact.hadoop-deps>
+        <artifact.hadoop-test-deps>kite-hadoop-cdh5-test-dependencies</artifact.hadoop-test-deps>
+        <artifact.hbase-deps>kite-hbase-cdh5-dependencies</artifact.hbase-deps>
+        <artifact.hbase-test-deps>kite-hbase-cdh5-test-dependencies</artifact.hbase-test-deps>
         <cdh.version>5.0.0</cdh.version>
         <vers.flume>1.4.0-cdh${cdh.version}</vers.flume>
         <vers.hadoop>2.3.0-cdh${cdh.version}</vers.hadoop>

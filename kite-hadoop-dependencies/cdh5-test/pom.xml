@@ -17,29 +17,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>kite-hbase-deps-parent</artifactId>
+  <artifactId>kite-hadoop-cdh5-test-dependencies</artifactId>
   <packaging>pom</packaging>
-
-  <modules>
-    <module>hadoop1</module>
-    <module>hadoop1-test</module>
-    <module>hadoop2</module>
-    <module>hadoop2-test</module>
-    <module>default</module>
-    <module>default-test</module>
-    <module>cdh5</module>
-    <module>cdh5-test</module>
-  </modules>
+  <version>0.14.2-SNAPSHOT</version>
 
   <parent>
     <groupId>org.kitesdk</groupId>
-    <artifactId>kite-parent</artifactId>
+    <artifactId>kite-hadoop-deps-parent</artifactId>
     <version>0.14.2-SNAPSHOT</version>
   </parent>
 
-  <name>Kite HBase Dependencies Module</name>
+  <name>Kite Hadoop CDH5 Test Dependencies Module</name>
   <description>
-    The Kite HBase Dependencies module aggregates HBase dependencies
+    The Kite Hadoop Dependencies module aggregates CDH5 Hadoop dependencies
   </description>
 
   <build>
@@ -65,5 +55,25 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-common</artifactId>
+      <version>${vers.hadoop}</version>
+      <type>test-jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-hdfs</artifactId>
+      <version>${vers.hadoop}</version>
+      <type>test-jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-minicluster</artifactId>
+      <version>${vers.hadoop-mr1}</version>
+    </dependency>
+  </dependencies>
 
 </project>
