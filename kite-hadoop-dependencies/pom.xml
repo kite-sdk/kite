@@ -49,21 +49,6 @@
         <artifactId>apache-rat-plugin</artifactId>
       </plugin>
     </plugins>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <configuration>
-            <compilerArgs>
-              <arg>-Werror</arg> <!-- fail on warnings -->
-              <arg>-Xlint:-options</arg> <!-- ignore cross-compilation warning -->
-              <arg>-Xlint:unchecked</arg>
-            </compilerArgs>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 
 </project>
