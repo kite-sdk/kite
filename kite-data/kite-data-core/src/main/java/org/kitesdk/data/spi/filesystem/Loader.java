@@ -85,12 +85,12 @@ public class Loader implements Loadable {
         new URIBuilder(conf);
 
     Registration.register(
-        new URIPattern(URI.create("file:/*path?absolute=true")),
-        new URIPattern(URI.create("file:/*path/:dataset?absolute=true")),
+        new URIPattern("file:/*path?absolute=true"),
+        new URIPattern("file:/*path/:dataset?absolute=true"),
         builder);
     Registration.register(
-        new URIPattern(URI.create("file:*path")),
-        new URIPattern(URI.create("file:*path/:dataset")),
+        new URIPattern("file:*path"),
+        new URIPattern("file:*path/:dataset"),
         builder);
 
     String hdfsAuthority;
@@ -106,15 +106,13 @@ public class Loader implements Loadable {
     }
 
     Registration.register(
-        new URIPattern(URI.create(
-            "hdfs://" + hdfsAuthority + "/*path?absolute=true"
-        )),
-        new URIPattern(URI.create("hdfs:/*path/:dataset?absolute=true")),
+        new URIPattern("hdfs://" + hdfsAuthority + "/*path?absolute=true"),
+        new URIPattern("hdfs:/*path/:dataset?absolute=true"),
         builder
     );
     Registration.register(
-        new URIPattern(URI.create("hdfs:*path")),
-        new URIPattern(URI.create("hdfs:*path/:dataset")),
+        new URIPattern("hdfs:*path"),
+        new URIPattern("hdfs:*path/:dataset"),
         builder);
   }
 

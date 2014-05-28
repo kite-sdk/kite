@@ -45,8 +45,8 @@ public class Loader implements Loadable {
   @Override
   public void load() {
     Registration.register(
-        new URIPattern(URI.create("hbase::zk")),
-        new URIPattern(URI.create("hbase::zk/:dataset")),
+        new URIPattern("hbase::zk"),
+        new URIPattern("hbase::zk/:dataset"),
         new OptionBuilder<DatasetRepository>() {
           @Override
           public DatasetRepository getFromOptions(Map<String, String> options) {

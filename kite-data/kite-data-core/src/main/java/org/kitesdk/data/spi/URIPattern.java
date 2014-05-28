@@ -77,8 +77,8 @@ public class URIPattern {
     this.defaults = ImmutableMap.copyOf(accumulator);
   }
 
-  public URIPattern(String uri) throws URISyntaxException {
-    this(new URI(uri));
+  public URIPattern(String uri) {
+    this(URI.create(uri));
   }
 
   @Override
