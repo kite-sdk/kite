@@ -16,13 +16,6 @@
 
 package org.kitesdk.data.spi.filesystem;
 
-import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.DatasetRepositoryException;
-import org.kitesdk.data.spi.Loadable;
-import org.kitesdk.data.spi.OptionBuilder;
-import org.kitesdk.data.spi.Registration;
-import org.kitesdk.data.spi.URIPattern;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,6 +23,12 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.DatasetRepositoryException;
+import org.kitesdk.data.spi.Loadable;
+import org.kitesdk.data.spi.OptionBuilder;
+import org.kitesdk.data.spi.Registration;
+import org.kitesdk.data.spi.URIPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,39 +77,21 @@ public class Loader implements Loadable {
     }
   }
 
-  private static class DatasetBuilder implements OptionBuilder<Dataset> {
-    private final OptionBuilder<DatasetRepository> repoBuilder;
-
-    public DatasetBuilder(OptionBuilder<DatasetRepository> repoBuilder) {
-      this.repoBuilder = repoBuilder;
-    }
-
-    @Override
-    public Dataset getFromOptions(Map<String, String> options) {
-      DatasetRepository repo = repoBuilder.getFromOptions(options);
-      return repo.load(options.get("name"));
-    }
-  }
-
   @Override
   public void load() {
     // get a default Configuration to configure defaults (so it's okay!)
     Configuration conf = new Configuration();
     OptionBuilder<DatasetRepository> builder =
         new URIBuilder(conf);
-    OptionBuilder<Dataset> datasetBuilder = new DatasetBuilder(builder);
 
-    Registration.registerRepoURI(
-        new URIPattern(URI.create("file:/*path?absolute=true")), builder);
-    Registration.registerRepoURI(
-        new URIPattern(URI.create("file:*path")), builder);
-
-    Registration.registerDatasetURI(
-        new URIPattern(URI.create("file:/*path/:name?absolute=true")),
-        datasetBuilder);
-    Registration.registerDatasetURI(
-        new URIPattern(URI.create("file:*path/:name")),
-        datasetBuilder);
+    Registration.register(
+        new URIPattern(URI.create("file:/*path?absolute=true")),
+        new URIPattern(URI.create("file:/*path/:dataset?absolute=true")),
+        builder);
+    Registration.register(
+        new URIPattern(URI.create("file:*path")),
+        new URIPattern(URI.create("file:*path/:dataset")),
+        builder);
 
     String hdfsAuthority;
     try {
@@ -124,20 +105,17 @@ public class Loader implements Loadable {
       hdfsAuthority = "";
     }
 
-    Registration.registerRepoURI(
+    Registration.register(
         new URIPattern(URI.create(
-            "hdfs://" + hdfsAuthority + "/*path?absolute=true")),
+            "hdfs://" + hdfsAuthority + "/*path?absolute=true"
+        )),
+        new URIPattern(URI.create("hdfs:/*path/:dataset?absolute=true")),
+        builder
+    );
+    Registration.register(
+        new URIPattern(URI.create("hdfs:*path")),
+        new URIPattern(URI.create("hdfs:*path/:dataset")),
         builder);
-    Registration.registerRepoURI(
-        new URIPattern(URI.create("hdfs:*path")), builder);
-
-    // register Dataset builder
-    Registration.registerDatasetURI(
-        new URIPattern(URI.create("hdfs:/*path/:name?absolute=true")),
-        datasetBuilder);
-    Registration.registerDatasetURI(
-        new URIPattern(URI.create("hdfs:*path/:name")),
-        datasetBuilder);
   }
 
   private static URI fileSystemURI(Map<String, String> match) {

@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import java.net.URI;
 import java.util.Map;
@@ -37,6 +38,31 @@ public class Registration {
   private static final Map<URIPattern, OptionBuilder<Dataset>>
       DATASET_BUILDERS = Maps.newLinkedHashMap();
 
+  private static class DatasetBuilder implements OptionBuilder<Dataset> {
+    private static final String DATASET_NAME_OPTION = "dataset";
+    private final OptionBuilder<DatasetRepository> repoBuilder;
+
+    public DatasetBuilder(OptionBuilder<DatasetRepository> repoBuilder) {
+      this.repoBuilder = repoBuilder;
+    }
+
+    @Override
+    public Dataset getFromOptions(Map<String, String> options) {
+      DatasetRepository repo = repoBuilder.getFromOptions(options);
+      // some URI patterns don't include a dataset as a required option, so
+      // check that it is passed as a query option
+      Preconditions.checkArgument(options.containsKey(DATASET_NAME_OPTION),
+          "Missing required query option \"" + DATASET_NAME_OPTION + "\"");
+      return repo.load(options.get(DATASET_NAME_OPTION));
+    }
+  }
+
+  public static void register(URIPattern repoPattern, URIPattern datasetPattern,
+                              OptionBuilder<DatasetRepository> repoBuilder) {
+    registerRepoURI(repoPattern, repoBuilder);
+    registerDatasetURI(datasetPattern, new DatasetBuilder(repoBuilder));
+  }
+
   /**
    * Registers a {@link URIPattern} and an {@link OptionBuilder} to create
    * instances of {@link DatasetRepository} from the pattern's match options.
@@ -45,7 +71,7 @@ public class Registration {
    * @param builder an OptionBuilder that expects options defined by
    *                {@code pattern} and builds DatasetRepository instances.
    */
-  public static void registerRepoURI(URIPattern pattern,
+  private static void registerRepoURI(URIPattern pattern,
                                      OptionBuilder<DatasetRepository> builder) {
     REPO_BUILDERS.put(pattern, builder);
   }
@@ -73,7 +99,7 @@ public class Registration {
    * @param builder an OptionBuilder that expects options defined by
    *                {@code pattern} and builds Dataset instances.
    */
-  public static void registerDatasetURI(URIPattern pattern,
+  private static void registerDatasetURI(URIPattern pattern,
                                         OptionBuilder<Dataset> builder) {
     DATASET_BUILDERS.put(pattern, builder);
   }
