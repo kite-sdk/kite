@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.ServiceLoader;
 import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ public class Registration {
         return (D) repo;
       }
     }
-    throw new IllegalArgumentException("Unknown dataset URI: " + uri);
+    throw new DatasetNotFoundException("Unknown dataset URI: " + uri);
   }
 
   static {

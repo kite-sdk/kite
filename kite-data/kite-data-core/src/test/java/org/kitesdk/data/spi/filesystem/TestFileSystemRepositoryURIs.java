@@ -30,14 +30,13 @@ import java.net.URISyntaxException;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.junit.BeforeClass;
 
-public class TestFileSystemURIs extends MiniDFSTest {
+public class TestFileSystemRepositoryURIs extends MiniDFSTest {
 
   @BeforeClass
   public static void loadImpl() {
     new Loader().load();
   }
 
-  @SuppressWarnings("deprecation")
   @Test
   public void testLocalRelative() throws URISyntaxException {
     URI repositoryUri = new URI("repo:file:target/dsr-repo-test");
@@ -64,7 +63,6 @@ public class TestFileSystemURIs extends MiniDFSTest {
         new URI(repository.getUri().getSchemeSpecificPart()));
   }
 
-  @SuppressWarnings("deprecation")
   @Test
   public void testLocalAbsolute() throws URISyntaxException {
     URI repositoryUri = new URI("repo:file:///tmp/dsr-repo-test");
@@ -84,7 +82,6 @@ public class TestFileSystemURIs extends MiniDFSTest {
     DatasetRepositories.open("repo:hdfs:/");
   }
 
-  @SuppressWarnings("deprecation")
   @Test
   public void testHdfsAbsolute() throws URISyntaxException {
     URI hdfsUri = getDFS().getUri();

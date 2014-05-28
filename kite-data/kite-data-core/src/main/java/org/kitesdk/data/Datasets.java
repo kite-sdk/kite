@@ -24,16 +24,17 @@ import org.kitesdk.data.spi.URIPattern;
 
 public class Datasets {
 
-  private static final URIPattern BASE_PATTERN = new URIPattern(
-      URI.create("dataset:*storage-uri"));
+  private static final String DATASET_SCHEME = "dataset";
 
   public static <E, D extends Dataset<E>> D load(URI uri) {
-    final Map<String, String> baseMatch = BASE_PATTERN.getMatch(uri);
-
-    Preconditions.checkArgument(baseMatch != null,
+    Preconditions.checkArgument(DATASET_SCHEME.equals(uri.getScheme()),
         "Invalid dataset URI \"%s\": scheme must be \"dataset\"", uri);
 
-    return Registration.<E, D>load(URI.create(baseMatch.get("storage-uri")));
+    return Registration.<E, D>load(URI.create(uri.getRawSchemeSpecificPart()));
+  }
+
+  public static <E, D extends Dataset<E>> D load(String uriString) {
+    return Datasets.<E, D>load(URI.create(uriString));
   }
 
 }

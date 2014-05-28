@@ -29,8 +29,7 @@ import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
  */
 public class DatasetRepositories {
 
-  private static final URIPattern BASE_PATTERN = new URIPattern(
-      URI.create("repo:*storage-uri"));
+  private static final String REPO_SCHEME = "repo";
 
   /**
    * Synonym for {@link #open(java.net.URI)} for String URIs.
@@ -167,18 +166,15 @@ public class DatasetRepositories {
    * </table>
    * </p>
    *
-   * @param repositoryUri The repository URI
+   * @param repoUri The repository URI
    * @return An appropriate implementation of {@link DatasetRepository}
    * @since 0.8.0
    */
-  public static <R extends DatasetRepository> R open(URI repositoryUri) {
-    final Map<String, String> baseMatch = BASE_PATTERN.getMatch(repositoryUri);
+  public static <R extends DatasetRepository> R open(URI repoUri) {
+    Preconditions.checkArgument(REPO_SCHEME.equals(repoUri.getScheme()),
+        "Invalid repository URI \"%s\": scheme must be \"repo\"", repoUri);
 
-    Preconditions.checkArgument(baseMatch != null,
-        "Invalid repository URI \"%s\": scheme must be \"repo\"",
-        repositoryUri);
-
-    return Registration.open(URI.create(baseMatch.get("storage-uri")));
+    return Registration.open(URI.create(repoUri.getRawSchemeSpecificPart()));
   }
 
   /**
@@ -191,7 +187,7 @@ public class DatasetRepositories {
    * @since 0.9.0
    */
   public static RandomAccessDatasetRepository openRandomAccess(String uri) {
-    return openRandomAccess(URI.create(uri));
+    return open(URI.create(uri));
   }
   
   /**
@@ -243,6 +239,6 @@ public class DatasetRepositories {
    * @since 0.9.0
    */
   public static RandomAccessDatasetRepository openRandomAccess(URI repositoryUri) {
-    return (RandomAccessDatasetRepository)open(repositoryUri);
+    return open(repositoryUri);
   }
 }
