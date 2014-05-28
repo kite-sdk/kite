@@ -58,13 +58,11 @@ public class Loader implements Loadable {
     public DatasetRepository getFromOptions(Map<String, String> match) {
       final Path root;
       String path = match.get("path");
-      if (path == null || path.isEmpty()) {
-        root = new Path(".");
-      } else if (match.containsKey("absolute")
+      if (match.containsKey("absolute")
           && Boolean.valueOf(match.get("absolute"))) {
-        root = new Path("/", path);
+        root = (path == null || path.isEmpty()) ? new Path("/") : new Path("/", path);
       } else {
-        root = new Path(path);
+        root = (path == null || path.isEmpty()) ? new Path(".") : new Path(path);
       }
       final FileSystem fs;
       try {

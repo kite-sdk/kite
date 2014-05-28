@@ -17,7 +17,7 @@
 package org.kitesdk.data.hcatalog;
 
 import org.kitesdk.data.spi.filesystem.Loader;
-import org.kitesdk.data.spi.filesystem.TestFileSystemURIs;
+import org.kitesdk.data.spi.filesystem.TestFileSystemRepositoryURIs;
 
 import org.apache.hadoop.conf.Configuration;
 import org.junit.After;
@@ -37,7 +37,7 @@ import org.kitesdk.data.spi.MetadataProvider;
  * This inherits from TestFileSystemURIs because those URIs should continue to
  * work correctly after the Hive URIs are added.
  */
-public class TestHiveURIs extends TestFileSystemURIs {
+public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
 
   @BeforeClass
   public static void registerURIs() {

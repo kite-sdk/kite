@@ -19,9 +19,9 @@ package org.kitesdk.data.hcatalog.impl;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
-import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
+import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.URIPattern;
 import java.io.IOException;
 import java.net.URI;
@@ -65,9 +65,9 @@ public class Loader implements Loadable {
       String path = match.get("path");
       if (match.containsKey("absolute")
           && Boolean.valueOf(match.get("absolute"))) {
-        root = path == null ? new Path("/") : new Path("/", path);
+        root = (path == null || path.isEmpty()) ? new Path("/") : new Path("/", path);
       } else {
-        root = path == null ? new Path(".") : new Path(path);
+        root = (path == null || path.isEmpty()) ? new Path(".") : new Path(path);
       }
       final FileSystem fs;
       try {
@@ -130,12 +130,12 @@ public class Loader implements Loadable {
     // Hive-managed data sets
     final OptionBuilder<DatasetRepository> managedBuilder =
         new ManagedBuilder(conf);
-    Accessor.getDefault().registerDatasetRepository(
+    Registration.registerRepoURI(
         new URIPattern(URI.create("hive")), managedBuilder);
     // add a URI with no path to allow overriding the metastore authority
     // the authority section is *always* a URI without it cannot match and one
     // with a path (so missing authority) also cannot match
-    Accessor.getDefault().registerDatasetRepository(
+    Registration.registerRepoURI(
         new URIPattern(URI.create("hive://" + ALWAYS_REPLACED)),
         managedBuilder);
 
@@ -157,11 +157,11 @@ public class Loader implements Loadable {
       hdfsAuthority = "";
     }
 
-    Accessor.getDefault().registerDatasetRepository(
+    Registration.registerRepoURI(
         new URIPattern(URI.create("hive://" + hiveAuthority +
             "/*path?absolute=true" + hdfsAuthority)),
         externalBuilder);
-    Accessor.getDefault().registerDatasetRepository(
+    Registration.registerRepoURI(
         new URIPattern(URI.create("hive:*path")), externalBuilder);
   }
 
