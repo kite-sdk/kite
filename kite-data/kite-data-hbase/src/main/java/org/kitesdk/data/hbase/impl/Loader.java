@@ -20,6 +20,7 @@ import org.kitesdk.data.hbase.HBaseDatasetRepository;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
+import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.URIPattern;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
@@ -43,7 +44,9 @@ public class Loader implements Loadable {
 
   @Override
   public void load() {
-    Accessor.getDefault().registerDatasetRepository(new URIPattern(URI.create("hbase:*zk")),
+    Registration.register(
+        new URIPattern(URI.create("hbase::zk")),
+        new URIPattern(URI.create("hbase::zk/:dataset")),
         new OptionBuilder<DatasetRepository>() {
           @Override
           public DatasetRepository getFromOptions(Map<String, String> options) {
