@@ -33,8 +33,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -290,7 +288,7 @@ public class DatasetDescriptor {
     // used to match resource:schema.avsc URIs
     private static final String RESOURCE_PATH = "resource-path";
     private static final URIPattern RESOURCE_URI_PATTERN =
-        new URIPattern(URI.create("resource:*" + RESOURCE_PATH));
+        new URIPattern("resource:*" + RESOURCE_PATH);
 
     private Schema schema;
     private URL schemaUrl;
