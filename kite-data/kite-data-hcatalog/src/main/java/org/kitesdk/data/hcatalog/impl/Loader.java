@@ -128,16 +128,17 @@ public class Loader implements Loadable {
     }
 
     // Hive-managed data sets
+    // Managed sets use the same URI for both repository and dataset, which
+    // means that dataset must be passed as a query argument
     final OptionBuilder<DatasetRepository> managedBuilder =
         new ManagedBuilder(conf);
-    Registration.registerRepoURI(
-        new URIPattern(URI.create("hive")), managedBuilder);
+    URIPattern basic = new URIPattern(URI.create("hive"));
+    Registration.register(basic, basic, managedBuilder);
     // add a URI with no path to allow overriding the metastore authority
     // the authority section is *always* a URI without it cannot match and one
     // with a path (so missing authority) also cannot match
-    Registration.registerRepoURI(
-        new URIPattern(URI.create("hive://" + ALWAYS_REPLACED)),
-        managedBuilder);
+    URIPattern basicAuth = new URIPattern(URI.create("hive://" + ALWAYS_REPLACED));
+    Registration.register(basicAuth, basicAuth, managedBuilder);
 
     // external data sets
     final OptionBuilder<DatasetRepository> externalBuilder =
@@ -157,12 +158,20 @@ public class Loader implements Loadable {
       hdfsAuthority = "";
     }
 
-    Registration.registerRepoURI(
-        new URIPattern(URI.create("hive://" + hiveAuthority +
-            "/*path?absolute=true" + hdfsAuthority)),
+    Registration.register(
+        new URIPattern(URI.create(
+            "hive://" + hiveAuthority + "/*path?absolute=true" + hdfsAuthority
+        )),
+        new URIPattern(URI.create(
+            "hive://" + hiveAuthority + "/*path/:dataset?absolute=true" +
+                hdfsAuthority
+        )),
+        externalBuilder
+    );
+    Registration.register(
+        new URIPattern(URI.create("hive:*path")),
+        new URIPattern(URI.create("hive:*path/:dataset")),
         externalBuilder);
-    Registration.registerRepoURI(
-        new URIPattern(URI.create("hive:*path")), externalBuilder);
   }
 
   private static URI fileSystemURI(Map<String, String> match) {

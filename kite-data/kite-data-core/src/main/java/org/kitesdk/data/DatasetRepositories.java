@@ -17,9 +17,7 @@ package org.kitesdk.data;
 
 import com.google.common.base.Preconditions;
 import java.net.URI;
-import java.util.Map;
 import org.kitesdk.data.spi.Registration;
-import org.kitesdk.data.spi.URIPattern;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 
 /**
