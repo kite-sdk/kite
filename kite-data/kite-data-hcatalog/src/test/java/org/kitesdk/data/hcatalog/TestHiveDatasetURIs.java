@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.hcatalog;
 
-import com.google.common.io.Resources;
 import java.net.URI;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
@@ -44,7 +43,7 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
     hdfsQueryArgs = "hdfs-host=" + getDFS().getUri().getHost() +
         "&hdfs-port=" + getDFS().getUri().getPort();
     descriptor = new DatasetDescriptor.Builder()
-        .schema(Resources.getResource("schema/user.avsc").openStream())
+        .schemaUri("resource:schema/user.avsc")
         .build();
   }
 
@@ -135,7 +134,7 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
       @Override
       public void run() {
         Dataset<Object> ds = Datasets
-            .load("dataset:hdfs://" + hdfsAuth + "/tmp/data/nosuchdataset");
+            .load("dataset:hive:/tmp/data/nosuchdataset?" + hdfsQueryArgs);
       }
     });
   }

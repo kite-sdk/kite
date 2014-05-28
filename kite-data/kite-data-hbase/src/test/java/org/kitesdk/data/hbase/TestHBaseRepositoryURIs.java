@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.hbase.avro;
+package org.kitesdk.data.hbase;
 
 import java.net.URI;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.RandomAccessDatasetRepository;
-import org.kitesdk.data.hbase.HBaseDatasetRepository;
+import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.hbase.impl.Loader;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;
 
@@ -31,7 +31,7 @@ import junit.framework.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class TestHBaseURIs {
+public class TestHBaseRepositoryURIs {
 
   @BeforeClass
   public static void registerURIs() throws Exception {
@@ -69,11 +69,22 @@ public class TestHBaseURIs {
     String zkClientPort = HBaseTestUtils.getConf().get(HConstants.ZOOKEEPER_CLIENT_PORT);
     String zk = zkQuorum + ":" + zkClientPort; // OK since zkQuorum is a single host
     URI repositoryUri = new URI("repo:hbase:" + zk);
-    RandomAccessDatasetRepository repo = DatasetRepositories.openRandomAccess(repositoryUri);
+    RandomAccessDatasetRepository repo = DatasetRepositories.open(repositoryUri);
 
     Assert.assertNotNull("Received a repository", repo);
     assertTrue("Repo is a HBase repo", repo instanceof HBaseDatasetRepository);
     assertEquals("Repository URI", repositoryUri, repo.getUri());
+  }
+
+  @Test
+  public void testPathFailsMatch() {
+    TestHelpers.assertThrows("Should not match URIs that contain '/'",
+        IllegalArgumentException.class, new Runnable() {
+      @Override
+      public void run() {
+        DatasetRepositories.open(URI.create("repo:hbase:zk1,zk2:2000/path"));
+      }
+    });
   }
 
 }
