@@ -25,6 +25,7 @@ import org.kitesdk.data.spi.URIPattern;
 public class Datasets {
 
   private static final String DATASET_SCHEME = "dataset";
+  private static final String VIEW_SCHEME = "dataset";
 
   public static <E, D extends Dataset<E>> D load(URI uri) {
     Preconditions.checkArgument(DATASET_SCHEME.equals(uri.getScheme()),
@@ -37,4 +38,14 @@ public class Datasets {
     return Datasets.<E, D>load(URI.create(uriString));
   }
 
+  public static <E, V extends View<E>> V view(URI uri) {
+    Preconditions.checkArgument(VIEW_SCHEME.equals(uri.getScheme()),
+        "Invalid view URI \"%s\": scheme must be \"view\"", uri);
+
+    return Registration.<E, V>view(URI.create(uri.getRawSchemeSpecificPart()));
+  }
+
+  public static <E, V extends View<E>> V view(String uriString) {
+    return Datasets.<E, V>view(URI.create(uriString));
+  }
 }

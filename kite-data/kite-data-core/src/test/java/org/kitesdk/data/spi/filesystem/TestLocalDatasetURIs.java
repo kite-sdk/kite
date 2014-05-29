@@ -29,7 +29,9 @@ import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.spi.Constraints;
 
 public class TestLocalDatasetURIs {
 
@@ -80,6 +82,34 @@ public class TestLocalDatasetURIs {
         new Path(cwd, "target/data/test").toUri(), ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
         repo.load("test").getDescriptor(), ds.getDescriptor());
+
+    repo.delete("test");
+  }
+
+  @Test
+  public void testViewConstraints() {
+    DatasetRepository repo = DatasetRepositories
+        .open("repo:file:/tmp/data");
+    repo.delete("test");
+    repo.create("test", descriptor);
+
+    RefinableView<Object> v = Datasets
+        .view("dataset:file:/tmp/data/test?username=user");
+
+    Assert.assertNotNull("Should load view", v);
+    Assert.assertTrue(v instanceof FileSystemView);
+    Assert.assertEquals("Locations should match",
+        URI.create("file:/tmp/data/test"),
+        v.getDataset().getDescriptor().getLocation());
+
+    DatasetDescriptor loaded = repo.load("test").getDescriptor();
+    Assert.assertEquals("Descriptors should match",
+        loaded, v.getDataset().getDescriptor());
+
+    Constraints withUser = new Constraints(loaded.getSchema())
+        .with("username", "user");
+    Assert.assertEquals("Constraints should be username=user",
+        withUser, ((FileSystemView) v).getConstraints());
 
     repo.delete("test");
   }

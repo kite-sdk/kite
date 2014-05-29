@@ -22,9 +22,12 @@ import com.google.common.collect.Maps;
 import java.net.URI;
 import java.util.Map;
 import java.util.ServiceLoader;
+import org.apache.avro.Schema;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.RefinableView;
+import org.kitesdk.data.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +38,10 @@ public class Registration {
   private static final Map<URIPattern, OptionBuilder<DatasetRepository>>
       REPO_BUILDERS = Maps.newLinkedHashMap();
 
-  private static final Map<URIPattern, OptionBuilder<Dataset>>
+  private static final Map<URIPattern, DatasetBuilder>
       DATASET_BUILDERS = Maps.newLinkedHashMap();
 
-  private static class DatasetBuilder implements OptionBuilder<Dataset> {
+  private static class DatasetBuilder {
     private static final String DATASET_NAME_OPTION = "dataset";
     private final OptionBuilder<DatasetRepository> repoBuilder;
 
@@ -46,8 +49,7 @@ public class Registration {
       this.repoBuilder = repoBuilder;
     }
 
-    @Override
-    public Dataset getFromOptions(Map<String, String> options) {
+    public <E> Dataset<E> load(Map<String, String> options) {
       DatasetRepository repo = repoBuilder.getFromOptions(options);
       // some URI patterns don't include a dataset as a required option, so
       // check that it is passed as a query option
@@ -100,7 +102,7 @@ public class Registration {
    *                {@code pattern} and builds Dataset instances.
    */
   private static void registerDatasetURI(URIPattern pattern,
-                                        OptionBuilder<Dataset> builder) {
+                                         DatasetBuilder builder) {
     DATASET_BUILDERS.put(pattern, builder);
   }
 
@@ -109,14 +111,45 @@ public class Registration {
     for (URIPattern pattern : DATASET_BUILDERS.keySet()) {
       Map<String, String> match = pattern.getMatch(uri);
       if (match != null) {
-        OptionBuilder<Dataset> builder = DATASET_BUILDERS.get(pattern);
-        Dataset repo = builder.getFromOptions(match);
-        LOG.debug("Opened dataset {}", repo);
+        DatasetBuilder builder = DATASET_BUILDERS.get(pattern);
+        Dataset<E> dataset = builder.load(match);
+        LOG.debug("Opened dataset {}", dataset);
 
-        return (D) repo;
+        return (D) dataset;
       }
     }
     throw new DatasetNotFoundException("Unknown dataset URI: " + uri);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <E, V extends View<E>> V view(URI uri) {
+    Dataset<E> dataset = null;
+    Map<String, String> match = null;
+    for (URIPattern pattern : DATASET_BUILDERS.keySet()) {
+      match = pattern.getMatch(uri);
+      if (match != null) {
+        DatasetBuilder builder = DATASET_BUILDERS.get(pattern);
+        dataset = builder.load(match);
+        LOG.debug("Opened dataset {}", dataset);
+        break;
+      }
+    }
+    // match should be null iff dataset is, but check both to be thorough
+    if (match == null || dataset == null) {
+      throw new DatasetNotFoundException("Unknown dataset URI: " + uri);
+    }
+    RefinableView<E> view = dataset;
+    Schema schema = dataset.getDescriptor().getSchema();
+    // for each schema field, see if there is a query arg equality constraint
+    for (Schema.Field field : schema.getFields()) {
+      String name = field.name();
+      if (match.containsKey(name)) {
+        view = view.with(name, Conversions.convert(
+            match.get(name),
+            SchemaUtil.getClassForType(field.schema().getType())));
+      }
+    }
+    return (V) view;
   }
 
   static {
