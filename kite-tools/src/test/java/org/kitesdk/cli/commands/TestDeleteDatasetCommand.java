@@ -24,6 +24,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.spi.OptionBuilder;
+import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.URIPattern;
 import org.slf4j.Logger;
 
@@ -39,15 +40,17 @@ public class TestDeleteDatasetCommand {
 
   @BeforeClass
   public static void addMockRepoBuilder() throws Exception {
-    org.kitesdk.data.impl.Accessor.getDefault().registerDatasetRepository(
-        new URIPattern("mock::id"), new OptionBuilder<DatasetRepository>() {
+    Registration.register(
+        new URIPattern("mock::id"), new URIPattern("mock::id"),
+        new OptionBuilder<DatasetRepository>() {
           @Override
           public DatasetRepository getFromOptions(Map<String, String> options) {
             DatasetRepository repo = mock(DatasetRepository.class);
             repos.put(options.get("id"), repo);
             return repo;
           }
-        });
+        }
+    );
   }
 
   @Before

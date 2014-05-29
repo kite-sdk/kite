@@ -20,9 +20,7 @@ import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Resources;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 import org.junit.Before;
@@ -31,8 +29,8 @@ import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.MiniDFSTest;
-import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.OptionBuilder;
+import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.URIPattern;
 import org.slf4j.Logger;
 
@@ -40,7 +38,6 @@ import static org.mockito.Mockito.contains;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class TestCreateDatasetCommandCluster extends MiniDFSTest {
 
@@ -52,15 +49,17 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
 
   @BeforeClass
   public static void addMockRepoBuilder() throws Exception {
-    org.kitesdk.data.impl.Accessor.getDefault().registerDatasetRepository(
-        new URIPattern("mock::id"), new OptionBuilder<DatasetRepository>() {
+    Registration.register(
+        new URIPattern("mock::id"), new URIPattern("mock::id"),
+        new OptionBuilder<DatasetRepository>() {
           @Override
           public DatasetRepository getFromOptions(Map<String, String> options) {
             DatasetRepository repo = mock(DatasetRepository.class);
             repos.put(options.get("id"), repo);
             return repo;
           }
-        });
+        }
+    );
   }
 
   @Before
