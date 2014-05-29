@@ -39,7 +39,7 @@ public class TestFileSystemRepositoryURIs extends MiniDFSTest {
 
   @Test
   public void testLocalRelative() throws URISyntaxException {
-    URI repositoryUri = new URI("repo:file:target/dsr-repo-test");
+    URI repositoryUri = new URI("file:target/dsr-repo-test");
     DatasetRepository repository = DatasetRepositories.open(repositoryUri);
 
     // We only do the deeper implementation checks one per combination.
@@ -57,15 +57,15 @@ public class TestFileSystemRepositoryURIs extends MiniDFSTest {
         new Path("target/dsr-repo-test"));
     Assert.assertEquals("Root directory should be the correct qualified path",
         expected, fsProvider.getRootDirectory());
-    Assert.assertEquals("Repository URI scheme", "repo", repository.getUri()
+    Assert.assertEquals("Repository URI scheme", "file", repository.getUri()
         .getScheme());
     Assert.assertEquals("Repository URI scheme", expected.toUri(),
-        new URI(repository.getUri().getSchemeSpecificPart()));
+        repository.getUri());
   }
 
   @Test
   public void testLocalAbsolute() throws URISyntaxException {
-    URI repositoryUri = new URI("repo:file:///tmp/dsr-repo-test");
+    URI repositoryUri = new URI("file:///tmp/dsr-repo-test");
     DatasetRepository repository = DatasetRepositories.open(repositoryUri);
 
     FileSystemMetadataProvider provider = (FileSystemMetadataProvider)
@@ -79,13 +79,13 @@ public class TestFileSystemRepositoryURIs extends MiniDFSTest {
   public void testHdfsFailsDefault() {
     // the environment doesn't contain the HDFS URI, so this should cause a
     // DatasetRepository exception about not finding HDFS
-    DatasetRepositories.open("repo:hdfs:/");
+    DatasetRepositories.open("hdfs:/");
   }
 
   @Test
   public void testHdfsAbsolute() throws URISyntaxException {
     URI hdfsUri = getDFS().getUri();
-    URI repositoryUri = new URI("repo:hdfs://" + hdfsUri.getAuthority() + "/tmp/dsr-repo-test");
+    URI repositoryUri = new URI("hdfs://" + hdfsUri.getAuthority() + "/tmp/dsr-repo-test");
     DatasetRepository repository = DatasetRepositories.open(repositoryUri);
 
     // We only do the deeper implementation checks one per combination.

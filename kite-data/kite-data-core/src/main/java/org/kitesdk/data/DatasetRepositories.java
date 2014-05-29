@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data;
 
-import com.google.common.base.Preconditions;
 import java.net.URI;
 import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
@@ -169,10 +168,12 @@ public class DatasetRepositories {
    * @since 0.8.0
    */
   public static <R extends DatasetRepository> R open(URI repoUri) {
-    Preconditions.checkArgument(REPO_SCHEME.equals(repoUri.getScheme()),
-        "Invalid repository URI \"%s\": scheme must be \"repo\"", repoUri);
-
-    return Registration.open(URI.create(repoUri.getRawSchemeSpecificPart()));
+    if (REPO_SCHEME.equals(repoUri.getScheme())) {
+      // backward-compatibility: accept repo:<storage-uri> URIs
+      return Registration.open(URI.create(repoUri.getRawSchemeSpecificPart()));
+    } else {
+      return Registration.open(repoUri);
+    }
   }
 
   /**

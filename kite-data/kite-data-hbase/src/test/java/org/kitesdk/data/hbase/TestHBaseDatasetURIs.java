@@ -48,7 +48,7 @@ public class TestHBaseDatasetURIs {
     String zkQuorum = HBaseTestUtils.getConf().get(HConstants.ZOOKEEPER_QUORUM);
     String zkClientPort = HBaseTestUtils.getConf().get(HConstants.ZOOKEEPER_CLIENT_PORT);
     zk = zkQuorum + ":" + zkClientPort; // OK since zkQuorum is a single host
-    repositoryUri = new URI("repo:hbase:" + zk);
+    repositoryUri = new URI("hbase:" + zk);
   }
 
   @Test
@@ -58,7 +58,7 @@ public class TestHBaseDatasetURIs {
     repo.create("test", descriptor);
 
     RandomAccessDataset<Object> ds =
-        Datasets.load(URI.create("dataset:hbase:" + zk + "/test")) ;
+        Datasets.load(URI.create("hbase:" + zk + "/test")) ;
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof DaoDataset);
@@ -75,7 +75,7 @@ public class TestHBaseDatasetURIs {
           @Override
           public void run() {
             Dataset<Object> ds = Datasets
-                .load("dataset:hbase:" + zk + "/nosuchdataset");
+                .load("hbase:" + zk + "/nosuchdataset");
           }
         }
     );
@@ -87,8 +87,7 @@ public class TestHBaseDatasetURIs {
         DatasetNotFoundException.class, new Runnable() {
           @Override
           public void run() {
-            Dataset<Object> ds = Datasets
-                .load("dataset:unknown:" + zk + "/test");
+            Dataset<Object> ds = Datasets.load("unknown:" + zk + "/test");
           }
         });
   }

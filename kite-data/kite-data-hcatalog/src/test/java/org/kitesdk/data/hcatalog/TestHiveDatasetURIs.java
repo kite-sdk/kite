@@ -50,12 +50,12 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   @Test
   public void testExternal() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hive:/tmp/data?" + hdfsQueryArgs);
+        .open("hive:/tmp/data?" + hdfsQueryArgs);
     repo.delete("test");
     repo.create("test", descriptor);
 
     Dataset<Object> ds = Datasets
-        .load("dataset:hive:/tmp/data/test?" + hdfsQueryArgs);
+        .load("hive:/tmp/data/test?" + hdfsQueryArgs);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -71,11 +71,11 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   @Test
   public void testExternalRoot() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hive:/?" + hdfsQueryArgs);
+        .open("hive:/?" + hdfsQueryArgs);
     repo.delete("test");
     repo.create("test", descriptor);
 
-    Dataset<Object> ds = Datasets.load("dataset:hive:/test?" + hdfsQueryArgs);
+    Dataset<Object> ds = Datasets.load("hive:/test?" + hdfsQueryArgs);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -91,12 +91,11 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   @Test
   public void testExternalRelative() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hive:data?" + hdfsQueryArgs);
+        .open("hive:data?" + hdfsQueryArgs);
     repo.delete("test");
     repo.create("test", descriptor);
 
-    Dataset<Object> ds = Datasets
-        .load("dataset:hive:data/test?" + hdfsQueryArgs);
+    Dataset<Object> ds = Datasets.load("hive:data/test?" + hdfsQueryArgs);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -112,12 +111,11 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   @Test
   public void testManaged() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hive?" + hdfsQueryArgs);
+        .open("hive?" + hdfsQueryArgs);
     repo.delete("test");
     repo.create("test", descriptor);
 
-    Dataset<Object> ds = Datasets
-        .load("dataset:hive?dataset=test&" + hdfsQueryArgs);
+    Dataset<Object> ds = Datasets.load("hive?dataset=test&" + hdfsQueryArgs);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -134,7 +132,7 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
       @Override
       public void run() {
         Dataset<Object> ds = Datasets
-            .load("dataset:hive:/tmp/data/nosuchdataset?" + hdfsQueryArgs);
+            .load("hive:/tmp/data/nosuchdataset?" + hdfsQueryArgs);
       }
     });
   }
@@ -146,7 +144,7 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
           @Override
           public void run() {
             Dataset<Object> ds = Datasets
-                .load("dataset:unknown://" + hdfsAuth + "/tmp/data/test");
+                .load("unknown://" + hdfsAuth + "/tmp/data/test");
           }
         });
   }

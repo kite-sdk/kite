@@ -56,7 +56,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
 
   @Test
   public void testManagedURI() throws Exception {
-    DatasetRepository repo = DatasetRepositories.open("repo:hive");
+    DatasetRepository repo = DatasetRepositories.open("hive");
 
     Assert.assertNotNull("Received a repository", repo);
     Assert.assertTrue("Repo should be a HCatalogDatasetRepository",
@@ -65,12 +65,12 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
         .getMetadataProvider();
     Assert.assertTrue("Repo should be using a HCatalogManagedMetadataProvider",
         provider instanceof HCatalogManagedMetadataProvider);
-    Assert.assertEquals("Repository URI", new URI("repo:hive"), repo.getUri());
+    Assert.assertEquals("Repository URI", new URI("hive"), repo.getUri());
   }
 
   @Test
   public void testManagedURIWithHostAndPort() {
-    DatasetRepository repo = DatasetRepositories.open("repo:hive://meta-host:1234");
+    DatasetRepository repo = DatasetRepositories.open("hive://meta-host:1234");
     Assert.assertNotNull("Received a repository", repo);
     Assert.assertTrue("Repo should be a HCatalogDatasetRepository",
         repo instanceof HCatalogDatasetRepository);
@@ -78,13 +78,13 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
         .getMetadataProvider();
     Assert.assertTrue("Repo should be using a HCatalogManagedMetadataProvider",
         provider instanceof HCatalogManagedMetadataProvider);
-    Assert.assertEquals("Repository URI", URI.create("repo:hive://meta-host:1234"),
+    Assert.assertEquals("Repository URI", URI.create("hive://meta-host:1234"),
         repo.getUri());
   }
 
   @Test
   public void testExternalURILocalFileSystem() {
-    URI repoUri = URI.create("repo:hive:/tmp/hive-repo");
+    URI repoUri = URI.create("hive:/tmp/hive-repo");
     DatasetRepository repo = DatasetRepositories.open(repoUri);
 
     Assert.assertNotNull("Received a repository", repo);
@@ -105,7 +105,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
 
   @Test
   public void testExternalOpaqueURILocalFileSystem() {
-    URI repoUri = URI.create("repo:hive:/tmp/hive-repo");
+    URI repoUri = URI.create("hive:/tmp/hive-repo");
     DatasetRepository repo = DatasetRepositories.open(repoUri);
 
     Assert.assertNotNull("Received a repository", repo);
@@ -128,7 +128,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
   @Test
   public void testExternalURI() {
     URI hdfsUri = getDFS().getUri();
-    URI repoUri = URI.create("repo:hive:/tmp/hive-repo?hdfs-host=" + hdfsUri.getHost() +
+    URI repoUri = URI.create("hive:/tmp/hive-repo?hdfs-host=" + hdfsUri.getHost() +
         "&hdfs-port=" + hdfsUri.getPort());
     DatasetRepository repo = DatasetRepositories.open(repoUri);
 
@@ -155,7 +155,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
   @Test
   public void testExternalURIWithHostAndPort() {
     URI hdfsUri = getDFS().getUri();
-    URI repoUri = URI.create("repo:hive://meta-host:1234/tmp/data?hdfs-host=" +
+    URI repoUri = URI.create("hive://meta-host:1234/tmp/data?hdfs-host=" +
         hdfsUri.getHost() + "&hdfs-port=" + hdfsUri.getPort());
     DatasetRepository repo = DatasetRepositories.open(repoUri);
 
@@ -168,7 +168,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
   @Test
   public void testExternalURIWithRootPath() {
     URI hdfsUri = getDFS().getUri();
-    URI repoUri = URI.create("repo:hive:/?hdfs-host=" + hdfsUri.getHost() +
+    URI repoUri = URI.create("hive:/?hdfs-host=" + hdfsUri.getHost() +
         "&hdfs-port=" + hdfsUri.getPort());
     DatasetRepository repo = DatasetRepositories.open(repoUri);
     Assert.assertNotNull("Received a repository", repo);
@@ -184,7 +184,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
   @Test
   public void testExternalURIWithHostAndPortAndRootPath() {
     URI hdfsUri = getDFS().getUri();
-    URI repoUri = URI.create("repo:hive://meta-host:1234/?hdfs-host=" +
+    URI repoUri = URI.create("hive://meta-host:1234/?hdfs-host=" +
         hdfsUri.getHost() + "&hdfs-port=" + hdfsUri.getPort());
     DatasetRepository repo = DatasetRepositories.open(repoUri);
     Assert.assertNotNull("Received a repository", repo);

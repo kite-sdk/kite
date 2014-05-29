@@ -16,22 +16,13 @@
 
 package org.kitesdk.data;
 
-import com.google.common.base.Preconditions;
 import java.net.URI;
-import java.util.Map;
 import org.kitesdk.data.spi.Registration;
-import org.kitesdk.data.spi.URIPattern;
 
 public class Datasets {
 
-  private static final String DATASET_SCHEME = "dataset";
-  private static final String VIEW_SCHEME = "dataset";
-
   public static <E, D extends Dataset<E>> D load(URI uri) {
-    Preconditions.checkArgument(DATASET_SCHEME.equals(uri.getScheme()),
-        "Invalid dataset URI \"%s\": scheme must be \"dataset\"", uri);
-
-    return Registration.<E, D>load(URI.create(uri.getRawSchemeSpecificPart()));
+    return Registration.<E, D>load(uri);
   }
 
   public static <E, D extends Dataset<E>> D load(String uriString) {
@@ -39,10 +30,7 @@ public class Datasets {
   }
 
   public static <E, V extends View<E>> V view(URI uri) {
-    Preconditions.checkArgument(VIEW_SCHEME.equals(uri.getScheme()),
-        "Invalid view URI \"%s\": scheme must be \"view\"", uri);
-
-    return Registration.<E, V>view(URI.create(uri.getRawSchemeSpecificPart()));
+    return Registration.<E, V>view(uri);
   }
 
   public static <E, V extends View<E>> V view(String uriString) {
