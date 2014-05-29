@@ -190,7 +190,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
     }
 
     private URI getRepositoryUri(Configuration conf) {
-      return URI.create(String.format("repo:hbase:%s:%s",
+      return URI.create(String.format("hbase:%s:%s",
           conf.get(HConstants.ZOOKEEPER_QUORUM),
           conf.get(HConstants.ZOOKEEPER_CLIENT_PORT)));
     }

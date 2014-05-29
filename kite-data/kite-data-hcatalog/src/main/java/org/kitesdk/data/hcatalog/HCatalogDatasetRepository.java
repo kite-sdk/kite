@@ -150,7 +150,7 @@ public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository
 
     private URI getRepositoryUri(Configuration conf, Path rootDirectory) {
       String hiveMetaStoreUriProperty = conf.get(Loader.HIVE_METASTORE_URI_PROP);
-      StringBuilder uri = new StringBuilder("repo:hive");
+      StringBuilder uri = new StringBuilder("hive");
       if (hiveMetaStoreUriProperty != null) {
         URI hiveMetaStoreUri = URI.create(hiveMetaStoreUriProperty);
         Preconditions.checkArgument(hiveMetaStoreUri.getScheme().equals("thrift"),
