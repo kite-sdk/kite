@@ -413,6 +413,25 @@ public class Constraints implements Serializable{
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    Constraints that = (Constraints) o;
+    return Objects.equal(this.constraints, that.constraints) &&
+        Objects.equal(this.schema, that.schema);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(schema, constraints);
+  }
+
+  @Override
   public String toString() {
     return Objects.toStringHelper(this).addValue(constraints).toString();
   }
