@@ -27,6 +27,7 @@ import org.apache.solr.common.cloud.SolrZkClient;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.IndexSchemaFactory;
 import org.apache.solr.util.SystemIdResolver;
 import org.apache.zookeeper.KeeperException;
 import org.kitesdk.morphline.api.MorphlineCompilationException;
@@ -161,10 +162,8 @@ public class SolrLocator {
       try {
         SolrResourceLoader loader = new SolrResourceLoader(mySolrHomeDir);
         SolrConfig solrConfig = new SolrConfig(loader, "solrconfig.xml", null);
-        InputSource is = new InputSource(loader.openSchema("schema.xml"));
-        is.setSystemId(SystemIdResolver.createSystemIdFromResourceName("schema.xml"));
         
-        IndexSchema schema = new IndexSchema(solrConfig, "schema.xml", is);
+        IndexSchema schema = IndexSchemaFactory.buildIndexSchema("schema.xml", solrConfig);
         validateSchema(schema);
         return schema;
       } catch (ParserConfigurationException e) {
