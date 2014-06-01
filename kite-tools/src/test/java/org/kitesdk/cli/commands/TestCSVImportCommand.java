@@ -97,7 +97,7 @@ public class TestCSVImportCommand {
 
   @After
   public void removeData() throws Exception {
-    TestUtil.run("delete", datasetName, "--local", "-d", "target/data");
+    TestUtil.run("delete", datasetName, "--use-local", "-d", "target/data");
   }
 
   @Test

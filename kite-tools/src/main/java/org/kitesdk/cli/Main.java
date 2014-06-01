@@ -25,6 +25,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.PropertyConfigurator;
 import org.kitesdk.cli.commands.CSVImportCommand;
 import org.kitesdk.cli.commands.CSVSchemaCommand;
+import org.kitesdk.cli.commands.CopyCommand;
 import org.kitesdk.cli.commands.CreateDatasetCommand;
 import org.kitesdk.cli.commands.CreatePartitionStrategyCommand;
 import org.kitesdk.cli.commands.DeleteDatasetCommand;
@@ -69,6 +70,7 @@ public class Main extends Configured implements Tool {
     jc.setProgramName(PROGRAM_NAME);
     jc.addCommand("help", help, "-h", "-help", "--help");
     jc.addCommand("create", new CreateDatasetCommand(console));
+    jc.addCommand("copy", new CopyCommand(console));
     jc.addCommand("delete", new DeleteDatasetCommand(console));
     jc.addCommand("schema", new SchemaCommand(console));
     jc.addCommand("show", new ShowRecordsCommand(console));
