@@ -130,29 +130,18 @@
       <groupId>org.kitesdk</groupId>
       <artifactId>${artifact.hadoop-deps}</artifactId>
       <type>pom</type>
-      <scope>compile</scope> <!-- plugin acts as a Hadoop container -->
+      <scope>provided</scope> <!-- has to be added as a plugin dependency -->
     </dependency>
     <dependency>
       <groupId>org.apache.oozie</groupId>
       <artifactId>oozie-client</artifactId>
+      <scope>provided</scope> <!-- has to be added as a plugin dependency -->
       <exclusions>
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-simple</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>${artifact.hbase-deps}</artifactId>
-      <type>pom</type>
-      <scope>runtime</scope> <!-- plugin acts as a Hadoop container -->
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hive</groupId>
-      <artifactId>hive-exec</artifactId>
-      <version>${vers.hive}</version>
-      <scope>runtime</scope> <!-- plugin acts as a Hadoop container -->
     </dependency>
   </dependencies>
 
