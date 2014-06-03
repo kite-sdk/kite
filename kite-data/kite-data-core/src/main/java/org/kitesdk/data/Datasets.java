@@ -21,8 +21,16 @@ import org.kitesdk.data.spi.Registration;
 
 public class Datasets {
 
+  private static final String DATASET_SCHEME = "dataset";
+  private static final String VIEW_SCHEME = "view";
+
   public static <E, D extends Dataset<E>> D load(URI uri) {
-    return Registration.<E, D>load(uri);
+    if (DATASET_SCHEME.equals(uri.getScheme())) {
+      // accept dataset:<storage-uri> URIs
+      return Registration.<E, D>load(URI.create(uri.getRawSchemeSpecificPart()));
+    } else {
+      return Registration.<E, D>load(uri);
+    }
   }
 
   public static <E, D extends Dataset<E>> D load(String uriString) {
@@ -30,7 +38,12 @@ public class Datasets {
   }
 
   public static <E, V extends View<E>> V view(URI uri) {
-    return Registration.<E, V>view(uri);
+    if (VIEW_SCHEME.equals(uri.getScheme())) {
+      // accept view:<storage-uri> URIs
+      return Registration.<E, V>view(URI.create(uri.getRawSchemeSpecificPart()));
+    } else {
+      return Registration.<E, V>view(uri);
+    }
   }
 
   public static <E, V extends View<E>> V view(String uriString) {
