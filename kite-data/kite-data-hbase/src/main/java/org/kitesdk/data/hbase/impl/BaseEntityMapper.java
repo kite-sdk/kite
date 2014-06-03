@@ -62,22 +62,22 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
       partitionKey = keySerDe.deserialize(result.getRow());
     }
     EntityComposer.Builder<E> builder = getEntityComposer().getBuilder();
-    int currentKeyPos = 0;
     for (FieldMapping fieldMapping : entitySchema.getColumnMappingDescriptor()
         .getFieldMappings()) {
       Object fieldValue;
       if (fieldMapping.getMappingType() == MappingType.KEY) {
         if (partitionKey != null) {
-          // KEY field mappings are always identity mappers, so just get the
-          // value from the key.
-          fieldValue = partitionKey.get(currentKeyPos);
-          currentKeyPos++;
+          // KEY field mappings are always associated with identity mappers,
+          // which is enforced by the DatasetDescriptor. Get the value from the
+          // key at the correct position.
+          fieldValue = partitionKey.get(
+              keySchema.position(fieldMapping.getFieldName()));
         } else {
-          // TODO: This should never happen. The partitionKey is null only when
+          // This should never happen. The partitionKey is null only when
           // a keySerDe hasn't been set, which indicates we have an entity
           // without a key. That means there should be no KEY mapping types, but
-          // we somehow got here. Should we throw an exception here?
-          fieldValue = null;
+          // we somehow got here.
+          throw new DatasetException("[BUG] Key-mapped field and null key");
         }
       } else {
         fieldValue = entitySerDe.deserialize(fieldMapping, result);

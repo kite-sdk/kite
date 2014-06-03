@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.SchemaUtil;
-import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 
 /**
  * <p>

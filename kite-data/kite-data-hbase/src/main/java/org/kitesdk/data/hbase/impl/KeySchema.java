@@ -15,7 +15,13 @@
  */
 package org.kitesdk.data.hbase.impl;
 
+import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.FieldPartitioner;
+import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 
 /**
  * The KeySchema type.
@@ -24,10 +30,20 @@ public class KeySchema {
 
   private final String rawSchema;
   private final PartitionStrategy partitionStrategy;
+  private final Map<String, Integer> fieldPositions;
 
   public KeySchema(String rawSchema, PartitionStrategy partitionStrategy) {
     this.rawSchema = rawSchema;
     this.partitionStrategy = partitionStrategy;
+    this.fieldPositions = Maps.newHashMap();
+
+    List<FieldPartitioner> partitioners = partitionStrategy.getFieldPartitioners();
+    for (int i = 0; i < partitioners.size(); i += 1) {
+      FieldPartitioner fp = partitioners.get(i);
+      if (fp instanceof IdentityFieldPartitioner) {
+        fieldPositions.put(fp.getSourceName(), i);
+      }
+    }
   }
 
   /**
@@ -48,7 +64,7 @@ public class KeySchema {
     // throw an exception if anyone calls this directly, as this should be
     // overridden in derived classes.
     throw new UnsupportedOperationException(
-        "KeyScheam class can't determine if two key schemas are compatible.");
+        "KeySchema class can't determine if two key schemas are compatible.");
   }
 
   /**
@@ -62,5 +78,23 @@ public class KeySchema {
 
   public PartitionStrategy getPartitionStrategy() {
     return partitionStrategy;
+  }
+
+  /**
+   * Resolves the storage position of a field in keys with this KeySchema.
+   *
+   * @param fieldName
+   *          The source field name.
+   * @return
+   *          The position of the field in keys with this schema.
+   * @throws DatasetException
+   *          If the field cannot be recovered from keys with this schema.
+   */
+  public int position(String fieldName) {
+    if (fieldPositions.containsKey(fieldName)) {
+      return fieldPositions.get(fieldName);
+    } else {
+      throw new DatasetException("Cannot recover " + fieldName + " from key");
+    }
   }
 }
