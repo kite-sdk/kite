@@ -20,7 +20,7 @@
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-app-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.14.1-SNAPSHOT</version>
+  <version>0.14.2-SNAPSHOT</version>
 
   <name>Kite Application POM</name>
   <description>
@@ -32,15 +32,15 @@
     <kite.hadoop.profile></kite.hadoop.profile>
 
     <!-- dependency version properties -->
-    <kite.version>0.14.1-SNAPSHOT</kite.version>
+    <kite.version>0.14.2-SNAPSHOT</kite.version>
     <kite.crunch.version>0.9.0-hadoop2</kite.crunch.version>
     <kite.avro.version>1.7.5</kite.avro.version>
     <kite.hive.version>0.10.0-cdh4.4.0</kite.hive.version>
-    <kite.hcatalog.version>0.5.0-cdh4.4.0</kite.hcatalog.version>
     <kite.findbugs.version>2.0.1</kite.findbugs.version>
 
     <!-- other properties to help apps -->
     <hadoop.guava.version>11.0.2</hadoop.guava.version>
+    <hadoop.slf4j.version>1.6.1</hadoop.slf4j.version>
 
     <!-- internal properties -->
     <private.hadoop-deps.artifact>kite-hadoop${kite.hadoop.profile}-dependencies</private.hadoop-deps.artifact>
@@ -272,16 +272,6 @@
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
       <version>${kite.avro.version}</version>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.hcatalog</groupId>
-      <artifactId>hcatalog-core</artifactId>
-      <version>${kite.hcatalog.version}</version>
-      <scope>provided</scope>
-      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -299,7 +289,6 @@
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>
-
 
     <!-- Kite test dependencies -->
 
