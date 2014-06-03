@@ -3,6 +3,15 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version TBD
+
+Release date: TBD
+
+Version TBD contains the following notable changes:
+
+* Morphlines Library
+    * Added morphline command that removes all record fields for which the field name matches a blacklist but not a whitelist: [removeFields](kite-morphlines/morphlinesReferenceGuide.html#removeFields)
+
 ## Version 0.14.1
 
 Release date: 23 May 2014

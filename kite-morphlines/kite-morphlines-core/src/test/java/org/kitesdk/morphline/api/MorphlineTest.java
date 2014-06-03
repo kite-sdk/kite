@@ -170,6 +170,42 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  public void testRemoveFields() throws Exception {
+    morphline = createMorphline("test-morphlines/removeFields");    
+    Record record = new Record();
+    record.put("foo", "data");
+    record.put("foobar", "data");
+    record.put("barx", "data");
+    record.put("barox", "data");
+    record.put("baz", "data");
+    record.put("hello", "data");
+    
+    Record expected = new Record();
+    expected.put("foobar", "data");
+    expected.put("barox", "data");
+    expected.put("hello", "data");
+    processAndVerifySuccess(record, expected);
+  }
+
+  @Test
+  public void testRemoveAllFields() throws Exception {
+    morphline = createMorphline("test-morphlines/removeAllFields");    
+    Record record = new Record();
+    record.put("foo", "data");
+    processAndVerifySuccess(record, new Record());
+  }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testRemoveFieldsSyntaxErrorWithMissingColon() throws Exception {  
+    createMorphline("test-morphlines/removeFieldsSyntaxErrorWithMissingColon");
+  }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testRemoveFieldsSyntaxErrorWithUnknownType() throws Exception {  
+    createMorphline("test-morphlines/removeFieldsSyntaxErrorWithUnknownType");
+  }
+
+  @Test
   public void testNotifications() throws Exception {
     morphline = createMorphline("test-morphlines/pipeWithTwoBasicCommands");
     Notifications.notifyBeginTransaction(morphline);

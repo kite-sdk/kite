@@ -70,6 +70,7 @@ h3. kite\-morphlines\-core\-stdlib
 | [logTrace, logDebug, logInfo, logWarn, logError|#logTrace] | Logs a message at the given log level to [SLF4J|http://www.slf4j.org]. |
 | [#not] | Inverts the boolean return value of a nested command. | 
 | [#pipe] | Pipes a record through a chain of commands. | 
+| [#removeFields] | Removes all record fields for which the field name matches a blacklist but not a whitelist. |
 | [#sample] | Forwards each input record with a given probability to its child command. |
 | [#separateAttachments] | Emits one separate output record for each attachment in the input record's list of attachments. |
 | [#setValues] | Assigns a given list of values (or the contents of another field) to a given field. |
@@ -1067,6 +1068,45 @@ pipe {
     { logDebug { format : "output record: {}", args : ["@{}"] } }
   ]
 }
+{code}
+
+h2. removeFields
+
+The {{removeFields}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/RemoveFieldsBuilder.java]) removes all record fields for which the field name matches at least one of the given include predicates (blacklist), but matches none of the given exclude predicates (whitelist).
+
+An include/exclude predicate can be a regex pattern (e.g. "regex:foo.\*") or glob pattern (e.g. "glob:foo\*") or literal pattern (e.g. "literal:foo") or "\*" which is equivalent to "glob:\*".
+ 
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| includes | "[\*]" | The blacklist predicates to use. If the includes specification is absent it defaults to MATCH ALL. |
+| excludes | "[]" | The whitelist predicates to use. If the excludes specification is absent it defaults to MATCH NONE. |
+
+Example usage:
+{code}
+# Remove all fields where the field name matches at least one of foo.* or bar* or baz, 
+# but matches none of foobar or baro*
+removeFields {
+  includes : ["regex:foo.*", "glob:bar*", "literal:baz"]
+  excludes: ["literal:foobar", "glob:baro*"]
+}
+{code}
+
+Input record:
+{code}
+foo:data
+foobar:data
+barx:data
+barox:data
+baz:data
+hello:data 
+{code}
+  
+Expected output:
+{code}
+foobar:data
+barox:data
+hello:data
 {code}
 
 h2. sample
