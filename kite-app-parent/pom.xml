@@ -36,6 +36,7 @@
     <kite.crunch.version>0.9.0-hadoop2</kite.crunch.version>
     <kite.avro.version>1.7.5</kite.avro.version>
     <kite.hive.version>0.10.0-cdh4.4.0</kite.hive.version>
+    <kite.oozie.version>3.3.2-cdh4.4.0</kite.oozie.version>
     <kite.findbugs.version>2.0.1</kite.findbugs.version>
 
     <!-- other properties to help apps -->
@@ -90,6 +91,43 @@
           <groupId>org.kitesdk</groupId>
           <artifactId>kite-maven-plugin</artifactId>
           <version>${kite.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.kitesdk</groupId>
+              <artifactId>${private.hadoop-deps.artifact}</artifactId>
+              <version>${kite.version}</version>
+              <type>pom</type>
+              <exclusions>
+                <exclusion>
+                  <!-- conflicts with jetty included with HBase -->
+                  <groupId>tomcat</groupId>
+                  <artifactId>jasper-runtime</artifactId>
+                </exclusion>
+              </exclusions>
+            </dependency>
+            <dependency>
+              <groupId>org.kitesdk</groupId>
+              <artifactId>${private.hbase-deps.artifact}</artifactId>
+              <version>${kite.version}</version>
+              <type>pom</type>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.hive</groupId>
+              <artifactId>hive-exec</artifactId>
+              <version>${kite.hive.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.oozie</groupId>
+              <artifactId>oozie-client</artifactId>
+              <version>${kite.oozie.version}</version>
+              <exclusions>
+                <exclusion>
+                  <groupId>org.slf4j</groupId>
+                  <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+              </exclusions>
+            </dependency>
+          </dependencies>
         </plugin>
 
         <plugin>
