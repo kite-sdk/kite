@@ -1074,7 +1074,7 @@ h2. removeFields
 
 The {{removeFields}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/RemoveFieldsBuilder.java]) removes all record fields for which the field name matches at least one of the given include predicates (blacklist), but matches none of the given exclude predicates (whitelist).
 
-An include/exclude predicate can be a regex pattern (e.g. "regex:foo.\*") or glob pattern (e.g. "glob:foo\*") or literal pattern (e.g. "literal:foo") or "\*" which is equivalent to "glob:\*".
+An include/exclude predicate can be a regex pattern (e.g. "regex:foo.\*") or [POSIX glob pattern|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/shaded/org/apache/hadoop/fs/GlobPattern.java] (e.g. "glob:foo\*") or literal pattern (e.g. "literal:foo") or "\*" which is equivalent to "glob:\*".
  
 The command provides the following configuration options:
 
