@@ -41,6 +41,7 @@
 
     <!-- other properties to help apps -->
     <hadoop.guava.version>11.0.2</hadoop.guava.version>
+    <hadoop.log4j.version>1.2.16</hadoop.log4j.version>
     <hadoop.slf4j.version>1.6.1</hadoop.slf4j.version>
 
     <!-- internal properties -->
