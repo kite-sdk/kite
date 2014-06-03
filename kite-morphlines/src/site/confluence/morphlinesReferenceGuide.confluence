@@ -1072,23 +1072,23 @@ pipe {
 
 h2. removeFields
 
-The {{removeFields}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/RemoveFieldsBuilder.java]) removes all record fields for which the field name matches at least one of the given include predicates (blacklist), but matches none of the given exclude predicates (whitelist).
+The {{removeFields}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/RemoveFieldsBuilder.java]) removes all record fields for which the field name matches at least one of the given blacklist predicates, but matches none of the given whitelist predicates.
 
-An include/exclude predicate can be a regex pattern (e.g. "regex:foo.\*") or [POSIX glob pattern|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/shaded/org/apache/hadoop/fs/GlobPattern.java] (e.g. "glob:foo\*") or literal pattern (e.g. "literal:foo") or "\*" which is equivalent to "glob:\*".
+An predicate can be a regex pattern (e.g. "regex:foo.\*") or [POSIX glob pattern|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/shaded/org/apache/hadoop/fs/GlobPattern.java] (e.g. "glob:foo\*") or literal pattern (e.g. "literal:foo") or "\*" which is equivalent to "glob:\*".
  
 The command provides the following configuration options:
 
 || Property Name || Default || Description ||
-| includes | "[\*]" | The blacklist predicates to use. If the includes specification is absent it defaults to MATCH ALL. |
-| excludes | "[]" | The whitelist predicates to use. If the excludes specification is absent it defaults to MATCH NONE. |
+| blacklist | "[\*]" | The blacklist predicates to use. If the blacklist specification is absent it defaults to MATCH ALL. |
+| whitelist | "[]" | The whitelist predicates to use. If the whitelist specification is absent it defaults to MATCH NONE. |
 
 Example usage:
 {code}
 # Remove all fields where the field name matches at least one of foo.* or bar* or baz, 
 # but matches none of foobar or baro*
 removeFields {
-  includes : ["regex:foo.*", "glob:bar*", "literal:baz"]
-  excludes: ["literal:foobar", "glob:baro*"]
+  blacklist : ["regex:foo.*", "glob:bar*", "literal:baz"]
+  whitelist: ["literal:foobar", "glob:baro*"]
 }
 {code}
 

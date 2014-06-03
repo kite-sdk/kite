@@ -30,10 +30,10 @@ import org.kitesdk.morphline.base.AbstractCommand;
 import com.typesafe.config.Config;
 
 /**
- * Removes all record fields where the name matches at least one of the given include expression
- * (blacklist) but none of the given exclude expressions (whitelist).
+ * Removes all record fields for which the field name matches at least one of the given blacklist
+ * predicates but none of the given whitelist predicates.
  * 
- * If the includes specification is absent it defaults to MATCH ALL. If the excludes specification
+ * If the blacklist specification is absent it defaults to MATCH ALL. If the whitelist specification
  * is absent it defaults to MATCH NONE.
  */
 public final class RemoveFieldsBuilder implements CommandBuilder {
@@ -58,8 +58,8 @@ public final class RemoveFieldsBuilder implements CommandBuilder {
 
     public RemoveFields(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) { 
       super(builder, config, parent, child, context);
-      List<String> includes = getConfigs().getStringList(config, "includes", Collections.singletonList("*"));
-      List<String> excludes = getConfigs().getStringList(config, "excludes", Collections.<String>emptyList());
+      List<String> includes = getConfigs().getStringList(config, "blacklist", Collections.singletonList("*"));
+      List<String> excludes = getConfigs().getStringList(config, "whitelist", Collections.<String>emptyList());
       this.nameMatcher = PatternNameMatcher.parse(includes, excludes);
       validateArguments();
     }
