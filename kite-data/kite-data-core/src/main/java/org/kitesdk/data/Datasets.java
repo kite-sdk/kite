@@ -25,6 +25,19 @@ public class Datasets {
   private static final String DATASET_SCHEME = "dataset";
   private static final String VIEW_SCHEME = "view";
 
+  /**
+   * Load a {@link Dataset} for the given {@link URI}.
+   * <p>
+   * If the URI is a view URI, the underlying Dataset will be returned.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param uri a {@code Dataset} or {@code View} URI.
+   * @param <E> The type of entities stored in the {@code Dataset}.
+   * @param <D> The type of {@code Dataset} expected.
+   * @return a {@code Dataset} for the given URI.
+   */
   public static <E, D extends Dataset<E>> D load(URI uri) {
     Preconditions.checkArgument(
         VIEW_SCHEME.equals(uri.getScheme()) ||
@@ -33,10 +46,36 @@ public class Datasets {
     return Registration.<E, D>load(URI.create(uri.getRawSchemeSpecificPart()));
   }
 
+  /**
+   * Load a {@link Dataset} for the given URI string.
+   * <p>
+   * If the URI is a view URI, the underlying Dataset will be returned.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param uriString a {@code Dataset} or {@code View} URI.
+   * @param <E> The type of entities stored in the {@code Dataset}.
+   * @param <D> The type of {@code Dataset} expected.
+   * @return a {@code Dataset} for the given URI.
+   */
   public static <E, D extends Dataset<E>> D load(String uriString) {
     return Datasets.<E, D>load(URI.create(uriString));
   }
 
+  /**
+   * Load a {@link View} for the given {@link URI}.
+   * <p>
+   * If the URI is a dataset URI, the unfiltered Dataset will be returned.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param uri a {@code Dataset} or {@code View} URI.
+   * @param <E> The type of entities stored in the {@code Dataset}.
+   * @param <V> The type of {@code View} expected.
+   * @return a {@code View} for the given URI.
+   */
   public static <E, V extends View<E>> V view(URI uri) {
     Preconditions.checkArgument(
         VIEW_SCHEME.equals(uri.getScheme()) ||
@@ -45,6 +84,19 @@ public class Datasets {
     return Registration.<E, V>view(URI.create(uri.getRawSchemeSpecificPart()));
   }
 
+  /**
+   * Load a {@link View} for the given URI string.
+   * <p>
+   * If the URI is a dataset URI, the unfiltered Dataset will be returned.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param uriString a {@code Dataset} or {@code View} URI.
+   * @param <E> The type of entities stored in the {@code Dataset}.
+   * @param <V> The type of {@code View} expected.
+   * @return a {@code View} for the given URI.
+   */
   public static <E, V extends View<E>> V view(String uriString) {
     return Datasets.<E, V>view(URI.create(uriString));
   }
