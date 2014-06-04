@@ -487,7 +487,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
     }
 
     private URI makeRepositoryUri(Path rootDirectory) {
-      return rootDirectory.toUri();
+      return URI.create("repo:" + rootDirectory.toUri());
     }
   }
 }
