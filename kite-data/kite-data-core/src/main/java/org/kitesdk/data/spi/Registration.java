@@ -59,6 +59,19 @@ public class Registration {
     }
   }
 
+  /**
+   * Registers a repository and a dataset {@link URIPattern} using a repository
+   * {@link OptionBuilder}.
+   * <p>
+   * Both patterns should produce options used by the builder to produce a
+   * {@link DatasetRepository}. The dataset pattern should also produce a
+   * "dataset" option that will be passed to the repository's load method as
+   * the dataset name.
+   *
+   * @param repoPattern a {@code URIPattern} for a {@code DatasetRepository}
+   * @param datasetPattern a {@code URIPattern} for a {@code Dataset}
+   * @param repoBuilder a {@code OptionBuilder} valid for both URIs
+   */
   public static void register(URIPattern repoPattern, URIPattern datasetPattern,
                               OptionBuilder<DatasetRepository> repoBuilder) {
     registerRepoURI(repoPattern, repoBuilder);
