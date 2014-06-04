@@ -329,40 +329,6 @@
       <optional>true</optional>
     </dependency>
 
-    <!-- Kite test dependencies -->
-
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-core</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-hbase</artifactId>
-      <version>${kite.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>${private.hadoop-test-deps.artifact}</artifactId>
-      <version>${kite.version}</version>
-      <type>pom</type>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>${private.hbase-test-deps.artifact}</artifactId>
-      <version>${kite.version}</version>
-      <type>pom</type>
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
 
 </project>
