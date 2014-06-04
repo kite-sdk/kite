@@ -43,15 +43,16 @@ public class AvroEntityMapperTest {
 
   private final String schemaString = "{ \"name\": \"test\", \"type\": \"record\", "
       + "\"partitions\": ["
-      + "    {\"source\": \"keyPart1\", \"type\": \"identity\"},"
-      + "    {\"source\": \"keyPart2\", \"type\": \"identity\"}"
+      + "    {\"source\": \"keyPart1\", \"type\": \"hash\", \"buckets\": 4},"
+      + "    {\"source\": \"keyPart2\", \"type\": \"identity\"},"
+      + "    {\"source\": \"keyPart1\", \"type\": \"identity\"}"
       + "],"
       + "\"fields\": [ "
       + "{ \"name\": \"keyPart1\", \"type\": \"int\", \"mapping\": "
-      + "    { \"type\": \"key\", \"value\": \"0\" } "
+      + "    { \"type\": \"key\" } "
       + "}, "
       + "{ \"name\": \"keyPart2\", \"type\": \"int\",  \"mapping\": "
-      + "    { \"type\": \"key\", \"value\": \"1\" } "
+      + "    { \"type\": \"key\" } "
       + "}, "      
       + "{ \"name\": \"field1\", \"type\": \"int\", \"mapping\": "
       + "    { \"type\": \"column\", \"value\": \"int:1\" } "
@@ -84,8 +85,9 @@ public class AvroEntityMapperTest {
     EntityMapper<GenericRecord> entityMapper = new BaseEntityMapper<GenericRecord>(
         keySchema, entitySchema, keySerDe, entitySerDe);
 
-    byte[] row = new byte[] { (byte) 0x80, (byte) 0, (byte) 0, (byte) 1,
-        (byte) 0x80, (byte) 0, (byte) 0, (byte) 2 };
+    byte[] row = new byte[] { (byte) 0x80, (byte) 0, (byte) 0, (byte) 0, // hash
+        (byte) 0x80, (byte) 0, (byte) 0, (byte) 2,   // keyPart2
+        (byte) 0x80, (byte) 0, (byte) 0, (byte) 1 }; // keyPart1
 
     byte[] intFamily = stringToBytes("int");
     byte[] mapFamily = stringToBytes("map");
