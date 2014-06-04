@@ -37,7 +37,7 @@ public class DatasetRepositories {
    * @throws IllegalArgumentException If the String cannot be parsed into a
    *                                  valid {@link java.net.URI}.
    */
-  public static <R extends DatasetRepository> R open(String uri) {
+  public static DatasetRepository open(String uri) {
     // uses of URI.create throw IllegalArgumentException if the URI is invalid
     return open(URI.create(uri));
   }
@@ -168,7 +168,7 @@ public class DatasetRepositories {
    * @return An appropriate implementation of {@link DatasetRepository}
    * @since 0.8.0
    */
-  public static <R extends DatasetRepository> R open(URI repoUri) {
+  public static DatasetRepository open(URI repoUri) {
     Preconditions.checkArgument(REPO_SCHEME.equals(repoUri.getScheme()),
         "Not a repository URI: " + repoUri);
     return Registration.open(URI.create(repoUri.getRawSchemeSpecificPart()));
@@ -184,7 +184,7 @@ public class DatasetRepositories {
    * @since 0.9.0
    */
   public static RandomAccessDatasetRepository openRandomAccess(String uri) {
-    return open(URI.create(uri));
+    return openRandomAccess(URI.create(uri));
   }
   
   /**
@@ -236,6 +236,6 @@ public class DatasetRepositories {
    * @since 0.9.0
    */
   public static RandomAccessDatasetRepository openRandomAccess(URI repositoryUri) {
-    return open(repositoryUri);
+    return (RandomAccessDatasetRepository) open(repositoryUri);
   }
 }
