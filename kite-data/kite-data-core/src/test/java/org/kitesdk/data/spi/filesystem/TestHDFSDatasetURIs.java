@@ -46,12 +46,12 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
   @Test
   public void testAbsolute() {
     DatasetRepository repo = DatasetRepositories
-        .open("hdfs://" + hdfsAuth + "/tmp/data");
+        .open("repo:hdfs://" + hdfsAuth + "/tmp/data");
     repo.delete("test");
     repo.create("test", descriptor);
 
     Dataset<Object> ds = Datasets
-        .load("hdfs://" + hdfsAuth + "/tmp/data/test");
+        .load("dataset:hdfs://" + hdfsAuth + "/tmp/data/test");
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -67,11 +67,11 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
   @Test
   public void testAbsoluteRoot() {
     DatasetRepository repo = DatasetRepositories
-        .open("hdfs://" + hdfsAuth + "/");
+        .open("repo:hdfs://" + hdfsAuth + "/");
     repo.delete("test");
     repo.create("test", descriptor);
 
-    Dataset<Object> ds = Datasets.load("hdfs://" + hdfsAuth + "/test");
+    Dataset<Object> ds = Datasets.load("dataset:hdfs://" + hdfsAuth + "/test");
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -87,12 +87,12 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
   @Test
   public void testRelative() {
     DatasetRepository repo = DatasetRepositories
-        .open("hdfs://" + hdfsAuth + "/data?absolute=false");
+        .open("repo:hdfs://" + hdfsAuth + "/data?absolute=false");
     repo.delete("test");
     repo.create("test", descriptor);
 
     Dataset<Object> ds = Datasets
-        .load("hdfs://" + hdfsAuth + "/data/test?absolute=false");
+        .load("dataset:hdfs://" + hdfsAuth + "/data/test?absolute=false");
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -112,7 +112,7 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
       @Override
       public void run() {
         Dataset<Object> ds = Datasets
-            .load("hdfs://" + hdfsAuth + "/tmp/data/nosuchdataset");
+            .load("dataset:hdfs://" + hdfsAuth + "/tmp/data/nosuchdataset");
       }
     });
   }
@@ -124,7 +124,7 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
           @Override
           public void run() {
             Dataset<Object> ds = Datasets
-                .load("unknown://" + hdfsAuth + "/tmp/data/test");
+                .load("dataset:unknown://" + hdfsAuth + "/tmp/data/test");
           }
         });
   }

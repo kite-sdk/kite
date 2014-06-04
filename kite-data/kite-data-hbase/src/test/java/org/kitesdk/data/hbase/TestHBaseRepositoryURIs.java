@@ -68,8 +68,8 @@ public class TestHBaseRepositoryURIs {
     String zkQuorum = HBaseTestUtils.getConf().get(HConstants.ZOOKEEPER_QUORUM);
     String zkClientPort = HBaseTestUtils.getConf().get(HConstants.ZOOKEEPER_CLIENT_PORT);
     String zk = zkQuorum + ":" + zkClientPort; // OK since zkQuorum is a single host
-    URI repositoryUri = new URI("hbase:" + zk);
-    RandomAccessDatasetRepository repo = DatasetRepositories.open(repositoryUri);
+    URI repositoryUri = new URI("repo:hbase:" + zk);
+    RandomAccessDatasetRepository repo = DatasetRepositories.openRandomAccess(repositoryUri);
 
     Assert.assertNotNull("Received a repository", repo);
     assertTrue("Repo is a HBase repo", repo instanceof HBaseDatasetRepository);
@@ -82,7 +82,7 @@ public class TestHBaseRepositoryURIs {
         IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
-        DatasetRepositories.open("hbase:zk1,zk2:2000/path");
+        DatasetRepositories.open("repo:hbase:zk1,zk2:2000/path");
       }
     });
   }

@@ -48,11 +48,11 @@ public class TestLocalDatasetURIs {
 
   @Test
   public void testAbsolute() {
-    DatasetRepository repo = DatasetRepositories.open("file:/tmp/data");
+    DatasetRepository repo = DatasetRepositories.open("repo:file:/tmp/data");
     repo.delete("test");
     repo.create("test", descriptor);
 
-    Dataset<Object> ds = Datasets.load("file:/tmp/data/test");
+    Dataset<Object> ds = Datasets.load("dataset:file:/tmp/data/test");
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -67,11 +67,11 @@ public class TestLocalDatasetURIs {
 
   @Test
   public void testRelative() {
-    DatasetRepository repo = DatasetRepositories.open("file:target/data");
+    DatasetRepository repo = DatasetRepositories.open("repo:file:target/data");
     repo.delete("test");
     repo.create("test", descriptor);
 
-    Dataset<Object> ds = Datasets.load("file:target/data/test");
+    Dataset<Object> ds = Datasets.load("dataset:file:target/data/test");
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -86,12 +86,12 @@ public class TestLocalDatasetURIs {
 
   @Test
   public void testViewConstraints() {
-    DatasetRepository repo = DatasetRepositories.open("file:/tmp/data");
+    DatasetRepository repo = DatasetRepositories.open("repo:file:/tmp/data");
     repo.delete("test");
     repo.create("test", descriptor);
 
     RefinableView<Object> v = Datasets
-        .view("file:/tmp/data/test?username=user");
+        .view("view:file:/tmp/data/test?username=user");
 
     Assert.assertNotNull("Should load view", v);
     Assert.assertTrue(v instanceof FileSystemView);
