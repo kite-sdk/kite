@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
@@ -66,10 +65,9 @@ public final class RemoveFieldsBuilder implements CommandBuilder {
 
     @Override
     protected boolean doProcess(Record record) {      
-      Iterator<Map.Entry<String, Collection<Object>>> iter = record.getFields().asMap().entrySet().iterator();
+      Iterator<String> iter = record.getFields().asMap().keySet().iterator();
       while (iter.hasNext()) {
-        Map.Entry<String, Collection<Object>> entry = iter.next();
-        if (nameMatcher.matches(entry.getKey())) {
+        if (nameMatcher.matches(iter.next())) {
           iter.remove();
         }
       }
