@@ -178,6 +178,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     record.put("barx", "data");
     record.put("barox", "data");
     record.put("baz", "data");
+    record.put("baz", "data");
     record.put("hello", "data");
     
     Record expected = new Record();
