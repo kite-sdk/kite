@@ -107,7 +107,7 @@ final class PatternNameMatcher implements NameMatcher {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  public static interface Expression {
+  private static interface Expression {
     boolean matches(String str);
   }
 
@@ -115,7 +115,7 @@ final class PatternNameMatcher implements NameMatcher {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  public static final class MatchAllExpression implements Expression {
+  private static final class MatchAllExpression implements Expression {
     
     @Override
     public boolean matches(String str) {
@@ -128,7 +128,7 @@ final class PatternNameMatcher implements NameMatcher {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  public static final class LiteralExpression implements Expression {
+  private static final class LiteralExpression implements Expression {
     
     private final String pattern;
     
@@ -147,7 +147,7 @@ final class PatternNameMatcher implements NameMatcher {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  public static final class RegexExpression implements Expression {
+  private static final class RegexExpression implements Expression {
     
     private final Matcher regex;
     
@@ -166,7 +166,7 @@ final class PatternNameMatcher implements NameMatcher {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  public static final class GlobExpression implements Expression {
+  private static final class GlobExpression implements Expression {
     
     private final Matcher regex;
     
