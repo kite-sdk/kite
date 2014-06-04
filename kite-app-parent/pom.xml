@@ -98,13 +98,6 @@
               <artifactId>${private.hadoop-deps.artifact}</artifactId>
               <version>${kite.version}</version>
               <type>pom</type>
-              <exclusions>
-                <exclusion>
-                  <!-- conflicts with jetty included with HBase -->
-                  <groupId>tomcat</groupId>
-                  <artifactId>jasper-runtime</artifactId>
-                </exclusion>
-              </exclusions>
             </dependency>
             <dependency>
               <groupId>org.kitesdk</groupId>
@@ -288,13 +281,6 @@
       <version>${kite.version}</version>
       <type>pom</type>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <!-- conflicts with jetty included with HBase -->
-          <groupId>tomcat</groupId>
-          <artifactId>jasper-runtime</artifactId>
-        </exclusion>
-      </exclusions>
       <optional>true</optional>
     </dependency>
 
