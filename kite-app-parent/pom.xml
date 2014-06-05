@@ -28,9 +28,6 @@
   </description>
 
   <properties>
-    <!-- set to 1 or 2 -->
-    <kite.hadoop.profile></kite.hadoop.profile>
-
     <!-- dependency version properties -->
     <kite.version>0.14.2-SNAPSHOT</kite.version>
     <kite.crunch.version>0.9.0-hadoop2</kite.crunch.version>
@@ -43,12 +40,6 @@
     <hadoop.guava.version>11.0.2</hadoop.guava.version>
     <hadoop.log4j.version>1.2.16</hadoop.log4j.version>
     <hadoop.slf4j.version>1.6.1</hadoop.slf4j.version>
-
-    <!-- internal properties -->
-    <private.hadoop-deps.artifact>kite-hadoop${kite.hadoop.profile}-dependencies</private.hadoop-deps.artifact>
-    <private.hadoop-test-deps.artifact>kite-hadoop${kite.hadoop.profile}-test-dependencies</private.hadoop-test-deps.artifact>
-    <private.hbase-deps.artifact>kite-hbase${kite.hadoop.profile}-dependencies</private.hbase-deps.artifact>
-    <private.hbase-test-deps.artifact>kite-hbase${kite.hadoop.profile}-test-dependencies</private.hbase-test-deps.artifact>
   </properties>
 
   <repositories>
@@ -95,13 +86,13 @@
           <dependencies>
             <dependency>
               <groupId>org.kitesdk</groupId>
-              <artifactId>${private.hadoop-deps.artifact}</artifactId>
+              <artifactId>kite-hadoop-dependencies</artifactId>
               <version>${kite.version}</version>
               <type>pom</type>
             </dependency>
             <dependency>
               <groupId>org.kitesdk</groupId>
-              <artifactId>${private.hbase-deps.artifact}</artifactId>
+              <artifactId>kite-hbase-dependencies</artifactId>
               <version>${kite.version}</version>
               <type>pom</type>
             </dependency>
@@ -277,7 +268,7 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>${private.hadoop-deps.artifact}</artifactId>
+      <artifactId>kite-hadoop-dependencies</artifactId>
       <version>${kite.version}</version>
       <type>pom</type>
       <scope>provided</scope>
@@ -286,7 +277,7 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>${private.hbase-deps.artifact}</artifactId>
+      <artifactId>kite-hbase-dependencies</artifactId>
       <version>${kite.version}</version>
       <type>pom</type>
       <scope>provided</scope>
