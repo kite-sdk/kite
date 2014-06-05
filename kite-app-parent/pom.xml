@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-~ Copyright 2013 Cloudera Inc.
+~ Copyright 2014 Cloudera Inc.
 ~
 ~ Licensed under the Apache License, Version 2.0 (the "License");
 ~ you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-app-parent</artifactId>
-  <packaging>pom</packaging>
   <version>0.14.2-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
   <name>Kite Application POM</name>
   <description>
@@ -30,11 +30,11 @@
   <properties>
     <!-- dependency version properties -->
     <kite.version>0.14.2-SNAPSHOT</kite.version>
-    <kite.crunch.version>0.9.0-hadoop2</kite.crunch.version>
     <kite.avro.version>1.7.5</kite.avro.version>
+    <kite.crunch.version>0.9.0-hadoop2</kite.crunch.version>
+    <kite.findbugs.version>2.0.1</kite.findbugs.version>
     <kite.hive.version>0.10.0-cdh4.4.0</kite.hive.version>
     <kite.oozie.version>3.3.2-cdh4.4.0</kite.oozie.version>
-    <kite.findbugs.version>2.0.1</kite.findbugs.version>
 
     <!-- other properties to help apps -->
     <hadoop.guava.version>11.0.2</hadoop.guava.version>
@@ -147,34 +147,6 @@
     </plugins>
   </build>
 
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.7</version>
-        <inherited>false</inherited>
-        <reportSets>
-          <reportSet>
-            <inherited>false</inherited>
-            <reports>
-              <report>index</report>
-              <report>summary</report>
-              <report>dependency-info</report>
-              <report>dependencies</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9.1</version>
-        <inherited>false</inherited>
-      </plugin>
-    </plugins>
-  </reporting>
-
   <dependencies>
 
     <!-- Kite dependencies -->
@@ -218,6 +190,12 @@
     <!-- Recommended dependencies -->
 
     <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <version>${kite.avro.version}</version>
+    </dependency>
+
+    <dependency>
       <!-- not usually provided -->
       <groupId>org.apache.crunch</groupId>
       <artifactId>crunch-core</artifactId>
@@ -246,7 +224,7 @@
     </dependency>
 
     <dependency>
-      <!-- avoid warnings by bundling annotations -->
+      <!-- avoid warnings by bundling annotations, see CDK-191 -->
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <version>${kite.findbugs.version}</version>
@@ -254,7 +232,7 @@
     </dependency>
 
     <dependency>
-      <!-- avoid warnings by bundling annotations -->
+      <!-- avoid warnings by bundling annotations, see CDK-191 -->
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>annotations</artifactId>
       <version>${kite.findbugs.version}</version>
@@ -282,12 +260,6 @@
       <type>pom</type>
       <scope>provided</scope>
       <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
-      <version>${kite.avro.version}</version>
     </dependency>
 
     <dependency>
