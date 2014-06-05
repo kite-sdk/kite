@@ -15,7 +15,10 @@
  */
 package org.kitesdk.morphline.stdlib;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,25 +40,30 @@ final class PatternNameMatcher implements NameMatcher {
   
   private final Expression[] includes;
   private final Expression[] excludes;
+  private final Set<String> includeLiterals = new HashSet<String>();
+  private final Set<String> excludeLiterals = new HashSet<String>();
 
   public static NameMatcher parse(List<String> includeExpressions, List<String> excludeExpressions) {
     return new PatternNameMatcher(includeExpressions, excludeExpressions);
   }
   
   private PatternNameMatcher(List<String> includeExpressions, List<String> excludeExpressions) {
-    includes = parseExpressions(includeExpressions);
-    excludes = parseExpressions(excludeExpressions);
+    includes = parseExpressions(includeExpressions, includeLiterals);
+    excludes = parseExpressions(excludeExpressions, excludeLiterals);
   }
   
-  private Expression[] parseExpressions(List<String> expressions) {
-    Expression[] parsedExpressions = new Expression[expressions.size()];
+  private Expression[] parseExpressions(List<String> expressions, Set<String> literals) {
+    List<Expression> parsedExpressions = new ArrayList<Expression>();
     for (int i = 0; i < expressions.size(); i++) {
-      parsedExpressions[i] = parseExpression(expressions.get(i));
+      Expression expr = parseExpression(expressions.get(i), literals);
+      if (expr != null) {
+        parsedExpressions.add(expr);
+      }
     }
-    return parsedExpressions;
+    return parsedExpressions.toArray(new Expression[parsedExpressions.size()]);
   }
   
-  private Expression parseExpression(String expr) {
+  private Expression parseExpression(String expr, Set<String> literals) {
     if (expr.equals("*")) {
       expr = "glob:*";
     }
@@ -66,7 +74,9 @@ final class PatternNameMatcher implements NameMatcher {
     String type = expr.substring(0, i);
     String pattern = expr.substring(i + 1, expr.length());
     if (type.equals("literal")) {
-      return new LiteralExpression(pattern);
+      //return new LiteralExpression(pattern);
+      literals.add(pattern);
+      return null;
     } else if (type.equals("regex")) {
       if (pattern.equals(".*")) {
         return new MatchAllExpression(); // optimization
@@ -85,12 +95,12 @@ final class PatternNameMatcher implements NameMatcher {
   @Override
   public boolean matches(String name) {
     Preconditions.checkNotNull(name);
-    boolean isIncluded = false;
-    for (Expression include : includes) {
-      isIncluded = include.matches(name);
-      if (isIncluded) {
-        break;
-      }
+    if (excludeLiterals.size() > 0 && excludeLiterals.contains(name)) {
+      return false;
+    }
+    boolean isIncluded = includeLiterals.size() > 0 && includeLiterals.contains(name);
+    for (int i = 0; !isIncluded && i < includes.length; i++) {
+      isIncluded = includes[i].matches(name);
     }
     if (!isIncluded) {
       return false;
@@ -128,25 +138,6 @@ final class PatternNameMatcher implements NameMatcher {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  private static final class LiteralExpression implements Expression {
-    
-    private final String pattern;
-    
-    public LiteralExpression(String pattern) {
-      this.pattern = pattern;
-    }
-    
-    @Override
-    public boolean matches(String str) {
-      return pattern.equals(str);
-    }
-
-  }
-  
-  
-  ///////////////////////////////////////////////////////////////////////////////
-  // Nested classes:
-  ///////////////////////////////////////////////////////////////////////////////
   private static final class RegexExpression implements Expression {
     
     private final Matcher regex;
@@ -180,5 +171,24 @@ final class PatternNameMatcher implements NameMatcher {
     }
 
   }
+
+  
+  ///////////////////////////////////////////////////////////////////////////////
+  // Nested classes:
+  ///////////////////////////////////////////////////////////////////////////////
+//  private static final class LiteralExpression implements Expression {
+//    
+//    private final String pattern;
+//    
+//    public LiteralExpression(String pattern) {
+//      this.pattern = pattern;
+//    }
+//    
+//    @Override
+//    public boolean matches(String str) {
+//      return pattern.equals(str);
+//    }
+//
+//  }
 
 }
