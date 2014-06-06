@@ -5,7 +5,8 @@ jdk:
 env:
   - HADOOP_PROFILE=default
   - HADOOP_PROFILE=hadoop-1
-  - HADOOP_PROFILE=hadoop-2
+  - HADOOP_PROFILE=cdh4
+  - HADOOP_PROFILE=cdh5
 
 install: mvn -q install -DskipTests=true -Dmaven.javadoc.skip=true -Dsource.skip=true
 before_script: umask 0022

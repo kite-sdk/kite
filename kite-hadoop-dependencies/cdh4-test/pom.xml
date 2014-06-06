@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>kite-hadoop2-test-dependencies</artifactId>
+  <artifactId>kite-hadoop-cdh4-test-dependencies</artifactId>
   <packaging>pom</packaging>
   <version>0.14.2-SNAPSHOT</version>
 
@@ -27,39 +27,34 @@
     <version>0.14.2-SNAPSHOT</version>
   </parent>
 
-  <name>Kite Hadoop-2 Test Dependencies Module</name>
+  <name>Kite Hadoop CDH4 Test Dependencies Module</name>
   <description>
-    The Kite Hadoop Dependencies module aggregates Hadoop-2 dependencies
+    The Kite Hadoop Dependencies module aggregates CDH4 Hadoop dependencies
   </description>
-
-  <properties>
-    <vers.hadoop>2.2.0</vers.hadoop>
-  </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
-      <version>${vers.hadoop}</version>
+      <version>${vers.hadoop-cdh4}</version>
       <type>test-jar</type>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-hdfs</artifactId>
-      <version>${vers.hadoop}</version>
+      <version>${vers.hadoop-cdh4}</version>
       <type>test-jar</type>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-minicluster</artifactId>
-      <version>${vers.hadoop}</version>
+      <version>${vers.hadoop-mr1-cdh4}</version>
     </dependency>
     <!-- missing from Hadoop, and needed for local job runner -->
     <dependency>
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
       <version>3.1</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 

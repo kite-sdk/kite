@@ -36,7 +36,7 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
-      <version>${vers.hadoop-mr1}</version>
+      <version>${vers.hadoop-cdh5}</version>
       <!-- exclude server-side parts that conflict with running in a webapp -->
       <exclusions>
         <exclusion>
@@ -62,6 +62,10 @@
         <exclusion>
           <groupId>javax.servlet</groupId>
           <artifactId>javax.servlet-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.servlet</groupId>
+          <artifactId>servlet-api</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.mortbay.jetty</groupId>

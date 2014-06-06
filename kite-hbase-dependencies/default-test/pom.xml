@@ -35,9 +35,8 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.hbase</groupId>
-      <artifactId>hbase</artifactId>
-      <version>${vers.hbase}</version>
-      <classifier>tests</classifier>
+      <artifactId>hbase-testing-util</artifactId>
+      <version>${vers.hbase2}</version>
     </dependency>
   </dependencies>
 

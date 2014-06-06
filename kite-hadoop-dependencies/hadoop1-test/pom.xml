@@ -32,15 +32,11 @@
     The Kite Hadoop Dependencies module aggregates Hadoop-1 dependencies
   </description>
 
-  <properties>
-    <vers.hadoop>1.2.1</vers.hadoop>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-test</artifactId>
-      <version>${vers.hadoop}</version>
+      <version>${vers.hadoop1}</version>
     </dependency>
   </dependencies>
 

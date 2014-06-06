@@ -36,7 +36,7 @@
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-testing-util</artifactId>
-      <version>${vers.hbase2}</version>
+      <version>${vers.hbase-cdh5}</version>
     </dependency>
   </dependencies>
 

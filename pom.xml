@@ -115,7 +115,9 @@
 
     <previous.project.version>0.14.1</previous.project.version> <!-- used by jdiff, semver rule -->
 
-    <cdh.version>4.4.0</cdh.version>
+    <cdh4.version>4.4.0</cdh4.version>
+    <cdh5.version>5.0.0</cdh5.version>
+    <cdh.version>${cdh4.version}</cdh.version>
 
     <!-- artifacts that depend on profiles -->
     <artifact.hadoop-deps>kite-hadoop-dependencies</artifact.hadoop-deps>
@@ -132,15 +134,18 @@
     <vers.crunch-base>0.9.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-hadoop2</vers.crunch>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
-    <vers.flume>1.4.0-cdh${cdh.version}</vers.flume>
+    <vers.flume>1.4.0</vers.flume>
     <vers.guava>11.0.2</vers.guava>
-    <vers.hadoop>2.0.0-cdh${cdh.version}</vers.hadoop>
-    <vers.hadoop-mr1>2.0.0-mr1-cdh${cdh.version}</vers.hadoop-mr1>
     <vers.hadoop1>1.2.1</vers.hadoop1>
-    <vers.hbase>0.94.6-cdh${cdh.version}</vers.hbase>
+    <vers.hadoop2>2.2.0</vers.hadoop2>
+    <vers.hadoop-cdh4>2.0.0-cdh${cdh4.version}</vers.hadoop-cdh4>
+    <vers.hadoop-mr1-cdh4>2.0.0-mr1-cdh${cdh4.version}</vers.hadoop-mr1-cdh4>
+    <vers.hadoop-cdh5>2.3.0-cdh${cdh5.version}</vers.hadoop-cdh5>
     <vers.hbase1>0.94.6</vers.hbase1>
     <vers.hbase2>0.96.1.1-hadoop2</vers.hbase2>
-    <vers.hive>0.10.0-cdh${cdh.version}</vers.hive>
+    <vers.hbase-cdh4>0.94.6-cdh${cdh4.version}</vers.hbase-cdh4>
+    <vers.hbase-cdh5>0.96.1.1-cdh${cdh5.version}</vers.hbase-cdh5>
+    <vers.hive>0.10.0</vers.hive>
     <vers.jetty>8.1.14.v20131031</vers.jetty>
     <vers.jexl>2.1.1</vers.jexl>
     <vers.compress>1.4.1</vers.compress>
@@ -149,7 +154,7 @@
     <vers.maven>2.0.6</vers.maven>
     <vers.mockito>1.9.5</vers.mockito>
     <vers.mojo-executor>1.5</vers.mojo-executor>
-    <vers.oozie>3.3.2-cdh${cdh.version}</vers.oozie>
+    <vers.oozie>3.3.2-cdh${cdh.version}</vers.oozie> <!-- OOZIE-1790 -->
     <vers.parquet>1.4.1</vers.parquet>
     <vers.plexus-utils>3.0</vers.plexus-utils>
     <vers.rat>0.9</vers.rat>
@@ -410,7 +415,7 @@
             <links>
               <link>http://avro.apache.org/docs/${vers.avro}/api/java/</link>
               <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
-              <link>http://archive.cloudera.com/cdh4/cdh/4/hadoop-${vers.hadoop}/api/</link>
+              <link>http://hadoop.apache.org/docs/r${vers.hadoop2}/api/</link>
             </links>
           </configuration>
           <executions>
@@ -666,7 +671,7 @@
           <links>
             <link>http://avro.apache.org/docs/${vers.avro}/api/java/</link>
             <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
-            <link>http://archive.cloudera.com/cdh4/cdh/4/hadoop-${vers.hadoop}/api/</link>
+            <link>http://hadoop.apache.org/docs/r${vers.hadoop2}/api/</link>
           </links>
         </configuration>
         <reportSets>
@@ -1120,29 +1125,31 @@
         <artifact.hbase-deps>kite-hbase1-dependencies</artifact.hbase-deps>
         <artifact.hbase-test-deps>kite-hbase1-test-dependencies</artifact.hbase-test-deps>
         <vers.crunch>${vers.crunch-base}</vers.crunch>
+        <vers.flume>1.4.0</vers.flume>
         <vers.hive>0.10.0</vers.hive>
         <vers.commons-lang>2.4</vers.commons-lang>
       </properties>
     </profile>
 
     <profile>
-      <id>hadoop-2</id>
+      <id>cdh4</id>
       <activation>
         <property>
           <name>hadoop.profile</name>
-          <value>2</value>
+          <value>cdh4</value>
         </property>
       </activation>
       <properties>
-        <!-- test hadoop-2 with the same jars that were produced for default profile -->
+        <!-- test cdh4 with the same jars that were produced for default profile -->
         <maven.main.skip>true</maven.main.skip>
-        <artifact.hadoop-deps>kite-hadoop2-dependencies</artifact.hadoop-deps>
-        <artifact.hadoop-test-deps>kite-hadoop2-test-dependencies</artifact.hadoop-test-deps>
-        <artifact.hbase-deps>kite-hbase2-dependencies</artifact.hbase-deps>
-        <artifact.hbase-test-deps>kite-hbase2-test-dependencies</artifact.hbase-test-deps>
-        <vers.flume>1.4.0</vers.flume>
-        <vers.hadoop>2.2.0</vers.hadoop>
-        <vers.hive>0.10.0</vers.hive>
+        <artifact.hadoop-deps>kite-hadoop-cdh4-dependencies</artifact.hadoop-deps>
+        <artifact.hadoop-test-deps>kite-hadoop-cdh4-test-dependencies</artifact.hadoop-test-deps>
+        <artifact.hbase-deps>kite-hbase-cdh4-dependencies</artifact.hbase-deps>
+        <artifact.hbase-test-deps>kite-hbase-cdh4-test-dependencies</artifact.hbase-test-deps>
+        <cdh.version>${cdh4.version}</cdh.version>
+        <vers.flume>1.4.0-cdh${cdh4.version}</vers.flume>
+        <vers.hive>0.10.0-cdh${cdh4.version}</vers.hive>
+        <vers.oozie>3.3.2-cdh${cdh4.version}</vers.oozie>
       </properties>
     </profile>
 
@@ -1161,14 +1168,10 @@
         <artifact.hadoop-test-deps>kite-hadoop-cdh5-test-dependencies</artifact.hadoop-test-deps>
         <artifact.hbase-deps>kite-hbase-cdh5-dependencies</artifact.hbase-deps>
         <artifact.hbase-test-deps>kite-hbase-cdh5-test-dependencies</artifact.hbase-test-deps>
-        <cdh.version>5.0.0</cdh.version>
-        <vers.flume>1.4.0-cdh${cdh.version}</vers.flume>
-        <vers.hadoop>2.3.0-cdh${cdh.version}</vers.hadoop>
-        <vers.hadoop-mr1>2.3.0-mr1-cdh${cdh.version}</vers.hadoop-mr1>
-
-        <vers.hbase2>0.96.1.1-cdh${cdh.version}</vers.hbase2>
-        <vers.hive>0.12.0-cdh${cdh.version}</vers.hive>
-        <vers.oozie>4.0.0-cdh${cdh.version}</vers.oozie>
+        <cdh.version>${cdh5.version}</cdh.version>
+        <vers.flume>1.4.0-cdh${cdh5.version}</vers.flume>
+        <vers.hive>0.12.0-cdh${cdh5.version}</vers.hive>
+        <vers.oozie>4.0.0-cdh${cdh5.version}</vers.oozie>
       </properties>
     </profile>
 
