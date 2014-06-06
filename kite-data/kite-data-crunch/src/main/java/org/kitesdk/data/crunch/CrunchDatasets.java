@@ -23,8 +23,8 @@ import org.kitesdk.data.View;
 
 /**
  * <p>
- * A helper class for exposing a filesystem-based dataset as a Crunch
- * {@link ReadableSource} or {@link Target}.
+ * A helper class for exposing {@link Dataset}s and {@link View}s as Crunch
+ * {@link ReadableSource}s or {@link Target}s.
  * </p>
  */
 @Beta
