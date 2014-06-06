@@ -15,6 +15,9 @@
  */
 package org.kitesdk.data.hbase;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -125,5 +128,15 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   @Override
   public InputFormat<E, Void> getInputFormat() {
     return new HBaseViewKeyInputFormat<E>(this);
+  }
+
+  @Override
+  public String getUri() {
+    URI storageUri = URI.create(URI.create(getRepositoryUri()).getRawSchemeSpecificPart());
+    try {
+      return new URI("dataset:" + storageUri.toString() + "/" + getName()).toString();
+    } catch (URISyntaxException e) {
+      throw new IllegalArgumentException(e);
+    }
   }
 }

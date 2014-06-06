@@ -94,5 +94,10 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
     throw new UnsupportedOperationException(
         "This Dataset does not support bulk deletion");
   }
+  
+  public String getRepositoryUri() {
+    return getDescriptor().getProperty(
+        AbstractDatasetRepository.REPOSITORY_URI_PROPERTY_NAME);
+  }
 
 }

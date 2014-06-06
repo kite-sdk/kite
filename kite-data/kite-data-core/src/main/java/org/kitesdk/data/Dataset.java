@@ -97,4 +97,12 @@ public interface Dataset<E> extends RefinableView<E> {
    */
   Iterable<Dataset<E>> getPartitions();
 
+  /**
+   * Return the URI identifying this dataset.  The dataset can be loaded
+   * again from the URI with {@link Datasets#load(String)}.
+   * 
+   * @return the URI identifying this dataset
+   */
+  String getUri();
+
 }

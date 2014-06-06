@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class FileSystemDataset<E> extends AbstractDataset<E> implements
@@ -418,6 +419,19 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       }
     }
     return lastMod;
+  }
+  
+  @Override
+  public String getUri() {
+    URI storageUri = URI.create(URI.create(getRepositoryUri()).getRawSchemeSpecificPart());
+    try {
+      return new URI("dataset:" + storageUri.getScheme(),
+          storageUri.getRawUserInfo(), storageUri.getHost(), storageUri.getPort(),
+          storageUri.getRawPath() + "/" + getName(), storageUri.getRawQuery(),
+          storageUri.getRawFragment()).toString();
+    } catch (URISyntaxException e) {
+      throw new IllegalArgumentException(e);
+    }
   }
 
   public static class Builder {
