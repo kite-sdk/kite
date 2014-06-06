@@ -109,7 +109,7 @@ public class URIPattern {
    */
   public URI construct(Map<String, String> options) {
     // make a copy that can be modified
-    Map<String, String> uriData = Maps.newHashMap(options);
+    Map<String, String> uriData = Maps.newLinkedHashMap(options);
     try {
       // scheme should always be present, but default if necessary
       String scheme = defaults.get(SCHEME);
@@ -177,7 +177,7 @@ public class URIPattern {
       return null;
     }
 
-    Map<String, String> result = Maps.newHashMap(defaults);
+    Map<String, String> result = Maps.newLinkedHashMap(defaults);
 
     if (pattern.isOpaque()) {
       Iterator<String> pathQuery = PATH_QUERY_SPLITTER

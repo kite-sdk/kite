@@ -93,14 +93,6 @@ public class Registration {
     throw new IllegalArgumentException("Unknown repository URI: " + uri);
   }
 
-  // TODO: move this to the URI builder
-  public static URI datasetUri(URI repoUri, String datasetName) {
-    Pair<URIPattern, Map<String, String>> pair = lookupPatternByRepoUri(repoUri);
-    Map<String, String> uriData = pair.second();
-    uriData.put("dataset", datasetName);
-    return pair.first().construct(uriData);
-  }
-
   /**
    * Registers a {@link URIPattern} and an {@link OptionBuilder} to create
    * instances of {@link DatasetRepository} from the pattern's match options.
