@@ -153,7 +153,7 @@
     <vers.plexus-utils>3.0</vers.plexus-utils>
     <vers.rat>0.9</vers.rat>
     <vers.slf4j>1.6.1</vers.slf4j>
-    <vers.codahale.metrics>3.0.1</vers.codahale.metrics>
+    <vers.codahale.metrics>3.0.2</vers.codahale.metrics>
     <vers.typesafe.config>1.0.2</vers.typesafe.config>
     <vers.solr>4.6.1</vers.solr>
     <solr.expected.version>4.6.1</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->

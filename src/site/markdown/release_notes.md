@@ -12,6 +12,7 @@ Version TBD contains the following notable changes:
 * Morphlines Library
     * Added morphline command that removes all record fields for which the field name matches a blacklist but not a whitelist: [removeFields](kite-morphlines/morphlinesReferenceGuide.html#removeFields)
     * Upgraded kite-morphlines-maxmind module from maxmind-db-0.3.1 to bug fix release maxmind-db-0.3.3
+    * Upgraded kite-morphlines-core module from metrics-0.3.1 to bug fix release metrics-0.3.2
 
 ## Version 0.14.1
 
