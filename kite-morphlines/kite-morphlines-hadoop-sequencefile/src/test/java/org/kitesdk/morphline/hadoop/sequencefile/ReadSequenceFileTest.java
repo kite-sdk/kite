@@ -36,7 +36,7 @@ import org.kitesdk.morphline.base.Fields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.io.Closeables;
+import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
 
 public class ReadSequenceFileTest extends AbstractMorphlineTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(ReadSequenceFileTest.class);

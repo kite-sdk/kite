@@ -44,7 +44,7 @@ import parquet.avro.AvroParquetReader;
 import parquet.avro.AvroReadSupport;
 
 import com.codahale.metrics.Meter;
-import com.google.common.io.Closeables;
+import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
 import com.typesafe.config.Config;
 
 

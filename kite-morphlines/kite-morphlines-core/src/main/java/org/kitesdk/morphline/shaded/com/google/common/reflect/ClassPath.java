@@ -44,8 +44,6 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.Logger;
 
-import javax.annotation.Nullable;
-
 /**
  * Scans the source of a {@link ClassLoader} and finds all loadable classes and resources.
  *
@@ -360,7 +358,7 @@ public final class ClassPath {
      * manifest, and an empty set will be returned.
      */
     @VisibleForTesting static ImmutableSet<URI> getClassPathFromManifest(
-        File jarFile, @Nullable Manifest manifest) {
+        File jarFile, Manifest manifest) {
       if (manifest == null) {
         return ImmutableSet.of();
       }

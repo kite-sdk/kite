@@ -24,7 +24,7 @@ import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
 
-import com.google.common.io.Closeables;
+import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
 
 /**
  * Adapted from org.apache.tika.extractor.ParsingEmbeddedDocumentExtractor

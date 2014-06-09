@@ -35,7 +35,7 @@ import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.stdio.AbstractParser;
 
-import com.google.common.io.Closeables;
+import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
 import com.typesafe.config.Config;
 
 /**

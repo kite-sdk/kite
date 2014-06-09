@@ -46,7 +46,7 @@ import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Fields;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
+import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
 import com.typesafe.config.Config;
 
 /**

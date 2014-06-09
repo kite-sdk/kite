@@ -18,7 +18,7 @@ package org.kitesdk.morphline.stdlib;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
-import com.google.common.io.Closeables;
+import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
 import com.typesafe.config.Config;
 import org.kitesdk.morphline.api.MorphlineCompilationException;
 import org.kitesdk.morphline.base.Configs;

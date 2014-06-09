@@ -36,7 +36,7 @@ import org.kitesdk.morphline.base.Metrics;
 
 import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
+import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
 import com.typesafe.config.Config;
 
 /**

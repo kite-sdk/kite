@@ -42,7 +42,7 @@ import org.kitesdk.morphline.base.Validator;
 import org.kitesdk.morphline.stdio.AbstractParser;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.Closeables;
+import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
