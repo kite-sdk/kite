@@ -21,12 +21,12 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>hadoop1</module>
-    <module>hadoop1-test</module>
-    <module>hadoop2</module>
-    <module>hadoop2-test</module>
     <module>default</module>
     <module>default-test</module>
+    <module>hadoop1</module>
+    <module>hadoop1-test</module>
+    <module>cdh4</module>
+    <module>cdh4-test</module>
     <module>cdh5</module>
     <module>cdh5-test</module>
   </modules>

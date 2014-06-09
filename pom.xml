@@ -120,10 +120,10 @@
     <cdh.version>${cdh4.version}</cdh.version>
 
     <!-- artifacts that depend on profiles -->
-    <artifact.hadoop-deps>kite-hadoop-dependencies</artifact.hadoop-deps>
-    <artifact.hadoop-test-deps>kite-hadoop-test-dependencies</artifact.hadoop-test-deps>
-    <artifact.hbase-deps>kite-hbase-dependencies</artifact.hbase-deps>
-    <artifact.hbase-test-deps>kite-hbase-test-dependencies</artifact.hbase-test-deps>
+    <artifact.hadoop-deps>kite-hadoop2-dependencies</artifact.hadoop-deps>
+    <artifact.hadoop-test-deps>kite-hadoop2-test-dependencies</artifact.hadoop-test-deps>
+    <artifact.hbase-deps>kite-hbase2-dependencies</artifact.hbase-deps>
+    <artifact.hbase-test-deps>kite-hbase2-test-dependencies</artifact.hbase-test-deps>
 
     <!-- Library versions -->
     <vers.avro>1.7.5</vers.avro>
@@ -134,7 +134,7 @@
     <vers.crunch-base>0.9.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-hadoop2</vers.crunch>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
-    <vers.flume>1.4.0-cdh${cdh.version}</vers.flume>
+    <vers.flume>1.4.0</vers.flume>
     <vers.guava>11.0.2</vers.guava>
     <vers.hadoop1>1.2.1</vers.hadoop1>
     <vers.hadoop2>2.2.0</vers.hadoop2>
@@ -146,7 +146,7 @@
     <vers.hbase2>0.96.1.1-hadoop2</vers.hbase2>
     <vers.hbase-cdh4>0.94.6-cdh${cdh4.version}</vers.hbase-cdh4>
     <vers.hbase-cdh5>0.96.1.1-cdh${cdh5.version}</vers.hbase-cdh5>
-    <vers.hive>0.10.0-cdh${cdh.version}</vers.hive>
+    <vers.hive>0.10.0</vers.hive>
     <vers.jetty>8.1.14.v20131031</vers.jetty>
     <vers.jexl>2.1.1</vers.jexl>
     <vers.compress>1.4.1</vers.compress>
@@ -1133,22 +1133,24 @@
     </profile>
 
     <profile>
-      <id>hadoop-2</id>
+      <id>cdh4</id>
       <activation>
         <property>
           <name>hadoop.profile</name>
-          <value>2</value>
+          <value>cdh5</value>
         </property>
       </activation>
       <properties>
-        <!-- test hadoop-2 with the same jars that were produced for default profile -->
+        <!-- test cdh4 with the same jars that were produced for default profile -->
         <maven.main.skip>true</maven.main.skip>
-        <artifact.hadoop-deps>kite-hadoop2-dependencies</artifact.hadoop-deps>
-        <artifact.hadoop-test-deps>kite-hadoop2-test-dependencies</artifact.hadoop-test-deps>
-        <artifact.hbase-deps>kite-hbase2-dependencies</artifact.hbase-deps>
-        <artifact.hbase-test-deps>kite-hbase2-test-dependencies</artifact.hbase-test-deps>
-        <vers.flume>1.4.0</vers.flume>
-        <vers.hive>0.10.0</vers.hive>
+        <artifact.hadoop-deps>kite-hadoop-cdh4-dependencies</artifact.hadoop-deps>
+        <artifact.hadoop-test-deps>kite-hadoop-cdh4-test-dependencies</artifact.hadoop-test-deps>
+        <artifact.hbase-deps>kite-hbase-cdh4-dependencies</artifact.hbase-deps>
+        <artifact.hbase-test-deps>kite-hbase-cdh4-test-dependencies</artifact.hbase-test-deps>
+        <cdh.version>${cdh4.version}</cdh.version>
+        <vers.flume>1.4.0-cdh${cdh4.version}</vers.flume>
+        <vers.hive>0.10.0-cdh${cdh4.version}</vers.hive>
+        <vers.oozie>3.3.2-cdh${cdh4.version}</vers.oozie>
       </properties>
     </profile>
 
