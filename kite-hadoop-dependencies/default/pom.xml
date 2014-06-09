@@ -36,7 +36,7 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
-      <version>${vers.hadoop-mr1}</version>
+      <version>${vers.hadoop-mr1-cdh4}</version>
       <!-- exclude server-side parts that conflict with running in a webapp -->
       <exclusions>
         <exclusion>

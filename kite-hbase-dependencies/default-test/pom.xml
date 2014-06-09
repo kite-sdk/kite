@@ -36,7 +36,7 @@
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase</artifactId>
-      <version>${vers.hbase}</version>
+      <version>${vers.hbase-cdh4}</version>
       <classifier>tests</classifier>
     </dependency>
   </dependencies>

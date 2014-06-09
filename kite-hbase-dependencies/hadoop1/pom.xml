@@ -32,10 +32,6 @@
     The Kite HBase Dependencies module aggregates HBase Hadoop-1 dependencies
   </description>
 
-  <properties>
-    <vers.hadoop>1.2.1</vers.hadoop>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.hbase</groupId>

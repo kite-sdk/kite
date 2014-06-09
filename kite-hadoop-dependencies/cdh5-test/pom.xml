@@ -36,19 +36,19 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
-      <version>${vers.hadoop}</version>
+      <version>${vers.hadoop-cdh5}</version>
       <type>test-jar</type>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-hdfs</artifactId>
-      <version>${vers.hadoop}</version>
+      <version>${vers.hadoop-cdh5}</version>
       <type>test-jar</type>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-minicluster</artifactId>
-      <version>${vers.hadoop-mr1}</version>
+      <version>${vers.hadoop-mr1-cdh5}</version>
     </dependency>
   </dependencies>
 
