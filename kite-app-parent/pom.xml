@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+~ Copyright 2013 Cloudera Inc.
+~
+~ Licensed under the Apache License, Version 2.0 (the "License");
+~ you may not use this file except in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~ http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing, software
+~ distributed under the License is distributed on an "AS IS" BASIS,
+~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~ See the License for the specific language governing permissions and
+~ limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.kitesdk</groupId>
+  <artifactId>kite-app-parent</artifactId>
+  <packaging>pom</packaging>
+  <version>0.14.1-SNAPSHOT</version>
+
+  <name>Kite Application POM</name>
+  <description>
+    This POM can be used as a parent POM to manage Kite and Hadoop dependencies.
+  </description>
+
+  <properties>
+    <!-- set to 1 or 2 -->
+    <kite.hadoop.profile></kite.hadoop.profile>
+
+    <!-- dependency version properties -->
+    <kite.version>0.14.1-SNAPSHOT</kite.version>
+    <kite.crunch.version>0.9.0-hadoop2</kite.crunch.version>
+    <kite.avro.version>1.7.5</kite.avro.version>
+    <kite.hive.version>0.10.0-cdh4.4.0</kite.hive.version>
+    <kite.hcatalog.version>0.5.0-cdh4.4.0</kite.hcatalog.version>
+    <kite.findbugs.version>2.0.1</kite.findbugs.version>
+
+    <!-- other properties to help apps -->
+    <hadoop.guava.version>11.0.2</hadoop.guava.version>
+
+    <!-- internal properties -->
+    <private.hadoop-deps.artifact>kite-hadoop${kite.hadoop.profile}-dependencies</private.hadoop-deps.artifact>
+    <private.hadoop-test-deps.artifact>kite-hadoop${kite.hadoop.profile}-test-dependencies</private.hadoop-test-deps.artifact>
+    <private.hbase-deps.artifact>kite-hbase${kite.hadoop.profile}-dependencies</private.hbase-deps.artifact>
+    <private.hbase-test-deps.artifact>kite-hbase${kite.hadoop.profile}-test-dependencies</private.hbase-test-deps.artifact>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>com.cloudera.releases</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+      <name>Cloudera Repositories</name>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>maven-twttr</id>
+      <name>Twitter Public Maven Repo</name>
+      <url>http://maven.twttr.com</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>com.cloudera.plugin.releases</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+      <name>Cloudera Repositories</name>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <pluginManagement>
+      <!-- Inherited plugins -->
+      <plugins>
+        <plugin>
+          <groupId>org.kitesdk</groupId>
+          <artifactId>kite-maven-plugin</artifactId>
+          <version>${kite.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro-maven-plugin</artifactId>
+          <version>${kite.avro.version}</version>
+          <configuration>
+            <stringType>String</stringType>
+            <createSetters>false</createSetters>
+            <fieldVisibility>private</fieldVisibility>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>schema</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <version>0.9</version>
+        <!-- ensure this project is checked, but don't include for children -->
+        <inherited>false</inherited>
+      </plugin>
+    </plugins>
+  </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.7</version>
+        <inherited>false</inherited>
+        <reportSets>
+          <reportSet>
+            <inherited>false</inherited>
+            <reports>
+              <report>index</report>
+              <report>summary</report>
+              <report>dependency-info</report>
+              <report>dependencies</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <inherited>false</inherited>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <dependencies>
+
+    <!-- Kite dependencies -->
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hcatalog</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-mapreduce</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-crunch</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-compatibility</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <!-- Recommended dependencies -->
+
+    <dependency>
+      <!-- not usually provided -->
+      <groupId>org.apache.crunch</groupId>
+      <artifactId>crunch-core</artifactId>
+      <version>${kite.crunch.version}</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <!-- Avro is provided
+               This is excluded because this pulls in the hadoop1 version
+               because the crunch pom selects the dependency using a profile
+               -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro-mapred</artifactId>
+        </exclusion>
+        <exclusion>
+          <!-- kite doesn't use trevni -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>trevni-avro</artifactId>
+        </exclusion>
+        <exclusion>
+          <!-- kite doesn't use trevni -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>trevni-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <!-- avoid warnings by bundling annotations -->
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>${kite.findbugs.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <!-- avoid warnings by bundling annotations -->
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+      <version>${kite.findbugs.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Hadoop-provided dependencies
+         These are required by Kite, but on Hadoop clusters.
+         Kite works with most versions via kite-hadoop-compatibility
+         -->
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${private.hadoop-deps.artifact}</artifactId>
+      <version>${kite.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <!-- conflicts with jetty included with HBase -->
+          <groupId>tomcat</groupId>
+          <artifactId>jasper-runtime</artifactId>
+        </exclusion>
+      </exclusions>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${private.hbase-deps.artifact}</artifactId>
+      <version>${kite.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <version>${kite.avro.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hcatalog</groupId>
+      <artifactId>hcatalog-core</artifactId>
+      <version>${kite.hcatalog.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-exec</artifactId>
+      <version>${kite.hive.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-serde</artifactId>
+      <version>${kite.hive.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+
+    <!-- Kite test dependencies -->
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>${kite.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${private.hadoop-test-deps.artifact}</artifactId>
+      <version>${kite.version}</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>${private.hbase-test-deps.artifact}</artifactId>
+      <version>${kite.version}</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+</project>
