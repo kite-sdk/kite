@@ -18,13 +18,13 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kitesdk</groupId>
-  <artifactId>kite-app-parent</artifactId>
+  <artifactId>kite-app-parent-cdh4</artifactId>
   <version>0.14.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Kite Application POM</name>
+  <name>Kite Application POM for CDH4</name>
   <description>
-    This POM can be used as a parent POM to manage Kite and Hadoop dependencies.
+    This POM can be used as a parent POM to manage Kite and Hadoop dependencies for CDH4.
   </description>
 
   <properties>
@@ -86,13 +86,13 @@
           <dependencies>
             <dependency>
               <groupId>org.kitesdk</groupId>
-              <artifactId>kite-hadoop-dependencies</artifactId>
+              <artifactId>kite-hadoop-cdh4-dependencies</artifactId>
               <version>${kite.version}</version>
               <type>pom</type>
             </dependency>
             <dependency>
               <groupId>org.kitesdk</groupId>
-              <artifactId>kite-hbase-dependencies</artifactId>
+              <artifactId>kite-hbase-cdh4-dependencies</artifactId>
               <version>${kite.version}</version>
               <type>pom</type>
             </dependency>
@@ -246,7 +246,7 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>kite-hadoop-dependencies</artifactId>
+      <artifactId>kite-hadoop-cdh4-dependencies</artifactId>
       <version>${kite.version}</version>
       <type>pom</type>
       <scope>provided</scope>
@@ -255,7 +255,7 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>kite-hbase-dependencies</artifactId>
+      <artifactId>kite-hbase-cdh4-dependencies</artifactId>
       <version>${kite.version}</version>
       <type>pom</type>
       <scope>provided</scope>
