@@ -17,6 +17,7 @@ package org.kitesdk.cli.commands;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.io.FileNotFoundException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -72,7 +73,7 @@ public class TestCreateDatasetCommand {
 
   @Test
   public void testBasicUse() throws Exception {
-    command.avroSchemaFile = "test-schemas/user.avsc";
+    command.avroSchemaFile = "resource:test-schemas/user.avsc";
     command.datasetNames = Lists.newArrayList("users");
     command.run();
 
@@ -86,7 +87,7 @@ public class TestCreateDatasetCommand {
 
   @Test
   public void testParquetFormat() throws Exception {
-    command.avroSchemaFile = "test-schemas/user.avsc";
+    command.avroSchemaFile = "resource:test-schemas/user.avsc";
     command.datasetNames = Lists.newArrayList("users");
     command.format = "parquet";
     command.run();
@@ -102,7 +103,7 @@ public class TestCreateDatasetCommand {
 
   @Test
   public void testUnrecognizedFormat() throws Exception {
-    command.avroSchemaFile = "test-schemas/user.avsc";
+    command.avroSchemaFile = "resource:test-schemas/user.avsc";
     command.datasetNames = Lists.newArrayList("users");
     command.format = "nosuchformat";
     TestHelpers.assertThrows("Should fail on invalid format",
@@ -121,7 +122,7 @@ public class TestCreateDatasetCommand {
     command.avroSchemaFile = "nonexistent.avsc";
     command.datasetNames = Lists.newArrayList("users");
     TestHelpers.assertThrows("Should fail on missing schema",
-        IllegalArgumentException.class, new Callable() {
+        FileNotFoundException.class, new Callable() {
           @Override
           public Void call() throws Exception {
             command.run();

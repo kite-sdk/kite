@@ -66,7 +66,7 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
       throw new IllegalArgumentException("Unrecognized format: " + format);
     }
 
-    descriptorBuilder.schema(open(avroSchemaFile));
+    descriptorBuilder.schemaUri(qualifiedURI(avroSchemaFile));
 
     if (partitionStrategyFile != null) {
       descriptorBuilder.partitionStrategy(open(partitionStrategyFile));

@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
@@ -29,12 +30,15 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.cli.Command;
+import org.kitesdk.data.spi.HadoopFileSystemURLStreamHandler;
 import org.slf4j.Logger;
 
 public abstract class BaseCommand implements Command, Configurable {
 
   @VisibleForTesting
   static final Charset UTF8 = Charset.forName("utf8");
+
+  private static final String RESOURCE_URI_SCHEME = "resource";
 
   private Configuration conf = null;
   private LocalFileSystem localFS = null;
@@ -133,6 +137,25 @@ public abstract class BaseCommand implements Command, Configurable {
   }
 
   /**
+   * Returns a {@link URI} for the {@code filename} that is a qualified Path or
+   * a resource URI.
+   *
+   * If the file does not have a file system scheme, this uses the default FS.
+   *
+   * @param filename The filename to qualify
+   * @return A qualified URI for the filename
+   * @throws IOException
+   */
+  public URI qualifiedURI(String filename) throws IOException {
+    URI fileURI = URI.create(filename);
+    if (RESOURCE_URI_SCHEME.equals(fileURI.getScheme())) {
+      return fileURI;
+    } else {
+      return qualifiedPath(filename).toUri();
+    }
+  }
+
+  /**
    * Opens an existing file or resource.
    *
    * If the file does not have a file system scheme, this uses the default FS.
@@ -143,24 +166,21 @@ public abstract class BaseCommand implements Command, Configurable {
    * @throws IllegalArgumentException If the file does not exist
    */
   public InputStream open(String filename) throws IOException {
-    Path filePath = qualifiedPath(filename);
-    // even though it was qualified using the default FS, it may not be in it
-    FileSystem fs = filePath.getFileSystem(getConf());
-    if (fs.exists(filePath)) {
-      return fs.open(filePath);
+    URI uri = qualifiedURI(filename);
+    if (RESOURCE_URI_SCHEME.equals(uri.getScheme())) {
+      return Resources.getResource(uri.getRawSchemeSpecificPart()).openStream();
     } else {
-      try {
-        return Resources.getResource(filename).openStream();
-      } catch (IllegalArgumentException e) {
-        // not a resource, throw an exception with a better error message
-        throw new IllegalArgumentException("Path does not exist: " + filePath);
-      }
+      Path filePath = new Path(uri);
+      // even though it was qualified using the default FS, it may not be in it
+      FileSystem fs = filePath.getFileSystem(getConf());
+      return fs.open(filePath);
     }
   }
 
   @Override
   public void setConf(Configuration conf) {
     this.conf = conf;
+    HadoopFileSystemURLStreamHandler.setDefaultConf(conf);
   }
 
   @Override
