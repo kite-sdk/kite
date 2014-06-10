@@ -24,6 +24,7 @@ import java.util.Iterator;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.NotReadySignalableException;
 import org.kitesdk.data.hbase.impl.EntityScanner;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionKey;
@@ -181,5 +182,11 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
   @Override
   public InputFormat<E, Void> getInputFormat() {
     return new HBaseViewKeyInputFormat<E>(this);
+  }
+
+  @Override
+  public boolean isReady() {
+    throw new NotReadySignalableException(
+        "View does not support ready signaling: " + this);
   }
 }

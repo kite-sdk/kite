@@ -31,6 +31,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.junit.Assert;
@@ -171,8 +172,11 @@ public class TestMapReduce {
     Assert.assertEquals(2, counts.get("banana").intValue());
     Assert.assertEquals(1, counts.get("carrot").intValue());
 
+    if (!DatasetKeyOutputFormat.isHadoop1()) {
+      Assert.assertTrue(outputDataset.isReady());
+    }
   }
-
+  
   private GenericData.Record newStringRecord(String text) {
     return new GenericRecordBuilder(STRING_SCHEMA).set("text", text).build();
   }

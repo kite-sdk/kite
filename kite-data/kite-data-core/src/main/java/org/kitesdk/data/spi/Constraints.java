@@ -22,10 +22,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Range;
 import com.google.common.collect.Ranges;
+import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -37,7 +40,9 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.codec.binary.Base64;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.Predicates.In;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +54,10 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -90,6 +98,101 @@ public class Constraints implements Serializable{
    */
   public <E> Predicate<E> toEntityPredicate() {
     return new EntityPredicate<E>(constraints);
+  }
+  
+  /**
+   * Indicates if the constraints can be converted to a set of
+   * {@link PartitionKey partition keys}
+   * 
+   * Constraints cannot be converted to partition keys if any of the following:
+   * <ul>
+   * <li>they are not {@link #alignedWithBoundaries(PartitionStrategy) aligned
+   * with partition boundaries}</li>
+   * <li>they represent a {@link #isRange() range}</li>
+   * <li>representation as partition keys would require an infinite number of
+   * partition keys</li>
+   * </ul>
+   * 
+   * @param strategy
+   *          the partition strategy
+   * @return true if the constraints can be converted to a set of partition keys
+   */
+  public boolean convertableToPartitionKeys(PartitionStrategy strategy) {
+    if (!alignedWithBoundaries(strategy)) {
+      return false;
+    }
+    if (isRange()) {
+      return false;
+    }
+    
+    boolean hasGap = false;
+    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+      if (constraints.get(fp.getSourceName()) == null) {
+        hasGap = true;
+      }
+      else if (hasGap) {
+        // If there is a constrained partition field after an unconstrained
+        // partition field then the constraints would represent an infinite
+        // number of partition keys
+        //
+        // For example, strategy = identity("a").identity("b") and there is
+        // only a constraint on b -- there are infinite partition keys (X, "b")
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  /**
+   * Gets the {@link PartitionKey partition keys} that mimic the constraints.
+   * 
+   * This method should not be called unless
+   * {@link #convertableToPartitionKeys(PartitionStrategy)} returns true. If
+   * not, the constraints cannot be cleanly represented as partition keys and
+   * an {@link IllegalArgumentException} will be thrown.
+   * 
+   * @param strategy
+   *          the {@link PartitionStrategy} on which to base the returned
+   *          {@link PartitionKey partition keys}
+   * @return the {@link PartitionKey partition keys} that mimic the constraints
+   */
+  public Set<PartitionKey> toPartitionKeys(PartitionStrategy strategy) {
+    Preconditions.checkArgument(convertableToPartitionKeys(strategy));
+    
+    if (isUnbounded()) {
+      return ImmutableSet.of(strategy.partitionKey());
+    }
+
+    SetMultimap<Integer, PartitionKey> partitionKeys = HashMultimap.create();
+    List<FieldPartitioner> fieldPartitioners = strategy.getFieldPartitioners();
+    int fpIndex = 0;
+    for (; fpIndex < fieldPartitioners.size(); fpIndex++) {
+      FieldPartitioner fp = fieldPartitioners.get(fpIndex);
+      // since range constraints are not allowed, we should be able to safely
+      // assume the predicate is an "In" predicate
+      Predicates.In predicate = (In) constraints.get(fp.getSourceName());
+      if (predicate == null) {
+        break;
+      }
+      Set set = predicate.getSet();
+      for (Object object : set) {
+        if (fpIndex == 0) {
+          partitionKeys.put(fpIndex, strategy.partitionKey(object));
+        } else {
+          for (PartitionKey partitionKey : ImmutableSet.copyOf(partitionKeys.get(fpIndex - 1))) {
+            ArrayList<Object> values = Lists.newArrayList(partitionKey.getValues());
+            values.add(object);
+            partitionKeys.put(fpIndex, strategy.partitionKey(values.toArray()));
+          }
+        }
+      }
+    }
+    // Return all the partition keys from the last level of partitioning that was matched
+    // It is guaranteed there will matching on at least the first partitioner or:
+    // - the constraints are unbounded and we returned earlier
+    // - the constraints do not align with partition boundaries and we exited earlier
+    return ImmutableSet.copyOf(partitionKeys.get(fpIndex-1));
   }
 
   /**
@@ -320,7 +423,16 @@ public class Constraints implements Serializable{
 
     return true;
   }
-
+  
+  public boolean isRange() {
+    for (Predicate predicate : constraints.values()) {
+      if (predicate instanceof Range<?>) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
   @SuppressWarnings("unchecked")
   public Constraints with(String name, Object... values) {
     SchemaUtil.checkTypeConsistency(schema, name, values);
@@ -498,6 +610,10 @@ public class Constraints implements Serializable{
       // previous must be null, return the new constraint
       return additional;
     }
+  }
+
+  public boolean isUnbounded() {
+    return constraints.isEmpty();
   }
 
   /**

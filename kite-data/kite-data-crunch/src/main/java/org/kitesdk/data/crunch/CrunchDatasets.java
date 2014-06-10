@@ -111,7 +111,7 @@ public class CrunchDatasets {
   public static <E> Target asTarget(View<E> view) {
     return new DatasetTarget<E>(view);
   }
-
+  
   /**
    * Expose the {@link Dataset} or {@link View} represented by the given
    * URI as a Crunch {@link Target}.

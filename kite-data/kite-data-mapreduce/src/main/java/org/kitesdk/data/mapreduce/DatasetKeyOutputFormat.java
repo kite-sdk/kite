@@ -16,6 +16,7 @@
 package org.kitesdk.data.mapreduce;
 
 import com.google.common.annotations.Beta;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
@@ -40,6 +41,7 @@ import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.Mergeable;
+import org.kitesdk.data.spi.ReadySignalable;
 import org.kitesdk.data.spi.TemporaryDatasetRepository;
 import org.kitesdk.data.spi.TemporaryDatasetRepositoryAccessor;
 import org.kitesdk.data.spi.URIBuilder;
@@ -206,7 +208,9 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       View<E> targetView = load(jobContext);
       Dataset<E> jobDataset = repo.load(jobDatasetName);
       ((Mergeable<Dataset<E>>) targetView.getDataset()).merge(jobDataset);
-
+      if (targetView instanceof ReadySignalable) {
+        ((ReadySignalable) targetView).signalReady();
+      }
       if (isTemp) {
         ((TemporaryDatasetRepository) repo).delete();
       } else {
@@ -305,7 +309,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     return !isHadoop1() && target.getDataset() instanceof Mergeable;
   }
 
-  private static boolean isHadoop1() {
+  @VisibleForTesting
+  static boolean isHadoop1() {
     return !JobContext.class.isInterface();
   }
 

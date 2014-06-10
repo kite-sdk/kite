@@ -16,6 +16,7 @@
 package org.kitesdk.data;
 
 import javax.annotation.concurrent.Immutable;
+import org.kitesdk.data.spi.ReadySignalable;
 
 /**
  * A {@code View} is a subset of a {@link Dataset}.
@@ -97,4 +98,16 @@ public interface View<E> {
    * @since 0.12.0
    */
   public boolean deleteAll();
+  
+  /**
+   * Indicates whether the View has been signaled as being ready for consumption
+   * by downstream processing. Some views do not support being signaled ready
+   * and in such cases, this method will throw
+   * {@link NotReadySignalableException}.
+   * 
+   * @return true if the view supports signaling and has been signaled
+   * @throws NotReadySignalableException
+   *           if the view does not support ready signaling
+   */
+  public boolean isReady();
 }

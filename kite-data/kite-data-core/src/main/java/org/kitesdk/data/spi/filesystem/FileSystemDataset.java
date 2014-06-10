@@ -37,6 +37,7 @@ import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.PartitionListener;
+import org.kitesdk.data.spi.ReadySignalable;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -55,7 +56,7 @@ import java.util.List;
 
 public class FileSystemDataset<E> extends AbstractDataset<E> implements
     Mergeable<FileSystemDataset<E>>, InputFormatAccessor<E>, LastModifiedAccessor,
-    SizeAccessor {
+    SizeAccessor, ReadySignalable {
 
   private static final Logger LOG = LoggerFactory
     .getLogger(FileSystemDataset.class);
@@ -427,6 +428,16 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       }
     }
     return lastMod;
+  }
+  
+  @Override
+  public boolean isReady() {
+    return unbounded.isReady();
+  }
+
+  @Override
+  public void signalReady() {
+    unbounded.signalReady();
   }
 
   public static class Builder {

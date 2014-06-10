@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.junit.After;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -309,5 +310,40 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     pipeline.run();
 
     Assert.assertEquals(10, datasetSize(outputDataset));
+  }
+  
+  @Test
+  public void testSignalReady() {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", 2).build();
+
+    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+    
+    writeTestUsers(inputDataset, 10);
+
+    View<Record> inputView = inputDataset.with("username", "test-11");
+    Assert.assertEquals(0, datasetSize(inputView));
+    
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputView, GenericData.Record.class));
+    pipeline.write(data, CrunchDatasets.asTarget(new URIBuilder(repo
+        .getUri(), "out").build()), Target.WriteMode.APPEND);
+    pipeline.run();
+
+    // signalReady should work even when the output is empty
+    Assert.assertEquals(0, datasetSize(outputDataset));
+    
+    // signalReady doesn't work in Hadoop 1 so only assert if not Hadoop 1
+    if (!isHadoop1()) {
+      Assert.assertTrue(outputDataset.isReady());
+    }
+  }
+  
+  private static boolean isHadoop1() {
+    return !JobContext.class.isInterface();
   }
 }
