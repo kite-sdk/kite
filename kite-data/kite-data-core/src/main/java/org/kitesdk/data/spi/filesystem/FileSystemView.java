@@ -166,15 +166,15 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     return deleted;
   }
 
-  private static boolean cleanlyDelete(FileSystem fs, Path root, Path dir) {
+  private static boolean cleanlyDelete(FileSystem fs, Path root, Path path) {
     try {
       boolean deleted;
-      if (dir.isAbsolute()) {
-        LOG.debug("Deleting path {}", dir);
-        deleted = fs.delete(dir, true /* include any files */ );
+      if (path.isAbsolute()) {
+        LOG.debug("Deleting path {}", path);
+        deleted = fs.delete(path, true /* include any files */ );
       } else {
         // the path should be treated as relative to the root path
-        Path absolute = new Path(root, dir);
+        Path absolute = new Path(root, path);
         LOG.debug("Deleting path {}", absolute);
         deleted = fs.delete(absolute, true /* include any files */ );
         // iterate up to the root, removing empty directories
@@ -194,7 +194,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
       }
       return deleted;
     } catch (IOException ex) {
-      throw new DatasetIOException("Could not cleanly delete path:" + dir, ex);
+      throw new DatasetIOException("Could not cleanly delete path:" + path, ex);
     }
   }
 
