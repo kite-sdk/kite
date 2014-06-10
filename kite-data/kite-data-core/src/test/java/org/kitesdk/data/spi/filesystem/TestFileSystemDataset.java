@@ -485,6 +485,22 @@ public class TestFileSystemDataset extends MiniDFSTest {
       }
     });
   }
+  
+  @Test
+  public void testDeleteAllWithoutPartitions() {
+    final FileSystemDataset<Record> ds = new FileSystemDataset.Builder()
+        .name("users")
+        .configuration(getConfiguration())
+        .descriptor(
+            new DatasetDescriptor.Builder().schema(USER_SCHEMA).format(format)
+                .location(testDirectory).build()).build();
+    
+    writeTestUsers(ds, 10);
+    
+    Assert.assertTrue(ds.deleteAll());
+    
+    checkReaderBehavior(ds.newReader(), 0, (RecordValidator<Record>) null);
+  }
 
   @SuppressWarnings("deprecation")
   private int readTestUsersInPartition(FileSystemDataset<Record> ds, PartitionKey key,
