@@ -217,7 +217,7 @@ public class TestSchemaCommandCluster extends MiniDFSTest {
     Schema schema = new Schema.Parser().parse(
         Resources.getResource("schema/user.avsc").openStream());
 
-    TestUtil.run("create", "users", "--schema", "schema/user.avsc",
+    TestUtil.run("create", "users", "--schema", "resource:schema/user.avsc",
         "-r", repoURI);
 
     SchemaCommand command = new SchemaCommand(console);
@@ -241,7 +241,7 @@ public class TestSchemaCommandCluster extends MiniDFSTest {
     Schema schema = new Schema.Parser().parse(
         Resources.getResource("schema/user.avsc").openStream());
 
-    TestUtil.run("create", "users", "--schema", "schema/user.avsc",
+    TestUtil.run("create", "users", "--schema", "resource:schema/user.avsc",
         "-r", repoURI);
 
     String hdfsSchemaPath = "hdfs:/tmp/schemas/user.avsc";

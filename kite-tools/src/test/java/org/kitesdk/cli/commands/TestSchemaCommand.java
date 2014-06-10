@@ -49,7 +49,7 @@ public class TestSchemaCommand {
 
   @Before
   public void setup() throws Exception {
-    TestUtil.run("create", "users", "--schema", "schema/user.avsc");
+    TestUtil.run("create", "users", "--schema", "resource:schema/user.avsc");
     this.console = mock(Logger.class);
     this.command = new SchemaCommand(console);
     command.setConf(new Configuration());
@@ -73,7 +73,7 @@ public class TestSchemaCommand {
 
   @Test
   public void testMultipleSchemasStdout() throws Exception {
-    TestUtil.run("create", "users_2", "--schema", "schema/user.avsc");
+    TestUtil.run("create", "users_2", "--schema", "resource:schema/user.avsc");
     command.datasetNames = Lists.newArrayList("users", "users_2");
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);

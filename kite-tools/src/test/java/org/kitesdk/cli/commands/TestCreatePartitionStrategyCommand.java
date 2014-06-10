@@ -39,7 +39,7 @@ public class TestCreatePartitionStrategyCommand {
     this.console = mock(Logger.class);
     this.command = new CreatePartitionStrategyCommand(console);
     command.setConf(new Configuration());
-    command.avroSchemaFile = "test-schemas/user.avsc";
+    command.avroSchemaFile = "resource:test-schemas/user.avsc";
   }
 
   @Test

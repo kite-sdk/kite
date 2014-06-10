@@ -74,7 +74,7 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
 
   @Test
   public void testBasicUse() throws Exception {
-    command.avroSchemaFile = "test-schemas/user.avsc";
+    command.avroSchemaFile = "resource:test-schemas/user.avsc";
     command.datasetNames = Lists.newArrayList("users");
     command.run();
 
