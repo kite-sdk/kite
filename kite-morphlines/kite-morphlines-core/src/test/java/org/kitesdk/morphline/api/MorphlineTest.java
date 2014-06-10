@@ -171,21 +171,23 @@ public class MorphlineTest extends AbstractMorphlineTest {
   
   @Test
   public void testRemoveFields() throws Exception {
-    morphline = createMorphline("test-morphlines/removeFields");    
-    Record record = new Record();
-    record.put("foo", "data");
-    record.put("foobar", "data");
-    record.put("barx", "data");
-    record.put("barox", "data");
-    record.put("baz", "data");
-    record.put("baz", "data");
-    record.put("hello", "data");
-    
-    Record expected = new Record();
-    expected.put("foobar", "data");
-    expected.put("barox", "data");
-    expected.put("hello", "data");
-    processAndVerifySuccess(record, expected);
+    morphline = createMorphline("test-morphlines/removeFields");
+    for (int i = 0; i < 2; i++) {
+      Record record = new Record();
+      record.put("foo", "data");
+      record.put("foobar", "data");
+      record.put("barx", "data");
+      record.put("barox", "data");
+      record.put("baz", "data");
+      record.put("baz", "data");
+      record.put("hello", "data");
+      
+      Record expected = new Record();
+      expected.put("foobar", "data");
+      expected.put("barox", "data");
+      expected.put("hello", "data");
+      processAndVerifySuccess(record, expected);
+    }
   }
 
   @Test

@@ -17,7 +17,9 @@ package org.kitesdk.morphline.stdlib;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,7 +88,7 @@ final class PatternNameMatcher implements NameMatcher {
       if (pattern.equals("*")) {
         return new MatchAllExpression(); // optimization
       }
-      return new GlobExpression(pattern);
+      return new RegexExpression(GlobPattern.compile(pattern));
     } else {
       throw new IllegalArgumentException("Illegal match type: " + type);
     }
@@ -141,6 +143,7 @@ final class PatternNameMatcher implements NameMatcher {
   private static final class RegexExpression implements Expression {
     
     private final Matcher regex;
+    private final Map<String, Boolean> cache = new BoundedLRUHashMap(10000);
     
     public RegexExpression(Pattern pattern) {
       this.regex = pattern.matcher("");
@@ -148,7 +151,12 @@ final class PatternNameMatcher implements NameMatcher {
     
     @Override
     public boolean matches(String str) {
-      return regex.reset(str).matches();
+      Boolean isMatch = cache.get(str);
+      if (isMatch == null) {
+        isMatch = regex.reset(str).matches();
+        cache.put(str, isMatch); // cache it for later fast reuse
+      }      
+      return isMatch.booleanValue();
     }
 
   }
@@ -157,22 +165,23 @@ final class PatternNameMatcher implements NameMatcher {
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
-  private static final class GlobExpression implements Expression {
+  private static final class BoundedLRUHashMap<K,V> extends LinkedHashMap<K,V> {
     
-    private final Matcher regex;
-    
-    public GlobExpression(String pattern) {
-      this.regex = GlobPattern.compile(pattern).matcher("");
+    private final int capacity;
+
+    private BoundedLRUHashMap(int capacity) {
+      super(16, 0.5f, true);
+      this.capacity = capacity;
     }
     
     @Override
-    public boolean matches(String str) {
-      return regex.reset(str).matches();
+    protected boolean removeEldestEntry(Map.Entry eldest) {
+      return size() > capacity;
     }
+      
+  } 
 
-  }
 
-  
   ///////////////////////////////////////////////////////////////////////////////
   // Nested classes:
   ///////////////////////////////////////////////////////////////////////////////
