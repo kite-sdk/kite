@@ -99,8 +99,8 @@ public class DatasetRepositories {
    * connect to the Hive MetaStore, but tables are external and stored
    * under <code>[path]</code>. The repository storage layout is the same
    * as <code>hdfs</code> and <code>file</code> repositories. HDFS connection
-   * options can be supplied by adding <code>hdfs-host</code> and
-   * <code>hdfs-port</code> query options to the URI (see examples).
+   * options can be supplied by adding <code>hdfs:host</code> and
+   * <code>hdfs:port</code> query options to the URI (see examples).
    * </p>
    * <h1>HBase URIs</h1>
    * <p>
@@ -135,21 +135,21 @@ public class DatasetRepositories {
    * and creates managed tables.
    * </tr>
    * <tr>
-   * <td><code>repo:hive:/path?hdfs-host=localhost&hdfs-port=8020</code></td>
+   * <td><code>repo:hive:/path?hdfs:host=localhost&hdfs:port=8020</code></td>
    * <td>Connects to the default Hive MetaStore and creates external tables
    * stored in <code>hdfs://localhost:8020/</code> at <code>path</code>.
-   * <code>hdfs-host</code> and <code>hdfs-port</code> are optional.
+   * <code>hdfs:host</code> and <code>hdfs:port</code> are optional.
    * </td>
    * </tr>
    * <tr>
    * <td>
-   * <code>repo:hive://meta-host:9083/path?hdfs-host=localhost&amp;hdfs-port=8020
+   * <code>repo:hive://meta-host:9083/path?hdfs:host=localhost&amp;hdfs:port=8020
    * </code>
    * </td>
    * <td>
    * Connects to the Hive MetaStore at <code>thrift://meta-host:9083/</code>
    * and creates external tables stored in <code>hdfs://localhost:8020/</code>
-   * at <code>path</code>. <code>hdfs-host</code> and <code>hdfs-port</code>
+   * at <code>path</code>. <code>hdfs:host</code> and <code>hdfs:port</code>
    * are optional.
    * </td>
    * </tr>

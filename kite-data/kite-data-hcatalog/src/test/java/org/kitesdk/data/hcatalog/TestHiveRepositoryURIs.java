@@ -129,8 +129,8 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
   @Test
   public void testExternalURI() {
     URI hdfsUri = getDFS().getUri();
-    URI repoUri = URI.create("repo:hive:/tmp/hive-repo?hdfs-host=" +
-        hdfsUri.getHost() + "&hdfs-port=" + hdfsUri.getPort());
+    URI repoUri = URI.create("repo:hive:/tmp/hive-repo?hdfs:host=" +
+        hdfsUri.getHost() + "&hdfs:port=" + hdfsUri.getPort());
     DatasetRepository repo = DatasetRepositories.open(repoUri);
 
     Assert.assertNotNull("Received a repository", repo);
@@ -156,8 +156,8 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
   @Test
   public void testExternalURIWithHostAndPort() {
     URI hdfsUri = getDFS().getUri();
-    URI repoUri = URI.create("repo:hive://meta-host:1234/tmp/data?hdfs-host=" +
-        hdfsUri.getHost() + "&hdfs-port=" + hdfsUri.getPort());
+    URI repoUri = URI.create("repo:hive://meta-host:1234/tmp/data?hdfs:host=" +
+        hdfsUri.getHost() + "&hdfs:port=" + hdfsUri.getPort());
     DatasetRepository repo = DatasetRepositories.open(repoUri);
 
     Assert.assertNotNull("Received a repository", repo);
@@ -169,8 +169,8 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
   @Test
   public void testExternalURIWithRootPath() {
     URI hdfsUri = getDFS().getUri();
-    URI repoUri = URI.create("repo:hive:/?hdfs-host=" + hdfsUri.getHost() +
-        "&hdfs-port=" + hdfsUri.getPort());
+    URI repoUri = URI.create("repo:hive:/?hdfs:host=" + hdfsUri.getHost() +
+        "&hdfs:port=" + hdfsUri.getPort());
     DatasetRepository repo = DatasetRepositories.open(repoUri);
     Assert.assertNotNull("Received a repository", repo);
     Assert.assertTrue("Repo should be a HCatalogExternalDatasetRepository",
@@ -185,8 +185,8 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
   @Test
   public void testExternalURIWithHostAndPortAndRootPath() {
     URI hdfsUri = getDFS().getUri();
-    URI repoUri = URI.create("repo:hive://meta-host:1234/?hdfs-host=" +
-        hdfsUri.getHost() + "&hdfs-port=" + hdfsUri.getPort());
+    URI repoUri = URI.create("repo:hive://meta-host:1234/?hdfs:host=" +
+        hdfsUri.getHost() + "&hdfs:port=" + hdfsUri.getPort());
     DatasetRepository repo = DatasetRepositories.open(repoUri);
     Assert.assertNotNull("Received a repository", repo);
     Assert.assertTrue("Repo should be a HCatalogExternalDatasetRepository",

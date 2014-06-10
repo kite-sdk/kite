@@ -17,7 +17,6 @@ package org.kitesdk.data.hbase.impl;
 
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepository;
-import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.Registration;
@@ -27,7 +26,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
-import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;

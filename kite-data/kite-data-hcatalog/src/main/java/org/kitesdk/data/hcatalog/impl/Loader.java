@@ -44,6 +44,10 @@ public class Loader implements Loadable {
   public static final String HIVE_METASTORE_URI_PROP = "hive.metastore.uris";
   private static final int UNSPECIFIED_PORT = -1;
   private static final String ALWAYS_REPLACED = "ALWAYS-REPLACED";
+  private static final String HDFS_HOST = "hdfs:host";
+  private static final String HDFS_PORT = "hdfs:port";
+  private static final String OLD_HDFS_HOST = "hdfs-host";
+  private static final String OLD_HDFS_PORT = "hdfs-port";
 
   /**
    * This class builds configured instances of
@@ -149,8 +153,8 @@ public class Loader implements Loadable {
       // Use a HDFS URI with no authority and the environment's configuration
       // to find the default HDFS information
       final URI hdfs = FileSystem.get(URI.create("hdfs:/"), conf).getUri();
-      hdfsAuthority = "&hdfs-host=" + hdfs.getHost() +
-          "&hdfs-port=" + hdfs.getPort();
+      hdfsAuthority = "&" + HDFS_HOST + "=" + hdfs.getHost() +
+          "&" + HDFS_PORT + "=" + hdfs.getPort();
     } catch (IOException ex) {
       LOG.warn(
           "Could not locate HDFS, hdfs-host and hdfs-port " +
@@ -176,27 +180,27 @@ public class Loader implements Loadable {
 
   private static URI fileSystemURI(Map<String, String> match) {
     final String userInfo;
-    if (match.containsKey("username")) {
-      if (match.containsKey("password")) {
-        userInfo = match.get("username") + ":" +
-            match.get("password");
+    if (match.containsKey(URIPattern.USERNAME)) {
+      if (match.containsKey(URIPattern.PASSWORD)) {
+        userInfo = match.get(URIPattern.USERNAME) + ":" +
+            match.get(URIPattern.PASSWORD);
       } else {
-        userInfo = match.get("username");
+        userInfo = match.get(URIPattern.USERNAME);
       }
     } else {
       userInfo = null;
     }
     try {
-      if (match.containsKey("hdfs-host")) {
+      if (match.containsKey(HDFS_HOST) || match.containsKey(OLD_HDFS_HOST)) {
         int port = UNSPECIFIED_PORT;
-        if (match.containsKey("hdfs-port")) {
+        if (match.containsKey(HDFS_PORT) || match.containsKey(OLD_HDFS_PORT)) {
           try {
-            port = Integer.parseInt(match.get("hdfs-port"));
+            port = Integer.parseInt(first(match, HDFS_PORT, OLD_HDFS_PORT));
           } catch (NumberFormatException e) {
             port = UNSPECIFIED_PORT;
           }
         }
-        return new URI("hdfs", userInfo, match.get("hdfs-host"),
+        return new URI("hdfs", userInfo, first(match, HDFS_HOST, OLD_HDFS_HOST),
             port, "/", null, null);
       } else {
         return new URI("file", userInfo, "", UNSPECIFIED_PORT, "/", null, null);
@@ -217,9 +221,9 @@ public class Loader implements Loadable {
       Configuration conf, Map<String, String> match) {
     try {
       int port = UNSPECIFIED_PORT;
-      if (match.containsKey("port")) {
+      if (match.containsKey(URIPattern.HOST)) {
         try {
-          port = Integer.parseInt(match.get("port"));
+          port = Integer.parseInt(match.get(URIPattern.PORT));
         } catch (NumberFormatException e) {
           port = UNSPECIFIED_PORT;
         }
@@ -227,14 +231,23 @@ public class Loader implements Loadable {
       // if either the host or the port is set, construct a new MetaStore URI
       // and set the property in the Configuration. otherwise, this will not
       // change the connection URI.
-      if (match.containsKey("host")) {
+      if (match.containsKey(URIPattern.HOST)) {
          conf.set(HIVE_METASTORE_URI_PROP,
-             new URI("thrift", null, match.get("host"), port, "/", null, null)
-                 .toString());
+             new URI("thrift", null, match.get(URIPattern.HOST), port, "/",
+                 null, null).toString());
       }
     } catch (URISyntaxException ex) {
       throw new DatasetRepositoryException(
           "Could not build metastore URI", ex);
     }
+  }
+
+  private static String first(Map<String, String> data, String... keys) {
+    for (String key : keys) {
+      if (data.containsKey(key)) {
+        return data.get(key);
+      }
+    }
+    return null;
   }
 }

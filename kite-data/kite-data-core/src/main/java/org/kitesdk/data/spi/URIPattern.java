@@ -37,11 +37,11 @@ import java.util.Map;
  */
 public class URIPattern {
 
-  public static final String SCHEME = "scheme";
-  public static final String HOST = "host";
-  public static final String PORT = "port";
-  public static final String USERNAME = "username";
-  public static final String PASSWORD = "password";
+  public static final String SCHEME = "uri:scheme";
+  public static final String HOST = "auth:host";
+  public static final String PORT = "auth:port";
+  public static final String USERNAME = "auth:username";
+  public static final String PASSWORD = "auth:password";
 
   private static final Splitter PATH_SPLITTER = Splitter.on('/');
   private static final Joiner PATH_JOINER = Joiner.on('/');
