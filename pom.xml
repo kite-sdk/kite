@@ -120,10 +120,10 @@
     <cdh.version>${cdh4.version}</cdh.version>
 
     <!-- artifacts that depend on profiles -->
-    <artifact.hadoop-deps>kite-hadoop2-dependencies</artifact.hadoop-deps>
-    <artifact.hadoop-test-deps>kite-hadoop2-test-dependencies</artifact.hadoop-test-deps>
-    <artifact.hbase-deps>kite-hbase2-dependencies</artifact.hbase-deps>
-    <artifact.hbase-test-deps>kite-hbase2-test-dependencies</artifact.hbase-test-deps>
+    <artifact.hadoop-deps>kite-hadoop-dependencies</artifact.hadoop-deps>
+    <artifact.hadoop-test-deps>kite-hadoop-test-dependencies</artifact.hadoop-test-deps>
+    <artifact.hbase-deps>kite-hbase-dependencies</artifact.hbase-deps>
+    <artifact.hbase-test-deps>kite-hbase-test-dependencies</artifact.hbase-test-deps>
 
     <!-- Library versions -->
     <vers.avro>1.7.5</vers.avro>
