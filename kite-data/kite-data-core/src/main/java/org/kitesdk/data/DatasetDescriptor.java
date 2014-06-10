@@ -44,6 +44,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.reflect.ReflectData;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.spi.ColumnMappingParser;
+import org.kitesdk.data.spi.HadoopFileSystemURLStreamHandler;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.SchemaUtil;
 import org.kitesdk.data.spi.URIPattern;

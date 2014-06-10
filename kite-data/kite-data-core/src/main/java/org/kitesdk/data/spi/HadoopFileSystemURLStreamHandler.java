@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data;
+package org.kitesdk.data.spi;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -28,9 +29,37 @@ import org.apache.hadoop.fs.Path;
  * A {@link URLStreamHandler} for handling Hadoop filesystem URLs,
  * most commonly those with the <i>hdfs</i> scheme.
  */
-class HadoopFileSystemURLStreamHandler extends URLStreamHandler {
+public class HadoopFileSystemURLStreamHandler extends URLStreamHandler
+    implements Configurable {
 
-  static class HadoopFileSystemURLConnection extends URLConnection {
+  private static Configuration defaultConf = new Configuration();
+
+  public static Configuration getDefaultConf() {
+    return defaultConf;
+  }
+
+  public static void setDefaultConf(Configuration defaultConf) {
+    HadoopFileSystemURLStreamHandler.defaultConf = defaultConf;
+  }
+
+  private Configuration conf = defaultConf;
+
+  @Override
+  public void setConf(Configuration conf) {
+    this.conf = conf;
+  }
+
+  @Override
+  public Configuration getConf() {
+    return conf;
+  }
+
+  @Override
+  protected URLConnection openConnection(URL url) throws IOException {
+    return new HadoopFileSystemURLConnection(url);
+  }
+
+  class HadoopFileSystemURLConnection extends URLConnection {
     public HadoopFileSystemURLConnection(URL url) {
       super(url);
     }
@@ -40,13 +69,8 @@ class HadoopFileSystemURLStreamHandler extends URLStreamHandler {
     @Override
     public InputStream getInputStream() throws IOException {
       Path path = new Path(url.toExternalForm());
-      FileSystem fileSystem = path.getFileSystem(new Configuration());
+      FileSystem fileSystem = path.getFileSystem(conf);
       return fileSystem.open(path);
     }
-  }
-
-  @Override
-  protected URLConnection openConnection(URL url) throws IOException {
-    return new HadoopFileSystemURLConnection(url);
   }
 }
