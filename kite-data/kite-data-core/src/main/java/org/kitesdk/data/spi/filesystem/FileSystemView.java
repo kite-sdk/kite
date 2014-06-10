@@ -153,8 +153,15 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
 
   boolean deleteAllUnsafe() {
     boolean deleted = false;
-    for (Pair<StorageKey, Path> partition : partitionIterator()) {
-      deleted = cleanlyDelete(fs, root, partition.second()) || deleted;
+    if (dataset.getDescriptor().isPartitioned()) {
+      for (Pair<StorageKey, Path> partition : partitionIterator()) {
+        deleted = cleanlyDelete(fs, root, partition.second()) || deleted;
+      }
+    }
+    else {
+      for (Path path : pathIterator()) {
+        deleted = cleanlyDelete(fs, root, path) || deleted;
+      }
     }
     return deleted;
   }
