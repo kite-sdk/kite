@@ -35,17 +35,20 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
 
   private static String hdfsAuth;
   private static String hdfsQueryArgs;
+  private static String hdfsQueryArgsOld;
   private static DatasetDescriptor descriptor;
 
   @BeforeClass
-  public static void createRepositoryAndTestDatasets() throws Exception {
-    hdfsAuth = getDFS().getUri().getAuthority();
-    hdfsQueryArgs = "hdfs-host=" + getDFS().getUri().getHost() +
-        "&hdfs-port=" + getDFS().getUri().getPort();
-    descriptor = new DatasetDescriptor.Builder()
-        .schemaUri("resource:schema/user.avsc")
-        .build();
-  }
+        public static void createRepositoryAndTestDatasets() throws Exception {
+          hdfsAuth = getDFS().getUri().getAuthority();
+          hdfsQueryArgs = "hdfs:host=" + getDFS().getUri().getHost() +
+              "&hdfs:port=" + getDFS().getUri().getPort();
+          hdfsQueryArgsOld = "hdfs-host=" + getDFS().getUri().getHost() +
+              "&hdfs-port=" + getDFS().getUri().getPort();
+          descriptor = new DatasetDescriptor.Builder()
+              .schemaUri("resource:schema/user.avsc")
+              .build();
+        }
 
   @Test
   public void testExternal() {
@@ -56,6 +59,27 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
 
     Dataset<Object> ds = Datasets
         .load("dataset:hive:/tmp/data/test?" + hdfsQueryArgs);
+
+    Assert.assertNotNull("Should load dataset", ds);
+    Assert.assertTrue(ds instanceof FileSystemDataset);
+    Assert.assertEquals("Locations should match",
+        URI.create("hdfs://" + hdfsAuth + "/tmp/data/test"),
+        ds.getDescriptor().getLocation());
+    Assert.assertEquals("Descriptors should match",
+        repo.load("test").getDescriptor(), ds.getDescriptor());
+
+    repo.delete("test");
+  }
+
+  @Test
+  public void testExternalHDFSQueryOptions() {
+    DatasetRepository repo = DatasetRepositories
+        .open("repo:hive:/tmp/data?" + hdfsQueryArgs);
+    repo.delete("test");
+    repo.create("test", descriptor);
+
+    Dataset<Object> ds = Datasets
+        .load("dataset:hive:/tmp/data/test?" + hdfsQueryArgsOld);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -118,6 +142,24 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
 
     Dataset<Object> ds = Datasets
         .load("dataset:hive?dataset=test&" + hdfsQueryArgs);
+
+    Assert.assertNotNull("Should load dataset", ds);
+    Assert.assertTrue(ds instanceof FileSystemDataset);
+    Assert.assertEquals("Descriptors should match",
+        repo.load("test").getDescriptor(), ds.getDescriptor());
+
+    repo.delete("test");
+  }
+
+  @Test
+  public void testManagedHDFSQueryOptions() {
+    DatasetRepository repo = DatasetRepositories
+        .open("repo:hive?" + hdfsQueryArgs);
+    repo.delete("test");
+    repo.create("test", descriptor);
+
+    Dataset<Object> ds = Datasets
+        .load("dataset:hive?dataset=test&" + hdfsQueryArgsOld);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);

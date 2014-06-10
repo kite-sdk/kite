@@ -164,10 +164,9 @@ public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository
         URI rootUri = rootDirectory.toUri();
         uri.append(rootUri.getPath());
         if (rootUri.getHost() != null) {
-          uri.append("?").append("hdfs-host").append("=").append(rootUri.getHost());
+          uri.append("?").append("hdfs:host").append("=").append(rootUri.getHost());
           if (rootUri.getPort() != -1) {
-            uri.append("&").append("hdfs-port").append("=").append(rootUri.getPort());
-
+            uri.append("&").append("hdfs:port").append("=").append(rootUri.getPort());
           }
         }
       }

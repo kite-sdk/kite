@@ -118,27 +118,27 @@ public class Loader implements Loadable {
 
   private static URI fileSystemURI(Map<String, String> match) {
     final String userInfo;
-    if (match.containsKey("username")) {
-      if (match.containsKey("password")) {
-        userInfo = match.get("username") + ":" +
-            match.get("password");
+    if (match.containsKey(URIPattern.USERNAME)) {
+      if (match.containsKey(URIPattern.PASSWORD)) {
+        userInfo = match.get(URIPattern.USERNAME) + ":" +
+            match.get(URIPattern.PASSWORD);
       } else {
-        userInfo = match.get("username");
+        userInfo = match.get(URIPattern.USERNAME);
       }
     } else {
       userInfo = null;
     }
     try {
       int port = UNSPECIFIED_PORT;
-      if (match.containsKey("port")) {
+      if (match.containsKey(URIPattern.PORT)) {
         try {
-          port = Integer.parseInt(match.get("port"));
+          port = Integer.parseInt(match.get(URIPattern.PORT));
         } catch (NumberFormatException e) {
           port = UNSPECIFIED_PORT;
         }
       }
-      return new URI(match.get("scheme"), userInfo, match.get("host"), port, "/",
-          null, null);
+      return new URI(match.get(URIPattern.SCHEME), userInfo,
+          match.get(URIPattern.HOST), port, "/", null, null);
     } catch (URISyntaxException ex) {
       throw new DatasetRepositoryException("Could not build FS URI", ex);
     }

@@ -46,7 +46,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "scheme");
+    expected.put("uri:scheme", "scheme");
     expected.put("sub-uri", "other-scheme:/path/to/data.avro");
     Assert.assertEquals(expected, actual);
   }
@@ -58,7 +58,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "scheme");
+    expected.put("uri:scheme", "scheme");
     Assert.assertEquals(expected, actual);
   }
 
@@ -69,7 +69,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "file");
+    expected.put("uri:scheme", "file");
     expected.put("path", "path/to/data.avro");
     Assert.assertEquals(expected, actual);
   }
@@ -81,7 +81,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "mysql");
+    expected.put("uri:scheme", "mysql");
     expected.put("db", "myDB");
     expected.put("table", "myTable");
     Assert.assertEquals(expected, actual);
@@ -95,8 +95,8 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "scheme");
-    expected.put("host", "real-authority");
+    expected.put("uri:scheme", "scheme");
+    expected.put("auth:host", "real-authority");
     Assert.assertEquals(expected, actual);
 
     // should not match any path element or fragment
@@ -113,7 +113,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "mysql");
+    expected.put("uri:scheme", "mysql");
     expected.put("db", "myDB");
     expected.put("table", "myTable");
     Assert.assertEquals(expected, actual);
@@ -128,7 +128,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "mysql");
+    expected.put("uri:scheme", "mysql");
     expected.put("db", "myDB");
     expected.put("table", "myTable");
     Assert.assertEquals(expected, actual);
@@ -143,7 +143,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "mysql");
+    expected.put("uri:scheme", "mysql");
     expected.put("db", "myDB");
     expected.put("table", "myTable");
     Assert.assertEquals(expected, actual);
@@ -158,7 +158,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "mysql");
+    expected.put("uri:scheme", "mysql");
     expected.put("db", "myDB");
     expected.put("table", "myTable");
     expected.put("the-rest", "a/b/c");
@@ -172,7 +172,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "file");
+    expected.put("uri:scheme", "file");
     expected.put("ns", "namespace");
     expected.put("ds", "dataset");
     expected.put("path", "a/b/c");
@@ -186,7 +186,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "file");
+    expected.put("uri:scheme", "file");
     expected.put("ns", "namespace");
     expected.put("ds", "dataset");
     expected.put("path", "a/b/c");
@@ -200,7 +200,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "file");
+    expected.put("uri:scheme", "file");
     expected.put("ns", "namespace");
     expected.put("ds", "dataset");
     expected.put("path", "a/b/c");
@@ -214,7 +214,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "file");
+    expected.put("uri:scheme", "file");
     expected.put("ns", "namespace");
     expected.put("ds", "dataset");
     expected.put("path", "a/b/c");
@@ -228,11 +228,11 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "scheme");
-    expected.put("host", "host");
-    expected.put("port", "3434");
-    expected.put("username", "user");
-    expected.put("password", "pass:w0rd");
+    expected.put("uri:scheme", "scheme");
+    expected.put("auth:host", "host");
+    expected.put("auth:port", "3434");
+    expected.put("auth:username", "user");
+    expected.put("auth:password", "pass:w0rd");
     expected.put("path", "path/to/data.avro");
     Assert.assertEquals(expected, actual);
   }
@@ -244,11 +244,11 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "scheme");
-    expected.put("host", "other");
-    expected.put("port", "3435");
-    expected.put("username", "user");
-    expected.put("password", "pass:w0rd");
+    expected.put("uri:scheme", "scheme");
+    expected.put("auth:host", "other");
+    expected.put("auth:port", "3435");
+    expected.put("auth:username", "user");
+    expected.put("auth:password", "pass:w0rd");
     expected.put("path", "path/to/data.avro");
     Assert.assertEquals(expected, actual);
   }
@@ -260,7 +260,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "scheme");
+    expected.put("uri:scheme", "scheme");
     expected.put("path", "path/to/data.avro");
     expected.put("custom-option", "true");
     expected.put("use-ssl", "false");
@@ -274,7 +274,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "scheme");
+    expected.put("uri:scheme", "scheme");
     expected.put("path", "path/to/data.avro");
     expected.put("custom-option", "true");
     expected.put("use-ssl", "false");
@@ -288,7 +288,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "scheme");
+    expected.put("uri:scheme", "scheme");
     expected.put("path", "path/to/data.avro");
     expected.put("custom-option", "true");
     expected.put("use-ssl", "true");
@@ -302,7 +302,7 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "scheme");
+    expected.put("uri:scheme", "scheme");
     expected.put("path", "path/to/data.avro");
     expected.put("custom-option", "true");
     expected.put("use-ssl", "true");
@@ -318,11 +318,11 @@ public class TestURIPattern {
     Assert.assertTrue(pattern.matches(uri));
 
     Map<String, String> actual = pattern.getMatch(uri);
-    expected.put("scheme", "mysql");
-    expected.put("host", "real-db-host");
-    expected.put("port", "3434");
-    expected.put("username", "cloudera");
-    expected.put("password", "cloudera");
+    expected.put("uri:scheme", "mysql");
+    expected.put("auth:host", "real-db-host");
+    expected.put("auth:port", "3434");
+    expected.put("auth:username", "cloudera");
+    expected.put("auth:password", "cloudera");
     expected.put("db", "my-db");
     expected.put("table", "my-table");
     expected.put("custom-option", "true");
