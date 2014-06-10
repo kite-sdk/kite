@@ -30,6 +30,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.fs.Path;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +47,7 @@ public class PathConversion {
     Path currentPath = fromPath;
     int index = partitioners.size() - 1;
     while (currentPath != null && index >= 0) {
+
       values.set(index, valueForDirname(
           (FieldPartitioner<?, ?>) partitioners.get(index),
           currentPath.getName()));
@@ -86,8 +90,12 @@ public class PathConversion {
           .build();
 
   public static <T> String dirnameForValue(FieldPartitioner<?, T> field, T value) {
-    return PART_JOIN.join(field.getName(),
-        Conversions.makeString(value, WIDTHS.get(field.getClass())));
+    try{
+      return PART_JOIN.join(field.getName(),
+          URLEncoder.encode(Conversions.makeString(value, WIDTHS.get(field.getClass())), "UTF-8"));
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("Unable to find UTF-8 encoding.");
+    }
   }
 
   public <T> T valueForDirname(FieldPartitioner<?, T> field, String name) {
@@ -96,6 +104,10 @@ public class PathConversion {
   }
 
   public String valueStringForDirname(String name) {
-    return Iterables.getLast(PART_SEP.split(name));
+    try {
+      return URLDecoder.decode(Iterables.getLast(PART_SEP.split(name)), "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("Unable to find UTF-8 encoding.");
+    }
   }
 }
