@@ -116,4 +116,20 @@ public class TestPathConversion {
     Assert.assertEquals(expected, convert.toKey(
         new Path("year=2013/month=11/day=5"), new StorageKey(strategy)));
   }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void toDirNameIdentityWithSlashes() {
+    PartitionStrategy strategy = new PartitionStrategy.Builder()
+        .identity("name")
+        .identity("address")
+        .build();
+
+    StorageKey key = new StorageKey(strategy);
+    key.replaceValues((List) Lists.newArrayList("John Doe", "NY/USA"));
+
+    Assert.assertEquals(
+        new Path("name_copy=John+Doe/address_copy=NY%2FUSA"),
+        convert.fromKey(key));
+  }
 }
