@@ -48,7 +48,7 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-minicluster</artifactId>
-      <version>${vers.hadoop-mr1-cdh5}</version>
+      <version>${vers.hadoop-cdh5}</version>
     </dependency>
   </dependencies>
 
