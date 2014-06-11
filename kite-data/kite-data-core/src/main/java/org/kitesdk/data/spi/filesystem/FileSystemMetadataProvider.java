@@ -103,9 +103,9 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   public DatasetDescriptor load(String name) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    LOG.debug("Loading dataset metadata name:{}", name);
+    LOG.debug("Loading dataset metadata name: {}", name);
 
-    final Path metadataPath = pathForMetadata(name);
+    Path metadataPath = pathForMetadata(name);
     checkExists(rootFileSystem, metadataPath);
 
     InputStream inputStream = null;
@@ -154,8 +154,9 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       // when the descriptor is first created.
       location = new Path(properties.getProperty(LOCATION_FIELD_NAME));
     } else {
-      // backwards-compatibility: older versions didn't write this property
-      location = pathForDataset(name);
+      // backwards-compatibility: older versions didn't write this property but
+      // the data and metadata were always co-located.
+      location = expectedPathForDataset(name);
     }
     builder.location(location);
 
@@ -178,21 +179,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     LOG.debug("Saving dataset metadata name:{} descriptor:{}", name,
         descriptor);
 
-    final Path dataLocation;
-
-    // If the descriptor has a location, use it.
-    if (descriptor.getLocation() != null) {
-      dataLocation = new Path(descriptor.getLocation());
-    } else {
-      dataLocation = pathForDataset(name);
-    }
-
-    final Path metadataLocation = pathForMetadata(name);
-
-    // get a DatasetDescriptor with the location set
-    DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder(descriptor)
-        .location(dataLocation)
-        .build();
+    Path metadataLocation = pathForMetadata(name);
 
     try {
       if (rootFileSystem.exists(metadataLocation)) {
@@ -207,9 +194,9 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
           " for dataset:" + name, e));
     }
 
-    writeDescriptor(rootFileSystem, metadataLocation, name, newDescriptor);
+    writeDescriptor(rootFileSystem, metadataLocation, name, descriptor);
 
-    return newDescriptor;
+    return descriptor;
   }
 
   @Override
@@ -218,8 +205,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
     Compatibility.checkAndWarn(name, descriptor);
 
-    LOG.debug("Saving dataset metadata name:{} descriptor:{}", name,
-      descriptor);
+    LOG.debug("Saving dataset metadata name: {} descriptor: {}", name,
+        descriptor);
 
     writeDescriptor(
         rootFileSystem, pathForMetadata(name), name, descriptor);
@@ -231,7 +218,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   public boolean delete(String name) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    LOG.debug("Deleting dataset metadata name:{}", name);
+    LOG.debug("Deleting dataset metadata name: {}", name);
 
     final Path metadataDirectory = pathForMetadata(name);
 
@@ -320,17 +307,22 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
         .add("conf", conf).toString();
   }
 
-  private Path pathForDataset(String name) {
-    Preconditions.checkState(rootDirectory != null,
-      "Dataset repository root directory can not be null");
-
-    return rootFileSystem.makeQualified(pathForDataset(rootDirectory, name));
+  private Path expectedPathForDataset(String name) {
+    return rootFileSystem.makeQualified(
+        FileSystemDatasetRepository.pathForDataset(rootDirectory, name));
   }
 
+  /**
+   * Returns the path where this MetadataProvider will store metadata.
+   *
+   * Note that this is not dependent on the actual storage location for the
+   * dataset, although they are usually co-located. This provider must be able
+   * to read metadata without a location for the Dataset when loading.
+   *
+   * @param name The {@link Dataset} name
+   * @return The directory {@link Path} where metadata files will be located
+   */
   private Path pathForMetadata(String name) {
-    Preconditions.checkState(rootDirectory != null,
-      "Dataset repository root directory can not be null");
-
     return pathForMetadata(rootDirectory, name);
   }
 
@@ -423,21 +415,9 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
    * @return the metadata Path
    */
   private static Path pathForMetadata(Path root, String name) {
-    return new Path(pathForDataset(root, name), METADATA_DIRECTORY);
-  }
-
-  /**
-   * Returns the correct dataset path for the given name and root directory.
-   *
-   * @param root A Path
-   * @param name A String dataset name
-   * @return the correct dataset Path
-   */
-  private static Path pathForDataset(Path root, String name) {
-    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
-
-    // Why replace '.' here? Is this a namespacing hack?
-    return new Path(root, name.replace('.', Path.SEPARATOR_CHAR));
+    return new Path(
+        FileSystemDatasetRepository.pathForDataset(root, name),
+        METADATA_DIRECTORY);
   }
 
   /**

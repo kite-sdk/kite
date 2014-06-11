@@ -108,10 +108,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
         testDescriptor.getPartitionStrategy(), created.getPartitionStrategy());
     Assert.assertEquals("Format should match",
         testDescriptor.getFormat(), created.getFormat());
-    Assert.assertNotNull("Location URI should be set",
-        created.getLocation());
-    Assert.assertNotNull("Location URI should have a scheme",
-        created.getLocation().getScheme());
+    // the MetadataProvider optionally sets the location, nothing to test
   }
 
   public void testCreateWithLocation() throws URISyntaxException {

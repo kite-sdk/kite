@@ -55,7 +55,7 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
   }
 
   @Test
-  public void testLoadSetsURIs() throws IOException {
+  public void testLoadSetsLocation() throws IOException {
     ensureCreated();
 
     DatasetDescriptor loaded = provider.load(NAME);
@@ -87,25 +87,10 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
   }
 
   @Test
-  public void testCreateSetsURIs() throws IOException {
+  public void testCreateIgnoresLocation() throws IOException {
     DatasetDescriptor created = provider.create(NAME, testDescriptor);
-    Assert.assertNotNull("Created descriptor should have a location",
+    Assert.assertNull("Created descriptor should not have a location",
         created.getLocation());
-    if (distributed) {
-      Assert.assertEquals(
-          "hdfs",
-          created.getLocation().getScheme());
-      Assert.assertEquals(
-          getDFS().getUri().getAuthority(),
-          created.getLocation().getAuthority());
-    } else {
-      Assert.assertEquals(
-          "file",
-          created.getLocation().getScheme());
-      Assert.assertEquals(
-          getFS().getUri().getAuthority(),
-          created.getLocation().getAuthority());
-    }
   }
 
   @Test
