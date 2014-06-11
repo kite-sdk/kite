@@ -38,14 +38,14 @@ import com.google.common.base.Preconditions;
  * "regex:foo.*") or glob pattern (e.g. "glob:foo*") or literal pattern (e.g. "literal:foo") or "*"
  * which is equivalent to "glob:*".
  */
-final class PatternNameMatcher implements NameMatcher {
+final class PatternNameMatcher {
   
   private final Expression[] includes;
   private final Expression[] excludes;
   private final Set<String> includeLiterals = new HashSet<String>();
   private final Set<String> excludeLiterals = new HashSet<String>();
 
-  public static NameMatcher parse(List<String> includeExpressions, List<String> excludeExpressions) {
+  public static PatternNameMatcher parse(List<String> includeExpressions, List<String> excludeExpressions) {
     return new PatternNameMatcher(includeExpressions, excludeExpressions);
   }
   
@@ -94,7 +94,6 @@ final class PatternNameMatcher implements NameMatcher {
     }
   }
 
-  @Override
   public boolean matches(String name) {
     Preconditions.checkNotNull(name);
     if (excludeLiterals.size() > 0 && excludeLiterals.contains(name)) {

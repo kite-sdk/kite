@@ -53,7 +53,7 @@ public final class RemoveFieldsBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class RemoveFields extends AbstractCommand {
     
-    private final NameMatcher nameMatcher;
+    private final PatternNameMatcher nameMatcher;
 
     public RemoveFields(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) { 
       super(builder, config, parent, child, context);
