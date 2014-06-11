@@ -16,6 +16,8 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.EncoderException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
 import org.kitesdk.data.spi.partition.HourFieldPartitioner;
@@ -29,14 +31,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.fs.Path;
+import org.apache.commons.codec.net.URLCodec;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
-public class PathConversion {
+public class PathConversion{
+
+  private static final URLCodec CODEC = new URLCodec("UTF-8");
 
   public StorageKey toKey(Path fromPath, StorageKey storage) {
     final List<FieldPartitioner> partitioners =
@@ -92,9 +94,9 @@ public class PathConversion {
   public static <T> String dirnameForValue(FieldPartitioner<?, T> field, T value) {
     try{
       return PART_JOIN.join(field.getName(),
-          URLEncoder.encode(Conversions.makeString(value, WIDTHS.get(field.getClass())), "UTF-8"));
-    } catch (UnsupportedEncodingException e) {
-      throw new AssertionError("Unable to find UTF-8 encoding.");
+          CODEC.encode(Conversions.makeString(value, WIDTHS.get(field.getClass()))));
+    } catch (EncoderException e) {
+      throw new RuntimeException("Unable encode partition value.", e);
     }
   }
 
@@ -105,9 +107,9 @@ public class PathConversion {
 
   public String valueStringForDirname(String name) {
     try {
-      return URLDecoder.decode(Iterables.getLast(PART_SEP.split(name)), "UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      throw new AssertionError("Unable to find UTF-8 encoding.");
+      return CODEC.decode(Iterables.getLast(PART_SEP.split(name)));
+    } catch (DecoderException e) {
+      throw new RuntimeException("Unable decode partition value.", e);
     }
   }
 }
