@@ -45,11 +45,7 @@ final class PatternNameMatcher {
   private final Set<String> includeLiterals = new HashSet<String>();
   private final Set<String> excludeLiterals = new HashSet<String>();
 
-  public static PatternNameMatcher parse(List<String> includeExpressions, List<String> excludeExpressions) {
-    return new PatternNameMatcher(includeExpressions, excludeExpressions);
-  }
-  
-  private PatternNameMatcher(List<String> includeExpressions, List<String> excludeExpressions) {
+  public PatternNameMatcher(List<String> includeExpressions, List<String> excludeExpressions) {
     includes = parseExpressions(includeExpressions, includeLiterals);
     excludes = parseExpressions(excludeExpressions, excludeLiterals);
   }
