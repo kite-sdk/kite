@@ -33,6 +33,7 @@ h3. Table of Contents
 - [#kite\-morphlines\-solr\-core]
 - [#kite\-morphlines\-solr\-cell]
 - [#kite\-morphlines\-useragent]
+- [#kite\-morphlines\-protobuf]
 
 {anchor:kite\-morphlines\-core\-stdio}
 \\
@@ -182,6 +183,13 @@ h3. kite\-morphlines\-solr\-cell
 \\
 h3. kite\-morphlines\-useragent
 | [#userAgent] | Parses a user agent string and returns structured higher level data like user agent family, operating system, version, and device type. |
+
+{anchor:kite\-morphlines\-protobuf}
+\\
+\\
+h3. kite\-morphlines\-protobuf
+| [#readProtobuf] | Parses an InputStream that contains Protocol buffer data and emits a morphline record containing the protobuf object as an attachment. |
+| [#extractProtobufPaths] | Extracts specific values from a protobuf object, akin to a simple form of XPath. |
 
 \\
 \\
@@ -1935,6 +1943,108 @@ Alternatively, if the [#extractJsonPaths] command doesn't fit your needs you can
     """
     } 
   }
+}
+{code}
+
+h1. kite\-morphlines\-protobuf
+
+This maven module contains morphline commands for reading, extracting, and transforming protocol buffer objects.
+
+h2. readProtobuf
+
+The {{readProtobuf}} command ([source code|http://kite.org/kite/blob/master/kite-morphlines/kite-morphlines-protobuf/src/main/java/org/kitesdk/morphline/protobuf/ReadProtobufBuilder.java]) parses an InputStream or byte array that contains protocol buffer data. For each protobuf object, the command emits a morphline record containing the top level object as an attachment in the field \_attachment\_body.
+
+The input stream or byte array is read from the first attachment of the input record.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| protobufClass | \[\] | The fully qualified name of a Java class that contains a java generated protobuf message definitions. |
+| outputClass | \[\] | The name of an inner Java class for deserialize data to. |
+
+Example usage:
+{code}
+readProtobuf { 
+  protobufClass : org.kitesdk.morphline.protobuf.Protos 
+  outputClass : RepeatedLongs 
+}
+{code}
+
+h2. extractProtobufPaths
+
+The {{extractProtobufPaths}} command ([source code|http://kite.org/kite/blob/master/kite-morphlines/kite-morphlines-protobuf/src/main/java/org/kitesdk/morphline/protobuf/ExtractProtobufPathsBuilder.java]) extracts specific values from a protocol buffer object, akin to a simple form of XPath. The command uses zero or more path expressions to extract values from a protobuf instance object.
+
+The protobuf input object is expected to be contained in the field \_attachment\_body, and typically placed there by an upstream [#readProtobuf] command.
+
+Each path expression consists of a record output field name (on the left side of the colon ':') as well as zero or more path steps (on the right hand side), each path step separated by a '/' slash, akin to a simple form of XPath. Repeated values(Lists) are traversed with the '\[\]' notation.
+
+The result of a path expression is a list of objects, each of which is added to the given record output field.
+
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| objectExtractMethod | toByteArray | Java method that is called on protobuf object to get a value to pass to next command if type of value on a path is an protobuf object. Options are: *toByteArray* \- the "toByteArray()" method is called to get serialized bytes from protobuf object. *toString* \- the "toString()" method is called to get String representation of a protobuf object. *none* \- no method is called and whole protobuf object is passed to next command. |
+| enumExtractMethod | name | Java method that is called to get a value to pass to next command if type of value on a path is an enum object. Options are: *name* \- the "name()" method is called to get String representation of enum object. *getNumber* \- the "getNumber()" method is called to get int representation of enum object, *none* \- no method is called and whole enum object is passed to next command |
+| paths | \[\] | Zero or more protobuf path expressions. |
+
+Example usage:
+{code}
+extractProtobufPaths {
+  objectExtractMethod : toByteArray
+  enumExtractMethod : name
+  paths : { 
+    "docId" : "/docId"
+    "name" : "/name"
+    "intVal" : "/name/intVal"
+    "longVal" : "/name/longVal"
+    "doubleVal" : "/name/doubleVal"
+    "floatVal" : "/name/floatVal"
+    "stringVals" : "/name/stringVal[]"
+    "longVals" : "/name/repeatedLong/longVal[]"
+    "links" : "/link[]"
+    "languages" : "/link[]/language"
+    "urls" : "/link[]/url"
+    "type" : "/type"
+  } 
+}
+{code}
+
+And protobuf schema:
+{code}
+option java_package = "org.kitesdk.morphline.protobuf";
+option java_outer_classname = "Protos";
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+message RepeatedLongs {
+  repeated sint64 longVal = 1;
+}
+
+message Complex {
+
+  message Name {
+    optional uint32 intVal = 1;
+    optional uint64 longVal = 2;
+    optional double doubleVal = 3;
+    optional float floatVal = 4;
+    repeated string stringVal = 5;
+    optional RepeatedLongs repeatedLong = 6;
+  }
+
+  message Link {
+    repeated string language = 1;
+    required string url = 2;
+  }
+
+  enum Type {
+    QUERY = 1;
+    UPDATE = 2;
+  }
+
+  required sint32 docId = 1;
+  required Name name = 2;
+  repeated Link link = 3;
+  required Type type = 4;
 }
 {code}
 
