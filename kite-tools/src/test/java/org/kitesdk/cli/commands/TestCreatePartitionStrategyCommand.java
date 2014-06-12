@@ -50,7 +50,7 @@ public class TestCreatePartitionStrategyCommand {
 
     PartitionStrategy strategy = new PartitionStrategy.Builder()
         .hash("username", 16)
-        .identity("username", "username_copy", Object.class, -1)
+        .identity("username")
         .build();
     verify(console).info(strategy.toString(true));
     verifyNoMoreInteractions(console);
