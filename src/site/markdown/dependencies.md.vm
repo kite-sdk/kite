@@ -1,6 +1,24 @@
-# Dependency Information
+#set($h1 = '#')
+#set($h2 = '##')
+#set($h3 = '###')
+#set($h4 = '####')
 
-To use the Kite modules in a Java project add the Cloudera repository to your Maven POM:
+$h1 Dependency Information
+
+The simplest way to specify Kite and Hadoop dependencies is to use the Kite App Parent 
+POM. This ensures that you inherit a compatible set of dependencies and that the Kite 
+plugins are suitably configured. Add the following to your POM:
+ 
+```xml
+<parent>
+  <groupId>org.kitesdk</groupId>
+  <artifactId>kite-app-parent-cdh4</artifactId>
+  <version>${project.version}</version>
+</parent>
+```
+
+Alternatively, if you choose not to use the Kite App Parent POM add the Cloudera 
+repository to your Maven POM:
 
 ```xml
 <repository>
@@ -16,7 +34,7 @@ Then add a dependency for each module you want to use by referring to the
 information listed on the Dependency Information pages listed below.
 You can also view the transitive dependencies for each module.
 
-## Hadoop Component Dependencies
+$h2 Hadoop Component Dependencies
 
 As a general rule, Kite modules mark Hadoop component dependencies as having `provided`
 [scope](http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Transitive_Dependencies),
@@ -27,23 +45,54 @@ For example,
 
 * Kite Data has a `provided` dependency on the core Hadoop libraries
 * Kite Crunch has a `provided` dependency on Crunch and the core Hadoop libraries
-* Kite HCatalog has a `provided` dependency on HCatalog
+* Kite HCatalog has a `provided` dependency on Hive
 
 The following containers provide the dependencies listed:
 
-* The Kite Maven Plugin goal `kite:run-tool` provides the Hadoop and HCatalog dependencies.
-* The Kite Maven Plugin goal `kite:run-job` provides the Hadoop dependencies. HCatalog
-should be added as a `runtime` dependency ([example](https://github.com/cloudera/kite-examples/tree/master/demo/demo-oozie)).
-* The `hadoop jar` command provides the Hadoop dependencies.
+* The `hadoop jar` command provides the core Hadoop dependencies.
+* The MapReduce task environment provides the core Hadoop dependencies.
+* When used from then Kite App Parent POM the Kite Maven Plugin provides the Hadoop, 
+HBase and Hive dependencies. If the Kite App Parent POM is not being used, then these 
+dependencies should be specified in the plugin's dependencies section of the POM.
 
 However, there are some cases where you may have to provide the relevant Hadoop component
-dependencies yourself:
+dependencies yourself, and Kite has [grouping dependencies](http://books.sonatype.com/mvnref-book/reference/pom-relationships-sect-pom-best-practice.html) for this purpose.
 
-* Crunch programs (even those running in the containers listed above) ([example](https://github.com/cloudera/kite-examples/tree/master/demo/demo-crunch))
+There is a grouping dependency for each flavor of Hadoop distribution, which differ by 
+Maven artifact ID:
+
+* Apache Hadoop 2 (the default), `kite-hadoop2-dependencies`
+* Apache Hadoop 1, `kite-hadoop1-dependencies`
+* CDH 4, `kite-hadoop-cdh4-dependencies`
+* CDH 5, `kite-hadoop-cdh5-dependencies`
+
+This is how you would specify a dependency on the CDH 4 dependencies:
+
+```xml
+<dependency>
+  <groupId>org.kitesdk</groupId>
+  <artifactId>kite-hadoop-cdh4-dependencies</artifactId>
+  <version>${kite.version}</version>
+  <type>pom</type>
+  <scope>compile</scope>
+</dependency>
+```
+
+There are an analogous set of grouping dependencies for HBase:
+
+* Apache Hadoop 2 (the default), `kite-hbase2-dependencies`
+* Apache Hadoop 1, `kite-hbase1-dependencies`
+* CDH 4, `kite-hbase-cdh4-dependencies`
+* CDH 5, `kite-hbase-cdh5-dependencies`
+
+Here are some scenarios when you need to provide Hadoop component dependencies:
+
+* Crunch jobs, even those running in the containers listed above. However, if using
+ the Kite App Parent POM Crunch is provided ([example](https://github.com/cloudera/kite-examples/tree/master/demo/demo-crunch))
 * Standalone Java programs, not run using `kite:run-tool` or `hadoop jar` ([example](https://github.com/cloudera/kite-examples/tree/master/dataset))
 * Web apps ([example](https://github.com/cloudera/kite-examples/tree/master/logging-webapp))
 
-## Kite Data Modules
+$h2 Kite Data Modules
 
 * Kite Data Core
  [Dependency Information](kite-data/kite-data-core/dependency-info.html),
@@ -54,11 +103,17 @@ dependencies yourself:
 * Kite Data Flume
  [Dependency Information](kite-data/kite-data-flume/dependency-info.html),
  [Dependencies](kite-data/kite-data-flume/dependencies.html)
+* Kite Data HBase
+  [Dependency Information](kite-data/kite-data-hbase/dependency-info.html),
+  [Dependencies](kite-data/kite-data-hbase/dependencies.html)
 * Kite Data HCatalog
  [Dependency Information](kite-data/kite-data-hcatalog/dependency-info.html),
  [Dependencies](kite-data/kite-data-hcatalog/dependencies.html)
+* Kite Data MapReduce
+ [Dependency Information](kite-data/kite-data-mapreduce/dependency-info.html),
+ [Dependencies](kite-data/kite-data-mapreduce/dependencies.html)
 
-## Kite Morphlines Modules
+$h2 Kite Morphlines Modules
 
 * Kite Morphlines Core
  [Dependency Information](kite-morphlines/kite-morphlines-core/dependency-info.html),
@@ -115,7 +170,7 @@ dependencies yourself:
  [Dependency Information](kite-morphlines/kite-morphlines-all-except-solr/dependency-info.html),
  [Dependencies](kite-morphlines/kite-morphlines-all-except-solr/dependencies.html)
 
-## Kite Tools Modules
+$h2 Kite Tools Modules
 
 * Kite Tools
  [Dependency Information](kite-tools/dependency-info.html),
