@@ -1,5 +1,6 @@
 package org.kitesdk.data.spi;
 
+import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -37,12 +38,15 @@ public class URIBuilder {
    * @param datasetName the {@link Dataset} name
    */
   public URIBuilder(URI repoUri, String datasetName) {
+    Preconditions.checkNotNull(repoUri, "Repository URI cannot be null");
+    Preconditions.checkNotNull(datasetName, "Dataset name cannot be null");
     this.repoUri = repoUri;
     this.datasetName = datasetName;
   }
   
   /**
-   * Adds a view constraint equivalent to {@link Dataset#with(String, Object)}
+   * Adds a view constraint equivalent to
+   * {@link org.kitesdk.data.RefinableView#with(String, Object...)}
    * 
    * @param name the field name of the Entity
    * @param value the field value

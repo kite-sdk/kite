@@ -16,6 +16,8 @@
 package org.kitesdk.data.crunch;
 
 import com.google.common.base.Preconditions;
+import java.net.URI;
+import java.util.Map;
 import org.apache.crunch.SourceTarget;
 import org.apache.crunch.Target;
 import org.apache.crunch.io.CrunchOutputs;
@@ -28,48 +30,23 @@ import org.apache.crunch.types.avro.AvroType;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
-import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.View;
-import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
-import org.kitesdk.data.spi.AbstractDatasetRepository;
 
 class DatasetTarget<E> implements MapReduceTarget {
 
   FormatBundle formatBundle;
 
-  public DatasetTarget(Dataset<E> dataset) {
-    this.formatBundle = FormatBundle.forOutput(DatasetKeyOutputFormat.class);
-    formatBundle.set(DatasetKeyOutputFormat.KITE_REPOSITORY_URI, getRepositoryUri(dataset));
-    formatBundle.set(DatasetKeyOutputFormat.KITE_DATASET_NAME, dataset.getName());
-
-    // TODO: replace with View#getDataset to get the top-level dataset
-    DatasetRepository repo = DatasetRepositories.open(getRepositoryUri(dataset));
-    // only set the partition dir for subpartitions
-    Dataset<E> topLevelDataset = repo.load(dataset.getName());
-    if (topLevelDataset.getDescriptor().isPartitioned() &&
-        topLevelDataset.getDescriptor().getLocation() != null &&
-        !topLevelDataset.getDescriptor().getLocation().equals(dataset.getDescriptor().getLocation())) {
-      formatBundle.set(DatasetKeyOutputFormat.KITE_PARTITION_DIR, dataset.getDescriptor().getLocation().toString());
-    }
-  }
-
   public DatasetTarget(View<E> view) {
-    this.formatBundle = FormatBundle.forOutput(DatasetKeyOutputFormat.class);
-    formatBundle.set(DatasetKeyOutputFormat.KITE_REPOSITORY_URI, getRepositoryUri(view.getDataset()));
-    formatBundle.set(DatasetKeyOutputFormat.KITE_DATASET_NAME, view.getDataset().getName());
-
-    Configuration conf = new Configuration();
-    DatasetKeyOutputFormat.setView(conf, view);
-    formatBundle.set(DatasetKeyOutputFormat.KITE_CONSTRAINTS,
-        conf.get(DatasetKeyOutputFormat.KITE_CONSTRAINTS));
+    Configuration temp = emptyConf();
+    DatasetKeyOutputFormat.configure(temp).writeTo(view);
+    this.formatBundle = outputBundle(temp);
   }
 
-  private String getRepositoryUri(Dataset<E> dataset) {
-    return dataset.getDescriptor().getProperty(
-        AbstractDatasetRepository.REPOSITORY_URI_PROPERTY_NAME);
+  public DatasetTarget(URI uri) {
+    Configuration temp = emptyConf();
+    DatasetKeyOutputFormat.configure(temp).writeTo(uri);
+    this.formatBundle = outputBundle(temp);
   }
 
   @Override
@@ -117,5 +94,26 @@ class DatasetTarget<E> implements MapReduceTarget {
     CrunchOutputs.addNamedOutput(job, name, formatBundle, keyClass, valueClass);
     job.setOutputFormatClass(formatBundle.getFormatClass());
     formatBundle.configure(job.getConfiguration());
+  }
+
+  private static Configuration emptyConf() {
+    return new Configuration(false /* do not load defaults */ );
+  }
+
+  /**
+   * Builds a FormatBundle for DatasetKeyOutputFormat by copying a temp config.
+   *
+   * All properties will be copied from the temporary configuration
+   *
+   * @param conf A Configuration that will be copied
+   * @return a FormatBundle with the contents of conf
+   */
+  private static FormatBundle<DatasetKeyOutputFormat> outputBundle(Configuration conf) {
+    FormatBundle<DatasetKeyOutputFormat> bundle = FormatBundle
+        .forOutput(DatasetKeyOutputFormat.class);
+    for (Map.Entry<String, String> entry : conf) {
+      bundle.set(entry.getKey(), entry.getValue());
+    }
+    return bundle;
   }
 }

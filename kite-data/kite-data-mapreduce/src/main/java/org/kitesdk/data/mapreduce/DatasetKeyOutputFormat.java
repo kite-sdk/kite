@@ -31,15 +31,16 @@ import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.Mergeable;
+import org.kitesdk.data.spi.URIBuilder;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 
 /**
@@ -53,31 +54,99 @@ import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 @Beta
 public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
+  public static final String KITE_OUTPUT_URI = "kite.outputUri";
+  @Deprecated
   public static final String KITE_REPOSITORY_URI = "kite.outputRepositoryUri";
+  @Deprecated
   public static final String KITE_DATASET_NAME = "kite.outputDatasetName";
   public static final String KITE_PARTITION_DIR = "kite.outputPartitionDir";
   public static final String KITE_CONSTRAINTS = "kite.outputConstraints";
 
-  public static void setRepositoryUri(Job job, URI uri) {
-    job.getConfiguration().set(KITE_REPOSITORY_URI, uri.toString());
-  }
+  public static class ConfigBuilder {
+    private final Configuration conf;
 
-  public static void setDatasetName(Job job, String name) {
-    job.getConfiguration().set(KITE_DATASET_NAME, name);
-  }
-
-  public static <E> void setView(Job job, View<E> view) {
-    setView(job.getConfiguration(), view);
-  }
-
-  public static <E> void setView(Configuration conf, View<E> view) {
-    if (view instanceof AbstractRefinableView) {
-      conf.set(KITE_CONSTRAINTS,
-          Constraints.serialize(((AbstractRefinableView) view).getConstraints()));
-    } else {
-      throw new UnsupportedOperationException("Implementation " +
-          "does not provide InputFormat support. View: " + view);
+    private ConfigBuilder(Job job) {
+      this.conf = Hadoop.JobContext.getConfiguration.invoke(job);
     }
+
+    private ConfigBuilder(Configuration conf) {
+      this.conf = conf;
+    }
+
+    public ConfigBuilder writeTo(URI viewUri) {
+      conf.set(KITE_OUTPUT_URI, viewUri.toString());
+      return this;
+    }
+
+    public ConfigBuilder writeTo(View<?> view) {
+      if (view instanceof Dataset) {
+        if (view instanceof FileSystemDataset) {
+          FileSystemDataset dataset = (FileSystemDataset) view;
+          conf.set(KITE_PARTITION_DIR,
+              String.valueOf(dataset.getDescriptor().getLocation()));
+        }
+      } else if (view instanceof AbstractRefinableView) {
+        conf.set(KITE_CONSTRAINTS,
+            Constraints.serialize(((AbstractRefinableView) view).getConstraints()));
+      } else {
+        throw new UnsupportedOperationException("Implementation " +
+            "does not provide OutputFormat support. View: " + view);
+      }
+      return writeTo(view.getDataset().getUri());
+    }
+
+    public ConfigBuilder writeTo(String viewUri) {
+      return writeTo(URI.create(viewUri));
+    }
+  }
+
+  /**
+   * Sets the output dataset that will be used for the given Job.
+   * @param job
+   */
+  public static ConfigBuilder configure(Job job) {
+    job.setOutputFormatClass(DatasetKeyOutputFormat.class);
+    return new ConfigBuilder(job);
+  }
+
+  /**
+   * Sets the output dataset that will be used for the given Configuration.
+   * @param conf
+   */
+  public static ConfigBuilder configure(Configuration conf) {
+    return new ConfigBuilder(conf);
+  }
+
+  /**
+   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
+   */
+  public static void setRepositoryUri(Job job, URI uri) {
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(job);
+    conf.set(KITE_REPOSITORY_URI, uri.toString());
+    conf.unset(KITE_OUTPUT_URI); // this URI would override, so remove it
+  }
+
+  /**
+   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
+   */
+  public static void setDatasetName(Job job, String name) {
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(job);
+    conf.set(KITE_DATASET_NAME, name);
+    conf.unset(KITE_OUTPUT_URI); // this URI would override, so remove it
+  }
+
+  /**
+   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
+   */
+  public static <E> void setView(Job job, View<E> view) {
+    configure(job).writeTo(view);
+  }
+
+  /**
+   * @deprecated will be removed in 0.16.0; use {@link #configure(Configuration)}
+   */
+  public static <E> void setView(Configuration conf, View<E> view) {
+    configure(conf).writeTo(view);
   }
 
   static class DatasetRecordWriter<E> extends RecordWriter<E, Void> {
@@ -128,9 +197,9 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     @Override
     @SuppressWarnings("unchecked")
     public void commitJob(JobContext jobContext) throws IOException {
-      Dataset<E> dataset = loadDataset(jobContext);
+      View<E> targetView = load(jobContext);
       Dataset<E> jobDataset = loadJobDataset(jobContext);
-      ((Mergeable<Dataset<E>>) dataset).merge(jobDataset);
+      ((Mergeable<Dataset<E>>) targetView.getDataset()).merge(jobDataset);
       deleteJobDataset(jobContext);
     }
 
@@ -171,8 +240,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   public RecordWriter<E, Void> getRecordWriter(TaskAttemptContext taskAttemptContext) {
     Configuration conf = Hadoop.TaskAttemptContext
         .getConfiguration.invoke(taskAttemptContext);
-    Dataset<E> target = loadDataset(taskAttemptContext);
-    Dataset<E> working;
+    View<E> target = load(taskAttemptContext);
+    View<E> working;
 
     if (usePerTaskAttemptDatasets(target)) {
       working = loadOrCreateTaskAttemptDataset(taskAttemptContext);
@@ -182,11 +251,12 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
     String partitionDir = conf.get(KITE_PARTITION_DIR);
     String constraintsString = conf.get(KITE_CONSTRAINTS);
-    if (working.getDescriptor().isPartitioned() && partitionDir != null) {
+    if (working.getDataset().getDescriptor().isPartitioned() &&
+        partitionDir != null) {
       PartitionKey key = ((FileSystemDataset) target).keyFromDirectory(
           new Path(partitionDir));
       if (key != null) {
-        working = working.getPartition(key, true);
+        working = working.getDataset().getPartition(key, true);
       }
       return new DatasetRecordWriter<E>(working);
     } else if (constraintsString != null) {
@@ -203,18 +273,19 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   @Override
   public void checkOutputSpecs(JobContext jobContext) {
     // always run
+    // The committer setup will fail if the output dataset does not exist
   }
 
   @Override
   public OutputCommitter getOutputCommitter(TaskAttemptContext taskAttemptContext) {
-    Dataset<E> dataset = loadDataset(taskAttemptContext);
-    return usePerTaskAttemptDatasets(dataset) ?
+    View<E> view = load(taskAttemptContext);
+    return usePerTaskAttemptDatasets(view) ?
         new MergeOutputCommitter<E>() : new NullOutputCommitter();
   }
 
-  private static <E> boolean usePerTaskAttemptDatasets(Dataset<E> dataset) {
+  private static <E> boolean usePerTaskAttemptDatasets(View<E> target) {
     // new API output committers are not called properly in Hadoop 1
-    return !isHadoop1() && dataset instanceof Mergeable;
+    return !isHadoop1() && target.getDataset() instanceof Mergeable;
   }
 
   private static boolean isHadoop1() {
@@ -223,28 +294,32 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   private static DatasetRepository getDatasetRepository(JobContext jobContext) {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
-    return DatasetRepositories.open(conf.get(KITE_REPOSITORY_URI));
+    return Datasets.repositoryFor(conf.get(KITE_OUTPUT_URI));
   }
 
   private static String getJobDatasetName(JobContext jobContext) {
-    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
-    return conf.get(KITE_DATASET_NAME) + "_" + jobContext.getJobID().toString();
+    return jobContext.getJobID().toString();
   }
 
   private static String getTaskAttemptDatasetName(TaskAttemptContext taskContext) {
-    Configuration conf = Hadoop.TaskAttemptContext
-        .getConfiguration.invoke(taskContext);
-    return conf.get(KITE_DATASET_NAME) + "_" + taskContext.getTaskAttemptID().toString();
+    return taskContext.getTaskAttemptID().toString();
   }
 
-  private static <E> Dataset<E> loadDataset(JobContext jobContext) {
+  @SuppressWarnings("deprecation")
+  private static <E> View<E> load(JobContext jobContext) {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
-    DatasetRepository repo = getDatasetRepository(jobContext);
-    return repo.load(conf.get(KITE_DATASET_NAME));
+    String outputUri = conf.get(KITE_OUTPUT_URI);
+    if (outputUri == null) {
+      return Datasets.<E, View<E>>view(
+          new URIBuilder(
+              conf.get(KITE_REPOSITORY_URI), conf.get(KITE_DATASET_NAME))
+              .build());
+    }
+    return Datasets.<E, View<E>>view(outputUri);
   }
 
   private static <E> Dataset<E> createJobDataset(JobContext jobContext) {
-    Dataset<Object> dataset = loadDataset(jobContext);
+    Dataset<Object> dataset = load(jobContext).getDataset();
     String jobDatasetName = getJobDatasetName(jobContext);
     DatasetRepository repo = getDatasetRepository(jobContext);
     return repo.create(jobDatasetName, copy(dataset.getDescriptor()));
@@ -261,13 +336,13 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   }
 
   private static <E> Dataset<E> loadOrCreateTaskAttemptDataset(TaskAttemptContext taskContext) {
-    Dataset<Object> dataset = loadDataset(taskContext);
     String taskAttemptDatasetName = getTaskAttemptDatasetName(taskContext);
     DatasetRepository repo = getDatasetRepository(taskContext);
+    Dataset<E> jobDataset = loadJobDataset(taskContext);
     if (repo.exists(taskAttemptDatasetName)) {
       return repo.load(taskAttemptDatasetName);
     } else {
-      return repo.create(taskAttemptDatasetName, copy(dataset.getDescriptor()));
+      return repo.create(taskAttemptDatasetName, copy(jobDataset.getDescriptor()));
     }
   }
 

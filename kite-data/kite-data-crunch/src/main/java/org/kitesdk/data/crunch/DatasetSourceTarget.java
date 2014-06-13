@@ -17,6 +17,8 @@ package org.kitesdk.data.crunch;
 
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
+import java.net.URI;
+import java.util.Map;
 import java.util.Set;
 import org.apache.avro.generic.GenericData;
 import org.apache.crunch.ReadableData;
@@ -35,13 +37,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
-import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.View;
 import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
-import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.kitesdk.data.spi.LastModifiedAccessor;
 import org.kitesdk.data.spi.SizeAccessor;
 import org.slf4j.Logger;
@@ -57,58 +56,28 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   private AvroType<E> avroType;
 
   @SuppressWarnings("unchecked")
-  public DatasetSourceTarget(Dataset<E> dataset, Class<E> type) {
-    super(dataset);
+  public DatasetSourceTarget(View<E> view, Class<E> type) {
+    super(view);
 
-    this.view = dataset;
-    this.formatBundle = FormatBundle.forInput(DatasetKeyInputFormat.class);
-    formatBundle.set(DatasetKeyInputFormat.KITE_REPOSITORY_URI, getRepositoryUri(dataset));
-    formatBundle.set(DatasetKeyInputFormat.KITE_DATASET_NAME, dataset.getName());
+    this.view = view;
+
+    Configuration temp = new Configuration(false /* use an empty conf */ );
+    DatasetKeyInputFormat.configure(temp).readFrom(view);
+    this.formatBundle = inputBundle(temp);
+
     // the following is only needed for input splits that are not instances of FileSplit
     formatBundle.set(RuntimeParameters.DISABLE_COMBINE_FILE, "true");
 
-    DatasetRepository repo = DatasetRepositories.open(getRepositoryUri(dataset));
-    // only set the partition dir for subpartitions
-    Dataset<E> topLevelDataset = repo.load(dataset.getName());
-    if (topLevelDataset.getDescriptor().isPartitioned() &&
-        topLevelDataset.getDescriptor().getLocation() != null &&
-        !topLevelDataset.getDescriptor().getLocation().equals(dataset.getDescriptor().getLocation())) {
-      formatBundle.set(DatasetKeyInputFormat.KITE_PARTITION_DIR, dataset.getDescriptor().getLocation().toString());
-    }
-
     if (type.isAssignableFrom(GenericData.Record.class)) {
-      this.avroType = (AvroType<E>) Avros.generics(dataset.getDescriptor().getSchema());
+      this.avroType = (AvroType<E>) Avros.generics(
+          view.getDataset().getDescriptor().getSchema());
     } else {
       this.avroType = Avros.records(type);
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public DatasetSourceTarget(View<E> view, Class<E> type) {
-    super(view.getDataset());
-
-    this.view = view;
-    this.formatBundle = FormatBundle.forInput(DatasetKeyInputFormat.class);
-    formatBundle.set(DatasetKeyInputFormat.KITE_REPOSITORY_URI, getRepositoryUri(view.getDataset()));
-    formatBundle.set(DatasetKeyInputFormat.KITE_DATASET_NAME, view.getDataset().getName());
-
-    Configuration conf = new Configuration();
-    DatasetKeyInputFormat.setView(conf, view);
-    formatBundle.set(DatasetKeyInputFormat.KITE_CONSTRAINTS,
-        conf.get(DatasetKeyInputFormat.KITE_CONSTRAINTS));
-    formatBundle.set(RuntimeParameters.DISABLE_COMBINE_FILE, "true");
-
-    if (type.isAssignableFrom(GenericData.Record.class)) {
-      this.avroType = (AvroType<E>) Avros.generics(this.view.getDataset().getDescriptor()
-          .getSchema());
-    } else {
-      this.avroType = Avros.records(type);
-    }
-  }
-
-  private String getRepositoryUri(Dataset<E> dataset) {
-    return dataset.getDescriptor().getProperty(
-        AbstractDatasetRepository.REPOSITORY_URI_PROPERTY_NAME);
+  public DatasetSourceTarget(URI uri, Class<E> type) {
+    this(Datasets.<E, View<E>>view(uri), type);
   }
 
   @Override
@@ -195,5 +164,22 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
     inputConf(key, value);
     outputConf(key, value);
     return this;
+  }
+
+  /**
+   * Builds a FormatBundle for DatasetKeyInputFormat by copying a temp config.
+   *
+   * All properties will be copied from the temporary configuration
+   *
+   * @param conf A Configuration that will be copied
+   * @return a FormatBundle with the contents of conf
+   */
+  private static FormatBundle<DatasetKeyInputFormat> inputBundle(Configuration conf) {
+    FormatBundle<DatasetKeyInputFormat> bundle = FormatBundle
+        .forInput(DatasetKeyInputFormat.class);
+    for (Map.Entry<String, String> entry : conf) {
+      bundle.set(entry.getKey(), entry.getValue());
+    }
+    return bundle;
   }
 }

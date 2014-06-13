@@ -37,8 +37,9 @@ public class CrunchDatasets {
    * @param type    the Java type of the entities in the dataset
    * @param <E>     the type of entity produced by the source
    * @return a {@link ReadableSource} for the dataset
+   * @deprecated will be removed in 0.16.0; use {@link #asSource(View, Class)}
    */
-  @SuppressWarnings("unchecked")
+  @Deprecated
   public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
     return new DatasetSourceTarget<E>(dataset, type);
   }
@@ -63,7 +64,9 @@ public class CrunchDatasets {
    * @param dataset the dataset to write to
    * @param <E>     the type of entity stored in the dataset
    * @return a {@link Target} for the dataset
+   * @deprecated will be removed in 0.16.0; use {@link #asTarget(View)}
    */
+  @Deprecated
   public static <E> Target asTarget(Dataset<E> dataset) {
     return new DatasetTarget<E>(dataset);
   }

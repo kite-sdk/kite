@@ -136,9 +136,7 @@ public class TestMapReduceHBase {
       writer.close();
     }
 
-    job.setInputFormatClass(DatasetKeyInputFormat.class);
-    DatasetKeyInputFormat.setRepositoryUri(job, repo.getUri());
-    DatasetKeyInputFormat.setDatasetName(job, inputDataset.getName());
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset);
 
     job.setMapperClass(AvroKeyWrapperMapper.class);
     job.setMapOutputKeyClass(AvroKey.class);
@@ -150,9 +148,7 @@ public class TestMapReduceHBase {
     job.setOutputValueClass(Void.class);
     AvroJob.setOutputKeySchema(job, new Schema.Parser().parse(testGenericEntity));
 
-    job.setOutputFormatClass(DatasetKeyOutputFormat.class);
-    DatasetKeyOutputFormat.setRepositoryUri(job, repo.getUri());
-    DatasetKeyOutputFormat.setDatasetName(job, outputDataset.getName());
+    DatasetKeyOutputFormat.configure(job).writeTo(outputDataset);
 
     Assert.assertTrue(job.waitForCompletion(true));
 

@@ -28,16 +28,17 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.InputFormatAccessor;
+import org.kitesdk.data.spi.URIBuilder;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,10 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   private static final Logger LOG =
       LoggerFactory.getLogger(DatasetKeyInputFormat.class);
 
+  public static final String KITE_INPUT_URI = "kite.inputUri";
+  @Deprecated
   public static final String KITE_REPOSITORY_URI = "kite.inputRepositoryUri";
+  @Deprecated
   public static final String KITE_DATASET_NAME = "kite.inputDatasetName";
   public static final String KITE_PARTITION_DIR = "kite.inputPartitionDir";
   public static final String KITE_CONSTRAINTS = "kite.inputConstraints";
@@ -65,26 +69,95 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   private Configuration conf;
   private InputFormat<E, Void> delegate;
 
-  public static void setRepositoryUri(Job job, URI uri) {
-    job.getConfiguration().set(KITE_REPOSITORY_URI, uri.toString());
-  }
+  public static class ConfigBuilder {
+    private final Configuration conf;
 
-  public static void setDatasetName(Job job, String name) {
-    job.getConfiguration().set(KITE_DATASET_NAME, name);
-  }
-
-  public static <E> void setView(Job job, View<E> view) {
-    setView(job.getConfiguration(), view);
-  }
-
-  public static <E> void setView(Configuration conf, View<E> view) {
-    if (view instanceof AbstractRefinableView) {
-      conf.set(KITE_CONSTRAINTS,
-          Constraints.serialize(((AbstractRefinableView) view).getConstraints()));
-    } else {
-      throw new UnsupportedOperationException("Implementation " +
-          "does not provide InputFormat support. View: " + view);
+    private ConfigBuilder(Job job) {
+      this.conf = Hadoop.JobContext.getConfiguration.invoke(job);
     }
+
+    private ConfigBuilder(Configuration conf) {
+      this.conf = conf;
+    }
+
+    public ConfigBuilder readFrom(URI viewUri) {
+      conf.set(KITE_INPUT_URI, viewUri.toString());
+      return this;
+    }
+
+    public ConfigBuilder readFrom(View<?> view) {
+      if (view instanceof Dataset) {
+        if (view instanceof FileSystemDataset) {
+          FileSystemDataset dataset = (FileSystemDataset) view;
+          conf.set(KITE_PARTITION_DIR,
+              String.valueOf(dataset.getDescriptor().getLocation()));
+        }
+      } else if (view instanceof AbstractRefinableView) {
+        conf.set(KITE_CONSTRAINTS,
+            Constraints.serialize(((AbstractRefinableView) view).getConstraints()));
+      } else {
+        throw new UnsupportedOperationException("Implementation " +
+            "does not provide InputFormat support. View: " + view);
+      }
+      return readFrom(view.getDataset().getUri());
+    }
+
+    public ConfigBuilder readFrom(String viewUri) {
+      return readFrom(URI.create(viewUri));
+    }
+  }
+
+  /**
+   * Sets the input dataset that will be used for the given Job.
+   * @param job
+   */
+  public static ConfigBuilder configure(Job job) {
+    job.setInputFormatClass(DatasetKeyInputFormat.class);
+    return new ConfigBuilder(job);
+  }
+
+  /**
+   * Sets the input dataset that will be used for the given Configuration.
+   * @param conf
+   */
+  public static ConfigBuilder configure(Configuration conf) {
+    return new ConfigBuilder(conf);
+  }
+
+  /**
+   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
+   */
+  @Deprecated
+  public static void setRepositoryUri(Job job, URI uri) {
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(job);
+    conf.set(KITE_REPOSITORY_URI, uri.toString());
+    conf.unset(KITE_INPUT_URI); // this URI would override, so remove it
+  }
+
+  /**
+   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
+   */
+  @Deprecated
+  public static void setDatasetName(Job job, String name) {
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(job);
+    conf.set(KITE_DATASET_NAME, name);
+    conf.unset(KITE_INPUT_URI); // this URI would override, so remove it
+  }
+
+  /**
+   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
+   */
+  @Deprecated
+  public static <E> void setView(Job job, View<E> view) {
+    configure(job).readFrom(view);
+  }
+
+  /**
+   * @deprecated will be removed in 0.16.0; use {@link #configure(Configuration)}
+   */
+  @Deprecated
+  public static <E> void setView(Configuration conf, View<E> view) {
+    configure(conf).readFrom(view);
   }
 
   @Override
@@ -95,16 +168,16 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   @Override
   public void setConf(Configuration configuration) {
     conf = configuration;
-    Dataset<E> dataset = loadDataset(configuration);
+    View<E> view = load(configuration);
 
     String partitionDir = conf.get(KITE_PARTITION_DIR);
     String constraintsString = conf.get(KITE_CONSTRAINTS);
-    if (dataset.getDescriptor().isPartitioned() && partitionDir != null) {
-      delegate = getDelegateInputFormatForPartition(dataset, partitionDir);
+    if (view.getDataset().getDescriptor().isPartitioned() && partitionDir != null) {
+      delegate = getDelegateInputFormatForPartition(view.getDataset(), partitionDir);
     } else if (constraintsString != null) {
-      delegate = getDelegateInputFormatForView(dataset, constraintsString);
+      delegate = getDelegateInputFormatForView(view.getDataset(), constraintsString);
     } else {
-      delegate = getDelegateInputFormat(dataset);
+      delegate = getDelegateInputFormat(view);
     }
   }
 
@@ -141,9 +214,16 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     throw new DatasetException("Cannot find view from constraints for " + dataset);
   }
 
-  private static <E> Dataset<E> loadDataset(Configuration conf) {
-    DatasetRepository repo = DatasetRepositories.open(conf.get(KITE_REPOSITORY_URI));
-    return repo.load(conf.get(KITE_DATASET_NAME));
+  @SuppressWarnings("deprecation")
+  private static <E> View<E> load(Configuration conf) {
+    String inputUri = conf.get(KITE_INPUT_URI);
+    if (inputUri == null) {
+      return Datasets.<E, View<E>>view(
+          new URIBuilder(
+              conf.get(KITE_REPOSITORY_URI), conf.get(KITE_DATASET_NAME))
+              .build());
+    }
+    return Datasets.<E, View<E>>view(inputUri);
   }
 
   @Override

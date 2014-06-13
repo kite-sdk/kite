@@ -89,6 +89,7 @@ public class TestCrunchDatasetsHBase {
   }
 
   @Test
+  @SuppressWarnings("deprecation") // still testing asTarget/asSource(Dataset)
   public void testGeneric() throws IOException {
     String datasetName = tableName + ".TestGenericEntity";
 
@@ -111,6 +112,7 @@ public class TestCrunchDatasetsHBase {
   }
 
   @Test
+  @SuppressWarnings("deprecation") // still testing asTarget/asSource(Dataset)
   public void testSourceView() throws IOException {
     String datasetName = tableName + ".TestGenericEntity";
 

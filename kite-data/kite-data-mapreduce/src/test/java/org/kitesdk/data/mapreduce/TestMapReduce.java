@@ -140,9 +140,7 @@ public class TestMapReduce {
     writer.write(newStringRecord("apple"));
     writer.close();
 
-    job.setInputFormatClass(DatasetKeyInputFormat.class);
-    DatasetKeyInputFormat.setRepositoryUri(job, repo.getUri());
-    DatasetKeyInputFormat.setDatasetName(job, inputDataset.getName());
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset);
 
     job.setMapperClass(LineCountMapper.class);
     job.setMapOutputKeyClass(Text.class);
@@ -157,9 +155,7 @@ public class TestMapReduce {
             .format(format)
             .build());
 
-    job.setOutputFormatClass(DatasetKeyOutputFormat.class);
-    DatasetKeyOutputFormat.setRepositoryUri(job, repo.getUri());
-    DatasetKeyOutputFormat.setDatasetName(job, outputDataset.getName());
+    DatasetKeyOutputFormat.configure(job).writeTo(outputDataset);
 
     Assert.assertTrue(job.waitForCompletion(true));
 
