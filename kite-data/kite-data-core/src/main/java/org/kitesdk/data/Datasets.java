@@ -77,11 +77,16 @@ public class Datasets {
    * @return a {@code View} for the given URI.
    */
   public static <E, V extends View<E>> V view(URI uri) {
-    Preconditions.checkArgument(
-        VIEW_SCHEME.equals(uri.getScheme()) ||
-            DATASET_SCHEME.equals(uri.getScheme()),
+    boolean isView = VIEW_SCHEME.equals(uri.getScheme());
+    Preconditions.checkArgument(isView ||
+        DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset or view URI: " + uri);
-    return Registration.<E, V>view(URI.create(uri.getRawSchemeSpecificPart()));
+    if (isView) {
+      return Registration.<E, V>view(URI.create(uri.getRawSchemeSpecificPart()));
+    } else {
+      // if the URI isn't a view URI, only load the dataset
+      return Registration.<E, V>load(URI.create(uri.getRawSchemeSpecificPart()));
+    }
   }
 
   /**
@@ -99,5 +104,40 @@ public class Datasets {
    */
   public static <E, V extends View<E>> V view(String uriString) {
     return Datasets.<E, V>view(URI.create(uriString));
+  }
+
+  /**
+   * Load a {@link DatasetRepository} for the given dataset or view URI.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param datasetUri a {@code Dataset} or {@code View} URI.
+   * @param <R> The type of {@code DatasetRepository} expected.
+   * @return a {@code DatasetRepository} responsible for the given URI.
+   */
+  @SuppressWarnings("unchecked")
+  public static <R extends DatasetRepository> R repositoryFor(URI datasetUri) {
+    Preconditions.checkArgument(
+        DATASET_SCHEME.equals(datasetUri.getScheme()) ||
+        VIEW_SCHEME.equals(datasetUri.getScheme()),
+        "Not a dataset or view URI: " + datasetUri);
+    return (R) Registration.repoForDataset(
+        URI.create(datasetUri.getRawSchemeSpecificPart()));
+  }
+
+  /**
+   * Load a {@link DatasetRepository} for the given dataset or view URI string.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param datasetUriString a {@code Dataset} or {@code View} URI.
+   * @param <R> The type of {@code DatasetRepository} expected.
+   * @return a {@code DatasetRepository} responsible for the given URI.
+   */
+  public static <R extends DatasetRepository>
+  R repositoryFor(String datasetUriString) {
+    return repositoryFor(URI.create(datasetUriString));
   }
 }

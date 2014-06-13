@@ -53,12 +53,16 @@ public class Registration {
     }
 
     public <E> Dataset<E> load(Map<String, String> options) {
-      DatasetRepository repo = repoBuilder.getFromOptions(options);
+      DatasetRepository repo = repo(options);
       // some URI patterns don't include a dataset as a required option, so
       // check that it is passed as a query option
       Preconditions.checkArgument(options.containsKey(DATASET_NAME_OPTION),
           "Missing required query option \"" + DATASET_NAME_OPTION + "\"");
       return repo.load(options.get(DATASET_NAME_OPTION));
+    }
+
+    public DatasetRepository repo(Map<String, String> options) {
+      return repoBuilder.getFromOptions(options);
     }
   }
 
@@ -122,6 +126,28 @@ public class Registration {
   }
 
   /**
+   * Returns the repository responsible for the given dataset or view URI.
+   *
+   * @param datasetUri
+   * @param <R>
+   * @return
+   */
+  @SuppressWarnings("unchecked")
+  public static <R extends DatasetRepository> R repoForDataset(URI datasetUri) {
+    for (URIPattern pattern : DATASET_BUILDERS.keySet()) {
+      Map<String, String> match = pattern.getMatch(datasetUri);
+      if (match != null) {
+        DatasetBuilder builder = DATASET_BUILDERS.get(pattern);
+        DatasetRepository repo = builder.repo(match);
+        LOG.debug("Opened repository {}", repo);
+
+        return (R) repo;
+      }
+    }
+    throw new DatasetNotFoundException("Unknown dataset URI: " + datasetUri);
+  }
+
+  /**
    * Registers a {@link URIPattern} and an {@link OptionBuilder} to create
    * instances of {@link Dataset} from the pattern's match options.
    *
@@ -135,7 +161,7 @@ public class Registration {
   }
 
   @SuppressWarnings("unchecked")
-  public static <E, D extends Dataset<E>> D load(URI uri) {
+  public static <E, V extends View<E>> V load(URI uri) {
     for (URIPattern pattern : DATASET_BUILDERS.keySet()) {
       Map<String, String> match = pattern.getMatch(uri);
       if (match != null) {
@@ -143,7 +169,7 @@ public class Registration {
         Dataset<E> dataset = builder.load(match);
         LOG.debug("Opened dataset {}", dataset);
 
-        return (D) dataset;
+        return (V) dataset;
       }
     }
     throw new DatasetNotFoundException("Unknown dataset URI: " + uri);
