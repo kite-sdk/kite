@@ -16,6 +16,8 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.EncoderException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
 import org.kitesdk.data.spi.partition.HourFieldPartitioner;
@@ -29,11 +31,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.fs.Path;
+import org.apache.commons.codec.net.URLCodec;
 
 import java.util.List;
 import java.util.Map;
 
-public class PathConversion {
+public class PathConversion{
+
+  private static final URLCodec CODEC = new URLCodec("UTF-8");
 
   public StorageKey toKey(Path fromPath, StorageKey storage) {
     final List<FieldPartitioner> partitioners =
@@ -44,6 +49,7 @@ public class PathConversion {
     Path currentPath = fromPath;
     int index = partitioners.size() - 1;
     while (currentPath != null && index >= 0) {
+
       values.set(index, valueForDirname(
           (FieldPartitioner<?, ?>) partitioners.get(index),
           currentPath.getName()));
@@ -86,8 +92,12 @@ public class PathConversion {
           .build();
 
   public static <T> String dirnameForValue(FieldPartitioner<?, T> field, T value) {
-    return PART_JOIN.join(field.getName(),
-        Conversions.makeString(value, WIDTHS.get(field.getClass())));
+    try{
+      return PART_JOIN.join(field.getName(),
+          CODEC.encode(Conversions.makeString(value, WIDTHS.get(field.getClass()))));
+    } catch (EncoderException e) {
+      throw new RuntimeException("Unable encode partition value.", e);
+    }
   }
 
   public <T> T valueForDirname(FieldPartitioner<?, T> field, String name) {
@@ -96,6 +106,10 @@ public class PathConversion {
   }
 
   public String valueStringForDirname(String name) {
-    return Iterables.getLast(PART_SEP.split(name));
+    try {
+      return CODEC.decode(Iterables.getLast(PART_SEP.split(name)));
+    } catch (DecoderException e) {
+      throw new RuntimeException("Unable decode partition value.", e);
+    }
   }
 }
