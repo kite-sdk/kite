@@ -44,6 +44,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,6 +143,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         .name(name)
         .configuration(conf)
         .descriptor(newDescriptor)
+        .uri(new URIBuilder(repositoryUri, name).build())
         .partitionKey(newDescriptor.isPartitioned() ?
             org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
             null)
@@ -199,6 +201,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         .name(name)
         .configuration(conf)
         .descriptor(updatedDescriptor)
+        .uri(new URIBuilder(repositoryUri, name).build())
         .partitionKey(updatedDescriptor.isPartitioned() ?
             org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
             null)
@@ -219,6 +222,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
         .name(name)
         .configuration(conf)
         .descriptor(descriptor)
+        .uri(new URIBuilder(repositoryUri, name).build())
         .partitionKey(descriptor.isPartitioned() ?
             org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
             null)
@@ -486,7 +490,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
           repositoryUri);
     }
 
-    private URI makeRepositoryUri(Path rootDirectory) {
+    private static URI makeRepositoryUri(Path rootDirectory) {
       return URI.create("repo:" + rootDirectory.toUri());
     }
   }

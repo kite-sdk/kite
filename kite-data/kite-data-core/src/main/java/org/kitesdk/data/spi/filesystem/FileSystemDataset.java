@@ -65,6 +65,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   private final String name;
   private final DatasetDescriptor descriptor;
   private PartitionKey partitionKey;
+  private final URI uri;
 
   private final PartitionStrategy partitionStrategy;
   private final PartitionListener partitionListener;
@@ -75,7 +76,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   private final PathConversion convert;
 
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
-                    DatasetDescriptor descriptor,
+                    DatasetDescriptor descriptor, URI uri,
                     @Nullable PartitionListener partitionListener) {
 
     this.fileSystem = fileSystem;
@@ -86,6 +87,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
         descriptor.isPartitioned() ? descriptor.getPartitionStrategy() : null;
     this.partitionListener = partitionListener;
     this.convert = new PathConversion();
+    this.uri = uri;
 
     this.unbounded = new FileSystemView<E>(this);
     // remove this.partitionKey for 0.14.0
@@ -93,10 +95,15 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   }
 
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
-    DatasetDescriptor descriptor, @Nullable PartitionKey partitionKey,
+    DatasetDescriptor descriptor, URI uri, @Nullable PartitionKey partitionKey,
     @Nullable PartitionListener partitionListener) {
-    this(fileSystem, directory, name, descriptor, partitionListener);
+    this(fileSystem, directory, name, descriptor, uri, partitionListener);
     this.partitionKey = partitionKey;
+  }
+
+  @Override
+  public URI getUri() {
+    return uri;
   }
 
   @Override
@@ -190,6 +197,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     return new FileSystemDataset.Builder()
         .name(name)
         .fileSystem(fileSystem)
+        .uri(uri)
         .descriptor(new DatasetDescriptor.Builder(descriptor)
             .location(partitionDirectory)
             .partitionStrategy(subpartitionStrategy)
@@ -247,6 +255,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       Builder builder = new FileSystemDataset.Builder()
           .name(name)
           .fileSystem(fileSystem)
+          .uri(uri)
           .descriptor(new DatasetDescriptor.Builder(descriptor)
               .location(p)
               .partitionStrategy(subPartitionStrategy)
@@ -427,6 +436,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     private Path directory;
     private String name;
     private DatasetDescriptor descriptor;
+    private URI uri;
     private PartitionKey partitionKey;
     private PartitionListener partitionListener;
 
@@ -451,6 +461,11 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
       this.descriptor = descriptor;
 
+      return this;
+    }
+
+    public Builder uri(URI uri) {
+      this.uri = uri;
       return this;
     }
 
@@ -483,7 +498,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
       Path absoluteDirectory = fileSystem.makeQualified(directory);
       return new FileSystemDataset<E>(
-          fileSystem, absoluteDirectory, name, descriptor, partitionKey,
+          fileSystem, absoluteDirectory, name, descriptor, uri, partitionKey,
           partitionListener);
     }
   }

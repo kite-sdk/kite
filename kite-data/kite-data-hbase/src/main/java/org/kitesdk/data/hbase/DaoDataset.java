@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.hbase;
 
+import java.net.URI;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -31,15 +32,17 @@ import org.kitesdk.data.spi.InputFormatAccessor;
 class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>,
     InputFormatAccessor<E> {
 
-  private String name;
-  private Dao<E> dao;
-  private DatasetDescriptor descriptor;
+  private final String name;
+  private final Dao<E> dao;
+  private final DatasetDescriptor descriptor;
+  private final URI uri;
   private final DaoView<E> unbounded;
 
-  public DaoDataset(String name, Dao<E> dao, DatasetDescriptor descriptor) {
+  public DaoDataset(String name, Dao<E> dao, DatasetDescriptor descriptor, URI uri) {
     this.name = name;
     this.dao = dao;
     this.descriptor = descriptor;
+    this.uri = uri;
     this.unbounded = new DaoView<E>(this);
   }
 
@@ -50,6 +53,11 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public URI getUri() {
+    return uri;
   }
 
   @Override

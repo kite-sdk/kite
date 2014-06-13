@@ -53,6 +53,7 @@ public class TestFileSystemDatasetPartitionKeyForPath {
     dataset = new FileSystemDataset.Builder()
         .name("partitioned-users")
         .configuration(new Configuration())
+        .uri(URI.create("test"))
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .location(testDirectory)

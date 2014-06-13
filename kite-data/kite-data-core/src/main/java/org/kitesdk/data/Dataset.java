@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data;
 
+import java.net.URI;
 import org.apache.avro.Schema;
 
 import javax.annotation.concurrent.Immutable;
@@ -96,5 +97,15 @@ public interface Dataset<E> extends RefinableView<E> {
    * @throws DatasetException
    */
   Iterable<Dataset<E>> getPartitions();
+
+  /**
+   * Return a {@code URI} for this {@code Dataset}.
+   *
+   * The returned URI should load a copy of this dataset when passed to
+   * {@link Datasets#load(java.net.URI)}.
+   *
+   * @return a URI that identifies this dataset
+   */
+  URI getUri();
 
 }

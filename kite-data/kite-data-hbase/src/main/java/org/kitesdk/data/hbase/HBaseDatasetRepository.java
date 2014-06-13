@@ -41,6 +41,7 @@ import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
+import org.kitesdk.data.spi.URIBuilder;
 
 public class HBaseDatasetRepository extends AbstractDatasetRepository implements RandomAccessDatasetRepository {
 
@@ -117,7 +118,8 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
     }
     Dao dao = SpecificAvroDao.buildCompositeDaoWithEntityManager(tablePool,
         tableName, subEntityClasses, schemaManager);
-    return new DaoDataset<E>(name, dao, descriptors.get(0));
+    return new DaoDataset<E>(name, dao, descriptors.get(0),
+        new URIBuilder(repositoryUri, name).build());
   }
 
   @SuppressWarnings("unchecked")
@@ -131,7 +133,8 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
     } else {
       dao = new GenericAvroDao(tablePool, tableName, entityName, schemaManager);
     }
-    return new DaoDataset(name, dao, descriptor);
+    return new DaoDataset(name, dao, descriptor,
+        new URIBuilder(repositoryUri, name).build());
   }
 
   private static boolean isSpecific(DatasetDescriptor descriptor) {
