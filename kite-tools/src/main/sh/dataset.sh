@@ -46,17 +46,6 @@ if [ -z "${HADOOP_COMMON_HOME}" ]; then
 fi
 debug "Using HADOOP_COMMON_HOME=${HADOOP_COMMON_HOME}"
 
-if [ -z "${HADOOP_MAPRED_HOME}" ]; then
-  HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce
-  if [ ! -d "${HADOOP_MAPRED_HOME}" ]; then
-    if [ -n "${HADOOP_HOME}" ]; then
-      HADOOP_MAPRED_HOME=${HADOOP_HOME}
-    else
-      HADOOP_MAPRED_HOME=${HADOOP_COMMON_HOME}/../hadoop-mapreduce
-    fi
-  fi
-fi
-
 # We are setting HADOOP_HOME to HADOOP_COMMON_HOME if it is not set
 # so that hcat script works correctly on BigTop
 if [ -z "${HADOOP_HOME}" ]; then
@@ -66,6 +55,17 @@ if [ -z "${HADOOP_HOME}" ]; then
   fi
 fi
 
+if [ -z "${HADOOP_MAPRED_HOME}" ]; then
+  HADOP_MAPRED_HOME=/usr/lib/hadoop-0.20-mapreduce
+  if [ ! -d "${HADOOP_MAPRED_HOME}" ]; then
+    HADOOP_MAPRED_HOME=${HADOOP_COMMON_HOME}/../hadoop-0.20-mapreduce
+    if [ ! -d "${HADOOP_MAPRED_HOME}" ]; then
+      HADOOP_MAPRED_HOME=${HADOOP_COMMON_HOME}/../hadoop-mapreduce
+    fi
+  fi
+fi
+debug "Using HADOOP_MAPRED_HOME=${HADOOP_MAPRED_HOME}"
+
 if [ -z "${HBASE_HOME}" ]; then
   if [ -d "/usr/lib/hbase" ]; then
     HBASE_HOME=/usr/lib/hbase
@@ -73,6 +73,7 @@ if [ -z "${HBASE_HOME}" ]; then
     HBASE_HOME=${HADOOP_COMMON_HOME}/../hbase
   fi
 fi
+debug "Using HBASE_HOME=${HBASE_HOME}"
 
 if [ -z "${HIVE_HOME}" ]; then
   if [ -d "/usr/lib/hive" ]; then
@@ -81,40 +82,21 @@ if [ -z "${HIVE_HOME}" ]; then
     HIVE_HOME=${HADOOP_COMMON_HOME}/../hive
   fi
 fi
-export HIVE_HOME
+debug "Using HIVE_HOME=${HIVE_HOME}"
 
-if [ -z "${HCAT_HOME}" ]; then
-  if [ -d "/usr/lib/hive-hcatalog" ]; then
-    HCAT_HOME=/usr/lib/hive-hcatalog
-  elif [ -d "/usr/lib/hcatalog" ]; then
-    HCAT_HOME=/usr/lib/hcatalog
-  else
-    HCAT_HOME=${HADOOP_COMMON_HOME}/../hive-hcatalog
-    if [ ! -d ${HCAT_HOME} ]; then
-       HCAT_HOME=${HADOOP_COMMON_HOME}/../hcatalog
-    fi
+if [ -z "${HIVE_CONF_DIR}" ]; then
+  HIVE_CONF_DIR=/etc/hive/conf
+  if [ ! -d "${HIVE_CONF_DIR}" ]; then
+    HIVE_CONF_DIR=${HIVE_HOME}/conf
   fi
 fi
+debug "Using HIVE_CONF_DIR=${HIVE_CONF_DIR}"
 
 # Check: If we can't find our dependencies, give up here.
 if [ ! -d "${HADOOP_COMMON_HOME}" ]; then
   echo "WARNING: Cannot find Hadoop installation!"
   echo "You can fix this warning by setting HADOOP_HOME"
 fi
-# if [ ! -d "${HADOOP_MAPRED_HOME}" ]; then
-#   echo "Error: $HADOOP_MAPRED_HOME does not exist!"
-#   echo 'Please set $HADOOP_MAPRED_HOME to the root of your Hadoop MapReduce installation.'
-#   exit 1
-# fi
-
-function add_to_classpath() {
-  dir=$1
-  for f in $dir/*.jar; do
-    KITE_CLASSPATH=${KITE_CLASSPATH}:$f;
-  done
-
-  export KITE_CLASSPATH
-}
 
 # Add dependencies to classpath.
 KITE_CLASSPATH=""
@@ -125,18 +107,13 @@ if [ -e "$HBASE_HOME/bin/hbase" ]; then
   KITE_CLASSPATH=${TMP_KITE_CLASSPATH}
 fi
 
-# Add HCatalog to dependency list
-if [ -e "${HCAT_HOME}/bin/hcat" ]; then
-  TMP_KITE_CLASSPATH=${KITE_CLASSPATH}:`${HCAT_HOME}/bin/hcat -classpath`
-  if [ 0 -ne $? ]; then
-    echo "WARNING: Cannot configure the Hive classpath!"
-    echo "Try setting HIVE_HOME to fix this warning"
-    debug "HCat output: " `${HCAT_HOME}/bin/hcat -classpath`
+if [ -d "$HIVE_HOME" ]; then
+  # need to add lib/* to pick up the jars
+  KITE_CLASSPATH=$HIVE_HOME/lib/*:$KITE_CLASSPATH
+  if [ -d "$HIVE_CONF_DIR" ]; then
+    # adding $HIVE_CONF_DIR/* prevents hive from finding hive-site.xml
+    KITE_CLASSPATH=$HIVE_CONF_DIR:$KITE_CLASSPATH
   fi
-  if [ -z "${HIVE_CONF_DIR}" ]; then
-    TMP_KITE_CLASSPATH=${TMP_KITE_CLASSPATH}:${HIVE_CONF_DIR}
-  fi
-  KITE_CLASSPATH=${TMP_KITE_CLASSPATH}
 fi
 
 ZOOCFGDIR=${ZOOCFGDIR:-/etc/zookeeper}
@@ -150,13 +127,14 @@ if [ ! -z "$KITE_USER_CLASSPATH" ]; then
   # Kite's own lib directories.
   export HADOOP_CLASSPATH="${KITE_USER_CLASSPATH}:${HADOOP_CLASSPATH}"
 fi
+debug "Using HADOOP_CLASSPATH=${HADOOP_CLASSPATH}"
 
 export HADOOP_CLASSPATH
 export HADOOP_COMMON_HOME
 export HADOOP_MAPRED_HOME
 export HBASE_HOME
-export HCAT_HOME
 export HIVE_CONF_DIR
+export HIVE_HOME
 
 if [ -x "$HADOOP_COMMON_HOME/bin/hadoop" ]; then
   exec ${HADOOP_COMMON_HOME}/bin/hadoop jar "$0" $flags "$@"
