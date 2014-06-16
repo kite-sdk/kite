@@ -26,11 +26,13 @@ import org.junit.runners.Parameterized;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.View;
+import org.kitesdk.data.spi.URIBuilder;
 import junit.framework.Assert;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
@@ -40,9 +42,8 @@ import org.apache.crunch.Target;
 import org.apache.crunch.impl.mr.MRPipeline;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.io.IOException;
-
+import java.net.URI;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.datasetSize;
@@ -255,5 +256,58 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     pipeline.run();
 
     Assert.assertEquals(1, datasetSize(outputDataset));
+  }
+  
+  
+  @Test
+  public void testViewUris() throws IOException {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", 2).build();
+
+    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+
+    writeTestUsers(inputDataset, 10);
+
+    URI sourceViewUri = new URIBuilder(repo.getUri(), "in").with("username",
+        "test-0").build();
+    View<Record> inputView = Datasets.<Record, Dataset<Record>> view(sourceViewUri);
+    Assert.assertEquals(1, datasetSize(inputView));
+    
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(CrunchDatasets
+        .asSource(sourceViewUri, GenericData.Record.class));
+    URI targetViewUri = new URIBuilder(repo.getUri(), "out").with(
+        "email", "email-0").build();
+    pipeline.write(data, CrunchDatasets.asTarget(targetViewUri),
+        Target.WriteMode.APPEND);
+    pipeline.run();
+
+    Assert.assertEquals(1, datasetSize(outputDataset));
+  }
+  
+  @Test
+  public void testDatasetUris() throws IOException {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
+        "username", 2).build();
+
+    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
+
+    writeTestUsers(inputDataset, 10);
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(new URIBuilder(repo.getUri(), "in").build(),
+            GenericData.Record.class));
+    pipeline.write(data, CrunchDatasets.asTarget(
+        new URIBuilder(repo.getUri(), "out").build()), Target.WriteMode.APPEND);
+    pipeline.run();
+
+    Assert.assertEquals(10, datasetSize(outputDataset));
   }
 }
