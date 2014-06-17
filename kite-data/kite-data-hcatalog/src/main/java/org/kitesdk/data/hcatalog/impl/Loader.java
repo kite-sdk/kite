@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.hcatalog.impl;
 
+import org.kitesdk.compat.DynConstructors;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
@@ -116,8 +117,14 @@ public class Loader implements Loadable {
 
   @Override
   public void load() {
+    // Need to use a HiveConf so that the hive-site.xml file is used, but Hive
+    // may not be available. If the constructor can't be found, don't register.
+    DynConstructors.Ctor<Configuration> hiveConf = new DynConstructors.Builder()
+        .impl("org.apache.hadoop.hive.conf.HiveConf")
+        .build();
+
     // get a default Configuration to configure defaults (so it's okay!)
-    final Configuration conf = new Configuration();
+    Configuration conf = hiveConf.newInstance();
 
     String hiveAuthority;
     if (conf.get(HIVE_METASTORE_URI_PROP) != null) {
@@ -233,7 +240,7 @@ public class Loader implements Loadable {
       // change the connection URI.
       if (match.containsKey(URIPattern.HOST)) {
          conf.set(HIVE_METASTORE_URI_PROP,
-             new URI("thrift", null, match.get(URIPattern.HOST), port, "/",
+             new URI("thrift", null, match.get(URIPattern.HOST), port, null,
                  null, null).toString());
       }
     } catch (URISyntaxException ex) {

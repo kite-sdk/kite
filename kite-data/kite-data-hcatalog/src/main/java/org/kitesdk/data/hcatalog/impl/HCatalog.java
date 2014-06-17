@@ -67,11 +67,11 @@ public final class HCatalog {
   }
 
   public HCatalog(Configuration conf) {
+    this.hiveConf = new HiveConf(conf, HiveConf.class);
     if (conf.get(Loader.HIVE_METASTORE_URI_PROP) == null) {
       LOG.warn("Using a local Hive MetaStore (for testing only)");
     }
     try {
-      hiveConf = new HiveConf(conf, HiveConf.class);
       client = new HiveMetaStoreClient(hiveConf);
     } catch (TException e) {
       throw new DatasetRepositoryException("Hive metastore exception", e);

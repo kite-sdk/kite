@@ -103,7 +103,11 @@ public class Registration {
     for (Loadable loader : impls) {
       // the ServiceLoader is lazy, so this iteration forces service loading
       LOG.debug("Loading: " + loader.getClass().getName());
-      loader.load();
+      try {
+        loader.load();
+      } catch (Exception e) {
+        LOG.warn("Cannot load " + loader.getClass(), e);
+      }
     }
     LOG.debug("Registered repository URIs:\n\t" +
         Joiner.on("\n\t").join(REPO_PATTERNS.keySet()));
