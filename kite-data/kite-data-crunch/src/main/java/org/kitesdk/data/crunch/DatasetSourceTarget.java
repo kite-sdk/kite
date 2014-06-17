@@ -77,7 +77,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   }
 
   public DatasetSourceTarget(URI uri, Class<E> type) {
-    this(Datasets.<E, View<E>>view(uri), type);
+    this(Datasets.<E, View<E>>load(uri), type);
   }
 
   @Override

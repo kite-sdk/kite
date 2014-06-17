@@ -218,12 +218,12 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   private static <E> View<E> load(Configuration conf) {
     String inputUri = conf.get(KITE_INPUT_URI);
     if (inputUri == null) {
-      return Datasets.<E, View<E>>view(
+      return Datasets.<E, View<E>>load(
           new URIBuilder(
               conf.get(KITE_REPOSITORY_URI), conf.get(KITE_DATASET_NAME))
               .build());
     }
-    return Datasets.<E, View<E>>view(inputUri);
+    return Datasets.<E, View<E>>load(inputUri);
   }
 
   @Override

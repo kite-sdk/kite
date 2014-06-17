@@ -91,7 +91,7 @@ public class TestLocalDatasetURIs {
     repo.create("test", descriptor);
 
     RefinableView<Object> v = Datasets
-        .view("view:file:/tmp/data/test?username=user");
+        .load("view:file:/tmp/data/test?username=user");
 
     Assert.assertNotNull("Should load view", v);
     Assert.assertTrue(v instanceof FileSystemView);

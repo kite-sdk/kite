@@ -310,12 +310,12 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     String outputUri = conf.get(KITE_OUTPUT_URI);
     if (outputUri == null) {
-      return Datasets.<E, View<E>>view(
+      return Datasets.<E, View<E>>load(
           new URIBuilder(
               conf.get(KITE_REPOSITORY_URI), conf.get(KITE_DATASET_NAME))
               .build());
     }
-    return Datasets.<E, View<E>>view(outputUri);
+    return Datasets.<E, View<E>>load(outputUri);
   }
 
   private static <E> Dataset<E> createJobDataset(JobContext jobContext) {
