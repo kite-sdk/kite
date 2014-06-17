@@ -44,6 +44,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.TemporaryDatasetRepository;
+import org.kitesdk.data.spi.TemporaryDatasetRepositoryAccessor;
 import org.kitesdk.data.spi.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +83,8 @@ import org.slf4j.LoggerFactory;
  * @see org.kitesdk.data.PartitionStrategy
  * @see org.kitesdk.data.spi.MetadataProvider
  */
-public class FileSystemDatasetRepository extends AbstractDatasetRepository {
+public class FileSystemDatasetRepository extends AbstractDatasetRepository
+    implements TemporaryDatasetRepositoryAccessor {
 
   private static final Logger LOG = LoggerFactory
     .getLogger(FileSystemDatasetRepository.class);
@@ -284,6 +287,11 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   @Override
   public URI getUri() {
     return repositoryUri;
+  }
+
+  @Override
+  public TemporaryDatasetRepository getTemporaryRepository(String key) {
+    return new TemporaryFileSystemDatasetRepository(conf, rootDirectory, key);
   }
 
   private Path pathForDataset(String name) {

@@ -155,47 +155,15 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
     boolean deleted = false;
     if (dataset.getDescriptor().isPartitioned()) {
       for (Pair<StorageKey, Path> partition : partitionIterator()) {
-        deleted = cleanlyDelete(fs, root, partition.second()) || deleted;
+        deleted = FileSystemUtil.cleanlyDelete(fs, root, partition.second()) || deleted;
       }
     }
     else {
       for (Path path : pathIterator()) {
-        deleted = cleanlyDelete(fs, root, path) || deleted;
+        deleted = FileSystemUtil.cleanlyDelete(fs, root, path) || deleted;
       }
     }
     return deleted;
-  }
-
-  private static boolean cleanlyDelete(FileSystem fs, Path root, Path path) {
-    try {
-      boolean deleted;
-      if (path.isAbsolute()) {
-        LOG.debug("Deleting path {}", path);
-        deleted = fs.delete(path, true /* include any files */ );
-      } else {
-        // the path should be treated as relative to the root path
-        Path absolute = new Path(root, path);
-        LOG.debug("Deleting path {}", absolute);
-        deleted = fs.delete(absolute, true /* include any files */ );
-        // iterate up to the root, removing empty directories
-        for (Path current = absolute.getParent();
-             !current.equals(root) && !(current.getParent() == null);
-             current = current.getParent()) {
-          final FileStatus[] stats = fs.listStatus(current);
-          if (stats == null || stats.length == 0) {
-            // dir is empty and should be removed
-            LOG.debug("Deleting empty path {}", current);
-            deleted = fs.delete(current, true) || deleted;
-          } else {
-            // all parent directories will be non-empty
-            break;
-          }
-        }
-      }
-      return deleted;
-    } catch (IOException ex) {
-      throw new DatasetIOException("Could not cleanly delete path:" + path, ex);
-    }
   }
 
   @Override

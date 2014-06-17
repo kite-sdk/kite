@@ -19,12 +19,17 @@ package org.kitesdk.data.spi.filesystem;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileSystemUtil {
+
+  private static final Logger LOG = LoggerFactory.getLogger(FileSystemUtil.class);
 
   /**
    * Creates, if necessary, the given the location for {@code descriptor}.
@@ -55,6 +60,38 @@ public class FileSystemUtil {
       }
     } catch (IOException e) {
       throw new DatasetIOException("Cannot access data location", e);
+    }
+  }
+
+  static boolean cleanlyDelete(FileSystem fs, Path root, Path path) {
+    try {
+      boolean deleted;
+      if (path.isAbsolute()) {
+        LOG.debug("Deleting path {}", path);
+        deleted = fs.delete(path, true /* include any files */ );
+      } else {
+        // the path should be treated as relative to the root path
+        Path absolute = new Path(root, path);
+        LOG.debug("Deleting path {}", absolute);
+        deleted = fs.delete(absolute, true /* include any files */ );
+        // iterate up to the root, removing empty directories
+        for (Path current = absolute.getParent();
+             !current.equals(root) && !(current.getParent() == null);
+             current = current.getParent()) {
+          final FileStatus[] stats = fs.listStatus(current);
+          if (stats == null || stats.length == 0) {
+            // dir is empty and should be removed
+            LOG.debug("Deleting empty path {}", current);
+            deleted = fs.delete(current, true) || deleted;
+          } else {
+            // all parent directories will be non-empty
+            break;
+          }
+        }
+      }
+      return deleted;
+    } catch (IOException ex) {
+      throw new DatasetIOException("Could not cleanly delete path:" + path, ex);
     }
   }
 }
