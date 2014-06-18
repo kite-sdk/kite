@@ -1,0 +1,21 @@
+{
+  "type": "record",
+  "name": "SimpleHBaseRecord",
+  "namespace": "org.kitesdk.data.hbase.avro.entities",
+  "tables": ["simple"],
+  "fields": [
+
+    { "name": "keyPart1", "type": "string", "mapping": { "type": "key", "value": "0" } },
+
+    { "name": "field1", "type": "string", "mapping":
+      { "type": "column", "value": "meta:field1" }
+    },
+
+    {
+      "name": "version",
+      "type": "long",
+      "default": 0,
+      "mapping": { "type": "occVersion" }
+    }
+  ]
+}
