@@ -107,7 +107,7 @@ public class TestCSVImportCommand {
     Assert.assertEquals("Should contain expected records",
         expected, DatasetTestUtilities.materialize(dataset));
     verify(console).trace(contains("repo:file:target/data"));
-    verify(console).info("Added {} records to dataset \"{}\"", 2, datasetName);
+    verify(console).info("Added {} records to \"{}\"", 2l, datasetName);
     verifyNoMoreInteractions(console);
   }
 
@@ -131,7 +131,7 @@ public class TestCSVImportCommand {
     Assert.assertEquals("Should contain expected records",
         expected, DatasetTestUtilities.materialize(dataset));
     verify(console).trace(contains("repo:file:target/data"));
-    verify(console).info("Added {} records to dataset \"{}\"", 2, datasetName);
+    verify(console).info("Added {} records to \"{}\"", 2l, datasetName);
     verifyNoMoreInteractions(console);
   }
 

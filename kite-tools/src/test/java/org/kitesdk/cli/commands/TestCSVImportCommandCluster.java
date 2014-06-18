@@ -113,19 +113,19 @@ public class TestCSVImportCommandCluster extends MiniDFSTest {
     command.run();
     Assert.assertEquals("Should contain expected records",
         expected, DatasetTestUtilities.materialize(dataset));
-    verify(console).info("Added {} records to dataset \"{}\"", 2, datasetName);
+    verify(console).info("Added {} records to \"{}\"", 2l, datasetName);
     verifyNoMoreInteractions(console);
   }
 
   @Test
   public void testHDFSBasicImport() throws Exception {
-    String hdfsSample = "hdfs:/tmp/" + sample;
-    getDFS().copyFromLocalFile(new Path(sample), new Path(hdfsSample));
-    command.targets = Lists.newArrayList(hdfsSample, datasetName);
+    Path hdfsSample = getDFS().makeQualified(new Path("hdfs:/tmp/" + sample));
+    getDFS().copyFromLocalFile(new Path(sample), hdfsSample);
+    command.targets = Lists.newArrayList(hdfsSample.toString(), datasetName);
     command.run();
     Assert.assertEquals("Should contain expected records",
         expected, DatasetTestUtilities.materialize(dataset));
-    verify(console).info("Added {} records to dataset \"{}\"", 2, datasetName);
+    verify(console).info("Added {} records to \"{}\"", 2l, datasetName);
     verifyNoMoreInteractions(console);
   }
 
@@ -148,14 +148,14 @@ public class TestCSVImportCommandCluster extends MiniDFSTest {
     command.run();
     Assert.assertEquals("Should contain expected records",
         expected, DatasetTestUtilities.materialize(dataset));
-    verify(console).info("Added {} records to dataset \"{}\"", 2, datasetName);
+    verify(console).info("Added {} records to \"{}\"", 2l, datasetName);
     verifyNoMoreInteractions(console);
   }
 
   @Test
   public void testHDFSDirectoryImport() throws Exception {
-    String hdfsSample = "hdfs:/tmp/sample";
-    getDFS().mkdirs(new Path(hdfsSample));
+    Path hdfsSample = getDFS().makeQualified(new Path("hdfs:/tmp/sample"));
+    getDFS().mkdirs(hdfsSample);
 
     FSDataOutputStream one = getDFS().create(
         new Path(hdfsSample, "one.csv"), true /* overwrite */ );
@@ -171,11 +171,11 @@ public class TestCSVImportCommandCluster extends MiniDFSTest {
     writer.append("2,user,user@example.com\n");
     writer.close();
 
-    command.targets = Lists.newArrayList(hdfsSample, datasetName);
+    command.targets = Lists.newArrayList(hdfsSample.toString(), datasetName);
     command.run();
     Assert.assertEquals("Should contain expected records",
         expected, DatasetTestUtilities.materialize(dataset));
-    verify(console).info("Added {} records to dataset \"{}\"", 2, datasetName);
+    verify(console).info("Added {} records to \"{}\"", 2l, datasetName);
     verifyNoMoreInteractions(console);
   }
 
