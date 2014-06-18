@@ -17,11 +17,13 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.collect.Maps;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.kitesdk.data.TestHelpers;
 
 public class TestURIPattern {
 
@@ -49,6 +51,9 @@ public class TestURIPattern {
     expected.put("uri:scheme", "scheme");
     expected.put("sub-uri", "other-scheme:/path/to/data.avro");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -60,6 +65,9 @@ public class TestURIPattern {
     Map<String, String> actual = pattern.getMatch(uri);
     expected.put("uri:scheme", "scheme");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -72,6 +80,9 @@ public class TestURIPattern {
     expected.put("uri:scheme", "file");
     expected.put("path", "path/to/data.avro");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -85,6 +96,9 @@ public class TestURIPattern {
     expected.put("db", "myDB");
     expected.put("table", "myTable");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -104,6 +118,9 @@ public class TestURIPattern {
     Assert.assertFalse(pattern.matches("scheme:/"));
     Assert.assertFalse(pattern.matches(uri + "/abc"));
     Assert.assertFalse(pattern.matches(uri + "#fragment"));
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -119,6 +136,9 @@ public class TestURIPattern {
     Assert.assertEquals(expected, actual);
 
     Assert.assertNull(pattern.getMatch("mysql:/myDB/myTable"));
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -134,6 +154,9 @@ public class TestURIPattern {
     Assert.assertEquals(expected, actual);
 
     Assert.assertNull(pattern.getMatch("mysql:/myDB/myTable"));
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -149,6 +172,9 @@ public class TestURIPattern {
     Assert.assertEquals(expected, actual);
 
     Assert.assertNull(pattern.getMatch("mysql:/myDB/myTable"));
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -163,6 +189,9 @@ public class TestURIPattern {
     expected.put("table", "myTable");
     expected.put("the-rest", "a/b/c");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -177,6 +206,9 @@ public class TestURIPattern {
     expected.put("ds", "dataset");
     expected.put("path", "a/b/c");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -191,6 +223,9 @@ public class TestURIPattern {
     expected.put("ds", "dataset");
     expected.put("path", "a/b/c");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -205,6 +240,9 @@ public class TestURIPattern {
     expected.put("ds", "dataset");
     expected.put("path", "a/b/c");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -219,6 +257,9 @@ public class TestURIPattern {
     expected.put("ds", "dataset");
     expected.put("path", "a/b/c");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -235,6 +276,9 @@ public class TestURIPattern {
     expected.put("auth:password", "pass:w0rd");
     expected.put("path", "path/to/data.avro");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -251,6 +295,9 @@ public class TestURIPattern {
     expected.put("auth:password", "pass:w0rd");
     expected.put("path", "path/to/data.avro");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -265,6 +312,9 @@ public class TestURIPattern {
     expected.put("custom-option", "true");
     expected.put("use-ssl", "false");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -279,6 +329,9 @@ public class TestURIPattern {
     expected.put("custom-option", "true");
     expected.put("use-ssl", "false");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -293,6 +346,9 @@ public class TestURIPattern {
     expected.put("custom-option", "true");
     expected.put("use-ssl", "true");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -307,6 +363,9 @@ public class TestURIPattern {
     expected.put("custom-option", "true");
     expected.put("use-ssl", "true");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
   }
 
   @Test
@@ -328,6 +387,29 @@ public class TestURIPattern {
     expected.put("custom-option", "true");
     expected.put("use-ssl", "true");
     Assert.assertEquals(expected, actual);
+
+    URI constructed = pattern.construct(expected);
+    Assert.assertEquals(URI.create(uri), constructed);
+  }
+
+  @Test
+  public void testConstructMissingOptions() throws URISyntaxException {
+    final URIPattern pattern = new URIPattern("scheme:/*path/:name");
+    TestHelpers.assertThrows("Should reject missing name",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            Map<String, String> options = Maps.newHashMap();
+            options.put("path", "a/b/c");
+            pattern.construct(options);
+          }
+        });
+
+    // globs are optional
+    Map<String, String> options = Maps.newHashMap();
+    options.put("name", "table-name");
+    URI constructed = pattern.construct(options);
+    Assert.assertEquals(URI.create("scheme:/table-name"), constructed);
   }
 
   // This is common in this type of matching, but the query part prevents it

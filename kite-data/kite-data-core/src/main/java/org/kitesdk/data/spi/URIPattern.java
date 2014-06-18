@@ -28,6 +28,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,9 +49,13 @@ public class URIPattern {
   private static final Splitter PATH_QUERY_SPLITTER = Splitter.on('?');
   private static final Splitter.MapSplitter QUERY_SPLITTER =
       Splitter.on('&').withKeyValueSeparator(Splitter.on('='));
+  private static final Joiner.MapJoiner QUERY_JOINER =
+      Joiner.on('&').withKeyValueSeparator("=");
 
   private static final CharMatcher USER_PASS_SEPARATOR = CharMatcher.is(':');
   private static final CharMatcher VAR_START = CharMatcher.anyOf(":*");
+
+  private static final int UNSPECIFIED_PORT = -1;
 
   private URI pattern;
   private String patternPath;
@@ -93,6 +98,38 @@ public class URIPattern {
   @Override
   public int hashCode() {
     return Objects.hashCode(pattern);
+  }
+
+  /**
+   * Constructs a {@link URI} that matches this pattern from the given options.
+   *
+   * @param options a map of variable and
+   * @return a {@link URI} that matches this pattern
+   * @throws IllegalArgumentException if the URI cannot be constructed
+   */
+  public URI construct(Map<String, String> options) {
+    // make a copy that can be modified
+    Map<String, String> uriData = Maps.newHashMap(options);
+    try {
+      // scheme should always be present, but default if necessary
+      String scheme = defaults.get(SCHEME);
+      if (uriData.containsKey(SCHEME)) {
+        scheme = uriData.remove(SCHEME);
+      }
+      if (pattern.isOpaque()) {
+        String path = constructPath(uriData, patternPath);
+        String query = constructQuery(uriData, defaults);
+        return new URI(scheme, path + (query == null ? "" : "?" + query), null);
+      } else {
+        return new URI(scheme, constructUserInfo(uriData, defaults),
+            removeNonDefault(HOST, uriData, defaults),
+            constructPort(uriData, defaults),
+            constructPath(uriData, patternPath),
+            constructQuery(uriData, defaults), null);
+      }
+    } catch (URISyntaxException ex) {
+      throw new IllegalArgumentException("Could not build URI", ex);
+    }
   }
 
   /**
@@ -311,5 +348,91 @@ public class URIPattern {
     if (query != null) {
       storage.putAll(QUERY_SPLITTER.split(query));
     }
+  }
+
+  private static String removeNonDefault(String key,
+                                         Map<String, String> options,
+                                         Map<String, String> defaults) {
+    String defaultValue = defaults.get(key);
+    if (options.containsKey(key)) {
+      String value = options.remove(key);
+      if (!defaultValue.equals(value)) {
+        return value;
+      }
+    }
+    // return null to default the value when parsed
+    return null;
+  }
+
+  private static String constructQuery(Map<String, String> uriOptions,
+                                       Map<String, String> defaults) {
+    // remove any default values
+    for (String key : defaults.keySet()) {
+      if (uriOptions.containsKey(key)) {
+        if (defaults.get(key).equals(uriOptions.get(key))) {
+          uriOptions.remove(key); // discard default value
+        }
+      }
+    }
+    if (uriOptions.isEmpty()) {
+      return null;
+    }
+    return QUERY_JOINER.join(uriOptions);
+  }
+
+  private static String constructPath(Map<String, String> match,
+                                      String pattern) {
+    LinkedList<String> patternParts = Lists.newLinkedList(
+        PATH_SPLITTER.split(pattern));
+    List<String> pathParts = Lists
+        .newArrayListWithExpectedSize(patternParts.size());
+    for (String part : patternParts) {
+      if (!part.isEmpty()) {
+        // only supports simple matches, like matching
+        if (VAR_START.matches(part.charAt(0))) {
+          String name = part.substring(1);
+          if (match.containsKey(name)) {
+            pathParts.add(match.remove(name));
+          } else if (!part.startsWith("*")) {
+            // required variable is missing
+            throw new IllegalArgumentException(
+                "Missing required option: " + name);
+          }
+        } else {
+          // it is a required URI part
+          pathParts.add(part);
+        }
+      } else {
+        // preserve additional slashes in paths
+        pathParts.add(part);
+      }
+    }
+    return PATH_JOINER.join(pathParts);
+  }
+
+  private static int constructPort(Map<String, String> uriOptions,
+                                   Map<String, String> defaults) {
+    String portStr = removeNonDefault(PORT, uriOptions, defaults);
+    if (portStr != null) {
+      try {
+        return Integer.parseInt(portStr);
+      } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Invalid port: " + portStr, e);
+      }
+    }
+    return UNSPECIFIED_PORT;
+  }
+
+  private static String constructUserInfo(Map<String, String> uriOptions,
+                                          Map<String, String> defaults) {
+    String username = removeNonDefault(USERNAME, uriOptions, defaults);
+    String password = removeNonDefault(PASSWORD, uriOptions, defaults);
+    if (username != null) {
+      if (password != null) {
+        return username + ":" + password;
+      }
+      return username;
+    }
+    return null;
   }
 }
