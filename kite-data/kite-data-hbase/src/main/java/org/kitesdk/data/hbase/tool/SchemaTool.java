@@ -123,45 +123,27 @@ public class SchemaTool {
       schemaStrings = getSchemaStringsFromDir(new File(schemaDirectory));
     }
 
-    Map<String, String> tableKeySchemaMap = new HashMap<String, String>();
     Map<String, List<String>> tableEntitySchemaMap = new HashMap<String, List<String>>();
     for (String schemaString : schemaStrings) {
-      String name = getEntityNameFromSchemaString(schemaString);
       List<String> tables = getTablesFromSchemaString(schemaString);
-      if (name.endsWith("StorageKey")) {
-        for (String table : tables) {
-          if (tableKeySchemaMap.containsKey(table)) {
-            String msg = "Multiple keys for table: " + table;
-            LOG.error(msg);
-            throw new ValidationException(msg);
-          }
-          LOG.debug("Adding key to tableKeySchemaMap for table: " + table
-              + ". " + schemaString);
-          tableKeySchemaMap.put(table, schemaString);
-        }
-      } else {
-        for (String table : tables) {
-          if (tableEntitySchemaMap.containsKey(table)) {
-            tableEntitySchemaMap.get(table).add(schemaString);
-          } else {
-            List<String> entityList = new ArrayList<String>();
-            entityList.add(schemaString);
-            tableEntitySchemaMap.put(table, entityList);
-          }
+      for (String table : tables) {
+        if (tableEntitySchemaMap.containsKey(table)) {
+          tableEntitySchemaMap.get(table).add(schemaString);
+        } else {
+          List<String> entityList = new ArrayList<String>();
+          entityList.add(schemaString);
+          tableEntitySchemaMap.put(table, entityList);
         }
       }
+
     }
 
     for (Entry<String, List<String>> entry : tableEntitySchemaMap.entrySet()) {
       String table = entry.getKey();
       List<String> entitySchemas = entry.getValue();
-      if (!tableKeySchemaMap.containsKey(table)) {
-        String msg = "No StorageKey Schema For Table: " + table;
-        LOG.error(msg);
-        throw new DatasetException(msg);
-      }
       if (entitySchemas.size() == 0) {
-        String msg = "StorageKey, but no entity schemas for Table: " + table;
+        String msg = "Table requested, but no entity schemas for Table: "
+            + table;
         LOG.error(msg);
         throw new ValidationException(msg);
       }
