@@ -41,6 +41,9 @@ public class Registration {
   private static final Map<URIPattern, DatasetBuilder>
       DATASET_BUILDERS = Maps.newLinkedHashMap();
 
+  private static final Map<URIPattern, URIPattern>
+      REPO_TO_DATASET_PATTERNS = Maps.newLinkedHashMap();
+
   private static class DatasetBuilder {
     private static final String DATASET_NAME_OPTION = "dataset";
     private final OptionBuilder<DatasetRepository> repoBuilder;
@@ -76,6 +79,26 @@ public class Registration {
                               OptionBuilder<DatasetRepository> repoBuilder) {
     registerRepoURI(repoPattern, repoBuilder);
     registerDatasetURI(datasetPattern, new DatasetBuilder(repoBuilder));
+    REPO_TO_DATASET_PATTERNS.put(repoPattern, datasetPattern);
+  }
+
+  public static Pair<URIPattern, Map<String, String>> lookupPatternByRepoUri(URI uri) {
+    for (URIPattern pattern : REPO_TO_DATASET_PATTERNS.keySet()) {
+      Map<String, String> match = pattern.getMatch(uri);
+      if (match != null) {
+        URIPattern datasetPattern = REPO_TO_DATASET_PATTERNS.get(pattern);
+        return Pair.of(datasetPattern, match);
+      }
+    }
+    throw new IllegalArgumentException("Unknown repository URI: " + uri);
+  }
+
+  // TODO: move this to the URI builder
+  public static URI datasetUri(URI repoUri, String datasetName) {
+    Pair<URIPattern, Map<String, String>> pair = lookupPatternByRepoUri(repoUri);
+    Map<String, String> uriData = pair.second();
+    uriData.put("dataset", datasetName);
+    return pair.first().construct(uriData);
   }
 
   /**
