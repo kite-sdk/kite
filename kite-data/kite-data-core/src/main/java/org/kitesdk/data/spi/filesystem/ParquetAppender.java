@@ -22,7 +22,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.kitesdk.compat.Hadoop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parquet.avro.AvroParquetWriter;
@@ -54,12 +53,7 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
   public void open() throws IOException {
     CompressionCodecName codecName = CompressionCodecName.UNCOMPRESSED;
     if (enableCompression) {
-      if (Hadoop.SnappyCodec.isSnappyNative.<Boolean>invoke(fileSystem.getConf())) {
-        codecName = CompressionCodecName.SNAPPY;
-      } else {
-        LOG.warn("Compression enabled, but Snappy native code not loaded. " +
-            "Parquet file will not be compressed.");
-      }
+      codecName = CompressionCodecName.SNAPPY;
     }
     avroParquetWriter = new AvroParquetWriter<E>(fileSystem.makeQualified(path),
         schema, codecName, DEFAULT_BLOCK_SIZE,
