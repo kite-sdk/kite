@@ -67,7 +67,7 @@ public class TestDeleteDatasetCommand {
 
   @Test
   public void testBasicUse() throws Exception {
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.run();
     verify(getMockRepo()).delete("users");
     verify(console).debug(contains("Deleted"), eq("users"));
@@ -75,7 +75,7 @@ public class TestDeleteDatasetCommand {
 
   @Test
   public void testMultipleDatasets() throws Exception {
-    command.datasetNames = Lists.newArrayList("users", "moreusers");
+    command.datasets = Lists.newArrayList("users", "moreusers");
     command.run();
     verify(getMockRepo()).delete("users");
     verify(console).debug(contains("Deleted"), eq("users"));

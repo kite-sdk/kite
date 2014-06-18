@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.kitesdk.data.spi.filesystem.CSVProperties;
 import org.kitesdk.data.spi.filesystem.CSVUtil;
 import org.slf4j.Logger;

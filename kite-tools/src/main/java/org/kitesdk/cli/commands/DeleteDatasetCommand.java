@@ -21,13 +21,14 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
 import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.Datasets;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Delete a dataset and its metadata")
 public class DeleteDatasetCommand extends BaseDatasetCommand {
 
   @Parameter(description = "<dataset names>")
-  List<String> datasetNames;
+  List<String> datasets;
 
   public DeleteDatasetCommand(Logger console) {
     super(console);
@@ -37,13 +38,18 @@ public class DeleteDatasetCommand extends BaseDatasetCommand {
   public int run() throws IOException {
     DatasetRepository repo = getDatasetRepository();
 
-    if (datasetNames == null || datasetNames.isEmpty()) {
+    if (datasets == null || datasets.isEmpty()) {
       throw new IllegalArgumentException("No dataset names were specified.");
     }
 
-    for (String datasetName : datasetNames) {
-      repo.delete(datasetName);
-      console.debug("Deleted dataset {}", datasetName);
+    for (String datasetUriOrName : datasets) {
+      try {
+        Datasets.delete(datasetUriOrName);
+      } catch (IllegalArgumentException _) {
+        // Not a "dataset" or "view" URI, use the default repository
+        repo.delete(datasetUriOrName);
+      }
+      console.debug("Deleted dataset {}", datasetUriOrName);
     }
 
     return 0;

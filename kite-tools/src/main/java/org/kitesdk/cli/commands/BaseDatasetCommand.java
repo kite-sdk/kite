@@ -21,11 +21,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import java.util.List;
-import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.conf.Configuration;
-import org.kitesdk.cli.Command;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.Datasets;
+import org.kitesdk.data.View;
 import org.slf4j.Logger;
 
 abstract class BaseDatasetCommand extends BaseCommand {
@@ -60,13 +59,26 @@ abstract class BaseDatasetCommand extends BaseCommand {
   String repoURI = null;
 
   protected final Logger console;
+  private DatasetRepository repo = null;
 
   public BaseDatasetCommand(Logger console) {
     this.console = console;
   }
 
-  DatasetRepository getDatasetRepository() {
-    return DatasetRepositories.open(buildRepoURI());
+  protected DatasetRepository getDatasetRepository() {
+    if (repo == null) {
+      this.repo = DatasetRepositories.open(buildRepoURI());
+    }
+    return repo;
+  }
+
+  protected <E> View<E> load(String uriOrName) {
+    try {
+      return Datasets.<E, View<E>>load(uriOrName);
+    } catch (IllegalArgumentException _) {
+      // URI lookup failed, not a "dataset" or "view" URI
+      return getDatasetRepository().load(uriOrName);
+    }
   }
 
   @VisibleForTesting

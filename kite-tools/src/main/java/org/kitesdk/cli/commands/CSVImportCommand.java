@@ -34,6 +34,7 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.View;
 import org.kitesdk.data.spi.ColumnMappingParser;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.filesystem.CSVProperties;
@@ -89,11 +90,10 @@ public class CSVImportCommand extends BaseDatasetCommand {
         .charset(charsetName)
         .build();
 
-    String datasetName = targets.get(1);
+    String dataset = targets.get(1);
 
-    DatasetRepository targetRepo = getDatasetRepository();
-    Dataset<Object> target = targetRepo.load(datasetName);
-    Schema datasetSchema = target.getDescriptor().getSchema();
+    View<Object> target = load(dataset);
+    Schema datasetSchema = target.getDataset().getDescriptor().getSchema();
 
     // TODO: replace this with a temporary Dataset from a FS repo
     // TODO: CDK-92: always use GenericRecord?
@@ -150,7 +150,7 @@ public class CSVImportCommand extends BaseDatasetCommand {
     }
 
     if (count > 0) {
-      console.info("Added {} records to dataset \"{}\"", count, datasetName);
+      console.info("Added {} records to dataset \"{}\"", count, dataset);
     }
 
     // in the future use: Jobs.copy(conf, csvSourceAsDataset, target) ? 0 : 1;

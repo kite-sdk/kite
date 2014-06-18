@@ -74,7 +74,7 @@ public class TestCreateDatasetCommand {
   @Test
   public void testBasicUse() throws Exception {
     command.avroSchemaFile = "resource:test-schemas/user.avsc";
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.run();
 
     DatasetDescriptor expectedDescriptor = new DatasetDescriptor.Builder()
@@ -88,7 +88,7 @@ public class TestCreateDatasetCommand {
   @Test
   public void testParquetFormat() throws Exception {
     command.avroSchemaFile = "resource:test-schemas/user.avsc";
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.format = "parquet";
     command.run();
 
@@ -104,7 +104,7 @@ public class TestCreateDatasetCommand {
   @Test
   public void testUnrecognizedFormat() throws Exception {
     command.avroSchemaFile = "resource:test-schemas/user.avsc";
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.format = "nosuchformat";
     TestHelpers.assertThrows("Should fail on invalid format",
         IllegalArgumentException.class, new Callable() {
@@ -120,7 +120,7 @@ public class TestCreateDatasetCommand {
   @Test
   public void testNonExistentAvroSchemaFile() throws Exception {
     command.avroSchemaFile = "nonexistent.avsc";
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     TestHelpers.assertThrows("Should fail on missing schema",
         FileNotFoundException.class, new Callable() {
           @Override
@@ -135,7 +135,7 @@ public class TestCreateDatasetCommand {
   @Test
   public void testMultipleDatasets() throws Exception {
     command.avroSchemaFile = "test-schemas/user.avsc";
-    command.datasetNames = Lists.newArrayList("users", "moreusers");
+    command.datasets = Lists.newArrayList("users", "moreusers");
     TestHelpers.assertThrows("Should reject multiple dataset names",
         IllegalArgumentException.class, new Callable() {
           @Override

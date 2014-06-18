@@ -18,25 +18,17 @@ package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
-import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.kitesdk.data.DatasetRepository;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Show the schema for a Dataset")
 public class SchemaCommand extends BaseDatasetCommand {
 
   @Parameter(description = "<dataset name>")
-  List<String> datasetNames;
+  List<String> datasets;
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="UWF_NULL_FIELD",
@@ -55,11 +47,11 @@ public class SchemaCommand extends BaseDatasetCommand {
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(
-        datasetNames != null && !datasetNames.isEmpty(),
+        datasets != null && !datasets.isEmpty(),
         "Missing dataset name");
-    DatasetRepository repo = getDatasetRepository();
-    if (datasetNames.size() == 1) {
-      String schema = repo.load(datasetNames.get(0))
+    if (datasets.size() == 1) {
+      String schema = load(datasets.get(0))
+          .getDataset()
           .getDescriptor()
           .getSchema()
           .toString(!minimize);
@@ -68,8 +60,9 @@ public class SchemaCommand extends BaseDatasetCommand {
     } else {
       Preconditions.checkArgument(outputPath == null,
           "Cannot output multiple schemas to one file");
-      for (String name : datasetNames) {
-        console.info("Dataset \"{}\" schema: {}", name, repo.load(name)
+      for (String name : datasets) {
+        console.info("Dataset \"{}\" schema: {}", name, load(name)
+            .getDataset()
             .getDescriptor()
             .getSchema()
             .toString(!minimize));

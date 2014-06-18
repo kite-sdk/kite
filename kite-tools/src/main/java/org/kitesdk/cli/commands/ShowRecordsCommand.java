@@ -23,16 +23,15 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import java.io.IOException;
 import java.util.List;
-import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.View;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Print the first n records in a Dataset")
 public class ShowRecordsCommand extends BaseDatasetCommand {
 
   @Parameter(description = "<dataset name>")
-  List<String> datasetNames;
+  List<String> datasets;
 
   @Parameter(names={"-n", "--num-records"},
       description="The number of records to print")
@@ -45,15 +44,14 @@ public class ShowRecordsCommand extends BaseDatasetCommand {
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(
-        datasetNames != null && !datasetNames.isEmpty(),
+        datasets != null && !datasets.isEmpty(),
         "Missing dataset name");
-    Preconditions.checkArgument(datasetNames.size() == 1,
+    Preconditions.checkArgument(datasets.size() == 1,
         "Only one dataset name can be given");
 
-    DatasetRepository repo = getDatasetRepository();
     // TODO: CDK-92: always use GenericRecord to have consistent record strings
 
-    Dataset<Object> dataset = repo.load(datasetNames.get(0));
+    View<Object> dataset = load(datasets.get(0));
     DatasetReader<Object> reader = dataset.newReader();
     boolean threw = true;
     try {

@@ -78,7 +78,7 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
   @Test
   public void testBasicUse() throws Exception {
     command.avroSchemaFile = "resource:test-schemas/user.avsc";
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.run();
 
     DatasetDescriptor expectedDescriptor = new DatasetDescriptor.Builder()
@@ -97,7 +97,7 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
     ByteStreams.copy(Resources.getResource("test-schemas/user.avsc").openStream(), out);
     out.close();
     command.avroSchemaFile = avsc;
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.run();
 
     DatasetDescriptor expectedDescriptor = new DatasetDescriptor.Builder()
@@ -116,7 +116,7 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
     ByteStreams.copy(Resources.getResource("test-schemas/user.avsc").openStream(), out);
     out.close();
     command.avroSchemaFile = avsc;
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.run();
 
     DatasetDescriptor expectedDescriptor = new DatasetDescriptor.Builder()

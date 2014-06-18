@@ -222,7 +222,7 @@ public class TestSchemaCommandCluster extends MiniDFSTest {
 
     SchemaCommand command = new SchemaCommand(console);
     command.setConf(getConfiguration());
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.outputPath = "target/user.avsc";
     command.repoURI = repoURI;
     int rc = command.run();
@@ -247,7 +247,7 @@ public class TestSchemaCommandCluster extends MiniDFSTest {
     String hdfsSchemaPath = "hdfs:/tmp/schemas/user.avsc";
     SchemaCommand command = new SchemaCommand(console);
     command.setConf(getConfiguration());
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.outputPath = hdfsSchemaPath;
     command.repoURI = repoURI;
     int rc = command.run();

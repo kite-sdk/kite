@@ -20,7 +20,6 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.util.Random;
 import java.util.concurrent.Callable;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -73,7 +72,7 @@ public class TestShowRecordsCommand {
 
   @Test
   public void testDefaultArgs() throws Exception {
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.run();
     verify(console).trace(contains("repo:file:target/data"));
     verify(console).info(
@@ -85,7 +84,7 @@ public class TestShowRecordsCommand {
 
   @Test
   public void testNumRecords() throws Exception {
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.numRecords = 1;
     command.run();
     verify(console).trace(contains("repo:file:target/data"));
@@ -96,7 +95,7 @@ public class TestShowRecordsCommand {
 
   @Test
   public void testZeroRecords() throws Exception {
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.numRecords = 0;
     command.run();
     verify(console).trace(contains("repo:file:target/data"));
@@ -105,7 +104,7 @@ public class TestShowRecordsCommand {
 
   @Test
   public void testNegativeNumRecords() throws Exception {
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.numRecords = -1;
     command.run();
     verify(console).trace(contains("repo:file:target/data"));
@@ -114,7 +113,7 @@ public class TestShowRecordsCommand {
 
   @Test
   public void testMissingDataset() throws Exception {
-    command.datasetNames= Lists.newArrayList("notadataset");
+    command.datasets = Lists.newArrayList("notadataset");
     TestHelpers.assertThrows("Should complain about missing dataset",
         DatasetNotFoundException.class, new Callable() {
           @Override

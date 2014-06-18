@@ -63,7 +63,7 @@ public class TestSchemaCommand {
 
   @Test
   public void testSchemaStdout() throws Exception {
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);
     verify(console).info(argThat(TestUtil.matchesSchema(schema)));
@@ -74,7 +74,7 @@ public class TestSchemaCommand {
   @Test
   public void testMultipleSchemasStdout() throws Exception {
     TestUtil.run("create", "users_2", "--schema", "resource:schema/user.avsc");
-    command.datasetNames = Lists.newArrayList("users", "users_2");
+    command.datasets = Lists.newArrayList("users", "users_2");
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);
     verify(console).info(anyString(),
@@ -87,7 +87,7 @@ public class TestSchemaCommand {
 
   @Test
   public void testSchemaToFile() throws Exception {
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.outputPath = "target/user.avsc";
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);
@@ -101,7 +101,7 @@ public class TestSchemaCommand {
 
   @Test
   public void testMultipleSchemasToFileFails() throws Exception {
-    command.datasetNames = Lists.newArrayList("users", "users_2");
+    command.datasets = Lists.newArrayList("users", "users_2");
     command.outputPath = "target/user_schemas.avsc";
     TestHelpers.assertThrows("Should reject saving multiple schemas in a file",
         IllegalArgumentException.class, new Callable<Void>() {
@@ -111,13 +111,12 @@ public class TestSchemaCommand {
         return null;
       }
     });
-    verify(console).trace(contains("repo:hive"));
     verifyNoMoreInteractions(console);
   }
 
   @Test
   public void testMinimize() throws Exception {
-    command.datasetNames = Lists.newArrayList("users");
+    command.datasets = Lists.newArrayList("users");
     command.minimize = true;
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);

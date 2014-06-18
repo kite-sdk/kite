@@ -20,8 +20,9 @@ import com.beust.jcommander.Parameters;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
+import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Formats;
 import org.slf4j.Logger;
 
@@ -29,7 +30,7 @@ import org.slf4j.Logger;
 public class CreateDatasetCommand extends BaseDatasetCommand {
 
   @Parameter(description = "<dataset name>")
-  List<String> datasetNames;
+  List<String> datasets;
 
   @Parameter(names = {"-s", "--schema"}, required=true,
       description = "The file containing the Avro schema.")
@@ -49,12 +50,10 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
 
   @Override
   public int run() throws IOException {
-    if (datasetNames == null || datasetNames.size() != 1) {
+    if (datasets == null || datasets.size() != 1) {
       throw new IllegalArgumentException(
           "Exactly one dataset name must be specified.");
     }
-
-    DatasetRepository repo = getDatasetRepository();
 
     DatasetDescriptor.Builder descriptorBuilder = new DatasetDescriptor.Builder();
 
@@ -72,8 +71,14 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
       descriptorBuilder.partitionStrategy(open(partitionStrategyFile));
     }
 
-    repo.create(datasetNames.get(0), descriptorBuilder.build());
-    console.debug("Created dataset {}", datasetNames.get(0));
+    DatasetDescriptor descriptor = descriptorBuilder.build();
+    try {
+      Datasets.<Object, Dataset<Object>> create(datasets.get(0), descriptor);
+    } catch (IllegalArgumentException _) {
+      // Not a "dataset" or "view" URI, use the default repository
+      getDatasetRepository().create(datasets.get(0), descriptor);
+    }
+    console.debug("Created dataset {}", datasets.get(0));
 
     return 0;
   }
