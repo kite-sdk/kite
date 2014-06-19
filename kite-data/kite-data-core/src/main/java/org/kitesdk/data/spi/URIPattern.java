@@ -356,7 +356,7 @@ public class URIPattern {
     String defaultValue = defaults.get(key);
     if (options.containsKey(key)) {
       String value = options.remove(key);
-      if (!defaultValue.equals(value)) {
+      if (defaultValue == null || !defaultValue.equals(value)) {
         return value;
       }
     }
@@ -369,7 +369,8 @@ public class URIPattern {
     // remove any default values
     for (String key : defaults.keySet()) {
       if (uriOptions.containsKey(key)) {
-        if (defaults.get(key).equals(uriOptions.get(key))) {
+        String defaultValue = defaults.get(key);
+        if (defaultValue != null && defaultValue.equals(uriOptions.get(key))) {
           uriOptions.remove(key); // discard default value
         }
       }
