@@ -15,8 +15,8 @@
  */
 package org.kitesdk.data.hcatalog;
 
-import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.spi.MetadataProvider;
 
 class HCatalogExternalDatasetRepository extends HCatalogAbstractDatasetRepository {
@@ -24,9 +24,17 @@ class HCatalogExternalDatasetRepository extends HCatalogAbstractDatasetRepositor
   /**
    * Create an HCatalog dataset repository with external tables.
    */
-  @SuppressWarnings("deprecation")
-  HCatalogExternalDatasetRepository(Configuration conf, MetadataProvider provider, URI repositoryUri) {
-    super(conf, provider, repositoryUri);
+  HCatalogExternalDatasetRepository(Configuration conf, Path rootDirectory) {
+    super(conf, rootDirectory,
+        new HCatalogExternalMetadataProvider(conf, rootDirectory));
+  }
+
+  /**
+   * Create an HCatalog dataset repository with external tables.
+   */
+  HCatalogExternalDatasetRepository(Configuration conf, Path rootDirectory,
+                                    MetadataProvider provider) {
+    super(conf, rootDirectory, provider);
   }
 
 }

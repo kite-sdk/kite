@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.hcatalog;
 
-import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.hadoop.conf.Configuration;
@@ -24,7 +23,6 @@ import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.hcatalog.impl.Loader;
 import org.kitesdk.data.spi.MetadataProvider;
 
 /**
@@ -54,8 +52,15 @@ public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository
   /**
    * Create an HCatalog dataset repository with managed tables.
    */
-  HCatalogDatasetRepository(Configuration conf, MetadataProvider provider, URI repositoryUri) {
-    super(conf, provider, repositoryUri);
+  HCatalogDatasetRepository(Configuration conf) {
+    super(conf, new HCatalogManagedMetadataProvider(conf));
+  }
+
+  /**
+   * Create an HCatalog dataset repository with managed tables.
+   */
+  HCatalogDatasetRepository(Configuration conf, MetadataProvider provider) {
+    super(conf, provider);
   }
 
   @Override
@@ -133,44 +138,10 @@ public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository
       }
 
       if (rootDirectory != null) {
-        // external
-        URI repositoryUri = getRepositoryUri(configuration, rootDirectory);
-        HCatalogMetadataProvider metadataProvider =
-            new HCatalogExternalMetadataProvider(configuration, rootDirectory);
-        return new HCatalogExternalDatasetRepository(configuration, metadataProvider,
-            repositoryUri);
+        return new HCatalogExternalDatasetRepository(configuration, rootDirectory);
       } else {
-        // managed
-        URI repositoryUri = getRepositoryUri(configuration, null);
-        HCatalogMetadataProvider metadataProvider =
-            new HCatalogManagedMetadataProvider(configuration);
-        return new HCatalogDatasetRepository(configuration, metadataProvider, repositoryUri);
+        return new HCatalogDatasetRepository(configuration);
       }
-    }
-
-    private URI getRepositoryUri(Configuration conf, Path rootDirectory) {
-      String hiveMetaStoreUriProperty = conf.get(Loader.HIVE_METASTORE_URI_PROP);
-      StringBuilder uri = new StringBuilder("repo:hive");
-      if (hiveMetaStoreUriProperty != null) {
-        URI hiveMetaStoreUri = URI.create(hiveMetaStoreUriProperty);
-        Preconditions.checkArgument(hiveMetaStoreUri.getScheme().equals("thrift"),
-            "Metastore URI scheme must be 'thrift'.");
-        uri.append("://").append(hiveMetaStoreUri.getAuthority());
-      }
-      if (rootDirectory != null) {
-        if (hiveMetaStoreUriProperty == null) {
-          uri.append(":");
-        }
-        URI rootUri = rootDirectory.toUri();
-        uri.append(rootUri.getPath());
-        if (rootUri.getHost() != null) {
-          uri.append("?").append("hdfs:host").append("=").append(rootUri.getHost());
-          if (rootUri.getPort() != -1) {
-            uri.append("&").append("hdfs:port").append("=").append(rootUri.getPort());
-          }
-        }
-      }
-      return URI.create(uri.toString());
     }
   }
 }

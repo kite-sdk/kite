@@ -47,7 +47,8 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   public DatasetRepository newRepo(MetadataProvider provider) {
     // this purposely does not set the Configuration to test that the code
     // relies on filesystem URIs set in the DatasetDescriptor.
-    return new FileSystemDatasetRepository(new Configuration(), provider);
+    return new FileSystemDatasetRepository(
+        new Configuration(), testDirectory, provider);
   }
 
   @Test

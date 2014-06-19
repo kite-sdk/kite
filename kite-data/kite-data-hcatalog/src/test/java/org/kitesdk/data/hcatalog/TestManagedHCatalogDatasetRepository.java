@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.hcatalog;
 
-import java.net.URI;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.spi.filesystem.TestFileSystemDatasetRepository;
 import java.io.IOException;
@@ -40,7 +39,7 @@ public class TestManagedHCatalogDatasetRepository extends TestFileSystemDatasetR
   @Override
   public DatasetRepository newRepo(MetadataProvider provider) {
     // use null URI because TestDatasetRepositories expects no URI
-    return new HCatalogDatasetRepository(conf, provider, null);
+    return new HCatalogDatasetRepository(conf, provider);
   }
 
   @Override

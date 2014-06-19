@@ -367,9 +367,10 @@ public class URIPattern {
   private static String constructQuery(Map<String, String> uriOptions,
                                        Map<String, String> defaults) {
     // remove any default values
-    for (String key : defaults.keySet()) {
+    for (Map.Entry<String, String> entry : defaults.entrySet()) {
+      String key = entry.getKey();
       if (uriOptions.containsKey(key)) {
-        String defaultValue = defaults.get(key);
+        String defaultValue = entry.getValue();
         if (defaultValue != null && defaultValue.equals(uriOptions.get(key))) {
           uriOptions.remove(key); // discard default value
         }

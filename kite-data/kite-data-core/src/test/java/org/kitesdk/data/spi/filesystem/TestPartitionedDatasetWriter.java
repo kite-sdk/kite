@@ -37,18 +37,15 @@ public class TestPartitionedDatasetWriter {
   private Configuration conf;
   private FileSystem fileSystem;
   private Path testDirectory;
-  private MetadataProvider testProvider;
   private FileSystemDatasetRepository repo;
   private PartitionedDatasetWriter<Object> writer;
 
   @Before
-  @SuppressWarnings({"unchecked", "deprecation"})
   public void setUp() throws IOException {
     this.conf = new Configuration();
     this.fileSystem = FileSystem.get(conf);
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    this.testProvider = new FileSystemMetadataProvider(conf, testDirectory);
-    this.repo = new FileSystemDatasetRepository(conf, testProvider);
+    this.repo = new FileSystemDatasetRepository(conf, testDirectory);
 
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", 2).build();
@@ -58,7 +55,8 @@ public class TestPartitionedDatasetWriter {
             .schema(USER_SCHEMA)
             .partitionStrategy(partitionStrategy)
             .build());
-    writer = new PartitionedDatasetWriter<Object>(new FileSystemView(users));
+    writer = new PartitionedDatasetWriter<Object>(
+        new FileSystemView<Object>(users));
   }
 
   @After
