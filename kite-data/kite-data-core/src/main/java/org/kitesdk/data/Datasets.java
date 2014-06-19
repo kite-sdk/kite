@@ -17,9 +17,7 @@
 package org.kitesdk.data;
 
 import com.google.common.base.Preconditions;
-
 import java.net.URI;
-
 import org.kitesdk.data.spi.Registration;
 
 public class Datasets {
@@ -102,5 +100,4 @@ public class Datasets {
   public static <E, V extends View<E>> V view(String uriString) {
     return Datasets.<E, V>view(URI.create(uriString));
   }
-  
 }

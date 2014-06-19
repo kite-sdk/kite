@@ -5,6 +5,9 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.Datasets;
+import org.kitesdk.data.View;
 
 import com.google.common.collect.Maps;
 
@@ -17,10 +20,22 @@ public class URIBuilder {
   // LinkedHashMap preserves the order so that constructed URIs are more predictable
   private Map<String, String> equalityConstraints = Maps.newLinkedHashMap(); 
 
+  /**
+   * Constructs a builder based on the given repository URI and {@link Dataset#getName() dataset name}.
+   * 
+   * @param repoUri the {@link DatasetRepository} URI
+   * @param datasetName the {@link Dataset} name
+   */
   public URIBuilder(String repoUri, String datasetName) {
     this(URI.create(repoUri), datasetName);
   }
   
+  /**
+   * Constructs a builder based on the given repository URI and {@link Dataset#getName() dataset name}.
+   * 
+   * @param repoUri the {@link DatasetRepository} URI
+   * @param datasetName the {@link Dataset} name
+   */
   public URIBuilder(URI repoUri, String datasetName) {
     this.repoUri = repoUri;
     this.datasetName = datasetName;
@@ -39,7 +54,9 @@ public class URIBuilder {
   }
   
   /**
-   * Returns the URI encompassing the given constraints.
+   * Returns the URI encompassing the given constraints. The referenced
+   * {@link Dataset} or {@link View} may be loaded again with
+   * {@link Datasets#load(URI)} or {@link Datasets#view(URI)}.
    * 
    * @return the URI
    */
