@@ -119,13 +119,13 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository {
   public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
-    Preconditions.checkArgument(descriptor.getLocation() == null,
-        "Descriptor location cannot be set; " +
-        "it is assigned by the FileSystem implementation");
 
-    DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder(descriptor)
-        .location(pathForDataset(name)) // suggest a location for this dataset
-        .build();
+    DatasetDescriptor newDescriptor = descriptor;
+    if (descriptor.getLocation() == null) {
+      newDescriptor = new DatasetDescriptor.Builder(descriptor)
+          .location(pathForDataset(name)) // suggest a location for this dataset
+          .build();
+    }
 
     newDescriptor = metadataProvider.create(name, newDescriptor);
 
