@@ -18,26 +18,27 @@ package org.kitesdk.data;
 import java.net.URI;
 
 import org.junit.Test;
+import org.kitesdk.data.spi.URIBuilder;
 
 import junit.framework.Assert;
 
 public class TestDatasetsURIBuilder {
   @Test
   public void testBuildDatasetUri() {
-    URI uri = new Datasets.URIBuilder("repo:file:/tmp/data", "test-ds").build();
+    URI uri = new URIBuilder("repo:file:/tmp/data", "test-ds").build();
     Assert.assertEquals(URI.create("dataset:file:/tmp/data/test-ds"), uri);
   }
   
   @Test
   public void testBuildViewUri() {
-    URI uri = new Datasets.URIBuilder("repo:file:/tmp/data", "test-ds")
+    URI uri = new URIBuilder("repo:file:/tmp/data", "test-ds")
         .with("username", "bob").with("lastName", "Smith").build();
     Assert.assertEquals(URI.create("view:file:/tmp/data/test-ds?username=bob&lastName=Smith"), uri);
   }
   
   @Test
   public void testRepoUriHasQueryString() {
-    URI uri = new Datasets.URIBuilder("repo:file:/tmp/data?repoParam=x",
+    URI uri = new URIBuilder("repo:file:/tmp/data?repoParam=x",
         "test-ds").with("username", "bob").build();
     
     Assert.assertEquals(URI.create("view:file:/tmp/data/test-ds?repoParam=x&username=bob"), uri);

@@ -17,16 +17,10 @@
 package org.kitesdk.data;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
 
-import org.kitesdk.data.spi.Conversions;
-import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.Registration;
-import org.kitesdk.data.spi.URIPattern;
 
 public class Datasets {
 
@@ -107,59 +101,6 @@ public class Datasets {
    */
   public static <E, V extends View<E>> V view(String uriString) {
     return Datasets.<E, V>view(URI.create(uriString));
-  }
-  
-  /**
-   * Builds dataset and view URIs 
-   */
-  public static class URIBuilder {
-    private URI repoUri;
-    private String datasetName;
-    // LinkedHashMap preserves the order so that constructed URIs are more predictable
-    private Map<String, String> equalityConstraints = Maps.newLinkedHashMap(); 
-
-    public URIBuilder(String repoUri, String datasetName) {
-      this(URI.create(repoUri), datasetName);
-    }
-    
-    public URIBuilder(URI repoUri, String datasetName) {
-      this.repoUri = repoUri;
-      this.datasetName = datasetName;
-    }
-    
-    /**
-     * Adds a view constraint equivalent to {@link Dataset#with(String, Object)}
-     * 
-     * @param name the field name of the Entity
-     * @param value the field value
-     * @return this builder
-     */
-    public URIBuilder with(String name, Object value) {
-      equalityConstraints.put(name, Conversions.makeString(value));
-      return this;
-    }
-    
-    /**
-     * Returns the URI encompassing the given constraints.
-     * 
-     * @return the URI
-     */
-    public URI build() {
-      URI repoStorageUri = URI.create(repoUri.getRawSchemeSpecificPart());
-      Pair<URIPattern, Map<String, String>> pair =
-          Registration.lookupPatternByRepoUri(repoStorageUri);
-      Map<String, String> uriData = pair.second();
-      uriData.put("dataset", datasetName);
-      uriData.putAll(equalityConstraints);
-      try {
-        return new URI(
-            equalityConstraints.isEmpty() ? "dataset" : "view",
-            pair.first().construct(uriData).toString(),
-            null);
-      } catch (URISyntaxException e) {
-        throw new IllegalArgumentException("Could not build URI", e);
-      }
-    }
   }
   
 }
