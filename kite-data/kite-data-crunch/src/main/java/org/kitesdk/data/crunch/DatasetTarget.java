@@ -34,6 +34,7 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.View;
 import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
 import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
+import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 
 class DatasetTarget<E> implements MapReduceTarget {
@@ -68,8 +69,7 @@ class DatasetTarget<E> implements MapReduceTarget {
   }
 
   private String getRepositoryUri(Dataset<E> dataset) {
-    return dataset.getDescriptor().getProperty(
-        AbstractDatasetRepository.REPOSITORY_URI_PROPERTY_NAME);
+    return ((AbstractDataset<E>) dataset).getRepositoryUri();
   }
 
   @Override

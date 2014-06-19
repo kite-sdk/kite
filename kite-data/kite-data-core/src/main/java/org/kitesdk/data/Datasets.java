@@ -17,7 +17,13 @@
 package org.kitesdk.data;
 
 import com.google.common.base.Preconditions;
+
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.kitesdk.data.spi.Registration;
 
 public class Datasets {
@@ -100,4 +106,64 @@ public class Datasets {
   public static <E, V extends View<E>> V view(String uriString) {
     return Datasets.<E, V>view(URI.create(uriString));
   }
+  
+  /**
+   * Builds dataset and view URIs 
+   */
+  public static class URIBuilder {
+    private Dataset<?> dataset;
+    private Map<String, Object> equalityConstraints = new HashMap<String, Object>(); 
+
+    public URIBuilder(String repoUri, String datasetName) {
+      dataset = DatasetRepositories.open(repoUri).load(datasetName);
+    }
+    
+    public URIBuilder(URI repoUri, String datasetName) {
+      this(repoUri.toString(), datasetName);
+    }
+    
+    /**
+     * Adds a view constraint equivalent to {@link Dataset#with(String, Object)}
+     * 
+     * @param name the field name of the Entity
+     * @param value the field value
+     * @return this builder
+     */
+    public URIBuilder with(String name, Object value) {
+      equalityConstraints.put(name, value);
+      return this;
+    }
+    
+    /**
+     * Returns the URI encompassing the givne constraints.
+     * 
+     * @return the URI
+     */
+    public String build() {
+      URI datasetUri = URI.create(dataset.getUri());
+      if (equalityConstraints.isEmpty()) {
+        return datasetUri.toString();
+      }
+      
+      URI storageUri = URI.create(datasetUri.getRawSchemeSpecificPart());
+      String query = storageUri.getQuery();
+      StringBuilder queryBuilder = new StringBuilder(query == null ? "" : query);
+      for (Map.Entry<String, Object> entry : equalityConstraints.entrySet()) {
+        if (queryBuilder.length() > 0) {
+          queryBuilder.append("&");
+        }
+        queryBuilder.append(entry.getKey() + "=" + entry.getValue());
+      }
+      try {
+        return new URI("view:" + storageUri.getScheme(),
+            storageUri.getUserInfo(), storageUri.getHost(), storageUri.getPort(),
+            storageUri.getPath(), queryBuilder.toString(), storageUri.getFragment())
+            .toString();
+      } catch (URISyntaxException e) {
+        // mimicking behavior of URI.create()
+        throw new IllegalArgumentException(e);
+      }
+    }
+  }
+  
 }
