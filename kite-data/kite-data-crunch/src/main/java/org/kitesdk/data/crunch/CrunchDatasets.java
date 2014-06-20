@@ -20,7 +20,6 @@ import com.google.common.annotations.Beta;
 import org.apache.crunch.Target;
 import org.apache.crunch.io.ReadableSource;
 import org.kitesdk.data.Dataset;
-import org.kitesdk.data.Datasets;
 import org.kitesdk.data.View;
 
 /**
@@ -71,8 +70,7 @@ public class CrunchDatasets {
    * @return a {@link ReadableSource} for the view
    */
   public static <E> ReadableSource<E> asSource(URI uri, Class<E> type) {
-    View<E> view = Datasets.<E, View<E>>view(uri);
-    return new DatasetSourceTarget<E>(view, type);
+    return new DatasetSourceTarget<E>(uri, type);
   }
   
   /**
@@ -133,7 +131,6 @@ public class CrunchDatasets {
    * @return a {@link Target} for the dataset or view
    */
   public static Target asTarget(URI uri) {
-    View<Object> view = Datasets.view(uri);
-    return new DatasetTarget<Object>(view);
+    return new DatasetTarget<Object>(uri);
   }
 }
