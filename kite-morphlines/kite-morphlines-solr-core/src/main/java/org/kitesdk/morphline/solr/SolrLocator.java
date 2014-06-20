@@ -22,8 +22,10 @@ import java.net.MalformedURLException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.CloudSolrServer;
 import org.apache.solr.common.cloud.SolrZkClient;
+import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.schema.IndexSchema;
@@ -102,15 +104,20 @@ public class SolrLocator {
         throw new MorphlineRuntimeException(e);
       }
     } else {
+
+      if ( solrUrl == null && solrHomeDir !=null ) {
+          CoreContainer coreContainer = new CoreContainer(solrHomeDir);
+          EmbeddedSolrServer embeddedSolrServer = new EmbeddedSolrServer(coreContainer,collectionName);
+          return new SolrServerDocumentLoader(embeddedSolrServer, batchSize);
+      }
+
       if (solrUrl == null || solrUrl.length() == 0) {
         throw new MorphlineCompilationException("Missing parameter 'solrUrl'", config);
       }
       int solrServerNumThreads = 2;
       int solrServerQueueLength = solrServerNumThreads;
       SolrServer server = new SafeConcurrentUpdateSolrServer(solrUrl, solrServerQueueLength, solrServerNumThreads);
-      // SolrServer server = new HttpSolrServer(solrServerUrl);
-      // SolrServer server = new ConcurrentUpdateSolrServer(solrServerUrl, solrServerQueueLength, solrServerNumThreads);
-      // server.setParser(new XMLResponseParser()); // binary parser is used by default
+
       return new SolrServerDocumentLoader(server, batchSize);
     }
   }
