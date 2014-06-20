@@ -273,7 +273,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     URI sourceViewUri = new URIBuilder(repo.getUri(), "in").with("username",
         "test-0").build();
-    View<Record> inputView = Datasets.<Record, Dataset<Record>> view(sourceViewUri);
+    View<Record> inputView = Datasets.<Record, Dataset<Record>> load(sourceViewUri);
     Assert.assertEquals(1, datasetSize(inputView));
     
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
