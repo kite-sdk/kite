@@ -16,13 +16,17 @@
 
 package org.kitesdk.data;
 
+import com.google.common.collect.Lists;
 import java.net.URI;
+import java.util.Collection;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.spi.URIBuilder;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -410,6 +414,68 @@ public class TestDatasets {
         });
 
     verifyNoMoreInteractions(repo);
+  }
+
+  @Test
+  public void testListRejectsDatasetUri() {
+    TestHelpers.assertThrows("Should reject dataset URI",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            Datasets.list(new URIBuilder(repoUri, "test").build());
+          }
+        });
+    verifyNoMoreInteractions(repo);
+  }
+
+  @Test
+  public void testListRejectsViewUri() {
+    TestHelpers.assertThrows("Should reject dataset URI",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            Datasets.list(new URIBuilder(repoUri, "test")
+                .with("field", 34)
+                .build());
+          }
+        });
+    verifyNoMoreInteractions(repo);
+  }
+
+  @Test
+  public void testListRepoUri() {
+    when(repo.list()).thenReturn(Lists.newArrayList("a", "b", "c"));
+    List<URI> expected = Lists.newArrayList(
+        new URIBuilder(repoUri, "a").build(),
+        new URIBuilder(repoUri, "b").build(),
+        new URIBuilder(repoUri, "c").build()
+    );
+
+    Collection<URI> datasetUris = Datasets.list(repoUri);
+
+    verify(repo, times(2)).getUri(); // called in @Before and Datasets.list
+    verify(repo).list();
+    verifyNoMoreInteractions(repo);
+
+    Assert.assertEquals(expected, datasetUris);
+  }
+
+  @Test
+  public void testListStringRepoUri() {
+    when(repo.list()).thenReturn(Lists.newArrayList("a", "b", "c"));
+    List<URI> expected = Lists.newArrayList(
+        new URIBuilder(repoUri, "a").build(),
+        new URIBuilder(repoUri, "b").build(),
+        new URIBuilder(repoUri, "c").build()
+    );
+
+    Collection<URI> datasetUris = Datasets.list(repoUri.toString());
+
+    verify(repo, times(2)).getUri(); // called in @Before and Datasets.list
+    verify(repo).list();
+    verifyNoMoreInteractions(repo);
+
+    Assert.assertEquals(expected, datasetUris);
   }
 
   @Test

@@ -17,6 +17,7 @@
 package org.kitesdk.data;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -26,12 +27,14 @@ import org.kitesdk.data.spi.Conversions;
 import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.URIBuilder;
 
 public class Datasets {
 
   private static final String DATASET_NAME_OPTION = "dataset";
   private static final String DATASET_SCHEME = "dataset";
   private static final String VIEW_SCHEME = "view";
+  private static final String REPO_SCHEME = "repo";
 
   /**
    * Load a {@link Dataset} or {@link View} for the given {@link URI}.
@@ -278,6 +281,44 @@ public class Datasets {
    */
   public static boolean exists(String uri) {
     return exists(URI.create(uri));
+  }
+
+  /**
+   * List the {@link Dataset} URIs in the repository identified by the URI
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations. The repository
+   * URIs passed to this method must begin with "repo:".
+   *
+   * @param uri a {@code DatasetRepository} URI
+   * @return the URIs present in the {@code DatasetRepository}
+   */
+  public static Collection<URI> list(URI uri) {
+    boolean isRepo = REPO_SCHEME.equals(uri.getScheme());
+    Preconditions.checkArgument(isRepo, "Not a repository URI: " + uri);
+    DatasetRepository repo = Registration
+        .open(URI.create(uri.getRawSchemeSpecificPart()));
+
+    // build a URI for each dataset name
+    URI repoUri = repo.getUri();
+    List<URI> datasets = Lists.newArrayList();
+    for (String dataset : repo.list()) {
+      datasets.add(new URIBuilder(repoUri, dataset).build());
+    }
+
+    return datasets;
+  }
+
+  /**
+   * List the {@link Dataset} URIs in the repository identified by the URI string
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations. The repository
+   * URIs passed to this method must begin with "repo:".
+   *
+   * @param uri a {@code DatasetRepository} URI string
+   * @return the URIs present in the {@code DatasetRepository}
+   */
+  public static Collection<URI> list(String uri) {
+    return list(URI.create(uri));
   }
 
   @SuppressWarnings("unchecked")
