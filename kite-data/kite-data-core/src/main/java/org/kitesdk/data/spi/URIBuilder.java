@@ -76,7 +76,7 @@ public class URIBuilder {
   /**
    * Returns the URI encompassing the given constraints. The referenced
    * {@link Dataset} or {@link View} may be loaded again with
-   * {@link Datasets#load(URI)} or {@link Datasets#view(URI)}.
+   * {@link Datasets#load(URI)}.
    * 
    * @return the URI
    */

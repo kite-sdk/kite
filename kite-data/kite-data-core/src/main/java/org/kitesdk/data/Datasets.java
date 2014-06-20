@@ -18,6 +18,8 @@ package org.kitesdk.data;
 
 import com.google.common.base.Preconditions;
 import java.net.URI;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.apache.avro.Schema;
 import org.kitesdk.data.spi.Conversions;
@@ -59,19 +61,7 @@ public class Datasets {
     Dataset<E> dataset = repo.load(uriOptions.get(DATASET_NAME_OPTION));
 
     if (isView) {
-      RefinableView<E> view = dataset;
-      Schema schema = dataset.getDescriptor().getSchema();
-      // for each schema field, see if there is a query arg equality constraint
-      for (Schema.Field field : schema.getFields()) {
-        String name = field.name();
-        if (uriOptions.containsKey(name)) {
-          view = view.with(name, Conversions.convert(
-              uriOptions.get(name),
-              SchemaUtil.getClassForType(field.schema().getType())));
-        }
-      }
-      return (V) view;
-
+      return Datasets.<E, V> view(dataset, uriOptions);
     } else {
       // if the URI isn't a view URI, only load the dataset
       return (V) dataset;
@@ -140,15 +130,14 @@ public class Datasets {
    *
    * @param uri a {@code Dataset} or {@code View} URI.
    * @param <E> The type of entities stored in the {@code Dataset}.
-   * @param <D> The type of {@code Dataset} expected.
+   * @param <V> The type of {@code Dataset} or {@code View} expected.
    * @return a newly created {@code Dataset} responsible for the given URI.
    */
   @SuppressWarnings("unchecked")
-  public static <E, D extends Dataset<E>> D create(
-      URI uri, DatasetDescriptor descriptor) {
-    Preconditions.checkArgument(
-        DATASET_SCHEME.equals(uri.getScheme()) ||
-            VIEW_SCHEME.equals(uri.getScheme()),
+  public static <E, V extends View<E>> V create(URI uri, DatasetDescriptor descriptor) {
+    boolean isView = VIEW_SCHEME.equals(uri.getScheme());
+    Preconditions.checkArgument(isView ||
+            DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset or view URI: " + uri);
 
     Pair<DatasetRepository, Map<String, String>> pair =
@@ -156,7 +145,13 @@ public class Datasets {
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
-    return (D) repo.create(uriOptions.get(DATASET_NAME_OPTION), descriptor);
+    Dataset<E> dataset = repo.create(uriOptions.get(DATASET_NAME_OPTION), descriptor);
+
+    if (isView) {
+      return Datasets.<E, V> view(dataset, uriOptions);
+    } else {
+      return (V) dataset;
+    }
   }
 
   /**
@@ -167,11 +162,11 @@ public class Datasets {
    *
    * @param uri a {@code Dataset} or {@code View} URI string.
    * @param <E> The type of entities stored in the {@code Dataset}.
-   * @param <D> The type of {@code Dataset} expected.
+   * @param <V> The type of {@code Dataset} or {@code View} expected.
    * @return a newly created {@code Dataset} responsible for the given URI.
    */
-  public static <E, D extends Dataset<E>> D create(String uri, DatasetDescriptor descriptor) {
-    return Datasets.<E, D> create(URI.create(uri), descriptor);
+  public static <E, V extends View<E>> V create(String uri, DatasetDescriptor descriptor) {
+    return Datasets.<E, V> create(URI.create(uri), descriptor);
   }
 
   /**
@@ -189,8 +184,7 @@ public class Datasets {
   public static <E, D extends Dataset<E>> D update(
       URI uri, DatasetDescriptor descriptor) {
     Preconditions.checkArgument(
-        DATASET_SCHEME.equals(uri.getScheme()) ||
-            VIEW_SCHEME.equals(uri.getScheme()),
+        DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset or view URI: " + uri);
 
     Pair<DatasetRepository, Map<String, String>> pair =
@@ -249,5 +243,57 @@ public class Datasets {
    */
   public static boolean delete(String uri) {
     return delete(URI.create(uri));
+  }
+
+  /**
+   * Check if a {@link Dataset} identified by the given URI exists.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:".
+   *
+   * @param uri a {@code Dataset} URI.
+   * @return {@code true} if the dataset exists, {@code false} otherwise
+   */
+  public static boolean exists(URI uri) {
+    Preconditions.checkArgument(
+        DATASET_SCHEME.equals(uri.getScheme()),
+        "Not a dataset URI: " + uri);
+
+    Pair<DatasetRepository, Map<String, String>> pair =
+        Registration.lookupDatasetUri(URI.create(uri.getRawSchemeSpecificPart()));
+    DatasetRepository repo = pair.first();
+    Map<String, String> uriOptions = pair.second();
+
+    return repo.exists(uriOptions.get(DATASET_NAME_OPTION));
+  }
+
+  /**
+   * Check if a {@link Dataset} identified by the given URI string exists.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:".
+   *
+   * @param uri a {@code Dataset} URI string.
+   * @return {@code true} if the dataset exists, {@code false} otherwise
+   */
+  public static boolean exists(String uri) {
+    return exists(URI.create(uri));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <E, V extends View<E>> V view(Dataset<E> dataset,
+                                               Map<String, String> uriOptions) {
+    RefinableView<E> view = dataset;
+    Schema schema = dataset.getDescriptor().getSchema();
+    // for each schema field, see if there is a query arg equality constraint
+    for (Schema.Field field : schema.getFields()) {
+      String name = field.name();
+      if (uriOptions.containsKey(name)) {
+        view = view.with(name, Conversions.convert(
+            uriOptions.get(name),
+            SchemaUtil.getClassForType(field.schema().getType())));
+      }
+    }
+    return (V) view;
   }
 }
