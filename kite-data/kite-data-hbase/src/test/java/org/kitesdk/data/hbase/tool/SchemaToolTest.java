@@ -25,6 +25,7 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.PartitionKey;
@@ -43,30 +44,34 @@ import org.kitesdk.data.hbase.testing.HBaseTestUtils;
 public class SchemaToolTest {
   private static final String tableName = "simple";
   private static final String managedTableName = "managed_schemas";
-  private static final File simpleSchemaFile;
-  private static final String simpleSchema;
+  private static File simpleSchemaFile;
+  private static String simpleSchema;
 
   private HTablePool tablePool;
-
-  static {
-    try {
-      simpleSchema = AvroUtils.inputStreamToString(AvroDaoTest.class
-          .getResourceAsStream("/SchemaTool/SimpleHBaseRecord.avsc"));
-      simpleSchemaFile = FileUtils.toFile(AvroDaoTest.class
-          .getResource("/SchemaTool/SimpleHBaseRecord.avsc"));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
+  private SchemaManager manager;
+  private SchemaTool tool;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
+    simpleSchema = AvroUtils.inputStreamToString(AvroDaoTest.class
+        .getResourceAsStream("/SchemaTool/SimpleHBaseRecord.avsc"));
+    simpleSchemaFile = FileUtils.toFile(AvroDaoTest.class
+        .getResource("/SchemaTool/SimpleHBaseRecord.avsc"));
+    
     HBaseTestUtils.getMiniCluster();
   }
 
   @AfterClass
   public static void afterClass() throws Exception {
     HBaseTestUtils.util.deleteTable(Bytes.toBytes(tableName));
+  }
+  
+  @Before
+  public void before() throws Exception {
+    tablePool = new HTablePool(HBaseTestUtils.getConf(), 10);
+    manager = new DefaultSchemaManager(tablePool);
+    tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
+        manager);
   }
 
   @After
@@ -78,10 +83,6 @@ public class SchemaToolTest {
 
   @Test
   public void testMigrateDirectory() throws Exception {
-    tablePool = new HTablePool(HBaseTestUtils.getConf(), 10);
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
-    SchemaTool tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
-        manager);
     tool.createOrMigrateSchemaDirectory("classpath:SchemaTool", true);
 
     Dao<SimpleHBaseRecord> dao = new SpecificAvroDao<SimpleHBaseRecord>(
@@ -91,10 +92,6 @@ public class SchemaToolTest {
 
   @Test
   public void testMigrateFile() throws Exception {
-    tablePool = new HTablePool(HBaseTestUtils.getConf(), 10);
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
-    SchemaTool tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
-        manager);
     tool.createOrMigrateSchemaFile(tableName, simpleSchemaFile, true);
 
     Dao<SimpleHBaseRecord> dao = new SpecificAvroDao<SimpleHBaseRecord>(
@@ -104,10 +101,6 @@ public class SchemaToolTest {
 
   @Test
   public void testMigrateSchema() throws Exception {
-    tablePool = new HTablePool(HBaseTestUtils.getConf(), 10);
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
-    SchemaTool tool = new SchemaTool(new HBaseAdmin(HBaseTestUtils.getConf()),
-        manager);
     tool.createOrMigrateSchema(tableName, simpleSchema, true);
 
     Dao<SimpleHBaseRecord> dao = new SpecificAvroDao<SimpleHBaseRecord>(

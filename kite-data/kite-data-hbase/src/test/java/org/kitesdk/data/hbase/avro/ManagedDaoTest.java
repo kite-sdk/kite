@@ -62,92 +62,87 @@ import static org.junit.Assert.fail;
 
 public class ManagedDaoTest {
 
-  private static final String testRecord;
-  private static final String testRecordv2;
-  private static final String compositeSubrecord1;
-  private static final String compositeSubrecord2;
-  private static final String testIncrement;
-  private static final String badCreateIncompatibleColumn1;
-  private static final String badCreateIncompatibleColumn2;
-  private static final String badCreateIncompatibleColumn3;
-  private static final String badCreateIncompatibleKey1;
-  private static final String badCreateIncompatibleKey2;
-  private static final String badMigrationRecordAddKeyField;
-  private static final String badMigrationRecordAddFieldNoDefault;
-  private static final String badMigrationRecordAddSubFieldNoDefault;
-  private static final String badMigrationRecordModifiedMapping;
-  private static final String badMigrationRecordIntToLong;
-  private static final String goodMigrationRecordAddField;
-  private static final String goodMigrationRecordAddSubField;
-  private static final String goodMigrationRecordRemoveField;
-  private static final String managedRecordString;
+  private static String testRecord;
+  private static String testRecordv2;
+  private static String compositeSubrecord1;
+  private static String compositeSubrecord2;
+  private static String testIncrement;
+  private static String badCreateIncompatibleColumn1;
+  private static String badCreateIncompatibleColumn2;
+  private static String badCreateIncompatibleColumn3;
+  private static String badCreateIncompatibleKey1;
+  private static String badCreateIncompatibleKey2;
+  private static String badMigrationRecordAddKeyField;
+  private static String badMigrationRecordAddFieldNoDefault;
+  private static String badMigrationRecordAddSubFieldNoDefault;
+  private static String badMigrationRecordModifiedMapping;
+  private static String badMigrationRecordIntToLong;
+  private static String goodMigrationRecordAddField;
+  private static String goodMigrationRecordAddSubField;
+  private static String goodMigrationRecordRemoveField;
+  private static String managedRecordString;
   private static final String tableName = "test_table";
   private static final String compositeTableName = "test_composite_table";
   private static final String incrementTableName = "test_increment_table";
   private static final String managedTableName = "managed_schemas";
 
   private HTablePool tablePool;
-
-  static {
-    try {
-      testRecord = AvroUtils.inputStreamToString(AvroDaoTest.class
-          .getResourceAsStream("/TestRecord.avsc"));
-      testRecordv2 = AvroUtils.inputStreamToString(AvroDaoTest.class
-          .getResourceAsStream("/TestRecordv2.avsc"));
-      compositeSubrecord1 = AvroUtils.inputStreamToString(AvroDaoTest.class
-          .getResourceAsStream("/SubRecord1.avsc"));
-      compositeSubrecord2 = AvroUtils.inputStreamToString(AvroDaoTest.class
-          .getResourceAsStream("/SubRecord2.avsc"));
-      testIncrement = AvroUtils.inputStreamToString(AvroDaoTest.class
-          .getResourceAsStream("/TestIncrement.avsc"));
-      badCreateIncompatibleColumn1 = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/BadCreateIncompatibleColumn1.avsc"));
-      badCreateIncompatibleColumn2 = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/BadCreateIncompatibleColumn2.avsc"));
-      badCreateIncompatibleColumn3 = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/BadCreateIncompatibleColumn3.avsc"));
-      badCreateIncompatibleKey1 = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/BadCreateIncompatibleKey1.avsc"));
-      badCreateIncompatibleKey2 = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/BadCreateIncompatibleKey2.avsc"));
-      badMigrationRecordAddKeyField = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/BadMigrationRecordAddKeyField.avsc"));
-      badMigrationRecordAddFieldNoDefault = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/BadMigrationRecordAddFieldNoDefault.avsc"));
-      badMigrationRecordAddSubFieldNoDefault = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/BadMigrationRecordAddSubFieldNoDefault.avsc"));
-      badMigrationRecordModifiedMapping = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/BadMigrationRecordModifiedMapping.avsc"));
-      badMigrationRecordIntToLong = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/BadMigrationRecordIntToLong.avsc"));
-      goodMigrationRecordAddField = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/GoodMigrationRecordAddField.avsc"));
-      goodMigrationRecordAddSubField = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/GoodMigrationRecordAddSubField.avsc"));
-      goodMigrationRecordRemoveField = AvroUtils
-          .inputStreamToString(AvroDaoTest.class
-              .getResourceAsStream("/GoodMigrationRecordRemoveField.avsc"));
-      managedRecordString = AvroUtils.inputStreamToString(AvroDaoTest.class
-          .getResourceAsStream("/ManagedSchema.avsc"));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
+  private SchemaManager manager;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
+    testRecord = AvroUtils.inputStreamToString(AvroDaoTest.class
+        .getResourceAsStream("/TestRecord.avsc"));
+    testRecordv2 = AvroUtils.inputStreamToString(AvroDaoTest.class
+        .getResourceAsStream("/TestRecordv2.avsc"));
+    compositeSubrecord1 = AvroUtils.inputStreamToString(AvroDaoTest.class
+        .getResourceAsStream("/SubRecord1.avsc"));
+    compositeSubrecord2 = AvroUtils.inputStreamToString(AvroDaoTest.class
+        .getResourceAsStream("/SubRecord2.avsc"));
+    testIncrement = AvroUtils.inputStreamToString(AvroDaoTest.class
+        .getResourceAsStream("/TestIncrement.avsc"));
+    badCreateIncompatibleColumn1 = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/BadCreateIncompatibleColumn1.avsc"));
+    badCreateIncompatibleColumn2 = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/BadCreateIncompatibleColumn2.avsc"));
+    badCreateIncompatibleColumn3 = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/BadCreateIncompatibleColumn3.avsc"));
+    badCreateIncompatibleKey1 = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/BadCreateIncompatibleKey1.avsc"));
+    badCreateIncompatibleKey2 = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/BadCreateIncompatibleKey2.avsc"));
+    badMigrationRecordAddKeyField = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/BadMigrationRecordAddKeyField.avsc"));
+    badMigrationRecordAddFieldNoDefault = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/BadMigrationRecordAddFieldNoDefault.avsc"));
+    badMigrationRecordAddSubFieldNoDefault = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/BadMigrationRecordAddSubFieldNoDefault.avsc"));
+    badMigrationRecordModifiedMapping = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/BadMigrationRecordModifiedMapping.avsc"));
+    badMigrationRecordIntToLong = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/BadMigrationRecordIntToLong.avsc"));
+    goodMigrationRecordAddField = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/GoodMigrationRecordAddField.avsc"));
+    goodMigrationRecordAddSubField = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/GoodMigrationRecordAddSubField.avsc"));
+    goodMigrationRecordRemoveField = AvroUtils
+        .inputStreamToString(AvroDaoTest.class
+            .getResourceAsStream("/GoodMigrationRecordRemoveField.avsc"));
+    managedRecordString = AvroUtils.inputStreamToString(AvroDaoTest.class
+        .getResourceAsStream("/ManagedSchema.avsc"));
+    
     HBaseTestUtils.getMiniCluster();
   }
 
@@ -167,6 +162,7 @@ public class ManagedDaoTest {
     tool.createOrMigrateSchema(compositeTableName, compositeSubrecord1, true);
     tool.createOrMigrateSchema(compositeTableName, compositeSubrecord2, true);
     tool.createOrMigrateSchema(incrementTableName, testIncrement, true);
+    manager = new DefaultSchemaManager(tablePool);
   }
 
   @After
@@ -325,7 +321,6 @@ public class ManagedDaoTest {
 
   @Test
   public void testGeneric() throws Exception {
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<GenericRecord> dao = new GenericAvroDao(tablePool, tableName,
         "TestRecord", manager, testRecord);
 
@@ -358,7 +353,6 @@ public class ManagedDaoTest {
 
   @Test
   public void testSpecific() throws Exception {
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool, tableName,
         "TestRecord", manager);
 
@@ -391,7 +385,6 @@ public class ManagedDaoTest {
 
   @Test
   public void testMigrateEntities() throws Exception {
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<TestRecord> dao = new SpecificAvroDao<TestRecord>(tablePool, tableName,
         "TestRecord", manager);
 
@@ -416,7 +409,6 @@ public class ManagedDaoTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testMigrateAndPut() throws Exception {
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<GenericRecord> dao = new GenericAvroDao(tablePool, tableName,
         "TestRecord", manager, testRecord);
 
@@ -476,7 +468,6 @@ public class ManagedDaoTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testDynamicGenericDao() throws Exception {
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<GenericRecord> dao = new GenericAvroDao(tablePool, tableName,
         "TestRecord", manager);
 
@@ -525,7 +516,6 @@ public class ManagedDaoTest {
 
   @Test
   public void testIncrement() {
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
     Dao<TestIncrement> dao = new SpecificAvroDao<TestIncrement>(tablePool,
         incrementTableName, "TestIncrement", manager);
 
@@ -544,8 +534,6 @@ public class ManagedDaoTest {
   
   @Test
   public void testComposite() {
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
-    
     // Construct Dao
     Dao<CompositeRecord> dao = SpecificAvroDao.buildCompositeDaoWithEntityManager(tablePool,
         compositeTableName, CompositeRecord.class, manager);
@@ -649,7 +637,6 @@ public class ManagedDaoTest {
 
   @Test
   public void testGoodMigrations() throws Exception {
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
     manager.migrateSchema(tableName, "TestRecord", goodMigrationRecordAddField);
     manager.migrateSchema(tableName, "TestRecord",
         goodMigrationRecordRemoveField);
@@ -687,7 +674,6 @@ public class ManagedDaoTest {
 
   @Test(expected = IncompatibleSchemaException.class)
   public void testCannotCreateExisting() throws Exception {
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
     manager.createSchema(tableName, "TestRecord", goodMigrationRecordAddField,
         "org.kitesdk.data.hbase.avro.AvroKeyEntitySchemaParser",
         "org.kitesdk.data.hbase.avro.AvroKeySerDe",
@@ -699,7 +685,6 @@ public class ManagedDaoTest {
   }
 
   private void badMigration(String name, String badMigration) throws Exception {
-    SchemaManager manager = new DefaultSchemaManager(tablePool);
     manager.migrateSchema(tableName, name, badMigration);
   }
 }
