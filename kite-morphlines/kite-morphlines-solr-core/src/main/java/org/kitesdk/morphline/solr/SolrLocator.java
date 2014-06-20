@@ -107,6 +107,7 @@ public class SolrLocator {
 
       if ( solrUrl == null && solrHomeDir !=null ) {
           CoreContainer coreContainer = new CoreContainer(solrHomeDir);
+          coreContainer.load();
           EmbeddedSolrServer embeddedSolrServer = new EmbeddedSolrServer(coreContainer,collectionName);
           return new SolrServerDocumentLoader(embeddedSolrServer, batchSize);
       }
