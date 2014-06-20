@@ -42,8 +42,8 @@ final class PatternNameMatcher {
   
   private final Expression[] includes;
   private final Expression[] excludes;
-  private final Set<String> includeLiterals = new HashSet<String>();
-  private final Set<String> excludeLiterals = new HashSet<String>();
+  private final Set<String> includeLiterals = new HashSet<String>(16, 0.5f);
+  private final Set<String> excludeLiterals = new HashSet<String>(16, 0.5f);
 
   public PatternNameMatcher(List<String> includeExpressions, List<String> excludeExpressions) {
     includes = parseExpressions(includeExpressions, includeLiterals);
