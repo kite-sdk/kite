@@ -21,8 +21,6 @@ import com.google.common.io.Closeables;
 import java.io.IOException;
 import java.net.URI;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
-import org.apache.crunch.DoFn;
-import org.apache.crunch.Emitter;
 import org.apache.crunch.PCollection;
 import org.apache.crunch.Pipeline;
 import org.apache.crunch.PipelineResult;
@@ -31,6 +29,7 @@ import org.apache.crunch.impl.mem.MemPipeline;
 import org.apache.crunch.impl.mr.MRPipeline;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.mapreduce.TaskCounter;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.View;
@@ -39,8 +38,6 @@ import org.kitesdk.data.crunch.CrunchDatasets;
 public class CopyTask<E> extends Configured {
 
   private static final String LOCAL_FS_SCHEME = "file";
-  private static final String COUNTER_GROUP = "Copy task";
-  private static final String PROCESSED_RECORDS_COUNTER = "Processed records";
 
   private final View<E> from;
   private final View<E> to;
@@ -63,11 +60,11 @@ public class CopyTask<E> extends Configured {
       runInParallel = false;
     }
 
-    TaskUtil.configure(getConf())
-        .addJarPathForClass(HiveConf.class)
-        .addJarForClass(AvroKeyInputFormat.class);
-
     if (runInParallel) {
+      TaskUtil.configure(getConf())
+          .addJarPathForClass(HiveConf.class)
+          .addJarForClass(AvroKeyInputFormat.class);
+
       // TODO: Add reduce phase and allow control over the number of reducers
       Pipeline pipeline = new MRPipeline(getClass(), getConf());
 
@@ -75,16 +72,13 @@ public class CopyTask<E> extends Configured {
       PCollection<E> collection = pipeline.read(
           CrunchDatasets.asSource(from, entityClass));
 
-      pipeline.write(
-          collection.parallelDo(new CountRecords<E>(), collection.getPType()),
-          CrunchDatasets.asTarget(to));
+      pipeline.write(collection, CrunchDatasets.asTarget(to));
 
       PipelineResult result = pipeline.done();
 
       StageResult sr = Iterables.getFirst(result.getStageResults(), null);
       if (sr != null) {
-        this.count = sr.getCounterValue(
-            COUNTER_GROUP, PROCESSED_RECORDS_COUNTER);
+        this.count = sr.getCounterValue(TaskCounter.MAP_INPUT_RECORDS);
       }
 
       return result;
@@ -112,17 +106,6 @@ public class CopyTask<E> extends Configured {
       }
 
       return pipeline.done();
-    }
-  }
-
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-      value="SE_NO_SERIALVERSIONID",
-      justification="Purposely not compatible with other versions")
-  private static class CountRecords<E> extends DoFn<E, E> {
-    @Override
-    public void process(E input, Emitter<E> emitter) {
-      increment(COUNTER_GROUP, PROCESSED_RECORDS_COUNTER);
-      emitter.emit(input);
     }
   }
 
