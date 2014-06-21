@@ -50,13 +50,16 @@ public class TaskUtil {
 
   public static class ConfigBuilder {
     private final Configuration conf;
+    // this is needed because local distributed cache fails on jar files
+    private final boolean skipDistributedCache;
 
     private ConfigBuilder(Job job) {
-      this.conf = Hadoop.JobContext.getConfiguration.invoke(job);
+      this(Hadoop.JobContext.getConfiguration.<Configuration>invoke(job));
     }
 
     private ConfigBuilder(Configuration conf) {
       this.conf = conf;
+      this.skipDistributedCache = conf.getBoolean("kite.testing", false);
     }
 
     /**
@@ -67,12 +70,14 @@ public class TaskUtil {
      * @return this for method chaining
      */
     public ConfigBuilder addJarForClass(Class<?> requiredClass) {
-      File jar = findJarForClass(requiredClass);
-      try {
-        DistCache.addJarToDistributedCache(conf, jar);
-      } catch (IOException e) {
-        throw new DatasetIOException(
-            "Cannot add jar to distributed cache: " + jar, e);
+      if (!skipDistributedCache) {
+        File jar = findJarForClass(requiredClass);
+        try {
+          DistCache.addJarToDistributedCache(conf, jar);
+        } catch (IOException e) {
+          throw new DatasetIOException(
+              "Cannot add jar to distributed cache: " + jar, e);
+        }
       }
       return this;
     }
@@ -85,12 +90,14 @@ public class TaskUtil {
      * @return this for method chaining
      */
     public ConfigBuilder addJarPathForClass(Class<?> requiredClass) {
-      String jarPath = findJarForClass(requiredClass).getParent();
-      try {
-        DistCache.addJarDirToDistributedCache(conf, jarPath);
-      } catch (IOException e) {
-        throw new DatasetIOException(
-            "Cannot add jar path to distributed cache: " + jarPath, e);
+      if (!skipDistributedCache) {
+        String jarPath = findJarForClass(requiredClass).getParent();
+        try {
+          DistCache.addJarDirToDistributedCache(conf, jarPath);
+        } catch (IOException e) {
+          throw new DatasetIOException(
+              "Cannot add jar path to distributed cache: " + jarPath, e);
+        }
       }
       return this;
     }

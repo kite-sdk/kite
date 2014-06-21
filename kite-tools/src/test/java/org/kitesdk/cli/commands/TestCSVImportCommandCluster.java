@@ -99,7 +99,9 @@ public class TestCSVImportCommandCluster extends MiniDFSTest {
     // set the test repository information
     command.repoURI = repoURI;
     // set up the configuration as it would be with a cluster
-    command.setConf(getConfiguration());
+    Configuration conf = getConfiguration();
+    conf.setBoolean("kite.testing", true);
+    command.setConf(conf);
   }
 
   @After
