@@ -29,13 +29,22 @@ import org.apache.crunch.impl.mem.MemPipeline;
 import org.apache.crunch.impl.mr.MRPipeline;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.mapreduce.TaskCounter;
+import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.View;
 import org.kitesdk.data.crunch.CrunchDatasets;
 
 public class CopyTask<E> extends Configured {
+
+  private static DynMethods.StaticMethod getEnumByName =
+      new DynMethods.Builder("valueOf")
+          .impl("org.apache.hadoop.mapred.Task$Counter", String.class)
+          .impl("org.apache.hadoop.mapreduce.TaskCounter", String.class)
+          .defaultNoop() // missing is okay, record count will be 0
+          .buildStatic();
+  private static final Enum<?> MAP_INPUT_RECORDS = getEnumByName
+      .invoke("MAP_INPUT_RECORDS");
 
   private static final String LOCAL_FS_SCHEME = "file";
 
@@ -77,8 +86,8 @@ public class CopyTask<E> extends Configured {
       PipelineResult result = pipeline.done();
 
       StageResult sr = Iterables.getFirst(result.getStageResults(), null);
-      if (sr != null) {
-        this.count = sr.getCounterValue(TaskCounter.MAP_INPUT_RECORDS);
+      if (sr != null && MAP_INPUT_RECORDS != null) {
+        this.count = sr.getCounterValue(MAP_INPUT_RECORDS);
       }
 
       return result;
