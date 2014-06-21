@@ -43,10 +43,9 @@ public class DeleteDatasetCommand extends BaseDatasetCommand {
     }
 
     for (String datasetUriOrName : datasets) {
-      try {
+      if (isDataUri(datasets.get(0))) {
         Datasets.delete(datasetUriOrName);
-      } catch (IllegalArgumentException _) {
-        // Not a "dataset" or "view" URI, use the default repository
+      } else {
         repo.delete(datasetUriOrName);
       }
       console.debug("Deleted dataset {}", datasetUriOrName);

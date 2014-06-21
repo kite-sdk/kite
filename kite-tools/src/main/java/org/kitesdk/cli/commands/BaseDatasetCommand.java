@@ -72,11 +72,18 @@ abstract class BaseDatasetCommand extends BaseCommand {
     return repo;
   }
 
+  protected boolean isDataUri(String uriOrName) {
+    return (uriOrName.startsWith("dataset:") || uriOrName.startsWith("view:"));
+  }
+
+  protected boolean isRepoUri(String uriOrName) {
+    return uriOrName.startsWith("repo:");
+  }
+
   protected <E> View<E> load(String uriOrName) {
-    try {
+    if (isDataUri(uriOrName)) {
       return Datasets.<E, View<E>>load(uriOrName);
-    } catch (IllegalArgumentException _) {
-      // URI lookup failed, not a "dataset" or "view" URI
+    } else {
       return getDatasetRepository().load(uriOrName);
     }
   }

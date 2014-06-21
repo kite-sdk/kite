@@ -72,10 +72,9 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
     }
 
     DatasetDescriptor descriptor = descriptorBuilder.build();
-    try {
+    if (isDataUri(datasets.get(0))) {
       Datasets.<Object, Dataset<Object>> create(datasets.get(0), descriptor);
-    } catch (IllegalArgumentException _) {
-      // Not a "dataset" or "view" URI, use the default repository
+    } else {
       getDatasetRepository().create(datasets.get(0), descriptor);
     }
     console.debug("Created dataset {}", datasets.get(0));
