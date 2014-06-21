@@ -30,7 +30,6 @@ import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.IndexSchemaFactory;
-import org.apache.solr.util.SystemIdResolver;
 import org.apache.zookeeper.KeeperException;
 import org.kitesdk.morphline.api.MorphlineCompilationException;
 import org.kitesdk.morphline.api.MorphlineContext;
@@ -38,7 +37,6 @@ import org.kitesdk.morphline.api.MorphlineRuntimeException;
 import org.kitesdk.morphline.base.Configs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Preconditions;
@@ -90,7 +88,7 @@ public class SolrLocator {
         return loader;
       }
     }
-    
+
     if (zkHost != null && zkHost.length() > 0) {
       if (collectionName == null || collectionName.length() == 0) {
         throw new MorphlineCompilationException("Parameter 'zkHost' requires that you also pass parameter 'collection'", config);
@@ -104,14 +102,12 @@ public class SolrLocator {
         throw new MorphlineRuntimeException(e);
       }
     } else {
-
-      if ( solrUrl == null && solrHomeDir !=null ) {
-          CoreContainer coreContainer = new CoreContainer(solrHomeDir);
-          coreContainer.load();
-          EmbeddedSolrServer embeddedSolrServer = new EmbeddedSolrServer(coreContainer,collectionName);
-          return new SolrServerDocumentLoader(embeddedSolrServer, batchSize);
+      if (solrUrl == null && solrHomeDir != null) {
+        CoreContainer coreContainer = new CoreContainer(solrHomeDir);
+        coreContainer.load();
+        EmbeddedSolrServer embeddedSolrServer = new EmbeddedSolrServer(coreContainer, collectionName);
+        return new SolrServerDocumentLoader(embeddedSolrServer, batchSize);
       }
-
       if (solrUrl == null || solrUrl.length() == 0) {
         throw new MorphlineCompilationException("Missing parameter 'solrUrl'", config);
       }
