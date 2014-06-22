@@ -40,6 +40,10 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
       description = "The file containing a JSON-formatted partition strategy.")
   String partitionStrategyFile;
 
+  @Parameter(names = {"-m", "--mapping"},
+      description = "The file containing a JSON-formatted column mapping.")
+  String columnMappingFile;
+
   @Parameter(names = {"-f", "--format"},
       description = "The file format: avro or parquet.")
   String format = Formats.AVRO.getName();
@@ -68,7 +72,11 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
     descriptorBuilder.schemaUri(qualifiedURI(avroSchemaFile));
 
     if (partitionStrategyFile != null) {
-      descriptorBuilder.partitionStrategy(open(partitionStrategyFile));
+      descriptorBuilder.partitionStrategyUri(qualifiedURI(partitionStrategyFile));
+    }
+
+    if (columnMappingFile != null) {
+      descriptorBuilder.columnMappingUri(qualifiedURI(columnMappingFile));
     }
 
     DatasetDescriptor descriptor = descriptorBuilder.build();
@@ -77,7 +85,7 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
     } else {
       getDatasetRepository().create(datasets.get(0), descriptor);
     }
-    console.debug("Created dataset {}", datasets.get(0));
+    console.debug("Created {}", datasets.get(0));
 
     return 0;
   }
