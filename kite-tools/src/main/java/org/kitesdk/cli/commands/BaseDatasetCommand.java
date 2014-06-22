@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 
 abstract class BaseDatasetCommand extends BaseCommand {
 
-  @Parameter(names = {"-d", "--directory"},
+  @Parameter(names = {"-d", "--directory"}, hidden = true,
       description = "Storage directory for datasets, required for HDFS")
   String directory = null;
 
@@ -37,19 +37,19 @@ abstract class BaseDatasetCommand extends BaseCommand {
       description = "Store data in local files")
   boolean local = false;
 
-  @Parameter(names = {"--use-hdfs"},
+  @Parameter(names = {"--use-hdfs"}, hidden = true,
       description = "Store data in HDFS files")
   boolean hdfs = false;
 
-  @Parameter(names = {"--use-hive"},
+  @Parameter(names = {"--use-hive"}, hidden = true,
       description = "Store data in Hive managed tables (default)")
   boolean hive = false;
 
-  @Parameter(names = {"--use-hbase"},
+  @Parameter(names = {"--use-hbase"}, hidden = true,
       description = "Store data in HBase tables")
   boolean hbase = false;
 
-  @Parameter(names = {"--zookeeper", "--zk"},
+  @Parameter(names = {"--zookeeper", "--zk"}, hidden = true,
       description = "ZooKeeper host list as host or host:port")
   List<String> zookeeper = Lists.newArrayList("localhost");
 
