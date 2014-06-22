@@ -26,6 +26,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.kitesdk.cli.commands.CSVImportCommand;
 import org.kitesdk.cli.commands.CSVSchemaCommand;
 import org.kitesdk.cli.commands.CopyCommand;
+import org.kitesdk.cli.commands.CreateColumnMappingCommand;
 import org.kitesdk.cli.commands.CreateDatasetCommand;
 import org.kitesdk.cli.commands.CreatePartitionStrategyCommand;
 import org.kitesdk.cli.commands.DeleteDatasetCommand;
@@ -80,6 +81,7 @@ public class Main extends Configured implements Tool {
     jc.addCommand("csv-import", new CSVImportCommand(console));
     jc.addCommand("obj-schema", new ObjectSchemaCommand(console));
     jc.addCommand("partition-config", new CreatePartitionStrategyCommand(console));
+    jc.addCommand("mapping-config", new CreateColumnMappingCommand(console));
   }
 
   @Override
