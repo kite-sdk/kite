@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.impl;
 
-import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
@@ -66,5 +65,4 @@ public abstract class Accessor {
 
   public abstract PartitionStrategy fromExpression(String partitionExpression);
 
-  public abstract DatasetException providerExceptionFor(DatasetException e);
 }

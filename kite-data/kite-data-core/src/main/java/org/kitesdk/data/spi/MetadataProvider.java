@@ -42,7 +42,7 @@ public interface MetadataProvider {
    * @param name The fully qualified name of an existing dataset.
    * @return A dataset descriptor.
    * @throws org.kitesdk.data.DatasetNotFoundException  If there is no descriptor for {@code name}
-   * @throws org.kitesdk.data.MetadataProviderException If the dataset doesn't exist or the descriptor can not be loaded.
+   * @throws org.kitesdk.data.DatasetException If the dataset doesn't exist or the descriptor can not be loaded.
    */
   DatasetDescriptor load(String name);
 
@@ -58,7 +58,7 @@ public interface MetadataProvider {
    * @return The descriptor as persisted to the Metadata store.
    * @throws org.kitesdk.data.DatasetExistsException     If a {@code DatasetDescriptor} already
    *                                    exists for {@code name}
-   * @throws org.kitesdk.data.MetadataProviderException  If the {@code DatasetDescriptor} can not
+   * @throws org.kitesdk.data.DatasetException  If the {@code DatasetDescriptor} can not
    *                                    be saved
    *
    * @since 0.7.0
@@ -82,7 +82,7 @@ public interface MetadataProvider {
    *                                       {@code name}
    * @throws UnsupportedOperationException If descriptor updates are not
    *                                       supported by the implementation.
-   * @throws org.kitesdk.data.MetadataProviderException     If the dataset descriptor can not be
+   * @throws org.kitesdk.data.DatasetException     If the dataset descriptor can not be
    *                                       updated.
    *
    * @since 0.7.0
@@ -101,7 +101,7 @@ public interface MetadataProvider {
    * @param name The fully qualified name of a dataset.
    * @return {@code true} if the metadata is successfully deleted,
    *         {@code false} if no action was taken.
-   * @throws org.kitesdk.data.MetadataProviderException If the dataset metadata exists but can
+   * @throws org.kitesdk.data.DatasetException If the dataset metadata exists but can
    *                                   not be deleted.
    */
   boolean delete(String name);
@@ -112,7 +112,7 @@ public interface MetadataProvider {
    *
    * @param name a {@code Dataset} name to check the existence of
    * @return true if {@code name} exists, false otherwise
-   * @throws org.kitesdk.data.MetadataProviderException
+   * @throws org.kitesdk.data.DatasetException
    *
    * @since 0.7.0
    */
@@ -125,7 +125,7 @@ public interface MetadataProvider {
    * empty list will be returned.
    *
    * @return a {@link Collection} of Dataset names ({@link String}s)
-   * @throws org.kitesdk.data.MetadataProviderException
+   * @throws org.kitesdk.data.DatasetException
    *
    * @since 0.8.0
    */

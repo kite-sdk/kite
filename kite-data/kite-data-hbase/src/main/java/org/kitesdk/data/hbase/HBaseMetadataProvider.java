@@ -29,7 +29,6 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.ColumnMappingParser;
 import org.kitesdk.data.hbase.avro.AvroEntitySchema;
 import org.kitesdk.data.hbase.impl.Constants;
@@ -203,8 +202,7 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
           hbaseAdmin.enableTable(tableName);
         }
       } catch (IOException e) {
-        throw Accessor.getDefault().providerExceptionFor(
-            new DatasetIOException("Cannot delete " + name, e));
+        throw new DatasetIOException("Cannot delete " + name, e);
       }
     }
     return true;

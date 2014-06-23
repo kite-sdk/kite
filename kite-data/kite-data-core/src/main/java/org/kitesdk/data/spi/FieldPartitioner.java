@@ -155,7 +155,7 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
    * </p>
    * @since 0.4.0
    *
-   * @deprecated will be removed in 0.14.0
+   * @deprecated will be removed with the partition API
    */
   @Deprecated
   public String valueToString(T value) {

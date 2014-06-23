@@ -94,8 +94,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       this.rootFileSystem = rootDirectory.getFileSystem(conf);
       this.rootDirectory = rootFileSystem.makeQualified(rootDirectory);
     } catch (IOException ex) {
-      throw Accessor.getDefault().providerExceptionFor(new DatasetIOException(
-          "Cannot get FileSystem for root path", ex));
+      throw new DatasetIOException("Cannot get FileSystem for root path", ex);
     }
   }
 
@@ -119,15 +118,14 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       properties.load(inputStream);
       threw = false;
     } catch (IOException e) {
-      throw Accessor.getDefault().providerExceptionFor(new DatasetIOException(
+      throw new DatasetIOException(
           "Unable to load descriptor file:" + descriptorPath +
-          " for dataset:" + name, e));
+          " for dataset:" + name, e);
     } finally {
       try {
         Closeables.close(inputStream, threw);
       } catch (IOException e) {
-        throw Accessor.getDefault().providerExceptionFor(
-            new DatasetIOException("Cannot close", e));
+        throw new DatasetIOException("Cannot close", e);
       }
     }
 
@@ -143,9 +141,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     try {
       builder.schemaUri(rootFileSystem.makeQualified(schemaPath).toUri());
     } catch (IOException e) {
-      throw Accessor.getDefault().providerExceptionFor(new DatasetIOException(
-          "Unable to load schema file:" + schemaPath + " for dataset:" + name,
-          e));
+      throw new DatasetIOException(
+          "Unable to load schema file:" + schemaPath + " for dataset:" + name, e);
     }
 
     final Path location;
@@ -189,9 +186,9 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       // create the directory so that update can do the rest of the work
       rootFileSystem.mkdirs(metadataLocation);
     } catch (IOException e) {
-      throw Accessor.getDefault().providerExceptionFor(new DatasetIOException(
+      throw new DatasetIOException(
           "Unable to create metadata directory:" + metadataLocation +
-          " for dataset:" + name, e));
+          " for dataset:" + name, e);
     }
 
     writeDescriptor(rootFileSystem, metadataLocation, name, descriptor);
@@ -234,9 +231,9 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
         return false;
       }
     } catch (IOException e) {
-      throw Accessor.getDefault().providerExceptionFor(new DatasetIOException(
+      throw new DatasetIOException(
           "Unable to find or delete metadata directory:" + metadataDirectory +
-          " for dataset:" + name, e));
+          " for dataset:" + name, e);
     }
   }
 
@@ -248,8 +245,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     try {
       return rootFileSystem.exists(potentialPath);
     } catch (IOException ex) {
-      throw Accessor.getDefault().providerExceptionFor(new DatasetIOException(
-          "Could not check metadata path:" + potentialPath, ex));
+      throw new DatasetIOException(
+          "Could not check metadata path:" + potentialPath, ex);
     }
   }
 
@@ -272,8 +269,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       // the repo hasn't created any files yet
       return datasets;
     } catch (IOException ex) {
-      throw Accessor.getDefault().providerExceptionFor(
-          new DatasetIOException("Could not list data sets", ex));
+      throw new DatasetIOException("Could not list data sets", ex);
     }
     return datasets;
   }
@@ -355,15 +351,13 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       outputStream.flush();
       threw = false;
     } catch (IOException e) {
-      throw Accessor.getDefault().providerExceptionFor(new DatasetIOException(
-          "Unable to save schema file:" + schemaPath +
-          " for dataset:" + name, e));
+      throw new DatasetIOException("Unable to save schema file:" + schemaPath +
+          " for dataset:" + name, e);
     } finally {
       try {
         Closeables.close(outputStream, threw);
       } catch (IOException e) {
-        throw Accessor.getDefault().providerExceptionFor(
-            new DatasetIOException("Cannot close", e));
+        throw new DatasetIOException("Cannot close", e);
       }
     }
 
@@ -395,15 +389,13 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       outputStream.flush();
       threw = false;
     } catch (IOException e) {
-      throw Accessor.getDefault().providerExceptionFor(new DatasetIOException(
-          "Unable to save descriptor file:" + descriptorPath +
-          " for dataset:" + name, e));
+      throw new DatasetIOException("Unable to save descriptor file:" + descriptorPath +
+          " for dataset:" + name, e);
     } finally {
       try {
         Closeables.close(outputStream, threw);
       } catch (IOException e) {
-        throw Accessor.getDefault().providerExceptionFor(
-            new DatasetIOException("Cannot close", e));
+        throw new DatasetIOException("Cannot close", e);
       }
     }
   }
@@ -435,8 +427,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
             location);
       }
     } catch (IOException ex) {
-      throw Accessor.getDefault().providerExceptionFor(
-          new DatasetIOException("Cannot access descriptor location", ex));
+      throw new DatasetIOException("Cannot access descriptor location", ex);
     }
   }
 

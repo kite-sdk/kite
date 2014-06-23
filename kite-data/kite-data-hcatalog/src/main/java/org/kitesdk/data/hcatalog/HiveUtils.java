@@ -124,8 +124,7 @@ class HiveUtils {
         // URI.create is safe because this library wrote the URI
         builder.schemaUri(URI.create(schemaUrlString));
       } catch (IOException e) {
-        throw Accessor.getDefault().providerExceptionFor(
-            new DatasetIOException("Could not read schema", e));
+        throw new DatasetIOException("Could not read schema", e);
       }
     }
 
@@ -137,8 +136,7 @@ class HiveUtils {
     try {
       return builder.build();
     } catch (IllegalStateException ex) {
-      throw Accessor.getDefault().providerExceptionFor(
-          new DatasetException("Cannot find schema: missing metadata"));
+      throw new DatasetException("Cannot find schema: missing metadata");
     }
   }
 
@@ -188,9 +186,8 @@ class HiveUtils {
         table.setInputFormatClass(FORMAT_TO_INPUT_FORMAT.get(format));
         table.setOutputFormatClass(FORMAT_TO_OUTPUT_FORMAT.get(format));
       } catch (HiveException ex) {
-        throw Accessor.getDefault().providerExceptionFor(new DatasetException(
-            "Failed to set input/output formats for format:" +
-            format.getName(), ex));
+        throw new DatasetException("Failed to set input/output formats for format:" +
+            format.getName(), ex);
       }
     } else {
       throw new UnknownFormatException(
@@ -239,18 +236,16 @@ class HiveUtils {
           descriptor.getSchema().toString());
     } else if (table.getProperty(AVRO_SCHEMA_URL_PROPERTY_NAME) != null) {
       if (descriptor.getSchemaUrl() == null) {
-        throw Accessor.getDefault().providerExceptionFor(new DatasetException(
-            "Cannot update " + AVRO_SCHEMA_URL_PROPERTY_NAME +
-            " since descriptor schema URL is not set."));
+        throw new DatasetException("Cannot update " + AVRO_SCHEMA_URL_PROPERTY_NAME +
+            " since descriptor schema URL is not set.");
       }
       table.setProperty(
           AVRO_SCHEMA_URL_PROPERTY_NAME,
           descriptor.getSchemaUrl().toExternalForm());
     } else {
-      throw Accessor.getDefault().providerExceptionFor(new DatasetException(
-          "Cannot update Avro schema since neither " +
+      throw new DatasetException("Cannot update Avro schema since neither " +
           AVRO_SCHEMA_LITERAL_PROPERTY_NAME + " nor " +
-          AVRO_SCHEMA_URL_PROPERTY_NAME + " is set."));
+          AVRO_SCHEMA_URL_PROPERTY_NAME + " is set.");
     }
   }
 
@@ -258,8 +253,7 @@ class HiveUtils {
     try {
       return path.getFileSystem(conf);
     } catch (IOException ex) {
-      throw Accessor.getDefault().providerExceptionFor(new DatasetIOException(
-          "Cannot access FileSystem for uri:" + path, ex));
+      throw new DatasetIOException("Cannot access FileSystem for uri:" + path, ex);
     }
   }
 
@@ -291,8 +285,7 @@ class HiveUtils {
   private static String getHiveType(Class<?> type) {
     String typeName = PrimitiveObjectInspectorUtils.getTypeNameFromPrimitiveJava(type);
     if (typeName == null) {
-      throw Accessor.getDefault().providerExceptionFor(
-          new DatasetException("Unsupported FieldPartitioner type: " + type));
+      throw new DatasetException("Unsupported FieldPartitioner type: " + type);
     }
     return typeName;
   }

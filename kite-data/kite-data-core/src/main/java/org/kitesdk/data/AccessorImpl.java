@@ -16,8 +16,6 @@
 package org.kitesdk.data;
 
 import org.kitesdk.data.impl.Accessor;
-import org.kitesdk.data.spi.OptionBuilder;
-import org.kitesdk.data.spi.URIPattern;
 
 final class AccessorImpl extends Accessor {
 
@@ -46,19 +44,4 @@ final class AccessorImpl extends Accessor {
     return new PartitionExpression(partitionExpression, true).evaluate();
   }
 
-  /**
-   * Returns the given {@link DatasetException} wrapped in a deprecated
-   * {@link MetadataProviderException}. Users should switch to catching the
-   * wrapped exception.
-   *
-   * This is located here to avoid build failures when importing
-   * {@code MetadataProviderException} and should be removed in 0.14.0 with
-   * {@code MetadataProviderException}.
-   *
-   * @param e a {@code DatasetException} to wrap and throw
-   */
-  @SuppressWarnings("deprecation")
-  public DatasetException providerExceptionFor(DatasetException e) {
-    return new MetadataProviderException(e);
-  }
 }
