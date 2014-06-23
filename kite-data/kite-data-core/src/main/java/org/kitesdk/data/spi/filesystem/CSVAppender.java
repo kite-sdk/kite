@@ -68,6 +68,11 @@ class CSVAppender<E> implements FileSystemWriter.FileAppender<E> {
   }
 
   @Override
+  public void cleanup() throws IOException {
+    // No cleanup tasks needed
+  }
+
+  @Override
   public void flush() throws IOException {
     writer.flush();
     Hadoop.FSDataOutputStream.hflush.invoke(outgoing);

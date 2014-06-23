@@ -16,6 +16,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Splitter;
 import com.google.common.io.Closeables;
 import java.io.IOException;
 import org.apache.avro.Schema;
@@ -28,67 +29,71 @@ import parquet.avro.AvroParquetWriter;
 import parquet.hadoop.ParquetWriter;
 import parquet.hadoop.metadata.CompressionCodecName;
 
-class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileAppender<E> {
+class DurableParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileAppender<E> {
 
   private static final Logger LOG = LoggerFactory
-    .getLogger(ParquetAppender.class);
-  private static final int DEFAULT_BLOCK_SIZE = 50 * 1024 * 1024;
+      .getLogger(DurableParquetAppender.class);
 
   private final Path path;
+  private final Path avroPath;
+  private final AvroAppender<E> avroAppender;
+  private final ParquetAppender<E> parquetAppender;
   private final Schema schema;
-  private final FileSystem fileSystem;
-  private final boolean enableCompression;
+  private final FileSystem fs;
 
-  private AvroParquetWriter<E> avroParquetWriter = null;
-
-  public ParquetAppender(FileSystem fileSystem, Path path,
+  public DurableParquetAppender(FileSystem fs, Path path,
                          Schema schema, boolean enableCompression) {
-    this.fileSystem = fileSystem;
+    this.fs = fs;
     this.path = path;
     this.schema = schema;
-    this.enableCompression = enableCompression;
+    this.avroPath = avroPath(path);
+    this.avroAppender = new AvroAppender<E>(
+        fs, avroPath, schema, enableCompression);
+    this.parquetAppender = new ParquetAppender<E>(
+        fs, path, schema, enableCompression);
   }
 
   @Override
   public void open() throws IOException {
-    CompressionCodecName codecName = CompressionCodecName.UNCOMPRESSED;
-    if (enableCompression) {
-      codecName = CompressionCodecName.SNAPPY;
-    }
-    avroParquetWriter = new AvroParquetWriter<E>(fileSystem.makeQualified(path),
-        schema, codecName, DEFAULT_BLOCK_SIZE,
-        ParquetWriter.DEFAULT_PAGE_SIZE,
-        ParquetWriter.DEFAULT_IS_DICTIONARY_ENABLED, fileSystem.getConf());
+    avroAppender.open();
+    parquetAppender.open();
   }
 
   @Override
   public void append(E entity) throws IOException {
-    avroParquetWriter.write(entity);
+    avroAppender.append(entity);
+    parquetAppender.append(entity);
   }
 
   @Override
-  public void flush() {
-    // Parquet doesn't (currently) expose a flush operation
+  public void flush() throws IOException {
+    avroAppender.flush();
   }
 
   @Override
   public void close() throws IOException {
-    Closeables.close(avroParquetWriter, false);
+    Closeables.close(avroAppender, false);
+    Closeables.close(parquetAppender, false);
   }
 
   @Override
   public void cleanup() throws IOException {
-    // No cleanup tasks needed
+    // this is called after the parquet file is committed
+    // the avro copy is no longer needed
+    fs.delete(avroPath, false /* no recursion, should be a file */ );
   }
 
   @Override
   public String toString() {
     return Objects.toStringHelper(this)
-      .add("path", path)
-      .add("schema", schema)
-      .add("fileSystem", fileSystem)
-      .add("avroParquetWriter", avroParquetWriter)
-      .toString();
+        .add("fs", fs)
+        .add("path", path)
+        .add("schema", schema)
+        .add("avroPath", avroPath)
+        .toString();
   }
 
+  private static Path avroPath(Path path) {
+    return new Path(path.getParent(), path.getName() + ".avro");
+  }
 }

@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.Closeable;
 import java.io.Flushable;
@@ -39,9 +40,15 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileSystemWriter.class);
 
+  @VisibleForTesting
+  static final String ALLOW_CSV_PROP = "kite.allow.csv";
+
+  public static final String DURABLE_PARQUET_PROP = "kite.parquet.durable-writes";
+
   static interface FileAppender<E> extends Flushable, Closeable {
     public void open() throws IOException;
     public void append(E entity) throws IOException;
+    public void cleanup() throws IOException;
   }
 
   protected final FileSystem fs;
@@ -162,6 +169,13 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
 
         LOG.debug("Discarded {} ({} entities)", tempPath, count);
       }
+
+      try {
+        appender.cleanup();
+      } catch (IOException e) {
+        throw new DatasetIOException("Failed to clean up " + appender, e);
+      }
+
       this.state = ReaderWriterState.CLOSED;
 
     } else if (state.equals(ReaderWriterState.ERROR)) {
@@ -186,11 +200,16 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
   private <E> FileAppender<E> newAppender(Path temp) {
     Format format = descriptor.getFormat();
     if (Formats.PARQUET.equals(format)) {
-      return (FileAppender<E>) new ParquetAppender(
-          fs, temp, descriptor.getSchema(), true);
+      if (isTrue(DURABLE_PARQUET_PROP, descriptor)) {
+        return (FileAppender<E>) new DurableParquetAppender(
+            fs, temp, descriptor.getSchema(), true);
+      } else {
+        return (FileAppender<E>) new ParquetAppender(
+            fs, temp, descriptor.getSchema(), true);
+      }
     } else if (Formats.AVRO.equals(format)) {
       return new AvroAppender<E>(fs, temp, descriptor.getSchema(), true);
-    } else if (Formats.CSV.equals(format) && descriptor.hasProperty("kite.allow.csv")) {
+    } else if (Formats.CSV.equals(format) && isTrue(ALLOW_CSV_PROP, descriptor)) {
       return new CSVAppender<E>(fs, temp, descriptor);
     } else {
       this.state = ReaderWriterState.ERROR;
@@ -213,5 +232,13 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
         throws IOException, InterruptedException {
       FileSystemWriter.this.close();
     }
+  }
+
+  private boolean isTrue(String property, DatasetDescriptor descriptor) {
+    if (descriptor.hasProperty(property)) {
+      // return true only if the property value is "true"
+      return Boolean.valueOf(descriptor.getProperty(property));
+    }
+    return false;
   }
 }

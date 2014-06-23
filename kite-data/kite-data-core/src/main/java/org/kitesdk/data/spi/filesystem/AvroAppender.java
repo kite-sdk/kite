@@ -81,6 +81,11 @@ class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
   }
 
   @Override
+  public void cleanup() throws IOException {
+    // No cleanup tasks needed
+  }
+
+  @Override
   public String toString() {
     return Objects.toStringHelper(this)
       .add("path", path)
