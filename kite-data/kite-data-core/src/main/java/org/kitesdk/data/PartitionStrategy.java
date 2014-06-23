@@ -399,65 +399,6 @@ public class PartitionStrategy {
     }
 
     /**
-     * Configure an identity partitioner for a given type with a cardinality 
-     * hint of {@code buckets} size.
-     *
-     * The partition name is the source field name with a "_copy" suffix.
-     * For example, identity("color", String.class, 34) creates "color_copy"
-     * partitions.
-     *
-     * @param sourceName
-     *          The entity field name from which to get values to be
-     *          partitioned.
-     * @param type
-     *          The type of the field. This must match the schema.
-     * @param buckets
-     *          A hint as to the number of partitions that will be created (i.e.
-     *          the number of discrete values for the field {@code name} in the
-     *          data).
-     * @return An instance of the builder for method chaining.
-     * @see IdentityFieldPartitioner
-     * @since 0.8.0
-     * @deprecated will be removed  in 0.15.0
-     */
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public <S> Builder identity(String sourceName, Class<S> type, int buckets) {
-      add(new IdentityFieldPartitioner(sourceName, type, buckets));
-      return this;
-    }
-
-    /**
-     * Configure an identity partitioner for a given type with a cardinality hint of
-     * {@code buckets} size. If name is null, the partition name will be the source
-     * field name with a "_copy" suffix. For example, identity("color", null, ...)
-     * will create "color_copy" partitions.
-     *
-     * @param sourceName
-     *          The entity field name from which to get values to be
-     *          partitioned.
-     * @param name
-     *          A name for the partition field
-     * @param type
-     *          The type of the field. This must match the schema.
-     * @param buckets
-     *          A hint as to the number of partitions that will be created (i.e.
-     *          the number of discrete values for the field {@code name} in the
-     *          data).
-     * @return An instance of the builder for method chaining.
-     * @see IdentityFieldPartitioner
-     * @since 0.8.0
-     * @deprecated will be removed in 0.15.0
-     */
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public <S> Builder identity(String sourceName, String name, Class<S> type,
-                                int buckets) {
-      add(new IdentityFieldPartitioner(sourceName, name, type, buckets));
-      return this;
-    }
-
-    /**
      * Configure a range partitioner with a set of {@code upperBounds}.
      *
      * The partition name will be the source field name with a "_bound" suffix.

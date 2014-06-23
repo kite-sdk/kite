@@ -154,7 +154,7 @@ public class TestDescriptorValidation {
                 .requiredString("username")
                 .endRecord())
             .partitionStrategy(new PartitionStrategy.Builder()
-                .identity("username", "username_copy", Integer.class, -1)
+                .range("number", 5, 10, 15)
                 .build())
             .build();
       }

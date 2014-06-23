@@ -112,7 +112,7 @@ public class TestPartitionExpression {
   @SuppressWarnings("deprecation")
   public void testIntIdentity() {
     PartitionStrategy intIdStrategy = new PartitionStrategy.Builder()
-        .identity("intField", "intField_copy", Integer.class, -1)
+        .identity("intField")
         .build();
     PartitionStrategy copy = new PartitionExpression(
         PartitionExpression.toExpression(intIdStrategy), true).evaluate();
