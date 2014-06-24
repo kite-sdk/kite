@@ -76,6 +76,8 @@ public class SchemaCommand extends BaseDatasetCommand {
     return Lists.newArrayList(
         "# Print the schema for dataset \"users\" to standard out:",
         "users",
+        "# Print the schema for a dataset URI to standard out:",
+        "dataset:hbase:zk1,zk2/users",
         "# Save the schema for dataset \"users\" to user.avsc:",
         "users -o user.avsc"
     );

@@ -78,7 +78,11 @@ public class ShowRecordsCommand extends BaseDatasetCommand {
         "# Show the first 10 records in dataset \"users\":",
         "users",
         "# Show the first 50 records in dataset \"users\":",
-        "users -n 50"
+        "users -n 50",
+        "# Show the first 10 records for dataset URI:",
+        "dataset:hbase:zk1,zk2/users",
+        "# Show the first 10 records for view URI:",
+        "view:hbase:zk1,zk2/users?username=u1"
     );
   }
 

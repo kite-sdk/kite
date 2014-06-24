@@ -161,8 +161,12 @@ public class CSVImportCommand extends BaseDatasetCommand {
   @Override
   public List<String> getExamples() {
     return Lists.newArrayList(
-        "# Copy the records from sample.csv to Dataset \"sample\"",
-        "csv-import path/to/sample.csv sample"
+        "# Copy the records from sample.csv to dataset \"sample\"",
+        "csv-import path/to/sample.csv sample",
+        "# Copy the records from sample.csv to a dataset URI",
+        "csv-import path/to/sample.csv dataset:hdfs:/user/me/datasets/sample",
+        "# Copy the records from an HDFS directory to \"sample\"",
+        "csv-import hdfs:/data/path/samples/ sample"
     );
   }
 

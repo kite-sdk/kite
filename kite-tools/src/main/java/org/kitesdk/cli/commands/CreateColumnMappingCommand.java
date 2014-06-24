@@ -134,6 +134,12 @@ public class CreateColumnMappingCommand extends BaseCommand {
   @Override
   public List<String> getExamples() {
     return Lists.newArrayList(
+        "# store email in the key, other fields in column family \"u\":",
+        "email:key username:u id:u --schema user.avsc -o user-cols.json",
+        "# store preferences hash-map in column family \"prefs\":",
+        "... preferences:prefs --schema user.avsc",
+        "# use the \"version\" field as an OCC version:",
+        "... version:version --schema user.avsc"
     );
   }
 

@@ -95,10 +95,15 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
     return Lists.newArrayList(
         "# Create dataset \"users\" in Hive:",
         "users --schema user.avsc",
+        "# Create HDFS dataset \"users\":",
+        "dataset:hdfs:/user/me/datasets/users --schema user.avsc",
         "# Create dataset \"users\" using parquet:",
         "users --schema user.avsc --format parquet",
         "# Create dataset \"users\" partitioned by JSON configuration:",
-        "users --schema user.avsc --partition-by user_part.json"
+        "users --schema user.avsc --partition-by email-part.json",
+        "# Create HBase dataset \"users\":",
+        "dataset:hbase:zk1,zk2/users --schema user.avsc \\\n" +
+            "\t\t--partition-by email-part.json --mapping user-cols.json"
     );
   }
 

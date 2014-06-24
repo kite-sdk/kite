@@ -18,7 +18,6 @@ package org.kitesdk.cli.commands;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -27,11 +26,9 @@ import java.util.List;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.Datasets;
-import org.kitesdk.data.Formats;
-import org.kitesdk.data.View;
 import org.slf4j.Logger;
 
-@Parameters(commandDescription = "Create an empty dataset")
+@Parameters(commandDescription = "Update the metadata descriptor for dataset")
 public class UpdateDatasetCommand extends BaseDatasetCommand {
 
   private static final Splitter PROP_VALUE_SEP = Splitter.on('=').limit(2);
@@ -95,8 +92,8 @@ public class UpdateDatasetCommand extends BaseDatasetCommand {
     return Lists.newArrayList(
         "# Update schema for dataset \"users\" in Hive:",
         "users --schema user.avsc",
-        "# Update HDFS dataset, add property:",
-        "users --set kite.write.cache-size=20"
+        "# Update HDFS dataset by URI, add property:",
+        "dataset:hdfs:/user/me/datasets/users --set kite.write.cache-size=20"
     );
   }
 

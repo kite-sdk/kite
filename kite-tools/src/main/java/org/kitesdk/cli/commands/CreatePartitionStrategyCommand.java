@@ -110,7 +110,7 @@ public class CreatePartitionStrategyCommand extends BaseCommand {
   public List<String> getExamples() {
     return Lists.newArrayList(
         "# Partition by email address, balanced across 16 hash partitions",
-        "email:hash[16] email:copy -s user.avsc -o email-partitions.json",
+        "email:hash[16] email:copy -s user.avsc -o email-part.json",
         "# Partition by created_at time's year, month, and day",
         "created_at:year created_at:month created_at:day -s event.avsc"
     );

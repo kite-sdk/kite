@@ -58,7 +58,9 @@ public class DeleteDatasetCommand extends BaseDatasetCommand {
   public List<String> getExamples() {
     return Lists.newArrayList(
         "# Delete all data and metadata for the dataset \"users\":",
-        "users"
+        "users",
+        "# Delete all data and metadata for a dataset by URI:",
+        "dataset:hbase:zk1,zk2/users"
     );
   }
 
