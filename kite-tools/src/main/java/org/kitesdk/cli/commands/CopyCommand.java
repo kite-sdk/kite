@@ -38,6 +38,14 @@ public class CopyCommand extends BaseDatasetCommand {
   @Parameter(description="<source dataset> <destination dataset>")
   List<String> datasets;
 
+  @Parameter(names={"--no-compaction"},
+      description="Copy to output directly, without compacting the data")
+  boolean noCompaction = false;
+
+  @Parameter(names={"--num-writers"},
+      description="The number of writer processes to use")
+  int numWriters = -1;
+
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(datasets != null && datasets.size() > 1,
@@ -52,10 +60,19 @@ public class CopyCommand extends BaseDatasetCommand {
         source, dest, GenericData.Record.class);
     task.setConf(getConf());
 
+    if (noCompaction) {
+      task.noCompaction();
+    }
+
+    if (numWriters >= 0) {
+      task.setNumWriters(numWriters);
+    }
+
     PipelineResult result = task.run();
 
     if (result.succeeded()) {
-      console.info("Added {} records to \"{}\"", task.getCount(), dest);
+      console.info("Added {} records to \"{}\"",
+          task.getCount(), datasets.get(1));
       return 0;
     } else {
       return 1;
@@ -65,8 +82,10 @@ public class CopyCommand extends BaseDatasetCommand {
   @Override
   public List<String> getExamples() {
     return Lists.newArrayList(
-        "# Copy the contents of movies to movies2",
-        "movies movies2"
+        "# Copy the contents of movies_avro to movies_parquet",
+        "movies_avro movies_parquet",
+        "# Copy the movies dataset into HBase without a reduce round",
+        "movies dataset:hbase:zk-host/movies --map-only"
     );
   }
 }

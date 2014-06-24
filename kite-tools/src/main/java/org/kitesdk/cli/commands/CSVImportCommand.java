@@ -74,6 +74,14 @@ public class CSVImportCommand extends BaseDatasetCommand {
       description="Override schema checks (safety valve)", hidden = true)
   boolean skipSchemaChecks = false;
 
+  @Parameter(names={"--no-compaction"},
+      description="Copy to output directly, without compacting the data")
+  boolean noCompaction = false;
+
+  @Parameter(names={"--num-writers"},
+      description="The number of writer processes to use")
+  int numWriters = -1;
+
   @Override
   @SuppressWarnings("unchecked")
   public int run() throws IOException {
@@ -140,6 +148,14 @@ public class CSVImportCommand extends BaseDatasetCommand {
       CopyTask<GenericData.Record> copy = new CopyTask<GenericData.Record>(
           csvDataset, target, GenericData.Record.class);
       copy.setConf(getConf());
+
+      if (noCompaction) {
+        copy.noCompaction();
+      }
+
+      if (numWriters >= 0) {
+        copy.setNumWriters(numWriters);
+      }
 
       PipelineResult result = copy.run();
 

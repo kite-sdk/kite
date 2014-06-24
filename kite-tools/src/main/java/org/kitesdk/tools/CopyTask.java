@@ -16,6 +16,7 @@
 
 package org.kitesdk.tools;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Closeables;
 import java.io.IOException;
@@ -51,6 +52,9 @@ public class CopyTask<E> extends Configured {
   private final View<E> from;
   private final View<E> to;
   private final Class<E> entityClass;
+  private boolean compact = true;
+  private int numWriters = -1;
+
   private long count = 0;
 
   public CopyTask(View<E> from, View<E> to, Class<E> entityClass) {
@@ -61,6 +65,23 @@ public class CopyTask<E> extends Configured {
 
   public long getCount() {
     return count;
+  }
+
+  public CopyTask noCompaction() {
+    this.compact = false;
+    this.numWriters = 0;
+    return this;
+  }
+
+  public CopyTask setNumWriters(int numWriters) {
+    Preconditions.checkArgument(numWriters >= 0,
+        "Invalid number of reducers: " + numWriters);
+    if (numWriters == 0) {
+      noCompaction();
+    } else {
+      this.numWriters = numWriters;
+    }
+    return this;
   }
 
   public PipelineResult run() throws IOException {
@@ -80,6 +101,11 @@ public class CopyTask<E> extends Configured {
       // TODO: add transforms
       PCollection<E> collection = pipeline.read(
           CrunchDatasets.asSource(from, entityClass));
+
+      if (compact) {
+        collection = TaskUtil.partition(collection,
+            to.getDataset().getDescriptor(), numWriters);
+      }
 
       pipeline.write(collection, CrunchDatasets.asTarget(to));
 
