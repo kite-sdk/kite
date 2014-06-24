@@ -24,6 +24,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
+import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +51,10 @@ public class TestUtil {
     Main main = new Main(console);
     main.setConf(conf);
     return main.run(args);
+  }
+
+  public static Matcher<DatasetDescriptor> matches(DatasetDescriptor desc) {
+    return new DescriptorMatcher(desc);
   }
 
   public static Matcher<String> matchesMinimizedSchema(Schema schema) {
@@ -172,6 +178,25 @@ public class TestUtil {
         }
       }
       return 0;
+    }
+  }
+
+  private static class DescriptorMatcher extends TypeSafeMatcher<DatasetDescriptor> {
+    private final DatasetDescriptor descriptor;
+
+    public DescriptorMatcher(DatasetDescriptor descriptor) {
+      this.descriptor = descriptor;
+    }
+
+    @Override
+    public boolean matchesSafely(DatasetDescriptor actual) {
+      return descriptor.equals(actual);
+    }
+
+    @Override
+    public void describeTo(Description description) {
+      description.appendText("DatasetDescriptor equivalent to ")
+          .appendText(descriptor.toString());
     }
   }
 }

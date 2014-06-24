@@ -33,7 +33,7 @@ public class UpdateDatasetCommand extends BaseDatasetCommand {
 
   private static final Splitter PROP_VALUE_SEP = Splitter.on('=').limit(2);
 
-  @Parameter(description = "<dataset name>")
+  @Parameter(description = "<dataset>")
   List<String> datasets;
 
   @Parameter(names = {"-s", "--schema"},
