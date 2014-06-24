@@ -16,18 +16,11 @@
 
 package org.kitesdk.data;
 
-import com.google.common.collect.Maps;
 import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.kitesdk.data.spi.OptionBuilder;
-import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.URIBuilder;
-import org.kitesdk.data.spi.URIPattern;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -36,41 +29,12 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
 public class TestDatasets {
-  private static final AtomicInteger ids = new AtomicInteger(0);
-  private static final Map<String, DatasetRepository> repos = Maps.newHashMap();
-
-  @BeforeClass
-  public static void addMockRepoBuilder() throws Exception {
-    final URIPattern mockPattern = new URIPattern("mock::id");
-    Registration.register(
-        mockPattern, mockPattern,
-        new OptionBuilder<DatasetRepository>() {
-          @Override
-          public DatasetRepository getFromOptions(Map<String, String> options) {
-            DatasetRepository repo = repos.get(options.get("id"));
-            if (repo == null) {
-              repo = mock(DatasetRepository.class);
-              when(repo.getUri()).thenReturn(
-                  URI.create("repo:" + mockPattern.construct(options)));
-              repos.put(options.get("id"), repo);
-            }
-            return repo;
-          }
-        }
-    );
-  }
-
-  public DatasetRepository newMockRepository() {
-    String uri = "repo:mock:" + Integer.toString(ids.incrementAndGet());
-    return DatasetRepositories.open(uri);
-  }
-
   private DatasetRepository repo = null;
   private URI repoUri = null;
 
   @Before
   public void setupMock() {
-    this.repo = newMockRepository();
+    this.repo = MockRepositories.newMockRepository();
     this.repoUri = repo.getUri();
     verify(repo).getUri(); // verify the above getUri() call
   }

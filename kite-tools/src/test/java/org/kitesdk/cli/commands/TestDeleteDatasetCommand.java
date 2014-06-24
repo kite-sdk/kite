@@ -16,60 +16,37 @@
 package org.kitesdk.cli.commands;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.spi.OptionBuilder;
-import org.kitesdk.data.spi.Registration;
-import org.kitesdk.data.spi.URIPattern;
+import org.kitesdk.data.MockRepositories;
 import org.slf4j.Logger;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.contains;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class TestDeleteDatasetCommand {
 
-  private static AtomicInteger ids = new AtomicInteger(0);
-  private static Map<String, DatasetRepository> repos = Maps.newHashMap();
-  private String id;
+  private DatasetRepository repo;
   private DeleteDatasetCommand command;
   private Logger console;
 
-  @BeforeClass
-  public static void addMockRepoBuilder() throws Exception {
-    Registration.register(
-        new URIPattern("mock::id"), new URIPattern("mock::id"),
-        new OptionBuilder<DatasetRepository>() {
-          @Override
-          public DatasetRepository getFromOptions(Map<String, String> options) {
-            DatasetRepository repo = mock(DatasetRepository.class);
-            repos.put(options.get("id"), repo);
-            return repo;
-          }
-        }
-    );
-  }
-
   @Before
   public void setUp() {
-    this.id = Integer.toString(ids.addAndGet(1));
+    this.repo = MockRepositories.newMockRepository();
     this.console = mock(Logger.class);
     this.command = new DeleteDatasetCommand(console);
-    this.command.repoURI = "repo:mock:" + id;
-  }
-
-  public DatasetRepository getMockRepo() {
-    return repos.get(id);
+    this.command.repoURI = repo.getUri().toString();
+    verify(repo).getUri(); // verify the above call
   }
 
   @Test
   public void testBasicUse() throws Exception {
     command.datasets = Lists.newArrayList("users");
     command.run();
-    verify(getMockRepo()).delete("users");
+    verify(repo).delete("users");
     verify(console).debug(contains("Deleted"), eq("users"));
   }
 
@@ -77,9 +54,9 @@ public class TestDeleteDatasetCommand {
   public void testMultipleDatasets() throws Exception {
     command.datasets = Lists.newArrayList("users", "moreusers");
     command.run();
-    verify(getMockRepo()).delete("users");
+    verify(repo).delete("users");
     verify(console).debug(contains("Deleted"), eq("users"));
-    verify(getMockRepo()).delete("moreusers");
+    verify(repo).delete("moreusers");
     verify(console).debug(contains("Deleted"), eq("moreusers"));
   }
 

@@ -16,59 +16,37 @@
 package org.kitesdk.cli.commands;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import java.io.FileNotFoundException;
-import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.MockRepositories;
 import org.kitesdk.data.TestHelpers;
-import org.kitesdk.data.spi.OptionBuilder;
-import org.kitesdk.data.spi.Registration;
-import org.kitesdk.data.spi.URIPattern;
 import org.slf4j.Logger;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.contains;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class TestCreateDatasetCommand {
 
-  private static final AtomicInteger ids = new AtomicInteger(0);
-  private static final Map<String, DatasetRepository> repos = Maps.newHashMap();
-  private String id = null;
+  private DatasetRepository repo;
   private CreateDatasetCommand command = null;
   private Logger console;
 
-  @BeforeClass
-  public static void addMockRepoBuilder() throws Exception {
-    Registration.register(
-        new URIPattern("mock::id"), new URIPattern("mock::id"),
-        new OptionBuilder<DatasetRepository>() {
-          @Override
-          public DatasetRepository getFromOptions(Map<String, String> options) {
-            DatasetRepository repo = mock(DatasetRepository.class);
-            repos.put(options.get("id"), repo);
-            return repo;
-          }
-        }
-    );
-  }
-
   @Before
   public void setUp() {
-    this.id = Integer.toString(ids.addAndGet(1));
+    this.repo = MockRepositories.newMockRepository();
     this.console = mock(Logger.class);
     this.command = new CreateDatasetCommand(console);
     this.command.setConf(new Configuration());
-    this.command.repoURI = "repo:mock:" + id;
-  }
-
-  public DatasetRepository getMockRepo() {
-    return repos.get(id);
+    this.command.repoURI = repo.getUri().toString();
+    verify(repo).getUri(); // verify the above call
   }
 
   @Test
@@ -81,7 +59,7 @@ public class TestCreateDatasetCommand {
         .schemaUri("resource:test-schemas/user.avsc")
         .build();
 
-    verify(getMockRepo()).create("users", expectedDescriptor);
+    verify(repo).create("users", expectedDescriptor);
     verify(console).debug(contains("Created"), eq("users"));
   }
 
@@ -97,7 +75,7 @@ public class TestCreateDatasetCommand {
         .format("parquet")
         .build();
 
-    verify(getMockRepo()).create("users", expectedDescriptor);
+    verify(repo).create("users", expectedDescriptor);
     verify(console).debug(contains("Created"), eq("users"));
   }
 
