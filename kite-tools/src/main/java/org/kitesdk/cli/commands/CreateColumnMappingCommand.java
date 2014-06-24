@@ -36,7 +36,7 @@ public class CreateColumnMappingCommand extends BaseCommand {
 
   private static final Pattern KEY_MAPPING = Pattern.compile("(\\w+):key");
   private static final Pattern VERSION_MAPPING = Pattern.compile("(\\w+):version");
-  private static final Pattern FIELD_MAPPING = Pattern.compile("(\\w+):(\\w+)(?::(\\w)+)?");
+  private static final Pattern FIELD_MAPPING = Pattern.compile("(\\w+):(\\w+)(?::(\\w+))?");
 
   private static final Set<Schema.Type> counterTypes = Sets
       .newHashSet(Schema.Type.INT, Schema.Type.LONG);
@@ -74,17 +74,34 @@ public class CreateColumnMappingCommand extends BaseCommand {
   public int run() throws IOException {
     Schema schema = new Schema.Parser().parse(open(avroSchemaFile));
 
+    boolean hasVersion = false;
     ColumnMapping.Builder mappingBuilder = new ColumnMapping.Builder();
+
+    // handle version mappings first to know whether to use counters
+    for (String mapping : partitions) {
+      Matcher matcher = VERSION_MAPPING.matcher(mapping);
+      if (matcher.matches()) {
+        String source = matcher.group(1);
+        ValidationException.check(schema.getField(source) != null,
+            "Not a schema field: %s", source);
+        mappingBuilder.occ(source);
+        hasVersion = true;
+      }
+    }
+
+    // add the non-version mappings
     for (String mapping : partitions) {
       Matcher matcher = KEY_MAPPING.matcher(mapping);
       if (matcher.matches()) {
-        mappingBuilder.key(matcher.group(1));
+        String source = matcher.group(1);
+        ValidationException.check(schema.getField(source) != null,
+            "Not a schema field: %s", source);
+        mappingBuilder.key(source);
         continue;
       }
       matcher = VERSION_MAPPING.matcher(mapping);
       if (matcher.matches()) {
-        mappingBuilder.occ(matcher.group(1));
-        continue;
+        continue; // already processed above
       }
       matcher = FIELD_MAPPING.matcher(mapping);
       if (matcher.matches()) {
@@ -94,10 +111,10 @@ public class CreateColumnMappingCommand extends BaseCommand {
         Schema.Field field = schema.getField(source);
         ValidationException.check(field != null,
             "Not a schema field: %s", source);
-        ValidationException.check(family != null,
+        ValidationException.check(family != null && !family.isEmpty(),
             "Missing column family: %s:?", source);
         Schema.Type type = schema.getField(source).schema().getType();
-        if (counterTypes.contains(type)) {
+        if (!hasVersion && counterTypes.contains(type)) {
           if (qualOrPrefix == null) {
             mappingBuilder.counter(source, family, source);
           } else {

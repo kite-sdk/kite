@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "name": "user",
+  "fields": [
+    {
+      "type": "string",
+      "name": "username"
+    },
+    {
+      "type": "string",
+      "name": "email"
+    },
+    {
+      "type": {"type": "map", "values": "string"},
+      "name": "preferences"
+    },
+    {
+      "type": "long",
+      "name": "created_at"
+    },
+    {
+      "type": "long",
+      "name": "version"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+[ {
+  "source" : "email",
+  "type" : "hash",
+  "buckets" : 16,
+  "name" : "email_hash"
+}, {
+  "source" : "email",
+  "type" : "identity",
+  "name" : "email_copy"
+} ]

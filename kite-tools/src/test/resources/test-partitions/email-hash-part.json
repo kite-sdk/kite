@@ -1,0 +1,6 @@
+[ {
+  "source" : "email",
+  "type" : "hash",
+  "buckets" : 16,
+  "name" : "email_hash"
+} ]

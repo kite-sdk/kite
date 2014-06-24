@@ -52,7 +52,6 @@ public class TestUpdateDatasetCommand {
       "    { \"name\": \"f1\", \"type\": \"int\" }" +
       "  ]}";
 
-
   @Before
   @SuppressWarnings("unchecked")
   public void setUp() {
