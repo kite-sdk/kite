@@ -80,11 +80,29 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       this.conf = conf;
     }
 
-    public ConfigBuilder readFrom(URI viewUri) {
-      conf.set(KITE_INPUT_URI, viewUri.toString());
+    /**
+     * Adds configuration for {@code DatasetKeyInputFormat} to read from the
+     * given dataset or view URI.
+     * <p>
+     * URI formats are defined by {@link Dataset} implementations, but must
+     * begin with "dataset:" or "view:". For more information, see
+     * {@link Datasets}.
+     *
+     * @param uri a dataset or view URI
+     * @return this for method chaining
+     */
+    public ConfigBuilder readFrom(URI uri) {
+      conf.set(KITE_INPUT_URI, uri.toString());
       return this;
     }
 
+    /**
+     * Adds configuration for {@code DatasetKeyInputFormat} to read from the
+     * given {@link Dataset} or {@link View} instance.
+     *
+     * @param view a dataset or view
+     * @return this for method chaining
+     */
     public ConfigBuilder readFrom(View<?> view) {
       if (view instanceof Dataset) {
         if (view instanceof FileSystemDataset) {
@@ -102,14 +120,27 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       return readFrom(view.getDataset().getUri());
     }
 
-    public ConfigBuilder readFrom(String viewUri) {
-      return readFrom(URI.create(viewUri));
+    /**
+     * Adds configuration for {@code DatasetKeyInputFormat} to read from the
+     * given dataset or view URI string.
+     * <p>
+     * URI formats are defined by {@link Dataset} implementations, but must
+     * begin with "dataset:" or "view:". For more information, see
+     * {@link Datasets}.
+     *
+     * @param uri a dataset or view URI string
+     * @return this for method chaining
+     */
+    public ConfigBuilder readFrom(String uri) {
+      return readFrom(URI.create(uri));
     }
   }
 
   /**
-   * Sets the input dataset that will be used for the given Job.
-   * @param job
+   * Configures the {@code Job} to use the {@code DatasetKeyInputFormat} and
+   * returns a helper to add further configuration.
+   *
+   * @param job the {@code Job} to configure
    */
   public static ConfigBuilder configure(Job job) {
     job.setInputFormatClass(DatasetKeyInputFormat.class);
@@ -117,8 +148,9 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   }
 
   /**
-   * Sets the input dataset that will be used for the given Configuration.
-   * @param conf
+   * Returns a helper to add input options to the given {@code Configuration}.
+   *
+   * @param conf a {@code Configuration}
    */
   public static ConfigBuilder configure(Configuration conf) {
     return new ConfigBuilder(conf);
