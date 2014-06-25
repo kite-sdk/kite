@@ -124,6 +124,9 @@ $h2 Kite Morphlines Modules
 * Kite Morphlines JSON
  [Dependency Information](kite-morphlines/kite-morphlines-json/dependency-info.html),
  [Dependencies](kite-morphlines/kite-morphlines-json/dependencies.html)
+* Kite Morphlines protobuf
+ [Dependency Information](kite-morphlines/kite-morphlines-protobuf/dependency-info.html),
+ [Dependencies](kite-morphlines/kite-morphlines-protobuf/dependencies.html)
 * Kite Morphlines Hadoop Core
  [Dependency Information](kite-morphlines/kite-morphlines-hadoop-core/dependency-info.html),
  [Dependencies](kite-morphlines/kite-morphlines-hadoop-core/dependencies.html)
