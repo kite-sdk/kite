@@ -58,13 +58,13 @@ public class CrunchDatasets {
   public static <E> ReadableSource<E> asSource(View<E> view, Class<E> type) {
     return new DatasetSourceTarget<E>(view, type);
   }
-  
-  
+
+
   /**
    * Expose the {@link View} or {@link Dataset} represented by the URI
    * as a Crunch {@link ReadableSource}.
    *
-   * @param view the URI of the view or dataset to read from
+   * @param uri the URI of the view or dataset to read from
    * @param type    the Java type of the entities in the dataset
    * @param <E>     the type of entity produced by the source
    * @return a {@link ReadableSource} for the view
@@ -72,12 +72,12 @@ public class CrunchDatasets {
   public static <E> ReadableSource<E> asSource(URI uri, Class<E> type) {
     return new DatasetSourceTarget<E>(uri, type);
   }
-  
+
   /**
    * Expose the {@link View} or {@link Dataset} represented by the URI
    * as a Crunch {@link ReadableSource}.
    *
-   * @param view the URI of the view or dataset to read from
+   * @param uri the URI of the view or dataset to read from
    * @param type    the Java type of the entities in the dataset
    * @param <E>     the type of entity produced by the source
    * @return a {@link ReadableSource} for the view
@@ -115,18 +115,18 @@ public class CrunchDatasets {
   /**
    * Expose the {@link Dataset} or {@link View} represented by the given
    * URI as a Crunch {@link Target}.
-   * 
+   *
    * @param uri the dataset or view URI
    * @return a {@link Target} for the dataset or view
    */
   public static Target asTarget(String uri) {
     return asTarget(URI.create(uri));
   }
-  
+
   /**
    * Expose the {@link Dataset} or {@link View} represented by the given
    * URI as a Crunch {@link Target}.
-   * 
+   *
    * @param uri the dataset or view URI
    * @return a {@link Target} for the dataset or view
    */
