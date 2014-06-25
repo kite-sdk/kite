@@ -207,7 +207,7 @@ public class TestCopyCommandCluster extends MiniDFSTest {
             .optionalString("username")
             .optionalString("email")
             .endRecord())
-        .build());
+        .build(), Object.class);
 
     int rc = command.run();
     Assert.assertEquals("Should return success", 0, rc);

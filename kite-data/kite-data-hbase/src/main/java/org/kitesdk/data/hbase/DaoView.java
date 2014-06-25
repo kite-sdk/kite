@@ -38,13 +38,14 @@ import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.Marker;
 import org.kitesdk.data.spi.MarkerRange;
 import java.util.List;
+import org.apache.hadoop.conf.Configuration;
 
 class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor<E> {
 
   private final DaoDataset<E> dataset;
 
-  DaoView(DaoDataset<E> dataset) {
-    super(dataset);
+  DaoView(DaoDataset<E> dataset, Class<E> type) {
+    super(dataset, type);
     this.dataset = dataset;
   }
 
@@ -196,7 +197,7 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
   }
 
   @Override
-  public InputFormat<E, Void> getInputFormat() {
+  public InputFormat<E, Void> getInputFormat(Configuration conf) {
     return new HBaseViewKeyInputFormat<E>(this);
   }
 }

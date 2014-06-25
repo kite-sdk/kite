@@ -50,7 +50,7 @@ public class SchemaCommand extends BaseDatasetCommand {
         datasets != null && !datasets.isEmpty(),
         "Missing dataset name");
     if (datasets.size() == 1) {
-      String schema = load(datasets.get(0))
+      String schema = load(datasets.get(0), Object.class)
           .getDataset()
           .getDescriptor()
           .getSchema()
@@ -61,7 +61,7 @@ public class SchemaCommand extends BaseDatasetCommand {
       Preconditions.checkArgument(outputPath == null,
           "Cannot output multiple schemas to one file");
       for (String name : datasets) {
-        console.info("Dataset \"{}\" schema: {}", name, load(name)
+        console.info("Dataset \"{}\" schema: {}", name, load(name, Object.class)
             .getDataset()
             .getDescriptor()
             .getSchema()

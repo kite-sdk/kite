@@ -17,6 +17,9 @@
 package org.kitesdk.data.spi.filesystem;
 
 import java.net.URI;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericData.Record;
+import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -52,7 +55,8 @@ public class TestLocalDatasetURIs {
     repo.delete("test");
     repo.create("test", descriptor);
 
-    Dataset<Object> ds = Datasets.load("dataset:file:/tmp/data/test");
+    Dataset<Record> ds = Datasets.<Record, Dataset<Record>>
+        load("dataset:file:/tmp/data/test", Record.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -71,7 +75,8 @@ public class TestLocalDatasetURIs {
     repo.delete("test");
     repo.create("test", descriptor);
 
-    Dataset<Object> ds = Datasets.load("dataset:file:target/data/test");
+    Dataset<Record> ds = Datasets.<Record, Dataset<Record>>
+        load("dataset:file:target/data/test", Record.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -90,8 +95,8 @@ public class TestLocalDatasetURIs {
     repo.delete("test");
     repo.create("test", descriptor);
 
-    RefinableView<Object> v = Datasets
-        .load("view:file:/tmp/data/test?username=user");
+    RefinableView<Record> v = Datasets.<Record, RefinableView<Record>>
+        load("view:file:/tmp/data/test?username=user", Record.class);
 
     Assert.assertNotNull("Should load view", v);
     Assert.assertTrue(v instanceof FileSystemView);
@@ -104,7 +109,7 @@ public class TestLocalDatasetURIs {
         loaded, v.getDataset().getDescriptor());
 
     Constraints withUser = new Constraints(loaded.getSchema())
-        .with("username", "user");
+        .with("username", new Utf8("user"));
     Assert.assertEquals("Constraints should be username=user",
         withUser, ((FileSystemView) v).getConstraints());
 
@@ -117,7 +122,8 @@ public class TestLocalDatasetURIs {
         DatasetNotFoundException.class, new Runnable() {
       @Override
       public void run() {
-        Dataset<Object> ds = Datasets.load("dataset:file:/tmp/data/nosuchdataset");
+        Dataset<Record> ds = Datasets.<Record, Dataset<Record>>
+            load("dataset:file:/tmp/data/nosuchdataset", Record.class);
       }
     });
   }
@@ -128,7 +134,8 @@ public class TestLocalDatasetURIs {
         DatasetNotFoundException.class, new Runnable() {
           @Override
           public void run() {
-            Dataset<Object> ds = Datasets.load("dataset:unknown:/tmp/data/test");
+            Dataset<Record> ds = Datasets.<Record, Dataset<Record>>
+                load("dataset:unknown:/tmp/data/test", Record.class);
           }
         });
   }

@@ -81,7 +81,7 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
 
     DatasetDescriptor descriptor = descriptorBuilder.build();
     if (isDataUri(datasets.get(0))) {
-      Datasets.<Object, Dataset<Object>> create(datasets.get(0), descriptor);
+      Datasets.<Object, Dataset<Object>> create(datasets.get(0), descriptor, Object.class);
     } else {
       getDatasetRepository().create(datasets.get(0), descriptor);
     }

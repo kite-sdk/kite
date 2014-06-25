@@ -51,6 +51,8 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import org.apache.avro.generic.IndexedRecord;
+import org.kitesdk.data.Formats;
 
 @SuppressWarnings("deprecation")
 public class FileSystemDataset<E> extends AbstractDataset<E> implements
@@ -77,7 +79,14 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
                     DatasetDescriptor descriptor, URI uri,
-                    @Nullable PartitionListener partitionListener) {
+                    @Nullable PartitionListener partitionListener, Class<E> type) {
+    super(type, descriptor.getSchema());
+    if (Formats.PARQUET.equals(descriptor.getFormat())) {
+      Preconditions.checkArgument(IndexedRecord.class.isAssignableFrom(type) ||
+          type == Object.class,
+          "Parquet only supports generic and specific data models, type"
+          + " parameter must implement IndexedRecord");
+    }
 
     this.fileSystem = fileSystem;
     this.directory = directory;
@@ -89,15 +98,15 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     this.convert = new PathConversion();
     this.uri = uri;
 
-    this.unbounded = new FileSystemView<E>(this);
+    this.unbounded = new FileSystemView<E>(this, type);
     // remove this.partitionKey for 0.14.0
     this.partitionKey = null;
   }
 
   FileSystemDataset(FileSystem fileSystem, Path directory, String name,
     DatasetDescriptor descriptor, URI uri, @Nullable PartitionKey partitionKey,
-    @Nullable PartitionListener partitionListener) {
-    this(fileSystem, directory, name, descriptor, uri, partitionListener);
+    @Nullable PartitionListener partitionListener, Class<E> type) {
+    this(fileSystem, directory, name, descriptor, uri, partitionListener, type);
     this.partitionKey = partitionKey;
   }
 
@@ -194,7 +203,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     PartitionStrategy subpartitionStrategy = Accessor.getDefault()
         .getSubpartitionStrategy(partitionStrategy, partitionDepth);
 
-    return new FileSystemDataset.Builder()
+    return new FileSystemDataset.Builder<E>()
         .name(name)
         .fileSystem(fileSystem)
         .uri(uri)
@@ -202,6 +211,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
             .location(partitionDirectory)
             .partitionStrategy(subpartitionStrategy)
             .build())
+        .type(type)
         .partitionKey(key)
         .partitionListener(partitionListener)
         .build();
@@ -252,7 +262,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       PartitionKey key = keyFromDirectory(p.getName());
       PartitionStrategy subPartitionStrategy = Accessor.getDefault()
           .getSubpartitionStrategy(partitionStrategy, 1);
-      Builder builder = new FileSystemDataset.Builder()
+      Builder<E> builder = new FileSystemDataset.Builder<E>()
           .name(name)
           .fileSystem(fileSystem)
           .uri(uri)
@@ -260,10 +270,11 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
               .location(p)
               .partitionStrategy(subPartitionStrategy)
               .build())
+          .type(type)
           .partitionKey(key)
           .partitionListener(partitionListener);
 
-      partitions.add(builder.<E>build());
+      partitions.add(builder.build());
     }
 
     return partitions;
@@ -329,8 +340,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   }
 
   @Override
-  public InputFormat<E, Void> getInputFormat() {
-    return new FileSystemViewKeyInputFormat<E>(this);
+  public InputFormat<E, Void> getInputFormat(Configuration conf) {
+    return new FileSystemViewKeyInputFormat<E>(this, conf);
   }
 
   @SuppressWarnings("unchecked")
@@ -429,33 +440,34 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     return lastMod;
   }
 
-  public static class Builder {
+  public static class Builder<E> {
 
     private Configuration conf;
     private FileSystem fileSystem;
     private Path directory;
     private String name;
     private DatasetDescriptor descriptor;
+    private Class<E> type;
     private URI uri;
     private PartitionKey partitionKey;
     private PartitionListener partitionListener;
 
-    public Builder name(String name) {
+    public Builder<E> name(String name) {
       this.name = name;
       return this;
     }
 
-    protected Builder fileSystem(FileSystem fs) {
+    protected Builder<E> fileSystem(FileSystem fs) {
       this.fileSystem = fs;
       return this;
     }
 
-    public Builder configuration(Configuration conf) {
+    public Builder<E> configuration(Configuration conf) {
       this.conf = conf;
       return this;
     }
 
-     public Builder descriptor(DatasetDescriptor descriptor) {
+     public Builder<E> descriptor(DatasetDescriptor descriptor) {
       Preconditions.checkArgument(descriptor.getLocation() != null,
           "Dataset location cannot be null");
 
@@ -464,27 +476,36 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       return this;
     }
 
-    public Builder uri(URI uri) {
+    public Builder<E> type(Class<E> type) {
+      Preconditions.checkArgument(type != null, "Type cannot be null");
+
+      this.type = type;
+
+      return this;
+    }
+
+    public Builder<E> uri(URI uri) {
       this.uri = uri;
       return this;
     }
 
-    Builder partitionKey(@Nullable PartitionKey partitionKey) {
+    Builder<E> partitionKey(@Nullable PartitionKey partitionKey) {
       this.partitionKey = partitionKey;
       return this;
     }
 
-    Builder partitionListener(@Nullable PartitionListener partitionListener) {
+    Builder<E> partitionListener(@Nullable PartitionListener partitionListener) {
       this.partitionListener = partitionListener;
       return this;
     }
 
-    public <E> FileSystemDataset<E> build() {
+    public FileSystemDataset<E> build() {
       Preconditions.checkState(this.name != null, "No dataset name defined");
       Preconditions.checkState(this.descriptor != null,
         "No dataset descriptor defined");
       Preconditions.checkState((conf != null) || (fileSystem != null),
           "Configuration or FileSystem must be set");
+      Preconditions.checkState(type != null, "No type specified");
 
       this.directory = new Path(descriptor.getLocation());
 
@@ -499,7 +520,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       Path absoluteDirectory = fileSystem.makeQualified(directory);
       return new FileSystemDataset<E>(
           fileSystem, absoluteDirectory, name, descriptor, uri, partitionKey,
-          partitionListener);
+          partitionListener, type);
     }
   }
 

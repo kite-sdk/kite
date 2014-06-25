@@ -19,6 +19,7 @@ import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import org.apache.avro.generic.GenericData;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -34,6 +35,7 @@ import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.spi.PartitionedDataset;
+import org.kitesdk.data.TypeNotFoundException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
@@ -66,6 +68,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   public static final String KITE_DATASET_NAME = "kite.inputDatasetName";
   public static final String KITE_PARTITION_DIR = "kite.inputPartitionDir";
   public static final String KITE_CONSTRAINTS = "kite.inputConstraints";
+  public static final String KITE_TYPE = "kite.inputEntityType";
 
   private Configuration conf;
   private InputFormat<E, Void> delegate;
@@ -118,6 +121,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
         throw new UnsupportedOperationException("Implementation " +
             "does not provide InputFormat support. View: " + view);
       }
+      withType(view.getType());
       return readFrom(view.getDataset().getUri());
     }
 
@@ -134,6 +138,11 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
      */
     public ConfigBuilder readFrom(String uri) {
       return readFrom(URI.create(uri));
+    }
+
+    public <E> ConfigBuilder withType(Class<E> type) {
+      conf.setClass(KITE_TYPE, type, type);
+      return this;
     }
   }
 
@@ -210,25 +219,25 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     String partitionDir = conf.get(KITE_PARTITION_DIR);
     String constraintsString = conf.get(KITE_CONSTRAINTS);
     if (view.getDataset().getDescriptor().isPartitioned() && partitionDir != null) {
-      delegate = getDelegateInputFormatForPartition(view.getDataset(), partitionDir);
+      delegate = getDelegateInputFormatForPartition(view.getDataset(), partitionDir, conf);
     } else if (constraintsString != null) {
-      delegate = getDelegateInputFormatForView(view.getDataset(), constraintsString);
+      delegate = getDelegateInputFormatForView(view.getDataset(), constraintsString, conf);
     } else {
-      delegate = getDelegateInputFormat(view);
+      delegate = getDelegateInputFormat(view, conf);
     }
   }
 
   @SuppressWarnings("unchecked")
-  private InputFormat<E, Void> getDelegateInputFormat(View<E> view) {
+  private InputFormat<E, Void> getDelegateInputFormat(View<E> view, Configuration conf) {
     if (view instanceof InputFormatAccessor) {
-      return ((InputFormatAccessor<E>) view).getInputFormat();
+      return ((InputFormatAccessor<E>) view).getInputFormat(conf);
     }
     throw new UnsupportedOperationException("Implementation " +
           "does not provide InputFormat support. View: " + view);
   }
 
   private InputFormat<E, Void> getDelegateInputFormatForPartition(Dataset<E> dataset,
-      String partitionDir) {
+      String partitionDir, Configuration conf) {
     if (!(dataset instanceof FileSystemDataset)) {
       throw new UnsupportedOperationException("Partitions only supported for " +
           "FileSystemDataset. Dataset: " + dataset);
@@ -241,31 +250,45 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     if (key != null) {
       PartitionedDataset<E> partition = fsDataset.getPartition(key, false);
       LOG.debug("Partition: {}", partition);
-      return getDelegateInputFormat(partition);
+      return getDelegateInputFormat(partition, conf);
     }
     throw new DatasetException("Cannot find partition " + partitionDir);
   }
 
   @SuppressWarnings("unchecked")
   private InputFormat<E, Void> getDelegateInputFormatForView(Dataset<E> dataset,
-      String constraintsString) {
+      String constraintsString, Configuration conf) {
     Constraints constraints = Constraints.deserialize(constraintsString);
     if (dataset instanceof AbstractDataset) {
-      return getDelegateInputFormat(((AbstractDataset) dataset).filter(constraints));
+      return getDelegateInputFormat(((AbstractDataset) dataset).filter(constraints),
+          conf);
     }
     throw new DatasetException("Cannot find view from constraints for " + dataset);
   }
 
-  @SuppressWarnings("deprecation")
+  @SuppressWarnings({"deprecation", "unchecked"})
   private static <E> View<E> load(Configuration conf) {
+    Class<E> type; 
+    try {
+      type = (Class<E>)conf.getClass(KITE_TYPE, GenericData.Record.class);
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof ClassNotFoundException) {
+        throw new TypeNotFoundException(String.format(
+            "The Java class %s for the entity type could not be found",
+            conf.get(KITE_TYPE)),
+            e.getCause());
+      } else {
+        throw e;
+      }
+    }
     String inputUri = conf.get(KITE_INPUT_URI);
     if (inputUri == null) {
       return Datasets.<E, View<E>>load(
           new URIBuilder(
               conf.get(KITE_REPOSITORY_URI), conf.get(KITE_DATASET_NAME))
-              .build());
+              .build(), type);
     }
-    return Datasets.<E, View<E>>load(inputUri);
+    return Datasets.<E, View<E>>load(inputUri, type);
   }
 
   @Override

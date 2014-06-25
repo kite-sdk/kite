@@ -18,6 +18,7 @@ package org.kitesdk.data.spi.filesystem;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
+import org.apache.avro.hadoop.io.AvroSerialization;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
@@ -36,6 +37,7 @@ import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
 import org.kitesdk.data.spi.AbstractRefinableView;
+import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.FilteredRecordReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,13 +51,20 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
   private FileSystemDataset<E> dataset;
   private FileSystemView<E> view;
 
-  public FileSystemViewKeyInputFormat(FileSystemDataset<E> dataset) {
+  public FileSystemViewKeyInputFormat(FileSystemDataset<E> dataset,
+      Configuration conf) {
     this.dataset = dataset;
     LOG.debug("Dataset: {}", dataset);
+
+    Format format = dataset.getDescriptor().getFormat();
+    if (Formats.AVRO.equals(format)) {
+      AvroSerialization.setDataModelClass(conf,
+          DataModelUtil.getDataModelForType(dataset.getType()).getClass());
+    }
   }
 
-  public FileSystemViewKeyInputFormat(FileSystemView<E> view) {
-    this((FileSystemDataset<E>) view.getDataset());
+  public FileSystemViewKeyInputFormat(FileSystemView<E> view, Configuration conf) {
+    this((FileSystemDataset<E>) view.getDataset(), conf);
     this.view = view;
     LOG.debug("View: {}", view);
   }
@@ -129,6 +138,7 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     } else if (Formats.CSV.equals(format)) {
       CSVInputFormat<E> delegate = new CSVInputFormat<E>();
       delegate.setDescriptor(dataset.getDescriptor());
+      delegate.setType(dataset.getType());
       return delegate.createRecordReader(inputSplit, taskAttemptContext);
     } else {
       throw new UnsupportedOperationException(

@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputFormat;
 
 /**
@@ -24,5 +25,5 @@ public interface InputFormatAccessor<E> {
   /**
    * @return an input format for this dataset or view
    */
-  public InputFormat<E, Void> getInputFormat();
+  public InputFormat<E, Void> getInputFormat(Configuration conf);
 }

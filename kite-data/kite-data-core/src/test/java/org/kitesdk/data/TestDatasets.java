@@ -51,16 +51,27 @@ public class TestDatasets {
         .build();
 
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.create("test", descriptor)).thenReturn(expected);
+    when(repo.create("test", descriptor, Object.class)).thenReturn(expected);
 
-    Dataset<Object> ds = Datasets.create(datasetUri, descriptor);
+    Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+        create(datasetUri, descriptor, Object.class);
 
-    verify(repo).create("test", descriptor);
+    verify(repo).create("test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
 
     Assert.assertEquals(expected, ds);
+  }
+
+  @Test(expected=NullPointerException.class)
+  public void testCreateNullType() {
+    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaLiteral("\"string\"")
+        .build();
+
+    Datasets.<Object, Dataset<Object>> create(datasetUri, descriptor, null);
   }
 
   @Test
@@ -71,11 +82,12 @@ public class TestDatasets {
         .build();
 
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.create("test", descriptor)).thenReturn(expected);
+    when(repo.create("test", descriptor, Object.class)).thenReturn(expected);
 
-    Dataset<Object> ds = Datasets.create(datasetUri.toString(), descriptor);
+    Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+        create(datasetUri.toString(), descriptor, Object.class);
 
-    verify(repo).create("test", descriptor);
+    verify(repo).create("test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -90,7 +102,7 @@ public class TestDatasets {
         .build();
 
     Dataset<Object> ds = mock(Dataset.class);
-    when(repo.create("test", descriptor)).thenReturn(ds);
+    when(repo.create("test", descriptor, Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     RefinableView<Object> userView = mock(RefinableView.class);
@@ -106,9 +118,10 @@ public class TestDatasets {
         .with("ignoredOption", "abc")
         .build();
 
-    RefinableView<Object> view = Datasets.create(datasetUri, descriptor);
+    RefinableView<Object> view = Datasets.<Object, RefinableView<Object>>
+        create(datasetUri, descriptor, Object.class);
 
-    verify(repo).create("test", descriptor);
+    verify(repo).create("test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -130,7 +143,7 @@ public class TestDatasets {
         .build();
 
     Dataset<Object> ds = mock(Dataset.class);
-    when(repo.create("test", descriptor)).thenReturn(ds);
+    when(repo.create("test", descriptor, Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     RefinableView<Object> userView = mock(RefinableView.class);
@@ -146,10 +159,10 @@ public class TestDatasets {
         .with("ignoredOption", "abc")
         .build();
 
-    RefinableView<Object> view = Datasets
-        .create(datasetUri.toString(), descriptor);
+    RefinableView<Object> view = Datasets.<Object, RefinableView<Object>>
+        create(datasetUri.toString(), descriptor, Object.class);
 
-    verify(repo).create("test", descriptor);
+    verify(repo).create("test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -167,13 +180,14 @@ public class TestDatasets {
   @Test
   public void testLoad() {
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.load("test")).thenReturn(expected);
+    when(repo.load("test", Object.class)).thenReturn(expected);
 
     URI datasetUri = new URIBuilder(repoUri, "test").build();
 
-    Dataset<Object> ds = Datasets.load(datasetUri);
+    Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+        load(datasetUri, Object.class);
 
-    verify(repo).load("test");
+    verify(repo).load("test", Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -181,16 +195,24 @@ public class TestDatasets {
     Assert.assertEquals(expected, ds);
   }
 
+  @Test(expected=NullPointerException.class)
+  public void testLoadNullType() {
+    URI datasetUri = new URIBuilder(repoUri, "test").build();
+
+    Datasets.<Object, Dataset<Object>> load(datasetUri, null);
+  }
+
   @Test
   public void testLoadStringUri() {
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.load("test")).thenReturn(expected);
+    when(repo.load("test", Object.class)).thenReturn(expected);
 
     URI datasetUri = new URIBuilder(repoUri, "test").build();
 
-    Dataset<Object> ds = Datasets.load(datasetUri);
+    Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+        load(datasetUri, Object.class);
 
-    verify(repo).load("test");
+    verify(repo).load("test", Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -205,7 +227,7 @@ public class TestDatasets {
         .build();
 
     Dataset<Object> ds = mock(Dataset.class);
-    when(repo.load("test")).thenReturn(ds);
+    when(repo.load("test", Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     RefinableView<Object> userView = mock(RefinableView.class);
@@ -221,9 +243,10 @@ public class TestDatasets {
         .with("ignoredOption", "abc")
         .build();
 
-    RefinableView<Object> view = Datasets.load(datasetUri);
+    RefinableView<Object> view = Datasets.<Object, RefinableView<Object>>
+        load(datasetUri, Object.class);
 
-    verify(repo).load("test");
+    verify(repo).load("test", Object.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -245,7 +268,7 @@ public class TestDatasets {
         .build();
 
     Dataset<Object> ds = mock(Dataset.class);
-    when(repo.load("test")).thenReturn(ds);
+    when(repo.load("test", Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     RefinableView<Object> userView = mock(RefinableView.class);
@@ -261,9 +284,10 @@ public class TestDatasets {
         .with("ignoredOption", "abc")
         .build();
 
-    RefinableView<Object> view = Datasets.load(datasetUri.toString());
+    RefinableView<Object> view = Datasets.<Object, RefinableView<Object>>
+        load(datasetUri.toString(), Object.class);
 
-    verify(repo).load("test");
+    verify(repo).load("test", Object.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -364,16 +388,27 @@ public class TestDatasets {
         .build();
 
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.update("test", descriptor)).thenReturn(expected);
+    when(repo.update("test", descriptor, Object.class)).thenReturn(expected);
 
-    Dataset<Object> ds = Datasets.update(datasetUri, descriptor);
+    Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+        update(datasetUri, descriptor, Object.class);
 
-    verify(repo).update("test", descriptor);
+    verify(repo).update("test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
 
     Assert.assertEquals(expected, ds);
+  }
+
+  @Test(expected=NullPointerException.class)
+  public void testUpdateNullType() {
+    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaLiteral("\"string\"")
+        .build();
+
+    Datasets.<Object, Dataset<Object>> update(datasetUri, descriptor, null);
   }
 
   @Test
@@ -384,11 +419,12 @@ public class TestDatasets {
         .build();
 
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.update("test", descriptor)).thenReturn(expected);
+    when(repo.update("test", descriptor, Object.class)).thenReturn(expected);
 
-    Dataset<Object> ds = Datasets.update(datasetUri.toString(), descriptor);
+    Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+        update(datasetUri.toString(), descriptor, Object.class);
 
-    verify(repo).update("test", descriptor);
+    verify(repo).update("test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -409,7 +445,7 @@ public class TestDatasets {
         IllegalArgumentException.class, new Runnable() {
           @Override
           public void run() {
-            Datasets.<Object, Dataset<Object>>update(datasetUri, descriptor);
+            Datasets.<Object, Dataset<Object>>update(datasetUri, descriptor, Object.class);
           }
         });
 

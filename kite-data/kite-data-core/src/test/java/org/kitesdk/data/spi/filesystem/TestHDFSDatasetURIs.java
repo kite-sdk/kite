@@ -50,8 +50,8 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
     repo.delete("test");
     repo.create("test", descriptor);
 
-    Dataset<Object> ds = Datasets
-        .load("dataset:hdfs://" + hdfsAuth + "/tmp/data/test");
+    Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+        load("dataset:hdfs://" + hdfsAuth + "/tmp/data/test", Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -71,7 +71,9 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
     repo.delete("test");
     repo.create("test", descriptor);
 
-    Dataset<Object> ds = Datasets.load("dataset:hdfs://" + hdfsAuth + "/test");
+    Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+        load("dataset:hdfs://" + hdfsAuth + "/test",
+        Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -91,8 +93,9 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
     repo.delete("test");
     repo.create("test", descriptor);
 
-    Dataset<Object> ds = Datasets
-        .load("dataset:hdfs://" + hdfsAuth + "/data/test?absolute=false");
+    Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+        load("dataset:hdfs://" + hdfsAuth + "/data/test?absolute=false",
+        Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
@@ -111,8 +114,9 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
         DatasetNotFoundException.class, new Runnable() {
       @Override
       public void run() {
-        Dataset<Object> ds = Datasets
-            .load("dataset:hdfs://" + hdfsAuth + "/tmp/data/nosuchdataset");
+        Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+            load("dataset:hdfs://" + hdfsAuth + "/tmp/data/nosuchdataset",
+            Object.class);
       }
     });
   }
@@ -123,8 +127,9 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
         DatasetNotFoundException.class, new Runnable() {
           @Override
           public void run() {
-            Dataset<Object> ds = Datasets
-                .load("dataset:unknown://" + hdfsAuth + "/tmp/data/test");
+            Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+                load("dataset:unknown://" + hdfsAuth + "/tmp/data/test",
+                Object.class);
           }
         });
   }

@@ -57,8 +57,8 @@ public class TestHBaseDatasetURIs {
     repo.delete("test");
     repo.create("test", descriptor);
 
-    RandomAccessDataset<Object> ds =
-        Datasets.load(URI.create("dataset:hbase:" + zk + "/test")) ;
+    RandomAccessDataset<Object> ds = Datasets
+	.<Object, RandomAccessDataset<Object>>load(URI.create("dataset:hbase:" + zk + "/test"), Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof DaoDataset);
@@ -75,7 +75,7 @@ public class TestHBaseDatasetURIs {
           @Override
           public void run() {
             Dataset<Object> ds = Datasets
-                .load("dataset:hbase:" + zk + "/nosuchdataset");
+                .<Object, Dataset<Object>>load("dataset:hbase:" + zk + "/nosuchdataset", Object.class);
           }
         }
     );
@@ -87,7 +87,8 @@ public class TestHBaseDatasetURIs {
         DatasetNotFoundException.class, new Runnable() {
           @Override
           public void run() {
-            Dataset<Object> ds = Datasets.load("dataset:unknown:" + zk + "/test");
+            Dataset<Object> ds = Datasets
+                .<Object, Dataset<Object>>load("dataset:unknown:" + zk + "/test", Object.class);
           }
         });
   }

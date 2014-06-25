@@ -41,10 +41,19 @@ public interface RandomAccessDatasetRepository extends DatasetRepository {
 
   @Override
   <E> RandomAccessDataset<E> load(String name);
+  
+  @Override
+  <E> RandomAccessDataset<E> load(String name, Class<E> type);
 
   @Override
   <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor);
 
   @Override
+  <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor, Class<E> type);
+
+  @Override
   <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor);
+
+  @Override
+  <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor, Class<E> type);
 }

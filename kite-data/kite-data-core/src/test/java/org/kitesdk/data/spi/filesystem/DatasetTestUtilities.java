@@ -31,6 +31,7 @@ import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.avro.util.Utf8;
 import org.junit.Assert;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.InitializeAccessor;
@@ -109,7 +110,7 @@ public class DatasetTestUtilities {
         new RecordValidator<GenericData.Record>() {
           @Override
           public void validate(GenericData.Record record, int recordNum) {
-            Assert.assertTrue(usernames.remove((String) record.get("username")));
+            Assert.assertTrue(usernames.remove(record.get("username").toString()));
             for (String field : fields) {
               Assert.assertNotNull(record.get(field));
             }
@@ -128,8 +129,8 @@ public class DatasetTestUtilities {
       usernames.add("test-" + i);
     }
     for (GenericData.Record actualRecord : records) {
-      Assert.assertTrue(usernames.remove((String) actualRecord
-          .get("username")));
+      Assert.assertTrue(usernames.remove(actualRecord
+          .get("username").toString()));
       Assert.assertNotNull(actualRecord.get("email"));
     }
     Assert.assertTrue(usernames.isEmpty());

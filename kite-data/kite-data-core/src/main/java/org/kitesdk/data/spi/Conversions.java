@@ -16,7 +16,11 @@
 
 package org.kitesdk.data.spi;
 
+import com.google.common.base.Preconditions;
 import java.text.NumberFormat;
+import java.util.List;
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
 
 /**
  * Static helper methods for converting between types.
@@ -26,6 +30,10 @@ import java.text.NumberFormat;
 public class Conversions {
 
   public static <T> T convert(Object obj, Class<T> returnType) {
+    if (obj == null) {
+      return null;
+    }
+
     if (returnType == Object.class) {
       return returnType.cast(obj);
     } else if (returnType.isAssignableFrom(Long.class)) {
@@ -42,6 +50,39 @@ public class Conversions {
       throw new ClassCastException(
           "Cannot convert to unknown return type:" + returnType.getName());
     }
+  }
+
+  public static Object convertField(Object obj, Schema schema, String name) {
+    Preconditions.checkArgument(schema.getType() == Schema.Type.RECORD,
+        "Trying to convert the field of a non-Record Avro object.");
+    Field field = schema.getField(name);
+    Schema.Type type = field.schema().getType();
+    if (type == Schema.Type.RECORD) {
+      return obj;
+    }
+
+    Class<?> returnType = SchemaUtil.getClassForType(type);
+    if (type == Schema.Type.UNION) {
+      List<Schema> types = field.schema().getTypes();
+      for(int i = 0; i < types.size(); i++) {
+        type = types.get(i).getType();
+        returnType = SchemaUtil.getClassForType(type);
+        if (returnType != null) {
+          break;
+        }
+      }
+    }
+
+    if (returnType == null) {
+      throw new IllegalArgumentException(String.format("No valid type conversion for schema %s",
+          field.schema().toString()));
+    }
+
+    return convert(obj, returnType);
+  }
+
+  public static Comparable convertField(Comparable obj, Schema schema, String name) {
+    return (Comparable) convertField((Object)obj, schema, name);
   }
 
   public static Long makeLong(Object value) {

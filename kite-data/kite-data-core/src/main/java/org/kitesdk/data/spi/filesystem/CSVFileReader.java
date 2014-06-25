@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import org.kitesdk.data.spi.DataModelUtil;
 
 class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
@@ -51,7 +52,7 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
   private final Path path;
   private final Schema schema;
 
-  private Class<E> recordClass = null;
+  private final Class<E> recordClass;
 
   private CSVReader reader = null;
 
@@ -64,10 +65,13 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
   private boolean hasNext = false;
   private String[] next = null;
 
-  public CSVFileReader(FileSystem fileSystem, Path path, DatasetDescriptor descriptor) {
+  @SuppressWarnings("unchecked")
+  public CSVFileReader(FileSystem fileSystem, Path path,
+      DatasetDescriptor descriptor, Class<E> type) {
     this.fs = fileSystem;
     this.path = path;
     this.schema = descriptor.getSchema();
+    this.recordClass = DataModelUtil.resolveType(type, schema);
     this.state = ReaderWriterState.NEW;
     this.props = CSVProperties.fromDescriptor(descriptor);
 
@@ -82,9 +86,6 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
   public void initialize() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "A reader may not be opened more than once - current state:%s", state);
-
-    // may be null if not using specific records
-    this.recordClass = SpecificData.get().getClass(schema);
 
     try {
       this.incoming =  fs.open(path);
@@ -162,7 +163,7 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
   }
 
   private E makeRecord() {
-    if (recordClass != null) {
+    if (recordClass != GenericData.Record.class) {
       E record = makeReflectRecord();
       if (record != null) {
         return record;

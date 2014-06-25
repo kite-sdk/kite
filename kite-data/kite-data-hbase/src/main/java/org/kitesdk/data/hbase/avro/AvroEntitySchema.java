@@ -17,16 +17,14 @@ package org.kitesdk.data.hbase.avro;
 
 import com.google.common.base.Objects;
 
-import java.io.IOException;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
-import org.apache.avro.io.parsing.ResolvingGrammarGenerator;
-import org.apache.avro.io.parsing.Symbol;
 import org.kitesdk.data.ColumnMapping;
-import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.hbase.impl.EntitySchema;
 import org.kitesdk.data.FieldMapping;
+import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.SchemaValidationUtil;
 
 /**
  * An EntitySchema implementation powered by Avro.
@@ -108,11 +106,11 @@ public class AvroEntitySchema extends EntitySchema {
       return false;
     }
     AvroEntitySchema avroEntitySchema = (AvroEntitySchema) entitySchema;
-    if (!avroReadWriteSchemasCompatible(schema,
+    if (!SchemaValidationUtil.canRead(schema,
         avroEntitySchema.getAvroSchema())) {
       return false;
     }
-    if (!avroReadWriteSchemasCompatible(avroEntitySchema.getAvroSchema(),
+    if (!SchemaValidationUtil.canRead(avroEntitySchema.getAvroSchema(),
         schema)) {
       return false;
     }
@@ -140,60 +138,6 @@ public class AvroEntitySchema extends EntitySchema {
       }
     }
     return true;
-  }
-
-  /**
-   * Returns true if the writer and reader schema are compatible with each
-   * other, following the avro specification.
-   * 
-   * @param writer
-   *          writer schema
-   * @param reader
-   *          reader schema
-   * @return True if compatible, false if not.
-   */
-  private static boolean avroReadWriteSchemasCompatible(Schema writer,
-      Schema reader) {
-    Symbol rootSymbol;
-    try {
-      ResolvingGrammarGenerator g = new ResolvingGrammarGenerator();
-      rootSymbol = g.generate(writer, reader);
-    } catch (IOException e) {
-      throw new DatasetIOException("IOException while generating grammar.", e);
-    }
-
-    return !hasErrorSymbol(rootSymbol);
-  }
-
-  /**
-   * Determine if the symbol tree has an error symbol in it. This would indicate
-   * that the two schemas are not compatible.
-   * 
-   * @param rootSymbol
-   *          The root symbol to traverse from to look for an error symbol.
-   * @return true if an error symbol exists in the tree.
-   */
-  private static boolean hasErrorSymbol(Symbol rootSymbol) {
-    if (rootSymbol.production == null) {
-      return false;
-    }
-    for (Symbol s : rootSymbol.production) {
-      if (s == rootSymbol) {
-        continue;
-      }
-      if (s.getClass().equals(Symbol.ErrorAction.class)) {
-        return true;
-      } else {
-        if (s.production != null) {
-          for (Symbol subSymbol : s.production) {
-            if (hasErrorSymbol(subSymbol)) {
-              return true;
-            }
-          }
-        }
-      }
-    }
-    return false;
   }
 
   private static boolean fieldsEqual(Field field1, FieldMapping field1Mapping,

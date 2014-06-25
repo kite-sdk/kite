@@ -119,7 +119,8 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .property("kite.csv.has-header", "true")
         .schema(VALIDATOR_SCHEMA)
         .build();
-    return new CSVFileReader<GenericData.Record>(localfs, validatorFile, desc);
+    return new CSVFileReader<GenericData.Record>(localfs, validatorFile, desc,
+        GenericData.Record.class);
   }
 
   @Override
@@ -145,7 +146,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     final DatasetDescriptor desc = new DatasetDescriptor.Builder()
         .schema(SchemaBuilder.array().items().stringType())
         .build();
-    new CSVFileReader(localfs, csvFile, desc);
+    new CSVFileReader<GenericData.Record>(localfs, csvFile, desc, GenericData.Record.class);
   }
 
   @Test
@@ -154,7 +155,8 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .schema(STRINGS)
         .build();
     final CSVFileReader<GenericData.Record> reader =
-        new CSVFileReader<GenericData.Record>(localfs, csvFile, desc);
+        new CSVFileReader<GenericData.Record>(localfs, csvFile, desc,
+            GenericData.Record.class);
 
     reader.initialize();
     Assert.assertTrue(reader.hasNext());
@@ -189,7 +191,8 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .schema(STRINGS)
         .build();
     final CSVFileReader<GenericData.Record> reader =
-        new CSVFileReader<GenericData.Record>(localfs, tsvFile, desc);
+        new CSVFileReader<GenericData.Record>(localfs, tsvFile, desc,
+            GenericData.Record.class);
 
     reader.initialize();
     Assert.assertTrue(reader.hasNext());
@@ -224,7 +227,8 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .schema(STRINGS)
         .build();
     final CSVFileReader<GenericData.Record> reader =
-        new CSVFileReader<GenericData.Record>(localfs, tsvFile, desc);
+        new CSVFileReader<GenericData.Record>(localfs, tsvFile, desc,
+            GenericData.Record.class);
 
     reader.initialize();
     Assert.assertTrue(reader.hasNext());
@@ -257,7 +261,8 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .schema(SCHEMA)
         .build();
     final CSVFileReader<GenericData.Record> reader =
-        new CSVFileReader<GenericData.Record>(localfs, csvFile, desc);
+        new CSVFileReader<GenericData.Record>(localfs, csvFile, desc,
+            GenericData.Record.class);
 
     reader.initialize();
     Assert.assertTrue(reader.hasNext());
@@ -292,7 +297,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .schema(BEAN_SCHEMA)
         .build();
     final CSVFileReader<TestBean> reader =
-        new CSVFileReader<TestBean>(localfs, csvFile, desc);
+        new CSVFileReader<TestBean>(localfs, csvFile, desc, TestBean.class);
 
     reader.initialize();
     Assert.assertTrue(reader.hasNext());

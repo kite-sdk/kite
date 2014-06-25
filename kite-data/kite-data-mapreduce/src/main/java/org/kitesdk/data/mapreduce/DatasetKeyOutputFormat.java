@@ -18,6 +18,9 @@ package org.kitesdk.data.mapreduce;
 import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.net.URI;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.reflect.ReflectData;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
@@ -36,10 +39,12 @@ import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.spi.PartitionedDataset;
+import org.kitesdk.data.TypeNotFoundException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.TemporaryDatasetRepository;
 import org.kitesdk.data.spi.TemporaryDatasetRepositoryAccessor;
@@ -64,6 +69,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   public static final String KITE_DATASET_NAME = "kite.outputDatasetName";
   public static final String KITE_PARTITION_DIR = "kite.outputPartitionDir";
   public static final String KITE_CONSTRAINTS = "kite.outputConstraints";
+  public static final String KITE_TYPE = "kite.outputEntityType";
 
   public static class ConfigBuilder {
     private final Configuration conf;
@@ -113,6 +119,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
         throw new UnsupportedOperationException("Implementation " +
             "does not provide OutputFormat support. View: " + view);
       }
+      withType(view.getType());
       return writeTo(view.getDataset().getUri());
     }
 
@@ -129,6 +136,11 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      */
     public ConfigBuilder writeTo(String uri) {
       return writeTo(URI.create(uri));
+    }
+
+   public <E> ConfigBuilder withType(Class<E> type) {
+      conf.setClass(KITE_TYPE, type, type);
+      return this;
     }
   }
 
@@ -191,14 +203,31 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   static class DatasetRecordWriter<E> extends RecordWriter<E, Void> {
 
     private DatasetWriter<E> datasetWriter;
+    private GenericData dataModel;
+    private boolean copyEntities;
+    private Schema schema;
 
     public DatasetRecordWriter(View<E> view) {
       this.datasetWriter = view.newWriter();
+
+      this.schema = view.getDataset().getDescriptor().getSchema();
+      this.dataModel = DataModelUtil.getDataModelForType(
+          view.getType());
+      if (dataModel.getClass() != ReflectData.class) {
+        copyEntities = true;
+      }
     }
 
     @Override
     public void write(E key, Void v) {
+      if (copyEntities) {
+        key = copy(key);
+      }
       datasetWriter.write(key);
+    }
+
+    private <E> E copy(E key) {
+      return dataModel.deepCopy(schema, key);
     }
 
     @Override
@@ -370,21 +399,44 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   @SuppressWarnings("deprecation")
   private static <E> View<E> load(JobContext jobContext) {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
+    Class<E> type = getType(jobContext);
+
     String outputUri = conf.get(KITE_OUTPUT_URI);
     if (outputUri == null) {
       return Datasets.<E, View<E>>load(
           new URIBuilder(
               conf.get(KITE_REPOSITORY_URI), conf.get(KITE_DATASET_NAME))
-              .build());
+              .build(), type);
     }
-    return Datasets.<E, View<E>>load(outputUri);
+    return Datasets.<E, View<E>>load(outputUri, type);
   }
 
+  @SuppressWarnings("unchecked")
+  private static <E> Class<E> getType(JobContext jobContext) {
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
+    Class<E> type;
+    try {
+      type = (Class<E>)conf.getClass(KITE_TYPE, GenericData.Record.class);
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof ClassNotFoundException) {
+        throw new TypeNotFoundException(String.format(
+            "The Java class %s for the entity type could not be found",
+            conf.get(KITE_TYPE)),
+            e.getCause());
+      } else {
+        throw e;
+      }
+    }
+    return type;
+  }
+
+  @SuppressWarnings("unchecked")
   private static <E> Dataset<E> createJobDataset(JobContext jobContext) {
     Dataset<Object> dataset = load(jobContext).getDataset();
     String jobDatasetName = getJobDatasetName(jobContext);
     DatasetRepository repo = getDatasetRepository(jobContext);
-    return repo.create(jobDatasetName, copy(dataset.getDescriptor()));
+    return repo.create(jobDatasetName, copy(dataset.getDescriptor()),
+        (Class<E>)getType(jobContext));
   }
 
   private static <E> Dataset<E> loadJobDataset(JobContext jobContext) {
