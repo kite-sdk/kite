@@ -32,6 +32,7 @@
     <module>kite-morphlines-json</module>
     <module>kite-morphlines-maxmind</module>
     <module>kite-morphlines-metrics-servlets</module>
+    <module>kite-morphlines-protobuf</module>
     <module>kite-morphlines-saxon</module>
     <module>kite-morphlines-tika-core</module>
     <module>kite-morphlines-tika-decompress</module>
@@ -45,7 +46,6 @@
     <module>kite-morphlines-solr-cell</module>
     <module>kite-morphlines-all</module>
     <module>kite-morphlines-all-except-solr</module>
-    <module>kite-morphlines-protobuf</module>
   </modules>
 
   <dependencyManagement>
