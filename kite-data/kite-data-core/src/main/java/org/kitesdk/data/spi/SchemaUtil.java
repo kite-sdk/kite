@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.avro.Schema;
@@ -27,6 +28,8 @@ import org.apache.avro.specific.SpecificData;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.ValidationException;
+import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 
 public class SchemaUtil {
 
@@ -96,41 +99,122 @@ public class SchemaUtil {
    */
   public static void checkTypeConsistency(Schema schema, String fieldName,
       Object... values) {
+    checkTypeConsistency(schema, null, fieldName, values);
+  }
 
-    Preconditions.checkArgument(hasField(schema, fieldName),
-        "No field '%s' in schema %s", fieldName, schema);
-
-    Schema.Field field = schema.getField(fieldName);
+  /**
+   * Checks that the type of each of {@code values} is consistent with the type of
+   * field {@code fieldName} declared in the Avro schema (from {@code descriptor}).
+   */
+  public static void checkTypeConsistency(Schema schema,
+                                          PartitionStrategy strategy,
+                                          String fieldName, Object... values) {
+    Schema fieldSchema = fieldSchema(schema, strategy, fieldName);
 
     for (Object value : values) {
       // SpecificData#validate checks consistency for generic, reflect,
       // and specific models.
-      Preconditions.checkArgument(SpecificData.get().validate(field.schema(), value),
-          "Value '%s' of type '%s' inconsistent with field %s.", value, value.getClass(),
-          field);
+      Preconditions.checkArgument(
+          SpecificData.get().validate(fieldSchema, value),
+          "Value '%s' of type '%s' inconsistent with field schema %s.",
+          value, value.getClass(), fieldSchema);
     }
   }
 
-  private static boolean hasField(Schema schema, String fieldName) {
-    return (schema.getField(fieldName) != null);
+  /**
+   * Builds a Schema for the FieldPartitioner using the given Schema to
+   * determine types not fixed by the FieldPartitioner.
+   *
+   * @param fp a FieldPartitioner
+   * @param schema an entity Schema that will be partitioned
+   * @return a Schema for the field partitioner
+   */
+  public static Schema partitionFieldSchema(FieldPartitioner<?, ?> fp, Schema schema) {
+    if (fp instanceof IdentityFieldPartitioner) {
+      // copy the schema directly from the entity to preserve annotations
+      return schema.getField(fp.getSourceName()).schema();
+    } else {
+      Class<?> fieldType = getPartitionType(fp, schema);
+      if (fieldType == Integer.class) {
+        return Schema.create(Schema.Type.INT);
+      } else if (fieldType == Long.class) {
+        return Schema.create(Schema.Type.LONG);
+      } else if (fieldType == String.class) {
+        return Schema.create(Schema.Type.STRING);
+      } else {
+        throw new ValidationException(
+            "Cannot encode partition " + fp.getName() +
+                " with type " + fp.getSourceType()
+        );
+      }
+    }
+  }
+
+  /**
+   * Returns a {@link Schema} for the given field name, which could be either a
+   * schema field or a partition field.
+   *
+   * @param schema an entity Schema that will be partitioned
+   * @param strategy a {@code PartitionStrategy} used to partition entities
+   * @param name a schema or partition field name
+   * @return a Schema for the partition or schema field
+   */
+  public static Schema fieldSchema(Schema schema, PartitionStrategy strategy,
+                                   String name) {
+    Schema.Field field = schema.getField(name);
+    if (field != null) {
+      return field.schema();
+    } else if (strategy != null && strategy.hasPartitioner(name)) {
+      return partitionFieldSchema(strategy.getPartitioner(name), schema);
+    } else {
+      throw new IllegalArgumentException(
+          "Not a schema or partition field: " + name);
+    }
+  }
+
+  /**
+   * Creates a {@link Schema} for the keys of a {@link PartitionStrategy} based
+   * on an entity {@code Schema}.
+   * <p>
+   * The partition strategy and schema are assumed to be compatible and this
+   * will result in NullPointerExceptions if they are not.
+   *
+   * @param schema an entity schema {@code Schema}
+   * @param strategy a {@code PartitionStrategy}
+   * @return a {@code Schema} for the storage keys of the partition strategy
+   */
+  public static Schema keySchema(Schema schema, PartitionStrategy strategy) {
+    List<Schema.Field> partitionFields = new ArrayList<Schema.Field>();
+    for (FieldPartitioner<?, ?> fp : strategy.getFieldPartitioners()) {
+      partitionFields.add(partitionField(fp, schema));
+    }
+    Schema keySchema = Schema.createRecord(
+        schema.getName() + "KeySchema", null, null, false);
+    keySchema.setFields(partitionFields);
+    return keySchema;
+  }
+
+  /**
+   * Builds a Schema.Field for the FieldPartitioner using the Schema to
+   * determine types not fixed by the FieldPartitioner.
+   *
+   * @param fp a FieldPartitioner
+   * @param schema an entity Schema that will be partitioned
+   * @return a Schema.Field for the field partitioner, with the same name
+   */
+  private static Schema.Field partitionField(FieldPartitioner<?, ?> fp,
+                                             Schema schema) {
+    return new Schema.Field(
+        fp.getName(), partitionFieldSchema(fp, schema), null, null);
   }
 
   public static void checkPartitionedBy(DatasetDescriptor descriptor,
-                                         String fieldName) {
+                                        String fieldName) {
     Preconditions.checkArgument(descriptor.isPartitioned(),
         "Descriptor %s is not partitioned", descriptor);
-    Preconditions.checkArgument(isPartitionedBy(descriptor, fieldName),
+    Preconditions.checkArgument(
+        descriptor.getPartitionStrategy().hasPartitioner(fieldName),
         "Descriptor %s is not partitioned by '%s'", descriptor, fieldName);
-  }
-
-  private static boolean isPartitionedBy(DatasetDescriptor descriptor, String fieldName) {
-    PartitionStrategy partitionStrategy = descriptor.getPartitionStrategy();
-    for (FieldPartitioner<?, ?> fp : partitionStrategy.getFieldPartitioners()) {
-      if (fp.getSourceName().equals(fieldName)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   public abstract static class SchemaVisitor<T> {
@@ -197,5 +281,4 @@ public class SchemaUtil {
         return visitor.primitive(schema);
     }
   }
-
 }

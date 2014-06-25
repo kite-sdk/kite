@@ -21,6 +21,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.util.Utf8;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -28,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import org.kitesdk.data.PartitionStrategy;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -216,6 +218,16 @@ public class TestConstraintsSerialization {
     assertThat(newConstraints.get(rangeName), equalTo(constraints.get(rangeName)));
     assertThat(newConstraints.get(existsName), equalTo(constraints.get(existsName)));
     assertThat(newConstraints.get(inName), equalTo(constraints.get(inName)));
+  }
+
+  @Test
+  public void testPartitionFieldSerialization()
+      throws IOException, ClassNotFoundException {
+    Constraints constraints = new Constraints(
+        SCHEMA, new PartitionStrategy.Builder().identity("color").build());
+    constraints = constraints.with("color", "orange", "blue");
+    Constraints newConstraints = serializeAndDeserialize(constraints);
+    Assert.assertEquals(constraints, newConstraints);
   }
 
   public Constraints serializeAndDeserialize(Constraints constraints) throws IOException, ClassNotFoundException {

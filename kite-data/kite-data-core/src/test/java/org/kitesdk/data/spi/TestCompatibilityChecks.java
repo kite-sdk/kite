@@ -108,7 +108,7 @@ public class TestCompatibilityChecks {
   public void testDuplicatePartitionNames() {
     TestHelpers.assertThrows(
         "Should reject partition names that duplicate partition names",
-        IllegalStateException.class, new Runnable() {
+        IllegalArgumentException.class, new Runnable() {
       @Override
       public void run() {
         Compatibility.checkDescriptor(

@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
+import org.kitesdk.data.PartitionStrategy;
 
 /**
  * Serialization Utils for serializing {@link Constraints}
@@ -53,11 +54,16 @@ class ConstraintsSerialization {
    * @param out the stream for writing constraints.
    * @throws IOException error writing the constraints.
    */
-  public static void writeConstraints(Schema schema, Map<String, Predicate> predicates, ObjectOutputStream out) throws IOException {
+  public static void writeConstraints(
+      Schema schema, PartitionStrategy strategy,
+      Map<String, Predicate> predicates, ObjectOutputStream out)
+      throws IOException {
     out.writeInt(predicates.size());
     for (Map.Entry<String, Predicate> entry: predicates.entrySet()) {
       out.writeUTF(entry.getKey());
-      writePredicate(schema.getField(entry.getKey()).schema(), entry.getValue(), out);
+      writePredicate(
+          SchemaUtil.fieldSchema(schema, strategy, entry.getKey()),
+          entry.getValue(), out);
     }
   }
 
@@ -68,12 +74,15 @@ class ConstraintsSerialization {
    * @return the constraints read from the stream.
    * @throws IOException error reading the constraints.
    */
-  public static Map<String, Predicate> readConstraints(Schema schema, ObjectInputStream in) throws IOException {
+  public static Map<String, Predicate> readConstraints(
+      Schema schema, PartitionStrategy strategy, ObjectInputStream in)
+      throws IOException {
     int numPredicates = in.readInt();
     Map<String, Predicate> predicates = new HashMap<String, Predicate>();
     for(int i = 0; i < numPredicates; i++){
       String name = in.readUTF();
-      Predicate predicate = readPredicate(schema.getField(name).schema(), in);
+      Predicate predicate = readPredicate(
+          SchemaUtil.fieldSchema(schema, strategy, name), in);
       predicates.put(name, predicate);
     }
 

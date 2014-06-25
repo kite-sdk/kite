@@ -57,6 +57,8 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     this.dataset = dataset;
     final DatasetDescriptor descriptor = dataset.getDescriptor();
     if (descriptor.isPartitioned()) {
+      this.constraints = new Constraints(
+          descriptor.getSchema(), descriptor.getPartitionStrategy());
       this.comparator = new MarkerComparator(descriptor.getPartitionStrategy());
       this.keys = new ThreadLocal<StorageKey>() {
         @Override
@@ -65,10 +67,10 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
         }
       };
     } else {
+      this.constraints = new Constraints(descriptor.getSchema());
       this.comparator = null;
       this.keys = null;
     }
-    this.constraints = new Constraints(dataset.getDescriptor().getSchema());
     this.entityTest = constraints.toEntityPredicate();
     this.type = DataModelUtil.resolveType(type, dataset.getDescriptor().getSchema());
   }

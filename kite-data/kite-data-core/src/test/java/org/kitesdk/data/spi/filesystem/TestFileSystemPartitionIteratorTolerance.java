@@ -51,23 +51,22 @@ import java.util.Set;
 public class TestFileSystemPartitionIteratorTolerance extends MiniDFSTest {
   public FileSystem fileSystem;
   public Path testDirectory;
-  public static PartitionStrategy strategy;
   public static MarkerComparator comparator;
   public static List<StorageKey> keys;
+
+  public static final PartitionStrategy strategy = new PartitionStrategy.Builder()
+      .year("timestamp")
+      .month("timestamp")
+      .day("timestamp")
+      .build();
 
   public static final Constraints emptyConstraints = new Constraints(
       SchemaBuilder.record("Event").fields()
           .requiredLong("timestamp")
-          .endRecord());
+          .endRecord(), strategy);
 
   @BeforeClass
   public static void createExpectedKeys() {
-    strategy = new PartitionStrategy.Builder()
-        .year("timestamp")
-        .month("timestamp")
-        .day("timestamp")
-        .build();
-
     comparator = new MarkerComparator(strategy);
 
     keys = Lists.newArrayList();

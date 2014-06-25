@@ -16,7 +16,9 @@
 package org.kitesdk.data;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import java.util.Map;
 import java.util.Set;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
@@ -74,6 +76,7 @@ public class PartitionStrategy {
   private static final Logger LOG = LoggerFactory.getLogger(PartitionStrategy.class);
 
   private final List<FieldPartitioner> fieldPartitioners;
+  private final Map<String, FieldPartitioner> partitionerMap;
 
   static {
     Accessor.setDefault(new AccessorImpl());
@@ -84,6 +87,12 @@ public class PartitionStrategy {
    */
   PartitionStrategy(List<FieldPartitioner> partitioners) {
     this.fieldPartitioners = ImmutableList.copyOf(partitioners);
+    ImmutableMap.Builder<String, FieldPartitioner> mapBuilder =
+        ImmutableMap.builder();
+    for (FieldPartitioner fp : partitioners) {
+      mapBuilder.put(fp.getName(), fp);
+    }
+    this.partitionerMap = mapBuilder.build();
   }
 
   /**
@@ -97,6 +106,22 @@ public class PartitionStrategy {
    */
   public List<FieldPartitioner> getFieldPartitioners() {
     return fieldPartitioners;
+  }
+
+  /**
+   * Get a partitioner by partition name.
+   * @return a FieldPartitioner with the given partition name
+   */
+  public FieldPartitioner getPartitioner(String name) {
+    return partitionerMap.get(name);
+  }
+
+  /**
+   * Check if a partitioner for the partition name exists.
+   * @return {@code true} if this strategy has a partitioner for the name
+   */
+  public boolean hasPartitioner(String name) {
+    return partitionerMap.containsKey(name);
   }
 
   /**

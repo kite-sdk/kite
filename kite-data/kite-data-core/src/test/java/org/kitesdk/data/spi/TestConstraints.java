@@ -17,15 +17,18 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Instant;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.PartitionStrategy;
@@ -35,13 +38,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TestConstraints {
-  private static final Constraints emptyConstraints = new Constraints(
-      SchemaBuilder.record("Event").fields()
-          .requiredString("id")
-          .requiredLong("timestamp")
-          .requiredString("color")
-          .optionalInt("year")
-          .endRecord());
+  private static final Schema schema = SchemaBuilder.record("Event").fields()
+      .requiredString("id")
+      .requiredLong("timestamp")
+      .requiredString("color")
+      .endRecord();
+
+  private static PartitionStrategy timeOnly = new PartitionStrategy.Builder()
+      .year("timestamp")
+      .month("timestamp")
+      .day("timestamp")
+      .build();
+
+  private static PartitionStrategy strategy = new PartitionStrategy.Builder()
+      .hash("id", "id-hash", 64)
+      .year("timestamp")
+      .month("timestamp")
+      .day("timestamp")
+      .identity("id")
+      .build();
+
+  private static final Constraints emptyConstraints =
+      new Constraints(schema, strategy);
 
   private static final Logger LOG = LoggerFactory
       .getLogger(TestConstraints.class);
@@ -63,32 +81,8 @@ public class TestConstraints {
     }
   }
 
-  private PartitionStrategy timeOnly = new PartitionStrategy.Builder()
-      .year("timestamp")
-      .month("timestamp")
-      .day("timestamp")
-      .build();
-
-  private PartitionStrategy strategy = new PartitionStrategy.Builder()
-      .hash("id", "id-hash", 64)
-      .year("timestamp")
-      .month("timestamp")
-      .day("timestamp")
-      .identity("id")
-      .build();
-
   @Test
-  public void testEmptyConstraints() {
-    Predicate<StorageKey> keyPredicate = emptyConstraints.toKeyPredicate();
-    Assert.assertNotNull("Empty constraints should produce a key predicate",
-        keyPredicate);
-    // TODO: these should be in their own tests
-    Assert.assertFalse("Should not match a null key", keyPredicate.apply(null));
-    Assert.assertTrue("Should match empty time key",
-        keyPredicate.apply(new StorageKey(timeOnly)));
-    Assert.assertTrue("Should match empty strategy key",
-        keyPredicate.apply(new StorageKey(strategy)));
-
+  public void testEmptyConstraintsEntityPredicate() {
     Assert.assertNotNull("Empty constraints should produce an entity predicate",
         emptyConstraints.toEntityPredicate());
     Assert.assertTrue("Should match event",
@@ -101,6 +95,27 @@ public class TestConstraints {
 
     Assert.assertTrue("Empty constraints should be unbounded",
         emptyConstraints.isUnbounded());
+  }
+
+  @Test
+  public void testEmptyConstraintsKeyPredicateRequiresStrategy() {
+    TestHelpers.assertThrows("Cannot produce a key Predicate without strategy",
+        NullPointerException.class, new Runnable() {
+          @Override
+          public void run() {
+            new Constraints(schema).toKeyPredicate();
+          }
+        });
+  }
+
+  @Test
+  public void testEmptyConstraintsKeyPredicate() {
+    Constraints constraints = new Constraints(schema, strategy);
+    Predicate<StorageKey> keyPredicate = constraints.toKeyPredicate();
+    Assert.assertNotNull("Should produce a key Predicate", keyPredicate);
+    Assert.assertFalse("Should not match a null key", keyPredicate.apply(null));
+    Assert.assertTrue("Should match empty key",
+        keyPredicate.apply(new StorageKey(strategy)));
   }
 
   @Test
@@ -118,8 +133,6 @@ public class TestConstraints {
     Assert.assertFalse("Should not match event with null id",
         exists.toEntityPredicate().apply(event));
 
-    Assert.assertNotNull("Should produce a key predicate",
-        exists.toKeyPredicate());
     Assert.assertNotNull("Should produce a key range",
         exists.toKeyRanges(strategy));
 
@@ -442,7 +455,7 @@ public class TestConstraints {
     GenericEvent e = new GenericEvent();
     StorageKey key = new StorageKey(strategy).reuseFor(e);
 
-    Constraints time = emptyConstraints
+    Constraints time = new Constraints(schema, strategy)
         .from("timestamp", START)
         .to("timestamp", START + 100000);
     Predicate<StorageKey> matchKeys = time.toKeyPredicate();
@@ -603,14 +616,117 @@ public class TestConstraints {
     e.timestamp = oct_25_2013;
     StorageKey key = new StorageKey(timeOnly).reuseFor(e);
 
-    Constraints c = emptyConstraints.with("timestamp", oct_24_2013);
+    Constraints empty = new Constraints(schema, timeOnly);
+
+    Constraints c = empty.with("timestamp", oct_24_2013);
     Assert.assertFalse("Should not match", c.toKeyPredicate().apply(key));
 
-    c = emptyConstraints.toBefore("timestamp", oct_24_2013_end);
+    c = empty.toBefore("timestamp", oct_24_2013_end);
     LOG.info("Constraints: {}", c);
 
     e.timestamp = oct_25_2013;
     key.reuseFor(e);
     Assert.assertFalse("Should not match toBefore", c.toKeyPredicate().apply(key));
+  }
+
+  @Test
+  public void testRejectsNonSchemaOrPartitionFields() {
+    TestHelpers.assertThrows("Should reject unknown field name",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            emptyConstraints.with("prescription", 34);
+          }
+        });
+  }
+
+  @Test
+  public void testRejectsFieldSchemaMismatch() {
+    TestHelpers.assertThrows("Should reject incorrect schema, string for long",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            emptyConstraints.with("timestamp", "boat");
+          }
+        });
+    TestHelpers.assertThrows("Should reject incorrect schema, int for string",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            emptyConstraints.with("color", 34);
+          }
+        });
+  }
+
+  @Test
+  public void testRejectsPartitionFieldSchemaMismatch() {
+    TestHelpers.assertThrows("Should reject incorrect schema, string for int",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            emptyConstraints.with("year", "joker");
+          }
+        });
+    TestHelpers.assertThrows("Should reject incorrect schema, int for string",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            emptyConstraints.with("id", 34);
+          }
+        });
+  }
+
+  @Test
+  public void testPartitionFieldConstraints() {
+    GenericEvent e = new GenericEvent();
+    DateTime eventDateTime = new Instant(e.getTimestamp())
+        .toDateTime(DateTimeZone.UTC);
+
+    // these constraints are for partition fields
+    Constraints eventDay = emptyConstraints
+        .with("year", eventDateTime.getYear())
+        .with("month", eventDateTime.getMonthOfYear())
+        .with("day", eventDateTime.getDayOfMonth());
+
+    StorageKey eventKey = new StorageKey.Builder(strategy)
+        .add("timestamp", e.getTimestamp())
+        .add("id", e.getId())
+        .build();
+
+    Predicate<StorageKey> keyPredicate = eventDay.toKeyPredicate();
+    Assert.assertNotNull("Should produce a KeyPredicate", keyPredicate);
+    Assert.assertTrue("Should match key", keyPredicate.apply(eventKey));
+
+    Predicate<GenericEvent> entityPredicate = eventDay.toEntityPredicate();
+    Assert.assertNotNull("Should produce an EntityPredicate", entityPredicate);
+    Assert.assertTrue("Should match entity", entityPredicate.apply(e));
+  }
+
+  @Test
+  public void testPartitionFieldConstraintsMinimized() {
+    GenericEvent e = new GenericEvent();
+    DateTime eventDateTime = new Instant(e.getTimestamp())
+        .toDateTime(DateTimeZone.UTC);
+
+    // year and month constraints are for partition fields
+    Constraints green = emptyConstraints
+        .from("year", eventDateTime.getYear()) // will be removed
+        .with("month", eventDateTime.getMonthOfYear()) // will be removed
+        .with("color", "green");
+
+    StorageKey eventKey = new StorageKey.Builder(strategy)
+        .add("timestamp", e.getTimestamp())
+        .add("id", e.getId())
+        .build();
+
+    Map<String, Predicate> minimized = green.minimizeFor(eventKey);
+    Assert.assertEquals("Should have one unsatisfied constraint",
+        1, minimized.size());
+    Map.Entry<String, Predicate> entry = Iterables.getOnlyElement(
+        minimized.entrySet());
+    Assert.assertEquals("Should be the color constraint",
+        "color", entry.getKey());
+    Assert.assertEquals("Should match green",
+        Predicates.in("green"), entry.getValue());
   }
 }
