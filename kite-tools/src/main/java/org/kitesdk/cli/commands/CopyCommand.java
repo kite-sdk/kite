@@ -84,8 +84,8 @@ public class CopyCommand extends BaseDatasetCommand {
     return Lists.newArrayList(
         "# Copy the contents of movies_avro to movies_parquet",
         "movies_avro movies_parquet",
-        "# Copy the movies dataset into HBase without a reduce round",
-        "movies dataset:hbase:zk-host/movies --map-only"
+        "# Copy the movies dataset into HBase in a map-only job",
+        "movies dataset:hbase:zk-host/movies --no-compaction"
     );
   }
 }
