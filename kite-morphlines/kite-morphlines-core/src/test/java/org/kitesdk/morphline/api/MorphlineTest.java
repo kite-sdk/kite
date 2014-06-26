@@ -94,7 +94,8 @@ public class MorphlineTest extends AbstractMorphlineTest {
     Iterator<Record> iter = collector.getRecords().iterator();
     for (Multimap expected : expectedMaps) {
       assertTrue(iter.hasNext());
-      assertEquals(expected, iter.next().getFields());
+      Record record = iter.next();
+      assertEquals(expected, record.getFields());
     }    
     assertFalse(iter.hasNext());
   }
@@ -871,7 +872,27 @@ public class MorphlineTest extends AbstractMorphlineTest {
           
           ImmutableMultimap.of("Age", "5", "Extras", "none", "Type", "This is a\nmulti, line text", "column4", "no\""),
           
-          ImmutableMultimap.of("Age", "6", "Extras", "many", "Type", "Another multi, line text", "column4", "maybe")
+          ImmutableMultimap.of("Age", "6", "Extras", "many", "Type", "multi line2", "column4", "maybe")
+          );
+      in.close();
+    }
+  }  
+
+  @Test
+  public void testReadCSVAndIgnoreTooLongRecords() throws Exception {
+    morphline = createMorphline("test-morphlines/readCSVAndIgnoreTooLongRecords");    
+    for (int i = 0; i < 3; i++) {
+      InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/cars2.csv"));
+      Record record = new Record();
+      record.put(Fields.ATTACHMENT_BODY, in);
+      processAndVerifySuccess(record, 
+          ImmutableMultimap.of("Age", "Age", "Extras", "Extras", "Type", "Type", "column4", "Used"),
+  
+          ImmutableMultimap.of("Age", "2", "Extras", "GPS", "Type", "Gas, with electric", "column4", ""),
+          
+          ImmutableMultimap.of("Age", "100", "Extras", "Labeled \"Vintage 1913\"", "Type", "yes"),
+          
+          ImmutableMultimap.of("Age", "6", "Extras", "many", "Type", "multi line2", "column4", "maybe")
           );
       in.close();
     }

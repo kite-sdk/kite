@@ -29,6 +29,7 @@ import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineCompilationException;
 import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.api.Record;
+import org.kitesdk.morphline.base.Validator;
 import org.kitesdk.morphline.shaded.com.googlecode.jcsv.fastreader.CSVTokenizer;
 import org.kitesdk.morphline.shaded.com.googlecode.jcsv.fastreader.QuotedCSVTokenizer;
 import org.kitesdk.morphline.shaded.com.googlecode.jcsv.fastreader.SimpleCSVTokenizer;
@@ -68,6 +69,8 @@ public final class ReadCSVBuilder implements CommandBuilder {
     private final String commentPrefix;
     private final String quoteChar;
     private final boolean ignoreEmptyLines = true;
+    private final int maxCharactersPerRecord;
+    private final boolean ignoreTooLongRecords;
     private final CSVTokenizer tokenizer;
   
     public ReadCSV(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
@@ -96,9 +99,14 @@ public final class ReadCSVBuilder implements CommandBuilder {
         throw new MorphlineCompilationException(
             "Comment prefix must not have a length of more than one character: " + commentPrefix, config);
       }
+      this.maxCharactersPerRecord = getConfigs().getInt(config, "maxCharactersPerRecord", 1000 * 1000);
+      this.ignoreTooLongRecords = new Validator<OnMaxCharactersPerRecord>().validateEnum(
+          config,
+          getConfigs().getString(config, "onMaxCharactersPerRecord", OnMaxCharactersPerRecord.throwException.toString()),
+          OnMaxCharactersPerRecord.class) == OnMaxCharactersPerRecord.ignoreRecord;
       this.tokenizer = quoteChar.length() == 0 ? 
           new SimpleCSVTokenizer(separatorChar, trim, addEmptyStrings, columnNames) : 
-          new QuotedCSVTokenizer(separatorChar, trim, addEmptyStrings, columnNames, quoteChar.charAt(0));          
+          new QuotedCSVTokenizer(separatorChar, trim, addEmptyStrings, columnNames, maxCharactersPerRecord, ignoreTooLongRecords, quoteChar.charAt(0));          
       validateArguments();
     }
   
@@ -114,8 +122,8 @@ public final class ReadCSVBuilder implements CommandBuilder {
       }      
 
       while (true) {
-        Record outputRecord = template.copy();
-        if (!readNext(reader, outputRecord)) {
+        Record outputRecord = readNext(reader, template);
+        if (outputRecord == null) {
           break;
         }
         incrementNumRecords();
@@ -128,23 +136,32 @@ public final class ReadCSVBuilder implements CommandBuilder {
       return true;
     }
 
-    private boolean readNext(BufferedReader reader, Record record) throws IOException {
+    private Record readNext(BufferedReader reader, Record template) throws IOException {
       while (true) {
         String line = reader.readLine();
         if (line == null) {
-          return false;
+          return null;
         }
 
+        if (!QuotedCSVTokenizer.verifyRecordLength(
+            line.length(), maxCharactersPerRecord, line, ignoreTooLongRecords, LOG)) {
+          continue; // ignore
+        }
+        
         if (ignoreEmptyLines && isTrimmedLineEmpty(line)) {
-          continue;
+          continue; // ignore
         }
 
         if (commentPrefix.length() > 0 && line.startsWith(commentPrefix)) {
-          continue;
+          continue; // ignore
         }
 
-        tokenizer.tokenizeLine(line, reader, record);
-        return true;
+        Record outputRecord = template.copy();
+        if (!tokenizer.tokenizeLine(line, reader, outputRecord)) {
+          continue; // ignore
+        }
+        
+        return outputRecord;
       }
     }
     
@@ -158,6 +175,15 @@ public final class ReadCSVBuilder implements CommandBuilder {
       }
       return true;
     }
+
+    
+    ///////////////////////////////////////////////////////////////////////////////
+    // Nested classes:
+    ///////////////////////////////////////////////////////////////////////////////
+    private static enum OnMaxCharactersPerRecord {
+      ignoreRecord,
+      throwException,
+    }     
     
   }
 }

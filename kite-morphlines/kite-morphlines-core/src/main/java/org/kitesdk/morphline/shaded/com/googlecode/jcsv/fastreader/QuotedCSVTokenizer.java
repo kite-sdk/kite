@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.kitesdk.morphline.api.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -36,18 +38,26 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
   private final boolean addEmptyStrings; 
   private final List<String> columnNames;
   private final char quoteChar;
+  private final int maxCharactersPerRecord;
+  private final boolean ignoreTooLongRecords;
   
-  public QuotedCSVTokenizer(char separatorChar, boolean trim, boolean addEmptyStrings, List<String> columnNames, char quoteChar) {
+  private static final Logger LOG = LoggerFactory.getLogger(QuotedCSVTokenizer.class);
+  
+  public QuotedCSVTokenizer(char separatorChar, boolean trim, boolean addEmptyStrings, List<String> columnNames,
+      int maxCharactersPerRecord, boolean ignoreTooLongRecords, char quoteChar) {
     this.separatorChar = separatorChar;
     this.trim = trim;
     this.addEmptyStrings = addEmptyStrings;
     this.columnNames = columnNames;
+    this.maxCharactersPerRecord = maxCharactersPerRecord;
+    this.ignoreTooLongRecords = ignoreTooLongRecords;
     this.quoteChar = quoteChar;
   }
   
   /** Splits the given input line into parts, using the given delimiter. */
   @Override
-  public void tokenizeLine(String line, BufferedReader reader, Record record) throws IOException {
+  public boolean tokenizeLine(String line, BufferedReader reader, Record record) throws IOException {
+    int numChars = line.length();
     final char DELIMITER = separatorChar;
     final char QUOTE = quoteChar;
     final StringBuilder sb = new StringBuilder(30);
@@ -88,6 +98,11 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
           if (line == null) {
             throw new IllegalStateException("unexpected end of file, unclosed quotation");
           }
+          numChars += line.length();
+          if (!verifyRecordLength(
+              numChars, maxCharactersPerRecord, line, ignoreTooLongRecords, LOG)) {
+            return false; // attempt to ignore it
+          }
         } else {
           final char c = line.charAt(i);
           if (c == QUOTE) {
@@ -109,6 +124,8 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
     if (!(j == 0 && sb.length() == 0)) {
       put(sb, j, record);
     }
+    
+    return true;
   }
   
   private void put(StringBuilder sb, int j, Record record) {
@@ -125,4 +142,18 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
     }
   }
 
+  public static boolean verifyRecordLength(int numChars, int maxChars, String line, boolean ignoreTooLongRecords, Logger LOG) {
+    if (numChars <= maxChars) {
+      return true;
+    }
+    String msg = "Invalid input data - CSV record length is larger than the maximum of "
+        + maxChars + " characters near line: " + line;
+    if (ignoreTooLongRecords) {
+      LOG.warn(msg);
+      return false;
+    } else {
+      throw new IllegalArgumentException(msg);
+    }      
+  }
+  
 }

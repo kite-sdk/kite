@@ -31,5 +31,5 @@ public interface CSVTokenizer {
    * @param reader the reader may be used to read further lines if the line ends with an open quotation
    * @return the tokens
    */
-  public void tokenizeLine(String line, BufferedReader reader, Record record) throws IOException;
+  public boolean tokenizeLine(String line, BufferedReader reader, Record record) throws IOException;
 }

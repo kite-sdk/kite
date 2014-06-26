@@ -13,6 +13,7 @@ Version TBD contains the following notable changes:
     * Added morphline command that parses an InputStream that contains protobuf data: [readProtobuf](kite-morphlines/morphlinesReferenceGuide.html#readProtobuf) (Rober Fiser via whoschek)
     * Added morphline command that extracts specific values from a protobuf object, akin to a simple form of XPath: [extractProtobufPaths](kite-morphlines/morphlinesReferenceGuide.html#extractProtobufPaths) (Rober Fiser via whoschek)
     * Added morphline command that removes all record fields for which the field name matches a blacklist but not a whitelist: [removeFields](kite-morphlines/morphlinesReferenceGuide.html#removeFields)
+    * Added optional parameters `maxCharactersPerRecord` and `onMaxCharactersPerRecord` to morphline command [readCSV](kite-morphlines/morphlinesReferenceGuide.html#readCSV)
     * Upgraded kite-morphlines-maxmind module from maxmind-db-0.3.1 to bug fix release maxmind-db-0.3.3
     * Upgraded kite-morphlines-core module from metrics-0.3.1 to bug fix release metrics-0.3.2
 

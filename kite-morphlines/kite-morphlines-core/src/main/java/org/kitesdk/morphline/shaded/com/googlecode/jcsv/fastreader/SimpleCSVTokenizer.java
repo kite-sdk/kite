@@ -42,7 +42,7 @@ public final class SimpleCSVTokenizer implements CSVTokenizer {
   
   /** Splits the given input line into parts, using the given delimiter. */
   @Override
-  public void tokenizeLine(String line, BufferedReader reader, Record record) throws IOException {
+  public boolean tokenizeLine(String line, BufferedReader reader, Record record) throws IOException {
     char separator = separatorChar;
     int len = line.length();
     int start = 0; 
@@ -55,6 +55,7 @@ public final class SimpleCSVTokenizer implements CSVTokenizer {
       }
     }
     put(line, start, len, j, record);
+    return true;
   }
 
   private void put(String line, int start, int i, int j, Record record) {

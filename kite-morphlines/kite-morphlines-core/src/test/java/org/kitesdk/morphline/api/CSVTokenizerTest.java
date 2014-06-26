@@ -51,7 +51,7 @@ public class CSVTokenizerTest extends Assert {
     Record record = new Record();
     CSVTokenizer tokenizer;
     if (isQuoted) {
-      tokenizer = new QuotedCSVTokenizer(separator, false, addEmptyStrings, new ArrayList(), '"');
+      tokenizer = new QuotedCSVTokenizer(separator, false, addEmptyStrings, new ArrayList(), 1000, false, '"');
       tokenizer.tokenizeLine(line, new BufferedReader(new StringReader("")), record);      
     } else {
       tokenizer = new SimpleCSVTokenizer(separator, false, addEmptyStrings, new ArrayList());
@@ -83,6 +83,30 @@ public class CSVTokenizerTest extends Assert {
   @Test(expected=IllegalStateException.class)
   public void testIllegalQuotedState() throws Exception {
     split(Arrays.asList(), "foo,maybe\"", ',', true, true);
+  }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testThrowExceptionIfRecordTooLong() throws Exception {
+    boolean ignoreTooLongRecords = false;
+    int maxCharactersPerRecord = 10;
+    CSVTokenizer tokenizer = new QuotedCSVTokenizer(
+        ',', false, false, new ArrayList(), maxCharactersPerRecord, ignoreTooLongRecords, '"');
+    tokenizer.tokenizeLine(
+        "\"", 
+        new BufferedReader(new StringReader("line tooooooooo long\"")), 
+        new Record());
+  }
+
+  @Test
+  public void testIgnoreRecordTooLong() throws Exception {
+    boolean ignoreTooLongRecords = true;
+    int maxCharactersPerRecord = 10;
+    CSVTokenizer tokenizer = new QuotedCSVTokenizer(
+        ',', false, false, new ArrayList(), maxCharactersPerRecord, ignoreTooLongRecords, '"');
+    assertFalse(tokenizer.tokenizeLine(
+        "\"", 
+        new BufferedReader(new StringReader("line tooooooooo long\"")), 
+        new Record()));
   }
 
 }
