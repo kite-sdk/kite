@@ -17,26 +17,27 @@
 package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.internal.Lists;
-import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.Iterators;
 import com.google.common.io.Files;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.net.URI;
-import java.util.Set;
-import org.apache.avro.Schema;
+import java.util.Map;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.LocalJobRunner;
+import org.apache.hadoop.mapreduce.Job;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
+import org.kitesdk.compat.DynMethods;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepositories;
@@ -49,8 +50,6 @@ import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.slf4j.Logger;
 
-import static org.mockito.Matchers.contains;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -143,6 +142,8 @@ public class TestCopyCommandCluster extends MiniDFSTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testCopyWithNumWriters() throws Exception {
+    Assume.assumeTrue(setLocalReducerMax(getConfiguration(), 3));
+
     command.repoURI = repoUri;
     command.numWriters = 3;
     command.datasets = Lists.newArrayList(source, dest);
@@ -157,8 +158,31 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     int size = DatasetTestUtilities.datasetSize(ds);
     Assert.assertEquals("Should contain copied records", 6, size);
 
+    Assert.assertEquals("Should produce 3 files",
+        3, Iterators.size(ds.pathIterator()));
+
     verify(console).info("Added {} records to \"{}\"", 6l, dest);
     verifyNoMoreInteractions(console);
+  }
+
+  private boolean setLocalReducerMax(Configuration conf, int max) {
+    try {
+      Job job = Hadoop.Job.newInstance.invoke(new Configuration(false));
+      DynMethods.StaticMethod setReducerMax = new DynMethods
+          .Builder("setLocalMaxRunningReduces")
+          .impl(LocalJobRunner.class,
+              org.apache.hadoop.mapreduce.JobContext.class, Integer.TYPE)
+          .buildStaticChecked();
+      setReducerMax.invoke(job, max);
+      // copy the setting into the passed configuration
+      Configuration jobConf = Hadoop.JobContext.getConfiguration.invoke(job);
+      for (Map.Entry<String, String> entry : jobConf) {
+        conf.set(entry.getKey(), entry.getValue());
+      }
+      return true;
+    } catch (NoSuchMethodException e) {
+      return false;
+    }
   }
 
   @Test
@@ -168,7 +192,7 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     command.numWriters = 3;
     command.datasets = Lists.newArrayList(source, "dest_partitioned");
     URI dsUri = new URIBuilder("repo:" + repoUri, "dest_partitioned").build();
-    Datasets.create(dsUri, new DatasetDescriptor.Builder()
+    Datasets.<Object, Dataset<Object>>create(dsUri, new DatasetDescriptor.Builder()
         .partitionStrategy(new PartitionStrategy.Builder()
             .hash("id", 2)
             .build())

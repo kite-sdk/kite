@@ -137,7 +137,7 @@
     <vers.flume>1.4.0</vers.flume>
     <vers.guava>11.0.2</vers.guava>
     <vers.hadoop1>1.2.1</vers.hadoop1>
-    <vers.hadoop2>2.2.0</vers.hadoop2>
+    <vers.hadoop2>2.3.0</vers.hadoop2>
     <vers.hadoop-cdh4>2.0.0-cdh${cdh4.version}</vers.hadoop-cdh4>
     <vers.hadoop-mr1-cdh4>2.0.0-mr1-cdh${cdh4.version}</vers.hadoop-mr1-cdh4>
     <vers.hadoop-cdh5>2.3.0-cdh${cdh5.version}</vers.hadoop-cdh5>
