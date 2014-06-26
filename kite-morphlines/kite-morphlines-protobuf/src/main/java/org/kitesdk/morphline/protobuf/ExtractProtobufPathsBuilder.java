@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -259,7 +260,7 @@ public final class ExtractProtobufPathsBuilder implements CommandBuilder {
       if (getter == null) {
         StringBuilder getterName = new StringBuilder();
         getterName.append(GET);
-        getterName.append(propertyName.substring(0, 1).toUpperCase());
+        getterName.append(propertyName.substring(0, 1).toUpperCase(Locale.ROOT));
         getterName.append(propertyName.substring(1));
         try {
           getter = clazz.getMethod(getterName.toString());
@@ -267,7 +268,7 @@ public final class ExtractProtobufPathsBuilder implements CommandBuilder {
           getterName.append(LIST);
           getter = clazz.getMethod(getterName.toString());
           if (getter == null) {
-            throw new MorphlineRuntimeException("Property '" + propertyName + "' not exists in class '"
+            throw new MorphlineRuntimeException("Property '" + propertyName + "' does not exist in class '"
                 + clazz.getName() + "'.");
           }
         }
