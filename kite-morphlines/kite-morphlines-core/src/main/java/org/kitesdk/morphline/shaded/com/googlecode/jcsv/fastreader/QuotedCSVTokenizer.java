@@ -146,6 +146,9 @@ public final class QuotedCSVTokenizer implements CSVTokenizer {
     if (numChars <= maxChars) {
       return true;
     }
+    if (line.length() > 10000) {
+      line = line.substring(0, 10000); // prevent gigantic messages
+    }
     String msg = "Invalid input data - CSV record length is larger than the maximum of "
         + maxChars + " characters near line: " + line;
     if (ignoreTooLongRecords) {
