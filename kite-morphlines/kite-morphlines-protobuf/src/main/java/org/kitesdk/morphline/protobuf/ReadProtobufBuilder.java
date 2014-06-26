@@ -74,14 +74,14 @@ public final class ReadProtobufBuilder implements CommandBuilder {
       String outputClassName = getConfigs().getString(config, "outputClass");
       outputClass = getInnerClass(protobufClass, outputClassName);
       if (outputClass == null) {
-        throw new MorphlineCompilationException("Output class '" + outputClassName + "' not exists in class '"
+        throw new MorphlineCompilationException("Output class '" + outputClassName + "' does not exist in class '"
             + protoClassName + "'.", config);
       }
 
       try {
         parseMethod = outputClass.getMethod(PARSE_FROM, InputStream.class);
       } catch (NoSuchMethodException e) {
-        throw new MorphlineCompilationException("Method '" + PARSE_FROM + "' not exists in class '" + outputClassName
+        throw new MorphlineCompilationException("Method '" + PARSE_FROM + "' does not exist in class '" + outputClassName
             + "'.", config, e);
       } catch (SecurityException e) {
         throw new MorphlineCompilationException("Method '" + PARSE_FROM + "' is probably not public in class '"
