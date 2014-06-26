@@ -19,6 +19,14 @@ package org.kitesdk.compat;
 import org.apache.hadoop.conf.Configuration;
 
 public class Hadoop {
+  public static class Job {
+    public static final DynMethods.StaticMethod newInstance =
+        new DynMethods.Builder("getInstance")
+            .impl(org.apache.hadoop.mapreduce.Job.class, Configuration.class)
+            .ctorImpl(org.apache.hadoop.mapreduce.Job.class, Configuration.class)
+            .buildStatic();
+  }
+
   public static class JobContext {
     public static final DynMethods.UnboundMethod getConfiguration =
         new DynMethods.Builder("getConfiguration")

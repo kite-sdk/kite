@@ -16,6 +16,8 @@
 
 package org.kitesdk.compat;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -23,11 +25,12 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 public class DynConstructors {
-  public static class Ctor<C> {
+  public static class Ctor<C> extends DynMethods.UnboundMethod {
     private final Constructor<C> ctor;
     private final Class<? extends C> constructed;
 
     private Ctor(Constructor<C> constructor, Class<? extends C> constructed) {
+      super(null, "newInstance");
       this.ctor = constructor;
       this.constructed = constructed;
     }
@@ -57,6 +60,35 @@ public class DynConstructors {
       } catch (Exception e) {
         throw Throwables.propagate(e);
       }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <R> R invoke(Object target, Object... args) {
+      Preconditions.checkArgument(target == null,
+          "Invalid call to constructor: target must be null");
+      return (R) newInstance(target, args);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <R> R invokeChecked(Object target, Object... args) throws Exception {
+      Preconditions.checkArgument(target == null,
+          "Invalid call to constructor: target must be null");
+      return (R) newInstanceChecked(args);
+    }
+
+    @Override
+    public boolean isStatic() {
+      return true;
+    }
+
+    @Override
+    public String toString() {
+      return Objects.toStringHelper(this)
+          .add("constructor", ctor)
+          .add("class", constructed)
+          .toString();
     }
   }
 

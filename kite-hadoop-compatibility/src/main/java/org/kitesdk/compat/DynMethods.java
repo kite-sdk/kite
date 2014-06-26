@@ -38,7 +38,7 @@ public class DynMethods {
     private final String name;
     private final int argLength;
 
-    private UnboundMethod(Method method, String name) {
+    UnboundMethod(Method method, String name) {
       this.method = method;
       this.name = name;
       this.argLength = (method == null || method.isVarArgs()) ? -1 :
@@ -280,6 +280,38 @@ public class DynMethods {
      */
     public Builder impl(Class<?> targetClass, Class<?>... argClasses) {
       impl(targetClass, name, argClasses);
+      return this;
+    }
+
+    public Builder ctorImpl(Class<?> targetClass, Class<?>... argClasses) {
+      // don't do any work if an implementation has been found
+      if (method != null) {
+        return this;
+      }
+
+      try {
+        this.method = new DynConstructors.Builder()
+            .impl(targetClass, argClasses)
+            .buildChecked();
+      } catch (NoSuchMethodException e) {
+        // not the right implementation
+      }
+      return this;
+    }
+
+    public Builder ctorImpl(String className, Class<?>... argClasses) {
+      // don't do any work if an implementation has been found
+      if (method != null) {
+        return this;
+      }
+
+      try {
+        this.method = new DynConstructors.Builder()
+            .impl(className, argClasses)
+            .buildChecked();
+      } catch (NoSuchMethodException e) {
+        // not the right implementation
+      }
       return this;
     }
 
