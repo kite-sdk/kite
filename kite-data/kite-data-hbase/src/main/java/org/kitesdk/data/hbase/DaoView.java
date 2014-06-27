@@ -117,6 +117,9 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
   @Override
   public DatasetWriter<E> newWriter() {
     final DatasetWriter<E> wrappedWriter = dataset.getDao().newBatch();
+    if (constraints.isUnbounded()) {
+      return wrappedWriter;
+    }
     final StorageKey partitionStratKey = new StorageKey(dataset.getDescriptor().getPartitionStrategy());
     // Return a dataset writer that checks on write that an entity is within the
     // range of the view

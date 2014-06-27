@@ -501,6 +501,15 @@ public class Constraints implements Serializable{
   }
 
   /**
+   * Returns true if there are no constraints.
+   *
+   * @return {@code true} if there are no constraints, {@code false} otherwise
+   */
+  public boolean isUnbounded() {
+    return constraints.isEmpty();
+  }
+
+  /**
    * A {@link Predicate} for testing entities against a set of predicates.
    *
    * @param <E> The type of entities this predicate tests

@@ -98,6 +98,9 @@ public class TestConstraints {
 
     Assert.assertNotNull("Should produce an unbound key range",
         emptyConstraints.toKeyRanges(strategy));
+
+    Assert.assertTrue("Empty constraints should be unbounded",
+        emptyConstraints.isUnbounded());
   }
 
   @Test
@@ -119,6 +122,9 @@ public class TestConstraints {
         exists.toKeyPredicate());
     Assert.assertNotNull("Should produce a key range",
         exists.toKeyRanges(strategy));
+
+    Assert.assertFalse("Non-empty constraints (exists) should not be unbounded",
+        exists.isUnbounded());
   }
 
   @Test
@@ -173,6 +179,9 @@ public class TestConstraints {
     event.id = id;
     Assert.assertTrue("Should match event with correct id",
         withSingle.toEntityPredicate().apply(event));
+
+    Assert.assertFalse("Non-empty constraints (with) should not be unbounded",
+        withSingle.isUnbounded());
   }
 
   @Test
@@ -196,6 +205,9 @@ public class TestConstraints {
     event.id = ids[1];
     Assert.assertTrue("Should match event with correct id",
         withMultiple.toEntityPredicate().apply(event));
+
+    Assert.assertFalse("Non-empty constraints (with) should not be unbounded",
+        withMultiple.isUnbounded());
   }
 
   @Test
@@ -312,6 +324,15 @@ public class TestConstraints {
     Assert.assertEquals("Should be neg-infinity to open",
         Ranges.lessThan(2013),
         emptyConstraints.toBefore("year", 2013).get("year"));
+
+    Assert.assertFalse("Non-empty constraints (from) should not be unbounded",
+        emptyConstraints.from("year", 2013).isUnbounded());
+    Assert.assertFalse("Non-empty constraints (fromAfter) should not be unbounded",
+        emptyConstraints.fromAfter("year", 2013).isUnbounded());
+    Assert.assertFalse("Non-empty constraints (to) should not be unbounded",
+        emptyConstraints.to("year", 2013).isUnbounded());
+    Assert.assertFalse("Non-empty constraints (toBefore) should not be unbounded",
+        emptyConstraints.toBefore("year", 2013).isUnbounded());
   }
 
   @Test
