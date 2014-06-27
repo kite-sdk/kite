@@ -16,8 +16,13 @@
 
 package org.kitesdk.data.hcatalog;
 
+import com.google.common.collect.Sets;
+import java.util.Set;
 import org.apache.avro.generic.GenericData;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.TableType;
+import org.apache.hadoop.hive.ql.metadata.Table;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +33,7 @@ import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.hcatalog.impl.HCatalog;
 
 public class TestManagedExternalHandling {
   private static final DatasetDescriptor descriptor =
@@ -118,5 +124,37 @@ public class TestManagedExternalHandling {
             managed.load("managed");
           }
         });
+  }
+
+  @Test
+  public void testRepositoryList() throws Exception {
+    // create unreadable hive tables
+    HCatalog metastore = new HCatalog(new Configuration());
+    metastore.dropTable("default", "bad_type");
+    metastore.dropTable("default", "bad_serde");
+    metastore.dropTable("default", "bad_schema");
+
+    Table badType = new Table("default", "bad_type");
+    badType.setTableType(TableType.VIRTUAL_VIEW);
+    metastore.createTable(badType);
+
+    Table badSerDe = new Table("default", "bad_serde");
+    badSerDe.setTableType(TableType.MANAGED_TABLE); // readable type
+    badSerDe.setSerializationLib("com.example.ExampleHiveSerDe");
+    metastore.createTable(badSerDe);
+
+    Table badSchema = new Table("default", "bad_schema");
+    badSchema.setTableType(TableType.MANAGED_TABLE); // readable type
+    badSchema.setSerializationLib("org.apache.hadoop.hive.serde2.avro.AvroSerDe");
+    badSchema.setInputFormatClass("org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
+    badSchema.setOutputFormatClass("org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat");
+    metastore.createTable(badSchema);
+
+    // note that unreadable tables are not in the list
+    Set<String> expected = Sets.newHashSet("managed", "external");
+    Assert.assertEquals("Managed should list external and managed tables",
+        expected, Sets.newHashSet(managed.list()));
+    Assert.assertEquals("External should list external and managed tables",
+        expected, Sets.newHashSet(external.list()));
   }
 }

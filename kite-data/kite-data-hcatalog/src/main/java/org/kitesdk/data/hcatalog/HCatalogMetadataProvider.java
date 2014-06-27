@@ -17,12 +17,16 @@
 package org.kitesdk.data.hcatalog;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import java.util.Collection;
+import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetNotFoundException;
+import org.kitesdk.data.UnknownFormatException;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.AbstractMetadataProvider;
 import org.kitesdk.data.spi.Compatibility;
@@ -58,8 +62,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
    * @throws DatasetNotFoundException If the table does not exist in Hive
    */
   protected boolean isManaged(String name) {
-    Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
-    return TableType.MANAGED_TABLE.equals(table.getTableType());
+    return isManaged(getHcat().getTable(HiveUtils.DEFAULT_DB, name));
   }
 
   /**
@@ -69,8 +72,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
    * @throws DatasetNotFoundException If the table does not exist in Hive
    */
   protected boolean isExternal(String name) {
-    Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
-    return TableType.EXTERNAL_TABLE.equals(table.getTableType());
+    return isExternal(getHcat().getTable(HiveUtils.DEFAULT_DB, name));
   }
 
   @Override
@@ -109,7 +111,27 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
 
   @Override
   public Collection<String> list() {
-    return getHcat().getAllTables(HiveUtils.DEFAULT_DB);
+    Collection<String> tables = getHcat().getAllTables(HiveUtils.DEFAULT_DB);
+    List<String> readableTables = Lists.newArrayList();
+    for (String name : tables) {
+      Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
+      if (isManaged(table) || isExternal(table)) { // readable table types
+        try {
+          // get a descriptor for the table. if this succeeds, it is readable
+          HiveUtils.descriptorForTable(conf, table);
+          readableTables.add(name);
+        } catch (DatasetException e) {
+          // not a readable table
+        } catch (IllegalStateException e) {
+          // not a readable table
+        } catch (IllegalArgumentException e) {
+          // not a readable table
+        } catch (UnsupportedOperationException e) {
+          // not a readable table
+        }
+      }
+    }
+    return readableTables;
   }
 
   @Override
@@ -118,5 +140,12 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
     getHcat().addPartition(HiveUtils.DEFAULT_DB, name, path);
   }
 
+  private boolean isManaged(Table table) {
+    return TableType.MANAGED_TABLE.equals(table.getTableType());
+  }
+
+  private boolean isExternal(Table table) {
+    return TableType.EXTERNAL_TABLE.equals(table.getTableType());
+  }
 
 }
