@@ -132,8 +132,14 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     Assert.assertEquals("Should return success", 0, rc);
 
     DatasetRepository repo = DatasetRepositories.open("repo:" + repoUri);
-    int size = DatasetTestUtilities.datasetSize(repo.load(dest));
+    FileSystemDataset<GenericData.Record> ds =
+        (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
+            load(dest);
+    int size = DatasetTestUtilities.datasetSize(ds);
     Assert.assertEquals("Should contain copied records", 6, size);
+
+    Assert.assertEquals("Should produce 1 files",
+        1, Iterators.size(ds.pathIterator()));
 
     verify(console).info("Added {} records to \"{}\"", 6l, dest);
     verifyNoMoreInteractions(console);
