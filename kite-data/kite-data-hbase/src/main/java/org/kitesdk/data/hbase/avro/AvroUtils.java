@@ -16,6 +16,7 @@
 package org.kitesdk.data.hbase.avro;
 
 import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.SerializationException;
 import com.google.common.collect.Lists;
 
@@ -216,8 +217,10 @@ public class AvroUtils {
     // fields
     // in the case that the entity is being used as a key.
     List<Field> fields = Lists.newArrayList();
+    PartitionStrategy strategy = keySchema.getPartitionStrategy();
     for (Schema.Field field : keySchema.getAvroSchema().getFields()) {
-      fields.add(copy(schemaField.getField(field.name())));
+      String sourceName = strategy.getPartitioner(field.name()).getSourceName();
+      fields.add(copy(schemaField.getField(sourceName)));
     }
     Schema schema = Schema.createRecord(keySchema.getAvroSchema().getName(),
         keySchema.getAvroSchema().getDoc(), keySchema.getAvroSchema()

@@ -23,6 +23,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Test;
+import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.MetadataProvider;
 import org.kitesdk.data.spi.TestMetadataProviders;
@@ -58,6 +60,22 @@ public class TestExternalHCatalogMetadataProvider extends TestMetadataProviders 
     Path assignedPath = new Path(loaded.getLocation().getPath());
     Assert.assertEquals("Path should be in the test directory",
         new Path(testDirectory, NAME), assignedPath);
+  }
+
+  @Test
+  public void testRejectsDuplicatePartitionNames() {
+    final DatasetDescriptor descriptor = new DatasetDescriptor.Builder(testDescriptor)
+        .partitionStrategy(new PartitionStrategy.Builder()
+            .identity("timestamp", "timestamp")
+            .build())
+        .build();
+    TestHelpers.assertThrows("Should reject duplicate field and partition name",
+        IllegalStateException.class, new Runnable() {
+      @Override
+      public void run() {
+        provider.create("reject", descriptor);
+      }
+    });
   }
 
   // TODO:

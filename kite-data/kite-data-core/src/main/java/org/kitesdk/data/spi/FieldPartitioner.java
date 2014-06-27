@@ -62,19 +62,11 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
 
   protected FieldPartitioner(String sourceName, String name,
                              Class<S> sourceType, Class<T> type) {
-    Preconditions.checkArgument(!sourceName.equals(name),
-        "Source name and partition name cannot be the same");
-    this.sourceName = sourceName;
-    this.name = name;
-    this.sourceType = sourceType;
-    this.type = type;
-    this.cardinality = UNKNOWN_CARDINALITY;
+    this(sourceName, name, sourceType, type, UNKNOWN_CARDINALITY);
   }
 
   protected FieldPartitioner(String sourceName, String name,
       Class<S> sourceType, Class<T> type, int cardinality) {
-    Preconditions.checkArgument(!sourceName.equals(name),
-        "Source name and partition name cannot be the same");
     this.sourceName = sourceName;
     this.name = name;
     this.sourceType = sourceType;

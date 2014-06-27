@@ -46,17 +46,17 @@ public class AvroKeyEntitySchemaParserTest {
 
     AvroKeySchema avroKeySchema = parser.parseKeySchema(entitySchema);
     assertEquals(Type.STRING, avroKeySchema.getAvroSchema()
-        .getField("keyPart1").schema().getType());
+        .getField("keyPart1_copy").schema().getType());
     assertEquals(Type.STRING, avroKeySchema.getAvroSchema()
-        .getField("keyPart2").schema().getType());
+        .getField("keyPart2_copy").schema().getType());
     assertEquals(2, avroKeySchema.getPartitionStrategy().getFieldPartitioners()
         .size());
   }
 
   @Test
   public void testOverridePartitionStrategy() {
-    PartitionStrategy strat = new PartitionStrategy.Builder().hash("keyPart1",
-        10).build();
+    PartitionStrategy strat = new PartitionStrategy.Builder()
+        .hash("keyPart1", "keyPart1", 10).build();
     AvroKeySchema avroKeySchema = parser.parseKeySchema(entitySchema, strat);
     assertEquals(Type.INT, avroKeySchema.getAvroSchema().getField("keyPart1")
         .schema().getType());
