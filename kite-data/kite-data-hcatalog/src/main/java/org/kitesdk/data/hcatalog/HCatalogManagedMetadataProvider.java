@@ -15,13 +15,10 @@
  */
 package org.kitesdk.data.hcatalog;
 
-import java.net.URI;
-import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.DatasetExistsException;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.ql.metadata.Table;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.spi.Compatibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,10 +38,6 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
     Compatibility.checkDatasetName(name);
 
     final Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
-
-    if (!TableType.MANAGED_TABLE.equals(table.getTableType())) {
-      throw new DatasetException("Table is not managed");
-    }
 
     return HiveUtils.descriptorForTable(conf, table);
   }

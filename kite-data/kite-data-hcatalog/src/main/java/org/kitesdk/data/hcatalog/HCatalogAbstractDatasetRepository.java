@@ -21,6 +21,7 @@ import java.net.URI;
 import javax.annotation.Nullable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.hcatalog.impl.Loader;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
@@ -52,6 +53,19 @@ class HCatalogAbstractDatasetRepository extends FileSystemDatasetRepository {
   }
 
   @Override
+  public boolean delete(String name) {
+    try {
+      if (isManaged(name)) {
+        // avoids calling fsRepository.delete, which deletes the data path
+        return getMetadataProvider().delete(name);
+      }
+      return super.delete(name);
+    } catch (DatasetNotFoundException e) {
+      return false;
+    }
+  }
+
+  @Override
   public URI getUri() {
     return repoUri;
   }
@@ -59,6 +73,15 @@ class HCatalogAbstractDatasetRepository extends FileSystemDatasetRepository {
   @VisibleForTesting
   MetadataProvider getMetadataProvider() {
     return provider;
+  }
+
+  private boolean isManaged(String name) {
+    MetadataProvider provider = getMetadataProvider();
+    if (provider instanceof HCatalogMetadataProvider) {
+      return ((HCatalogMetadataProvider) provider).isManaged(name);
+    }
+    // if the provider isn't talking to Hive, then it isn't managed
+    return false;
   }
 
   private URI getRepositoryUri(Configuration conf,

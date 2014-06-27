@@ -39,16 +39,16 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   private static DatasetDescriptor descriptor;
 
   @BeforeClass
-        public static void createRepositoryAndTestDatasets() throws Exception {
-          hdfsAuth = getDFS().getUri().getAuthority();
-          hdfsQueryArgs = "hdfs:host=" + getDFS().getUri().getHost() +
-              "&hdfs:port=" + getDFS().getUri().getPort();
-          hdfsQueryArgsOld = "hdfs-host=" + getDFS().getUri().getHost() +
-              "&hdfs-port=" + getDFS().getUri().getPort();
-          descriptor = new DatasetDescriptor.Builder()
-              .schemaUri("resource:schema/user.avsc")
-              .build();
-        }
+  public static void createRepositoryAndTestDatasets() throws Exception {
+    hdfsAuth = getDFS().getUri().getAuthority();
+    hdfsQueryArgs = "hdfs:host=" + getDFS().getUri().getHost() +
+        "&hdfs:port=" + getDFS().getUri().getPort();
+    hdfsQueryArgsOld = "hdfs-host=" + getDFS().getUri().getHost() +
+        "&hdfs-port=" + getDFS().getUri().getPort();
+    descriptor = new DatasetDescriptor.Builder()
+        .schemaUri("resource:schema/user.avsc")
+        .build();
+  }
 
   @Test
   public void testExternal() {

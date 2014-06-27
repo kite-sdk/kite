@@ -167,16 +167,7 @@ class HiveUtils {
       table.setTableType(TableType.MANAGED_TABLE);
     }
 
-    // copy custom properties to the table
-    if (!descriptor.listProperties().isEmpty()) {
-      for (String property : descriptor.listProperties()) {
-        // no need to check the reserved list, those are not set on descriptors
-        table.setProperty(property, descriptor.getProperty(property));
-      }
-      // set which properties are custom and should be set on descriptors
-      table.setProperty(CUSTOM_PROPERTIES_PROPERTY_NAME,
-          NAME_JOINER.join(descriptor.listProperties()));
-    }
+    addPropertiesForDescriptor(table, descriptor);
 
     // translate from Format to SerDe
     final Format format = descriptor.getFormat();
@@ -247,6 +238,8 @@ class HiveUtils {
           AVRO_SCHEMA_LITERAL_PROPERTY_NAME + " nor " +
           AVRO_SCHEMA_URL_PROPERTY_NAME + " is set.");
     }
+    // keep the custom properties up-to-date
+    addPropertiesForDescriptor(table, descriptor);
   }
 
   static FileSystem fsForPath(Configuration conf, Path path) {
@@ -254,6 +247,20 @@ class HiveUtils {
       return path.getFileSystem(conf);
     } catch (IOException ex) {
       throw new DatasetIOException("Cannot access FileSystem for uri:" + path, ex);
+    }
+  }
+
+  private static void addPropertiesForDescriptor(Table table,
+                                                 DatasetDescriptor descriptor) {
+    // copy custom properties to the table
+    if (!descriptor.listProperties().isEmpty()) {
+      for (String property : descriptor.listProperties()) {
+        // no need to check the reserved list, those are not set on descriptors
+        table.setProperty(property, descriptor.getProperty(property));
+      }
+      // set which properties are custom and should be set on descriptors
+      table.setProperty(CUSTOM_PROPERTIES_PROPERTY_NAME,
+          NAME_JOINER.join(descriptor.listProperties()));
     }
   }
 

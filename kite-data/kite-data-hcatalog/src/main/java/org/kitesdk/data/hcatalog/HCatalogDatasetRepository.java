@@ -70,12 +70,6 @@ public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository
     return load(name);
   }
 
-  @Override
-  public boolean delete(String name) {
-    // avoids calling fsRepository.delete, which deletes the data path
-    return getMetadataProvider().delete(name);
-  }
-
   /**
    * A fluent builder to aid in the construction of {@link HCatalogDatasetRepository}
    * instances.

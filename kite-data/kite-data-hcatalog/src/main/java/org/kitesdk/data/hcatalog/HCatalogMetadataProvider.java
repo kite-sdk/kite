@@ -17,14 +17,13 @@
 package org.kitesdk.data.hcatalog;
 
 import com.google.common.base.Preconditions;
-import java.net.URI;
 import java.util.Collection;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
-import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.kitesdk.data.spi.AbstractMetadataProvider;
 import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.PartitionListener;
@@ -50,6 +49,28 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
       hcat = new HCatalog(conf);
     }
     return hcat;
+  }
+
+  /**
+   * Returns whether the table is a managed hive table.
+   * @param name a Table name
+   * @return true if the table is managed, false otherwise
+   * @throws DatasetNotFoundException If the table does not exist in Hive
+   */
+  protected boolean isManaged(String name) {
+    Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
+    return TableType.MANAGED_TABLE.equals(table.getTableType());
+  }
+
+  /**
+   * Returns whether the table is a managed hive table.
+   * @param name a Table name
+   * @return true if the table is managed, false otherwise
+   * @throws DatasetNotFoundException If the table does not exist in Hive
+   */
+  protected boolean isExternal(String name) {
+    Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
+    return TableType.EXTERNAL_TABLE.equals(table.getTableType());
   }
 
   @Override
