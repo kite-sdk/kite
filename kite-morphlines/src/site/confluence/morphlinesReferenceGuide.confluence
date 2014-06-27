@@ -1989,7 +1989,7 @@ This maven module contains morphline commands for handling Hadoop Avro Parquet f
 
 h2. readAvroParquetFile
 
-The {{readAvroParquetFile}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-hadoop-parquet-avro/src/main/java/org/kitesdk/morphline/hadoop/parquet/avro/ReadParquetFileBuilder.java]) parses a Hadoop [Parquet|http://parquet.io] file and emits a morphline record for each contained Avro datum.
+The {{readAvroParquetFile}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-hadoop-parquet-avro/src/main/java/org/kitesdk/morphline/hadoop/parquet/avro/ReadAvroParquetFileBuilder.java]) parses a Hadoop [Parquet|http://parquet.io] file and emits a morphline record for each contained Avro datum.
 
 The morphline record input field file\_upload\_url must contain the HDFS Path of the Parquet file to read. (This field is already provided out of the box with {{MapReduceIndexerTool}}).
 
