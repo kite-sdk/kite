@@ -15,14 +15,14 @@
  */
 package org.kitesdk.data.hbase.impl;
 
-import org.kitesdk.data.DatasetIOException;
-
-import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Set;
 
 import org.apache.hadoop.hbase.KeyValue;
@@ -48,6 +48,18 @@ public class HBaseUtils {
     void addFamily(byte[] family);
 
   }
+  
+  private static final Method getFamilyMapMethod;
+  
+  static {
+    try {
+      getFamilyMapMethod = Put.class.getMethod("getFamilyMap");
+    } catch (SecurityException e) {
+      throw new RuntimeException(e);
+    } catch (NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    }    
+  }
 
   /**
    * Given a list of puts, create a new put with the values in each put merged
@@ -62,8 +74,18 @@ public class HBaseUtils {
    */
   public static Put mergePuts(byte[] keyBytes, List<Put> putList) {
     Put put = new Put(keyBytes);
-    for (Put putToMerge : putList) {
-      Map<byte[], List<KeyValue>> familyMap = putToMerge.getFamilyMap();
+    for (Put putToMerge : putList) {      
+      Map<byte[], List<KeyValue>> familyMap;
+      try {
+        familyMap = (Map<byte[], List<KeyValue>>) getFamilyMapMethod.invoke(putToMerge);
+      } catch (IllegalArgumentException e) {
+        throw new RuntimeException(e);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(e);
+      }
+      
       for (List<KeyValue> keyValueList : familyMap.values()) {
         for (KeyValue keyValue : keyValueList) {
           // don't use put.add(KeyValue) since it doesn't work with HBase 0.96 onwards
