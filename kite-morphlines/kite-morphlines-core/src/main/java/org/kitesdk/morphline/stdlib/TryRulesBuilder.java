@@ -89,7 +89,6 @@ public final class TryRulesBuilder implements CommandBuilder {
     }
     
     @Override
-
     protected void doNotify(Record notification) {
       for (Command childRule : childRules) {
         if (!catchExceptions) {
