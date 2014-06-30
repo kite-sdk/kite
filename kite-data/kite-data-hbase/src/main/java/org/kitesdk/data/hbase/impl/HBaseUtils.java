@@ -15,9 +15,6 @@
  */
 package org.kitesdk.data.hbase.impl;
 
-import org.kitesdk.data.DatasetIOException;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,6 +27,7 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.kitesdk.compat.DynMethods;
 
 /**
  * Static utility functions for working with the HBase API.
@@ -48,7 +46,11 @@ public class HBaseUtils {
     void addFamily(byte[] family);
 
   }
-
+  
+  // CDK-506 Add compat for hbase-0.98
+  private static final DynMethods.UnboundMethod GET_FAMILY_MAP_METHOD = 
+      new DynMethods.Builder("getFamilyMap").impl(Put.class).build(); 
+  
   /**
    * Given a list of puts, create a new put with the values in each put merged
    * together. It is expected that no puts have a value for the same fully
@@ -63,7 +65,9 @@ public class HBaseUtils {
   public static Put mergePuts(byte[] keyBytes, List<Put> putList) {
     Put put = new Put(keyBytes);
     for (Put putToMerge : putList) {
-      Map<byte[], List<KeyValue>> familyMap = putToMerge.getFamilyMap();
+      Map<byte[], List<KeyValue>> familyMap = 
+          (Map<byte[], List<KeyValue>>) GET_FAMILY_MAP_METHOD.invoke(putToMerge);
+      
       for (List<KeyValue> keyValueList : familyMap.values()) {
         for (KeyValue keyValue : keyValueList) {
           // don't use put.add(KeyValue) since it doesn't work with HBase 0.96 onwards
