@@ -142,7 +142,7 @@
     <vers.hadoop-mr1-cdh4>2.0.0-mr1-cdh${cdh4.version}</vers.hadoop-mr1-cdh4>
     <vers.hadoop-cdh5>2.3.0-cdh${cdh5.version}</vers.hadoop-cdh5>
     <vers.hbase1>0.94.6</vers.hbase1>
-    <vers.hbase2>0.96.1.1-hadoop2</vers.hbase2>
+    <vers.hbase2>0.98.3-hadoop2</vers.hbase2>
     <vers.hbase-cdh4>0.94.6-cdh${cdh4.version}</vers.hbase-cdh4>
     <vers.hbase-cdh5>0.96.1.1-cdh${cdh5.version}</vers.hbase-cdh5>
     <vers.hive>0.10.0</vers.hive>
