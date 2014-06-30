@@ -33,6 +33,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
@@ -228,12 +229,17 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
 
   private InputFormat<E, Void> getDelegateInputFormatForPartition(Dataset<E> dataset,
       String partitionDir) {
+    if (!(dataset instanceof FileSystemDataset)) {
+      throw new UnsupportedOperationException("Partitions only supported for " +
+          "FileSystemDataset. Dataset: " + dataset);
+    }
+    FileSystemDataset<E> fsDataset = (FileSystemDataset<E>) dataset;
     LOG.debug("Getting delegate input format for dataset {} with partition directory {}",
         dataset, partitionDir);
-    PartitionKey key = ((FileSystemDataset<E>) dataset).keyFromDirectory(new Path(partitionDir));
+    PartitionKey key = fsDataset.keyFromDirectory(new Path(partitionDir));
     LOG.debug("Partition key: {}", key);
     if (key != null) {
-      Dataset<E> partition = dataset.getPartition(key, false);
+      PartitionedDataset<E> partition = fsDataset.getPartition(key, false);
       LOG.debug("Partition: {}", partition);
       return getDelegateInputFormat(partition);
     }

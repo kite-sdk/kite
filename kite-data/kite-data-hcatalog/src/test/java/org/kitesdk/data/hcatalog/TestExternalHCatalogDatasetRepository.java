@@ -22,6 +22,7 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.spi.filesystem.TestFileSystemDatasetRepository;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -146,7 +147,8 @@ public class TestExternalHCatalogDatasetRepository extends TestFileSystemDataset
   private void writeRecord(Dataset<GenericRecord> dataset, int partition) {
     PartitionKey key = dataset.getDescriptor()
         .getPartitionStrategy().partitionKey(partition);
-    DatasetWriter<GenericRecord> writer = dataset.getPartition(key, true).newWriter();
+    DatasetWriter<GenericRecord> writer =
+        ((PartitionedDataset<GenericRecord>) dataset).getPartition(key, true).newWriter();
     try {
       GenericRecordBuilder recordBuilder = new GenericRecordBuilder(
           dataset.getDescriptor().getSchema())

@@ -44,6 +44,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.spi.PartitionedDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -508,7 +509,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
     int readCount = 0;
     DatasetReader<Record> reader = null;
     try {
-      Dataset<Record> partition = ds.getPartition(key, false);
+      PartitionedDataset<Record> partition = ds.getPartition(key, false);
       if (subpartitionName != null) {
         List<FieldPartitioner> fieldPartitioners = partition.getDescriptor()
             .getPartitionStrategy().getFieldPartitioners();

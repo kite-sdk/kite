@@ -31,6 +31,7 @@ import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.URIBuilder;
 import junit.framework.Assert;
@@ -140,7 +141,8 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     writeTestUsers(inputDataset, 10);
 
     PartitionKey key = partitionStrategy.partitionKey(0);
-    Dataset<Record> inputPart0 = inputDataset.getPartition(key, false);
+    Dataset<Record> inputPart0 =
+        ((PartitionedDataset<Record>) inputDataset).getPartition(key, false);
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
@@ -165,8 +167,10 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     writeTestUsers(inputDataset, 10);
 
     PartitionKey key = partitionStrategy.partitionKey(0);
-    Dataset<Record> inputPart0 = inputDataset.getPartition(key, false);
-    Dataset<Record> outputPart0 = outputDataset.getPartition(key, true);
+    Dataset<Record> inputPart0 =
+        ((PartitionedDataset<Record>) inputDataset).getPartition(key, false);
+    Dataset<Record> outputPart0 =
+        ((PartitionedDataset<Record>) outputDataset).getPartition(key, true);
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
@@ -191,7 +195,8 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     writeTestUsers(inputDataset, 10);
 
     PartitionKey key = partitionStrategy.partitionKey(0);
-    Dataset<Record> inputPart0 = inputDataset.getPartition(key, false);
+    Dataset<Record> inputPart0 =
+        ((PartitionedDataset<Record>) inputDataset).getPartition(key, false);
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
@@ -202,7 +207,8 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     Assert.assertEquals(5, datasetSize(outputDataset));
 
     // check all records are in the correct partition
-    Dataset<Record> outputPart0 = outputDataset.getPartition(key, false);
+    Dataset<Record> outputPart0 =
+        ((PartitionedDataset<Record>) outputDataset).getPartition(key, false);
     Assert.assertNotNull(outputPart0);
     Assert.assertEquals(5, datasetSize(outputPart0));
   }

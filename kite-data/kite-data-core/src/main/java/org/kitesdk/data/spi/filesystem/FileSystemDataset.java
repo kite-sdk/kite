@@ -20,7 +20,6 @@ import com.google.common.collect.Sets;
 import java.util.Iterator;
 import java.util.Set;
 import org.apache.hadoop.mapreduce.InputFormat;
-import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
@@ -28,7 +27,6 @@ import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.RefinableView;
-import org.kitesdk.data.View;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.Constraints;
@@ -44,6 +42,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.spi.SizeAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +52,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
+@SuppressWarnings("deprecation")
 public class FileSystemDataset<E> extends AbstractDataset<E> implements
     Mergeable<FileSystemDataset<E>>, InputFormatAccessor<E>, LastModifiedAccessor,
-    SizeAccessor {
+    PartitionedDataset<E>, SizeAccessor {
 
   private static final Logger LOG = LoggerFactory
     .getLogger(FileSystemDataset.class);
@@ -162,8 +162,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   @Override
   @Nullable
-  @Deprecated
-  public Dataset<E> getPartition(PartitionKey key, boolean allowCreate) {
+  @SuppressWarnings("deprecation")
+  public PartitionedDataset<E> getPartition(PartitionKey key, boolean allowCreate) {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get a partition on a non-partitioned dataset (name:%s)",
       name);
@@ -208,7 +208,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   }
 
   @Override
-  @Deprecated
+  @SuppressWarnings("deprecation")
   public void dropPartition(PartitionKey key) {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to drop a partition on a non-partitioned dataset (name:%s)",
@@ -230,13 +230,13 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   }
 
   @Override
-  @Deprecated
-  public Iterable<Dataset<E>> getPartitions() {
+  @SuppressWarnings("deprecation")
+  public Iterable<PartitionedDataset<E>> getPartitions() {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get partitions on a non-partitioned dataset (name:%s)",
       name);
 
-    List<Dataset<E>> partitions = Lists.newArrayList();
+    List<PartitionedDataset<E>> partitions = Lists.newArrayList();
 
     FileStatus[] fileStatuses;
 
