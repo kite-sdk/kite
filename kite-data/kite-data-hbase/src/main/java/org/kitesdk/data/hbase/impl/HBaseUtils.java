@@ -15,14 +15,11 @@
  */
 package org.kitesdk.data.hbase.impl;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.Set;
 
 import org.apache.hadoop.hbase.KeyValue;
@@ -30,6 +27,7 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.kitesdk.compat.DynMethods;
 
 /**
  * Static utility functions for working with the HBase API.
@@ -49,18 +47,10 @@ public class HBaseUtils {
 
   }
   
-  private static final Method getFamilyMapMethod;
+  // CDK-506 Add compat for hbase-0.98
+  private static final DynMethods.UnboundMethod GET_FAMILY_MAP_METHOD = 
+      new DynMethods.Builder("getFamilyMap").impl(Put.class).build(); 
   
-  static {
-    try {
-      getFamilyMapMethod = Put.class.getMethod("getFamilyMap");
-    } catch (SecurityException e) {
-      throw new RuntimeException(e);
-    } catch (NoSuchMethodException e) {
-      throw new RuntimeException(e);
-    }    
-  }
-
   /**
    * Given a list of puts, create a new put with the values in each put merged
    * together. It is expected that no puts have a value for the same fully
@@ -74,17 +64,9 @@ public class HBaseUtils {
    */
   public static Put mergePuts(byte[] keyBytes, List<Put> putList) {
     Put put = new Put(keyBytes);
-    for (Put putToMerge : putList) {      
-      Map<byte[], List<KeyValue>> familyMap;
-      try {
-        familyMap = (Map<byte[], List<KeyValue>>) getFamilyMapMethod.invoke(putToMerge);
-      } catch (IllegalArgumentException e) {
-        throw new RuntimeException(e);
-      } catch (IllegalAccessException e) {
-        throw new RuntimeException(e);
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException(e);
-      }
+    for (Put putToMerge : putList) {
+      Map<byte[], List<KeyValue>> familyMap = 
+          (Map<byte[], List<KeyValue>>) GET_FAMILY_MAP_METHOD.invoke(putToMerge);
       
       for (List<KeyValue> keyValueList : familyMap.values()) {
         for (KeyValue keyValue : keyValueList) {
