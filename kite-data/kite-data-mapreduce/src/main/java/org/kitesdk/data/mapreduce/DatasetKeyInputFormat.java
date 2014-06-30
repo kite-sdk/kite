@@ -33,6 +33,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.PartitionedDataset;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
@@ -229,7 +230,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     PartitionKey key = ((FileSystemDataset<E>) dataset).keyFromDirectory(new Path(partitionDir));
     LOG.debug("Partition key: {}", key);
     if (key != null) {
-      Dataset<E> partition = dataset.getPartition(key, false);
+      PartitionedDataset<E> partition = ((PartitionedDataset<E>) dataset).getPartition(key, false);
       LOG.debug("Partition: {}", partition);
       return getDelegateInputFormat(partition);
     }

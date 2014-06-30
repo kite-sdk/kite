@@ -27,6 +27,7 @@ import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.PartitionedDataset;
 import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.View;
 import org.kitesdk.data.impl.Accessor;
@@ -55,7 +56,7 @@ import java.util.List;
 
 public class FileSystemDataset<E> extends AbstractDataset<E> implements
     Mergeable<FileSystemDataset<E>>, InputFormatAccessor<E>, LastModifiedAccessor,
-    SizeAccessor {
+    PartitionedDataset<E>, SizeAccessor {
 
   private static final Logger LOG = LoggerFactory
     .getLogger(FileSystemDataset.class);
@@ -163,7 +164,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   @Override
   @Nullable
   @Deprecated
-  public Dataset<E> getPartition(PartitionKey key, boolean allowCreate) {
+  public PartitionedDataset<E> getPartition(PartitionKey key, boolean allowCreate) {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get a partition on a non-partitioned dataset (name:%s)",
       name);
@@ -231,12 +232,12 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   @Override
   @Deprecated
-  public Iterable<Dataset<E>> getPartitions() {
+  public Iterable<PartitionedDataset<E>> getPartitions() {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get partitions on a non-partitioned dataset (name:%s)",
       name);
 
-    List<Dataset<E>> partitions = Lists.newArrayList();
+    List<PartitionedDataset<E>> partitions = Lists.newArrayList();
 
     FileStatus[] fileStatuses;
 

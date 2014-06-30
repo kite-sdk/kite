@@ -32,6 +32,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.junit.Assert;
+import org.kitesdk.data.PartitionedDataset;
 import org.kitesdk.data.View;
 
 public class DatasetTestUtilities {
@@ -156,7 +157,7 @@ public class DatasetTestUtilities {
   }
 
   @SuppressWarnings("deprecation")
-  public static <E> void testPartitionKeysAreEqual(Dataset<E> ds,
+  public static <E> void testPartitionKeysAreEqual(PartitionedDataset<E> ds,
       PartitionKey... expectedKeys) {
     Set<PartitionKey> expected = Sets.newHashSet(expectedKeys);
     Set<PartitionKey> actual = Sets.newHashSet(Iterables.transform(ds.getPartitions(),

@@ -35,6 +35,7 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.PartitionedDataset;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
@@ -305,7 +306,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       PartitionKey key = ((FileSystemDataset) target).keyFromDirectory(
           new Path(partitionDir));
       if (key != null) {
-        working = working.getDataset().getPartition(key, true);
+        working = ((PartitionedDataset) working.getDataset()).getPartition(key, true);
       }
       return new DatasetRecordWriter<E>(working);
     } else if (constraintsString != null) {

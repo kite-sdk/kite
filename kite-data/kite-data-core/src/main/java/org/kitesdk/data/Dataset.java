@@ -71,7 +71,11 @@ public interface Dataset<E> extends RefinableView<E> {
    * @param autoCreate If true, automatically creates the partition if it
    * doesn't exist.
    * @throws DatasetException
+   * @deprecated will be removed in 0.16.0; use
+   *   {@link org.kitesdk.data.PartitionedDataset#getPartition(PartitionKey, boolean)}
+   *   instead
    */
+  @Deprecated
   Dataset<E> getPartition(PartitionKey key, boolean autoCreate);
 
   /**
@@ -81,7 +85,11 @@ public interface Dataset<E> extends RefinableView<E> {
    * @param key The key used to look up the partition.
    * @throws DatasetException
    * @since 0.2.0
+   * @deprecated will be removed in 0.16.0; use
+   *   {@link org.kitesdk.data.PartitionedDataset#dropPartition(PartitionKey)}
+   *   instead
    */
+  @Deprecated
   void dropPartition(PartitionKey key);
 
   /**
@@ -95,8 +103,11 @@ public interface Dataset<E> extends RefinableView<E> {
    *
    * @return an iterable over all partitions of this dataset
    * @throws DatasetException
+   * @deprecated will be removed in 0.16.0; use {@link PartitionedDataset#getPartitions()}
+   *   instead
    */
-  Iterable<Dataset<E>> getPartitions();
+  @Deprecated
+  Iterable<? extends Dataset<E>> getPartitions();
 
   /**
    * Return a {@code URI} for this {@code Dataset}.
