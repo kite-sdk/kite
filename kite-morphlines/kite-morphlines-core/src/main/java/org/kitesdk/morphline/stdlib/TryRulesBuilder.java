@@ -89,9 +89,20 @@ public final class TryRulesBuilder implements CommandBuilder {
     }
     
     @Override
+
     protected void doNotify(Record notification) {
       for (Command childRule : childRules) {
-        childRule.notify(notification);
+        if (!catchExceptions) {
+          childRule.notify(notification);
+        } else {
+          try {
+            childRule.notify(notification);
+          } catch (RuntimeException e) {
+            numExceptionsCaught.mark();
+            LOG.warn("tryRules command caught rule exception in doNotify(). Continuing to try other remaining rules", e);
+            // continue and try the other remaining rules
+          }
+        }
       }
       super.doNotify(notification);
     }
