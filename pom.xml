@@ -133,6 +133,7 @@
     <vers.commons-lang>2.5</vers.commons-lang>
     <vers.crunch-base>0.10.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-hadoop2</vers.crunch>
+    <vers.crunch-cdh5>0.9.0-cdh${cdh5.version}</vers.crunch-cdh5>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.flume>1.4.0</vers.flume>
     <vers.guava>11.0.2</vers.guava>
@@ -163,6 +164,7 @@
     <vers.typesafe.config>1.0.2</vers.typesafe.config>
     <vers.solr>4.6.1</vers.solr>
     <solr.expected.version>4.6.1</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
+    <vers.solr-cdh5>4.4.0-cdh${cdh.version}</vers.solr-cdh5>
     <vers.tika>1.4</vers.tika>
     <vers.jackson>2.3.1</vers.jackson>
     <vers.opencsv>2.3</vers.opencsv>
@@ -1172,9 +1174,12 @@
         <artifact.hbase-deps>kite-hbase-cdh5-dependencies</artifact.hbase-deps>
         <artifact.hbase-test-deps>kite-hbase-cdh5-test-dependencies</artifact.hbase-test-deps>
         <cdh.version>${cdh5.version}</cdh.version>
+        <vers.crunch>${vers.crunch-cdh5}</vers.crunch>
         <vers.flume>1.4.0-cdh${cdh5.version}</vers.flume>
         <vers.hive>0.12.0-cdh${cdh5.version}</vers.hive>
         <vers.oozie>4.0.0-cdh${cdh5.version}</vers.oozie>
+        <vers.solr>${vers.solr-cdh5}</vers.solr>
+        <solr.expected.version>${vers.solr-cdh5}</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
       </properties>
     </profile>
 
