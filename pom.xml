@@ -131,7 +131,7 @@
     <vers.commons-io>2.1</vers.commons-io>
     <vers.commons-logging>1.1.1</vers.commons-logging>
     <vers.commons-lang>2.5</vers.commons-lang>
-    <vers.crunch-base>0.9.0</vers.crunch-base>
+    <vers.crunch-base>0.10.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-hadoop2</vers.crunch>
     <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
     <vers.flume>1.4.0</vers.flume>
