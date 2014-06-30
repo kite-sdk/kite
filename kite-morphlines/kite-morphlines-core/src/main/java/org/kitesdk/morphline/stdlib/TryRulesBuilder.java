@@ -122,7 +122,7 @@ public final class TryRulesBuilder implements CommandBuilder {
             }
           } catch (RuntimeException e) {
             numExceptionsCaught.mark();
-            LOG.warn("tryRules command caught rule exception. Continuing to try other remaining rules", e);
+            LOG.warn("tryRules command caught rule exception in doProcess(). Continuing to try other remaining rules", e);
             // continue and try the other remaining rules
           }
         }
