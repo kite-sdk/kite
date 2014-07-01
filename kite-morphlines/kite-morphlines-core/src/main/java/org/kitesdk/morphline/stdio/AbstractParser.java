@@ -36,7 +36,10 @@ import org.kitesdk.morphline.base.Metrics;
 
 import com.codahale.metrics.Meter;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+
 import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
+
 import com.typesafe.config.Config;
 
 /**
@@ -71,7 +74,7 @@ public abstract class AbstractParser extends AbstractCommand {
 
   protected void addSupportedMimeType(String mediaType) {
     if (supportedMimeTypes == null) {
-      supportedMimeTypes = new HashSet();
+      supportedMimeTypes = Sets.newHashSet();
     }
     supportedMimeTypes.add(parseMimeType(mediaType));
   }

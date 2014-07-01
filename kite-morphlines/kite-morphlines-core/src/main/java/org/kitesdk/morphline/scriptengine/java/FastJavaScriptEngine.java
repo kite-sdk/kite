@@ -65,6 +65,7 @@ class FastJavaScriptEngine extends AbstractScriptEngine implements Compilable {
 		
 		private final Method targetMethod; // TODO: use java.lang.invoke.MethodHandle on Java7 for better perf; e.g. see http://vanillajava.blogspot.com/2011/08/methodhandle-performance-in-java-7.html
 
+		@SuppressWarnings("unchecked")
 		JavaCompiledScript (Class clazz, String methodName, Class[] parameterTypes) throws ScriptException {
 			try {
 				this.targetMethod = clazz.getMethod(methodName, parameterTypes);
@@ -207,6 +208,7 @@ class FastJavaScriptEngine extends AbstractScriptEngine implements Compilable {
 	}
 
 	// find public static void main(String[]) method, if any
+  @SuppressWarnings("unchecked")
 	private static Method findMainMethod(Class clazz) {
 		try {
 			Method mainMethod = clazz.getMethod("main", new Class[] { String[].class });

@@ -37,6 +37,7 @@ import com.codahale.metrics.CsvReporter.Builder;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 
 /**
@@ -65,7 +66,7 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
   private static final class StartReportingMetricsToCSV extends AbstractCommand {
 
     private final File outputDir;
-    private static final Map<MetricRegistry, Map<File, CsvReporter>> REGISTRIES = new IdentityHashMap();
+    private static final Map<MetricRegistry, Map<File, CsvReporter>> REGISTRIES = Maps.newIdentityHashMap();
     
     public StartReportingMetricsToCSV(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);      
@@ -85,7 +86,7 @@ public final class StartReportingMetricsToCSVBuilder implements CommandBuilder {
       synchronized (REGISTRIES) {
         Map<File, CsvReporter> reporters = REGISTRIES.get(registry);
         if (reporters == null) {
-          reporters = new HashMap();
+          reporters = Maps.newHashMap();
           REGISTRIES.put(registry, reporters);
         }
         CsvReporter reporter = reporters.get(outputDir);

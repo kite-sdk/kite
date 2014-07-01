@@ -138,7 +138,7 @@ final class PatternNameMatcher {
   private static final class RegexExpression implements Expression {
     
     private final Matcher regex;
-    private final Map<String, Boolean> cache = new BoundedLRUHashMap(10000);
+    private final Map<String, Boolean> cache = new BoundedLRUHashMap<String, Boolean>(10000);
     
     public RegexExpression(Pattern pattern) {
       this.regex = pattern.matcher("");

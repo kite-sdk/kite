@@ -30,6 +30,7 @@ import org.junit.Test;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
@@ -86,7 +87,7 @@ public class SimpleHoconConfigTest extends Assert {
 	
   @Test
 	public void testParseMap() { // test access based on path
-    final Map<String, String> map = new HashMap();
+    final Map<String, String> map = Maps.newHashMap();
     map.put(TIKA_CONFIG_LOCATION, "src/test/resources/tika-config.xml");
     map.put("collection1.testcoll.solr.home", "target/test-classes/solr/collection1");
 //    Config config = ConfigValueFactory.fromMap(new Context(map).getParameters()).toConfig();
@@ -99,7 +100,7 @@ public class SimpleHoconConfigTest extends Assert {
   
   @Test
   public void testFromMap() { // test access based on key
-    final Map<String, String> map = new HashMap();
+    final Map<String, String> map = Maps.newHashMap();
     map.put(TIKA_CONFIG_LOCATION, "src/test/resources/tika-config.xml");
     String key = "collection1.testcoll.solr.home";
     map.put(key, "target/test-classes/solr/collection1");

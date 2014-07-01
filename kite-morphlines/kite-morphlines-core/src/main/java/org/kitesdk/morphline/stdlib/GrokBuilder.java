@@ -31,6 +31,7 @@ import org.kitesdk.morphline.base.Validator;
 import org.kitesdk.morphline.shaded.com.google.code.regexp.GroupInfo;
 import org.kitesdk.morphline.shaded.com.google.code.regexp.Matcher;
 
+import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -64,7 +65,7 @@ public final class GrokBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class Grok extends AbstractCommand {
 
-    private final Map<String, Matcher> regexes = new HashMap();
+    private final Map<String, Matcher> regexes = Maps.newHashMap();
     private final boolean extract;
     private final boolean extractInPlace;
     private final NumRequiredMatches numRequiredMatches;

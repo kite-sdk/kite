@@ -34,6 +34,7 @@ import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.JmxReporter.Builder;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -61,7 +62,7 @@ public final class StartReportingMetricsToJMXBuilder implements CommandBuilder {
   private static final class StartReportingMetricsToJMX extends AbstractCommand {
 
     private final String domain;
-    private static final Map<MetricRegistry, Map<String, JmxReporter>> REGISTRIES = new IdentityHashMap();
+    private static final Map<MetricRegistry, Map<String, JmxReporter>> REGISTRIES = Maps.newIdentityHashMap();
     
     public StartReportingMetricsToJMX(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);      
@@ -70,13 +71,13 @@ public final class StartReportingMetricsToJMXBuilder implements CommandBuilder {
       TimeUnit defaultDurationUnit = getConfigs().getTimeUnit(config, "defaultDurationUnit", TimeUnit.MILLISECONDS);
       TimeUnit defaultRateUnit = getConfigs().getTimeUnit(config, "defaultRateUnit", TimeUnit.SECONDS);
       
-      Map<String, TimeUnit> durationUnits = new HashMap();
+      Map<String, TimeUnit> durationUnits =  Maps.newHashMap();
       Config durationUnitsConfig = getConfigs().getConfig(config, "durationUnits", ConfigFactory.empty());
       for (Map.Entry<String, Object> entry : new Configs().getEntrySet(durationUnitsConfig)) {
         TimeUnit unit = new Configs().getTimeUnit(entry.getValue().toString());
         durationUnits.put(entry.getKey(), unit);
       }      
-      Map<String, TimeUnit> rateUnits = new HashMap();
+      Map<String, TimeUnit> rateUnits =  Maps.newHashMap();
       Config rateUnitsConfig = getConfigs().getConfig(config, "rateUnits", ConfigFactory.empty());
       for (Map.Entry<String, Object> entry : new Configs().getEntrySet(rateUnitsConfig)) {
         TimeUnit unit = new Configs().getTimeUnit(entry.getValue().toString());
@@ -89,7 +90,7 @@ public final class StartReportingMetricsToJMXBuilder implements CommandBuilder {
       synchronized (REGISTRIES) {
         Map<String, JmxReporter> reporters = REGISTRIES.get(registry);
         if (reporters == null) {
-          reporters = new HashMap();
+          reporters = Maps.newHashMap();
           REGISTRIES.put(registry, reporters);
         }
         JmxReporter reporter = reporters.get(domain);

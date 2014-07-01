@@ -15,6 +15,7 @@
  */
 package org.kitesdk.morphline.api;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -48,7 +49,7 @@ public final class Record {
   /** Returns a shallow copy of this record. */
   public Record copy() {
     //return new Record(ArrayListMultimap.create(fields)); // adding fields later causes (slow) rehashing
-    ArrayListMultimap copy = ArrayListMultimap.create(fields.size() + 16, 10);
+    ArrayListMultimap<String,Object> copy = ArrayListMultimap.create(fields.size() + 16, 10);
     copy.putAll(fields);
     return new Record(copy);
   }
@@ -83,7 +84,7 @@ public final class Record {
    */
   public void replaceValues(String key, Object value) {
 //    fields.replaceValues(key, Collections.singletonList(value)); // unnecessarily slow
-    List list = fields.get(key);
+    List<Object> list = fields.get(key);
     list.clear(); 
     list.add(value);
   }
@@ -119,7 +120,7 @@ public final class Record {
   
   @Override
   public String toString() { // print fields sorted by key for better human readability
-    return new TreeMap(fields.asMap()).toString();
+    return new TreeMap<String, Collection<Object>>(fields.asMap()).toString();
   }
 
   private static ArrayListMultimap<String, Object> create() {

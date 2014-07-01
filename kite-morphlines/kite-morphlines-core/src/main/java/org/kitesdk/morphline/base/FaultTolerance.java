@@ -81,6 +81,7 @@ public final class FaultTolerance implements ExceptionHandler {
     return isIgnoringRecoverableExceptions;
   }
   
+  @SuppressWarnings("unchecked")
   private boolean isRecoverableException(Throwable t) {
     while (true) {
       for (Class clazz : clazzes) {

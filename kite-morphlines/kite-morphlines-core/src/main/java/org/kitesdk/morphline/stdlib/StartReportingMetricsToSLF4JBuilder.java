@@ -35,6 +35,7 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.Slf4jReporter.Builder;
+import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 
 /**
@@ -62,7 +63,7 @@ public final class StartReportingMetricsToSLF4JBuilder implements CommandBuilder
   private static final class StartReportingMetricsToSLF4J extends AbstractCommand {
 
     private final String logger;
-    private static final Map<MetricRegistry, Map<String, Slf4jReporter>> REGISTRIES = new IdentityHashMap();
+    private static final Map<MetricRegistry, Map<String, Slf4jReporter>> REGISTRIES = Maps.newIdentityHashMap();
     
     public StartReportingMetricsToSLF4J(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);      
@@ -79,7 +80,7 @@ public final class StartReportingMetricsToSLF4JBuilder implements CommandBuilder
       synchronized (REGISTRIES) {
         Map<String, Slf4jReporter> reporters = REGISTRIES.get(registry);
         if (reporters == null) {
-          reporters = new HashMap();
+          reporters = Maps.newHashMap();
           REGISTRIES.put(registry, reporters);
         }
         Slf4jReporter reporter = reporters.get(logger);

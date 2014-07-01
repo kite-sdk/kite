@@ -60,6 +60,7 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
 import com.typesafe.config.Config;
@@ -639,7 +640,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     morphline = createMorphline("test-morphlines/tryRulesPass");    
     Record record = new Record();
     record.put("first_name", "Nadja");
-    List<Record> expectedList = new ArrayList();
+    List<Record> expectedList = Lists.newArrayList();
     for (int i = 0; i < 2; i++) {
       Record expected = record.copy();
       expected.put("foo", "bar");
@@ -658,7 +659,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     morphline = createMorphline("test-morphlines/tryRulesFail");    
     Record record = new Record();
     record.put("first_name", "Nadja");
-    List<Record> expectedList = new ArrayList();
+    List<Record> expectedList = Lists.newArrayList();
     for (int i = 0; i < 2; i++) {
       Record expected = record.copy();
       expected.put("foo2", "bar2");
@@ -677,7 +678,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     morphline = createMorphline("test-morphlines/tryRulesCatchException");    
     Record record = new Record();
     record.put("first_name", "Nadja");
-    List<Record> expectedList = new ArrayList();
+    List<Record> expectedList = Lists.newArrayList();
     for (int i = 0; i < 2; i++) {
       Record expected = record.copy();
       expected.put("foo2", "bar2");
@@ -696,7 +697,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     morphline = createMorphline("test-morphlines/tryRulesFailTwice");    
     Record record = new Record();
     record.put("first_name", "Nadja");
-    List<Record> expectedList = new ArrayList();
+    List<Record> expectedList = Lists.newArrayList();
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     try {
@@ -780,7 +781,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(record));
-    assertEquals(Arrays.asList(), collector.getRecords());
+    assertEquals(Lists.newArrayList(), collector.getRecords());
   }
   
   @Test
@@ -1084,7 +1085,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     } catch (MorphlineRuntimeException e) {
       assertTrue(e.getMessage().startsWith("Cannot execute script"));
     }
-    assertEquals(Arrays.asList(), collector.getRecords());
+    assertEquals(Lists.newArrayList(), collector.getRecords());
   }
   
   @Test
@@ -1180,7 +1181,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
       startSession();
       assertEquals(1, collector.getNumStartEvents());
       assertFalse(morphline.process(record));
-      assertEquals(Arrays.asList(), collector.getRecords());
+      assertEquals(Lists.newArrayList(), collector.getRecords());
       
       // double match
       collector.reset();
@@ -1260,7 +1261,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertFalse(morphline.process(record));
-    assertEquals(Arrays.asList(), collector.getRecords());
+    assertEquals(Lists.newArrayList(), collector.getRecords());
   }
   
   @Test
@@ -1268,7 +1269,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     String msg = "hello\tworld\tfoo";
     Pattern pattern = Pattern.compile("(?<word>.+?)(\\t|\\z)");
     Matcher matcher = pattern.matcher(msg);
-    List<String> results = new ArrayList();
+    List<String> results = Lists.newArrayList();
     while (matcher.find()) {
       //System.out.println("match:'" + matcher.group(1) + "'");
       results.add(matcher.group(1));
@@ -1508,6 +1509,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  @SuppressWarnings("unchecked")
   public void testSplitKeyValue() throws Exception {
     morphline = createMorphline("test-morphlines/splitKeyValue");    
     Record record = new Record();
@@ -1524,6 +1526,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  @SuppressWarnings("unchecked")
   public void testSplitKeyValueWithLiteralSeparatorOfLength3() throws Exception {
     morphline = createMorphline("test-morphlines/splitKeyValueWithLiteralSeparatorOfLength3");    
     Record record = new Record();
@@ -1540,6 +1543,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
   
   @Test
+  @SuppressWarnings("unchecked")
   public void testSplitKeyValueWithRegex() throws Exception {
     morphline = createMorphline("test-morphlines/splitKeyValueWithRegex");    
     Record record = new Record();
@@ -1916,22 +1920,22 @@ public class MorphlineTest extends AbstractMorphlineTest {
     internalExtractURIQueryParams("foo", host + "?foo=x&foo=y&foo=z", Arrays.asList("x", "y", "z"));
     internalExtractURIQueryParams("foo", host + "?foo=x&foo=y&foo=z#fragment", Arrays.asList("x", "y", "z"));
     internalExtractURIQueryParams("foo", host + "?boo=x&foo=y&boo=z", Arrays.asList("y"));
-    internalExtractURIQueryParams("foo", host + "?boo=x&bar=y&baz=z", Arrays.asList());
+    internalExtractURIQueryParams("foo", host + "?boo=x&bar=y&baz=z", Lists.newArrayList());
 
     internalExtractURIQueryParams("foo", host + "?foo=x&foo=y&foo=z", Arrays.asList("x"), 1);
-    internalExtractURIQueryParams("foo", host + "?foo=x&foo=y&foo=z", Arrays.asList(), 0);
+    internalExtractURIQueryParams("foo", host + "?foo=x&foo=y&foo=z", Lists.newArrayList(), 0);
 
-    internalExtractURIQueryParams("foo", "", Arrays.asList());
-    internalExtractURIQueryParams("foo", "?", Arrays.asList());
-    internalExtractURIQueryParams("foo", "::", Arrays.asList()); // syntax error in URI
-    internalExtractURIQueryParams("foo", new String(new byte[10], "ASCII"), Arrays.asList());
-    internalExtractURIQueryParams("foo", host + "", Arrays.asList());
-    internalExtractURIQueryParams("foo", host + "?", Arrays.asList());
+    internalExtractURIQueryParams("foo", "", Lists.newArrayList());
+    internalExtractURIQueryParams("foo", "?", Lists.newArrayList());
+    internalExtractURIQueryParams("foo", "::", Lists.newArrayList()); // syntax error in URI
+    internalExtractURIQueryParams("foo", new String(new byte[10], "ASCII"), Lists.newArrayList());
+    internalExtractURIQueryParams("foo", host + "", Lists.newArrayList());
+    internalExtractURIQueryParams("foo", host + "?", Lists.newArrayList());
     
     internalExtractURIQueryParams("foo", host + "?foo=hello%26%3D%23&bar=world", Arrays.asList("hello&=#"));
     internalExtractURIQueryParams("foo&=#", host + "?foo%26%3D%23=hello%26%3D%23&bar=world", Arrays.asList("hello&=#"));
-    internalExtractURIQueryParams("foo&=#", host + "?foo&=#=hello%26%3D%23&bar=world", Arrays.asList());
-    internalExtractURIQueryParams("foo%26%3D%23", host + "?foo%26%3D%23=hello%26%3D%23&bar=world", Arrays.asList());
+    internalExtractURIQueryParams("foo&=#", host + "?foo&=#=hello%26%3D%23&bar=world", Lists.newArrayList());
+    internalExtractURIQueryParams("foo%26%3D%23", host + "?foo%26%3D%23=hello%26%3D%23&bar=world", Lists.newArrayList());
     
     internalExtractURIQueryParams("bar", host + "?foo=hello%26%3D%23&bar=world", Arrays.asList("world"));
     internalExtractURIQueryParams("bar", host + "?foo%26%3D%23=hello%26%3D%23&bar=world", Arrays.asList("world"));
@@ -1942,6 +1946,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     internalExtractURIQueryParams(paramName, url, expected, -1);
   }
   
+  @SuppressWarnings("unchecked")
   private void internalExtractURIQueryParams(String paramName, String url, List expected, int maxParams) throws Exception {
     String fileName = "test-morphlines/extractURIQueryParameters";
     String overridesStr = "queryParam : " + ConfigUtil.quoteString(paramName);

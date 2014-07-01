@@ -198,6 +198,7 @@ class JavaScriptEngine extends AbstractScriptEngine
 	}
 
 	// find public static void main(String[]) method, if any
+  @SuppressWarnings("unchecked")
 	private static Method findMainMethod(Class clazz) {
 		try {
 			Method mainMethod = clazz.getMethod("main", new Class[] { String[].class });
@@ -212,6 +213,7 @@ class JavaScriptEngine extends AbstractScriptEngine
 	}
 
 	// find public static void setScriptContext(ScriptContext) method, if any
+  @SuppressWarnings("unchecked")
 	private static Method findSetScriptContextMethod(Class clazz) {
 		try {
 			Method setCtxMethod = clazz.getMethod("setScriptContext", 

@@ -63,7 +63,7 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
   private static final class ConvertTimestamp extends AbstractCommand {
 
     private final String fieldName;
-    private final List<SimpleDateFormat> inputFormats = new ArrayList();
+    private final List<SimpleDateFormat> inputFormats = new ArrayList<SimpleDateFormat>();
     private final SimpleDateFormat outputFormat;
     private final String inputFormatsDebugString; // cached
     
@@ -101,7 +101,7 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
       this.outputFormat = dateFormat;
       validateArguments();
 
-      List<String> inputFormatsStringList = new ArrayList();
+      List<String> inputFormatsStringList = new ArrayList<String>();
       for (SimpleDateFormat inputFormat : inputFormats) {
         // SimpleDateFormat.toString() doesn't print anything useful
         inputFormatsStringList.add(inputFormat.toPattern()); 
@@ -116,6 +116,7 @@ public final class ConvertTimestampBuilder implements CommandBuilder {
     }
         
     @Override
+    @SuppressWarnings("unchecked")
     protected boolean doProcess(Record record) {
       ParsePosition pos = new ParsePosition(0);
       ListIterator iter = record.get(fieldName).listIterator();

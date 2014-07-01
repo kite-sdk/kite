@@ -22,6 +22,7 @@ import java.util.List;
 import org.kitesdk.morphline.api.Record;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.typesafe.config.Config;
 
 /**
@@ -30,7 +31,7 @@ import com.typesafe.config.Config;
  */
 public final class FieldExpression {
   
-  private final List fields = new ArrayList();
+  private final List<Object> fields = Lists.newArrayList();
   
   private static final String START_TOKEN = "@{";
   private static final char END_TOKEN = '}';
@@ -76,12 +77,12 @@ public final class FieldExpression {
     }
 
     // slow path:
-    ArrayList results = new ArrayList(1);
+    ArrayList<Object> results = new ArrayList<Object>(1);
     evaluate2(0, record, new StringBuilder(), results);
     return results;
   }
 
-  private void evaluate2(int from, Record record, StringBuilder buf, ArrayList results) {
+  private void evaluate2(int from, Record record, StringBuilder buf, ArrayList<Object> results) {
     if (from >= fields.size()) {
       results.add(buf.toString());
       return;

@@ -51,7 +51,7 @@ final class GrokDictionaries {
    */
   
   private final Config config;
-  private final Map<String, String> dictionary = new HashMap();
+  private final Map<String, String> dictionary = new HashMap<String, String>();
   
   private final Logger LOG = LoggerFactory.getLogger(GrokDictionaries.class);
   
@@ -171,7 +171,9 @@ final class GrokDictionaries {
         }
       }
     }
-    LOG.debug("dictionary: {}", Joiner.on("\n").join(new TreeMap(dictionary).entrySet()));
+    LOG.debug("dictionary: {}", Joiner.on("\n").join(
+        new TreeMap<String,String>(dictionary).entrySet()));
+    
     for (Map.Entry<String, String> entry : dictionary.entrySet()) {
       Pattern.compile(entry.getValue()); // validate syntax
     }

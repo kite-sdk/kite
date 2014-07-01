@@ -111,6 +111,7 @@ public class ScriptEvaluator<T> {
     engine.getContext().setErrorWriter(new PrintWriter(System.err, true)); // reset
   }
   
+  @SuppressWarnings("unchecked")
   public T evaluate(Object... params) throws ScriptException {
     // TODO: consider restricting permissions/sandboxing; also see http://worldwizards.blogspot.com/2009/08/java-scripting-api-sandbox.html
     try {

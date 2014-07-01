@@ -60,6 +60,7 @@ public final class ToStringBuilder implements CommandBuilder {
     }
         
     @Override
+    @SuppressWarnings("unchecked")
     protected boolean doProcess(Record record) {
       ListIterator iter = record.get(fieldName).listIterator();
       while (iter.hasNext()) {

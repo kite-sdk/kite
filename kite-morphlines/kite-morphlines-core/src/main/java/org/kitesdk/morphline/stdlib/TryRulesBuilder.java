@@ -65,12 +65,13 @@ public final class TryRulesBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class TryRules extends AbstractCommand {
 
-    private final List<Command> childRules = new ArrayList();
+    private final List<Command> childRules = new ArrayList<Command>();
     private final boolean throwExceptionIfAllRulesFailed;
     private final boolean catchExceptions;
     private final boolean copyRecords;
     private final Meter numExceptionsCaught;
     
+    @SuppressWarnings("unchecked")
     public TryRules(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);
       this.throwExceptionIfAllRulesFailed = getConfigs().getBoolean(config, "throwExceptionIfAllRulesFailed", true);

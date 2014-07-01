@@ -28,6 +28,8 @@ import org.kitesdk.morphline.shaded.com.googlecode.jcsv.fastreader.CSVTokenizer;
 import org.kitesdk.morphline.shaded.com.googlecode.jcsv.fastreader.QuotedCSVTokenizer;
 import org.kitesdk.morphline.shaded.com.googlecode.jcsv.fastreader.SimpleCSVTokenizer;
 
+import com.google.common.collect.Lists;
+
 public class CSVTokenizerTest extends Assert {
   
   @Test
@@ -37,12 +39,12 @@ public class CSVTokenizerTest extends Assert {
     split(Arrays.asList("", "hello", "world", ""), "|hello|world|", '|', false, true);
     split(Arrays.asList(""), "", '|', false, true);
     split(Arrays.asList("", "", "x"), "||x", '|', false, true);
-    split(Arrays.asList(), "", '|', false, false);
+    split(Lists.newArrayList(), "", '|', false, false);
     split(Arrays.asList("x"), "x", '|', false, false);
     split(Arrays.asList(null,"x"), "|x", '|', false, false);
     
     Record record = new Record();
-    CSVTokenizer tokenizer = new SimpleCSVTokenizer(',', true, true, new ArrayList());
+    CSVTokenizer tokenizer = new SimpleCSVTokenizer(',', true, true, new ArrayList<String>());
     tokenizer.tokenizeLine(" x ", null, record);
     assertEquals(Arrays.asList("x"), record.get("column0"));
   }
@@ -51,10 +53,10 @@ public class CSVTokenizerTest extends Assert {
     Record record = new Record();
     CSVTokenizer tokenizer;
     if (isQuoted) {
-      tokenizer = new QuotedCSVTokenizer(separator, false, addEmptyStrings, new ArrayList(), 1000, false, '"');
+      tokenizer = new QuotedCSVTokenizer(separator, false, addEmptyStrings, new ArrayList<String>(), 1000, false, '"');
       tokenizer.tokenizeLine(line, new BufferedReader(new StringReader("")), record);      
     } else {
-      tokenizer = new SimpleCSVTokenizer(separator, false, addEmptyStrings, new ArrayList());
+      tokenizer = new SimpleCSVTokenizer(separator, false, addEmptyStrings, new ArrayList<String>());
       tokenizer.tokenizeLine(line, null, record);
     }
     for (int i = 0; i < expected.size(); i++) {
@@ -72,9 +74,9 @@ public class CSVTokenizerTest extends Assert {
         "5,orange,\"This is a\nmulti, line text\",no\"\"", ',', true, true);
     split(Arrays.asList("x", ""), "x|", '|', true, true);
     split(Arrays.asList("x", ""), "x|" + doubleQuote, '|', true, true);
-    split(Arrays.asList(), doubleQuote, '|', true, true);
-    split(Arrays.asList(), "", '|', true, true);
-    split(Arrays.asList(), "", '|', true, false);
+    split(Lists.newArrayList(), doubleQuote, '|', true, true);
+    split(Lists.newArrayList(), "", '|', true, true);
+    split(Lists.newArrayList(), "", '|', true, false);
     split(Arrays.asList("x"), "x", '|', true, false);
     split(Arrays.asList(null,"x"), "|x", '|', true, false);
     split(Arrays.asList(null,"x"), doubleQuote + "|" + quote + "x" + quote, '|', true, false);
@@ -82,7 +84,7 @@ public class CSVTokenizerTest extends Assert {
 
   @Test(expected=IllegalStateException.class)
   public void testIllegalQuotedState() throws Exception {
-    split(Arrays.asList(), "foo,maybe\"", ',', true, true);
+    split(Lists.newArrayList(), "foo,maybe\"", ',', true, true);
   }
 
   @Test(expected=IllegalArgumentException.class)
@@ -90,7 +92,7 @@ public class CSVTokenizerTest extends Assert {
     boolean ignoreTooLongRecords = false;
     int maxCharactersPerRecord = 10;
     CSVTokenizer tokenizer = new QuotedCSVTokenizer(
-        ',', false, false, new ArrayList(), maxCharactersPerRecord, ignoreTooLongRecords, '"');
+        ',', false, false, new ArrayList<String>(), maxCharactersPerRecord, ignoreTooLongRecords, '"');
     tokenizer.tokenizeLine(
         "\"", 
         new BufferedReader(new StringReader("line tooooooooo long\"")), 
@@ -102,7 +104,7 @@ public class CSVTokenizerTest extends Assert {
     boolean ignoreTooLongRecords = true;
     int maxCharactersPerRecord = 10;
     CSVTokenizer tokenizer = new QuotedCSVTokenizer(
-        ',', false, false, new ArrayList(), maxCharactersPerRecord, ignoreTooLongRecords, '"');
+        ',', false, false, new ArrayList<String>(), maxCharactersPerRecord, ignoreTooLongRecords, '"');
     assertFalse(tokenizer.tokenizeLine(
         "\"", 
         new BufferedReader(new StringReader("line tooooooooo long\"")), 

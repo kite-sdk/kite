@@ -34,6 +34,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 /**
  * Additional user defined parameters that will be passed to all morphline commands.
@@ -43,7 +44,7 @@ public class MorphlineContext {
   private ExceptionHandler exceptionHandler;
   private MetricRegistry metricRegistry;
   private HealthCheckRegistry healthCheckRegistry;
-  private Map<String, Class<CommandBuilder>> commandBuilders = Collections.EMPTY_MAP;
+  private Map<String, Class<CommandBuilder>> commandBuilders = Collections.emptyMap();
 
   private static final Logger LOG = LoggerFactory.getLogger(MorphlineContext.class);
 
@@ -72,7 +73,7 @@ public class MorphlineContext {
 
   public void importCommandBuilders(Collection<String> importSpecs) {
     if (commandBuilders == Collections.EMPTY_MAP) { // intentionally effective no more than once
-      commandBuilders = new HashMap();
+      commandBuilders = Maps.newHashMap();
       if (LOG.isDebugEnabled()) {
         LOG.debug("Importing commands from Java classpath: {}", System.getProperty("java.class.path"));
       } else {
@@ -107,6 +108,7 @@ public class MorphlineContext {
    * of guava without issues.
    */
   @VisibleForTesting
+  @SuppressWarnings("unchecked")
   <T> Collection<Class<T>> getTopLevelClasses(Collection<String> importSpecs, Class<T> iface) { 
     // count number of FQCNs in importSpecs
     int fqcnCount = 0;
@@ -116,7 +118,7 @@ public class MorphlineContext {
       }      
     }
     
-    HashMap<String,Class<T>> classes = new LinkedHashMap();
+    HashMap<String,Class<T>> classes = Maps.newLinkedHashMap();
     for (ClassLoader loader : getClassLoaders()) {
       if (importSpecs.size() == fqcnCount) { 
         // importSpecs consists solely of FQCNs!
@@ -179,7 +181,7 @@ public class MorphlineContext {
     return classes.values();
   }
   
-  private <T> void addClass(Class clazz, HashMap<String,Class<T>> classes, Class<T> iface) {
+  private <T> void addClass(Class<T> clazz, HashMap<String,Class<T>> classes, Class<T> iface) {
     if (!classes.containsKey(clazz.getName()) 
         && iface.isAssignableFrom(clazz) 
         && !clazz.isInterface()

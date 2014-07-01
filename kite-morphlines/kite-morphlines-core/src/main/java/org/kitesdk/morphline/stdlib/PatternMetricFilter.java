@@ -48,8 +48,8 @@ import com.typesafe.config.Config;
  */
 final class PatternMetricFilter implements MetricFilter {
   
-  private final List<ExpressionPair> includes = new ArrayList();
-  private final List<ExpressionPair> excludes = new ArrayList();
+  private final List<ExpressionPair> includes = new ArrayList<ExpressionPair>();
+  private final List<ExpressionPair> excludes = new ArrayList<ExpressionPair>();
 
   public static MetricFilter parse(Configs configs, Config config) {
     Preconditions.checkNotNull(configs);

@@ -28,6 +28,7 @@ import org.kitesdk.morphline.api.MorphlineCompilationException;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
 
@@ -36,7 +37,7 @@ import com.typesafe.config.ConfigValue;
  */
 public final class Configs {
   
-  private final Set<String> recognizedArguments = new LinkedHashSet();
+  private final Set<String> recognizedArguments = new LinkedHashSet<String>();
 
   private Set<String> getRecognizedArguments() {
     return recognizedArguments;
@@ -252,7 +253,7 @@ public final class Configs {
   }  
 
   public Set<Map.Entry<String, Object>> getEntrySet(Config config) {
-    Map<String, Object> map = new HashMap();
+    Map<String, Object> map = Maps.newHashMap();
     for (Map.Entry<String, ConfigValue> entry : config.entrySet()) {
       map.put(trimQuote(entry.getKey()), entry.getValue().unwrapped());
     }

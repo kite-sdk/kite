@@ -37,7 +37,7 @@ public final class Collector implements Command {
   }
   
   public void reset() {
-    records = new ArrayList();
+    records = new ArrayList<Record>();
     numStartEvents = 0;
   }
 

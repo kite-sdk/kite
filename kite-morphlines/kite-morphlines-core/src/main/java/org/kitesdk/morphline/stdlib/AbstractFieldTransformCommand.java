@@ -45,6 +45,7 @@ public abstract class AbstractFieldTransformCommand extends AbstractCommand {
   }
       
   @Override
+  @SuppressWarnings("unchecked")
   protected final boolean doProcess(Record record) {
     ListIterator iter = record.get(fieldName).listIterator();
     while (iter.hasNext()) {

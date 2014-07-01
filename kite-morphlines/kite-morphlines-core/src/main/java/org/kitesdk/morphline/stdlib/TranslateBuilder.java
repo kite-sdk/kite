@@ -53,7 +53,7 @@ public final class TranslateBuilder implements CommandBuilder {
   private static final class Translate extends AbstractCommand {
 
     private final String fieldName;
-    private final Map<String, Object> dictionary = new HashMap();
+    private final Map<String, Object> dictionary = new HashMap<String, Object>();
     private final Object fallback;
     
     public Translate(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
@@ -68,6 +68,7 @@ public final class TranslateBuilder implements CommandBuilder {
     }
         
     @Override
+    @SuppressWarnings("unchecked")
     protected boolean doProcess(Record record) {
       ListIterator iter = record.get(fieldName).listIterator();
       while (iter.hasNext()) {

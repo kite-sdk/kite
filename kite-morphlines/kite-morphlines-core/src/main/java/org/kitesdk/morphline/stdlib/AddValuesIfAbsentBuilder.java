@@ -55,6 +55,7 @@ public final class AddValuesIfAbsentBuilder implements CommandBuilder {
     }
     
     @Override
+    @SuppressWarnings("unchecked")
     protected void putAll(Record record, String key, Collection values) {
       List existingValues = record.get(key);
       if (values.size() <= 3) { // fast path for small N

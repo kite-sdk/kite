@@ -89,6 +89,7 @@ public class AbstractMorphlineTest extends Assert {
     Notifications.notifyStartSession(morphline);
   }
 
+  @SuppressWarnings("unchecked")
   protected static <T> T[] concat(T[]... arrays) {    
     if (arrays.length == 0) throw new IllegalArgumentException();
     Class clazz = null;

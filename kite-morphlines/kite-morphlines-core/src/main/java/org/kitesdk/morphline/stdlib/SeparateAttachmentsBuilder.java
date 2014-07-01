@@ -65,14 +65,14 @@ public final class SeparateAttachmentsBuilder implements CommandBuilder {
         Record outputRecord = record.copy();        
         outputRecord.getFields().replaceValues(Fields.ATTACHMENT_BODY, Collections.singletonList(attachments.get(i)));
         
-        List replacement;
-        replacement = i < mimeTypes.size() ? Collections.singletonList(mimeTypes.get(i)) : Collections.EMPTY_LIST;
+        List<Object> replacement;
+        replacement = i < mimeTypes.size() ? Collections.singletonList(mimeTypes.get(i)) : Collections.emptyList();
         outputRecord.getFields().replaceValues(Fields.ATTACHMENT_MIME_TYPE, replacement);
         
-        replacement = i < charsets.size() ? Collections.singletonList(charsets.get(i)) : Collections.EMPTY_LIST;
+        replacement = i < charsets.size() ? Collections.singletonList(charsets.get(i)) : Collections.emptyList();
         outputRecord.getFields().replaceValues(Fields.ATTACHMENT_CHARSET, replacement);
         
-        replacement = i < names.size() ? Collections.singletonList(names.get(i)) : Collections.EMPTY_LIST;
+        replacement = i < names.size() ? Collections.singletonList(names.get(i)) : Collections.emptyList();
         outputRecord.getFields().replaceValues(Fields.ATTACHMENT_NAME, replacement);
         
         // pass record to next command in chain:

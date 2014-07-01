@@ -28,6 +28,7 @@ import com.google.common.base.Joiner;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+@SuppressWarnings("unchecked")
 public class FieldExpressionTest extends Assert {
   
   @Test

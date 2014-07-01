@@ -23,6 +23,7 @@ import org.kitesdk.morphline.scriptengine.java.ScriptEvaluator;
 import com.google.common.collect.ArrayListMultimap;
 
 
+@SuppressWarnings("unchecked")
 public class ScriptEvaluatorTest extends Assert {
 
   private String javaImports;

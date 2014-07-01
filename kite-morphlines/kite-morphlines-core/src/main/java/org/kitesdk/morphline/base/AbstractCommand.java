@@ -35,6 +35,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.typesafe.config.Config;
 
 /**
@@ -236,7 +237,7 @@ public abstract class AbstractCommand implements Command {
     Preconditions.checkNotNull(configKey);
     Preconditions.checkNotNull(finalChild);
     List<? extends Config> commandConfigs = new Configs().getConfigList(rootConfig, configKey, Collections.<Config>emptyList());
-    List<Command> commands = new ArrayList();
+    List<Command> commands = Lists.newArrayList();
     Command currentParent = this;
     Connector lastConnector = null;        
     for (int i = 0; i < commandConfigs.size(); i++) {
