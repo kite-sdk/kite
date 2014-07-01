@@ -98,7 +98,9 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
       }
       
       if (getClass() == ReadAvroContainer.class) {
-        resolverCache = new BoundedLRUHashMap(getConfigs().getInt(config, "schemaCacheCapacity", 100));
+        resolverCache = new BoundedLRUHashMap<ByteArrayKey, ResolvingDecoder>(
+            getConfigs().getInt(config, "schemaCacheCapacity", 100));
+        
         validateArguments();
       } else {
         resolverCache = null;
@@ -106,6 +108,7 @@ public final class ReadAvroContainerBuilder implements CommandBuilder {
     }
     
     @Override
+    @SuppressWarnings("unchecked")
     protected boolean doProcess(Record inputRecord, InputStream in) throws IOException {
       if (datumReader == null) { // reuse for performance
         datumReader = new FastGenericDatumReader(null, readerSchema);

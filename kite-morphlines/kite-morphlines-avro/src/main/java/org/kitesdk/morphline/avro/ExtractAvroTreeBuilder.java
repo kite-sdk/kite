@@ -93,6 +93,7 @@ public final class ExtractAvroTreeBuilder implements CommandBuilder {
     /**
      * Writes the given Avro datum into the given record, using the given Avro schema
      */
+    @SuppressWarnings("unchecked")
     private void extractTree(Object datum, Schema schema, Record outputRecord, String prefix) {
       // RECORD, ENUM, ARRAY, MAP, UNION, FIXED, STRING, BYTES, INT, LONG, FLOAT,
       // DOUBLE, BOOLEAN, NULL

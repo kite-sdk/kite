@@ -50,6 +50,7 @@ final class FastGenericDatumReader<D> extends GenericDatumReader<D> {
   
   // method getResolver(getSchema(), getExpected()) is final so instead we override read()
   @Override
+  @SuppressWarnings("unchecked")
   public D read(D reuse, Decoder in) throws IOException {    
     resolver.configure(in);
     D result = (D) read(reuse, getExpected(), resolver);

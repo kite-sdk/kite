@@ -57,6 +57,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 
+@SuppressWarnings("unchecked")
 public class AvroMorphlineTest extends AbstractMorphlineTest {
 
   @Test

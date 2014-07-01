@@ -71,7 +71,7 @@ public final class ToAvroBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class ToAvro extends AbstractCommand {
     
-    private final Map<String, String> mappings = new HashMap();
+    private final Map<String, String> mappings = new HashMap<String,String>();
     private final Schema fixedSchema;
     private final String schemaField;
     
@@ -197,6 +197,7 @@ public final class ToAvroBuilder implements CommandBuilder {
       return result;
     }
     
+    @SuppressWarnings("unchecked")
     private Object toAvro(Object item, Schema schema) {
       // RECORD, ENUM, ARRAY, MAP, UNION, FIXED, STRING, BYTES, INT, LONG, FLOAT,
       // DOUBLE, BOOLEAN, NULL

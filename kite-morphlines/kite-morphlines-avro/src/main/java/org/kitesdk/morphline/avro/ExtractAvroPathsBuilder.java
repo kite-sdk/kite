@@ -143,6 +143,7 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
       return getChild().process(outputRecord);
     }
 
+    @SuppressWarnings("unchecked")
     private void extractPath(Object datum, Schema schema, String fieldName, List<String> steps, Record record, int level) {
       if (level >= steps.size()) {
         return;
@@ -282,6 +283,7 @@ public final class ExtractAvroPathsBuilder implements CommandBuilder {
       }
     }
 
+    @SuppressWarnings("unchecked")
     private void flatten(Object datum, Schema schema, List list) { 
       if (datum == null) {
         return;

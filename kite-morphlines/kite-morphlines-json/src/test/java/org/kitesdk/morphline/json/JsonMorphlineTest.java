@@ -183,6 +183,7 @@ public class JsonMorphlineTest extends AbstractMorphlineTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testExtractJsonPathsComplexFlattened() throws Exception {
     morphline = createMorphline("test-morphlines/extractJsonPathsFlattened");    
     File file = new File(RESOURCES_DIR + "/test-documents/complex.json");

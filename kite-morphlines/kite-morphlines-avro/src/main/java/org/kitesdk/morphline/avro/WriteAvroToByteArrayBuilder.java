@@ -42,7 +42,9 @@ import org.kitesdk.morphline.base.Validator;
 import org.kitesdk.morphline.stdio.AbstractParser;
 
 import com.google.common.base.Preconditions;
+
 import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -73,7 +75,7 @@ public final class WriteAvroToByteArrayBuilder implements CommandBuilder {
     
     private final Format format;
     private final CodecFactory codecFactory;
-    private final Map<String,String> metadata = new HashMap();
+    private final Map<String,String> metadata = new HashMap<String,String>();
     
     public WriteAvroToByteArray(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);      
@@ -113,6 +115,7 @@ public final class WriteAvroToByteArrayBuilder implements CommandBuilder {
       return super.doProcess(outputRecord);
     }
 
+    @SuppressWarnings("unchecked")
     private void writeContainer(Record src, OutputStream dst) {
       DataFileWriter dataFileWriter = null;
       try {
@@ -147,6 +150,7 @@ public final class WriteAvroToByteArrayBuilder implements CommandBuilder {
       }
     }
       
+    @SuppressWarnings("unchecked")
     private void writeContainerless(Record src, OutputStream dst) {
       try {
         GenericDatumWriter datumWriter = new GenericDatumWriter();

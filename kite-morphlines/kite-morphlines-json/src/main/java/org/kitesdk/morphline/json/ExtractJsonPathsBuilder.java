@@ -197,6 +197,7 @@ public final class ExtractJsonPathsBuilder implements CommandBuilder {
       }
     }
 
+    @SuppressWarnings("unchecked")
     private void flatten(JsonNode datum, List list) { 
       if (datum == null) {
         return;
