@@ -36,17 +36,20 @@ import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
 class DatasetTarget<E> implements MapReduceTarget {
 
   FormatBundle formatBundle;
+  private URI datasetUri;
 
   public DatasetTarget(View<E> view) {
     Configuration temp = emptyConf();
     DatasetKeyOutputFormat.configure(temp).writeTo(view);
     this.formatBundle = outputBundle(temp);
+    this.datasetUri = view.getDataset().getUri();
   }
 
   public DatasetTarget(URI uri) {
     Configuration temp = emptyConf();
     DatasetKeyOutputFormat.configure(temp).writeTo(uri);
     this.formatBundle = outputBundle(temp);
+    this.datasetUri = uri;
   }
 
   @Override
@@ -116,4 +119,19 @@ class DatasetTarget<E> implements MapReduceTarget {
     }
     return bundle;
   }
+  
+  /**
+   * Returns a brief description of this {@code DatasetTarget}. The exact details of the
+   * representation are unspecified and subject to change, but the following may be regarded
+   * as typical:
+   * <p>
+   * "Kite(dataset:hdfs://host/path/to/repo)"
+   * 
+   * @return  a string representation of the object.
+   */
+  @Override
+  public String toString() {
+    return new StringBuilder().append("Kite(").append(datasetUri).append(")").toString();
+  }
+  
 }
