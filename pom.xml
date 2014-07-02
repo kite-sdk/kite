@@ -267,6 +267,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <version>${vers.maven-release-plugin}</version>
         <configuration>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
           <goals>deploy</goals>
           <tagNameFormat>release-@{project.version}</tagNameFormat>
         </configuration>
