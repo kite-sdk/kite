@@ -22,6 +22,12 @@
   <version>0.14.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <parent>
+    <groupId>org.kitesdk</groupId>
+    <artifactId>kite-parent</artifactId>
+    <version>0.14.2-SNAPSHOT</version>
+  </parent>
+
   <name>Kite Application POM Modules</name>
   <description>
     These POMs can be used as parent POM to manage Kite and Hadoop dependencies.
