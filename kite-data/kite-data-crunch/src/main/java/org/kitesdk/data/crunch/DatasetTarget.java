@@ -131,10 +131,7 @@ class DatasetTarget<E> implements MapReduceTarget {
    */
   @Override
   public String toString() {
-    return new StringBuilder()
-        .append("Kite(")
-        .append(datasetUri == null ? "null" : datasetUri.toString())
-        .append(")").toString();
+    return new StringBuilder().append("Kite(").append(datasetUri).append(")").toString();
   }
   
 }
