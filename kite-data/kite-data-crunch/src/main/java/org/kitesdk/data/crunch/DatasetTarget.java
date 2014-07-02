@@ -36,20 +36,20 @@ import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
 class DatasetTarget<E> implements MapReduceTarget {
 
   FormatBundle formatBundle;
-  private String toStringValue;
+  private URI datasetUri;
 
   public DatasetTarget(View<E> view) {
     Configuration temp = emptyConf();
     DatasetKeyOutputFormat.configure(temp).writeTo(view);
     this.formatBundle = outputBundle(temp);
-    this.toStringValue = "Kite(" + view.getDataset().getUri() + ")";
+    this.datasetUri = view.getDataset().getUri();
   }
 
   public DatasetTarget(URI uri) {
     Configuration temp = emptyConf();
     DatasetKeyOutputFormat.configure(temp).writeTo(uri);
     this.formatBundle = outputBundle(temp);
-    this.toStringValue = "Kite(" + uri + ")";
+    this.datasetUri = uri;
   }
 
   @Override
@@ -131,6 +131,10 @@ class DatasetTarget<E> implements MapReduceTarget {
    */
   @Override
   public String toString() {
-    return toStringValue;
+    return new StringBuilder()
+        .append("Kite(")
+        .append(datasetUri == null ? "null" : datasetUri.toString())
+        .append(")").toString();
   }
+  
 }
