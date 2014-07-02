@@ -26,6 +26,45 @@
   <description>
     This POM can be used as a parent POM to manage Kite and Hadoop dependencies for CDH4.
   </description>
+  <url>http://kitesdk.org/</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>tomwhite</id>
+      <name>Tom White</name>
+      <organization>Cloudera</organization>
+    </developer>
+    <developer>
+      <id>esammer</id>
+      <name>Eric Sammer</name>
+      <organization>Cloudera</organization>
+    </developer>
+    <developer>
+      <id>whoschek</id>
+      <name>Wolfgang Hoschek</name>
+      <organization>Cloudera</organization>
+    </developer>
+    <developer>
+      <id>awarrington</id>
+      <name>Adam Warrington</name>
+      <organization>Cloudera</organization>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/kite-sdk/kite.git</connection>
+    <url>https://github.com/kite-sdk/kite</url>
+    <developerConnection>scm:git:git@github.com:kite-sdk/kite.git
+    </developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 
   <properties>
     <!-- dependency version properties -->
@@ -279,5 +318,50 @@
     </dependency>
 
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.2</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>false</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>ossrh</id>
+          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+          <id>ossrh</id>
+          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
 
 </project>
