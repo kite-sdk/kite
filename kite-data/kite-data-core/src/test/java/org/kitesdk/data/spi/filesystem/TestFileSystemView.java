@@ -16,27 +16,33 @@
 
 package org.kitesdk.data.spi.filesystem;
 
-import java.util.Iterator;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.junit.Ignore;
-import org.kitesdk.data.DatasetRepository;
-import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.TestHelpers;
-import org.kitesdk.data.View;
-import org.kitesdk.data.spi.TestRefinableViews;
-import org.kitesdk.data.event.StandardEvent;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Iterator;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.NotReadySignalableException;
+import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.RefinableView;
+import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.View;
+import org.kitesdk.data.event.StandardEvent;
+import org.kitesdk.data.spi.ReadySignalable;
+import org.kitesdk.data.spi.TestRefinableViews;
 
 public class TestFileSystemView extends TestRefinableViews {
 
@@ -270,7 +276,131 @@ public class TestFileSystemView extends TestRefinableViews {
     assertDirectoriesDoNotExist(fs, y2013, sep12, sep, oct12, oct, nov11, nov);
     assertDirectoriesExist(fs, root);
   }
+  
+  @Test
+  public void testIsReadySignalReadyWholeDataset() {
+    assertFalse(unbounded.isReady());
+    
+    ((ReadySignalable) unbounded).signalReady();
+    
+    final DatasetWriter<StandardEvent> writer = unbounded.newWriter();
+    try {
+      writer.open();
+      writer.write(sepEvent);
+      writer.write(octEvent);
+      writer.write(novEvent);
+    } finally {
+      writer.close();
+    }
+    
+    assertTrue(unbounded.isReady());
+  }
+  
+  @Test
+  public void testIsReadySignalReadyAcrossPartitions() {
+    TestHelpers.assertThrows("signalReady should fail if not aligned with partition boundaries",
+        NotReadySignalableException.class, new Runnable() {
 
+          @Override
+          public void run() {
+            RefinableView<StandardEvent> boundedView = unbounded.with(
+                "event_name", "test-event");
+            boundedView.isReady();
+          }
+        });
+  }
+  
+  @Test
+  public void testIsReadySignalReadyPartitionRange() {
+    TestHelpers.assertThrows("signalReady should fail if it represents a partition range",
+        NotReadySignalableException.class, new Runnable() {
+
+          @Override
+          public void run() {
+            RefinableView<StandardEvent> boundedView = unbounded.from(
+                "timestamp", sepEvent.getTimestamp());
+            boundedView.isReady();
+          }
+        });
+  }
+  
+  @Test
+  public void testIsReadySignalReadySinglePartition() {
+    Dataset<StandardEvent> ds = repo.create(
+        "test-signal-ready",
+        new DatasetDescriptor.Builder()
+            .schema(StandardEvent.class)
+            .partitionStrategy(
+                new PartitionStrategy.Builder().identity("event_name").build()).build());
+    RefinableView<StandardEvent> boundedView = ds.with("event_name", "test-event");
+    
+    DatasetWriter<StandardEvent> writer = boundedView.newWriter();
+    try {
+      writer.open();
+      writer.write(StandardEvent.newBuilder(sepEvent)
+          .setEventName("test-event").build());
+    } finally {
+      writer.close();
+    }
+    
+    Assert.assertFalse(boundedView.isReady());
+    
+    ((ReadySignalable) boundedView).signalReady();
+    
+    Assert.assertTrue(boundedView.isReady());
+  }
+  
+  @Test
+  public void testIsReadySignalReadyEmptyPartition() {
+    PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().identity("event_name").build();
+    Dataset<StandardEvent> ds = repo.create(
+        "test-signal-ready",
+        new DatasetDescriptor.Builder()
+            .schema(StandardEvent.class)
+            .partitionStrategy(
+                partitionStrategy).build());
+    RefinableView<StandardEvent> boundedView = ds.with("event_name", "test-event");
+    
+    Assert.assertFalse(boundedView.isReady());
+    
+    ((ReadySignalable) boundedView).signalReady();
+
+    Assert.assertTrue(boundedView.isReady());
+  }
+  
+  @Test
+  public void testIsReadySignalReadyMultiplePartitions() {
+    Dataset<StandardEvent> ds = repo.create(
+        "test-signal-ready",
+        new DatasetDescriptor.Builder()
+            .schema(StandardEvent.class)
+            .partitionStrategy(
+                new PartitionStrategy.Builder().identity("event_name").build()).build());
+    
+    DatasetWriter<StandardEvent> writer = ds.newWriter();
+    try {
+      writer.open();
+      writer.write(StandardEvent.newBuilder(sepEvent)
+          .setEventName("test-event").build());
+      writer.write(StandardEvent.newBuilder(sepEvent)
+          .setEventName("test-event-2").build());
+    } finally {
+      writer.close();
+    }
+    
+    RefinableView<StandardEvent> boundedView = ds.with("event_name", "test-event", "test-event-2");
+    Assert.assertFalse(boundedView.isReady());
+    
+    ((ReadySignalable) boundedView).signalReady();
+    
+    Assert.assertTrue(boundedView.isReady());
+    Assert.assertTrue(ds.with("event_name", "test-event").isReady());
+    Assert.assertTrue(ds.with("event_name", "test-event-2").isReady());
+    Assert.assertTrue(ds.with("event_name", "test-event", "test-event-2").isReady());
+    Assert.assertFalse(ds.with("event_name", "test-event", "test-event-2", "test-event-3").isReady());
+    Assert.assertFalse(ds.with("event_name", "test-event-3").isReady());
+  }
+  
   @SuppressWarnings("deprecation")
   public static void assertDirectoriesExist(FileSystem fs, Path... dirs)
       throws IOException {

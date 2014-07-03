@@ -17,17 +17,22 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
+
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
+
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Test;
+import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.partition.HashFieldPartitioner;
@@ -597,7 +602,7 @@ public class TestConstraints {
     final long oct_24_2013 = new DateTime(2013, 10, 24, 0, 0, DateTimeZone.UTC).getMillis();
     final long oct_25_2013 = new DateTime(2013, 10, 25, 0, 0, DateTimeZone.UTC).getMillis();
     final long oct_24_2013_end = new DateTime(2013, 10, 24, 23, 59, 59, 999, DateTimeZone.UTC).getMillis();
-    //final long oct_24_2013_end = oct_25_2013 - 1;
+    // final long oct_24_2013_end = oct_25_2013 - 1;
     GenericEvent e = new GenericEvent();
 
     e.timestamp = oct_25_2013;
@@ -612,5 +617,103 @@ public class TestConstraints {
     e.timestamp = oct_25_2013;
     key.reuseFor(e);
     Assert.assertFalse("Should not match toBefore", c.toKeyPredicate().apply(key));
+  }
+
+  @Test
+  public void testIsRange() {
+    long timestamp = new DateTime().getMillis();
+    Assert.assertFalse(emptyConstraints.with("timestamp", timestamp).isRange());
+    Assert.assertTrue(emptyConstraints.from("timestamp", timestamp).isRange());
+    Assert.assertTrue(emptyConstraints.fromAfter("timestamp", timestamp).isRange());
+    Assert.assertTrue(emptyConstraints.to("timestamp", timestamp).isRange());
+    Assert.assertTrue(emptyConstraints.toBefore("timestamp", timestamp).isRange());
+  }
+  
+  @Test
+  public void testToPartitionKeys() {
+    final Constraints emptyConstraints = new Constraints(SchemaBuilder
+        .record("Event").fields().requiredString("a").requiredString("b")
+        .requiredString("c").requiredString("d").endRecord());
+    final PartitionStrategy strategy = new PartitionStrategy.Builder()
+        .identity("a").identity("b").identity("c").build();
+    
+    Set<PartitionKey> partitionKeys = emptyConstraints.toPartitionKeys(strategy);
+    Assert.assertEquals(ImmutableSet.of(strategy.partitionKey()), partitionKeys);
+    
+    partitionKeys = emptyConstraints.with("a", "1").toPartitionKeys(strategy);
+    Assert.assertEquals(ImmutableSet.of(strategy.partitionKey("1")), partitionKeys);
+    
+    partitionKeys = emptyConstraints.with("a", "1", "11").toPartitionKeys(strategy);
+    Assert.assertEquals(
+        ImmutableSet.of(
+          strategy.partitionKey("1"),
+          strategy.partitionKey("11")),
+        partitionKeys);
+    
+    partitionKeys = emptyConstraints
+        .with("a", "1", "11")
+        .with("b", "2", "22")
+        .toPartitionKeys(strategy);
+    
+    Assert.assertEquals(
+        ImmutableSet.of(
+            strategy.partitionKey("1", "2"),
+            strategy.partitionKey("1", "22"),
+            strategy.partitionKey("11", "2"),
+            strategy.partitionKey("11", "22")),
+        partitionKeys);
+    
+    partitionKeys = emptyConstraints.with("a", "1").with("b", "2").with("c", "3").toPartitionKeys(strategy);
+    Assert.assertEquals(ImmutableSet.of(strategy.partitionKey("1", "2", "3")), partitionKeys);
+    
+    partitionKeys = emptyConstraints
+        .with("a", "1", "11")
+        .with("b", "2", "22")
+        .with("c", "3", "33")
+        .toPartitionKeys(strategy);
+    
+    Assert.assertEquals(
+        ImmutableSet.of(
+            strategy.partitionKey("1", "2", "3"),
+            strategy.partitionKey("1", "2", "33"),
+            strategy.partitionKey("1", "22", "3"),
+            strategy.partitionKey("1", "22", "33"),
+            strategy.partitionKey("11", "2", "3"),
+            strategy.partitionKey("11", "2", "33"),
+            strategy.partitionKey("11", "22", "3"),
+            strategy.partitionKey("11", "22", "33")),
+        partitionKeys);
+    
+    TestHelpers.assertThrows(
+        "Should fail due to a gap between constrained field partitioners",
+        IllegalArgumentException.class, new Runnable() {
+      @Override
+      public void run() {
+        emptyConstraints.with("a", "1").with("c", "3").toPartitionKeys(strategy);
+      }});
+    
+    TestHelpers.assertThrows(
+        "Should fail due to a gap between constrained field partitioners",
+        IllegalArgumentException.class, new Runnable() {
+      @Override
+      public void run() {
+        emptyConstraints.with("b", "2").toPartitionKeys(strategy);
+      }});
+    
+    TestHelpers.assertThrows(
+        "Should fail due to lack of alignment with partition boundaries",
+        IllegalArgumentException.class, new Runnable() {
+      @Override
+      public void run() {
+        emptyConstraints.with("a", "1").with("d", "X").toPartitionKeys(strategy);
+      }});
+    
+    TestHelpers.assertThrows(
+        "Should fail due to constraints being a range",
+        IllegalArgumentException.class, new Runnable() {
+      @Override
+      public void run() {
+        emptyConstraints.from("a", "1").toPartitionKeys(strategy);
+      }});
   }
 }
