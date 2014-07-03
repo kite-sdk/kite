@@ -2699,7 +2699,7 @@ The protobuf input object is expected to be contained in the field \_attachment\
 
 Each path expression consists of a record output field name (on the left side of the colon ':') as well as zero or more path steps (on the right hand side), each path step separated by a '/' slash, akin to a simple form of XPath. Repeated values(Lists) are traversed with the '\[\]' notation.
 
-The result of a path expression is a list of objects, each of which is added to the given record output field.
+The result of a path expression is a list of objects, each of which is added to the given record output field. To check if the property is set and serialized in protobuf message is used the *has<PropertyName>()* method and if the property isn't set then there is no result of a path expression. That means the output field is not passed to next command.
 
 The command provides the following configuration options:
 
