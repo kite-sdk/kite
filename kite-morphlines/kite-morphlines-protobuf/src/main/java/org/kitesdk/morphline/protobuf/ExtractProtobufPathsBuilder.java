@@ -85,6 +85,7 @@ public final class ExtractProtobufPathsBuilder implements CommandBuilder {
 
     private static final String LIST = "List";
     private static final String GET = "get";
+    private static final String HAS = "has";
 
     private static final String ARRAY_TOKEN = "[]";
     private static final Set<Class<?>> WRAPPERS;
@@ -109,6 +110,7 @@ public final class ExtractProtobufPathsBuilder implements CommandBuilder {
     private final Map<Class<?>, Method> objectExtractMethods = new HashMap<Class<?>, Method>();
     private final Map<Class<?>, Method> enumExtractMethods = new HashMap<Class<?>, Method>();
     private final Map<Class<?>, Map<String, Method>> propertyGetters = new HashMap<Class<?>, Map<String, Method>>();
+    private final Map<Class<?>, Map<String, Method>> propertyCheckers = new HashMap<Class<?>, Map<String, Method>>();
 
     public ExtractProtobufPaths(CommandBuilder builder, Config config, Command parent, Command child,
         MorphlineContext context) {
@@ -194,7 +196,7 @@ public final class ExtractProtobufPathsBuilder implements CommandBuilder {
             extractPath(iter.next(), fieldName, steps, record, level + 1);
           }
         }
-      } else {
+      } else if (hasProperty(datum, step)) {
         Object value = readProperty(datum, step);
         if (value != null) {
           if (isLeaf) {
@@ -235,6 +237,61 @@ public final class ExtractProtobufPathsBuilder implements CommandBuilder {
       return extractMethod.invoke(datum);
     }
 
+    private void findGetAndCheckMethods(String propertyName, Class<?> clazz) {
+      Map<String, Method> getters = propertyGetters.get(clazz);
+      Map<String, Method> checkers = propertyCheckers.get(clazz);
+      if (getters == null) {
+        getters = new HashMap<String, Method>();
+        checkers = new HashMap<String, Method>();
+        propertyGetters.put(clazz, getters);
+        propertyCheckers.put(clazz, checkers);
+      }
+      if (!getters.containsKey(propertyName)) {
+        String uppercaseProperty = new StringBuilder(propertyName.substring(0, 1).toUpperCase(Locale.ROOT)).append(
+            propertyName.substring(1)).toString();
+
+        String checkerName = new StringBuilder(HAS).append(uppercaseProperty).toString();
+        try {
+          checkers.put(propertyName, clazz.getMethod(checkerName));
+        } catch (Exception e) {
+          checkers.put(propertyName, null);
+        }
+
+        StringBuilder getterName = new StringBuilder(GET).append(uppercaseProperty);
+        try {
+          getters.put(propertyName, clazz.getMethod(getterName.toString()));
+        } catch (NoSuchMethodException e) {
+          getterName.append(LIST);
+          try {
+            getters.put(propertyName, clazz.getMethod(getterName.toString()));
+          } catch (Exception e1) {
+            throw new MorphlineRuntimeException("Property '" + propertyName + "' does not exist in class '"
+                + clazz.getName() + "'.");
+          }
+        }
+      }
+    }
+
+    private Method getCheckMethod(String propertyName, Class<?> clazz) {
+      if (!propertyCheckers.containsKey(clazz) || !propertyCheckers.get(clazz).containsKey(propertyName)) {
+        findGetAndCheckMethods(propertyName, clazz);
+      }
+      return propertyCheckers.get(clazz).get(propertyName);
+    }
+
+    private Method getReadMethod(String propertyName, Class<?> clazz) {
+      if (!propertyGetters.containsKey(clazz) || !propertyGetters.get(clazz).containsKey(propertyName)) {
+        findGetAndCheckMethods(propertyName, clazz);
+      }
+      return propertyGetters.get(clazz).get(propertyName);
+    }
+
+    private boolean hasProperty(Object datum, String propertyName) throws IllegalAccessException,
+        IllegalArgumentException, InvocationTargetException {
+      Method checker = getCheckMethod(propertyName, datum.getClass());
+      return checker == null || Boolean.TRUE.equals(checker.invoke(datum));
+    }
+
     private boolean isCommonType(Class<?> clazz) {
       return clazz.isPrimitive() || isWrapper(clazz);
     }
@@ -248,32 +305,9 @@ public final class ExtractProtobufPathsBuilder implements CommandBuilder {
       return ARRAY_TOKEN.equals(step) ? ARRAY_TOKEN : step;
     }
 
-    private Object readProperty(Object datum, String propertyName) throws NoSuchMethodException, SecurityException,
-        IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-      Class<?> clazz = datum.getClass();
-      Map<String, Method> getters = propertyGetters.get(clazz);
-      if (getters == null) {
-        getters = new HashMap<String, Method>();
-        propertyGetters.put(clazz, getters);
-      }
-      Method getter = getters.get(propertyName);
-      if (getter == null) {
-        StringBuilder getterName = new StringBuilder();
-        getterName.append(GET);
-        getterName.append(propertyName.substring(0, 1).toUpperCase(Locale.ROOT));
-        getterName.append(propertyName.substring(1));
-        try {
-          getter = clazz.getMethod(getterName.toString());
-        } catch (NoSuchMethodException e) {
-          getterName.append(LIST);
-          getter = clazz.getMethod(getterName.toString());
-          if (getter == null) {
-            throw new MorphlineRuntimeException("Property '" + propertyName + "' does not exist in class '"
-                + clazz.getName() + "'.");
-          }
-        }
-        getters.put(propertyName, getter);
-      }
+    private Object readProperty(Object datum, String propertyName) throws IllegalAccessException,
+        IllegalArgumentException, InvocationTargetException {
+      Method getter = getReadMethod(propertyName, datum.getClass());
       return getter.invoke(datum);
     }
 

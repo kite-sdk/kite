@@ -46,7 +46,7 @@ public class ProtobufMorphlineTest extends AbstractMorphlineTest {
   public static void prepareInputExtractProtoPaths() {
 
     Name.Builder nameBuilder = Complex.Name.newBuilder();
-    nameBuilder.setDoubleVal(10d).setFloatVal(5f).setIntVal(100).setLongVal(5000l);
+    nameBuilder.setFloatVal(5f).setIntVal(100).setLongVal(5000l);
     nameBuilder.addAllStringVal(Arrays.asList("All", "you", "need", "is", "money"));
     nameBuilder.setRepeatedLong(RepeatedLongs.newBuilder().addAllLongVal(LIST_OF_LONGS));
     Name name = nameBuilder.build();
@@ -91,7 +91,7 @@ public class ProtobufMorphlineTest extends AbstractMorphlineTest {
     assertArrayEquals(nameBytes, (byte[]) firstRecord.getFirstValue("name"));
     assertEquals(Arrays.asList(complex.getName().getIntVal()), firstRecord.get("intVal"));
     assertEquals(Arrays.asList(complex.getName().getLongVal()), firstRecord.get("longVal"));
-    assertEquals(Arrays.asList(complex.getName().getDoubleVal()), firstRecord.get("doubleVal"));
+    assertFalse(firstRecord.getFields().containsKey("doubleVal"));
     assertEquals(Arrays.asList(complex.getName().getFloatVal()), firstRecord.get("floatVal"));
     assertEquals(complex.getName().getStringValList(), firstRecord.get("stringVals"));
     assertEquals(LIST_OF_LONGS, firstRecord.get("longVals"));
