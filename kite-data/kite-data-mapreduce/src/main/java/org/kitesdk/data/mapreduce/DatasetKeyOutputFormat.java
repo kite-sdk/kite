@@ -189,7 +189,6 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
     public DatasetRecordWriter(View<E> view) {
       this.datasetWriter = view.newWriter();
-      this.datasetWriter.open();
     }
 
     @Override

@@ -25,6 +25,9 @@ import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.spi.AbstractDataset;
+import org.kitesdk.data.spi.AbstractDatasetReader;
+import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.InputFormatAccessor;
@@ -76,17 +79,22 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
 
   @Override
   public DatasetReader<E> newReader() {
-    return new MultiFileDatasetReader<E>(
+    AbstractDatasetReader<E> reader = new MultiFileDatasetReader<E>(
         fs, pathIterator(), dataset.getDescriptor(), constraints);
+    reader.initialize();
+    return reader;
   }
 
   @Override
   public DatasetWriter<E> newWriter() {
+    AbstractDatasetWriter<E> writer;
     if (dataset.getDescriptor().isPartitioned()) {
-      return new PartitionedDatasetWriter<E>(this);
+      writer = new PartitionedDatasetWriter<E>(this);
     } else {
-      return new FileSystemWriter<E>(fs, root, dataset.getDescriptor());
+      writer = new FileSystemWriter<E>(fs, root, dataset.getDescriptor());
     }
+    writer.initialize();
+    return writer;
   }
 
   @Override

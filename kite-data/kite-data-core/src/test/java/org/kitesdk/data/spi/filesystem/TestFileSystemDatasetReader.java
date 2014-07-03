@@ -35,6 +35,7 @@ import org.junit.Test;
 
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.*;
 import org.apache.avro.generic.GenericData;
+import org.kitesdk.data.spi.AbstractDatasetReader;
 
 public class TestFileSystemDatasetReader extends TestDatasetReaders {
 
@@ -103,13 +104,13 @@ public class TestFileSystemDatasetReader extends TestDatasetReaders {
 
   @Test(expected = DatasetReaderException.class)
   public void testMissingFile() {
-    DatasetReader<String> reader = new FileSystemDatasetReader<String>(
+    AbstractDatasetReader<String> reader = new FileSystemDatasetReader<String>(
         fileSystem, new Path("/tmp/does-not-exist.avro"), STRING_SCHEMA);
 
     // the reader should not fail until open()
     Assert.assertNotNull(reader);
 
-    reader.open();
+    reader.initialize();
   }
 
   @Test(expected = DatasetReaderException.class)
@@ -121,13 +122,13 @@ public class TestFileSystemDatasetReader extends TestDatasetReaders {
         fileSystem.createNewFile(emptyFile));
 
     try {
-      DatasetReader<String> reader = new FileSystemDatasetReader<String>(
+      AbstractDatasetReader<String> reader = new FileSystemDatasetReader<String>(
           fileSystem, emptyFile, STRING_SCHEMA);
 
       // the reader should not fail until open()
       Assert.assertNotNull(reader);
 
-      reader.open();
+      reader.initialize();
     } finally {
       Assert.assertTrue("Failed to clean up empty file",
           fileSystem.delete(emptyFile, true));

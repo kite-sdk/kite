@@ -105,9 +105,7 @@ public class HBaseDatasetRepositoryTest {
     ds.put(createGenericEntity(1));
 
     DatasetWriter<GenericRecord> writer = ds.newWriter();
-    assertFalse("Writer should not be open before calling open", writer.isOpen());
-    writer.open();
-    assertTrue("Writer should be open after calling open", writer.isOpen());
+    assertTrue("Writer should be open initially", writer.isOpen());
     try {
       for (int i = 2; i < 10; ++i) {
         GenericRecord entity = createGenericEntity(i);
@@ -133,9 +131,7 @@ public class HBaseDatasetRepositoryTest {
     // ensure the new entities are what we expect with scan operations
     int cnt = 0;
     DatasetReader<GenericRecord> reader = ds.newReader();
-    assertFalse("Reader should not be open before calling open", reader.isOpen());
-    reader.open();
-    assertTrue("Reader should be open after calling open", reader.isOpen());
+    assertTrue("Reader should be open initially", reader.isOpen());
     try {
       for (GenericRecord entity : reader) {
         compareEntitiesWithUtf8(cnt, entity);
@@ -153,7 +149,6 @@ public class HBaseDatasetRepositoryTest {
         .from("part1", new Utf8("part1_3")).from("part2", new Utf8("part2_3"))
         .to("part1", new Utf8("part1_7")).to("part2", new Utf8("part2_7"))
         .newReader();
-    reader.open();
     try {
       for (GenericRecord entity : reader) {
         compareEntitiesWithUtf8(cnt, entity);
@@ -190,7 +185,6 @@ public class HBaseDatasetRepositoryTest {
     ds.put(createSpecificEntity(1));
 
     DatasetWriter<TestEntity> writer = ds.newWriter();
-    writer.open();
     try {
       for (int i = 2; i < 10; ++i) {
         TestEntity entity = createSpecificEntity(i);
@@ -212,7 +206,6 @@ public class HBaseDatasetRepositoryTest {
     // ensure the new entities are what we expect with scan operations
     int cnt = 0;
     DatasetReader<TestEntity> reader = ds.newReader();
-    reader.open();
     try {
       for (TestEntity entity : reader) {
         compareEntitiesWithString(cnt, entity);

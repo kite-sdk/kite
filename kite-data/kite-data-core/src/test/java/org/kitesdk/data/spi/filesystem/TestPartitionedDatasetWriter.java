@@ -65,8 +65,8 @@ public class TestPartitionedDatasetWriter {
   }
 
   @Test
-  public void testBasicOpenClose() throws IOException {
-    writer.open();
+  public void testBasicInitClose() throws IOException {
+    writer.initialize();
     writer.close();
   }
 
@@ -75,7 +75,7 @@ public class TestPartitionedDatasetWriter {
     Record record = new GenericRecordBuilder(USER_SCHEMA)
         .set("username", "test1").set("email", "a@example.com").build();
     try {
-      writer.open();
+      writer.initialize();
       writer.write(record);
       writer.flush();
       writer.close();
@@ -88,7 +88,7 @@ public class TestPartitionedDatasetWriter {
   public void testWriteToClosedWriterFails() throws IOException {
     Record record = new GenericRecordBuilder(USER_SCHEMA)
         .set("username", "test1").set("email", "a@example.com").build();
-    writer.open();
+    writer.initialize();
     writer.close();
     writer.write(record);
   }

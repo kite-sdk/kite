@@ -21,6 +21,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetReaderException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.ReaderWriterState;
@@ -78,7 +79,7 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
   @Override
   @SuppressWarnings("unchecked")
-  public void open() {
+  public void initialize() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "A reader may not be opened more than once - current state:%s", state);
 
@@ -308,9 +309,6 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
     @Override
     public void initialize(InputSplit split, TaskAttemptContext context)
         throws IOException, InterruptedException {
-      if (!isOpen()) {
-        open();
-      }
     }
 
     @Override

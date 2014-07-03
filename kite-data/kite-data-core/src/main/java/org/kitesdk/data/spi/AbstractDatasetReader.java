@@ -17,13 +17,24 @@ package org.kitesdk.data.spi;
 
 import org.kitesdk.data.DatasetReader;
 import java.util.Iterator;
+import org.kitesdk.data.DatasetWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A common DatasetReader base class to simplify implementations.
  *
  * @param <E> The type of entities returned by this DatasetReader.
  */
-public abstract class AbstractDatasetReader<E> implements DatasetReader<E> {
+public abstract class AbstractDatasetReader<E>
+    implements DatasetReader<E>, InitializeAccessor {
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetReader.class);
+
+  @Override
+  @Deprecated
+  public void open() {
+    LOG.warn("DatasetReader#open is no longer needed and will be removed");
+  }
 
   @Override
   public void remove() {

@@ -52,10 +52,10 @@ public class ShowRecordsCommand extends BaseDatasetCommand {
     // TODO: CDK-92: always use GenericRecord to have consistent record strings
 
     View<Object> dataset = load(datasets.get(0));
-    DatasetReader<Object> reader = dataset.newReader();
+    DatasetReader<Object> reader = null;
     boolean threw = true;
     try {
-      reader.open();
+      reader = dataset.newReader();
       int i = 0;
       for (Object record : reader) {
         if (i >= numRecords) {

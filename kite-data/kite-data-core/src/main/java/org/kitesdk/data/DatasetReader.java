@@ -32,10 +32,9 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * expected to instantiate implementations directly.
  * Instead, use the containing dataset's
  * {@link Dataset#newReader()} method to get an appropriate implementation.
- * Normally, you receive an instance of this interface from a dataset, call
- * {@link #open()} to prepare for IO operations, invoke {@link #hasNext()} and
- * {@link #next()} as necessary, and {@link #close()} when they are done or no
- * more data exists.
+ * Normally, you receive an instance of this interface from a dataset, invoke
+ * {@link #hasNext()} and {@link #next()} as necessary, and {@link #close()}
+ * when you are done or no more data exists.
  * </p>
  * <p>
  * Implementations can hold system resources until the {@link #close()} method
@@ -74,7 +73,9 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    *
    * @throws UnknownFormatException
    * @throws DatasetReaderException
+   * @deprecated will be removed in 0.16.0; no longer required
    */
+  @Deprecated
   void open();
 
   /**

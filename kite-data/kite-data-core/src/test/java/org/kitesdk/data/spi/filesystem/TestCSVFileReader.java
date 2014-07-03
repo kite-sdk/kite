@@ -156,7 +156,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     final CSVFileReader<GenericData.Record> reader =
         new CSVFileReader<GenericData.Record>(localfs, csvFile, desc);
 
-    reader.open();
+    reader.initialize();
     Assert.assertTrue(reader.hasNext());
     GenericData.Record rec = reader.next();
     Assert.assertEquals("str", rec.get(0));
@@ -191,7 +191,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     final CSVFileReader<GenericData.Record> reader =
         new CSVFileReader<GenericData.Record>(localfs, tsvFile, desc);
 
-    reader.open();
+    reader.initialize();
     Assert.assertTrue(reader.hasNext());
     GenericData.Record rec = reader.next();
     Assert.assertEquals("str", rec.get(0));
@@ -226,7 +226,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     final CSVFileReader<GenericData.Record> reader =
         new CSVFileReader<GenericData.Record>(localfs, tsvFile, desc);
 
-    reader.open();
+    reader.initialize();
     Assert.assertTrue(reader.hasNext());
     GenericData.Record rec = reader.next();
     Assert.assertEquals("str", rec.get(0));
@@ -259,7 +259,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     final CSVFileReader<GenericData.Record> reader =
         new CSVFileReader<GenericData.Record>(localfs, csvFile, desc);
 
-    reader.open();
+    reader.initialize();
     Assert.assertTrue(reader.hasNext());
     GenericData.Record rec = reader.next();
     Assert.assertEquals("str", rec.get(0));
@@ -294,7 +294,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     final CSVFileReader<TestBean> reader =
         new CSVFileReader<TestBean>(localfs, csvFile, desc);
 
-    reader.open();
+    reader.initialize();
     Assert.assertTrue(reader.hasNext());
     TestBean bean = reader.next();
     Assert.assertEquals("str", bean.myStr);

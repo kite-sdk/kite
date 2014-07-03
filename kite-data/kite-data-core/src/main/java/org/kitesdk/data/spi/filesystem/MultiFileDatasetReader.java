@@ -18,7 +18,6 @@ package org.kitesdk.data.spi.filesystem;
 import com.google.common.collect.Iterators;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.UnknownFormatException;
@@ -40,7 +39,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
 
   private final Iterator<Path> filesIter;
   private final PathIterator pathIter;
-  private DatasetReader<E> reader = null;
+  private AbstractDatasetReader<E> reader = null;
   private Iterator<E> readerIterator = null;
 
   private ReaderWriterState state;
@@ -64,7 +63,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   }
 
   @Override
-  public void open() {
+  public void initialize() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
       "A reader may not be opened more than once - current state:%s", state);
 
@@ -89,7 +88,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
       this.reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
           descriptor.getSchema());
     }
-    reader.open();
+    reader.initialize();
     this.readerIterator = Iterators.filter(reader,
         constraints.toEntityPredicate(
             pathIter != null ? pathIter.getStorageKey() : null));

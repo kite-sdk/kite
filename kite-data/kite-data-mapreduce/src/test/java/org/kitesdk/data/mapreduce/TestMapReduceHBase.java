@@ -126,7 +126,6 @@ public class TestMapReduceHBase {
     Dataset<GenericRecord> outputDataset = repo.create(datasetName, descriptor);
 
     DatasetWriter<GenericRecord> writer = inputDataset.newWriter();
-    writer.open();
     try {
       for (int i = 0; i < 10; ++i) {
         GenericRecord entity = HBaseDatasetRepositoryTest.createGenericEntity(i);
@@ -154,7 +153,6 @@ public class TestMapReduceHBase {
 
     int cnt = 0;
     DatasetReader<GenericRecord> reader = outputDataset.newReader();
-    reader.open();
     try {
       for (GenericRecord entity : reader) {
         HBaseDatasetRepositoryTest.compareEntitiesWithUtf8(cnt, entity);

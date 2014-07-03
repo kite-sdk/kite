@@ -92,7 +92,7 @@ public class UserProfileExample {
    */
   public void printUserProfies() {
     EntityScanner<UserProfileModel> scanner = userProfileDao.getScanner();
-    scanner.open();
+    scanner.initialize();
     try {
       for (UserProfileModel entity : scanner) {
         System.out.println(entity.toString());
@@ -126,7 +126,7 @@ public class UserProfileExample {
 
     EntityScanner<UserProfileActionsModel> scanner = userProfileActionsDao
         .getScanner(startKey, null);
-    scanner.open();
+    scanner.initialize();
     try {
       // scan until we find a last name not equal to the one provided
       for (UserProfileActionsModel entity : scanner) {

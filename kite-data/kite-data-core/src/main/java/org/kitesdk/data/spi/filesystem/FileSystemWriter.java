@@ -27,15 +27,15 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
-import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.DatasetWriterException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
+import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.ReaderWriterState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class FileSystemWriter<E> implements DatasetWriter<E> {
+class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileSystemWriter.class);
 
@@ -64,7 +64,7 @@ class FileSystemWriter<E> implements DatasetWriter<E> {
   }
 
   @Override
-  public final void open() {
+  public final void initialize() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "Unable to open a writer from state:%s", state);
 

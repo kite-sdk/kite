@@ -141,7 +141,6 @@ public class TestCrunchDatasetsHBase {
 
   private void writeRecords(Dataset<GenericRecord> dataset, int count) {
     DatasetWriter<GenericRecord> writer = dataset.newWriter();
-    writer.open();
     try {
       for (int i = 0; i < count; ++i) {
         GenericRecord entity = HBaseDatasetRepositoryTest.createGenericEntity(i);
@@ -155,7 +154,6 @@ public class TestCrunchDatasetsHBase {
   private void checkRecords(Dataset<GenericRecord> dataset, int count, int start) {
     int cnt = start;
     DatasetReader<GenericRecord> reader = dataset.newReader();
-    reader.open();
     try {
       for (GenericRecord entity : reader) {
         HBaseDatasetRepositoryTest.compareEntitiesWithUtf8(cnt, entity);

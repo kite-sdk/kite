@@ -117,7 +117,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
         fileSystem, Lists.newArrayList(null, TEST_FILE), DESCRIPTOR,
         CONSTRAINTS);
-    reader.open();
+    reader.initialize();
     reader.hasNext();
   }
 
@@ -132,7 +132,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
         fileSystem, Lists.newArrayList(TEST_FILE), descriptor, CONSTRAINTS);
 
     try {
-      reader.open();
+      reader.initialize();
     } finally {
       reader.close();
     }
@@ -157,7 +157,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
 
     try {
       try {
-        reader.open();
+        reader.initialize();
       } catch (Throwable t) {
         Assert.fail("Reader failed in open: " + t.getClass().getName());
       }
@@ -195,7 +195,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
 
       try {
         try {
-          reader.open();
+          reader.initialize();
         } catch (Throwable t) {
           Assert.fail("Reader failed in open: " + t.getClass().getName());
         }

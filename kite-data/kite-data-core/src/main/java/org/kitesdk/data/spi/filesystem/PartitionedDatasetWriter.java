@@ -18,6 +18,7 @@ package org.kitesdk.data.spi.filesystem;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.PartitionListener;
 import org.kitesdk.data.spi.StorageKey;
@@ -34,7 +35,7 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
+class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
   private static final Logger LOG = LoggerFactory
     .getLogger(PartitionedDatasetWriter.class);
@@ -79,7 +80,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
   }
 
   @Override
-  public void open() {
+  public void initialize() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
       "Unable to open a writer from state:%s", state);
 
@@ -187,7 +188,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
 
       FileSystemDataset dataset = (FileSystemDataset) view.getDataset();
       Path partition = convert.fromKey(key);
-      DatasetWriter<E> writer = new FileSystemWriter<E>(
+      AbstractDatasetWriter<E> writer = new FileSystemWriter<E>(
           dataset.getFileSystem(),
           new Path(dataset.getDirectory(), partition),
           dataset.getDescriptor());
@@ -197,7 +198,7 @@ class PartitionedDatasetWriter<E> implements DatasetWriter<E> {
         listener.partitionAdded(dataset.getName(), partition.toString());
       }
 
-      writer.open();
+      writer.initialize();
 
       return writer;
     }

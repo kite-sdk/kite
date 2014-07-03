@@ -55,7 +55,7 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
   }
 
   @Override
-  public void open() {
+  public void initialize() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
       "A reader may not be opened more than once - current state:%s", state);
 

@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.io.Closeables;
 import java.util.Iterator;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -60,16 +61,16 @@ public class TestFileSystemView extends TestRefinableViews {
   @Test
   @Ignore("getCoveringPartitions is not yet implemented")
   @SuppressWarnings("unchecked")
-  public void testCoveringPartitions() {
+  public void testCoveringPartitions() throws IOException {
     // NOTE: this is an un-restricted write so all should succeed
-    final DatasetWriter<StandardEvent> writer = unbounded.newWriter();
+    DatasetWriter<StandardEvent> writer = null;
     try {
-      writer.open();
+      writer = unbounded.newWriter();
       writer.write(sepEvent);
       writer.write(octEvent);
       writer.write(novEvent);
     } finally {
-      writer.close();
+      Closeables.close(writer, false);
     }
 
     Iterator<View<StandardEvent>> coveringPartitions =
@@ -104,14 +105,14 @@ public class TestFileSystemView extends TestRefinableViews {
   @SuppressWarnings("unchecked")
   public void testDelete() throws Exception {
     // NOTE: this is an un-restricted write so all should succeed
-    final DatasetWriter<StandardEvent> writer = unbounded.newWriter();
+    DatasetWriter<StandardEvent> writer = null;
     try {
-      writer.open();
+      writer = unbounded.newWriter();
       writer.write(sepEvent);
       writer.write(octEvent);
       writer.write(novEvent);
     } finally {
-      writer.close();
+      Closeables.close(writer, false);
     }
 
     final Path root = new Path("target/data/test");
@@ -245,14 +246,14 @@ public class TestFileSystemView extends TestRefinableViews {
   @SuppressWarnings("unchecked")
   public void testUnboundedDelete() throws Exception {
     // NOTE: this is an un-restricted write so all should succeed
-    final DatasetWriter<StandardEvent> writer = unbounded.newWriter();
+    DatasetWriter<StandardEvent> writer = null;
     try {
-      writer.open();
+      writer = unbounded.newWriter();
       writer.write(sepEvent);
       writer.write(octEvent);
       writer.write(novEvent);
     } finally {
-      writer.close();
+      Closeables.close(writer, false);
     }
 
     final Path root = new Path("target/data/test");

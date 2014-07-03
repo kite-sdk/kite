@@ -131,7 +131,6 @@ public class TestMapReduce {
             .format(format)
             .build());
     DatasetWriter<GenericData.Record> writer = inputDataset.newWriter();
-    writer.open();
     writer.write(newStringRecord("apple"));
     writer.write(newStringRecord("banana"));
     writer.write(newStringRecord("banana"));
@@ -160,7 +159,6 @@ public class TestMapReduce {
     Assert.assertTrue(job.waitForCompletion(true));
 
     DatasetReader<GenericData.Record> reader = outputDataset.newReader();
-    reader.open();
     Map<String, Integer> counts = new HashMap<String, Integer>();
     for (GenericData.Record record : reader) {
       counts.put(record.get("name").toString(), (Integer) record.get("count"));

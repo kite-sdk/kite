@@ -25,11 +25,14 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.hbase.impl.EntityScanner;
+import org.kitesdk.data.spi.AbstractDatasetReader;
+import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.InitializeAccessor;
 import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.Marker;
@@ -70,10 +73,12 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
     final DatasetReader<E> wrappedReader = newEntityScanner();
     final UnmodifiableIterator<E> filteredIterator =
         Iterators.filter(wrappedReader.iterator(), constraints.toEntityPredicate());
-    return new DatasetReader<E>() {
+    AbstractDatasetReader<E> reader = new AbstractDatasetReader<E>() {
       @Override
-      public void open() {
-        wrappedReader.open();
+      public void initialize() {
+        if (wrappedReader instanceof InitializeAccessor) {
+          ((InitializeAccessor) wrappedReader).initialize();
+        }
       }
 
       @Override
@@ -112,23 +117,30 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
         return filteredIterator;
       }
     };
+    reader.initialize();
+    return reader;
   }
 
   @Override
   public DatasetWriter<E> newWriter() {
     final DatasetWriter<E> wrappedWriter = dataset.getDao().newBatch();
     if (constraints.isUnbounded()) {
+      if (wrappedWriter instanceof InitializeAccessor) {
+        ((InitializeAccessor) wrappedWriter).initialize();
+      }
       return wrappedWriter;
     }
     final StorageKey partitionStratKey = new StorageKey(dataset.getDescriptor().getPartitionStrategy());
     // Return a dataset writer that checks on write that an entity is within the
     // range of the view
-    return new DatasetWriter<E>() {
+    AbstractDatasetWriter<E> writer = new AbstractDatasetWriter<E>() {
       private Predicate<StorageKey> keyPredicate = constraints.toKeyPredicate();
 
       @Override
-      public void open() {
-        wrappedWriter.open();
+      public void initialize() {
+        if (wrappedWriter instanceof InitializeAccessor) {
+          ((InitializeAccessor) wrappedWriter).initialize();
+        }
       }
 
       @Override
@@ -155,6 +167,8 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
         return wrappedWriter.isOpen();
       }
     };
+    writer.initialize();
+    return writer;
   }
 
   @SuppressWarnings("deprecation")

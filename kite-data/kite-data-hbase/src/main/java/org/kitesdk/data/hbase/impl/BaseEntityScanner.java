@@ -16,6 +16,7 @@
 package org.kitesdk.data.hbase.impl;
 
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.ReaderWriterState;
 import com.google.common.base.Preconditions;
 
@@ -37,7 +38,8 @@ import org.apache.hadoop.hbase.filter.FilterList;
  * @param <E>
  *          The entity type this scanner scans.
  */
-public class BaseEntityScanner<E> implements EntityScanner<E> {
+public class BaseEntityScanner<E> extends AbstractDatasetReader<E>
+    implements EntityScanner<E> {
 
   private final EntityMapper<E> entityMapper;
   private final HTablePool tablePool;
@@ -132,7 +134,7 @@ public class BaseEntityScanner<E> implements EntityScanner<E> {
   }
 
   @Override
-  public void open() {
+  public void initialize() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "A scanner may not be opened more than once - current state:%s", state);
 

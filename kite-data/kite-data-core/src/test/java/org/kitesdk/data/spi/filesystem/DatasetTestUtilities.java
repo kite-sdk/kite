@@ -33,6 +33,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.junit.Assert;
 import org.kitesdk.data.View;
+import org.kitesdk.data.spi.InitializeAccessor;
 
 public class DatasetTestUtilities {
 
@@ -69,7 +70,6 @@ public class DatasetTestUtilities {
     DatasetWriter<GenericData.Record> writer = null;
     try {
       writer = ds.newWriter();
-      writer.open();
       for (int i = start; i < count + start; i++) {
         GenericRecordBuilder recordBuilder = new GenericRecordBuilder(ds.getDescriptor
             ().getSchema()).set("username", "test-" + i);
@@ -139,7 +139,6 @@ public class DatasetTestUtilities {
     DatasetReader<E> reader = null;
     try {
       reader = ds.newReader();
-      reader.open();
       for (E record : reader) {
         records.add(record);
       }
@@ -175,12 +174,14 @@ public class DatasetTestUtilities {
 
   public static <R> void checkReaderBehavior(
       DatasetReader<R> reader, int totalRecords, RecordValidator<R> validator) {
-    Assert.assertFalse("Reader is open before open()", reader.isOpen());
+    // this is now used for both initialized and not initialized records because
+    // initialization now happens automatically in newReader
+    if (!reader.isOpen() && reader instanceof InitializeAccessor) {
+      ((InitializeAccessor) reader).initialize();
+    }
 
     try {
-      reader.open();
-
-      Assert.assertTrue("Reader is not open after open()", reader.isOpen());
+      Assert.assertTrue("Reader should be open", reader.isOpen());
 
       checkReaderIteration(reader, totalRecords, validator);
 

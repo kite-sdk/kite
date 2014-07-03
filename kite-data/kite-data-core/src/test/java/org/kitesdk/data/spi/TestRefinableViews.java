@@ -16,6 +16,9 @@
 
 package org.kitesdk.data.spi;
 
+import com.google.common.io.Closeables;
+import java.io.IOException;
+import java.util.concurrent.Callable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.kitesdk.data.*;
@@ -104,14 +107,14 @@ public abstract class TestRefinableViews extends MiniDFSTest {
     this.unbounded = repo.create("test", testDescriptor);
   }
 
-  public static <E> void assertContentEquals(Set<E> expected, View<E> view) {
-    DatasetReader<E> reader = view.newReader();
+  public static <E> void assertContentEquals(Set<E> expected, View<E> view) throws IOException {
+    DatasetReader<E> reader = null;
     try {
-      reader.open();
+      reader = view.newReader();
       Assert.assertEquals(expected,
           Sets.newHashSet((Iterable<E>) reader));
     } finally {
-      reader.close();
+      Closeables.close(reader, false);
     }
   }
 
@@ -126,16 +129,16 @@ public abstract class TestRefinableViews extends MiniDFSTest {
   }
 
   @Test
-  public void testLimitedReader() {
+  public void testLimitedReader() throws IOException {
     // NOTE: this is an un-restricted write so all should succeed
-    DatasetWriter<StandardEvent> writer = unbounded.newWriter();
+    DatasetWriter<StandardEvent> writer = null;
     try {
-      writer.open();
+      writer = unbounded.newWriter();
       writer.write(sepEvent);
       writer.write(octEvent);
       writer.write(novEvent);
     } finally {
-      writer.close();
+      Closeables.close(writer, false);
     }
 
     // unbounded
@@ -172,75 +175,78 @@ public abstract class TestRefinableViews extends MiniDFSTest {
   }
 
   @Test
-  public void testLimitedWriter() {
+  public void testLimitedWriter() throws IOException {
     long start = new DateTime(2013, 10, 1, 0, 0, DateTimeZone.UTC).getMillis();
     long end = new DateTime(2013, 11, 14, 0, 0, DateTimeZone.UTC).getMillis();
     final RefinableView<StandardEvent> range = unbounded
         .from("timestamp", start).toBefore("timestamp", end);
 
-    DatasetWriter<StandardEvent> writer = range.newWriter();
+    DatasetWriter<StandardEvent> writer = null;
     try {
-      writer.open();
+      writer = range.newWriter();
       writer.write(octEvent);
       writer.write(novEvent);
     } finally {
-      writer.close();
+      Closeables.close(writer, false);
     }
     assertContentEquals(Sets.newHashSet(octEvent, novEvent), range);
 
     TestHelpers.assertThrows("Should reject older event",
-        IllegalArgumentException.class, new Runnable() {
+        IllegalArgumentException.class, new Callable<Void>() {
       @Override
-      public void run() {
-        DatasetWriter<StandardEvent> writer = range.newWriter();
+      public Void call() throws IOException {
+        DatasetWriter<StandardEvent> writer = null;
         try {
-          writer.open();
+          writer = range.newWriter();
           writer.write(sepEvent);
         } finally {
-          writer.close();
+          Closeables.close(writer, false);
         }
+        return null;
       }
     });
     TestHelpers.assertThrows("Should reject current event",
-        IllegalArgumentException.class, new Runnable() {
+        IllegalArgumentException.class, new Callable<Void>() {
       @Override
-      public void run() {
-        DatasetWriter<StandardEvent> writer = range.newWriter();
+      public Void call() throws IOException {
+        DatasetWriter<StandardEvent> writer = null;
         try {
-          writer.open();
+          writer = range.newWriter();
           writer.write(event);
         } finally {
-          writer.close();
+          Closeables.close(writer, false);
         }
+        return null;
       }
     });
   }
 
   @Test
-  public void testLimitedWriterForNonPartitionedField() {
+  public void testLimitedWriterForNonPartitionedField() throws IOException {
     final RefinableView<StandardEvent> view = unbounded.with("user_id", 0L);
 
-    DatasetWriter<StandardEvent> writer = view.newWriter();
+    DatasetWriter<StandardEvent> writer = null;
     try {
-      writer.open();
+      writer = view.newWriter();
       writer.write(sepEvent);
       writer.write(novEvent);
     } finally {
-      writer.close();
+      Closeables.close(writer, false);
     }
     assertContentEquals(Sets.newHashSet(sepEvent, novEvent), view);
 
     TestHelpers.assertThrows("Should reject event with user_id = 1",
-        IllegalArgumentException.class, new Runnable() {
+        IllegalArgumentException.class, new Callable<Void>() {
       @Override
-      public void run() {
-        DatasetWriter<StandardEvent> writer = view.newWriter();
+      public Void call() throws IOException {
+        DatasetWriter<StandardEvent> writer = null;
         try {
-          writer.open();
+          writer = view.newWriter();
           writer.write(octEvent);
         } finally {
-          writer.close();
+          Closeables.close(writer, false);
         }
+        return null;
       }
     });
   }

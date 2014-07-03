@@ -79,7 +79,7 @@ class ManagedSchemaHBaseDao implements ManagedSchemaDao {
   public List<ManagedSchema> getManagedSchemas() {
     List<ManagedSchema> returnList = new ArrayList<ManagedSchema>();
     EntityScanner<ManagedSchema> entityScanner = managedSchemaDao.getScanner();
-    entityScanner.open();
+    entityScanner.initialize();
     try {
       for (ManagedSchema entity : entityScanner) {
         returnList.add(entity);

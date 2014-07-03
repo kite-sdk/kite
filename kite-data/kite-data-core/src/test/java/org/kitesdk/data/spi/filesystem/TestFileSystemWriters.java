@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.spi.InitializeAccessor;
 
 public abstract class TestFileSystemWriters<E> {
 
@@ -51,7 +52,7 @@ public abstract class TestFileSystemWriters<E> {
 
   @Test
   public void testDiscardEmptyFiles() throws IOException {
-    fsWriter.open();
+    init(fsWriter);
     fsWriter.close();
     Assert.assertEquals("Should not contain any files", 0,
         ImmutableList.copyOf(fs.listStatus(testDirectory)).size());
@@ -74,5 +75,11 @@ public abstract class TestFileSystemWriters<E> {
     }
 
     writer.close();
+  }
+
+  public void init(DatasetWriter<?> writer) {
+    if (writer instanceof InitializeAccessor) {
+      ((InitializeAccessor) writer).initialize();
+    }
   }
 }

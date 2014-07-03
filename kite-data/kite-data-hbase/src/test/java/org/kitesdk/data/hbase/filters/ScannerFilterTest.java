@@ -118,7 +118,7 @@ public class ScannerFilterTest {
     // Scan and make sure all of the values are in the list
     int cnt = 0;
 
-    entityScanner.open();
+    entityScanner.initialize();
     try {
       for (GenericRecord entity : entityScanner) {
         assertTrue(values.contains(entity.get("field1").toString()));

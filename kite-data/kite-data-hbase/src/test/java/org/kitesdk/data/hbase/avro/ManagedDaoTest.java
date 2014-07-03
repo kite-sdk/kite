@@ -339,7 +339,7 @@ public class ManagedDaoTest {
     // ensure the new entities are what we expect with scan operations
     int cnt = 0;
     EntityScanner<GenericRecord> entityScanner = dao.getScanner();
-    entityScanner.open();
+    entityScanner.initialize();
     try {
       for (GenericRecord entity : entityScanner) {
         compareEntitiesWithUtf8(cnt, entity);
@@ -371,7 +371,7 @@ public class ManagedDaoTest {
     // ensure the new entities are what we expect with scan operations
     int cnt = 0;
     EntityScanner<TestRecord> entityScanner = dao.getScanner();
-    entityScanner.open();
+    entityScanner.initialize();
     try {
       for (TestRecord entity : entityScanner) {
         compareEntitiesWithString(cnt, entity);
@@ -449,7 +449,7 @@ public class ManagedDaoTest {
     // ensure the new entities are what we expect with scan operations
     int cnt = 0;
     EntityScanner<GenericRecord> entityScanner = dao.getScanner();
-    entityScanner.open();
+    entityScanner.initialize();
     try {
       for (GenericRecord entity : entityScanner) {
         compareEntitiesWithUtf8(cnt, entity);

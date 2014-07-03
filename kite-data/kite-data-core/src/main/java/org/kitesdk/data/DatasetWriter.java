@@ -30,9 +30,8 @@ import javax.annotation.concurrent.NotThreadSafe;
  * not expected to instantiate implementations directly. Instead, use the
  * containing dataset's {@link Dataset#newWriter()} method to get an appropriate
  * implementation. You should receive an instance of this interface from a
- * dataset, call {@link #open()} to prepare for IO operations, invoke
- * {@link #write(Object)} and {@link #flush()} as necessary, and
- * {@link #close()} when they are done, or no more data exists.
+ * dataset, invoke {@link #write(Object)} and {@link #flush()} as necessary,
+ * and {@link #close()} when they are done, or no more data exists.
  * </p>
  * <p>
  * Implementations can hold system resources until the {@link #close()} method
@@ -69,7 +68,9 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
    * </p>
    *
    * @throws DatasetWriterException
+   * @deprecated will be removed in 0.16.0; no longer required
    */
+  @Deprecated
   void open();
 
   /**

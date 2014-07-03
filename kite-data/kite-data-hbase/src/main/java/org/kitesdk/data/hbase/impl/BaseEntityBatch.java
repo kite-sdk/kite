@@ -16,6 +16,7 @@
 package org.kitesdk.data.hbase.impl;
 
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.ReaderWriterState;
 import com.google.common.base.Preconditions;
 
@@ -24,7 +25,8 @@ import java.io.IOException;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.HTablePool;
 
-public class BaseEntityBatch<E> implements EntityBatch<E> {
+public class BaseEntityBatch<E> extends AbstractDatasetWriter<E>
+    implements EntityBatch<E> {
   private final HTableInterface table;
   private final EntityMapper<E> entityMapper;
   private final HBaseClientTemplate clientTemplate;
@@ -92,7 +94,7 @@ public class BaseEntityBatch<E> implements EntityBatch<E> {
   }
 
   @Override
-  public void open() {
+  public void initialize() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "Unable to open a writer from state:%s", state);
     state = ReaderWriterState.OPEN;

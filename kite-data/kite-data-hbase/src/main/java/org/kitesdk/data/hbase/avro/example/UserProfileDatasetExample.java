@@ -104,7 +104,6 @@ public class UserProfileDatasetExample {
    */
   public void printUserProfies() {
     DatasetReader<UserProfileModel2> reader = userProfileDataset.newReader();
-    reader.open();
     try {
       for (UserProfileModel2 userProfile : reader) {
         System.out.println(userProfile.toString());
@@ -129,7 +128,6 @@ public class UserProfileDatasetExample {
   public void printUserProfileActionsForLastName(String lastName) {
     // TODO: use a reader with a start key
     DatasetReader<UserProfileActionsModel2> reader = userProfileActionsDataset.newReader();
-    reader.open();
     try {
       for (UserProfileActionsModel2 entity : reader) {
         UserProfileModel2 userProfile = entity.getUserProfileModel();

@@ -16,8 +16,9 @@
 package org.kitesdk.data.hbase.impl;
 
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.spi.InitializeAccessor;
 
-public interface EntityBatch<E> extends DatasetWriter<E> {
+public interface EntityBatch<E> extends DatasetWriter<E>, InitializeAccessor {
 
   /**
    * Put the entity into the HBase table. Since this is a part of a batch

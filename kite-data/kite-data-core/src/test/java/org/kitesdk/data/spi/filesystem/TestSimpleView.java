@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.collect.Sets;
+import com.google.common.io.Closeables;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Set;
@@ -102,28 +103,28 @@ public class TestSimpleView {
     fs.delete(new Path("target/data"), true);
   }
 
-  public static <E> void assertContentEquals(Set<E> expected, View<E> view) {
-    DatasetReader<E> reader = view.newReader();
+  public static <E> void assertContentEquals(Set<E> expected, View<E> view) throws IOException {
+    DatasetReader<E> reader = null;
     try {
-      reader.open();
+      reader = view.newReader();
       Assert.assertEquals(expected,
           Sets.newHashSet((Iterable<E>) reader));
     } finally {
-      reader.close();
+      Closeables.close(reader, false);
     }
   }
 
   @Test
-  public void testLimitedReader() {
+  public void testLimitedReader() throws IOException {
     // NOTE: this is an un-restricted write so all should succeed
-    DatasetWriter<StandardEvent> writer = testDataset.newWriter();
+    DatasetWriter<StandardEvent> writer = null;
     try {
-      writer.open();
+      writer = testDataset.newWriter();
       writer.write(sepEvent);
       writer.write(octEvent);
       writer.write(novEvent);
     } finally {
-      writer.close();
+      Closeables.close(writer, false);
     }
 
     // unbounded

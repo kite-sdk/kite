@@ -106,7 +106,6 @@ public class DaoViewTest {
     Assert.assertFalse(range.includes(newTestEntity("9", "99")));
 
     DatasetReader<TestEntity> reader = range.newReader();
-    reader.open();
     int cnt = 2;
     try {
       for (TestEntity entity : reader) {
@@ -147,7 +146,6 @@ public class DaoViewTest {
         .fromAfter(NAMES[0], "1").to(NAMES[0], "5")
         .fromAfter(NAMES[1], "1").to(NAMES[1], "5");
     DatasetWriter<TestEntity> writer = range.newWriter();
-    writer.open();
     try {
       writer.write(newTestEntity("3", "3"));
       writer.write(newTestEntity("5", "5"));
@@ -188,7 +186,6 @@ public class DaoViewTest {
   private void validRange(View<TestEntity> range, int startIdx, int endIdx) {
     int cnt = startIdx;
     DatasetReader<TestEntity> reader = range.newReader();
-    reader.open();
     try {
       for (TestEntity entity : reader) {
         Assert.assertEquals(Integer.toString(cnt), entity.getPart1());

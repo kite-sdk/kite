@@ -146,9 +146,10 @@ public class CopyTask<E> extends Configured {
           CrunchDatasets.asSource(from, entityClass));
 
       boolean threw = true;
-      DatasetWriter<E> writer = to.newWriter();
+      DatasetWriter<E> writer = null;
       try {
-        writer.open();
+        writer = to.newWriter();
+
         for (E entity : collection.materialize()) {
           writer.write(entity);
           count += 1;

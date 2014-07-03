@@ -16,6 +16,7 @@
 package org.kitesdk.data.hbase.impl;
 
 import org.kitesdk.data.DatasetReader;
+import org.kitesdk.data.spi.InitializeAccessor;
 
 /**
  * A Scanner interface that represents an Iterable that allows us to iterate
@@ -24,5 +25,5 @@ import org.kitesdk.data.DatasetReader;
  * @param <E>
  *          The type of the entity to return
  */
-public interface EntityScanner<E> extends DatasetReader<E> {
+public interface EntityScanner<E> extends DatasetReader<E>, InitializeAccessor {
 }

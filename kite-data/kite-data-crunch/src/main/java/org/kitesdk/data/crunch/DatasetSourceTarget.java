@@ -38,7 +38,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
@@ -140,9 +139,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   @Override
   public Iterable<E> read(Configuration configuration) throws IOException {
     // TODO: what to do with Configuration? create new view?
-    DatasetReader<E> reader = view.newReader();
-    reader.open();
-    return reader; // TODO: who calls close?
+    return view.newReader(); // TODO: who calls close?
   }
 
   @Override
@@ -161,9 +158,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
 
       @Override
       public Iterable<E> read(TaskInputOutputContext<?, ?, ?, ?> context) throws IOException {
-        DatasetReader<E> reader = view.newReader();
-        reader.open();
-        return reader;
+        return view.newReader();
       }
     };
   }

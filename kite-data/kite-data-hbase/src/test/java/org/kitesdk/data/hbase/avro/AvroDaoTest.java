@@ -123,7 +123,7 @@ public class AvroDaoTest {
 
     int cnt = 0;
     EntityScanner<GenericRecord> entityScanner = dao.getScanner();
-    entityScanner.open();
+    entityScanner.initialize();
     try {
       for (GenericRecord entity : entityScanner) {
         assertEquals("field1_" + cnt, entity.get("field1").toString());
@@ -138,7 +138,7 @@ public class AvroDaoTest {
     cnt = 5;
     PartitionKey startKey = dao.getPartitionStrategy().partitionKey("part1_5");
     entityScanner = dao.getScanner(startKey, null);
-    entityScanner.open();
+    entityScanner.initialize();
     try {
       for (GenericRecord entity : entityScanner) {
         assertEquals("field1_" + cnt, entity.get("field1").toString());
@@ -193,7 +193,7 @@ public class AvroDaoTest {
 
     int cnt = 0;
     EntityScanner<TestRecord> entityScanner = dao.getScanner();
-    entityScanner.open();
+    entityScanner.initialize();
     try {
       for (TestRecord entity : entityScanner) {
         assertEquals("field1_" + cnt, entity.getField1());
@@ -208,11 +208,11 @@ public class AvroDaoTest {
     // Test scanner with null keys
     PartitionKey key1 = dao.getPartitionStrategy().partitionKey("part1_5");
     entityScanner = dao.getScanner(key1, null);
-    entityScanner.open();
+    entityScanner.initialize();
     assertEquals("field1_5", entityScanner.iterator().next().getField1());
 
     entityScanner = dao.getScanner(null, key1);
-    entityScanner.open();
+    entityScanner.initialize();
     assertEquals("field1_0", entityScanner.iterator().next().getField1());
 
     PartitionKey deleteKey = dao.getPartitionStrategy().partitionKey("part1_5",
@@ -335,7 +335,7 @@ public class AvroDaoTest {
         schemaString, TestRecord.class);
 
     EntityBatch<TestRecord> batch = dao.newBatch();
-    batch.open();
+    batch.initialize();
     for (TestRecord entity : createSpecificEntities(100)) {
       batch.put(entity);
     }

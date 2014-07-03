@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import org.kitesdk.data.spi.InitializeAccessor;
 
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.RecordValidator;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkReaderBehavior;
@@ -56,41 +57,10 @@ public abstract class TestDatasetReaders<R> {
     checkReaderBehavior(reader, totalRecords, validator);
   }
 
-  @Test(expected = IllegalStateException.class)
-  public void testDoubleOpenFails() {
-    try {
-      try {
-        reader.open();
-      } catch (Throwable t) {
-        Assert.fail("Initial open threw and exception: " + t.getClass().getName());
-      }
-
-      reader.open();
-
-    } finally {
-      reader.close();
-    }
-  }
-
-  @Test
-  public void testInitialCloseIgnored() throws IOException {
-    reader.close();
-    checkReaderBehavior(reader, totalRecords, validator);
-  }
-
   @Test
   public void testDoubleCloseIgnored() throws IOException {
     checkReaderBehavior(reader, totalRecords, validator);
     reader.close();
-  }
-
-  @Test(expected = IllegalStateException.class)
-  public void testHasNextOnNonOpenWriterFails() throws IOException {
-    try {
-      reader.hasNext();
-    } finally {
-      reader.close();
-    }
   }
 
   @Test(expected = IllegalStateException.class)
@@ -99,15 +69,6 @@ public abstract class TestDatasetReaders<R> {
 
     try {
       reader.hasNext();
-    } finally {
-      reader.close();
-    }
-  }
-
-  @Test(expected = IllegalStateException.class)
-  public void testNextOnNonOpenWriterFails() throws IOException {
-    try {
-      reader.next();
     } finally {
       reader.close();
     }
@@ -128,7 +89,9 @@ public abstract class TestDatasetReaders<R> {
   public void testRemove() throws IOException {
     try {
       try {
-        reader.open();
+        if (!reader.isOpen() && reader instanceof InitializeAccessor) {
+          ((InitializeAccessor) reader).initialize();
+        }
       } catch (Throwable t) {
         Assert.fail("Reader failed in open: " + t.getClass().getName());
       }
