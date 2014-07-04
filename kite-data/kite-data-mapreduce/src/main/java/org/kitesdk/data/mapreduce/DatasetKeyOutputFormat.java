@@ -35,7 +35,7 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionKey;
-import org.kitesdk.data.PartitionedDataset;
+import org.kitesdk.data.spi.filesystem.PartitionedDataset;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;

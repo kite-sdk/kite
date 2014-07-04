@@ -22,7 +22,7 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.PartitionedDataset;
+import org.kitesdk.data.spi.filesystem.PartitionedDataset;
 import org.kitesdk.data.spi.filesystem.TestFileSystemDatasetRepository;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;

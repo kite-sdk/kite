@@ -32,7 +32,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.junit.Assert;
-import org.kitesdk.data.PartitionedDataset;
 import org.kitesdk.data.View;
 
 public class DatasetTestUtilities {

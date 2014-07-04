@@ -31,7 +31,7 @@ import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.PartitionedDataset;
+import org.kitesdk.data.spi.filesystem.PartitionedDataset;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.URIBuilder;
 import junit.framework.Assert;
