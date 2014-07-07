@@ -141,6 +141,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
    * returns a helper to add further configuration.
    *
    * @param job the {@code Job} to configure
+   *
+   * @since 0.15.0
    */
   public static ConfigBuilder configure(Job job) {
     job.setInputFormatClass(DatasetKeyInputFormat.class);
@@ -151,6 +153,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
    * Returns a helper to add input options to the given {@code Configuration}.
    *
    * @param conf a {@code Configuration}
+   *
+   * @since 0.15.0
    */
   public static ConfigBuilder configure(Configuration conf) {
     return new ConfigBuilder(conf);

@@ -68,6 +68,8 @@ public class CrunchDatasets {
    * @param type    the Java type of the entities in the dataset
    * @param <E>     the type of entity produced by the source
    * @return a {@link ReadableSource} for the view
+   *
+   * @since 0.15.0
    */
   public static <E> ReadableSource<E> asSource(URI uri, Class<E> type) {
     return new DatasetSourceTarget<E>(uri, type);
@@ -81,6 +83,8 @@ public class CrunchDatasets {
    * @param type    the Java type of the entities in the dataset
    * @param <E>     the type of entity produced by the source
    * @return a {@link ReadableSource} for the view
+   *
+   * @since 0.15.0
    */
   public static <E> ReadableSource<E> asSource(String uri, Class<E> type) {
     return asSource(URI.create(uri), type);
@@ -118,6 +122,8 @@ public class CrunchDatasets {
    *
    * @param uri the dataset or view URI
    * @return a {@link Target} for the dataset or view
+   *
+   * @since 0.15.0
    */
   public static Target asTarget(String uri) {
     return asTarget(URI.create(uri));
@@ -129,6 +135,8 @@ public class CrunchDatasets {
    *
    * @param uri the dataset or view URI
    * @return a {@link Target} for the dataset or view
+   *
+   * @since 0.15.0
    */
   public static Target asTarget(URI uri) {
     return new DatasetTarget<Object>(uri);

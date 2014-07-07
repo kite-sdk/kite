@@ -29,6 +29,11 @@ import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.SchemaUtil;
 import org.kitesdk.data.spi.URIBuilder;
 
+/**
+ * <p>Convenience methods for working with {@link Dataset} instances.</p>
+ *
+ * @since 0.8.0
+ */
 public class Datasets {
 
   private static final String DATASET_NAME_OPTION = "dataset";

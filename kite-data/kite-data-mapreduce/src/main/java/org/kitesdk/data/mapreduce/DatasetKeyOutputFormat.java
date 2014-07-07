@@ -136,6 +136,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
    * returns a helper to add further configuration.
    *
    * @param job the {@code Job} to configure
+   *
+   * @since 0.15.0
    */
   public static ConfigBuilder configure(Job job) {
     job.setOutputFormatClass(DatasetKeyOutputFormat.class);
@@ -146,6 +148,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
    * Returns a helper to add output options to the given {@code Configuration}.
    *
    * @param conf a {@code Configuration}
+   *
+   * @since 0.15.0
    */
   public static ConfigBuilder configure(Configuration conf) {
     return new ConfigBuilder(conf);
