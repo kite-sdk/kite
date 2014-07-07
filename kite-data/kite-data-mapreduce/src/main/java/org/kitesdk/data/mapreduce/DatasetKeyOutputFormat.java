@@ -35,7 +35,7 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionKey;
-import org.kitesdk.data.spi.filesystem.PartitionedDataset;
+import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
@@ -303,10 +303,14 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     String constraintsString = conf.get(KITE_CONSTRAINTS);
     if (working.getDataset().getDescriptor().isPartitioned() &&
         partitionDir != null) {
-      PartitionKey key = ((FileSystemDataset) target).keyFromDirectory(
-          new Path(partitionDir));
+      if (!(target instanceof FileSystemDataset)) {
+        throw new UnsupportedOperationException("Partitions only supported for " +
+            "FileSystemDataset. Dataset: " + target);
+      }
+      FileSystemDataset fsDataset = (FileSystemDataset) target;
+      PartitionKey key = fsDataset.keyFromDirectory(new Path(partitionDir));
       if (key != null) {
-        working = ((PartitionedDataset) working.getDataset()).getPartition(key, true);
+        working = fsDataset.getPartition(key, true);
       }
       return new DatasetRecordWriter<E>(working);
     } else if (constraintsString != null) {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.spi.filesystem;
+package org.kitesdk.data.spi;
 
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.PartitionKey;

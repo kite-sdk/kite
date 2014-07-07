@@ -42,6 +42,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.spi.SizeAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,7 +161,6 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   @Override
   @Nullable
-  @Deprecated
   public PartitionedDataset<E> getPartition(PartitionKey key, boolean allowCreate) {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get a partition on a non-partitioned dataset (name:%s)",
@@ -206,7 +206,6 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   }
 
   @Override
-  @Deprecated
   public void dropPartition(PartitionKey key) {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to drop a partition on a non-partitioned dataset (name:%s)",
@@ -228,7 +227,6 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   }
 
   @Override
-  @Deprecated
   public Iterable<PartitionedDataset<E>> getPartitions() {
     Preconditions.checkState(descriptor.isPartitioned(),
       "Attempt to get partitions on a non-partitioned dataset (name:%s)",

@@ -33,6 +33,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.junit.Assert;
 import org.kitesdk.data.View;
+import org.kitesdk.data.spi.PartitionedDataset;
 
 public class DatasetTestUtilities {
 
