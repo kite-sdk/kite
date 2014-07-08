@@ -16,6 +16,7 @@
 package org.kitesdk.data;
 
 import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.spi.PartitionKey;
 
 final class AccessorImpl extends Accessor {
 

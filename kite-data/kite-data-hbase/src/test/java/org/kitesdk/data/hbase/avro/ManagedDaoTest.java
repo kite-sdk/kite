@@ -16,7 +16,7 @@
 package org.kitesdk.data.hbase.avro;
 
 import org.kitesdk.data.IncompatibleSchemaException;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.SchemaNotFoundException;
 import org.kitesdk.data.hbase.avro.entities.ArrayRecord;

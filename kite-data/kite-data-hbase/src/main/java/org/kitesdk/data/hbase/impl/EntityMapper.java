@@ -20,7 +20,7 @@ import java.util.Set;
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
 
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 
 /**
  * An interface for mapping HBase Result instances to a StorageKey/Entity pair,

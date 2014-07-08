@@ -16,7 +16,7 @@
 package org.kitesdk.data.hbase.avro;
 
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.SchemaNotFoundException;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.hbase.impl.BaseEntityMapper;

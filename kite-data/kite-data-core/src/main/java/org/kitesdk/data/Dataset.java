@@ -19,6 +19,7 @@ import java.net.URI;
 import org.apache.avro.Schema;
 
 import javax.annotation.concurrent.Immutable;
+import org.kitesdk.data.spi.PartitionKey;
 
 /**
  * <p>

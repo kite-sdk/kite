@@ -16,15 +16,14 @@
 package org.kitesdk.data.spi;
 
 import org.kitesdk.data.Dataset;
-import org.kitesdk.data.PartitionKey;
 
 @SuppressWarnings("deprecation")
 public interface PartitionedDataset<E> extends Dataset<E> {
 
   /**
-   * Get a partition for a {@link org.kitesdk.data.PartitionKey}, optionally creating the
+   * Get a partition for a {@link PartitionKey}, optionally creating the
    * partition if it doesn't already exist. You can obtain the
-   * {@link org.kitesdk.data.PartitionKey} using
+   * {@link PartitionKey} using
    * {@link org.kitesdk.data.PartitionStrategy#partitionKey(Object...)} or
    * {@link org.kitesdk.data.PartitionStrategy#partitionKeyForEntity(Object)}.
    *

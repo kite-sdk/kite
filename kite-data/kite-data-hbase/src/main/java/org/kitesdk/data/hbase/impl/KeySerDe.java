@@ -15,7 +15,7 @@
  */
 package org.kitesdk.data.hbase.impl;
 
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 
 /**
  * This class handles key serialization and deserialization.

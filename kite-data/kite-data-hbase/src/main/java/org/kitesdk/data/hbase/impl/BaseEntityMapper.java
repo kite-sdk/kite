@@ -24,7 +24,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.FieldMapping.MappingType;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 
 /**
  * A base implementation of EntityMapper, that uses the provided EntitySerDe and

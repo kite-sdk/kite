@@ -16,7 +16,7 @@
 package org.kitesdk.data.hbase.impl;
 
 import org.kitesdk.data.DatasetIOException;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import com.google.common.annotations.VisibleForTesting;
 
 import java.io.IOException;

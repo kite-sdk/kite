@@ -18,6 +18,7 @@ package org.kitesdk.data;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import java.util.Set;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
 import org.kitesdk.data.spi.partition.HourFieldPartitioner;

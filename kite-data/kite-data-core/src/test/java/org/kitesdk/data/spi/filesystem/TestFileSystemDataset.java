@@ -24,7 +24,7 @@ import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
