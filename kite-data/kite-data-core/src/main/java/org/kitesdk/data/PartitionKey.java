@@ -15,10 +15,7 @@
  */
 package org.kitesdk.data;
 
-import com.google.common.base.Objects;
-
-import java.util.Arrays;
-import java.util.List;
+import edu.umd.cs.findbugs.annotations.*;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -28,80 +25,38 @@ import javax.annotation.concurrent.NotThreadSafe;
  * <p>
  * A {@code PartitionKey} is an ordered sequence of values corresponding to the
  * {@link org.kitesdk.data.spi.FieldPartitioner}s in a
- * {@link PartitionStrategy}. You can obtain a {@link PartitionKey} using
+ * {@link PartitionStrategy}. You can obtain a {@link org.kitesdk.data.PartitionKey} using
  * {@link PartitionStrategy#partitionKey(Object...)} or
  * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
  * </p>
  * <p>
- * Implementations of {@link PartitionKey} are typically not thread-safe; that 
+ * Implementations of {@link org.kitesdk.data.PartitionKey} are typically not thread-safe; that
  * is, the behavior when accessing a single instance from multiple threads is
  * undefined.
  * </p>
- * 
+ *
  * @see PartitionStrategy
  * @see org.kitesdk.data.spi.FieldPartitioner
  * @see Dataset
+ *
+* @deprecated will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}
+* methods instead
  */
 @NotThreadSafe
-public class PartitionKey {
-
-  private final Object[] values;
+@Deprecated
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value="NM_SAME_SIMPLE_NAME_AS_SUPERCLASS",
+    justification="Part of deprecation process.")
+public class PartitionKey extends org.kitesdk.data.spi.PartitionKey {
 
   PartitionKey(Object... values) {
-    this.values = values;
+    super(values);
   }
 
   PartitionKey(int size) {
-    this.values = new Object[size];
+    this(new Object[size]);
   }
 
-  public List<Object> getValues() {
-    return Arrays.asList(values);
+  protected void set(int index, Object value) {
+    super.set(index, value);
   }
-
-  /**
-   * Return the value at the specified index in the key.
-   */
-  public Object get(int index) {
-    if (index < values.length) {
-      return values[index];
-    }
-    return null;
-  }
-
-  void set(int index, Object value) {
-    values[index] = value;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || !getClass().equals(o.getClass())) {
-      return false;
-    }
-
-    PartitionKey that = (PartitionKey) o;
-
-    return Arrays.equals(values, that.values);
-  }
-
-  @Override
-  public int hashCode() {
-    return values != null ? Arrays.hashCode(values) : 0;
-  }
-
-  /**
-   * Return the number of values in the key.
-   */
-  public int getLength() {
-    return values.length;
-  }
-
-  @Override
-  public String toString() {
-    return Objects.toStringHelper(this).add("values", getValues()).toString();
-  }
-
 }

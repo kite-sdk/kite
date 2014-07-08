@@ -16,16 +16,13 @@
 package org.kitesdk.data;
 
 import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.spi.PartitionKey;
 
 final class AccessorImpl extends Accessor {
 
   @Override
   public Format newFormat(String name) {
     return new Format(name);
-  }
-  @Override
-  public PartitionKey newPartitionKey(Object... values) {
-    return new PartitionKey(values);
   }
 
   @Override

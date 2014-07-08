@@ -16,7 +16,7 @@
 package org.kitesdk.data.hbase.avro;
 
 import org.kitesdk.data.IncompatibleSchemaException;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.SchemaNotFoundException;
 import org.kitesdk.data.hbase.avro.entities.ArrayRecord;
@@ -176,8 +176,7 @@ public class ManagedDaoTest {
 
   private PartitionKey createKey(PartitionStrategy partitionStrategy,
       long uniqueIdx) {
-    return partitionStrategy.partitionKey("part1_" + uniqueIdx, "part2_"
-        + uniqueIdx);
+    return new PartitionKey("part1_" + uniqueIdx, "part2_" + uniqueIdx);
   }
 
   private GenericRecord createGenericEntity(long uniqueIdx) {
@@ -523,8 +522,7 @@ public class ManagedDaoTest {
         .setKeyPart2("part2").setField1(10).build();
     dao.put(entity);
 
-    PartitionKey key = dao.getPartitionStrategy()
-        .partitionKey("part1", "part2");
+    PartitionKey key = new PartitionKey("part1", "part2");
     dao.increment(key, "field1", 10);
     assertEquals(20L, (long) dao.get(key).getField1());
 
@@ -553,7 +551,7 @@ public class ManagedDaoTest {
     assertTrue(dao.put(compositeRecord));
     
     // validate deleting one of the records doesn't delete the entire row
-    PartitionKey key = dao.getPartitionStrategy().partitionKey("1", "1");
+    PartitionKey key = new PartitionKey("1", "1");
     subRecord2Dao.delete(key);
     subRecord1 = subRecord1Dao.get(key);
     assertNotNull(subRecord1);
@@ -651,8 +649,7 @@ public class ManagedDaoTest {
     Dao<ManagedSchema> managedDao = new SpecificAvroDao<ManagedSchema>(
         tablePool, "managed_schemas", managedRecordString, ManagedSchema.class);
 
-    managedDao.delete(managedDao.getPartitionStrategy().partitionKey(tableName,
-        "test"));
+    managedDao.delete(new PartitionKey(tableName, "test"));
 
     SchemaManager manager = new DefaultSchemaManager(tablePool);
     try {

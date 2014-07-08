@@ -23,7 +23,7 @@ import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.IncompatibleSchemaException;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
@@ -142,9 +142,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .configuration(conf)
         .descriptor(newDescriptor)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(newDescriptor.isPartitioned() ?
-            org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
-            null)
+        .partitionKey(newDescriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
   }
@@ -198,9 +196,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .configuration(conf)
         .descriptor(updatedDescriptor)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(updatedDescriptor.isPartitioned() ?
-            org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
-            null)
+        .partitionKey(updatedDescriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
   }
@@ -218,9 +214,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .configuration(conf)
         .descriptor(descriptor)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(descriptor.isPartitioned() ?
-            org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
-            null)
+        .partitionKey(descriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
 
@@ -313,7 +307,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
   }
 
   /**
-   * Get a {@link org.kitesdk.data.PartitionKey} corresponding to a partition's filesystem path
+   * Get a {@link org.kitesdk.data.spi.PartitionKey} corresponding to a partition's filesystem path
    * represented as a {@link URI}. If the path is not a valid partition,
    * then {@link IllegalArgumentException} is thrown. Note that the partition does not
    * have to exist.
@@ -373,8 +367,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
       values.add(fp.valueFromString(stringValue,
           SchemaUtil.getPartitionType(fp, schema)));
     }
-    return org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey(
-        values.toArray(new Object[values.size()]));
+    return new PartitionKey(values.toArray(new Object[values.size()]));
   }
 
   @Override

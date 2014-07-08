@@ -16,7 +16,7 @@
 package org.kitesdk.data.hbase.avro;
 
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.hbase.avro.entities.ArrayRecord;
 import org.kitesdk.data.hbase.avro.entities.EmbeddedRecord;
 import org.kitesdk.data.hbase.avro.entities.TestEnum;
@@ -114,7 +114,7 @@ public class AvroDaoTest {
     }
 
     for (int i = 0; i < 10; ++i) {
-      PartitionKey key = dao.getPartitionStrategy().partitionKey(
+      PartitionKey key = new PartitionKey(
           "part1_" + Integer.toString(i), "part2_" + Integer.toString(i));
       GenericRecord genericRecord = dao.get(key);
       assertEquals("field1_" + i, genericRecord.get("field1").toString());
@@ -136,7 +136,7 @@ public class AvroDaoTest {
     }
 
     cnt = 5;
-    PartitionKey startKey = dao.getPartitionStrategy().partitionKey("part1_5");
+    PartitionKey startKey = new PartitionKey("part1_5");
     entityScanner = dao.getScanner(startKey, null);
     entityScanner.initialize();
     try {
@@ -152,8 +152,7 @@ public class AvroDaoTest {
       }
     }
 
-    PartitionKey key = dao.getPartitionStrategy().partitionKey("part1_5",
-        "part2_5");
+    PartitionKey key = new PartitionKey("part1_5", "part2_5");
     dao.delete(key);
     GenericRecord deletedRecord = dao.get(key);
     assertNull(deletedRecord);
@@ -169,8 +168,7 @@ public class AvroDaoTest {
     }
 
     for (int i = 0; i < 10; ++i) {
-      PartitionKey partitionKey = dao.getPartitionStrategy().partitionKey(
-          "part1_" + i, "part2_" + i);
+      PartitionKey partitionKey = new PartitionKey("part1_" + i, "part2_" + i);
       TestRecord record = dao.get(partitionKey);
       assertEquals("field1_" + i, record.getField1());
       assertEquals("field2_" + i, record.getField2());
@@ -206,7 +204,7 @@ public class AvroDaoTest {
     }
 
     // Test scanner with null keys
-    PartitionKey key1 = dao.getPartitionStrategy().partitionKey("part1_5");
+    PartitionKey key1 = new PartitionKey("part1_5");
     entityScanner = dao.getScanner(key1, null);
     entityScanner.initialize();
     assertEquals("field1_5", entityScanner.iterator().next().getField1());
@@ -215,8 +213,7 @@ public class AvroDaoTest {
     entityScanner.initialize();
     assertEquals("field1_0", entityScanner.iterator().next().getField1());
 
-    PartitionKey deleteKey = dao.getPartitionStrategy().partitionKey("part1_5",
-        "part2_5");
+    PartitionKey deleteKey = new PartitionKey("part1_5", "part2_5");
     dao.delete(deleteKey);
     assertNull(dao.get(deleteKey));
   }
@@ -231,8 +228,7 @@ public class AvroDaoTest {
         .setKeyPart2("part2").setField1(10).build();
     assertTrue(dao.put(entity));
 
-    PartitionKey key = dao.getPartitionStrategy()
-        .partitionKey("part1", "part2");
+    PartitionKey key = new PartitionKey("part1", "part2");
     long incrementResult = dao.increment(key, "field1", 5);
     assertEquals(15L, incrementResult);
     assertEquals(15L, (long) dao.get(key).getField1());
@@ -249,8 +245,7 @@ public class AvroDaoTest {
 
     // now fetch the entity twice. Change one, and do a put. Change the other,
     // and the second put should fail.
-    PartitionKey key = dao.getPartitionStrategy()
-        .partitionKey("part1", "part2");
+    PartitionKey key = new PartitionKey("part1", "part2");
     TestRecord recordRef1 = TestRecord.newBuilder(dao.get(key))
         .setField1("part1_1").build();
     TestRecord recordRef2 = TestRecord.newBuilder(dao.get(key))
@@ -289,8 +284,7 @@ public class AvroDaoTest {
 
     assertTrue(dao.put(entity));
 
-    PartitionKey key = dao.getPartitionStrategy()
-        .partitionKey("part1", "part2");
+    PartitionKey key = new PartitionKey("part1", "part2");
     TestRecord record = dao.get(key);
 
     assertEquals("field1", record.getField1());
@@ -316,8 +310,7 @@ public class AvroDaoTest {
     }
 
     // get and put it a couple of times to build up versions
-    PartitionKey key = dao.getPartitionStrategy().partitionKey("part1_5",
-        "part2_5");
+    PartitionKey key = new PartitionKey("part1_5", "part2_5");
     TestRecord entity = dao.get(key);
     dao.put(entity);
     entity = dao.get(key);
@@ -342,8 +335,7 @@ public class AvroDaoTest {
     batch.close();
 
     for (int i = 0; i < 100; i++) {
-      PartitionKey key = dao.getPartitionStrategy().partitionKey("part1_" + i,
-          "part2_" + i);
+      PartitionKey key = new PartitionKey("part1_" + i, "part2_" + i);
       TestRecord record = dao.get(key);
       assertEquals("field1_" + i, record.getField1());
     }

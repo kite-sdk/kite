@@ -27,7 +27,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.FieldMapping;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 
 /**

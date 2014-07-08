@@ -15,7 +15,7 @@
  */
 package org.kitesdk.data.hbase.impl;
 
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 
 import org.apache.hadoop.hbase.client.HTablePool;
@@ -89,7 +89,7 @@ public class BaseDao<E> implements Dao<E> {
   public boolean delete(E entity) {
     VersionCheckAction checkAction = entityMapper.mapFromEntity(entity)
         .getVersionCheckAction();
-    PartitionKey key = getPartitionStrategy().partitionKeyForEntity(entity);
+    PartitionKey key = PartitionKey.partitionKeyForEntity(getPartitionStrategy(), entity);
     return clientTemplate.delete(key, entityMapper.getRequiredColumns(),
         checkAction, entityMapper.getKeySerDe());
   }

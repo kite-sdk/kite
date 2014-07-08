@@ -68,6 +68,7 @@ import org.slf4j.LoggerFactory;
  * @see Dataset
  */
 @Immutable
+@SuppressWarnings("deprecation")
 public class PartitionStrategy {
 
   private static final Logger LOG = LoggerFactory.getLogger(PartitionStrategy.class);
@@ -141,7 +142,11 @@ public class PartitionStrategy {
    * <p>
    * Null values are not permitted.
    * </p>
+   * @deprecated will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}
+   * methods instead
    */
+  @SuppressWarnings("deprecation")
+  @Deprecated
   public PartitionKey partitionKey(Object... values) {
     return new PartitionKey(values);
   }
@@ -154,7 +159,11 @@ public class PartitionStrategy {
    * This is a convenient way to find the partition that a given entity is
    * written to, or to find a partition using objects from the entity domain.
    * </p>
+   * @deprecated will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}
+   * methods instead
    */
+  @SuppressWarnings("deprecation")
+  @Deprecated
   public PartitionKey partitionKeyForEntity(Object entity) {
     return partitionKeyForEntity(entity, null);
   }
@@ -168,8 +177,11 @@ public class PartitionStrategy {
    * This is a convenient way to find the partition that a given entity is
    * written to, or to find a partition using objects from the entity domain.
    * </p>
+   * @deprecated will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}
+   * methods instead
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "deprecation"})
+  @Deprecated
   public PartitionKey partitionKeyForEntity(Object entity,
       @Nullable PartitionKey reuseKey) {
     PartitionKey key = (reuseKey == null ? newKey() : reuseKey);

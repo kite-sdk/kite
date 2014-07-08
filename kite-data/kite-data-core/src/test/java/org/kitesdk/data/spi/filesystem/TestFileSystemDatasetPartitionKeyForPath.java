@@ -16,7 +16,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import com.google.common.io.Files;
 import java.io.IOException;
@@ -32,7 +32,6 @@ import org.junit.Test;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA;
 import static org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository
     .partitionKeyForPath;
-import org.kitesdk.data.impl.Accessor;
 import org.apache.avro.generic.GenericData.Record;
 
 public class TestFileSystemDatasetPartitionKeyForPath {
@@ -102,7 +101,7 @@ public class TestFileSystemDatasetPartitionKeyForPath {
   public void testValidPartition() throws Exception {
     PartitionKey key = partitionKeyForPath(dataset,
         new Path(testDirectory, "username_part=1").toUri());
-    Assert.assertEquals(Accessor.getDefault().newPartitionKey(1), key);
+    Assert.assertEquals(new PartitionKey(1), key);
   }
 
 }

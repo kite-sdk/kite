@@ -28,7 +28,7 @@ import org.kitesdk.data.hbase.impl.EntityScanner;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
@@ -192,7 +192,7 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
       values[i] = marker.valueFor(fp);
     }
 
-    return strategy.partitionKey(values);
+    return new PartitionKey(values);
   }
 
   @Override

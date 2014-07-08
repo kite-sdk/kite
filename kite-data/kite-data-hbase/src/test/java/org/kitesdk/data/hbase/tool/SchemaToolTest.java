@@ -28,7 +28,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.hbase.avro.AvroDaoTest;
 import org.kitesdk.data.hbase.avro.AvroUtils;
 import org.kitesdk.data.hbase.avro.SpecificAvroDao;
@@ -113,7 +113,7 @@ public class SchemaToolTest {
         .setKeyPart1("KeyPart 1").build();
     dao.put(r1);
 
-    PartitionKey key = dao.getPartitionStrategy().partitionKey("KeyPart 1");
+    PartitionKey key = new PartitionKey("KeyPart 1");
     SimpleHBaseRecord r2 = dao.get(key);
     assertEquals(r1.getField1().toString(), r2.getField1().toString());
     assertEquals(r1.getKeyPart1().toString(), r2.getKeyPart1().toString());

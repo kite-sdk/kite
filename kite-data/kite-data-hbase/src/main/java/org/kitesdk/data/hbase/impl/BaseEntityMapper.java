@@ -24,7 +24,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.FieldMapping.MappingType;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 
 /**
  * A base implementation of EntityMapper, that uses the provided EntitySerDe and
@@ -122,8 +122,8 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
     if (keySchema == null || keySerDe == null) {
       keyBytes = new byte[] { (byte) 0 };
     } else {
-      PartitionKey partitionKey = keySchema.getPartitionStrategy()
-          .partitionKeyForEntity(entity);
+      PartitionKey partitionKey = PartitionKey.partitionKeyForEntity(
+          keySchema.getPartitionStrategy(), entity);
       keyBytes = keySerDe.serialize(partitionKey);
     }
     for (FieldMapping fieldMapping : entitySchema.getColumnMappingDescriptor()

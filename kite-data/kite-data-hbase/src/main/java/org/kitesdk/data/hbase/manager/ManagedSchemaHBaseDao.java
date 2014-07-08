@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.apache.hadoop.hbase.client.HTablePool;
 
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.hbase.avro.AvroEntitySchema;
 import org.kitesdk.data.hbase.avro.AvroKeyEntitySchemaParser;
 import org.kitesdk.data.hbase.avro.AvroUtils;
@@ -92,8 +92,7 @@ class ManagedSchemaHBaseDao implements ManagedSchemaDao {
 
   @Override
   public ManagedSchema getManagedSchema(String tableName, String entityName) {
-    PartitionKey key = managedSchemaDao.getPartitionStrategy().partitionKey(
-        tableName, entityName);
+    PartitionKey key = new PartitionKey(tableName, entityName);
     ManagedSchema managedSchemaRecord = managedSchemaDao.get(key);
     if (managedSchemaRecord == null) {
       return null;

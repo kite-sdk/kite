@@ -16,7 +16,7 @@
 package org.kitesdk.data.hbase.avro;
 
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.hbase.avro.entities.CompositeRecord;
 import org.kitesdk.data.hbase.avro.entities.SubRecord1;
 import org.kitesdk.data.hbase.avro.entities.SubRecord2;
@@ -101,7 +101,7 @@ public class CompositeDaoTest {
     // Test put and get
     dao.put(compositeRecord);
 
-    PartitionKey key = dao.getPartitionStrategy().partitionKey("1", "1");
+    PartitionKey key = new PartitionKey("1", "1");
     CompositeRecord returnedCompositeRecord = dao.get(key);
     assertEquals("field1_1", returnedCompositeRecord.getSubRecord1()
         .getField1());
@@ -122,7 +122,7 @@ public class CompositeDaoTest {
     compositeRecord = CompositeRecord.newBuilder().setSubRecord1(subRecord1)
         .build();
     dao.put(compositeRecord);
-    key = dao.getPartitionStrategy().partitionKey("1", "2");
+    key = new PartitionKey("1", "2");
     compositeRecord = dao.get(key);
     assertEquals(null, compositeRecord.getSubRecord2());
   }
@@ -146,7 +146,7 @@ public class CompositeDaoTest {
 
     // Test put and get
     dao.put(compositeRecord);
-    PartitionKey key = dao.getPartitionStrategy().partitionKey("1", "1");
+    PartitionKey key = new PartitionKey("1", "1");
     Map<String, SpecificRecord> returnedCompositeRecord = dao.get(key);
     assertEquals("field1_1", ((SubRecord1) returnedCompositeRecord.get("SubRecord1"))
         .getField1());
@@ -167,7 +167,7 @@ public class CompositeDaoTest {
         .setField1("field1_1").setField2("field1_2").build();
     compositeRecord.put("SubRecord1", subRecord1);
     dao.put(compositeRecord);
-    key = dao.getPartitionStrategy().partitionKey("1", "2");
+    key = new PartitionKey("1", "2");
     compositeRecord = dao.get(key);
     assertEquals(null, compositeRecord.get("SubRecord2"));
   }

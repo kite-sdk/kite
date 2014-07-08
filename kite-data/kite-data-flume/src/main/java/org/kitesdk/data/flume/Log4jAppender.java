@@ -19,7 +19,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetRepositories;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import java.net.URL;
 import java.util.Map;
@@ -103,7 +103,7 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
     }
     super.populateAvroHeaders(hdrs, schema, message);
     if (partitionStrategy != null) {
-      key = partitionStrategy.partitionKeyForEntity(message, key);
+      key = PartitionKey.partitionKeyForEntity(partitionStrategy, message, key);
       int i = 0;
       for (FieldPartitioner fp : partitionStrategy.getFieldPartitioners()) {
         hdrs.put(PARTITION_PREFIX + fp.getName(), fp.valueToString(key.get(i++)));

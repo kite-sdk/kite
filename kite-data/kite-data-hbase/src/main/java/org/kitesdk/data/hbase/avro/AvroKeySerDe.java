@@ -16,7 +16,7 @@
 package org.kitesdk.data.hbase.avro;
 
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.hbase.avro.io.MemcmpDecoder;
 import org.kitesdk.data.hbase.avro.io.MemcmpEncoder;
@@ -121,11 +121,11 @@ public class AvroKeySerDe implements KeySerDe {
     for (int i = 0; i < genericRecord.getSchema().getFields().size(); i++) {
       keyParts[i] = genericRecord.get(i);
     }
-    return partitionStrategy.partitionKey(keyParts);
+    return new PartitionKey(keyParts);
   }
 
   @Override
   public byte[] serialize(Object... keyPartValues) {
-    return serialize(partitionStrategy.partitionKey(keyPartValues));
+    return serialize(new PartitionKey(keyPartValues));
   }
 }

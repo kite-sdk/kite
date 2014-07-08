@@ -29,7 +29,7 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.View;
@@ -140,7 +140,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     writeTestUsers(inputDataset, 10);
 
-    PartitionKey key = partitionStrategy.partitionKey(0);
+    PartitionKey key = new PartitionKey(0);
     Dataset<Record> inputPart0 =
         ((PartitionedDataset<Record>) inputDataset).getPartition(key, false);
 
@@ -166,7 +166,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     writeTestUsers(inputDataset, 10);
 
-    PartitionKey key = partitionStrategy.partitionKey(0);
+    PartitionKey key = new PartitionKey(0);
     Dataset<Record> inputPart0 =
         ((PartitionedDataset<Record>) inputDataset).getPartition(key, false);
     Dataset<Record> outputPart0 =
@@ -194,7 +194,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     writeTestUsers(inputDataset, 10);
 
-    PartitionKey key = partitionStrategy.partitionKey(0);
+    PartitionKey key = new PartitionKey(0);
     Dataset<Record> inputPart0 =
         ((PartitionedDataset<Record>) inputDataset).getPartition(key, false);
 

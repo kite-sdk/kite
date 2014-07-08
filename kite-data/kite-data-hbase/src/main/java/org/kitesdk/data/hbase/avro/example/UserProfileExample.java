@@ -23,7 +23,7 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.hbase.avro.SpecificAvroDao;
 import org.kitesdk.data.hbase.impl.Dao;
 import org.kitesdk.data.hbase.impl.EntityScanner;
@@ -117,8 +117,7 @@ public class UserProfileExample {
   public void printUserProfileActionsForLastName(String lastName) {
     // Create a partial key that will allow us to start the scanner from the
     // first user record that has last name equal to the one provided.
-    PartitionKey startKey = userProfileActionsDao.getPartitionStrategy()
-        .partitionKey("lastName");
+    PartitionKey startKey = new PartitionKey("lastName");
 
     // Get the scanner with the start key. Null for stopKey in the getScanner
     // method indicates that the scanner will scan to the end of the table. Our
@@ -202,8 +201,7 @@ public class UserProfileExample {
     long ts = System.currentTimeMillis();
 
     // Construct the key we'll use to fetch the user.
-    PartitionKey key = userProfileActionsDao.getPartitionStrategy()
-        .partitionKey(lastName, firstName);
+    PartitionKey key = new PartitionKey(lastName, firstName);
 
     // Get the profile and actions entity from the composite dao.
     UserProfileActionsModel profileActionsModel = userProfileActionsDao
