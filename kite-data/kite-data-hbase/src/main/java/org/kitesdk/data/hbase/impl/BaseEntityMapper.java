@@ -122,8 +122,8 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
     if (keySchema == null || keySerDe == null) {
       keyBytes = new byte[] { (byte) 0 };
     } else {
-      PartitionKey partitionKey = keySchema.getPartitionStrategy()
-          .partitionKeyForEntity(entity);
+      PartitionKey partitionKey = PartitionKey.partitionKeyForEntity(
+          keySchema.getPartitionStrategy(), entity);
       keyBytes = keySerDe.serialize(partitionKey);
     }
     for (FieldMapping fieldMapping : entitySchema.getColumnMappingDescriptor()

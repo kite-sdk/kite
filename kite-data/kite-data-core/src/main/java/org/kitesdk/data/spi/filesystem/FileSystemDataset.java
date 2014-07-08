@@ -362,7 +362,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
     values.add(convert.valueForDirname(fp, name));
 
-    return Accessor.getDefault().newPartitionKey(values.toArray());
+    return new PartitionKey(values.toArray());
   }
 
   @SuppressWarnings("unchecked")
@@ -392,7 +392,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       values.addAll(0, partitionKey.getValues());
     }
 
-    return Accessor.getDefault().newPartitionKey(values.toArray());
+    return new PartitionKey(values.toArray());
   }
 
   @Override

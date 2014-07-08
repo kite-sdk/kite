@@ -283,10 +283,8 @@ public class ScannerFilterTest {
     possibleValues.add("field1_22");
     possibleValues.add("field1_23");
     possibleValues.add("field1_24");
-    PartitionKey startKey = dao.getPartitionStrategy().partitionKey("part1_20",
-        "part2_20");
-    PartitionKey stopKey = dao.getPartitionStrategy().partitionKey("part1_25",
-        "part2_25");
+    PartitionKey startKey = new PartitionKey("part1_20", "part2_20");
+    PartitionKey stopKey = new PartitionKey("part1_25", "part2_25");
 
     EntityScannerBuilder<GenericRecord> builder = dao.getScannerBuilder()
         .setStartKey(startKey).setStopKey(stopKey);

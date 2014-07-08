@@ -49,7 +49,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.*;
-import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.FieldPartitioner;
 
 @RunWith(Parameterized.class)
@@ -136,8 +135,8 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertTrue("Partitioned directory 1 exists",
       fileSystem.exists(new Path(testDirectory, "username_hash=1")));
     checkTestUsers(ds, 10);
-    PartitionKey key0 = partitionStrategy.partitionKey(0);
-    PartitionKey key1 = partitionStrategy.partitionKey(1);
+    PartitionKey key0 = new PartitionKey(0);
+    PartitionKey key1 = new PartitionKey(1);
     int total = readTestUsersInPartition(ds, key0, null)
       + readTestUsersInPartition(ds, key1, null);
     Assert.assertEquals(10, total);
@@ -177,8 +176,8 @@ public class TestFileSystemDataset extends MiniDFSTest {
 
     writeTestUsers(ds, 10);
     checkTestUsers(ds, 10);
-    PartitionKey key0 = Accessor.getDefault().newPartitionKey(0);
-    PartitionKey key1 = Accessor.getDefault().newPartitionKey(1);
+    PartitionKey key0 = new PartitionKey(0);
+    PartitionKey key1 = new PartitionKey(1);
     int total = readTestUsersInPartition(ds, key0, "email_hash")
       + readTestUsersInPartition(ds, key0, "email_hash");
     Assert.assertEquals(10, total);
@@ -190,7 +189,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         Assert.assertTrue("Partitioned directory " + part + " exists",
           fileSystem.exists(new Path(testDirectory, part)));
         total += readTestUsersInPartition(ds,
-          partitionStrategy.partitionKey(i1, i2), null);
+          new PartitionKey(i1, i2), null);
       }
     }
     Assert.assertEquals(10, total);
@@ -225,7 +224,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .build();
 
     Assert
-      .assertNull(ds.getPartition(partitionStrategy.partitionKey(1), false));
+      .assertNull(ds.getPartition(new PartitionKey(1), false));
   }
 
   @Test
@@ -245,7 +244,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
             .build())
         .build();
 
-    PartitionKey key = Accessor.getDefault().newPartitionKey(1);
+    PartitionKey key = new PartitionKey(1);
     FileSystemDataset<Record> userPartition = (FileSystemDataset<Record>) ds.getPartition(key, true);
     Assert.assertEquals(key, userPartition.getPartitionKey());
 
@@ -279,18 +278,18 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertTrue(
       fileSystem.isDirectory(new Path(testDirectory, "username_hash=1")));
 
-    ds.dropPartition(partitionStrategy.partitionKey(0));
+    ds.dropPartition(new PartitionKey(0));
     Assert.assertFalse(
       fileSystem.isDirectory(new Path(testDirectory, "username_hash=0")));
 
-    ds.dropPartition(partitionStrategy.partitionKey(1));
+    ds.dropPartition(new PartitionKey(1));
     Assert.assertFalse(
       fileSystem.isDirectory(new Path(testDirectory, "username_hash=1")));
 
     DatasetException caught = null;
 
     try {
-      ds.dropPartition(partitionStrategy.partitionKey(0));
+      ds.dropPartition(new PartitionKey(0));
     } catch (DatasetException e) {
       caught = e;
     }
@@ -460,15 +459,15 @@ public class TestFileSystemDataset extends MiniDFSTest {
     Assert.assertTrue("dirIterator should yield absolute paths.", dirPaths.get(0).isAbsolute());
 
     FileSystemDataset<Record> partition = (FileSystemDataset<Record>)
-        ds.getPartition(partitionStrategy.partitionKey(1, 2), false);
+        ds.getPartition(new PartitionKey(1, 2), false);
     List<Path> leafPaths = Lists.newArrayList(partition.dirIterator());
     Assert.assertEquals(1, leafPaths.size());
     final Path leafPath = leafPaths.get(0);
     Assert.assertTrue("dirIterator should yield absolute paths.", leafPath.isAbsolute());
 
-    Assert.assertEquals(partitionStrategy.partitionKey(1, 2), ds.keyFromDirectory(leafPath));
-    Assert.assertEquals(partitionStrategy.partitionKey(1), ds.keyFromDirectory(leafPath.getParent()));
-    Assert.assertEquals(partitionStrategy.partitionKey(), ds.keyFromDirectory(leafPath.getParent().getParent()));
+    Assert.assertEquals(new PartitionKey(1, 2), ds.keyFromDirectory(leafPath));
+    Assert.assertEquals(new PartitionKey(1), ds.keyFromDirectory(leafPath.getParent()));
+    Assert.assertEquals(new PartitionKey(), ds.keyFromDirectory(leafPath.getParent().getParent()));
 
     TestHelpers.assertThrows("Path with too many components",
         IllegalStateException.class, new Runnable() {

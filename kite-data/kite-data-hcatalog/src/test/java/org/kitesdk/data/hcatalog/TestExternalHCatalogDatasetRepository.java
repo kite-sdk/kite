@@ -145,8 +145,7 @@ public class TestExternalHCatalogDatasetRepository extends TestFileSystemDataset
   }
 
   private void writeRecord(Dataset<GenericRecord> dataset, int partition) {
-    PartitionKey key = dataset.getDescriptor()
-        .getPartitionStrategy().partitionKey(partition);
+    PartitionKey key = new PartitionKey(partition);
     DatasetWriter<GenericRecord> writer =
         ((PartitionedDataset<GenericRecord>) dataset).getPartition(key, true).newWriter();
     try {
