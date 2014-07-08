@@ -121,11 +121,11 @@ public class AvroKeySerDe implements KeySerDe {
     for (int i = 0; i < genericRecord.getSchema().getFields().size(); i++) {
       keyParts[i] = genericRecord.get(i);
     }
-    return partitionStrategy.partitionKey(keyParts);
+    return new PartitionKey(keyParts);
   }
 
   @Override
   public byte[] serialize(Object... keyPartValues) {
-    return serialize(partitionStrategy.partitionKey(keyPartValues));
+    return serialize(new PartitionKey(keyPartValues));
   }
 }

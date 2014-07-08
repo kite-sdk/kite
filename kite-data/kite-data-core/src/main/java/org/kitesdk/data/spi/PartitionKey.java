@@ -17,9 +17,16 @@ package org.kitesdk.data.spi;
 
 import com.google.common.base.Objects;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.apache.avro.generic.GenericRecord;
+import org.kitesdk.data.PartitionStrategy;
 
 /**
  * <p>
@@ -47,12 +54,8 @@ public class PartitionKey {
 
   private final Object[] values;
 
-  PartitionKey(Object... values) {
+  public PartitionKey(Object... values) {
     this.values = values;
-  }
-
-  PartitionKey(int size) {
-    this.values = new Object[size];
   }
 
   public List<Object> getValues() {
@@ -69,8 +72,71 @@ public class PartitionKey {
     return null;
   }
 
-  void set(int index, Object value) {
+  protected void set(int index, Object value) {
     values[index] = value;
+  }
+
+  /**
+   * <p>
+   * Construct a partition key for the given entity.
+   * </p>
+   * <p>
+   * This is a convenient way to find the partition that a given entity is
+   * written to, or to find a partition using objects from the entity domain.
+   * </p>
+   */
+  public static PartitionKey partitionKeyForEntity(PartitionStrategy strategy,
+      Object entity) {
+    return partitionKeyForEntity(strategy, entity, null);
+  }
+
+  /**
+   * <p>
+   * Construct a partition key for the given entity, reusing the supplied key if
+   * not null.
+   * </p>
+   * <p>
+   * This is a convenient way to find the partition that a given entity is
+   * written to, or to find a partition using objects from the entity domain.
+   * </p>
+   */
+  @SuppressWarnings("unchecked")
+  public static PartitionKey partitionKeyForEntity(PartitionStrategy strategy,
+      Object entity, @Nullable PartitionKey reuseKey) {
+    List<FieldPartitioner> fieldPartitioners = strategy.getFieldPartitioners();
+
+    PartitionKey key = (reuseKey == null ?
+        new PartitionKey(new Object[fieldPartitioners.size()]) : reuseKey);
+
+    for (int i = 0; i < fieldPartitioners.size(); i++) {
+      FieldPartitioner fp = fieldPartitioners.get(i);
+      String name = fp.getSourceName();
+      Object value;
+      if (entity instanceof GenericRecord) {
+        value = ((GenericRecord) entity).get(name);
+      } else {
+        try {
+          PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name,
+              entity.getClass(), getter(name), null /* assume read only */);
+          value = propertyDescriptor.getReadMethod().invoke(entity);
+        } catch (IllegalAccessException e) {
+          throw new RuntimeException("Cannot read property " + name + " from "
+              + entity, e);
+        } catch (InvocationTargetException e) {
+          throw new RuntimeException("Cannot read property " + name + " from "
+              + entity, e);
+        } catch (IntrospectionException e) {
+          throw new RuntimeException("Cannot read property " + name + " from "
+              + entity, e);
+        }
+      }
+      key.set(i, fp.apply(value));
+    }
+    return key;
+  }
+
+  private static String getter(String name) {
+    return "get" + name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1);
   }
 
   @Override

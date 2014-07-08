@@ -136,7 +136,7 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
       values[i] = key.get(i);
     }
 
-    return strategy.partitionKey(values);
+    return new PartitionKey(values);
   }
 
   @Override

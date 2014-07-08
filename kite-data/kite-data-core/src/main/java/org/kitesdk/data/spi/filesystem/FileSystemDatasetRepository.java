@@ -144,9 +144,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .descriptor(newDescriptor)
         .type(type)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(newDescriptor.isPartitioned() ?
-            org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
-            null)
+        .partitionKey(newDescriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
   }
@@ -201,9 +199,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .descriptor(updatedDescriptor)
         .type(type)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(updatedDescriptor.isPartitioned() ?
-            org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
-            null)
+        .partitionKey(updatedDescriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
   }
@@ -222,9 +218,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .descriptor(descriptor)
         .type(type)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(descriptor.isPartitioned() ?
-            org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
-            null)
+        .partitionKey(descriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
 
@@ -377,8 +371,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
       values.add(fp.valueFromString(stringValue,
           SchemaUtil.getPartitionType(fp, schema)));
     }
-    return org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey(
-        values.toArray(new Object[values.size()]));
+    return new PartitionKey(values.toArray(new Object[values.size()]));
   }
 
   @Override

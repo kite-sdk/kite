@@ -92,8 +92,7 @@ class ManagedSchemaHBaseDao implements ManagedSchemaDao {
 
   @Override
   public ManagedSchema getManagedSchema(String tableName, String entityName) {
-    PartitionKey key = managedSchemaDao.getPartitionStrategy().partitionKey(
-        tableName, entityName);
+    PartitionKey key = new PartitionKey(tableName, entityName);
     ManagedSchema managedSchemaRecord = managedSchemaDao.get(key);
     if (managedSchemaRecord == null) {
       return null;

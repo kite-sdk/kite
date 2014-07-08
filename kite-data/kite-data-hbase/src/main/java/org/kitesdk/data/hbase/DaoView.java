@@ -193,7 +193,7 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
       values[i] = marker.valueFor(fp);
     }
 
-    return strategy.partitionKey(values);
+    return new PartitionKey(values);
   }
 
   @Override

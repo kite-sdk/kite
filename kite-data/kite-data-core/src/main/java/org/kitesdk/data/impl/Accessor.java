@@ -57,8 +57,6 @@ public abstract class Accessor {
 
   public abstract Format newFormat(String name);
 
-  public abstract PartitionKey newPartitionKey(Object... values);
-
   public abstract PartitionStrategy getSubpartitionStrategy(PartitionStrategy partitionStrategy, int startIndex);
 
   public abstract String toExpression(PartitionStrategy partitionStrategy);
