@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data;
+package org.kitesdk.data.spi;
 
 import com.google.common.base.Objects;
 
@@ -23,14 +23,14 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * <p>
- * A key for retrieving partitions from a {@link Dataset}.
+ * A key for retrieving partitions from a {@link org.kitesdk.data.Dataset}.
  * </p>
  * <p>
  * A {@code PartitionKey} is an ordered sequence of values corresponding to the
  * {@link org.kitesdk.data.spi.FieldPartitioner}s in a
- * {@link PartitionStrategy}. You can obtain a {@link PartitionKey} using
- * {@link PartitionStrategy#partitionKey(Object...)} or
- * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
+ * {@link org.kitesdk.data.PartitionStrategy}. You can obtain a {@link PartitionKey} using
+ * {@link org.kitesdk.data.PartitionStrategy#partitionKey(Object...)} or
+ * {@link org.kitesdk.data.PartitionStrategy#partitionKeyForEntity(Object)}.
  * </p>
  * <p>
  * Implementations of {@link PartitionKey} are typically not thread-safe; that 
@@ -38,9 +38,9 @@ import javax.annotation.concurrent.NotThreadSafe;
  * undefined.
  * </p>
  * 
- * @see PartitionStrategy
+ * @see org.kitesdk.data.PartitionStrategy
  * @see org.kitesdk.data.spi.FieldPartitioner
- * @see Dataset
+ * @see org.kitesdk.data.Dataset
  */
 @NotThreadSafe
 public class PartitionKey {

@@ -16,7 +16,7 @@
 package org.kitesdk.data.impl;
 
 import org.kitesdk.data.Format;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 
 /**

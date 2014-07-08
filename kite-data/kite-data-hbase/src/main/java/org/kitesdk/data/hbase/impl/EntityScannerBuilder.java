@@ -23,7 +23,7 @@ import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.hbase.filters.EntityFilter;
 import org.kitesdk.data.hbase.filters.RegexEntityFilter;
 import org.kitesdk.data.hbase.filters.SingleFieldEntityFilter;

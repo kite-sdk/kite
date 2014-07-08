@@ -23,7 +23,7 @@ import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.IncompatibleSchemaException;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
@@ -313,7 +313,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
   }
 
   /**
-   * Get a {@link org.kitesdk.data.PartitionKey} corresponding to a partition's filesystem path
+   * Get a {@link org.kitesdk.data.spi.PartitionKey} corresponding to a partition's filesystem path
    * represented as a {@link URI}. If the path is not a valid partition,
    * then {@link IllegalArgumentException} is thrown. Note that the partition does not
    * have to exist.

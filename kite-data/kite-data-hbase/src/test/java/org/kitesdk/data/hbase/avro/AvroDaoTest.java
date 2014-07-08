@@ -16,7 +16,7 @@
 package org.kitesdk.data.hbase.avro;
 
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.hbase.avro.entities.ArrayRecord;
 import org.kitesdk.data.hbase.avro.entities.EmbeddedRecord;
 import org.kitesdk.data.hbase.avro.entities.TestEnum;
