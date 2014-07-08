@@ -60,6 +60,7 @@
   <body>
     <menu name="Main" inherit="top">
       <item name="Home" href="index.html"/>
+      <item name="Development Guide" href="guide"/>
       <item name="Release Notes" href="release_notes.html"/>
       <item name="Javadoc" href="apidocs/index.html"/>
       <item name="API Diffs" href="jdiff/changes.html"/>

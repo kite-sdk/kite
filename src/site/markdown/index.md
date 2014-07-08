@@ -16,6 +16,8 @@ applications
 
 [Kite Documentation](overview.html)
 
+[Kite Development Guide](guide)
+
 ## Modules
 
 * [__Kite Data__](kite-data/index.html) The data module provides logical abstractions on
