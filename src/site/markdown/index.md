@@ -14,9 +14,9 @@ applications
 * __Provides smart defaults__ for platform choices
 * __Supports gradual adoption__ via loosely-coupled modules
 
-[Kite Documentation](overview.html)
+## Kite Development Guide
 
-[Kite Development Guide](guide)
+* [Kite SDK Development Guide](guide)
 
 ## Modules
 
