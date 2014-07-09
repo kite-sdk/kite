@@ -40,7 +40,6 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
   private static final Logger LOG = LoggerFactory
     .getLogger(PartitionedDatasetWriter.class);
 
-  private static final String WRITER_CACHE_SIZE_PROP = "kite.writer.cache-size";
   private static final int DEFAULT_WRITER_CACHE_SIZE = 10;
 
   private FileSystemView<E> view;
@@ -62,13 +61,13 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
     this.partitionStrategy = descriptor.getPartitionStrategy();
 
     int maxWriters = DEFAULT_WRITER_CACHE_SIZE;
-    if (descriptor.hasProperty(WRITER_CACHE_SIZE_PROP)) {
+    if (descriptor.hasProperty(FileSystemProperties.WRITER_CACHE_SIZE_PROP)) {
       try {
         maxWriters = Integer.parseInt(
-            descriptor.getProperty(WRITER_CACHE_SIZE_PROP));
+            descriptor.getProperty(FileSystemProperties.WRITER_CACHE_SIZE_PROP));
       } catch (NumberFormatException e) {
-        LOG.warn("Not an integer: " + WRITER_CACHE_SIZE_PROP + "=" +
-            descriptor.getProperty(WRITER_CACHE_SIZE_PROP));
+        LOG.warn("Not an integer: " + FileSystemProperties.WRITER_CACHE_SIZE_PROP + "=" +
+            descriptor.getProperty(FileSystemProperties.WRITER_CACHE_SIZE_PROP));
       }
     } else if (partitionStrategy.getCardinality() != FieldPartitioner.UNKNOWN_CARDINALITY) {
         maxWriters = Math.min(maxWriters, partitionStrategy.getCardinality());

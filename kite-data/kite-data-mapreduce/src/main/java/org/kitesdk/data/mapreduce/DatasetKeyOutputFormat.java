@@ -37,7 +37,6 @@ import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
-import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.TypeNotFoundException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.AbstractDataset;
@@ -45,10 +44,12 @@ import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.Mergeable;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.spi.TemporaryDatasetRepository;
 import org.kitesdk.data.spi.TemporaryDatasetRepositoryAccessor;
 import org.kitesdk.data.spi.URIBuilder;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
+import org.kitesdk.data.spi.filesystem.FileSystemProperties;
 
 /**
  * A MapReduce {@code OutputFormat} for writing to a {@link Dataset}.
@@ -468,8 +469,12 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   }
 
   private static DatasetDescriptor copy(DatasetDescriptor descriptor) {
-    // location must be null when creating a new dataset
-    return new DatasetDescriptor.Builder(descriptor).location((URI) null).build();
+    // don't reuse the previous dataset's location and don't use durable
+    // parquet writers because fault-tolerance is handled by OutputCommitter
+    return new DatasetDescriptor.Builder(descriptor)
+        .property(FileSystemProperties.NON_DURABLE_PARQUET_PROP, "true")
+        .location((URI) null)
+        .build();
   }
 
 }

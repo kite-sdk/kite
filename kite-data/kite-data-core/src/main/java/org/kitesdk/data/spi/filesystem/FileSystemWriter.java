@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.Closeable;
 import java.io.Flushable;
@@ -32,6 +31,7 @@ import org.kitesdk.data.DatasetWriterException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
+import org.kitesdk.data.spi.DescriptorUtil;
 import org.kitesdk.data.spi.ReaderWriterState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +39,6 @@ import org.slf4j.LoggerFactory;
 class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileSystemWriter.class);
-
-  @VisibleForTesting
-  static final String ALLOW_CSV_PROP = "kite.allow.csv";
-
-  public static final String DURABLE_PARQUET_PROP = "kite.parquet.durable-writes";
 
   static interface FileAppender<E> extends Flushable, Closeable {
     public void open() throws IOException;
@@ -200,16 +195,19 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
   private <E> FileAppender<E> newAppender(Path temp) {
     Format format = descriptor.getFormat();
     if (Formats.PARQUET.equals(format)) {
-      if (isTrue(DURABLE_PARQUET_PROP, descriptor)) {
-        return (FileAppender<E>) new DurableParquetAppender(
+      // by default, guarantee durability with the more costly writer
+      if (DescriptorUtil.isEnabled(
+          FileSystemProperties.NON_DURABLE_PARQUET_PROP, descriptor)) {
+        return (FileAppender<E>) new ParquetAppender(
             fs, temp, descriptor.getSchema(), true);
       } else {
-        return (FileAppender<E>) new ParquetAppender(
+        return (FileAppender<E>) new DurableParquetAppender(
             fs, temp, descriptor.getSchema(), true);
       }
     } else if (Formats.AVRO.equals(format)) {
       return new AvroAppender<E>(fs, temp, descriptor.getSchema(), true);
-    } else if (Formats.CSV.equals(format) && isTrue(ALLOW_CSV_PROP, descriptor)) {
+    } else if (Formats.CSV.equals(format) &&
+        DescriptorUtil.isEnabled(FileSystemProperties.ALLOW_CSV_PROP, descriptor)) {
       return new CSVAppender<E>(fs, temp, descriptor);
     } else {
       this.state = ReaderWriterState.ERROR;
@@ -232,13 +230,5 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
         throws IOException, InterruptedException {
       FileSystemWriter.this.close();
     }
-  }
-
-  private boolean isTrue(String property, DatasetDescriptor descriptor) {
-    if (descriptor.hasProperty(property)) {
-      // return true only if the property value is "true"
-      return Boolean.valueOf(descriptor.getProperty(property));
-    }
-    return false;
   }
 }
