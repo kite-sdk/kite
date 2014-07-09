@@ -37,7 +37,7 @@ import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.filesystem.CSVProperties;
 import org.kitesdk.data.spi.filesystem.CSVUtil;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
-import org.kitesdk.data.spi.filesystem.SchemaValidationUtil;
+import org.kitesdk.data.spi.SchemaValidationUtil;
 import org.kitesdk.data.spi.filesystem.TemporaryFileSystemDatasetRepository;
 import org.kitesdk.tools.CopyTask;
 import org.slf4j.Logger;
@@ -104,7 +104,7 @@ public class CSVImportCommand extends BaseDatasetCommand {
 
     String dataset = targets.get(1);
 
-    View<GenericData.Record> target = load(dataset);
+    View<GenericData.Record> target = load(dataset, GenericData.Record.class);
     Schema datasetSchema = target.getDataset().getDescriptor().getSchema();
 
     // TODO: replace this with a temporary Dataset from a FS repo

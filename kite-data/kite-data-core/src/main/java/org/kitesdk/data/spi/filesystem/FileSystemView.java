@@ -42,6 +42,7 @@ import org.apache.hadoop.fs.Path;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +61,8 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
   private final FileSystem fs;
   private final Path root;
 
-  FileSystemView(FileSystemDataset<E> dataset) {
-    super(dataset);
+  FileSystemView(FileSystemDataset<E> dataset, Class<E> type) {
+    super(dataset, type);
     this.fs = dataset.getFileSystem();
     this.root = dataset.getDirectory();
   }
@@ -80,7 +81,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
   @Override
   public DatasetReader<E> newReader() {
     AbstractDatasetReader<E> reader = new MultiFileDatasetReader<E>(
-        fs, pathIterator(), dataset.getDescriptor(), constraints);
+        fs, pathIterator(), dataset.getDescriptor(), constraints, type);
     reader.initialize();
     return reader;
   }
@@ -113,8 +114,8 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
   }
 
   @Override
-  public InputFormat<E, Void> getInputFormat() {
-    return new FileSystemViewKeyInputFormat<E>(this);
+  public InputFormat<E, Void> getInputFormat(Configuration conf) {
+    return new FileSystemViewKeyInputFormat<E>(this, conf);
   }
 
   PathIterator pathIterator() {

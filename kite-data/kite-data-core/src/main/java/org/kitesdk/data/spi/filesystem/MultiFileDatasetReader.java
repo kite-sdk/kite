@@ -36,6 +36,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   private final FileSystem fileSystem;
   private final DatasetDescriptor descriptor;
   private final Constraints constraints;
+  private final Class<E> type;
 
   private final Iterator<Path> filesIter;
   private final PathIterator pathIter;
@@ -45,7 +46,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   private ReaderWriterState state;
 
   public MultiFileDatasetReader(FileSystem fileSystem, Iterable<Path> files,
-      DatasetDescriptor descriptor, Constraints constraints) {
+      DatasetDescriptor descriptor, Constraints constraints, Class<E> type) {
     Preconditions.checkArgument(fileSystem != null, "FileSystem cannot be null");
     Preconditions.checkArgument(descriptor != null, "Descriptor cannot be null");
     Preconditions.checkArgument(files != null, "Partition paths cannot be null");
@@ -53,6 +54,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
     this.fileSystem = fileSystem;
     this.descriptor = descriptor;
     this.constraints = constraints;
+    this.type = type;
     this.filesIter = files.iterator();
     this.state = ReaderWriterState.NEW;
     if (files instanceof PathIterator) {
@@ -80,13 +82,13 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   private void openNextReader() {
     if (Formats.PARQUET.equals(descriptor.getFormat())) {
       this.reader = new ParquetFileSystemDatasetReader(fileSystem,
-          filesIter.next(), descriptor.getSchema());
+          filesIter.next(), descriptor.getSchema(), type);
     } else if (Formats.CSV.equals(descriptor.getFormat())) {
       this.reader = new CSVFileReader<E>(fileSystem, filesIter.next(),
-          descriptor);
+          descriptor, type);
     } else {
       this.reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
-          descriptor.getSchema());
+          descriptor.getSchema(), type);
     }
     reader.initialize();
     this.readerIterator = Iterators.filter(reader,

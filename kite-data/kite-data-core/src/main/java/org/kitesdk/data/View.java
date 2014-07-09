@@ -97,4 +97,13 @@ public interface View<E> {
    * @since 0.12.0
    */
   public boolean deleteAll();
+
+  /**
+   * Get the runtime type of entities contained in this {@code View}.
+   * 
+   * @return the runtime type of entities contained in this view
+   * 
+   * @since 0.15.0
+   */
+  public Class<E> getType();
 }

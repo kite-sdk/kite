@@ -90,7 +90,7 @@ public class DaoViewTest {
   public void testRange() {
     populateTestEntities(10);
 
-    final AbstractRefinableView<TestEntity> range = new DaoView<TestEntity>(ds)
+    final AbstractRefinableView<TestEntity> range = new DaoView<TestEntity>(ds, TestEntity.class)
             .fromAfter(NAMES[0], "1").to(NAMES[0], "9")
             .fromAfter(NAMES[1], "1").to(NAMES[1], "9");
 
@@ -124,17 +124,17 @@ public class DaoViewTest {
   public void testLimitedReader() {
     populateTestEntities(10);
 
-    AbstractRefinableView<TestEntity> range = new DaoView<TestEntity>(ds)
+    AbstractRefinableView<TestEntity> range = new DaoView<TestEntity>(ds, TestEntity.class)
         .from(NAMES[0], "0").to(NAMES[0], "9")
         .from(NAMES[1], "0").to(NAMES[1], "9");
     validRange(range, 0, 10);
 
-    range = new DaoView<TestEntity>(ds)
+    range = new DaoView<TestEntity>(ds, TestEntity.class)
         .fromAfter(NAMES[0], "1").to(NAMES[0], "9")
         .fromAfter(NAMES[1], "1").to(NAMES[1], "9");
     validRange(range, 2, 10);
 
-    range = new DaoView<TestEntity>(ds)
+    range = new DaoView<TestEntity>(ds, TestEntity.class)
         .from(NAMES[0], "0").toBefore(NAMES[0], "9")
         .from(NAMES[1], "0").toBefore(NAMES[1], "9");
     validRange(range, 0, 9);

@@ -15,6 +15,8 @@
  */
 package org.kitesdk.data.spi;
 
+import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetRepository;
 
 /**
@@ -26,4 +28,22 @@ import org.kitesdk.data.DatasetRepository;
  * need to implement deprecated methods.
  */
 public abstract class AbstractDatasetRepository implements DatasetRepository {
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
+    return (Dataset<E>) create(name, descriptor, Object.class);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <E> Dataset<E> load(String name) {
+    return (Dataset<E>) load(name, Object.class);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <E> Dataset<E> update(String name, DatasetDescriptor descriptor) {
+    return (Dataset<E>) update(name, descriptor, Object.class);
+  }
 }

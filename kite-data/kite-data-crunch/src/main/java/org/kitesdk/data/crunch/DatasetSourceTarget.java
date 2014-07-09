@@ -58,6 +58,10 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   private FormatBundle formatBundle;
   private AvroType<E> avroType;
 
+  public DatasetSourceTarget(View<E> view) {
+    this(view, view.getType());
+  }
+
   @SuppressWarnings("unchecked")
   public DatasetSourceTarget(View<E> view, Class<E> type) {
     super(view);
@@ -85,7 +89,7 @@ class DatasetSourceTarget<E> extends DatasetTarget<E> implements ReadableSourceT
   }
 
   public DatasetSourceTarget(URI uri, Class<E> type) {
-    this(Datasets.<E, View<E>>load(uri), type);
+    this(Datasets.<E, View<E>>load(uri, type));
   }
 
   @Override

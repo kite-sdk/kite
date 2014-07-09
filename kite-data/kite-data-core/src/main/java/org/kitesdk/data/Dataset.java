@@ -50,7 +50,7 @@ import javax.annotation.concurrent.Immutable;
 public interface Dataset<E> extends RefinableView<E> {
 
   /**
-   * Get the name of a {@code Dataset}. No guarantees are made about the format 
+   * Get the name of a {@code Dataset}. No guarantees are made about the format
    * of this name.
    */
   String getName();
@@ -111,7 +111,7 @@ public interface Dataset<E> extends RefinableView<E> {
    * Return a {@code URI} for this {@code Dataset}.
    *
    * The returned URI should load a copy of this dataset when passed to
-   * {@link Datasets#load(java.net.URI)}.
+   * {@link Datasets#load(java.net.URI, java.lang.Class)}.
    *
    * @return a URI that identifies this dataset
    */

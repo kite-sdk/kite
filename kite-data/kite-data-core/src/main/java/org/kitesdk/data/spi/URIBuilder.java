@@ -29,27 +29,27 @@ import org.kitesdk.data.View;
 import com.google.common.collect.Maps;
 
 /**
- * Builds dataset and view URIs 
+ * Builds dataset and view URIs
  */
 public class URIBuilder {
   private URI repoUri;
   private String datasetName;
   // LinkedHashMap preserves the order so that constructed URIs are more predictable
-  private Map<String, String> equalityConstraints = Maps.newLinkedHashMap(); 
+  private Map<String, String> equalityConstraints = Maps.newLinkedHashMap();
 
   /**
    * Constructs a builder based on the given repository URI and {@link Dataset#getName() dataset name}.
-   * 
+   *
    * @param repoUri the {@link DatasetRepository} URI
    * @param datasetName the {@link Dataset} name
    */
   public URIBuilder(String repoUri, String datasetName) {
     this(URI.create(repoUri), datasetName);
   }
-  
+
   /**
    * Constructs a builder based on the given repository URI and {@link Dataset#getName() dataset name}.
-   * 
+   *
    * @param repoUri the {@link DatasetRepository} URI
    * @param datasetName the {@link Dataset} name
    */
@@ -59,11 +59,11 @@ public class URIBuilder {
     this.repoUri = repoUri;
     this.datasetName = datasetName;
   }
-  
+
   /**
    * Adds a view constraint equivalent to
    * {@link org.kitesdk.data.RefinableView#with(String, Object...)}
-   * 
+   *
    * @param name the field name of the Entity
    * @param value the field value
    * @return this builder
@@ -72,12 +72,12 @@ public class URIBuilder {
     equalityConstraints.put(name, Conversions.makeString(value));
     return this;
   }
-  
+
   /**
    * Returns the URI encompassing the given constraints. The referenced
    * {@link Dataset} or {@link View} may be loaded again with
-   * {@link Datasets#load(URI)}.
-   * 
+   * {@link Datasets#load(java.net.URI, java.lang.Class)}.
+   *
    * @return the URI
    */
   public URI build() {

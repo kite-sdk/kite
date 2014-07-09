@@ -80,9 +80,9 @@ abstract class BaseDatasetCommand extends BaseCommand {
     return uriOrName.startsWith("repo:");
   }
 
-  protected <E> View<E> load(String uriOrName) {
+  protected <E> View<E> load(String uriOrName, Class<E> type) {
     if (isDataUri(uriOrName)) {
-      return Datasets.<E, View<E>>load(uriOrName);
+      return Datasets.<E, View<E>>load(uriOrName, type);
     } else {
       return getDatasetRepository().load(uriOrName);
     }

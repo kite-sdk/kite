@@ -22,19 +22,20 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
-import org.apache.avro.reflect.ReflectDatumReader;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import org.kitesdk.data.spi.DataModelUtil;
 
 class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
 
   private final FileSystem fileSystem;
   private final Path path;
   private final Schema schema;
+  private final Class<E> type;
 
   private ReaderWriterState state;
   private DataFileReader<E> reader;
@@ -42,7 +43,8 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
   private static final Logger LOG = LoggerFactory
     .getLogger(FileSystemDatasetReader.class);
 
-  public FileSystemDatasetReader(FileSystem fileSystem, Path path, Schema schema) {
+  public FileSystemDatasetReader(FileSystem fileSystem, Path path, Schema schema,
+      Class<E> type) {
     Preconditions.checkArgument(fileSystem != null, "FileSystem cannot be null");
     Preconditions.checkArgument(path != null, "Path cannot be null");
     Preconditions.checkArgument(schema != null, "Schema cannot be null");
@@ -50,6 +52,7 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
     this.fileSystem = fileSystem;
     this.path = path;
     this.schema = schema;
+    this.type = type;
 
     this.state = ReaderWriterState.NEW;
   }
@@ -63,8 +66,8 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
 
     try {
       reader = new DataFileReader<E>(new AvroFSInput(fileSystem.open(path),
-        fileSystem.getFileStatus(path).getLen()), new ReflectDatumReader<E>(
-        schema));
+        fileSystem.getFileStatus(path).getLen()),
+          DataModelUtil.getDatumReaderForType(type, schema));
     } catch (IOException e) {
       throw new DatasetReaderException("Unable to create reader path:" + path, e);
     }

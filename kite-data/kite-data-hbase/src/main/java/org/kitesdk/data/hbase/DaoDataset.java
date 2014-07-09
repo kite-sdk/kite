@@ -15,7 +15,10 @@
  */
 package org.kitesdk.data.hbase;
 
+import com.google.common.base.Preconditions;
 import java.net.URI;
+import org.apache.avro.generic.IndexedRecord;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -38,12 +41,18 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   private final URI uri;
   private final DaoView<E> unbounded;
 
-  public DaoDataset(String name, Dao<E> dao, DatasetDescriptor descriptor, URI uri) {
+  public DaoDataset(String name, Dao<E> dao, DatasetDescriptor descriptor,
+      URI uri, Class<E> type) {
+    super(type, descriptor.getSchema());
+    Preconditions.checkArgument(IndexedRecord.class.isAssignableFrom(type) ||
+        type == Object.class,
+        "HBase only supports the generic and specific data models. The entity"
+        + " type must implement IndexedRecord");
     this.name = name;
     this.dao = dao;
     this.descriptor = descriptor;
     this.uri = uri;
-    this.unbounded = new DaoView<E>(this);
+    this.unbounded = new DaoView<E>(this, type);
   }
 
   Dao<E> getDao() {
@@ -131,7 +140,7 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   }
 
   @Override
-  public InputFormat<E, Void> getInputFormat() {
+  public InputFormat<E, Void> getInputFormat(Configuration conf) {
     return new HBaseViewKeyInputFormat<E>(this);
   }
 }

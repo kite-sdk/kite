@@ -1,0 +1,18 @@
+{
+  "name": "SmallEvent",
+  "namespace": "org.kitesdk.data.event",
+  "type": "record",
+  "doc": "A projection of standard event type for logging, based on the paper 'The Unified Logging Infrastructure for Data Analytics at Twitter' by Lee et al, http://vldb.org/pvldb/vol5/p1771_georgelee_vldb2012.pdf",
+  "fields": [
+    {
+      "name": "user_id",
+      "type": "long",
+      "doc": "A unique identifier for the user. Required."
+    },
+    {
+      "name": "session_id",
+      "type": "string",
+      "doc": "A unique identifier for the session. Required."
+    }
+  ]
+}

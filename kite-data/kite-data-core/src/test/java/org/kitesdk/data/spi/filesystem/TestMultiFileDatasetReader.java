@@ -46,7 +46,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
       @Override
       public void validate(Record record, int recordNum) {
         Assert.assertNotNull(record);
-        Assert.assertEquals(String.valueOf(recordNum % 100), record.get("text"));
+        Assert.assertEquals(String.valueOf(recordNum % 100), record.get("text").toString());
       }
     };
   public static final DatasetDescriptor DESCRIPTOR = new DatasetDescriptor
@@ -57,7 +57,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
     return new MultiFileDatasetReader<GenericData.Record>(
         FileSystem.get(new Configuration()),
         Lists.newArrayList(TEST_FILE, TEST_FILE),
-        DESCRIPTOR, CONSTRAINTS);
+        DESCRIPTOR, CONSTRAINTS, GenericData.Record.class);
   }
 
   @Override
@@ -79,7 +79,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
   @Test
   public void testEmptyPathList() throws IOException {
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, Lists.<Path>newArrayList(), DESCRIPTOR, CONSTRAINTS);
+        fileSystem, Lists.<Path>newArrayList(), DESCRIPTOR, CONSTRAINTS, Record.class);
 
     checkReaderBehavior(reader, 0, VALIDATOR);
   }
@@ -87,7 +87,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
   @Test
   public void testSingleFile() throws IOException {
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, Lists.newArrayList(TEST_FILE), DESCRIPTOR, CONSTRAINTS);
+        fileSystem, Lists.newArrayList(TEST_FILE), DESCRIPTOR, CONSTRAINTS, Record.class);
 
     checkReaderBehavior(reader, 100, VALIDATOR);
   }
@@ -96,27 +96,27 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
   public void testRequriesFileSystem() throws IOException {
     new MultiFileDatasetReader<Record>(
         null, Lists.newArrayList(TEST_FILE, TEST_FILE), DESCRIPTOR,
-        CONSTRAINTS);
+        CONSTRAINTS, Record.class);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testRequriesFiles() throws IOException {
     new MultiFileDatasetReader<Record>(
-        fileSystem, null, DESCRIPTOR, CONSTRAINTS);
+        fileSystem, null, DESCRIPTOR, CONSTRAINTS, Record.class);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testRequriesDescriptor() throws IOException {
     new MultiFileDatasetReader<Record>(
         fileSystem, Lists.newArrayList(TEST_FILE, TEST_FILE), null,
-        CONSTRAINTS);
+        CONSTRAINTS, Record.class);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testRejectsNullPaths() throws IOException {
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
         fileSystem, Lists.newArrayList(null, TEST_FILE), DESCRIPTOR,
-        CONSTRAINTS);
+        CONSTRAINTS, Record.class);
     reader.initialize();
     reader.hasNext();
   }
@@ -129,7 +129,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
         .build();
 
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
-        fileSystem, Lists.newArrayList(TEST_FILE), descriptor, CONSTRAINTS);
+        fileSystem, Lists.newArrayList(TEST_FILE), descriptor, CONSTRAINTS, Record.class);
 
     try {
       reader.initialize();
@@ -153,7 +153,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
 
     MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
         fileSystem, Lists.newArrayList(missingFile, TEST_FILE), DESCRIPTOR,
-        CONSTRAINTS);
+        CONSTRAINTS, Record.class);
 
     try {
       try {
@@ -191,7 +191,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
     try {
       MultiFileDatasetReader<Record> reader = new MultiFileDatasetReader<Record>(
           fileSystem, Lists.newArrayList(emptyFile, TEST_FILE), DESCRIPTOR,
-          CONSTRAINTS);
+          CONSTRAINTS, Record.class);
 
       try {
         try {

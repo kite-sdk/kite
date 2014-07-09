@@ -129,7 +129,7 @@ public class TestMapReduce {
             .property("kite.allow.csv", "true")
             .schema(STRING_SCHEMA)
             .format(format)
-            .build());
+            .build(), GenericData.Record.class);
     DatasetWriter<GenericData.Record> writer = inputDataset.newWriter();
     writer.write(newStringRecord("apple"));
     writer.write(newStringRecord("banana"));
@@ -139,7 +139,7 @@ public class TestMapReduce {
     writer.write(newStringRecord("apple"));
     writer.close();
 
-    DatasetKeyInputFormat.configure(job).readFrom(inputDataset);
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset).withType(GenericData.Record.class);
 
     job.setMapperClass(LineCountMapper.class);
     job.setMapOutputKeyClass(Text.class);
@@ -152,9 +152,9 @@ public class TestMapReduce {
             .property("kite.allow.csv", "true")
             .schema(STATS_SCHEMA)
             .format(format)
-            .build());
+            .build(), GenericData.Record.class);
 
-    DatasetKeyOutputFormat.configure(job).writeTo(outputDataset);
+    DatasetKeyOutputFormat.configure(job).writeTo(outputDataset).withType(GenericData.Record.class);
 
     Assert.assertTrue(job.waitForCompletion(true));
 

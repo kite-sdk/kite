@@ -23,6 +23,7 @@ import com.google.common.base.Preconditions;
 import java.io.EOFException;
 import java.io.IOException;
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -35,6 +36,7 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDa
   private FileSystem fileSystem;
   private Path path;
   private Schema schema;
+  private Class<E> type;
 
   private ReaderWriterState state;
   private AvroParquetReader<E> reader;
@@ -44,14 +46,19 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDa
   private static final Logger LOG = LoggerFactory
     .getLogger(ParquetFileSystemDatasetReader.class);
 
-  public ParquetFileSystemDatasetReader(FileSystem fileSystem, Path path, Schema schema) {
+  public ParquetFileSystemDatasetReader(FileSystem fileSystem, Path path,
+      Schema schema, Class<E> type) {
     Preconditions.checkArgument(fileSystem != null, "FileSystem cannot be null");
     Preconditions.checkArgument(path != null, "Path cannot be null");
     Preconditions.checkArgument(schema != null, "Schema cannot be null");
+    Preconditions.checkArgument(IndexedRecord.class.isAssignableFrom(type) ||
+        (Class<?>)type == Object.class,
+        "The entity type must implement IndexedRecord");
 
     this.fileSystem = fileSystem;
     this.path = path;
     this.schema = schema;
+    this.type = type;
 
     this.state = ReaderWriterState.NEW;
   }

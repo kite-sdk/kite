@@ -22,6 +22,7 @@ import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.RefinableView;
 import javax.annotation.concurrent.Immutable;
+import org.apache.avro.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,11 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
   private static final Logger LOG = LoggerFactory.getLogger(AbstractDataset.class);
 
   protected abstract RefinableView<E> asRefinableView();
+  protected final Class<E> type;
+
+  public AbstractDataset(Class<E> type, Schema schema) {
+    this.type = DataModelUtil.resolveType(type, schema);
+  }
 
   @Override
   public Dataset<E> getDataset() {
@@ -62,6 +68,11 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
   @Override
   public boolean includes(E entity) {
     return true;
+  }
+
+  @Override
+  public Class<E> getType() {
+    return type;
   }
 
   @Override

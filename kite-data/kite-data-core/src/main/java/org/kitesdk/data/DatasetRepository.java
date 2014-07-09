@@ -61,6 +61,19 @@ public interface DatasetRepository {
   <E> Dataset<E> load(String name);
 
   /**
+   * Get the latest version of a named {@link Dataset}. If no dataset with the
+   * provided {@code name} exists, a {@link DatasetNotFoundException} is thrown.
+   *
+   * @param name The name of the dataset.
+   * @param type the Java type of entities in the dataset
+   * @throws DatasetNotFoundException if there is no data set named {@code name}
+   * @throws DatasetRepositoryException
+   *
+   * @since 0.15.0
+   */
+  <E> Dataset<E> load(String name, Class<E> type);
+
+  /**
    * Create a {@link Dataset} with the supplied {@code descriptor}. Depending on
    * the underlying dataset storage, some schema types or configurations might
    * not be supported. If you supply an illegal schema, the implementing class
@@ -89,6 +102,39 @@ public interface DatasetRepository {
    * @throws DatasetRepositoryException
    */
   <E> Dataset<E> create(String name, DatasetDescriptor descriptor);
+
+  /**
+   * Create a {@link Dataset} with the supplied {@code descriptor}. Depending on
+   * the underlying dataset storage, some schema types or configurations might
+   * not be supported. If you supply an illegal schema, the implementing class
+   * throws an exception. It is illegal to create more than one dataset with the
+   * same name. If you provide a duplicate name, the implementing class throws
+   * an exception.
+   *
+   * @param name        The fully qualified dataset name
+   * @param descriptor  A descriptor that describes the schema and other
+   *                    properties of the dataset
+   * @param type        the Java type of entities in the dataset
+   * @return The newly created dataset
+   * @throws IllegalArgumentException   if {@code name} or {@code descriptor}
+   *                                    is {@code null}
+   * @throws DatasetExistsException     if a {@code Dataset} named {@code name}
+   *                                    already exists.
+   * @throws ConcurrentSchemaModificationException
+   *                                    if the {@code Dataset}
+   *                                    schema is updated
+   *                                    concurrently.
+   * @throws IncompatibleSchemaException
+   *                                    if the schema is not
+   *                                    compatible with existing
+   *                                    datasets with shared
+   *                                    storage (for example, in the
+   *                                    same HBase table).
+   * @throws DatasetRepositoryException
+   * 
+   * @since 0.15.0
+   */
+  <E> Dataset<E> create(String name, DatasetDescriptor descriptor, Class<E> type);
 
   /**
    * Update an existing {@link Dataset} to reflect the supplied
@@ -124,6 +170,42 @@ public interface DatasetRepository {
    * @since 0.3.0
    */
   <E> Dataset<E> update(String name, DatasetDescriptor descriptor);
+
+  /**
+   * Update an existing {@link Dataset} to reflect the supplied
+   * {@code descriptor}. The common case is updating a dataset schema. Depending
+   * on the underlying dataset storage, some updates might not be supported,
+   * such as a change in format or partition strategy. Any attempt to make an
+   * unsupported or incompatible update results in an exception being thrown 
+   * and no changes made to the dataset.
+   *
+   * @param name       The fully qualified dataset name
+   * @param descriptor A descriptor that describes the schema and other
+   *                   properties of the dataset
+   * @param type        the Java type of entities in the dataset
+   * @return The updated dataset
+   * @throws IllegalArgumentException      if {@code name} is null
+   * @throws DatasetNotFoundException      if there is no data set named
+   *                                       {@code name}
+   * @throws UnsupportedOperationException if descriptor updates are not
+   *                                       supported by the implementation
+   * @throws ConcurrentSchemaModificationException
+   *                                       if the {@code Dataset}
+   *                                       schema is updated
+   *                                       concurrently
+   * @throws IncompatibleSchemaException
+   *                                    if the schema is not
+   *                                    compatible with
+   *                                    previous schemas,
+   *                                    or with existing
+   *                                    datasets with shared
+   *                                    storage (for example, in the
+   *                                    same HBase table).
+   * @throws DatasetRepositoryException
+   *
+   * @since 0.15.0
+   */
+  <E> Dataset<E> update(String name, DatasetDescriptor descriptor, Class<E> type);
 
   /**
    * Delete data for the {@link Dataset} named {@code name} and remove its

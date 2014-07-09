@@ -50,7 +50,7 @@ public class TestFileSystemDatasetPartitionKeyForPath {
     partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", "username_part", 2).hash("email", 3).build();
 
-    dataset = new FileSystemDataset.Builder()
+    dataset = new FileSystemDataset.Builder<Record>()
         .name("partitioned-users")
         .configuration(new Configuration())
         .uri(URI.create("test"))
@@ -59,6 +59,7 @@ public class TestFileSystemDatasetPartitionKeyForPath {
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .build())
+        .type(Record.class)
         .build();
   }
 

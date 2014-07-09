@@ -37,14 +37,14 @@ import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.*;
 import org.apache.avro.generic.GenericData;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 
-public class TestFileSystemDatasetReader extends TestDatasetReaders {
+public class TestFileSystemDatasetReader extends TestDatasetReaders<Record> {
 
   @Override
-  public DatasetReader newReader() throws IOException {
-    return new FileSystemDatasetReader<String>(
+  public DatasetReader<Record> newReader() throws IOException {
+    return new FileSystemDatasetReader<Record>(
         FileSystem.getLocal(new Configuration()),
         new Path(Resources.getResource("data/strings-100.avro").getFile()),
-        STRING_SCHEMA);
+        STRING_SCHEMA, Record.class);
   }
 
   @Override
@@ -53,11 +53,11 @@ public class TestFileSystemDatasetReader extends TestDatasetReaders {
   }
 
   @Override
-  public DatasetTestUtilities.RecordValidator getValidator() {
-    return new DatasetTestUtilities.RecordValidator<GenericData.Record>() {
+  public DatasetTestUtilities.RecordValidator<Record> getValidator() {
+    return new DatasetTestUtilities.RecordValidator<Record>() {
       @Override
-      public void validate(GenericData.Record record, int recordNum) {
-        Assert.assertEquals(String.valueOf(recordNum), record.get("text"));
+      public void validate(Record record, int recordNum) {
+        Assert.assertEquals(String.valueOf(recordNum), record.get("text").toString());
       }
     };
   }
@@ -79,13 +79,13 @@ public class TestFileSystemDatasetReader extends TestDatasetReaders {
 
     FileSystemDatasetReader<Record> reader = new FileSystemDatasetReader<Record>(
         fileSystem, new Path(Resources.getResource("data/strings-100.avro")
-            .getFile()), schema);
+            .getFile()), schema, Record.class);
 
     checkReaderBehavior(reader, 100, new RecordValidator<Record>() {
       @Override
       public void validate(Record record, int recordNum) {
-        Assert.assertEquals(String.valueOf(recordNum), record.get("text"));
-        Assert.assertEquals("N/A", record.get("text2"));
+        Assert.assertEquals(String.valueOf(recordNum), record.get("text").toString());
+        Assert.assertEquals("N/A", record.get("text2").toString());
       }
     });
   }
@@ -93,19 +93,20 @@ public class TestFileSystemDatasetReader extends TestDatasetReaders {
   @Test(expected = IllegalArgumentException.class)
   public void testNullFileSystem() {
     DatasetReader<String> reader = new FileSystemDatasetReader<String>(
-        null, new Path("/tmp/does-not-exist.avro"), STRING_SCHEMA);
+        null, new Path("/tmp/does-not-exist.avro"), STRING_SCHEMA, String.class);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testNullFile() {
     DatasetReader<String> reader = new FileSystemDatasetReader<String>(
-        fileSystem, null, STRING_SCHEMA);
+        fileSystem, null, STRING_SCHEMA, String.class);
   }
 
   @Test(expected = DatasetReaderException.class)
   public void testMissingFile() {
     AbstractDatasetReader<String> reader = new FileSystemDatasetReader<String>(
-        fileSystem, new Path("/tmp/does-not-exist.avro"), STRING_SCHEMA);
+        fileSystem, new Path("/tmp/does-not-exist.avro"), STRING_SCHEMA,
+        String.class);
 
     // the reader should not fail until open()
     Assert.assertNotNull(reader);
@@ -123,7 +124,7 @@ public class TestFileSystemDatasetReader extends TestDatasetReaders {
 
     try {
       AbstractDatasetReader<String> reader = new FileSystemDatasetReader<String>(
-          fileSystem, emptyFile, STRING_SCHEMA);
+          fileSystem, emptyFile, STRING_SCHEMA, String.class);
 
       // the reader should not fail until open()
       Assert.assertNotNull(reader);

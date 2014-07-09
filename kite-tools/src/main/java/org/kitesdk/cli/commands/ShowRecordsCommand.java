@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
 import java.io.IOException;
 import java.util.List;
+import org.apache.avro.generic.GenericData;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.View;
 import org.slf4j.Logger;
@@ -49,15 +50,13 @@ public class ShowRecordsCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(datasets.size() == 1,
         "Only one dataset name can be given");
 
-    // TODO: CDK-92: always use GenericRecord to have consistent record strings
-
-    View<Object> dataset = load(datasets.get(0));
-    DatasetReader<Object> reader = null;
+    View<GenericData.Record> dataset = load(datasets.get(0), GenericData.Record.class);
+    DatasetReader<GenericData.Record> reader = null;
     boolean threw = true;
     try {
       reader = dataset.newReader();
       int i = 0;
-      for (Object record : reader) {
+      for (GenericData.Record record : reader) {
         if (i >= numRecords) {
           break;
         }

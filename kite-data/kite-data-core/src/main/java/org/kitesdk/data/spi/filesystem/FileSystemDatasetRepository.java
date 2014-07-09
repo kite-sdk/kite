@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import org.kitesdk.data.spi.SchemaValidationUtil;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
@@ -119,7 +120,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
   }
 
   @Override
-  public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
+  public <E> Dataset<E> create(String name, DatasetDescriptor descriptor, Class<E> type) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
@@ -137,10 +138,11 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
     LOG.debug("Created dataset: {} schema: {} datasetPath: {}", new Object[] {
         name, newDescriptor.getSchema(), newDescriptor.getLocation() });
 
-    return new FileSystemDataset.Builder()
+    return new FileSystemDataset.Builder<E>()
         .name(name)
         .configuration(conf)
         .descriptor(newDescriptor)
+        .type(type)
         .uri(new URIBuilder(getUri(), name).build())
         .partitionKey(newDescriptor.isPartitioned() ?
             org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
@@ -150,7 +152,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
   }
 
   @Override
-  public <E> Dataset<E> update(String name, DatasetDescriptor descriptor) {
+  public <E> Dataset<E> update(String name, DatasetDescriptor descriptor, Class<E> type) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
@@ -193,10 +195,11 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
     LOG.debug("Updated dataset: {} schema: {} location: {}", new Object[] {
         name, updatedDescriptor.getSchema(), updatedDescriptor.getLocation() });
 
-    return new FileSystemDataset.Builder()
+    return new FileSystemDataset.Builder<E>()
         .name(name)
         .configuration(conf)
         .descriptor(updatedDescriptor)
+        .type(type)
         .uri(new URIBuilder(getUri(), name).build())
         .partitionKey(updatedDescriptor.isPartitioned() ?
             org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :
@@ -206,17 +209,18 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
   }
 
   @Override
-  public <E> Dataset<E> load(String name) {
+  public <E> Dataset<E> load(String name, Class<E> type) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     LOG.debug("Loading dataset: {}", name);
 
     DatasetDescriptor descriptor = metadataProvider.load(name);
 
-    FileSystemDataset<E> ds = new FileSystemDataset.Builder()
+    FileSystemDataset<E> ds = new FileSystemDataset.Builder<E>()
         .name(name)
         .configuration(conf)
         .descriptor(descriptor)
+        .type(type)
         .uri(new URIBuilder(getUri(), name).build())
         .partitionKey(descriptor.isPartitioned() ?
             org.kitesdk.data.impl.Accessor.getDefault().newPartitionKey() :

@@ -145,7 +145,7 @@ public class HBaseDatasetRepositoryTest {
 
     // test a partial scan
     cnt = 3;
-    reader = new DaoView<GenericRecord>(ds)
+    reader = new DaoView<GenericRecord>(ds, GenericRecord.class)
         .from("part1", new Utf8("part1_3")).from("part2", new Utf8("part2_3"))
         .to("part1", new Utf8("part1_7")).to("part2", new Utf8("part2_7"))
         .newReader();

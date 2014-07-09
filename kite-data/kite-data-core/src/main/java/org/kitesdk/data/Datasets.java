@@ -26,7 +26,6 @@ import org.apache.avro.Schema;
 import org.kitesdk.data.spi.Conversions;
 import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.Registration;
-import org.kitesdk.data.spi.SchemaUtil;
 import org.kitesdk.data.spi.URIBuilder;
 
 /**
@@ -50,23 +49,27 @@ public class Datasets {
    * with "dataset:" or "view:".
    *
    * @param uri a {@code Dataset} or {@code View} URI.
+   * @param type the Java type of the entities in the dataset
    * @param <E> The type of entities stored in the {@code Dataset}.
    * @param <V> The type of {@code View} expected.
    * @return a {@code View} for the given URI.
    */
   @SuppressWarnings("unchecked")
-  public static <E, V extends View<E>> V load(URI uri) {
+  public static <E, V extends View<E>> V load(URI uri, Class<E> type) {
     boolean isView = VIEW_SCHEME.equals(uri.getScheme());
     Preconditions.checkArgument(isView ||
         DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset or view URI: " + uri);
+    Preconditions.checkNotNull(type,
+        "The entity type can't be null, use Object.class to have the type"
+        + " determined by the schema.");
 
     Pair<DatasetRepository, Map<String, String>> pair =
         Registration.lookupDatasetUri(URI.create(uri.getRawSchemeSpecificPart()));
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
-    Dataset<E> dataset = repo.load(uriOptions.get(DATASET_NAME_OPTION));
+    Dataset<E> dataset = repo.load(uriOptions.get(DATASET_NAME_OPTION), type);
 
     if (isView) {
       return Datasets.<E, V> view(dataset, uriOptions);
@@ -85,12 +88,13 @@ public class Datasets {
    * with "dataset:" or "view:".
    *
    * @param uriString a {@code Dataset} or {@code View} URI.
+   * @param type the Java type of the entities in the dataset
    * @param <E> The type of entities stored in the {@code Dataset}.
    * @param <V> The type of {@code View} expected.
    * @return a {@code View} for the given URI.
    */
-  public static <E, V extends View<E>> V load(String uriString) {
-    return Datasets.<E, V> load(URI.create(uriString));
+  public static <E, V extends View<E>> V load(String uriString, Class<E> type) {
+    return Datasets.<E, V> load(URI.create(uriString), type);
   }
 
   /**
@@ -137,23 +141,27 @@ public class Datasets {
    * with "dataset:" or "view:".
    *
    * @param uri a {@code Dataset} or {@code View} URI.
+   * @param type the Java type of the entities in the dataset
    * @param <E> The type of entities stored in the {@code Dataset}.
    * @param <V> The type of {@code Dataset} or {@code View} expected.
    * @return a newly created {@code Dataset} responsible for the given URI.
    */
   @SuppressWarnings("unchecked")
-  public static <E, V extends View<E>> V create(URI uri, DatasetDescriptor descriptor) {
+  public static <E, V extends View<E>> V create(URI uri, DatasetDescriptor descriptor, Class<E> type) {
     boolean isView = VIEW_SCHEME.equals(uri.getScheme());
     Preconditions.checkArgument(isView ||
             DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset or view URI: " + uri);
+    Preconditions.checkNotNull(type,
+        "The entity type can't be null, use Object.class to have the type"
+        + " determined by the schema.");
 
     Pair<DatasetRepository, Map<String, String>> pair =
         Registration.lookupDatasetUri(URI.create(uri.getRawSchemeSpecificPart()));
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
-    Dataset<E> dataset = repo.create(uriOptions.get(DATASET_NAME_OPTION), descriptor);
+    Dataset<E> dataset = repo.create(uriOptions.get(DATASET_NAME_OPTION), descriptor, type);
 
     if (isView) {
       return Datasets.<E, V> view(dataset, uriOptions);
@@ -169,12 +177,13 @@ public class Datasets {
    * with "dataset:" or "view:".
    *
    * @param uri a {@code Dataset} or {@code View} URI string.
+   * @param type the Java type of the entities in the dataset
    * @param <E> The type of entities stored in the {@code Dataset}.
    * @param <V> The type of {@code Dataset} or {@code View} expected.
    * @return a newly created {@code Dataset} responsible for the given URI.
    */
-  public static <E, V extends View<E>> V create(String uri, DatasetDescriptor descriptor) {
-    return Datasets.<E, V> create(URI.create(uri), descriptor);
+  public static <E, V extends View<E>> V create(String uri, DatasetDescriptor descriptor, Class<E> type) {
+    return Datasets.<E, V> create(URI.create(uri), descriptor, type);
   }
 
   /**
@@ -184,23 +193,27 @@ public class Datasets {
    * with "dataset:" or "view:".
    *
    * @param uri a {@code Dataset} or {@code View} URI.
+   * @param type the Java type of the entities in the dataset
    * @param <E> The type of entities stored in the {@code Dataset}.
    * @param <D> The type of {@code Dataset} expected.
    * @return a newly created {@code Dataset} responsible for the given URI.
    */
   @SuppressWarnings("unchecked")
   public static <E, D extends Dataset<E>> D update(
-      URI uri, DatasetDescriptor descriptor) {
+      URI uri, DatasetDescriptor descriptor, Class<E> type) {
     Preconditions.checkArgument(
         DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset or view URI: " + uri);
+    Preconditions.checkNotNull(type,
+        "The entity type can't be null, use Object.class to have the type"
+        + " determined by the schema.");
 
     Pair<DatasetRepository, Map<String, String>> pair =
         Registration.lookupDatasetUri(URI.create(uri.getRawSchemeSpecificPart()));
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
-    return (D) repo.update(uriOptions.get(DATASET_NAME_OPTION), descriptor);
+    return (D) repo.update(uriOptions.get(DATASET_NAME_OPTION), descriptor, type);
   }
 
   /**
@@ -210,12 +223,13 @@ public class Datasets {
    * with "dataset:" or "view:".
    *
    * @param uri a {@code Dataset} or {@code View} URI string.
+   * @param type the Java type of the entities in the dataset
    * @param <E> The type of entities stored in the {@code Dataset}.
    * @param <D> The type of {@code Dataset} expected.
    * @return a newly created {@code Dataset} responsible for the given URI.
    */
-  public static <E, D extends Dataset<E>> D update(String uri, DatasetDescriptor descriptor) {
-    return Datasets.<E, D> update(URI.create(uri), descriptor);
+  public static <E, D extends Dataset<E>> D update(String uri, DatasetDescriptor descriptor, Class<E> type) {
+    return Datasets.<E, D> update(URI.create(uri), descriptor, type);
   }
 
   /**
@@ -335,9 +349,8 @@ public class Datasets {
     for (Schema.Field field : schema.getFields()) {
       String name = field.name();
       if (uriOptions.containsKey(name)) {
-        view = view.with(name, Conversions.convert(
-            uriOptions.get(name),
-            SchemaUtil.getClassForType(field.schema().getType())));
+        view = view.with(name,
+            Conversions.convertField(uriOptions.get(name), schema, name));
       }
     }
     return (V) view;

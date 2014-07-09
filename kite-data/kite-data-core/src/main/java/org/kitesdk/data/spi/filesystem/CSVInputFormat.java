@@ -28,13 +28,17 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetReader;
 
 class CSVInputFormat<E> extends FileInputFormat<E, Void> {
   private DatasetDescriptor descriptor;
+  private Class<E> type;
 
   public void setDescriptor(DatasetDescriptor descriptor) {
     this.descriptor = descriptor;
+  }
+
+  public void setType(Class<E> type) {
+    this.type = type;
   }
 
   @Override
@@ -55,7 +59,7 @@ class CSVInputFormat<E> extends FileInputFormat<E, Void> {
         .getConfiguration.invoke(context);
     Path path = ((FileSplit) split).getPath();
     CSVFileReader<E> reader = new CSVFileReader<E>(
-        path.getFileSystem(conf), path, descriptor);
+        path.getFileSystem(conf), path, descriptor, type);
     reader.initialize();
     return reader.asRecordReader();
   }

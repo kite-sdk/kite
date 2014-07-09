@@ -58,25 +58,37 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
   }
 
   @Override
-  public <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor) {
+  public <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor, Class<E> type) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
     DatasetDescriptor newDescriptor = metadataProvider.create(name, descriptor);
-    return newDataset(name, newDescriptor);
+    return newDataset(name, newDescriptor, type);
   }
 
   @Override
-  public <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor) {
+  @SuppressWarnings("unchecked")
+  public <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor) {
+    return (RandomAccessDataset<E>) create(name, descriptor, Object.class);
+  }
+
+  @Override
+  public <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor, Class<E> type) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
     DatasetDescriptor newDescriptor = metadataProvider.update(name, descriptor);
-    return newDataset(name, newDescriptor);
+    return newDataset(name, newDescriptor, type);
   }
 
   @Override
-  public <E> RandomAccessDataset<E> load(String name) {
+  @SuppressWarnings("unchecked")
+  public <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor) {
+    return (RandomAccessDataset<E>) update(name, descriptor, Object.class);
+  }
+
+  @Override
+  public <E> RandomAccessDataset<E> load(String name, Class<E> type) {
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     String tableName = HBaseMetadataProvider.getTableName(name);
@@ -87,11 +99,17 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
         DatasetDescriptor descriptor = metadataProvider.load(tableName + "." + subEntityName);
         descriptors.add(descriptor);
       }
-      return newCompositeDataset(name, tableName, descriptors);
+      return newCompositeDataset(name, tableName, descriptors, type);
     } else {
       DatasetDescriptor descriptor = metadataProvider.load(name);
-      return newDataset(name, descriptor);
+      return newDataset(name, descriptor, type);
     }
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <E> RandomAccessDataset<E> load(String name) {
+    return (RandomAccessDataset<E>) load(name, Object.class);
   }
 
   @Override
@@ -101,7 +119,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
 
   @SuppressWarnings("unchecked")
   private <E> RandomAccessDataset<E> newCompositeDataset(String name, String tableName,
-      List<DatasetDescriptor> descriptors) {
+      List<DatasetDescriptor> descriptors, Class<E> type) {
     List<Class<SpecificRecord>> subEntityClasses = new ArrayList<Class<SpecificRecord>>();
     for (DatasetDescriptor descriptor : descriptors) {
       try {
@@ -115,11 +133,11 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
     Dao dao = SpecificAvroDao.buildCompositeDaoWithEntityManager(tablePool,
         tableName, subEntityClasses, schemaManager);
     return new DaoDataset<E>(name, dao, descriptors.get(0),
-        new URIBuilder(repositoryUri, name).build());
+        new URIBuilder(repositoryUri, name).build(), type);
   }
 
   @SuppressWarnings("unchecked")
-  private <E> RandomAccessDataset<E> newDataset(String name, DatasetDescriptor descriptor) {
+  private <E> RandomAccessDataset<E> newDataset(String name, DatasetDescriptor descriptor, Class<E> type) {
     // TODO: use descriptor.getFormat() to decide type of DAO (Avro vs. other)
     String tableName = HBaseMetadataProvider.getTableName(name);
     String entityName = HBaseMetadataProvider.getEntityName(name);
@@ -130,7 +148,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
       dao = new GenericAvroDao(tablePool, tableName, entityName, schemaManager);
     }
     return new DaoDataset(name, dao, descriptor,
-        new URIBuilder(repositoryUri, name).build());
+        new URIBuilder(repositoryUri, name).build(), type);
   }
 
   private static boolean isSpecific(DatasetDescriptor descriptor) {
