@@ -91,7 +91,7 @@ public class TestConstraints {
         emptyConstraints.toEntityPredicate().apply(null));
 
     Assert.assertNotNull("Should produce an unbound key range",
-        emptyConstraints.toKeyRanges(strategy));
+        emptyConstraints.toKeyRanges());
 
     Assert.assertTrue("Empty constraints should be unbounded",
         emptyConstraints.isUnbounded());
@@ -110,7 +110,7 @@ public class TestConstraints {
 
   @Test
   public void testEmptyConstraintsKeyPredicate() {
-    Constraints constraints = new Constraints(schema, strategy);
+    Constraints constraints = emptyConstraints.partitionedBy(strategy);
     Predicate<StorageKey> keyPredicate = constraints.toKeyPredicate();
     Assert.assertNotNull("Should produce a key Predicate", keyPredicate);
     Assert.assertFalse("Should not match a null key", keyPredicate.apply(null));
@@ -134,7 +134,7 @@ public class TestConstraints {
         exists.toEntityPredicate().apply(event));
 
     Assert.assertNotNull("Should produce a key range",
-        exists.toKeyRanges(strategy));
+        exists.toKeyRanges());
 
     Assert.assertFalse("Non-empty constraints (exists) should not be unbounded",
         exists.isUnbounded());
@@ -455,7 +455,7 @@ public class TestConstraints {
     GenericEvent e = new GenericEvent();
     StorageKey key = new StorageKey(strategy).reuseFor(e);
 
-    Constraints time = new Constraints(schema, strategy)
+    Constraints time = emptyConstraints.partitionedBy(strategy)
         .from("timestamp", START)
         .to("timestamp", START + 100000);
     Predicate<StorageKey> matchKeys = time.toKeyPredicate();
@@ -554,55 +554,55 @@ public class TestConstraints {
     // if the data is not partitioned by a field, then the partitioning cannot
     // be used to satisfy constraints for that field
     Assert.assertFalse("Cannot be satisfied by partition unless partitioned",
-        c.with("color", "orange").alignedWithBoundaries(strategy));
+        c.with("color", "orange").partitionedBy(strategy).alignedWithBoundaries());
     // even if partitioned, lacking a strict projection means that we cannot
     // reason about what the predicate would accept given the partition data
     Assert.assertFalse("Cannot be satisfied by hash partition filtering",
-        c.alignedWithBoundaries(hashStrategy));
+        c.partitionedBy(hashStrategy).alignedWithBoundaries());
     Assert.assertFalse("Cannot be satisfied by time filtering for timestamp",
         c.with("timestamp",
             new DateTime(2013, 9, 1, 12, 0, DateTimeZone.UTC).getMillis())
-            .alignedWithBoundaries(strategy));
+            .partitionedBy(strategy).alignedWithBoundaries());
     // if there is a strict projection, we can only use it if it is equivalent
     // to the permissive projection. if we can't tell or if the strict
     // projection is too conservative, we can't use the partition data
     Assert.assertFalse("Cannot be satisfied because equality doesn't hold",
-        c.with("color", "green", "brown")
-            .alignedWithBoundaries(withColor));
+        c.with("color", "green", "brown").partitionedBy(withColor)
+            .alignedWithBoundaries());
     Assert.assertFalse("Cannot be satisfied because equality doesn't hold",
-        c.fromAfter("color", "blue").to("color", "red")
-            .alignedWithBoundaries(withColor));
+        c.fromAfter("color", "blue").to("color", "red").partitionedBy(withColor)
+            .alignedWithBoundaries());
 
     // if the strict projection and permissive projections are identical, then
     // we can conclude that the information in the partitions is sufficient to
     // satisfy the original predicate.
     Assert.assertTrue("Should be satisfied by partition filtering on id",
-        c.alignedWithBoundaries(strategy));
+        c.partitionedBy(strategy).alignedWithBoundaries());
   }
 
   @Test
   public void testTimeAlignedWithPartitionBoundaries() {
-    Constraints c = emptyConstraints;
+    Constraints c = emptyConstraints.partitionedBy(strategy);
     Assert.assertFalse("Cannot be satisfied because timestamp is in middle of partition",
         c.from("timestamp", new DateTime(2013, 9, 1, 12, 0, DateTimeZone.UTC).getMillis())
-            .alignedWithBoundaries(strategy));
+            .alignedWithBoundaries());
     Assert.assertTrue("Should be satisfied because 'from' timestamp is on inclusive partition boundary",
         c.from("timestamp", new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis())
-            .alignedWithBoundaries(strategy));
+            .alignedWithBoundaries());
     Assert.assertFalse("Cannot be satisfied because 'from' timestamp is on exclusive partition boundary",
         c.fromAfter("timestamp", new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis())
-            .alignedWithBoundaries(strategy));
+            .alignedWithBoundaries());
     Assert.assertTrue("Should be satisfied because 'to' timestamp is on exclusive partition boundary",
         c.toBefore("timestamp", new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis())
-            .alignedWithBoundaries(strategy));
+            .alignedWithBoundaries());
     Assert.assertFalse("Cannot be satisfied because 'to' timestamp is on inclusive partition boundary",
         c.to("timestamp", new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis())
-            .alignedWithBoundaries(strategy));
+            .alignedWithBoundaries());
     Assert.assertTrue("Should be satisfied because 'from' timestamp is on inclusive " +
             "partition boundary and 'to' timestamp is on exclusive partition boundary",
         c.from("timestamp", new DateTime(2013, 9, 1, 0, 0, DateTimeZone.UTC).getMillis())
             .toBefore("timestamp", new DateTime(2013, 9, 2, 0, 0, DateTimeZone.UTC).getMillis())
-            .alignedWithBoundaries(strategy));
+            .alignedWithBoundaries());
   }
 
   @Test
@@ -616,7 +616,7 @@ public class TestConstraints {
     e.timestamp = oct_25_2013;
     StorageKey key = new StorageKey(timeOnly).reuseFor(e);
 
-    Constraints empty = new Constraints(schema, timeOnly);
+    Constraints empty = emptyConstraints.partitionedBy(timeOnly);
 
     Constraints c = empty.with("timestamp", oct_24_2013);
     Assert.assertFalse("Should not match", c.toKeyPredicate().apply(key));

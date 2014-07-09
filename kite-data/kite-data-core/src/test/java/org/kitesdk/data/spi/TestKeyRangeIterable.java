@@ -71,30 +71,31 @@ public class TestKeyRangeIterable {
 
   @Test
   public void testUnbounded() {
-    Constraints c = emptyConstraints;
+    Constraints c = emptyConstraints.partitionedBy(id);
     assertIterableEquals(
         Sets.newHashSet(new MarkerRange(idCmp)),
-        c.toKeyRanges(id));
+        c.toKeyRanges());
   }
 
   @Test
   public void testSingleSet() {
-    Constraints c = emptyConstraints.with("component", "com.company.Main");
+    Constraints c = emptyConstraints.partitionedBy(id)
+        .with("component", "com.company.Main");
 
     Marker main = new Marker.Builder("id_component", "com.company.Main").build();
-    MarkerRange actual = Iterables.getOnlyElement(c.toKeyRanges(id));
+    MarkerRange actual = Iterables.getOnlyElement(c.toKeyRanges());
     Assert.assertEquals(main, actual.getStart().getBound());
     Assert.assertEquals(main, actual.getEnd().getBound());
     Assert.assertEquals(new MarkerRange(idCmp).of(main), actual);
 
-    c = emptyConstraints.with("component",
+    c = emptyConstraints.partitionedBy(id).with("component",
         "com.company.Main", "com.company.SomeClass");
     Marker sc = new Marker.Builder("id_component", "com.company.SomeClass").build();
     assertIterableEquals(
         Sets.newHashSet(
             new MarkerRange(idCmp).of(main),
             new MarkerRange(idCmp).of(sc)),
-        c.toKeyRanges(id));
+        c.toKeyRanges());
   }
 
   @Test
@@ -104,27 +105,27 @@ public class TestKeyRangeIterable {
       UUID.randomUUID().toString(), UUID.randomUUID().toString()};
     FieldPartitioner hashFunc = hash.getFieldPartitioners().get(0);
 
-    Constraints c = emptyConstraints.with("id", ids[0]);
+    Constraints c = emptyConstraints.partitionedBy(hash).with("id", ids[0]);
 
     Marker marker0 = new Marker.Builder()
         .add("id_hash", hashFunc.apply(ids[0])).add("id_copy", ids[0]).build();
-    MarkerRange actual = Iterables.getOnlyElement(c.toKeyRanges(hash));
+    MarkerRange actual = Iterables.getOnlyElement(c.toKeyRanges());
     Assert.assertEquals(marker0, actual.getStart().getBound());
     Assert.assertEquals(marker0, actual.getEnd().getBound());
 
-    c = emptyConstraints.with("id", (Object[]) ids);
+    c = emptyConstraints.partitionedBy(hash).with("id", (Object[]) ids);
     Marker marker1 = new Marker.Builder()
         .add("id_hash", hashFunc.apply(ids[1])).add("id_copy", ids[1]).build();
     assertIterableEquals(
         Sets.newHashSet(
             new MarkerRange(hashCmp).of(marker0),
             new MarkerRange(hashCmp).of(marker1)),
-        c.toKeyRanges(hash));
+        c.toKeyRanges());
   }
 
   @Test
   public void testSingleRange() {
-    Constraints c = emptyConstraints
+    Constraints c = emptyConstraints.partitionedBy(num2)
         .from("number", 5).toBefore("number", 18)
         .to("number2", 9);
     Marker start = new Marker.Builder("id_number", 5).build();
@@ -132,30 +133,32 @@ public class TestKeyRangeIterable {
 
     Assert.assertEquals(
         new MarkerRange(num2Cmp).from(start).to(stop),
-        Iterables.getOnlyElement(c.toKeyRanges(num2)));
+        Iterables.getOnlyElement(c.toKeyRanges()));
   }
 
   @Test
   public void testHashRange() {
-    Constraints c = emptyConstraints.from("id", "0000").toBefore("id", "0001");
+    Constraints c = emptyConstraints.partitionedBy(hash)
+        .from("id", "0000").toBefore("id", "0001");
     // note the lack of a hash field -- ranges cannot be projected through hash
     Marker start = new Marker.Builder("id_copy", "0000").build();
     Marker stop = new Marker.Builder("id_copy", "0001").build();
 
     Assert.assertEquals(
         new MarkerRange(hashCmp).from(start).to(stop),
-        Iterables.getOnlyElement(c.toKeyRanges(hash)));
+        Iterables.getOnlyElement(c.toKeyRanges()));
   }
 
   @Test
   public void testGroupRange() {
-    Constraints c = emptyConstraints.from("number", 5).toBefore("number", 18);
+    Constraints c = emptyConstraints.partitionedBy(num)
+        .from("number", 5).toBefore("number", 18);
     Marker start = new Marker.Builder("id_number", 5).build();
     Marker stop = new Marker.Builder("id_number", 18).build();
 
     Assert.assertEquals(
         new MarkerRange(numCmp).from(start).to(stop),
-        Iterables.getOnlyElement(c.toKeyRanges(num)));
+        Iterables.getOnlyElement(c.toKeyRanges()));
   }
 
   @Test
@@ -166,7 +169,8 @@ public class TestKeyRangeIterable {
         1384204547042L  // Mon Nov 11 13:15:47 PST 2013
     };
 
-    Constraints c = emptyConstraints.with("timestamp", (Object[]) timestamps);
+    Constraints c = emptyConstraints.partitionedBy(time)
+        .with("timestamp", (Object[]) timestamps);
 
     Marker sep = new Marker.Builder().add("year", 2013).add("month", 9).add("day", 12).build();
     Marker oct = new Marker.Builder().add("year", 2013).add("month", 10).add("day", 12).build();
@@ -176,7 +180,7 @@ public class TestKeyRangeIterable {
         new MarkerRange(timeCmp).of(sep),
         new MarkerRange(timeCmp).of(oct),
         new MarkerRange(timeCmp).of(nov)),
-        c.toKeyRanges(time));
+        c.toKeyRanges());
   }
 
   @Test
@@ -187,7 +191,7 @@ public class TestKeyRangeIterable {
         1384204547042L  // Mon Nov 11 13:15:47 PST 2013
     };
 
-    Constraints c = emptyConstraints
+    Constraints c = emptyConstraints.partitionedBy(time)
         .from("timestamp", timestamps[0]).to("timestamp", timestamps[2]);
 
     Marker sep = new Marker.Builder().add("year", 2013).add("month", 9).add("day", 12).build();
@@ -195,7 +199,7 @@ public class TestKeyRangeIterable {
 
     Assert.assertEquals(
         new MarkerRange(timeCmp).from(sep).to(nov),
-        Iterables.getOnlyElement(c.toKeyRanges(time)));
+        Iterables.getOnlyElement(c.toKeyRanges()));
   }
 
   @Test
@@ -209,7 +213,7 @@ public class TestKeyRangeIterable {
         UUID.randomUUID().toString(), UUID.randomUUID().toString()};
     FieldPartitioner hashFunc = hash.getFieldPartitioners().get(0);
 
-    Constraints c = emptyConstraints
+    Constraints c = emptyConstraints.partitionedBy(strategy)
         .from("timestamp", timestamps[0]).to("timestamp", timestamps[1])
         .with("id", (Object[]) ids);
 
@@ -234,7 +238,7 @@ public class TestKeyRangeIterable {
     assertIterableEquals(Sets.newHashSet(
         new MarkerRange(cmp).from(sep0).to(nov0),
         new MarkerRange(cmp).from(sep1).to(nov1)),
-        c.toKeyRanges(strategy));
+        c.toKeyRanges());
 
     // more complication
     Marker sep2 = new Marker.Builder()
@@ -283,18 +287,19 @@ public class TestKeyRangeIterable {
         new MarkerRange(cmp).from(sep4).to(nov4),
         new MarkerRange(cmp).from(sep5).to(nov5)),
         c.with("component", "com.company.Main", "com.company.SomeClass")
-            .toKeyRanges(strategy));
+            .toKeyRanges());
   }
 
   @Test
   public void testOneSidedRange() {
     // Thu Sep 12 14:15:47 PDT 2013
-    Constraints c = emptyConstraints.from("timestamp", 1379020547042L);
+    Constraints c = emptyConstraints.partitionedBy(time)
+        .from("timestamp", 1379020547042L);
 
     Marker sep = new Marker.Builder()
         .add("year", 2013).add("month", 9).add("day", 12).build();
     assertIterableEquals(Sets.newHashSet(new MarkerRange(timeCmp).from(sep)),
-        c.toKeyRanges(time));
+        c.toKeyRanges());
   }
 
   public static <T> void assertIterableEquals(

@@ -25,7 +25,6 @@ import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.AbstractRefinableView;
@@ -106,7 +105,7 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
       throw new UnsupportedOperationException(
           "Cannot cleanly delete view: " + this);
     }
-    if (!constraints.alignedWithBoundaries(descriptor.getPartitionStrategy())) {
+    if (!constraints.alignedWithBoundaries()) {
       throw new UnsupportedOperationException(
           "Cannot cleanly delete view: " + this);
     }

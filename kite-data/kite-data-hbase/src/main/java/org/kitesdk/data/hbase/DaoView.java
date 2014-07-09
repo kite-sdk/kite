@@ -60,8 +60,7 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
   }
 
   EntityScanner<E> newEntityScanner() {
-    PartitionStrategy partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
-    Iterable<MarkerRange> markerRanges = constraints.toKeyRanges(partitionStrategy);
+    Iterable<MarkerRange> markerRanges = constraints.toKeyRanges();
     // TODO: combine all ranges into a single reader
     MarkerRange range = Iterables.getOnlyElement(markerRanges);
     return dataset.getDao().getScanner(
