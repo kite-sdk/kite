@@ -99,7 +99,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
-        CrunchDatasets.asSource(inputDataset, GenericData.Record.class));
+        CrunchDatasets.asSource(inputDataset));
     pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
     pipeline.run();
 
@@ -120,7 +120,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
-        CrunchDatasets.asSource(inputDataset, GenericData.Record.class));
+        CrunchDatasets.asSource(inputDataset));
     pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
     pipeline.run();
 
@@ -146,7 +146,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
-        CrunchDatasets.asSource(inputPart0, GenericData.Record.class));
+        CrunchDatasets.asSource(inputPart0));
     pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
     pipeline.run();
 
@@ -174,7 +174,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
-        CrunchDatasets.asSource(inputPart0, GenericData.Record.class));
+        CrunchDatasets.asSource(inputPart0));
     pipeline.write(data, CrunchDatasets.asTarget(outputPart0), Target.WriteMode.APPEND);
     pipeline.run();
 
@@ -200,7 +200,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
-        CrunchDatasets.asSource(inputPart0, GenericData.Record.class));
+        CrunchDatasets.asSource(inputPart0));
     pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
     pipeline.run();
 
@@ -231,7 +231,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
-        CrunchDatasets.asSource(inputView, GenericData.Record.class));
+        CrunchDatasets.asSource(inputView));
     pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
     pipeline.run();
 
@@ -257,7 +257,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
-        CrunchDatasets.asSource(inputView, GenericData.Record.class));
+        CrunchDatasets.asSource(inputView));
     pipeline.write(data, CrunchDatasets.asTarget(outputView), Target.WriteMode.APPEND);
     pipeline.run();
 

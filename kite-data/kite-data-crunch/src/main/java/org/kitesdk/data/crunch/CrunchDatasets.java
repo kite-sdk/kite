@@ -38,7 +38,7 @@ public class CrunchDatasets {
    * @param type    the Java type of the entities in the dataset
    * @param <E>     the type of entity produced by the source
    * @return a {@link ReadableSource} for the dataset
-   * @deprecated will be removed in 0.16.0; use {@link #asSource(View, Class)}
+   * @deprecated will be removed in 0.16.0; use {@link #asSource(View)}
    */
   @Deprecated
   public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
@@ -54,11 +54,24 @@ public class CrunchDatasets {
    * @return a {@link ReadableSource} for the view
    *
    * @since 0.14.0
+   * @deprecated will be removed in 0.16.0; use {@link #asSource(View)}
    */
   public static <E> ReadableSource<E> asSource(View<E> view, Class<E> type) {
     return new DatasetSourceTarget<E>(view, type);
   }
 
+  /**
+   * Expose the given {@link View} as a Crunch {@link ReadableSource}.
+   *
+   * @param view the view to read from
+   * @param <E>     the type of entity produced by the source
+   * @return a {@link ReadableSource} for the view
+   *
+   * @since 0.14.0
+   */
+  public static <E> ReadableSource<E> asSource(View<E> view) {
+    return new DatasetSourceTarget<E>(view);
+  }
 
   /**
    * Expose the {@link View} or {@link Dataset} represented by the URI
