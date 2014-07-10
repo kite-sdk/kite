@@ -106,7 +106,11 @@ public class Registration {
       try {
         loader.load();
       } catch (Exception e) {
-        LOG.warn("Cannot load " + loader.getClass(), e);
+        if (LOG.isDebugEnabled()) {
+          LOG.warn("Not loading URI patterns in " + loader.getClass().getName(), e);
+        } else {
+          LOG.warn("Not loading URI patterns in " + loader.getClass().getName());
+        }
       }
     }
     LOG.debug("Registered repository URIs:\n\t" +
