@@ -32,6 +32,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.kitesdk.compat.DynMethods;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
@@ -48,6 +49,13 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
   private static final Logger LOG =
       LoggerFactory.getLogger(FileSystemViewKeyInputFormat.class);
 
+  // this is required for 1.7.4 because setDataModelClass is not available
+  private static final DynMethods.StaticMethod setModel =
+      new DynMethods.Builder("setDataModelClass")
+          .impl(AvroSerialization.class, Configuration.class, Class.class)
+          .defaultNoop()
+          .buildStatic();
+
   private FileSystemDataset<E> dataset;
   private FileSystemView<E> view;
 
@@ -58,7 +66,7 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
 
     Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
-      AvroSerialization.setDataModelClass(conf,
+      setModel.invoke(conf,
           DataModelUtil.getDataModelForType(dataset.getType()).getClass());
     }
   }
