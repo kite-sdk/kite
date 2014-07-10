@@ -104,7 +104,7 @@ public class TestCrunchDatasetsHBase {
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasetsHBase.class, HBaseTestUtils.getConf());
     PCollection<GenericRecord> data = pipeline.read(
-        CrunchDatasets.asSource(inputDataset, GenericRecord.class));
+        CrunchDatasets.asSource(inputDataset));
     pipeline.write(data, CrunchDatasets.asTarget(outputDataset), Target.WriteMode.APPEND);
     pipeline.run();
 
