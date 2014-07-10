@@ -20,11 +20,13 @@ import com.google.common.collect.Lists;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import org.apache.avro.generic.GenericData;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.spi.URIBuilder;
 
+import static org.apache.avro.generic.GenericData.Record;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -64,6 +66,26 @@ public class TestDatasets {
     Assert.assertEquals(expected, ds);
   }
 
+  @Test
+  public void testCreateWithoutType() {
+    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaLiteral("\"string\"")
+        .build();
+
+    Dataset<Record> expected = mock(Dataset.class);
+    when(repo.create("test", descriptor, Record.class)).thenReturn(expected);
+
+    Dataset<Record> ds = Datasets.create(datasetUri, descriptor);
+
+    verify(repo).create("test", descriptor, Record.class);
+    verifyNoMoreInteractions(repo);
+
+    verifyNoMoreInteractions(expected);
+
+    Assert.assertEquals(expected, ds);
+  }
+
   @Test(expected=NullPointerException.class)
   public void testCreateNullType() {
     URI datasetUri = new URIBuilder(repoUri, "test").build();
@@ -88,6 +110,26 @@ public class TestDatasets {
         create(datasetUri.toString(), descriptor, Object.class);
 
     verify(repo).create("test", descriptor, Object.class);
+    verifyNoMoreInteractions(repo);
+
+    verifyNoMoreInteractions(expected);
+
+    Assert.assertEquals(expected, ds);
+  }
+
+  @Test
+  public void testCreateStringUriWithoutType() {
+    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaLiteral("\"string\"")
+        .build();
+
+    Dataset<Record> expected = mock(Dataset.class);
+    when(repo.create("test", descriptor, Record.class)).thenReturn(expected);
+
+    Dataset<Record> ds = Datasets.create(datasetUri.toString(), descriptor);
+
+    verify(repo).create("test", descriptor, Record.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -122,6 +164,46 @@ public class TestDatasets {
         create(datasetUri, descriptor, Object.class);
 
     verify(repo).create("test", descriptor, Object.class);
+    verifyNoMoreInteractions(repo);
+
+    verify(ds).getDescriptor();
+    verify(ds).with("username", "user1");
+    verifyNoMoreInteractions(ds);
+
+    verify(userView).with("email", "user1@example.com");
+    verifyNoMoreInteractions(userView);
+
+    verifyNoMoreInteractions(userAndEmailView);
+
+    Assert.assertEquals(userAndEmailView, view);
+  }
+
+  @Test
+  public void testCreateViewWithoutType() throws Exception {
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaUri("resource:schema/user.avsc")
+        .build();
+
+    Dataset<Record> ds = mock(Dataset.class);
+    when(repo.create("test", descriptor, Record.class)).thenReturn(ds);
+    when(ds.getDescriptor()).thenReturn(descriptor);
+
+    RefinableView<Record> userView = mock(RefinableView.class);
+    when(ds.with("username", "user1")).thenReturn(userView);
+
+    RefinableView<Record> userAndEmailView = mock(RefinableView.class);
+    when(userView.with("email", "user1@example.com"))
+        .thenReturn(userAndEmailView);
+
+    URI datasetUri = new URIBuilder(repoUri, "test")
+        .with("username", "user1")
+        .with("email", "user1@example.com")
+        .with("ignoredOption", "abc")
+        .build();
+
+    RefinableView<Record> view = Datasets.create(datasetUri, descriptor);
+
+    verify(repo).create("test", descriptor, Record.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -178,6 +260,46 @@ public class TestDatasets {
   }
 
   @Test
+  public void testCreateViewStringUriWithoutType() throws Exception {
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaUri("resource:schema/user.avsc")
+        .build();
+
+    Dataset<Record> ds = mock(Dataset.class);
+    when(repo.create("test", descriptor, Record.class)).thenReturn(ds);
+    when(ds.getDescriptor()).thenReturn(descriptor);
+
+    RefinableView<Record> userView = mock(RefinableView.class);
+    when(ds.with("username", "user1")).thenReturn(userView);
+
+    RefinableView<Record> userAndEmailView = mock(RefinableView.class);
+    when(userView.with("email", "user1@example.com"))
+        .thenReturn(userAndEmailView);
+
+    URI datasetUri = new URIBuilder(repoUri, "test")
+        .with("username", "user1")
+        .with("email", "user1@example.com")
+        .with("ignoredOption", "abc")
+        .build();
+
+    RefinableView<Record> view = Datasets.create(datasetUri.toString(), descriptor);
+
+    verify(repo).create("test", descriptor, Record.class);
+    verifyNoMoreInteractions(repo);
+
+    verify(ds).getDescriptor();
+    verify(ds).with("username", "user1");
+    verifyNoMoreInteractions(ds);
+
+    verify(userView).with("email", "user1@example.com");
+    verifyNoMoreInteractions(userView);
+
+    verifyNoMoreInteractions(userAndEmailView);
+
+    Assert.assertEquals(userAndEmailView, view);
+  }
+
+  @Test
   public void testLoad() {
     Dataset<Object> expected = mock(Dataset.class);
     when(repo.load("test", Object.class)).thenReturn(expected);
@@ -188,6 +310,23 @@ public class TestDatasets {
         load(datasetUri, Object.class);
 
     verify(repo).load("test", Object.class);
+    verifyNoMoreInteractions(repo);
+
+    verifyNoMoreInteractions(expected);
+
+    Assert.assertEquals(expected, ds);
+  }
+
+  @Test
+  public void testLoadWithoutType() {
+    Dataset<Record> expected = mock(Dataset.class);
+    when(repo.load("test", Record.class)).thenReturn(expected);
+
+    URI datasetUri = new URIBuilder(repoUri, "test").build();
+
+    Dataset<Record> ds = Datasets.load(datasetUri);
+
+    verify(repo).load("test", Record.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -213,6 +352,23 @@ public class TestDatasets {
         load(datasetUri, Object.class);
 
     verify(repo).load("test", Object.class);
+    verifyNoMoreInteractions(repo);
+
+    verifyNoMoreInteractions(expected);
+
+    Assert.assertEquals(expected, ds);
+  }
+
+  @Test
+  public void testLoadStringUriWithoutType() {
+    Dataset<Record> expected = mock(Dataset.class);
+    when(repo.load("test", Record.class)).thenReturn(expected);
+
+    URI datasetUri = new URIBuilder(repoUri, "test").build();
+
+    Dataset<Record> ds = Datasets.load(datasetUri);
+
+    verify(repo).load("test", Record.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -262,6 +418,46 @@ public class TestDatasets {
   }
 
   @Test
+  public void testLoadViewWithoutType() throws Exception {
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaUri("resource:schema/user.avsc")
+        .build();
+
+    Dataset<Record> ds = mock(Dataset.class);
+    when(repo.load("test", Record.class)).thenReturn(ds);
+    when(ds.getDescriptor()).thenReturn(descriptor);
+
+    RefinableView<Record> userView = mock(RefinableView.class);
+    when(ds.with("username", "user1")).thenReturn(userView);
+
+    RefinableView<Record> userAndEmailView = mock(RefinableView.class);
+    when(userView.with("email", "user1@example.com"))
+        .thenReturn(userAndEmailView);
+
+    URI datasetUri = new URIBuilder(repoUri, "test")
+        .with("username", "user1")
+        .with("email", "user1@example.com")
+        .with("ignoredOption", "abc")
+        .build();
+
+    RefinableView<Record> view = Datasets.load(datasetUri);
+
+    verify(repo).load("test", Record.class);
+    verifyNoMoreInteractions(repo);
+
+    verify(ds).getDescriptor();
+    verify(ds).with("username", "user1");
+    verifyNoMoreInteractions(ds);
+
+    verify(userView).with("email", "user1@example.com");
+    verifyNoMoreInteractions(userView);
+
+    verifyNoMoreInteractions(userAndEmailView);
+
+    Assert.assertEquals(userAndEmailView, view);
+  }
+
+  @Test
   public void testLoadViewStringUri() throws Exception {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
@@ -288,6 +484,46 @@ public class TestDatasets {
         load(datasetUri.toString(), Object.class);
 
     verify(repo).load("test", Object.class);
+    verifyNoMoreInteractions(repo);
+
+    verify(ds).getDescriptor();
+    verify(ds).with("username", "user1");
+    verifyNoMoreInteractions(ds);
+
+    verify(userView).with("email", "user1@example.com");
+    verifyNoMoreInteractions(userView);
+
+    verifyNoMoreInteractions(userAndEmailView);
+
+    Assert.assertEquals(userAndEmailView, view);
+  }
+
+  @Test
+  public void testLoadViewStringUriWithoutType() throws Exception {
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaUri("resource:schema/user.avsc")
+        .build();
+
+    Dataset<Record> ds = mock(Dataset.class);
+    when(repo.load("test", Record.class)).thenReturn(ds);
+    when(ds.getDescriptor()).thenReturn(descriptor);
+
+    RefinableView<Record> userView = mock(RefinableView.class);
+    when(ds.with("username", "user1")).thenReturn(userView);
+
+    RefinableView<Record> userAndEmailView = mock(RefinableView.class);
+    when(userView.with("email", "user1@example.com"))
+        .thenReturn(userAndEmailView);
+
+    URI datasetUri = new URIBuilder(repoUri, "test")
+        .with("username", "user1")
+        .with("email", "user1@example.com")
+        .with("ignoredOption", "abc")
+        .build();
+
+    RefinableView<Record> view = Datasets.load(datasetUri.toString());
+
+    verify(repo).load("test", Record.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -401,6 +637,26 @@ public class TestDatasets {
     Assert.assertEquals(expected, ds);
   }
 
+  @Test
+  public void testUpdateWithoutType() {
+    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaLiteral("\"string\"")
+        .build();
+
+    Dataset<Record> expected = mock(Dataset.class);
+    when(repo.update("test", descriptor, Record.class)).thenReturn(expected);
+
+    Dataset<Record> ds = Datasets.update(datasetUri, descriptor);
+
+    verify(repo).update("test", descriptor, Record.class);
+    verifyNoMoreInteractions(repo);
+
+    verifyNoMoreInteractions(expected);
+
+    Assert.assertEquals(expected, ds);
+  }
+
   @Test(expected=NullPointerException.class)
   public void testUpdateNullType() {
     URI datasetUri = new URIBuilder(repoUri, "test").build();
@@ -425,6 +681,26 @@ public class TestDatasets {
         update(datasetUri.toString(), descriptor, Object.class);
 
     verify(repo).update("test", descriptor, Object.class);
+    verifyNoMoreInteractions(repo);
+
+    verifyNoMoreInteractions(expected);
+
+    Assert.assertEquals(expected, ds);
+  }
+
+  @Test
+  public void testUpdateStringUriWithoutType() {
+    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaLiteral("\"string\"")
+        .build();
+
+    Dataset<Record> expected = mock(Dataset.class);
+    when(repo.update("test", descriptor, Record.class)).thenReturn(expected);
+
+    Dataset<Record> ds = Datasets.update(datasetUri.toString(), descriptor);
+
+    verify(repo).update("test", descriptor, Record.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
