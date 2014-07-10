@@ -1,0 +1,22 @@
+{"type": "record", "name": "morphlineRecord",
+ "fields": 
+  [
+     {"name": "content",
+      "type":
+        {"type": "map", "values": 
+           {"type": "array", "items" : 
+             [               
+               {"type": "null"},
+               {"type": "boolean"},
+               {"type": "int"},
+               {"type": "long"},
+               {"type": "float"},
+               {"type": "double"},
+               {"type": "bytes"},
+               {"type": "string"}
+             ]
+           }
+        }
+     }
+  ]
+}

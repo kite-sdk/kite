@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,6 +60,39 @@ import com.google.common.io.Files;
 
 @SuppressWarnings("unchecked")
 public class AvroMorphlineTest extends AbstractMorphlineTest {
+
+  @Test
+  public void testToAvroMap() throws Exception {
+    morphline = createMorphline("test-morphlines/toAvroMap");
+    
+    byte[] bytes = new byte[] {47, 13};
+    Record jdoc1 = new Record();     
+
+    jdoc1.put("intField", 20);
+    jdoc1.put("longField", 200L);
+    jdoc1.put("stringField", "200");
+    jdoc1.put("boolField", Boolean.TRUE);
+    jdoc1.put("floatField", 200.0f);
+    jdoc1.put("doubleField", 200.0);
+    jdoc1.put("bytesField", bytes);
+    jdoc1.put("nullField", null);
+    jdoc1.getFields().putAll("arrayField", Arrays.asList(10.0, 20.0));
+    collector.reset();
+    assertTrue(morphline.process(jdoc1));
+    
+    GenericData.Record actual = (GenericData.Record) collector.getFirstRecord().getFirstValue(Fields.ATTACHMENT_BODY);
+    Map map = (Map) actual.get("content");
+    assertEquals(Arrays.asList(20), map.get("intField"));
+    assertNull(map.get("defaultIntField"));    
+    assertEquals(Arrays.asList(200L), map.get("longField"));
+    assertEquals(Arrays.asList("200"), map.get("stringField"));
+    assertEquals(Arrays.asList(Boolean.TRUE), map.get("boolField"));
+    assertEquals(Arrays.asList(200.0f), map.get("floatField"));
+    assertEquals(Arrays.asList(200.0), map.get("doubleField"));
+    assertEquals(Arrays.asList(ByteBuffer.wrap(bytes)), map.get("bytesField"));
+    assertEquals(Collections.singletonList(null), map.get("nullField"));
+    assertEquals(Arrays.asList(10.0, 20.0), map.get("arrayField"));
+  }
 
   @Test
   public void testToAvroBasic() throws Exception {
