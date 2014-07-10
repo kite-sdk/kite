@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
 import org.kitesdk.data.spi.Conversions;
 import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.Registration;
@@ -80,6 +81,23 @@ public class Datasets {
   }
 
   /**
+   * Load a {@link Dataset} or {@link View} for the given {@link URI}.
+   * <p>
+   * If the URI is a dataset URI, the unfiltered Dataset will be returned.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param uri a {@code Dataset} or {@code View} URI.
+   * @param <V> The type of {@code View} expected.
+   * @return a {@code View} for the given URI.
+   */
+  @SuppressWarnings("unchecked")
+  public static <V extends View<GenericData.Record>> V load(URI uri) {
+    return Datasets.<GenericData.Record, V>load(uri, GenericData.Record.class);
+  }
+
+  /**
    * Load a {@link Dataset} or {@link View} for the given URI string.
    * <p>
    * If the URI is a dataset URI, the unfiltered Dataset will be returned.
@@ -95,6 +113,23 @@ public class Datasets {
    */
   public static <E, V extends View<E>> V load(String uriString, Class<E> type) {
     return Datasets.<E, V> load(URI.create(uriString), type);
+  }
+
+  /**
+   * Load a {@link Dataset} or {@link View} for the given URI string.
+   * <p>
+   * If the URI is a dataset URI, the unfiltered Dataset will be returned.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param uriString a {@code Dataset} or {@code View} URI.
+   * @param <V> The type of {@code View} expected.
+   * @return a {@code View} for the given URI.
+   */
+  public static <V extends View<GenericData.Record>> V load(String uriString) {
+    return Datasets.<GenericData.Record, V>load(
+        uriString, GenericData.Record.class);
   }
 
   /**
@@ -171,6 +206,22 @@ public class Datasets {
   }
 
   /**
+   * Create a {@link Dataset} for the given dataset or view URI.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param uri a {@code Dataset} or {@code View} URI.
+   * @param <V> The type of {@code Dataset} or {@code View} expected.
+   * @return a newly created {@code Dataset} responsible for the given URI.
+   */
+  @SuppressWarnings("unchecked")
+  public static <V extends View<GenericData.Record>> V create(URI uri, DatasetDescriptor descriptor) {
+    return Datasets.<GenericData.Record, V>create(
+        uri, descriptor, GenericData.Record.class);
+  }
+
+  /**
    * Create a {@link Dataset} for the given dataset or view URI string.
    * <p>
    * URI formats are defined by {@code Dataset} implementations, but must begin
@@ -187,7 +238,23 @@ public class Datasets {
   }
 
   /**
-   * Create a {@link Dataset} for the given dataset or view URI.
+   * Create a {@link Dataset} for the given dataset or view URI string.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param uri a {@code Dataset} or {@code View} URI string.
+   * @param <V> The type of {@code Dataset} or {@code View} expected.
+   * @return a newly created {@code Dataset} responsible for the given URI.
+   */
+  @SuppressWarnings("unchecked")
+  public static <V extends View<GenericData.Record>> V create(String uri, DatasetDescriptor descriptor) {
+    return Datasets.<GenericData.Record, V>create(
+        uri, descriptor, GenericData.Record.class);
+  }
+
+  /**
+   * Update a {@link Dataset} for the given dataset or view URI.
    * <p>
    * URI formats are defined by {@code Dataset} implementations, but must begin
    * with "dataset:" or "view:".
@@ -217,7 +284,24 @@ public class Datasets {
   }
 
   /**
-   * Create a {@link Dataset} for the given dataset or view URI string.
+   * Update a {@link Dataset} for the given dataset or view URI.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param uri a {@code Dataset} or {@code View} URI.
+   * @param <D> The type of {@code Dataset} expected.
+   * @return a newly created {@code Dataset} responsible for the given URI.
+   */
+  @SuppressWarnings("unchecked")
+  public static <D extends Dataset<GenericData.Record>> D update(
+      URI uri, DatasetDescriptor descriptor) {
+    return Datasets.<GenericData.Record, D>update(
+        uri, descriptor, GenericData.Record.class);
+  }
+
+  /**
+   * Update a {@link Dataset} for the given dataset or view URI string.
    * <p>
    * URI formats are defined by {@code Dataset} implementations, but must begin
    * with "dataset:" or "view:".
@@ -230,6 +314,21 @@ public class Datasets {
    */
   public static <E, D extends Dataset<E>> D update(String uri, DatasetDescriptor descriptor, Class<E> type) {
     return Datasets.<E, D> update(URI.create(uri), descriptor, type);
+  }
+
+  /**
+   * Update a {@link Dataset} for the given dataset or view URI string.
+   * <p>
+   * URI formats are defined by {@code Dataset} implementations, but must begin
+   * with "dataset:" or "view:".
+   *
+   * @param uri a {@code Dataset} or {@code View} URI string.
+   * @param <D> The type of {@code Dataset} expected.
+   * @return a newly created {@code Dataset} responsible for the given URI.
+   */
+  public static <D extends Dataset<GenericData.Record>> D update(String uri, DatasetDescriptor descriptor) {
+    return Datasets.<GenericData.Record, D>update(
+        uri, descriptor, GenericData.Record.class);
   }
 
   /**
