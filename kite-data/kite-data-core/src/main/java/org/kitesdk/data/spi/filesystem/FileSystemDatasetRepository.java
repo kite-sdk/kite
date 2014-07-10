@@ -15,6 +15,8 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import org.kitesdk.data.PartitionKey;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.SchemaValidationUtil;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -24,7 +26,6 @@ import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.IncompatibleSchemaException;
-import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
@@ -144,7 +145,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .descriptor(newDescriptor)
         .type(type)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(newDescriptor.isPartitioned() ? new PartitionKey() : null)
+        .partitionKey(newDescriptor.isPartitioned() ?
+            Accessor.getDefault().newPartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
   }
@@ -199,7 +201,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .descriptor(updatedDescriptor)
         .type(type)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(updatedDescriptor.isPartitioned() ? new PartitionKey() : null)
+        .partitionKey(updatedDescriptor.isPartitioned() ?
+            Accessor.getDefault().newPartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
   }
@@ -218,7 +221,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .descriptor(descriptor)
         .type(type)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(descriptor.isPartitioned() ? new PartitionKey() : null)
+        .partitionKey(descriptor.isPartitioned() ?
+            Accessor.getDefault().newPartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
 
@@ -371,7 +375,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
       values.add(fp.valueFromString(stringValue,
           SchemaUtil.getPartitionType(fp, schema)));
     }
-    return new PartitionKey(values.toArray(new Object[values.size()]));
+    return Accessor.getDefault().newPartitionKey(values.toArray(new Object[values.size()]));
   }
 
   @Override
