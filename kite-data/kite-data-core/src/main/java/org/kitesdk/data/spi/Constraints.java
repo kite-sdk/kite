@@ -317,7 +317,7 @@ public class Constraints implements Serializable{
       checkContained(name, values);
       // this is the most specific constraint and is idempotent under "and"
       return new Constraints(schema, strategy, constraints, name,
-          new Predicates.In<Object>(values));
+          Predicates.in(values));
     } else {
       if (!constraints.containsKey(name)) {
         // no other constraint => add the exists

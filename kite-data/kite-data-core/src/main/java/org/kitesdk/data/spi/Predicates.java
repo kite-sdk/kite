@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import com.google.common.collect.Ranges;
+import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.annotation.Nullable;
 
@@ -35,11 +36,23 @@ public abstract class Predicates {
     return (Exists<T>) Exists.INSTANCE;
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> In<T> in(Set<T> set) {
+    T item = Iterables.getFirst(set, null);
+    if (item != null && item instanceof CharSequence) {
+      return (In<T>) new In(new CharSequences.CharSequenceSet(
+          (Set<CharSequence>) set));
+    }
     return new In<T>(set);
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> In<T> in(T... set) {
+    T item = set[0];
+    if (item != null && item instanceof CharSequence) {
+      return (In<T>) new In(new CharSequences.CharSequenceSet(
+          (Set<CharSequence>) Sets.newHashSet(set)));
+    }
     return new In<T>(set);
   }
 
@@ -109,15 +122,19 @@ public abstract class Predicates {
 
   public static class In<T> implements Predicate<T> {
     // ImmutableSet entries are non-null
-    private final ImmutableSet<T> set;
+    private final Set<T> set;
 
-    public In(Iterable<T> values) {
+    private In(Iterable<T> values) {
       this.set = ImmutableSet.copyOf(values);
       Preconditions.checkArgument(set.size() > 0, "No values to match");
     }
 
-    public In(T... values) {
+    private In(T... values) {
       this.set = ImmutableSet.copyOf(values);
+    }
+
+    private In(Set<T> set) {
+      this.set = set;
     }
 
     @Override

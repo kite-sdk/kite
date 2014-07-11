@@ -20,20 +20,19 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.DecoderFactory;
-import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectData;
 import org.apache.avro.reflect.ReflectDatumWriter;
 import org.apache.avro.specific.SpecificData;
 import org.apache.avro.specific.SpecificRecord;
 import org.kitesdk.data.IncompatibleSchemaException;
+import org.kitesdk.data.PartitionStrategy;
 
 /**
  * Utilities for determining the appropriate data model at runtime.
@@ -141,11 +140,12 @@ public class DataModelUtil {
    * @throws IOException There was an IO error with (de)serialization
    */
   @SuppressWarnings("unchecked")
-  public static <E> Object roundTripFieldValue(Schema writerSchema, Class<E> type,
-      String name, Object value) throws IOException {
+  public static <E> Object roundTripFieldValue(Schema writerSchema,
+      PartitionStrategy strategy, Class<E> type, String name, Object value)
+      throws IOException {
     GenericData dataModel = getDataModelForType(type);
-    Field writerField = writerSchema.getField(name);
-    Schema writerFieldSchema = writerField.schema();
+    Schema writerFieldSchema = SchemaUtil.fieldSchema(
+        writerSchema, strategy, name);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     DatumWriter<Object> writer = new ReflectDatumWriter<Object>(writerFieldSchema);
@@ -153,35 +153,13 @@ public class DataModelUtil {
     writer.write(value, binaryEncoder);
     binaryEncoder.flush();
 
-    Field readerField = getReaderSchema(type, writerSchema).getField(name);
-    Schema readerFieldSchema = readerField.schema();
+    Schema readerFieldSchema = SchemaUtil.fieldSchema(
+        getReaderSchema(type, writerSchema), strategy, name);
 
     ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
     DatumReader reader = dataModel.createDatumReader(writerFieldSchema, readerFieldSchema);
     Object newValue = reader.read(null, DecoderFactory.get().binaryDecoder(in, null));
 
     return newValue;
-  }
-
-  /**
-   * Take the given writerField name and array of values and round trip each value through
-   * Avro serialization using the given schema.
-   *
-   * @param <E> The entity type
-   * @param schema The {@link Schema} for the entity
-   * @param type The Java class of the entity type
-   * @param name The name of the writerField
-   * @param value The values of the writerField
-   * @return The values after being serialized/deserialized
-   * @throws IOException There was an IO error with (de)serialization
-   */
-  public static <E> Object[] roundTripFieldValues(Schema schema, Class<E> type,
-      String name, Object[] values) throws IOException {
-    Object[] result = new Object[values.length];
-    for (int i = 0; i < values.length; i++) {
-      result[i] = roundTripFieldValue(schema, type, name, values[i]);
-    }
-
-    return result;
   }
 }
