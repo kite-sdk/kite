@@ -25,7 +25,8 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.kitesdk.data.spi.DatasetRepository;
-import org.kitesdk.data.spi.Conversions;
+import org.kitesdk.data.spi.AbstractDataset;
+import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.URIBuilder;
@@ -36,11 +37,6 @@ import org.kitesdk.data.spi.URIBuilder;
  * @since 0.8.0
  */
 public class Datasets {
-
-  private static final String DATASET_NAME_OPTION = "dataset";
-  private static final String DATASET_SCHEME = "dataset";
-  private static final String VIEW_SCHEME = "view";
-  private static final String REPO_SCHEME = "repo";
 
   /**
    * Load a {@link Dataset} or {@link View} for the given {@link URI}.
@@ -58,9 +54,9 @@ public class Datasets {
    */
   @SuppressWarnings("unchecked")
   public static <E, V extends View<E>> V load(URI uri, Class<E> type) {
-    boolean isView = VIEW_SCHEME.equals(uri.getScheme());
+    boolean isView = URIBuilder.VIEW_SCHEME.equals(uri.getScheme());
     Preconditions.checkArgument(isView ||
-        DATASET_SCHEME.equals(uri.getScheme()),
+        URIBuilder.DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset or view URI: " + uri);
     Preconditions.checkNotNull(type,
         "The entity type can't be null, use Object.class to have the type"
@@ -71,7 +67,8 @@ public class Datasets {
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
-    Dataset<E> dataset = repo.load(uriOptions.get(DATASET_NAME_OPTION), type);
+    Dataset<E> dataset = repo.load(
+        uriOptions.get(URIBuilder.DATASET_NAME_OPTION), type);
 
     if (isView) {
       return Datasets.<E, V> view(dataset, uriOptions);
@@ -181,9 +178,9 @@ public class Datasets {
    */
   @SuppressWarnings("unchecked")
   public static <E, V extends View<E>> V create(URI uri, DatasetDescriptor descriptor, Class<E> type) {
-    boolean isView = VIEW_SCHEME.equals(uri.getScheme());
+    boolean isView = URIBuilder.VIEW_SCHEME.equals(uri.getScheme());
     Preconditions.checkArgument(isView ||
-            DATASET_SCHEME.equals(uri.getScheme()),
+        URIBuilder.DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset or view URI: " + uri);
     Preconditions.checkNotNull(type,
         "The entity type can't be null, use Object.class to have the type"
@@ -194,7 +191,8 @@ public class Datasets {
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
-    Dataset<E> dataset = repo.create(uriOptions.get(DATASET_NAME_OPTION), descriptor, type);
+    Dataset<E> dataset = repo.create(
+        uriOptions.get(URIBuilder.DATASET_NAME_OPTION), descriptor, type);
 
     if (isView) {
       return Datasets.<E, V> view(dataset, uriOptions);
@@ -267,7 +265,7 @@ public class Datasets {
   public static <E, D extends Dataset<E>> D update(
       URI uri, DatasetDescriptor descriptor, Class<E> type) {
     Preconditions.checkArgument(
-        DATASET_SCHEME.equals(uri.getScheme()),
+        URIBuilder.DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset or view URI: " + uri);
     Preconditions.checkNotNull(type,
         "The entity type can't be null, use Object.class to have the type"
@@ -278,7 +276,8 @@ public class Datasets {
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
-    return (D) repo.update(uriOptions.get(DATASET_NAME_OPTION), descriptor, type);
+    return (D) repo.update(
+        uriOptions.get(URIBuilder.DATASET_NAME_OPTION), descriptor, type);
   }
 
   /**
@@ -340,7 +339,7 @@ public class Datasets {
    */
   public static boolean delete(URI uri) {
     Preconditions.checkArgument(
-        DATASET_SCHEME.equals(uri.getScheme()),
+        URIBuilder.DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset URI: " + uri);
 
     Pair<DatasetRepository, Map<String, String>> pair =
@@ -348,7 +347,7 @@ public class Datasets {
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
-    return repo.delete(uriOptions.get(DATASET_NAME_OPTION));
+    return repo.delete(uriOptions.get(URIBuilder.DATASET_NAME_OPTION));
   }
 
   /**
@@ -375,7 +374,7 @@ public class Datasets {
    */
   public static boolean exists(URI uri) {
     Preconditions.checkArgument(
-        DATASET_SCHEME.equals(uri.getScheme()),
+        URIBuilder.DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset URI: " + uri);
 
     Pair<DatasetRepository, Map<String, String>> pair =
@@ -383,7 +382,7 @@ public class Datasets {
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
-    return repo.exists(uriOptions.get(DATASET_NAME_OPTION));
+    return repo.exists(uriOptions.get(URIBuilder.DATASET_NAME_OPTION));
   }
 
   /**
@@ -409,7 +408,7 @@ public class Datasets {
    * @return the URIs present in the {@code DatasetRepository}
    */
   public static Collection<URI> list(URI uri) {
-    boolean isRepo = REPO_SCHEME.equals(uri.getScheme());
+    boolean isRepo = URIBuilder.REPO_SCHEME.equals(uri.getScheme());
     Preconditions.checkArgument(isRepo, "Not a repository URI: " + uri);
     DatasetRepository repo = Registration
         .open(URI.create(uri.getRawSchemeSpecificPart()));
@@ -440,16 +439,18 @@ public class Datasets {
   @SuppressWarnings("unchecked")
   private static <E, V extends View<E>> V view(Dataset<E> dataset,
                                                Map<String, String> uriOptions) {
-    RefinableView<E> view = dataset;
-    Schema schema = dataset.getDescriptor().getSchema();
-    // for each schema field, see if there is a query arg equality constraint
-    for (Schema.Field field : schema.getFields()) {
-      String name = field.name();
-      if (uriOptions.containsKey(name)) {
-        view = view.with(name,
-            Conversions.convertField(uriOptions.get(name), schema, name));
+    if (dataset instanceof AbstractDataset) {
+      DatasetDescriptor descriptor = dataset.getDescriptor();
+      Schema schema = descriptor.getSchema();
+      PartitionStrategy strategy = null;
+      if (descriptor.isPartitioned()) {
+        strategy = descriptor.getPartitionStrategy();
       }
+      Constraints constraints = Constraints.fromQueryMap(
+          schema, strategy, uriOptions);
+      return (V) ((AbstractDataset) dataset).filter(constraints);
+    } else {
+      return (V) dataset;
     }
-    return (V) view;
   }
 }

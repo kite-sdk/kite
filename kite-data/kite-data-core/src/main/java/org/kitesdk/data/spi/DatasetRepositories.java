@@ -22,10 +22,6 @@ import java.util.Map;
 
 public class DatasetRepositories {
 
-  private static final String DATASET_SCHEME = "dataset";
-  private static final String VIEW_SCHEME = "view";
-  private static final String REPO_SCHEME = "repo";
-
   /**
    * Load a {@link DatasetRepository} for the given dataset, view or repository URI.
    * <p>
@@ -38,14 +34,14 @@ public class DatasetRepositories {
    */
   @SuppressWarnings("unchecked")
   public static <R extends DatasetRepository> R repositoryFor(URI uri) {
-    Preconditions.checkArgument(
-        DATASET_SCHEME.equals(uri.getScheme()) ||
-        VIEW_SCHEME.equals(uri.getScheme()) ||
-        REPO_SCHEME.equals(uri.getScheme()),
-        "Not a dataset or view URI: " + uri);
+    boolean isRepoUri = URIBuilder.REPO_SCHEME.equals(uri.getScheme());
+    Preconditions.checkArgument(isRepoUri ||
+        URIBuilder.DATASET_SCHEME.equals(uri.getScheme()) ||
+        URIBuilder.VIEW_SCHEME.equals(uri.getScheme()),
+        "Not a repository, dataset, or view URI: " + uri);
 
     Pair<DatasetRepository, Map<String, String>> pair; 
-    if (REPO_SCHEME.equals(uri.getScheme())) {
+    if (URIBuilder.REPO_SCHEME.equals(uri.getScheme())) {
       pair = Registration.lookupRepoUri(
           URI.create(uri.getRawSchemeSpecificPart()));
     } else {

@@ -69,6 +69,16 @@ public class Registration {
     throw new IllegalArgumentException("Unknown repository URI: " + uri);
   }
 
+  public static Pair<URIPattern, Map<String, String>> lookupDatasetPattern(URI uri) {
+    for (URIPattern pattern : DATASET_PATTERNS.keySet()) {
+      Map<String, String> match = pattern.getMatch(uri);
+      if (match != null) {
+        return Pair.of(pattern, match);
+      }
+    }
+    throw new IllegalArgumentException("Unknown repository URI: " + uri);
+  }
+
   public static Pair<DatasetRepository, Map<String, String>>
       lookupRepoUri(URI repoUri) {
     for (URIPattern pattern : REPO_PATTERNS.keySet()) {

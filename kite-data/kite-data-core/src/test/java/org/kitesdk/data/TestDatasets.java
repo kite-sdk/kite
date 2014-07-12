@@ -26,6 +26,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.AbstractDataset;
+import org.kitesdk.data.spi.AbstractRefinableView;
+import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.URIBuilder;
 
 import static org.mockito.Mockito.mock;
@@ -143,17 +146,16 @@ public class TestDatasets {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .build();
+    Constraints constraints = new Constraints(descriptor.getSchema(), null)
+        .with("username", "user1")
+        .with("email", "user1@example.com");
 
-    Dataset<Object> ds = mock(Dataset.class);
+    AbstractDataset<Object> ds = mock(AbstractDataset.class);
     when(repo.create("test", descriptor, Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<Object> userView = mock(RefinableView.class);
-    when(ds.with("username", "user1")).thenReturn(userView);
-
-    RefinableView<Object> userAndEmailView = mock(RefinableView.class);
-    when(userView.with("email", "user1@example.com"))
-        .thenReturn(userAndEmailView);
+    AbstractRefinableView<Object> userAndEmailView = mock(AbstractRefinableView.class);
+    when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
     URI datasetUri = new URIBuilder(repoUri, "test")
         .with("username", "user1")
@@ -168,11 +170,8 @@ public class TestDatasets {
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
-    verify(ds).with("username", "user1");
+    verify(ds).filter(constraints);
     verifyNoMoreInteractions(ds);
-
-    verify(userView).with("email", "user1@example.com");
-    verifyNoMoreInteractions(userView);
 
     verifyNoMoreInteractions(userAndEmailView);
 
@@ -184,17 +183,16 @@ public class TestDatasets {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .build();
+    Constraints constraints = new Constraints(descriptor.getSchema(), null)
+        .with("username", "user1")
+        .with("email", "user1@example.com");
 
-    Dataset<GenericRecord> ds = mock(Dataset.class);
+    AbstractDataset<GenericRecord> ds = mock(AbstractDataset.class);
     when(repo.create("test", descriptor, GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<GenericRecord> userView = mock(RefinableView.class);
-    when(ds.with("username", "user1")).thenReturn(userView);
-
-    RefinableView<GenericRecord> userAndEmailView = mock(RefinableView.class);
-    when(userView.with("email", "user1@example.com"))
-        .thenReturn(userAndEmailView);
+    AbstractRefinableView<GenericRecord> userAndEmailView = mock(AbstractRefinableView.class);
+    when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
     URI datasetUri = new URIBuilder(repoUri, "test")
         .with("username", "user1")
@@ -202,17 +200,14 @@ public class TestDatasets {
         .with("ignoredOption", "abc")
         .build();
 
-    RefinableView<GenericRecord> view = Datasets.create(datasetUri, descriptor);
+    View<GenericRecord> view = Datasets.create(datasetUri, descriptor);
 
     verify(repo).create("test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
-    verify(ds).with("username", "user1");
+    verify(ds).filter(constraints);
     verifyNoMoreInteractions(ds);
-
-    verify(userView).with("email", "user1@example.com");
-    verifyNoMoreInteractions(userView);
 
     verifyNoMoreInteractions(userAndEmailView);
 
@@ -224,17 +219,16 @@ public class TestDatasets {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .build();
+    Constraints constraints = new Constraints(descriptor.getSchema(), null)
+        .with("username", "user1")
+        .with("email", "user1@example.com");
 
-    Dataset<Object> ds = mock(Dataset.class);
+    AbstractDataset<Object> ds = mock(AbstractDataset.class);
     when(repo.create("test", descriptor, Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<Object> userView = mock(RefinableView.class);
-    when(ds.with("username", "user1")).thenReturn(userView);
-
-    RefinableView<Object> userAndEmailView = mock(RefinableView.class);
-    when(userView.with("email", "user1@example.com"))
-        .thenReturn(userAndEmailView);
+    AbstractRefinableView<Object> userAndEmailView = mock(AbstractRefinableView.class);
+    when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
     URI datasetUri = new URIBuilder(repoUri, "test")
         .with("username", "user1")
@@ -249,11 +243,8 @@ public class TestDatasets {
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
-    verify(ds).with("username", "user1");
+    verify(ds).filter(constraints);
     verifyNoMoreInteractions(ds);
-
-    verify(userView).with("email", "user1@example.com");
-    verifyNoMoreInteractions(userView);
 
     verifyNoMoreInteractions(userAndEmailView);
 
@@ -265,17 +256,16 @@ public class TestDatasets {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .build();
+    Constraints constraints = new Constraints(descriptor.getSchema(), null)
+        .with("username", "user1")
+        .with("email", "user1@example.com");
 
-    Dataset<GenericRecord> ds = mock(Dataset.class);
+    AbstractDataset<GenericRecord> ds = mock(AbstractDataset.class);
     when(repo.create("test", descriptor, GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<GenericRecord> userView = mock(RefinableView.class);
-    when(ds.with("username", "user1")).thenReturn(userView);
-
-    RefinableView<GenericRecord> userAndEmailView = mock(RefinableView.class);
-    when(userView.with("email", "user1@example.com"))
-        .thenReturn(userAndEmailView);
+    AbstractRefinableView<GenericRecord> userAndEmailView = mock(AbstractRefinableView.class);
+    when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
     URI datasetUri = new URIBuilder(repoUri, "test")
         .with("username", "user1")
@@ -283,17 +273,14 @@ public class TestDatasets {
         .with("ignoredOption", "abc")
         .build();
 
-    RefinableView<GenericRecord> view = Datasets.create(datasetUri.toString(), descriptor);
+    View<GenericRecord> view = Datasets.create(datasetUri.toString(), descriptor);
 
     verify(repo).create("test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
-    verify(ds).with("username", "user1");
+    verify(ds).filter(constraints);
     verifyNoMoreInteractions(ds);
-
-    verify(userView).with("email", "user1@example.com");
-    verifyNoMoreInteractions(userView);
 
     verifyNoMoreInteractions(userAndEmailView);
 
@@ -382,17 +369,16 @@ public class TestDatasets {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .build();
+    Constraints constraints = new Constraints(descriptor.getSchema(), null)
+        .with("username", "user1")
+        .with("email", "user1@example.com");
 
-    Dataset<Object> ds = mock(Dataset.class);
+    AbstractDataset<Object> ds = mock(AbstractDataset.class);
     when(repo.load("test", Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<Object> userView = mock(RefinableView.class);
-    when(ds.with("username", "user1")).thenReturn(userView);
-
-    RefinableView<Object> userAndEmailView = mock(RefinableView.class);
-    when(userView.with("email", "user1@example.com"))
-        .thenReturn(userAndEmailView);
+    AbstractRefinableView<Object> userAndEmailView = mock(AbstractRefinableView.class);
+    when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
     URI datasetUri = new URIBuilder(repoUri, "test")
         .with("username", "user1")
@@ -407,11 +393,8 @@ public class TestDatasets {
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
-    verify(ds).with("username", "user1");
+    verify(ds).filter(constraints);
     verifyNoMoreInteractions(ds);
-
-    verify(userView).with("email", "user1@example.com");
-    verifyNoMoreInteractions(userView);
 
     verifyNoMoreInteractions(userAndEmailView);
 
@@ -423,17 +406,16 @@ public class TestDatasets {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .build();
+    Constraints constraints = new Constraints(descriptor.getSchema(), null)
+        .with("username", "user1")
+        .with("email", "user1@example.com");
 
-    Dataset<GenericRecord> ds = mock(Dataset.class);
+    AbstractDataset<GenericRecord> ds = mock(AbstractDataset.class);
     when(repo.load("test", GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<GenericRecord> userView = mock(RefinableView.class);
-    when(ds.with("username", "user1")).thenReturn(userView);
-
-    RefinableView<GenericRecord> userAndEmailView = mock(RefinableView.class);
-    when(userView.with("email", "user1@example.com"))
-        .thenReturn(userAndEmailView);
+    AbstractRefinableView<GenericRecord> userAndEmailView = mock(AbstractRefinableView.class);
+    when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
     URI datasetUri = new URIBuilder(repoUri, "test")
         .with("username", "user1")
@@ -447,11 +429,8 @@ public class TestDatasets {
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
-    verify(ds).with("username", "user1");
+    verify(ds).filter(constraints);
     verifyNoMoreInteractions(ds);
-
-    verify(userView).with("email", "user1@example.com");
-    verifyNoMoreInteractions(userView);
 
     verifyNoMoreInteractions(userAndEmailView);
 
@@ -463,17 +442,16 @@ public class TestDatasets {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .build();
+    Constraints constraints = new Constraints(descriptor.getSchema(), null)
+        .with("username", "user1")
+        .with("email", "user1@example.com");
 
-    Dataset<Object> ds = mock(Dataset.class);
+    AbstractDataset<Object> ds = mock(AbstractDataset.class);
     when(repo.load("test", Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<Object> userView = mock(RefinableView.class);
-    when(ds.with("username", "user1")).thenReturn(userView);
-
-    RefinableView<Object> userAndEmailView = mock(RefinableView.class);
-    when(userView.with("email", "user1@example.com"))
-        .thenReturn(userAndEmailView);
+    AbstractRefinableView<Object> userAndEmailView = mock(AbstractRefinableView.class);
+    when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
     URI datasetUri = new URIBuilder(repoUri, "test")
         .with("username", "user1")
@@ -488,11 +466,8 @@ public class TestDatasets {
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
-    verify(ds).with("username", "user1");
+    verify(ds).filter(constraints);
     verifyNoMoreInteractions(ds);
-
-    verify(userView).with("email", "user1@example.com");
-    verifyNoMoreInteractions(userView);
 
     verifyNoMoreInteractions(userAndEmailView);
 
@@ -504,17 +479,16 @@ public class TestDatasets {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .build();
+    Constraints constraints = new Constraints(descriptor.getSchema(), null)
+        .with("username", "user1")
+        .with("email", "user1@example.com");
 
-    Dataset<GenericRecord> ds = mock(Dataset.class);
+    AbstractDataset<GenericRecord> ds = mock(AbstractDataset.class);
     when(repo.load("test", GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<GenericRecord> userView = mock(RefinableView.class);
-    when(ds.with("username", "user1")).thenReturn(userView);
-
-    RefinableView<GenericRecord> userAndEmailView = mock(RefinableView.class);
-    when(userView.with("email", "user1@example.com"))
-        .thenReturn(userAndEmailView);
+    AbstractRefinableView<GenericRecord> userAndEmailView = mock(AbstractRefinableView.class);
+    when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
     URI datasetUri = new URIBuilder(repoUri, "test")
         .with("username", "user1")
@@ -528,11 +502,8 @@ public class TestDatasets {
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
-    verify(ds).with("username", "user1");
+    verify(ds).filter(constraints);
     verifyNoMoreInteractions(ds);
-
-    verify(userView).with("email", "user1@example.com");
-    verifyNoMoreInteractions(userView);
 
     verifyNoMoreInteractions(userAndEmailView);
 

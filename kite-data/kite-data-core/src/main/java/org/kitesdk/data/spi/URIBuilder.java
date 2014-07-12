@@ -31,10 +31,15 @@ import com.google.common.collect.Maps;
  * Builds dataset and view URIs
  */
 public class URIBuilder {
-  private URI repoUri;
-  private String datasetName;
+  public static final String DATASET_NAME_OPTION = "dataset";
+  public static final String DATASET_SCHEME = "dataset";
+  public static final String VIEW_SCHEME = "view";
+  public static final String REPO_SCHEME = "repo";
+
+  private URIPattern pattern;
+  private boolean isView = false;
   // LinkedHashMap preserves the order so that constructed URIs are more predictable
-  private Map<String, String> equalityConstraints = Maps.newLinkedHashMap();
+  private Map<String, String> options = Maps.newLinkedHashMap();
 
   /**
    * Constructs a builder based on the given repository URI and {@link Dataset#getName() dataset name}.
@@ -55,8 +60,38 @@ public class URIBuilder {
   public URIBuilder(URI repoUri, String datasetName) {
     Preconditions.checkNotNull(repoUri, "Repository URI cannot be null");
     Preconditions.checkNotNull(datasetName, "Dataset name cannot be null");
-    this.repoUri = repoUri;
-    this.datasetName = datasetName;
+    Preconditions.checkArgument(REPO_SCHEME.equals(repoUri.getScheme()));
+
+    Pair<URIPattern, Map<String, String>> pair = Registration
+        .lookupPatternByRepoUri(URI.create(repoUri.getRawSchemeSpecificPart()));
+    this.pattern = pair.first();
+    options.putAll(pair.second());
+    options.put(DATASET_NAME_OPTION, datasetName);
+  }
+
+  public URIBuilder(URI uri) {
+    boolean isViewUri = VIEW_SCHEME.equals(uri.getScheme());
+    Preconditions.checkArgument(isViewUri ||
+        DATASET_SCHEME.equals(uri.getScheme()),
+        "Not a dataset or view URI: " + uri);
+
+    Pair<URIPattern, Map<String, String>> pair =
+        Registration.lookupDatasetPattern(uri);
+    this.pattern = pair.first();
+    this.isView = isViewUri;
+    options.putAll(pair.second());
+  }
+
+  /**
+   * Adds a set of constraints.
+   *
+   * @param constraints a set of constraints
+   * @return this builder for method chaining
+   */
+  URIBuilder constraints(Constraints constraints) {
+    options.putAll(constraints.toQueryMap());
+    this.isView = true;
+    return this;
   }
 
   /**
@@ -68,7 +103,8 @@ public class URIBuilder {
    * @return this builder
    */
   public URIBuilder with(String name, Object value) {
-    equalityConstraints.put(name, Conversions.makeString(value));
+    options.put(name, Conversions.makeString(value));
+    this.isView = true;
     return this;
   }
 
@@ -80,17 +116,9 @@ public class URIBuilder {
    * @return the URI
    */
   public URI build() {
-    URI repoStorageUri = URI.create(repoUri.getRawSchemeSpecificPart());
-    Pair<URIPattern, Map<String, String>> pair =
-        Registration.lookupPatternByRepoUri(repoStorageUri);
-    Map<String, String> uriData = pair.second();
-    uriData.put("dataset", datasetName);
-    uriData.putAll(equalityConstraints);
     try {
-      return new URI(
-          equalityConstraints.isEmpty() ? "dataset" : "view",
-          pair.first().construct(uriData).toString(),
-          null);
+      return new URI(isView ? VIEW_SCHEME : DATASET_SCHEME,
+          pattern.construct(options).toString(), null);
     } catch (URISyntaxException e) {
       throw new IllegalArgumentException("Could not build URI", e);
     }

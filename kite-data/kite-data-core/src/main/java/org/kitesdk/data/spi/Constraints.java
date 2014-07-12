@@ -429,6 +429,31 @@ public class Constraints implements Serializable{
     return Objects.toStringHelper(this).addValue(constraints).toString();
   }
 
+  public Map<String, String> toQueryMap() {
+    Map<String, String> query = Maps.newHashMap();
+    for (Map.Entry<String, Predicate> entry : constraints.entrySet()) {
+      String name = entry.getKey();
+      Schema fieldSchema = SchemaUtil.fieldSchema(schema, strategy, name);
+      query.put(name, Predicates.toString(entry.getValue(), fieldSchema));
+    }
+    return query;
+  }
+
+  public static Constraints fromQueryMap(Schema schema,
+                                         PartitionStrategy strategy,
+                                         Map<String, String> query) {
+    Map<String, Predicate> constraints = Maps.newHashMap();
+    for (Map.Entry<String, String> entry : query.entrySet()) {
+      String name = entry.getKey();
+      if (SchemaUtil.isField(schema, strategy, name)) {
+        Schema fieldSchema = SchemaUtil.fieldSchema(schema, strategy, name);
+        constraints.put(name,
+            Predicates.fromString(entry.getValue(), fieldSchema));
+      }
+    }
+    return new Constraints(schema, strategy, constraints);
+  }
+
   /**
    * Writes out the {@link Constraints} using Java serialization.
    */
