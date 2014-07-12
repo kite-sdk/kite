@@ -22,7 +22,9 @@ import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 
 import com.google.common.base.Objects;
-import org.kitesdk.data.spi.Predicates;
+import org.kitesdk.data.spi.predicates.Exists;
+import org.kitesdk.data.spi.predicates.In;
+import org.kitesdk.data.spi.predicates.Predicates;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
         "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
@@ -57,10 +59,10 @@ public class HashFieldPartitioner extends FieldPartitioner<Object, Integer> {
 
   @Override
   public Predicate<Integer> project(Predicate<Object> predicate) {
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
-      return ((Predicates.In<Object>) predicate).transform(this);
+    } else if (predicate instanceof In) {
+      return ((In<Object>) predicate).transform(this);
     } else {
       // cannot enumerate ranges and get the image
       return null;

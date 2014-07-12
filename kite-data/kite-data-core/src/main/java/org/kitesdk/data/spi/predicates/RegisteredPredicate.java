@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.spi;
+package org.kitesdk.data.spi.predicates;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -42,6 +42,9 @@ public abstract class RegisteredPredicate<T> implements Predicate<T> {
   }
 
   public static String toString(RegisteredPredicate<?> predicate, Schema schema) {
+    // ensure fromString will be successful
+    Preconditions.checkArgument(REGISTRY.containsKey(predicate.getName()),
+        "Predicate is not registered: " + predicate.getName());
     return predicate.getName() + "(" + predicate.toString(schema) + ")";
   }
 

@@ -25,8 +25,11 @@ import java.util.Date;
 import java.util.TimeZone;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.spi.Predicates;
-import org.kitesdk.data.spi.Range;
+import org.kitesdk.data.spi.predicates.Exists;
+import org.kitesdk.data.spi.predicates.In;
+import org.kitesdk.data.spi.predicates.Predicates;
+import org.kitesdk.data.spi.predicates.Range;
+import org.kitesdk.data.spi.predicates.Ranges;
 
 /**
  * A FieldPartitioner that formats a timestamp (long) in milliseconds since
@@ -92,16 +95,16 @@ public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
 
   @Override
   public Predicate<String> project(Predicate<Long> predicate) {
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
-      return ((Predicates.In<Long>) predicate).transform(this);
+    } else if (predicate instanceof In) {
+      return ((In<Long>) predicate).transform(this);
     } else if (predicate instanceof Range) {
       // FIXME: This project is only true in some cases
       // true for yyyy-MM-dd, but not dd-MM-yyyy
       // this is lossy, so the final range must be closed:
       //   (2013-10-4 20:17:55, ...] => [2013-10-4, ...]
-      return Predicates.transformClosed((Range<Long>) predicate, this);
+      return Ranges.transformClosed((Range<Long>) predicate, this);
     } else {
       return null;
     }
@@ -109,7 +112,7 @@ public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
 
   @Override
   public Predicate<String> projectStrict(Predicate<Long> predicate) {
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
     } else {
       return null;

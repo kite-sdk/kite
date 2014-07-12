@@ -39,6 +39,11 @@ import java.util.Set;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.predicates.Exists;
+import org.kitesdk.data.spi.predicates.In;
+import org.kitesdk.data.spi.predicates.Predicates;
+import org.kitesdk.data.spi.predicates.Range;
+import org.kitesdk.data.spi.predicates.Ranges;
 
 /**
  * Serialization Utils for serializing {@link Constraints}
@@ -92,8 +97,8 @@ class ConstraintsSerialization {
    * following types:
    *
    * <ul>
-   *   <li>{@link org.kitesdk.data.spi.Predicates.In}</li>
-   *   <li>{@link org.kitesdk.data.spi.Predicates.Exists}</li>
+   *   <li>{@link org.kitesdk.data.spi.predicates.In}</li>
+   *   <li>{@link org.kitesdk.data.spi.predicates.Exists}</li>
    *   <li>{@link com.google.common.collect.Range}</li>
    * </ul>
    * @param fieldSchema schema for the predicate's field.
@@ -103,8 +108,8 @@ class ConstraintsSerialization {
    */
   private static void writePredicate(Schema fieldSchema, Predicate predicate, ObjectOutputStream out) throws IOException {
     out.writeUTF(predicate.getClass().getName());
-    if (predicate instanceof Predicates.In) {
-      writeInPredicate(fieldSchema, (Predicates.In) predicate, out);
+    if (predicate instanceof In) {
+      writeInPredicate(fieldSchema, (In) predicate, out);
     } else if (predicate instanceof Range) {
       writeRangePredicate(fieldSchema, (Range) predicate, out);
     }
@@ -119,11 +124,11 @@ class ConstraintsSerialization {
    */
   private static Predicate readPredicate(Schema fieldSchema, ObjectInputStream in) throws IOException{
     String className = in.readUTF();
-    if (className.equals(Predicates.In.class.getName())) {
+    if (className.equals(In.class.getName())) {
       return readInPredicate(fieldSchema, in);
     } else if (className.equals(Range.class.getName())) {
       return readRangePredicate(fieldSchema, in);
-    } else if (className.equals(Predicates.Exists.class.getName())) {
+    } else if (className.equals(Exists.class.getName())) {
       return Predicates.exists();
     }
     throw new IOException("Unable to deserialize predicate of type "+className);
@@ -131,10 +136,10 @@ class ConstraintsSerialization {
 
 
   /**
-   * Serializes an {@link org.kitesdk.data.spi.Predicates.In} predicate to the stream {@code out}.
+   * Serializes an {@link org.kitesdk.data.spi.predicates.In} predicate to the stream {@code out}.
    */
-  private static void writeInPredicate(Schema fieldSchema, Predicates.In in, ObjectOutputStream out) throws IOException{
-    Set values = in.getSet();
+  private static void writeInPredicate(Schema fieldSchema, In in, ObjectOutputStream out) throws IOException{
+    Set values = Predicates.asSet(in);
     out.writeInt(values.size());
     for (Object value: values) {
       writeValue(fieldSchema, value, out);
@@ -142,9 +147,9 @@ class ConstraintsSerialization {
   }
 
   /**
-   * Deserializes an {@link org.kitesdk.data.spi.Predicates.In} predicate from the stream {@code In}.
+   * Deserializes an {@link org.kitesdk.data.spi.predicates.In} predicate from the stream {@code In}.
    */
-  private static Predicates.In readInPredicate(Schema fieldSchema, ObjectInputStream in) throws IOException{
+  private static In readInPredicate(Schema fieldSchema, ObjectInputStream in) throws IOException{
     int numValues = in.readInt();
     Set<Object> values = new HashSet<Object>();
     for (int i = 0; i < numValues; i++) {
