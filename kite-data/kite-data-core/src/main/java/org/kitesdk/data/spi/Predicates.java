@@ -17,15 +17,19 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.annotation.Nullable;
+import org.apache.avro.Schema;
+import org.kitesdk.data.DatasetException;
 
 public abstract class Predicates {
   @SuppressWarnings("unchecked")
@@ -51,6 +55,34 @@ public abstract class Predicates {
           (Set<CharSequence>) Sets.newHashSet(set)));
     }
     return new In<T>(set);
+  }
+
+  public static <T> String toString(Predicate<T> predicate, Schema schema) {
+    if (predicate instanceof RegisteredPredicate) {
+      return ((RegisteredPredicate) predicate).toString(schema);
+    } else if (predicate instanceof Range) {
+      return ((Range) predicate).toString(schema);
+    } else if (predicate instanceof In) {
+      return ((In) predicate).toString(schema);
+    } else {
+      throw new DatasetException("Unknown predicate: " + predicate);
+    }
+  }
+
+  public static <T> Predicate<T> fromString(String pString, Schema schema) {
+    Predicate<T> predicate = Range.fromString(pString, schema);
+    if (predicate != null) {
+      return predicate;
+    }
+    predicate = RegisteredPredicate.fromString(pString, schema);
+    if (predicate != null) {
+      return predicate;
+    }
+    predicate = In.fromString(pString, schema);
+    if (predicate != null) {
+      return predicate;
+    }
+    throw new DatasetException("Unknown predicate: " + pString);
   }
 
   // This should be a method on Range, like In#transform.
@@ -100,7 +132,16 @@ public abstract class Predicates {
     }
   }
 
-  public static class Exists<T> implements Predicate<T> {
+  static {
+    RegisteredPredicate.register("exists", new RegisteredPredicate.Factory() {
+      @Override
+      public <T> RegisteredPredicate<T> fromString(String empty, Schema _) {
+        return exists();
+      }
+    });
+  }
+
+  public static class Exists<T> extends RegisteredPredicate<T> {
     public static final Exists INSTANCE = new Exists();
 
     private Exists() {
@@ -112,12 +153,30 @@ public abstract class Predicates {
     }
 
     @Override
+    public String getName() {
+      return "exists";
+    }
+
+    @Override
+    public String toString(Schema _) {
+      return "";
+    }
+
+    @Override
     public String toString() {
       return Objects.toStringHelper(this).toString();
     }
   }
 
   public static class In<T> implements Predicate<T> {
+    public static <T> In<T> fromString(String set, Schema schema) {
+      Set<T> values = Sets.newHashSet();
+      for (String value : Splitter.on(',').split(set)) {
+        values.add(SchemaUtil.<T>fromString(value, schema));
+      }
+      return Predicates.in(values);
+    }
+
     // ImmutableSet entries are non-null
     private final Set<T> set;
 
@@ -177,6 +236,24 @@ public abstract class Predicates {
     @Override
     public String toString() {
       return Objects.toStringHelper(this).add("set", set).toString();
+    }
+
+    public String toString(Schema schema) {
+      return Joiner.on(',').join(
+          Iterables.transform(set, new ToString<T>(schema)));
+    }
+
+    private static class ToString<T> implements Function<T, String> {
+      private final Schema schema;
+
+      private ToString(Schema schema) {
+        this.schema = schema;
+      }
+
+      @Override
+      public String apply(@Nullable T input) {
+        return SchemaUtil.toString(input, schema);
+      }
     }
   }
 }

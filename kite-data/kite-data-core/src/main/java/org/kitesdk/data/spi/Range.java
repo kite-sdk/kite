@@ -88,7 +88,8 @@ public class Range<T> implements Predicate<T> {
       boolean uIncl = "]".equals(match.group(4));
       return new Range<T>(bound(lower, lIncl), bound(upper, uIncl));
     } else {
-      throw new RuntimeException("Cannot parse as range: " + range);
+      // not a Range
+      return null;
     }
   }
 
@@ -221,7 +222,9 @@ public class Range<T> implements Predicate<T> {
 
   @SuppressWarnings("unchecked")
   private static <T> Bound<T> bound(T endpoint, boolean inclusive) {
-    if (endpoint instanceof CharSequence) {
+    if (endpoint == null) {
+      return (Bound<T>) INF;
+    } else if (endpoint instanceof CharSequence) {
       return (Bound<T>) new CharSequenceBound((CharSequence) endpoint, inclusive);
     } else if (endpoint instanceof Comparable) {
       return (Bound<T>) new ComparableBound((Comparable) endpoint, inclusive);
