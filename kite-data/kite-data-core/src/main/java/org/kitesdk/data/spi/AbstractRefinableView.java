@@ -16,16 +16,15 @@
 
 package org.kitesdk.data.spi;
 
-import com.google.common.base.Predicate;
-import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetDescriptor;
 import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
 import java.io.IOException;
-
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
+import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
-
+import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.View;
 import org.slf4j.Logger;
@@ -164,6 +163,20 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
   @Override
   public AbstractRefinableView<E> toBefore(String name, Comparable value) {
     return filter(constraints.toBefore(name, roundTripFieldValue(name, value)));
+  }
+
+  @Override
+  public boolean isEmpty() {
+    DatasetReader<E> reader = null;
+    try {
+      // use a reader because files may be present but empty
+      reader = newReader();
+      return !reader.hasNext();
+    } finally {
+      if (reader != null) {
+        reader.close();
+      }
+    }
   }
 
   @Override

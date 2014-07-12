@@ -106,4 +106,15 @@ public interface View<E> {
    * @since 0.15.0
    */
   public Class<E> getType();
+
+  /**
+   * Check whether this {@link View} contains any records.
+   *
+   * Implementations should return once a single record in this view is found.
+   * But this might require scanning through large amounts of data sequentially
+   * to determine if there are any records.
+   *
+   * @return {@code true} if least one record exists, {@code false} otherwise
+   */
+  public boolean isEmpty();
 }

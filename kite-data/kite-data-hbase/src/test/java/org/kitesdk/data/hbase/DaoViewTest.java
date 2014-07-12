@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.hbase;
 
+import java.io.IOException;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
@@ -160,6 +161,26 @@ public class DaoViewTest {
         .fromAfter(NAMES[0], "1").to(NAMES[0], "5")
         .fromAfter(NAMES[1], "1").to(NAMES[1], "5");
     range.newWriter().write(newTestEntity("6", "6"));
+  }
+
+  @Test
+  public void testEmptyCheck() throws IOException {
+    DaoView<TestEntity> unbounded = new DaoView<TestEntity>(ds, TestEntity.class);
+
+    Assert.assertTrue("New dataset should be empty", unbounded.isEmpty());
+
+    populateTestEntities(1);
+
+    Assert.assertFalse("Should not be empty after write", unbounded.isEmpty());
+
+    Assert.assertFalse("Should find entity 0", unbounded
+        .with(NAMES[0], "0").with(NAMES[1], "0")
+        .isEmpty());
+
+    Assert.assertTrue("Should not find entity 1", unbounded
+        .with(NAMES[0], "1").with(NAMES[1], "1")
+        .isEmpty());
+
   }
 
   private TestEntity newTestEntity(String part1, String part2) {

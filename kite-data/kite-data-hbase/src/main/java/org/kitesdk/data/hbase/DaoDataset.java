@@ -95,6 +95,11 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   }
 
   @Override
+  public boolean isEmpty() {
+    return unbounded.isEmpty();
+  }
+
+  @Override
   public DaoView<E> filter(Constraints c) {
     return unbounded.filter(c);
   }

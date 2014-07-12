@@ -104,6 +104,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
         .schemaUri("resource:standard_event.avsc")
         .partitionStrategy(strategy)
         .build();
+    repo.delete("test");
     this.unbounded = repo.create("test", testDescriptor);
   }
 
@@ -126,6 +127,28 @@ public abstract class TestRefinableViews extends MiniDFSTest {
   @Test(expected = IllegalArgumentException.class)
   public void testInconsistentFieldType() {
     unbounded.with("timestamp", 0); // not '0L'
+  }
+
+  @Test
+  public void testEmptyCheck() throws IOException {
+    Assert.assertTrue("New dataset should be empty", unbounded.isEmpty());
+
+    // NOTE: this is an un-restricted write so all should succeed
+    DatasetWriter<StandardEvent> writer = null;
+    try {
+      writer = unbounded.newWriter();
+      writer.write(sepEvent);
+    } finally {
+      Closeables.close(writer, false);
+    }
+
+    Assert.assertFalse("Should not be empty after write", unbounded.isEmpty());
+
+    Assert.assertFalse("Should find event in September",
+        unbounded.with("timestamp", sepEvent.getTimestamp()).isEmpty());
+
+    Assert.assertTrue("Should not find event in October",
+        unbounded.with("timestamp", octEvent.getTimestamp()).isEmpty());
   }
 
   @Test

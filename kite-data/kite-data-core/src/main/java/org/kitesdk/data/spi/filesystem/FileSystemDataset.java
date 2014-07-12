@@ -440,6 +440,11 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     return lastMod;
   }
 
+  @Override
+  public boolean isEmpty() {
+    return unbounded.isEmpty();
+  }
+
   public static class Builder<E> {
 
     private Configuration conf;
