@@ -16,6 +16,7 @@
 package org.kitesdk.data.mapreduce;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.URI;
 import org.apache.avro.Schema;
@@ -33,6 +34,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.TypeNotFoundException;
@@ -67,6 +69,12 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   public static final String KITE_PARTITION_DIR = "kite.outputPartitionDir";
   public static final String KITE_TYPE = "kite.outputEntityType";
 
+  private static final String KITE_WRITE_MODE = "kite.outputMode";
+
+  private static enum WriteMode {
+    APPEND, OVERWRITE, FAIL_UNLESS_EMPTY
+  }
+
   public static class ConfigBuilder {
     private final Configuration conf;
 
@@ -96,6 +104,25 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
     /**
      * Adds configuration for {@code DatasetKeyOutputFormat} to write to the
+     * given dataset or view URI after removing any existing data.
+     * <p>
+     * The underlying dataset implementation must support View#deleteAll for
+     * the view identified by the URI or the job will fail.
+     * <p>
+     * URI formats are defined by {@link Dataset} implementations, but must
+     * begin with "dataset:" or "view:". For more information, see
+     * {@link Datasets}.
+     *
+     * @param uri a dataset or view URI
+     * @return this for method chaining
+     */
+    public ConfigBuilder overwrite(URI uri) {
+      setOverwrite();
+      return writeTo(uri);
+    }
+
+    /**
+     * Adds configuration for {@code DatasetKeyOutputFormat} to write to the
      * given {@link Dataset} or {@link View} instance.
      *
      * @param view a dataset or view
@@ -113,6 +140,22 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
     /**
      * Adds configuration for {@code DatasetKeyOutputFormat} to write to the
+     * given {@link Dataset} or {@link View} instance after removing any
+     * existing data.
+     * <p>
+     * The underlying dataset implementation must support View#deleteAll for
+     * the {@code view} or the job will fail.
+     *
+     * @param view a dataset or view
+     * @return this for method chaining
+     */
+    public ConfigBuilder overwrite(View<?> view) {
+      setOverwrite();
+      return writeTo(view);
+    }
+
+    /**
+     * Adds configuration for {@code DatasetKeyOutputFormat} to write to the
      * given dataset or view URI string.
      * <p>
      * URI formats are defined by {@link Dataset} implementations, but must
@@ -126,9 +169,40 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       return writeTo(URI.create(uri));
     }
 
-   public <E> ConfigBuilder withType(Class<E> type) {
+    /**
+     * Adds configuration for {@code DatasetKeyOutputFormat} to write to the
+     * given dataset or view URI string after removing any existing data.
+     * <p>
+     * The underlying dataset implementation must support View#deleteAll for
+     * the view identified by the URI string or the job will fail.
+     * <p>
+     * URI formats are defined by {@link Dataset} implementations, but must
+     * begin with "dataset:" or "view:". For more information, see
+     * {@link Datasets}.
+     *
+     * @param uri a dataset or view URI string
+     * @return this for method chaining
+     */
+    public ConfigBuilder overwrite(String uri) {
+      setOverwrite();
+      return writeTo(uri);
+    }
+
+    public <E> ConfigBuilder withType(Class<E> type) {
       conf.setClass(KITE_TYPE, type, type);
       return this;
+    }
+
+    public ConfigBuilder failUnlessEmpty() {
+      conf.setEnum(KITE_WRITE_MODE, WriteMode.FAIL_UNLESS_EMPTY);
+      return this;
+    }
+
+    private void setOverwrite() {
+      String mode = conf.get(KITE_WRITE_MODE);
+      Preconditions.checkState(mode == null,
+          "Cannot replace existing write mode: " + mode);
+      conf.setEnum(KITE_WRITE_MODE, WriteMode.OVERWRITE);
     }
   }
 
@@ -339,8 +413,23 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   @Override
   public void checkOutputSpecs(JobContext jobContext) {
-    // always run
     // The committer setup will fail if the output dataset does not exist
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
+    View<E> target;
+    switch (conf.getEnum(KITE_WRITE_MODE, WriteMode.APPEND)) {
+      case FAIL_UNLESS_EMPTY:
+        target = load(jobContext);
+        if (!target.isEmpty()) {
+          throw new DatasetException("View is not empty: " + target);
+        }
+        break;
+      case OVERWRITE:
+        target = load(jobContext);
+        if (!target.isEmpty()) {
+          target.deleteAll();
+        }
+        break;
+    }
   }
 
   @Override
