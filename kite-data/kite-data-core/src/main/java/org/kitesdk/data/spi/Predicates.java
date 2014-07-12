@@ -20,12 +20,9 @@ import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.collect.BoundType;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Range;
-import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -80,12 +77,12 @@ public abstract class Predicates {
     // adjust to a closed range to avoid catching extra keys
     if (range.hasLowerBound()) {
       T lower = range.lowerEndpoint();
-      if (BoundType.OPEN == range.lowerBoundType()) {
+      if (range.isLowerBoundOpen()) {
         lower = domain.next(lower);
       }
       if (range.hasUpperBound()) {
         T upper = range.upperEndpoint();
-        if (BoundType.OPEN == range.upperBoundType()) {
+        if (range.isUpperBoundOpen()) {
           upper = domain.previous(upper);
         }
         return Ranges.closed(lower, upper);
@@ -94,7 +91,7 @@ public abstract class Predicates {
       }
     } else if (range.hasUpperBound()) {
       T upper = range.upperEndpoint();
-      if (BoundType.OPEN == range.upperBoundType()) {
+      if (range.isUpperBoundOpen()) {
         upper = domain.previous(upper);
       }
       return Ranges.atMost(upper);

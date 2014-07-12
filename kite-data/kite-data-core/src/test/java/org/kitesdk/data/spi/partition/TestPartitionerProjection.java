@@ -18,8 +18,6 @@ package org.kitesdk.data.spi.partition;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Range;
-import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -33,6 +31,8 @@ import org.junit.Test;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.Predicates;
+import org.kitesdk.data.spi.Range;
+import org.kitesdk.data.spi.Ranges;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

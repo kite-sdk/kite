@@ -17,9 +17,7 @@ package org.kitesdk.data.spi.partition;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.DiscreteDomains;
-import com.google.common.collect.Range;
 import com.google.common.base.Objects;
-import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 import java.util.Set;
@@ -27,6 +25,8 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.Predicates;
+import org.kitesdk.data.spi.Range;
+import org.kitesdk.data.spi.Ranges;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",

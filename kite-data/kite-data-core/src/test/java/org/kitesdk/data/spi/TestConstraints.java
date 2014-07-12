@@ -19,7 +19,6 @@ package org.kitesdk.data.spi;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
 import java.util.Map;
 import java.util.Random;

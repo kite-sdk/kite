@@ -16,11 +16,8 @@
 package org.kitesdk.data.spi.partition;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.BoundType;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.DiscreteDomains;
-import com.google.common.collect.Range;
-import com.google.common.collect.Ranges;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -28,6 +25,8 @@ import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 import com.google.common.base.Objects;
 import org.kitesdk.data.spi.Predicates;
+import org.kitesdk.data.spi.Range;
+import org.kitesdk.data.spi.Ranges;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
         "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
@@ -78,9 +77,9 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
     } else if (predicate instanceof Range) {
       // must use a closed range:
       //   if this( abc ) => b then this( acc ) => b, so b must be included
-      return Predicates.in(
-          Predicates.transformClosed((Range<String>) predicate, this)
-              .asSet(domain()));
+      Range<String> transformed = Predicates.transformClosed(
+          (Range<String>) predicate, this);
+      return Predicates.in(Range.asSet(transformed, domain()));
     } else {
       return null;
     }
@@ -96,7 +95,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
     } else if (predicate instanceof Range) {
       Range<String> transformed = transformClosed((Range<String>) predicate);
       if (transformed != null) {
-        return Predicates.in(transformed.asSet(domain()));
+        return Predicates.in(Range.asSet(transformed, domain()));
       }
     }
     return null;
@@ -159,8 +158,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
           String upper = range.upperEndpoint();
           String upperImage = apply(upper);
           // meaning: at the endpoint
-          if (upper.equals(upperImage) &&
-              range.upperBoundType() == BoundType.CLOSED) {
+          if (upper.equals(upperImage) && range.isUpperBoundClosed()) {
             // include upper
             return Ranges.closed(afterLower, upperImage);
           } else {
@@ -176,7 +174,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
     } else if (range.hasUpperBound()) {
       String upper = range.upperEndpoint();
       String upperImage = apply(upper);
-      if (upper.equals(upperImage) && range.upperBoundType() == BoundType.CLOSED) {
+      if (upper.equals(upperImage) && range.isUpperBoundClosed()) {
         // include upper
         return Ranges.atMost(upperImage);
       } else {

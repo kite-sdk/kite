@@ -17,7 +17,6 @@ package org.kitesdk.data.spi.partition;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +24,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.Predicates;
+import org.kitesdk.data.spi.Range;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
@@ -86,7 +86,7 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
         } else {
           // check each item in the set
           for (S item : items) {
-            if (range.contains((Comparable) item)) {
+            if (range.contains(item)) {
               possibleValues.add(i);
               break; // no need to test additional items in this set
             }

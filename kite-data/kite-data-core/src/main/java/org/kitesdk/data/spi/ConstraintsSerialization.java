@@ -18,8 +18,6 @@ package org.kitesdk.data.spi;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.BoundType;
-import com.google.common.collect.Range;
-import com.google.common.collect.Ranges;
 import org.apache.avro.Schema;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
@@ -162,7 +160,7 @@ class ConstraintsSerialization {
     if (range.hasLowerBound()) {
       //write out that there is a lower endpoint and the value.
       out.writeBoolean(true);
-      out.writeBoolean(range.lowerBoundType() == BoundType.OPEN);
+      out.writeBoolean(range.isLowerBoundOpen());
       writeValue(fieldSchema, range.lowerEndpoint(), out);
     } else {
       //Write that there is no lower bound
@@ -171,7 +169,7 @@ class ConstraintsSerialization {
 
     if (range.hasUpperBound()) {
       out.writeBoolean(true);
-      out.writeBoolean(range.upperBoundType() == BoundType.OPEN);
+      out.writeBoolean(range.isUpperBoundOpen());
       //write out that there is a lower endpoint and the value.
       writeValue(fieldSchema, range.upperEndpoint(), out);
     } else {

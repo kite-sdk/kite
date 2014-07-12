@@ -20,13 +20,13 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Range;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.Predicates;
+import org.kitesdk.data.spi.Range;
 
 /**
  * A FieldPartitioner that formats a timestamp (long) in milliseconds since
