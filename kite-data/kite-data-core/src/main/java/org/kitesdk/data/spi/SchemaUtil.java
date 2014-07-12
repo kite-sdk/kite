@@ -19,13 +19,25 @@ package org.kitesdk.data.spi;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.avro.Schema;
+import org.apache.avro.io.BinaryEncoder;
+import org.apache.avro.io.DatumReader;
+import org.apache.avro.io.DatumWriter;
+import org.apache.avro.io.Decoder;
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.reflect.ReflectData;
 import org.apache.avro.specific.SpecificData;
+import org.apache.commons.codec.binary.Base64;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.ValidationException;
@@ -279,6 +291,61 @@ public class SchemaUtil {
 
       default:
         return visitor.primitive(schema);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static String toString(Object value, Schema schema) {
+    switch (schema.getType()) {
+      case BOOLEAN:
+      case INT:
+      case LONG:
+      case FLOAT:
+      case DOUBLE:
+      case STRING:
+        // TODO: could be null
+        return value.toString();
+      default:
+        // otherwise, encode as Avro binary and then base64
+        DatumWriter writer = ReflectData.get().createDatumWriter(schema);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(out, null);
+        try {
+          writer.write(value, encoder);
+          encoder.flush();
+        } catch (IOException e) {
+          throw new DatasetIOException("Cannot encode Avro value", e);
+        }
+        return Base64.encodeBase64URLSafeString(out.toByteArray());
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> T fromString(String value, Schema schema) {
+    switch (schema.getType()) {
+      case BOOLEAN:
+        return (T) Boolean.valueOf(value);
+      case INT:
+        return (T) Integer.valueOf(value);
+      case LONG:
+        return (T) Long.valueOf(value);
+      case FLOAT:
+        return (T) Float.valueOf(value);
+      case DOUBLE:
+        return (T) Double.valueOf(value);
+      case STRING:
+        return (T) value;
+      default:
+        //  otherwise, the value is Avro binary encoded with base64
+        byte[] binary = Base64.decodeBase64(value);
+        Decoder decoder = DecoderFactory.get()
+            .binaryDecoder(new ByteArrayInputStream(binary), null);
+        DatumReader<T> reader = ReflectData.get().createDatumReader(schema);
+        try {
+          return reader.read(null, decoder);
+        } catch (IOException e) {
+          throw new DatasetIOException("Cannot decode Avro value", e);
+        }
     }
   }
 }

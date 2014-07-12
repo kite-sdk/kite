@@ -23,7 +23,10 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.DiscreteDomain;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import org.apache.avro.Schema;
 
 public class Range<T> implements Predicate<T> {
 
@@ -63,6 +66,32 @@ public class Range<T> implements Predicate<T> {
     return new Range<T>(bound(endpoint, true), bound(endpoint, true));
   }
 
+  public static final Pattern RANGE_PATTERN = Pattern.compile(
+      "([\\[\\(])([^,]*),([^\\]\\)]*)([\\]\\)])");
+
+  public static <T> Range<T> fromString(String range, Schema schema) {
+    Matcher match = RANGE_PATTERN.matcher(range);
+    if (match.matches()) {
+      boolean lIncl = "[".equals(match.group(1));
+      T lower;
+      if ("inf".equals(match.group(2))) {
+        lower = null;
+      } else {
+        lower = SchemaUtil.fromString(match.group(2), schema);
+      }
+      T upper;
+      if ("inf".equals(match.group(3))) {
+        upper = null;
+      } else {
+        upper = SchemaUtil.fromString(match.group(3), schema);
+      }
+      boolean uIncl = "]".equals(match.group(4));
+      return new Range<T>(bound(lower, lIncl), bound(upper, uIncl));
+    } else {
+      throw new RuntimeException("Cannot parse as range: " + range);
+    }
+  }
+
   public static <C extends Comparable<C>> Set<C> asSet(
       Range<C> range, DiscreteDomain<C> domain) {
     // cheat and pass this to guava
@@ -90,17 +119,6 @@ public class Range<T> implements Predicate<T> {
           range.isUpperBoundOpen() ? BoundType.OPEN : BoundType.CLOSED);
     } else {
       return com.google.common.collect.Ranges.all();
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <T> Bound<T> bound(T endpoint, boolean inclusive) {
-    if (endpoint instanceof CharSequence) {
-      return (Bound<T>) new CharSequenceBound((CharSequence) endpoint, inclusive);
-    } else if (endpoint instanceof Comparable) {
-      return (Bound<T>) new ComparableBound((Comparable) endpoint, inclusive);
-    } else {
-      throw new RuntimeException();
     }
   }
 
@@ -177,6 +195,12 @@ public class Range<T> implements Predicate<T> {
         (isUpperBoundClosed() ? "]" : ")");
   }
 
+  public String toString(Schema schema) {
+    return (isLowerBoundClosed() ? "[" : "(") +
+        lower.toString(schema) + "," + upper.toString(schema) +
+        (isUpperBoundClosed() ? "]" : ")");
+  }
+
   @Override
   public boolean equals(@Nullable Object object) {
     if (this == object) {
@@ -195,11 +219,23 @@ public class Range<T> implements Predicate<T> {
     return Objects.hashCode(lower, upper);
   }
 
+  @SuppressWarnings("unchecked")
+  private static <T> Bound<T> bound(T endpoint, boolean inclusive) {
+    if (endpoint instanceof CharSequence) {
+      return (Bound<T>) new CharSequenceBound((CharSequence) endpoint, inclusive);
+    } else if (endpoint instanceof Comparable) {
+      return (Bound<T>) new ComparableBound((Comparable) endpoint, inclusive);
+    } else {
+      throw new RuntimeException();
+    }
+  }
+
   private static interface Bound<T> {
     public boolean inclusive();
     public T endpoint();
     public boolean isLessThan(T other);
     public boolean isGreaterThan(T other);
+    public String toString(Schema schema);
   }
 
   private static Bound<Object> INF = new Bound<Object>() {
@@ -226,6 +262,11 @@ public class Range<T> implements Predicate<T> {
     @Override
     public String toString() {
       return "inf";
+    }
+
+    @Override
+    public String toString(Schema _) {
+      return toString();
     }
   };
 
@@ -290,6 +331,11 @@ public class Range<T> implements Predicate<T> {
     @Override
     public String toString() {
       return endpoint.toString();
+    }
+
+    @Override
+    public String toString(Schema schema) {
+      return SchemaUtil.toString(endpoint, schema);
     }
   }
 
