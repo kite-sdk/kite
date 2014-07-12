@@ -16,23 +16,14 @@
 
 package org.kitesdk.data.spi;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumReader;
-import org.apache.avro.io.DatumWriter;
-import org.apache.avro.io.DecoderFactory;
-import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectData;
-import org.apache.avro.reflect.ReflectDatumWriter;
 import org.apache.avro.specific.SpecificData;
 import org.apache.avro.specific.SpecificRecord;
 import org.kitesdk.data.IncompatibleSchemaException;
-import org.kitesdk.data.PartitionStrategy;
 
 /**
  * Utilities for determining the appropriate data model at runtime.
@@ -125,41 +116,5 @@ public class DataModelUtil {
     }
 
     return readerSchema;
-  }
-
-  /**
-   * Take the given writerField name and value and round trip the value through
-   * Avro serialization using the given writerSchema.
-   *
-   * @param <E> The entity type
-   * @param writerSchema The {@link Schema} for the entity
-   * @param type The Java class of the entity type
-   * @param name The name of the writerField
-   * @param value The value of the writerField
-   * @return The value after being serialized/deserialized
-   * @throws IOException There was an IO error with (de)serialization
-   */
-  @SuppressWarnings("unchecked")
-  public static <E> Object roundTripFieldValue(Schema writerSchema,
-      PartitionStrategy strategy, Class<E> type, String name, Object value)
-      throws IOException {
-    GenericData dataModel = getDataModelForType(type);
-    Schema writerFieldSchema = SchemaUtil.fieldSchema(
-        writerSchema, strategy, name);
-
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    DatumWriter<Object> writer = new ReflectDatumWriter<Object>(writerFieldSchema);
-    BinaryEncoder binaryEncoder = EncoderFactory.get().binaryEncoder(out, null);
-    writer.write(value, binaryEncoder);
-    binaryEncoder.flush();
-
-    Schema readerFieldSchema = SchemaUtil.fieldSchema(
-        getReaderSchema(type, writerSchema), strategy, name);
-
-    ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-    DatumReader reader = dataModel.createDatumReader(writerFieldSchema, readerFieldSchema);
-    Object newValue = reader.read(null, DecoderFactory.get().binaryDecoder(in, null));
-
-    return newValue;
   }
 }
