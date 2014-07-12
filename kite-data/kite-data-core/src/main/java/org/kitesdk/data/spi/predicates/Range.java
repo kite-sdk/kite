@@ -14,57 +14,19 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.spi;
+package org.kitesdk.data.spi.predicates;
 
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
-import com.google.common.collect.BoundType;
-import com.google.common.collect.DiscreteDomain;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import org.apache.avro.Schema;
+import org.kitesdk.data.spi.CharSequences;
+import org.kitesdk.data.spi.SchemaUtil;
 
 public class Range<T> implements Predicate<T> {
-
-  public static <T> Range<T> open(T lower, T upper) {
-    return new Range<T>(bound(lower, false), bound(upper, false));
-  }
-
-  public static <T> Range<T> closed(T lower, T upper) {
-    return new Range<T>(bound(lower, true), bound(upper, true));
-  }
-
-  public static <T> Range<T> closedOpen(T lower, T upper) {
-    return new Range<T>(bound(lower, true), bound(upper, false));
-  }
-
-  public static <T> Range<T> openClosed(T lower, T upper) {
-    return new Range<T>(bound(lower, false), bound(upper, true));
-  }
-
-  public static <T> Range<T> greaterThan(T endpoint) {
-    return new Range<T>(bound(endpoint, false), null);
-  }
-
-  public static <T> Range<T> atLeast(T endpoint) {
-    return new Range<T>(bound(endpoint, true), null);
-  }
-
-  public static <T> Range<T> lessThan(T endpoint) {
-    return new Range<T>(null, bound(endpoint, false));
-  }
-
-  public static <T> Range<T> atMost(T endpoint) {
-    return new Range<T>(null, bound(endpoint, true));
-  }
-
-  public static <T> Range<T> singleton(T endpoint) {
-    return new Range<T>(bound(endpoint, true), bound(endpoint, true));
-  }
 
   public static final Pattern RANGE_PATTERN = Pattern.compile(
       "([\\[\\(])([^,]*),([^\\]\\)]*)([\\]\\)])");
@@ -93,41 +55,11 @@ public class Range<T> implements Predicate<T> {
     }
   }
 
-  public static <C extends Comparable<C>> Set<C> asSet(
-      Range<C> range, DiscreteDomain<C> domain) {
-    // cheat and pass this to guava
-    return asGuavaRange(range).asSet(domain);
-  }
-
-  @VisibleForTesting
-  static <C extends Comparable<C>> com.google.common.collect.Range<C> asGuavaRange(
-      Range<C> range) {
-    if (range.hasLowerBound()) {
-      if (range.hasUpperBound()) {
-        return com.google.common.collect.Ranges.range(
-            range.lower.endpoint(),
-            range.isLowerBoundOpen() ? BoundType.OPEN : BoundType.CLOSED,
-            range.upper.endpoint(),
-            range.isUpperBoundOpen() ? BoundType.OPEN : BoundType.CLOSED);
-      } else {
-        return com.google.common.collect.Ranges.downTo(
-            range.lower.endpoint(),
-            range.isLowerBoundOpen() ? BoundType.OPEN : BoundType.CLOSED);
-      }
-    } else if (range.hasUpperBound()) {
-      return com.google.common.collect.Ranges.upTo(
-          range.upper.endpoint(),
-          range.isUpperBoundOpen() ? BoundType.OPEN : BoundType.CLOSED);
-    } else {
-      return com.google.common.collect.Ranges.all();
-    }
-  }
-
   private final Bound<T> lower;
   private final Bound<T> upper;
 
   @SuppressWarnings("unchecked")
-  private Range(Bound<T> lower, Bound<T> upper) {
+  Range(Bound<T> lower, Bound<T> upper) {
     this.lower = (lower == null ? ((Bound<T>) INF) : lower);
     this.upper = (upper == null ? ((Bound<T>) INF) : upper);
   }
@@ -221,7 +153,7 @@ public class Range<T> implements Predicate<T> {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> Bound<T> bound(T endpoint, boolean inclusive) {
+  static <T> Bound<T> bound(T endpoint, boolean inclusive) {
     if (endpoint == null) {
       return (Bound<T>) INF;
     } else if (endpoint instanceof CharSequence) {

@@ -30,6 +30,9 @@ import java.util.NoSuchElementException;
 import javax.annotation.Nullable;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
+import org.kitesdk.data.spi.predicates.In;
+import org.kitesdk.data.spi.predicates.Predicates;
+import org.kitesdk.data.spi.predicates.Range;
 
 class KeyRangeIterable implements Iterable<MarkerRange> {
   private final Map<String, Predicate> predicates;
@@ -62,8 +65,8 @@ class KeyRangeIterable implements Iterable<MarkerRange> {
       if (first instanceof CalendarFieldPartitioner) {
         current = TimeDomain.get(strategy, source)
             .addStackedIterator(constraint, current);
-      } else if (constraint instanceof Predicates.In) {
-        current = add((Predicates.In) constraint, fps, current);
+      } else if (constraint instanceof In) {
+        current = add((In) constraint, fps, current);
       } else if (constraint instanceof Range) {
         current = add((Range) constraint, fps, current);
       }
@@ -109,7 +112,7 @@ class KeyRangeIterable implements Iterable<MarkerRange> {
    */
   @SuppressWarnings("unchecked")
   static Iterator<MarkerRange.Builder> add(
-      Predicates.In constraint, List<FieldPartitioner> fps,
+      In constraint, List<FieldPartitioner> fps,
       Iterator<MarkerRange.Builder> inner) {
 
     Iterator<MarkerRange.Builder> current = inner;
@@ -118,7 +121,7 @@ class KeyRangeIterable implements Iterable<MarkerRange> {
       Predicate<?> projected = fp.project(constraint);
       if (projected instanceof Range) {
         current = addProjected(projected, fp.getName(), current);
-      } else if (projected instanceof Predicates.In) {
+      } else if (projected instanceof In) {
         compatible.add(fp);
       }
       // otherwise, all fields are included, so don't add anything
@@ -158,7 +161,7 @@ class KeyRangeIterable implements Iterable<MarkerRange> {
     List<Pair<String, Range>> compatible = Lists.newArrayList();
     for (FieldPartitioner fp : fps) {
       Predicate<?> projected = fp.project(constraint);
-      if (projected instanceof Predicates.In) {
+      if (projected instanceof In) {
         current = addProjected(projected, fp.getName(), current);
       } else if (projected instanceof Range) {
         compatible.add(Pair.of(fp.getName(), (Range) projected));
@@ -186,8 +189,8 @@ class KeyRangeIterable implements Iterable<MarkerRange> {
   private static Iterator<MarkerRange.Builder> addProjected(
       Predicate projected, String name,
       Iterator<MarkerRange.Builder> inner) {
-    if (projected instanceof Predicates.In) {
-      return new SetIterator((Predicates.In) projected, name, inner);
+    if (projected instanceof In) {
+      return new SetIterator((In) projected, name, inner);
     } else if (projected instanceof Range) {
       return new RangeIterator(name, (Range) projected, inner);
     } else {
@@ -278,10 +281,10 @@ class KeyRangeIterable implements Iterable<MarkerRange> {
      * @param inner An {@code Iterator} to wrap
      */
     @SuppressWarnings("unchecked")
-    private SetIterator(Predicates.In projected, String name,
+    private SetIterator(In projected, String name,
                        Iterator<MarkerRange.Builder> inner) {
       this.name = name;
-      setItems(projected.getSet());
+      setItems(Predicates.asSet(projected));
       setInner(inner);
     }
 
@@ -331,10 +334,10 @@ class KeyRangeIterable implements Iterable<MarkerRange> {
      * @param inner An {@code Iterator} to wrap
      */
     @SuppressWarnings("unchecked")
-    SetGroupIterator(Predicates.In constraint, List<FieldPartitioner> fps,
+    SetGroupIterator(In constraint, List<FieldPartitioner> fps,
                             Iterator<MarkerRange.Builder> inner) {
       this.fields = fps;
-      setItems(constraint.getSet());
+      setItems(Predicates.asSet(constraint));
       setInner(inner);
     }
 

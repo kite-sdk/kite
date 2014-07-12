@@ -24,9 +24,11 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
 import com.google.common.base.Objects;
-import org.kitesdk.data.spi.Predicates;
-import org.kitesdk.data.spi.Range;
-import org.kitesdk.data.spi.Ranges;
+import org.kitesdk.data.spi.predicates.Exists;
+import org.kitesdk.data.spi.predicates.In;
+import org.kitesdk.data.spi.predicates.Predicates;
+import org.kitesdk.data.spi.predicates.Range;
+import org.kitesdk.data.spi.predicates.Ranges;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value={
         "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
@@ -70,16 +72,16 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
 
   @Override
   public Predicate<String> project(Predicate<String> predicate) {
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
-      return ((Predicates.In<String>) predicate).transform(this);
+    } else if (predicate instanceof In) {
+      return ((In<String>) predicate).transform(this);
     } else if (predicate instanceof Range) {
       // must use a closed range:
       //   if this( abc ) => b then this( acc ) => b, so b must be included
-      Range<String> transformed = Predicates.transformClosed(
+      Range<String> transformed = Ranges.transformClosed(
           (Range<String>) predicate, this);
-      return Predicates.in(Range.asSet(transformed, domain()));
+      return Predicates.in(Ranges.asSet(transformed, domain()));
     } else {
       return null;
     }
@@ -87,15 +89,15 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
 
   @Override
   public Predicate<String> projectStrict(Predicate<String> predicate) {
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
+    } else if (predicate instanceof In) {
       // not possible to check all inputs to the predicate
       return null;
     } else if (predicate instanceof Range) {
       Range<String> transformed = transformClosed((Range<String>) predicate);
       if (transformed != null) {
-        return Predicates.in(Range.asSet(transformed, domain()));
+        return Predicates.in(Ranges.asSet(transformed, domain()));
       }
     }
     return null;

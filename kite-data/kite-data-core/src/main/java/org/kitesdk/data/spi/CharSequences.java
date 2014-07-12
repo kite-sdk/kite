@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.Set;
 import javax.annotation.concurrent.Immutable;
 
-class CharSequences {
+public class CharSequences {
 
   public static int compare(CharSequence left, CharSequence right) {
     if (left == right) {

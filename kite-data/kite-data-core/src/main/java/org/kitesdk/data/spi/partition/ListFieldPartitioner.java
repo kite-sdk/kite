@@ -23,8 +23,10 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.spi.Predicates;
-import org.kitesdk.data.spi.Range;
+import org.kitesdk.data.spi.predicates.Exists;
+import org.kitesdk.data.spi.predicates.In;
+import org.kitesdk.data.spi.predicates.Predicates;
+import org.kitesdk.data.spi.predicates.Range;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
@@ -71,10 +73,10 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
   @Override
   @SuppressWarnings("unchecked")
   public Predicate<Integer> project(Predicate<S> predicate) {
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
-      return ((Predicates.In<S>) predicate).transform(this);
+    } else if (predicate instanceof In) {
+      return ((In<S>) predicate).transform(this);
     } else if (predicate instanceof Range) {
       Range range = (Range) predicate;
       Set<Integer> possibleValues = Sets.newHashSet();
@@ -102,9 +104,9 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
 
   @Override
   public Predicate<Integer> projectStrict(Predicate<S> predicate) {
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
-    } else if (predicate instanceof Predicates.In ||
+    } else if (predicate instanceof In ||
         predicate instanceof Range) {
       Set<Integer> possibleValues = Sets.newHashSet();
       for (int i = 0; i < values.size(); i += 1) {
