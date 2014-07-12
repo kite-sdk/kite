@@ -18,6 +18,7 @@ package org.kitesdk.data.spi;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
+import java.net.URI;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -202,5 +203,10 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
         .add("dataset", dataset)
         .add("constraints", constraints)
         .toString();
+  }
+
+  @Override
+  public URI getUri() {
+    return new URIBuilder(dataset.getUri()).constraints(constraints).build();
   }
 }

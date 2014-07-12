@@ -163,6 +163,22 @@ public class SchemaUtil {
   }
 
   /**
+   * Return whether there is a field named {@code name} in the schema or
+   * partition strategy.
+   *
+   * @param schema a {@code Schema}
+   * @param strategy a {@code PartitionStrategy}
+   * @param name a String field name
+   * @return {@code true} if {@code name} identifies a field
+   */
+  public static boolean isField(Schema schema, PartitionStrategy strategy,
+                                String name) {
+    Schema.Field field = schema.getField(name);
+    return ((field != null) ||
+        (strategy != null && strategy.hasPartitioner(name)));
+  }
+
+  /**
    * Returns a {@link Schema} for the given field name, which could be either a
    * schema field or a partition field.
    *
