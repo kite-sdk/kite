@@ -15,8 +15,10 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.avro.hadoop.io.AvroSerialization;
 import org.apache.avro.mapred.AvroKey;
@@ -83,32 +85,37 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     Job job = new Job(conf);
     Format format = dataset.getDescriptor().getFormat();
-    if (Formats.AVRO.equals(format)) {
-      setInputPaths(jobContext, job);
-      AvroJob.setInputKeySchema(job, dataset.getDescriptor().getSchema());
-      AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
-      return delegate.getSplits(jobContext);
-    } else if (Formats.PARQUET.equals(format)) {
-      setInputPaths(jobContext, job);
-      // TODO: use later version of parquet (with https://github.com/Parquet/parquet-mr/pull/282) so we can set the schema correctly
-      // AvroParquetInputFormat.setReadSchema(job, view.getDescriptor().getSchema());
-      AvroParquetInputFormat delegate = new AvroParquetInputFormat();
-      return delegate.getSplits(jobContext);
-    } else if (Formats.CSV.equals(format)) {
-      setInputPaths(jobContext, job);
-      // this generates an unchecked cast exception?
-      return new CSVInputFormat().getSplits(jobContext);
+
+    if (setInputPaths(jobContext, job)) {
+      if (Formats.AVRO.equals(format)) {
+        AvroJob.setInputKeySchema(job, dataset.getDescriptor().getSchema());
+        AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
+        return delegate.getSplits(jobContext);
+      } else if (Formats.PARQUET.equals(format)) {
+        // TODO: use later version of parquet (with https://github.com/Parquet/parquet-mr/pull/282) so we can set the schema correctly
+        // AvroParquetInputFormat.setReadSchema(job, view.getDescriptor().getSchema());
+        AvroParquetInputFormat delegate = new AvroParquetInputFormat();
+        return delegate.getSplits(jobContext);
+      } else if (Formats.CSV.equals(format)) {
+        // this generates an unchecked cast exception?
+        return new CSVInputFormat().getSplits(jobContext);
+      } else {
+        throw new UnsupportedOperationException(
+            "Not a supported format: " + format);
+      }
     } else {
-      throw new UnsupportedOperationException(
-          "Not a supported format: " + format);
+      return ImmutableList.of();
     }
   }
 
   @SuppressWarnings("unchecked")
-  private void setInputPaths(JobContext jobContext, Job job) throws IOException {
-    List<Path> paths =
-        Lists.newArrayList(view == null ? dataset.dirIterator() : view.dirIterator());
+  private boolean setInputPaths(JobContext jobContext, Job job) throws IOException {
+    List<Path> paths = Lists.newArrayList((Iterator)
+        (view == null ? dataset.pathIterator() : view.pathIterator()));
     LOG.debug("Input paths: {}", paths);
+    if (paths.isEmpty()) {
+      return false;
+    }
     FileInputFormat.setInputPaths(job, paths.toArray(new Path[paths.size()]));
     // the following line is needed for Hadoop 1, otherwise the paths are not set
     Configuration contextConf = Hadoop.JobContext
@@ -116,6 +123,7 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     Configuration jobConf = Hadoop.JobContext
         .getConfiguration.invoke(job);
     contextConf.set("mapred.input.dir", jobConf.get("mapred.input.dir"));
+    return true;
   }
 
   @Override
