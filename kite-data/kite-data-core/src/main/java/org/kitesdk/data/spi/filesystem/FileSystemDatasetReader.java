@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import org.kitesdk.data.spi.DataModelUtil;
 
 class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
@@ -87,7 +88,12 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to read from a file in state:%s", state);
 
-    return reader.next();
+    E record = DataModelUtil.createRecord(type, schema);
+    try {
+      return reader.next(record);
+    } catch (IOException ex) {
+      throw new DatasetReaderException(ex);
+    }
   }
 
   @Override

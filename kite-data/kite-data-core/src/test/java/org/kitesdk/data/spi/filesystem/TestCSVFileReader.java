@@ -325,4 +325,40 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
     Assert.assertFalse(reader.hasNext());
   }
+
+  @Test
+  public void testCustomGenericRecords() {
+    final DatasetDescriptor desc = new DatasetDescriptor.Builder()
+        .schema(SCHEMA)
+        .build();
+    final CSVFileReader<TestGenericRecord> reader =
+        new CSVFileReader<TestGenericRecord>(localfs, csvFile, desc,
+        TestGenericRecord.class);
+
+    reader.initialize();
+    Assert.assertTrue(reader.hasNext());
+    TestGenericRecord record = reader.next();
+    Assert.assertEquals("str", record.get(0));
+    Assert.assertEquals((Integer) 34, record.get(1));
+    Assert.assertEquals((Float) 2.11f, record.get(2));
+    Assert.assertEquals(false, record.get(3));
+
+    Assert.assertTrue(reader.hasNext());
+    record = reader.next();
+    Assert.assertEquals("str,2", record.get(0));
+    Assert.assertEquals((Integer) 0, record.get(1));
+    Assert.assertEquals((Float) 4.0f, record.get(2));
+    Assert.assertEquals(true, record.get(3));
+
+    Assert.assertTrue(reader.hasNext());
+    TestHelpers.assertThrows("Should complain about missing default",
+        AvroRuntimeException.class, new Runnable() {
+      @Override
+      public void run() {
+        reader.next();
+      }
+    });
+
+    Assert.assertFalse(reader.hasNext());
+  }
 }
