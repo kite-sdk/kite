@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi;
 
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.BoundType;
@@ -65,27 +66,31 @@ public class Range<T> implements Predicate<T> {
   public static <C extends Comparable<C>> Set<C> asSet(
       Range<C> range, DiscreteDomain<C> domain) {
     // cheat and pass this to guava
-    com.google.common.collect.Range<C> guavaRange;
+    return asGuavaRange(range).asSet(domain);
+  }
+
+  @VisibleForTesting
+  static <C extends Comparable<C>> com.google.common.collect.Range<C> asGuavaRange(
+      Range<C> range) {
     if (range.hasLowerBound()) {
       if (range.hasUpperBound()) {
-        guavaRange = com.google.common.collect.Ranges.range(
+        return com.google.common.collect.Ranges.range(
             range.lower.endpoint(),
             range.isLowerBoundOpen() ? BoundType.OPEN : BoundType.CLOSED,
             range.upper.endpoint(),
             range.isUpperBoundOpen() ? BoundType.OPEN : BoundType.CLOSED);
       } else {
-        guavaRange = com.google.common.collect.Ranges.downTo(
+        return com.google.common.collect.Ranges.downTo(
             range.lower.endpoint(),
             range.isLowerBoundOpen() ? BoundType.OPEN : BoundType.CLOSED);
       }
     } else if (range.hasUpperBound()) {
-      guavaRange = com.google.common.collect.Ranges.upTo(
+      return com.google.common.collect.Ranges.upTo(
           range.upper.endpoint(),
           range.isUpperBoundOpen() ? BoundType.OPEN : BoundType.CLOSED);
     } else {
-      guavaRange = com.google.common.collect.Ranges.all();
+      return com.google.common.collect.Ranges.all();
     }
-    return guavaRange.asSet(domain);
   }
 
   @SuppressWarnings("unchecked")

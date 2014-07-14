@@ -16,10 +16,12 @@
 
 package org.kitesdk.data.spi;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.Set;
+import javax.annotation.concurrent.Immutable;
 
 class CharSequences {
 
@@ -46,31 +48,37 @@ class CharSequences {
     return result;
   }
 
-  public static class CharSequenceSet extends AbstractSet<CharSequence> {
+  @Immutable
+  public static class ImmutableCharSequenceSet extends AbstractSet<CharSequence> {
     private final HashMultimap<Integer, CharSequence> storage = HashMultimap.create();
     private final int size;
 
-    public CharSequenceSet(Iterable<CharSequence> strings) {
+    public ImmutableCharSequenceSet(Iterable<? extends CharSequence> strings) {
       int count = 0;
       for (CharSequence seq : strings) {
-        storage.put(CharSequences.hashCode(seq), seq);
-        count += 1;
+        // like guava collections, do not allow null
+        Preconditions.checkNotNull(seq, "Null values are not allowed");
+        if (!contains(seq)) { // don't add duplicates
+          storage.put(CharSequences.hashCode(seq), seq);
+          count += 1;
+        }
       }
       this.size = count;
     }
 
     @Override
+    public boolean add(CharSequence charSequence) {
+      throw new UnsupportedOperationException("Cannot add to Immutable set");
+    }
+
+    @Override
+    public boolean remove(Object o) {
+      throw new UnsupportedOperationException("Cannot remove from Immutable set");
+    }
+
+    @Override
     public boolean contains(Object query) {
-      if (query instanceof CharSequence) {
-        CharSequence seq = (CharSequence) query;
-        Set<CharSequence> set = storage.get(CharSequences.hashCode(seq));
-        for (CharSequence next : set) {
-          if (compare(seq, next) == 0) {
-            return true;
-          }
-        }
-      }
-      return false;
+      return query instanceof CharSequence && contains((CharSequence) query);
     }
 
     @Override
@@ -81,6 +89,32 @@ class CharSequences {
     @Override
     public int size() {
       return size;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      // satisfy findbugs. AbstractSet#equals is correct and based on contains
+      return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+      int hashCode = 0;
+      // like AbstractSet, hashCode is the sum of the contained seq hashCodes
+      for (CharSequence seq : this) {
+        hashCode += CharSequences.hashCode(seq);
+      }
+      return hashCode;
+    }
+
+    private boolean contains(CharSequence seq) {
+      Set<CharSequence> set = storage.get(CharSequences.hashCode(seq));
+      for (CharSequence next : set) {
+        if (compare(seq, next) == 0) {
+          return true;
+        }
+      }
+      return false;
     }
   }
 }
