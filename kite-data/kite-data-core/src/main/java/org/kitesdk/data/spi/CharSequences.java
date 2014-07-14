@@ -29,12 +29,12 @@ class CharSequences {
     }
     int minLength = Math.min(left.length(), right.length());
     for (int i = 0; i < minLength; i += 1) {
-      int cmp = Character.compare(left.charAt(i), right.charAt(i));
+      int cmp = (left.charAt(i) - right.charAt(i));
       if (cmp != 0) {
         return cmp;
       }
     }
-    return Integer.compare(left.length(), right.length());
+    return (left.length() - right.length());
   }
 
   public static int hashCode(CharSequence seq) {
