@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
 import org.kitesdk.data.spi.Conversions;
 import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.Registration;
@@ -93,8 +94,8 @@ public class Datasets {
    * @return a {@code View} for the given URI.
    */
   @SuppressWarnings("unchecked")
-  public static <V extends View<GenericData.Record>> V load(URI uri) {
-    return Datasets.<GenericData.Record, V>load(uri, GenericData.Record.class);
+  public static <V extends View<GenericRecord>> V load(URI uri) {
+    return Datasets.<GenericRecord, V>load(uri, GenericRecord.class);
   }
 
   /**
@@ -127,9 +128,9 @@ public class Datasets {
    * @param <V> The type of {@code View} expected.
    * @return a {@code View} for the given URI.
    */
-  public static <V extends View<GenericData.Record>> V load(String uriString) {
-    return Datasets.<GenericData.Record, V>load(
-        uriString, GenericData.Record.class);
+  public static <V extends View<GenericRecord>> V load(String uriString) {
+    return Datasets.<GenericRecord, V>load(
+        uriString, GenericRecord.class);
   }
 
   /**
@@ -216,9 +217,9 @@ public class Datasets {
    * @return a newly created {@code Dataset} responsible for the given URI.
    */
   @SuppressWarnings("unchecked")
-  public static <V extends View<GenericData.Record>> V create(URI uri, DatasetDescriptor descriptor) {
-    return Datasets.<GenericData.Record, V>create(
-        uri, descriptor, GenericData.Record.class);
+  public static <V extends View<GenericRecord>> V create(URI uri, DatasetDescriptor descriptor) {
+    return Datasets.<GenericRecord, V>create(
+        uri, descriptor, GenericRecord.class);
   }
 
   /**
@@ -248,9 +249,9 @@ public class Datasets {
    * @return a newly created {@code Dataset} responsible for the given URI.
    */
   @SuppressWarnings("unchecked")
-  public static <V extends View<GenericData.Record>> V create(String uri, DatasetDescriptor descriptor) {
-    return Datasets.<GenericData.Record, V>create(
-        uri, descriptor, GenericData.Record.class);
+  public static <V extends View<GenericRecord>> V create(String uri, DatasetDescriptor descriptor) {
+    return Datasets.<GenericRecord, V>create(
+        uri, descriptor, GenericRecord.class);
   }
 
   /**
@@ -273,7 +274,7 @@ public class Datasets {
         "Not a dataset or view URI: " + uri);
     Preconditions.checkNotNull(type,
         "The entity type can't be null, use Object.class to have the type"
-        + " determined by the schema.");
+            + " determined by the schema.");
 
     Pair<DatasetRepository, Map<String, String>> pair =
         Registration.lookupDatasetUri(URI.create(uri.getRawSchemeSpecificPart()));
@@ -294,10 +295,10 @@ public class Datasets {
    * @return a newly created {@code Dataset} responsible for the given URI.
    */
   @SuppressWarnings("unchecked")
-  public static <D extends Dataset<GenericData.Record>> D update(
+  public static <D extends Dataset<GenericRecord>> D update(
       URI uri, DatasetDescriptor descriptor) {
-    return Datasets.<GenericData.Record, D>update(
-        uri, descriptor, GenericData.Record.class);
+    return Datasets.<GenericRecord, D>update(
+        uri, descriptor, GenericRecord.class);
   }
 
   /**
@@ -326,9 +327,9 @@ public class Datasets {
    * @param <D> The type of {@code Dataset} expected.
    * @return a newly created {@code Dataset} responsible for the given URI.
    */
-  public static <D extends Dataset<GenericData.Record>> D update(String uri, DatasetDescriptor descriptor) {
-    return Datasets.<GenericData.Record, D>update(
-        uri, descriptor, GenericData.Record.class);
+  public static <D extends Dataset<GenericRecord>> D update(String uri, DatasetDescriptor descriptor) {
+    return Datasets.<GenericRecord, D>update(
+        uri, descriptor, GenericRecord.class);
   }
 
   /**

@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,12 +74,12 @@ public class TestDatasets {
         .schemaLiteral("\"string\"")
         .build();
 
-    Dataset<Record> expected = mock(Dataset.class);
-    when(repo.create("test", descriptor, Record.class)).thenReturn(expected);
+    Dataset<GenericRecord> expected = mock(Dataset.class);
+    when(repo.create("test", descriptor, GenericRecord.class)).thenReturn(expected);
 
-    Dataset<Record> ds = Datasets.create(datasetUri, descriptor);
+    Dataset<GenericRecord> ds = Datasets.create(datasetUri, descriptor);
 
-    verify(repo).create("test", descriptor, Record.class);
+    verify(repo).create("test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -124,12 +125,12 @@ public class TestDatasets {
         .schemaLiteral("\"string\"")
         .build();
 
-    Dataset<Record> expected = mock(Dataset.class);
-    when(repo.create("test", descriptor, Record.class)).thenReturn(expected);
+    Dataset<GenericRecord> expected = mock(Dataset.class);
+    when(repo.create("test", descriptor, GenericRecord.class)).thenReturn(expected);
 
-    Dataset<Record> ds = Datasets.create(datasetUri.toString(), descriptor);
+    Dataset<GenericRecord> ds = Datasets.create(datasetUri.toString(), descriptor);
 
-    verify(repo).create("test", descriptor, Record.class);
+    verify(repo).create("test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -184,14 +185,14 @@ public class TestDatasets {
         .schemaUri("resource:schema/user.avsc")
         .build();
 
-    Dataset<Record> ds = mock(Dataset.class);
-    when(repo.create("test", descriptor, Record.class)).thenReturn(ds);
+    Dataset<GenericRecord> ds = mock(Dataset.class);
+    when(repo.create("test", descriptor, GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<Record> userView = mock(RefinableView.class);
+    RefinableView<GenericRecord> userView = mock(RefinableView.class);
     when(ds.with("username", "user1")).thenReturn(userView);
 
-    RefinableView<Record> userAndEmailView = mock(RefinableView.class);
+    RefinableView<GenericRecord> userAndEmailView = mock(RefinableView.class);
     when(userView.with("email", "user1@example.com"))
         .thenReturn(userAndEmailView);
 
@@ -201,9 +202,9 @@ public class TestDatasets {
         .with("ignoredOption", "abc")
         .build();
 
-    RefinableView<Record> view = Datasets.create(datasetUri, descriptor);
+    RefinableView<GenericRecord> view = Datasets.create(datasetUri, descriptor);
 
-    verify(repo).create("test", descriptor, Record.class);
+    verify(repo).create("test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -265,14 +266,14 @@ public class TestDatasets {
         .schemaUri("resource:schema/user.avsc")
         .build();
 
-    Dataset<Record> ds = mock(Dataset.class);
-    when(repo.create("test", descriptor, Record.class)).thenReturn(ds);
+    Dataset<GenericRecord> ds = mock(Dataset.class);
+    when(repo.create("test", descriptor, GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<Record> userView = mock(RefinableView.class);
+    RefinableView<GenericRecord> userView = mock(RefinableView.class);
     when(ds.with("username", "user1")).thenReturn(userView);
 
-    RefinableView<Record> userAndEmailView = mock(RefinableView.class);
+    RefinableView<GenericRecord> userAndEmailView = mock(RefinableView.class);
     when(userView.with("email", "user1@example.com"))
         .thenReturn(userAndEmailView);
 
@@ -282,9 +283,9 @@ public class TestDatasets {
         .with("ignoredOption", "abc")
         .build();
 
-    RefinableView<Record> view = Datasets.create(datasetUri.toString(), descriptor);
+    RefinableView<GenericRecord> view = Datasets.create(datasetUri.toString(), descriptor);
 
-    verify(repo).create("test", descriptor, Record.class);
+    verify(repo).create("test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -319,14 +320,14 @@ public class TestDatasets {
 
   @Test
   public void testLoadWithoutType() {
-    Dataset<Record> expected = mock(Dataset.class);
-    when(repo.load("test", Record.class)).thenReturn(expected);
+    Dataset<GenericRecord> expected = mock(Dataset.class);
+    when(repo.load("test", GenericRecord.class)).thenReturn(expected);
 
     URI datasetUri = new URIBuilder(repoUri, "test").build();
 
-    Dataset<Record> ds = Datasets.load(datasetUri);
+    Dataset<GenericRecord> ds = Datasets.load(datasetUri);
 
-    verify(repo).load("test", Record.class);
+    verify(repo).load("test", GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -361,14 +362,14 @@ public class TestDatasets {
 
   @Test
   public void testLoadStringUriWithoutType() {
-    Dataset<Record> expected = mock(Dataset.class);
-    when(repo.load("test", Record.class)).thenReturn(expected);
+    Dataset<GenericRecord> expected = mock(Dataset.class);
+    when(repo.load("test", GenericRecord.class)).thenReturn(expected);
 
     URI datasetUri = new URIBuilder(repoUri, "test").build();
 
-    Dataset<Record> ds = Datasets.load(datasetUri);
+    Dataset<GenericRecord> ds = Datasets.load(datasetUri);
 
-    verify(repo).load("test", Record.class);
+    verify(repo).load("test", GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -423,14 +424,14 @@ public class TestDatasets {
         .schemaUri("resource:schema/user.avsc")
         .build();
 
-    Dataset<Record> ds = mock(Dataset.class);
-    when(repo.load("test", Record.class)).thenReturn(ds);
+    Dataset<GenericRecord> ds = mock(Dataset.class);
+    when(repo.load("test", GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<Record> userView = mock(RefinableView.class);
+    RefinableView<GenericRecord> userView = mock(RefinableView.class);
     when(ds.with("username", "user1")).thenReturn(userView);
 
-    RefinableView<Record> userAndEmailView = mock(RefinableView.class);
+    RefinableView<GenericRecord> userAndEmailView = mock(RefinableView.class);
     when(userView.with("email", "user1@example.com"))
         .thenReturn(userAndEmailView);
 
@@ -440,9 +441,9 @@ public class TestDatasets {
         .with("ignoredOption", "abc")
         .build();
 
-    RefinableView<Record> view = Datasets.load(datasetUri);
+    RefinableView<GenericRecord> view = Datasets.load(datasetUri);
 
-    verify(repo).load("test", Record.class);
+    verify(repo).load("test", GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -504,14 +505,14 @@ public class TestDatasets {
         .schemaUri("resource:schema/user.avsc")
         .build();
 
-    Dataset<Record> ds = mock(Dataset.class);
-    when(repo.load("test", Record.class)).thenReturn(ds);
+    Dataset<GenericRecord> ds = mock(Dataset.class);
+    when(repo.load("test", GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
-    RefinableView<Record> userView = mock(RefinableView.class);
+    RefinableView<GenericRecord> userView = mock(RefinableView.class);
     when(ds.with("username", "user1")).thenReturn(userView);
 
-    RefinableView<Record> userAndEmailView = mock(RefinableView.class);
+    RefinableView<GenericRecord> userAndEmailView = mock(RefinableView.class);
     when(userView.with("email", "user1@example.com"))
         .thenReturn(userAndEmailView);
 
@@ -521,9 +522,9 @@ public class TestDatasets {
         .with("ignoredOption", "abc")
         .build();
 
-    RefinableView<Record> view = Datasets.load(datasetUri.toString());
+    RefinableView<GenericRecord> view = Datasets.load(datasetUri.toString());
 
-    verify(repo).load("test", Record.class);
+    verify(repo).load("test", GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -644,12 +645,12 @@ public class TestDatasets {
         .schemaLiteral("\"string\"")
         .build();
 
-    Dataset<Record> expected = mock(Dataset.class);
-    when(repo.update("test", descriptor, Record.class)).thenReturn(expected);
+    Dataset<GenericRecord> expected = mock(Dataset.class);
+    when(repo.update("test", descriptor, GenericRecord.class)).thenReturn(expected);
 
-    Dataset<Record> ds = Datasets.update(datasetUri, descriptor);
+    Dataset<GenericRecord> ds = Datasets.update(datasetUri, descriptor);
 
-    verify(repo).update("test", descriptor, Record.class);
+    verify(repo).update("test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -695,12 +696,12 @@ public class TestDatasets {
         .schemaLiteral("\"string\"")
         .build();
 
-    Dataset<Record> expected = mock(Dataset.class);
-    when(repo.update("test", descriptor, Record.class)).thenReturn(expected);
+    Dataset<GenericRecord> expected = mock(Dataset.class);
+    when(repo.update("test", descriptor, GenericRecord.class)).thenReturn(expected);
 
-    Dataset<Record> ds = Datasets.update(datasetUri.toString(), descriptor);
+    Dataset<GenericRecord> ds = Datasets.update(datasetUri.toString(), descriptor);
 
-    verify(repo).update("test", descriptor, Record.class);
+    verify(repo).update("test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
