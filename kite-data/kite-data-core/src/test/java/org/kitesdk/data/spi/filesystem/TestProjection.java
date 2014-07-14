@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import java.io.IOException;
@@ -30,6 +29,8 @@ import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.IncompatibleSchemaException;
 import org.kitesdk.data.event.IncompatibleEvent;
+import org.kitesdk.data.event.ReflectSmallEvent;
+import org.kitesdk.data.event.ReflectStandardEvent;
 import org.kitesdk.data.event.SmallEvent;
 import org.kitesdk.data.event.StandardEvent;
 import org.kitesdk.data.spi.TestRefinableViews;
@@ -155,176 +156,5 @@ public class TestProjection extends TestRefinableViews {
         .setUserId(String.valueOf(event.getUserId()))
         .setSessionId(event.getSessionId())
         .build();
-  }
-
-  private static class ReflectStandardEvent {
-
-    /**
-     * Where the event was triggered from in the format
-     * {client,server}_{user,app}, e.g. 'client_user'. Required.
-     */
-    private String event_initiator;
-    /**
-     * A hierarchical name for the event, with parts separated by ':'. Required.
-     */
-    private String event_name;
-    /**
-     * A unique identifier for the user. Required.
-     */
-    private long user_id;
-    /**
-     * A unique identifier for the session. Required.
-     */
-    private String session_id;
-    /**
-     * The IP address of the host where the event originated. Required.
-     */
-    private String ip;
-    /**
-     * The point in time when the event occurred, represented as the number of
-     * milliseconds since January 1, 1970, 00:00:00 GMT. Required.
-     */
-    private long timestamp;
-
-    public ReflectStandardEvent() {
-    }
-
-    public ReflectStandardEvent(StandardEvent event) {
-      setEvent_initiator(event.getEventInitiator());
-      setEvent_name(event.getEventName());
-      setIp(event.getIp());
-      setSession_id(event.getSessionId());
-      setTimestamp(event.getTimestamp());
-      setUser_id(event.getUserId());
-    }
-
-    public String getEvent_initiator() {
-      return event_initiator;
-    }
-
-    public final void setEvent_initiator(String event_initiator) {
-      this.event_initiator = event_initiator;
-    }
-
-    public String getEvent_name() {
-      return event_name;
-    }
-
-    public final void setEvent_name(String event_name) {
-      this.event_name = event_name;
-    }
-
-    public String getIp() {
-      return ip;
-    }
-
-    public final void setIp(String ip) {
-      this.ip = ip;
-    }
-
-    public String getSession_id() {
-      return session_id;
-    }
-
-    public final void setSession_id(String session_id) {
-      this.session_id = session_id;
-    }
-
-    public long getTimestamp() {
-      return timestamp;
-    }
-
-    public final void setTimestamp(long timestamp) {
-      this.timestamp = timestamp;
-    }
-
-    public long getUser_id() {
-      return user_id;
-    }
-
-    public final void setUser_id(long user_id) {
-      this.user_id = user_id;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-
-      if (obj == null || !Objects.equal(getClass(), obj.getClass())) {
-        return false;
-      }
-
-      final ReflectStandardEvent other = (ReflectStandardEvent) obj;
-      return Objects.equal(this.getEvent_initiator(), other.getEvent_initiator()) &&
-          Objects.equal(this.getEvent_name(), other.getEvent_name()) &&
-          Objects.equal(this.getIp(), other.getIp()) &&
-          Objects.equal(this.getSession_id(), other.getSession_id()) &&
-          Objects.equal(this.getTimestamp(), other.getTimestamp()) &&
-          Objects.equal(this.getUser_id(), other.getUser_id());
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hashCode(getEvent_initiator(), getEvent_name(), getIp(),
-          getSession_id(), getTimestamp(), getUser_id());
-    }
-  }
-
-  private static class ReflectSmallEvent {
-
-    /**
-     * A unique identifier for the user. Required.
-     */
-    private long user_id;
-    /**
-     * A unique identifier for the session. Required.
-     */
-    private String session_id;
-
-    public ReflectSmallEvent() {
-    }
-
-    public ReflectSmallEvent(StandardEvent event) {
-      setSession_id(event.getSessionId());
-      setUser_id(event.getUserId());
-    }
-
-    public String getSession_id() {
-      return session_id;
-    }
-
-    public final void setSession_id(String session_id) {
-      this.session_id = session_id;
-    }
-
-    public long getUser_id() {
-      return user_id;
-    }
-
-    public final void setUser_id(long user_id) {
-      this.user_id = user_id;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-
-      if (obj == null || !Objects.equal(getClass(), obj.getClass())) {
-        return false;
-      }
-
-      final ReflectSmallEvent other = (ReflectSmallEvent) obj;
-      return Objects.equal(this.getSession_id(), other.getSession_id()) &&
-          Objects.equal(this.getUser_id(), other.getUser_id());
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hashCode(getSession_id(), getUser_id());
-    }
   }
 }
