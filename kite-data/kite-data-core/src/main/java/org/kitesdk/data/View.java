@@ -115,6 +115,7 @@ public interface View<E> {
    * to determine if there are any records.
    *
    * @return {@code true} if least one record exists, {@code false} otherwise
+   * @since 0.15.0
    */
   public boolean isEmpty();
 }

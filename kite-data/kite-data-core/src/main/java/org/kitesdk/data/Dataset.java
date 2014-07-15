@@ -115,6 +115,7 @@ public interface Dataset<E> extends RefinableView<E> {
    * {@link Datasets#load(java.net.URI, java.lang.Class)}.
    *
    * @return a URI that identifies this dataset
+   * @since 0.15.0
    */
   URI getUri();
 

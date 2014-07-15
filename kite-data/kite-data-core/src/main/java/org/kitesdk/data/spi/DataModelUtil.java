@@ -124,7 +124,7 @@ public class DataModelUtil {
    * will use the expected type.
    *
    * Implementations of GenericRecord that require a {@link Schema} parameter
-   * in the constructor should implement {@link SpecificData.SchemaConstructable}.
+   * in the constructor should implement SpecificData.SchemaConstructable.
    * Otherwise, your implementation must have a no-args constructor.
    *
    * @param <E> The entity type

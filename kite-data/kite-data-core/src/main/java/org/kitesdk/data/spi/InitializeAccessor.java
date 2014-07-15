@@ -29,7 +29,6 @@ public interface InitializeAccessor {
    * {@link org.kitesdk.data.View#newReader} or
    * {@link org.kitesdk.data.View#newWriter}.
    * </p>
-   * @return the initialized target object
    * @throws org.kitesdk.data.UnknownFormatException
    * @throws org.kitesdk.data.DatasetIOException to wrap any IOException
    */

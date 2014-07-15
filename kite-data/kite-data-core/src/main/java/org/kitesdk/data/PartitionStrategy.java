@@ -111,6 +111,7 @@ public class PartitionStrategy {
   /**
    * Get a partitioner by partition name.
    * @return a FieldPartitioner with the given partition name
+   * @since 0.15.0
    */
   public FieldPartitioner getPartitioner(String name) {
     return partitionerMap.get(name);
@@ -119,6 +120,7 @@ public class PartitionStrategy {
   /**
    * Check if a partitioner for the partition name exists.
    * @return {@code true} if this strategy has a partitioner for the name
+   * @since 0.15.0
    */
   public boolean hasPartitioner(String name) {
     return partitionerMap.containsKey(name);
