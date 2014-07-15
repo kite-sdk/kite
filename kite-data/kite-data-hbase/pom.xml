@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-data</artifactId>
-    <version>0.14.2-SNAPSHOT</version>
+    <version>0.15.0</version>
   </parent>
 
   <name>Kite Data HBase Module</name>
@@ -44,7 +44,7 @@
             <configuration>
               <tasks>
                 <echo message="Create empty javadoc JAR to satisfy Maven central" />
-                <mkdir dir="target/apidocs"/>
+                <mkdir dir="target/apidocs" />
               </tasks>
             </configuration>
           </execution>
@@ -167,7 +167,7 @@
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
-      <version>0.14.2-SNAPSHOT</version>
+      <version>0.15.0</version>
     </dependency>
 
     <!-- Hadoop and HBase -->
@@ -224,7 +224,7 @@
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
-      <version>0.14.2-SNAPSHOT</version>
+      <version>0.15.0</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
