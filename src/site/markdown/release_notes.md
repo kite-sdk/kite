@@ -3,12 +3,23 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
-## Version TBD
+## Version 0.15.0
 
-Release date: TBD
+Release date: 15 July 2014
 
-Version TBD contains the following notable changes:
+Version 0.15.0 contains the following notable changes:
 
+* Kite artifacts are built against Apache Hadoop 2 and related projects, 
+and are now available in Maven Central.
+* Added new [introduction and concepts documentation](http://kitesdk.org/docs/current/guide).
+* Added a new [Datasets](http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/Datasets.html) 
+convenience class for opening and working with Datasets, superseding DatasetRepositories.
+* Deprecated partition related methods in [Dataset](http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/Dataset.html) in favor of the views API.
+* Added a CLI [copy task](https://issues.cloudera.org/browse/CDK-374) for copying 
+datasets and also for dataset format conversion and data compaction.
+* Added an application parent POM that makes it easy to use Kite in a Maven project. 
+The [examples](https://github.com/kite-sdk/kite-examples) now use this parent POM.
+* Updated to Crunch 0.10.0
 * Morphlines Library
     * Added morphline command that parses an InputStream that contains protobuf data: [readProtobuf](kite-morphlines/morphlinesReferenceGuide.html#readProtobuf) (Rober Fiser via whoschek)
     * Added morphline command that extracts specific values from a protobuf object, akin to a simple form of XPath: [extractProtobufPaths](kite-morphlines/morphlinesReferenceGuide.html#extractProtobufPaths) (Rober Fiser via whoschek)
@@ -16,6 +27,9 @@ Version TBD contains the following notable changes:
     * Added optional parameters `maxCharactersPerRecord` and `onMaxCharactersPerRecord` to morphline command [readCSV](kite-morphlines/morphlinesReferenceGuide.html#readCSV)
     * Upgraded kite-morphlines-maxmind module from maxmind-db-0.3.1 to bug fix release maxmind-db-0.3.3
     * Upgraded kite-morphlines-core module from metrics-0.3.1 to bug fix release metrics-0.3.2
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10603)
+is available from JIRA.
 
 ## Version 0.14.1
 
