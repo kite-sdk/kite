@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Kite SDK Development Guide</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="Documentation for the Kite open source project on GitHub.">
+    <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Kite-Dataset-Command-Line-Interface/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/current/guide/css/main.css">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/current/guide/">Kite SDK Development Guide</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        
+          <a class="page-link" href="/docs/current/guide/about/">About</a>
+        
+          <a class="page-link" href="/docs/current/guide/Column-Mapping/"></a>
+        
+          <a class="page-link" href="/docs/current/guide/feed.xml"></a>
+        
+          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/"></a>
+        
+          <a class="page-link" href="/docs/current/guide/index.html"></a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/"></a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/"></a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/"></a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/"></a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/"></a>
+        
+          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/"></a>
+        
+          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/"></a>
+        
+          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/"></a>
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1></h1>
+  </header>
+
+  <article class="post-content">
+  <p><a name="top"></a>
+The Kite Dataset command line interface (CLI) provides utility commands that let you quickly create a schema and dataset, import data from a CSV file, then view the results.</p>
+
+<p>Each command is described below. See <a href="https://github.com/kite-sdk/kite/wiki/2.1-Using-the-Kite-CLI-to-Create-a-Dataset">Using the Kite CLI to Create a Dataset</a> for a practical example of the CLI in use.</p>
+
+<hr />
+<ul>
+  <li><a href="#csvSchema">csv-schema</a> (create a schema from a CSV data file)</li>
+  <li><a href="#objSchema">obj-schema</a> (create a schema from a Java object)</li>
+  <li><a href="#create">create</a> (create a dataset based on an existing schema)</li>
+  <li><a href="#schema">schema</a> (view the schema for an existing dataset)</li>
+  <li><a href="#csvImport">csv-import</a> (import a CSV data file)</li>
+  <li><a href="#show">show</a> (show the first <em>n</em> records of a dataset)</li>
+  <li><a href="#delete">delete</a> (delete a dataset)</li>
+  <li><a href="#partition-config">partition-config</a> (create a partition strategy for a schema)</li>
+  <li><a href="#help">help</a> (get help for the dataset command in general or a specific command)</li>
+</ul>
+
+<hr />
+<p><a name="csvSchema"></a></p>
+
+<h2 id="csv-schema">csv-schema</h2>
+<p>Use <code>csv-schema</code> to generate an Avro schema from a comma separated value (CSV) file.</p>
+
+<h3 id="syntax">Syntax</h3>
+
+<p><code>dataset [general options] csv-schema &lt;sample csv path&gt; [command options]</code></p>
+
+<h3 id="options">Options</h3>
+<p><code>--skip-lines</code></p>
+
+<p>The number of lines to skip before the start of the CSV data. Default is 0.</p>
+
+<p><code>--quote</code></p>
+
+<p>Quote character in the CSV data file. Default is the double-quote (&ldquo;).</p>
+
+<p><code>--delimiter</code></p>
+
+<p>Delimiter character in the CSV data file. Default is the comma (,).</p>
+
+<p><code>--escape</code></p>
+
+<p>Escape character in the CSV data file. Default is the backslash (\).</p>
+
+<p><code>--class, --record-name</code></p>
+
+<p>A class name or record name for the schema result. This value is <strong>required</strong>.</p>
+
+<p><code>-o, --output</code></p>
+
+<p>Save schema avsc to path.</p>
+
+<p><code>--no-header</code></p>
+
+<p>Use this option when the CSV data file does not have header information in the first line. Fields are given the default names <em>field_0</em>, <em>field_1,&hellip;field_n</em>.</p>
+
+<p><code>--minimize</code></p>
+
+<p>Minimize schema file size by eliminating white space.</p>
+
+<h2 id="examples">Examples</h2>
+
+<p>Print the schema to standard out: <code>dataset csv-schema sample.csv --class Sample</code></p>
+
+<p>Write the schema to sample.avsc: <code>dataset csv-schema sample.csv --class Sample -o sample.avsc</code></p>
+
+<hr />
+
+<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+
+<hr />
+
+<p><a name="objSchema"></a></p>
+
+<h2 id="obj-schema">obj-schema</h2>
+<p>Build a schema from a Java class.</p>
+
+<h3 id="syntax-1">Syntax</h3>
+
+<p><code>dataset [general options] obj-schema &lt;class name&gt; [command options]</code></p>
+
+<h3 id="options-1">Options</h3>
+
+<p><code>-o, --output</code></p>
+
+<p>Save schema in Avro format to a given path.</p>
+
+<p><code>--jar</code></p>
+
+<p>Add a jar to the classpath used when loading the Java class.</p>
+
+<p><code>--lib-dir</code></p>
+
+<p>Add a directory to the classpath used when loading the Java class.</p>
+
+<p><code>--minimize</code></p>
+
+<p>Minimize schema file size by eliminating white space.</p>
+
+<h3 id="examples-1">Examples</h3>
+
+<p>Create a schema for an example User class:
+<code>dataset obj-schema org.kitesdk.cli.example.User</code></p>
+
+<p>Create a schema for a class in a jar:
+<code>dataset obj-schema com.example.MyRecord --jar my-application.jar</code></p>
+
+<p>Save the schema for the example User class to user.avsc:
+<code>dataset obj-schema org.kitesdk.cli.example.User -o user.avsc</code></p>
+
+<hr />
+
+<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+
+<hr />
+
+<h2 id="create">create</h2>
+<p>After you have generated an Avro schema, you can use <code>create</code> to make an empty dataset.</p>
+
+<h3 id="usage">Usage</h3>
+
+<p><code>dataset [general options] create &lt;dataset name&gt; [command options]</code></p>
+
+<h3 id="options-2">Options</h3>
+
+<p><code>-d, --directory</code></p>
+
+<p>The root directory of the dataset repository. Optional if using Hive for metadata storage.</p>
+
+<p><code>--use-hive</code></p>
+
+<p>The dataset is stored in the filesystem by default. Set this switch to false to store the dataset in the file system.</p>
+
+<p><code>-s, --schema</code></p>
+
+<p>The file containing the Avro schema. This value is <strong>required</strong>.</p>
+
+<p><code>-f, --format</code></p>
+
+<p>By default, the dataset is created in Avro format. Use this switch to set the format to Parquet (<code>-f parquet</code>).</p>
+
+<p><code>-p, --partition-by</code></p>
+
+<p>The file containing a JSON-formatted partition strategy.</p>
+
+<h3 id="examples-2">Examples:</h3>
+
+<p>Create dataset &ldquo;users&rdquo; in Hive:</p>
+
+<p><code>dataset create users --schema user.avsc</code></p>
+
+<p>Create dataset &ldquo;users&rdquo; using Parquet:</p>
+
+<p><code>dataset create users --schema user.avsc --format parquet</code></p>
+
+<p>Create dataset &ldquo;users&rdquo; partitioned by JSON configuration:</p>
+
+<p><code>dataset create users --schema user.avsc --partition-by user_part.json</code></p>
+
+<hr />
+
+<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+
+<hr />
+
+<p><a name="schema"></a></p>
+
+<h2 id="schema">schema</h2>
+
+<p>Show the schema for a dataset.</p>
+
+<h3 id="syntax-2">Syntax</h3>
+
+<p><code>dataset [general options] schema &lt;dataset name&gt; [command options]</code></p>
+
+<h3 id="options-3">Options</h3>
+
+<p><code>-d, --directory</code></p>
+
+<p>The root directory of the dataset repository. Optional if you are using Hive for metadata storage.</p>
+
+<p><code>--use-hive</code></p>
+
+<p>By default, dataset metadata is stored in the file system. Use this switch to store dataset metadata in Hive.</p>
+
+<p><code>--minimize</code></p>
+
+<p>Minimize schema file size by eliminating white space.</p>
+
+<p><code>-o, --output</code></p>
+
+<p>Save schema in Avro format to a given path.</p>
+
+<h3 id="examples-3">Examples:</h3>
+
+<p>Print the schema for dataset &ldquo;users&rdquo; to standard out: <code>dataset schema users</code></p>
+
+<p>Save the schema for dataset &ldquo;users&rdquo; to user.avsc: <code>dataset schema users -o user.avsc</code></p>
+
+<hr />
+
+<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+
+<hr />
+
+<p><a name="csvImport"></a></p>
+
+<h2 id="csv-import">csv-import</h2>
+
+<p>Copy CSV records into a dataset.</p>
+
+<h3 id="syntax-3">Syntax</h3>
+<p><code>dataset [general options] csv-import &lt;csv path&gt; &lt;dataset name&gt; [command options]</code></p>
+
+<h3 id="options-4">Options</h3>
+
+<p><code>-d, --directory</code></p>
+
+<p>The root directory of the dataset repository. Optional if using Hive for metadata storage.</p>
+
+<p><code>--use-hive</code></p>
+
+<p>By default, dataset metadata is stored in Hive. Use this switch to store the dataset metadata in the file system.</p>
+
+<p><code>--escape</code></p>
+
+<p>Escape character. Default is backslash (\).</p>
+
+<p><code>--delimiter</code></p>
+
+<p>Delimiter character. Default is comma (,).</p>
+
+<p><code>--quote</code></p>
+
+<p>Quote character. Default is double quote (&ldquo;).</p>
+
+<p><code>--skip-lines</code></p>
+
+<p>Lines to skip before CSV start (default: 0)</p>
+
+<p><code>--no-header</code></p>
+
+<p>Use this option when the CSV data file does not have header information in the first line. Fields are given the default names <em>field_0</em>, <em>field_1,&hellip;field_n</em>.</p>
+
+<h3 id="examples-4">Examples</h3>
+
+<p>Copy the records from <code>sample.csv</code> to a dataset named &ldquo;sample&rdquo;: <code>dataset csv-import csv-import path/to/sample.csv sample</code></p>
+
+<hr />
+
+<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+
+<hr />
+
+<p><a name="show"></a></p>
+
+<h2 id="show">show</h2>
+
+<p>Print the first <em>n</em> records in a dataset.</p>
+
+<h3 id="syntax-4">Syntax</h3>
+<p><code>dataset [general options] show &lt;dataset name&gt; [command options]</code></p>
+
+<h3 id="options-5">Options</h3>
+
+<p><code>-d, --directory</code></p>
+
+<p>The root directory of the dataset repository. Optional if using Hive for metadata storage.</p>
+
+<p><code>--use-hive</code></p>
+
+<p>By default, dataset metadata is stored in Hive. Set this switch to false to use the file system (<code>--use-hive false</code>).</p>
+
+<p><code>-n, --num-records</code></p>
+
+<p>The number of records to print. The default number is 10.</p>
+
+<h3 id="examples-5">Examples</h3>
+
+<p>Show the first 10 records in dataset &ldquo;users&rdquo;: <code>dataset show users</code></p>
+
+<p>Show the first 50 records in dataset &ldquo;users&rdquo;: <code>dataset show users -n 50</code></p>
+
+<hr />
+
+<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+
+<hr />
+
+<p><a name="delete"></a></p>
+
+<h2 id="delete">delete</h2>
+
+<p>Delete one or more datasets and related metadata.</p>
+
+<h3 id="syntax-5">Syntax</h3>
+
+<p><code>dataset [general options] delete &lt;dataset names&gt; [command options]</code></p>
+
+<h3 id="options-6">Options</h3>
+
+<p><code>-d, --directory</code></p>
+
+<p>The root directory of the dataset repository. Optional if using Hive for metadata storage.</p>
+
+<p><code>--use-hive</code></p>
+
+<p>By default, metadata is stored in Hive. Set this value to false to store the metadata in the file system (<code>--use-hive false</code>).</p>
+
+<h3 id="examples-6">Examples</h3>
+
+<p>Delete all data and metadata for the dataset &ldquo;users&rdquo;: <code>dataset delete users</code></p>
+
+<hr />
+
+<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+
+<hr />
+
+<p><a name="partitionConfig"></a></p>
+
+<h2 id="partition-config">partition-config</h2>
+
+<p>Builds a partition strategy for a schema.</p>
+
+<h3 id="syntax-6">Syntax</h3>
+
+<p>dataset [general options] partition-config <field:type pairs=""> [command options]</field:type></p>
+
+<h3 id="options-7">Options:</h3>
+
+<p><code>-s, --schema</code>
+The file containing the Avro schema. <strong>This value is required</strong>.</p>
+
+<p><code>-o, --output</code>
+Save partition JSON file to path</p>
+
+<p><code>--minimize</code>
+Minimize output size by eliminating white space</p>
+
+<h3 id="examples-7">Examples</h3>
+
+<p>Partition by email address, balanced across 16 hash partitions and save as a JSON file.</p>
+
+<p><code>dataset partition-config email:hash[16] email:copy -s user.avsc -o part.json</code></p>
+
+<p>Partition by created_at time&rsquo;s year, month, and day
+<code>dataset partition-config created_at:year created_at:month created_at:day -s event.avsc</code></p>
+
+<hr />
+
+<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partitionConfig">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+
+<hr />
+
+<p><a name="help"></a></p>
+
+<h2 id="help">Help</h2>
+
+<p>Retrieves details on the functions of one or more dataset commands.</p>
+
+<h3 id="syntax-7">Syntax</h3>
+
+<p><code>dataset [general options] help &lt;commands&gt; [command options]</code></p>
+
+<h3 id="examples-8">Examples</h3>
+
+<p>Retrieve details for the create, show, and delete commands. <code>dataset help create show delete</code></p>
+
+<hr />
+
+<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+
+<hr />
+
+  </article>
+
+</div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap">
+
+    <h2 class="footer-heading">Kite SDK Development Guide</h2>
+
+    <div class="footer-col-1 column">
+      <ul>
+        <li>Kite SDK Development Guide</li>
+        <li><a href="mailto:cdk-dev@cloudera.org">cdk-dev@cloudera.org</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+      <ul>
+        <li>
+          <a href="https://github.com/">
+            <span class="icon github">
+              <svg version="1.1" class="github-icon-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                 viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+                <path fill-rule="evenodd" clip-rule="evenodd" fill="#C2C2C2" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761
+                c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32
+                c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472
+                c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037
+                C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65
+                c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261
+                c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082
+                c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129
+                c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+            <span class="username"></span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/">
+            <span class="icon twitter">
+              <svg version="1.1" class="twitter-icon-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                 viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+                <path fill="#C2C2C2" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27
+                c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767
+                c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206
+                C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271
+                c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469
+                c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/>
+              </svg>
+            </span>
+            <span class="username"></span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-3 column">
+      <p class="text">Documentation for the Kite open source project on GitHub.</p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>

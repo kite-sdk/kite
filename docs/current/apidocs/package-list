@@ -14,6 +14,7 @@ org.kitesdk.morphline.hadoop.sequencefile
 org.kitesdk.morphline.json
 org.kitesdk.morphline.maxmind
 org.kitesdk.morphline.metrics.servlets
+org.kitesdk.morphline.protobuf
 org.kitesdk.morphline.saxon
 org.kitesdk.morphline.scriptengine.java
 org.kitesdk.morphline.solr
