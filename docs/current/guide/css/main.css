@@ -6,6 +6,11 @@
   padding: 0;
 }
 
+td.code {
+  width: 100%;
+  padding: 0;
+}
+
 html, body { height: 100%; }
 
 body {
@@ -21,6 +26,20 @@ h1, h2, h3, h4, h5, h6 { font-size: 100%; font-weight: 400; }
 a         { color: #2a7ae2; text-decoration: none; }
 a:hover   { color: #000; text-decoration: underline; }
 a:visited { color: #205caa; }
+
+table {
+  padding: 0.2em;
+  width: 100%;
+}
+
+table th {
+  padding: 0.2em;
+  background: #eeeeec
+}
+
+table td {
+  padding: 0.2em;
+}
 
 /* Utility */
 
@@ -233,10 +252,11 @@ a:visited { color: #205caa; }
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
-  font-size: 15px;
+  font-size: 14px;
+  overflow: auto;
 }
 
-.post code { padding: 1px 5px; }
+.post code {padding: 0px 0px;  }
 
 .post ul,
 .post ol { margin-left: 1.35em; }

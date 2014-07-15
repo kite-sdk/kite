@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Kite SDK Development Guide</title>
+    <title>Inferring a Schema from an Avro Data File</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Documentation for the Kite open source project on GitHub.">
     <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">
@@ -35,35 +35,39 @@
             c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
         </svg>
       </a>
-      <div class="trigger">
+      <!--div class="trigger">
         
-          <a class="page-link" href="/docs/current/guide/about/">About</a>
+          <a class="page-link" href="/docs/current/guide/Column-Mapping/">Column Mapping</a>
         
-          <a class="page-link" href="/docs/current/guide/Column-Mapping/"></a>
+          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/">What is Kite?</a>
+        
+          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/docs/current/guide/Schema-URL-Warning/">Schema URL Warning</a>
+        
+          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/docs/current/guide/about/">About Kite SDK</a>
         
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
-          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/"></a>
+          <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
         
-          <a class="page-link" href="/docs/current/guide/index.html"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/"></a>
-        
-      </div>
+      </div -->
     </nav>
 
   </div>
@@ -76,27 +80,23 @@
       <div class="post">
 
   <header class="post-header">
-    <h1></h1>
+    <h1>Inferring a Schema from an Avro Data File</h1>
   </header>
 
   <article class="post-content">
-  <h2 id="inferring-a-schema-from-an-avro-data-file">Inferring a Schema from an Avro Data File</h2>
+  <p>You can use the <code>DatasetDescriptor.Builder.schemaFromAvroDataFile</code> method to use the schema of an existing data file in Avro format. The source can be a local file, an InputStream, or a URI.</p>
 
-<p>You can use the <code>DatasetDescriptor.Builder.schemaFromAvroDataFile</code> method to use the schema of an existing data file in Avro format. The source can be a local file, an InputStream, or a URI.</p>
+<p>An Avro data file is not meant to be human readable (though my superhuman co-workers tell me that they can read them). Imagine that you have a file named ‘movies.avro’. If you pass it to the method, as shown:</p>
 
-<p>An Avro data file is not meant to be human readable (though my superhuman co-workers tell me that they can read them). Imagine that you have a file named &lsquo;movies.avro&rsquo;. If you pass it to the method, as shown:</p>
-
-<p><code>java
-DatasetDescriptor movieDesc = new DatasetDescriptor.Builder()
+<pre><code class="language-java">DatasetDescriptor movieDesc = new DatasetDescriptor.Builder()
     .schemaFromAvroDataFile("movies.avro")
     .build()
-</code></p>
+</code></pre>
 
 <p>The method returns a dataset descriptor, configured to use the same Avro schema as the sample file, ready to be used for creating or updating a dataset.</p>
 
 <hr />
-<p><code>json
-{
+<pre><code class="language-json">{
   "type":"record",
   "name":"Movie",
   "namespace":"org.kitesdk.examples.data",
@@ -107,7 +107,7 @@ DatasetDescriptor movieDesc = new DatasetDescriptor.Builder()
     {"name":"imdbUrl","type":"string"}
   ]
 }
-</code></p>
+</code></pre>
 
 
   </article>

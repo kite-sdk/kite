@@ -4,10 +4,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Partitioned Datasets</title>
+    <title>Partition Strategy JSON Format</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Documentation for the Kite open source project on GitHub.">
-    <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Partitioned-Datasets/">
+    <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Partition-Strategy-Format/">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/docs/current/guide/css/main.css">
@@ -80,93 +80,107 @@
       <div class="post">
 
   <header class="post-header">
-    <h1>Partitioned Datasets</h1>
+    <h1>Partition Strategy JSON Format</h1>
   </header>
 
   <article class="post-content">
-  <p><a href="https://www.youtube.com/watch?v=rU1YAvmU6mY&amp;index=3&amp;list=PLGzsQf6UXBR-BJz5BGzJb2mMulWTfTu99">
-<img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/partitionTitleSlide.png" alt="Partitioning Video" width="240" height="180" border="10" align="right" title="Link to Partitioning Video" /></a></p>
+  <p>A partition strategy is made up of a list of partition fields. Each field defines how to take source data from an entity and produce a value that is used to store the entity. For example, a field can produce the year an event happened from its timestamp. Another field in the strategy can be the month from the timestamp.</p>
 
-<p>You can partition your dataset on one or more attributes of an entity. Proper partitioning helps Hadoop store information for improved performance. You can partition your records using hash, identity, or date (year, month, day, hour) strategies.</p>
+<p>Partition strategies are defined in <a href="http://www.json.org/">JSON</a> format. The strategy must be a list of objects—name/value pairs—each of which defines a field in the partition strategy. All field definitions require at least two attributes:</p>
 
-<p>Imagine that you are working the registration desk at a conference. There are 100 attendees. You might decide you can hand out the name badges more efficiently if you have two lines: A-M and N-Z. The attendee knows to go to one line or the other. The conference worker at the N-Z station doesn’t have to look through badges A-M; she knows that the attendee is going to be in her set of badges. It’s more efficient, because she only has to search half of the badges to find the right one.</p>
+<ul>
+  <li><code>source</code> – a source field on the entity, such as “created_at”</li>
+  <li><code>type</code> – the type of partition derived from the source data, such as “year”</li>
+</ul>
 
-<p>However, that assumes that there is an equal distribution of names across all letters of the alphabet. There might be an unusually high number of attendees whose names start with “B.” That would result in long waits in the first line, and little activity in the second line. Breaking out into three tables, A-I, J-S, T-Z might provide greater efficiency. They would share the workload and reduce the search time at any one table.</p>
+<p>Each definition can be thought of as a function run on the entity’s source to produce the partition field’s data. The order of the partition fields is preserved and used when the strategy is applied.</p>
 
-<p>Fastest of all might be to have 100 stations where each individual could pick up her badge. But that would be a waste of time and effort for most of the staff. There is a “sweet spot” that maximizes efficiency using minimal resources.</p>
+<p>The available types are:</p>
 
-<p>When you store records in HDFS, the data is stored in partitions. Partitions provide coarse-grained organization. You can improve performance by giving hints to the system in the form of a partition strategy.</p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Source</th>
+      <th>Produces</th>
+      <th>Requirements</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>year</code></td>
+      <td>a timestamp</td>
+      <td>year, like 2014</td>
+      <td>must be a long<a href="#notes"><sup>1</sup></a></td>
+    </tr>
+    <tr>
+      <td><code>month</code></td>
+      <td>a timestamp</td>
+      <td>month, 1-12</td>
+      <td>must be a long</td>
+    </tr>
+    <tr>
+      <td><code>day</code></td>
+      <td>a timestamp</td>
+      <td>day of the month, 1-31</td>
+      <td>must be a long</td>
+    </tr>
+    <tr>
+      <td><code>hour</code></td>
+      <td>a timestamp</td>
+      <td>hour in the day, 0-23</td>
+      <td>must be a long</td>
+    </tr>
+    <tr>
+      <td><code>minute</code></td>
+      <td>a timestamp</td>
+      <td>minute in the hour, 0-59</td>
+      <td>must be a long</td>
+    </tr>
+    <tr>
+      <td><code>identity</code></td>
+      <td>any string or number</td>
+      <td>the source value, unchanged</td>
+      <td>must be a string or numeric</td>
+    </tr>
+    <tr>
+      <td><code>hash</code></td>
+      <td>any object</td>
+      <td>int hash of the value, 0-B</td>
+      <td>requires B, <code>buckets</code> integer attribute<a href="#notes"><sup>2</sup></a></td>
+    </tr>
+  </tbody>
+</table>
 
-<p>For example, you might most often retrieve your data using time-based queries. You can define your partitioning strategy by year, month, day, or hour. Your queries run more quickly if the columns used to partition your data correspond with your most common type of query.</p>
+<p>A field definition can optionally provide a <code>name</code> attribute, which is used to reference the partition field. HDFS datasets use this name when creating partition paths. If the name attribute is missing, it is defaulted based on the partition type and source field name.</p>
 
-<h2 id="partition-strategies">Partition Strategies</h2>
-<p>Partition strategies configure how Kite logically divides your dataset. Good partitions enhance performance by making it easier for your system to look in the correct place. More importantly, they help to avoid looking in places where the data is not likely to be found.</p>
+<p>Requirements for the source data are validated when schemas and partition strategies are used together. </p>
 
-<p>For example, you might partition a database by Year and Month. You can send a query to locate data from February 2012. The system knows to only search for records in the partition for February in the year 2012. It doesn’t have to search any other year or any other month in the same year. This can lead to great improvement in performance.</p>
+<h2 id="examples">Examples</h2>
 
-<p>A partition strategy is configured with a <a href="../Partition-Strategy-Format">JSON-based format</a>. You can create a partition strategy by hand. However, it’s usually easier to use the CLI to create the definition in JSON format and check it against your schema. Then you can edit it, if needed.</p>
+<p>This strategy uses the year, month, and day from the “received_at” timestamp field on an event.</p>
 
-<h3 id="defining-a-partitioning-strategy">Defining a Partitioning Strategy</h3>
-
-<p>You describe partition strategies in JSON format. You can provide a partition strategy when you first create a dataset. You cannot apply a partition strategy to an existing dataset after you create it.</p>
-
-<p>For example, here is a schema for a dataset that keeps track of visitors to a casino. These visitors belong to a loyalty club called the “High Rollers”. The dataset stores information about their activity by UserID.  It records when they enter the casino, and how long they stay each time they visit.</p>
-
-<h4 id="highrollersavsc">HighRollers.avsc</h4>
-
-<pre><code class="language-json">{
-  "type" : "record",
-  "name" : "HighRollersClub",
-  "doc" : "Schema generated by Kite",
-  "fields" : [ {
-    "name" : "UserID",
-    "type" : [ "null", "long" ],
-    "doc" : "Unique customer identifier."
-  }, {
-    "name" : "EntryTime",
-    "type" : "long",
-    "doc" : "Timestamp at entry in milliseconds since Unix epoch"
-  }, {
-    "name" : "Duration",
-    "type" : [ "null", "long" ],
-    "doc" : "Time interval in milliseconds"
-  } ]
-}
+<pre><code class="language-json">[
+  {"type": "year", "source": "received_at"},
+  {"type": "month", "source": "received_at"},
+  {"type": "day", "source": "received_at"}
+]
 </code></pre>
 
-<p>Since the most common query against this data is time-based, you can define a partition strategy that gives Hadoop a hint that it should partition the information by year, month, and day. The partition strategy looks like this.</p>
+<p>This strategy hashes and embeds the “email” field from a user record.</p>
 
-<h4 id="highrollersjson">HighRollers.json</h4>
-
-<pre><code class="language-json">[ {
-  "source" : "EntryTime",
-  "type" : "year",
-  "name" : "year"
-}, {
-  "source" : "EntryTime",
-  "type" : "month",
-  "name" : "month"
-}, {
-  "source" : "EntryTime",
-  "type" : "day",
-  "name" : "day"
-} ]
+<pre><code class="language-json">[
+  {"type": "hash", "source": "email", "buckets": 16},
+  {"type": "identity", "source": "email"}
+]
 </code></pre>
 
-<p>You can also use the command <code>partition-config</code> from the command line interface to generate the JSON file. See <a href="../Kite-Dataset-Command-Line-Interface/index.html#partition-config">partition-config</a>.</p>
+<h3 id="notes">Notes:</h3>
+<ol>
+  <li>Source timestamps must be <a href="http://avro.apache.org/docs/1.7.6/spec.html#schema_primitive">long</a> fields. The value encodes the number of milliseconds since unix epoch, as in Joda Time’s <a href="http://www.joda.org/joda-time/apidocs/org/joda/time/Instant.html#getMillis()">Instant</a> and Java’s Date.</li>
+  <li>The <code>buckets</code> attribute is required for <code>hash</code> partitions and controls the number of partitions into which the entities should be pseudo-randomly distributed.</li>
+</ol>
 
-<h3 id="creating-a-dataset-that-uses-a-partition-strategy">Creating a Dataset That Uses a Partition Strategy</h3>
-
-<p>When you create a new dataset, you can specify the partition strategy along with the schema in the command line arguments. You can apply a partition strategy only when creating the dataset. You cannot apply a partition strategy to an existing dataset.</p>
-
-<p>For example, you can create a dataset for our High Rollers club using this command.</p>
-
-<pre><code class="language-bash">dataset create HighRollersClub -s HighRollers.avsc -p HighRollers.json 
-</code></pre>
-
-<p>See <a href="../Kite-Dataset-Command-Line-Interface/index.html#create">create</a> for more options when creating a dataset.</p>
-
-<p>You can also use Kite to manage datasets in HBase, using the same tools and APIs. HBase datasets work differently than datasets stored in HDFS in two ways. First, HBase handles its own dataset partitions, and configures them differently. Second, HBase stores data as a group of values, or cells; you need to configure how Kite will divide your records into separate cells.</p>
 
   </article>
 

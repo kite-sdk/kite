@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Kite SDK Development Guide</title>
+    <title>Using the Kite Command Line Interface to Create a Dataset</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Documentation for the Kite open source project on GitHub.">
     <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">
@@ -35,35 +35,39 @@
             c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
         </svg>
       </a>
-      <div class="trigger">
+      <!--div class="trigger">
         
-          <a class="page-link" href="/docs/current/guide/about/">About</a>
+          <a class="page-link" href="/docs/current/guide/Column-Mapping/">Column Mapping</a>
         
-          <a class="page-link" href="/docs/current/guide/Column-Mapping/"></a>
+          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/">What is Kite?</a>
+        
+          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/docs/current/guide/Schema-URL-Warning/">Schema URL Warning</a>
+        
+          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/docs/current/guide/about/">About Kite SDK</a>
         
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
-          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/"></a>
+          <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
         
-          <a class="page-link" href="/docs/current/guide/index.html"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/"></a>
-        
-      </div>
+      </div -->
     </nav>
 
   </div>
@@ -76,45 +80,44 @@
       <div class="post">
 
   <header class="post-header">
-    <h1></h1>
+    <h1>Using the Kite Command Line Interface to Create a Dataset</h1>
   </header>
 
   <article class="post-content">
-  <h2 id="using-the-kite-command-line-interface-to-create-a-dataset">Using the Kite Command Line Interface to Create a Dataset</h2>
+  <p><a href="https://www.youtube.com/watch?v=li3erFGiEw8&amp;list=PLGzsQf6UXBR-BJz5BGzJb2mMulWTfTu99&amp;index=2">
+<img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/CLItitle.jpg" alt="Kite CLI Video" width="240" height="180" border="10" align="right" title="Link to Kite CLI Video" /></a></p>
 
 <p>Kite provides a set of tools that handle the basic legwork for creating a dataset, allowing you to focus on the specifics of the business problem you want to solve. This short tutorial walks you through the process of creating a dataset and viewing the results using the command line interface (CLI).</p>
 
-<h3 id="preparation">Preparation</h3>
+<h2 id="preparation">Preparation</h2>
 
-<p>If you have not done so already, download the Kite <a href="https://repository.cloudera.com/artifactory/libs-release-local/org/kitesdk/kite-tools/0.13.0/kite-tools-0.13.0-binary.jar">command-line interface jar</a>. This jar is the executable that runs the command-line interface, so save it as <code>dataset</code>. To download with curl, run:</p>
+<p>If you have not done so already, download the Kite command-line interface jar. This jar is the executable that runs the command-line interface, so save it as <code>dataset</code>. To download with curl, run:</p>
 
-<p><code>
-curl https://repository.cloudera.com/artifactory/libs-release-local/org/kitesdk/kite-tools/0.13.0/kite-tools-0.13.0-binary.jar -o dataset
+<pre><code>curl https://repository.cloudera.com/artifactory/libs-release-local/org/kitesdk/kite-tools/0.15.0/kite-tools-0.15.0-binary.jar -o dataset
 chmod +x dataset
-</code></p>
+</code></pre>
 
-<h3 id="create-a-csv-data-file">Create a CSV Data File</h3>
+<h2 id="create-a-csv-data-file">Create a CSV Data File</h2>
 
-<p>If you have a CSV file sitting around waiting to be used, you can substitute your file for the one that follows. The truth is, it doesn&rsquo;t matter if you have 100 columns or 2 columns, the process is the same. Larger datasets are only larger, not more complex.</p>
+<p>If you have a CSV file sitting around waiting to be used, you can substitute your file for the one that follows. The truth is, it doesn’t matter if you have 100 columns or 2 columns, the process is the same. Larger datasets are only larger, not more complex.</p>
 
-<p>If you don&rsquo;t have a CSV file handy, you can copy the next code snippet and save it as a plain text file named <em>sandwiches.csv</em>.</p>
+<p>If you don’t have a CSV file handy, you can copy the next code snippet and save it as a plain text file named <em>sandwiches.csv</em>.</p>
 
-<p><code>
-name, description
+<pre><code>name, description
 Reuben, Pastrami and sauerkraut on toasted rye with Russian dressing.
 PBJ, Peanut butter and grape jelly on white bread.
-</code></p>
+</code></pre>
 
-<h3 id="infer-the-schema">Infer the Schema</h3>
+<h2 id="infer-the-schema">Infer the Schema</h2>
 
 <p>All right. Now we get to use the CLI. Start by inferring an Avro schema file from the <em>sandwiches.csv</em> file you just created. Enter the following command to create an Avro schema file named <em>sandwich.avsc</em> with the class name <em>Sandwich</em>. The schema details are based on the headings and data in <em>sandwiches.csv</em>.</p>
 
-<p><code>dataset csv-schema sandwiches.csv --class Sandwich -o sandwich.avsc</code></p>
+<pre><code>dataset csv-schema sandwiches.csv --class Sandwich -o sandwich.avsc
+</code></pre>
 
 <p>If you open <em>sandwich.avsc</em> in a text editor, it looks something like the code block below. <code>csv-schema</code> infers the names of the columns from the header, and the data type for each column from the first row of values.</p>
 
-<p><code>
-{
+<pre><code class="language-json">{
   "type" : "record",
   "name" : "Sandwich",
   "doc" : "Schema generated by Kite",
@@ -128,13 +131,14 @@ PBJ, Peanut butter and grape jelly on white bread.
     "doc" : "Type inferred from \" Pastrami and sauerkraut on toasted rye with Russian dressing.\""
   } ]
 }
-</code></p>
+</code></pre>
 
-<h3 id="create-the-dataset">Create the Dataset</h3>
+<h2 id="create-the-dataset">Create the Dataset</h2>
 
 <p>With a schema, you can create a new dataset. Enter the following command.</p>
 
-<p><code>dataset create sandwiches -s sandwich.avsc</code></p>
+<pre><code>dataset create sandwiches -s sandwich.avsc
+</code></pre>
 
 <p>While it does not create actual sandwiches, it does create an empty dataset in which you can store sandwich descriptions, which is the next best thing. Probably.</p>
 
@@ -142,10 +146,9 @@ PBJ, Peanut butter and grape jelly on white bread.
 
 <p><code>dataset schema sandwiches</code></p>
 
-<p>You&rsquo;ll get the same schema back, but this time, trust me, it&rsquo;s coming from the Hive repository. Honest.</p>
+<p>You’ll get the same schema back, but this time, trust me, it’s coming from the Hive repository. Honest.</p>
 
-<p><code>
-{
+<pre><code class="language-json">{
   "type" : "record",
   "name" : "Sandwich",
   "doc" : "Schema generated by Kite",
@@ -159,15 +162,18 @@ PBJ, Peanut butter and grape jelly on white bread.
     "doc" : "Type inferred from \" Pastrami and sauerkraut on toasted rye with Russian dressing.\""
   } ]
 }
-</code></p>
+</code></pre>
 
-<h3 id="import-the-csv-data">Import the CSV Data</h3>
-<p>You&rsquo;ve created a dataset in the Hive repository, which is the container, but not the information itself. Next, you might want to add some data so that you can run some queries. Use the following command to import the sandwiches in your CSV file.</p>
+<h2 id="import-the-csv-data">Import the CSV Data</h2>
+<p>You’ve created a dataset in the Hive repository, which is the container, but not the information itself. Next, you might want to add some data so that you can run some queries. Use the following command to import the sandwiches in your CSV file.</p>
 
-<p><code>dataset csv-import sandwiches.csv sandwiches</code></p>
+<pre><code>dataset csv-import sandwiches.csv sandwiches
+</code></pre>
 
-<p>The method returns a record count. 
-<code>Added 2 records to dataset "sandwiches"</code></p>
+<p>The method returns a record count. </p>
+
+<pre><code>Added 2 records to dataset "sandwiches"
+</code></pre>
 
 <p>But can you believe that? Inquiring minds want to verify that the information is actually in the dataset.</p>
 
@@ -175,36 +181,39 @@ PBJ, Peanut butter and grape jelly on white bread.
 
 <p>You can list records from your newly created dataset using the <code>show</code> command.</p>
 
-<p><code>dataset show sandwiches</code></p>
+<pre><code>dataset show sandwiches
+</code></pre>
 
 <p>By default, CLI retrieves up to the first 10 records from your dataset.</p>
 
-<p><code>
-{"name": "Reuben", "description": " Pastrami and sauerkraut on toasted rye with Russian dressing."}
+<pre><code>{"name": "Reuben", "description": " Pastrami and sauerkraut on toasted rye with Russian dressing."}
 {"name": "PBJ", "description": " Peanut butter and grape jelly on white bread."}
-</code></p>
+</code></pre>
 
 <p>If you find that number of sandwiches overwhelming, you can change the number of records the query returns.</p>
 
-<p><code>dataset show sandwiches -n 1</code></p>
+<pre><code>dataset show sandwiches -n 1
+</code></pre>
 
 <p>This time only the first record prints to screen.</p>
 
-<p><code>{"name": "Reuben", "description": " Pastrami and sauerkraut on toasted rye with Russian dressing."}</code></p>
+<pre><code>{"name": "Reuben", "description": " Pastrami and sauerkraut on toasted rye with Russian dressing."}
+</code></pre>
 
 <p>You can import additional records to the database and use Hive or Impala to query the results.</p>
 
 <h2 id="delete-the-dataset">Delete the Dataset</h2>
 
-<p>Given the ease with which you just created the sandwiches dataset, it seems a shame to destroy it out of hand. Keep in mind that this was only an example, and not something you were meant to treasure. I suppose you don&rsquo;t have to delete it, you might want to keep it around as a souvenir, like the first dollar earned or something like that. If so, create a dataset you hate, and prepare to annihilate it using this unassuming command.</p>
+<p>Given the ease with which you just created the sandwiches dataset, it seems a shame to destroy it out of hand. Keep in mind that this was only an example, and not something you were meant to treasure. I suppose you don’t have to delete it, you might want to keep it around as a souvenir, like the first dollar earned or something like that. If so, create a dataset you hate, and prepare to annihilate it using this unassuming command.</p>
 
-<p><code>dataset delete sandwiches</code></p>
+<pre><code>dataset delete sandwiches
+</code></pre>
 
 <p>There they go. Reuben and PBJ are gone. But you can create them again, or any other dataset you choose, using the CLI.</p>
 
 <hr />
 
-<p><a href="Kite-Dataset-Command-Line-Interface/">Kite Command Line Interface</a></p>
+<p><a href="../Kite-Dataset-Command-Line-Interface/">Kite Command Line Interface</a></p>
 
   </article>
 

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Kite SDK Development Guide</title>
+    <title>What is Kite?</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Documentation for the Kite open source project on GitHub.">
     <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Kite-SDK-Guide/">
@@ -35,35 +35,39 @@
             c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
         </svg>
       </a>
-      <div class="trigger">
+      <!--div class="trigger">
         
-          <a class="page-link" href="/docs/current/guide/about/">About</a>
+          <a class="page-link" href="/docs/current/guide/Column-Mapping/">Column Mapping</a>
         
-          <a class="page-link" href="/docs/current/guide/Column-Mapping/"></a>
+          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/">What is Kite?</a>
+        
+          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/docs/current/guide/Schema-URL-Warning/">Schema URL Warning</a>
+        
+          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/docs/current/guide/about/">About Kite SDK</a>
         
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
-          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/"></a>
+          <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
         
-          <a class="page-link" href="/docs/current/guide/index.html"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/"></a>
-        
-      </div>
+      </div -->
     </nav>
 
   </div>
@@ -76,19 +80,19 @@
       <div class="post">
 
   <header class="post-header">
-    <h1></h1>
+    <h1>What is Kite?</h1>
   </header>
 
   <article class="post-content">
-  <h2 id="what-is-kite-and-why-is-it-awesome">What Is Kite, and Why Is It Awesome?</h2>
+  <h2 id="and-what-makes-it-so-awesome">(and What Makes It So Awesome?)</h2>
 
-<p>You can learn about why Kite is awesome by watching this <a href="http://www.youtube.com/watch?feature=player_embedded&amp;v=JXAm3aasI6c" target="_blank">Kite Overview video</a>.</p>
+<p>You can learn about why Kite is awesome by watching this <a href="http://www.youtube.com/watch?feature=player_embedded&amp;v=JXAm3aasI6c">Kite Overview video</a>.</p>
 
-<p><a href="http://www.youtube.com/watch?feature=player_embedded&amp;v=JXAm3aasI6c" target="_blank"><img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/kiteOverviewStillImage.png" alt="Kite Overview Video" width="240" height="180" border="10" align="right" title="Link to Kite Overview Video" /></a></p>
+<p><a href="http://www.youtube.com/watch?feature=player_embedded&amp;v=JXAm3aasI6c"><img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/kiteOverviewStillImage.png" alt="Kite Overview Video" width="240" height="180" border="10" align="right" title="Link to Kite Overview Video" /></a></p>
 
 <p>Kite is an open source set of libraries, references, tutorials, and code samples for building data-oriented systems and applications. </p>
 
-<p>CDH and Cloudera Manager provide a data platform and data management platform, but they aren&rsquo;t enough. You need higher-level tools, APIs, documentation, and examples to get working quickly.</p>
+<p>CDH and Cloudera Manager provide a data platform and data management platform, but they aren’t enough. You need higher-level tools, APIs, documentation, and examples to get working quickly.</p>
 
 <p>Generally, everyone agrees that Hadoop is an incredibly powerful platform. It provides the infrastructure needed to process and store data at scale. </p>
 
@@ -102,7 +106,7 @@
 
 <p>Hadoop is not difficult to use. The complexity comes from the many parts that comprise a very large animal. Each piece, in isolation, is straightforward and easy to understand.</p>
 
-<h3 id="enter-kite">Enter Kite</h3>
+<h2 id="enter-kite">Enter Kite</h2>
 
 <p>This is where Kite comes in. Kite provides additional support for this infrastructure one level up in the stack so that they are codified in APIs that make sense to developers. </p>
 

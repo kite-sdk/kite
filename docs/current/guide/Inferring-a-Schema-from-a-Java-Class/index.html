@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Kite SDK Development Guide</title>
+    <title>Inferring a Schema from a Java Class</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Documentation for the Kite open source project on GitHub.">
     <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/">
@@ -35,35 +35,39 @@
             c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
         </svg>
       </a>
-      <div class="trigger">
+      <!--div class="trigger">
         
-          <a class="page-link" href="/docs/current/guide/about/">About</a>
+          <a class="page-link" href="/docs/current/guide/Column-Mapping/">Column Mapping</a>
         
-          <a class="page-link" href="/docs/current/guide/Column-Mapping/"></a>
+          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/">What is Kite?</a>
+        
+          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/docs/current/guide/Schema-URL-Warning/">Schema URL Warning</a>
+        
+          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/docs/current/guide/about/">About Kite SDK</a>
         
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
-          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/"></a>
+          <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
         
-          <a class="page-link" href="/docs/current/guide/index.html"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/"></a>
-        
-      </div>
+      </div -->
     </nav>
 
   </div>
@@ -76,88 +80,83 @@
       <div class="post">
 
   <header class="post-header">
-    <h1></h1>
+    <h1>Inferring a Schema from a Java Class</h1>
   </header>
 
   <article class="post-content">
-  <h2 id="inferring-a-schema-from-a-java-class">Inferring a Schema from a Java Class</h2>
-
-<p>You can use the <code>DatasetDescriptor.Builder#schema(Class&lt;?&gt; type)</code> method to infer a dataset schema from the instance variable fields of a Java class.</p>
+  <p>You can use the <code>DatasetDescriptor.Builder#schema(Class&lt;?&gt; type)</code> method to infer a dataset schema from the instance variable fields of a Java class.</p>
 
 <p>For example, the following class defines a Java object that provides access to the ID, Title, Release Date, and IMDB URL for a movie database.</p>
 
-<p>```java
- package org.kitesdk.examples.data;
+<pre><code class="language-java"> package org.kitesdk.examples.data;
  /** Movie class */
  class Movie {
    private int id;
    private String title;
    private String releaseDate;
-   private String imdbUrl;</p>
+   private String imdbUrl;
 
-<p>public Movie(int id, String title, String releaseDate, String imdbUrl) {
+   public Movie(int id, String title, String releaseDate, String imdbUrl) {
      this.id = id;
      this.title = title;
      this.releaseDate = releaseDate;
      this.imdbUrl = imdbUrl;
-   }</p>
-
-<p>public Movie() {
+   }
+	
+   public Movie() {
      // Empty constructor for serialization purposes
-   }</p>
+   }
 
-<p>public int getId() {
+   public int getId() {
      return id;
-   }</p>
+   }
 
-<p>public void setId (int id) {
+   public void setId (int id) {
      this.id = id;
-   }</p>
+   }
 
-<p>public String getTitle() {
+   public String getTitle() {
      return title;
-   }</p>
+   }
 
-<p>public void setTitle(String title) {
+   public void setTitle(String title) {
      this.title = title;
-   }</p>
-
-<p>public String getReleaseDate() {
+   }
+  
+   public String getReleaseDate() {
       return releaseDate;
-   }</p>
-
-<p>public void setReleaseDate (String releaseDate) {
+   }
+  
+   public void setReleaseDate (String releaseDate) {
      this.releaseDate = releaseDate;
-   }</p>
-
-<p>public String getImdbUrl () {
+   }
+  
+   public String getImdbUrl () {
      return imdbUrl;
-   }</p>
-
-<p>public void setImdbUrl (String imdbUrl) {
+   }
+  
+   public void setImdbUrl (String imdbUrl) {
      this.imdbUrl = imdbUrl;
-   }</p>
+   }
 
-<p>public void describeMovie() {
-     System.out.println(title + &ldquo;, ID: &ldquo; + id + &ldquo;, was released on &ldquo; + 
-       releaseDate + &ldquo;. For more info, see &ldquo; + imdbUrl + &ldquo;.&rdquo;);
+   public void describeMovie() {
+     System.out.println(title + ", ID: " + id + ", was released on " + 
+       releaseDate + ". For more info, see " + imdbUrl + ".");
    }
  }
-```</p>
+</code></pre>
 
 <hr />
 <p>Use the <code>schema(Class&lt;?&gt;)</code> builder method to create a descriptor that uses the Avro schema inferred from the <code>Movie</code> class.</p>
 
-<p><code>java
-DatasetDescriptor movieDesc = new DatasetDescriptor.Builder()
+<pre><code class="language-java">DatasetDescriptor movieDesc = new DatasetDescriptor.Builder()
     .schema(Movie.class)
     .build();
-</code></p>
+</code></pre>
 
 <p>The Builder uses the field names and data types to construct an Avro schema definition, which for the <code>Movie</code> class looks like this.</p>
 
-<p><code>
-{
+<pre><code class="language-json">{
   "type":"record",
   "name":"Movie",
   "namespace":"org.kitesdk.examples.data",
@@ -168,7 +167,7 @@ DatasetDescriptor movieDesc = new DatasetDescriptor.Builder()
     {"name":"imdbUrl","type":"string"}
   ]
 }
-</code></p>
+</code></pre>
 
   </article>
 
