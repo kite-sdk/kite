@@ -171,6 +171,38 @@ public class TestMapReduce {
 
   }
 
+  @Test
+  @SuppressWarnings("deprecation")
+  public void testJobEmptyView() throws Exception {
+    Job job = new Job();
+
+    Dataset<GenericData.Record> inputDataset = repo.create("in",
+        new DatasetDescriptor.Builder()
+            .property("kite.allow.csv", "true")
+            .schema(STRING_SCHEMA)
+            .format(format)
+            .build(), GenericData.Record.class);
+
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset).withType(GenericData.Record.class);
+
+    job.setMapperClass(LineCountMapper.class);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(IntWritable.class);
+
+    job.setReducerClass(GenericStatsReducer.class);
+
+    Dataset<GenericData.Record> outputDataset = repo.create("out",
+        new DatasetDescriptor.Builder()
+            .property("kite.allow.csv", "true")
+            .schema(STATS_SCHEMA)
+            .format(format)
+            .build(), GenericData.Record.class);
+
+    DatasetKeyOutputFormat.configure(job).writeTo(outputDataset).withType(GenericData.Record.class);
+
+    Assert.assertTrue(job.waitForCompletion(true));
+  }
+
   private GenericData.Record newStringRecord(String text) {
     return new GenericRecordBuilder(STRING_SCHEMA).set("text", text).build();
   }

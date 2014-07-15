@@ -166,4 +166,36 @@ public class TestMapReduceHBase {
 
   }
 
+  @Test
+  @SuppressWarnings("deprecation")
+  public void testJobEmptyView() throws Exception {
+    Job job = new Job(HBaseTestUtils.getConf());
+
+    String datasetName = tableName + ".TestGenericEntity";
+
+    Dataset<GenericRecord> inputDataset = repo.create("in",
+        new DatasetDescriptor.Builder()
+            .schemaLiteral(testGenericEntity).build());
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaLiteral(testGenericEntity)
+        .build();
+    Dataset<GenericRecord> outputDataset = repo.create(datasetName, descriptor);
+
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset);
+
+    job.setMapperClass(AvroKeyWrapperMapper.class);
+    job.setMapOutputKeyClass(AvroKey.class);
+    job.setMapOutputValueClass(NullWritable.class);
+    AvroJob.setMapOutputKeySchema(job, new Schema.Parser().parse(testGenericEntity));
+
+    job.setReducerClass(AvroKeyWrapperReducer.class);
+    job.setOutputKeyClass(GenericData.Record.class);
+    job.setOutputValueClass(Void.class);
+    AvroJob.setOutputKeySchema(job, new Schema.Parser().parse(testGenericEntity));
+
+    DatasetKeyOutputFormat.configure(job).writeTo(outputDataset);
+
+    Assert.assertTrue(job.waitForCompletion(true));
+  }
 }
