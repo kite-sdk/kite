@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Kite SDK Development Guide</title>
+    <title>Partitioned Datasets</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Documentation for the Kite open source project on GitHub.">
     <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Partitioned-Datasets/">
@@ -35,35 +35,39 @@
             c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
         </svg>
       </a>
-      <div class="trigger">
+      <!--div class="trigger">
         
-          <a class="page-link" href="/docs/current/guide/about/">About</a>
+          <a class="page-link" href="/docs/current/guide/Column-Mapping/">Column Mapping2</a>
         
-          <a class="page-link" href="/docs/current/guide/Column-Mapping/"></a>
+          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/">What is Kite?</a>
+        
+          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/docs/current/guide/Schema-URL-Warning/">Schema URL Warning</a>
+        
+          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/docs/current/guide/about/">About Kite SDK</a>
         
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
-          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/"></a>
+          <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
         
-          <a class="page-link" href="/docs/current/guide/index.html"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/"></a>
-        
-      </div>
+      </div -->
     </nav>
 
   </div>
@@ -76,61 +80,41 @@
       <div class="post">
 
   <header class="post-header">
-    <h1></h1>
+    <h1>Partitioned Datasets</h1>
   </header>
 
   <article class="post-content">
-  <h2 id="partitioned-datasets">Partitioned Datasets</h2>
-
-<p><a href="https://www.youtube.com/watch?v=rU1YAvmU6mY&amp;index=3&amp;list=PLGzsQf6UXBR-BJz5BGzJb2mMulWTfTu99" target="_blank">
+  <p><a href="https://www.youtube.com/watch?v=rU1YAvmU6mY&amp;index=3&amp;list=PLGzsQf6UXBR-BJz5BGzJb2mMulWTfTu99">
 <img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/partitionTitleSlide.png" alt="Partitioning Video" width="240" height="180" border="10" align="right" title="Link to Partitioning Video" /></a></p>
 
 <p>You can partition your dataset on one or more attributes of an entity. Proper partitioning helps Hadoop store information for improved performance. You can partition your records using hash, identity, or date (year, month, day, hour) strategies.</p>
 
-<p>Imagine that you are working the registration desk at a conference. There are 100 attendees. You might decide you can hand out the name badges more efficiently if you have two lines that distribute the badges alphabetically, from A-M and N-Z. The attendee knows to go to one line or the other. The conference worker at the N-Z station doesn&apos;t bother looking through the badges A-M, because she knows that the attendee is going to be in her set of badges. It&apos;s more efficient, because she only has to search half of the items to find the right one.</p>
+<p>Imagine that you are working the registration desk at a conference. There are 100 attendees. You might decide you can hand out the name badges more efficiently if you have two lines: A-M and N-Z. The attendee knows to go to one line or the other. The conference worker at the N-Z station doesn’t have to look through badges A-M; she knows that the attendee is going to be in her set of badges. It’s more efficient, because she only has to search half of the badges to find the right one.</p>
 
-<p>However, that assumes that there is an equal distribution of names across all letters of the alphabet. It could be that there just happen to be an unusually high number of attendees whose names start with &quot;B,&quot; resulting in long waits in the first line and little activity in the second line. Breaking out into three tables, A-I, J-S, T-Z might provide greater efficiency, sharing the workload and reducing the search time at any one table.</p>
+<p>However, that assumes that there is an equal distribution of names across all letters of the alphabet. There might be an unusually high number of attendees whose names start with “B.” That would result in long waits in the first line, and little activity in the second line. Breaking out into three tables, A-I, J-S, T-Z might provide greater efficiency. They would share the workload and reduce the search time at any one table.</p>
 
-<p>Fastest of all might be to have 100 stations where each individual could pick up her badge, but that would be a waste of time and effort for most of the staff. There is a &quot;sweet spot&quot; that maximizes efficiency with minimal resources.</p>
+<p>Fastest of all might be to have 100 stations where each individual could pick up her badge. But that would be a waste of time and effort for most of the staff. There is a “sweet spot” that maximizes efficiency using minimal resources.</p>
 
-<p>When you store records in HDFS, the data is stored in &quot;partitions&quot; that provide coarse-grained organization. You can improve performance by providing hints to the system using a partitioning strategy. For example, if you most often retrieve your data using time-based queries, you can define the partitioning strategy by year, month, day, and hour, depending on the frequency with which you&apos;re capturing data. Your queries will run more quickly if the buckets used to organize your data correspond with the types of queries you make most often.</p>
+<p>When you store records in HDFS, the data is stored in partitions. Partitions provide coarse-grained organization. You can improve performance by giving hints to the system in the form of a partition strategy.</p>
+
+<p>For example, you might most often retrieve your data using time-based queries. You can define your partitioning strategy by year, month, day, or hour. Your queries run more quickly if the columns used to partition your data correspond with your most common type of query.</p>
 
 <h2 id="partition-strategies">Partition Strategies</h2>
-<p>Partition strategies configure how kite will logically divide your dataset. Good partitioning enhances performance by making it easier to look in the correct places (and more importantly, to avoid looking in places where the data is not likely to be found). For example, if you partition a database by Year and Month, then send a query to locate data from February 2012, the system knows to only search for records in the partition for February in the year 2012: it doesn&rsquo;t have to search any other year, or any other month in the same year. This can lead to great improvements in performance.</p>
+<p>Partition strategies configure how Kite logically divides your dataset. Good partitions enhance performance by making it easier for your system to look in the correct place. More importantly, they help to avoid looking in places where the data is not likely to be found.</p>
 
-<p>A partition strategy is defined using JSON notation.</p>
+<p>For example, you might partition a database by Year and Month. You can send a query to locate data from February 2012. The system knows to only search for records in the partition for February in the year 2012. It doesn’t have to search any other year or any other month in the same year. This can lead to great improvement in performance.</p>
 
-<p>Partition strategies have the following traits:
-* Each must be defined in a valid JSON file.
-* Each is created from a list of partition definitions.
-* Each partition must define a source and a type, but the name is optional (if you do not define a name explicitly, it is given a generic name at configuration time).
-* Valid types are
-  * <code>year</code>
-  * <code>month</code>
-  * <code>day</code>
-  * <code>hour</code>
-  * <code>minute</code>
-  * <code>identity</code>
-  * <code>hash</code></p>
-
-<blockquote>
-*Hash also requires an integer, representing the number of partitions into which the field entries should be distributed.
-</blockquote>
-
-<p>You can create a partition strategy by hand, but it&rsquo;s usually easier to use the CLI to create the definition in valid JSON format and check it against your schema, then edit it if needed.</p>
-
-<p>If you write your own field definition with <em>source</em> and <em>type</em>, the system fills in the <em>name</em> automatically. If you change the default name, the system internally still uses the original name of the field when the partition strategy was created to maintain consistency.</p>
+<p>A partition strategy is configured with a <a href="../Partition-Strategy-Format">JSON-based format</a>. You can create a partition strategy by hand. However, it’s usually easier to use the CLI to create the definition in JSON format and check it against your schema. Then you can edit it, if needed.</p>
 
 <h3 id="defining-a-partitioning-strategy">Defining a Partitioning Strategy</h3>
 
-<p>Partitioning strategies are described in JSON format. You have the option of providing a partitioning strategy when you first create a dataset (you cannot apply a partitioning strategy to an existing dataset after you create it).</p>
+<p>You describe partition strategies in JSON format. You can provide a partition strategy when you first create a dataset. You cannot apply a partition strategy to an existing dataset after you create it.</p>
 
-<p>For example, here is a schema for a dataset that keeps track of visitors to a casino who belong to a loyalty club called the &quot;High Rollers.&quot; The dataset stores information about their activity them UserID, recording when they enter the casino and how long they stay each time they visit.</p>
+<p>For example, here is a schema for a dataset that keeps track of visitors to a casino. These visitors belong to a loyalty club called the “High Rollers”. The dataset stores information about their activity by UserID.  It records when they enter the casino, and how long they stay each time they visit.</p>
 
 <h4 id="highrollersavsc">HighRollers.avsc</h4>
 
-<p><code>json
-{
+<pre><code class="language-json">{
   "type" : "record",
   "name" : "HighRollersClub",
   "doc" : "Schema generated by Kite",
@@ -148,14 +132,13 @@
     "doc" : "Time interval in milliseconds"
   } ]
 }
-</code></p>
+</code></pre>
 
-<p>Since the most common query against this data is time-based, you can define a partitioning strategy that gives Hadoop a hint that it should partition the information by year, month, and day. The partitioning strategy looks like this.</p>
+<p>Since the most common query against this data is time-based, you can define a partition strategy that gives Hadoop a hint that it should partition the information by year, month, and day. The partition strategy looks like this.</p>
 
 <h4 id="highrollersjson">HighRollers.json</h4>
 
-<p><code>json
-[ {
+<pre><code class="language-json">[ {
   "source" : "EntryTime",
   "type" : "year",
   "name" : "year"
@@ -168,22 +151,22 @@
   "type" : "day",
   "name" : "day"
 } ]
-</code></p>
+</code></pre>
 
-<p>You can also use the command line interface command <code>partition-config</code> to generate the JSON file. See <a href="kitedatasetcli.html#partition-config">partition-config</a>.</p>
+<p>You can also use the command <code>partition-config</code> from the command line interface to generate the JSON file. See <a href="../Kite-Dataset-Command-Line-Interface/index.html#partition-config">partition-config</a>.</p>
 
 <h3 id="creating-a-dataset-that-uses-a-partition-strategy">Creating a Dataset That Uses a Partition Strategy</h3>
 
 <p>When you create a new dataset, you can specify the partition strategy along with the schema in the command line arguments. You can apply a partition strategy only when creating the dataset. You cannot apply a partition strategy to an existing dataset.</p>
 
-<p>For example, you can create a dataset for our HighRollers club using this command.</p>
+<p>For example, you can create a dataset for our High Rollers club using this command.</p>
 
-<p><code>
-dataset create HighRollersClub -s HighRollers.avsc -p HighRollers.json 
-</code></p>
+<pre><code class="language-bash">dataset create HighRollersClub -s HighRollers.avsc -p HighRollers.json 
+</code></pre>
 
-<p>See <a href="kitedatasetcli.html#create">create</a> for more options when creating a dataset.
-You can also use Kite to manage datasets in HBase, using the same tools and APIs. HBase datasets work differently than datasets backed by files in HDFS in two ways. First, dataset partitioning is handled by HBase and configuring it is a little different. Second, HBase stores data as a group of values, or cells, so you will need to configure how Kite divides your records into separate cells.</p>
+<p>See <a href="../Kite-Dataset-Command-Line-Interface/index.html#create">create</a> for more options when creating a dataset.</p>
+
+<p>You can also use Kite to manage datasets in HBase, using the same tools and APIs. HBase datasets work differently than datasets stored in HDFS in two ways. First, HBase handles its own dataset partitions, and configures them differently. Second, HBase stores data as a group of values, or cells; you need to configure how Kite will divide your records into separate cells.</p>
 
   </article>
 

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Kite SDK Development Guide</title>
+    <title>Kite Dataset Command Line Interface</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Documentation for the Kite open source project on GitHub.">
     <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Kite-Dataset-Command-Line-Interface/">
@@ -35,35 +35,39 @@
             c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
         </svg>
       </a>
-      <div class="trigger">
+      <!--div class="trigger">
         
-          <a class="page-link" href="/docs/current/guide/about/">About</a>
+          <a class="page-link" href="/docs/current/guide/Column-Mapping/">Column Mapping2</a>
         
-          <a class="page-link" href="/docs/current/guide/Column-Mapping/"></a>
+          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/">What is Kite?</a>
+        
+          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/docs/current/guide/Schema-URL-Warning/">Schema URL Warning</a>
+        
+          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/docs/current/guide/about/">About Kite SDK</a>
         
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
-          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/"></a>
+          <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
         
-          <a class="page-link" href="/docs/current/guide/index.html"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/"></a>
-        
-          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/"></a>
-        
-      </div>
+      </div -->
     </nav>
 
   </div>
@@ -76,80 +80,120 @@
       <div class="post">
 
   <header class="post-header">
-    <h1></h1>
+    <h1>Kite Dataset Command Line Interface</h1>
   </header>
 
   <article class="post-content">
-  <p><a name="top"></a>
-The Kite Dataset command line interface (CLI) provides utility commands that let you quickly create a schema and dataset, import data from a CSV file, then view the results.</p>
+  <p>The Kite Dataset command line interface (CLI) provides utility commands that let you perform essential tasks such as creating a schema and dataset, importing data from a CSV file, and viewing the results.</p>
 
-<p>Each command is described below. See <a href="https://github.com/kite-sdk/kite/wiki/2.1-Using-the-Kite-CLI-to-Create-a-Dataset">Using the Kite CLI to Create a Dataset</a> for a practical example of the CLI in use.</p>
+<p>Each command is described below. See <a href="../Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite CLI to Create a Dataset</a> for a practical example of the CLI in use.</p>
+
+<p><a name="top"></a> </p>
+
+<h2 id="commands">Commands</h2>
 
 <hr />
 <ul>
-  <li><a href="#csvSchema">csv-schema</a> (create a schema from a CSV data file)</li>
-  <li><a href="#objSchema">obj-schema</a> (create a schema from a Java object)</li>
-  <li><a href="#create">create</a> (create a dataset based on an existing schema)</li>
-  <li><a href="#schema">schema</a> (view the schema for an existing dataset)</li>
-  <li><a href="#csvImport">csv-import</a> (import a CSV data file)</li>
-  <li><a href="#show">show</a> (show the first <em>n</em> records of a dataset)</li>
-  <li><a href="#delete">delete</a> (delete a dataset)</li>
-  <li><a href="#partition-config">partition-config</a> (create a partition strategy for a schema)</li>
-  <li><a href="#help">help</a> (get help for the dataset command in general or a specific command)</li>
+  <li><a href="#general">general options</a>: options for all commands.</li>
+  <li><a href="#csvSchema">csv-schema</a>: create a schema from a CSV data file.</li>
+  <li><a href="#objSchema">obj-schema</a>: create a schema from a Java object.</li>
+  <li><a href="#create">create</a>: create a dataset based on an existing schema.</li>
+  <li><a href="#update">update</a>: update the metadata descriptor for a dataset. </li>
+  <li><a href="#schema">schema</a> : view the schema for an existing dataset.</li>
+  <li><a href="#csvImport">csv-import</a>: import a CSV data file.</li>
+  <li><a href="#show">show</a>: show the first <em>n</em> records of a dataset.</li>
+  <li><a href="#copy">copy</a>: copy one dataset to another dataset.</li>
+  <li><a href="#delete">delete</a>: delete a dataset.</li>
+  <li><a href="#partition-config">partition-config</a>: create a partition strategy for a schema.</li>
+  <li><a href="#mapping-config">mapping-config</a>: create a partition strategy for a schema.</li>
+  <li><a href="#help">help</a>: get help for the dataset command in general or a specific command.</li>
 </ul>
+
+<hr />
+<p><a name="general"></a></p>
+
+<h2 id="general-options">General options</h2>
+
+<p>Every command begins with <code>dataset</code>, followed by general options. Currently, the only general option turns on debugging, which will show a stack trace if something goes awry during execution of the command. A concise set of additional options might be added as the product matures.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>-v</code><br /><code>--verbose</code><br /><code>--debug</code></td>
+      <td>Turn on debug logging and show stack traces.</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+<p><a href="#top">Back to the Top</a></p>
 
 <hr />
 <p><a name="csvSchema"></a></p>
 
 <h2 id="csv-schema">csv-schema</h2>
+
 <p>Use <code>csv-schema</code> to generate an Avro schema from a comma separated value (CSV) file.</p>
 
 <h3 id="syntax">Syntax</h3>
 
-<p><code>dataset [general options] csv-schema &lt;sample csv path&gt; [command options]</code></p>
+<pre><code>dataset [-v] csv-schema &lt;sample csv path&gt; [command options]
+</code></pre>
 
 <h3 id="options">Options</h3>
-<p><code>--skip-lines</code></p>
 
-<p>The number of lines to skip before the start of the CSV data. Default is 0.</p>
+<table>
+  <tbody>
+    <tr>
+      <td><code>--skip-lines</code></td>
+      <td>The number of lines to skip before the start of the CSV data. Default is 0.</td>
+    </tr>
+    <tr>
+      <td><code>--quote</code></td>
+      <td>Quote character in the CSV data file. Default is the double-quote (“).</td>
+    </tr>
+    <tr>
+      <td><code>--delimiter</code></td>
+      <td>Delimiter character in the CSV data file. Default is the comma (,).</td>
+    </tr>
+    <tr>
+      <td><code>--escape</code></td>
+      <td>Escape character in the CSV data file. Default is the backslash (\).</td>
+    </tr>
+    <tr>
+      <td><code>--class,</code><br /><code>--record-name</code></td>
+      <td>A class name or record name for the schema result. This value is <strong>required</strong>.</td>
+    </tr>
+    <tr>
+      <td><code>-o, --output</code></td>
+      <td>Save schema avsc to path.</td>
+    </tr>
+    <tr>
+      <td><code>--no-header</code></td>
+      <td>Use this option when the CSV data file does not have header information in the first line.<br />Fields are given the default names <em>field_0</em>, <em>field_1,…field_n</em>.</td>
+    </tr>
+    <tr>
+      <td><code>--minimize</code></td>
+      <td>Minimize schema file size by eliminating white space.</td>
+    </tr>
+  </tbody>
+</table>
 
-<p><code>--quote</code></p>
+<h3 id="examples">Examples</h3>
 
-<p>Quote character in the CSV data file. Default is the double-quote (&ldquo;).</p>
+<p>Print the schema to standard out:</p>
 
-<p><code>--delimiter</code></p>
+<pre><code>dataset csv-schema sample.csv --class Sample
+</code></pre>
 
-<p>Delimiter character in the CSV data file. Default is the comma (,).</p>
+<p>Write the schema to sample.avsc:</p>
 
-<p><code>--escape</code></p>
-
-<p>Escape character in the CSV data file. Default is the backslash (\).</p>
-
-<p><code>--class, --record-name</code></p>
-
-<p>A class name or record name for the schema result. This value is <strong>required</strong>.</p>
-
-<p><code>-o, --output</code></p>
-
-<p>Save schema avsc to path.</p>
-
-<p><code>--no-header</code></p>
-
-<p>Use this option when the CSV data file does not have header information in the first line. Fields are given the default names <em>field_0</em>, <em>field_1,&hellip;field_n</em>.</p>
-
-<p><code>--minimize</code></p>
-
-<p>Minimize schema file size by eliminating white space.</p>
-
-<h2 id="examples">Examples</h2>
-
-<p>Print the schema to standard out: <code>dataset csv-schema sample.csv --class Sample</code></p>
-
-<p>Write the schema to sample.avsc: <code>dataset csv-schema sample.csv --class Sample -o sample.avsc</code></p>
+<pre><code>dataset csv-schema sample.csv --class Sample -o sample.avsc
+</code></pre>
 
 <hr />
 
-<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+<p><a href="#top">Back to the Top</a></p>
 
 <hr />
 
@@ -160,89 +204,151 @@ The Kite Dataset command line interface (CLI) provides utility commands that let
 
 <h3 id="syntax-1">Syntax</h3>
 
-<p><code>dataset [general options] obj-schema &lt;class name&gt; [command options]</code></p>
+<pre><code>dataset [-v] obj-schema &lt;class name&gt; [command options]
+</code></pre>
 
 <h3 id="options-1">Options</h3>
 
-<p><code>-o, --output</code></p>
-
-<p>Save schema in Avro format to a given path.</p>
-
-<p><code>--jar</code></p>
-
-<p>Add a jar to the classpath used when loading the Java class.</p>
-
-<p><code>--lib-dir</code></p>
-
-<p>Add a directory to the classpath used when loading the Java class.</p>
-
-<p><code>--minimize</code></p>
-
-<p>Minimize schema file size by eliminating white space.</p>
+<table>
+  <tbody>
+    <tr>
+      <td><code>-o, --output</code></td>
+      <td>Save schema in Avro format to a given path.</td>
+    </tr>
+    <tr>
+      <td><code>--jar</code></td>
+      <td>Add a jar to the classpath used when loading the Java class.</td>
+    </tr>
+    <tr>
+      <td><code>--lib-dir</code></td>
+      <td>Add a directory to the classpath used when loading the Java class.</td>
+    </tr>
+    <tr>
+      <td><code>--minimize</code></td>
+      <td>Minimize schema file size by eliminating white space.</td>
+    </tr>
+  </tbody>
+</table>
 
 <h3 id="examples-1">Examples</h3>
 
-<p>Create a schema for an example User class:
-<code>dataset obj-schema org.kitesdk.cli.example.User</code></p>
+<p>Create a schema for an example User class:</p>
 
-<p>Create a schema for a class in a jar:
-<code>dataset obj-schema com.example.MyRecord --jar my-application.jar</code></p>
+<pre><code>dataset obj-schema org.kitesdk.cli.example.User
+</code></pre>
 
-<p>Save the schema for the example User class to user.avsc:
-<code>dataset obj-schema org.kitesdk.cli.example.User -o user.avsc</code></p>
+<p>Create a schema for a class in a jar:</p>
+
+<pre><code>dataset obj-schema com.example.MyRecord --jar my-application.jar
+</code></pre>
+
+<p>Save the schema for the example User class to user.avsc:</p>
+
+<pre><code>dataset obj-schema org.kitesdk.cli.example.User -o user.avsc
+</code></pre>
 
 <hr />
 
-<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+<p><a href="#top">Back to the Top</a></p>
 
 <hr />
 
 <h2 id="create">create</h2>
+
 <p>After you have generated an Avro schema, you can use <code>create</code> to make an empty dataset.</p>
 
 <h3 id="usage">Usage</h3>
 
-<p><code>dataset [general options] create &lt;dataset name&gt; [command options]</code></p>
+<pre><code>dataset [-v] create &lt;dataset&gt; [command options]
+</code></pre>
 
 <h3 id="options-2">Options</h3>
 
-<p><code>-d, --directory</code></p>
-
-<p>The root directory of the dataset repository. Optional if using Hive for metadata storage.</p>
-
-<p><code>--use-hive</code></p>
-
-<p>The dataset is stored in the filesystem by default. Set this switch to false to store the dataset in the file system.</p>
-
-<p><code>-s, --schema</code></p>
-
-<p>The file containing the Avro schema. This value is <strong>required</strong>.</p>
-
-<p><code>-f, --format</code></p>
-
-<p>By default, the dataset is created in Avro format. Use this switch to set the format to Parquet (<code>-f parquet</code>).</p>
-
-<p><code>-p, --partition-by</code></p>
-
-<p>The file containing a JSON-formatted partition strategy.</p>
+<table>
+  <tbody>
+    <tr>
+      <td><code>-s, --schema</code></td>
+      <td>A file containing the Avro schema. This value is <strong>required</strong>.</td>
+    </tr>
+    <tr>
+      <td><code>-f, --format</code></td>
+      <td>By default, the dataset is created in Avro format.<br />Use this switch to set the format to Parquet <code>-f parquet</code></td>
+    </tr>
+    <tr>
+      <td><code>-p, --partition-by</code></td>
+      <td>A file containing a JSON-formatted partition strategy.</td>
+    </tr>
+    <tr>
+      <td><code>-m, --mapping</code></td>
+      <td>A file containing a JSON-formatted column mapping.</td>
+    </tr>
+  </tbody>
+</table>
 
 <h3 id="examples-2">Examples:</h3>
 
-<p>Create dataset &ldquo;users&rdquo; in Hive:</p>
+<p>Create dataset “users” in Hive:</p>
 
-<p><code>dataset create users --schema user.avsc</code></p>
+<pre><code>dataset create users --schema user.avsc
+</code></pre>
 
-<p>Create dataset &ldquo;users&rdquo; using Parquet:</p>
+<p>Create dataset “users” using Parquet:</p>
 
-<p><code>dataset create users --schema user.avsc --format parquet</code></p>
+<pre><code>dataset create users --schema user.avsc --format parquet
+</code></pre>
 
-<p>Create dataset &ldquo;users&rdquo; partitioned by JSON configuration:</p>
+<p>Create dataset “users” partitioned by JSON configuration:</p>
 
-<p><code>dataset create users --schema user.avsc --partition-by user_part.json</code></p>
+<pre><code>dataset create users --schema user.avsc --partition-by user_part.json
+</code></pre>
 
 <hr />
 
-<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<p><a name="update"></a></p>
+
+<h2 id="update">update</h2>
+
+<p>Update the metadata descriptor for a dataset.</p>
+
+<h3 id="syntax-2">Syntax</h3>
+
+<pre><code>dataset [-v] update-dataset &lt;dataset&gt; [command options]
+</code></pre>
+
+<h3 id="options-3">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>-s, --schema</code></td>
+      <td>The file containing the Avro schema.</td>
+    </tr>
+    <tr>
+      <td><code>--set, --property</code></td>
+      <td>Add a property pair: <code>prop.name=value</code>.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-3">Examples:</h3>
+
+<p>Update schema for dataset “users” in Hive:</p>
+
+<pre><code>dataset update users --schema user.avsc
+</code></pre>
+
+<p>Update HDFS dataset by URI, add property:</p>
+
+<pre><code>dataset update dataset:hdfs:/user/me/datasets/users --set kite.write.cache-size=20
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
 
 <hr />
 
@@ -252,37 +358,41 @@ The Kite Dataset command line interface (CLI) provides utility commands that let
 
 <p>Show the schema for a dataset.</p>
 
-<h3 id="syntax-2">Syntax</h3>
+<h3 id="syntax-3">Syntax</h3>
 
-<p><code>dataset [general options] schema &lt;dataset name&gt; [command options]</code></p>
+<pre><code>dataset [-v] schema &lt;dataset&gt; [command options]
+</code></pre>
 
-<h3 id="options-3">Options</h3>
+<h3 id="options-4">Options</h3>
 
-<p><code>-d, --directory</code></p>
+<table>
+  <tbody>
+    <tr>
+      <td><code>-o, --output</code></td>
+      <td>Save schema in Avro format to a given path.</td>
+    </tr>
+    <tr>
+      <td><code>--minimize</code></td>
+      <td>Minimize schema file size by eliminating white space.</td>
+    </tr>
+  </tbody>
+</table>
 
-<p>The root directory of the dataset repository. Optional if you are using Hive for metadata storage.</p>
+<h3 id="examples-4">Examples:</h3>
 
-<p><code>--use-hive</code></p>
+<p>Print the schema for dataset “users” to standard out:</p>
 
-<p>By default, dataset metadata is stored in the file system. Use this switch to store dataset metadata in Hive.</p>
+<pre><code>dataset schema users
+</code></pre>
 
-<p><code>--minimize</code></p>
+<p>Save the schema for dataset “users” to user.avsc:</p>
 
-<p>Minimize schema file size by eliminating white space.</p>
-
-<p><code>-o, --output</code></p>
-
-<p>Save schema in Avro format to a given path.</p>
-
-<h3 id="examples-3">Examples:</h3>
-
-<p>Print the schema for dataset &ldquo;users&rdquo; to standard out: <code>dataset schema users</code></p>
-
-<p>Save the schema for dataset &ldquo;users&rdquo; to user.avsc: <code>dataset schema users -o user.avsc</code></p>
+<pre><code>dataset schema users -o user.avsc
+</code></pre>
 
 <hr />
 
-<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+<p><a href="#top">Back to the Top</a></p>
 
 <hr />
 
@@ -292,46 +402,48 @@ The Kite Dataset command line interface (CLI) provides utility commands that let
 
 <p>Copy CSV records into a dataset.</p>
 
-<h3 id="syntax-3">Syntax</h3>
-<p><code>dataset [general options] csv-import &lt;csv path&gt; &lt;dataset name&gt; [command options]</code></p>
+<h3 id="syntax-4">Syntax</h3>
 
-<h3 id="options-4">Options</h3>
+<pre><code>dataset [-v] csv-import &lt;csv path&gt; &lt;dataset&gt; [command options]
+</code></pre>
 
-<p><code>-d, --directory</code></p>
+<h3 id="options-5">Options</h3>
 
-<p>The root directory of the dataset repository. Optional if using Hive for metadata storage.</p>
+<table>
+  <tbody>
+    <tr>
+      <td><code>--escape</code></td>
+      <td>Escape character. Default is backslash (\).</td>
+    </tr>
+    <tr>
+      <td><code>--delimiter</code></td>
+      <td>Delimiter character. Default is comma (,).</td>
+    </tr>
+    <tr>
+      <td><code>--quote</code></td>
+      <td>Quote character. Default is double quote (“).</td>
+    </tr>
+    <tr>
+      <td><code>--skip-lines</code></td>
+      <td>Lines to skip before CSV start (default: 0)</td>
+    </tr>
+    <tr>
+      <td><code>--no-header</code></td>
+      <td>Use this option when the CSV data file does not have header information in the first line.<br />Fields are given the default names <em>field_0</em>, <em>field_1,…field_n</em>.</td>
+    </tr>
+  </tbody>
+</table>
 
-<p><code>--use-hive</code></p>
+<h3 id="examples-5">Examples</h3>
 
-<p>By default, dataset metadata is stored in Hive. Use this switch to store the dataset metadata in the file system.</p>
+<p>Copy the records from <code>sample.csv</code> to a Hive dataset named “sample”:</p>
 
-<p><code>--escape</code></p>
-
-<p>Escape character. Default is backslash (\).</p>
-
-<p><code>--delimiter</code></p>
-
-<p>Delimiter character. Default is comma (,).</p>
-
-<p><code>--quote</code></p>
-
-<p>Quote character. Default is double quote (&ldquo;).</p>
-
-<p><code>--skip-lines</code></p>
-
-<p>Lines to skip before CSV start (default: 0)</p>
-
-<p><code>--no-header</code></p>
-
-<p>Use this option when the CSV data file does not have header information in the first line. Fields are given the default names <em>field_0</em>, <em>field_1,&hellip;field_n</em>.</p>
-
-<h3 id="examples-4">Examples</h3>
-
-<p>Copy the records from <code>sample.csv</code> to a dataset named &ldquo;sample&rdquo;: <code>dataset csv-import csv-import path/to/sample.csv sample</code></p>
+<pre><code>dataset csv-import csv-import path/to/sample.csv sample
+</code></pre>
 
 <hr />
 
-<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+<p><a href="#top">Back to the Top</a></p>
 
 <hr />
 
@@ -341,32 +453,81 @@ The Kite Dataset command line interface (CLI) provides utility commands that let
 
 <p>Print the first <em>n</em> records in a dataset.</p>
 
-<h3 id="syntax-4">Syntax</h3>
-<p><code>dataset [general options] show &lt;dataset name&gt; [command options]</code></p>
+<h3 id="syntax-5">Syntax</h3>
 
-<h3 id="options-5">Options</h3>
+<pre><code>dataset [-v] show &lt;dataset&gt; [command options]
+</code></pre>
 
-<p><code>-d, --directory</code></p>
+<h3 id="options-6">Options</h3>
 
-<p>The root directory of the dataset repository. Optional if using Hive for metadata storage.</p>
+<table>
+  <tbody>
+    <tr>
+      <td><code>-n, --num-records</code></td>
+      <td>The number of records to print. The default number is 10.</td>
+    </tr>
+  </tbody>
+</table>
 
-<p><code>--use-hive</code></p>
+<h3 id="examples-6">Examples</h3>
 
-<p>By default, dataset metadata is stored in Hive. Set this switch to false to use the file system (<code>--use-hive false</code>).</p>
+<p>Show the first 10 records in dataset “users”:</p>
 
-<p><code>-n, --num-records</code></p>
+<pre><code>dataset show users
+</code></pre>
 
-<p>The number of records to print. The default number is 10.</p>
+<p>Show the first 50 records in dataset “users”:</p>
 
-<h3 id="examples-5">Examples</h3>
-
-<p>Show the first 10 records in dataset &ldquo;users&rdquo;: <code>dataset show users</code></p>
-
-<p>Show the first 50 records in dataset &ldquo;users&rdquo;: <code>dataset show users -n 50</code></p>
+<pre><code>dataset show users -n 50
+</code></pre>
 
 <hr />
 
-<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<p><a name="copy"></a></p>
+
+<h2 id="copy">copy</h2>
+
+<p>Copy records from one dataset to another.</p>
+
+<h3 id="syntax-6">Syntax</h3>
+
+<pre><code>dataset [-v] copy &lt;source dataset&gt; &lt;destination dataset&gt; [command options]
+</code></pre>
+
+<h3 id="options-7">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>--no-compaction</code></td>
+      <td>Copy to output directly, without compacting the data.</td>
+    </tr>
+    <tr>
+      <td><code>--num-writers</code></td>
+      <td>The number of writer processes to use.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-7">Examples</h3>
+
+<p>Copy the contents of <code>movies_avro</code> to <code>movies_parquet</code>:</p>
+
+<pre><code>dataset copy movies_avro movies_parquet
+</code></pre>
+
+<p>Copy the movies dataset into HBase in a map-only job:</p>
+
+<pre><code>dataset copy movies dataset:hbase:zk-host/movies --no-compaction
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
 
 <hr />
 
@@ -376,27 +537,21 @@ The Kite Dataset command line interface (CLI) provides utility commands that let
 
 <p>Delete one or more datasets and related metadata.</p>
 
-<h3 id="syntax-5">Syntax</h3>
+<h3 id="syntax-7">Syntax</h3>
 
-<p><code>dataset [general options] delete &lt;dataset names&gt; [command options]</code></p>
+<pre><code>dataset [-v] delete &lt;datasets&gt; [command options]
+</code></pre>
 
-<h3 id="options-6">Options</h3>
+<h3 id="examples-8">Examples</h3>
 
-<p><code>-d, --directory</code></p>
+<p>Delete all data and metadata for the dataset “users”:</p>
 
-<p>The root directory of the dataset repository. Optional if using Hive for metadata storage.</p>
-
-<p><code>--use-hive</code></p>
-
-<p>By default, metadata is stored in Hive. Set this value to false to store the metadata in the file system (<code>--use-hive false</code>).</p>
-
-<h3 id="examples-6">Examples</h3>
-
-<p>Delete all data and metadata for the dataset &ldquo;users&rdquo;: <code>dataset delete users</code></p>
+<pre><code>dataset delete users
+</code></pre>
 
 <hr />
 
-<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+<p><a href="#top">Back to the Top</a></p>
 
 <hr />
 
@@ -406,33 +561,119 @@ The Kite Dataset command line interface (CLI) provides utility commands that let
 
 <p>Builds a partition strategy for a schema.</p>
 
-<h3 id="syntax-6">Syntax</h3>
+<h3 id="syntax-8">Syntax</h3>
 
-<p>dataset [general options] partition-config <field:type pairs=""> [command options]</field:type></p>
+<pre><code>dataset [-v] partition-config &lt;field:type pairs&gt; [command options]
+</code></pre>
 
-<h3 id="options-7">Options:</h3>
+<h3 id="options-8">Options:</h3>
 
-<p><code>-s, --schema</code>
-The file containing the Avro schema. <strong>This value is required</strong>.</p>
+<table>
+  <tbody>
+    <tr>
+      <td><code>-s, --schema</code></td>
+      <td>The file containing the Avro schema. <strong>This value is required</strong></td>
+    </tr>
+    <tr>
+      <td><code>-o, --output</code></td>
+      <td>Save partition JSON file to path</td>
+    </tr>
+    <tr>
+      <td><code>--minimize</code></td>
+      <td>Minimize output size by eliminating white space</td>
+    </tr>
+  </tbody>
+</table>
 
-<p><code>-o, --output</code>
-Save partition JSON file to path</p>
+<h3 id="examples-9">Examples</h3>
 
-<p><code>--minimize</code>
-Minimize output size by eliminating white space</p>
+<p>Partition by email address, balanced across 16 hash partitions and save to a file.</p>
 
-<h3 id="examples-7">Examples</h3>
+<pre><code>dataset partition-config email:hash[16] email:copy -s user.avsc -o part.json
+</code></pre>
 
-<p>Partition by email address, balanced across 16 hash partitions and save as a JSON file.</p>
+<p>Partition by <code>created_at</code> time’s year, month, and day:</p>
 
-<p><code>dataset partition-config email:hash[16] email:copy -s user.avsc -o part.json</code></p>
-
-<p>Partition by created_at time&rsquo;s year, month, and day
-<code>dataset partition-config created_at:year created_at:month created_at:day -s event.avsc</code></p>
+<pre><code>dataset partition-config created_at:year created_at:month created_at:day -s event.avsc
+</code></pre>
 
 <hr />
 
-<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partitionConfig">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<p><a name="mapping-config"></a></p>
+
+<h2 id="mapping-config">mapping-config</h2>
+
+<p>Builds a column mapping for a schema, required for HBase. The resulting mapping definition is a valid <a href="../Column-Mapping">JSON mapping file</a>.</p>
+
+<p>Mappings are specified by <code>field:type</code> pairs, where <code>field</code> is a source field from the given schema and <code>type</code> can be:</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>key</code></td>
+      <td>Uses a key mapping</td>
+    </tr>
+    <tr>
+      <td><code>version</code></td>
+      <td>Uses a version mapping (for optimistic concurrency)</td>
+    </tr>
+    <tr>
+      <td>any string</td>
+      <td>The given string is used as the family in a column mapping</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>If the last option is used, the mapping type will determined by the source field type. Numbers will use <code>counter</code>, hash maps and records will use <code>keyAsColumn</code>, and all others will use <code>column</code>.</p>
+
+<h3 id="syntax-9">Syntax</h3>
+
+<pre><code>dataset [-v] create-column-mapping &lt;field:type pairs&gt; [command options]
+</code></pre>
+
+<h3 id="options-9">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>-s, --schema</code></td>
+      <td>The file containing the Avro schema.</td>
+    </tr>
+    <tr>
+      <td><code>-p, --partition-by</code></td>
+      <td>The file containing the JSON partition strategy.</td>
+    </tr>
+    <tr>
+      <td><code>--minimize</code></td>
+      <td>Minimize output size by eliminating white space.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-10">Examples</h3>
+
+<p>Store email in the key, other fields in column family <code>u</code>:</p>
+
+<pre><code>dataset mapping-config email:key username:u id:u --schema user.avsc -o user-cols.json
+</code></pre>
+
+<p>Store preferences hash-map in column family <code>prefs</code>:</p>
+
+<pre><code>dataset mapping-config preferences:prefs --schema user.avsc
+</code></pre>
+
+<p>Use the <code>version</code> field as an OCC version:</p>
+
+<pre><code>dataset mapping-config version:version --schema user.avsc
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
 
 <hr />
 
@@ -442,17 +683,21 @@ Minimize output size by eliminating white space</p>
 
 <p>Retrieves details on the functions of one or more dataset commands.</p>
 
-<h3 id="syntax-7">Syntax</h3>
+<h3 id="syntax-10">Syntax</h3>
 
-<p><code>dataset [general options] help &lt;commands&gt; [command options]</code></p>
+<pre><code>dataset [-v] help &lt;commands&gt; [command options]
+</code></pre>
 
-<h3 id="examples-8">Examples</h3>
+<h3 id="examples-11">Examples</h3>
 
-<p>Retrieve details for the create, show, and delete commands. <code>dataset help create show delete</code></p>
+<p>Retrieve details for the create, show, and delete commands.</p>
+
+<pre><code>dataset help create show delete
+</code></pre>
 
 <hr />
 
-<p><a href="#top">Top</a>&nbsp;&nbsp;<a href="#csvSchema">csv-schema</a>&nbsp;&nbsp;<a href="#objSchema">obj-schema</a>&nbsp;&nbsp;<a href="#create">create</a>&nbsp;&nbsp;<a href="#schema">schema</a>&nbsp;&nbsp;<a href="#csvImport">csv-import</a>&nbsp;&nbsp;<a href="#show">show</a>&nbsp;&nbsp;<a href="#delete">delete</a>&nbsp;&nbsp;<a href="#partition-config">partition-config</a>&nbsp;&nbsp;<a href="#help">help</a></p>
+<p><a href="#top">Back to the Top</a></p>
 
 <hr />
 

@@ -4,10 +4,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Inferring a Schema from an Avro Data File</title>
+    <title>Schema URL Warning</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Documentation for the Kite open source project on GitHub.">
-    <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">
+    <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Schema-URL-Warning/">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/docs/current/guide/css/main.css">
@@ -80,35 +80,41 @@
       <div class="post">
 
   <header class="post-header">
-    <h1>Inferring a Schema from an Avro Data File</h1>
+    <h1>Schema URL Warning</h1>
   </header>
 
   <article class="post-content">
-  <p>You can use the <code>DatasetDescriptor.Builder.schemaFromAvroDataFile</code> method to use the schema of an existing data file in Avro format. The source can be a local file, an InputStream, or a URI.</p>
+  <p>This page explains the schema URL warning:</p>
 
-<p>An Avro data file is not meant to be human readable (though my superhuman co-workers tell me that they can read them). Imagine that you have a file named ‘movies.avro’. If you pass it to the method, as shown:</p>
-
-<pre><code class="language-java">DatasetDescriptor movieDesc = new DatasetDescriptor.Builder()
-    .schemaFromAvroDataFile("movies.avro")
-    .build()
+<pre><code class="language-bash">&gt; The Dataset is using a schema literal rather than a URL which will be attached to every message.
 </code></pre>
 
-<p>The method returns a dataset descriptor, configured to use the same Avro schema as the sample file, ready to be used for creating or updating a dataset.</p>
+<p>This warning means that the dataset is configured using an Avro schema string, a schema object, or by reflection. Configuring with an HDFS URL where the schema can be found, instead of the other options, allows certain components to pass the schema URL rather than the schema’s string literal. This cuts down on the size of headers that must be sent with each message.</p>
 
-<hr />
-<pre><code class="language-json">{
-  "type":"record",
-  "name":"Movie",
-  "namespace":"org.kitesdk.examples.data",
-  "fields":[
-    {"name":"id","type":"int"},
-    {"name":"title","type":"string"},
-    {"name":"releaseDate","type":"string"},
-    {"name":"imdbUrl","type":"string"}
-  ]
-}
+<h2 id="fixing-the-problem">Fixing the problem</h2>
+
+<p>The following Java code demonstrates how to change the descriptor to use a schema URL instead of a schema literal:</p>
+
+<pre><code class="language-java">// a path in HDFS where schemas should be stored
+Path schemaFolder = new Path("hdfs:/data/schemas");
+FileSystem fs = FileSystem.get(schemaFolder.toUri(), new Configuration());
+
+// open the repository (use the correct repository URI)
+DatasetRepository repo = DatasetRepositories.open("repo:hive");
+Dataset dataset = repo.load("datasetName"); // load your Dataset
+
+// write the schema to the schema folder
+Path schemaPath = new Path(schemaFolder, dataset.getName() + ".avsc");
+FSDataOutputStream schemaFile = fs.create(schemaPath);
+schemaFile.write(dataset.getDescriptor().getSchema().toString(true).getBytes(Charset.forName("UTF-8")));
+schemaFile.close();
+
+// update the Dataset to use the schema URI
+DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder(dataset.getDescriptor())
+    .schemaUri(schemaPath.toUri())
+    .build();
+repo.update(dataset.getName(), newDescriptor);
 </code></pre>
-
 
   </article>
 
