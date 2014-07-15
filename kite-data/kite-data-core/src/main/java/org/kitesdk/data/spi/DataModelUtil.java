@@ -18,10 +18,13 @@ package org.kitesdk.data.spi;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.reflect.ReflectData;
+import org.apache.avro.reflect.ReflectDatumReader;
 import org.apache.avro.specific.SpecificData;
+import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificRecord;
 import org.kitesdk.data.IncompatibleSchemaException;
 
@@ -62,7 +65,14 @@ public class DataModelUtil {
   @SuppressWarnings("unchecked")
   public static <E> DatumReader<E> getDatumReaderForType(Class<E> type, Schema writerSchema) {
     Schema readerSchema = getReaderSchema(type, writerSchema);
-    return getDataModelForType(type).createDatumReader(writerSchema, readerSchema);
+    GenericData dataModel = getDataModelForType(type);
+    if (dataModel instanceof ReflectData) {
+      return new ReflectDatumReader<E>(writerSchema, readerSchema, (ReflectData)dataModel);
+    } else if (dataModel instanceof SpecificData) {
+      return new SpecificDatumReader<E>(writerSchema, readerSchema, (SpecificData)dataModel);
+    } else {
+      return new GenericDatumReader<E>(writerSchema, readerSchema, dataModel);
+    }
   }
 
   /**
