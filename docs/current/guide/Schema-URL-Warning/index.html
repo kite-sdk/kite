@@ -86,8 +86,13 @@
   <article class="post-content">
   <p>This page explains the schema URL warning:</p>
 
-<pre><code class="language-bash">&gt; The Dataset is using a schema literal rather than a URL which will be attached to every message.
-</code></pre>
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>&gt; The Dataset is using a schema literal rather than a URL which will be attached to every message.
+</pre></td>
+</tr></table>
+</div>
 
 <p>This warning means that the dataset is configured using an Avro schema string, a schema object, or by reflection. Configuring with an HDFS URL where the schema can be found, instead of the other options, allows certain components to pass the schema URL rather than the schema’s string literal. This cuts down on the size of headers that must be sent with each message.</p>
 
@@ -95,26 +100,49 @@
 
 <p>The following Java code demonstrates how to change the descriptor to use a schema URL instead of a schema literal:</p>
 
-<pre><code class="language-java">// a path in HDFS where schemas should be stored
-Path schemaFolder = new Path("hdfs:/data/schemas");
-FileSystem fs = FileSystem.get(schemaFolder.toUri(), new Configuration());
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+<a href="#n12" name="n12">12</a>
+<a href="#n13" name="n13">13</a>
+<a href="#n14" name="n14">14</a>
+<a href="#n15" name="n15">15</a>
+<a href="#n16" name="n16">16</a>
+<a href="#n17" name="n17">17</a>
+<a href="#n18" name="n18">18</a>
+<a href="#n19" name="n19">19</a>
+</pre></td>
+  <td class="code"><pre><span style="color:#777">// a path in HDFS where schemas should be stored</span>
+Path schemaFolder = <span style="color:#080;font-weight:bold">new</span> Path(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">hdfs:/data/schemas</span><span style="color:#710">&quot;</span></span>);
+FileSystem fs = FileSystem.get(schemaFolder.toUri(), <span style="color:#080;font-weight:bold">new</span> <span style="color:#0a8;font-weight:bold">Configuration</span>());
 
-// open the repository (use the correct repository URI)
-DatasetRepository repo = DatasetRepositories.open("repo:hive");
-Dataset dataset = repo.load("datasetName"); // load your Dataset
+<span style="color:#777">// open the repository (use the correct repository URI)</span>
+DatasetRepository repo = DatasetRepositories.open(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">repo:hive</span><span style="color:#710">&quot;</span></span>);
+Dataset dataset = repo.load(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">datasetName</span><span style="color:#710">&quot;</span></span>); <span style="color:#777">// load your Dataset</span>
 
-// write the schema to the schema folder
-Path schemaPath = new Path(schemaFolder, dataset.getName() + ".avsc");
+<span style="color:#777">// write the schema to the schema folder</span>
+Path schemaPath = <span style="color:#080;font-weight:bold">new</span> Path(schemaFolder, dataset.getName() + <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">.avsc</span><span style="color:#710">&quot;</span></span>);
 FSDataOutputStream schemaFile = fs.create(schemaPath);
-schemaFile.write(dataset.getDescriptor().getSchema().toString(true).getBytes(Charset.forName("UTF-8")));
+schemaFile.write(dataset.getDescriptor().getSchema().toString(<span style="color:#069">true</span>).getBytes(<span style="color:#0a8;font-weight:bold">Charset</span>.forName(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">UTF-8</span><span style="color:#710">&quot;</span></span>)));
 schemaFile.close();
 
-// update the Dataset to use the schema URI
-DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder(dataset.getDescriptor())
+<span style="color:#777">// update the Dataset to use the schema URI</span>
+DatasetDescriptor newDescriptor = <span style="color:#080;font-weight:bold">new</span> DatasetDescriptor.Builder(dataset.getDescriptor())
     .schemaUri(schemaPath.toUri())
     .build();
 repo.update(dataset.getName(), newDescriptor);
-</code></pre>
+</pre></td>
+</tr></table>
+</div>
 
   </article>
 

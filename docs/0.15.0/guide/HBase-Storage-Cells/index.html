@@ -90,12 +90,21 @@
 
 <p>Data cells are organized first by column family, then by column qualifier. The cells form columns and groups of columns in a table structure. For example, a user’s data can be stored using the e-mail address for a key, then as a "name" column family with "first" and "last" qualifiers. We end up with a view that looks like this:</p>
 
-<pre><code class="language-bash">
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+</pre></td>
+  <td class="code"><pre>
 |  key           | name family      |
 | (e-mail)       | first|   last    |
 | -------------- | -----| --------- |
 | buzz@pixar.com | Buzz | Lightyear |
-</code></pre>
+</pre></td>
+</tr></table>
+</div>
 
 <h2 id="hbase-partitioning">HBase partitioning</h2>
 
