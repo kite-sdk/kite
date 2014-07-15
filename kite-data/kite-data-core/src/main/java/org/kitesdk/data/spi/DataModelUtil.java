@@ -117,4 +117,33 @@ public class DataModelUtil {
 
     return readerSchema;
   }
+
+  /**
+   * If E implements GenericRecord, but does not implement SpecificRecord, then
+   * create a new instance of E using reflection so that GenericDataumReader
+   * will use the expected type.
+   *
+   * Implementations of GenericRecord that require a {@link Schema} parameter
+   * in the constructor should implement {@link SpecificData.SchemaConstructable}.
+   * Otherwise, your implementation must have a no-args constructor.
+   *
+   * @param <E> The entity type
+   * @param type The Java class of the entity type
+   * @param schema The reader schema
+   * @return An instance of E, or null if the data model is specific or reflect
+   */
+  @SuppressWarnings("unchecked")
+  public static <E> E createRecord(Class<E> type, Schema schema) {
+    // Don't instantiate SpecificRecords or interfaces.
+    if (!SpecificRecord.class.isAssignableFrom(type) &&
+        GenericRecord.class.isAssignableFrom(type) &&
+        !type.isInterface()) {
+      if (GenericData.Record.class.equals(type)) {
+        return (E) GenericData.get().newRecord(null, schema);
+      }
+      return (E)ReflectData.newInstance(type, schema);
+    }
+
+    return null;
+  }
 }

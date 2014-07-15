@@ -18,7 +18,6 @@ package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.io.Files;
 import java.io.IOException;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -32,12 +31,12 @@ import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.TestDatasetReaders;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities.RecordValidator;
 
-public class TestWriteReflectReadGeneric extends TestDatasetReaders<GenericRecord> {
+public class TestReadCustomGeneric extends TestDatasetReaders<TestGenericRecord> {
 
   private static final int totalRecords = 100;
   protected static FileSystem fs = null;
   protected static Path testDirectory = null;
-  protected static Dataset<GenericRecord> readerDataset;
+  protected static Dataset<TestGenericRecord> readerDataset;
 
   @BeforeClass
   public static void setup() throws IOException {
@@ -54,7 +53,7 @@ public class TestWriteReflectReadGeneric extends TestDatasetReaders<GenericRecor
     }
     writer.close();
 
-    readerDataset = repo.load("test", GenericRecord.class);
+    readerDataset = repo.load("test", TestGenericRecord.class);
   }
 
   @AfterClass
@@ -63,7 +62,7 @@ public class TestWriteReflectReadGeneric extends TestDatasetReaders<GenericRecor
   }
 
   @Override
-  public DatasetReader<GenericRecord> newReader() throws IOException {
+  public DatasetReader<TestGenericRecord> newReader() throws IOException {
     return readerDataset.newReader();
   }
 
@@ -73,11 +72,11 @@ public class TestWriteReflectReadGeneric extends TestDatasetReaders<GenericRecor
   }
 
   @Override
-  public RecordValidator<GenericRecord> getValidator() {
-    return new RecordValidator<GenericRecord>() {
+  public RecordValidator<TestGenericRecord> getValidator() {
+    return new RecordValidator<TestGenericRecord>() {
 
       @Override
-      public void validate(GenericRecord record, int recordNum) {
+      public void validate(TestGenericRecord record, int recordNum) {
         Assert.assertEquals(String.valueOf(recordNum), record.get("text").toString());
         Assert.assertEquals(recordNum, record.get("value"));
       }
