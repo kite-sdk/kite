@@ -15,82 +15,32 @@
  */
 package org.kitesdk.data.mapreduce;
 
-import com.google.common.io.Files;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.util.Utf8;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Format;
-import org.kitesdk.data.Formats;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 
 @RunWith(Parameterized.class)
-public class TestMapReduce {
-
-  @Parameterized.Parameters
-  public static Collection<Object[]> data() {
-    Object[][] data = new Object[][] {
-      { Formats.AVRO },
-      { Formats.PARQUET },
-      { Formats.CSV }
-    };
-    return Arrays.asList(data);
-  }
-
-  private Format format;
-
-  public static final Schema STRING_SCHEMA =
-      new Schema.Parser().parse("{\n" +
-          "  \"name\": \"mystring\",\n" +
-          "  \"type\": \"record\",\n" +
-          "  \"fields\": [\n" +
-          "    { \"name\": \"text\", \"type\": \"string\" }\n" +
-          "  ]\n" +
-          "}\n");
-  public static final Schema STATS_SCHEMA =
-      new Schema.Parser().parse("{\"name\":\"stats\",\"type\":\"record\","
-          + "\"fields\":[{\"name\":\"count\",\"type\":\"int\"},"
-          + "{\"name\":\"name\",\"type\":\"string\"}]}");
-
-  private DatasetRepository repo;
+public class TestMapReduce extends FileSystemTestBase {
 
   public TestMapReduce(Format format) {
-    this.format = format;
+    super(format);
   }
-
-  @Before
-  public void setUp() throws Exception {
-    Configuration conf = new Configuration();
-    FileSystem fileSystem = FileSystem.get(conf);
-    Path testDirectory = fileSystem.makeQualified(
-        new Path(Files.createTempDir().getAbsolutePath()));
-    this.repo = new FileSystemDatasetRepository.Builder().configuration(conf)
-        .rootDirectory(testDirectory).build();
-  }
-
 
   private static class LineCountMapper
       extends Mapper<GenericData.Record, Void, Text, IntWritable> {
@@ -203,7 +153,4 @@ public class TestMapReduce {
     Assert.assertTrue(job.waitForCompletion(true));
   }
 
-  private GenericData.Record newStringRecord(String text) {
-    return new GenericRecordBuilder(STRING_SCHEMA).set("text", text).build();
-  }
 }

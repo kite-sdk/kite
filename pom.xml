@@ -171,6 +171,7 @@
     <vers.opencsv>2.3</vers.opencsv>
     <vers.jodatime>2.3</vers.jodatime>
     <vers.jcommander>1.35</vers.jcommander>
+    <vers.spark>1.0.0</vers.spark>
 
     <!-- Plugin versions -->
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
@@ -794,6 +795,13 @@
         <groupId>org.apache.oozie</groupId>
         <artifactId>oozie-client</artifactId>
         <version>${vers.oozie}</version>
+      </dependency>
+
+      <!-- Spark -->
+      <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-core_2.10</artifactId>
+        <version>${vers.spark}</version>
       </dependency>
 
       <!-- Misc -->

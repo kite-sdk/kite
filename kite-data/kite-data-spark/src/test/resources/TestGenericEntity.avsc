@@ -1,0 +1,61 @@
+{
+  "type": "record",
+  "name": "TestGenericEntity",
+  "namespace": "org.kitesdk.data.hbase.avro.entities",
+  "fields": [
+
+    { "name": "part1", "type": "string", "mapping":
+      { "type": "key", "value": "0" }
+    },
+    { "name": "part2", "type": "string", "mapping":
+      { "type": "key", "value": "1" }
+    },
+
+    { "name": "field1", "type": "string", "mapping":
+      { "type": "column", "value": "meta:field1" }
+    },
+
+    { "name": "field2", "type": "string", "mapping":
+      { "type": "column", "value": "meta:field2" }
+    },
+
+    { "name": "enum", "type": {
+      "type": "enum",
+      "name": "TestEnum",
+      "symbols": [
+        "ENUM1", "ENUM2", "ENUM3"
+      ] },
+      "mapping": { "type": "column", "value": "meta:enum" } },
+
+    { "name": "field3", "type": { "type": "map", "values": "string" }, "mapping":
+      { "type": "keyAsColumn", "value": "string:" }
+    },
+
+    { "name": "field4", "type": {
+      "type": "record",
+      "name": "EmbeddedRecord",
+      "fields": [
+        { "name": "embeddedField1", "type": "string" },
+        { "name": "embeddedField2", "type": "long" }
+      ] },
+      "mapping": { "type": "keyAsColumn", "value": "embedded:" }
+    },
+
+    {
+      "name": "field5",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "ArrayRecord",
+          "fields": [
+            { "name": "subfield1", "type": "string" },
+            { "name": "subfield2", "type": "long" },
+            { "name": "subfield3", "type": "string" }
+          ]
+        }
+      },
+      "mapping": { "type": "column", "value": "meta:field5" }
+    }
+  ]
+}
