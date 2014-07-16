@@ -21,71 +21,23 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.hbase.HBaseDatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepositoryTest;
-import org.kitesdk.data.hbase.avro.AvroUtils;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class TestMapReduceHBase {
-
-  private static final String testGenericEntity;
-
-  static {
-    try {
-      testGenericEntity = AvroUtils.inputStreamToString(TestMapReduceHBase.class
-          .getResourceAsStream("/TestGenericEntity.avsc"));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private DatasetRepository repo;
-
-  private static final String tableName = "testtable";
-  private static final String managedTableName = "managed_schemas";
-
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    HBaseTestUtils.getMiniCluster();
-    // managed table should be created by HBaseDatasetRepository
-    HBaseTestUtils.util.deleteTable(Bytes.toBytes(managedTableName));
-  }
-
-  @AfterClass
-  public static void afterClass() throws Exception {
-    HBaseTestUtils.util.deleteTable(Bytes.toBytes(tableName));
-  }
-
-  @Before
-  public void setUp() throws Exception {
-    this.repo = new HBaseDatasetRepository.Builder()
-        .configuration(HBaseTestUtils.getConf()).build();
-  }
-
-  @After
-  public void after() throws Exception {
-    HBaseTestUtils.util.truncateTable(Bytes.toBytes(tableName));
-    HBaseTestUtils.util.truncateTable(Bytes.toBytes(managedTableName));
-  }
+public class TestMapReduceHBase extends HBaseTestBase {
 
   private static class AvroKeyWrapperMapper extends Mapper<GenericData.Record, Void,
       AvroKey<GenericData.Record>, NullWritable> {

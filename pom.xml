@@ -171,6 +171,8 @@
     <vers.opencsv>2.3</vers.opencsv>
     <vers.jodatime>2.3</vers.jodatime>
     <vers.jcommander>1.35</vers.jcommander>
+    <vers.spark>0.9.0-cdh4.6.0</vers.spark>
+    <vers.spark-cdh5>0.9.0-cdh${cdh5.version}</vers.spark-cdh5>
 
     <!-- Plugin versions -->
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
@@ -796,6 +798,14 @@
         <version>${vers.oozie}</version>
       </dependency>
 
+      <!-- Spark -->
+      <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-core_2.10</artifactId>
+        <version>${vers.spark}</version>
+        <scope>test</scope>
+      </dependency>
+
       <!-- Misc -->
       <dependency>
         <groupId>com.google.guava</groupId>
@@ -1215,6 +1225,7 @@
         <vers.oozie>4.0.0-cdh${cdh5.version}</vers.oozie>
         <vers.solr>${vers.solr-cdh5}</vers.solr>
         <solr.expected.version>${vers.solr-cdh5}</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->
+        <vers.spark>${vers.spark-cdh5}</vers.spark>
       </properties>
     </profile>
 
