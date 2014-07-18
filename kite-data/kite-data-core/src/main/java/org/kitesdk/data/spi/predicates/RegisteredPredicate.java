@@ -27,7 +27,7 @@ import org.apache.avro.Schema;
 public abstract class RegisteredPredicate<T> implements Predicate<T> {
 
   private static final Pattern NAME = Pattern.compile("\\w+");
-  private static final Pattern FUNCTION = Pattern.compile("(\\w+)\\(([^\\)*])\\)");
+  private static final Pattern FUNCTION = Pattern.compile("(\\w+)\\(([^\\)]*)\\)");
 
   public static interface Factory {
     public <T> RegisteredPredicate<T> fromString(String predicate, Schema schema);
