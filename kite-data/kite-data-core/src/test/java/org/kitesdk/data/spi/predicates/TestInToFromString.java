@@ -45,6 +45,14 @@ public class TestInToFromString {
   }
 
   @Test
+  public void testSingleStringValueUrlEncoded() {
+    Assert.assertEquals("In<Utf8>#toString(STRING)",
+        "a%2Cb", Predicates.in(new Utf8("a,b")).toString(STRING));
+    Assert.assertEquals("In.fromString(String, STRING)",
+        Predicates.in("a,b"), In.<String>fromString("a%2Cb", STRING));
+  }
+
+  @Test
   public void testMultipleStringValues() {
     Assert.assertEquals("In<Utf8>#toString(STRING)",
         "a,b,c",
