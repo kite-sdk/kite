@@ -76,7 +76,7 @@ public class Registration {
         return Pair.of(pattern, match);
       }
     }
-    throw new IllegalArgumentException("Unknown repository URI: " + uri);
+    throw new IllegalArgumentException("Unknown dataset URI: " + uri);
   }
 
   public static Pair<DatasetRepository, Map<String, String>>

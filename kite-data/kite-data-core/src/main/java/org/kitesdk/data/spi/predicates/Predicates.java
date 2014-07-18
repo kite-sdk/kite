@@ -52,7 +52,8 @@ public abstract class Predicates {
 
   public static <T> String toString(Predicate<T> predicate, Schema schema) {
     if (predicate instanceof RegisteredPredicate) {
-      return ((RegisteredPredicate) predicate).toString(schema);
+      return RegisteredPredicate.toString(
+          (RegisteredPredicate) predicate, schema);
     } else if (predicate instanceof Range) {
       return ((Range) predicate).toString(schema);
     } else if (predicate instanceof In) {

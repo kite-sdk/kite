@@ -69,14 +69,19 @@ public class URIBuilder {
     options.put(DATASET_NAME_OPTION, datasetName);
   }
 
+  public URIBuilder(String uri) {
+    this(URI.create(uri));
+  }
+
   public URIBuilder(URI uri) {
+    Preconditions.checkNotNull(uri, "URI cannot be null");
     boolean isViewUri = VIEW_SCHEME.equals(uri.getScheme());
     Preconditions.checkArgument(isViewUri ||
         DATASET_SCHEME.equals(uri.getScheme()),
         "Not a dataset or view URI: " + uri);
 
-    Pair<URIPattern, Map<String, String>> pair =
-        Registration.lookupDatasetPattern(uri);
+    Pair<URIPattern, Map<String, String>> pair = Registration
+        .lookupDatasetPattern(URI.create(uri.getRawSchemeSpecificPart()));
     this.pattern = pair.first();
     this.isView = isViewUri;
     options.putAll(pair.second());
