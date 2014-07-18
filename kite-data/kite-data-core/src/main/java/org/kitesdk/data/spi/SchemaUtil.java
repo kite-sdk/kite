@@ -22,6 +22,9 @@ import com.google.common.collect.Lists;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -318,9 +321,14 @@ public class SchemaUtil {
       case LONG:
       case FLOAT:
       case DOUBLE:
+        return value.toString();
       case STRING:
         // TODO: could be null
-        return value.toString();
+        try {
+          return URLEncoder.encode(value.toString(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+          throw new DatasetIOException("Failed to encode value: " + value, e);
+        }
       default:
         // otherwise, encode as Avro binary and then base64
         DatumWriter writer = ReflectData.get().createDatumWriter(schema);
@@ -350,7 +358,11 @@ public class SchemaUtil {
       case DOUBLE:
         return (T) Double.valueOf(value);
       case STRING:
-        return (T) value;
+        try {
+          return (T) URLDecoder.decode(value, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+          throw new DatasetIOException("Failed to decode value: " + value, e);
+        }
       default:
         //  otherwise, the value is Avro binary encoded with base64
         byte[] binary = Base64.decodeBase64(value);
