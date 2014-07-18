@@ -33,14 +33,10 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.TypeNotFoundException;
 import org.kitesdk.data.View;
-import org.kitesdk.data.spi.AbstractDataset;
-import org.kitesdk.data.spi.AbstractRefinableView;
-import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
@@ -69,7 +65,6 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   @Deprecated
   public static final String KITE_DATASET_NAME = "kite.outputDatasetName";
   public static final String KITE_PARTITION_DIR = "kite.outputPartitionDir";
-  public static final String KITE_CONSTRAINTS = "kite.outputConstraints";
   public static final String KITE_TYPE = "kite.outputEntityType";
 
   public static class ConfigBuilder {
@@ -107,21 +102,13 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      * @return this for method chaining
      */
     public ConfigBuilder writeTo(View<?> view) {
-      if (view instanceof Dataset) {
-        if (view instanceof FileSystemDataset) {
+      if (view instanceof Dataset && view instanceof FileSystemDataset) {
           FileSystemDataset dataset = (FileSystemDataset) view;
           conf.set(KITE_PARTITION_DIR,
               String.valueOf(dataset.getDescriptor().getLocation()));
-        }
-      } else if (view instanceof AbstractRefinableView) {
-        conf.set(KITE_CONSTRAINTS,
-            Constraints.serialize(((AbstractRefinableView) view).getConstraints()));
-      } else {
-        throw new UnsupportedOperationException("Implementation " +
-            "does not provide OutputFormat support. View: " + view);
       }
       withType(view.getType());
-      return writeTo(view.getDataset().getUri());
+      return writeTo(view.getUri());
     }
 
     /**
@@ -333,7 +320,6 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     }
 
     String partitionDir = conf.get(KITE_PARTITION_DIR);
-    String constraintsString = conf.get(KITE_CONSTRAINTS);
     if (working.getDataset().getDescriptor().isPartitioned() &&
         partitionDir != null) {
       if (!(target instanceof FileSystemDataset)) {
@@ -346,12 +332,6 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
         working = fsDataset.getPartition(key, true);
       }
       return new DatasetRecordWriter<E>(working);
-    } else if (constraintsString != null) {
-      Constraints constraints = Constraints.deserialize(constraintsString);
-      if (working instanceof AbstractDataset) {
-        return new DatasetRecordWriter<E>(((AbstractDataset) working).filter(constraints));
-      }
-      throw new DatasetException("Cannot find view from constraints for " + working);
     } else {
       return new DatasetRecordWriter<E>(working);
     }
