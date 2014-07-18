@@ -37,9 +37,6 @@ import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.TypeNotFoundException;
 import org.kitesdk.data.View;
-import org.kitesdk.data.spi.AbstractDataset;
-import org.kitesdk.data.spi.AbstractRefinableView;
-import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.InputFormatAccessor;
 import org.kitesdk.data.spi.URIBuilder;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
@@ -67,7 +64,6 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   @Deprecated
   public static final String KITE_DATASET_NAME = "kite.inputDatasetName";
   public static final String KITE_PARTITION_DIR = "kite.inputPartitionDir";
-  public static final String KITE_CONSTRAINTS = "kite.inputConstraints";
   public static final String KITE_TYPE = "kite.inputEntityType";
 
   private Configuration conf;
@@ -108,21 +104,13 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
      * @return this for method chaining
      */
     public ConfigBuilder readFrom(View<?> view) {
-      if (view instanceof Dataset) {
-        if (view instanceof FileSystemDataset) {
+      if (view instanceof Dataset && view instanceof FileSystemDataset) {
           FileSystemDataset dataset = (FileSystemDataset) view;
           conf.set(KITE_PARTITION_DIR,
               String.valueOf(dataset.getDescriptor().getLocation()));
-        }
-      } else if (view instanceof AbstractRefinableView) {
-        conf.set(KITE_CONSTRAINTS,
-            Constraints.serialize(((AbstractRefinableView) view).getConstraints()));
-      } else {
-        throw new UnsupportedOperationException("Implementation " +
-            "does not provide InputFormat support. View: " + view);
       }
       withType(view.getType());
-      return readFrom(view.getDataset().getUri());
+      return readFrom(view.getUri());
     }
 
     /**
@@ -217,11 +205,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     View<E> view = load(configuration);
 
     String partitionDir = conf.get(KITE_PARTITION_DIR);
-    String constraintsString = conf.get(KITE_CONSTRAINTS);
     if (view.getDataset().getDescriptor().isPartitioned() && partitionDir != null) {
       delegate = getDelegateInputFormatForPartition(view.getDataset(), partitionDir, conf);
-    } else if (constraintsString != null) {
-      delegate = getDelegateInputFormatForView(view.getDataset(), constraintsString, conf);
     } else {
       delegate = getDelegateInputFormat(view, conf);
     }
@@ -253,17 +238,6 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       return getDelegateInputFormat(partition, conf);
     }
     throw new DatasetException("Cannot find partition " + partitionDir);
-  }
-
-  @SuppressWarnings("unchecked")
-  private InputFormat<E, Void> getDelegateInputFormatForView(Dataset<E> dataset,
-      String constraintsString, Configuration conf) {
-    Constraints constraints = Constraints.deserialize(constraintsString);
-    if (dataset instanceof AbstractDataset) {
-      return getDelegateInputFormat(((AbstractDataset) dataset).filter(constraints),
-          conf);
-    }
-    throw new DatasetException("Cannot find view from constraints for " + dataset);
   }
 
   @SuppressWarnings({"deprecation", "unchecked"})
