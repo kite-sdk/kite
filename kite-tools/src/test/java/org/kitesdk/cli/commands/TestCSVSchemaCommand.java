@@ -37,6 +37,7 @@ import static org.mockito.Mockito.*;
 public class TestCSVSchemaCommand {
 
   private static String sample = null;
+  private static String failedSample = null;
   private static Schema schema = null;
   private Logger console = null;
   private CSVSchemaCommand command;
@@ -44,11 +45,19 @@ public class TestCSVSchemaCommand {
   @BeforeClass
   public static void buildUserSchema() throws Exception {
     sample = "target/users.csv";
+    failedSample = "target/users_failed.csv";
     BufferedWriter writer = Files.newWriter(
         new File(sample), CSVSchemaCommand.SCHEMA_CHARSET);
     writer.append("id, username, email\n");
     writer.append("1, test, test@example.com\n");
     writer.close();
+
+    writer = Files.newWriter(
+            new File(failedSample), CSVSchemaCommand.SCHEMA_CHARSET);
+    writer.append("id, user name, email\n");
+    writer.append("1, test, test@example.com\n");
+    writer.close();
+
 
     schema = SchemaBuilder.record("User").fields()
         .optionalLong("id")
@@ -127,4 +136,17 @@ public class TestCSVSchemaCommand {
     verifyZeroInteractions(console);
   }
 
+  @Test
+  public void testInvalidCSVHeaderFail() throws Exception {
+          command.samplePaths = Lists.newArrayList("target/users_failed.csv");
+          TestHelpers.assertThrows("Should fail when csv header doesn't follow alphanumeric standards",
+                  RuntimeException.class, new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                       command.run();
+                       return null;
+                    }
+                  });
+         verifyZeroInteractions(console);
+  }
 }
