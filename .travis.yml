@@ -1,6 +1,6 @@
 language: java
 jdk:
-  - openjdk6
+  - oraclejdk7
 
 env:
   - HADOOP_PROFILE=default
@@ -11,6 +11,6 @@ cache:
   directories:
     - $HOME/.m2
 
-install: mvn -q install -DskipTests=true -Dmaven.javadoc.skip=true -Dsource.skip=true
+install: mvn -q install -DskipTests=true -Dmaven.javadoc.skip=true -Dsource.skip=true -DjavaVersion=1.7
 before_script: umask 0022
-script: mvn test -P $HADOOP_PROFILE
+script: mvn test -P $HADOOP_PROFILE -DjavaVersion=1.7
