@@ -127,4 +127,17 @@ public class TestCSVSchemaCommand {
     verifyZeroInteractions(console);
   }
 
+  @Test
+  public void testInvalidCSVHeaderFail() throws Exception {
+	  command.samplePaths = Lists.newArrayList("target/users.csv");
+	  TestHelpers.assertThrows("Should fail when csv header doesn't follow alphanumeric standards",
+		  RuntimeException.class, new Callable<Void>() {
+		    @Override
+		    public Void call() throws Exception {
+		       command.run();
+		       return null;
+		    }
+		  });
+	 verifyZeroInteractions(console);	  
+  }
 }

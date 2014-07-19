@@ -121,7 +121,7 @@ public class CSVUtil {
       } else if (header[i].trim().isEmpty()) {
         throw new RuntimeException(
             "Bad header for field " + i + ": \"" + header[i] + "\"");
-      }else if(!header[i].trim().matches("^[A-Za-z_][A-Za-z\\d_]*$")){
+      } else if(!header[i].trim().matches("^[A-Za-z_][A-Za-z\\d_]*$")) {
     	  throw new RuntimeException("Bad header for field, should start with a character or _ and can contain only alphanumerics and _" + i + ": \"" + header[i] + "\"");
       }
       fields.add(new Schema.Field(
