@@ -29,6 +29,8 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.apache.avro.Schema;
+import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.spi.Compatibility;
 
 public class CSVUtil {
 
@@ -117,12 +119,12 @@ public class CSVUtil {
     List<Schema.Field> fields = Lists.newArrayList();
     for (int i = 0; i < header.length; i += 1) {
       if (header[i] == null) {
-        throw new RuntimeException("Bad header for field " + i + ": null");
+        throw new DatasetException("Bad header for field " + i + ": null");
       } else if (header[i].trim().isEmpty()) {
-        throw new RuntimeException(
+        throw new DatasetException(
             "Bad header for field " + i + ": \"" + header[i] + "\"");
-      } else if(!header[i].trim().matches("^[A-Za-z_][A-Za-z\\d_]*$")) {
-          throw new RuntimeException(
+      } else if(!Compatibility.isAvroCompatibleName(header[i].trim())) {
+    	  throw new DatasetException(
               "Bad header for field, should start with a character " +
               "or _ and can contain only alphanumerics and _ " +
               i + ": \"" + header[i] + "\"");

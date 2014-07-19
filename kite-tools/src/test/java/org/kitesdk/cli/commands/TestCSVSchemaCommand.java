@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
 import org.kitesdk.data.TestHelpers;
 import org.slf4j.Logger;
-
+import org.kitesdk.data.DatasetException;
 import static org.mockito.Mockito.*;
 
 public class TestCSVSchemaCommand {
@@ -51,6 +51,13 @@ public class TestCSVSchemaCommand {
     writer.append("id, username, email\n");
     writer.append("1, test, test@example.com\n");
     writer.close();
+
+    writer = Files.newWriter(
+            new File(failedSample), CSVSchemaCommand.SCHEMA_CHARSET);
+    writer.append("id, user name, email\n");
+    writer.append("1, test, test@example.com\n");
+    writer.close();
+
 
     writer = Files.newWriter(
             new File(failedSample), CSVSchemaCommand.SCHEMA_CHARSET);
@@ -138,15 +145,15 @@ public class TestCSVSchemaCommand {
 
   @Test
   public void testInvalidCSVHeaderFail() throws Exception {
-          command.samplePaths = Lists.newArrayList("target/users_failed.csv");
-          TestHelpers.assertThrows("Should fail when csv header doesn't follow alphanumeric standards",
-                  RuntimeException.class, new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                       command.run();
-                       return null;
-                    }
-                  });
-         verifyZeroInteractions(console);
+    command.samplePaths = Lists.newArrayList("target/users_failed.csv");
+    TestHelpers.assertThrows("Should fail when csv header doesn't follow alphanumeric standards",
+        DatasetException.class, new Callable<Void>() {
+          @Override
+          public Void call() throws Exception {
+             command.run();
+             return null;
+          }
+        });
+    verifyZeroInteractions(console);
   }
 }
