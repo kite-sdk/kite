@@ -211,7 +211,7 @@ public class TestURIBuilder {
         URI.create("view:file:/datasets/test?id=" + ID + "&timestamp=1405720705333"),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(
-                empty.with("id", new Utf8(ID)).with("timestamp", 1405720705333l))
+                empty.with("id", new Utf8(ID)).with("timestamp", 1405720705333L))
             .build());
   }
 
@@ -245,8 +245,17 @@ public class TestURIBuilder {
         URI.create("view:file:/datasets/test?timestamp=[0,1405720705333)&color=(green,red]"),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty
-                .from("timestamp", 0l).toBefore("timestamp", 1405720705333l)
+                .from("timestamp", 0l).toBefore("timestamp", 1405720705333L)
                 .fromAfter("color", "green").to("color", "red"))
+            .build());
+  }
+
+  @Test
+  public void testEmptyConstraints() {
+    Assert.assertEquals("Empty constraints should produce dataset URI",
+        URI.create("dataset:file:/datasets/test"),
+        new URIBuilder("dataset:file:/datasets/test")
+            .constraints(empty)
             .build());
   }
 }

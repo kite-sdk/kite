@@ -98,17 +98,17 @@ public class TestInToFromString {
   @Test
   public void testSingleLongValue() {
     Assert.assertEquals("In#toString(LONG)",
-        "34", Predicates.in(34l).toString(LONG));
+        "34", Predicates.in(34L).toString(LONG));
     Assert.assertEquals("In.fromString(String, LONG)",
-        Predicates.in(34l), In.<Long>fromString("34", LONG));
+        Predicates.in(34L), In.<Long>fromString("34", LONG));
   }
 
   @Test
   public void testMultipleLongValues() {
     Assert.assertEquals("In#toString(LONG)",
-        "3,4,5", Predicates.in(3l,4l,5l).toString(LONG));
+        "3,4,5", Predicates.in(3L,4L,5L).toString(LONG));
     Assert.assertEquals("In.fromString(String, LONG)",
-        Predicates.in(3l,4l,5l), In.<Long>fromString("3,4,5", LONG));
+        Predicates.in(3L,4L,5L), In.<Long>fromString("3,4,5", LONG));
   }
 
   @Test
