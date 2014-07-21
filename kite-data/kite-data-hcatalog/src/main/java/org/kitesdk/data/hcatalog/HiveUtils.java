@@ -95,7 +95,7 @@ class HiveUtils {
           "Unknown format for serde:" + serializationLib);
     }
 
-    final Path dataLocation = new Path(table.getDataLocation());
+    final Path dataLocation = table.getPath();
     final FileSystem fs = fsForPath(conf, dataLocation);
 
     builder.location(fs.makeQualified(dataLocation));
@@ -167,7 +167,8 @@ class HiveUtils {
       table.setTableType(TableType.EXTERNAL_TABLE);
       // but it doesn't work without some additional magic:
       table.getParameters().put("EXTERNAL", "TRUE");
-      table.setDataLocation(descriptor.getLocation());
+      // don't use table.setDataLocation since it changed incompatibly in Hive 0.13.0
+      table.getTTable().getSd().setLocation(descriptor.getLocation().toString());
     } else {
       table.setTableType(TableType.MANAGED_TABLE);
     }
