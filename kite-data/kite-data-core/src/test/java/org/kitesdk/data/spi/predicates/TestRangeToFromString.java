@@ -71,53 +71,53 @@ public class TestRangeToFromString {
   @Test
   public void testRangeUnboundedTypes() {
     Assert.assertEquals("Should use [ and inf)",
-        "[3,inf)", Ranges.atLeast(3).toString(INT));
+        "[3,)", Ranges.atLeast(3).toString(INT));
     Assert.assertEquals("Should parse inf) correctly",
-        Ranges.atLeast(3), Range.<Integer>fromString("[3,inf)", INT));
+        Ranges.atLeast(3), Range.<Integer>fromString("[3,)", INT));
     Assert.assertEquals("Should use ( and inf)",
-        "(5,inf)", Ranges.greaterThan(5).toString(INT));
+        "(5,)", Ranges.greaterThan(5).toString(INT));
     Assert.assertEquals("Should parse inf) correctly",
-        Ranges.greaterThan(5), Range.<Integer>fromString("(5,inf)", INT));
+        Ranges.greaterThan(5), Range.<Integer>fromString("(5,)", INT));
     Assert.assertEquals("Should use (inf and )",
-        "(inf,4)", Ranges.lessThan(4).toString(INT));
+        "(,4)", Ranges.lessThan(4).toString(INT));
     Assert.assertEquals("Should parse (inf correctly",
-        Ranges.lessThan(4), Range.<Integer>fromString("(inf,4)", INT));
+        Ranges.lessThan(4), Range.<Integer>fromString("(,4)", INT));
     Assert.assertEquals("Should use (inf and ]",
-        "(inf,9]", Ranges.atMost(9).toString(INT));
+        "(,9]", Ranges.atMost(9).toString(INT));
     Assert.assertEquals("Should parse (inf correctly",
-        Ranges.atMost(9), Range.<Integer>fromString("(inf,9]", INT));
+        Ranges.atMost(9), Range.<Integer>fromString("(,9]", INT));
 
     // accepts inclusive inf bounds
     Assert.assertEquals("Should parse inf] as inf)",
-        Ranges.atLeast(3), Range.<Integer>fromString("[3,inf]", INT));
+        Ranges.atLeast(3), Range.<Integer>fromString("[3,]", INT));
     Assert.assertEquals("Should parse [inf as (inf",
-        Ranges.atMost(9), Range.<Integer>fromString("[inf,9]", INT));
+        Ranges.atMost(9), Range.<Integer>fromString("[,9]", INT));
   }
 
   @Test
   public void testStringRangeUnboundedTypes() {
     Assert.assertEquals("Should use [ and inf)",
-        "[c,inf)", Ranges.atLeast("c").toString(STRING));
+        "[c,)", Ranges.atLeast("c").toString(STRING));
     Assert.assertEquals("Should parse inf) correctly",
-        Ranges.atLeast("c"), Range.<String>fromString("[c,inf)", STRING));
+        Ranges.atLeast("c"), Range.<String>fromString("[c,)", STRING));
     Assert.assertEquals("Should use ( and inf)",
-        "(m,inf)", Ranges.greaterThan("m").toString(STRING));
+        "(m,)", Ranges.greaterThan("m").toString(STRING));
     Assert.assertEquals("Should parse inf) correctly",
-        Ranges.greaterThan("m"), Range.<String>fromString("(m,inf)", STRING));
+        Ranges.greaterThan("m"), Range.<String>fromString("(m,)", STRING));
     Assert.assertEquals("Should use (inf and )",
-        "(inf,f)", Ranges.lessThan("f").toString(STRING));
+        "(,f)", Ranges.lessThan("f").toString(STRING));
     Assert.assertEquals("Should parse (inf correctly",
-        Ranges.lessThan("f"), Range.<String>fromString("(inf,f)", STRING));
+        Ranges.lessThan("f"), Range.<String>fromString("(,f)", STRING));
     Assert.assertEquals("Should use (inf and ]",
-        "(inf,p]", Ranges.atMost("p").toString(STRING));
+        "(,p]", Ranges.atMost("p").toString(STRING));
     Assert.assertEquals("Should parse (inf correctly",
-        Ranges.atMost("p"), Range.<String>fromString("(inf,p]", STRING));
+        Ranges.atMost("p"), Range.<String>fromString("(,p]", STRING));
 
     // accepts inclusive inf bounds
     Assert.assertEquals("Should parse inf] as inf)",
-        Ranges.atLeast("c"), Range.<String>fromString("[c,inf]", STRING));
+        Ranges.atLeast("c"), Range.<String>fromString("[c,]", STRING));
     Assert.assertEquals("Should parse [inf as (inf",
-        Ranges.atMost("p"), Range.<String>fromString("[inf,p]", STRING));
+        Ranges.atMost("p"), Range.<String>fromString("[,p]", STRING));
   }
 
   @Test

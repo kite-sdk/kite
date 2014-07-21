@@ -232,12 +232,12 @@ public class TestURIBuilder {
   @Test
   public void testAddRangeConstraints() {
     Assert.assertEquals("Should add equality constraints",
-        URI.create("view:file:/datasets/test?color=[green,inf)"),
+        URI.create("view:file:/datasets/test?color=[green,)"),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty.from("color", "green"))
             .build());
     Assert.assertEquals("Should add equality constraints",
-        URI.create("view:file:/datasets/test?color=(inf,green]"),
+        URI.create("view:file:/datasets/test?color=(,green]"),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty.to("color", "green"))
             .build());

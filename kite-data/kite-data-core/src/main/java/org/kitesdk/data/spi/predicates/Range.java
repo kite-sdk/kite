@@ -36,13 +36,13 @@ public class Range<T> implements Predicate<T> {
     if (match.matches()) {
       boolean lIncl = "[".equals(match.group(1));
       T lower;
-      if ("inf".equals(match.group(2))) {
+      if (match.group(2).isEmpty()) {
         lower = null;
       } else {
         lower = SchemaUtil.fromString(match.group(2), schema);
       }
       T upper;
-      if ("inf".equals(match.group(3))) {
+      if (match.group(3).isEmpty()) {
         upper = null;
       } else {
         upper = SchemaUtil.fromString(match.group(3), schema);
@@ -201,7 +201,7 @@ public class Range<T> implements Predicate<T> {
 
     @Override
     public String toString(Schema _) {
-      return toString();
+      return "";
     }
   };
 
