@@ -105,12 +105,38 @@
       <artifactId>${artifact.hadoop-deps}</artifactId>
       <type>pom</type>
       <scope>provided</scope>
+      <exclusions>
+        <!-- Exclusions needed by Spark -->
+        <exclusion>
+          <artifactId>asm</artifactId>
+          <groupId>asm</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>servlet-api</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>servlet-api-2.5</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>${artifact.hbase-deps}</artifactId>
       <type>pom</type>
       <scope>provided</scope>
+      <exclusions>
+        <!-- Exclusions needed by Spark -->
+        <exclusion>
+          <artifactId>netty</artifactId>
+          <groupId>org.jboss.netty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>servlet-api-2.5</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
@@ -126,6 +152,8 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+      <!-- Version needed by Spark 1.0.0 -->
+      <version>14.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -168,9 +196,18 @@
       <type>pom</type>
       <scope>test</scope>
       <exclusions>
+        <!-- Exclusions needed by Spark -->
         <exclusion>
           <artifactId>asm</artifactId>
           <groupId>asm</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>servlet-api</artifactId>
+          <groupId>javax.servlet</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>servlet-api-2.5</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -180,6 +217,13 @@
       <artifactId>${artifact.hbase-test-deps}</artifactId>
       <type>pom</type>
       <scope>test</scope>
+      <exclusions>
+        <!-- Exclusions needed by Spark -->
+        <exclusion>
+          <artifactId>servlet-api-2.5</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

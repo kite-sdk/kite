@@ -36,7 +36,7 @@ import org.kitesdk.data.Format;
 import org.kitesdk.data.DatasetWriter;
 
 @RunWith(Parameterized.class)
-public class TestMapReduce extends FSTestBase {
+public class TestMapReduce extends FileSystemTestBase {
 
   public TestMapReduce(Format format) {
     super(format);

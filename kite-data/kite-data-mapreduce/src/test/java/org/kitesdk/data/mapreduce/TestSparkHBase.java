@@ -17,10 +17,8 @@
 package org.kitesdk.data.mapreduce;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.spark.SparkConf;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import org.junit.Test;
@@ -58,16 +56,16 @@ public class TestSparkHBase extends HBaseTestBase {
       writer.close();
     }
 
-    Configuration conf = HBaseTestUtils.getConf();
-    DatasetKeyInputFormat.configure(conf).readFrom(inputDataset);
-    DatasetKeyOutputFormat.configure(conf).writeTo(outputDataset);
+    Job job = Job.getInstance(HBaseTestUtils.getConf());
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset);
+    DatasetKeyOutputFormat.configure(job).writeTo(outputDataset);
 
     @SuppressWarnings("unchecked")
-    JavaPairRDD<GenericRecord, Void> inputData = SparkTestHelper.getSc().newAPIHadoopRDD(conf,
-        DatasetKeyInputFormat.class, GenericRecord.class, Void.class);
+    JavaPairRDD<GenericRecord, Void> inputData = SparkTestHelper.getSparkContext()
+        .newAPIHadoopRDD(job.getConfiguration(), DatasetKeyInputFormat.class,
+            GenericRecord.class, Void.class);
 
-    inputData.saveAsNewAPIHadoopFile("dummy", GenericRecord.class, Void.class,
-        DatasetKeyOutputFormat.class, conf);
+    inputData.saveAsNewAPIHadoopDataset(job.getConfiguration());
 
     int cnt = 0;
     DatasetReader<GenericRecord> reader = outputDataset.newReader();

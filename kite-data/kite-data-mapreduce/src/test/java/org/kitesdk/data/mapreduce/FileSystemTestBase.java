@@ -32,9 +32,9 @@ import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 
-public class FSTestBase {
+public class FileSystemTestBase {
 
-  public FSTestBase(Format format) {
+  public FileSystemTestBase(Format format) {
     this.format = format;
   }
 

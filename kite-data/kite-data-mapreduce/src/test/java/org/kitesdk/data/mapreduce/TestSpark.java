@@ -18,14 +18,11 @@ package org.kitesdk.data.mapreduce;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.avro.generic.GenericData.Record;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.spark.SparkConf;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,14 +34,14 @@ import org.kitesdk.data.Format;
 import scala.Tuple2;
 
 @RunWith(Parameterized.class)
-public class TestSpark extends FSTestBase {
+public class TestSpark extends FileSystemTestBase {
 
   public TestSpark(Format format) {
     super(format);
   }
 
   // These are static inner classes becasuse Format does not implement Serializable
-  public static class ToJava extends
+  public static class ToJava implements
       PairFunction<Tuple2<Record, Void>, String, Integer> {
 
     @Override
@@ -53,7 +50,7 @@ public class TestSpark extends FSTestBase {
     }
   }
 
-  public static class Sum extends Function2<Integer, Integer, Integer> {
+  public static class Sum implements Function2<Integer, Integer, Integer> {
 
     @Override
     public Integer call(Integer t1, Integer t2) throws Exception {
@@ -61,7 +58,7 @@ public class TestSpark extends FSTestBase {
     }
   }
 
-  public static class ToAvro extends
+  public static class ToAvro implements
       PairFunction<Tuple2<String, Integer>, Record, Void> {
 
     @Override
@@ -100,22 +97,20 @@ public class TestSpark extends FSTestBase {
           .format(format)
           .build(), Record.class);
 
-    Configuration conf = new Configuration();
-    DatasetKeyInputFormat.configure(conf).readFrom(inputDataset);
-    DatasetKeyOutputFormat.configure(conf).writeTo(outputDataset);
-
-
+    Job job = Job.getInstance();
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset);
+    DatasetKeyOutputFormat.configure(job).writeTo(outputDataset);
 
     @SuppressWarnings("unchecked")
-    JavaPairRDD<Record, Void> inputData = SparkTestHelper.getSc().newAPIHadoopRDD(conf,
-        DatasetKeyInputFormat.class, Record.class, Void.class);
+    JavaPairRDD<Record, Void> inputData = SparkTestHelper.getSparkContext()
+        .newAPIHadoopRDD(job.getConfiguration(), DatasetKeyInputFormat.class,
+            Record.class, Void.class);
 
-    JavaPairRDD<String, Integer> mappedData = inputData.map(new ToJava());
+    JavaPairRDD<String, Integer> mappedData = inputData.mapToPair(new ToJava());
     JavaPairRDD<String, Integer> sums = mappedData.reduceByKey(new Sum());
-    JavaPairRDD<Record, Void> outputData = sums.map(new ToAvro());
+    JavaPairRDD<Record, Void> outputData = sums.mapToPair(new ToAvro());
 
-    outputData.saveAsNewAPIHadoopFile("dummy", Record.class, Void.class,
-        DatasetKeyOutputFormat.class, conf);
+    outputData.saveAsNewAPIHadoopDataset(job.getConfiguration());
 
     DatasetReader<Record> reader = outputDataset.newReader();
     Map<String, Integer> counts = new HashMap<String, Integer>();

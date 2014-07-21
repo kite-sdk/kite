@@ -28,7 +28,7 @@ public class SparkTestHelper {
   private static JavaSparkContext sc = null;
   private static SparkConf sparkConf = null;
 
-  public synchronized static JavaSparkContext getSc() {
+  public synchronized static JavaSparkContext getSparkContext() {
     if (sc == null) {
       sc = new JavaSparkContext(getSparkConf());
     }
