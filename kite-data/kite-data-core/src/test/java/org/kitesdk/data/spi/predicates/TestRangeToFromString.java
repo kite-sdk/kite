@@ -141,9 +141,9 @@ public class TestRangeToFromString {
   @Test
   public void testLongRanges() {
     Assert.assertEquals("Range#toString(LONG)",
-        "[1,7)", Ranges.closedOpen(1l,7l).toString(LONG));
+        "[1,7)", Ranges.closedOpen(1L,7L).toString(LONG));
     Assert.assertEquals("Range.fromString(String, LONG)",
-        Ranges.closedOpen(1l, 7l), Range.<Long>fromString("[1,7)", LONG));
+        Ranges.closedOpen(1L, 7L), Range.<Long>fromString("[1,7)", LONG));
   }
 
   @Test

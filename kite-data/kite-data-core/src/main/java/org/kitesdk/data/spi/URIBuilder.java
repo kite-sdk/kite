@@ -95,7 +95,7 @@ public class URIBuilder {
    */
   URIBuilder constraints(Constraints constraints) {
     options.putAll(constraints.toQueryMap());
-    this.isView = true;
+    this.isView = !constraints.isUnbounded();
     return this;
   }
 

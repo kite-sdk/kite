@@ -16,7 +16,7 @@
 
 package org.kitesdk.data.spi;
 
-import org.apache.hadoop.mapreduce.InputFormat;
+import com.google.common.base.Objects;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
@@ -106,4 +106,22 @@ public abstract class AbstractDataset<E> implements Dataset<E>, RefinableView<E>
         "This Dataset does not support bulk deletion");
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || !Objects.equal(getClass(), obj.getClass())) {
+      return false;
+    }
+    AbstractDataset other = (AbstractDataset) obj;
+    return Objects.equal(getName(), other.getName()) &&
+        Objects.equal(getDescriptor(), other.getDescriptor()) &&
+        Objects.equal(getType(), other.getType());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getClass(), getName(), getDescriptor(), type);
+  }
 }
