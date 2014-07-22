@@ -40,6 +40,11 @@ public abstract class Compatibility {
   // quoted strings with any character, but this is not the case in practice.
   private static Pattern hiveCompatible = Pattern
       .compile("[a-zA-Z0-9][a-zA-Z0-9_]*");
+  
+  //As per the Avro specs mentioned here -http://avro.apache.org/docs/1.7.5/spec.html
+  // It should start with [A-Za-z_] and subsequently contain only [A-Za-z0-9_]
+  private static Pattern avroCompatible = Pattern.
+		  compile("^[A-Za-z_][A-Za-z\\d_]*$");
 
   /**
    * Checks the name and descriptor for known compatibility issues and warns.
@@ -193,5 +198,15 @@ public abstract class Compatibility {
     public List<String> getIncompatibleNames() {
       return incompatible;
     }
+  }
+  /** 
+   * Returns true if the name does not contain characters that are known to be
+   * incompatible with the specs defined in Avro schema.
+   * 
+   * @param name a String field name to check
+   * @return will return true if the name is Avro compatible ,false if not
+   */
+  public static boolean isAvroCompatibleName(String name) {
+	  return avroCompatible.matcher(name).matches();
   }
 }

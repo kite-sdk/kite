@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
 import org.kitesdk.data.TestHelpers;
 import org.slf4j.Logger;
-
+import org.kitesdk.data.DatasetException;
 import static org.mockito.Mockito.*;
 
 public class TestCSVSchemaCommand {
@@ -140,7 +140,7 @@ public class TestCSVSchemaCommand {
   public void testInvalidCSVHeaderFail() throws Exception {
 	  command.samplePaths = Lists.newArrayList("target/users_failed.csv");
 	  TestHelpers.assertThrows("Should fail when csv header doesn't follow alphanumeric standards",
-		  RuntimeException.class, new Callable<Void>() {
+		  DatasetException.class, new Callable<Void>() {
 		    @Override
 		    public Void call() throws Exception {
 		       command.run();
