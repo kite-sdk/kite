@@ -59,6 +59,13 @@ public class TestCSVSchemaCommand {
     writer.close();
     
 
+    writer = Files.newWriter(
+            new File(failedSample), CSVSchemaCommand.SCHEMA_CHARSET);
+    writer.append("id, user name, email\n");
+    writer.append("1, test, test@example.com\n");
+    writer.close();
+
+
     schema = SchemaBuilder.record("User").fields()
         .optionalLong("id")
         .optionalString("username")

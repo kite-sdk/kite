@@ -122,7 +122,7 @@ public class CSVUtil {
         throw new DatasetException("Bad header for field " + i + ": null");
       } else if (header[i].trim().isEmpty()) {
         throw new DatasetException(
-            "Bad header for field " + i + ": \"" + header[i] + "\"");
+            "Bad header for field " + i + ": \"" + header[i] + "\"");      
       } else if(!Compatibility.isAvroCompatibleName(header[i].trim())) {
     	  throw new DatasetException(
     			"Bad header for field, should start with a character "
