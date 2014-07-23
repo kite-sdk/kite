@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.TableType;
-import org.apache.hadoop.hive.ql.metadata.Table;
+import org.apache.hadoop.hive.metastore.api.Table;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetNotFoundException;
@@ -141,11 +141,11 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
   }
 
   private boolean isManaged(Table table) {
-    return TableType.MANAGED_TABLE.equals(table.getTableType());
+    return TableType.MANAGED_TABLE.toString().equals(table.getTableType());
   }
 
   private boolean isExternal(Table table) {
-    return TableType.EXTERNAL_TABLE.equals(table.getTableType());
+    return TableType.EXTERNAL_TABLE.toString().equals(table.getTableType());
   }
 
 }

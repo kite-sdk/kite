@@ -15,9 +15,11 @@
  */
 package org.kitesdk.data.hcatalog;
 
+import java.net.URISyntaxException;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hive.ql.metadata.Table;
+import org.apache.hadoop.hive.metastore.api.Table;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.spi.Compatibility;
 import org.slf4j.Logger;
@@ -64,8 +66,12 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
     // load the created table to get the data location
     final Table newTable = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
 
-    return new DatasetDescriptor.Builder(descriptor)
-        .location(newTable.getDataLocation())
-        .build();
+    try {
+      return new DatasetDescriptor.Builder(descriptor)
+          .location(newTable.getSd().getLocation())
+          .build();
+    } catch (URISyntaxException e) {
+      throw new DatasetException(e);
+    }
   }
 }

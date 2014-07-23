@@ -16,6 +16,12 @@
 
 package org.kitesdk.data.hcatalog;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.apache.hadoop.hive.metastore.api.Order;
+import org.apache.hadoop.hive.metastore.api.SerDeInfo;
+import org.apache.hadoop.hive.metastore.api.SkewedInfo;
+import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
@@ -47,8 +53,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
-import org.apache.hadoop.hive.ql.metadata.HiveException;
-import org.apache.hadoop.hive.ql.metadata.Table;
+import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
@@ -86,7 +91,7 @@ class HiveUtils {
   static DatasetDescriptor descriptorForTable(Configuration conf, Table table) {
     final DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder();
 
-    final String serializationLib = table.getSerializationLib();
+    final String serializationLib = table.getSd().getSerdeInfo().getSerializationLib();
     if (SERDE_TO_FORMAT.containsKey(serializationLib)) {
       builder.format(SERDE_TO_FORMAT.get(serializationLib));
     } else {
@@ -95,35 +100,36 @@ class HiveUtils {
           "Unknown format for serde:" + serializationLib);
     }
 
-    final Path dataLocation = table.getPath();
+    final Path dataLocation = new Path(table.getSd().getLocation());
     final FileSystem fs = fsForPath(conf, dataLocation);
 
     builder.location(fs.makeQualified(dataLocation));
 
     // custom properties
+    Map<String, String> properties = table.getParameters();
     String namesProperty = coalesce(
-        table.getProperty(CUSTOM_PROPERTIES_PROPERTY_NAME),
-        table.getProperty(OLD_CUSTOM_PROPERTIES_PROPERTY_NAME));
+        properties.get(CUSTOM_PROPERTIES_PROPERTY_NAME),
+        properties.get(OLD_CUSTOM_PROPERTIES_PROPERTY_NAME));
     if (namesProperty != null) {
       for (String property : NAME_SPLITTER.split(namesProperty)) {
-        builder.property(property, table.getProperty(property));
+        builder.property(property, properties.get(property));
       }
     }
 
-    if (table.isPartitioned()) {
+    if (isPartitioned(table)) {
       String partitionProperty = coalesce(
-          table.getProperty(PARTITION_EXPRESSION_PROPERTY_NAME),
-          table.getProperty(OLD_PARTITION_EXPRESSION_PROPERTY_NAME));
+          properties.get(PARTITION_EXPRESSION_PROPERTY_NAME),
+          properties.get(OLD_PARTITION_EXPRESSION_PROPERTY_NAME));
       if (partitionProperty != null) {
         builder.partitionStrategy(
             Accessor.getDefault().fromExpression(partitionProperty));
       } else {
         // build a partition strategy for the table from the Hive strategy
-        builder.partitionStrategy(fromPartitionColumns(table.getPartCols()));
+        builder.partitionStrategy(fromPartitionColumns(getPartCols(table)));
       }
     }
 
-    String schemaUrlString = table.getProperty(AVRO_SCHEMA_URL_PROPERTY_NAME);
+    String schemaUrlString = properties.get(AVRO_SCHEMA_URL_PROPERTY_NAME);
     if (schemaUrlString != null) {
       try {
         // URI.create is safe because this library wrote the URI
@@ -133,7 +139,7 @@ class HiveUtils {
       }
     }
 
-    String schemaLiteral = table.getProperty(AVRO_SCHEMA_LITERAL_PROPERTY_NAME);
+    String schemaLiteral = properties.get(AVRO_SCHEMA_LITERAL_PROPERTY_NAME);
     if (schemaLiteral != null) {
       builder.schemaLiteral(schemaLiteral);
     }
@@ -143,6 +149,19 @@ class HiveUtils {
     } catch (IllegalStateException ex) {
       throw new DatasetException("Cannot find schema: missing metadata");
     }
+  }
+
+  private static boolean isPartitioned(Table table) {
+    return (getPartCols(table) != null) && (getPartCols(table).size() != 0);
+  }
+
+  private static List<FieldSchema> getPartCols(Table table) {
+    List<FieldSchema> partKeys = table.getPartitionKeys();
+    if (partKeys == null) {
+      partKeys = new ArrayList<FieldSchema>();
+      table.setPartitionKeys(partKeys);
+    }
+    return partKeys;
   }
 
   /**
@@ -160,17 +179,16 @@ class HiveUtils {
 
   static Table tableForDescriptor(
       String name, DatasetDescriptor descriptor, boolean external) {
-    final Table table = new Table(DEFAULT_DB, name);
+    final Table table = createEmptyTable(name);
 
     if (external) {
       // you'd think this would do it...
-      table.setTableType(TableType.EXTERNAL_TABLE);
+      table.setTableType(TableType.EXTERNAL_TABLE.toString());
       // but it doesn't work without some additional magic:
       table.getParameters().put("EXTERNAL", "TRUE");
-      // don't use table.setDataLocation since it changed incompatibly in Hive 0.13.0
-      table.getTTable().getSd().setLocation(descriptor.getLocation().toString());
+      table.getSd().setLocation(descriptor.getLocation().toString());
     } else {
-      table.setTableType(TableType.MANAGED_TABLE);
+      table.setTableType(TableType.MANAGED_TABLE.toString());
     }
 
     addPropertiesForDescriptor(table, descriptor);
@@ -178,14 +196,9 @@ class HiveUtils {
     // translate from Format to SerDe
     final Format format = descriptor.getFormat();
     if (FORMAT_TO_SERDE.containsKey(format)) {
-      table.setSerializationLib(FORMAT_TO_SERDE.get(format));
-      try {
-        table.setInputFormatClass(FORMAT_TO_INPUT_FORMAT.get(format));
-        table.setOutputFormatClass(FORMAT_TO_OUTPUT_FORMAT.get(format));
-      } catch (HiveException ex) {
-        throw new DatasetException("Failed to set input/output formats for format:" +
-            format.getName(), ex);
-      }
+      table.getSd().getSerdeInfo().setSerializationLib(FORMAT_TO_SERDE.get(format));
+      table.getSd().setInputFormat(FORMAT_TO_INPUT_FORMAT.get(format));
+      table.getSd().setOutputFormat(FORMAT_TO_OUTPUT_FORMAT.get(format));
     } else {
       throw new UnknownFormatException(
           "No known serde for format:" + format.getName());
@@ -202,41 +215,65 @@ class HiveUtils {
     }
 
     if (useLiteral) {
-      table.setProperty(
+      table.getParameters().put(
           AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
           descriptor.getSchema().toString());
     } else {
-      table.setProperty(
+      table.getParameters().put(
           AVRO_SCHEMA_URL_PROPERTY_NAME,
           schemaURL.toExternalForm());
     }
 
     // convert the schema to Hive columns
-    table.setFields(convertSchema(descriptor.getSchema()));
+    table.getSd().setCols(convertSchema(descriptor.getSchema()));
 
     // copy partitioning info
     if (descriptor.isPartitioned()) {
       PartitionStrategy ps = descriptor.getPartitionStrategy();
-      table.setProperty(PARTITION_EXPRESSION_PROPERTY_NAME,
+      table.getParameters().put(PARTITION_EXPRESSION_PROPERTY_NAME,
           Accessor.getDefault().toExpression(ps));
-      table.setPartCols(partitionColumns(ps, descriptor.getSchema()));
+      table.setPartitionKeys(partitionColumns(ps, descriptor.getSchema()));
     }
 
     return table;
   }
 
+  static Table createEmptyTable(String name) {
+    Table table = new Table();
+    table.setDbName(DEFAULT_DB);
+    table.setTableName(name);
+    table.setPartitionKeys(new ArrayList<FieldSchema>());
+    table.setParameters(new HashMap<String, String>());
+
+    StorageDescriptor sd = new StorageDescriptor();
+    sd.setSerdeInfo(new SerDeInfo());
+    sd.setNumBuckets(-1);
+    sd.setBucketCols(new ArrayList<String>());
+    sd.setCols(new ArrayList<FieldSchema>());
+    sd.setParameters(new HashMap<String, String>());
+    sd.setSortCols(new ArrayList<Order>());
+    sd.getSerdeInfo().setParameters(new HashMap<String, String>());
+    SkewedInfo skewInfo = new SkewedInfo();
+    skewInfo.setSkewedColNames(new ArrayList<String>());
+    skewInfo.setSkewedColValues(new ArrayList<List<String>>());
+    skewInfo.setSkewedColValueLocationMaps(new HashMap<List<String>, String>());
+    sd.setSkewedInfo(skewInfo);
+    table.setSd(sd);
+
+    return table;
+  }
 
   public static void updateTableSchema(Table table, DatasetDescriptor descriptor) {
-    if (table.getProperty(AVRO_SCHEMA_LITERAL_PROPERTY_NAME) != null) {
-      table.setProperty(
+    if (table.getParameters().get(AVRO_SCHEMA_LITERAL_PROPERTY_NAME) != null) {
+      table.getParameters().put(
           AVRO_SCHEMA_LITERAL_PROPERTY_NAME,
           descriptor.getSchema().toString());
-    } else if (table.getProperty(AVRO_SCHEMA_URL_PROPERTY_NAME) != null) {
+    } else if (table.getParameters().get(AVRO_SCHEMA_URL_PROPERTY_NAME) != null) {
       if (descriptor.getSchemaUrl() == null) {
         throw new DatasetException("Cannot update " + AVRO_SCHEMA_URL_PROPERTY_NAME +
             " since descriptor schema URL is not set.");
       }
-      table.setProperty(
+      table.getParameters().put(
           AVRO_SCHEMA_URL_PROPERTY_NAME,
           descriptor.getSchemaUrl().toExternalForm());
     } else {
@@ -262,10 +299,10 @@ class HiveUtils {
     if (!descriptor.listProperties().isEmpty()) {
       for (String property : descriptor.listProperties()) {
         // no need to check the reserved list, those are not set on descriptors
-        table.setProperty(property, descriptor.getProperty(property));
+        table.getParameters().put(property, descriptor.getProperty(property));
       }
       // set which properties are custom and should be set on descriptors
-      table.setProperty(CUSTOM_PROPERTIES_PROPERTY_NAME,
+      table.getParameters().put(CUSTOM_PROPERTIES_PROPERTY_NAME,
           NAME_JOINER.join(descriptor.listProperties()));
     }
   }

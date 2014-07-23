@@ -22,7 +22,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.TableType;
-import org.apache.hadoop.hive.ql.metadata.Table;
+import org.apache.hadoop.hive.metastore.api.Table;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -134,20 +134,20 @@ public class TestManagedExternalHandling {
     metastore.dropTable("default", "bad_serde");
     metastore.dropTable("default", "bad_schema");
 
-    Table badType = new Table("default", "bad_type");
-    badType.setTableType(TableType.VIRTUAL_VIEW);
+    Table badType = HiveUtils.createEmptyTable("bad_type");
+    badType.setTableType(TableType.VIRTUAL_VIEW.toString());
     metastore.createTable(badType);
 
-    Table badSerDe = new Table("default", "bad_serde");
-    badSerDe.setTableType(TableType.MANAGED_TABLE); // readable type
-    badSerDe.setSerializationLib("com.example.ExampleHiveSerDe");
+    Table badSerDe = HiveUtils.createEmptyTable("bad_serde");
+    badSerDe.setTableType(TableType.MANAGED_TABLE.toString()); // readable type
+    badSerDe.getSd().getSerdeInfo().setSerializationLib("com.example.ExampleHiveSerDe");
     metastore.createTable(badSerDe);
 
-    Table badSchema = new Table("default", "bad_schema");
-    badSchema.setTableType(TableType.MANAGED_TABLE); // readable type
-    badSchema.setSerializationLib("org.apache.hadoop.hive.serde2.avro.AvroSerDe");
-    badSchema.setInputFormatClass("org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
-    badSchema.setOutputFormatClass("org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat");
+    Table badSchema = HiveUtils.createEmptyTable("bad_schema");
+    badSchema.setTableType(TableType.MANAGED_TABLE.toString()); // readable type
+    badSchema.getSd().getSerdeInfo().setSerializationLib("org.apache.hadoop.hive.serde2.avro.AvroSerDe");
+    badSchema.getSd().setInputFormat("org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
+    badSchema.getSd().setOutputFormat("org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat");
     metastore.createTable(badSchema);
 
     // note that unreadable tables are not in the list

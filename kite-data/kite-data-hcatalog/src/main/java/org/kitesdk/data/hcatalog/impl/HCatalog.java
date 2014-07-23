@@ -25,8 +25,8 @@ import org.apache.hadoop.hive.metastore.api.InvalidObjectException;
 import org.apache.hadoop.hive.metastore.api.InvalidOperationException;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
+import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.UnknownDBException;
-import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.thrift.TException;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.DatasetNotFoundException;
@@ -131,7 +131,7 @@ public final class HCatalog {
         new ClientAction<Void>() {
           @Override
           public Void call() throws TException {
-            client.createTable(tbl.getTTable());
+            client.createTable(tbl);
             return null;
           }
         };
@@ -158,7 +158,7 @@ public final class HCatalog {
           @Override
           public Void call() throws TException {
             client.alter_table(
-                tbl.getDbName(), tbl.getTableName(), tbl.getTTable());
+                tbl.getDbName(), tbl.getTableName(), tbl);
             return null;
           }
         };
