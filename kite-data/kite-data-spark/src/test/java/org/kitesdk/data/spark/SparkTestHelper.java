@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.mapreduce;
+package org.kitesdk.data.spark;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;

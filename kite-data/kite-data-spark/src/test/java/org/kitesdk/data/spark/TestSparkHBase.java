@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.mapreduce;
+package org.kitesdk.data.spark;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.mapreduce.Job;
@@ -28,6 +28,9 @@ import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.hbase.HBaseDatasetRepositoryTest;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;
+import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
+import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
+import org.kitesdk.data.mapreduce.HBaseTestBase;
 
 public class TestSparkHBase extends HBaseTestBase {
 

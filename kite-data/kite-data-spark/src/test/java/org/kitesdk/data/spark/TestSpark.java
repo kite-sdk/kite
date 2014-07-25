@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.mapreduce;
+package org.kitesdk.data.spark;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +31,10 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Format;
+import org.kitesdk.data.mapreduce.DatasetKeyInputFormat;
+import org.kitesdk.data.mapreduce.DatasetKeyOutputFormat;
+import org.kitesdk.data.mapreduce.FileSystemTestBase;
+import org.kitesdk.data.mapreduce.TestMapReduce;
 import scala.Tuple2;
 
 @RunWith(Parameterized.class)
