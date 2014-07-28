@@ -20,9 +20,11 @@ import com.google.common.collect.DiscreteDomains;
 import java.util.Calendar;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import org.kitesdk.data.spi.Predicates;
-import org.kitesdk.data.spi.Range;
-import org.kitesdk.data.spi.Ranges;
+import org.kitesdk.data.spi.predicates.Exists;
+import org.kitesdk.data.spi.predicates.In;
+import org.kitesdk.data.spi.predicates.Predicates;
+import org.kitesdk.data.spi.predicates.Range;
+import org.kitesdk.data.spi.predicates.Ranges;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
@@ -42,13 +44,13 @@ public class YearFieldPartitioner extends CalendarFieldPartitioner {
   @Override
   public Predicate<Integer> project(Predicate<Long> predicate) {
     // year is the only time field that can be projected
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
-      return ((Predicates.In<Long>) predicate).transform(this);
+    } else if (predicate instanceof In) {
+      return ((In<Long>) predicate).transform(this);
     } else if (predicate instanceof Range) {
-      return Predicates.transformClosed(
-          Predicates.adjustClosed(
+      return Ranges.transformClosed(
+          Ranges.adjustClosed(
               (Range<Long>) predicate, DiscreteDomains.longs()),
           this);
     } else {
@@ -58,16 +60,16 @@ public class YearFieldPartitioner extends CalendarFieldPartitioner {
 
   @Override
   public Predicate<Integer> projectStrict(Predicate<Long> predicate) {
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
+    } else if (predicate instanceof In) {
       // not enough information to make a judgement on behalf of the
       // original predicate. the year may match when month does not
       return null;
     } else if (predicate instanceof Range) {
       //return Predicates.transformClosedConservative(
       //    (Range<Long>) predicate, this, DiscreteDomains.integers());
-      Range<Long> adjusted = Predicates.adjustClosed(
+      Range<Long> adjusted = Ranges.adjustClosed(
           (Range<Long>) predicate, DiscreteDomains.longs());
       if (adjusted.hasLowerBound()) {
         long lower = adjusted.lowerEndpoint();

@@ -24,9 +24,11 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.spi.Predicates;
-import org.kitesdk.data.spi.Range;
-import org.kitesdk.data.spi.Ranges;
+import org.kitesdk.data.spi.predicates.Exists;
+import org.kitesdk.data.spi.predicates.In;
+import org.kitesdk.data.spi.predicates.Predicates;
+import org.kitesdk.data.spi.predicates.Range;
+import org.kitesdk.data.spi.predicates.Ranges;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
     value="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
@@ -67,15 +69,15 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
 
   @Override
   public Predicate<Integer> project(Predicate<Integer> predicate) {
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
-      return ((Predicates.In<Integer>) predicate).transform(this);
+    } else if (predicate instanceof In) {
+      return ((In<Integer>) predicate).transform(this);
     } else if (predicate instanceof Range) {
       // must use a closed range:
       //   if this( 5 ) => 10 then this( 6 ) => 10, so 10 must be included
-      return Predicates.transformClosed(
-          Predicates.adjustClosed((Range<Integer>) predicate,
+      return Ranges.transformClosed(
+          Ranges.adjustClosed((Range<Integer>) predicate,
               DiscreteDomains.integers()), this);
     } else {
       return null;
@@ -84,10 +86,10 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
 
   @Override
   public Predicate<Integer> projectStrict(Predicate<Integer> predicate) {
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
 
-    } else if (predicate instanceof Predicates.In) {
+    } else if (predicate instanceof In) {
       // accumulate the bounds for which all inputs match the predicate
       Set<Integer> possibleValues = Sets.newHashSet();
       int end = upperBounds[upperBounds.length - 1];
@@ -110,7 +112,7 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
       }
 
     } else if (predicate instanceof Range) {
-      Range<Integer> adjusted = Predicates.adjustClosed(
+      Range<Integer> adjusted = Ranges.adjustClosed(
           (Range<Integer>) predicate, DiscreteDomains.integers());
       if (adjusted.hasLowerBound()) {
         int lower = adjusted.lowerEndpoint();

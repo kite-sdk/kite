@@ -14,93 +14,44 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.spi;
+package org.kitesdk.data.spi.predicates;
 
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
-import com.google.common.collect.BoundType;
-import com.google.common.collect.DiscreteDomain;
-import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import org.apache.avro.Schema;
+import org.kitesdk.data.spi.CharSequences;
+import org.kitesdk.data.spi.SchemaUtil;
 
 public class Range<T> implements Predicate<T> {
 
-  public static <T> Range<T> open(T lower, T upper) {
-    return new Range<T>(bound(lower, false), bound(upper, false));
-  }
+  public static final Pattern RANGE_PATTERN = Pattern.compile(
+      "([\\[\\(])([^,]*),([^\\]\\)]*)([\\]\\)])");
 
-  public static <T> Range<T> closed(T lower, T upper) {
-    return new Range<T>(bound(lower, true), bound(upper, true));
-  }
-
-  public static <T> Range<T> closedOpen(T lower, T upper) {
-    return new Range<T>(bound(lower, true), bound(upper, false));
-  }
-
-  public static <T> Range<T> openClosed(T lower, T upper) {
-    return new Range<T>(bound(lower, false), bound(upper, true));
-  }
-
-  public static <T> Range<T> greaterThan(T endpoint) {
-    return new Range<T>(bound(endpoint, false), null);
-  }
-
-  public static <T> Range<T> atLeast(T endpoint) {
-    return new Range<T>(bound(endpoint, true), null);
-  }
-
-  public static <T> Range<T> lessThan(T endpoint) {
-    return new Range<T>(null, bound(endpoint, false));
-  }
-
-  public static <T> Range<T> atMost(T endpoint) {
-    return new Range<T>(null, bound(endpoint, true));
-  }
-
-  public static <T> Range<T> singleton(T endpoint) {
-    return new Range<T>(bound(endpoint, true), bound(endpoint, true));
-  }
-
-  public static <C extends Comparable<C>> Set<C> asSet(
-      Range<C> range, DiscreteDomain<C> domain) {
-    // cheat and pass this to guava
-    return asGuavaRange(range).asSet(domain);
-  }
-
-  @VisibleForTesting
-  static <C extends Comparable<C>> com.google.common.collect.Range<C> asGuavaRange(
-      Range<C> range) {
-    if (range.hasLowerBound()) {
-      if (range.hasUpperBound()) {
-        return com.google.common.collect.Ranges.range(
-            range.lower.endpoint(),
-            range.isLowerBoundOpen() ? BoundType.OPEN : BoundType.CLOSED,
-            range.upper.endpoint(),
-            range.isUpperBoundOpen() ? BoundType.OPEN : BoundType.CLOSED);
+  public static <T> Range<T> fromString(String range, Schema schema) {
+    Matcher match = RANGE_PATTERN.matcher(range);
+    if (match.matches()) {
+      boolean lIncl = "[".equals(match.group(1));
+      T lower;
+      if (match.group(2).isEmpty()) {
+        lower = null;
       } else {
-        return com.google.common.collect.Ranges.downTo(
-            range.lower.endpoint(),
-            range.isLowerBoundOpen() ? BoundType.OPEN : BoundType.CLOSED);
+        lower = SchemaUtil.fromString(match.group(2), schema);
       }
-    } else if (range.hasUpperBound()) {
-      return com.google.common.collect.Ranges.upTo(
-          range.upper.endpoint(),
-          range.isUpperBoundOpen() ? BoundType.OPEN : BoundType.CLOSED);
+      T upper;
+      if (match.group(3).isEmpty()) {
+        upper = null;
+      } else {
+        upper = SchemaUtil.fromString(match.group(3), schema);
+      }
+      boolean uIncl = "]".equals(match.group(4));
+      return new Range<T>(bound(lower, lIncl), bound(upper, uIncl));
     } else {
-      return com.google.common.collect.Ranges.all();
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <T> Bound<T> bound(T endpoint, boolean inclusive) {
-    if (endpoint instanceof CharSequence) {
-      return (Bound<T>) new CharSequenceBound((CharSequence) endpoint, inclusive);
-    } else if (endpoint instanceof Comparable) {
-      return (Bound<T>) new ComparableBound((Comparable) endpoint, inclusive);
-    } else {
-      throw new RuntimeException();
+      // not a Range
+      return null;
     }
   }
 
@@ -108,7 +59,7 @@ public class Range<T> implements Predicate<T> {
   private final Bound<T> upper;
 
   @SuppressWarnings("unchecked")
-  private Range(Bound<T> lower, Bound<T> upper) {
+  Range(Bound<T> lower, Bound<T> upper) {
     this.lower = (lower == null ? ((Bound<T>) INF) : lower);
     this.upper = (upper == null ? ((Bound<T>) INF) : upper);
   }
@@ -177,6 +128,12 @@ public class Range<T> implements Predicate<T> {
         (isUpperBoundClosed() ? "]" : ")");
   }
 
+  public String toString(Schema schema) {
+    return (isLowerBoundClosed() ? "[" : "(") +
+        lower.toString(schema) + "," + upper.toString(schema) +
+        (isUpperBoundClosed() ? "]" : ")");
+  }
+
   @Override
   public boolean equals(@Nullable Object object) {
     if (this == object) {
@@ -195,11 +152,25 @@ public class Range<T> implements Predicate<T> {
     return Objects.hashCode(lower, upper);
   }
 
+  @SuppressWarnings("unchecked")
+  static <T> Bound<T> bound(T endpoint, boolean inclusive) {
+    if (endpoint == null) {
+      return (Bound<T>) INF;
+    } else if (endpoint instanceof CharSequence) {
+      return (Bound<T>) new CharSequenceBound((CharSequence) endpoint, inclusive);
+    } else if (endpoint instanceof Comparable) {
+      return (Bound<T>) new ComparableBound((Comparable) endpoint, inclusive);
+    } else {
+      throw new RuntimeException();
+    }
+  }
+
   private static interface Bound<T> {
     public boolean inclusive();
     public T endpoint();
     public boolean isLessThan(T other);
     public boolean isGreaterThan(T other);
+    public String toString(Schema schema);
   }
 
   private static Bound<Object> INF = new Bound<Object>() {
@@ -226,6 +197,11 @@ public class Range<T> implements Predicate<T> {
     @Override
     public String toString() {
       return "inf";
+    }
+
+    @Override
+    public String toString(Schema _) {
+      return "";
     }
   };
 
@@ -290,6 +266,11 @@ public class Range<T> implements Predicate<T> {
     @Override
     public String toString() {
       return endpoint.toString();
+    }
+
+    @Override
+    public String toString(Schema schema) {
+      return SchemaUtil.toString(endpoint, schema);
     }
   }
 

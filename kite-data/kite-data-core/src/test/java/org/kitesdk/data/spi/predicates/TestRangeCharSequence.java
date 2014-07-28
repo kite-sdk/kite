@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.spi;
+package org.kitesdk.data.spi.predicates;
 
 import org.apache.avro.util.Utf8;
 import org.junit.Assert;
@@ -23,7 +23,7 @@ import org.junit.Test;
 public class TestRangeCharSequence {
   @Test
   public void testStringRangeAcceptsUtf8() {
-    Range<CharSequence> range = Range.<CharSequence>openClosed("ab", "cd");
+    Range<CharSequence> range = Ranges.<CharSequence>openClosed("ab", "cd");
     Assert.assertEquals(range.toString(), "(ab, cd]");
     Assert.assertTrue("Should contain inner Utf8",
         range.contains(new Utf8("ac")));
@@ -33,7 +33,7 @@ public class TestRangeCharSequence {
 
   @Test
   public void testUtf8RangeAcceptsString() {
-    Range<CharSequence> range = Range.<CharSequence>
+    Range<CharSequence> range = Ranges.<CharSequence>
         openClosed(new Utf8("ab"), new Utf8("cd"));
     Assert.assertEquals(range.toString(), "(ab, cd]");
     Assert.assertTrue("Should contain inner Utf8",
@@ -44,7 +44,7 @@ public class TestRangeCharSequence {
 
   @Test
   public void testSingletonRangeComparable() {
-    Range<String> range = Range.singleton("ab");
+    Range<String> range = Ranges.singleton("ab");
     Assert.assertEquals(range.toString(), "[ab, ab]");
     Assert.assertTrue("Should contain inner point", range.contains("ab"));
     Assert.assertFalse("Should not contain outside point", range.contains("aa"));
@@ -52,7 +52,7 @@ public class TestRangeCharSequence {
 
   @Test
   public void testOpenRangeComparable() {
-    Range<String> range = Range.open("ab", "cd");
+    Range<String> range = Ranges.open("ab", "cd");
     Assert.assertEquals(range.toString(), "(ab, cd)");
     Assert.assertTrue("Should contain inner point", range.contains("b"));
     Assert.assertFalse("Should not contain outside point", range.contains("aa"));
@@ -62,7 +62,7 @@ public class TestRangeCharSequence {
 
   @Test
   public void testClosedRangeComparable() {
-    Range<String> range = Range.closed("ab", "cd");
+    Range<String> range = Ranges.closed("ab", "cd");
     Assert.assertEquals(range.toString(), "[ab, cd]");
     Assert.assertTrue("Should contain inner point", range.contains("b"));
     Assert.assertFalse("Should not contain outside point", range.contains("aa"));
@@ -72,7 +72,7 @@ public class TestRangeCharSequence {
 
   @Test
   public void testOpenClosedRangeComparable() {
-    Range<String> range = Range.openClosed("ab", "cd");
+    Range<String> range = Ranges.openClosed("ab", "cd");
     Assert.assertEquals(range.toString(), "(ab, cd]");
     Assert.assertTrue("Should contain inner point", range.contains("b"));
     Assert.assertFalse("Should not contain outside point", range.contains("aa"));
@@ -82,7 +82,7 @@ public class TestRangeCharSequence {
 
   @Test
   public void testClosedOpenRangeComparable() {
-    Range<String> range = Range.closedOpen("ab", "cd");
+    Range<String> range = Ranges.closedOpen("ab", "cd");
     Assert.assertEquals(range.toString(), "[ab, cd)");
     Assert.assertTrue("Should contain inner point", range.contains("b"));
     Assert.assertFalse("Should not contain outside point", range.contains("aa"));
@@ -92,7 +92,7 @@ public class TestRangeCharSequence {
 
   @Test
   public void testAtLeastRangeComparable() {
-    Range<String> range = Range.atLeast("ab");
+    Range<String> range = Ranges.atLeast("ab");
     Assert.assertEquals(range.toString(), "[ab, inf)");
     Assert.assertTrue("Should contain inner point", range.contains("b"));
     Assert.assertFalse("Should not contain outside point", range.contains("aa"));
@@ -102,7 +102,7 @@ public class TestRangeCharSequence {
 
   @Test
   public void testGreaterThanRangeComparable() {
-    Range<String> range = Range.greaterThan("ab");
+    Range<String> range = Ranges.greaterThan("ab");
     Assert.assertEquals(range.toString(), "(ab, inf)");
     Assert.assertTrue("Should contain inner point", range.contains("b"));
     Assert.assertFalse("Should not contain outside point", range.contains("aa"));
@@ -112,7 +112,7 @@ public class TestRangeCharSequence {
 
   @Test
   public void testAtMostRangeComparable() {
-    Range<String> range = Range.atMost("cd");
+    Range<String> range = Ranges.atMost("cd");
     Assert.assertEquals(range.toString(), "(inf, cd]");
     Assert.assertTrue("Should contain inner point", range.contains("b"));
     Assert.assertFalse("Should not contain outside point", range.contains("d"));
@@ -122,7 +122,7 @@ public class TestRangeCharSequence {
 
   @Test
   public void testLessThanRangeComparable() {
-    Range<String> range = Range.lessThan("cd");
+    Range<String> range = Ranges.lessThan("cd");
     Assert.assertEquals(range.toString(), "(inf, cd)");
     Assert.assertTrue("Should contain inner point", range.contains("b"));
     Assert.assertFalse("Should not contain outside point", range.contains("d"));
@@ -135,107 +135,107 @@ public class TestRangeCharSequence {
     // some methods like asSet convert to Guava rather than reimplementing
     Assert.assertEquals("Should convert to guava singleton",
         com.google.common.collect.Ranges.singleton("ab"),
-        Range.asGuavaRange(Range.singleton("ab")));
+        Ranges.asGuavaRange(Ranges.singleton("ab")));
     Assert.assertEquals("Should convert to guava open",
         com.google.common.collect.Ranges.open("ab", "cd"),
-        Range.asGuavaRange(Range.open("ab", "cd")));
+        Ranges.asGuavaRange(Ranges.open("ab", "cd")));
     Assert.assertEquals("Should convert to guava closed",
         com.google.common.collect.Ranges.closed("ab", "cd"),
-        Range.asGuavaRange(Range.closed("ab", "cd")));
+        Ranges.asGuavaRange(Ranges.closed("ab", "cd")));
     Assert.assertEquals("Should convert to guava openClosed",
         com.google.common.collect.Ranges.openClosed("ab", "cd"),
-        Range.asGuavaRange(Range.openClosed("ab", "cd")));
+        Ranges.asGuavaRange(Ranges.openClosed("ab", "cd")));
     Assert.assertEquals("Should convert to guava closedOpen",
         com.google.common.collect.Ranges.closedOpen("ab", "cd"),
-        Range.asGuavaRange(Range.closedOpen("ab", "cd")));
+        Ranges.asGuavaRange(Ranges.closedOpen("ab", "cd")));
     Assert.assertEquals("Should convert to guava atLeast",
         com.google.common.collect.Ranges.atLeast("ab"),
-        Range.asGuavaRange(Range.atLeast("ab")));
+        Ranges.asGuavaRange(Ranges.atLeast("ab")));
     Assert.assertEquals("Should convert to guava greaterThan",
         com.google.common.collect.Ranges.greaterThan("ab"),
-        Range.asGuavaRange(Range.greaterThan("ab")));
+        Ranges.asGuavaRange(Ranges.greaterThan("ab")));
     Assert.assertEquals("Should convert to guava atMost",
         com.google.common.collect.Ranges.atMost("cd"),
-        Range.asGuavaRange(Range.atMost("cd")));
+        Ranges.asGuavaRange(Ranges.atMost("cd")));
     Assert.assertEquals("Should convert to guava lessThan",
         com.google.common.collect.Ranges.lessThan("cd"),
-        Range.asGuavaRange(Range.lessThan("cd")));
+        Ranges.asGuavaRange(Ranges.lessThan("cd")));
   }
 
   @Test
   public void testIntersectionOverlap() {
     Assert.assertEquals("Open inner endpoints remain open",
-        Range.open("d", "dz"),
-        Range.closedOpen("cd", "dz").intersection(Range.openClosed("d", "ee")));
+        Ranges.open("d", "dz"),
+        Ranges.closedOpen("cd", "dz").intersection(Ranges.openClosed("d", "ee")));
     Assert.assertEquals("Open inner endpoints remain open",
-        Range.open("d", "dz"),
-        Range.openClosed("d", "ee").intersection(Range.closedOpen("cd", "dz")));
+        Ranges.open("d", "dz"),
+        Ranges.openClosed("d", "ee").intersection(Ranges.closedOpen("cd", "dz")));
 
     Assert.assertEquals("Closed inner endpoints remain closed",
-        Range.closed("d", "dz"),
-        Range.openClosed("cd", "dz").intersection(Range.closedOpen("d", "ee")));
+        Ranges.closed("d", "dz"),
+        Ranges.openClosed("cd", "dz").intersection(Ranges.closedOpen("d", "ee")));
     Assert.assertEquals("Closed inner endpoints remain closed",
-        Range.closed("d", "dz"),
-        Range.closedOpen("d", "ee").intersection(Range.openClosed("cd", "dz")));
+        Ranges.closed("d", "dz"),
+        Ranges.closedOpen("d", "ee").intersection(Ranges.openClosed("cd", "dz")));
 
     Assert.assertEquals("Start endpoints equal, one open",
-        Range.openClosed("cd", "dz"),
-        Range.openClosed("cd", "dz").intersection(Range.closedOpen("cd", "ee")));
+        Ranges.openClosed("cd", "dz"),
+        Ranges.openClosed("cd", "dz").intersection(Ranges.closedOpen("cd", "ee")));
     Assert.assertEquals("Start endpoints equal, one open",
-        Range.openClosed("cd", "dz"),
-        Range.closedOpen("cd", "ee").intersection(Range.openClosed("cd", "dz")));
+        Ranges.openClosed("cd", "dz"),
+        Ranges.closedOpen("cd", "ee").intersection(Ranges.openClosed("cd", "dz")));
 
     Assert.assertEquals("Start endpoints equal, both closed",
-        Range.closedOpen("cd", "dz"),
-        Range.closedOpen("cd", "dz").intersection(Range.closedOpen("cd", "ee")));
+        Ranges.closedOpen("cd", "dz"),
+        Ranges.closedOpen("cd", "dz").intersection(Ranges.closedOpen("cd", "ee")));
     Assert.assertEquals("Start endpoints equal, both closed",
-        Range.closedOpen("cd", "dz"),
-        Range.closedOpen("cd", "ee").intersection(Range.closedOpen("cd", "dz")));
+        Ranges.closedOpen("cd", "dz"),
+        Ranges.closedOpen("cd", "ee").intersection(Ranges.closedOpen("cd", "dz")));
 
     Assert.assertEquals("Stop endpoints equal, one open",
-        Range.open("d", "ee"),
-        Range.openClosed("d", "ee").intersection(Range.closedOpen("cd", "ee")));
+        Ranges.open("d", "ee"),
+        Ranges.openClosed("d", "ee").intersection(Ranges.closedOpen("cd", "ee")));
     Assert.assertEquals("Stop endpoints equal, one open",
-        Range.open("d", "ee"),
-        Range.closedOpen("cd", "ee").intersection(Range.openClosed("d", "ee")));
+        Ranges.open("d", "ee"),
+        Ranges.closedOpen("cd", "ee").intersection(Ranges.openClosed("d", "ee")));
 
     Assert.assertEquals("Stop endpoints equal, both closed",
-        Range.openClosed("d", "ee"),
-        Range.openClosed("d", "ee").intersection(Range.openClosed("cd", "ee")));
+        Ranges.openClosed("d", "ee"),
+        Ranges.openClosed("d", "ee").intersection(Ranges.openClosed("cd", "ee")));
     Assert.assertEquals("Stop endpoints equal, both closed",
-        Range.openClosed("d", "ee"),
-        Range.openClosed("cd", "ee").intersection(Range.openClosed("d", "ee")));
+        Ranges.openClosed("d", "ee"),
+        Ranges.openClosed("cd", "ee").intersection(Ranges.openClosed("d", "ee")));
   }
 
   @Test
   public void testIntersectionPositiveInfinity() {
     Assert.assertEquals("Defined endpoint is used",
-        Range.closed("d", "ee"),
-        Range.openClosed("cd", "ee").intersection(Range.atLeast("d")));
+        Ranges.closed("d", "ee"),
+        Ranges.openClosed("cd", "ee").intersection(Ranges.atLeast("d")));
     Assert.assertEquals("Defined endpoint is used",
-        Range.closed("d", "ee"),
-        Range.atLeast("d").intersection(Range.openClosed("cd", "ee")));
+        Ranges.closed("d", "ee"),
+        Ranges.atLeast("d").intersection(Ranges.openClosed("cd", "ee")));
     Assert.assertEquals("Defined endpoint is used",
-        Range.open("d", "ee"),
-        Range.closedOpen("cd", "ee").intersection(Range.greaterThan("d")));
+        Ranges.open("d", "ee"),
+        Ranges.closedOpen("cd", "ee").intersection(Ranges.greaterThan("d")));
     Assert.assertEquals("Defined endpoint is used",
-        Range.open("d", "ee"),
-        Range.greaterThan("d").intersection(Range.closedOpen("cd", "ee")));
+        Ranges.open("d", "ee"),
+        Ranges.greaterThan("d").intersection(Ranges.closedOpen("cd", "ee")));
   }
 
   @Test
   public void testIntersectionNegativeInfinity() {
     Assert.assertEquals("Defined endpoint is used",
-        Range.openClosed("cd", "d"),
-        Range.openClosed("cd", "ee").intersection(Range.atMost("d")));
+        Ranges.openClosed("cd", "d"),
+        Ranges.openClosed("cd", "ee").intersection(Ranges.atMost("d")));
     Assert.assertEquals("Defined endpoint is used",
-        Range.openClosed("cd", "d"),
-        Range.atMost("d").intersection(Range.openClosed("cd", "ee")));
+        Ranges.openClosed("cd", "d"),
+        Ranges.atMost("d").intersection(Ranges.openClosed("cd", "ee")));
     Assert.assertEquals("Defined endpoint is used",
-        Range.closedOpen("cd", "d"),
-        Range.closedOpen("cd", "ee").intersection(Range.lessThan("d")));
+        Ranges.closedOpen("cd", "d"),
+        Ranges.closedOpen("cd", "ee").intersection(Ranges.lessThan("d")));
     Assert.assertEquals("Defined endpoint is used",
-        Range.closedOpen("cd", "d"),
-        Range.lessThan("d").intersection(Range.closedOpen("cd", "ee")));
+        Ranges.closedOpen("cd", "d"),
+        Ranges.lessThan("d").intersection(Ranges.closedOpen("cd", "ee")));
   }
 }

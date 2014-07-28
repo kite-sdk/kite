@@ -48,6 +48,11 @@ import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
+import org.kitesdk.data.spi.predicates.Exists;
+import org.kitesdk.data.spi.predicates.In;
+import org.kitesdk.data.spi.predicates.Predicates;
+import org.kitesdk.data.spi.predicates.Range;
+import org.kitesdk.data.spi.predicates.Ranges;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -277,7 +282,7 @@ public class Constraints implements Serializable{
       }
 
       Predicate predicate = entry.getValue();
-      if (!(predicate instanceof Predicates.Exists)) {
+      if (!(predicate instanceof Exists)) {
         boolean satisfied = false;
         for (FieldPartitioner fp : fps) {
           if (fp instanceof CalendarFieldPartitioner) {
@@ -424,6 +429,31 @@ public class Constraints implements Serializable{
     return Objects.toStringHelper(this).addValue(constraints).toString();
   }
 
+  public Map<String, String> toQueryMap() {
+    Map<String, String> query = Maps.newHashMap();
+    for (Map.Entry<String, Predicate> entry : constraints.entrySet()) {
+      String name = entry.getKey();
+      Schema fieldSchema = SchemaUtil.fieldSchema(schema, strategy, name);
+      query.put(name, Predicates.toString(entry.getValue(), fieldSchema));
+    }
+    return query;
+  }
+
+  public static Constraints fromQueryMap(Schema schema,
+                                         PartitionStrategy strategy,
+                                         Map<String, String> query) {
+    Map<String, Predicate> constraints = Maps.newHashMap();
+    for (Map.Entry<String, String> entry : query.entrySet()) {
+      String name = entry.getKey();
+      if (SchemaUtil.isField(schema, strategy, name)) {
+        Schema fieldSchema = SchemaUtil.fieldSchema(schema, strategy, name);
+        constraints.put(name,
+            Predicates.fromString(entry.getValue(), fieldSchema));
+      }
+    }
+    return new Constraints(schema, strategy, constraints);
+  }
+
   /**
    * Writes out the {@link Constraints} using Java serialization.
    */
@@ -481,14 +511,14 @@ public class Constraints implements Serializable{
       return left;
     } else if (left == null) {
       return right; // must be non-null
-    } else if (right == null || right instanceof Predicates.Exists) {
+    } else if (right == null || right instanceof Exists) {
       return left; // must be non-null, which satisfies exists
-    } else if (left instanceof Predicates.Exists) {
+    } else if (left instanceof Exists) {
       return right; // must be non-null, which satisfies exists
-    } else if (left instanceof Predicates.In) {
-      return ((Predicates.In) left).filter(right);
-    } else if (right instanceof Predicates.In) {
-      return ((Predicates.In) right).filter(left);
+    } else if (left instanceof In) {
+      return ((In) left).filter(right);
+    } else if (right instanceof In) {
+      return ((In) right).filter(left);
     } else if (left instanceof Range && right instanceof Range) {
       return ((Range) left).intersection((Range) right);
     } else {

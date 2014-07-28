@@ -34,6 +34,11 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
+import org.kitesdk.data.spi.predicates.Exists;
+import org.kitesdk.data.spi.predicates.In;
+import org.kitesdk.data.spi.predicates.Predicates;
+import org.kitesdk.data.spi.predicates.Range;
+import org.kitesdk.data.spi.predicates.Ranges;
 
 @Immutable
 public class TimeDomain {
@@ -84,8 +89,8 @@ public class TimeDomain {
   }
 
   public Predicate<Marker> project(Predicate<Long> predicate) {
-    if (predicate instanceof Predicates.In) {
-      return new TimeSetPredicate((Predicates.In<Long>) predicate);
+    if (predicate instanceof In) {
+      return new TimeSetPredicate((In<Long>) predicate);
     } else if (predicate instanceof Range) {
       return new TimeRangePredicate((Range<Long>) predicate);
     } else {
@@ -94,9 +99,9 @@ public class TimeDomain {
   }
 
   public Predicate<Marker> projectStrict(Predicate<Long> predicate) {
-    if (predicate instanceof Predicates.Exists) {
+    if (predicate instanceof Exists) {
       return Predicates.exists();
-    } else if (predicate instanceof Predicates.In) {
+    } else if (predicate instanceof In) {
       return null;
     } else if (predicate instanceof Range) {
       return new TimeRangeStrictPredicate((Range<Long>) predicate);
@@ -106,9 +111,9 @@ public class TimeDomain {
   }
 
   private class TimeSetPredicate implements Predicate<Marker> {
-    private final Predicates.In<List<Integer>> times;
+    private final In<List<Integer>> times;
 
-    private TimeSetPredicate(Predicates.In<Long> times) {
+    private TimeSetPredicate(In<Long> times) {
       this.times = times.transform(new Function<Long, List<Integer>>() {
         @Override
         public List<Integer> apply(@Nullable Long timestamp) {
@@ -170,7 +175,7 @@ public class TimeDomain {
     private final boolean acceptEqual;
 
     private TimeRangePredicateImpl(Range<Long> timeRange, boolean acceptEqual) {
-      this.range = Predicates.adjustClosed(timeRange, DiscreteDomains.longs());
+      this.range = Ranges.adjustClosed(timeRange, DiscreteDomains.longs());
       this.acceptEqual = acceptEqual;
 
       int length = partitioners.size();
@@ -312,11 +317,11 @@ public class TimeDomain {
   Iterator<MarkerRange.Builder> addStackedIterator(
       Predicate<Long> timePredicate,
       Iterator<MarkerRange.Builder> inner) {
-    if (timePredicate instanceof Predicates.In) {
+    if (timePredicate instanceof In) {
       // normal group handling is sufficient for a set of specific times
       // instantiate directly because the add method projects the predicate
       return new KeyRangeIterable.SetGroupIterator(
-          (Predicates.In) timePredicate, (List) partitioners, inner);
+          (In) timePredicate, (List) partitioners, inner);
     } else if (timePredicate instanceof Range) {
       return new TimeRangeIterator(
           (Range<Long>) timePredicate, partitioners, inner);

@@ -30,9 +30,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.spi.Predicates;
-import org.kitesdk.data.spi.Range;
-import org.kitesdk.data.spi.Ranges;
+import org.kitesdk.data.spi.predicates.In;
+import org.kitesdk.data.spi.predicates.Predicates;
+import org.kitesdk.data.spi.predicates.Range;
+import org.kitesdk.data.spi.predicates.Ranges;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -193,7 +194,7 @@ public class TestPartitionerProjection {
   public void testIdentityFieldPartitionerSetPredicate() {
     FieldPartitioner<String, String> fp =
         new IdentityFieldPartitioner<String>("str", "str_copy", String.class, 50);
-    Predicates.In<String> s = Predicates.in("a", "b");
+    In<String> s = Predicates.in("a", "b");
     Assert.assertEquals(s, fp.project(s));
     Assert.assertEquals(s, fp.projectStrict(s));
   }
