@@ -111,7 +111,7 @@
 
     <!-- Java versions -->
     <javaVersion>1.7</javaVersion>
-    <targetJavaVersion>1.7</targetJavaVersion>
+    <targetJavaVersion>1.6</targetJavaVersion>
 
     <!-- used by jdiff, semver rule -->
     <previous.project.version>0.15.0</previous.project.version>
