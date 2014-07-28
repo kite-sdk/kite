@@ -110,7 +110,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Java versions -->
-    <javaVersion>1.6</javaVersion>
+    <javaVersion>1.7</javaVersion>
     <targetJavaVersion>1.6</targetJavaVersion>
 
     <!-- used by jdiff, semver rule -->
