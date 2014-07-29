@@ -21,6 +21,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import com.google.common.annotations.VisibleForTesting;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.PropertyConfigurator;
 import org.kitesdk.cli.commands.CSVImportCommand;
@@ -30,8 +31,12 @@ import org.kitesdk.cli.commands.CreateColumnMappingCommand;
 import org.kitesdk.cli.commands.CreateDatasetCommand;
 import org.kitesdk.cli.commands.CreatePartitionStrategyCommand;
 import org.kitesdk.cli.commands.DeleteDatasetCommand;
+import org.kitesdk.cli.commands.SolrSchemaCommand;
+
 import com.google.common.collect.ImmutableSet;
+
 import java.util.Set;
+
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -82,7 +87,8 @@ public class Main extends Configured implements Tool {
     jc.addCommand("obj-schema", new ObjectSchemaCommand(console));
     jc.addCommand("partition-config", new CreatePartitionStrategyCommand(console));
     jc.addCommand("mapping-config", new CreateColumnMappingCommand(console));
-  }
+    jc.addCommand("solr-schema", new SolrSchemaCommand(console));
+    }
 
   @Override
   public int run(String[] args) throws Exception {

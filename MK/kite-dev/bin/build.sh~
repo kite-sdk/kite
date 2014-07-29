@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cd ..
+mvn compile package
+cd bin
+cat dataset.sh ./../target/kite-tools-0.15.1-SNAPSHOT.jar >> dataset
+chmod 777 dataset
+./dataset 
