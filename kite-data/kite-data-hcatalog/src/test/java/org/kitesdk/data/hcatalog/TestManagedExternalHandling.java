@@ -29,11 +29,11 @@ import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
+import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 
 public class TestManagedExternalHandling {
   private static final DatasetDescriptor descriptor =
@@ -50,9 +50,9 @@ public class TestManagedExternalHandling {
     Datasets.delete("dataset:hive?dataset=managed");
     Datasets.delete("dataset:hive:target/test-repo/external");
     // create datasets
-    this.managed = DatasetRepositories.open("repo:hive");
+    this.managed = DatasetRepositories.repositoryFor("repo:hive");
     managed.create("managed", descriptor);
-    this.external = DatasetRepositories.open("repo:hive:target/test-repo");
+    this.external = DatasetRepositories.repositoryFor("repo:hive:target/test-repo");
     external.create("external", descriptor);
   }
 

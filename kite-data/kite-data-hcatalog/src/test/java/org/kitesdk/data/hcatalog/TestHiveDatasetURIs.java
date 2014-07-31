@@ -24,11 +24,11 @@ import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 
 public class TestHiveDatasetURIs extends MiniDFSTest {
@@ -53,7 +53,7 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   @Test
   public void testExternal() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hive:/tmp/data?" + hdfsQueryArgs);
+        .repositoryFor("repo:hive:/tmp/data?" + hdfsQueryArgs);
     repo.delete("test");
     repo.create("test", descriptor);
 
@@ -74,7 +74,7 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   @Test
   public void testExternalHDFSQueryOptions() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hive:/tmp/data?" + hdfsQueryArgs);
+        .repositoryFor("repo:hive:/tmp/data?" + hdfsQueryArgs);
     repo.delete("test");
     repo.create("test", descriptor);
 
@@ -95,7 +95,7 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   @Test
   public void testExternalRoot() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hive:/?" + hdfsQueryArgs);
+        .repositoryFor("repo:hive:/?" + hdfsQueryArgs);
     repo.delete("test");
     repo.create("test", descriptor);
 
@@ -116,7 +116,7 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   @Test
   public void testExternalRelative() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hive:data?" + hdfsQueryArgs);
+        .repositoryFor("repo:hive:data?" + hdfsQueryArgs);
     repo.delete("test");
     repo.create("test", descriptor);
 
@@ -137,7 +137,7 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   @Test
   public void testManaged() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hive?" + hdfsQueryArgs);
+        .repositoryFor("repo:hive?" + hdfsQueryArgs);
     repo.delete("test");
     repo.create("test", descriptor);
 
@@ -155,7 +155,7 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   @Test
   public void testManagedHDFSQueryOptions() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hive?" + hdfsQueryArgs);
+        .repositoryFor("repo:hive?" + hdfsQueryArgs);
     repo.delete("test");
     repo.create("test", descriptor);
 

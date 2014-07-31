@@ -33,6 +33,7 @@ import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.hbase.HBaseDatasetRepositoryTest;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;
+import org.kitesdk.data.spi.DatasetRepository;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

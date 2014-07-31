@@ -15,7 +15,7 @@
  */
 package org.kitesdk.maven.plugins;
 
-import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;

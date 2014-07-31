@@ -18,7 +18,7 @@ package org.kitesdk.data.hcatalog;
 
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;

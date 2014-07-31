@@ -27,9 +27,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Before;
 import org.junit.runners.Parameterized;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 
 public class FileSystemTestBase {

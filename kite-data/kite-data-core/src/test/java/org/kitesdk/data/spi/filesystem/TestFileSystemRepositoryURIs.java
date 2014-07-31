@@ -15,10 +15,9 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.MiniDFSTest;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
@@ -29,6 +28,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.junit.BeforeClass;
+import org.kitesdk.data.Datasets;
+import org.kitesdk.data.spi.DatasetRepositories;
 
 public class TestFileSystemRepositoryURIs extends MiniDFSTest {
 
@@ -40,7 +41,7 @@ public class TestFileSystemRepositoryURIs extends MiniDFSTest {
   @Test
   public void testLocalRelative() throws URISyntaxException {
     URI repositoryUri = new URI("repo:file:target/dsr-repo-test");
-    DatasetRepository repository = DatasetRepositories.open(repositoryUri);
+    DatasetRepository repository = DatasetRepositories.repositoryFor(repositoryUri);
 
     // We only do the deeper implementation checks one per combination.
     Assert.assertNotNull("Received a repository", repository);
@@ -66,7 +67,7 @@ public class TestFileSystemRepositoryURIs extends MiniDFSTest {
   @Test
   public void testLocalAbsolute() throws URISyntaxException {
     URI repositoryUri = new URI("repo:file:///tmp/dsr-repo-test");
-    DatasetRepository repository = DatasetRepositories.open(repositoryUri);
+    DatasetRepository repository = DatasetRepositories.repositoryFor(repositoryUri);
 
     FileSystemMetadataProvider provider = (FileSystemMetadataProvider)
         ((FileSystemDatasetRepository) repository).getMetadataProvider();
@@ -79,14 +80,14 @@ public class TestFileSystemRepositoryURIs extends MiniDFSTest {
   public void testHdfsFailsDefault() {
     // the environment doesn't contain the HDFS URI, so this should cause a
     // DatasetRepository exception about not finding HDFS
-    DatasetRepositories.open("repo:hdfs:/");
+    DatasetRepositories.repositoryFor("repo:hdfs:/");
   }
 
   @Test
   public void testHdfsAbsolute() throws URISyntaxException {
     URI hdfsUri = getDFS().getUri();
     URI repositoryUri = new URI("repo:hdfs://" + hdfsUri.getAuthority() + "/tmp/dsr-repo-test");
-    DatasetRepository repository = DatasetRepositories.open(repositoryUri);
+    DatasetRepository repository = DatasetRepositories.repositoryFor(repositoryUri);
 
     // We only do the deeper implementation checks one per combination.
     Assert.assertNotNull("Received a repository", repository);

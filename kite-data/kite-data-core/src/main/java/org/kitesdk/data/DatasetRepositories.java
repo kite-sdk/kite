@@ -24,7 +24,10 @@ import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
  * <p>Convenience methods for working with {@link DatasetRepository} instances.</p>
  *
  * @since 0.8.0
+ *
+ * @deprecated will be removed in 0.17.0. Move to using {@link Datasets} instead
  */
+@Deprecated
 public class DatasetRepositories {
 
   private static final String REPO_SCHEME = "repo";
@@ -36,7 +39,11 @@ public class DatasetRepositories {
    * @return a DatasetRepository for the given URI.
    * @throws IllegalArgumentException If the String cannot be parsed into a
    *                                  valid {@link java.net.URI}.
+   *
+   * @deprecated will be removed in 0.17.0. Move to using
+   * {@link Datasets#load(java.lang.String, java.lang.Class)} instead
    */
+  @Deprecated
   public static DatasetRepository open(String uri) {
     // uses of URI.create throw IllegalArgumentException if the URI is invalid
     return open(URI.create(uri));
@@ -49,7 +56,7 @@ public class DatasetRepositories {
    * <p>
    * This method provides a way to open to a {@link DatasetRepository}
    * while providing configuration options. For almost all cases, this
-   * is the preferred method for retrieving an instance of a 
+   * is the preferred method for retrieving an instance of a
    * {@link DatasetRepository}.
    * </p>
    * <p>
@@ -81,8 +88,8 @@ public class DatasetRepositories {
    * <code>[port]</code> indicate the location of the Hadoop NameNode, and
    * <code>[path]</code> is the dataset repository root directory in which to
    * store dataset data. This form loads the Hadoop configuration
-   * information per the usual methods (that is, searching the process's 
-   * classpath for the various configuration files). This storage backend 
+   * information per the usual methods (that is, searching the process's
+   * classpath for the various configuration files). This storage backend
    * produces a {@link DatasetRepository} that stores both data and metadata in
    * HDFS. See {@link FileSystemDatasetRepository} for more information.
    * </p>
@@ -167,7 +174,11 @@ public class DatasetRepositories {
    * @param repoUri The repository URI
    * @return An appropriate implementation of {@link DatasetRepository}
    * @since 0.8.0
+   *
+   * @deprecated will be removed in 0.17.0. Move to using
+   * {@link Datasets#load(java.net.URI, java.lang.Class)} instead
    */
+  @Deprecated
   public static DatasetRepository open(URI repoUri) {
     Preconditions.checkArgument(REPO_SCHEME.equals(repoUri.getScheme()),
         "Not a repository URI: " + repoUri);
@@ -176,24 +187,28 @@ public class DatasetRepositories {
 
   /**
    * Synonym for {@link #openRandomAccess(java.net.URI)} for String URIs.
-   * 
+   *
    * @param uri a String URI
    * @return An appropriate implementation of {@link RandomAccessDatasetRepository}
    * @throws IllegalArgumentException If the String cannot be parsed into a
    *                                  valid {@link java.net.URI}.
    * @since 0.9.0
+   *
+   * @deprecated will be removed in 0.17.0. Move to using
+   * {@link Datasets#load(java.lang.String, java.lang.Class)} instead
    */
+  @Deprecated
   public static RandomAccessDatasetRepository openRandomAccess(String uri) {
     return openRandomAccess(URI.create(uri));
   }
-  
+
   /**
    * <p>
    * Synonym for {@link #open(java.net.URI)} for
    * {@link RandomAccessDatasetRepository}s
    * </p>
    * <p>
-   * This method provides a way to connect to a {@link DatasetRepository} the 
+   * This method provides a way to connect to a {@link DatasetRepository} the
    * same way {@link #open(java.net.URI)} does, but instead returns an
    * implementation of type {@link RandomAccessDatasetRepository}.
    * You should use this method when you need to access a
@@ -230,11 +245,15 @@ public class DatasetRepositories {
    * </td>
    * </tr>
    * </table>
-   * 
+   *
    * @param repositoryUri The repository URI
    * @return An appropriate implementation of {@link RandomAccessDatasetRepository}
    * @since 0.9.0
+   *
+   * @deprecated will be removed in 0.17.0. Move to using
+   * {@link Datasets#load(java.net.URI, java.lang.Class)} instead
    */
+  @Deprecated
   public static RandomAccessDatasetRepository openRandomAccess(URI repositoryUri) {
     return (RandomAccessDatasetRepository) open(repositoryUri);
   }

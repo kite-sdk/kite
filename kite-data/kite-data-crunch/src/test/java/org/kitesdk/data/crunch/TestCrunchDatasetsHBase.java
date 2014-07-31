@@ -32,13 +32,13 @@ import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.View;
 import org.kitesdk.data.hbase.HBaseDatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepositoryTest;
 import org.kitesdk.data.hbase.avro.AvroUtils;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;
+import org.kitesdk.data.spi.DatasetRepository;
 
 import static org.junit.Assert.assertEquals;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.datasetSize;

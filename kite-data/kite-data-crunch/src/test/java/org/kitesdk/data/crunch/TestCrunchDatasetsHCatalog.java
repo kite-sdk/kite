@@ -17,9 +17,9 @@ package org.kitesdk.data.crunch;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.junit.After;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
+import org.kitesdk.data.spi.DatasetRepository;
 
 public class TestCrunchDatasetsHCatalog extends TestCrunchDatasets {
   public TestCrunchDatasetsHCatalog(FileSystem fs) {

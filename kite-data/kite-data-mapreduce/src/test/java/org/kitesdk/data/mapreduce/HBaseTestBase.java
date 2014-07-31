@@ -21,10 +21,10 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepository;
 import org.kitesdk.data.hbase.avro.AvroUtils;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;
+import org.kitesdk.data.spi.DatasetRepository;
 
 public class HBaseTestBase {
 

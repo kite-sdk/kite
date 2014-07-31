@@ -37,9 +37,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
 import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetRepositories;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.spi.URIBuilder;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 import org.slf4j.Logger;
 
@@ -92,7 +93,8 @@ public class TestCSVImportCommandCluster extends MiniDFSTest {
   public void setup() throws Exception {
     TestUtil.run("create", datasetName, "-r", repoURI, "-s", avsc);
 
-    this.dataset = DatasetRepositories.open(repoURI).load(datasetName);
+    this.dataset = Datasets.load(new URIBuilder(repoURI, datasetName).build(),
+        GenericData.Record.class);
     this.console = mock(Logger.class);
     this.command = new CSVImportCommand(console);
     command.setConf(new Configuration());

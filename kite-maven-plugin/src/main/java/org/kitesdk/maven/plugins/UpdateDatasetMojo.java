@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.impl.Accessor;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
