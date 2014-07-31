@@ -76,8 +76,8 @@ For Hadoop 1:
 mvn install -Dhadoop.profile=1
 ```
 
-By default Java 6 is used. If you want to use Java 7, then add `-DjavaVersion=1.7`, e.g.
+By default Java 7 is used. If you want to use Java 6, then add `-DjavaVersion=1.6`, e.g.
 
 ```
-mvn install -DjavaVersion=1.7
+mvn install -DjavaVersion=1.6
 ```
