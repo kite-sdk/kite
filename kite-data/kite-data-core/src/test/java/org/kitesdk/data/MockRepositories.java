@@ -20,6 +20,8 @@ import com.google.common.collect.Maps;
 import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.URIPattern;
@@ -41,7 +43,7 @@ public class MockRepositories {
           public DatasetRepository getFromOptions(Map<String, String> options) {
             DatasetRepository repo = repos.get(options.get("id"));
             if (repo == null) {
-              repo = mock(DatasetRepository.class);
+              repo = mock(org.kitesdk.data.DatasetRepository.class);
               when(repo.getUri()).thenReturn(
                   URI.create("repo:" + mockPattern.construct(options)));
               repos.put(options.get("id"), repo);
@@ -61,6 +63,6 @@ public class MockRepositories {
   public static DatasetRepository newMockRepository() {
     ensureRegistered();
     String uri = "repo:mock:" + Integer.toString(ids.incrementAndGet());
-    return DatasetRepositories.open(uri);
+    return DatasetRepositories.repositoryFor(uri);
   }
 }

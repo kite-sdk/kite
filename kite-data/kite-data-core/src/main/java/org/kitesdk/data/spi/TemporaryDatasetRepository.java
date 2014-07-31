@@ -17,7 +17,6 @@
 package org.kitesdk.data.spi;
 
 import javax.annotation.concurrent.Immutable;
-import org.kitesdk.data.DatasetRepository;
 
 /**
  * A {@link DatasetRepository} that can be discarded when no longer needed.

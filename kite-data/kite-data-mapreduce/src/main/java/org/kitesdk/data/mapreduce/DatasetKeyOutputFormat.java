@@ -34,7 +34,6 @@ import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.TypeNotFoundException;
@@ -43,6 +42,8 @@ import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.DataModelUtil;
+import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.spi.TemporaryDatasetRepository;
@@ -378,9 +379,10 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     return !JobContext.class.isInterface();
   }
 
+  // TODO: Remove the need to use DatasetRepositories.repositoryFor()
   private static DatasetRepository getDatasetRepository(JobContext jobContext) {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
-    DatasetRepository repo = Datasets.repositoryFor(conf.get(KITE_OUTPUT_URI));
+    DatasetRepository repo = DatasetRepositories.repositoryFor(conf.get(KITE_OUTPUT_URI));
     if (repo instanceof TemporaryDatasetRepositoryAccessor) {
       repo = ((TemporaryDatasetRepositoryAccessor) repo)
           .getTemporaryRepository(getJobDatasetName(jobContext));

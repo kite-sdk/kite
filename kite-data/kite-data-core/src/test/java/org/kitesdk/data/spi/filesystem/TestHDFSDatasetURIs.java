@@ -24,11 +24,11 @@ import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.spi.DatasetRepository;
 
 public class TestHDFSDatasetURIs extends MiniDFSTest {
 
@@ -46,7 +46,7 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
   @Test
   public void testAbsolute() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hdfs://" + hdfsAuth + "/tmp/data");
+        .repositoryFor("repo:hdfs://" + hdfsAuth + "/tmp/data");
     repo.delete("test");
     repo.create("test", descriptor);
 
@@ -67,7 +67,7 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
   @Test
   public void testAbsoluteRoot() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hdfs://" + hdfsAuth + "/");
+        .repositoryFor("repo:hdfs://" + hdfsAuth + "/");
     repo.delete("test");
     repo.create("test", descriptor);
 
@@ -89,7 +89,7 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
   @Test
   public void testRelative() {
     DatasetRepository repo = DatasetRepositories
-        .open("repo:hdfs://" + hdfsAuth + "/data?absolute=false");
+        .repositoryFor("repo:hdfs://" + hdfsAuth + "/data?absolute=false");
     repo.delete("test");
     repo.create("test", descriptor);
 

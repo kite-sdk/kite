@@ -20,14 +20,14 @@ import com.google.common.collect.Lists;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.URIBuilder;
 
-import static org.apache.avro.generic.GenericData.Record;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -795,7 +795,7 @@ public class TestDatasets {
   public void testRepositoryFor() {
     URI datasetUri = new URIBuilder(repoUri, "test").build();
 
-    Assert.assertEquals(repo, Datasets.repositoryFor(datasetUri));
+    Assert.assertEquals(repo, DatasetRepositories.repositoryFor(datasetUri));
 
     verifyNoMoreInteractions(repo);
   }
@@ -804,7 +804,7 @@ public class TestDatasets {
   public void testRepositoryForStringUri() {
     URI datasetUri = new URIBuilder(repoUri, "test").build();
 
-    Assert.assertEquals(repo, Datasets.repositoryFor(datasetUri.toString()));
+    Assert.assertEquals(repo, DatasetRepositories.repositoryFor(datasetUri.toString()));
 
     verifyNoMoreInteractions(repo);
   }
@@ -815,7 +815,7 @@ public class TestDatasets {
         .with("field", 34)
         .build();
 
-    Assert.assertEquals(repo, Datasets.repositoryFor(datasetUri));
+    Assert.assertEquals(repo, DatasetRepositories.repositoryFor(datasetUri));
 
     verifyNoMoreInteractions(repo);
   }
@@ -826,7 +826,7 @@ public class TestDatasets {
         .with("field", 34)
         .build();
 
-    Assert.assertEquals(repo, Datasets.repositoryFor(datasetUri.toString()));
+    Assert.assertEquals(repo, DatasetRepositories.repositoryFor(datasetUri.toString()));
 
     verifyNoMoreInteractions(repo);
   }

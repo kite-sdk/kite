@@ -40,11 +40,11 @@ import org.kitesdk.compat.DynMethods;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.URIBuilder;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
@@ -114,7 +114,7 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     int rc = command.run();
     Assert.assertEquals("Should return success", 0, rc);
 
-    DatasetRepository repo = DatasetRepositories.open("repo:" + repoUri);
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     int size = DatasetTestUtilities.datasetSize(repo.load(dest));
     Assert.assertEquals("Should contain copied records", 6, size);
 
@@ -131,7 +131,7 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     int rc = command.run();
     Assert.assertEquals("Should return success", 0, rc);
 
-    DatasetRepository repo = DatasetRepositories.open("repo:" + repoUri);
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     FileSystemDataset<GenericData.Record> ds =
         (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
             load(dest);
@@ -157,7 +157,7 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     int rc = command.run();
     Assert.assertEquals("Should return success", 0, rc);
 
-    DatasetRepository repo = DatasetRepositories.open("repo:" + repoUri);
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     FileSystemDataset<GenericData.Record> ds =
         (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
             load(dest);
@@ -212,7 +212,7 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     int rc = command.run();
     Assert.assertEquals("Should return success", 0, rc);
 
-    DatasetRepository repo = DatasetRepositories.open("repo:" + repoUri);
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     FileSystemDataset<GenericData.Record> ds =
         (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
             load("dest_partitioned");

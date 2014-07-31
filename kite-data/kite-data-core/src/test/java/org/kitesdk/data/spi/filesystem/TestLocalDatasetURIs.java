@@ -17,7 +17,6 @@
 package org.kitesdk.data.spi.filesystem;
 
 import java.net.URI;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
@@ -29,12 +28,12 @@ import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 
 public class TestLocalDatasetURIs {
 
@@ -51,7 +50,7 @@ public class TestLocalDatasetURIs {
 
   @Test
   public void testAbsolute() {
-    DatasetRepository repo = DatasetRepositories.open("repo:file:/tmp/data");
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:/tmp/data");
     repo.delete("test");
     repo.create("test", descriptor);
 
@@ -71,7 +70,7 @@ public class TestLocalDatasetURIs {
 
   @Test
   public void testRelative() {
-    DatasetRepository repo = DatasetRepositories.open("repo:file:target/data");
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:target/data");
     repo.delete("test");
     repo.create("test", descriptor);
 
@@ -91,7 +90,7 @@ public class TestLocalDatasetURIs {
 
   @Test
   public void testViewConstraints() {
-    DatasetRepository repo = DatasetRepositories.open("repo:file:/tmp/data");
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:/tmp/data");
     repo.delete("test");
     repo.create("test", descriptor);
 

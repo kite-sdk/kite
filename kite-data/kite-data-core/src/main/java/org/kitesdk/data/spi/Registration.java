@@ -22,7 +22,6 @@ import java.net.URI;
 import java.util.Map;
 import java.util.ServiceLoader;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.DatasetRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

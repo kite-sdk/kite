@@ -17,14 +17,9 @@
 package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.internal.Lists;
-import com.beust.jcommander.internal.Sets;
 import com.google.common.io.Files;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.util.Set;
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -33,8 +28,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.Datasets;
+import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 import org.slf4j.Logger;
 
@@ -94,7 +90,7 @@ public class TestCopyCommandLocal {
     int rc = command.run();
     Assert.assertEquals("Should return success", 0, rc);
 
-    DatasetRepository repo = DatasetRepositories.open("repo:file:target/data");
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:target/data");
     int size = DatasetTestUtilities.datasetSize(repo.load(source));
     Assert.assertEquals("Should contain copied records", 2, size);
   }

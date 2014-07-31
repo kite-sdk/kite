@@ -17,9 +17,9 @@
 package org.kitesdk.data.hcatalog.impl;
 
 import org.kitesdk.compat.DynConstructors;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.Registration;

@@ -18,8 +18,8 @@ package org.kitesdk.cli.commands;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.MockRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.slf4j.Logger;
 
 import static org.mockito.Mockito.contains;

@@ -22,7 +22,6 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.kitesdk.data.Dataset;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.View;
 

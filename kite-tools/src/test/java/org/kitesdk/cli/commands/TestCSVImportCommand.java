@@ -35,8 +35,9 @@ import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.DatasetRepositories;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.spi.URIBuilder;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 import org.slf4j.Logger;
 
@@ -85,8 +86,9 @@ public class TestCSVImportCommand {
   public void setup() throws Exception {
     TestUtil.run("-v", "create", datasetName,
         "--use-local", "-d", "target/data", "-s", avsc);
-    this.dataset = DatasetRepositories.open("repo:file:target/data")
-        .load(datasetName);
+    this.dataset = Datasets.load(
+        new URIBuilder("repo:file:target/data", datasetName).build(),
+        GenericData.Record.class);
     this.console = mock(Logger.class);
     this.command = new CSVImportCommand(console);
     command.setConf(new Configuration());

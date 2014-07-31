@@ -22,9 +22,10 @@ import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 
 public class TestHivePartitioning {
 
@@ -115,7 +116,7 @@ public class TestHivePartitioning {
 
   @Test
   public void testManagedDatasetCreation() {
-    DatasetRepository repo = DatasetRepositories.open("repo:hive");
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:hive");
     repo.delete("records"); // ensure it does not already exist
     repo.create("records", descriptor);
     repo.delete("records"); // clean up
@@ -123,7 +124,7 @@ public class TestHivePartitioning {
 
   @Test
   public void testExternalDatasetCreation() {
-    DatasetRepository repo = DatasetRepositories.open("repo:hive:target/");
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:hive:target/");
     repo.delete("records"); // ensure it does not already exist
     repo.create("records", descriptor);
     repo.delete("records"); // clean up

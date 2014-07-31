@@ -16,7 +16,7 @@
 
 package org.kitesdk.data.hcatalog;
 
-import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.filesystem.TestFileSystemDatasetRepository;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;

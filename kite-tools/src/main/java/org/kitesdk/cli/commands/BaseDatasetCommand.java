@@ -21,10 +21,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import java.util.List;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.View;
+import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.slf4j.Logger;
 
 abstract class BaseDatasetCommand extends BaseCommand {
@@ -67,7 +67,7 @@ abstract class BaseDatasetCommand extends BaseCommand {
 
   protected DatasetRepository getDatasetRepository() {
     if (repo == null) {
-      this.repo = DatasetRepositories.open(buildRepoURI());
+      this.repo = DatasetRepositories.repositoryFor(buildRepoURI());
     }
     return repo;
   }

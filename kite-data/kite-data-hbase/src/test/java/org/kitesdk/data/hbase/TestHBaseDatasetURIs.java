@@ -24,13 +24,13 @@ import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.RandomAccessDataset;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.hbase.impl.Loader;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;
+import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.DatasetRepository;
 
 public class TestHBaseDatasetURIs {
 
@@ -53,7 +53,7 @@ public class TestHBaseDatasetURIs {
 
   @Test
   public void testBasic() {
-    DatasetRepository repo = DatasetRepositories.open(repositoryUri);
+    DatasetRepository repo = DatasetRepositories.repositoryFor(repositoryUri);
     repo.delete("test");
     repo.create("test", descriptor);
 

@@ -25,7 +25,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.IncompatibleSchemaException;
 import org.kitesdk.data.event.IncompatibleEvent;
@@ -33,6 +32,7 @@ import org.kitesdk.data.event.ReflectSmallEvent;
 import org.kitesdk.data.event.ReflectStandardEvent;
 import org.kitesdk.data.event.SmallEvent;
 import org.kitesdk.data.event.StandardEvent;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.TestRefinableViews;
 
 public class TestProjection extends TestRefinableViews {
