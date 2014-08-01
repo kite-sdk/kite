@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -38,12 +39,14 @@ public class SolrSchemaCommand extends BaseDatasetCommand {
   @Parameter(description = "<dataset name>")
   List<String> datasets;
   
-  String refFile = "refschema.xml";
+  String refFile1 = "refschema.xml";
+  String refFile2 = "refmorphline.conf";
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="UWF_NULL_FIELD",
       justification = "Field set by JCommander")
   @Parameter(names={"-o", "--output"}, description="Save SOLR schema.xml to path")
+
   String outputPath = null;
 
   @Parameter(names="--minimize",
@@ -60,30 +63,38 @@ public class SolrSchemaCommand extends BaseDatasetCommand {
         datasets != null && !datasets.isEmpty(),
         "Missing dataset name");
     if (datasets.size() == 1) {
-      Schema dsSchema = load(datasets.get(0), Object.class)
+      String datasetName = datasets.get(0); 		
+      Schema dsSchema = load(datasetName, Object.class)
         .getDataset()
         .getDescriptor()
         .getSchema();	
-    
-      String solr = "to be done";
-      File f = new File( refFile );
-	  System.out.println( dsSchema.toString() );
 
-	  System.out.println( ">>> Do the schema conversion now ... " );
-	  System.out.println( "> Use the reference-schema: " + f.getAbsolutePath() );
+      String collection = load(datasetName, Object.class)
+    	        .getDataset().getName();
+      
+      File f1 = new File( refFile1 );
+      File f2 = new File( refFile2 );
+  	  System.out.println( dsSchema.toString() );
+
+	  System.out.println( ">>> Do the schema conversion for collection " + collection + " now ... " );
+	  System.out.println( "> Use the reference-schema    : " + f1.getAbsolutePath() );
+	  System.out.println( "> Use the reference-morphline : " + f2.getAbsolutePath() );
 	  
 	  List<Field> listOfFields = dsSchema.getFields();
 
 	  String ex = "\n";
+	  String morphFields = "";
+	  
 	  for( Field fi : listOfFields ) { 
 		  String field = fi.name();
 		  ex = ex + "	  <field name=\"" + field + "\" type=\"string\" indexed=\"true\" stored=\"true\" required=\"true\" multiValued=\"false\" />"; 
+		  morphFields = morphFields + field + " : /" + field + "\n"; 
 	  }
 	  ex = ex + "	  <field name=\"_version_\" type=\"long\" indexed=\"true\" stored=\"true\" multiValued=\"false\"/>" +
 		   "	  <dynamicField name=\"ignored_*\" type=\"ignored\"/>";
 	  
 	  StringBuffer sb = new StringBuffer();
-	  BufferedReader br = new BufferedReader( new FileReader( f ) );
+	  BufferedReader br = new BufferedReader( new FileReader( f1 ) );
 	  while (br.ready()) { 
 		  String line = br.readLine();
 		  if ( line.contains( "___FIELDS___" ) )
@@ -95,10 +106,27 @@ public class SolrSchemaCommand extends BaseDatasetCommand {
 	  FileWriter fw = new FileWriter(fout);
 	  fw.write( sb.toString() );
 	  fw.close();
-	  
+
 	  System.out.println( "> Created solr-schema  : " + fout.getAbsolutePath() );
 	  
 	  System.out.println( "> This are your fields : \n" + ex );
+	  
+	  StringBuffer sb2 = new StringBuffer();
+	  BufferedReader br2 = new BufferedReader( new FileReader( f2 ) );
+	  while (br2.ready()) { 
+		  String line = br2.readLine();
+		  if ( line.contains( "___FIELDS___" ) )
+			  line = morphFields;
+		  sb2.append(line);
+	  }
+	  
+	  File fout2 = new File( collection + "-csv-morphlines.conf");
+	  System.out.println( "> Created morphline-file : " + fout2.getAbsolutePath() );
+	  FileWriter fw2 = new FileWriter(fout2);
+	  fw2.write( sb2.toString() );
+	  fw2.close();
+
+	  System.out.println( "> Fields in morphline : \n" + morphFields );
 	  
 	  System.out.println( "> Done.");
 	  
@@ -116,16 +144,12 @@ public class SolrSchemaCommand extends BaseDatasetCommand {
     return 0;
   }
 
-  @Override
-  public List<String> getExamples() {
-    return Lists.newArrayList(
-        "# Print the schema for dataset \"users\" to standard out:",
-        "users",
-        "# Print the schema for a dataset URI to standard out:",
-        "dataset:hbase:zk1,zk2/users",
-        "# Save the schema for dataset \"users\" to user.avsc:",
-        "users -o user.avsc"
-    );
-  }
+@Override
+public List<String> getExamples() {
+	// TODO Auto-generated method stub
+	return new ArrayList<String>();
+}
+
+   
 
 }
