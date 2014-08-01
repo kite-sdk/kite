@@ -80,7 +80,7 @@
       <item name="Source Repository" href="http://github.com/kite-sdk/kite"/>
       <item name="JIRA" href="https://issues.cloudera.org/browse/CDK"/>
       <item name="Mailing List" href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"/>
-      <item name="How To Contribute" href="how_to_contribute.html"/>
+      <item name="How To Contribute" href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"/>
       <item name="Adding a Module" href="adding_a_module.html"/>
       <item name="Project Information" href="project-info.html"/>
     </menu>
