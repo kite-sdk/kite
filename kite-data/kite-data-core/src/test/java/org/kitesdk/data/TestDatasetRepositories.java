@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.MemoryMetadataProvider;
 import org.kitesdk.data.spi.MetadataProvider;
 

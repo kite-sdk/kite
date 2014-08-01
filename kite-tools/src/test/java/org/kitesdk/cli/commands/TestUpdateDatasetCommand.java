@@ -27,9 +27,9 @@ import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.MockRepositories;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.slf4j.Logger;
 
 import static org.mockito.Mockito.*;

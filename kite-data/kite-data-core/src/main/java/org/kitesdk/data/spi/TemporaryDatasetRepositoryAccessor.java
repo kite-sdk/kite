@@ -16,8 +16,6 @@
 
 package org.kitesdk.data.spi;
 
-import org.kitesdk.data.DatasetRepository;
-
 public interface TemporaryDatasetRepositoryAccessor {
 
   /**

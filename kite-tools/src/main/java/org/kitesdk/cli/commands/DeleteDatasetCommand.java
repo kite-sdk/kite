@@ -20,8 +20,8 @@ import com.beust.jcommander.Parameters;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Delete a dataset and its metadata")

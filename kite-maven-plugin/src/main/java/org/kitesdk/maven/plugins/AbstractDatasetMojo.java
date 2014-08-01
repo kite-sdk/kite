@@ -16,8 +16,7 @@
 package org.kitesdk.maven.plugins;
 
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetRepositories;
-import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
 import com.google.common.annotations.VisibleForTesting;
@@ -36,6 +35,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.kitesdk.data.Datasets;
+import org.kitesdk.data.spi.DatasetRepositories;
 
 abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
 
@@ -85,7 +86,7 @@ abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
   DatasetRepository getDatasetRepository() {
     DatasetRepository repo;
     if (repositoryUri != null) {
-      return DatasetRepositories.open(repositoryUri);
+      return DatasetRepositories.repositoryFor(repositoryUri);
     }
     if (!hcatalog && rootDirectory == null) {
       throw new IllegalArgumentException("Root directory must be specified if not " +

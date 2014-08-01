@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data;
+package org.kitesdk.data.spi;
 
 import javax.annotation.concurrent.Immutable;
+import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetRepository;
+import org.kitesdk.data.RandomAccessDataset;
 
 /**
  * <p>
@@ -30,18 +34,30 @@ import javax.annotation.concurrent.Immutable;
  * <p>
  * Implementations of {@link DatasetRepository} are immutable.
  * </p>
- *
+ * 
  * @see RandomAccessDataset
  * @see DatasetRepository
  * @see DatasetDescriptor
  * @since 0.9.0
- *
- * @deprecated will be removed in 0.17.0. Move to using {@link Datasets} instead
  */
 @Immutable
-@Deprecated
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(value="NM_SAME_SIMPLE_NAME_AS_INTERFACE",
-    justification="Part of deprecation process.")
-public interface RandomAccessDatasetRepository extends org.kitesdk.data.spi.RandomAccessDatasetRepository {
+public interface RandomAccessDatasetRepository extends DatasetRepository {
 
+  @Override
+  <E> RandomAccessDataset<E> load(String name);
+  
+  @Override
+  <E> RandomAccessDataset<E> load(String name, Class<E> type);
+
+  @Override
+  <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor);
+
+  @Override
+  <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor, Class<E> type);
+
+  @Override
+  <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor);
+
+  @Override
+  <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor, Class<E> type);
 }

@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.Conversions;
 import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.Registration;
@@ -142,18 +142,12 @@ public class Datasets {
    * @param uri a {@code Dataset} or {@code View} URI.
    * @param <R> The type of {@code DatasetRepository} expected.
    * @return a {@code DatasetRepository} responsible for the given URI.
+   *
+   * @deprecated will be removed in 0.17.0.
    */
-  @SuppressWarnings("unchecked")
+  @Deprecated
   public static <R extends DatasetRepository> R repositoryFor(URI uri) {
-    Preconditions.checkArgument(
-        DATASET_SCHEME.equals(uri.getScheme()) ||
-        VIEW_SCHEME.equals(uri.getScheme()),
-        "Not a dataset or view URI: " + uri);
-
-    Pair<DatasetRepository, Map<String, String>> pair =
-        Registration.lookupDatasetUri(URI.create(uri.getRawSchemeSpecificPart()));
-
-    return (R) pair.first();
+    return org.kitesdk.data.spi.DatasetRepositories.repositoryFor(uri);
   }
 
   /**
@@ -165,9 +159,12 @@ public class Datasets {
    * @param uriString a {@code Dataset} or {@code View} URI.
    * @param <R> The type of {@code DatasetRepository} expected.
    * @return a {@code DatasetRepository} responsible for the given URI.
+   *
+   * @deprecated will be removed in 0.17.0.
    */
+  @Deprecated
   public static <R extends DatasetRepository> R repositoryFor(String uriString) {
-    return repositoryFor(URI.create(uriString));
+    return org.kitesdk.data.spi.DatasetRepositories.repositoryFor(uriString);
   }
 
   /**

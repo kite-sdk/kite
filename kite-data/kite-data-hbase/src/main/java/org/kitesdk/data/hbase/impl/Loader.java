@@ -15,8 +15,8 @@
  */
 package org.kitesdk.data.hbase.impl;
 
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.hbase.HBaseDatasetRepository;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.Registration;

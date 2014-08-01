@@ -26,9 +26,9 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetRepository;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 
 /**
