@@ -35,6 +35,16 @@ public class TestInToFromString {
   private static final Schema ARRAY = Schema.createArray(INT);
 
   @Test
+  public void testSingleEmptyStringValue() {
+    Assert.assertEquals("In<Utf8>#toString(STRING) (empty)",
+        "", Predicates.in(new Utf8("")).toString(STRING));
+    Assert.assertEquals("In#toString(STRING) (empty)",
+        "", Predicates.in("").toString(STRING));
+    Assert.assertEquals("In.fromString(String, STRING) (empty)",
+        Predicates.in(""), In.<String>fromString("", STRING));
+  }
+
+  @Test
   public void testSingleStringValue() {
     Assert.assertEquals("In<Utf8>#toString(STRING)",
         "a", Predicates.in(new Utf8("a")).toString(STRING));
@@ -61,6 +71,17 @@ public class TestInToFromString {
         "a,b,c", Predicates.in("a", "b", "c").toString(STRING));
     Assert.assertEquals("In.fromString(String, STRING)",
         Predicates.in("a", "b", "c"), In.<String>fromString("a,b,c", STRING));
+  }
+
+  @Test
+  public void testMultipleStringValuesWithEmpty() {
+    Assert.assertEquals("In<Utf8>#toString(STRING)",
+        "a,b,",
+        Predicates.in(new Utf8("a"), new Utf8("b"), new Utf8("")).toString(STRING));
+    Assert.assertEquals("In#toString(STRING)",
+        "a,b,", Predicates.in("a", "b", "").toString(STRING));
+    Assert.assertEquals("In.fromString(String, STRING)",
+        Predicates.in("a", "b", ""), In.<String>fromString("a,b,", STRING));
   }
 
   @Test

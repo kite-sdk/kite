@@ -218,12 +218,12 @@ public class TestURIBuilder {
   @Test
   public void testAddExistsConstraints() {
     Assert.assertEquals("Should add equality constraints",
-        URI.create("view:file:/datasets/test?id=exists()"),
+        URI.create("view:file:/datasets/test?id="),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty.with("id"))
             .build());
     Assert.assertEquals("Should add equality constraints",
-        URI.create("view:file:/datasets/test?id=exists()&timestamp=exists()"),
+        URI.create("view:file:/datasets/test?id=&timestamp="),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty.with("id").with("timestamp"))
             .build());

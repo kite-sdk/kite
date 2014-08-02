@@ -73,13 +73,13 @@ public class TestViewUris {
         "view:file:/tmp/test_name?timestamp=(0,)",
         test.fromAfter("timestamp", 0L));
     assertViewUriEquivalent("View with in(\"\") constraint",
-        "view:file:/tmp/test_name?color=",
+        "view:file:/tmp/test_name?color=in()",
         test.with("color", ""));
     assertViewUriEquivalent("View with in constraint",
         "view:file:/tmp/test_name?color=orange,red",
         test.with("color", "orange", "red"));
     assertViewUriEquivalent("View with exists constraint",
-        "view:file:/tmp/test_name?id=exists()",
+        "view:file:/tmp/test_name?id=",
         test.with("id"));
   }
 
