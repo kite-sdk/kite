@@ -51,19 +51,29 @@ public abstract class Predicates {
   }
 
   public static <T> String toString(Predicate<T> predicate, Schema schema) {
-    if (predicate instanceof RegisteredPredicate) {
-      return RegisteredPredicate.toString(
-          (RegisteredPredicate) predicate, schema);
+    if (predicate instanceof Exists) {
+      return "";
     } else if (predicate instanceof Range) {
       return ((Range) predicate).toString(schema);
     } else if (predicate instanceof In) {
-      return ((In) predicate).toString(schema);
+      String values = ((In) predicate).toString(schema);
+      if (values.length() != 0) {
+        return values;
+      }
+      // "" is a special case that conflicts with exists, use the named version
+      return "in()";
+    } else if (predicate instanceof RegisteredPredicate) {
+      return RegisteredPredicate.toString(
+          (RegisteredPredicate) predicate, schema);
     } else {
       throw new DatasetException("Unknown predicate: " + predicate);
     }
   }
 
   public static <T> Predicate<T> fromString(String pString, Schema schema) {
+    if (pString.length() == 0) {
+      return exists();
+    }
     Predicate<T> predicate = Range.fromString(pString, schema);
     if (predicate != null) {
       return predicate;

@@ -30,7 +30,17 @@ import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.kitesdk.data.spi.SchemaUtil;
 
-public class In<T> implements Predicate<T> {
+public class In<T> extends RegisteredPredicate<T> {
+  private static final String IN = "in";
+  static {
+    RegisteredPredicate.register(IN, new RegisteredPredicate.Factory() {
+      @Override
+      public <V> RegisteredPredicate<V> fromString(String values, Schema schema) {
+        return In.fromString(values, schema);
+      }
+    });
+  }
+
   public static <T> In<T> fromString(String set, Schema schema) {
     Set<T> values = Sets.newHashSet();
     for (String value : Splitter.on(',').split(set)) {
@@ -53,6 +63,11 @@ public class In<T> implements Predicate<T> {
 
   In(Set<T> set) {
     this.set = set;
+  }
+
+  @Override
+  public String getName() {
+    return IN;
   }
 
   @Override
