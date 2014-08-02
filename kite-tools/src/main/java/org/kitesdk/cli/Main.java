@@ -37,6 +37,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.kitesdk.cli.commands.InfoCommand;
 import org.kitesdk.cli.commands.ObjectSchemaCommand;
 import org.kitesdk.cli.commands.SchemaCommand;
 import org.kitesdk.cli.commands.ShowRecordsCommand;
@@ -76,6 +77,7 @@ public class Main extends Configured implements Tool {
     jc.addCommand("update", new UpdateDatasetCommand(console));
     jc.addCommand("delete", new DeleteDatasetCommand(console));
     jc.addCommand("schema", new SchemaCommand(console));
+    jc.addCommand("info", new InfoCommand(console));
     jc.addCommand("show", new ShowRecordsCommand(console));
     jc.addCommand("csv-schema", new CSVSchemaCommand(console));
     jc.addCommand("csv-import", new CSVImportCommand(console));
