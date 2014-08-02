@@ -16,7 +16,7 @@
 
 package org.kitesdk.data.spi.predicates;
 
-import java.util.Objects;
+import com.google.common.base.Objects;
 import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -93,7 +93,7 @@ public class TestRegisteredPredicateToFromString {
         return false;
       }
       Contains other = (Contains) obj;
-      return Objects.equals(contained, other.contained);
+      return Objects.equal(contained, other.contained);
     }
   }
 

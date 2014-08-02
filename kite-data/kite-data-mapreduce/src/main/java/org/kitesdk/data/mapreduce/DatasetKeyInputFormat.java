@@ -104,10 +104,10 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
      * @return this for method chaining
      */
     public ConfigBuilder readFrom(View<?> view) {
-      if (view instanceof Dataset && view instanceof FileSystemDataset) {
-          FileSystemDataset dataset = (FileSystemDataset) view;
-          conf.set(KITE_PARTITION_DIR,
-              String.valueOf(dataset.getDescriptor().getLocation()));
+      if (view instanceof FileSystemDataset) {
+        FileSystemDataset dataset = (FileSystemDataset) view;
+        conf.set(KITE_PARTITION_DIR,
+            String.valueOf(dataset.getDescriptor().getLocation()));
       }
       withType(view.getType());
       return readFrom(view.getUri());

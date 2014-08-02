@@ -102,10 +102,10 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      * @return this for method chaining
      */
     public ConfigBuilder writeTo(View<?> view) {
-      if (view instanceof Dataset && view instanceof FileSystemDataset) {
-          FileSystemDataset dataset = (FileSystemDataset) view;
-          conf.set(KITE_PARTITION_DIR,
-              String.valueOf(dataset.getDescriptor().getLocation()));
+      if (view instanceof FileSystemDataset) {
+        FileSystemDataset dataset = (FileSystemDataset) view;
+        conf.set(KITE_PARTITION_DIR,
+            String.valueOf(dataset.getDescriptor().getLocation()));
       }
       withType(view.getType());
       return writeTo(view.getUri());
