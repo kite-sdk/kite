@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,8 +40,8 @@ public class SolrSchemaCommand extends BaseDatasetCommand {
   @Parameter(description = "<dataset name>")
   List<String> datasets;
   
-  String refFile1 = "refschema.xml";
-  String refFile2 = "refmorphline.conf";
+  String refFile1 = "/refschema.xml";
+  String refFile2 = "/refmorphline.conf";
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="UWF_NULL_FIELD",
@@ -71,30 +72,33 @@ public class SolrSchemaCommand extends BaseDatasetCommand {
 
       String collection = load(datasetName, Object.class)
     	        .getDataset().getName();
-      
-      File f1 = new File( refFile1 );
-      File f2 = new File( refFile2 );
+       
   	  System.out.println( dsSchema.toString() );
 
-	  System.out.println( ">>> Do the schema conversion for collection " + collection + " now ... " );
-	  System.out.println( "> Use the reference-schema    : " + f1.getAbsolutePath() );
-	  System.out.println( "> Use the reference-morphline : " + f2.getAbsolutePath() );
+	  System.out.println( ">>> Start the schema conversion for collection :" + collection + " now ... " );
+	  System.out.println( ">     Use the reference-schema    : " + refFile1 );
+	  System.out.println( ">     Use the reference-morphline : " + refFile2 );
 	  
 	  List<Field> listOfFields = dsSchema.getFields();
 
 	  String ex = "\n";
-	  String morphFields = "";
+	  String morphFields = "	  ";
 	  
 	  for( Field fi : listOfFields ) { 
 		  String field = fi.name();
-		  ex = ex + "	  <field name=\"" + field + "\" type=\"string\" indexed=\"true\" stored=\"true\" required=\"true\" multiValued=\"false\" />"; 
-		  morphFields = morphFields + field + " : /" + field + "\n"; 
+		  ex = ex + "	  <field name=\"" + field + "\" type=\"string\" indexed=\"true\" stored=\"true\" required=\"true\" multiValued=\"false\" />\n"; 
+		  morphFields = morphFields + field + " : /" + field + "\n	  "; 
 	  }
-	  ex = ex + "	  <field name=\"_version_\" type=\"long\" indexed=\"true\" stored=\"true\" multiValued=\"false\"/>" +
-		   "	  <dynamicField name=\"ignored_*\" type=\"ignored\"/>";
+	  ex = ex + "	  <field name=\"_version_\" type=\"long\" indexed=\"true\" stored=\"true\" multiValued=\"false\"/>\n" +
+		   "	  <dynamicField name=\"ignored_*\" type=\"ignored\"/>\n";
+
+	  File fout = new File("schema.xml");
+
+	  System.out.println( ">     This are your fields : \n" + ex );
+	  System.out.println( ">>> Created solr-schema  : " + fout.getAbsolutePath() );
 	  
-	  StringBuffer sb = new StringBuffer();
-	  BufferedReader br = new BufferedReader( new FileReader( f1 ) );
+ 	  StringBuffer sb = new StringBuffer();
+	  BufferedReader br = new BufferedReader( new InputStreamReader( SolrSchemaCommand.class.getResourceAsStream( refFile1 ) ) );
 	  while (br.ready()) { 
 		  String line = br.readLine();
 		  if ( line.contains( "___FIELDS___" ) )
@@ -102,17 +106,16 @@ public class SolrSchemaCommand extends BaseDatasetCommand {
 		  sb.append(line);
 	  }
 
-	  File fout = new File("schema.xml");
 	  FileWriter fw = new FileWriter(fout);
 	  fw.write( sb.toString() );
 	  fw.close();
 
-	  System.out.println( "> Created solr-schema  : " + fout.getAbsolutePath() );
+	  System.out.println( ">>> Created solr-schema  : " + fout.getAbsolutePath() );
 	  
-	  System.out.println( "> This are your fields : \n" + ex );
+	  System.out.print( ">   This are your fields : \n" + ex );
 	  
 	  StringBuffer sb2 = new StringBuffer();
-	  BufferedReader br2 = new BufferedReader( new FileReader( f2 ) );
+	  BufferedReader br2 = new BufferedReader( new InputStreamReader( SolrSchemaCommand.class.getResourceAsStream( refFile2 ) ) );
 	  while (br2.ready()) { 
 		  String line = br2.readLine();
 		  if ( line.contains( "___FIELDS___" ) )
@@ -120,13 +123,15 @@ public class SolrSchemaCommand extends BaseDatasetCommand {
 		  sb2.append(line);
 	  }
 	  
+	  String ml = sb2.toString().replace("___COLLECTION___", collection );
+	  
 	  File fout2 = new File( collection + "-csv-morphlines.conf");
-	  System.out.println( "> Created morphline-file : " + fout2.getAbsolutePath() );
+	  System.out.println( ">>> Created morphline-file : " + fout2.getAbsolutePath() );
 	  FileWriter fw2 = new FileWriter(fout2);
 	  fw2.write( sb2.toString() );
 	  fw2.close();
 
-	  System.out.println( "> Fields in morphline : \n" + morphFields );
+	  System.out.println( ">   Fields in morphline : \n" + morphFields );
 	  
 	  System.out.println( "> Done.");
 	  

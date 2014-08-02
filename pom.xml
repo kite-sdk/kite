@@ -25,7 +25,7 @@
   <modules>
     <module>kite-hadoop-dependencies</module>
     <module>kite-hadoop-compatibility</module>
-    <!--module>kite-hbase-dependencies</module-->
+    <module>kite-hbase-dependencies</module>
     <module>kite-data</module>
     <module>kite-app-parent</module>
     <module>kite-maven-plugin</module>
@@ -529,6 +529,8 @@
           <configuration>
             <excludes>
               <exclude>**/*.avro</exclude>
+              <exclude>**/*.xml</exclude>
+              <exclude>**/*.conf</exclude>
               <exclude>**/*.avsc</exclude>
               <exclude>**/*.avdl</exclude>
               <exclude>**/*.json</exclude> <!-- some test fixtures are json -->
