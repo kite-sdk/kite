@@ -21,6 +21,8 @@ import com.beust.jcommander.Parameters;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -64,6 +66,7 @@ public class SolrSchemaCommand extends BaseDatasetCommand {
         datasets != null && !datasets.isEmpty(),
         "Missing dataset name");
     if (datasets.size() == 1) {
+    		
       String datasetName = datasets.get(0); 		
       Schema dsSchema = load(datasetName, Object.class)
         .getDataset()
@@ -122,6 +125,7 @@ public class SolrSchemaCommand extends BaseDatasetCommand {
 			  line = morphFields;
 		  sb2.append(line);
 	  }
+	  
 	  
 	  String ml = sb2.toString().replace("___COLLECTION___", collection );
 	  

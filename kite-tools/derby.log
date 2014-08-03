@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-2014-07-29 12:53:25.020 GMT:
- Booting Derby version The Apache Software Foundation - Apache Derby - 10.4.2.0 - (689064): instance a816c00e-0147-822e-b343-0000028f37e8
+2014-08-02 21:45:15.090 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.4.2.0 - (689064): instance a816c00e-0147-98af-0b9e-000002725050
 on database directory /home/training/kite/kite-tools/metastore_db  
 
 Database Class Loader started - derby.database.classpath=''

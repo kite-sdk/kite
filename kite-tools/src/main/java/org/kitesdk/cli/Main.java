@@ -31,6 +31,7 @@ import org.kitesdk.cli.commands.CreateColumnMappingCommand;
 import org.kitesdk.cli.commands.CreateDatasetCommand;
 import org.kitesdk.cli.commands.CreatePartitionStrategyCommand;
 import org.kitesdk.cli.commands.DeleteDatasetCommand;
+import org.kitesdk.cli.commands.DublinCoreCommand;
 import org.kitesdk.cli.commands.SolrSchemaCommand;
 
 import com.google.common.collect.ImmutableSet;
@@ -78,6 +79,7 @@ public class Main extends Configured implements Tool {
     jc.addCommand("help", help, "-h", "-help", "--help");
     jc.addCommand("create", new CreateDatasetCommand(console));
     jc.addCommand("copy", new CopyCommand(console));
+    jc.addCommand("dc", new DublinCoreCommand(console));
     jc.addCommand("update", new UpdateDatasetCommand(console));
     jc.addCommand("delete", new DeleteDatasetCommand(console));
     jc.addCommand("schema", new SchemaCommand(console));
