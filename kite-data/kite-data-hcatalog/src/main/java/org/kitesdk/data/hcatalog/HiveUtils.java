@@ -152,7 +152,7 @@ class HiveUtils {
   }
 
   private static boolean isPartitioned(Table table) {
-    return (getPartCols(table) != null) && (getPartCols(table).size() != 0);
+    return (getPartCols(table).size() != 0);
   }
 
   private static List<FieldSchema> getPartCols(Table table) {
