@@ -73,16 +73,14 @@ public class CopyTask<E> extends Configured {
 
   private final View<E> from;
   private final View<E> to;
-  private final Class<E> entityClass;
   private boolean compact = true;
   private int numWriters = -1;
 
   private long count = 0;
 
-  public CopyTask(View<E> from, View<E> to, Class<E> entityClass) {
+  public CopyTask(View<E> from, View<E> to) {
     this.from = from;
     this.to = to;
-    this.entityClass = entityClass;
   }
 
   public long getCount() {
@@ -120,8 +118,7 @@ public class CopyTask<E> extends Configured {
       Pipeline pipeline = new MRPipeline(getClass(), getConf());
 
       // TODO: add transforms
-      PCollection<E> collection = pipeline.read(
-          CrunchDatasets.asSource(from, entityClass));
+      PCollection<E> collection = pipeline.read(CrunchDatasets.asSource(from));
 
       if (compact) {
         collection = partition(collection,
@@ -143,8 +140,7 @@ public class CopyTask<E> extends Configured {
       Pipeline pipeline = MemPipeline.getInstance();
 
       // TODO: add transforms
-      PCollection<E> collection = pipeline.read(
-          CrunchDatasets.asSource(from, entityClass));
+      PCollection<E> collection = pipeline.read(CrunchDatasets.asSource(from));
 
       boolean threw = true;
       DatasetWriter<E> writer = null;

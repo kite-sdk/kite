@@ -17,7 +17,6 @@ package org.kitesdk.data.spi;
 
 import org.kitesdk.data.DatasetReader;
 import java.util.Iterator;
-import org.kitesdk.data.DatasetWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,12 +28,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractDatasetReader<E>
     implements DatasetReader<E>, InitializeAccessor {
   private static final Logger LOG = LoggerFactory.getLogger(DatasetReader.class);
-
-  @Override
-  @Deprecated
-  public void open() {
-    LOG.warn("DatasetReader#open is no longer needed and will be removed");
-  }
 
   @Override
   public void remove() {

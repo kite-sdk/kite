@@ -59,10 +59,6 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       LoggerFactory.getLogger(DatasetKeyInputFormat.class);
 
   public static final String KITE_INPUT_URI = "kite.inputUri";
-  @Deprecated
-  public static final String KITE_REPOSITORY_URI = "kite.inputRepositoryUri";
-  @Deprecated
-  public static final String KITE_DATASET_NAME = "kite.inputDatasetName";
   public static final String KITE_PARTITION_DIR = "kite.inputPartitionDir";
   public static final String KITE_TYPE = "kite.inputEntityType";
 
@@ -158,42 +154,6 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     return new ConfigBuilder(conf);
   }
 
-  /**
-   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
-   */
-  @Deprecated
-  public static void setRepositoryUri(Job job, URI uri) {
-    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(job);
-    conf.set(KITE_REPOSITORY_URI, uri.toString());
-    conf.unset(KITE_INPUT_URI); // this URI would override, so remove it
-  }
-
-  /**
-   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
-   */
-  @Deprecated
-  public static void setDatasetName(Job job, String name) {
-    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(job);
-    conf.set(KITE_DATASET_NAME, name);
-    conf.unset(KITE_INPUT_URI); // this URI would override, so remove it
-  }
-
-  /**
-   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
-   */
-  @Deprecated
-  public static <E> void setView(Job job, View<E> view) {
-    configure(job).readFrom(view);
-  }
-
-  /**
-   * @deprecated will be removed in 0.16.0; use {@link #configure(Configuration)}
-   */
-  @Deprecated
-  public static <E> void setView(Configuration conf, View<E> view) {
-    configure(conf).readFrom(view);
-  }
-
   @Override
   public Configuration getConf() {
     return conf;
@@ -256,12 +216,6 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       }
     }
     String inputUri = conf.get(KITE_INPUT_URI);
-    if (inputUri == null) {
-      return Datasets.<E, View<E>>load(
-          new URIBuilder(
-              conf.get(KITE_REPOSITORY_URI), conf.get(KITE_DATASET_NAME))
-              .build(), type);
-    }
     return Datasets.<E, View<E>>load(inputUri, type);
   }
 

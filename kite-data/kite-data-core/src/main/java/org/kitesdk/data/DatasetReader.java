@@ -62,23 +62,6 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
 
   /**
-   * <p>
-   * Open the reader, allocating any necessary resources required to produce
-   * entities.
-   * </p>
-   * <p>
-   * This method <strong>must</strong> be invoked prior to any calls of
-   * {@link #hasNext()} or {@link #next()}.
-   * </p>
-   *
-   * @throws UnknownFormatException
-   * @throws DatasetReaderException
-   * @deprecated will be removed in 0.16.0; no longer required
-   */
-  @Deprecated
-  void open();
-
-  /**
    * Tests the reader to see if additional entities can be read.
    *
    * @return true if additional entities exist, false otherwise.

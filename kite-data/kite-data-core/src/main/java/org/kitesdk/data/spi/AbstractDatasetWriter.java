@@ -29,9 +29,4 @@ public abstract class AbstractDatasetWriter<E>
     implements DatasetWriter<E>, InitializeAccessor {
   private static final Logger LOG = LoggerFactory.getLogger(DatasetWriter.class);
 
-  @Override
-  @Deprecated
-  public void open() {
-    LOG.warn("DatasetWriter#open is no longer needed and will be removed");
-  }
 }

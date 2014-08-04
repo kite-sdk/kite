@@ -146,7 +146,7 @@ public class CSVImportCommand extends BaseDatasetCommand {
       }
 
       CopyTask<GenericData.Record> copy = new CopyTask<GenericData.Record>(
-          csvDataset, target, GenericData.Record.class);
+          csvDataset, target);
       copy.setConf(getConf());
 
       if (noCompaction) {

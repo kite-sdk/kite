@@ -59,22 +59,6 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
 
   /**
    * <p>
-   * Open the writer, allocating any necessary resources required to store
-   * entities.
-   * </p>
-   * <p>
-   * This method <strong>must</strong> be invoked prior to any calls of
-   * {@link #write(Object)} or {@link #flush()}.
-   * </p>
-   *
-   * @throws DatasetWriterException
-   * @deprecated will be removed in 0.16.0; no longer required
-   */
-  @Deprecated
-  void open();
-
-  /**
-   * <p>
    * Write an entity of type {@code E} to the associated dataset.
    * </p>
    * <p>

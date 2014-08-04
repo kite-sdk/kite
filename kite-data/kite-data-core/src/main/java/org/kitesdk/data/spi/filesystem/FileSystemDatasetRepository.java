@@ -15,8 +15,7 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
-import org.kitesdk.data.PartitionKey;
-import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.spi.SchemaValidationUtil;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -145,8 +144,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .descriptor(newDescriptor)
         .type(type)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(newDescriptor.isPartitioned() ?
-            Accessor.getDefault().newPartitionKey() : null)
+        .partitionKey(newDescriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
   }
@@ -201,8 +199,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .descriptor(updatedDescriptor)
         .type(type)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(updatedDescriptor.isPartitioned() ?
-            Accessor.getDefault().newPartitionKey() : null)
+        .partitionKey(updatedDescriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
   }
@@ -221,8 +218,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .descriptor(descriptor)
         .type(type)
         .uri(new URIBuilder(getUri(), name).build())
-        .partitionKey(descriptor.isPartitioned() ?
-            Accessor.getDefault().newPartitionKey() : null)
+        .partitionKey(descriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
 
@@ -375,7 +371,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
       values.add(fp.valueFromString(stringValue,
           SchemaUtil.getPartitionType(fp, schema)));
     }
-    return Accessor.getDefault().newPartitionKey(values.toArray(new Object[values.size()]));
+    return new PartitionKey(values.toArray(new Object[values.size()]));
   }
 
   @Override

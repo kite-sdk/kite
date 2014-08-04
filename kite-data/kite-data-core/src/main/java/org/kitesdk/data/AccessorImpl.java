@@ -23,10 +23,6 @@ final class AccessorImpl extends Accessor {
   public Format newFormat(String name) {
     return new Format(name);
   }
-  @Override
-  public PartitionKey newPartitionKey(Object... values) {
-    return new PartitionKey(values);
-  }
 
   @Override
   @SuppressWarnings("deprecation")

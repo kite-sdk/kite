@@ -32,35 +32,6 @@ import org.kitesdk.data.View;
 public class CrunchDatasets {
 
   /**
-   * Expose the given {@link Dataset} as a Crunch {@link ReadableSource}.
-   *
-   * @param dataset the dataset to read from
-   * @param type    the Java type of the entities in the dataset
-   * @param <E>     the type of entity produced by the source
-   * @return a {@link ReadableSource} for the dataset
-   * @deprecated will be removed in 0.16.0; use {@link #asSource(View)}
-   */
-  @Deprecated
-  public static <E> ReadableSource<E> asSource(Dataset<E> dataset, Class<E> type) {
-    return new DatasetSourceTarget<E>(dataset, type);
-  }
-
-  /**
-   * Expose the given {@link View} as a Crunch {@link ReadableSource}.
-   *
-   * @param view the view to read from
-   * @param type    the Java type of the entities in the dataset
-   * @param <E>     the type of entity produced by the source
-   * @return a {@link ReadableSource} for the view
-   *
-   * @since 0.14.0
-   * @deprecated will be removed in 0.16.0; use {@link #asSource(View)}
-   */
-  public static <E> ReadableSource<E> asSource(View<E> view, Class<E> type) {
-    return new DatasetSourceTarget<E>(view, type);
-  }
-
-  /**
    * Expose the given {@link View} as a Crunch {@link ReadableSource}.
    *
    * @param view the view to read from
@@ -101,19 +72,6 @@ public class CrunchDatasets {
    */
   public static <E> ReadableSource<E> asSource(String uri, Class<E> type) {
     return asSource(URI.create(uri), type);
-  }
-
-  /**
-   * Expose the given {@link Dataset} as a Crunch {@link Target}.
-   *
-   * @param dataset the dataset to write to
-   * @param <E>     the type of entity stored in the dataset
-   * @return a {@link Target} for the dataset
-   * @deprecated will be removed in 0.16.0; use {@link #asTarget(View)}
-   */
-  @Deprecated
-  public static <E> Target asTarget(Dataset<E> dataset) {
-    return new DatasetTarget<E>(dataset);
   }
 
   /**
