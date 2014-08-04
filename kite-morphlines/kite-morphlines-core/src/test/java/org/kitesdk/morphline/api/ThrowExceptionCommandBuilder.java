@@ -58,8 +58,7 @@ public final class ThrowExceptionCommandBuilder implements CommandBuilder {
 
     @Override
     public boolean process(Record record) {
-      int x = 5 / 0;
-      return true;
+      throw new MorphlineRuntimeException("Forced exception");
     }
 
   }
