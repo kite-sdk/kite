@@ -62,10 +62,6 @@ import org.kitesdk.data.spi.filesystem.FileSystemProperties;
 public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   public static final String KITE_OUTPUT_URI = "kite.outputUri";
-  @Deprecated
-  public static final String KITE_REPOSITORY_URI = "kite.outputRepositoryUri";
-  @Deprecated
-  public static final String KITE_DATASET_NAME = "kite.outputDatasetName";
   public static final String KITE_PARTITION_DIR = "kite.outputPartitionDir";
   public static final String KITE_TYPE = "kite.outputEntityType";
 
@@ -274,38 +270,6 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
    */
   public static ConfigBuilder configure(Configuration conf) {
     return new ConfigBuilder(conf);
-  }
-
-  /**
-   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
-   */
-  public static void setRepositoryUri(Job job, URI uri) {
-    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(job);
-    conf.set(KITE_REPOSITORY_URI, uri.toString());
-    conf.unset(KITE_OUTPUT_URI); // this URI would override, so remove it
-  }
-
-  /**
-   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
-   */
-  public static void setDatasetName(Job job, String name) {
-    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(job);
-    conf.set(KITE_DATASET_NAME, name);
-    conf.unset(KITE_OUTPUT_URI); // this URI would override, so remove it
-  }
-
-  /**
-   * @deprecated will be removed in 0.16.0; use {@link #configure(Job)} instead
-   */
-  public static <E> void setView(Job job, View<E> view) {
-    configure(job).writeTo(view);
-  }
-
-  /**
-   * @deprecated will be removed in 0.16.0; use {@link #configure(Configuration)}
-   */
-  public static <E> void setView(Configuration conf, View<E> view) {
-    configure(conf).writeTo(view);
   }
 
   static class DatasetRecordWriter<E> extends RecordWriter<E, Void> {
@@ -520,12 +484,6 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     Class<E> type = getType(jobContext);
 
     String outputUri = conf.get(KITE_OUTPUT_URI);
-    if (outputUri == null) {
-      return Datasets.<E, View<E>>load(
-          new URIBuilder(
-              conf.get(KITE_REPOSITORY_URI), conf.get(KITE_DATASET_NAME))
-              .build(), type);
-    }
     return Datasets.<E, View<E>>load(outputUri, type);
   }
 

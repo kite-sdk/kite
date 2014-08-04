@@ -56,8 +56,7 @@ public class CopyCommand extends BaseDatasetCommand {
     View<GenericData.Record> source = load(datasets.get(0), GenericData.Record.class);
     View<GenericData.Record> dest = load(datasets.get(1), GenericData.Record.class);
 
-    CopyTask task = new CopyTask<GenericData.Record>(
-        source, dest, GenericData.Record.class);
+    CopyTask task = new CopyTask<GenericData.Record>(source, dest);
     task.setConf(getConf());
 
     if (noCompaction) {

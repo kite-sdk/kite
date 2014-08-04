@@ -22,10 +22,7 @@ public interface PartitionedDataset<E> extends Dataset<E> {
 
   /**
    * Get a partition for a {@link PartitionKey}, optionally creating the
-   * partition if it doesn't already exist. You can obtain the
-   * {@link PartitionKey} using
-   * {@link org.kitesdk.data.PartitionStrategy#partitionKey(Object...)} or
-   * {@link org.kitesdk.data.PartitionStrategy#partitionKeyForEntity(Object)}.
+   * partition if it doesn't already exist.
    *
    * @param key        The key used to look up the partition.
    * @param autoCreate If true, automatically creates the partition if it

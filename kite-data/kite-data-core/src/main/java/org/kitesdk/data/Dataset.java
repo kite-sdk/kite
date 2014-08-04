@@ -19,7 +19,6 @@ import java.net.URI;
 import org.apache.avro.Schema;
 
 import javax.annotation.concurrent.Immutable;
-import org.kitesdk.data.spi.PartitionKey;
 
 /**
  * <p>
@@ -60,53 +59,6 @@ public interface Dataset<E> extends RefinableView<E> {
    * Get the {@link DatasetDescriptor} associated with this dataset.
    */
   DatasetDescriptor getDescriptor();
-
-  /**
-   * Get a partition for a {@link PartitionKey}, optionally creating the
-   * partition if it doesn't already exist. You can obtain the
-   * {@link PartitionKey} using
-   * {@link PartitionStrategy#partitionKey(Object...)} or
-   * {@link PartitionStrategy#partitionKeyForEntity(Object)}.
-   *
-   * @param key        The key used to look up the partition.
-   * @param autoCreate If true, automatically creates the partition if it
-   * doesn't exist.
-   * @throws DatasetException
-   * @deprecated will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}
-   * methods instead
-   */
-  @Deprecated
-  Dataset<E> getPartition(PartitionKey key, boolean autoCreate);
-
-  /**
-   * Drop a partition for a {@link PartitionKey}. Dropping a partition that
-   * doesn't exist results in a {@link DatasetException} being thrown.
-   *
-   * @param key The key used to look up the partition.
-   * @throws DatasetException
-   * @since 0.2.0
-   * @deprecated will be removed in 0.16.0; use {@link #deleteAll()} on an appropriate
-   * view instead
-   */
-  @Deprecated
-  void dropPartition(PartitionKey key);
-
-  /**
-   * <p>
-   * Return partitions, if this dataset is partitioned.
-   * </p>
-   * <p>
-   * Note that, depending on the implementation, the returned iterable can hold
-   * system resources until exhausted and/or finalized.
-   * </p>
-   *
-   * @return an iterable over all partitions of this dataset
-   * @throws DatasetException
-   * @deprecated will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}
-   * methods instead
-   */
-  @Deprecated
-  Iterable<? extends Dataset<E>> getPartitions();
 
   /**
    * Return a {@code URI} for this {@code Dataset}.

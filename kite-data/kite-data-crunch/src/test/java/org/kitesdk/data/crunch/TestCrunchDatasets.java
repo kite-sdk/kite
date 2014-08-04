@@ -89,7 +89,6 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
   }
 
   @Test
-  @SuppressWarnings("deprecation") // still testing asTarget/asSource(Dataset)
   public void testGeneric() throws IOException {
     Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).build());
@@ -110,7 +109,6 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
   }
 
   @Test
-  @SuppressWarnings("deprecation") // still testing asTarget/asSource(Dataset)
   public void testGenericParquet() throws IOException {
     Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).format(Formats.PARQUET).build());
@@ -131,7 +129,6 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
   }
 
   @Test
-  @SuppressWarnings("deprecation") // still testing asTarget/asSource(Dataset)
   public void testPartitionedSource() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
@@ -157,7 +154,6 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
   }
 
   @Test
-  @SuppressWarnings("deprecation") // still testing asTarget/asSource(Dataset)
   public void testPartitionedSourceAndTarget() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
@@ -185,7 +181,6 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
   }
 
   @Test
-  @SuppressWarnings("deprecation")
   public void testPartitionedSourceAndTargetWritingToTopLevel() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
@@ -217,7 +212,6 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
   }
 
   @Test
-  @SuppressWarnings("deprecation") // still testing asTarget/asSource(Dataset)
   public void testSourceView() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
@@ -242,7 +236,6 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
   }
 
   @Test
-  @SuppressWarnings("deprecation") // still testing asTarget/asSource(Dataset)
   public void testTargetView() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();

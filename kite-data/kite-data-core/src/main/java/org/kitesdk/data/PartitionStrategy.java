@@ -26,15 +26,11 @@ import org.kitesdk.data.spi.partition.HourFieldPartitioner;
 import org.kitesdk.data.spi.partition.MinuteFieldPartitioner;
 import org.kitesdk.data.spi.partition.MonthFieldPartitioner;
 import org.kitesdk.data.spi.partition.PartitionFunctions;
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import java.util.Locale;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import org.apache.avro.generic.GenericRecord;
 
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.partition.HashFieldPartitioner;
@@ -57,15 +53,13 @@ import org.slf4j.LoggerFactory;
  * {@link FieldPartitioner}s upon creation. When a {@link Dataset} is configured
  * with a partition strategy, that data is considered partitioned. Any entities
  * written to a partitioned dataset are evaluated with its
- * {@code PartitionStrategy} which, in turn, produces a {@link PartitionKey}
- * that is used by the dataset implementation to select the proper partition.
+ * {@code PartitionStrategy} to determine which partition to write to.
  * </p>
  * <p>
  * You should use the inner {@link Builder} to create new instances.
  * </p>
  * 
  * @see FieldPartitioner
- * @see PartitionKey
  * @see DatasetDescriptor
  * @see Dataset
  */
@@ -154,104 +148,6 @@ public class PartitionStrategy {
       cardinality *= fieldPartitioner.getCardinality();
     }
     return cardinality;
-  }
-
-  /**
-   * <p>
-   * Construct a partition key with a variadic array of values corresponding to
-   * the field partitioners in this partition strategy.
-   * </p>
-   * <p>
-   * It is permitted to have fewer values than field partitioners, in which case
-   * all subpartititions in the unspecified parts of the key are matched by the
-   * key.
-   * </p>
-   * <p>
-   * Null values are not permitted.
-   * </p>
-   * @deprecated will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}
-   * methods instead
-   */
-  @SuppressWarnings("deprecation")
-  @Deprecated
-  public PartitionKey partitionKey(Object... values) {
-    return new PartitionKey(values);
-  }
-
-  /**
-   * <p>
-   * Construct a partition key for the given entity.
-   * </p>
-   * <p>
-   * This is a convenient way to find the partition that a given entity is
-   * written to, or to find a partition using objects from the entity domain.
-   * </p>
-   * @deprecated will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}
-   * methods instead
-   */
-  @SuppressWarnings("deprecation")
-  @Deprecated
-  public PartitionKey partitionKeyForEntity(Object entity) {
-    return partitionKeyForEntity(entity, null);
-  }
-
-  /**
-   * <p>
-   * Construct a partition key for the given entity, reusing the supplied key if 
-   * not null.
-   * </p>
-   * <p>
-   * This is a convenient way to find the partition that a given entity is
-   * written to, or to find a partition using objects from the entity domain.
-   * </p>
-   * @deprecated will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}
-   * methods instead
-   */
-  @SuppressWarnings({"unchecked", "deprecation"})
-  @Deprecated
-  public PartitionKey partitionKeyForEntity(Object entity,
-      @Nullable PartitionKey reuseKey) {
-    PartitionKey key = (reuseKey == null ? newKey() : reuseKey);
-
-    for (int i = 0; i < fieldPartitioners.size(); i++) {
-      FieldPartitioner fp = fieldPartitioners.get(i);
-      String name = fp.getSourceName();
-      Object value;
-      if (entity instanceof GenericRecord) {
-        value = ((GenericRecord) entity).get(name);
-      } else {
-        try {
-          PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name,
-              entity.getClass(), getter(name), null /* assume read only */);
-          value = propertyDescriptor.getReadMethod().invoke(entity);
-        } catch (IllegalAccessException e) {
-          throw new RuntimeException("Cannot read property " + name + " from "
-              + entity, e);
-        } catch (InvocationTargetException e) {
-          throw new RuntimeException("Cannot read property " + name + " from "
-              + entity, e);
-        } catch (IntrospectionException e) {
-          throw new RuntimeException("Cannot read property " + name + " from "
-              + entity, e);
-        }
-      }
-      key.set(i, fp.apply(value));
-    }
-    return key;
-  }
-
-  /**
-   * Constructs a new {@code PartitionKey} that you can use with this
-   * {@code PartitionStrategy}.
-   *
-   * @return a new {@code PartitionKey}
-   */
-  private PartitionKey newKey() {
-    return new PartitionKey(fieldPartitioners.size());
-  }
-
-  private String getter(String name) {
-    return "get" + name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1);
   }
 
   /**
