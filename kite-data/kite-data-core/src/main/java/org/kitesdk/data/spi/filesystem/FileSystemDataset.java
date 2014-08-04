@@ -314,7 +314,13 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     Set<String> addedPartitions = Sets.newHashSet();
     for (Path path : update.pathIterator()) {
       URI relativePath = update.getDirectory().toUri().relativize(path.toUri());
-      Path newPath = new Path(directory, new Path(relativePath));
+      Path newPath;
+      if (relativePath.toString().isEmpty()) {
+        newPath = directory;
+      } else {
+        newPath = new Path(directory, new Path(relativePath));
+      }
+
       Path newPartitionDirectory = newPath.getParent();
       try {
         if (!fileSystem.exists(newPartitionDirectory)) {
@@ -379,9 +385,14 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   @SuppressWarnings("unchecked")
   public PartitionKey keyFromDirectory(Path dir) {
 
-    Path relDir = new Path(directory.toUri().relativize(dir.toUri()));
-    Preconditions.checkState(!relDir.equals(dir), "Partition directory %s is not " +
-        "relative to dataset directory %s", dir, directory);
+    Path relDir = null;
+    URI relUri = directory.toUri().relativize(dir.toUri());
+
+    if (!relUri.toString().isEmpty()) {
+      relDir = new Path(relUri);
+      Preconditions.checkState(!relDir.equals(dir), "Partition directory %s is not " +
+          "relative to dataset directory %s", dir, directory);
+    }
 
     List<String> pathComponents = Lists.newArrayList();
     while (relDir != null && !relDir.getName().equals("")) {
