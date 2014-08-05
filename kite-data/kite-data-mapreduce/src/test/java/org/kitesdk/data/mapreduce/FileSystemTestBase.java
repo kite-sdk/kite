@@ -80,4 +80,8 @@ public class FileSystemTestBase {
     return new GenericRecordBuilder(STRING_SCHEMA).set("text", text).build();
   }
 
+  protected GenericData.Record newStatsRecord(int count, String name) {
+    return new GenericRecordBuilder(STATS_SCHEMA).set("count", count)
+        .set("name", name).build();
+  }
 }

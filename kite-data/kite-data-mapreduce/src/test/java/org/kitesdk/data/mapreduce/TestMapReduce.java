@@ -26,17 +26,22 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.DatasetWriter;
 
 @RunWith(Parameterized.class)
 public class TestMapReduce extends FileSystemTestBase {
+
+  private Dataset<GenericData.Record> inputDataset;
+  private Dataset<GenericData.Record> outputDataset;
 
   public TestMapReduce(Format format) {
     super(format);
@@ -69,26 +74,55 @@ public class TestMapReduce extends FileSystemTestBase {
     }
   }
 
-  @Test
-  @SuppressWarnings("deprecation")
-  public void testJob() throws Exception {
-    Job job = new Job();
-
-    Dataset<GenericData.Record> inputDataset = repo.create("in",
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+    inputDataset = repo.create("in",
         new DatasetDescriptor.Builder()
             .property("kite.allow.csv", "true")
             .schema(STRING_SCHEMA)
             .format(format)
             .build(), GenericData.Record.class);
-    DatasetWriter<GenericData.Record> writer = inputDataset.newWriter();
-    writer.write(newStringRecord("apple"));
-    writer.write(newStringRecord("banana"));
-    writer.write(newStringRecord("banana"));
-    writer.write(newStringRecord("carrot"));
-    writer.write(newStringRecord("apple"));
-    writer.write(newStringRecord("apple"));
-    writer.close();
+    outputDataset = repo.create("out",
+        new DatasetDescriptor.Builder()
+            .property("kite.allow.csv", "true")
+            .schema(STATS_SCHEMA)
+            .format(format)
+            .build(), GenericData.Record.class);
+  }
 
+  @Test
+  public void testJob() throws Exception {
+    populateInputDataset();
+
+    Job job = createJob();
+    Assert.assertTrue(job.waitForCompletion(true));
+    checkOutput(false);
+  }
+
+  @Test
+  public void testJobEmptyView() throws Exception {
+    Job job = createJob();
+    Assert.assertTrue(job.waitForCompletion(true));
+  }
+
+
+  @Test(expected = DatasetException.class)
+  public void testJobFailsWithExisting() throws Exception {
+    populateInputDataset();
+    populateOutputDataset(); // existing output will cause job to fail
+
+    Job job = createJob();
+    job.waitForCompletion(true);
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void testJobOverwrite() throws Exception {
+    populateInputDataset();
+    populateOutputDataset(); // existing output will be overwritten
+
+    Job job = new Job();
     DatasetKeyInputFormat.configure(job).readFrom(inputDataset).withType(GenericData.Record.class);
 
     job.setMapperClass(LineCountMapper.class);
@@ -97,17 +131,51 @@ public class TestMapReduce extends FileSystemTestBase {
 
     job.setReducerClass(GenericStatsReducer.class);
 
-    Dataset<GenericData.Record> outputDataset = repo.create("out",
-        new DatasetDescriptor.Builder()
-            .property("kite.allow.csv", "true")
-            .schema(STATS_SCHEMA)
-            .format(format)
-            .build(), GenericData.Record.class);
-
-    DatasetKeyOutputFormat.configure(job).writeTo(outputDataset).withType(GenericData.Record.class);
+    DatasetKeyOutputFormat.configure(job).overwriteTo(outputDataset).withType(GenericData.Record.class);
 
     Assert.assertTrue(job.waitForCompletion(true));
+    checkOutput(false);
+  }
 
+  @Test
+  @SuppressWarnings("deprecation")
+  public void testJobAppend() throws Exception {
+    populateInputDataset();
+    populateOutputDataset(); // existing output will be overwritten
+
+    Job job = new Job();
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset).withType(GenericData.Record.class);
+
+    job.setMapperClass(LineCountMapper.class);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(IntWritable.class);
+
+    job.setReducerClass(GenericStatsReducer.class);
+
+    DatasetKeyOutputFormat.configure(job).appendTo(outputDataset).withType(GenericData.Record.class);
+
+    Assert.assertTrue(job.waitForCompletion(true));
+    checkOutput(true);
+  }
+
+  private void populateInputDataset() {
+    DatasetWriter<GenericData.Record> writer = inputDataset.newWriter();
+    writer.write(newStringRecord("apple"));
+    writer.write(newStringRecord("banana"));
+    writer.write(newStringRecord("banana"));
+    writer.write(newStringRecord("carrot"));
+    writer.write(newStringRecord("apple"));
+    writer.write(newStringRecord("apple"));
+    writer.close();
+  }
+
+  private void populateOutputDataset() {
+    DatasetWriter<GenericData.Record> writer = outputDataset.newWriter();
+    writer.write(newStatsRecord(4, "date"));
+    writer.close();
+  }
+
+  private void checkOutput(boolean existingPresent) {
     DatasetReader<GenericData.Record> reader = outputDataset.newReader();
     Map<String, Integer> counts = new HashMap<String, Integer>();
     for (GenericData.Record record : reader) {
@@ -118,20 +186,16 @@ public class TestMapReduce extends FileSystemTestBase {
     Assert.assertEquals(3, counts.get("apple").intValue());
     Assert.assertEquals(2, counts.get("banana").intValue());
     Assert.assertEquals(1, counts.get("carrot").intValue());
-
+    if (existingPresent) {
+      Assert.assertEquals(4, counts.get("date").intValue());
+    } else {
+      Assert.assertNull(counts.get("date"));
+    }
   }
 
-  @Test
   @SuppressWarnings("deprecation")
-  public void testJobEmptyView() throws Exception {
+  private Job createJob() throws Exception {
     Job job = new Job();
-
-    Dataset<GenericData.Record> inputDataset = repo.create("in",
-        new DatasetDescriptor.Builder()
-            .property("kite.allow.csv", "true")
-            .schema(STRING_SCHEMA)
-            .format(format)
-            .build(), GenericData.Record.class);
 
     DatasetKeyInputFormat.configure(job).readFrom(inputDataset).withType(GenericData.Record.class);
 
@@ -141,16 +205,9 @@ public class TestMapReduce extends FileSystemTestBase {
 
     job.setReducerClass(GenericStatsReducer.class);
 
-    Dataset<GenericData.Record> outputDataset = repo.create("out",
-        new DatasetDescriptor.Builder()
-            .property("kite.allow.csv", "true")
-            .schema(STATS_SCHEMA)
-            .format(format)
-            .build(), GenericData.Record.class);
-
     DatasetKeyOutputFormat.configure(job).writeTo(outputDataset).withType(GenericData.Record.class);
 
-    Assert.assertTrue(job.waitForCompletion(true));
+    return job;
   }
 
 }

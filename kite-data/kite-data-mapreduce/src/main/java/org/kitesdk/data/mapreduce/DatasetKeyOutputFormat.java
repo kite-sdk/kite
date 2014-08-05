@@ -72,7 +72,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   private static final String KITE_WRITE_MODE = "kite.outputMode";
 
   private static enum WriteMode {
-    APPEND, OVERWRITE, FAIL_UNLESS_EMPTY
+    DEFAULT, APPEND, OVERWRITE
   }
 
   public static class ConfigBuilder {
@@ -116,7 +116,23 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      * @param uri a dataset or view URI
      * @return this for method chaining
      */
-    public ConfigBuilder overwrite(URI uri) {
+    public ConfigBuilder overwriteTo(URI uri) {
+      setOverwrite();
+      return writeTo(uri);
+    }
+
+    /**
+     * Adds configuration for {@code DatasetKeyOutputFormat} to append to the
+     * given dataset or view URI, leaving any existing data intact.
+     * <p>
+     * URI formats are defined by {@link Dataset} implementations, but must
+     * begin with "dataset:" or "view:". For more information, see
+     * {@link Datasets}.
+     *
+     * @param uri a dataset or view URI
+     * @return this for method chaining
+     */
+    public ConfigBuilder appendTo(URI uri) {
       setOverwrite();
       return writeTo(uri);
     }
@@ -149,8 +165,20 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      * @param view a dataset or view
      * @return this for method chaining
      */
-    public ConfigBuilder overwrite(View<?> view) {
+    public ConfigBuilder overwriteTo(View<?> view) {
       setOverwrite();
+      return writeTo(view);
+    }
+
+    /**
+     * Adds configuration for {@code DatasetKeyOutputFormat} to append to the
+     * given dataset or view URI, leaving any existing data intact.
+     *
+     * @param view a dataset or view
+     * @return this for method chaining
+     */
+    public ConfigBuilder appendTo(View<?> view) {
+      setAppend();
       return writeTo(view);
     }
 
@@ -183,8 +211,24 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      * @param uri a dataset or view URI string
      * @return this for method chaining
      */
-    public ConfigBuilder overwrite(String uri) {
+    public ConfigBuilder overwriteTo(String uri) {
       setOverwrite();
+      return writeTo(uri);
+    }
+
+    /**
+     * Adds configuration for {@code DatasetKeyOutputFormat} to append to the
+     * given dataset or view URI, leaving any existing data intact.
+     * <p>
+     * URI formats are defined by {@link Dataset} implementations, but must
+     * begin with "dataset:" or "view:". For more information, see
+     * {@link Datasets}.
+     *
+     * @param uri a dataset or view URI string
+     * @return this for method chaining
+     */
+    public ConfigBuilder appendTo(String uri) {
+      setAppend();
       return writeTo(uri);
     }
 
@@ -193,16 +237,18 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       return this;
     }
 
-    public ConfigBuilder failUnlessEmpty() {
-      conf.setEnum(KITE_WRITE_MODE, WriteMode.FAIL_UNLESS_EMPTY);
-      return this;
-    }
-
     private void setOverwrite() {
       String mode = conf.get(KITE_WRITE_MODE);
       Preconditions.checkState(mode == null,
           "Cannot replace existing write mode: " + mode);
       conf.setEnum(KITE_WRITE_MODE, WriteMode.OVERWRITE);
+    }
+
+    private void setAppend() {
+      String mode = conf.get(KITE_WRITE_MODE);
+      Preconditions.checkState(mode == null,
+          "Cannot replace existing write mode: " + mode);
+      conf.setEnum(KITE_WRITE_MODE, WriteMode.APPEND);
     }
   }
 
@@ -414,19 +460,20 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   @Override
   public void checkOutputSpecs(JobContext jobContext) {
     // The committer setup will fail if the output dataset does not exist
+    View<E> target = load(jobContext);
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
-    View<E> target;
-    switch (conf.getEnum(KITE_WRITE_MODE, WriteMode.APPEND)) {
-      case FAIL_UNLESS_EMPTY:
-        target = load(jobContext);
-        if (!target.isEmpty()) {
-          throw new DatasetException("View is not empty: " + target);
-        }
+    switch (conf.getEnum(KITE_WRITE_MODE, WriteMode.DEFAULT)) {
+      case APPEND:
         break;
       case OVERWRITE:
-        target = load(jobContext);
         if (!target.isEmpty()) {
           target.deleteAll();
+        }
+        break;
+      default:
+      case DEFAULT:
+        if (!target.isEmpty()) {
+          throw new DatasetException("View is not empty: " + target);
         }
         break;
     }
