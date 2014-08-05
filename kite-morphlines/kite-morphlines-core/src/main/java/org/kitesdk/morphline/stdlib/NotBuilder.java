@@ -47,22 +47,25 @@ public final class NotBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class Not extends AbstractCommand {
 
-    private Command realChild;
+    private final Command realChild;
     
     public Not(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);
-      realChild = buildCommand(config, this, child);
-    }
-
-    @Override
-    protected Command getChild() {
-      return realChild;
+      Command devNull = new DropRecordBuilder().build(null, this, null, context); // pipes into /dev/null
+      realChild = buildCommand(config, this, devNull);
     }
 
     @Override
     protected boolean doProcess(Record record) {
-      return !super.doProcess(record);
+      return !realChild.process(record) && super.doProcess(record);
     }
+    
+    @Override
+    protected void doNotify(Record notification) {
+      realChild.notify(notification);
+      super.doNotify(notification);
+    }
+    
   }
   
 }

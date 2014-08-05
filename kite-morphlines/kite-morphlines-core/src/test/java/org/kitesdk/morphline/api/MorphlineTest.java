@@ -769,9 +769,7 @@ public class MorphlineTest extends AbstractMorphlineTest {
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertFalse(morphline.process(record));
-    assertEquals(record, collector.getFirstRecord());
-    assertSame(record, collector.getFirstRecord());
-    assertEquals("touched", collector.getFirstRecord().getFirstValue("state"));
+    assertEquals(Lists.newArrayList(), collector.getRecords());
   }
   
   @Test
@@ -781,7 +779,28 @@ public class MorphlineTest extends AbstractMorphlineTest {
     startSession();
     assertEquals(1, collector.getNumStartEvents());
     assertTrue(morphline.process(record));
-    assertEquals(Lists.newArrayList(), collector.getRecords());
+    assertEquals(record, collector.getFirstRecord());
+    assertSame(record, collector.getFirstRecord());
+  }
+
+  @Test
+  public void testNotWithFalseWithContinuation() throws Exception {
+    morphline = createMorphline("test-morphlines/notWithFalseAndContinuation");
+    Record record = createBasicRecord();
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertTrue(morphline.process(record));
+    assertEquals(record, collector.getFirstRecord());
+    assertSame(record, collector.getFirstRecord());
+    assertEquals("touched", collector.getFirstRecord().getFirstValue("state"));
+  }
+
+  @Test
+  public void testIfThenElseWithThenAndNot() throws Exception {
+    morphline = createMorphline("test-morphlines/ifThenElseWithThenAndNot");
+    Record record = createBasicRecord();
+    processAndVerifySuccess(record, record);
+    assertEquals("then1", collector.getFirstRecord().getFirstValue("state"));
   }
   
   @Test
