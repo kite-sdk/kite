@@ -131,7 +131,7 @@ public class TestMapReduce extends FileSystemTestBase {
 
     job.setReducerClass(GenericStatsReducer.class);
 
-    DatasetKeyOutputFormat.configure(job).overwriteTo(outputDataset).withType(GenericData.Record.class);
+    DatasetKeyOutputFormat.configure(job).overwrite(outputDataset).withType(GenericData.Record.class);
 
     Assert.assertTrue(job.waitForCompletion(true));
     checkOutput(false);
