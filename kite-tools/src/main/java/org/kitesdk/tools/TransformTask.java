@@ -49,6 +49,7 @@ import org.apache.hadoop.hive.conf.HiveConf;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.View;
@@ -111,6 +112,9 @@ public class TransformTask<S, T> extends Configured {
       runInParallel = false;
     }
 
+    PType<T> toPType = ptype(to);
+    MapFn<T, T> validate = new CheckEntityClass<T>(to.getType());
+
     if (runInParallel) {
       TaskUtil.configure(getConf())
           .addJarPathForClass(HiveConf.class)
@@ -119,7 +123,7 @@ public class TransformTask<S, T> extends Configured {
       Pipeline pipeline = new MRPipeline(getClass(), getConf());
 
       PCollection<T> collection = pipeline.read(CrunchDatasets.asSource(from))
-          .parallelDo(transform, type(to));
+          .parallelDo(transform, toPType).parallelDo(validate, toPType);
 
       if (compact) {
         // the transform must be run before partitioning
@@ -141,7 +145,7 @@ public class TransformTask<S, T> extends Configured {
       Pipeline pipeline = MemPipeline.getInstance();
 
       PCollection<T> collection = pipeline.read(CrunchDatasets.asSource(from))
-          .parallelDo(transform, type(to));
+          .parallelDo(transform, toPType).parallelDo(validate, toPType);
 
       boolean threw = true;
       DatasetWriter<T> writer = null;
@@ -169,7 +173,7 @@ public class TransformTask<S, T> extends Configured {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> AvroType<T> type(View<T> view) {
+  private static <T> AvroType<T> ptype(View<T> view) {
     Class<T> recordClass = view.getType();
     if (GenericRecord.class.isAssignableFrom(recordClass)) {
       return (AvroType<T>) Avros.generics(
@@ -287,6 +291,28 @@ public class TransformTask<S, T> extends Configured {
       }
 
       return this;
+    }
+  }
+
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="SE_NO_SERIALVERSIONID",
+      justification="Purposely not supported across versions")
+  public static class CheckEntityClass<E> extends MapFn<E, E> {
+    private final Class<?> entityClass;
+
+    public CheckEntityClass(Class<?> entityClass) {
+      this.entityClass = entityClass;
+    }
+
+    @Override
+    public E map(E input) {
+      if (input != null && entityClass.isAssignableFrom(input.getClass())) {
+        return input;
+      } else {
+        throw new DatasetException(
+            "Object does not match expected type " + entityClass +
+            ": " + String.valueOf(input));
+      }
     }
   }
 }
