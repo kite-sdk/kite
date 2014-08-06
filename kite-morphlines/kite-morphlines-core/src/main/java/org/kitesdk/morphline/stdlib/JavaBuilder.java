@@ -79,6 +79,7 @@ public final class JavaBuilder implements CommandBuilder {
       
       String javaImports = getConfigs().getString(config, "imports", DEFAULT_IMPORTS);
       String javaCodeBlock = getConfigs().getString(config, "code");
+      validateArguments();
       this.script = new ScriptEvaluator<Boolean>(
           javaImports, 
           javaCodeBlock, 
@@ -87,7 +88,6 @@ public final class JavaBuilder implements CommandBuilder {
           new Class[] {Record.class, Config.class, Command.class, Command.class, MorphlineContext.class, Logger.class}, 
           javaCodeBlock
           );
-      validateArguments();
     }
         
     @Override
