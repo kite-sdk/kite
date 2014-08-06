@@ -23,8 +23,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.net.URI;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.LocalJobRunner;
 import org.apache.hadoop.mapreduce.Job;
@@ -59,6 +62,7 @@ public class TestCopyCommandCluster extends MiniDFSTest {
   private static final String source = "users_source";
   private static final String dest = "users_dest";
   private static final String avsc = "target/user.avsc";
+  private static final Pattern UPPER_CASE = Pattern.compile("^[A-Z]+\\d*$");
   private static String repoUri;
 
   @BeforeClass
@@ -120,6 +124,25 @@ public class TestCopyCommandCluster extends MiniDFSTest {
 
     verify(console).info("Added {} records to \"{}\"", 6l, dest);
     verifyNoMoreInteractions(console);
+  }
+
+  @Test
+  public void testTransform() throws Exception {
+    command.repoURI = repoUri;
+    command.transform = "org.kitesdk.cli.example.ToUpperCase";
+    command.datasets = Lists.newArrayList(source, dest);
+
+    int rc = command.run();
+    Assert.assertEquals("Should return success", 0, rc);
+
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
+    Set<GenericRecord> records = DatasetTestUtilities.materialize(
+        repo.<GenericRecord>load(dest));
+    Assert.assertEquals("Should contain copied records", 6, records.size());
+    for (GenericRecord record : records) {
+      Assert.assertTrue("Username should be upper case",
+          UPPER_CASE.matcher(record.get("username").toString()).matches());
+    }
   }
 
   @Test
@@ -225,4 +248,5 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     verify(console).info("Added {} records to \"{}\"", 6l, "dest_partitioned");
     verifyNoMoreInteractions(console);
   }
+
 }

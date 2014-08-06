@@ -20,6 +20,9 @@ import com.beust.jcommander.internal.Lists;
 import com.google.common.io.Files;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.Set;
+import java.util.regex.Pattern;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -41,6 +44,7 @@ public class TestCopyCommandLocal {
   private static final String source = "users_source";
   private static final String dest = "users_dest";
   private static final String avsc = "target/user.avsc";
+  private static final Pattern UPPER_CASE = Pattern.compile("^[A-Z]+$");
 
   @BeforeClass
   public static void createSourceDataset() throws Exception {
@@ -91,7 +95,26 @@ public class TestCopyCommandLocal {
     Assert.assertEquals("Should return success", 0, rc);
 
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:target/data");
-    int size = DatasetTestUtilities.datasetSize(repo.load(source));
+    int size = DatasetTestUtilities.datasetSize(repo.load(dest));
     Assert.assertEquals("Should contain copied records", 2, size);
+  }
+
+  @Test
+  public void testTransform() throws Exception {
+    command.repoURI = "file:target/data";
+    command.transform = "org.kitesdk.cli.example.ToUpperCase";
+    command.datasets = Lists.newArrayList(source, dest);
+
+    int rc = command.run();
+    Assert.assertEquals("Should return success", 0, rc);
+
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:target/data");
+    Set<GenericRecord> records = DatasetTestUtilities.materialize(
+        repo.<GenericRecord>load(dest));
+    Assert.assertEquals("Should contain copied records", 2, records.size());
+    for (GenericRecord record : records) {
+      Assert.assertTrue("Username should be upper case",
+          UPPER_CASE.matcher(record.get("username").toString()).matches());
+    }
   }
 }
