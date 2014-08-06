@@ -23,34 +23,12 @@ import java.security.AccessController;
 import java.security.CodeSource;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.reflect.ReflectData;
-import org.apache.crunch.DoFn;
-import org.apache.crunch.Emitter;
-import org.apache.crunch.MapFn;
-import org.apache.crunch.PCollection;
-import org.apache.crunch.PGroupedTable;
-import org.apache.crunch.PTable;
-import org.apache.crunch.Pair;
-import org.apache.crunch.types.PTableType;
-import org.apache.crunch.types.PType;
-import org.apache.crunch.types.avro.Avros;
 import org.apache.crunch.util.DistCache;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.kitesdk.compat.Hadoop;
-import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
-import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.ValidationException;
-import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.spi.PartitionStrategyParser;
-import org.kitesdk.data.spi.SchemaUtil;
-import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 
 public class TaskUtil {
 

@@ -20,16 +20,24 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.crunch.DoFn;
 import org.apache.crunch.PipelineResult;
+import org.apache.crunch.util.DistCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.compat.DynConstructors;
+import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.ColumnMappingParser;
@@ -40,7 +48,10 @@ import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.kitesdk.data.spi.SchemaValidationUtil;
 import org.kitesdk.data.spi.filesystem.TemporaryFileSystemDatasetRepository;
 import org.kitesdk.tools.CopyTask;
+import org.kitesdk.tools.TransformTask;
 import org.slf4j.Logger;
+
+import static org.apache.avro.generic.GenericData.Record;
 
 @Parameters(commandDescription="Copy CSV records into a Dataset")
 public class CSVImportCommand extends BaseDatasetCommand {
@@ -82,6 +93,14 @@ public class CSVImportCommand extends BaseDatasetCommand {
       description="The number of writer processes to use")
   int numWriters = -1;
 
+  @Parameter(names={"--transform"},
+      description="A transform DoFn class name")
+  String transform = null;
+
+  @Parameter(names="--jar",
+      description="Add a jar to the runtime classpath")
+  List<String> jars;
+
   @Override
   @SuppressWarnings("unchecked")
   public int run() throws IOException {
@@ -104,7 +123,7 @@ public class CSVImportCommand extends BaseDatasetCommand {
 
     String dataset = targets.get(1);
 
-    View<GenericData.Record> target = load(dataset, GenericData.Record.class);
+    View<Record> target = load(dataset, Record.class);
     Schema datasetSchema = target.getDataset().getDescriptor().getSchema();
 
     // TODO: replace this with a temporary Dataset from a FS repo
@@ -125,7 +144,7 @@ public class CSVImportCommand extends BaseDatasetCommand {
             UUID.randomUUID().toString());
 
     try {
-      FileSystemDataset<GenericData.Record> csvDataset =
+      FileSystemDataset<Record> csvDataset =
           (FileSystemDataset) repo.create("csv", csvDescriptor);
 
       Iterator<Path> iter = csvDataset.pathIterator().iterator();
@@ -145,22 +164,35 @@ public class CSVImportCommand extends BaseDatasetCommand {
             csvSchema.toString(true), datasetSchema.toString(true));
       }
 
-      CopyTask<GenericData.Record> copy = new CopyTask<GenericData.Record>(
-          csvDataset, target);
-      copy.setConf(getConf());
+      addJars(jars);
+
+      TransformTask task;
+      if (transform != null) {
+        DynConstructors.Ctor<DoFn<Record, Record>> ctor =
+            new DynConstructors.Builder(DoFn.class)
+                .impl(transform)
+                .build();
+        DoFn<Record, Record> transformFn = ctor.newInstance();
+        task = new TransformTask<Record, Record>(
+            csvDataset, target, transformFn);
+      } else {
+        task = new CopyTask<Record>(csvDataset, target);
+      }
+
+      task.setConf(getConf());
 
       if (noCompaction) {
-        copy.noCompaction();
+        task.noCompaction();
       }
 
       if (numWriters >= 0) {
-        copy.setNumWriters(numWriters);
+        task.setNumWriters(numWriters);
       }
 
-      PipelineResult result = copy.run();
+      PipelineResult result = task.run();
 
       if (result.succeeded()) {
-        long count = copy.getCount();
+        long count = task.getCount();
         if (count > 0) {
           console.info("Added {} records to \"{}\"", count, dataset);
         }

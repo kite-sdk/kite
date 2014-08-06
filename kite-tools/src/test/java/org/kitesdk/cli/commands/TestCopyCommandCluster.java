@@ -203,7 +203,7 @@ public class TestCopyCommandCluster extends MiniDFSTest {
             .hash("id", 2)
             .build())
         .schema(SchemaBuilder.record("User").fields()
-            .requiredString("id")
+            .requiredLong("id")
             .optionalString("username")
             .optionalString("email")
             .endRecord())

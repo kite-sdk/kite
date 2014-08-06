@@ -18,10 +18,15 @@ package org.kitesdk.cli.commands;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Resources;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.Charset;
+import java.util.List;
+import org.apache.crunch.util.DistCache;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.ChecksumFileSystem;
@@ -30,10 +35,16 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.cli.Command;
+import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.spi.HadoopFileSystemURLStreamHandler;
 import org.slf4j.Logger;
 
 public abstract class BaseCommand implements Command, Configurable {
+
+  private static final DynMethods.UnboundMethod addJarURL =
+      new DynMethods.Builder("addURL")
+          .hiddenImpl(URLClassLoader.class, URL.class)
+          .build();
 
   @VisibleForTesting
   static final Charset UTF8 = Charset.forName("utf8");
@@ -188,4 +199,22 @@ public abstract class BaseCommand implements Command, Configurable {
     return conf;
   }
 
+  /**
+   * Adds a list of jar paths to the current ClassLoader and the distributed
+   * cache.
+   * @param jars
+   * @throws IOException
+   */
+  protected void addJars(List<String> jars) throws IOException {
+    if (jars != null && !jars.isEmpty()) {
+      DynMethods.BoundMethod addJar = addJarURL.bind(
+          Thread.currentThread().getContextClassLoader());
+      for (String jar : jars) {
+        File jarFile = new File(jar);
+        DistCache.addJarToDistributedCache(getConf(), jarFile);
+        // add to the current loader
+        addJar.invoke(jarFile.toURI().toURL());
+      }
+    }
+  }
 }

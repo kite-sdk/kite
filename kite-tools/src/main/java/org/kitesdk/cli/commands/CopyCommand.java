@@ -20,13 +20,25 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.crunch.DoFn;
 import org.apache.crunch.PipelineResult;
+import org.apache.crunch.util.DistCache;
+import org.kitesdk.compat.DynConstructors;
+import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.View;
 import org.kitesdk.tools.CopyTask;
+import org.kitesdk.tools.TaskUtil;
+import org.kitesdk.tools.TransformTask;
 import org.slf4j.Logger;
+
+import static org.apache.avro.generic.GenericData.Record;
 
 @Parameters(commandDescription="Copy records from one Dataset to another")
 public class CopyCommand extends BaseDatasetCommand {
@@ -46,6 +58,14 @@ public class CopyCommand extends BaseDatasetCommand {
       description="The number of writer processes to use")
   int numWriters = -1;
 
+  @Parameter(names={"--transform"},
+      description="A transform DoFn class name")
+  String transform = null;
+
+  @Parameter(names="--jar",
+      description="Add a jar to the runtime classpath")
+  List<String> jars;
+
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(datasets != null && datasets.size() > 1,
@@ -53,10 +73,23 @@ public class CopyCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(datasets.size() == 2,
         "Cannot copy multiple datasets");
 
-    View<GenericData.Record> source = load(datasets.get(0), GenericData.Record.class);
-    View<GenericData.Record> dest = load(datasets.get(1), GenericData.Record.class);
+    View<Record> source = load(datasets.get(0), Record.class);
+    View<Record> dest = load(datasets.get(1), Record.class);
 
-    CopyTask task = new CopyTask<GenericData.Record>(source, dest);
+    addJars(jars);
+
+    TransformTask task;
+    if (transform != null) {
+      DynConstructors.Ctor<DoFn<Record, Record>> ctor =
+          new DynConstructors.Builder(DoFn.class)
+              .impl(transform)
+              .build();
+      DoFn<Record, Record> transformFn = ctor.newInstance();
+      task = new TransformTask<Record, Record>(source, dest, transformFn);
+    } else {
+      task = new CopyTask<Record>(source, dest);
+    }
+
     task.setConf(getConf());
 
     if (noCompaction) {
