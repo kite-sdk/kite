@@ -16,9 +16,10 @@
 package org.kitesdk.data.crunch;
 
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.hive.conf.HiveConf;
 import org.junit.After;
-import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
+import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.DatasetRepository;
 
 public class TestCrunchDatasetsHCatalog extends TestCrunchDatasets {
@@ -28,6 +29,10 @@ public class TestCrunchDatasetsHCatalog extends TestCrunchDatasets {
 
   @Override
   public DatasetRepository newRepo() {
+    // Workaround for HIVE-7633 which is triggered by auto stats gather
+    // since the external directory is created before the table is
+    fileSystem.getConf().setBoolean(HiveConf.ConfVars.HIVESTATSAUTOGATHER.varname,
+        false);
     return new HCatalogDatasetRepository.Builder()
         .configuration(fileSystem.getConf())
         .rootDirectory(testDirectory).build();
