@@ -16,15 +16,20 @@
 
 package org.kitesdk.cli.commands;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.List;
 import org.apache.crunch.util.DistCache;
 import org.apache.hadoop.conf.Configurable;
@@ -40,11 +45,6 @@ import org.kitesdk.data.spi.HadoopFileSystemURLStreamHandler;
 import org.slf4j.Logger;
 
 public abstract class BaseCommand implements Command, Configurable {
-
-  private static final DynMethods.UnboundMethod addJarURL =
-      new DynMethods.Builder("addURL")
-          .hiddenImpl(URLClassLoader.class, URL.class)
-          .build();
 
   @VisibleForTesting
   static final Charset UTF8 = Charset.forName("utf8");
@@ -200,21 +200,82 @@ public abstract class BaseCommand implements Command, Configurable {
   }
 
   /**
-   * Adds a list of jar paths to the current ClassLoader and the distributed
-   * cache.
-   * @param jars
-   * @throws IOException
+   * Returns a {@link ClassLoader} for a set of jars and directories.
+   *
+   * @param jars A list of jar paths
+   * @param paths A list of directories containing .class files
+   * @throws MalformedURLException
    */
-  protected void addJars(List<String> jars) throws IOException {
-    if (jars != null && !jars.isEmpty()) {
-      DynMethods.BoundMethod addJar = addJarURL.bind(
-          Thread.currentThread().getContextClassLoader());
-      for (String jar : jars) {
-        File jarFile = new File(jar);
-        DistCache.addJarToDistributedCache(getConf(), jarFile);
-        // add to the current loader
-        addJar.invoke(jarFile.toURI().toURL());
+  protected static ClassLoader loaderFor(List<String> jars, List<String> paths)
+      throws MalformedURLException {
+    return AccessController.doPrivileged(new GetClassLoader(urls(jars, paths)));
+  }
+
+  /**
+   * Returns a {@link ClassLoader} for a set of jars.
+   *
+   * @param jars A list of jar paths
+   * @throws MalformedURLException
+   */
+  protected static ClassLoader loaderForJars(List<String> jars)
+      throws MalformedURLException {
+    return AccessController.doPrivileged(new GetClassLoader(urls(jars, null)));
+  }
+
+  /**
+   * Returns a {@link ClassLoader} for a set of directories.
+   *
+   * @param paths A list of directories containing .class files
+   * @throws MalformedURLException
+   */
+  protected static ClassLoader loaderForPaths(List<String> paths)
+      throws MalformedURLException {
+    return AccessController.doPrivileged(new GetClassLoader(urls(null, paths)));
+  }
+
+  private static List<URL> urls(List<String> jars, List<String> dirs)
+      throws MalformedURLException {
+    // check the additional jars and lib directories in the local FS
+    final List<URL> urls = Lists.newArrayList();
+    if (dirs != null) {
+      for (String lib : dirs) {
+        // final URLs must end in '/' for URLClassLoader
+        File path = lib.endsWith("/") ? new File(lib) : new File(lib + "/");
+        Preconditions.checkArgument(path.exists(),
+            "Lib directory does not exist: " + lib);
+        Preconditions.checkArgument(path.isDirectory(),
+            "Not a directory: " + lib);
+        Preconditions.checkArgument(path.canRead() && path.canExecute(),
+            "Insufficient permissions to access lib directory: " + lib);
+        urls.add(path.toURI().toURL());
       }
+    }
+    if (jars != null) {
+      for (String jar : jars) {
+        File path = new File(jar);
+        Preconditions.checkArgument(path.exists(),
+            "Jar files does not exist: " + jar);
+        Preconditions.checkArgument(path.isFile(),
+            "Not a file: " + jar);
+        Preconditions.checkArgument(path.canRead(),
+            "Cannot read jar file: " + jar);
+        urls.add(path.toURI().toURL());
+      }
+    }
+    return urls;
+  }
+
+  private static class GetClassLoader implements PrivilegedAction<ClassLoader> {
+    private final URL[] urls;
+
+    public GetClassLoader(List<URL> urls) {
+      this.urls = urls.toArray(new URL[urls.size()]);
+    }
+
+    @Override
+    public ClassLoader run() {
+      return new URLClassLoader(
+          urls, Thread.currentThread().getContextClassLoader());
     }
   }
 }

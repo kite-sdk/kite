@@ -67,36 +67,7 @@ public class ObjectSchemaCommand extends BaseCommand {
     Preconditions.checkArgument(classNames.size() == 1,
         "Only one java class name can be given");
 
-    // check the additional jars and lib directories in the local FS
-    final List<URL> urls = Lists.newArrayList();
-    if (libs != null) {
-      for (String lib : libs) {
-        // final URLs must end in '/' for URLClassLoader
-        File path = lib.endsWith("/") ? new File(lib) : new File(lib + "/");
-        Preconditions.checkArgument(path.exists(),
-            "Lib directory does not exist: " + lib);
-        Preconditions.checkArgument(path.isDirectory(),
-            "Not a directory: " + lib);
-        Preconditions.checkArgument(path.canRead() && path.canExecute(),
-            "Insufficient permissions to access lib directory: " + lib);
-        urls.add(path.toURI().toURL());
-      }
-    }
-    if (jars != null) {
-      for (String jar : jars) {
-        File path = new File(jar);
-        Preconditions.checkArgument(path.exists(),
-            "Jar files does not exist: " + jar);
-        Preconditions.checkArgument(path.isFile(),
-            "Not a file: " + jar);
-        Preconditions.checkArgument(path.canRead(),
-            "Cannot read jar file: " + jar);
-        urls.add(path.toURI().toURL());
-      }
-    }
-
-    ClassLoader loader = AccessController.doPrivileged(
-        new GetClassLoader(urls));
+    ClassLoader loader = loaderFor(jars, libs);
 
     String className = classNames.get(0);
     Class<?> recordClass;
@@ -128,17 +99,4 @@ public class ObjectSchemaCommand extends BaseCommand {
     );
   }
 
-  public static class GetClassLoader implements PrivilegedAction<ClassLoader> {
-    private final URL[] urls;
-
-    public GetClassLoader(List<URL> urls) {
-      this.urls = urls.toArray(new URL[urls.size()]);
-    }
-
-    @Override
-    public ClassLoader run() {
-      return new URLClassLoader(
-          urls, Thread.currentThread().getContextClassLoader());
-    }
-  }
 }

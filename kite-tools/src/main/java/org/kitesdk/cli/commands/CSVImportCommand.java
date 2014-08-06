@@ -20,34 +20,28 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.crunch.DoFn;
 import org.apache.crunch.PipelineResult;
-import org.apache.crunch.util.DistCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.compat.DynConstructors;
-import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.ColumnMappingParser;
 import org.kitesdk.data.spi.PartitionStrategyParser;
+import org.kitesdk.data.spi.SchemaValidationUtil;
 import org.kitesdk.data.spi.filesystem.CSVProperties;
 import org.kitesdk.data.spi.filesystem.CSVUtil;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
-import org.kitesdk.data.spi.SchemaValidationUtil;
 import org.kitesdk.data.spi.filesystem.TemporaryFileSystemDatasetRepository;
 import org.kitesdk.tools.CopyTask;
+import org.kitesdk.tools.TaskUtil;
 import org.kitesdk.tools.TransformTask;
 import org.slf4j.Logger;
 
@@ -164,12 +158,13 @@ public class CSVImportCommand extends BaseDatasetCommand {
             csvSchema.toString(true), datasetSchema.toString(true));
       }
 
-      addJars(jars);
+      TaskUtil.configure(getConf()).addJars(jars);
 
       TransformTask task;
       if (transform != null) {
         DynConstructors.Ctor<DoFn<Record, Record>> ctor =
             new DynConstructors.Builder(DoFn.class)
+                .loader(loaderForJars(jars))
                 .impl(transform)
                 .build();
         DoFn<Record, Record> transformFn = ctor.newInstance();

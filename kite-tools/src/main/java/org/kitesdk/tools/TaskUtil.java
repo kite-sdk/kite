@@ -16,6 +16,7 @@
 
 package org.kitesdk.tools;
 
+import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -23,6 +24,7 @@ import java.security.AccessController;
 import java.security.CodeSource;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
+import java.util.List;
 import org.apache.crunch.util.DistCache;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
@@ -60,6 +62,33 @@ public class TaskUtil {
     private ConfigBuilder(Configuration conf) {
       this.conf = conf;
       this.skipDistributedCache = conf.getBoolean("kite.testing", false);
+    }
+
+    /**
+     * Adds a set of jar paths to the distributed cache.
+     *
+     * @param jars A list of jar paths
+     * @return this for method chaining
+     */
+    public ConfigBuilder addJars(List<String> jars) {
+      if (!skipDistributedCache && jars != null) {
+        for (String jar : jars) {
+          try {
+            File path = new File(jar);
+            Preconditions.checkArgument(path.exists(),
+                "Jar files does not exist: " + jar);
+            Preconditions.checkArgument(path.isFile(),
+                "Not a file: " + jar);
+            Preconditions.checkArgument(path.canRead(),
+                "Cannot read jar file: " + jar);
+            DistCache.addJarToDistributedCache(conf, path);
+          } catch (IOException e) {
+            throw new DatasetIOException(
+                "Cannot add jar to distributed cache: " + jar, e);
+          }
+        }
+      }
+      return this;
     }
 
     /**

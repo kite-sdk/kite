@@ -76,12 +76,13 @@ public class CopyCommand extends BaseDatasetCommand {
     View<Record> source = load(datasets.get(0), Record.class);
     View<Record> dest = load(datasets.get(1), Record.class);
 
-    addJars(jars);
+    TaskUtil.configure(getConf()).addJars(jars);
 
     TransformTask task;
     if (transform != null) {
       DynConstructors.Ctor<DoFn<Record, Record>> ctor =
           new DynConstructors.Builder(DoFn.class)
+              .loader(loaderForJars(jars))
               .impl(transform)
               .build();
       DoFn<Record, Record> transformFn = ctor.newInstance();
