@@ -186,10 +186,24 @@ public class DynMethods {
 
   public static class Builder {
     private final String name;
+    private ClassLoader loader = Thread.currentThread().getContextClassLoader();
     private UnboundMethod method = null;
 
     public Builder(String methodName) {
       this.name = methodName;
+    }
+
+    /**
+     * Set the {@link ClassLoader} used to lookup classes by name.
+     * <p>
+     * If not set, the current thread's ClassLoader is used.
+     *
+     * @param loader a ClassLoader
+     * @return this Builder for method chaining
+     */
+    public Builder loader(ClassLoader loader) {
+      this.loader = loader;
+      return this;
     }
 
     /**
@@ -223,7 +237,7 @@ public class DynMethods {
       }
 
       try {
-        Class<?> targetClass = Class.forName(className);
+        Class<?> targetClass = Class.forName(className, true, loader);
         impl(targetClass, methodName, argClasses);
       } catch (ClassNotFoundException e) {
         // not the right implementation
@@ -335,7 +349,7 @@ public class DynMethods {
       }
 
       try {
-        Class<?> targetClass = Class.forName(className);
+        Class<?> targetClass = Class.forName(className, true, loader);
         hiddenImpl(targetClass, methodName, argClasses);
       } catch (ClassNotFoundException e) {
         // not the right implementation

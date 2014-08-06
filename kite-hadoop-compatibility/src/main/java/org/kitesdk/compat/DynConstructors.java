@@ -94,6 +94,7 @@ public class DynConstructors {
 
   public static class Builder {
     private final Class<?> baseClass;
+    private ClassLoader loader = Thread.currentThread().getContextClassLoader();
     private Ctor ctor = null;
 
     public Builder(Class<?> baseClass) {
@@ -102,6 +103,19 @@ public class DynConstructors {
 
     public Builder() {
       this.baseClass = null;
+    }
+
+    /**
+     * Set the {@link ClassLoader} used to lookup classes by name.
+     * <p>
+     * If not set, the current thread's ClassLoader is used.
+     *
+     * @param loader a ClassLoader
+     * @return this Builder for method chaining
+     */
+    public Builder loader(ClassLoader loader) {
+      this.loader = loader;
+      return this;
     }
 
     public Builder impl(Class<?>... types) {
@@ -116,7 +130,7 @@ public class DynConstructors {
       }
 
       try {
-        Class<?> targetClass = Class.forName(className);
+        Class<?> targetClass = Class.forName(className, true, loader);
         impl(targetClass, types);
       } catch (NoClassDefFoundError e) {
         // cannot load this implementation
@@ -153,7 +167,7 @@ public class DynConstructors {
       }
 
       try {
-        Class targetClass = Class.forName(className);
+        Class targetClass = Class.forName(className, true, loader);
         hiddenImpl(targetClass, types);
       } catch (NoClassDefFoundError e) {
         // cannot load this implementation
