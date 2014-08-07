@@ -32,6 +32,7 @@ import org.apache.crunch.PipelineResult;
 import org.apache.crunch.util.DistCache;
 import org.kitesdk.compat.DynConstructors;
 import org.kitesdk.compat.DynMethods;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.View;
 import org.kitesdk.tools.CopyTask;
 import org.kitesdk.tools.TaskUtil;
@@ -80,12 +81,18 @@ public class CopyCommand extends BaseDatasetCommand {
 
     TransformTask task;
     if (transform != null) {
-      DynConstructors.Ctor<DoFn<Record, Record>> ctor =
-          new DynConstructors.Builder(DoFn.class)
-              .loader(loaderForJars(jars))
-              .impl(transform)
-              .build();
-      DoFn<Record, Record> transformFn = ctor.newInstance();
+      DoFn<Record, Record> transformFn;
+      try {
+        DynConstructors.Ctor<DoFn<Record, Record>> ctor =
+            new DynConstructors.Builder(DoFn.class)
+                .loader(loaderForJars(jars))
+                .impl(transform)
+                .buildChecked();
+        transformFn = ctor.newInstance();
+      } catch (NoSuchMethodException e) {
+        throw new DatasetException(
+            "Cannot find no-arg constructor for class: " + transform, e);
+      }
       task = new TransformTask<Record, Record>(source, dest, transformFn);
     } else {
       task = new CopyTask<Record>(source, dest);

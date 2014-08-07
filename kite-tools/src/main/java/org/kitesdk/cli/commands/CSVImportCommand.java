@@ -32,6 +32,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.compat.DynConstructors;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.ColumnMappingParser;
 import org.kitesdk.data.spi.PartitionStrategyParser;
@@ -162,12 +163,18 @@ public class CSVImportCommand extends BaseDatasetCommand {
 
       TransformTask task;
       if (transform != null) {
-        DynConstructors.Ctor<DoFn<Record, Record>> ctor =
-            new DynConstructors.Builder(DoFn.class)
-                .loader(loaderForJars(jars))
-                .impl(transform)
-                .build();
-        DoFn<Record, Record> transformFn = ctor.newInstance();
+        DoFn<Record, Record> transformFn;
+        try {
+          DynConstructors.Ctor<DoFn<Record, Record>> ctor =
+              new DynConstructors.Builder(DoFn.class)
+                  .loader(loaderForJars(jars))
+                  .impl(transform)
+                  .buildChecked();
+          transformFn = ctor.newInstance();
+        } catch (NoSuchMethodException e) {
+          throw new DatasetException(
+              "Cannot find no-arg constructor for class: " + transform, e);
+        }
         task = new TransformTask<Record, Record>(
             csvDataset, target, transformFn);
       } else {
