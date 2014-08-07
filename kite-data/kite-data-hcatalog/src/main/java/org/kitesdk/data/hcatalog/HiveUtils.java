@@ -82,10 +82,10 @@ class HiveUtils {
     FORMAT_TO_SERDE.put(Formats.PARQUET, "parquet.hive.serde.ParquetHiveSerDe");
 
     FORMAT_TO_INPUT_FORMAT.put(Formats.AVRO, "org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
-    FORMAT_TO_INPUT_FORMAT.put(Formats.PARQUET, "parquet.hive.DeprecatedParquetInputFormat");
+    FORMAT_TO_INPUT_FORMAT.put(Formats.PARQUET, getHiveParquetInputFormat());
 
     FORMAT_TO_OUTPUT_FORMAT.put(Formats.AVRO, "org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat");
-    FORMAT_TO_OUTPUT_FORMAT.put(Formats.PARQUET, "parquet.hive.DeprecatedParquetOutputFormat");
+    FORMAT_TO_OUTPUT_FORMAT.put(Formats.PARQUET, getHiveParquetOutputFormat());
   }
 
   static DatasetDescriptor descriptorForTable(Configuration conf, Table table) {
@@ -423,6 +423,30 @@ class HiveUtils {
     @Override
     public TypeInfo primitive(Schema primitive) {
       return TYPE_TO_TYPEINFO.get(primitive.getType());
+    }
+  }
+
+  private static String getHiveParquetInputFormat() {
+    String newClass = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat";
+    String oldClass = "parquet.hive.DeprecatedParquetInputFormat";
+
+    try {
+      Class.forName(newClass);
+      return newClass;
+    } catch (ClassNotFoundException ex) {
+      return oldClass;
+    }
+  }
+
+  private static String getHiveParquetOutputFormat() {
+    String newClass = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat";
+    String oldClass = "parquet.hive.DeprecatedParquetOutputFormat";
+
+    try {
+      Class.forName(newClass);
+      return newClass;
+    } catch (ClassNotFoundException ex) {
+      return oldClass;
     }
   }
 
