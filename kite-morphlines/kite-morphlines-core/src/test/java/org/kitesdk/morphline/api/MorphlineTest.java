@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -129,16 +130,22 @@ public class MorphlineTest extends AbstractMorphlineTest {
       }
     });
 
+    Map<String,Object> settings = new HashMap<String,Object>(); 
+    
     MorphlineContext ctx = new MorphlineContext.Builder()
+      .setSettings(settings)
       .setExceptionHandler(ex)
       .setHealthCheckRegistry(healthChecks)
       .setMetricRegistry(metricRegistry)
       .build();
     
+    assertSame(settings, ctx.getSettings());
     assertSame(ex, ctx.getExceptionHandler());
     assertSame(metricRegistry, ctx.getMetricRegistry());
     assertSame(healthChecks, ctx.getHealthCheckRegistry());
     ctx.getHealthCheckRegistry().runHealthChecks();
+    
+    assertEquals(0, new MorphlineContext.Builder().build().getSettings().size());
   }
   
   @Test

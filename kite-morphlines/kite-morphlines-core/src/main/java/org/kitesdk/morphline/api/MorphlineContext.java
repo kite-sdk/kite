@@ -21,7 +21,6 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +40,7 @@ import com.google.common.collect.Maps;
  */
 public class MorphlineContext {
 
+  private Map<String, Object> settings;
   private ExceptionHandler exceptionHandler;
   private MetricRegistry metricRegistry;
   private HealthCheckRegistry healthCheckRegistry;
@@ -51,6 +51,11 @@ public class MorphlineContext {
   /** For public access use {@link Builder#build()} instead */  
   protected MorphlineContext() {}
 
+
+  public Map<String, Object> getSettings() {
+    assert settings != null;
+    return settings;
+  }
 
   public ExceptionHandler getExceptionHandler() {
     assert exceptionHandler != null;
@@ -222,11 +227,18 @@ public class MorphlineContext {
   public static class Builder {
     
     protected MorphlineContext context = create();
+    private Map<String, Object> settings = Maps.newHashMap();
     private ExceptionHandler exceptionHandler = new DefaultExceptionHandler();
     private MetricRegistry metricRegistry = new MetricRegistry();
     private HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
     
     public Builder() {}
+
+    public Builder setSettings(Map<String,Object> settings) {
+      Preconditions.checkNotNull(settings);
+      this.settings = settings;
+      return this;
+    }
 
     public Builder setExceptionHandler(ExceptionHandler exceptionHandler) {
       Preconditions.checkNotNull(exceptionHandler);
@@ -245,8 +257,9 @@ public class MorphlineContext {
       this.healthCheckRegistry = healthCheckRegistry;
       return this;
     }
-
+    
     public MorphlineContext build() {
+      context.settings = settings;
       context.exceptionHandler = exceptionHandler;
       context.metricRegistry = metricRegistry;
       context.healthCheckRegistry = healthCheckRegistry;
