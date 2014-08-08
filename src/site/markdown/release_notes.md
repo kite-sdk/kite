@@ -3,6 +3,21 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version 0.16.0
+
+Release date: TBD
+
+Version 0.16.0 contains the following notable changes:
+
+* Writing to a non-empty dataset or view from MapReduce or Crunch will now fail unless 
+the write mode is explicitly set to append or overwrite. This is a change from 
+the previous behavior which was to append. See
+[CDK-572](https://issues.cloudera.org/browse/CDK-572) and
+[CDK-347](https://issues.cloudera.org/browse/CDK-347) for details.
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10609)
+is available from JIRA.
+
 ## Version 0.15.0
 
 Release date: 15 July 2014
