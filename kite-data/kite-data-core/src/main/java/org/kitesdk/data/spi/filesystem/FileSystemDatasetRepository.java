@@ -16,6 +16,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import org.kitesdk.data.spi.PartitionKey;
+import org.kitesdk.data.View;
 import org.kitesdk.data.spi.SchemaValidationUtil;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -372,6 +373,12 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
           SchemaUtil.getPartitionType(fp, schema)));
     }
     return new PartitionKey(values.toArray(new Object[values.size()]));
+  }
+
+  @SuppressWarnings("deprecation")
+  public static <E> View<E> viewForPath(Dataset<E> dataset, URI partitionPath) {
+    PartitionKey key = partitionKeyForPath(dataset, partitionPath);
+    return dataset.getPartition(key, false);
   }
 
   @Override
