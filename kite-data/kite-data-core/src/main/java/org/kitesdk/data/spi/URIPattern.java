@@ -180,6 +180,10 @@ public class URIPattern {
     Map<String, String> result = Maps.newLinkedHashMap(defaults);
 
     if (pattern.isOpaque()) {
+      if (!uri.isOpaque()) {
+        return null;
+      }
+
       Iterator<String> pathQuery = PATH_QUERY_SPLITTER
           .split(uri.getSchemeSpecificPart()).iterator();
 
@@ -250,6 +254,8 @@ public class URIPattern {
 
   private static boolean addPath(String pattern, String path,
                                  Map<String, String> storage) {
+    boolean matchedAfterGlob = false;
+    boolean matchedBeforeGlob = false;
     LinkedList<String> patternParts = Lists.newLinkedList(
         PATH_SPLITTER.split(pattern));
     LinkedList<String> parts = Lists.newLinkedList(PATH_SPLITTER.split(path));
@@ -267,6 +273,9 @@ public class URIPattern {
         // abort if the pattern doesn't account for an entry
         return false;
       }
+      if (!patternPart.isEmpty()) {
+        matchedBeforeGlob = true;
+      }
     }
 
     // consume URI parts moving backward until exhausted
@@ -281,12 +290,15 @@ public class URIPattern {
         // abort if the pattern doesn't account for an entry
         return false;
       }
+      matchedAfterGlob = true;
     }
 
     // see if there was a glob that matched
     if (globPattern != null && !parts.isEmpty()) {
       final String joined = PATH_JOINER.join(parts);
-      storage.put(globPattern.substring(1), joined);
+      if (!joined.isEmpty() || matchedAfterGlob || matchedBeforeGlob) {
+        storage.put(globPattern.substring(1), joined);
+      }
       return true; // all remaining parts are consumed
     }
 

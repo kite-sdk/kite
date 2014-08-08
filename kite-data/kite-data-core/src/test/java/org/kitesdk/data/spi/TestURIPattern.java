@@ -412,6 +412,42 @@ public class TestURIPattern {
     Assert.assertEquals(URI.create("scheme:/table-name"), constructed);
   }
 
+  @Test
+  public void testNotEnoughPathComponents() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("scheme:*path/:ns/:name");
+    Assert.assertFalse(pattern.matches("scheme://host:3434/dataset"));
+  }
+
+  @Test
+  public void testEmptyGlobs() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("file:/a/*path");
+    Map<String, String> match = pattern.getMatch("file:/a");
+    Assert.assertNotNull(match);
+    Assert.assertNull(match.get("path"));
+
+    match = pattern.getMatch("file:/a/");
+    Assert.assertNotNull(match);
+    Assert.assertEquals("", match.get("path"));
+
+    match = pattern.getMatch("file:/a//");
+    Assert.assertNotNull(match);
+    Assert.assertEquals("/", match.get("path"));
+
+    pattern = new URIPattern("file:/a/*path/:dataset");
+    match = pattern.getMatch("file:/a//dataset");
+    Assert.assertNotNull(match);
+    Assert.assertEquals("", match.get("path"));
+
+    match = pattern.getMatch("file:/a/dataset");
+    Assert.assertNotNull(match);
+    Assert.assertNull(match.get("path"));
+
+    pattern = new URIPattern("file:/*path");
+    match = pattern.getMatch("file:/");
+    Assert.assertNotNull(match);
+    Assert.assertNull(match.get("path"));
+  }
+
   // This is common in this type of matching, but the query part prevents it
 //  @Test
 //  public void testPathVariablesOptional() throws URISyntaxException {
