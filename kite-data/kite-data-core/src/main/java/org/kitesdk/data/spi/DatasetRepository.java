@@ -18,10 +18,12 @@ package org.kitesdk.data.spi;
 import java.net.URI;
 import java.util.Collection;
 import javax.annotation.concurrent.Immutable;
+import org.kitesdk.data.ConcurrentSchemaModificationException;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.Datasets;
+import org.kitesdk.data.IncompatibleSchemaException;
 
 /**
  * <p>
@@ -30,9 +32,9 @@ import org.kitesdk.data.Datasets;
  * <p>
  * Implementations of {@code DatasetRepository} are storage systems that contain
  * zero or more {@link Dataset}s. A repository acts as a factory, as well as a
- * registry, of datasets. You can {@link #create(String, DatasetDescriptor)} a
+ * registry, of datasets. You can {@link #create(String, String, DatasetDescriptor)} a
  * new {@link Dataset} with a name and schema, or retrieve a handle to an
- * existing dataset, by name, by way of the {@link #load(String)} method. While
+ * existing dataset, by name, by way of the {@link #load(String, String)} method. While
  * not expressly forbidden, most repositories are expected to support only a
  * single concrete {@link Dataset} implementation.
  * </p>
@@ -56,25 +58,28 @@ public interface DatasetRepository {
    * Get the latest version of a named {@link Dataset}. If no dataset with the
    * provided {@code name} exists, a {@link DatasetNotFoundException} is thrown.
    *
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @param name The name of the dataset.
    * @throws DatasetNotFoundException if there is no data set named {@code name}
    *
-   * @since 0.7.0
+   * @since 0.17.0
    */
-  <E> Dataset<E> load(String name);
+  <E> Dataset<E> load(String namespace, String name);
 
   /**
    * Get the latest version of a named {@link Dataset}. If no dataset with the
    * provided {@code name} exists, a {@link DatasetNotFoundException} is thrown.
    *
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @param name The name of the dataset.
    * @param type the Java type of entities in the dataset
    * @throws DatasetNotFoundException if there is no data set named {@code name}
    *
-   * @since 0.15.0
+   * @since 0.17.0
    */
-  <E> Dataset<E> load(String name, Class<E> type);
+  <E> Dataset<E> load(String namespace, String name, Class<E> type);
 
+  /**
   /**
    * Create a {@link Dataset} with the supplied {@code descriptor}. Depending on
    * the underlying dataset storage, some schema types or configurations might
@@ -83,6 +88,7 @@ public interface DatasetRepository {
    * same name. If you provide a duplicate name, the implementing class throws
    * an exception.
    *
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @param name        The fully qualified dataset name
    * @param descriptor  A descriptor that describes the schema and other
    *                    properties of the dataset
@@ -101,9 +107,10 @@ public interface DatasetRepository {
    *                                    datasets with shared
    *                                    storage (for example, in the
    *                                    same HBase table).
-   * @throws DatasetRepositoryException
+   *
+   * @since 0.17.0
    */
-  <E> Dataset<E> create(String name, DatasetDescriptor descriptor);
+  <E> Dataset<E> create(String namespace, String name, DatasetDescriptor descriptor);
 
   /**
    * Create a {@link Dataset} with the supplied {@code descriptor}. Depending on
@@ -114,6 +121,7 @@ public interface DatasetRepository {
    * an exception.
    *
    * @param name        The fully qualified dataset name
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @param descriptor  A descriptor that describes the schema and other
    *                    properties of the dataset
    * @param type        the Java type of entities in the dataset
@@ -133,18 +141,19 @@ public interface DatasetRepository {
    *                                    storage (for example, in the
    *                                    same HBase table).
    *
-   * @since 0.15.0
+   * @since 0.17.0
    */
-  <E> Dataset<E> create(String name, DatasetDescriptor descriptor, Class<E> type);
+  <E> Dataset<E> create(String namespace, String name, DatasetDescriptor descriptor, Class<E> type);
 
   /**
    * Update an existing {@link Dataset} to reflect the supplied
    * {@code descriptor}. The common case is updating a dataset schema. Depending
    * on the underlying dataset storage, some updates might not be supported,
    * such as a change in format or partition strategy. Any attempt to make an
-   * unsupported or incompatible update results in an exception being thrown 
+   * unsupported or incompatible update results in an exception being thrown
    * and no changes made to the dataset.
    *
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @param name       The fully qualified dataset name
    * @param descriptor A descriptor that describes the schema and other
    *                   properties of the dataset
@@ -167,18 +176,19 @@ public interface DatasetRepository {
    *                                    storage (for example, in the
    *                                    same HBase table).
    *
-   * @since 0.3.0
+   * @since 0.17.0
    */
-  <E> Dataset<E> update(String name, DatasetDescriptor descriptor);
+  <E> Dataset<E> update(String namespace, String name, DatasetDescriptor descriptor);
 
   /**
    * Update an existing {@link Dataset} to reflect the supplied
    * {@code descriptor}. The common case is updating a dataset schema. Depending
    * on the underlying dataset storage, some updates might not be supported,
    * such as a change in format or partition strategy. Any attempt to make an
-   * unsupported or incompatible update results in an exception being thrown 
+   * unsupported or incompatible update results in an exception being thrown
    * and no changes made to the dataset.
    *
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @param name       The fully qualified dataset name
    * @param descriptor A descriptor that describes the schema and other
    *                   properties of the dataset
@@ -202,9 +212,9 @@ public interface DatasetRepository {
    *                                    storage (for example, in the
    *                                    same HBase table).
    *
-   * @since 0.15.0
+   * @since 0.17.0
    */
-  <E> Dataset<E> update(String name, DatasetDescriptor descriptor, Class<E> type);
+  <E> Dataset<E> update(String namespace, String name, DatasetDescriptor descriptor, Class<E> type);
 
   /**
    * Delete data for the {@link Dataset} named {@code name} and remove its
@@ -216,6 +226,7 @@ public interface DatasetRepository {
    * {@code Dataset} corresponding to the given {@code name}, this
    * method makes no changes and returns {@code false}.
    *
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @param name The name of the dataset to delete.
    * @return {@code true} if any data or metadata is removed,
    *         {@code false} if no action is taken.
@@ -224,31 +235,44 @@ public interface DatasetRepository {
    *                                  if the {@code Dataset}
    *                                  schema is updated concurrently.
    *
-   * @since 0.7.0
+   * @since 0.17.0
    */
-  boolean delete(String name);
+  boolean delete(String namespace, String name);
 
   /**
    * Checks if there is a {@link Dataset} in this repository named {@code name}.
    *
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @param name a {@code Dataset} name to check the existence of
    * @return true if a Dataset named {@code name} exists, false otherwise
    * @throws IllegalArgumentException if {@code name} is null
    *
-   * @since 0.7.0
+   * @since 0.17.0
    */
-  boolean exists(String name);
+  boolean exists(String namespace, String name);
 
   /**
-   * List the names of the {@link Dataset}s in this {@code DatasetRepository}.
-   * If there is not at least one {@code Dataset} in this repository, an empty
-   * list is returned.
+   * List the names of the {@link Dataset} namespaces, or logical groups, in
+   * this {@code DatasetRepository}. If there is not at least one
+   * {@code Dataset} in this repository, an empty list is returned.
    *
+   * @return a {@link Collection} of namespace names ({@link String}s)
+   *
+   * @since 0.17.0
+   */
+  Collection<String> namespaces();
+
+  /**
+   * List the names of the {@link Dataset}s in a namespace in this
+   * {@code DatasetRepository}. If there is not at least one {@code Dataset} in
+   * the namespace or if the namespace does not exist, an empty list is returned.
+   *
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @return a {@link Collection} of Dataset names ({@link String}s)
    *
-   * @since 0.7.0
+   * @since 0.17.0
    */
-  Collection<String> list();
+  Collection<String> datasets(String namespace);
 
   /**
    * Return the {@link URI} of this repository. When used with the {@link

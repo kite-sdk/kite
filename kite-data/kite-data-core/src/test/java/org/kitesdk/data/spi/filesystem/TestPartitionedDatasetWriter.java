@@ -50,7 +50,7 @@ public class TestPartitionedDatasetWriter {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder()
         .hash("username", 2).build();
     FileSystemDataset<Object> users = (FileSystemDataset<Object>) repo.create(
-        "users",
+        "ns", "users",
         new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .partitionStrategy(partitionStrategy)

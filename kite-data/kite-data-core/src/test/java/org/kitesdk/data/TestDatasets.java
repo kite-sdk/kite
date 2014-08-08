@@ -51,18 +51,18 @@ public class TestDatasets {
 
   @Test
   public void testCreate() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build();
 
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.create("test", descriptor, Object.class)).thenReturn(expected);
+    when(repo.create("ns", "test", descriptor, Object.class)).thenReturn(expected);
 
     Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
         create(datasetUri, descriptor, Object.class);
 
-    verify(repo).create("test", descriptor, Object.class);
+    verify(repo).create("ns", "test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -72,17 +72,17 @@ public class TestDatasets {
 
   @Test
   public void testCreateWithoutType() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build();
 
     Dataset<GenericRecord> expected = mock(Dataset.class);
-    when(repo.create("test", descriptor, GenericRecord.class)).thenReturn(expected);
+    when(repo.create("ns", "test", descriptor, GenericRecord.class)).thenReturn(expected);
 
     Dataset<GenericRecord> ds = Datasets.create(datasetUri, descriptor);
 
-    verify(repo).create("test", descriptor, GenericRecord.class);
+    verify(repo).create("ns", "test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -92,7 +92,7 @@ public class TestDatasets {
 
   @Test(expected=NullPointerException.class)
   public void testCreateNullType() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build();
@@ -102,18 +102,18 @@ public class TestDatasets {
 
   @Test
   public void testCreateStringUri() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build();
 
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.create("test", descriptor, Object.class)).thenReturn(expected);
+    when(repo.create("ns", "test", descriptor, Object.class)).thenReturn(expected);
 
     Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
         create(datasetUri.toString(), descriptor, Object.class);
 
-    verify(repo).create("test", descriptor, Object.class);
+    verify(repo).create("ns", "test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -123,17 +123,17 @@ public class TestDatasets {
 
   @Test
   public void testCreateStringUriWithoutType() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build();
 
     Dataset<GenericRecord> expected = mock(Dataset.class);
-    when(repo.create("test", descriptor, GenericRecord.class)).thenReturn(expected);
+    when(repo.create("ns", "test", descriptor, GenericRecord.class)).thenReturn(expected);
 
     Dataset<GenericRecord> ds = Datasets.create(datasetUri.toString(), descriptor);
 
-    verify(repo).create("test", descriptor, GenericRecord.class);
+    verify(repo).create("ns", "test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -151,13 +151,13 @@ public class TestDatasets {
         .with("email", "user1@example.com");
 
     AbstractDataset<Object> ds = mock(AbstractDataset.class);
-    when(repo.create("test", descriptor, Object.class)).thenReturn(ds);
+    when(repo.create("ns", "test", descriptor, Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     AbstractRefinableView<Object> userAndEmailView = mock(AbstractRefinableView.class);
     when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
-    URI datasetUri = new URIBuilder(repoUri, "test")
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("username", "user1")
         .with("email", "user1@example.com")
         .with("ignoredOption", "abc")
@@ -166,7 +166,7 @@ public class TestDatasets {
     RefinableView<Object> view = Datasets.<Object, RefinableView<Object>>
         create(datasetUri, descriptor, Object.class);
 
-    verify(repo).create("test", descriptor, Object.class);
+    verify(repo).create("ns", "test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -188,13 +188,13 @@ public class TestDatasets {
         .with("email", "user1@example.com");
 
     AbstractDataset<GenericRecord> ds = mock(AbstractDataset.class);
-    when(repo.create("test", descriptor, GenericRecord.class)).thenReturn(ds);
+    when(repo.create("ns", "test", descriptor, GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     AbstractRefinableView<GenericRecord> userAndEmailView = mock(AbstractRefinableView.class);
     when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
-    URI datasetUri = new URIBuilder(repoUri, "test")
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("username", "user1")
         .with("email", "user1@example.com")
         .with("ignoredOption", "abc")
@@ -202,7 +202,7 @@ public class TestDatasets {
 
     View<GenericRecord> view = Datasets.create(datasetUri, descriptor);
 
-    verify(repo).create("test", descriptor, GenericRecord.class);
+    verify(repo).create("ns", "test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -224,13 +224,13 @@ public class TestDatasets {
         .with("email", "user1@example.com");
 
     AbstractDataset<Object> ds = mock(AbstractDataset.class);
-    when(repo.create("test", descriptor, Object.class)).thenReturn(ds);
+    when(repo.create("ns", "test", descriptor, Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     AbstractRefinableView<Object> userAndEmailView = mock(AbstractRefinableView.class);
     when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
-    URI datasetUri = new URIBuilder(repoUri, "test")
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("username", "user1")
         .with("email", "user1@example.com")
         .with("ignoredOption", "abc")
@@ -239,7 +239,7 @@ public class TestDatasets {
     RefinableView<Object> view = Datasets.<Object, RefinableView<Object>>
         create(datasetUri.toString(), descriptor, Object.class);
 
-    verify(repo).create("test", descriptor, Object.class);
+    verify(repo).create("ns", "test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -261,13 +261,13 @@ public class TestDatasets {
         .with("email", "user1@example.com");
 
     AbstractDataset<GenericRecord> ds = mock(AbstractDataset.class);
-    when(repo.create("test", descriptor, GenericRecord.class)).thenReturn(ds);
+    when(repo.create("ns", "test", descriptor, GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     AbstractRefinableView<GenericRecord> userAndEmailView = mock(AbstractRefinableView.class);
     when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
-    URI datasetUri = new URIBuilder(repoUri, "test")
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("username", "user1")
         .with("email", "user1@example.com")
         .with("ignoredOption", "abc")
@@ -275,7 +275,7 @@ public class TestDatasets {
 
     View<GenericRecord> view = Datasets.create(datasetUri.toString(), descriptor);
 
-    verify(repo).create("test", descriptor, GenericRecord.class);
+    verify(repo).create("ns", "test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -290,14 +290,14 @@ public class TestDatasets {
   @Test
   public void testLoad() {
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.load("test", Object.class)).thenReturn(expected);
+    when(repo.load("ns", "test", Object.class)).thenReturn(expected);
 
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 
     Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
         load(datasetUri, Object.class);
 
-    verify(repo).load("test", Object.class);
+    verify(repo).load("ns", "test", Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -308,13 +308,13 @@ public class TestDatasets {
   @Test
   public void testLoadWithoutType() {
     Dataset<GenericRecord> expected = mock(Dataset.class);
-    when(repo.load("test", GenericRecord.class)).thenReturn(expected);
+    when(repo.load("ns", "test", GenericRecord.class)).thenReturn(expected);
 
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 
     Dataset<GenericRecord> ds = Datasets.load(datasetUri);
 
-    verify(repo).load("test", GenericRecord.class);
+    verify(repo).load("ns", "test", GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -324,7 +324,7 @@ public class TestDatasets {
 
   @Test(expected=NullPointerException.class)
   public void testLoadNullType() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 
     Datasets.<Object, Dataset<Object>> load(datasetUri, null);
   }
@@ -332,14 +332,14 @@ public class TestDatasets {
   @Test
   public void testLoadStringUri() {
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.load("test", Object.class)).thenReturn(expected);
+    when(repo.load("ns", "test", Object.class)).thenReturn(expected);
 
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 
     Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
         load(datasetUri, Object.class);
 
-    verify(repo).load("test", Object.class);
+    verify(repo).load("ns", "test", Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -350,13 +350,13 @@ public class TestDatasets {
   @Test
   public void testLoadStringUriWithoutType() {
     Dataset<GenericRecord> expected = mock(Dataset.class);
-    when(repo.load("test", GenericRecord.class)).thenReturn(expected);
+    when(repo.load("ns", "test", GenericRecord.class)).thenReturn(expected);
 
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 
     Dataset<GenericRecord> ds = Datasets.load(datasetUri);
 
-    verify(repo).load("test", GenericRecord.class);
+    verify(repo).load("ns", "test", GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -374,13 +374,13 @@ public class TestDatasets {
         .with("email", "user1@example.com");
 
     AbstractDataset<Object> ds = mock(AbstractDataset.class);
-    when(repo.load("test", Object.class)).thenReturn(ds);
+    when(repo.load("ns", "test", Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     AbstractRefinableView<Object> userAndEmailView = mock(AbstractRefinableView.class);
     when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
-    URI datasetUri = new URIBuilder(repoUri, "test")
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("username", "user1")
         .with("email", "user1@example.com")
         .with("ignoredOption", "abc")
@@ -389,7 +389,7 @@ public class TestDatasets {
     RefinableView<Object> view = Datasets.<Object, RefinableView<Object>>
         load(datasetUri, Object.class);
 
-    verify(repo).load("test", Object.class);
+    verify(repo).load("ns", "test", Object.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -411,13 +411,13 @@ public class TestDatasets {
         .with("email", "user1@example.com");
 
     AbstractDataset<GenericRecord> ds = mock(AbstractDataset.class);
-    when(repo.load("test", GenericRecord.class)).thenReturn(ds);
+    when(repo.load("ns", "test", GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     AbstractRefinableView<GenericRecord> userAndEmailView = mock(AbstractRefinableView.class);
     when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
-    URI datasetUri = new URIBuilder(repoUri, "test")
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("username", "user1")
         .with("email", "user1@example.com")
         .with("ignoredOption", "abc")
@@ -425,7 +425,7 @@ public class TestDatasets {
 
     RefinableView<GenericRecord> view = Datasets.load(datasetUri);
 
-    verify(repo).load("test", GenericRecord.class);
+    verify(repo).load("ns", "test", GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -447,13 +447,13 @@ public class TestDatasets {
         .with("email", "user1@example.com");
 
     AbstractDataset<Object> ds = mock(AbstractDataset.class);
-    when(repo.load("test", Object.class)).thenReturn(ds);
+    when(repo.load("ns", "test", Object.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     AbstractRefinableView<Object> userAndEmailView = mock(AbstractRefinableView.class);
     when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
-    URI datasetUri = new URIBuilder(repoUri, "test")
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("username", "user1")
         .with("email", "user1@example.com")
         .with("ignoredOption", "abc")
@@ -462,7 +462,7 @@ public class TestDatasets {
     RefinableView<Object> view = Datasets.<Object, RefinableView<Object>>
         load(datasetUri.toString(), Object.class);
 
-    verify(repo).load("test", Object.class);
+    verify(repo).load("ns", "test", Object.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -484,13 +484,13 @@ public class TestDatasets {
         .with("email", "user1@example.com");
 
     AbstractDataset<GenericRecord> ds = mock(AbstractDataset.class);
-    when(repo.load("test", GenericRecord.class)).thenReturn(ds);
+    when(repo.load("ns", "test", GenericRecord.class)).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(descriptor);
 
     AbstractRefinableView<GenericRecord> userAndEmailView = mock(AbstractRefinableView.class);
     when(ds.filter(constraints)).thenReturn(userAndEmailView);
 
-    URI datasetUri = new URIBuilder(repoUri, "test")
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("username", "user1")
         .with("email", "user1@example.com")
         .with("ignoredOption", "abc")
@@ -498,7 +498,7 @@ public class TestDatasets {
 
     RefinableView<GenericRecord> view = Datasets.load(datasetUri.toString());
 
-    verify(repo).load("test", GenericRecord.class);
+    verify(repo).load("ns", "test", GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verify(ds).getDescriptor();
@@ -512,27 +512,27 @@ public class TestDatasets {
 
   @Test
   public void testDelete() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 
     Datasets.delete(datasetUri);
 
-    verify(repo).delete("test");
+    verify(repo).delete("ns", "test");
     verifyNoMoreInteractions(repo);
   }
 
   @Test
   public void testDeleteStringUri() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 
     Datasets.delete(datasetUri.toString());
 
-    verify(repo).delete("test");
+    verify(repo).delete("ns", "test");
     verifyNoMoreInteractions(repo);
   }
 
   @Test
   public void testDeleteRejectsViewUri() {
-    final URI datasetUri = new URIBuilder(repoUri, "test")
+    final URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("field", 34)
         .build();
 
@@ -549,31 +549,31 @@ public class TestDatasets {
 
   @Test
   public void testExists() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 
-    when(repo.exists("test")).thenReturn(true);
+    when(repo.exists("ns", "test")).thenReturn(true);
 
     Assert.assertTrue(Datasets.exists(datasetUri));
 
-    verify(repo).exists("test");
+    verify(repo).exists("ns", "test");
     verifyNoMoreInteractions(repo);
   }
 
   @Test
   public void testExistsStringUri() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 
-    when(repo.exists("test")).thenReturn(false);
+    when(repo.exists("ns", "test")).thenReturn(false);
 
     Assert.assertFalse(Datasets.exists(datasetUri.toString()));
 
-    verify(repo).exists("test");
+    verify(repo).exists("ns", "test");
     verifyNoMoreInteractions(repo);
   }
 
   @Test
   public void testExistsRejectsViewUri() {
-    final URI datasetUri = new URIBuilder(repoUri, "test")
+    final URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("field", 34)
         .build();
 
@@ -590,18 +590,18 @@ public class TestDatasets {
 
   @Test
   public void testUpdate() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build();
 
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.update("test", descriptor, Object.class)).thenReturn(expected);
+    when(repo.update("ns", "test", descriptor, Object.class)).thenReturn(expected);
 
     Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
         update(datasetUri, descriptor, Object.class);
 
-    verify(repo).update("test", descriptor, Object.class);
+    verify(repo).update("ns", "test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -611,17 +611,17 @@ public class TestDatasets {
 
   @Test
   public void testUpdateWithoutType() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build();
 
     Dataset<GenericRecord> expected = mock(Dataset.class);
-    when(repo.update("test", descriptor, GenericRecord.class)).thenReturn(expected);
+    when(repo.update("ns", "test", descriptor, GenericRecord.class)).thenReturn(expected);
 
     Dataset<GenericRecord> ds = Datasets.update(datasetUri, descriptor);
 
-    verify(repo).update("test", descriptor, GenericRecord.class);
+    verify(repo).update("ns", "test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -631,7 +631,7 @@ public class TestDatasets {
 
   @Test(expected=NullPointerException.class)
   public void testUpdateNullType() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build();
@@ -641,18 +641,18 @@ public class TestDatasets {
 
   @Test
   public void testUpdateStringUri() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build();
 
     Dataset<Object> expected = mock(Dataset.class);
-    when(repo.update("test", descriptor, Object.class)).thenReturn(expected);
+    when(repo.update("ns", "test", descriptor, Object.class)).thenReturn(expected);
 
     Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
         update(datasetUri.toString(), descriptor, Object.class);
 
-    verify(repo).update("test", descriptor, Object.class);
+    verify(repo).update("ns", "test", descriptor, Object.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -662,17 +662,17 @@ public class TestDatasets {
 
   @Test
   public void testUpdateStringUriWithoutType() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build();
 
     Dataset<GenericRecord> expected = mock(Dataset.class);
-    when(repo.update("test", descriptor, GenericRecord.class)).thenReturn(expected);
+    when(repo.update("ns", "test", descriptor, GenericRecord.class)).thenReturn(expected);
 
     Dataset<GenericRecord> ds = Datasets.update(datasetUri.toString(), descriptor);
 
-    verify(repo).update("test", descriptor, GenericRecord.class);
+    verify(repo).update("ns", "test", descriptor, GenericRecord.class);
     verifyNoMoreInteractions(repo);
 
     verifyNoMoreInteractions(expected);
@@ -682,7 +682,7 @@ public class TestDatasets {
 
   @Test
   public void testUpdateRejectsViewUri() {
-    final URI datasetUri = new URIBuilder(repoUri, "test")
+    final URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("field", 34)
         .build();
     final DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
@@ -706,7 +706,7 @@ public class TestDatasets {
         IllegalArgumentException.class, new Runnable() {
           @Override
           public void run() {
-            Datasets.list(new URIBuilder(repoUri, "test").build());
+            Datasets.list(new URIBuilder(repoUri, "ns", "test").build());
           }
         });
     verifyNoMoreInteractions(repo);
@@ -718,7 +718,7 @@ public class TestDatasets {
         IllegalArgumentException.class, new Runnable() {
           @Override
           public void run() {
-            Datasets.list(new URIBuilder(repoUri, "test")
+            Datasets.list(new URIBuilder(repoUri, "ns", "test")
                 .with("field", 34)
                 .build());
           }
@@ -728,17 +728,19 @@ public class TestDatasets {
 
   @Test
   public void testListRepoUri() {
-    when(repo.list()).thenReturn(Lists.newArrayList("a", "b", "c"));
+    when(repo.namespaces()).thenReturn(Lists.newArrayList("ns"));
+    when(repo.datasets("ns")).thenReturn(Lists.newArrayList("a", "b", "c"));
     List<URI> expected = Lists.newArrayList(
-        new URIBuilder(repoUri, "a").build(),
-        new URIBuilder(repoUri, "b").build(),
-        new URIBuilder(repoUri, "c").build()
+        new URIBuilder(repoUri, "ns", "a").build(),
+        new URIBuilder(repoUri, "ns", "b").build(),
+        new URIBuilder(repoUri, "ns", "c").build()
     );
 
     Collection<URI> datasetUris = Datasets.list(repoUri);
 
     verify(repo, times(2)).getUri(); // called in @Before and Datasets.list
-    verify(repo).list();
+    verify(repo).namespaces();
+    verify(repo).datasets("ns");
     verifyNoMoreInteractions(repo);
 
     Assert.assertEquals(expected, datasetUris);
@@ -746,17 +748,19 @@ public class TestDatasets {
 
   @Test
   public void testListStringRepoUri() {
-    when(repo.list()).thenReturn(Lists.newArrayList("a", "b", "c"));
+    when(repo.namespaces()).thenReturn(Lists.newArrayList("ns"));
+    when(repo.datasets("ns")).thenReturn(Lists.newArrayList("a", "b", "c"));
     List<URI> expected = Lists.newArrayList(
-        new URIBuilder(repoUri, "a").build(),
-        new URIBuilder(repoUri, "b").build(),
-        new URIBuilder(repoUri, "c").build()
+        new URIBuilder(repoUri, "ns", "a").build(),
+        new URIBuilder(repoUri, "ns", "b").build(),
+        new URIBuilder(repoUri, "ns", "c").build()
     );
 
     Collection<URI> datasetUris = Datasets.list(repoUri.toString());
 
     verify(repo, times(2)).getUri(); // called in @Before and Datasets.list
-    verify(repo).list();
+    verify(repo).namespaces();
+    verify(repo).datasets("ns");
     verifyNoMoreInteractions(repo);
 
     Assert.assertEquals(expected, datasetUris);
@@ -764,7 +768,7 @@ public class TestDatasets {
 
   @Test
   public void testRepositoryFor() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 
     Assert.assertEquals(repo, DatasetRepositories.repositoryFor(datasetUri));
 
@@ -773,7 +777,7 @@ public class TestDatasets {
 
   @Test
   public void testRepositoryForStringUri() {
-    URI datasetUri = new URIBuilder(repoUri, "test").build();
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test").build();
 
     Assert.assertEquals(repo, DatasetRepositories.repositoryFor(datasetUri.toString()));
 
@@ -782,7 +786,7 @@ public class TestDatasets {
 
   @Test
   public void testRepositoryForView() {
-    URI datasetUri = new URIBuilder(repoUri, "test")
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("field", 34)
         .build();
 
@@ -793,7 +797,7 @@ public class TestDatasets {
 
   @Test
   public void testRepositoryForViewStringUri() {
-    URI datasetUri = new URIBuilder(repoUri, "test")
+    URI datasetUri = new URIBuilder(repoUri, "ns", "test")
         .with("field", 34)
         .build();
 

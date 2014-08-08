@@ -100,12 +100,13 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public DatasetDescriptor load(String name) {
+  public DatasetDescriptor load(String namespace, String name) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     LOG.debug("Loading dataset metadata name: {}", name);
 
-    Path metadataPath = pathForMetadata(name);
+    Path metadataPath = pathForMetadata(namespace, name);
     checkExists(rootFileSystem, metadataPath);
 
     InputStream inputStream = null;
@@ -157,7 +158,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     } else {
       // backwards-compatibility: older versions didn't write this property but
       // the data and metadata were always co-located.
-      location = expectedPathForDataset(name);
+      location = expectedPathForDataset(namespace, name);
     }
     builder.location(location);
 
@@ -172,7 +173,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
+  public DatasetDescriptor create(String namespace, String name, DatasetDescriptor descriptor) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
     Compatibility.checkAndWarn(name, descriptor);
@@ -180,19 +182,19 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     LOG.debug("Saving dataset metadata name:{} descriptor:{}", name,
         descriptor);
 
-    Path metadataLocation = pathForMetadata(name);
+    Path metadataLocation = pathForMetadata(namespace, name);
 
     try {
       if (rootFileSystem.exists(metadataLocation)) {
         throw new DatasetExistsException(
-            "Descriptor directory:" + metadataLocation + " already exists");
+            "Descriptor directory already exists: " + metadataLocation);
       }
       // create the directory so that update can do the rest of the work
       rootFileSystem.mkdirs(metadataLocation);
     } catch (IOException e) {
       throw new DatasetIOException(
-          "Unable to create metadata directory:" + metadataLocation +
-          " for dataset:" + name, e);
+          "Unable to create metadata directory: " + metadataLocation +
+          " for dataset: " + name, e);
     }
 
     writeDescriptor(rootFileSystem, metadataLocation, name, descriptor);
@@ -201,7 +203,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
+  public DatasetDescriptor update(String namespace, String name, DatasetDescriptor descriptor) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
     Compatibility.checkAndWarn(name, descriptor);
@@ -210,18 +213,19 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
         descriptor);
 
     writeDescriptor(
-        rootFileSystem, pathForMetadata(name), name, descriptor);
+        rootFileSystem, pathForMetadata(namespace, name), name, descriptor);
 
     return descriptor;
   }
 
   @Override
-  public boolean delete(String name) {
+  public boolean delete(String namespace, String name) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     LOG.debug("Deleting dataset metadata name: {}", name);
 
-    final Path metadataDirectory = pathForMetadata(name);
+    final Path metadataDirectory = pathForMetadata(namespace, name);
 
     try {
       if (rootFileSystem.exists(metadataDirectory)) {
@@ -242,10 +246,11 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public boolean exists(String name) {
+  public boolean exists(String namespace, String name) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    final Path potentialPath = pathForMetadata(name);
+    final Path potentialPath = pathForMetadata(namespace, name);
     try {
       return rootFileSystem.exists(potentialPath);
     } catch (IOException ex) {
@@ -256,15 +261,38 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
   @SuppressWarnings("deprecation")
   @Override
-  public List<String> list() {
-    List<String> datasets = Lists.newArrayList();
+  public List<String> namespaces() {
+    List<String> namespaces = Lists.newArrayList();
     try {
       FileStatus[] entries = rootFileSystem.listStatus(rootDirectory,
           PathFilters.notHidden());
       for (FileStatus entry : entries) {
-        // assumes that all unhidden directories under the root are data sets
-        if (entry.isDir() &&
-            rootFileSystem.exists(new Path(entry.getPath(), ".metadata"))) {
+        if (entry.isDir() && isNamespace(entry.getPath())) {
+          // may want to add a check: !RESERVED_NAMES.contains(name)
+          namespaces.add(entry.getPath().getName());
+        }
+      }
+    } catch (FileNotFoundException ex) {
+      // the repo hasn't created any files yet
+      return namespaces;
+    } catch (IOException ex) {
+      throw new DatasetIOException("Could not list namespaces", ex);
+    }
+    return namespaces;
+  }
+
+  @SuppressWarnings("deprecation")
+  @Override
+  public List<String> datasets(String namespace) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
+
+    List<String> datasets = Lists.newArrayList();
+    try {
+      FileStatus[] entries = rootFileSystem.listStatus(
+          new Path(rootDirectory, namespace),
+          PathFilters.notHidden());
+      for (FileStatus entry : entries) {
+        if (entry.isDir() && isDataset(entry.getPath())) {
           // may want to add a check: !RESERVED_NAMES.contains(name)
           datasets.add(entry.getPath().getName());
         }
@@ -273,9 +301,39 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       // the repo hasn't created any files yet
       return datasets;
     } catch (IOException ex) {
-      throw new DatasetIOException("Could not list data sets", ex);
+      throw new DatasetIOException("Could not list datasets", ex);
     }
     return datasets;
+  }
+
+  /**
+   * Returns whether the given {@code Path} contains directories with
+   * {@code Dataset} metadata.
+   *
+   * @param dir a Path to check
+   * @return {@code true} if there is a direct sub-directory with metadata
+   * @throws IOException
+   */
+  @SuppressWarnings("deprecation")
+  private boolean isNamespace(Path dir) throws IOException {
+    FileStatus[] stats = rootFileSystem.listStatus(dir, PathFilters.notHidden());
+    for (FileStatus stat : stats) {
+      if (stat.isDir() && isDataset(stat.getPath())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns whether the given {@code Path} contains {@code Dataset} metadata.
+   *
+   * @param dir a Path to check
+   * @return {@code true} if there is a .metadata subdirectory
+   * @throws IOException
+   */
+  private boolean isDataset(Path dir) throws IOException {
+    return rootFileSystem.isDirectory(new Path(dir, METADATA_DIRECTORY));
   }
 
   /**
@@ -307,9 +365,9 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
         .add("conf", conf).toString();
   }
 
-  private Path expectedPathForDataset(String name) {
+  private Path expectedPathForDataset(String namespace, String name) {
     return rootFileSystem.makeQualified(
-        FileSystemDatasetRepository.pathForDataset(rootDirectory, name));
+        FileSystemDatasetRepository.pathForDataset(rootDirectory, namespace, name));
   }
 
   /**
@@ -322,8 +380,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
    * @param name The {@link Dataset} name
    * @return The directory {@link Path} where metadata files will be located
    */
-  private Path pathForMetadata(String name) {
-    return pathForMetadata(rootDirectory, name);
+  private Path pathForMetadata(String namespace, String name) {
+    return pathForMetadata(rootDirectory, namespace, name);
   }
 
   /**
@@ -355,8 +413,9 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       outputStream.flush();
       threw = false;
     } catch (IOException e) {
-      throw new DatasetIOException("Unable to save schema file:" + schemaPath +
-          " for dataset:" + name, e);
+      throw new DatasetIOException(
+          "Unable to save schema file: " + schemaPath +
+          " for dataset: " + name, e);
     } finally {
       try {
         Closeables.close(outputStream, threw);
@@ -394,8 +453,9 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       outputStream.flush();
       threw = false;
     } catch (IOException e) {
-      throw new DatasetIOException("Unable to save descriptor file:" + descriptorPath +
-          " for dataset:" + name, e);
+      throw new DatasetIOException(
+          "Unable to save descriptor file: " + descriptorPath +
+          " for dataset: " + name, e);
     } finally {
       try {
         Closeables.close(outputStream, threw);
@@ -411,9 +471,9 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
    * @param name A String dataset name
    * @return the metadata Path
    */
-  private static Path pathForMetadata(Path root, String name) {
+  private static Path pathForMetadata(Path root, String namespace, String name) {
     return new Path(
-        FileSystemDatasetRepository.pathForDataset(root, name),
+        FileSystemDatasetRepository.pathForDataset(root, namespace, name),
         METADATA_DIRECTORY);
   }
 
@@ -428,11 +488,12 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   private static void checkExists(FileSystem fs, Path location) {
     try {
       if (!fs.exists(location)) {
-        throw new DatasetNotFoundException("Descriptor location is missing: " +
-            location);
+        throw new DatasetNotFoundException(
+            "Descriptor location does not exist: " + location);
       }
     } catch (IOException ex) {
-      throw new DatasetIOException("Cannot access descriptor location", ex);
+      throw new DatasetIOException(
+          "Cannot access descriptor location: " + location, ex);
     }
   }
 

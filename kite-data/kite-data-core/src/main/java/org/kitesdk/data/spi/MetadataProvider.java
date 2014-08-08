@@ -34,12 +34,15 @@ public interface MetadataProvider {
   /**
    * Load the dataset descriptor for the dataset {@code name}.
    *
-   * @param name The fully qualified name of an existing dataset.
+   * @param namespace A namespace, or logical group name, for the dataset.
+   * @param name The name of an existing dataset.
    * @return A dataset descriptor.
    * @throws org.kitesdk.data.DatasetNotFoundException  If there is no descriptor for {@code name}
    * @throws org.kitesdk.data.DatasetException If the dataset doesn't exist or the descriptor can not be loaded.
+   *
+   * @since 0.16.0
    */
-  DatasetDescriptor load(String name);
+  DatasetDescriptor load(String namespace, String name);
 
   /**
    * Create a {@code DatasetDescriptor} for the dataset named {@code name}.
@@ -48,7 +51,8 @@ public interface MetadataProvider {
    * metadata store. It is illegal to create more than one descriptor for a
    * named data set, and an exception will be thrown.
    *
-   * @param name       The fully qualified name of a dataset.
+   * @param namespace A namespace, or logical group name, for the dataset.
+   * @param name       The name of a dataset.
    * @param descriptor A dataset descriptor.
    * @return The descriptor as persisted to the Metadata store.
    * @throws org.kitesdk.data.DatasetExistsException     If a {@code DatasetDescriptor} already
@@ -56,9 +60,9 @@ public interface MetadataProvider {
    * @throws org.kitesdk.data.DatasetException  If the {@code DatasetDescriptor} can not
    *                                    be saved
    *
-   * @since 0.7.0
+   * @since 0.16.0
    */
-  DatasetDescriptor create(String name, DatasetDescriptor descriptor);
+  DatasetDescriptor create(String namespace, String name, DatasetDescriptor descriptor);
 
   /**
    * Update a {@code DatasetDescriptor} for the dataset named {@code name}.
@@ -69,7 +73,8 @@ public interface MetadataProvider {
    *
    * This method is optional.
    *
-   * @param name       The fully qualified name of a dataset.
+   * @param namespace A namespace, or logical group name, for the dataset.
+   * @param name       The name of a dataset.
    * @param descriptor A dataset descriptor.
    * @return The descriptor as persisted to the Metadata store.
    *
@@ -80,9 +85,9 @@ public interface MetadataProvider {
    * @throws org.kitesdk.data.DatasetException     If the dataset descriptor can not be
    *                                       updated.
    *
-   * @since 0.7.0
+   * @since 0.16.0
    */
-  DatasetDescriptor update(String name, DatasetDescriptor descriptor);
+  DatasetDescriptor update(String namespace, String name, DatasetDescriptor descriptor);
 
   /**
    * Delete all metadata associated with the dataset named {@code name}.
@@ -93,36 +98,52 @@ public interface MetadataProvider {
    * no {@code DatasetDescriptor} corresponding to the given name, then this
    * method will not make any changes and will return {@code false}.
    *
-   * @param name The fully qualified name of a dataset.
+   * @param namespace A namespace, or logical group name, for the dataset.
+   * @param name The name of a dataset.
    * @return {@code true} if the metadata is successfully deleted,
    *         {@code false} if no action was taken.
    * @throws org.kitesdk.data.DatasetException If the dataset metadata exists but can
    *                                   not be deleted.
+   *
+   * @since 0.16.0
    */
-  boolean delete(String name);
+  boolean delete(String namespace, String name);
 
   /**
    * Checks if there is a {@link DatasetDescriptor} for the dataset named
    * {@code name}.
    *
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @param name a {@code Dataset} name to check the existence of
    * @return true if {@code name} exists, false otherwise
    * @throws org.kitesdk.data.DatasetException
    *
-   * @since 0.7.0
+   * @since 0.16.0
    */
-  boolean exists(String name);
-
+  boolean exists(String namespace, String name);
 
   /**
-   * List the names of the {@link org.kitesdk.data.Dataset}s managed by this
+   * List the namespaces for {@link org.kitesdk.data.Dataset}s managed by this
    * {@code MetadataProvider}. If there is not at least one {@code Dataset}, an
    * empty list will be returned.
+   *
+   * @return a {@link Collection} of namespace names ({@link String}s)
+   * @throws org.kitesdk.data.DatasetException
+   *
+   * @since 0.16.0
+   */
+  Collection<String> namespaces();
+
+  /**
+   * List the dataset names managed by this {@code MetadataProvider} in the
+   * given namespace. If there is not at least one {@code Dataset} in the
+   * namespace or if the namespace does not exist, an empty list will be
+   * returned.
    *
    * @return a {@link Collection} of Dataset names ({@link String}s)
    * @throws org.kitesdk.data.DatasetException
    *
-   * @since 0.8.0
+   * @since 0.16.0
    */
-  Collection<String> list();
+  Collection<String> datasets(String namespace);
 }

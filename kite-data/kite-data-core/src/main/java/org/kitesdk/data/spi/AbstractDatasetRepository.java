@@ -26,23 +26,23 @@ import org.kitesdk.data.DatasetDescriptor;
  * compatible implementations of current API methods so that implementers don't
  * need to implement deprecated methods.
  */
+@SuppressWarnings("deprecation") // this class helps transition
 public abstract class AbstractDatasetRepository implements DatasetRepository {
-
   @SuppressWarnings("unchecked")
   @Override
-  public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
-    return (Dataset<E>) create(name, descriptor, Object.class);
+  public <E> Dataset<E> create(String namespace, String name, DatasetDescriptor descriptor) {
+    return (Dataset<E>) create(namespace, name, descriptor, Object.class);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public <E> Dataset<E> load(String name) {
-    return (Dataset<E>) load(name, Object.class);
+  public <E> Dataset<E> load(String namespace, String name) {
+    return (Dataset<E>) load(namespace, name, Object.class);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public <E> Dataset<E> update(String name, DatasetDescriptor descriptor) {
-    return (Dataset<E>) update(name, descriptor, Object.class);
+  public <E> Dataset<E> update(String namespace, String name, DatasetDescriptor descriptor) {
+    return (Dataset<E>) update(namespace, name, descriptor, Object.class);
   }
 }

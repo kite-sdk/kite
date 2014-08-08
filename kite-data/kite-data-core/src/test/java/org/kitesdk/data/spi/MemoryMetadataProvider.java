@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi;
 
+import com.google.common.collect.ImmutableList;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.DatasetIOException;
@@ -34,7 +35,8 @@ import org.apache.hadoop.fs.Path;
 
 public class MemoryMetadataProvider extends AbstractMetadataProvider {
 
-  private final Map<String, DatasetDescriptor> descriptors = Maps.newHashMap();
+  private final Map<String, Map<String, DatasetDescriptor>> descriptors =
+      Maps.newHashMap();
   private final Configuration conf;
   private transient final FileSystem fs;
 
@@ -58,22 +60,27 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public DatasetDescriptor load(String name) {
+  public DatasetDescriptor load(String namespace, String name) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Name cannot be null");
 
-    if (descriptors.containsKey(name)) {
-      return descriptors.get(name);
-    } else {
-      throw new DatasetNotFoundException("Missing dataset:" + name);
+    if (descriptors.containsKey(namespace)) {
+      Map<String, DatasetDescriptor> datasets = descriptors.get(namespace);
+      if (datasets.containsKey(name)) {
+        return datasets.get(name);
+      }
     }
+    throw new DatasetNotFoundException(
+        "Missing dataset:" + namespace + ":" + name);
   }
 
   @Override
-  public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
+  public DatasetDescriptor create(String namespace, String name, DatasetDescriptor descriptor) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
-    if (descriptors.containsKey(name)) {
+    if (exists(namespace, name)) {
       throw new DatasetExistsException(
           "Dataset already exists for name:" + name);
     }
@@ -89,45 +96,69 @@ public class MemoryMetadataProvider extends AbstractMetadataProvider {
     }
 
     // save and return
-    descriptors.put(name, newDescriptor);
+    if (!descriptors.containsKey(namespace)) {
+      descriptors.put(namespace, Maps.<String, DatasetDescriptor>newHashMap());
+    }
+    Map<String, DatasetDescriptor> datasets = descriptors.get(namespace);
+    datasets.put(name, newDescriptor);
+
     return newDescriptor;
   }
 
   @Override
-  public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
+  public DatasetDescriptor update(String namespace, String name, DatasetDescriptor descriptor) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
-    if (!descriptors.containsKey(name)) {
+    if (!exists(namespace, name)) {
       throw new DatasetNotFoundException("Missing dataset:" + name);
     }
 
-    descriptors.put(name, descriptor);
+    descriptors.get(namespace).put(name, descriptor);
+
     return descriptor;
   }
 
   @Override
-  public boolean delete(String name) {
+  public boolean delete(String namespace, String name) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Name cannot be null");
 
-    if (descriptors.containsKey(name)) {
-      descriptors.remove(name);
-      return true;
-    } else {
-      return false;
+    if (descriptors.containsKey(namespace)) {
+      Map<String, DatasetDescriptor> datasets = descriptors.get(namespace);
+      if (datasets.containsKey(name)) {
+        datasets.remove(name);
+        if (datasets.isEmpty()) {
+          descriptors.remove(namespace);
+        }
+        return true;
+      }
     }
+    return false;
   }
 
   @Override
-  public boolean exists(String name) {
+  public boolean exists(String namespace, String name) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Name cannot be null");
 
-    return descriptors.containsKey(name);
+    return (descriptors.containsKey(namespace) &&
+        descriptors.get(namespace).containsKey(name));
   }
 
   @Override
-  public Collection<String> list() {
+  public Collection<String> namespaces() {
     return descriptors.keySet();
+  }
+
+  @Override
+  public Collection<String> datasets(String namespace) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
+    if (descriptors.containsKey(namespace)) {
+      return descriptors.get(namespace).keySet();
+    }
+    return ImmutableList.of();
   }
 
 }

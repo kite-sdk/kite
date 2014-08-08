@@ -120,18 +120,23 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
   }
 
   @Override
-  public <E> Dataset<E> create(String name, DatasetDescriptor descriptor, Class<E> type) {
+  public <E> Dataset<E> create(String namespace, String name,
+                               DatasetDescriptor descriptor, Class<E> type) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
+
+    // suggest a location for this dataset: <root>/<namespace>/<name>/
+    Path suggestedLocation = pathForDataset(namespace, name);
 
     DatasetDescriptor newDescriptor = descriptor;
     if (descriptor.getLocation() == null) {
       newDescriptor = new DatasetDescriptor.Builder(descriptor)
-          .location(pathForDataset(name)) // suggest a location for this dataset
+          .location(suggestedLocation) // may be overridden by MetadataProvider
           .build();
     }
 
-    newDescriptor = metadataProvider.create(name, newDescriptor);
+    newDescriptor = metadataProvider.create(namespace, name, newDescriptor);
 
     FileSystemUtil.ensureLocationExists(newDescriptor, conf);
 
@@ -143,24 +148,26 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .configuration(conf)
         .descriptor(newDescriptor)
         .type(type)
-        .uri(new URIBuilder(getUri(), name).build())
+        .uri(new URIBuilder(getUri(), namespace, name).build())
         .partitionKey(newDescriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
   }
 
   @Override
-  public <E> Dataset<E> update(String name, DatasetDescriptor descriptor, Class<E> type) {
+  public <E> Dataset<E> update(String namespace, String name,
+                               DatasetDescriptor descriptor, Class<E> type) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
-    DatasetDescriptor oldDescriptor = metadataProvider.load(name);
+    DatasetDescriptor oldDescriptor = metadataProvider.load(namespace, name);
 
     // oldDescriptor is valid if load didn't throw NoSuchDatasetException
 
     checkUpdate(oldDescriptor, descriptor);
 
-    DatasetDescriptor updatedDescriptor = metadataProvider.update(name, descriptor);
+    DatasetDescriptor updatedDescriptor = metadataProvider.update(namespace, name, descriptor);
 
     LOG.debug("Updated dataset: {} schema: {} location: {}", new Object[] {
         name, updatedDescriptor.getSchema(), updatedDescriptor.getLocation() });
@@ -170,26 +177,27 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         .configuration(conf)
         .descriptor(updatedDescriptor)
         .type(type)
-        .uri(new URIBuilder(getUri(), name).build())
+        .uri(new URIBuilder(getUri(), namespace, name).build())
         .partitionKey(updatedDescriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
   }
 
   @Override
-  public <E> Dataset<E> load(String name, Class<E> type) {
+  public <E> Dataset<E> load(String namespace, String name, Class<E> type) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     LOG.debug("Loading dataset: {}", name);
 
-    DatasetDescriptor descriptor = metadataProvider.load(name);
+    DatasetDescriptor descriptor = metadataProvider.load(namespace, name);
 
     FileSystemDataset<E> ds = new FileSystemDataset.Builder<E>()
         .name(name)
         .configuration(conf)
         .descriptor(descriptor)
         .type(type)
-        .uri(new URIBuilder(getUri(), name).build())
+        .uri(new URIBuilder(getUri(), namespace, name).build())
         .partitionKey(descriptor.isPartitioned() ? new PartitionKey() : null)
         .partitionListener(getPartitionListener())
         .build();
@@ -200,52 +208,63 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
   }
 
   @Override
-  public boolean delete(String name) {
+  public boolean delete(String namespace, String name) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     LOG.debug("Deleting dataset:{}", name);
 
     DatasetDescriptor descriptor;
     try {
-      descriptor = metadataProvider.load(name);
+      descriptor = metadataProvider.load(namespace, name);
     } catch (DatasetNotFoundException ex) {
       return false;
     }
 
     // don't care about the return value here -- if it already doesn't exist
     // we still need to delete the data directory
-    boolean changed = metadataProvider.delete(name);
+    boolean changed = metadataProvider.delete(namespace, name);
 
-    final Path dataLocation = new Path(descriptor.getLocation());
-    final FileSystem fs = fsForPath(dataLocation, conf);
+    Path dataLocation = new Path(descriptor.getLocation());
+    FileSystem dataFS = fsForPath(dataLocation, conf);
 
-    try {
-      if (fs.exists(dataLocation)) {
-        if (fs.delete(dataLocation, true)) {
-          changed = true;
-        } else {
-          throw new IOException(
-              "Failed to delete dataset name:" + name +
-              " location:" + dataLocation);
+    if (fs.getUri().equals(dataFS.getUri())) {
+      // the data location is on the right FS, so cleanlyDelete will work
+      changed |= FileSystemUtil.cleanlyDelete(fs, rootDirectory, dataLocation);
+    } else {
+      try {
+        if (dataFS.exists(dataLocation)) {
+          if (dataFS.delete(dataLocation, true)) {
+            changed = true;
+          } else {
+            throw new IOException(
+                "Failed to delete dataset name:" + name +
+                " location:" + dataLocation);
+          }
         }
+      } catch (IOException e) {
+        throw new DatasetIOException(
+            "Internal failure when removing location:" + dataLocation, e);
       }
-    } catch (IOException e) {
-      throw new DatasetIOException(
-          "Internal failure when removing location:" + dataLocation, e);
     }
-
     return changed;
   }
 
   @Override
-  public boolean exists(String name) {
+  public boolean exists(String namespace, String name) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
-    return metadataProvider.exists(name);
+    return metadataProvider.exists(namespace, name);
   }
 
   @Override
-  public Collection<String> list() {
-    return metadataProvider.list();
+  public Collection<String> datasets(String namespace) {
+    return metadataProvider.datasets(namespace);
+  }
+
+  @Override
+  public Collection<String> namespaces() {
+    return metadataProvider.namespaces();
   }
 
   @Override
@@ -258,8 +277,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
     return new TemporaryFileSystemDatasetRepository(conf, rootDirectory, key);
   }
 
-  private Path pathForDataset(String name) {
-    return fs.makeQualified(pathForDataset(rootDirectory, name));
+  private Path pathForDataset(String namespace, String name) {
+    return fs.makeQualified(pathForDataset(rootDirectory, namespace, name));
   }
 
   /**
@@ -272,11 +291,12 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
       justification="Checked in precondition")
-  static Path pathForDataset(Path root, @Nullable String name) {
+  static Path pathForDataset(Path root, @Nullable String namespace, @Nullable String name) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     // Why replace '.' here? Is this a namespacing hack?
-    return new Path(root, name.replace('.', Path.SEPARATOR_CHAR));
+    return new Path(root, new Path(namespace, name.replace('.', Path.SEPARATOR_CHAR)));
   }
 
   /**

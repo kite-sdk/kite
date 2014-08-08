@@ -64,14 +64,26 @@ public class FileSystemUtil {
   }
 
   static boolean cleanlyDelete(FileSystem fs, Path root, Path path) {
+    Preconditions.checkNotNull(fs, "File system cannot be null");
+    Preconditions.checkNotNull(root, "Root path cannot be null");
+    Preconditions.checkNotNull(path, "Path to delete cannot be null");
     try {
       boolean deleted;
+      // attempt to relativize the path to delete
+      Path relativePath;
       if (path.isAbsolute()) {
+        relativePath = new Path(root.toUri().relativize(path.toUri()));
+      } else {
+        relativePath = path;
+      }
+
+      if (relativePath.isAbsolute()) {
+        // path is not relative to the root. delete just the path
         LOG.debug("Deleting path {}", path);
         deleted = fs.delete(path, true /* include any files */ );
       } else {
-        // the path should be treated as relative to the root path
-        Path absolute = new Path(root, path);
+        // the is relative to the root path
+        Path absolute = new Path(root, relativePath);
         LOG.debug("Deleting path {}", absolute);
         deleted = fs.delete(absolute, true /* include any files */ );
         // iterate up to the root, removing empty directories

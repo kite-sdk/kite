@@ -38,6 +38,7 @@ import org.kitesdk.data.PartitionStrategy;
 @RunWith(Parameterized.class)
 public abstract class TestMetadataProviders extends MiniDFSTest {
 
+  protected static final String NAMESPACE = "ns1";
   protected static final String NAME = "provider_test1";
 
   @Parameterized.Parameters
@@ -96,12 +97,12 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
 
   @Test
   public void testCreate() {
-    Assert.assertFalse("Sanity check", provider.exists(NAME));
+    Assert.assertFalse("Sanity check", provider.exists(NAMESPACE, NAME));
 
-    DatasetDescriptor created = provider.create(NAME, testDescriptor);
+    DatasetDescriptor created = provider.create(NAMESPACE, NAME, testDescriptor);
 
     Assert.assertNotNull("Descriptor should be returned", created);
-    Assert.assertTrue("Descriptor should exist", provider.exists(NAME));
+    Assert.assertTrue("Descriptor should exist", provider.exists(NAMESPACE, NAME));
     Assert.assertEquals("Schema should match",
         testDescriptor.getSchema(), created.getSchema());
     Assert.assertEquals("PartitionStrategy should match",
@@ -111,8 +112,9 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     // the MetadataProvider optionally sets the location, nothing to test
   }
 
+  @Test
   public void testCreateWithLocation() throws URISyntaxException {
-    Assert.assertFalse("Sanity check", provider.exists(NAME));
+    Assert.assertFalse("Sanity check", provider.exists(NAMESPACE, NAME));
 
     URI requestedLocation = new URI("hdfs:/tmp/data/my_data_set");
     DatasetDescriptor requested = new DatasetDescriptor.Builder(testDescriptor)
@@ -121,7 +123,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
 
     final DatasetDescriptor created;
     try {
-      created = provider.create(NAME, requested);
+      created = provider.create(NAMESPACE, NAME, requested);
     } catch (UnsupportedOperationException ex) {
       // this is expected if the provider doesn't support requested locations
       return;
@@ -129,38 +131,43 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
 
     // if supported, the location should be unchanged.
     Assert.assertNotNull("Descriptor should be returned", created);
-    Assert.assertTrue("Descriptor should exist", provider.exists(NAME));
+    Assert.assertTrue("Descriptor should exist", provider.exists(NAMESPACE, NAME));
     Assert.assertEquals("Requested locations should match",
         requestedLocation, created.getLocation());
   }
 
   public void ensureCreated() {
-    // use testCreate to create NAME
+    // use testCreate to create NAMESPACE/NAME
     testCreate();
-    Assert.assertTrue("Sanity check", provider.exists(NAME));
+    Assert.assertTrue("Sanity check", provider.exists(NAMESPACE, NAME));
   }
 
   @Test(expected=DatasetExistsException.class)
   public void testCreateAlreadyExists() {
     ensureCreated();
-    provider.create(NAME, anotherDescriptor);
+    provider.create(NAMESPACE, NAME, anotherDescriptor);
+  }
+
+  @Test(expected=NullPointerException.class)
+  public void testCreateFailsNullNamespace() {
+    provider.create(null, NAME, testDescriptor);
   }
 
   @Test(expected=NullPointerException.class)
   public void testCreateFailsNullName() {
-    provider.create(null, testDescriptor);
+    provider.create(NAMESPACE, null, testDescriptor);
   }
 
   @Test(expected=NullPointerException.class)
   public void testCreateFailsNullDescriptor() {
-    provider.create(NAME, null);
+    provider.create(NAMESPACE, NAME, null);
   }
 
   @Test
   public void testLoad() {
     ensureCreated();
 
-    DatasetDescriptor loaded = provider.load(NAME);
+    DatasetDescriptor loaded = provider.load(NAMESPACE, NAME);
 
     Assert.assertNotNull("DatasetDescriptor should be returned", loaded);
     Assert.assertEquals("Schema should match",
@@ -173,13 +180,18 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
 
   @Test(expected=DatasetNotFoundException.class)
   public void testLoadNoDataset() {
-    Assert.assertFalse("Sanity check", provider.exists(NAME));
-    provider.load(NAME);
+    Assert.assertFalse("Sanity check", provider.exists(NAMESPACE, NAME));
+    provider.load(NAMESPACE, NAME);
+  }
+
+  @Test(expected=NullPointerException.class)
+  public void testLoadFailsNullNamespace() {
+    provider.load(null, NAME);
   }
 
   @Test(expected=NullPointerException.class)
   public void testLoadFailsNullName() {
-    provider.load(null);
+    provider.load(NAMESPACE, null);
   }
 
   public void testUpdate() {
@@ -192,7 +204,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
      * changes are incompatible.
      */
 
-    final DatasetDescriptor saved = provider.update(NAME, anotherDescriptor);
+    final DatasetDescriptor saved = provider.update(NAMESPACE, NAME, anotherDescriptor);
 
     Assert.assertNotNull("Updated Descriptor should be returned", saved);
     Assert.assertEquals("Schema should match update",
@@ -205,78 +217,138 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
 
   @Test(expected=DatasetNotFoundException.class)
   public void testUpdateFailsNoDataset() {
-    provider.update(NAME, testDescriptor);
+    provider.update(NAMESPACE, NAME, testDescriptor);
+  }
+
+  @Test(expected=NullPointerException.class)
+  public void testUpdateFailsNullNamespace() {
+    provider.update(null, NAME, testDescriptor);
   }
 
   @Test(expected=NullPointerException.class)
   public void testUpdateFailsNullName() {
-    provider.update(null, testDescriptor);
+    provider.update(NAMESPACE, null, testDescriptor);
   }
 
   @Test(expected=NullPointerException.class)
   public void testUpdateFailsNullDescriptor() {
-    provider.update(NAME, null);
+    provider.update(NAMESPACE, NAME, null);
   }
 
   public void testDelete() {
     ensureCreated();
 
-    boolean result = provider.delete(NAME);
+    boolean result = provider.delete(NAMESPACE, NAME);
     Assert.assertTrue("Delete descriptor should return true", result);
 
-    result = provider.delete(NAME);
+    result = provider.delete(NAMESPACE, NAME);
     Assert.assertFalse("Delete non-existent descriptor should return false", result);
   }
 
   @Test(expected=NullPointerException.class)
+  public void testDeleteFailsNullNamespace() {
+    provider.delete(null, NAME);
+  }
+
+  @Test(expected=NullPointerException.class)
   public void testDeleteFailsNullName() {
-    provider.delete(null);
+    provider.delete(NAMESPACE, null);
   }
 
   @Test
   public void testExists() {
-    Assert.assertFalse(provider.exists(NAME));
+    Assert.assertFalse(provider.exists(NAMESPACE, NAME));
 
-    provider.create(NAME, testDescriptor);
-    Assert.assertTrue(provider.exists(NAME));
+    provider.create(NAMESPACE, NAME, testDescriptor);
+    Assert.assertTrue(provider.exists(NAMESPACE, NAME));
 
-    provider.delete(NAME);
-    Assert.assertFalse(provider.exists(NAME));
+    provider.delete(NAMESPACE, NAME);
+    Assert.assertFalse(provider.exists(NAMESPACE, NAME));
+  }
+
+  @Test(expected=NullPointerException.class)
+  public void testExistsNullNamespace() {
+    provider.exists(null, NAME);
   }
 
   @Test(expected=NullPointerException.class)
   public void testExistsNullName() {
-    provider.exists(null);
+    provider.exists(NAMESPACE, null);
   }
 
   @Test
-  public void testList() {
-    Assert.assertEquals(ImmutableMultiset.of(),
-        ImmutableMultiset.copyOf(provider.list()));
+  public void testListDatasets() {
+    Assert.assertEquals(ImmutableMultiset.<String>of(),
+        ImmutableMultiset.copyOf(provider.datasets(NAMESPACE)));
 
-    provider.create("test1", testDescriptor);
+    provider.create(NAMESPACE, "test1", testDescriptor);
     Assert.assertEquals(ImmutableMultiset.of("test1"),
-        ImmutableMultiset.copyOf(provider.list()));
+        ImmutableMultiset.copyOf(provider.datasets(NAMESPACE)));
 
-    provider.create("test2", testDescriptor);
+    provider.create(NAMESPACE, "test2", testDescriptor);
     Assert.assertEquals(ImmutableMultiset.of("test1", "test2"),
-        ImmutableMultiset.copyOf(provider.list()));
+        ImmutableMultiset.copyOf(provider.datasets(NAMESPACE)));
 
-    provider.create("test3", testDescriptor);
+    provider.create(NAMESPACE, "test3", testDescriptor);
     Assert.assertEquals(ImmutableMultiset.of("test1", "test2", "test3"),
-        ImmutableMultiset.copyOf(provider.list()));
+        ImmutableMultiset.copyOf(provider.datasets(NAMESPACE)));
 
-    provider.delete("test2");
+    provider.delete(NAMESPACE, "test2");
     Assert.assertEquals(ImmutableMultiset.of("test1", "test3"),
-        ImmutableMultiset.copyOf(provider.list()));
+        ImmutableMultiset.copyOf(provider.datasets(NAMESPACE)));
 
-    provider.delete("test3");
+    provider.delete(NAMESPACE, "test3");
     Assert.assertEquals(ImmutableMultiset.of("test1"),
-        ImmutableMultiset.copyOf(provider.list()));
+        ImmutableMultiset.copyOf(provider.datasets(NAMESPACE)));
 
-    provider.delete("test1");
-    Assert.assertEquals(ImmutableMultiset.of(),
-        ImmutableMultiset.copyOf(provider.list()));
+    provider.delete(NAMESPACE, "test1");
+    Assert.assertEquals(ImmutableMultiset.<String>of(),
+        ImmutableMultiset.copyOf(provider.datasets(NAMESPACE)));
+  }
+
+  @Test
+  public void testListNamespaces() {
+    Assert.assertEquals(ImmutableMultiset.<String>of(),
+        ImmutableMultiset.copyOf(provider.namespaces()));
+
+    provider.create("test1", "d1", testDescriptor);
+    provider.create("test1", "d2", anotherDescriptor);
+    Assert.assertEquals(ImmutableMultiset.of("test1"),
+        ImmutableMultiset.copyOf(provider.namespaces()));
+
+    provider.create("test2", "d1", testDescriptor);
+    provider.create("test2", "d2", anotherDescriptor);
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test2"),
+        ImmutableMultiset.copyOf(provider.namespaces()));
+
+    provider.create("test3", "d1", testDescriptor);
+    provider.create("test3", "d2", anotherDescriptor);
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test2", "test3"),
+        ImmutableMultiset.copyOf(provider.namespaces()));
+
+    provider.delete("test2", "d2");
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test2", "test3"),
+        ImmutableMultiset.copyOf(provider.namespaces()));
+
+    provider.delete("test2", "d1");
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test3"),
+        ImmutableMultiset.copyOf(provider.namespaces()));
+
+    provider.delete("test3", "d2");
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test3"),
+        ImmutableMultiset.copyOf(provider.namespaces()));
+
+    provider.delete("test3", "d1");
+    Assert.assertEquals(ImmutableMultiset.of("test1"),
+        ImmutableMultiset.copyOf(provider.namespaces()));
+
+    provider.delete("test1", "d1");
+    Assert.assertEquals(ImmutableMultiset.of("test1"),
+        ImmutableMultiset.copyOf(provider.namespaces()));
+
+    provider.delete("test1", "d2");
+    Assert.assertEquals(ImmutableMultiset.<String>of(),
+        ImmutableMultiset.copyOf(provider.namespaces()));
   }
 
   @Test
@@ -288,7 +360,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
         .property(propName, propValue)
         .build();
 
-    DatasetDescriptor created = provider.create(NAME, descriptorWithProp);
+    DatasetDescriptor created = provider.create(NAMESPACE, NAME, descriptorWithProp);
     Assert.assertTrue("Should have custom property",
         created.hasProperty(propName));
     Assert.assertEquals("Should have correct custom property value",
@@ -296,7 +368,7 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
     Assert.assertTrue("List should contain property name",
         created.listProperties().contains(propName));
 
-    DatasetDescriptor loaded = provider.load(NAME);
+    DatasetDescriptor loaded = provider.load(NAMESPACE, NAME);
     Assert.assertTrue("Should have custom property",
         loaded.hasProperty(propName));
     Assert.assertEquals("Should have correct custom property value",

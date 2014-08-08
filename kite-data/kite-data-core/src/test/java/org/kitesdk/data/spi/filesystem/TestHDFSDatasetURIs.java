@@ -25,9 +25,9 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.Datasets;
-import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
 
 public class TestHDFSDatasetURIs extends MiniDFSTest {
@@ -47,78 +47,103 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
   public void testAbsolute() {
     DatasetRepository repo = DatasetRepositories
         .repositoryFor("repo:hdfs://" + hdfsAuth + "/tmp/data");
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
     Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
-        load("dataset:hdfs://" + hdfsAuth + "/tmp/data/test", Object.class);
+        load("dataset:hdfs://" + hdfsAuth + "/tmp/data/ns/test", Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
     Assert.assertEquals("Locations should match",
-        URI.create("hdfs://" + hdfsAuth + "/tmp/data/test"),
+        URI.create("hdfs://" + hdfsAuth + "/tmp/data/ns/test"),
         ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
-        repo.load("test").getDescriptor(), ds.getDescriptor());
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
 
-    repo.delete("test");
+    repo.delete("ns", "test");
   }
 
   @Test
   public void testAbsoluteRoot() {
     DatasetRepository repo = DatasetRepositories
         .repositoryFor("repo:hdfs://" + hdfsAuth + "/");
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
     Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
-        load("dataset:hdfs://" + hdfsAuth + "/test",
+        load("dataset:hdfs://" + hdfsAuth + "/ns/test",
         Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
     Assert.assertEquals("Locations should match",
-        URI.create("hdfs://" + hdfsAuth + "/test"),
+        URI.create("hdfs://" + hdfsAuth + "/ns/test"),
         ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
-        repo.load("test").getDescriptor(), ds.getDescriptor());
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
 
-    repo.delete("test");
+    repo.delete("ns", "test");
   }
 
   @Test
   public void testRelative() {
     DatasetRepository repo = DatasetRepositories
         .repositoryFor("repo:hdfs://" + hdfsAuth + "/data?absolute=false");
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
     Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
-        load("dataset:hdfs://" + hdfsAuth + "/data/test?absolute=false",
+        load("dataset:hdfs://" + hdfsAuth + "/data/ns/test?absolute=false",
         Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
     Path cwd = getDFS().makeQualified(new Path("."));
     Assert.assertEquals("Locations should match",
-        new Path(cwd, "data/test").toUri(), ds.getDescriptor().getLocation());
+        new Path(cwd, "data/ns/test").toUri(), ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
-        repo.load("test").getDescriptor(), ds.getDescriptor());
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
 
-    repo.delete("test");
+    repo.delete("ns", "test");
+  }
+
+  @Test
+  public void testMissingNamespace() {
+    TestHelpers.assertThrows("Should not find dataset: no such dataset",
+        DatasetNotFoundException.class, new Runnable() {
+          @Override
+          public void run() {
+            Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+                load("dataset:hdfs://" + hdfsAuth + "/tmp/data/nosuchnamespace/test",
+                Object.class);
+          }
+        });
   }
 
   @Test
   public void testMissingDataset() {
     TestHelpers.assertThrows("Should not find dataset: no such dataset",
         DatasetNotFoundException.class, new Runnable() {
-      @Override
-      public void run() {
-        Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
-            load("dataset:hdfs://" + hdfsAuth + "/tmp/data/nosuchdataset",
-            Object.class);
-      }
-    });
+          @Override
+          public void run() {
+            Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+                load("dataset:hdfs://" + hdfsAuth + "/tmp/data/ns/nosuchdataset",
+                Object.class);
+          }
+        });
+  }
+
+  @Test
+  public void testNotEnoughPathComponents() {
+    TestHelpers.assertThrows("Should not match URI pattern",
+        DatasetNotFoundException.class, new Runnable() {
+          @Override
+          public void run() {
+            Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+                load("dataset:hdfs://" + hdfsAuth + "/test", Object.class);
+          }
+        });
   }
 
   @Test

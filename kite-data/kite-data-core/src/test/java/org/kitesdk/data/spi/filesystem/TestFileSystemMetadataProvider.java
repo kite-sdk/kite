@@ -58,7 +58,7 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
   public void testLoadSetsLocation() throws IOException {
     ensureCreated();
 
-    DatasetDescriptor loaded = provider.load(NAME);
+    DatasetDescriptor loaded = provider.load(NAMESPACE, NAME);
     Assert.assertNotNull("Loaded descriptor should have a location",
         loaded.getLocation());
     if (distributed) {
@@ -88,7 +88,7 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
 
   @Test
   public void testCreateIgnoresLocation() throws IOException {
-    DatasetDescriptor created = provider.create(NAME, testDescriptor);
+    DatasetDescriptor created = provider.create(NAMESPACE, NAME, testDescriptor);
     Assert.assertNull("Created descriptor should not have a location",
         created.getLocation());
   }
@@ -97,7 +97,7 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
   public void testCreateMetadataFiles() throws IOException {
     ensureCreated();
 
-    Path namedDirectory = new Path(testDirectory, NAME);
+    Path namedDirectory = new Path(testDirectory, new Path(NAMESPACE, NAME));
     Path metadataDirectory = new Path(namedDirectory, ".metadata");
     Path propertiesFile = new Path(metadataDirectory, "descriptor.properties");
     Path schemaFile = new Path(metadataDirectory, "schema.avsc");
@@ -116,14 +116,14 @@ public class TestFileSystemMetadataProvider extends TestMetadataProviders {
   public void testDeleteRemovesMetadataFiles() throws IOException {
     testCreateMetadataFiles();
 
-    DatasetDescriptor loaded = provider.load(NAME);
+    DatasetDescriptor loaded = provider.load(NAMESPACE, NAME);
 
     Path namedDirectory = new Path(loaded.getLocation());
     Path metadataDirectory = new Path(namedDirectory, ".metadata");
     Path propertiesFile = new Path(metadataDirectory, "descriptor.properties");
     Path schemaFile = new Path(metadataDirectory, "schema.avsc");
 
-    boolean result = provider.delete(NAME);
+    boolean result = provider.delete(NAMESPACE, NAME);
     Assert.assertTrue(result);
     Assert.assertFalse("Descriptor properties file should not exist",
         fileSystem.exists(propertiesFile));

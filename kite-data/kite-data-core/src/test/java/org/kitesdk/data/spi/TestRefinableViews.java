@@ -104,8 +104,8 @@ public abstract class TestRefinableViews extends MiniDFSTest {
         .schemaUri("resource:standard_event.avsc")
         .partitionStrategy(strategy)
         .build();
-    repo.delete("test");
-    this.unbounded = repo.create("test", testDescriptor);
+    repo.delete("ns", "test");
+    this.unbounded = repo.create("ns", "test", testDescriptor);
   }
 
   public static <E> void assertContentEquals(Set<E> expected, View<E> view) throws IOException {
@@ -793,7 +793,7 @@ public abstract class TestRefinableViews extends MiniDFSTest {
         .partitionStrategy((PartitionStrategy) null)
         .build();
     final Dataset<StandardEvent> notPartitioned =
-        repo.create("flat", flatDescriptor);
+        repo.create("ns", "flat", flatDescriptor);
 
     // test events
     Assert.assertTrue("Should include any StandardEvent",

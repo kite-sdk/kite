@@ -53,7 +53,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
   @Test
   public void testCreatePath() throws IOException {
-    Dataset<Record> created = repo.create(NAME, testDescriptor);
+    Dataset<Record> created = repo.create(NAMESPACE, NAME, testDescriptor);
 
     URI location = created.getDescriptor().getLocation();
     Assert.assertNotNull(
@@ -67,7 +67,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   public void testLoadNewHasZeroSize() {
     ensureCreated();
 
-    Dataset<Record> dataset = repo.load(NAME);
+    Dataset<Record> dataset = repo.load(NAMESPACE, NAME);
 
     /*
      * We perform a read test to make sure only data files are encountered
@@ -78,7 +78,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
   @Test
   public void testUpdateFailsWithFormatChange() {
-    Dataset<Record> dataset = repo.create(NAME,
+    Dataset<Record> dataset = repo.create(NAMESPACE, NAME,
         new DatasetDescriptor.Builder(testDescriptor)
             .format(Formats.AVRO)
             .build());
@@ -89,14 +89,14 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
         .build();
 
     try {
-      repo.update(NAME, changed);
+      repo.update(NAMESPACE, NAME, changed);
       Assert.fail("Should fail due to format change");
     } catch (ValidationException e) {
       // expected
     }
 
     Assert.assertEquals(
-        Formats.AVRO, repo.load(NAME).getDescriptor().getFormat());
+        Formats.AVRO, repo.load(NAMESPACE, NAME).getDescriptor().getFormat());
   }
 
   @Test
@@ -109,7 +109,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
         .hash("email", 3)
         .build();
 
-    Dataset<Record> dataset = repo.create(NAME,
+    Dataset<Record> dataset = repo.create(NAMESPACE, NAME,
         new DatasetDescriptor.Builder(testDescriptor)
             .partitionStrategy(ps1)
             .build());
@@ -120,20 +120,20 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
             .build();
 
     try {
-      repo.update(NAME, changed);
+      repo.update(NAMESPACE, NAME, changed);
       Assert.fail("Should fail due to partition strategy change");
     } catch (ValidationException e) {
       // expected
     }
 
     Assert.assertEquals(
-        ps1, repo.load(NAME).getDescriptor().getPartitionStrategy());
+        ps1, repo.load(NAMESPACE, NAME).getDescriptor().getPartitionStrategy());
   }
 
   @Test
   public void testUpdateFailsWithLocationChange() {
     ensureCreated();
-    Dataset<Record> dataset = repo.load(NAME);
+    Dataset<Record> dataset = repo.load(NAMESPACE, NAME);
     URI location = dataset.getDescriptor().getLocation();
 
     DatasetDescriptor changed =
@@ -142,19 +142,19 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
             .build();
 
     try {
-      repo.update(NAME, changed);
+      repo.update(NAMESPACE, NAME, changed);
       Assert.fail("Should fail due to data location change");
     } catch (ValidationException ex) {
       // expected
     }
 
     Assert.assertEquals(
-        location, repo.load(NAME).getDescriptor().getLocation());
+        location, repo.load(NAMESPACE, NAME).getDescriptor().getLocation());
   }
 
   @Test
   public void testUpdateFailsWithIncompatibleSchemaChange() {
-    Dataset<Record> dataset = repo.create(NAME, new DatasetDescriptor.Builder()
+    Dataset<Record> dataset = repo.create(NAMESPACE, NAME, new DatasetDescriptor.Builder()
         .schema(testSchema).build());
 
     Assert.assertEquals("Dataset name is propagated", NAME,
@@ -169,19 +169,19 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
         .endRecord();
 
     try {
-      repo.update(NAME, new DatasetDescriptor.Builder().schema(testSchemaV2).build());
+      repo.update(NAMESPACE, NAME, new DatasetDescriptor.Builder().schema(testSchemaV2).build());
       Assert.fail("Should fail due to incompatible update");
     } catch (ValidationException e) {
       // expected
     }
-    dataset = repo.load(NAME);
+    dataset = repo.load(NAMESPACE, NAME);
     Assert.assertEquals("Dataset schema is unchanged", testSchema, dataset
         .getDescriptor().getSchema());
   }
 
   @Test
   public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldAdded() {
-    Dataset<Record> dataset = repo.create(NAME, new DatasetDescriptor.Builder()
+    Dataset<Record> dataset = repo.create(NAMESPACE, NAME, new DatasetDescriptor.Builder()
         .schema(testSchema).build());
 
     writeTestUsers(dataset, 5, 0, "email");
@@ -193,7 +193,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
         .nullableString("favoriteColor", "orange")
         .endRecord();
 
-    Dataset<Record> datasetV2 = repo.update(NAME,
+    Dataset<Record> datasetV2 = repo.update(NAMESPACE, NAME,
         new DatasetDescriptor.Builder(dataset.getDescriptor())
             .schema(testSchemaV2)
             .build());
@@ -211,7 +211,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
   @Test
   public void testUpdateSuccessfulWithCompatibleSchemaChangeFieldRemoved() {
-    Dataset<Record> dataset = repo.create(NAME, new DatasetDescriptor.Builder()
+    Dataset<Record> dataset = repo.create(NAMESPACE, NAME, new DatasetDescriptor.Builder()
         .schema(testSchema).build());
 
     writeTestUsers(dataset, 5, 0, "email");
@@ -221,7 +221,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
         .requiredString("username")
         .endRecord();
 
-    Dataset<Record> datasetV2 = repo.update(NAME,
+    Dataset<Record> datasetV2 = repo.update(NAMESPACE, NAME,
         new DatasetDescriptor.Builder(dataset.getDescriptor())
             .schema(testSchemaV2)
             .build());
@@ -241,11 +241,11 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   public void testDeleteRemovesDatasetPath() throws IOException {
     ensureCreated();
 
-    Dataset<Record> dataset = repo.load(NAME);
+    Dataset<Record> dataset = repo.load(NAMESPACE, NAME);
     Path dataPath = new Path(dataset.getDescriptor().getLocation());
     Assert.assertTrue(fileSystem.exists(dataPath));
 
-    repo.delete(NAME);
+    repo.delete(NAMESPACE, NAME);
 
     Assert.assertFalse(fileSystem.exists(dataPath));
   }

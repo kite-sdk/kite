@@ -51,59 +51,59 @@ public class TestLocalDatasetURIs {
   @Test
   public void testAbsolute() {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:/tmp/data");
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
     Dataset<Record> ds = Datasets.<Record, Dataset<Record>>
-        load("dataset:file:/tmp/data/test", Record.class);
+        load("dataset:file:/tmp/data/ns/test", Record.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
     Assert.assertEquals("Locations should match",
-        URI.create("file:/tmp/data/test"),
+        URI.create("file:/tmp/data/ns/test"),
         ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
-        repo.load("test").getDescriptor(), ds.getDescriptor());
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
 
-    repo.delete("test");
+    repo.delete("ns", "test");
   }
 
   @Test
   public void testRelative() {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:target/data");
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
     Dataset<Record> ds = Datasets.<Record, Dataset<Record>>
-        load("dataset:file:target/data/test", Record.class);
+        load("dataset:file:target/data/ns/test", Record.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
     Path cwd = localFS.makeQualified(new Path("."));
     Assert.assertEquals("Locations should match",
-        new Path(cwd, "target/data/test").toUri(), ds.getDescriptor().getLocation());
+        new Path(cwd, "target/data/ns/test").toUri(), ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
-        repo.load("test").getDescriptor(), ds.getDescriptor());
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
 
-    repo.delete("test");
+    repo.delete("ns", "test");
   }
 
   @Test
   public void testViewConstraints() {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:/tmp/data");
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
     RefinableView<Record> v = Datasets.<Record, RefinableView<Record>>
-        load("view:file:/tmp/data/test?username=user", Record.class);
+        load("view:file:/tmp/data/ns/test?username=user", Record.class);
 
     Assert.assertNotNull("Should load view", v);
     Assert.assertTrue(v instanceof FileSystemView);
     Assert.assertEquals("Locations should match",
-        URI.create("file:/tmp/data/test"),
+        URI.create("file:/tmp/data/ns/test"),
         v.getDataset().getDescriptor().getLocation());
 
-    DatasetDescriptor loaded = repo.load("test").getDescriptor();
+    DatasetDescriptor loaded = repo.load("ns", "test").getDescriptor();
     Assert.assertEquals("Descriptors should match",
         loaded, v.getDataset().getDescriptor());
 
@@ -112,7 +112,7 @@ public class TestLocalDatasetURIs {
     Assert.assertEquals("Constraints should be username=user",
         withUser, ((FileSystemView) v).getConstraints());
 
-    repo.delete("test");
+    repo.delete("ns", "test");
   }
 
   @Test
@@ -122,9 +122,33 @@ public class TestLocalDatasetURIs {
       @Override
       public void run() {
         Dataset<Record> ds = Datasets.<Record, Dataset<Record>>
-            load("dataset:file:/tmp/data/nosuchdataset", Record.class);
+            load("dataset:file:/tmp/data/ns/nosuchdataset", Record.class);
       }
     });
+  }
+
+  @Test
+  public void testMissingNamespace() {
+    TestHelpers.assertThrows("Should not find dataset: no such namespace",
+        DatasetNotFoundException.class, new Runnable() {
+          @Override
+          public void run() {
+            Dataset<Record> ds = Datasets.<Record, Dataset<Record>>
+                load("dataset:file:/tmp/data/nosuchnamespace/test", Record.class);
+          }
+        });
+  }
+
+  @Test
+  public void testNotEnoughPathComponents() {
+    TestHelpers.assertThrows("Should not match URI pattern",
+        DatasetNotFoundException.class, new Runnable() {
+          @Override
+          public void run() {
+            Dataset<Record> ds = Datasets.<Record, Dataset<Record>>
+                load("dataset:file:/test", Record.class);
+          }
+        });
   }
 
   @Test

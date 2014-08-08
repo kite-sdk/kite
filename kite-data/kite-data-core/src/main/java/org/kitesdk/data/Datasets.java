@@ -68,6 +68,7 @@ public class Datasets {
     Map<String, String> uriOptions = pair.second();
 
     Dataset<E> dataset = repo.load(
+        uriOptions.get(URIBuilder.NAMESPACE_OPTION),
         uriOptions.get(URIBuilder.DATASET_NAME_OPTION), type);
 
     if (isView) {
@@ -158,6 +159,7 @@ public class Datasets {
     Map<String, String> uriOptions = pair.second();
 
     Dataset<E> dataset = repo.create(
+        uriOptions.get(URIBuilder.NAMESPACE_OPTION),
         uriOptions.get(URIBuilder.DATASET_NAME_OPTION), descriptor, type);
 
     if (isView) {
@@ -243,6 +245,7 @@ public class Datasets {
     Map<String, String> uriOptions = pair.second();
 
     return (D) repo.update(
+        uriOptions.get(URIBuilder.NAMESPACE_OPTION),
         uriOptions.get(URIBuilder.DATASET_NAME_OPTION), descriptor, type);
   }
 
@@ -313,7 +316,9 @@ public class Datasets {
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
-    return repo.delete(uriOptions.get(URIBuilder.DATASET_NAME_OPTION));
+    return repo.delete(
+        uriOptions.get(URIBuilder.NAMESPACE_OPTION),
+        uriOptions.get(URIBuilder.DATASET_NAME_OPTION));
   }
 
   /**
@@ -348,7 +353,9 @@ public class Datasets {
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
-    return repo.exists(uriOptions.get(URIBuilder.DATASET_NAME_OPTION));
+    return repo.exists(
+        uriOptions.get(URIBuilder.NAMESPACE_OPTION),
+        uriOptions.get(URIBuilder.DATASET_NAME_OPTION));
   }
 
   /**
@@ -382,8 +389,10 @@ public class Datasets {
     // build a URI for each dataset name
     URI repoUri = repo.getUri();
     List<URI> datasets = Lists.newArrayList();
-    for (String dataset : repo.list()) {
-      datasets.add(new URIBuilder(repoUri, dataset).build());
+    for (String namespace : repo.namespaces()) {
+      for (String dataset : repo.datasets(namespace)) {
+        datasets.add(new URIBuilder(repoUri, namespace, dataset).build());
+      }
     }
 
     return datasets;

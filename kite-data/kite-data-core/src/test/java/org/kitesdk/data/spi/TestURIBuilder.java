@@ -48,8 +48,8 @@ public class TestURIBuilder {
   @Test
   public void testRepoUriAndNameToDatasetUri() {
     Assert.assertEquals("Should construct the correct dataset URI",
-        URI.create("dataset:file:/datasets/test-name"),
-        new URIBuilder("repo:file:/datasets", "test-name").build());
+        URI.create("dataset:file:/datasets/ns/test-name"),
+        new URIBuilder("repo:file:/datasets", "ns", "test-name").build());
   }
 
   @Test
@@ -58,7 +58,7 @@ public class TestURIBuilder {
         IllegalArgumentException.class, new Runnable() {
           @Override
           public void run() {
-            new URIBuilder("dataset:file:/datasets/test-name", "test-name-2")
+            new URIBuilder("dataset:file:/datasets/test-name", "ns", "test-name-2")
                 .build();
           }
         });
@@ -66,7 +66,7 @@ public class TestURIBuilder {
         IllegalArgumentException.class, new Runnable() {
           @Override
           public void run() {
-            new URIBuilder("view:file:/datasets/test-name?n=34", "test-name-2")
+            new URIBuilder("view:file:/datasets/test-name?n=34", "ns", "test-name-2")
                 .build();
           }
         });
@@ -74,21 +74,28 @@ public class TestURIBuilder {
         NullPointerException.class, new Runnable() {
           @Override
           public void run() {
-            new URIBuilder((String) null, "test-name").build();
+            new URIBuilder((String) null, "ns", "test-name").build();
           }
         });
     TestHelpers.assertThrows("Should reject null URI",
         NullPointerException.class, new Runnable() {
           @Override
           public void run() {
-            new URIBuilder((URI) null, "test-name").build();
+            new URIBuilder((URI) null, "ns", "test-name").build();
+          }
+        });
+    TestHelpers.assertThrows("Should reject null namespace",
+        NullPointerException.class, new Runnable() {
+          @Override
+          public void run() {
+            new URIBuilder("repo:file:/datasets", null, "test-name").build();
           }
         });
     TestHelpers.assertThrows("Should reject null name",
         NullPointerException.class, new Runnable() {
           @Override
           public void run() {
-            new URIBuilder("repo:file:/datasets", null).build();
+            new URIBuilder("repo:file:/datasets", "ns", null).build();
           }
         });
   }
@@ -96,22 +103,22 @@ public class TestURIBuilder {
   @Test
   public void testRepoUriAndNameToDatasetUriPreservesOptions() {
     Assert.assertEquals("Should construct the correct dataset URI",
-        URI.create("dataset:file:/datasets/test-name?hdfs:port=1080"),
-        new URIBuilder("repo:file:/datasets?hdfs:port=1080", "test-name")
+        URI.create("dataset:file:/datasets/ns/test-name?hdfs:port=1080"),
+        new URIBuilder("repo:file:/datasets?hdfs:port=1080", "ns", "test-name")
             .build());
   }
 
   @Test
   public void testRepoUriAndNameAddEquals() {
     Assert.assertEquals("Should construct the correct dataset URI",
-        URI.create("view:file:/datasets/test-name?prop=value"),
-        new URIBuilder("repo:file:/datasets", "test-name")
+        URI.create("view:file:/datasets/ns/test-name?prop=value"),
+        new URIBuilder("repo:file:/datasets", "ns", "test-name")
             .with("prop", "value")
             .build());
     // order should be preserved
     Assert.assertEquals("Should construct the correct dataset URI",
-        URI.create("view:file:/datasets/test-name?prop=value&num=34"),
-        new URIBuilder("repo:file:/datasets", "test-name")
+        URI.create("view:file:/datasets/ns/test-name?prop=value&num=34"),
+        new URIBuilder("repo:file:/datasets", "ns", "test-name")
             .with("prop", "value")
             .with("num", 34)
             .build());

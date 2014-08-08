@@ -66,7 +66,8 @@ public class TestProjection extends TestRefinableViews {
       Closeables.close(writer, false);
     }
 
-    Dataset<SmallEvent> dataset = repo.load(unbounded.getDataset().getName(),
+    Dataset<SmallEvent> dataset = repo.load(
+        "ns", unbounded.getDataset().getName(),
         SmallEvent.class);
 
     Set<SmallEvent> expected = Sets.newHashSet(toSmallEvent(sepEvent),
@@ -77,7 +78,8 @@ public class TestProjection extends TestRefinableViews {
 
   @Test
   public void testReflectProjection() throws IOException {
-    Dataset<ReflectStandardEvent> original = repo.create("reflectProjection",
+    Dataset<ReflectStandardEvent> original = repo.create(
+        "ns", "reflectProjection",
         new DatasetDescriptor.Builder()
             .schema(ReflectStandardEvent.class)
             .build(), ReflectStandardEvent.class);
@@ -92,7 +94,7 @@ public class TestProjection extends TestRefinableViews {
       Closeables.close(writer, false);
     }
 
-    Dataset<ReflectSmallEvent> dataset = repo.load(original.getName(),
+    Dataset<ReflectSmallEvent> dataset = repo.load("ns", original.getName(),
         ReflectSmallEvent.class);
 
     Set<ReflectSmallEvent> expected = Sets.newHashSet(
@@ -104,7 +106,7 @@ public class TestProjection extends TestRefinableViews {
 
   @Test
   public void testMixedProjection() throws IOException {
-    Dataset<StandardEvent> original = repo.create("mixedProjection",
+    Dataset<StandardEvent> original = repo.create("ns", "mixedProjection",
         new DatasetDescriptor.Builder()
             .schema(StandardEvent.class)
             .build(), StandardEvent.class);
@@ -119,7 +121,7 @@ public class TestProjection extends TestRefinableViews {
       Closeables.close(writer, false);
     }
 
-    Dataset<ReflectSmallEvent> dataset = repo.load(original.getName(),
+    Dataset<ReflectSmallEvent> dataset = repo.load("ns", original.getName(),
         ReflectSmallEvent.class);
 
     Set<ReflectSmallEvent> expected = Sets.newHashSet(
@@ -141,7 +143,7 @@ public class TestProjection extends TestRefinableViews {
       Closeables.close(writer, false);
     }
 
-    repo.load(unbounded.getDataset().getName(), IncompatibleEvent.class);
+    repo.load("ns", unbounded.getDataset().getName(), IncompatibleEvent.class);
   }
 
   private static SmallEvent toSmallEvent(StandardEvent event) {

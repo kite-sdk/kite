@@ -95,7 +95,7 @@ public class TestSimpleView {
         .schemaUri("resource:standard_event.avsc")
         .partitionStrategy(strategy)
         .build();
-    this.testDataset = repo.create("test", testDescriptor);
+    this.testDataset = repo.create("ns", "test", testDescriptor);
   }
 
   @After
@@ -171,7 +171,8 @@ public class TestSimpleView {
               .build();
 
       // Create a separate dataset to avoid conflicts with the above.
-      Dataset<StandardEvent> identityDataset = repo.create("test_identity", descriptor);
+      Dataset<StandardEvent> identityDataset = repo.create(
+          "ns", "test_identity", descriptor);
 
       DatasetWriter<StandardEvent> writer = null;
 

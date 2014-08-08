@@ -25,22 +25,23 @@ import junit.framework.Assert;
 public class TestDatasetsURIBuilder {
   @Test
   public void testBuildDatasetUri() {
-    URI uri = new URIBuilder("repo:file:/tmp/data", "test-ds").build();
-    Assert.assertEquals(URI.create("dataset:file:/tmp/data/test-ds"), uri);
+    URI uri = new URIBuilder("repo:file:/tmp/data", "ns", "test-ds").build();
+    Assert.assertEquals(URI.create("dataset:file:/tmp/data/ns/test-ds"), uri);
   }
   
   @Test
   public void testBuildViewUri() {
-    URI uri = new URIBuilder("repo:file:/tmp/data", "test-ds")
+    URI uri = new URIBuilder("repo:file:/tmp/data", "ns", "test-ds")
         .with("username", "bob").with("lastName", "Smith").build();
-    Assert.assertEquals(URI.create("view:file:/tmp/data/test-ds?username=bob&lastName=Smith"), uri);
+    Assert.assertEquals(URI.create("view:file:/tmp/data/ns/test-ds?username=bob&lastName=Smith"), uri);
   }
   
   @Test
   public void testRepoUriHasQueryString() {
-    URI uri = new URIBuilder("repo:file:/tmp/data?repoParam=x",
-        "test-ds").with("username", "bob").build();
+    URI uri = new URIBuilder("repo:file:/tmp/data?repoParam=x", "ns", "test-ds")
+        .with("username", "bob")
+        .build();
     
-    Assert.assertEquals(URI.create("view:file:/tmp/data/test-ds?repoParam=x&username=bob"), uri);
+    Assert.assertEquals(URI.create("view:file:/tmp/data/ns/test-ds?repoParam=x&username=bob"), uri);
   }
 }

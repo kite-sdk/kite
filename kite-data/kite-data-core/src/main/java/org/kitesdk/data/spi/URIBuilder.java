@@ -32,6 +32,8 @@ import com.google.common.collect.Maps;
  */
 public class URIBuilder {
   public static final String DATASET_NAME_OPTION = "dataset";
+  public static final String NAMESPACE_OPTION = "namespace";
+  public static final String NAMESPACE_DEFAULT = "default";
   public static final String DATASET_SCHEME = "dataset";
   public static final String VIEW_SCHEME = "view";
   public static final String REPO_SCHEME = "repo";
@@ -45,19 +47,21 @@ public class URIBuilder {
    * Constructs a builder based on the given repository URI and {@link Dataset#getName() dataset name}.
    *
    * @param repoUri the {@link DatasetRepository} URI
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @param datasetName the {@link Dataset} name
    */
-  public URIBuilder(String repoUri, String datasetName) {
-    this(URI.create(repoUri), datasetName);
+  public URIBuilder(String repoUri, String namespace, String datasetName) {
+    this(URI.create(repoUri), namespace, datasetName);
   }
 
   /**
    * Constructs a builder based on the given repository URI and {@link Dataset#getName() dataset name}.
    *
    * @param repoUri the {@link DatasetRepository} URI
+   * @param namespace A namespace, or logical group name, for the dataset.
    * @param datasetName the {@link Dataset} name
    */
-  public URIBuilder(URI repoUri, String datasetName) {
+  public URIBuilder(URI repoUri, String namespace, String datasetName) {
     Preconditions.checkNotNull(repoUri, "Repository URI cannot be null");
     Preconditions.checkNotNull(datasetName, "Dataset name cannot be null");
     Preconditions.checkArgument(REPO_SCHEME.equals(repoUri.getScheme()));
@@ -67,6 +71,7 @@ public class URIBuilder {
     this.pattern = pair.first();
     options.putAll(pair.second());
     options.put(DATASET_NAME_OPTION, datasetName);
+    options.put(NAMESPACE_OPTION, namespace);
   }
 
   public URIBuilder(String uri) {
@@ -84,6 +89,7 @@ public class URIBuilder {
         .lookupDatasetPattern(URI.create(uri.getRawSchemeSpecificPart()));
     this.pattern = pair.first();
     this.isView = isViewUri;
+    options.put(NAMESPACE_OPTION, NAMESPACE_DEFAULT);
     options.putAll(pair.second());
   }
 

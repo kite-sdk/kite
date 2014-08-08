@@ -115,14 +115,14 @@ public class TestFileSystemView extends TestRefinableViews {
       Closeables.close(writer, false);
     }
 
-    final Path root = new Path("target/data/test");
-    final Path y2013 = new Path("target/data/test/year=2013");
-    final Path sep = new Path("target/data/test/year=2013/month=09");
-    final Path sep12 = new Path("target/data/test/year=2013/month=09/day=12");
-    final Path oct = new Path("target/data/test/year=2013/month=10");
-    final Path oct12 = new Path("target/data/test/year=2013/month=10/day=12");
-    final Path nov = new Path("target/data/test/year=2013/month=11");
-    final Path nov11 = new Path("target/data/test/year=2013/month=11/day=11");
+    final Path root = new Path("target/data/ns/test");
+    final Path y2013 = new Path("target/data/ns/test/year=2013");
+    final Path sep = new Path("target/data/ns/test/year=2013/month=09");
+    final Path sep12 = new Path("target/data/ns/test/year=2013/month=09/day=12");
+    final Path oct = new Path("target/data/ns/test/year=2013/month=10");
+    final Path oct12 = new Path("target/data/ns/test/year=2013/month=10/day=12");
+    final Path nov = new Path("target/data/ns/test/year=2013/month=11");
+    final Path nov11 = new Path("target/data/ns/test/year=2013/month=11/day=11");
     assertDirectoriesExist(fs, root, y2013, sep, sep12, oct, oct12, nov, nov11);
 
     long julStart = new DateTime(2013, 6, 1, 0, 0, DateTimeZone.UTC).getMillis();
@@ -256,14 +256,14 @@ public class TestFileSystemView extends TestRefinableViews {
       Closeables.close(writer, false);
     }
 
-    final Path root = new Path("target/data/test");
-    final Path y2013 = new Path("target/data/test/year=2013");
-    final Path sep = new Path("target/data/test/year=2013/month=09");
-    final Path sep12 = new Path("target/data/test/year=2013/month=09/day=12");
-    final Path oct = new Path("target/data/test/year=2013/month=10");
-    final Path oct12 = new Path("target/data/test/year=2013/month=10/day=12");
-    final Path nov = new Path("target/data/test/year=2013/month=11");
-    final Path nov11 = new Path("target/data/test/year=2013/month=11/day=11");
+    final Path root = new Path("target/data/ns/test");
+    final Path y2013 = new Path("target/data/ns/test/year=2013");
+    final Path sep = new Path("target/data/ns/test/year=2013/month=09");
+    final Path sep12 = new Path("target/data/ns/test/year=2013/month=09/day=12");
+    final Path oct = new Path("target/data/ns/test/year=2013/month=10");
+    final Path oct12 = new Path("target/data/ns/test/year=2013/month=10/day=12");
+    final Path nov = new Path("target/data/ns/test/year=2013/month=11");
+    final Path nov11 = new Path("target/data/ns/test/year=2013/month=11/day=11");
     assertDirectoriesExist(fs, root, y2013, sep, sep12, oct, oct12, nov, nov11);
 
     Assert.assertTrue("Delete should return false to indicate no changes",

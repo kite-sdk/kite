@@ -39,6 +39,7 @@ import org.kitesdk.data.spi.MetadataProvider;
 @RunWith(Parameterized.class)
 public abstract class TestDatasetRepositories extends MiniDFSTest {
 
+  protected static final String NAMESPACE = "ns1";
   protected static final String NAME = "test1";
 
   @Parameterized.Parameters
@@ -104,17 +105,18 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
 
   @Test
   public void testCreate() {
-    Assert.assertFalse("Sanity check", testProvider.exists(NAME));
+    Assert.assertFalse("Sanity check", testProvider.exists(NAMESPACE, NAME));
 
-    Dataset dataset = repo.create(NAME, testDescriptor);
+    Dataset dataset = repo.create(NAMESPACE, NAME, testDescriptor);
     Assert.assertNotNull("Dataset should be returned", dataset);
-    Assert.assertTrue("Dataset should exist", repo.exists(NAME));
+    Assert.assertTrue("Dataset should exist", repo.exists(NAMESPACE, NAME));
 
-    DatasetDescriptor saved = testProvider.load(NAME);
+    DatasetDescriptor saved = testProvider.load(NAMESPACE, NAME);
     Assert.assertNotNull("Dataset metadata is stored under name", saved);
     Assert.assertEquals("Saved metadata is returned",
         saved, dataset.getDescriptor());
 
+    // TODO: Add test for namespace accessor
     Assert.assertEquals("Dataset name is propagated",
         NAME, dataset.getName());
     Assert.assertEquals("Dataset schema is propagated",
@@ -128,17 +130,22 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
   public void ensureCreated() {
     // invoke the creation test so we have a dataset to test with.
     testCreate();
-    Assert.assertTrue("Sanity check", testProvider.exists(NAME));
+    Assert.assertTrue("Sanity check", testProvider.exists(NAMESPACE, NAME));
+  }
+
+  @Test(expected=NullPointerException.class)
+  public void testCreateNullNamespace() {
+    repo.create(null, NAME, testDescriptor);
   }
 
   @Test(expected=NullPointerException.class)
   public void testCreateNullName() {
-    repo.create(null, testDescriptor);
+    repo.create(NAMESPACE, null, testDescriptor);
   }
 
   @Test(expected=NullPointerException.class)
   public void testCreateNullDescriptor() {
-    repo.create(NAME, null);
+    repo.create(NAMESPACE, NAME, null);
   }
 
   @Test
@@ -147,11 +154,11 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
         .partitionStrategy(
             new PartitionStrategy.Builder().hash("username", 3).build())
         .build();
-    Assert.assertFalse("Sanity check", testProvider.exists("test2"));
+    Assert.assertFalse("Sanity check", testProvider.exists(NAMESPACE, "test2"));
 
-    Dataset dataset = repo.create("test2", requested);
+    Dataset dataset = repo.create(NAMESPACE, "test2", requested);
 
-    DatasetDescriptor saved = testProvider.load("test2");
+    DatasetDescriptor saved = testProvider.load(NAMESPACE, "test2");
     Assert.assertNotNull("Dataset metadata is stored under name", saved);
     Assert.assertEquals("Saved metadata is returned",
         saved, dataset.getDescriptor());
@@ -169,89 +176,151 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
     ensureCreated();
 
     // create the same dataset again, this time it should fail
-    repo.create(NAME, new DatasetDescriptor.Builder()
+    repo.create(NAMESPACE, NAME, new DatasetDescriptor.Builder()
         .schema(testSchema).build());
   }
 
   @Test
   public void testUpdateSuccessWithoutChanges() {
     ensureCreated();
-    repo.update(NAME, testProvider.load(NAME));
+    repo.update(NAMESPACE, NAME, testProvider.load(NAMESPACE, NAME));
   }
 
   @Test(expected=DatasetNotFoundException.class)
   public void testUpdateNoDataset() {
-    Assert.assertFalse("Sanity check", testProvider.exists(NAME));
+    Assert.assertFalse("Sanity check", testProvider.exists(NAMESPACE, NAME));
 
-    repo.update(NAME, testDescriptor);
+    repo.update(NAMESPACE, NAME, testDescriptor);
+  }
+
+  @Test(expected=NullPointerException.class)
+  public void testUpdateNullNamespace() {
+    ensureCreated();
+
+    repo.update(null, NAME, testDescriptor);
   }
 
   @Test(expected=NullPointerException.class)
   public void testUpdateNullName() {
     ensureCreated();
 
-    repo.update(null, testDescriptor);
+    repo.update(NAMESPACE, null, testDescriptor);
   }
 
   @Test(expected=NullPointerException.class)
   public void testUpdateNullDescriptor() {
     ensureCreated();
 
-    repo.update(NAME, null);
+    repo.update(NAMESPACE, NAME, null);
   }
 
   @Test
-  public void testList() {
+  public void testListDatasets() {
     Assert.assertEquals(ImmutableMultiset.<String>of(),
-        ImmutableMultiset.copyOf(repo.list()));
+        ImmutableMultiset.copyOf(repo.datasets(NAMESPACE)));
 
-    repo.create("test1", testDescriptor);
+    repo.create(NAMESPACE, "test1", testDescriptor);
     Assert.assertEquals(ImmutableMultiset.of("test1"),
-        ImmutableMultiset.copyOf(repo.list()));
+        ImmutableMultiset.copyOf(repo.datasets(NAMESPACE)));
 
-    repo.create("test2", testDescriptor);
+    repo.create(NAMESPACE, "test2", testDescriptor);
     Assert.assertEquals(ImmutableMultiset.of("test1", "test2"),
-        ImmutableMultiset.copyOf(repo.list()));
+        ImmutableMultiset.copyOf(repo.datasets(NAMESPACE)));
 
-    repo.create("test3", testDescriptor);
+    repo.create(NAMESPACE, "test3", testDescriptor);
     Assert.assertEquals(ImmutableMultiset.of("test1", "test2", "test3"),
-        ImmutableMultiset.copyOf(repo.list()));
+        ImmutableMultiset.copyOf(repo.datasets(NAMESPACE)));
 
-    repo.delete("test2");
+    repo.delete(NAMESPACE, "test2");
     Assert.assertEquals(ImmutableMultiset.of("test1", "test3"),
-        ImmutableMultiset.copyOf(repo.list()));
+        ImmutableMultiset.copyOf(repo.datasets(NAMESPACE)));
 
-    repo.delete("test3");
+    repo.delete(NAMESPACE, "test3");
     Assert.assertEquals(ImmutableMultiset.of("test1"),
-        ImmutableMultiset.copyOf(repo.list()));
+        ImmutableMultiset.copyOf(repo.datasets(NAMESPACE)));
 
-    repo.delete("test1");
+    repo.delete(NAMESPACE, "test1");
     Assert.assertEquals(ImmutableMultiset.<String>of(),
-        ImmutableMultiset.copyOf(repo.list()));
+        ImmutableMultiset.copyOf(repo.datasets(NAMESPACE)));
+  }
+
+  @Test
+  public void testListNamespaces() {
+    DatasetDescriptor anotherDescriptor = new DatasetDescriptor
+        .Builder(testDescriptor)
+        .property("prop", "value")
+        .build();
+
+    Assert.assertEquals(ImmutableMultiset.<String>of(),
+        ImmutableMultiset.copyOf(repo.namespaces()));
+
+    repo.create("test1", "d1", testDescriptor);
+    repo.create("test1", "d2", anotherDescriptor);
+    Assert.assertEquals(ImmutableMultiset.of("test1"),
+        ImmutableMultiset.copyOf(repo.namespaces()));
+
+    repo.create("test2", "d1", testDescriptor);
+    repo.create("test2", "d2", anotherDescriptor);
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test2"),
+        ImmutableMultiset.copyOf(repo.namespaces()));
+
+    repo.create("test3", "d1", testDescriptor);
+    repo.create("test3", "d2", anotherDescriptor);
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test2", "test3"),
+        ImmutableMultiset.copyOf(repo.namespaces()));
+
+    repo.delete("test2", "d2");
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test2", "test3"),
+        ImmutableMultiset.copyOf(repo.namespaces()));
+
+    repo.delete("test2", "d1");
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test3"),
+        ImmutableMultiset.copyOf(repo.namespaces()));
+
+    repo.delete("test3", "d2");
+    Assert.assertEquals(ImmutableMultiset.of("test1", "test3"),
+        ImmutableMultiset.copyOf(repo.namespaces()));
+
+    repo.delete("test3", "d1");
+    Assert.assertEquals(ImmutableMultiset.of("test1"),
+        ImmutableMultiset.copyOf(repo.namespaces()));
+
+    repo.delete("test1", "d1");
+    Assert.assertEquals(ImmutableMultiset.of("test1"),
+        ImmutableMultiset.copyOf(repo.namespaces()));
+
+    repo.delete("test1", "d2");
+    Assert.assertEquals(ImmutableMultiset.<String>of(),
+        ImmutableMultiset.copyOf(repo.namespaces()));
   }
 
   @Test
   public void testExists() {
-    Assert.assertFalse(repo.exists("test1"));
+    Assert.assertFalse(repo.exists(NAMESPACE, "test1"));
 
-    repo.create("test1", new DatasetDescriptor.Builder()
+    repo.create(NAMESPACE, "test1", new DatasetDescriptor.Builder()
         .schema(testSchema).build());
-    Assert.assertTrue(repo.exists("test1"));
+    Assert.assertTrue(repo.exists(NAMESPACE, "test1"));
 
-    repo.delete("test1");
-    Assert.assertFalse(repo.exists("test1"));
+    repo.delete(NAMESPACE, "test1");
+    Assert.assertFalse(repo.exists(NAMESPACE, "test1"));
+  }
+
+  @Test(expected=NullPointerException.class)
+  public void testExistsNullNamespace() {
+    repo.exists(null, NAME);
   }
 
   @Test(expected=NullPointerException.class)
   public void testExistsNullName() {
-    repo.exists(null);
+    repo.exists(NAMESPACE, null);
   }
 
   @Test
   public void testLoad() {
     ensureCreated();
 
-    Dataset dataset = repo.load(NAME);
+    Dataset dataset = repo.load(NAMESPACE, NAME);
 
     Assert.assertNotNull("Dataset is loaded and produced", dataset);
     Assert.assertEquals("Dataset name is propagated",
@@ -262,24 +331,29 @@ public abstract class TestDatasetRepositories extends MiniDFSTest {
 
   @Test(expected=DatasetNotFoundException.class)
   public void testLoadNoDataset() {
-    Assert.assertFalse("Santity check", testProvider.exists(NAME));
+    Assert.assertFalse("Santity check", testProvider.exists(NAMESPACE, NAME));
 
-    Dataset dataset = repo.load(NAME);
+    Dataset dataset = repo.load(NAMESPACE, NAME);
+  }
+
+  @Test(expected=NullPointerException.class)
+  public void testLoadNullNamespace() {
+    repo.load(null, NAME);
   }
 
   @Test(expected=NullPointerException.class)
   public void testLoadNullName() {
-    repo.load(null);
+    repo.load(NAMESPACE, (String) null);
   }
 
   @Test
   public void testDelete() {
     ensureCreated();
 
-    boolean result = repo.delete(NAME);
+    boolean result = repo.delete(NAMESPACE, NAME);
     Assert.assertTrue("Delete dataset should return true", result);
 
-    result = repo.delete(NAME);
+    result = repo.delete(NAMESPACE, NAME);
     Assert.assertFalse("Delete nonexistent dataset should return false", result);
   }
 }

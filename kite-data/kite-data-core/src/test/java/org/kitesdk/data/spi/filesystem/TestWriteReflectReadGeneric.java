@@ -45,7 +45,7 @@ public class TestWriteReflectReadGeneric extends TestDatasetReaders<GenericRecor
     fs = FileSystem.getLocal(conf);
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
     FileSystemDatasetRepository repo = new FileSystemDatasetRepository(conf, testDirectory);
-    Dataset<MyRecord> writerDataset = repo.create("test", new DatasetDescriptor.Builder()
+    Dataset<MyRecord> writerDataset = repo.create("ns", "test", new DatasetDescriptor.Builder()
                                    .schema(MyRecord.class)
                                    .build(), MyRecord.class);
     DatasetWriter<MyRecord> writer = writerDataset.newWriter();
@@ -54,7 +54,7 @@ public class TestWriteReflectReadGeneric extends TestDatasetReaders<GenericRecor
     }
     writer.close();
 
-    readerDataset = repo.load("test", GenericRecord.class);
+    readerDataset = repo.load("ns", "test", GenericRecord.class);
   }
 
   @AfterClass
