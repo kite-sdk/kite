@@ -50,6 +50,7 @@ public class TestFileSystemDatasetPartitionKeyForPath {
         .hash("username", "username_part", 2).hash("email", 3).build();
 
     dataset = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("partitioned-users")
         .configuration(new Configuration())
         .uri(URI.create("test"))

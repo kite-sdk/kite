@@ -208,7 +208,8 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
       PartitionListener listener = dataset.getPartitionListener();
       if (listener != null) {
-        listener.partitionAdded(dataset.getName(), partition.toString());
+        listener.partitionAdded(
+            dataset.getNamespace(), dataset.getName(), partition.toString());
       }
 
       writer.initialize();

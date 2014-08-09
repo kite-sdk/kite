@@ -60,6 +60,10 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
         ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
         repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "ns", ds.getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", ds.getName());
 
     repo.delete("ns", "test");
   }
@@ -82,6 +86,10 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
         ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
         repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "ns", ds.getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", ds.getName());
 
     repo.delete("ns", "test");
   }
@@ -104,6 +112,10 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
         new Path(cwd, "data/ns/test").toUri(), ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
         repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "ns", ds.getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", ds.getName());
 
     repo.delete("ns", "test");
   }

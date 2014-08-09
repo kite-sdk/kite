@@ -101,6 +101,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Test
   public void testWriteAndRead() throws IOException {
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("test")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -126,6 +127,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
       "username", 2).build();
 
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -173,6 +175,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
       .hash("username", 2).hash("email", 3).build();
 
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -229,6 +232,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
       "username", 2).build();
 
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -251,6 +255,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
       .hash("username", "username_part", 2).hash("email", 3).build();
 
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -280,6 +285,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
       .hash("username", 2).build();
 
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -324,6 +330,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         "username", 2).build();
 
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -343,6 +350,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         new Path(Files.createTempDir().getAbsolutePath()));
 
     FileSystemDataset<Record> dsUpdate = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -368,6 +376,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Test(expected = ValidationException.class)
   public void testCannotMergeDatasetsWithDifferentFormats() throws IOException {
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -378,6 +387,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .type(Record.class)
         .build();
     FileSystemDataset<Record> dsUpdate = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -393,6 +403,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Test(expected = ValidationException.class)
   public void testCannotMergeDatasetsWithDifferentPartitionStrategies() throws IOException {
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -404,6 +415,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .type(Record.class)
         .build();
     FileSystemDataset<Record> dsUpdate = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -420,6 +432,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Test(expected = ValidationException.class)
   public void testCannotMergeDatasetsWithDifferentSchemas() throws IOException {
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -429,6 +442,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .type(Record.class)
         .build();
     FileSystemDataset<Record> dsUpdate = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -443,6 +457,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Test
   public void testPathIterator_Directory() {
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -466,6 +481,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .hash("username", 2).hash("email", 3).build();
 
     final FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("partitioned-users")
         .configuration(getConfiguration())
         .descriptor(new DatasetDescriptor.Builder()
@@ -524,6 +540,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
   @Test
   public void testDeleteAllWithoutPartitions() {
     final FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
+        .namespace("ns")
         .name("users")
         .configuration(getConfiguration())
         .descriptor(

@@ -20,5 +20,5 @@ package org.kitesdk.data.spi;
  * so they can act on it (e.g. by registering the new partition in their metadata store).
  */
 public interface PartitionListener {
-  void partitionAdded(String name, String partition);
+  void partitionAdded(String namespace, String name, String partition);
 }

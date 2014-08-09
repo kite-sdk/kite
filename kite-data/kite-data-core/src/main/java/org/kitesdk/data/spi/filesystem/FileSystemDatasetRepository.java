@@ -62,9 +62,9 @@ import org.slf4j.LoggerFactory;
  * FileSystem (HDFS). Users may directly instantiate this class with the three
  * dependencies above and then perform dataset-related operations using any of
  * the provided methods. The primary methods of interest will be
- * {@link #create(String, DatasetDescriptor)},
- * {@link #load(String)}, and
- * {@link #delete(String)} which create a new dataset, load an existing
+ * {@link #create(String, String, DatasetDescriptor)},
+ * {@link #load(String, String)}, and
+ * {@link #delete(String, String)} which create a new dataset, load an existing
  * dataset, or delete an existing dataset, respectively. Once a dataset has been created
  * or loaded, users can invoke the appropriate {@link Dataset} methods to get a reader
  * or writer as needed.
@@ -144,6 +144,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         name, newDescriptor.getSchema(), newDescriptor.getLocation() });
 
     return new FileSystemDataset.Builder<E>()
+        .namespace(namespace)
         .name(name)
         .configuration(conf)
         .descriptor(newDescriptor)
@@ -173,6 +174,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         name, updatedDescriptor.getSchema(), updatedDescriptor.getLocation() });
 
     return new FileSystemDataset.Builder<E>()
+        .namespace(namespace)
         .name(name)
         .configuration(conf)
         .descriptor(updatedDescriptor)
@@ -193,6 +195,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
     DatasetDescriptor descriptor = metadataProvider.load(namespace, name);
 
     FileSystemDataset<E> ds = new FileSystemDataset.Builder<E>()
+        .namespace(namespace)
         .name(name)
         .configuration(conf)
         .descriptor(descriptor)

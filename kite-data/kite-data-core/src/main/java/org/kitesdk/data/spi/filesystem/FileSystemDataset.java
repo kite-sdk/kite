@@ -62,6 +62,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   private final FileSystem fileSystem;
   private final Path directory;
+  private final String namespace;
   private final String name;
   private final DatasetDescriptor descriptor;
   private PartitionKey partitionKey;
@@ -75,9 +76,11 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   // reusable path converter, has no relevant state
   private final PathConversion convert;
 
-  FileSystemDataset(FileSystem fileSystem, Path directory, String name,
+  FileSystemDataset(FileSystem fileSystem, Path directory,
+                    String namespace, String name,
                     DatasetDescriptor descriptor, URI uri,
-                    @Nullable PartitionListener partitionListener, Class<E> type) {
+                    @Nullable PartitionListener partitionListener,
+                    Class<E> type) {
     super(type, descriptor.getSchema());
     if (Formats.PARQUET.equals(descriptor.getFormat())) {
       Preconditions.checkArgument(IndexedRecord.class.isAssignableFrom(type) ||
@@ -88,6 +91,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
     this.fileSystem = fileSystem;
     this.directory = directory;
+    this.namespace = namespace;
     this.name = name;
     this.descriptor = descriptor;
     this.partitionStrategy =
@@ -101,16 +105,24 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     this.partitionKey = null;
   }
 
-  FileSystemDataset(FileSystem fileSystem, Path directory, String name,
-    DatasetDescriptor descriptor, URI uri, @Nullable PartitionKey partitionKey,
-    @Nullable PartitionListener partitionListener, Class<E> type) {
-    this(fileSystem, directory, name, descriptor, uri, partitionListener, type);
+  FileSystemDataset(FileSystem fileSystem, Path directory,
+                    String namespace, String name,
+                    DatasetDescriptor descriptor, URI uri,
+                    @Nullable PartitionKey partitionKey,
+                    @Nullable PartitionListener partitionListener,
+                    Class<E> type) {
+    this(fileSystem, directory, namespace, name, descriptor, uri,
+        partitionListener, type);
     this.partitionKey = partitionKey;
   }
 
   @Override
   public URI getUri() {
     return uri;
+  }
+
+  public String getNamespace() {
+    return namespace;
   }
 
   @Override
@@ -186,7 +198,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
         if (allowCreate) {
           fileSystem.mkdirs(partitionDirectory);
           if (partitionListener != null) {
-            partitionListener.partitionAdded(name,
+            partitionListener.partitionAdded(namespace, name,
                 toRelativeDirectory(key).toString());
           }
         } else {
@@ -202,6 +214,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
         .getSubpartitionStrategy(partitionStrategy, partitionDepth);
 
     return new FileSystemDataset.Builder<E>()
+        .namespace(namespace)
         .name(name)
         .fileSystem(fileSystem)
         .uri(uri)
@@ -261,6 +274,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       PartitionStrategy subPartitionStrategy = Accessor.getDefault()
           .getSubpartitionStrategy(partitionStrategy, 1);
       Builder<E> builder = new FileSystemDataset.Builder<E>()
+          .namespace(namespace)
           .name(name)
           .fileSystem(fileSystem)
           .uri(uri)
@@ -320,7 +334,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       if (descriptor.isPartitioned() && partitionListener != null) {
         String partition = newPartitionDirectory.toString();
         if (!addedPartitions.contains(partition)) {
-          partitionListener.partitionAdded(name, partition);
+          partitionListener.partitionAdded(namespace, name, partition);
           addedPartitions.add(partition);
         }
       }
@@ -443,12 +457,18 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     private Configuration conf;
     private FileSystem fileSystem;
     private Path directory;
+    private String namespace;
     private String name;
     private DatasetDescriptor descriptor;
     private Class<E> type;
     private URI uri;
     private PartitionKey partitionKey;
     private PartitionListener partitionListener;
+
+    public Builder<E> namespace(String namespace) {
+      this.namespace = namespace;
+      return this;
+    }
 
     public Builder<E> name(String name) {
       this.name = name;
@@ -498,6 +518,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     }
 
     public FileSystemDataset<E> build() {
+      Preconditions.checkState(this.namespace != null, "No namespace defined");
       Preconditions.checkState(this.name != null, "No dataset name defined");
       Preconditions.checkState(this.descriptor != null,
         "No dataset descriptor defined");
@@ -517,8 +538,8 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
       Path absoluteDirectory = fileSystem.makeQualified(directory);
       return new FileSystemDataset<E>(
-          fileSystem, absoluteDirectory, name, descriptor, uri, partitionKey,
-          partitionListener, type);
+          fileSystem, absoluteDirectory, namespace, name, descriptor, uri,
+          partitionKey, partitionListener, type);
     }
   }
 

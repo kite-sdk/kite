@@ -64,6 +64,10 @@ public class TestLocalDatasetURIs {
         ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
         repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "ns", ds.getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", ds.getName());
 
     repo.delete("ns", "test");
   }
@@ -84,6 +88,10 @@ public class TestLocalDatasetURIs {
         new Path(cwd, "target/data/ns/test").toUri(), ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
         repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "ns", ds.getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", ds.getName());
 
     repo.delete("ns", "test");
   }
@@ -106,6 +114,10 @@ public class TestLocalDatasetURIs {
     DatasetDescriptor loaded = repo.load("ns", "test").getDescriptor();
     Assert.assertEquals("Descriptors should match",
         loaded, v.getDataset().getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "ns", v.getDataset().getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", v.getDataset().getName());
 
     Constraints withUser = new Constraints(loaded.getSchema())
         .with("username", new Utf8("user"));

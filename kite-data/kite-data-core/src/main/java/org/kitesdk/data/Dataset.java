@@ -55,6 +55,12 @@ public interface Dataset<E> extends RefinableView<E> {
   String getName();
 
   /**
+   * Get the namespace that contains this {@code Dataset}. A namespace is a
+   * string that identifies a logical group of datasets.
+   */
+  String getNamespace();
+
+  /**
    * Get the {@link DatasetDescriptor} associated with this dataset.
    */
   DatasetDescriptor getDescriptor();
