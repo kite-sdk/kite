@@ -116,7 +116,8 @@ public abstract class TestMetadataProviders extends MiniDFSTest {
   public void testCreateWithLocation() throws URISyntaxException {
     Assert.assertFalse("Sanity check", provider.exists(NAMESPACE, NAME));
 
-    URI requestedLocation = new URI("hdfs:/tmp/data/my_data_set");
+    String auth = getDFS().getUri().getAuthority();
+    URI requestedLocation = new URI("hdfs://" + auth + "/tmp/data/my_data_set");
     DatasetDescriptor requested = new DatasetDescriptor.Builder(testDescriptor)
         .location(requestedLocation)
         .build();
