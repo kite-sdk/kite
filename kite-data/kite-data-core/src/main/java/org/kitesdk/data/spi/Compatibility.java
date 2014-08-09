@@ -52,12 +52,13 @@ public abstract class Compatibility {
    * If the column names are not compatible across components or if any
    * partition name duplicates its source field name, this will warn the user.
    *
-   * @param datasetName a String dataset name
+   * @param namespace a String namespace
+   * @param name a String dataset name
    * @param descriptor a {@link DatasetDescriptor}
    */
-  public static void checkAndWarn(String datasetName, DatasetDescriptor descriptor) {
+  public static void checkAndWarn(String namespace, String name, DatasetDescriptor descriptor) {
     try {
-      checkDatasetName(datasetName);
+      checkDatasetName(namespace, name);
       checkDescriptor(descriptor);
     } catch (IllegalArgumentException e) {
       LOG.warn(e.getMessage());
@@ -72,12 +73,13 @@ public abstract class Compatibility {
    * If the column names are not compatible across components, this will warn
    * the user.
    *
+   * @param namespace a String namespace
    * @param datasetName a String dataset name
    * @param schema a {@link Schema}
    */
-  public static void checkAndWarn(String datasetName, Schema schema) {
+  public static void checkAndWarn(String namespace, String datasetName, Schema schema) {
     try {
-      checkDatasetName(datasetName);
+      checkDatasetName(namespace, datasetName);
       checkSchema(schema);
     } catch (IllegalArgumentException e) {
       LOG.warn(e.getMessage());
@@ -89,10 +91,15 @@ public abstract class Compatibility {
   /**
    * Precondition-style validation that a dataset name is compatible.
    *
+   * @param namespace a String namespace
    * @param name a String name
    */
-  public static void checkDatasetName(String name) {
+  public static void checkDatasetName(String namespace, String name) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
+    Preconditions.checkArgument(Compatibility.isCompatibleName(namespace),
+        "Hive incompatible: Namespace %s is not alphanumeric (plus '_')",
+        namespace);
     Preconditions.checkArgument(Compatibility.isCompatibleName(name),
         "Hive incompatible: Dataset name %s is not alphanumeric (plus '_')",
         name);
@@ -199,10 +206,11 @@ public abstract class Compatibility {
       return incompatible;
     }
   }
-  /** 
+
+  /**
    * Returns true if the name does not contain characters that are known to be
    * incompatible with the specs defined in Avro schema.
-   * 
+   *
    * @param name a String field name to check
    * @return will return true if the name is Avro compatible ,false if not
    */
