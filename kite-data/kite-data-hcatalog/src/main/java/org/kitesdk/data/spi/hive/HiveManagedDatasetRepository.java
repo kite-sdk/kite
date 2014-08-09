@@ -37,8 +37,8 @@ import org.kitesdk.data.spi.MetadataProvider;
  * </p>
  * <p>
  * The primary methods of interest will be
- * {@link #create(String, DatasetDescriptor)}, {@link #load(String)}, and
- * {@link #delete(String)} which create a new dataset, load an existing
+ * {@link #create(String, String, DatasetDescriptor)}, {@link #load(String, String)}, and
+ * {@link #delete(String, String)} which create a new dataset, load an existing
  * dataset, or delete an existing dataset, respectively. Once a dataset has been created
  * or loaded, users can invoke the appropriate {@link Dataset} methods to get a reader
  * or writer as needed.
@@ -64,10 +64,10 @@ public class HiveManagedDatasetRepository extends HiveAbstractDatasetRepository 
   }
 
   @Override
-  public <E> Dataset<E> create(String name, DatasetDescriptor descriptor) {
+  public <E> Dataset<E> create(String namespace, String name, DatasetDescriptor descriptor) {
     // avoids calling fsRepository.create, which creates the data path
-    getMetadataProvider().create(name, descriptor);
-    return load(name);
+    getMetadataProvider().create(namespace, name, descriptor);
+    return load(namespace, name);
   }
 
   /**

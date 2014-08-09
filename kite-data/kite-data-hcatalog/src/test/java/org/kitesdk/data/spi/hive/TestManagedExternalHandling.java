@@ -23,6 +23,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,24 +48,37 @@ public class TestManagedExternalHandling {
   public void setupRepositories() {
     // ensure the datasets do not already exist
     Datasets.delete("dataset:hive?dataset=managed");
-    Datasets.delete("dataset:hive:target/test-repo/external");
+    Datasets.delete("dataset:hive:target/test-repo/ns/external");
+    // ensure no other metadata is left in the metastore
+    cleanHCatalog();
     // create datasets
     this.managed = DatasetRepositories.repositoryFor("repo:hive");
-    managed.create("managed", descriptor);
+    Datasets.create("dataset:hive?dataset=managed", descriptor);
     this.external = DatasetRepositories.repositoryFor("repo:hive:target/test-repo");
-    external.create("external", descriptor);
+    external.create("ns", "external", descriptor);
+  }
+
+  @After
+  public void cleanHCatalog() {
+    // ensures all tables are removed
+    MetaStoreUtil metastore = new MetaStoreUtil(new Configuration());
+    for (String dbName : metastore.getAllDatabases()) {
+      for (String tableName : metastore.getAllTables(dbName)) {
+        metastore.dropTable(dbName, tableName);
+      }
+    }
   }
 
   @Test
   public void testManagedWithExternal() {
     HiveAbstractMetadataProvider provider = new HiveManagedMetadataProvider(
         new HiveConf());
-    Assert.assertTrue(provider.isExternal("external"));
+    Assert.assertTrue(provider.isExternal("ns", "external"));
 
-    Dataset<GenericData.Record> dataset = managed.load("external");
+    Dataset<GenericData.Record> dataset = managed.load("ns", "external");
     Assert.assertNotNull("Should open external dataset with managed", dataset);
     Assert.assertEquals("Should match external dataset",
-        external.load("external").getDescriptor(), dataset.getDescriptor());
+        external.load("ns", "external").getDescriptor(), dataset.getDescriptor());
 
     DatasetDescriptor updatedDescriptor =
         new DatasetDescriptor.Builder(dataset.getDescriptor())
@@ -73,19 +87,19 @@ public class TestManagedExternalHandling {
             .build();
 
     Dataset<GenericData.Record> updated = managed
-        .update("external", updatedDescriptor);
+        .update("ns", "external", updatedDescriptor);
     Assert.assertNotNull("Should update external dataset with managed",
         updated);
     Assert.assertEquals("Should see changes in external dataset",
-        external.load("external").getDescriptor(), updated.getDescriptor());
+        external.load("ns", "external").getDescriptor(), updated.getDescriptor());
 
     Assert.assertTrue("Should delete external tables with managed",
-        managed.delete("external"));
+        managed.delete("ns", "external"));
     TestHelpers.assertThrows("Should delete external table correctly",
         DatasetNotFoundException.class, new Runnable() {
           @Override
           public void run() {
-            external.load("external");
+            external.load("ns", "external");
           }
         });
   }
@@ -94,12 +108,12 @@ public class TestManagedExternalHandling {
   public void testExternalWithManaged() {
     HiveAbstractMetadataProvider provider = new HiveManagedMetadataProvider(
         new HiveConf());
-    Assert.assertTrue(provider.isManaged("managed"));
+    Assert.assertTrue(provider.isManaged("default", "managed"));
 
-    Dataset<GenericData.Record> dataset = external.load("managed");
+    Dataset<GenericData.Record> dataset = external.load("default", "managed");
     Assert.assertNotNull("Should open managed dataset with external", dataset);
     Assert.assertEquals("Should match managed dataset",
-        managed.load("managed").getDescriptor(), dataset.getDescriptor());
+        managed.load("default", "managed").getDescriptor(), dataset.getDescriptor());
 
     DatasetDescriptor updatedDescriptor =
         new DatasetDescriptor.Builder(dataset.getDescriptor())
@@ -108,19 +122,19 @@ public class TestManagedExternalHandling {
             .build();
 
     Dataset<GenericData.Record> updated = external
-        .update("managed", updatedDescriptor);
+        .update("default", "managed", updatedDescriptor);
     Assert.assertNotNull("Should update managed dataset with external",
         updated);
     Assert.assertEquals("Should see changes in managed dataset",
-        managed.load("managed").getDescriptor(), updated.getDescriptor());
+        managed.load("default", "managed").getDescriptor(), updated.getDescriptor());
 
     Assert.assertTrue("Should delete managed tables with external",
-        external.delete("managed"));
+        external.delete("default", "managed"));
     TestHelpers.assertThrows("Should delete managed table correctly",
         DatasetNotFoundException.class, new Runnable() {
           @Override
           public void run() {
-            managed.load("managed");
+            managed.load("default", "managed");
           }
         });
   }
@@ -130,30 +144,42 @@ public class TestManagedExternalHandling {
     // create unreadable hive tables
     MetaStoreUtil metastore = new MetaStoreUtil(new Configuration());
     metastore.dropTable("default", "bad_type");
-    metastore.dropTable("default", "bad_serde");
-    metastore.dropTable("default", "bad_schema");
+    metastore.dropTable("bad", "bad_serde");
+    metastore.dropTable("bad", "bad_schema");
 
-    Table badType = HiveUtils.createEmptyTable("bad_type");
+    Table badType = HiveUtils.createEmptyTable("default", "bad_type");
     badType.setTableType(TableType.VIRTUAL_VIEW.toString());
     metastore.createTable(badType);
 
-    Table badSerDe = HiveUtils.createEmptyTable("bad_serde");
+    Table badSerDe = HiveUtils.createEmptyTable("bad", "bad_serde");
     badSerDe.setTableType(TableType.MANAGED_TABLE.toString()); // readable type
     badSerDe.getSd().getSerdeInfo().setSerializationLib("com.example.ExampleHiveSerDe");
     metastore.createTable(badSerDe);
 
-    Table badSchema = HiveUtils.createEmptyTable("bad_schema");
+    Table badSchema = HiveUtils.createEmptyTable("bad", "bad_schema");
     badSchema.setTableType(TableType.MANAGED_TABLE.toString()); // readable type
     badSchema.getSd().getSerdeInfo().setSerializationLib("org.apache.hadoop.hive.serde2.avro.AvroSerDe");
     badSchema.getSd().setInputFormat("org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
     badSchema.getSd().setOutputFormat("org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat");
     metastore.createTable(badSchema);
 
-    // note that unreadable tables are not in the list
-    Set<String> expected = Sets.newHashSet("managed", "external");
+    // note that unreadable tables are not in the lists
+    Set<String> expectedNamespaces = Sets.newHashSet("default", "ns");
+    Assert.assertEquals("Managed should list namespaces with external and managed tables",
+        expectedNamespaces, Sets.newHashSet(managed.namespaces()));
+    Assert.assertEquals("External should list namespaces with external and managed tables",
+        expectedNamespaces, Sets.newHashSet(external.namespaces()));
+
+    Set<String> expectedInDefault = Sets.newHashSet("managed");
     Assert.assertEquals("Managed should list external and managed tables",
-        expected, Sets.newHashSet(managed.list()));
+        expectedInDefault, Sets.newHashSet(managed.datasets("default")));
     Assert.assertEquals("External should list external and managed tables",
-        expected, Sets.newHashSet(external.list()));
+        expectedInDefault, Sets.newHashSet(external.datasets("default")));
+
+    Set<String> expectedInNS = Sets.newHashSet("external");
+    Assert.assertEquals("Managed should list external and managed tables",
+        expectedInNS, Sets.newHashSet(managed.datasets("ns")));
+    Assert.assertEquals("External should list external and managed tables",
+        expectedInNS, Sets.newHashSet(external.datasets("ns")));
   }
 }

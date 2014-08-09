@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi.hive;
 
+import org.junit.Before;
 import org.kitesdk.data.DatasetDescriptor;
 import com.google.common.io.Files;
 import junit.framework.Assert;
@@ -42,12 +43,13 @@ public class TestHiveExternalMetadataProvider extends TestMetadataProviders {
     return new HiveExternalMetadataProvider(conf, testDirectory);
   }
 
+  @Before
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    MetaStoreUtil hcat = new MetaStoreUtil(conf);
-    for (String tableName : hcat.getAllTables("default")) {
-      hcat.dropTable("default", tableName);
+    MetaStoreUtil metastore = new MetaStoreUtil(conf);
+    for (String tableName : metastore.getAllTables(NAMESPACE)) {
+      metastore.dropTable(NAMESPACE, tableName);
     }
   }
 
@@ -55,10 +57,10 @@ public class TestHiveExternalMetadataProvider extends TestMetadataProviders {
   public void testCreateAssignsCorrectLocation() {
     ensureCreated();
 
-    DatasetDescriptor loaded = provider.load(NAME);
+    DatasetDescriptor loaded = provider.load(NAMESPACE, NAME);
     Path assignedPath = new Path(loaded.getLocation().getPath());
     Assert.assertEquals("Path should be in the test directory",
-        new Path(testDirectory, NAME), assignedPath);
+        new Path(testDirectory, new Path(NAMESPACE, NAME)), assignedPath);
   }
 
   @Test
@@ -72,7 +74,7 @@ public class TestHiveExternalMetadataProvider extends TestMetadataProviders {
         IllegalStateException.class, new Runnable() {
       @Override
       public void run() {
-        provider.create("reject", descriptor);
+        provider.create(NAMESPACE, "reject", descriptor);
       }
     });
   }

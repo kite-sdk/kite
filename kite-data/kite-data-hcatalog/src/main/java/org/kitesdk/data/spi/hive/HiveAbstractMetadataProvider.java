@@ -59,8 +59,8 @@ abstract class HiveAbstractMetadataProvider extends AbstractMetadataProvider imp
    * @return true if the table is managed, false otherwise
    * @throws DatasetNotFoundException If the table does not exist in Hive
    */
-  protected boolean isManaged(String name) {
-    return isManaged(getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name));
+  protected boolean isManaged(String namespace, String name) {
+    return isManaged(getMetaStoreUtil().getTable(namespace, name));
   }
 
   /**
@@ -69,73 +69,117 @@ abstract class HiveAbstractMetadataProvider extends AbstractMetadataProvider imp
    * @return true if the table is managed, false otherwise
    * @throws DatasetNotFoundException If the table does not exist in Hive
    */
-  protected boolean isExternal(String name) {
-    return isExternal(getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name));
+  protected boolean isExternal(String namespace, String name) {
+    return isExternal(getMetaStoreUtil().getTable(namespace, name));
   }
 
   @Override
-  public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
-    Compatibility.checkDatasetName(name);
+  public DatasetDescriptor update(String namespace, String name, DatasetDescriptor descriptor) {
+    Compatibility.checkDatasetName(namespace, name);
     Compatibility.checkDescriptor(descriptor);
 
-    if (!exists(name)) {
+    if (!exists(namespace, name)) {
       throw new DatasetNotFoundException("Table not found: " + name);
     }
 
-    Table table = getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name);
+    Table table = getMetaStoreUtil().getTable(namespace, name);
     HiveUtils.updateTableSchema(table, descriptor);
     getMetaStoreUtil().alterTable(table);
     return descriptor;
   }
 
   @Override
-  public boolean delete(String name) {
-    Compatibility.checkDatasetName(name);
+  public boolean delete(String namespace, String name) {
+    Compatibility.checkDatasetName(namespace, name);
 
     // TODO: when switching off of HCatalog, this may need to be moved
-    if (!exists(name)) {
+    if (!exists(namespace, name)) {
       return false;
     }
-    getMetaStoreUtil().dropTable(HiveUtils.DEFAULT_DB, name);
+    getMetaStoreUtil().dropTable(namespace, name);
     return true;
   }
 
   @Override
-  public boolean exists(String name) {
-    Compatibility.checkDatasetName(name);
+  public boolean exists(String namespace, String name) {
+    Compatibility.checkDatasetName(namespace, name);
 
-    return getMetaStoreUtil().exists(HiveUtils.DEFAULT_DB, name);
+    return getMetaStoreUtil().exists(namespace, name);
   }
 
   @Override
-  public Collection<String> list() {
-    Collection<String> tables = getMetaStoreUtil().getAllTables(HiveUtils.DEFAULT_DB);
+  public Collection<String> namespaces() {
+    Collection<String> databases = getMetaStoreUtil().getAllDatabases();
+    List<String> databasesWithDatasets = Lists.newArrayList();
+    for (String db : databases) {
+      if (isNamespace(db)) {
+        databasesWithDatasets.add(db);
+      }
+    }
+    return databasesWithDatasets;
+  }
+
+  @Override
+  public Collection<String> datasets(String namespace) {
+    Collection<String> tables = getMetaStoreUtil().getAllTables(namespace);
     List<String> readableTables = Lists.newArrayList();
     for (String name : tables) {
-      Table table = getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name);
-      if (isManaged(table) || isExternal(table)) { // readable table types
-        try {
-          // get a descriptor for the table. if this succeeds, it is readable
-          HiveUtils.descriptorForTable(conf, table);
-          readableTables.add(name);
-        } catch (DatasetException e) {
-          // not a readable table
-        } catch (IllegalStateException e) {
-          // not a readable table
-        } catch (IllegalArgumentException e) {
-          // not a readable table
-        } catch (UnsupportedOperationException e) {
-          // not a readable table
-        }
+      if (isReadable(namespace, name)) {
+        readableTables.add(name);
       }
     }
     return readableTables;
   }
 
+  /**
+   * Returns true if there is at least one table in the give database that can
+   * be read.
+   *
+   * @param database a Hive database name
+   * @return {@code true} if there is at least one readable table in database
+   * @see {@link #isReadable(String, String)}
+   */
+  private boolean isNamespace(String database) {
+    Collection<String> tables = getMetaStoreUtil().getAllTables(database);
+    for (String name : tables) {
+      if (isReadable(database, name)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns true if the given table exists and can be read by this library.
+   *
+   * @param namespace a Hive database name
+   * @param name a table name
+   * @return {@code true} if the table exists and is supported
+   */
+  private boolean isReadable(String namespace, String name) {
+    Table table = getMetaStoreUtil().getTable(namespace, name);
+    if (isManaged(table) || isExternal(table)) { // readable table types
+      try {
+        // get a descriptor for the table. if this succeeds, it is readable
+        HiveUtils.descriptorForTable(conf, table);
+        return true;
+      } catch (DatasetException e) {
+        // not a readable table
+      } catch (IllegalStateException e) {
+        // not a readable table
+      } catch (IllegalArgumentException e) {
+        // not a readable table
+      } catch (UnsupportedOperationException e) {
+        // not a readable table
+      }
+    }
+    return false;
+  }
+
   @Override
   @SuppressWarnings("unchecked")
-  public void partitionAdded(String name, String path) {
-    getMetaStoreUtil().addPartition(HiveUtils.DEFAULT_DB, name, path);
+  public void partitionAdded(String namespace, String name, String path) {
+    getMetaStoreUtil().addPartition(namespace, name, path);
   }
 
   private boolean isManaged(Table table) {

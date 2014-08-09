@@ -16,8 +16,10 @@
 
 package org.kitesdk.data.spi.hive;
 
+import java.net.URISyntaxException;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.After;
+import org.junit.Before;
 import org.kitesdk.data.spi.MetadataProvider;
 import org.kitesdk.data.spi.TestMetadataProviders;
 
@@ -32,13 +34,18 @@ public class TestHiveManagedMetadataProvider extends TestMetadataProviders {
     return new HiveManagedMetadataProvider(conf);
   }
 
+  @Before
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    MetaStoreUtil hcat = new MetaStoreUtil(conf);
-    for (String tableName : hcat.getAllTables("default")) {
-      hcat.dropTable("default", tableName);
+    MetaStoreUtil metastore = new MetaStoreUtil(conf);
+    for (String tableName : metastore.getAllTables(NAMESPACE)) {
+      metastore.dropTable(NAMESPACE, tableName);
     }
   }
 
+  @Override
+  public void testCreateWithLocation() throws URISyntaxException {
+    // not valid for managed tables
+  }
 }

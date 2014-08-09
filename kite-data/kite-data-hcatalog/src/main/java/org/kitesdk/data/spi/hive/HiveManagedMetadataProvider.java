@@ -36,20 +36,20 @@ class HiveManagedMetadataProvider extends HiveAbstractMetadataProvider {
   }
 
   @Override
-  public DatasetDescriptor load(String name) {
-    Compatibility.checkDatasetName(name);
+  public DatasetDescriptor load(String namespace, String name) {
+    Compatibility.checkDatasetName(namespace, name);
 
-    final Table table = getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name);
+    final Table table = getMetaStoreUtil().getTable(namespace, name);
 
     return HiveUtils.descriptorForTable(conf, table);
   }
 
   @Override
-  public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
-    Compatibility.checkDatasetName(name);
+  public DatasetDescriptor create(String namespace, String name, DatasetDescriptor descriptor) {
+    Compatibility.checkDatasetName(namespace, name);
     Compatibility.checkDescriptor(descriptor);
 
-    if (exists(name)) {
+    if (exists(namespace, name)) {
       throw new DatasetExistsException(
           "Metadata already exists for dataset:" + name);
     }
@@ -58,13 +58,13 @@ class HiveManagedMetadataProvider extends HiveAbstractMetadataProvider {
 
     // construct the table metadata from a descriptor
     final Table table = HiveUtils.tableForDescriptor(
-        name, descriptor, false /* managed table */);
+        namespace, name, descriptor, false /* managed table */);
 
     // create it
     getMetaStoreUtil().createTable(table);
 
     // load the created table to get the data location
-    final Table newTable = getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name);
+    final Table newTable = getMetaStoreUtil().getTable(namespace, name);
 
     try {
       return new DatasetDescriptor.Builder(descriptor)

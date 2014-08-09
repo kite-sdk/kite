@@ -60,7 +60,6 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.kitesdk.data.spi.SchemaUtil;
 
 class HiveUtils {
-  static final String DEFAULT_DB = "default";
   static final String HDFS_SCHEME = "hdfs";
 
   private static final String CUSTOM_PROPERTIES_PROPERTY_NAME = "kite.custom.property.names";
@@ -185,9 +184,10 @@ class HiveUtils {
     return null;
   }
 
-  static Table tableForDescriptor(
-      String name, DatasetDescriptor descriptor, boolean external) {
-    final Table table = createEmptyTable(name);
+  static Table tableForDescriptor(String namespace, String name,
+                                  DatasetDescriptor descriptor,
+                                  boolean external) {
+    final Table table = createEmptyTable(namespace, name);
 
     if (external) {
       // you'd think this would do it...
@@ -249,9 +249,9 @@ class HiveUtils {
     return table;
   }
 
-  static Table createEmptyTable(String name) {
+  static Table createEmptyTable(String namespace, String name) {
     Table table = new Table();
-    table.setDbName(DEFAULT_DB);
+    table.setDbName(namespace);
     table.setTableName(name);
     table.setPartitionKeys(new ArrayList<FieldSchema>());
     table.setParameters(new HashMap<String, String>());
@@ -322,14 +322,16 @@ class HiveUtils {
    * Returns the correct dataset path for the given name and root directory.
    *
    * @param root A Path
+   * @param namespace A String namespace, or logical group
    * @param name A String dataset name
    * @return the correct dataset Path
    */
-  static Path pathForDataset(Path root, String name) {
-    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
+  static Path pathForDataset(Path root, String namespace, String name) {
+    Preconditions.checkNotNull(namespace, "Namespace cannot be null");
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     // Why replace '.' here? Is this a namespacing hack?
-    return new Path(root, name.replace('.', Path.SEPARATOR_CHAR));
+    return new Path(root, new Path(namespace, name.replace('.', Path.SEPARATOR_CHAR)));
   }
 
   static List<FieldSchema> partitionColumns(PartitionStrategy strategy, Schema schema) {

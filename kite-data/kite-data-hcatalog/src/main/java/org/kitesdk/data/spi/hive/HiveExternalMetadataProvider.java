@@ -49,38 +49,41 @@ class HiveExternalMetadataProvider extends HiveAbstractMetadataProvider {
   }
 
   @Override
-  public DatasetDescriptor load(String name) {
-    Compatibility.checkDatasetName(name);
+  public DatasetDescriptor load(String namespace, String name) {
+    Compatibility.checkDatasetName(namespace, name);
 
-    final Table table = getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name);
+    final Table table = getMetaStoreUtil().getTable(namespace, name);
 
     return HiveUtils.descriptorForTable(conf, table);
   }
 
   @Override
-  public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
-    Compatibility.checkDatasetName(name);
+  public DatasetDescriptor create(String namespace, String name, DatasetDescriptor descriptor) {
+    Compatibility.checkDatasetName(namespace, name);
     Compatibility.checkDescriptor(descriptor);
 
-    if (exists(name)) {
+    if (exists(namespace, name)) {
       throw new DatasetExistsException(
           "Metadata already exists for dataset:" + name);
     }
 
     LOG.info("Creating an external Hive table named: " + name);
 
-    // create a new descriptor with the dataset's location
-    final DatasetDescriptor newDescriptor =
-        new DatasetDescriptor.Builder(descriptor)
-        .location(pathForDataset(name))
-        .build();
+    DatasetDescriptor newDescriptor = descriptor;
+
+    if (descriptor.getLocation() == null) {
+      // create a new descriptor with the dataset's location
+      newDescriptor = new DatasetDescriptor.Builder(descriptor)
+          .location(pathForDataset(namespace, name))
+          .build();
+    }
 
     // create the data directory first so it is owned by the current user, not Hive
     FileSystemUtil.ensureLocationExists(newDescriptor, conf);
 
     // this object will be the table metadata
     final Table table = HiveUtils.tableForDescriptor(
-        name, newDescriptor, true /* external table */ );
+        namespace, name, newDescriptor, true /* external table */ );
 
     // assign the location of the the table
     getMetaStoreUtil().createTable(table);
@@ -88,11 +91,11 @@ class HiveExternalMetadataProvider extends HiveAbstractMetadataProvider {
     return newDescriptor;
   }
 
-  private Path pathForDataset(String name) {
+  private Path pathForDataset(String namespace, String name) {
     Preconditions.checkState(rootDirectory != null,
       "Dataset repository root directory can not be null");
 
     return rootFileSystem.makeQualified(
-        HiveUtils.pathForDataset(rootDirectory, name));
+        HiveUtils.pathForDataset(rootDirectory, namespace, name));
   }
 }

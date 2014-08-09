@@ -116,17 +116,17 @@ public class TestHivePartitioning {
   @Test
   public void testManagedDatasetCreation() {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:hive");
-    repo.delete("records"); // ensure it does not already exist
-    repo.create("records", descriptor);
-    repo.delete("records"); // clean up
+    repo.delete("ns", "records"); // ensure it does not already exist
+    repo.create("ns", "records", descriptor);
+    repo.delete("ns", "records"); // clean up
   }
 
   @Test
   public void testExternalDatasetCreation() {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:hive:target/");
-    repo.delete("records"); // ensure it does not already exist
-    repo.create("records", descriptor);
-    repo.delete("records"); // clean up
+    repo.delete("ns", "records"); // ensure it does not already exist
+    repo.create("ns", "records", descriptor);
+    repo.delete("ns", "records"); // clean up
   }
 
 }

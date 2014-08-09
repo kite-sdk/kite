@@ -56,17 +56,17 @@ public class TestHiveManagedDatasetRepository extends TestFileSystemDatasetRepos
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    MetaStoreUtil hcat = new MetaStoreUtil(conf);
-    for (String tableName : hcat.getAllTables("default")) {
-      hcat.dropTable("default", tableName);
+    MetaStoreUtil metastore = new MetaStoreUtil(conf);
+    for (String tableName : metastore.getAllTables(NAMESPACE)) {
+      metastore.dropTable(NAMESPACE, tableName);
     }
   }
 
   @Test
   public void testTableExists() throws MetaException, TException {
     ensureCreated();
-    HiveTestUtils.assertTableExists(client, "default", NAME);
-    HiveTestUtils.assertTableIsManaged(client, "default", NAME);
+    HiveTestUtils.assertTableExists(client, NAMESPACE, NAME);
+    HiveTestUtils.assertTableIsManaged(client, NAMESPACE, NAME);
   }
 
   @Override

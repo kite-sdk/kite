@@ -28,13 +28,14 @@ public class TestHiveUtils {
 
   @Test
   public void testRoundTripDescriptor() throws Exception {
+    String namespace = "test_ns";
     String name = "test_table";
     DatasetDescriptor original = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .location("file:/tmp/data/test_table")
         .build();
     boolean external = true;
-    Table table = HiveUtils.tableForDescriptor(name, original, external);
+    Table table = HiveUtils.tableForDescriptor(namespace, name, original, external);
 
     Configuration conf = new HiveConf();
     DatasetDescriptor result = HiveUtils.descriptorForTable(conf, table);
@@ -43,6 +44,7 @@ public class TestHiveUtils {
 
   @Test
   public void testRoundTripDescriptorWithCompressionType() throws Exception {
+    String namespace = "test_ns";
     String name = "test_table";
     DatasetDescriptor original = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
@@ -50,7 +52,7 @@ public class TestHiveUtils {
         .compressionType(CompressionType.Deflate)
         .build();
     boolean external = true;
-    Table table = HiveUtils.tableForDescriptor(name, original, external);
+    Table table = HiveUtils.tableForDescriptor(namespace, name, original, external);
 
     Configuration conf = new HiveConf();
     DatasetDescriptor result = HiveUtils.descriptorForTable(conf, table);
@@ -59,13 +61,14 @@ public class TestHiveUtils {
 
   @Test
   public void testRoundTripDescriptorNoCompressionProperty() throws Exception {
+    String namespace = "test_ns";
     String name = "test_table";
     DatasetDescriptor original = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .location("file:/tmp/data/test_table")
         .build();
     boolean external = true;
-    Table table = HiveUtils.tableForDescriptor(name, original, external);
+    Table table = HiveUtils.tableForDescriptor(namespace, name, original, external);
     assertEquals("snappy", table.getParameters().get("kite.compression.type"));
     table.getParameters().remove("kite.compression.type");
 

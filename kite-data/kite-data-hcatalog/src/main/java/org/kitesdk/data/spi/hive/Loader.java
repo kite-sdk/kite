@@ -143,12 +143,13 @@ public class Loader implements Loadable {
     // means that dataset must be passed as a query argument
     final OptionBuilder<DatasetRepository> managedBuilder =
         new ManagedBuilder(conf);
-    URIPattern basic = new URIPattern("hive");
+    URIPattern basic = new URIPattern("hive?namespace=default");
     Registration.register(basic, basic, managedBuilder);
     // add a URI with no path to allow overriding the metastore authority
     // the authority section is *always* a URI without it cannot match and one
     // with a path (so missing authority) also cannot match
-    URIPattern basicAuth = new URIPattern("hive://" + ALWAYS_REPLACED);
+    URIPattern basicAuth = new URIPattern(
+        "hive://" + ALWAYS_REPLACED + "?namespace=default");
     Registration.register(basicAuth, basicAuth, managedBuilder);
 
     // external data sets
@@ -175,13 +176,13 @@ public class Loader implements Loadable {
         ),
         new URIPattern(
             "hive://" + hiveAuthority +
-                "/*path/:dataset?absolute=true" + hdfsAuthority
+                "/*path/:namespace/:dataset?absolute=true" + hdfsAuthority
         ),
         externalBuilder
     );
     Registration.register(
         new URIPattern("hive:*path"),
-        new URIPattern("hive:*path/:dataset"),
+        new URIPattern("hive:*path/:namespace/:dataset"),
         externalBuilder);
   }
 

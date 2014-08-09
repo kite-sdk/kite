@@ -54,120 +54,170 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
   public void testExternal() {
     DatasetRepository repo = DatasetRepositories
         .repositoryFor("repo:hive:/tmp/data?" + hdfsQueryArgs);
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
     Dataset<Object> ds = Datasets
-        .<Object, Dataset<Object>>load("dataset:hive:/tmp/data/test?" + hdfsQueryArgs, Object.class);
+        .<Object, Dataset<Object>>load("dataset:hive:/tmp/data/ns/test?" + hdfsQueryArgs, Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
     Assert.assertEquals("Locations should match",
-        URI.create("hdfs://" + hdfsAuth + "/tmp/data/test"),
+        URI.create("hdfs://" + hdfsAuth + "/tmp/data/ns/test"),
         ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
-        repo.load("test").getDescriptor(), ds.getDescriptor());
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "ns", ds.getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", ds.getName());
 
-    repo.delete("test");
+    repo.delete("ns", "test");
   }
 
   @Test
   public void testExternalHDFSQueryOptions() {
     DatasetRepository repo = DatasetRepositories
         .repositoryFor("repo:hive:/tmp/data?" + hdfsQueryArgs);
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
     Dataset<Object> ds = Datasets
-        .<Object, Dataset<Object>>load("dataset:hive:/tmp/data/test?" + hdfsQueryArgsOld, Object.class);
+        .<Object, Dataset<Object>>load("dataset:hive:/tmp/data/ns/test?" + hdfsQueryArgsOld, Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
     Assert.assertEquals("Locations should match",
-        URI.create("hdfs://" + hdfsAuth + "/tmp/data/test"),
+        URI.create("hdfs://" + hdfsAuth + "/tmp/data/ns/test"),
         ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
-        repo.load("test").getDescriptor(), ds.getDescriptor());
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
 
-    repo.delete("test");
+    repo.delete("ns", "test");
   }
 
   @Test
   public void testExternalRoot() {
     DatasetRepository repo = DatasetRepositories
         .repositoryFor("repo:hive:/?" + hdfsQueryArgs);
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
     Dataset<Object> ds = Datasets
-        .<Object, Dataset<Object>>load("dataset:hive:/test?" + hdfsQueryArgs, Object.class);
+        .<Object, Dataset<Object>>load("dataset:hive:/ns/test?" + hdfsQueryArgs, Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
     Assert.assertEquals("Locations should match",
-        URI.create("hdfs://" + hdfsAuth + "/test"),
+        URI.create("hdfs://" + hdfsAuth + "/ns/test"),
         ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
-        repo.load("test").getDescriptor(), ds.getDescriptor());
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "ns", ds.getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", ds.getName());
 
-    repo.delete("test");
+    repo.delete("ns", "test");
   }
 
   @Test
   public void testExternalRelative() {
     DatasetRepository repo = DatasetRepositories
         .repositoryFor("repo:hive:data?" + hdfsQueryArgs);
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
     Dataset<Object> ds = Datasets
-        .<Object, Dataset<Object>>load("dataset:hive:data/test?" + hdfsQueryArgs, Object.class);
+        .<Object, Dataset<Object>>load("dataset:hive:data/ns/test?" + hdfsQueryArgs, Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
     Path cwd = getDFS().makeQualified(new Path("."));
     Assert.assertEquals("Locations should match",
-        new Path(cwd, "data/test").toUri(), ds.getDescriptor().getLocation());
+        new Path(cwd, "data/ns/test").toUri(), ds.getDescriptor().getLocation());
     Assert.assertEquals("Descriptors should match",
-        repo.load("test").getDescriptor(), ds.getDescriptor());
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
 
-    repo.delete("test");
+    repo.delete("ns", "test");
   }
 
   @Test
   public void testManaged() {
     DatasetRepository repo = DatasetRepositories
         .repositoryFor("repo:hive?" + hdfsQueryArgs);
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
+    Dataset<Object> ds = Datasets
+        .<Object, Dataset<Object>>load("dataset:hive?dataset=test&namespace=ns&" + hdfsQueryArgs, Object.class);
+
+    Assert.assertNotNull("Should load dataset", ds);
+    Assert.assertTrue(ds instanceof FileSystemDataset);
+    Assert.assertEquals("Descriptors should match",
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "ns", ds.getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", ds.getName());
+
+    repo.delete("ns", "test");
+  }
+
+  @Test
+  public void testManagedDefaultDatabase() {
+    DatasetRepository repo = DatasetRepositories
+        .repositoryFor("repo:hive?" + hdfsQueryArgs);
+    repo.delete("default", "test");
+    repo.create("default", "test", descriptor);
+
+    // namespace is not included in the URI
     Dataset<Object> ds = Datasets
         .<Object, Dataset<Object>>load("dataset:hive?dataset=test&" + hdfsQueryArgs, Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
     Assert.assertEquals("Descriptors should match",
-        repo.load("test").getDescriptor(), ds.getDescriptor());
+        repo.load("default", "test").getDescriptor(), ds.getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "default", ds.getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", ds.getName());
 
-    repo.delete("test");
+    repo.delete("default", "test");
   }
 
   @Test
   public void testManagedHDFSQueryOptions() {
     DatasetRepository repo = DatasetRepositories
         .repositoryFor("repo:hive?" + hdfsQueryArgs);
-    repo.delete("test");
-    repo.create("test", descriptor);
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
 
     Dataset<Object> ds = Datasets
-        .<Object, Dataset<Object>>load("dataset:hive?dataset=test&" + hdfsQueryArgsOld, Object.class);
+        .<Object, Dataset<Object>>load("dataset:hive?dataset=test&namespace=ns&" + hdfsQueryArgsOld, Object.class);
 
     Assert.assertNotNull("Should load dataset", ds);
     Assert.assertTrue(ds instanceof FileSystemDataset);
     Assert.assertEquals("Descriptors should match",
-        repo.load("test").getDescriptor(), ds.getDescriptor());
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "ns", ds.getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", ds.getName());
 
-    repo.delete("test");
+    repo.delete("ns", "test");
+  }
+
+  @Test
+  public void testMissingNamespace() {
+    TestHelpers.assertThrows("Should not find namespace: no such namespace",
+        DatasetNotFoundException.class, new Runnable() {
+          @Override
+          public void run() {
+            Datasets.load("dataset:hive:/tmp/data/nosuchnamespace/nosuchdataset?" + hdfsQueryArgs, Object.class);
+          }
+        });
   }
 
   @Test
@@ -176,10 +226,20 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
         DatasetNotFoundException.class, new Runnable() {
       @Override
       public void run() {
-        Dataset<Object> ds = Datasets
-            .<Object, Dataset<Object>>load("dataset:hive:/tmp/data/nosuchdataset?" + hdfsQueryArgs, Object.class);
+        Datasets.load("dataset:hive:/tmp/data/default/nosuchdataset?" + hdfsQueryArgs, Object.class);
       }
     });
+  }
+
+  @Test
+  public void testExternalNotEnoughPathComponents() {
+    TestHelpers.assertThrows("Should not match URI pattern",
+        DatasetNotFoundException.class, new Runnable() {
+          @Override
+          public void run() {
+            Datasets.load("dataset:hive:/test", Object.class);
+          }
+        });
   }
 
   @Test
@@ -188,8 +248,7 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
         DatasetNotFoundException.class, new Runnable() {
           @Override
           public void run() {
-            Dataset<Object> ds = Datasets
-                .<Object, Dataset<Object>>load("dataset:unknown://" + hdfsAuth + "/tmp/data/test", Object.class);
+            Datasets.load("dataset:unknown://" + hdfsAuth + "/tmp/data/test", Object.class);
           }
         });
   }

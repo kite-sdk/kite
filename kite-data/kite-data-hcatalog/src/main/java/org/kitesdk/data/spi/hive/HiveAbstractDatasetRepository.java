@@ -52,13 +52,13 @@ class HiveAbstractDatasetRepository extends FileSystemDatasetRepository {
   }
 
   @Override
-  public boolean delete(String name) {
+  public boolean delete(String namespace, String name) {
     try {
-      if (isManaged(name)) {
+      if (isManaged(namespace, name)) {
         // avoids calling fsRepository.delete, which deletes the data path
-        return getMetadataProvider().delete(name);
+        return getMetadataProvider().delete(namespace, name);
       }
-      return super.delete(name);
+      return super.delete(namespace, name);
     } catch (DatasetNotFoundException e) {
       return false;
     }
@@ -74,10 +74,10 @@ class HiveAbstractDatasetRepository extends FileSystemDatasetRepository {
     return provider;
   }
 
-  private boolean isManaged(String name) {
+  private boolean isManaged(String namespace, String name) {
     MetadataProvider provider = getMetadataProvider();
     if (provider instanceof HiveAbstractMetadataProvider) {
-      return ((HiveAbstractMetadataProvider) provider).isManaged(name);
+      return ((HiveAbstractMetadataProvider) provider).isManaged(namespace, name);
     }
     // if the provider isn't talking to Hive, then it isn't managed
     return false;

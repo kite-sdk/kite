@@ -65,17 +65,17 @@ public class TestHiveExternalDatasetRepository extends TestFileSystemDatasetRepo
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    MetaStoreUtil hcat = new MetaStoreUtil(conf);
-    for (String tableName : hcat.getAllTables("default")) {
-      hcat.dropTable("default", tableName);
+    MetaStoreUtil metastore = new MetaStoreUtil(conf);
+    for (String tableName : metastore.getAllTables(NAMESPACE)) {
+      metastore.dropTable(NAMESPACE, tableName);
     }
   }
 
   @Test
   public void testTableExists() throws MetaException, TException {
     ensureCreated();
-    HiveTestUtils.assertTableExists(client, "default", NAME);
-    HiveTestUtils.assertTableIsExternal(client, "default", NAME);
+    HiveTestUtils.assertTableExists(client, NAMESPACE, NAME);
+    HiveTestUtils.assertTableIsExternal(client, NAMESPACE, NAME);
   }
 
   @SuppressWarnings("deprecation")
@@ -91,17 +91,17 @@ public class TestHiveExternalDatasetRepository extends TestFileSystemDatasetRepo
         .partitionStrategy(partitionStrategy)
         .build();
 
-    Dataset<GenericRecord> dataset = repo.create(NAME2, descriptor);
+    Dataset<GenericRecord> dataset = repo.create(NAMESPACE, NAME2, descriptor);
 
-    HiveTestUtils.assertTableExists(client, "default", NAME2);
-    HiveTestUtils.assertTableIsExternal(client, "default", NAME2);
+    HiveTestUtils.assertTableExists(client, NAMESPACE, NAME2);
+    HiveTestUtils.assertTableIsExternal(client, NAMESPACE, NAME2);
     Assert.assertTrue("No partitions yet",
-        client.listPartitionNames("default", NAME2, (short) 10).isEmpty());
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).isEmpty());
 
     writeRecord(dataset, 0);
 
     Assert.assertEquals("Should be one partition", 1,
-        client.listPartitionNames("default", NAME2, (short) 10).size());
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).size());
 
   }
 
@@ -119,19 +119,19 @@ public class TestHiveExternalDatasetRepository extends TestFileSystemDatasetRepo
         .partitionStrategy(partitionStrategy)
         .build();
 
-    Dataset<GenericRecord> dataset = repo.create(NAME2, descriptor);
+    Dataset<GenericRecord> dataset = repo.create(NAMESPACE, NAME2, descriptor);
 
-    HiveTestUtils.assertTableExists(client, "default", NAME2);
-    HiveTestUtils.assertTableIsExternal(client, "default", NAME2);
+    HiveTestUtils.assertTableExists(client, NAMESPACE, NAME2);
+    HiveTestUtils.assertTableIsExternal(client, NAMESPACE, NAME2);
     Assert.assertTrue("No partitions yet",
-        client.listPartitionNames("default", NAME2, (short) 10).isEmpty());
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).isEmpty());
 
     writeRecord(dataset, 0);
 
     Assert.assertEquals("Should be one partition", 1,
-        client.listPartitionNames("default", NAME2, (short) 10).size());
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).size());
 
-    Dataset<GenericRecord> dsUpdate = repo.create(NAME3, descriptor);
+    Dataset<GenericRecord> dsUpdate = repo.create(NAMESPACE, NAME3, descriptor);
 
     writeRecord(dsUpdate, 1);
 
@@ -139,7 +139,7 @@ public class TestHiveExternalDatasetRepository extends TestFileSystemDatasetRepo
     ((Mergeable<Dataset<GenericRecord>>) dataset).merge(dsUpdate);
 
     Assert.assertEquals("Should be two partitions", 2,
-        client.listPartitionNames("default", NAME2, (short) 10).size());
+        client.listPartitionNames(NAMESPACE, NAME2, (short) 10).size());
 
   }
 

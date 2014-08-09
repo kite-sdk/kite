@@ -47,9 +47,11 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    MetaStoreUtil hcat = new MetaStoreUtil(new Configuration());
-    for (String tableName : hcat.getAllTables("default")) {
-      hcat.dropTable("default", tableName);
+    MetaStoreUtil metastore = new MetaStoreUtil(new Configuration());
+    for (String dbName : metastore.getAllDatabases()) {
+      for (String tableName : metastore.getAllTables(dbName)) {
+        metastore.dropTable(dbName, tableName);
+      }
     }
   }
 
@@ -93,7 +95,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
     Assert.assertEquals("Repository URI", repoUri, repo.getUri());
 
     // verify location
-    DatasetDescriptor created = repo.create("test",
+    DatasetDescriptor created = repo.create("ns", "test",
         new DatasetDescriptor.Builder()
             .schemaLiteral("\"string\"")
             .build()).getDescriptor();
@@ -114,14 +116,14 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
     Assert.assertEquals("Repository URI", repoUri, repo.getUri());
 
     // verify location
-    DatasetDescriptor created = repo.create("test",
+    DatasetDescriptor created = repo.create("ns", "test",
         new DatasetDescriptor.Builder()
             .schemaLiteral("\"string\"")
             .build()).getDescriptor();
     Assert.assertEquals("Location should be in local FS",
         "file", created.getLocation().getScheme());
     Assert.assertTrue("Location should be in the repo path",
-        created.getLocation().getPath().endsWith("tmp/hive-repo/test"));
+        created.getLocation().getPath().endsWith("tmp/hive-repo/ns/test"));
   }
 
   @Test
@@ -137,7 +139,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
     Assert.assertEquals("Repository URI", repoUri, repo.getUri());
 
     // verify location
-    DatasetDescriptor created = repo.create("test",
+    DatasetDescriptor created = repo.create("tmp", "test",
         new DatasetDescriptor.Builder()
         .schemaLiteral("\"string\"")
         .build()).getDescriptor();

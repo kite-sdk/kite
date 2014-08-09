@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.AlreadyExistsException;
+import org.apache.hadoop.hive.metastore.api.Database;
 import org.apache.hadoop.hive.metastore.api.InvalidObjectException;
 import org.apache.hadoop.hive.metastore.api.InvalidOperationException;
 import org.apache.hadoop.hive.metastore.api.MetaException;
@@ -125,7 +126,34 @@ public class MetaStoreUtil {
           "Exception communicating with the Hive MetaStore", e);
     }
   }
-  
+
+  public void createDatabase(final String dbName) {
+    ClientAction<Void> create =
+        new ClientAction<Void>() {
+          @Override
+          public Void call() throws TException {
+            client.createDatabase(
+                new Database(dbName, "Database created by Kite",
+                    null /* default location */,
+                    null /* no custom parameters */ ));
+            return null;
+          }
+        };
+
+    try {
+      doWithRetry(create);
+    } catch (AlreadyExistsException e) {
+      throw new DatasetExistsException("Hive database exists", e);
+    } catch (InvalidObjectException e) {
+      throw new DatasetOperationException("Invalid database", e);
+    } catch (MetaException e) {
+      throw new DatasetOperationException("Hive MetaStore exception", e);
+    } catch (TException e) {
+      throw new DatasetOperationException(
+          "Exception communicating with the Hive MetaStore", e);
+    }
+  }
+
   public void createTable(final Table tbl) {
     ClientAction<Void> create =
         new ClientAction<Void>() {
@@ -135,6 +163,12 @@ public class MetaStoreUtil {
             return null;
           }
         };
+
+    try {
+      createDatabase(tbl.getDbName());
+    } catch (DatasetExistsException e) {
+      // not a problem, use the existing database
+    }
 
     try {
       doWithRetry(create);
@@ -240,6 +274,27 @@ public class MetaStoreUtil {
           @Override
           public List<String> call() throws TException {
             return client.getAllTables(dbName);
+          }
+        };
+
+    try {
+      return doWithRetry(create);
+    } catch (NoSuchObjectException e) {
+      return ImmutableList.of();
+    } catch (MetaException e) {
+      throw new DatasetOperationException("Hive MetaStore exception", e);
+    } catch (TException e) {
+      throw new DatasetOperationException(
+          "Exception communicating with the Hive MetaStore", e);
+    }
+  }
+
+  public List<String> getAllDatabases() {
+    ClientAction<List<String>> create =
+        new ClientAction<List<String>>() {
+          @Override
+          public List<String> call() throws TException {
+            return client.getAllDatabases();
           }
         };
 
