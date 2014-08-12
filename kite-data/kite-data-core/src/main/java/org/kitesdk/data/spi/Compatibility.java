@@ -23,8 +23,11 @@ import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.IncompatibleSchemaException;
+import org.kitesdk.data.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,4 +220,57 @@ public abstract class Compatibility {
   public static boolean isAvroCompatibleName(String name) {
 	  return avroCompatible.matcher(name).matches();
   }
+
+  /**
+   * Checks that the {@code existing} {@link DatasetDescriptor} can be replaced
+   * by {@code updated}.
+   *
+   * @param existing the current {@code DatasetDescriptor} for a dataset
+   * @param updated a new {@code DatasetDescriptor} for the same dataset
+   */
+  public static void checkUpdate(DatasetDescriptor existing,
+                                 DatasetDescriptor updated) {
+    checkNotChanged("location", existing.getLocation(), updated.getLocation());
+    checkCompatible(existing, updated);
+  }
+
+  /**
+   * Checks that the {@code existing} {@link DatasetDescriptor} is compatible
+   * with {@code test}.
+   *
+   * @param existing the current {@code DatasetDescriptor} for a dataset
+   * @param test a new {@code DatasetDescriptor} for the same dataset
+   */
+  public static void checkCompatible(DatasetDescriptor existing,
+                                     DatasetDescriptor test) {
+    checkNotChanged("format", existing.getFormat(), test.getFormat());
+
+    checkNotChanged("partitioning",
+        existing.isPartitioned(), test.isPartitioned());
+
+    if (existing.isPartitioned()) {
+      checkNotChanged("partition strategy",
+          existing.getPartitionStrategy(), test.getPartitionStrategy());
+    }
+
+    // check can read records written with old schema using new schema
+    Schema oldSchema = existing.getSchema();
+    Schema testSchema = test.getSchema();
+    if (!SchemaValidationUtil.canRead(oldSchema, testSchema)) {
+      throw new IncompatibleSchemaException("Schema cannot read data " +
+          "written using existing schema. Schema: " + testSchema.toString(true) +
+          "\nExisting schema: " + oldSchema.toString(true));
+    }
+
+  }
+
+  private static void checkNotChanged(String what,
+                                      @Nullable Object existing,
+                                      @Nullable Object test) {
+    ValidationException.check(
+        (existing == test) || (existing != null && existing.equals(test)),
+        "Dataset %s is not compatible with existing: %s != %s",
+        what, String.valueOf(existing), String.valueOf(test));
+  }
+
 }

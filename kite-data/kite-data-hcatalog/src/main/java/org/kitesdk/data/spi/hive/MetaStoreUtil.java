@@ -28,6 +28,7 @@ import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.UnknownDBException;
+import org.apache.hadoop.hive.ql.metadata.Hive;
 import org.apache.thrift.TException;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.DatasetNotFoundException;
@@ -92,7 +93,8 @@ public class MetaStoreUtil {
     try {
       table = doWithRetry(getTable);
     } catch (NoSuchObjectException e) {
-      throw new DatasetNotFoundException("Hive table lookup exception", e);
+      throw new DatasetNotFoundException(
+          "Hive table not found: " + dbName + "." + tableName);
     } catch (MetaException e) {
       throw new DatasetNotFoundException("Hive table lookup exception", e);
     } catch (TException e) {
@@ -143,9 +145,10 @@ public class MetaStoreUtil {
     try {
       doWithRetry(create);
     } catch (AlreadyExistsException e) {
-      throw new DatasetExistsException("Hive database exists", e);
+      throw new DatasetExistsException(
+          "Hive database already exists: " + dbName, e);
     } catch (InvalidObjectException e) {
-      throw new DatasetOperationException("Invalid database", e);
+      throw new DatasetOperationException("Invalid database: " + dbName, e);
     } catch (MetaException e) {
       throw new DatasetOperationException("Hive MetaStore exception", e);
     } catch (TException e) {
@@ -173,9 +176,11 @@ public class MetaStoreUtil {
     try {
       doWithRetry(create);
     } catch (NoSuchObjectException e) {
-      throw new DatasetNotFoundException("Hive table lookup exception", e);
+      throw new DatasetNotFoundException("Hive table not found: " +
+          tbl.getDbName() + "." + tbl.getTableName());
     } catch (AlreadyExistsException e) {
-      throw new DatasetExistsException("Hive table exists", e);
+      throw new DatasetExistsException("Hive table already exists: " +
+          tbl.getDbName() + "." + tbl.getTableName(), e);
     } catch (InvalidObjectException e) {
       throw new DatasetOperationException("Invalid table", e);
     } catch (MetaException e) {
@@ -200,7 +205,8 @@ public class MetaStoreUtil {
     try {
       doWithRetry(alter);
     } catch (NoSuchObjectException e) {
-      throw new DatasetNotFoundException("Hive table lookup exception", e);
+      throw new DatasetNotFoundException("Hive table not found: " +
+          tbl.getDbName() + "." + tbl.getTableName());
     } catch (InvalidObjectException e) {
       throw new DatasetOperationException("Invalid table", e);
     } catch (InvalidOperationException e) {
@@ -255,7 +261,8 @@ public class MetaStoreUtil {
     } catch (AlreadyExistsException e) {
       // this is okay
     } catch (InvalidObjectException e) {
-      throw new DatasetOperationException("Invalid partition", e);
+      throw new DatasetOperationException(
+          "Invalid partition for " + dbName + "." + tableName + ": " + path, e);
     } catch (MetaException e) {
       throw new DatasetOperationException("Hive MetaStore exception", e);
     } catch (TException e) {

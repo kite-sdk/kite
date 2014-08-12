@@ -16,15 +16,13 @@
 package org.kitesdk.data.spi.filesystem;
 
 import javax.annotation.Nullable;
-import org.kitesdk.data.ValidationException;
+import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.PartitionKey;
-import org.kitesdk.data.spi.SchemaValidationUtil;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.IncompatibleSchemaException;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
@@ -44,7 +42,6 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.kitesdk.data.spi.SchemaUtil;
 import org.kitesdk.data.spi.TemporaryDatasetRepository;
 import org.kitesdk.data.spi.TemporaryDatasetRepositoryAccessor;
 import org.kitesdk.data.spi.URIBuilder;
@@ -165,8 +162,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
     DatasetDescriptor oldDescriptor = metadataProvider.load(namespace, name);
 
     // oldDescriptor is valid if load didn't throw NoSuchDatasetException
-
-    checkUpdate(oldDescriptor, descriptor);
+    Compatibility.checkUpdate(oldDescriptor, descriptor);
 
     DatasetDescriptor updatedDescriptor = metadataProvider.update(namespace, name, descriptor);
 
@@ -394,43 +390,6 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
       throw new DatasetIOException(
           "Cannot get FileSystem for descriptor", ex);
     }
-  }
-
-  private static void checkUpdate(DatasetDescriptor existing,
-                                  DatasetDescriptor updated) {
-    checkNotChanged("location", existing.getLocation(), updated.getLocation());
-    checkCompatible(existing, updated);
-  }
-
-  static void checkCompatible(DatasetDescriptor existing,
-                              DatasetDescriptor test) {
-    checkNotChanged("format", existing.getFormat(), test.getFormat());
-
-    checkNotChanged("partitioning",
-        existing.isPartitioned(), test.isPartitioned());
-
-    if (existing.isPartitioned()) {
-      checkNotChanged("partition strategy",
-          existing.getPartitionStrategy(), test.getPartitionStrategy());
-    }
-
-    // check can read records written with old schema using new schema
-    Schema oldSchema = existing.getSchema();
-    Schema testSchema = test.getSchema();
-    if (!SchemaValidationUtil.canRead(oldSchema, testSchema)) {
-      throw new IncompatibleSchemaException("Schema cannot read data " +
-          "written using existing schema. Schema: " + testSchema.toString(true) +
-          "\nExisting schema: " + oldSchema.toString(true));
-    }
-
-  }
-
-  private static void checkNotChanged(String what, @Nullable Object existing,
-                                      @Nullable Object test) {
-    ValidationException.check(
-        (existing == test) || (existing != null && existing.equals(test)),
-        "Dataset %s is not compatible with existing: %s != %s",
-        what, String.valueOf(existing), String.valueOf(test));
   }
 
   /**

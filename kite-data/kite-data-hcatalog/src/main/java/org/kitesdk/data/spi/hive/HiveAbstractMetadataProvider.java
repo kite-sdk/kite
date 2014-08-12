@@ -79,7 +79,8 @@ abstract class HiveAbstractMetadataProvider extends AbstractMetadataProvider imp
     Compatibility.checkDescriptor(descriptor);
 
     if (!exists(namespace, name)) {
-      throw new DatasetNotFoundException("Table not found: " + name);
+      throw new DatasetNotFoundException(
+          "Hive table not found: " + namespace + "." + name);
     }
 
     Table table = getMetaStoreUtil().getTable(namespace, name);

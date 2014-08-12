@@ -22,6 +22,7 @@ import java.util.Set;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.RefinableView;
@@ -305,7 +306,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     DatasetDescriptor updateDescriptor = update.getDescriptor();
 
     // check that the dataset's descriptor can read the update
-    FileSystemDatasetRepository.checkCompatible(updateDescriptor, descriptor);
+    Compatibility.checkCompatible(updateDescriptor, descriptor);
 
     Set<String> addedPartitions = Sets.newHashSet();
     for (Path path : update.pathIterator()) {
