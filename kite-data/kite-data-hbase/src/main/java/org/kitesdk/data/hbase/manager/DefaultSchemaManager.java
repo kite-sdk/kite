@@ -17,6 +17,7 @@ package org.kitesdk.data.hbase.manager;
 
 import com.google.common.collect.Lists;
 
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -360,6 +361,15 @@ public class DefaultSchemaManager implements SchemaManager {
       }
     }
     return names;
+  }
+
+  @Override
+  public Collection<String> getTableNames() {
+    Set<String> tables = Sets.newHashSet();
+    for (ManagedSchema managedSchema : managedSchemaDao.getManagedSchemas()) {
+      tables.add(managedSchema.getTable());
+    }
+    return tables;
   }
 
   /**

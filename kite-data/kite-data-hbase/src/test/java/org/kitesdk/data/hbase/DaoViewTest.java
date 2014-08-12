@@ -77,12 +77,12 @@ public class DaoViewTest {
         HBaseTestUtils.getConf()).build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testEntity).build();
-    ds = (DaoDataset) repo.create(tableName, descriptor);
+    ds = (DaoDataset) repo.create("default", tableName, descriptor);
   }
 
   @After
   public void after() throws Exception {
-    repo.delete(tableName);
+    repo.delete("default", tableName);
     HBaseTestUtils.util.truncateTable(Bytes.toBytes(tableName));
     HBaseTestUtils.util.truncateTable(Bytes.toBytes(managedTableName));
   }

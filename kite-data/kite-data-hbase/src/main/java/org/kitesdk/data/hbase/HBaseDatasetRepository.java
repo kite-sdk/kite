@@ -44,6 +44,8 @@ import org.kitesdk.data.spi.URIBuilder;
 
 public class HBaseDatasetRepository extends AbstractDatasetRepository {
 
+  private static final String DEFAULT_NAMESPACE = "default";
+
   private HTablePool tablePool;
   private SchemaManager schemaManager;
   private HBaseMetadataProvider metadataProvider;
@@ -57,37 +59,43 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   }
 
   @Override
-  public <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor, Class<E> type) {
+  public <E> RandomAccessDataset<E> create(String namespace, String name, DatasetDescriptor descriptor, Class<E> type) {
+    Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
+        "Non-default namespaces are not supported");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
-    DatasetDescriptor newDescriptor = metadataProvider.create(name, descriptor);
-    return newDataset(name, newDescriptor, type);
+    DatasetDescriptor newDescriptor = metadataProvider.create(namespace, name, descriptor);
+    return newDataset(namespace, name, newDescriptor, type);
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <E> RandomAccessDataset<E> create(String name, DatasetDescriptor descriptor) {
-    return (RandomAccessDataset<E>) create(name, descriptor, Object.class);
+  public <E> RandomAccessDataset<E> create(String namespace, String name, DatasetDescriptor descriptor) {
+    return (RandomAccessDataset<E>) create(namespace, name, descriptor, Object.class);
   }
 
   @Override
-  public <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor, Class<E> type) {
+  public <E> RandomAccessDataset<E> update(String namespace, String name, DatasetDescriptor descriptor, Class<E> type) {
+    Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
+        "Non-default namespaces are not supported");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
 
-    DatasetDescriptor newDescriptor = metadataProvider.update(name, descriptor);
-    return newDataset(name, newDescriptor, type);
+    DatasetDescriptor newDescriptor = metadataProvider.update(namespace, name, descriptor);
+    return newDataset(namespace, name, newDescriptor, type);
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <E> RandomAccessDataset<E> update(String name, DatasetDescriptor descriptor) {
-    return (RandomAccessDataset<E>) update(name, descriptor, Object.class);
+  public <E> RandomAccessDataset<E> update(String namespace, String name, DatasetDescriptor descriptor) {
+    return (RandomAccessDataset<E>) update(namespace, name, descriptor, Object.class);
   }
 
   @Override
-  public <E> RandomAccessDataset<E> load(String name, Class<E> type) {
+  public <E> RandomAccessDataset<E> load(String namespace, String name, Class<E> type) {
+    Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
+        "Non-default namespaces are not supported");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     String tableName = HBaseMetadataProvider.getTableName(name);
@@ -95,20 +103,20 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
     if (entityName.contains(".")) {
       List<DatasetDescriptor> descriptors = new ArrayList<DatasetDescriptor>();
       for (String subEntityName : entityName.split("\\.")) {
-        DatasetDescriptor descriptor = metadataProvider.load(tableName + "." + subEntityName);
+        DatasetDescriptor descriptor = metadataProvider.load(namespace, tableName + "." + subEntityName);
         descriptors.add(descriptor);
       }
-      return newCompositeDataset(name, tableName, descriptors, type);
+      return newCompositeDataset(namespace, name, tableName, descriptors, type);
     } else {
-      DatasetDescriptor descriptor = metadataProvider.load(name);
-      return newDataset(name, descriptor, type);
+      DatasetDescriptor descriptor = metadataProvider.load(namespace, name);
+      return newDataset(namespace, name, descriptor, type);
     }
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <E> RandomAccessDataset<E> load(String name) {
-    return (RandomAccessDataset<E>) load(name, Object.class);
+  public <E> RandomAccessDataset<E> load(String namespace, String name) {
+    return (RandomAccessDataset<E>) load(namespace, name, Object.class);
   }
 
   @Override
@@ -117,7 +125,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   }
 
   @SuppressWarnings("unchecked")
-  private <E> RandomAccessDataset<E> newCompositeDataset(String name, String tableName,
+  private <E> RandomAccessDataset<E> newCompositeDataset(String namespace, String name, String tableName,
       List<DatasetDescriptor> descriptors, Class<E> type) {
     List<Class<SpecificRecord>> subEntityClasses = new ArrayList<Class<SpecificRecord>>();
     for (DatasetDescriptor descriptor : descriptors) {
@@ -131,12 +139,12 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
     }
     Dao dao = SpecificAvroDao.buildCompositeDaoWithEntityManager(tablePool,
         tableName, subEntityClasses, schemaManager);
-    return new DaoDataset<E>(name, dao, descriptors.get(0),
-        new URIBuilder(repositoryUri, name).build(), type);
+    return new DaoDataset<E>(namespace, name, dao, descriptors.get(0),
+        new URIBuilder(repositoryUri, namespace, name).build(), type);
   }
 
   @SuppressWarnings("unchecked")
-  private <E> RandomAccessDataset<E> newDataset(String name, DatasetDescriptor descriptor, Class<E> type) {
+  private <E> RandomAccessDataset<E> newDataset(String namespace, String name, DatasetDescriptor descriptor, Class<E> type) {
     // TODO: use descriptor.getFormat() to decide type of DAO (Avro vs. other)
     String tableName = HBaseMetadataProvider.getTableName(name);
     String entityName = HBaseMetadataProvider.getEntityName(name);
@@ -146,8 +154,8 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
     } else {
       dao = new GenericAvroDao(tablePool, tableName, entityName, schemaManager);
     }
-    return new DaoDataset(name, dao, descriptor,
-        new URIBuilder(repositoryUri, name).build(), type);
+    return new DaoDataset(namespace, name, dao, descriptor,
+        new URIBuilder(repositoryUri, namespace, name).build(), type);
   }
 
   private static boolean isSpecific(DatasetDescriptor descriptor) {
@@ -160,22 +168,31 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository {
   }
 
   @Override
-  public boolean delete(String name) {
+  public boolean delete(String namespace, String name) {
+    Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
+        "Non-default namespaces are not supported");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    return metadataProvider.delete(name);
+    return metadataProvider.delete(namespace, name);
   }
 
   @Override
-  public boolean exists(String name) {
+  public boolean exists(String namespace, String name) {
+    Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
+        "Non-default namespaces are not supported");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    return metadataProvider.exists(name);
+    return metadataProvider.exists(namespace, name);
   }
 
   @Override
-  public Collection<String> list() {
-    throw new UnsupportedOperationException();
+  public Collection<String> namespaces() {
+    return metadataProvider.namespaces();
+  }
+
+  @Override
+  public Collection<String> datasets(String namespace) {
+    return metadataProvider.datasets(namespace);
   }
 
   public static class Builder {

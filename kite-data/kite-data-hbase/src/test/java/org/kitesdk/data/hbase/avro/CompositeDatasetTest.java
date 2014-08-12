@@ -76,15 +76,16 @@ public class CompositeDatasetTest {
         .configuration(HBaseTestUtils.getConf()).build();
 
     // create constituent datasets
-    repo.create(tableName + ".SubEntity1", new DatasetDescriptor.Builder()
+    repo.create("default", tableName + ".SubEntity1", new DatasetDescriptor.Builder()
         .schema(SubEntity1.SCHEMA$)
         .build());
-    repo.create(tableName + ".SubEntity2", new DatasetDescriptor.Builder()
+    repo.create("default", tableName + ".SubEntity2", new DatasetDescriptor.Builder()
         .schema(SubEntity2.SCHEMA$)
         .build());
 
     // create composite dataset
-    RandomAccessDataset<Map<String, SpecificRecord>> ds = repo.load(tableName + ".SubEntity1.SubEntity2");
+    RandomAccessDataset<Map<String, SpecificRecord>> ds = repo.load(
+        "default", tableName + ".SubEntity1.SubEntity2");
 
     // Construct entities
     SubEntity1 subEntity1 = SubEntity1.newBuilder().setPart1("1").setPart2("1")

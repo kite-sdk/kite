@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.hbase.impl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -188,4 +189,11 @@ public interface SchemaManager {
    * @return The entity names for the table.
    */
   public List<String> getEntityNames(String tableName);
+
+  /**
+   * Returns the known tables with managed schemas. If no such tables exist,
+   * then an empty list will be returned.
+   * @return The table names with managed schemas.
+   */
+  public Collection<String> getTableNames();
 }

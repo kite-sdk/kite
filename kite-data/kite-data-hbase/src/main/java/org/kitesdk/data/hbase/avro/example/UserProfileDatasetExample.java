@@ -81,17 +81,17 @@ public class UserProfileDatasetExample {
 
     DatasetDescriptor userProfileDatasetDescriptor =
         new DatasetDescriptor.Builder().schema(UserProfileModel2.SCHEMA$).build();
-    userProfileDataset = repo.create("kite_example_user_profiles.UserProfileModel2",
+    userProfileDataset = repo.create("default", "kite_example_user_profiles.UserProfileModel2",
         userProfileDatasetDescriptor);
 
     DatasetDescriptor userActionsDatasetDescriptor =
         new DatasetDescriptor.Builder().schema(UserActionsModel2.SCHEMA$).build();
-    userActionsDataset = repo.create("kite_example_user_profiles.UserActionsModel2",
+    userActionsDataset = repo.create("default", "kite_example_user_profiles.UserActionsModel2",
         userActionsDatasetDescriptor);
 
     DatasetDescriptor userProfileActionsDatasetDescriptor =
         new DatasetDescriptor.Builder().schema(UserProfileActionsModel2.SCHEMA$).build();
-    userProfileActionsDataset = repo.create("kite_example_user_profiles.UserProfileActionsProtocol2",
+    userProfileActionsDataset = repo.create("default", "kite_example_user_profiles.UserProfileActionsProtocol2",
         userProfileActionsDatasetDescriptor);
 
   }

@@ -98,7 +98,7 @@ public class HBaseDatasetRepositoryTest {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    DaoDataset<GenericRecord> ds = (DaoDataset) repo.create(datasetName, descriptor);
+    DaoDataset<GenericRecord> ds = (DaoDataset) repo.create("default", datasetName, descriptor);
 
     // Create the new entities
     ds.put(createGenericEntity(0));
@@ -117,7 +117,7 @@ public class HBaseDatasetRepositoryTest {
     }
 
     // reload
-    ds = (DaoDataset) repo.load(datasetName);
+    ds = (DaoDataset) repo.load("default", datasetName);
 
     // ensure the new entities are what we expect with get operations
     for (int i = 0; i < 10; ++i) {
@@ -178,7 +178,7 @@ public class HBaseDatasetRepositoryTest {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testEntity)
         .build();
-    RandomAccessDataset<TestEntity> ds = repo.create(datasetName, descriptor);
+    RandomAccessDataset<TestEntity> ds = repo.create("default", datasetName, descriptor);
 
     // Create the new entities
     ds.put(createSpecificEntity(0));
@@ -236,7 +236,7 @@ public class HBaseDatasetRepositoryTest {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    RandomAccessDataset<GenericRecord> ds = repo.create(datasetName, descriptor);
+    RandomAccessDataset<GenericRecord> ds = repo.create("default", datasetName, descriptor);
 
     // Create a new entity
     ds.put(createGenericEntity(0));
@@ -249,17 +249,17 @@ public class HBaseDatasetRepositoryTest {
     compareEntitiesWithUtf8(0, ds.get(key));
 
     // delete dataset
-    boolean success = repo.delete(datasetName);
+    boolean success = repo.delete("default", datasetName);
     assertTrue("dataset should have been successfully deleted", success);
 
-    assertFalse("second delete should return false", repo.delete(datasetName));
+    assertFalse("second delete should return false", repo.delete("default", datasetName));
 
     // check that tables have no rows
     assertEquals(0, HBaseTestUtils.util.countRows(new HTable(HBaseTestUtils.getConf(), managedTableName)));
     assertEquals(0, HBaseTestUtils.util.countRows(new HTable(HBaseTestUtils.getConf(), tableName)));
 
     // create the dataset again
-    ds = repo.create(datasetName, descriptor);
+    ds = repo.create("default", datasetName, descriptor);
 
     // Create a new entity
     ds.put(createGenericEntity(0));
@@ -279,7 +279,7 @@ public class HBaseDatasetRepositoryTest {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    RandomAccessDataset<GenericRecord> ds = repo.create(datasetName, descriptor);
+    RandomAccessDataset<GenericRecord> ds = repo.create("default", datasetName, descriptor);
 
     // Create a new entity
     ds.put(createGenericEntity(0));
@@ -287,7 +287,7 @@ public class HBaseDatasetRepositoryTest {
     DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity2)
         .build();
-    repo.update(datasetName, newDescriptor);
+    repo.update("default", datasetName, newDescriptor);
   }
 
   // TODO: remove duplication from ManagedDaoTest

@@ -50,7 +50,7 @@ public class HBaseDatasetReaderTest extends TestDatasetReaders<GenericRecord> {
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    dataset = repo.create("testtable", descriptor);
+    dataset = repo.create("default", "testtable", descriptor);
     for (int i = 0; i < 10; i++) {
       dataset.put(HBaseDatasetRepositoryTest.createGenericEntity(i));
     }

@@ -34,19 +34,21 @@ import org.kitesdk.data.spi.InputFormatAccessor;
 class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>,
     InputFormatAccessor<E> {
 
+  private final String namespace;
   private final String name;
   private final Dao<E> dao;
   private final DatasetDescriptor descriptor;
   private final URI uri;
   private final DaoView<E> unbounded;
 
-  public DaoDataset(String name, Dao<E> dao, DatasetDescriptor descriptor,
+  public DaoDataset(String namespace, String name, Dao<E> dao, DatasetDescriptor descriptor,
       URI uri, Class<E> type) {
     super(type, descriptor.getSchema());
     Preconditions.checkArgument(IndexedRecord.class.isAssignableFrom(type) ||
-        type == Object.class,
+            type == Object.class,
         "HBase only supports the generic and specific data models. The entity"
-        + " type must implement IndexedRecord");
+            + " type must implement IndexedRecord");
+    this.namespace = namespace;
     this.name = name;
     this.dao = dao;
     this.descriptor = descriptor;
@@ -61,6 +63,11 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String getNamespace() {
+    return namespace;
   }
 
   @Override

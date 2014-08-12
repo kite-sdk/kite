@@ -74,7 +74,7 @@ public class HBaseMetadataProviderTest {
 
   @Test
   public void testBasic() {
-    DatasetDescriptor desc = provider.create(tableName + ".TestEntity",
+    DatasetDescriptor desc = provider.create("default", tableName + ".TestEntity",
         new DatasetDescriptor.Builder().schemaLiteral(testEntity).build());
     ColumnMapping columnMapping = desc.getColumnMapping();
     PartitionStrategy partStrat = desc.getPartitionStrategy();

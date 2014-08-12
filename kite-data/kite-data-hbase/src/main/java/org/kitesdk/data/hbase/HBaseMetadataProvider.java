@@ -17,9 +17,12 @@ package org.kitesdk.data.hbase;
 
 import com.google.common.base.Preconditions;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.avro.Schema;
@@ -45,6 +48,8 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
   private static final Logger LOG = LoggerFactory
       .getLogger(HBaseMetadataProvider.class);
 
+  private static final String DEFAULT_NAMESPACE = "default";
+
   private HBaseAdmin hbaseAdmin;
   private SchemaManager schemaManager;
 
@@ -54,11 +59,14 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public DatasetDescriptor create(String name, DatasetDescriptor descriptor) {
+  public DatasetDescriptor create(String namespace, String name, DatasetDescriptor descriptor) {
+    Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
+        "Non-default namespaces are not supported");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
     Compatibility.checkAndWarn(
-        HBaseMetadataProvider.getEntityName(name),
+        namespace,
+        HBaseMetadataProvider.getTableName(name),
         descriptor.getSchema());
     Preconditions.checkArgument(descriptor.isColumnMapped(),
         "Cannot create dataset %s: missing column mapping", name);
@@ -131,11 +139,14 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public DatasetDescriptor update(String name, DatasetDescriptor descriptor) {
+  public DatasetDescriptor update(String namespace, String name, DatasetDescriptor descriptor) {
+    Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
+        "Non-default namespaces are not supported");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
     Compatibility.checkAndWarn(
-        HBaseMetadataProvider.getEntityName(name),
+        namespace,
+        HBaseMetadataProvider.getTableName(name),
         descriptor.getSchema());
     Preconditions.checkArgument(descriptor.isColumnMapped(),
         "Cannot update dataset %s: missing column mapping", name);
@@ -159,10 +170,12 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public DatasetDescriptor load(String name) {
+  public DatasetDescriptor load(String namespace, String name) {
+    Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
+        "Non-default namespaces are not supported");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    if (!exists(name)) {
+    if (!exists(namespace, name)) {
       throw new DatasetNotFoundException("No such dataset: " + name);
     }
     String tableName = getTableName(name);
@@ -174,12 +187,14 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public boolean delete(String name) {
+  public boolean delete(String namespace, String name) {
+    Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
+        "Non-default namespaces are not supported");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     DatasetDescriptor descriptor;
     try {
-      descriptor = load(name);
+      descriptor = load(namespace, name);
     } catch (DatasetNotFoundException e) {
       return false;
     }
@@ -209,7 +224,9 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public boolean exists(String name) {
+  public boolean exists(String namespace, String name) {
+    Preconditions.checkArgument(DEFAULT_NAMESPACE.equals(namespace),
+        "Non-default namespaces are not supported");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     String tableName = getTableName(name);
@@ -218,8 +235,20 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
     return schemaManager.hasManagedSchema(tableName, entityName);
   }
 
-  public Collection<String> list() {
-    throw new UnsupportedOperationException();
+  @Override
+  public Collection<String> namespaces() {
+    return ImmutableList.of(DEFAULT_NAMESPACE);
+  }
+
+  @Override
+  public Collection<String> datasets(String namespace) {
+    List<String> datasets = Lists.newArrayList();
+    for (String table : schemaManager.getTableNames()) {
+      for (String entity : schemaManager.getEntityNames(table)) {
+        datasets.add(table + "." + entity);
+      }
+    }
+    return datasets;
   }
 
   static String getTableName(String name) {
