@@ -33,6 +33,20 @@
 
   <build>
     <plugins>
+    
+      <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+                  <configuration>
+                          <archive>
+                                    <manifest>
+                                                <mainClass>fully.qualified.MainClass</mainClass>
+                                                          </manifest>
+                                                                  </archive>
+                                                                          <descriptorRefs>
+                                                                                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                                                                                            </descriptorRefs>
+                                                                                                  </configuration>
+                                                                                                      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -223,6 +237,9 @@
           </reportSet>
         </reportSets>
       </plugin>
+      
+      
+      
     </plugins>
   </reporting>
 
@@ -263,7 +280,7 @@
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-hadoop-compatibility</artifactId>
-      <version>${project.version}</version>
+      <version>${project.version}</version><!--$NO-MVN-MAN-VER$-->
     </dependency>
 
     <!-- Direct dependencies (bundled) -->
@@ -277,6 +294,14 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+    
+
+<dependency>
+  <groupId>org.apache.tika</groupId>
+  <artifactId>tika-app</artifactId>
+	<version>1.4</version>
+</dependency>
+
 
     <dependency>
       <!-- already on cluster -->
