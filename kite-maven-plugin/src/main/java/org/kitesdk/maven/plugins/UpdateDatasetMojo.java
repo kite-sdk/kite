@@ -15,12 +15,14 @@
  */
 package org.kitesdk.maven.plugins;
 
+import com.google.common.base.Preconditions;
 import com.google.common.io.Resources;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.impl.Accessor;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -41,9 +43,15 @@ public class UpdateDatasetMojo extends AbstractDatasetMojo {
       .getLogger(UpdateDatasetMojo.class);
 
   /**
-   * The name of the dataset to update.
+   * The name of the dataset to update. Ignored if kite.uri is set.
    */
-  @Parameter(property = "kite.datasetName", required = true)
+  @Parameter(property = "kite.datasetNamespace", defaultValue = "default")
+  private String datasetNamespace;
+
+  /**
+   * The name of the dataset to update. Ignored if kite.uri is set.
+   */
+  @Parameter(property = "kite.datasetName")
   private String datasetName;
 
   /**
@@ -73,9 +81,18 @@ public class UpdateDatasetMojo extends AbstractDatasetMojo {
           + "kite.avroSchemaReflectClass must be specified");
     }
 
-    DatasetRepository repo = getDatasetRepository();
+    DatasetDescriptor descriptor;
+    if (uri != null) {
+      descriptor = Datasets.load(uri).getDataset().getDescriptor();
+    } else {
+      LOG.warn(
+          "kite.datasetName is deprecated, instead use kite.uri=<dataset-uri>");
+      Preconditions.checkArgument(datasetName != null,
+          "kite.datasetName is required if kite.uri is not used");
+      DatasetRepository repo = getDatasetRepository();
+      descriptor = repo.load(datasetNamespace, datasetName).getDescriptor();
+    }
 
-    DatasetDescriptor descriptor = repo.load(datasetName).getDescriptor();
     DatasetDescriptor.Builder descriptorBuilder = new DatasetDescriptor.Builder(
         descriptor);
     configureSchema(descriptorBuilder, avroSchemaFile, avroSchemaReflectClass);
@@ -95,6 +112,12 @@ public class UpdateDatasetMojo extends AbstractDatasetMojo {
       }
     }
 
-    repo.update(datasetName, descriptorBuilder.build());
+    if (uri != null) {
+      Datasets.update(uri, descriptorBuilder.build());
+    } else {
+      // datasetName is checked above
+      DatasetRepository repo = getDatasetRepository();
+      repo.update(datasetNamespace, datasetName, descriptorBuilder.build());
+    }
   }
 }

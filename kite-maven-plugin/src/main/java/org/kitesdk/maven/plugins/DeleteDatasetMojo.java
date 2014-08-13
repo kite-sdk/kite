@@ -15,6 +15,8 @@
  */
 package org.kitesdk.maven.plugins;
 
+import com.google.common.base.Preconditions;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -32,14 +34,28 @@ public class DeleteDatasetMojo extends AbstractDatasetMojo {
   private static final Logger LOG = LoggerFactory.getLogger(DeleteDatasetMojo.class);
 
   /**
-   * The name of the dataset to drop.
+   * The name of the dataset to delete. Ignored if kite.uri is set.
    */
-  @Parameter(property = "kite.datasetName", required = true)
+  @Parameter(property = "kite.datasetNamespace", defaultValue = "default")
+  private String datasetNamespace;
+
+  /**
+   * The name of the dataset to delete. Ignored if kite.uri is set.
+   */
+  @Parameter(property = "kite.datasetName")
   private String datasetName;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
-    DatasetRepository repo = getDatasetRepository();
-    repo.delete(datasetName);
+    if (uri != null) {
+      Datasets.delete(uri);
+    } else {
+      LOG.warn(
+          "kite.datasetName is deprecated, instead use kite.uri=<dataset-uri>");
+      Preconditions.checkArgument(datasetName != null,
+          "kite.datasetName is required if kite.uri is not used");
+      DatasetRepository repo = getDatasetRepository();
+      repo.delete(datasetNamespace, datasetName);
+    }
   }
 }

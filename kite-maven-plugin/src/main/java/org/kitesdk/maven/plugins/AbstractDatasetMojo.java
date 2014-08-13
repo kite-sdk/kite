@@ -41,6 +41,12 @@ import org.kitesdk.data.spi.DatasetRepositories;
 abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
 
   /**
+   * A Kite dataset URI.
+   */
+  @Parameter(property = "kite.uri")
+  protected String uri;
+
+  /**
    * The root directory of the dataset repository. Optional if using HCatalog for metadata storage.
    */
   @Parameter(property = "kite.rootDirectory")

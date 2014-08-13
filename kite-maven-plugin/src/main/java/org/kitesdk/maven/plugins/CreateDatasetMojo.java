@@ -15,6 +15,7 @@
  */
 package org.kitesdk.maven.plugins;
 
+import com.google.common.base.Preconditions;
 import com.google.common.io.Resources;
 
 import java.io.File;
@@ -26,10 +27,13 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.PartitionStrategyParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Create a named dataset whose entries conform to a defined schema.
@@ -37,10 +41,18 @@ import org.kitesdk.data.spi.PartitionStrategyParser;
 @Mojo(name = "create-dataset", requiresProject = false, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class CreateDatasetMojo extends AbstractDatasetMojo {
 
+  private static final Logger LOG = LoggerFactory.getLogger(CreateDatasetMojo.class);
+
   /**
-   * The name of the dataset to create.
+   * The name of the dataset to create. Ignored if kite.uri is set.
    */
-  @Parameter(property = "kite.datasetName", required = true)
+  @Parameter(property = "kite.datasetNamespace", defaultValue = "default")
+  private String datasetNamespace;
+
+  /**
+   * The name of the dataset to create. Ignored if kite.uri is set.
+   */
+  @Parameter(property = "kite.datasetName")
   private String datasetName;
 
   /**
@@ -84,8 +96,6 @@ public class CreateDatasetMojo extends AbstractDatasetMojo {
       throw new IllegalArgumentException("One of kite.avroSchemaFile or "
           + "kite.avroSchemaReflectClass must be specified");
     }
-
-    DatasetRepository repo = getDatasetRepository();
 
     DatasetDescriptor.Builder descriptorBuilder = new DatasetDescriptor.Builder();
     configureSchema(descriptorBuilder, avroSchemaFile, avroSchemaReflectClass);
@@ -131,7 +141,16 @@ public class CreateDatasetMojo extends AbstractDatasetMojo {
       }
     }
 
-    repo.create(datasetName, descriptorBuilder.build());
+    if (uri != null) {
+      Datasets.create(uri, descriptorBuilder.build());
+    } else {
+      LOG.warn(
+          "kite.datasetName is deprecated, instead use kite.uri=<dataset-uri>");
+      Preconditions.checkArgument(datasetName != null,
+          "kite.datasetName is required if kite.uri is not used");
+      DatasetRepository repo = getDatasetRepository();
+      repo.create(datasetNamespace, datasetName, descriptorBuilder.build());
+    }
   }
 
 }
