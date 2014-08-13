@@ -81,6 +81,8 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
   @Before
   public void setUp() throws Exception {
     this.repo = newRepo();
+    repo.delete("ns", "in");
+    repo.delete("ns", "out");
   }
 
   @After
@@ -90,9 +92,9 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
   @Test
   public void testGeneric() throws IOException {
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).build());
 
     // write two files, each of 5 records
@@ -110,9 +112,9 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
   @Test
   public void testGenericParquet() throws IOException {
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).format(Formats.PARQUET).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).format(Formats.PARQUET).build());
 
     // write two files, each of 5 records
@@ -133,9 +135,9 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
 
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).format(Formats.PARQUET).build());
 
     writeTestUsers(inputDataset, 10);
@@ -158,9 +160,9 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
 
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
 
     writeTestUsers(inputDataset, 10);
@@ -185,9 +187,9 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
 
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
 
     writeTestUsers(inputDataset, 10);
@@ -216,9 +218,9 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
 
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).format(Formats.PARQUET).build());
 
     writeTestUsers(inputDataset, 10);
@@ -240,9 +242,9 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
 
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
 
     writeTestUsers(inputDataset, 10);
@@ -265,14 +267,14 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
 
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
 
     writeTestUsers(inputDataset, 10);
 
-    URI sourceViewUri = new URIBuilder(repo.getUri(), "in").with("username",
+    URI sourceViewUri = new URIBuilder(repo.getUri(), "ns", "in").with("username",
         "test-0").build();
     View<Record> inputView = Datasets.<Record, Dataset<Record>> load(sourceViewUri,
         Record.class);
@@ -281,7 +283,7 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(CrunchDatasets
         .asSource(sourceViewUri, GenericData.Record.class));
-    URI targetViewUri = new URIBuilder(repo.getUri(), "out").with(
+    URI targetViewUri = new URIBuilder(repo.getUri(), "ns", "out").with(
         "email", "email-0").build();
     pipeline.write(data, CrunchDatasets.asTarget(targetViewUri),
         Target.WriteMode.APPEND);
@@ -295,19 +297,19 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();
 
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).partitionStrategy(partitionStrategy).build());
 
     writeTestUsers(inputDataset, 10);
 
     Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
     PCollection<GenericData.Record> data = pipeline.read(
-        CrunchDatasets.asSource(new URIBuilder(repo.getUri(), "in").build(),
+        CrunchDatasets.asSource(new URIBuilder(repo.getUri(), "ns", "in").build(),
             GenericData.Record.class));
     pipeline.write(data, CrunchDatasets.asTarget(
-        new URIBuilder(repo.getUri(), "out").build()), Target.WriteMode.APPEND);
+        new URIBuilder(repo.getUri(), "ns", "out").build()), Target.WriteMode.APPEND);
     pipeline.run();
 
     Assert.assertEquals(10, datasetSize(outputDataset));
@@ -315,9 +317,9 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
   @Test(expected = CrunchRuntimeException.class)
   public void testWriteModeDefaultFailsWithExisting() throws IOException {
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).build());
 
     writeTestUsers(inputDataset, 1, 0);
@@ -331,9 +333,9 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
   @Test
   public void testWriteModeOverwrite() throws IOException {
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).build());
 
     writeTestUsers(inputDataset, 1, 0);
@@ -352,9 +354,9 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
   @Test
   public void testWriteModeCheckpoint() throws Exception {
-    Dataset<Record> inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).build());
-    Dataset<Record> outputDataset = repo.create("out", new DatasetDescriptor.Builder()
+    Dataset<Record> outputDataset = repo.create("ns", "out", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).build());
 
     writeTestUsers(inputDataset, 1, 0);
@@ -373,8 +375,8 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
 
     // re-write input then re-run and output should be re-written
     Thread.sleep(1000); // ensure new input is newer than output
-    repo.delete("in");
-    inputDataset = repo.create("in", new DatasetDescriptor.Builder()
+    repo.delete("ns", "in");
+    inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
         .schema(USER_SCHEMA).build());
     writeTestUsers(inputDataset, 1, 0);
     runCheckpointPipeline(inputDataset, outputDataset);

@@ -66,6 +66,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
   public static final String KITE_TYPE = "kite.outputEntityType";
 
   private static final String KITE_WRITE_MODE = "kite.outputMode";
+  private static final String TEMP_NAMESPACE = "mr";
 
   private static enum WriteMode {
     DEFAULT, APPEND, OVERWRITE
@@ -361,13 +362,13 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
       String jobDatasetName = getJobDatasetName(jobContext);
       View<E> targetView = load(jobContext);
-      Dataset<E> jobDataset = repo.load(jobDatasetName);
+      Dataset<E> jobDataset = repo.load(TEMP_NAMESPACE, jobDatasetName);
       ((Mergeable<Dataset<E>>) targetView.getDataset()).merge(jobDataset);
 
       if (isTemp) {
         ((TemporaryDatasetRepository) repo).delete();
       } else {
-        repo.delete(jobDatasetName);
+        repo.delete(TEMP_NAMESPACE, jobDatasetName);
       }
     }
 
@@ -392,13 +393,13 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       DatasetRepository repo = getDatasetRepository(taskContext);
       boolean inTempRepo = repo instanceof TemporaryDatasetRepository;
 
-      Dataset<E> jobDataset = repo.load(getJobDatasetName(taskContext));
+      Dataset<E> jobDataset = repo.load(TEMP_NAMESPACE, getJobDatasetName(taskContext));
       String taskAttemptDatasetName = getTaskAttemptDatasetName(taskContext);
-      if (repo.exists(taskAttemptDatasetName)) {
-        Dataset<E> taskAttemptDataset = repo.load(taskAttemptDatasetName);
+      if (repo.exists(TEMP_NAMESPACE, taskAttemptDatasetName)) {
+        Dataset<E> taskAttemptDataset = repo.load(TEMP_NAMESPACE, taskAttemptDatasetName);
         ((Mergeable<Dataset<E>>) jobDataset).merge(taskAttemptDataset);
         if (!inTempRepo) {
-          repo.delete(taskAttemptDatasetName);
+          repo.delete(TEMP_NAMESPACE, taskAttemptDatasetName);
         }
       }
     }
@@ -531,36 +532,38 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     Dataset<Object> dataset = load(jobContext).getDataset();
     String jobDatasetName = getJobDatasetName(jobContext);
     DatasetRepository repo = getDatasetRepository(jobContext);
-    return repo.create(jobDatasetName, copy(dataset.getDescriptor()),
-        (Class<E>)getType(jobContext));
+    return repo.create(TEMP_NAMESPACE, jobDatasetName,
+        copy(dataset.getDescriptor()),
+        DatasetKeyOutputFormat.<E>getType(jobContext));
   }
 
   private static <E> Dataset<E> loadJobDataset(JobContext jobContext) {
     DatasetRepository repo = getDatasetRepository(jobContext);
-    return repo.load(getJobDatasetName(jobContext));
+    return repo.load(TEMP_NAMESPACE, getJobDatasetName(jobContext));
   }
 
   private static void deleteJobDataset(JobContext jobContext) {
     DatasetRepository repo = getDatasetRepository(jobContext);
-    repo.delete(getJobDatasetName(jobContext));
+    repo.delete(TEMP_NAMESPACE, getJobDatasetName(jobContext));
   }
 
   private static <E> Dataset<E> loadOrCreateTaskAttemptDataset(TaskAttemptContext taskContext) {
     String taskAttemptDatasetName = getTaskAttemptDatasetName(taskContext);
     DatasetRepository repo = getDatasetRepository(taskContext);
     Dataset<E> jobDataset = loadJobDataset(taskContext);
-    if (repo.exists(taskAttemptDatasetName)) {
-      return repo.load(taskAttemptDatasetName);
+    if (repo.exists(TEMP_NAMESPACE, taskAttemptDatasetName)) {
+      return repo.load(TEMP_NAMESPACE, taskAttemptDatasetName);
     } else {
-      return repo.create(taskAttemptDatasetName, copy(jobDataset.getDescriptor()));
+      return repo.create(TEMP_NAMESPACE, taskAttemptDatasetName,
+          copy(jobDataset.getDescriptor()));
     }
   }
 
   private static void deleteTaskAttemptDataset(TaskAttemptContext taskContext) {
     DatasetRepository repo = getDatasetRepository(taskContext);
     String taskAttemptDatasetName = getTaskAttemptDatasetName(taskContext);
-    if (repo.exists(taskAttemptDatasetName)) {
-      repo.delete(taskAttemptDatasetName);
+    if (repo.exists(TEMP_NAMESPACE, taskAttemptDatasetName)) {
+      repo.delete(TEMP_NAMESPACE, taskAttemptDatasetName);
     }
   }
 

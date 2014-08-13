@@ -69,14 +69,14 @@ public class TestMapReduceHBase extends HBaseTestBase {
 
     String datasetName = tableName + ".TestGenericEntity";
 
-    Dataset<GenericRecord> inputDataset = repo.create("in",
+    Dataset<GenericRecord> inputDataset = repo.create("default", "in",
         new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity).build());
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    Dataset<GenericRecord> outputDataset = repo.create(datasetName, descriptor);
+    Dataset<GenericRecord> outputDataset = repo.create("default", datasetName, descriptor);
 
     DatasetWriter<GenericRecord> writer = inputDataset.newWriter();
     try {
@@ -126,14 +126,14 @@ public class TestMapReduceHBase extends HBaseTestBase {
 
     String datasetName = tableName + ".TestGenericEntity";
 
-    Dataset<GenericRecord> inputDataset = repo.create("in",
+    Dataset<GenericRecord> inputDataset = repo.create("default", "in",
         new DatasetDescriptor.Builder()
             .schemaLiteral(testGenericEntity).build());
 
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testGenericEntity)
         .build();
-    Dataset<GenericRecord> outputDataset = repo.create(datasetName, descriptor);
+    Dataset<GenericRecord> outputDataset = repo.create("default", datasetName, descriptor);
 
     DatasetKeyInputFormat.configure(job).readFrom(inputDataset);
 

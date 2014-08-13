@@ -77,13 +77,13 @@ public class TestMapReduce extends FileSystemTestBase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    inputDataset = repo.create("in",
+    inputDataset = repo.create("ns", "in",
         new DatasetDescriptor.Builder()
             .property("kite.allow.csv", "true")
             .schema(STRING_SCHEMA)
             .format(format)
             .build(), GenericData.Record.class);
-    outputDataset = repo.create("out",
+    outputDataset = repo.create("ns", "out",
         new DatasetDescriptor.Builder()
             .property("kite.allow.csv", "true")
             .schema(STATS_SCHEMA)

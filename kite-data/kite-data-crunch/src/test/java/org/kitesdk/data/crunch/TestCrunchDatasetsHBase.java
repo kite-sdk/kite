@@ -96,8 +96,8 @@ public class TestCrunchDatasetsHBase {
         .schemaLiteral(testGenericEntity)
         .build();
 
-    Dataset<GenericRecord> inputDataset = repo.create("in", descriptor);
-    Dataset<GenericRecord> outputDataset = repo.create(datasetName, descriptor);
+    Dataset<GenericRecord> inputDataset = repo.create("default", "in", descriptor);
+    Dataset<GenericRecord> outputDataset = repo.create("default", datasetName, descriptor);
 
     writeRecords(inputDataset, 10);
 
@@ -118,8 +118,8 @@ public class TestCrunchDatasetsHBase {
         .schemaLiteral(testGenericEntity)
         .build();
 
-    Dataset<GenericRecord> inputDataset = repo.create("in", descriptor);
-    Dataset<GenericRecord> outputDataset = repo.create(datasetName, descriptor);
+    Dataset<GenericRecord> inputDataset = repo.create("default", "in", descriptor);
+    Dataset<GenericRecord> outputDataset = repo.create("default", datasetName, descriptor);
 
     writeRecords(inputDataset, 10);
 
