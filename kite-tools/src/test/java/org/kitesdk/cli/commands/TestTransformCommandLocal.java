@@ -31,7 +31,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.cli.TestUtil;
-import org.kitesdk.data.Datasets;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
@@ -39,7 +38,7 @@ import org.slf4j.Logger;
 
 import static org.mockito.Mockito.mock;
 
-public class TestCopyCommandLocal {
+public class TestTransformCommandLocal {
 
   private static final String source = "users_source";
   private static final String dest = "users_dest";
@@ -70,14 +69,14 @@ public class TestCopyCommandLocal {
   }
 
   private Logger console;
-  private CopyCommand command;
+  private TransformCommand command;
 
   @Before
   public void createDestination() throws Exception {
     TestUtil.run("delete", dest, "--use-local", "-d", "target/data");
     TestUtil.run("create", dest, "-s", avsc, "--use-local", "-d", "target/data");
     this.console = mock(Logger.class);
-    this.command = new CopyCommand(console);
+    this.command = new TransformCommand(console);
     command.setConf(new Configuration());
   }
 
@@ -97,5 +96,24 @@ public class TestCopyCommandLocal {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:target/data");
     int size = DatasetTestUtilities.datasetSize(repo.load(dest));
     Assert.assertEquals("Should contain copied records", 2, size);
+  }
+
+  @Test
+  public void testTransform() throws Exception {
+    command.repoURI = "file:target/data";
+    command.transform = "org.kitesdk.cli.example.ToUpperCase";
+    command.datasets = Lists.newArrayList(source, dest);
+
+    int rc = command.run();
+    Assert.assertEquals("Should return success", 0, rc);
+
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:target/data");
+    Set<GenericRecord> records = DatasetTestUtilities.materialize(
+        repo.<GenericRecord>load(dest));
+    Assert.assertEquals("Should contain copied records", 2, records.size());
+    for (GenericRecord record : records) {
+      Assert.assertTrue("Username should be upper case",
+          UPPER_CASE.matcher(record.get("username").toString()).matches());
+    }
   }
 }

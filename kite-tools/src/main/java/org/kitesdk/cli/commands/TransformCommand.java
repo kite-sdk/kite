@@ -22,17 +22,23 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
+import org.apache.crunch.DoFn;
 import org.apache.crunch.PipelineResult;
+import org.kitesdk.compat.DynConstructors;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.View;
 import org.kitesdk.tools.CopyTask;
+import org.kitesdk.tools.TaskUtil;
+import org.kitesdk.tools.TransformTask;
 import org.slf4j.Logger;
 
 import static org.apache.avro.generic.GenericData.Record;
 
-@Parameters(commandDescription="Copy records from one Dataset to another")
-public class CopyCommand extends BaseDatasetCommand {
+@Parameters(commandDescription=
+    "Transform records from one Dataset and store them in another")
+public class TransformCommand extends BaseDatasetCommand {
 
-  public CopyCommand(Logger console) {
+  public TransformCommand(Logger console) {
     super(console);
   }
 
@@ -47,6 +53,14 @@ public class CopyCommand extends BaseDatasetCommand {
       description="The number of writer processes to use")
   int numWriters = -1;
 
+  @Parameter(names={"--transform"},
+      description="A transform DoFn class name")
+  String transform = null;
+
+  @Parameter(names="--jar",
+      description="Add a jar to the runtime classpath")
+  List<String> jars;
+
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(datasets != null && datasets.size() > 1,
@@ -57,7 +71,26 @@ public class CopyCommand extends BaseDatasetCommand {
     View<Record> source = load(datasets.get(0), Record.class);
     View<Record> dest = load(datasets.get(1), Record.class);
 
-    CopyTask task = new CopyTask<Record>(source, dest);
+    TaskUtil.configure(getConf()).addJars(jars);
+
+    TransformTask task;
+    if (transform != null) {
+      DoFn<Record, Record> transformFn;
+      try {
+        DynConstructors.Ctor<DoFn<Record, Record>> ctor =
+            new DynConstructors.Builder(DoFn.class)
+                .loader(loaderForJars(jars))
+                .impl(transform)
+                .buildChecked();
+        transformFn = ctor.newInstance();
+      } catch (NoSuchMethodException e) {
+        throw new DatasetException(
+            "Cannot find no-arg constructor for class: " + transform, e);
+      }
+      task = new TransformTask<Record, Record>(source, dest, transformFn);
+    } else {
+      task = new CopyTask<Record>(source, dest);
+    }
 
     task.setConf(getConf());
 
@@ -83,10 +116,8 @@ public class CopyCommand extends BaseDatasetCommand {
   @Override
   public List<String> getExamples() {
     return Lists.newArrayList(
-        "# Copy the contents of movies_avro to movies_parquet",
-        "movies_avro movies_parquet",
-        "# Copy the movies dataset into HBase in a map-only job",
-        "movies dataset:hbase:zk-host/movies --no-compaction"
+        "# Transform the contents of movies_src using com.example.TransformFn",
+        "movies_src movies --transform com.example.TransformFn --jar fns.jar"
     );
   }
 }

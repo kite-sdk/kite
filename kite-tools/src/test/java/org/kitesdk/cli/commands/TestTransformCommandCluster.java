@@ -57,7 +57,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-public class TestCopyCommandCluster extends MiniDFSTest {
+public class TestTransformCommandCluster extends MiniDFSTest {
 
   private static final String source = "users_source";
   private static final String dest = "users_dest";
@@ -94,14 +94,14 @@ public class TestCopyCommandCluster extends MiniDFSTest {
   }
 
   private Logger console;
-  private CopyCommand command;
+  private TransformCommand command;
 
   @Before
   public void createDestination() throws Exception {
     TestUtil.run("delete", dest, "-r", repoUri, "-d", "target/data");
     TestUtil.run("create", dest, "-s", avsc, "-r", repoUri, "-d", "target/data");
     this.console = mock(Logger.class);
-    this.command = new CopyCommand(console);
+    this.command = new TransformCommand(console);
     command.setConf(new Configuration());
   }
 
@@ -124,6 +124,25 @@ public class TestCopyCommandCluster extends MiniDFSTest {
 
     verify(console).info("Added {} records to \"{}\"", 6l, dest);
     verifyNoMoreInteractions(console);
+  }
+
+  @Test
+  public void testTransform() throws Exception {
+    command.repoURI = repoUri;
+    command.transform = "org.kitesdk.cli.example.ToUpperCase";
+    command.datasets = Lists.newArrayList(source, dest);
+
+    int rc = command.run();
+    Assert.assertEquals("Should return success", 0, rc);
+
+    DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
+    Set<GenericRecord> records = DatasetTestUtilities.materialize(
+        repo.<GenericRecord>load(dest));
+    Assert.assertEquals("Should contain copied records", 6, records.size());
+    for (GenericRecord record : records) {
+      Assert.assertTrue("Username should be upper case",
+          UPPER_CASE.matcher(record.get("username").toString()).matches());
+    }
   }
 
   @Test

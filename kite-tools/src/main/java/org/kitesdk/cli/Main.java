@@ -41,6 +41,7 @@ import org.kitesdk.cli.commands.InfoCommand;
 import org.kitesdk.cli.commands.ObjectSchemaCommand;
 import org.kitesdk.cli.commands.SchemaCommand;
 import org.kitesdk.cli.commands.ShowRecordsCommand;
+import org.kitesdk.cli.commands.TransformCommand;
 import org.kitesdk.cli.commands.UpdateDatasetCommand;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
@@ -74,6 +75,7 @@ public class Main extends Configured implements Tool {
     jc.addCommand("help", help, "-h", "-help", "--help");
     jc.addCommand("create", new CreateDatasetCommand(console));
     jc.addCommand("copy", new CopyCommand(console));
+    jc.addCommand("transform", new TransformCommand(console));
     jc.addCommand("update", new UpdateDatasetCommand(console));
     jc.addCommand("delete", new DeleteDatasetCommand(console));
     jc.addCommand("schema", new SchemaCommand(console));
