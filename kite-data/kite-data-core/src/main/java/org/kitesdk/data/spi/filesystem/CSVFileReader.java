@@ -163,7 +163,7 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
   }
 
   private E makeRecord() {
-    if (recordClass != GenericData.Record.class) {
+    if (recordClass != GenericData.Record.class && !recordClass.isInterface()) {
       E record = makeReflectRecord();
       if (record != null) {
         return record;

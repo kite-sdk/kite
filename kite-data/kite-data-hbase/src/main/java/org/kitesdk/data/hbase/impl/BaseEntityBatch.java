@@ -128,6 +128,11 @@ public class BaseEntityBatch<E> extends AbstractDatasetWriter<E>
   }
 
   @Override
+  public void sync() {
+    flush(); // there is no equivalent of sync, HBase manages durability
+  }
+
+  @Override
   public void close() {
     if (state.equals(ReaderWriterState.OPEN)) {
       try {

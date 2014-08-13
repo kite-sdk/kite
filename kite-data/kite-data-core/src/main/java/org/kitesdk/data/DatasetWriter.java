@@ -75,7 +75,7 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
 
   /**
    * <p>
-   * Force or commit any outstanding data to storage.
+   * Force or commit any outstanding buffered data to the underlying stream.
    * </p>
    * <p>
    * Implementations of this interface must declare their durability guarantees.
@@ -85,6 +85,18 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
    */
   @Override
   void flush();
+
+  /**
+   * <p>
+   * Ensure that data in the underlying stream has been written to disk.
+   * </p>
+   * <p>
+   * Implementations of this interface must declare their durability guarantees.
+   * </p>
+   *
+   * @throws DatasetWriterException
+   */
+  void sync();
 
   /**
    * <p>

@@ -72,6 +72,11 @@ class DurableParquetAppender<E extends IndexedRecord> implements FileSystemWrite
   }
 
   @Override
+  public void sync() throws IOException {
+    avroAppender.sync();
+  }
+
+  @Override
   public void close() throws IOException {
     Closeables.close(avroAppender, false);
     Closeables.close(parquetAppender, false);

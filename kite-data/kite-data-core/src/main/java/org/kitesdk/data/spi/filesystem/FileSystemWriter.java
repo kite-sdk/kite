@@ -45,6 +45,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
   static interface FileAppender<E> extends Flushable, Closeable {
     public void open() throws IOException;
     public void append(E entity) throws IOException;
+    public void sync() throws IOException;
     public void cleanup() throws IOException;
   }
 
@@ -126,12 +127,24 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
   @Override
   public void flush() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to write to a writer in state:%s", state);
+        "Attempt to flush a writer in state:%s", state);
     try {
       appender.flush();
     } catch (IOException e) {
       this.state = ReaderWriterState.ERROR;
       throw new DatasetWriterException("Failed to flush appender " + appender);
+    }
+  }
+
+  @Override
+  public void sync() {
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to sync a writer in state:%s", state);
+    try {
+      appender.sync();
+    } catch (IOException e) {
+      this.state = ReaderWriterState.ERROR;
+      throw new DatasetIOException("Failed to sync appender " + appender, e);
     }
   }
 

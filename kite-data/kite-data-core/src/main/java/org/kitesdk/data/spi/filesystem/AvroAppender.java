@@ -71,8 +71,15 @@ class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
 
   @Override
   public void flush() throws IOException {
+    // Avro sync forces the end of the current block so the data is recoverable
     dataFileWriter.flush();
     Hadoop.FSDataOutputStream.hflush.invoke(out);
+  }
+
+  @Override
+  public void sync() throws IOException {
+    flush();
+    Hadoop.FSDataOutputStream.hsync.invoke(out);
   }
 
   @Override

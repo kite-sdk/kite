@@ -122,7 +122,7 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
   @Override
   public void flush() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-      "Attempt to write to a writer in state:%s", state);
+      "Attempt to flush a writer in state:%s", state);
 
     LOG.debug("Flushing all cached writers for view:{}", view);
 
@@ -136,6 +136,19 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
     for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
       LOG.debug("Flushing partition writer:{}", writer);
       writer.flush();
+    }
+  }
+
+  @Override
+  public void sync() {
+    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+        "Attempt to sync a writer in state:%s", state);
+
+    LOG.debug("Syncing all cached writers for view:{}", view);
+
+    for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
+      LOG.debug("Syncing partition writer:{}", writer);
+      writer.sync();
     }
   }
 

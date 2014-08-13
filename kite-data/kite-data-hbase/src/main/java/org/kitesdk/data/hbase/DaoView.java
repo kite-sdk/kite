@@ -158,6 +158,11 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
       }
 
       @Override
+      public void sync() {
+        wrappedWriter.sync();
+      }
+
+      @Override
       public void close() {
         wrappedWriter.close();
       }

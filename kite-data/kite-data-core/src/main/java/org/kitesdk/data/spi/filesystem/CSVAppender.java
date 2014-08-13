@@ -78,6 +78,12 @@ class CSVAppender<E> implements FileSystemWriter.FileAppender<E> {
     Hadoop.FSDataOutputStream.hflush.invoke(outgoing);
   }
 
+  @Override
+  public void sync() throws IOException {
+    flush();
+    Hadoop.FSDataOutputStream.hsync.invoke(outgoing);
+  }
+
   private String[] shred(E entity) {
     if (entity instanceof IndexedRecord) {
       return shredIndexed((IndexedRecord) entity, schema);

@@ -76,6 +76,11 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
   }
 
   @Override
+  public void sync() {
+    // Parquet doesn't (currently) expose a sync operation
+  }
+
+  @Override
   public void close() throws IOException {
     Closeables.close(avroParquetWriter, false);
   }
