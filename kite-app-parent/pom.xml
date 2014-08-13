@@ -35,6 +35,7 @@
 
   <modules>
     <module>cdh4</module>
+    <module>cdh5</module>
   </modules>
 
 
