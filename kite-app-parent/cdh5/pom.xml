@@ -302,6 +302,21 @@
       <type>pom</type>
       <scope>provided</scope>
       <optional>true</optional>
+      <exclusions>
+        <!-- Exclusions needed by Spark -->
+        <exclusion>
+          <artifactId>asm</artifactId>
+          <groupId>asm</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>servlet-api</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>servlet-api-2.5</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -311,6 +326,17 @@
       <type>pom</type>
       <scope>provided</scope>
       <optional>true</optional>
+      <exclusions>
+        <!-- Exclusions needed by Spark -->
+        <exclusion>
+          <artifactId>netty</artifactId>
+          <groupId>org.jboss.netty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>servlet-api-2.5</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
