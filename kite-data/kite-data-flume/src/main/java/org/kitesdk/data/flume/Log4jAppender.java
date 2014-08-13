@@ -33,6 +33,7 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
   private static final String PARTITION_PREFIX = "kite.partition.";
 
   private String datasetRepositoryUri;
+  private String datasetNamespace;
   private String datasetName;
   private boolean initialized;
   
@@ -76,6 +77,10 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
     this.datasetRepositoryUri = datasetRepositoryUri;
   }
 
+  public void setDatasetNamespace(String datasetNamespace) {
+    this.datasetNamespace = datasetNamespace;
+  }
+
   public void setDatasetName(String datasetName) {
     this.datasetName = datasetName;
   }
@@ -88,7 +93,7 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
       // initialize here rather than in activateOptions to avoid initialization
       // cycle in Configuration and log4j
       try {
-        URI datasetUri = new URIBuilder(datasetRepositoryUri, datasetName).build();
+        URI datasetUri = new URIBuilder(datasetRepositoryUri, datasetNamespace, datasetName).build();
         Dataset dataset = Datasets.load(datasetUri);
         if (dataset.getDescriptor().isPartitioned()) {
           partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
