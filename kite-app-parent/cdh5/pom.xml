@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+~ Copyright 2014 Cloudera Inc.
+~
+~ Licensed under the Apache License, Version 2.0 (the "License");
+~ you may not use this file except in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~ http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing, software
+~ distributed under the License is distributed on an "AS IS" BASIS,
+~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~ See the License for the specific language governing permissions and
+~ limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.kitesdk</groupId>
+  <artifactId>kite-app-parent-cdh5</artifactId>
+  <version>0.15.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Kite Application POM for CDH5</name>
+  <description>
+    This POM can be used as a parent POM to manage Kite and Hadoop dependencies for CDH5.
+  </description>
+  <url>http://kitesdk.org/</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>tomwhite</id>
+      <name>Tom White</name>
+      <organization>Cloudera</organization>
+    </developer>
+    <developer>
+      <id>esammer</id>
+      <name>Eric Sammer</name>
+      <organization>Cloudera</organization>
+    </developer>
+    <developer>
+      <id>whoschek</id>
+      <name>Wolfgang Hoschek</name>
+      <organization>Cloudera</organization>
+    </developer>
+    <developer>
+      <id>awarrington</id>
+      <name>Adam Warrington</name>
+      <organization>Cloudera</organization>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/kite-sdk/kite.git</connection>
+    <url>https://github.com/kite-sdk/kite</url>
+    <developerConnection>scm:git:git@github.com:kite-sdk/kite.git
+    </developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
+  <properties>
+    <!-- dependency version properties -->
+    <kite.version>0.15.1-SNAPSHOT</kite.version>
+    <kite.avro.version>1.7.5-cdh5.1.0</kite.avro.version>
+    <kite.crunch.version>0.10.0-cdh5.1.0</kite.crunch.version>
+    <kite.findbugs.version>2.0.1</kite.findbugs.version>
+    <kite.hive.version>0.12.0-cdh5.1.0</kite.hive.version>
+    <kite.oozie.version>4.0.0-cdh5.1.0</kite.oozie.version>
+    <kite.spark.version>1.0.0-cdh5.1.0</kite.spark.version>
+
+    <!-- other properties to help apps -->
+    <hadoop.guava.version>11.0.2</hadoop.guava.version>
+    <hadoop.log4j.version>1.2.16</hadoop.log4j.version>
+    <hadoop.slf4j.version>1.6.1</hadoop.slf4j.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>com.cloudera.releases</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+      <name>Cloudera Repositories</name>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>maven-twttr</id>
+      <name>Twitter Public Maven Repo</name>
+      <url>http://maven.twttr.com</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>com.cloudera.plugin.releases</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+      <name>Cloudera Repositories</name>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <pluginManagement>
+      <!-- Inherited plugins -->
+      <plugins>
+        <plugin>
+          <groupId>org.kitesdk</groupId>
+          <artifactId>kite-maven-plugin</artifactId>
+          <version>${kite.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.kitesdk</groupId>
+              <artifactId>kite-hadoop-cdh5-dependencies</artifactId>
+              <version>${kite.version}</version>
+              <type>pom</type>
+            </dependency>
+            <dependency>
+              <groupId>org.kitesdk</groupId>
+              <artifactId>kite-hbase-cdh5-dependencies</artifactId>
+              <version>${kite.version}</version>
+              <type>pom</type>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.hive</groupId>
+              <artifactId>hive-exec</artifactId>
+              <version>${kite.hive.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.oozie</groupId>
+              <artifactId>oozie-client</artifactId>
+              <version>${kite.oozie.version}</version>
+              <exclusions>
+                <exclusion>
+                  <groupId>org.slf4j</groupId>
+                  <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+              </exclusions>
+            </dependency>
+          </dependencies>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro-maven-plugin</artifactId>
+          <version>${kite.avro.version}</version>
+          <configuration>
+            <stringType>String</stringType>
+            <createSetters>false</createSetters>
+            <fieldVisibility>private</fieldVisibility>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>schema</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <version>0.9</version>
+        <!-- ensure this project is checked, but don't include for children -->
+        <inherited>false</inherited>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.3</version>
+        <!-- ensure this project is checked, but don't include for children -->
+        <inherited>false</inherited>
+        <configuration>
+          <skip>true</skip>
+          <skipDeploy>true</skipDeploy>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+
+    <!-- Kite dependencies -->
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hcatalog</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hbase</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-mapreduce</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-crunch</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-compatibility</artifactId>
+      <version>${kite.version}</version>
+    </dependency>
+
+    <!-- Recommended dependencies -->
+
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <version>${kite.avro.version}</version>
+    </dependency>
+
+    <dependency>
+      <!-- not usually provided -->
+      <groupId>org.apache.crunch</groupId>
+      <artifactId>crunch-core</artifactId>
+      <version>${kite.crunch.version}</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <!-- Avro is provided
+               This is excluded because this pulls in the hadoop1 version
+               because the crunch pom selects the dependency using a profile
+               -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro-mapred</artifactId>
+        </exclusion>
+        <exclusion>
+          <!-- kite doesn't use trevni -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>trevni-avro</artifactId>
+        </exclusion>
+        <exclusion>
+          <!-- kite doesn't use trevni -->
+          <groupId>org.apache.avro</groupId>
+          <artifactId>trevni-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <!-- avoid warnings by bundling annotations, see CDK-191 -->
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>${kite.findbugs.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <!-- avoid warnings by bundling annotations, see CDK-191 -->
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+      <version>${kite.findbugs.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Hadoop-provided dependencies
+         These are required by Kite, but on Hadoop clusters.
+         Kite works with most versions via kite-hadoop-compatibility
+         -->
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hadoop-cdh5-dependencies</artifactId>
+      <version>${kite.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-hbase-cdh5-dependencies</artifactId>
+      <version>${kite.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-exec</artifactId>
+      <version>${kite.hive.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+      <exclusions>
+        <!-- asm from Hive conflicts with Spark -->
+        <exclusion>
+          <artifactId>asm</artifactId>
+          <groupId>asm</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-serde</artifactId>
+      <version>${kite.hive.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_2.10</artifactId>
+      <version>${kite.spark.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+      <exclusions>
+        <!-- Exclude Spark's Hadoop dependencies -->
+        <exclusion>
+          <artifactId>hadoop-annotations</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hadoop-auth</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hadoop-client</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.2</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>false</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>ossrh</id>
+          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+          <id>ossrh</id>
+          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
+
+</project>
