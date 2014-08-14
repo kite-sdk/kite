@@ -31,6 +31,9 @@ import org.kitesdk.cli.commands.CreateDatasetCommand;
 import org.kitesdk.cli.commands.CreatePartitionStrategyCommand;
 import org.kitesdk.cli.commands.DeleteDatasetCommand;
 import com.google.common.collect.ImmutableSet;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.Set;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
@@ -56,6 +59,10 @@ public class Main extends Configured implements Tool {
       description = "Print extra debugging information")
   private boolean debug = false;
 
+  @Parameter(names = {"--version"},
+      description = "Print Kite version and exit")
+  private boolean printVersion = false;
+
   @VisibleForTesting
   static final String PROGRAM_NAME = "dataset";
 
@@ -66,6 +73,35 @@ public class Main extends Configured implements Tool {
 
   @VisibleForTesting
   final JCommander jc;
+
+  private static final String version;
+
+  static {
+    String location = "/META-INF/maven/org.kitesdk/kite-tools/pom.properties";
+    String tempVersion;
+    InputStream resourceAsStream = null;
+    try {
+      Properties pomProperties = new Properties();
+      resourceAsStream = Help.class.getResourceAsStream(location);
+      pomProperties.load(resourceAsStream);
+
+      tempVersion = pomProperties.getProperty("version");
+    } catch (Exception ex) {
+      LoggerFactory.getLogger(Help.class).warn(
+          "Unable to determine version from the {} file: {}", location, ex.getMessage());
+      tempVersion = "unknown";
+    } finally {
+      if (resourceAsStream != null) {
+        try {
+          resourceAsStream.close();
+        } catch (IOException ex) {
+          LoggerFactory.getLogger(Help.class).warn(
+              "IO error closing pom properties stream: {}", ex.getMessage());
+        }
+      }
+    }
+    version = tempVersion;
+  }
 
   Main(Logger console) {
     this.console = console;
@@ -112,6 +148,11 @@ public class Main extends Configured implements Tool {
       }
       console.error(e.getMessage());
       return 1;
+    }
+
+    if (printVersion) {
+      console.info("kite version \"{}\"", version);
+      return 0;
     }
 
     // configure log4j

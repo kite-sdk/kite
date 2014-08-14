@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -110,7 +109,7 @@ public class TestMain {
         contains("Usage: {} [options] [command] [command options]"),
         eq(Main.PROGRAM_NAME));
     verify(console).info(contains("Options"));
-    verify(console).info(anyString(), any(Object[].class)); // -v
+    verify(console, times(2)).info(anyString(), any(Object[].class)); // -v, --version
     verify(console).info(contains("Commands"));
     verify(console).info(anyString(), eq("create"), anyString());
     verify(console).info(anyString(), eq("delete"), anyString());
@@ -155,6 +154,13 @@ public class TestMain {
     verify(console).info(anyString(), contains("this is a comment"));
     verify(console).info(anyString(),
         eq(new Object[] {Main.PROGRAM_NAME, "test", "test dataset-name"}));
+    assertEquals(0, rc);
+  }
+
+  @Test
+  public void testVersion() throws Exception {
+    int rc = run("--version");
+    verify(console).info(anyString(), anyString());
     assertEquals(0, rc);
   }
 
