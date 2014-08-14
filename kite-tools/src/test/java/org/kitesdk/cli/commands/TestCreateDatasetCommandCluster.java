@@ -85,7 +85,7 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
         .schemaUri("resource:test-schemas/user.avsc")
         .build();
 
-    verify(getMockRepo()).create("users", expectedDescriptor);
+    verify(getMockRepo()).create("default", "users", expectedDescriptor);
     verify(console).debug(contains("Created"), eq("users"));
   }
 
@@ -104,7 +104,7 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
         .schemaUri("resource:test-schemas/user.avsc")
         .build();
 
-    verify(getMockRepo()).create("users", expectedDescriptor);
+    verify(getMockRepo()).create("default", "users", expectedDescriptor);
     verify(console).debug(contains("Created"), eq("users"));
   }
 
@@ -123,7 +123,7 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
         .schemaUri("resource:test-schemas/user.avsc")
         .build();
 
-    verify(getMockRepo()).create("users", expectedDescriptor);
+    verify(getMockRepo()).create("default", "users", expectedDescriptor);
     verify(console).debug(contains("Created"), eq("users"));
   }
 

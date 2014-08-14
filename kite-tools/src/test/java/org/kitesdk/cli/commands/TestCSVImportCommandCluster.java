@@ -93,7 +93,7 @@ public class TestCSVImportCommandCluster extends MiniDFSTest {
   public void setup() throws Exception {
     TestUtil.run("create", datasetName, "-r", repoURI, "-s", avsc);
 
-    this.dataset = Datasets.load(new URIBuilder(repoURI, datasetName).build(),
+    this.dataset = Datasets.load(new URIBuilder(repoURI, "default", datasetName).build(),
         GenericData.Record.class);
     this.console = mock(Logger.class);
     this.command = new CSVImportCommand(console);

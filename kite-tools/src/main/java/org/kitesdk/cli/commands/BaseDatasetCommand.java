@@ -33,6 +33,10 @@ abstract class BaseDatasetCommand extends BaseCommand {
       description = "Storage directory for datasets, required for HDFS")
   String directory = null;
 
+  @Parameter(names = {"--namespace"}, hidden = true,
+      description = "Namespace for datasets")
+  String namespace = "default";
+
   @Parameter(names = {"--use-local"}, hidden = true,
       description = "Store data in local files")
   boolean local = false;
@@ -84,7 +88,7 @@ abstract class BaseDatasetCommand extends BaseCommand {
     if (isDataUri(uriOrName)) {
       return Datasets.<E, View<E>>load(uriOrName, type);
     } else {
-      return getDatasetRepository().load(uriOrName);
+      return getDatasetRepository().load(namespace, uriOrName);
     }
   }
 

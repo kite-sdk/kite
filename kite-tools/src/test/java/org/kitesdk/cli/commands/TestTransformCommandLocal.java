@@ -94,7 +94,7 @@ public class TestTransformCommandLocal {
     Assert.assertEquals("Should return success", 0, rc);
 
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:target/data");
-    int size = DatasetTestUtilities.datasetSize(repo.load(dest));
+    int size = DatasetTestUtilities.datasetSize(repo.load("default", dest));
     Assert.assertEquals("Should contain copied records", 2, size);
   }
 
@@ -109,7 +109,7 @@ public class TestTransformCommandLocal {
 
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:target/data");
     Set<GenericRecord> records = DatasetTestUtilities.materialize(
-        repo.<GenericRecord>load(dest));
+        repo.<GenericRecord>load("default", dest));
     Assert.assertEquals("Should contain copied records", 2, records.size());
     for (GenericRecord record : records) {
       Assert.assertTrue("Username should be upper case",

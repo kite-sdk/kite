@@ -140,7 +140,7 @@ public class CSVImportCommand extends BaseDatasetCommand {
 
     try {
       FileSystemDataset<Record> csvDataset =
-          (FileSystemDataset) repo.create("csv", csvDescriptor);
+          (FileSystemDataset) repo.create("default", "csv", csvDescriptor);
 
       Iterator<Path> iter = csvDataset.pathIterator().iterator();
       Preconditions.checkArgument(iter.hasNext(),

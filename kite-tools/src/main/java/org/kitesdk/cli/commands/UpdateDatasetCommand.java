@@ -80,7 +80,7 @@ public class UpdateDatasetCommand extends BaseDatasetCommand {
     if (isDataUri(dataset)) {
       Datasets.<GenericData.Record, Dataset<GenericData.Record>> update(dataset, descriptor, GenericData.Record.class);
     } else {
-      getDatasetRepository().update(dataset, descriptor);
+      getDatasetRepository().update(namespace, dataset, descriptor);
     }
 
     console.debug("Updated {}", dataset);

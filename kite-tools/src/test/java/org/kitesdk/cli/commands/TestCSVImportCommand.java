@@ -87,7 +87,7 @@ public class TestCSVImportCommand {
     TestUtil.run("-v", "create", datasetName,
         "--use-local", "-d", "target/data", "-s", avsc);
     this.dataset = Datasets.load(
-        new URIBuilder("repo:file:target/data", datasetName).build(),
+        new URIBuilder("repo:file:target/data", "default", datasetName).build(),
         GenericData.Record.class);
     this.console = mock(Logger.class);
     this.command = new CSVImportCommand(console);

@@ -68,7 +68,7 @@ public class TestUpdateDatasetCommand {
         .build();
 
     this.ds = mock(Dataset.class);
-    when(repo.load("users")).thenReturn(ds);
+    when(repo.load("default", "users")).thenReturn(ds);
     when(ds.getDataset()).thenReturn(ds);
     when(ds.getDescriptor()).thenReturn(original);
   }
@@ -79,9 +79,9 @@ public class TestUpdateDatasetCommand {
     //
     command.run();
 
-    verify(repo).load("users"); // need to load the current dataset
+    verify(repo).load("default", "users"); // need to load the current dataset
     verify(ds).getDescriptor(); // should inspect and use its descriptor
-    verify(repo).update(eq("users"), argThat(TestUtil.matches(original)));
+    verify(repo).update(eq("default"), eq("users"), argThat(TestUtil.matches(original)));
     verify(console).debug(contains("Updated"), eq("users"));
   }
 
@@ -98,9 +98,9 @@ public class TestUpdateDatasetCommand {
         .schemaLiteral(schema2)
         .build();
 
-    verify(repo).load("users"); // need to load the current dataset
+    verify(repo).load("default", "users"); // need to load the current dataset
     verify(ds).getDescriptor(); // should inspect and use its descriptor
-    verify(repo).update(eq("users"), argThat(TestUtil.matches(updated)));
+    verify(repo).update(eq("default"), eq("users"), argThat(TestUtil.matches(updated)));
     verify(console).debug(contains("Updated"), eq("users"));
   }
 
@@ -118,9 +118,9 @@ public class TestUpdateDatasetCommand {
         .property("prop", "with=equals")
         .build();
 
-    verify(repo).load("users"); // need to load the current dataset
+    verify(repo).load("default", "users"); // need to load the current dataset
     verify(ds).getDescriptor(); // should inspect and use its descriptor
-    verify(repo).update(eq("users"), argThat(TestUtil.matches(updated)));
+    verify(repo).update(eq("default"), eq("users"), argThat(TestUtil.matches(updated)));
     verify(console).debug(contains("Updated"), eq("users"));
   }
 

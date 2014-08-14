@@ -95,7 +95,7 @@ public class TestCopyCommandLocal {
     Assert.assertEquals("Should return success", 0, rc);
 
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:file:target/data");
-    int size = DatasetTestUtilities.datasetSize(repo.load(dest));
+    int size = DatasetTestUtilities.datasetSize(repo.load("default", source));
     Assert.assertEquals("Should contain copied records", 2, size);
   }
 }

@@ -59,7 +59,7 @@ public class TestCreateDatasetCommand {
         .schemaUri("resource:test-schemas/user.avsc")
         .build();
 
-    verify(repo).create("users", expectedDescriptor);
+    verify(repo).create("default", "users", expectedDescriptor);
     verify(console).debug(contains("Created"), eq("users"));
   }
 
@@ -75,7 +75,7 @@ public class TestCreateDatasetCommand {
         .format("parquet")
         .build();
 
-    verify(repo).create("users", expectedDescriptor);
+    verify(repo).create("default", "users", expectedDescriptor);
     verify(console).debug(contains("Created"), eq("users"));
   }
 

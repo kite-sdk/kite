@@ -83,7 +83,7 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
     if (isDataUri(datasets.get(0))) {
       Datasets.<Object, Dataset<Object>> create(datasets.get(0), descriptor, Object.class);
     } else {
-      getDatasetRepository().create(datasets.get(0), descriptor);
+      getDatasetRepository().create(namespace, datasets.get(0), descriptor);
     }
     console.debug("Created {}", datasets.get(0));
 

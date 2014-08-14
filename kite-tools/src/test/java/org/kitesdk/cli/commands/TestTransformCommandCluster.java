@@ -119,7 +119,7 @@ public class TestTransformCommandCluster extends MiniDFSTest {
     Assert.assertEquals("Should return success", 0, rc);
 
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
-    int size = DatasetTestUtilities.datasetSize(repo.load(dest));
+    int size = DatasetTestUtilities.datasetSize(repo.load("default", dest));
     Assert.assertEquals("Should contain copied records", 6, size);
 
     verify(console).info("Added {} records to \"{}\"", 6l, dest);
@@ -137,7 +137,7 @@ public class TestTransformCommandCluster extends MiniDFSTest {
 
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     Set<GenericRecord> records = DatasetTestUtilities.materialize(
-        repo.<GenericRecord>load(dest));
+        repo.<GenericRecord>load("default", dest));
     Assert.assertEquals("Should contain copied records", 6, records.size());
     for (GenericRecord record : records) {
       Assert.assertTrue("Username should be upper case",
@@ -157,7 +157,7 @@ public class TestTransformCommandCluster extends MiniDFSTest {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     FileSystemDataset<GenericData.Record> ds =
         (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
-            load(dest);
+            load("default", dest);
     int size = DatasetTestUtilities.datasetSize(ds);
     Assert.assertEquals("Should contain copied records", 6, size);
 
@@ -183,7 +183,7 @@ public class TestTransformCommandCluster extends MiniDFSTest {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     FileSystemDataset<GenericData.Record> ds =
         (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
-            load(dest);
+            load("default", dest);
     int size = DatasetTestUtilities.datasetSize(ds);
     Assert.assertEquals("Should contain copied records", 6, size);
 
@@ -220,7 +220,7 @@ public class TestTransformCommandCluster extends MiniDFSTest {
     command.repoURI = repoUri;
     command.numWriters = 3;
     command.datasets = Lists.newArrayList(source, "dest_partitioned");
-    URI dsUri = new URIBuilder("repo:" + repoUri, "dest_partitioned").build();
+    URI dsUri = new URIBuilder("repo:" + repoUri, "default", "dest_partitioned").build();
     Datasets.<Object, Dataset<Object>>create(dsUri, new DatasetDescriptor.Builder()
         .partitionStrategy(new PartitionStrategy.Builder()
             .hash("id", 2)
@@ -238,7 +238,7 @@ public class TestTransformCommandCluster extends MiniDFSTest {
     DatasetRepository repo = DatasetRepositories.repositoryFor("repo:" + repoUri);
     FileSystemDataset<GenericData.Record> ds =
         (FileSystemDataset<GenericData.Record>) repo.<GenericData.Record>
-            load("dest_partitioned");
+            load("default", "dest_partitioned");
     int size = DatasetTestUtilities.datasetSize(ds);
     Assert.assertEquals("Should contain copied records", 6, size);
 
