@@ -90,7 +90,7 @@ public class UpdateDatasetMojo extends AbstractDatasetMojo {
       Preconditions.checkArgument(datasetName != null,
           "kite.datasetName is required if kite.uri is not used");
       DatasetRepository repo = getDatasetRepository();
-      descriptor = repo.load(datasetNamespace, datasetName).getDescriptor();
+      descriptor = repo.load(datasetName).getDescriptor();
     }
 
     DatasetDescriptor.Builder descriptorBuilder = new DatasetDescriptor.Builder(
@@ -117,7 +117,7 @@ public class UpdateDatasetMojo extends AbstractDatasetMojo {
     } else {
       // datasetName is checked above
       DatasetRepository repo = getDatasetRepository();
-      repo.update(datasetNamespace, datasetName, descriptorBuilder.build());
+      repo.update(datasetName, descriptorBuilder.build());
     }
   }
 }

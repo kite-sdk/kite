@@ -55,7 +55,7 @@ public class DeleteDatasetMojo extends AbstractDatasetMojo {
       Preconditions.checkArgument(datasetName != null,
           "kite.datasetName is required if kite.uri is not used");
       DatasetRepository repo = getDatasetRepository();
-      repo.delete(datasetNamespace, datasetName);
+      repo.delete(datasetName);
     }
   }
 }
