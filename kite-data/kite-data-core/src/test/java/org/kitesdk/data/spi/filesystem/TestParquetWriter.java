@@ -16,8 +16,13 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import java.io.IOException;
 import org.apache.avro.SchemaBuilder;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.Assert;
+import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
 
@@ -31,5 +36,22 @@ public class TestParquetWriter extends TestFileSystemWriters<Object> {
                 .endRecord())
             .format("parquet")
             .build());
+  }
+
+  @Test
+  public void testParquetConfiguration() throws IOException {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.getLocal(conf);
+    FileSystemWriter<Object> writer = new FileSystemWriter<Object>(
+        fs, new Path("/tmp"),
+        new DatasetDescriptor.Builder()
+            .property("parquet.block.size", "34343434")
+            .schema(SchemaBuilder.record("test").fields()
+                .requiredString("s")
+                .endRecord())
+            .format("parquet")
+            .build());
+    Assert.assertEquals("Should copy properties to Configuration",
+        34343434, writer.conf.getInt("parquet.block.size", -1));
   }
 }
