@@ -21,6 +21,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.Closeables;
 import org.apache.log4j.Level;
 import org.apache.log4j.PropertyConfigurator;
 import org.kitesdk.cli.commands.CSVImportCommand;
@@ -31,6 +32,9 @@ import org.kitesdk.cli.commands.CreateDatasetCommand;
 import org.kitesdk.cli.commands.CreatePartitionStrategyCommand;
 import org.kitesdk.cli.commands.DeleteDatasetCommand;
 import com.google.common.collect.ImmutableSet;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.Set;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
@@ -55,6 +59,10 @@ public class Main extends Configured implements Tool {
   @Parameter(names = {"-v", "--verbose", "--debug"},
       description = "Print extra debugging information")
   private boolean debug = false;
+
+  @Parameter(names = {"--version"},
+      description = "Print Kite version and exit")
+  private boolean printVersion = false;
 
   @VisibleForTesting
   static final String PROGRAM_NAME = "dataset";
@@ -112,6 +120,11 @@ public class Main extends Configured implements Tool {
       }
       console.error(e.getMessage());
       return 1;
+    }
+
+    if (printVersion) {
+      console.info("kite version \"{}\"", getVersion());
+      return 0;
     }
 
     // configure log4j
@@ -183,6 +196,32 @@ public class Main extends Configured implements Tool {
       }
       return 1;
     }
+  }
+
+  @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch"})
+  private String getVersion() {
+    String location = "/META-INF/maven/org.kitesdk/kite-tools/pom.properties";
+    String version = "unknown";
+    InputStream pomPropertiesStream = null;
+    try {
+      Properties pomProperties = new Properties();
+      pomPropertiesStream = Main.class.getResourceAsStream(location);
+      pomProperties.load(pomPropertiesStream);
+
+      version = pomProperties.getProperty("version");
+    } catch (Exception ex) {
+      if (debug) {
+        console.warn("Unable to determine version from the {} file", location);
+        console.warn("Exception:", ex);
+      } else {
+        console.warn("Unable to determine version from the {} file: {}",
+            location, ex.getMessage());
+      }
+    } finally {
+      Closeables.closeQuietly(pomPropertiesStream);
+    }
+
+    return version;
   }
 
   public static void main(String[] args) throws Exception {
