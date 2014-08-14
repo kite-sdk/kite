@@ -31,6 +31,7 @@ import org.apache.crunch.types.avro.AvroType;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
+import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.View;
@@ -150,7 +151,11 @@ class DatasetTarget<E> implements MapReduceTarget {
   @Override
   @SuppressWarnings("unchecked")
   public Converter<?, ?, ?, ?> getConverter(PType<?> ptype) {
-    return new KeyConverter<E>((AvroType<E>) ptype);
+    if (ptype instanceof AvroType) {
+      return new KeyConverter<E>((AvroType<E>) ptype);
+    }
+    throw new DatasetException(
+        "Cannot create converter for non-Avro type: " + ptype);
   }
 
   @Override
