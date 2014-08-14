@@ -20,8 +20,10 @@ import com.google.common.io.Closeables;
 import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.DatasetDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parquet.avro.AvroParquetWriter;
@@ -37,15 +39,17 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
   private final Path path;
   private final Schema schema;
   private final FileSystem fileSystem;
+  private final Configuration conf;
   private final boolean enableCompression;
 
   private AvroParquetWriter<E> avroParquetWriter = null;
 
-  public ParquetAppender(FileSystem fileSystem, Path path,
-                         Schema schema, boolean enableCompression) {
+  public ParquetAppender(FileSystem fileSystem, Path path, Schema schema,
+                         Configuration conf, boolean enableCompression) {
     this.fileSystem = fileSystem;
     this.path = path;
     this.schema = schema;
+    this.conf = conf;
     this.enableCompression = enableCompression;
   }
 
@@ -58,7 +62,7 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
     avroParquetWriter = new AvroParquetWriter<E>(fileSystem.makeQualified(path),
         schema, codecName, DEFAULT_BLOCK_SIZE,
         ParquetWriter.DEFAULT_PAGE_SIZE,
-        ParquetWriter.DEFAULT_IS_DICTIONARY_ENABLED, fileSystem.getConf());
+        ParquetWriter.DEFAULT_IS_DICTIONARY_ENABLED, conf);
   }
 
   @Override

@@ -16,11 +16,13 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 import java.util.UUID;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -55,6 +57,9 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
   private ReaderWriterState state;
   private int count = 0;
 
+  @VisibleForTesting
+  final Configuration conf;
+
   public FileSystemWriter(FileSystem fs, Path path, DatasetDescriptor descriptor) {
     Preconditions.checkNotNull(fs, "File system is not defined");
     Preconditions.checkNotNull(path, "Destination directory is not defined");
@@ -62,7 +67,13 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     this.fs = fs;
     this.directory = path;
     this.descriptor = descriptor;
+    this.conf = new Configuration(fs.getConf());
     this.state = ReaderWriterState.NEW;
+
+    // copy file format settings from custom properties to the Configuration
+    for (String prop : descriptor.listProperties()) {
+      conf.set(prop, descriptor.getProperty(prop));
+    }
   }
 
   @Override
@@ -199,10 +210,10 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
       if (DescriptorUtil.isEnabled(
           FileSystemProperties.NON_DURABLE_PARQUET_PROP, descriptor)) {
         return (FileAppender<E>) new ParquetAppender(
-            fs, temp, descriptor.getSchema(), true);
+            fs, temp, descriptor.getSchema(), conf, true);
       } else {
         return (FileAppender<E>) new DurableParquetAppender(
-            fs, temp, descriptor.getSchema(), true);
+            fs, temp, descriptor.getSchema(), conf, true);
       }
     } else if (Formats.AVRO.equals(format)) {
       return new AvroAppender<E>(fs, temp, descriptor.getSchema(), true);
