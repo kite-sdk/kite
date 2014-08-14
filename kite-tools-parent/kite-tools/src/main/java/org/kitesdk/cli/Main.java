@@ -47,6 +47,7 @@ import org.kitesdk.cli.commands.ObjectSchemaCommand;
 import org.kitesdk.cli.commands.SchemaCommand;
 import org.kitesdk.cli.commands.ShowRecordsCommand;
 import org.kitesdk.cli.commands.TransformCommand;
+import org.kitesdk.cli.commands.TarImportCommand;
 import org.kitesdk.cli.commands.UpdateDatasetCommand;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
@@ -103,6 +104,7 @@ public class Main extends Configured implements Tool {
     jc.addCommand("mapping-config", new CreateColumnMappingCommand(console));
     jc.addCommand("log4j-config", new Log4jConfigCommand(console));
     jc.addCommand("flume-config", new FlumeConfigCommand(console));
+    jc.addCommand("tar-import", new TarImportCommand(console));
   }
 
   @Override
