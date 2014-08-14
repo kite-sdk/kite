@@ -149,7 +149,7 @@ public class CreateDatasetMojo extends AbstractDatasetMojo {
       Preconditions.checkArgument(datasetName != null,
           "kite.datasetName is required if kite.uri is not used");
       DatasetRepository repo = getDatasetRepository();
-      repo.create(datasetName, descriptorBuilder.build());
+      repo.create(datasetNamespace, datasetName, descriptorBuilder.build());
     }
   }
 
