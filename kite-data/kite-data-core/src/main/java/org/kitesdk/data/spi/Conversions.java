@@ -52,37 +52,26 @@ public class Conversions {
     }
   }
 
-  public static Object convertField(Object obj, Schema schema, String name) {
-    Preconditions.checkArgument(schema.getType() == Schema.Type.RECORD,
-        "Trying to convert the field of a non-Record Avro object.");
-    Field field = schema.getField(name);
-    Schema.Type type = field.schema().getType();
-    if (type == Schema.Type.RECORD) {
-      return obj;
+  public static Object convert(Object obj, Schema schema) {
+    Class<?> returnType = SchemaUtil.getClassForType(schema.getType());
+    if (returnType != null) {
+      return convert(obj, returnType);
     }
 
-    Class<?> returnType = SchemaUtil.getClassForType(type);
-    if (type == Schema.Type.UNION) {
-      List<Schema> types = field.schema().getTypes();
-      for(int i = 0; i < types.size(); i++) {
-        type = types.get(i).getType();
-        returnType = SchemaUtil.getClassForType(type);
-        if (returnType != null) {
-          break;
+    switch (schema.getType()) {
+      case UNION:
+        for (Schema possibleSchema : schema.getTypes()) {
+          try {
+            return convert(obj,
+                SchemaUtil.getClassForType(possibleSchema.getType()));
+          } catch (ClassCastException e) {
+            // didn't work, try the next one
+          }
         }
-      }
+        break;
     }
-
-    if (returnType == null) {
-      throw new IllegalArgumentException(String.format("No valid type conversion for schema %s",
-          field.schema().toString()));
-    }
-
-    return convert(obj, returnType);
-  }
-
-  public static Comparable convertField(Comparable obj, Schema schema, String name) {
-    return (Comparable) convertField((Object)obj, schema, name);
+    throw new ClassCastException(
+        "Cannot convert using schema: " + schema.toString(true));
   }
 
   public static Long makeLong(Object value) {

@@ -50,7 +50,8 @@ class DatasetTarget<E> implements MapReduceTarget {
   public DatasetTarget(View<E> view) {
     this.view = view;
     Configuration temp = emptyConf();
-    DatasetKeyOutputFormat.configure(temp).writeTo(view);
+    // use appendTo since handleExisting checks for existing data
+    DatasetKeyOutputFormat.configure(temp).appendTo(view);
     this.formatBundle = outputBundle(temp);
     this.uri = view.getDataset().getUri();
   }
@@ -58,7 +59,8 @@ class DatasetTarget<E> implements MapReduceTarget {
   public DatasetTarget(URI uri) {
     this.uri = uri;
     Configuration temp = emptyConf();
-    DatasetKeyOutputFormat.configure(temp).writeTo(uri);
+    // use appendTo since handleExisting checks for existing data
+    DatasetKeyOutputFormat.configure(temp).appendTo(uri);
     this.formatBundle = outputBundle(temp);
   }
 
