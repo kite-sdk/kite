@@ -15,12 +15,14 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.spi.AbstractDatasetRepository;
 import org.kitesdk.data.spi.AbstractMetadataProvider;
 import org.kitesdk.data.spi.MetadataProvider;
 import com.google.common.base.Charsets;
@@ -75,6 +77,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
   private static final String FORMAT_FIELD_NAME = "format";
   private static final String LOCATION_FIELD_NAME = "location";
   private static final String COMPRESSION_TYPE_FIELD_NAME = "compressionType";
+  private static final String DEFAULT_NAMESPACE = "default";
 
   private static final Set<String> RESERVED_PROPERTIES = Sets.newHashSet(
       PARTITION_EXPRESSION_FIELD_NAME, VERSION_FIELD_NAME, FORMAT_FIELD_NAME,
@@ -106,8 +109,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
     LOG.debug("Loading dataset metadata name: {}", name);
 
-    Path metadataPath = pathForMetadata(namespace, name);
-    checkExists(rootFileSystem, metadataPath);
+    Path metadataPath = find(namespace, name);
 
     InputStream inputStream = null;
     Properties properties = new Properties();
@@ -182,6 +184,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     LOG.debug("Saving dataset metadata name:{} descriptor:{}", name,
         descriptor);
 
+    // no need to check backward-compatibility when creating new datasets
     Path metadataLocation = pathForMetadata(namespace, name);
 
     try {
@@ -212,8 +215,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     LOG.debug("Saving dataset metadata name: {} descriptor: {}", name,
         descriptor);
 
-    writeDescriptor(
-        rootFileSystem, pathForMetadata(namespace, name), name, descriptor);
+    Path metadataPath = find(namespace, name);
+    writeDescriptor(rootFileSystem, metadataPath, name, descriptor);
 
     return descriptor;
   }
@@ -225,7 +228,12 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
 
     LOG.debug("Deleting dataset metadata name: {}", name);
 
-    final Path metadataDirectory = pathForMetadata(namespace, name);
+    Path metadataDirectory;
+    try {
+      metadataDirectory = find(namespace, name);
+    } catch (DatasetNotFoundException _) {
+      return false;
+    }
 
     try {
       if (rootFileSystem.exists(metadataDirectory)) {
@@ -250,12 +258,11 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
-    final Path potentialPath = pathForMetadata(namespace, name);
     try {
-      return rootFileSystem.exists(potentialPath);
-    } catch (IOException ex) {
-      throw new DatasetIOException(
-          "Could not check metadata path:" + potentialPath, ex);
+      find(namespace, name);
+      return true;
+    } catch (DatasetNotFoundException e) {
+      return false;
     }
   }
 
@@ -267,9 +274,15 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
       FileStatus[] entries = rootFileSystem.listStatus(rootDirectory,
           PathFilters.notHidden());
       for (FileStatus entry : entries) {
-        if (entry.isDir() && isNamespace(entry.getPath())) {
+        if (entry.isDir()) {
           // may want to add a check: !RESERVED_NAMES.contains(name)
-          namespaces.add(entry.getPath().getName());
+          if (isNamespace(entry.getPath())) {
+            namespaces.add(entry.getPath().getName());
+
+          } else if (isDataset(entry.getPath())) {
+            // add the default namespace for datasets with no namespace
+            namespaces.add(DEFAULT_NAMESPACE);
+          }
         }
       }
     } catch (FileNotFoundException ex) {
@@ -287,6 +300,27 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     Preconditions.checkNotNull(namespace, "Namespace cannot be null");
 
     List<String> datasets = Lists.newArrayList();
+
+    try {
+      // if using the default namespace, add datasets with no namespace dir
+      if (DEFAULT_NAMESPACE.equals(namespace)) {
+        FileStatus[] directEntries = rootFileSystem.listStatus(
+            rootDirectory,
+            PathFilters.notHidden());
+        for (FileStatus entry : directEntries) {
+          if (entry.isDir() && isDataset(entry.getPath())) {
+            // may want to add a check: !RESERVED_NAMES.contains(name)
+            datasets.add(entry.getPath().getName());
+          }
+        }
+      }
+    } catch (FileNotFoundException e) {
+      // if the root directory doesn't exist, then no namespace directories do
+      return datasets;
+    } catch (IOException ex) {
+      throw new DatasetIOException("Could not list datasets", ex);
+    }
+
     try {
       FileStatus[] entries = rootFileSystem.listStatus(
           new Path(rootDirectory, namespace),
@@ -297,6 +331,7 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
           datasets.add(entry.getPath().getName());
         }
       }
+
     } catch (FileNotFoundException ex) {
       // the repo hasn't created any files yet
       return datasets;
@@ -397,7 +432,8 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
    *                          If the {@code metadataLocation} does not exist or
    *                          if any IOExceptions need to be propagated.
    */
-  private static void writeDescriptor(
+  @VisibleForTesting
+  static void writeDescriptor(
       FileSystem fs, Path metadataLocation, String name,
       DatasetDescriptor descriptor) {
 
@@ -497,4 +533,42 @@ public class FileSystemMetadataProvider extends AbstractMetadataProvider {
     }
   }
 
+  /**
+   * This method provides backward-compatibility for finding metadata.
+   * <p>
+   * This handles the case where an existing program is opening a
+   * DatasetRepository by URI. For example, the DatasetSink and maven plugin do
+   * this. In that case, the repository URI will directly contain a directory
+   * named for the dataset with .metadata in it. This checks for the updated
+   * scheme and falls back to the old scheme if the namespace is "default".
+   *
+   * @param namespace the requested namespace.
+   * @param name the dataset name.
+   * @return a Path to the correct metadata directory
+   * @throws DatasetNotFoundException if neither location has metadata
+   */
+  private Path find(String namespace, String name) {
+    Path expectedPath = pathForMetadata(namespace, name);
+    if (DEFAULT_NAMESPACE.equals(namespace)) {
+      // when using the default namespace, the namespace may not be in the path
+      try {
+        checkExists(rootFileSystem, expectedPath);
+        return expectedPath;
+      } catch (DatasetNotFoundException e) {
+        try {
+          Path backwardCompatiblePath = new Path(rootDirectory, new Path(
+              name.replace('.', Path.SEPARATOR_CHAR), METADATA_DIRECTORY));
+          checkExists(rootFileSystem, backwardCompatiblePath);
+          return backwardCompatiblePath;
+        } catch (DatasetNotFoundException _) {
+          throw e; // throw the original
+        }
+      }
+
+    } else {
+      // no need to check other locations
+      checkExists(rootFileSystem, expectedPath);
+      return expectedPath;
+    }
+  }
 }
