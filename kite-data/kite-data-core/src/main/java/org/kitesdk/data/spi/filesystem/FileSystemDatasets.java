@@ -32,11 +32,23 @@ import org.kitesdk.data.spi.Conversions;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.SchemaUtil;
 
+/**
+ * <p>
+ * A helper class working with {@link org.kitesdk.data.spi.filesystem.FileSystemDataset}s.
+ * </p>
+ */
 public class FileSystemDatasets {
 
   private static final Splitter PATH_SPLITTER = Splitter.on('/');
-  private static final Splitter KV_SPILTTER = Splitter.on('=').limit(2);
+  private static final Splitter KV_SPLITTER = Splitter.on('=').limit(2);
 
+  /**
+   * Convert a URI for a partition directory in a filesystem dataset to a {@link View}
+   * object representing that partition.
+   * @param dataset the (partitioned) filesystem dataset
+   * @param uri the path to the partition directory
+   * @return a view of the partition
+   */
   public static <E> View<E> viewForUri(Dataset<E> dataset, URI uri) {
     Preconditions.checkArgument(dataset instanceof FileSystemDataset,
         "Not a file system dataset: " + dataset);
@@ -69,17 +81,31 @@ public class FileSystemDatasets {
       if (!parts.hasNext()) {
         break;
       }
-      String value = Iterables.getLast(KV_SPILTTER.split(parts.next()));
+      String value = Iterables.getLast(KV_SPLITTER.split(parts.next()));
       Schema fieldSchema = SchemaUtil.fieldSchema(schema, strategy, fp.getName());
       view = view.with(fp.getName(), Conversions.convert(value, fieldSchema));
     }
     return view;
   }
 
+  /**
+   * Convert a URI for a partition directory in a filesystem dataset to a {@link View}
+   * object representing that partition.
+   * @param dataset the (partitioned) filesystem dataset
+   * @param uri the path to the partition directory
+   * @return a view of the partition
+   */
   public static <E> View<E> viewForUri(Dataset<E> dataset, String uri) {
     return viewForUri(dataset, URI.create(uri));
   }
 
+  /**
+   * Convert a path to a partition directory in a filesystem dataset to a {@link View}
+   * object representing that partition.
+   * @param dataset the (partitioned) filesystem dataset
+   * @param path the path to the partition directory
+   * @return a view of the partition
+   */
   public static <E> View<E> viewForPath(Dataset<E> dataset, Path path) {
     return viewForUri(dataset, path.toUri());
   }
