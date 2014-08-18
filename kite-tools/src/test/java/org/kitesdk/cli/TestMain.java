@@ -160,7 +160,7 @@ public class TestMain {
   @Test
   public void testVersion() throws Exception {
     int rc = run("--version");
-    verify(console).info(anyString(), anyString());
+    verify(console).info(contains("kite version"), anyString());
     assertEquals(0, rc);
   }
 

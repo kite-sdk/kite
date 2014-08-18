@@ -21,6 +21,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.Closeables;
 import org.apache.log4j.Level;
 import org.apache.log4j.PropertyConfigurator;
 import org.kitesdk.cli.commands.CSVImportCommand;
@@ -74,35 +75,6 @@ public class Main extends Configured implements Tool {
   @VisibleForTesting
   final JCommander jc;
 
-  private static final String version;
-
-  static {
-    String location = "/META-INF/maven/org.kitesdk/kite-tools/pom.properties";
-    String tempVersion;
-    InputStream resourceAsStream = null;
-    try {
-      Properties pomProperties = new Properties();
-      resourceAsStream = Help.class.getResourceAsStream(location);
-      pomProperties.load(resourceAsStream);
-
-      tempVersion = pomProperties.getProperty("version");
-    } catch (Exception ex) {
-      LoggerFactory.getLogger(Help.class).warn(
-          "Unable to determine version from the {} file: {}", location, ex.getMessage());
-      tempVersion = "unknown";
-    } finally {
-      if (resourceAsStream != null) {
-        try {
-          resourceAsStream.close();
-        } catch (IOException ex) {
-          LoggerFactory.getLogger(Help.class).warn(
-              "IO error closing pom properties stream: {}", ex.getMessage());
-        }
-      }
-    }
-    version = tempVersion;
-  }
-
   Main(Logger console) {
     this.console = console;
     this.jc = new JCommander(this);
@@ -151,7 +123,7 @@ public class Main extends Configured implements Tool {
     }
 
     if (printVersion) {
-      console.info("kite version \"{}\"", version);
+      console.info("kite version \"{}\"", getVersion());
       return 0;
     }
 
@@ -224,6 +196,32 @@ public class Main extends Configured implements Tool {
       }
       return 1;
     }
+  }
+
+  @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch"})
+  private String getVersion() {
+    String location = "/META-INF/maven/org.kitesdk/kite-tools/pom.properties";
+    String version = "unknown";
+    InputStream pomPropertiesStream = null;
+    try {
+      Properties pomProperties = new Properties();
+      pomPropertiesStream = Main.class.getResourceAsStream(location);
+      pomProperties.load(pomPropertiesStream);
+
+      version = pomProperties.getProperty("version");
+    } catch (Exception ex) {
+      if (debug) {
+        console.warn("Unable to determine version from the {} file", location);
+        console.warn("Exception:", ex);
+      } else {
+        console.warn("Unable to determine version from the {} file: {}",
+            location, ex.getMessage());
+      }
+    } finally {
+      Closeables.closeQuietly(pomPropertiesStream);
+    }
+
+    return version;
   }
 
   public static void main(String[] args) throws Exception {
