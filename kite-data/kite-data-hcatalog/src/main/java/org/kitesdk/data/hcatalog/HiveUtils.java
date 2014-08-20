@@ -79,7 +79,7 @@ class HiveUtils {
   private static final Map<Format, String> FORMAT_TO_OUTPUT_FORMAT = Maps.newHashMap();
   static {
     FORMAT_TO_SERDE.put(Formats.AVRO, "org.apache.hadoop.hive.serde2.avro.AvroSerDe");
-    FORMAT_TO_SERDE.put(Formats.PARQUET, "parquet.hive.serde.ParquetHiveSerDe");
+    FORMAT_TO_SERDE.put(Formats.PARQUET, getHiveParquetSerde());
 
     FORMAT_TO_INPUT_FORMAT.put(Formats.AVRO, "org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
     FORMAT_TO_INPUT_FORMAT.put(Formats.PARQUET, getHiveParquetInputFormat());
@@ -450,4 +450,15 @@ class HiveUtils {
     }
   }
 
+  private static String getHiveParquetSerde() {
+    String newClass = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe";
+    String oldClass = "parquet.hive.serde.ParquetHiveSerDe";
+
+    try {
+      Class.forName(newClass);
+      return newClass;
+    } catch (ClassNotFoundException ex) {
+      return oldClass;
+    }
+  }
 }
