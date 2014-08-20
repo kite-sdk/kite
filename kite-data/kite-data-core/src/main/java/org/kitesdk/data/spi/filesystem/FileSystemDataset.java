@@ -95,7 +95,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
     this.partitionStrategy =
         descriptor.isPartitioned() ? descriptor.getPartitionStrategy() : null;
     this.partitionListener = partitionListener;
-    this.convert = new PathConversion();
+    this.convert = new PathConversion(descriptor.getSchema());
     this.uri = uri;
 
     this.unbounded = new FileSystemView<E>(this, type);

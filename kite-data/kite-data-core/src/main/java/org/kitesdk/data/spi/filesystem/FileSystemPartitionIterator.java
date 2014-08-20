@@ -19,6 +19,7 @@ package org.kitesdk.data.spi.filesystem;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import javax.annotation.Nullable;
+import org.apache.avro.Schema;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
@@ -91,10 +92,10 @@ class FileSystemPartitionIterator implements
     private final StorageKey reusableKey;
     private final PathConversion convert;
 
-    public MakeKey(PartitionStrategy strategy) {
+    public MakeKey(PartitionStrategy strategy, Schema schema) {
       this.partitioners = strategy.getFieldPartitioners();
       this.reusableKey = new StorageKey(strategy);
-      this.convert = new PathConversion();
+      this.convert = new PathConversion(schema);
     }
 
     @Override
@@ -135,7 +136,7 @@ class FileSystemPartitionIterator implements
 
   @SuppressWarnings("deprecation")
   FileSystemPartitionIterator(
-      FileSystem fs, Path root, PartitionStrategy strategy,
+      FileSystem fs, Path root, PartitionStrategy strategy, Schema schema,
       final Constraints constraints)
       throws IOException {
     Preconditions.checkArgument(fs.isDirectory(root));
@@ -144,7 +145,7 @@ class FileSystemPartitionIterator implements
     this.iterator = Iterators.filter(
         Iterators.transform(
             new FileSystemIterator(strategy.getFieldPartitioners().size()),
-            new MakeKey(strategy)),
+            new MakeKey(strategy, schema)),
         new KeyPredicate(constraints.toKeyPredicate()));
   }
 

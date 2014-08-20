@@ -16,7 +16,9 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import org.apache.avro.Schema;
 import org.kitesdk.data.spi.FieldPartitioner;
+import org.kitesdk.data.spi.SchemaUtil;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
 import org.kitesdk.data.spi.partition.HourFieldPartitioner;
 import org.kitesdk.data.spi.partition.MinuteFieldPartitioner;
@@ -37,6 +39,12 @@ import java.util.List;
 import java.util.Map;
 
 public class PathConversion {
+
+  private final Schema schema;
+
+  public PathConversion(Schema schema) {
+    this.schema = schema;
+  }
 
   public StorageKey toKey(Path fromPath, StorageKey storage) {
     final List<FieldPartitioner> partitioners =
@@ -100,7 +108,8 @@ public class PathConversion {
 
   public <T> T valueForDirname(FieldPartitioner<?, T> field, String name) {
     // this could check that the field name matches the directory name
-    return Conversions.convert(valueStringForDirname(name), field.getType());
+    return Conversions.convert(valueStringForDirname(name),
+        SchemaUtil.getPartitionType(field, schema));
   }
 
   public String valueStringForDirname(String name) {

@@ -150,10 +150,11 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
   }
 
   private FileSystemPartitionIterator partitionIterator() {
+    DatasetDescriptor descriptor = dataset.getDescriptor();
     try {
       return new FileSystemPartitionIterator(
-          fs, root,
-          dataset.getDescriptor().getPartitionStrategy(), constraints);
+          fs, root, descriptor.getPartitionStrategy(), descriptor.getSchema(),
+          constraints);
     } catch (IOException ex) {
       throw new DatasetException("Cannot list partitions in view:" + this, ex);
     }

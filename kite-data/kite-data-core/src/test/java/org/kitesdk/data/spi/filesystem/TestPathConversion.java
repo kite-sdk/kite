@@ -15,6 +15,8 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
 import org.kitesdk.data.spi.partition.HourFieldPartitioner;
@@ -33,7 +35,12 @@ import java.util.List;
 
 public class TestPathConversion {
 
-  private static final PathConversion convert = new PathConversion();
+  private static final Schema schema = SchemaBuilder.record("Event").fields()
+      .requiredLong("id")
+      .requiredLong("timestamp")
+      .endRecord();
+
+  private static final PathConversion convert = new PathConversion(schema);
   private static final Splitter EQ = Splitter.on('=');
 
   @Test
@@ -131,5 +138,20 @@ public class TestPathConversion {
     Assert.assertEquals(
         new Path("name_copy=John+Doe/address_copy=NY%2FUSA"),
         convert.fromKey(key));
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void toDirNameIdentityWithNonString() {
+    PartitionStrategy strategy = new PartitionStrategy.Builder()
+        .identity("id")
+        .build();
+
+    StorageKey expected = new StorageKey(strategy);
+    expected.replace(0, 0L);
+
+    Assert.assertEquals("Should convert to schema type",
+        expected,
+        convert.toKey(new Path("id=0"), new StorageKey(strategy)));
   }
 }

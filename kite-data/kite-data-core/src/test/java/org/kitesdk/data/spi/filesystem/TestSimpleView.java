@@ -159,4 +159,32 @@ public class TestSimpleView {
 
   }
 
+  @Test
+  public void testRefineIdentity() throws Exception {
+      PartitionStrategy strategy = new PartitionStrategy.Builder()
+              .identity("user_id")
+              .build();
+
+      DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+              .schemaUri("resource:standard_event.avsc")
+              .partitionStrategy(strategy)
+              .build();
+
+      // Create a separate dataset to avoid conflicts with the above.
+      Dataset<StandardEvent> identityDataset = repo.create("test_identity", descriptor);
+
+      DatasetWriter<StandardEvent> writer = null;
+
+      try {
+          writer = identityDataset.newWriter();
+          writer.write(sepEvent);
+          writer.write(octEvent);
+          writer.write(novEvent);
+      } finally {
+          Closeables.close(writer, false);
+      }
+
+      assertContentEquals(Sets.newHashSet(sepEvent, novEvent),
+              identityDataset.with("user_id", 0L));
+  }
 }

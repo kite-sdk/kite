@@ -190,7 +190,8 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
     public DatasetWriterCacheLoader(FileSystemView<E> view) {
       this.view = view;
-      this.convert = new PathConversion();
+      this.convert = new PathConversion(
+          view.getDataset().getDescriptor().getSchema());
     }
 
     @Override
