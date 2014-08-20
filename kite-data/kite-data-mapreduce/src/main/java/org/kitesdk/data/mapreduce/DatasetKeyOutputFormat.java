@@ -111,6 +111,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      *
      * @param uri a dataset or view URI
      * @return this for method chaining
+     *
+     * @since 0.16.0
      */
     public ConfigBuilder overwrite(URI uri) {
       setOverwrite();
@@ -127,6 +129,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      *
      * @param uri a dataset or view URI
      * @return this for method chaining
+     *
+     * @since 0.16.0
      */
     public ConfigBuilder appendTo(URI uri) {
       setAppend();
@@ -160,6 +164,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      *
      * @param view a dataset or view
      * @return this for method chaining
+     *
+     * @since 0.16.0
      */
     public ConfigBuilder overwrite(View<?> view) {
       setOverwrite();
@@ -172,6 +178,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      *
      * @param view a dataset or view
      * @return this for method chaining
+     *
+     * @since 0.16.0
      */
     public ConfigBuilder appendTo(View<?> view) {
       setAppend();
@@ -206,6 +214,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      *
      * @param uri a dataset or view URI string
      * @return this for method chaining
+     *
+     * @since 0.16.0
      */
     public ConfigBuilder overwrite(String uri) {
       setOverwrite();
@@ -222,6 +232,8 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
      *
      * @param uri a dataset or view URI string
      * @return this for method chaining
+     *
+     * @since 0.16.0
      */
     public ConfigBuilder appendTo(String uri) {
       setAppend();

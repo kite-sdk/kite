@@ -89,7 +89,7 @@ public interface View<E> {
    * then the implementation is allowed to reject the deletion rather than
    * copy the remaining records to a new file. Implementations must  document
    * what deletes are supported and under what conditions deletes are rejected.
-   * 
+   *
    * @return true if any data was deleted, false if the View was already empty
    * @throws UnsupportedOperationException
    *          if the requested delete cannot be completed by the implementation
@@ -101,9 +101,9 @@ public interface View<E> {
 
   /**
    * Get the runtime type of entities contained in this {@code View}.
-   * 
+   *
    * @return the runtime type of entities contained in this view
-   * 
+   *
    * @since 0.15.0
    */
   public Class<E> getType();
@@ -124,6 +124,8 @@ public interface View<E> {
    * Get a {@link URI} that identifies this {@code View}.
    *
    * @return a {@link URI} for this view.
+   *
+   * @since 0.16.0
    */
   public URI getUri();
 }

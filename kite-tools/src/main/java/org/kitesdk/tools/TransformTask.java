@@ -44,6 +44,9 @@ import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.View;
 import org.kitesdk.data.crunch.CrunchDatasets;
 
+/**
+ * @since 0.16.0
+ */
 public class TransformTask<S, T> extends Configured {
 
   private static DynMethods.StaticMethod getEnumByName =
