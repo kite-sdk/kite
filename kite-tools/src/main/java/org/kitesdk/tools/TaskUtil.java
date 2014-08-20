@@ -69,6 +69,8 @@ public class TaskUtil {
      *
      * @param jars A list of jar paths
      * @return this for method chaining
+     *
+     * @since 0.16.0
      */
     public ConfigBuilder addJars(List<String> jars) {
       if (!skipDistributedCache && jars != null) {

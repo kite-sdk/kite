@@ -21,6 +21,9 @@ import org.kitesdk.data.View;
 
 public class CopyTask<E> extends TransformTask<E, E> {
 
+  /**
+   * @since 0.16.0
+   */
   public CopyTask(View<E> from, View<E> to) {
     super(from, to, IdentityFn.<E>getInstance());
   }

@@ -95,6 +95,8 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
    * </p>
    *
    * @throws DatasetWriterException
+   *
+   * @since 0.16.0
    */
   void sync();
 
@@ -104,7 +106,7 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
    * </p>
    * <p>
    * No further operations of this interface (other than additional calls to
-   * this method) can be performed; however, implementations can choose to 
+   * this method) can be performed; however, implementations can choose to
    * permit other method calls. See implementation documentation for details.
    * </p>
    *
