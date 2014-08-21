@@ -7,7 +7,7 @@
 <meta name="description" content="JDiff is a Javadoc doclet which generates an HTML report of all the packages, classes, constructors, methods, and fields which have been removed, added or changed in any way, including their documentation, when two APIs are compared.">
 <meta name="keywords" content="diff, jdiff, javadiff, java diff, java difference, API difference, difference between two APIs, API diff, Javadoc, doclet">
 <TITLE>
-org.kitesdk.data.PartitionKey
+org.kitesdk.tools.CopyTask
 </TITLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="../stylesheet-jdiff.css" TITLE="Style">
 </HEAD>
@@ -18,9 +18,9 @@ org.kitesdk.data.PartitionKey
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionKey.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/tools/CopyTask.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.tools.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="jdiff_help.html"><FONT CLASS="NavBarFont1"><B>Help</B></FONT></A>&nbsp;</TD>
     </TR>
@@ -30,13 +30,13 @@ org.kitesdk.data.PartitionKey
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.DatasetWriter.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="org.kitesdk.data.PartitionStrategy.html"><B>NEXT CLASS</B></A>
+&nbsp;<B>PREV CLASS</B>&nbsp;
+&nbsp;<A HREF="org.kitesdk.tools.TaskUtil.ConfigBuilder.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
-  &nbsp;<A HREF="org.kitesdk.data.PartitionKey.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
+  &nbsp;<A HREF="org.kitesdk.tools.CopyTask.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell3"><FONT SIZE="-2"> DETAIL: &nbsp;
-CONSTRUCTORS&nbsp;|&nbsp;
+<a href="#constructors">CONSTRUCTORS</a>&nbsp;|&nbsp;
 <a href="#methods">METHODS</a>&nbsp;|&nbsp;
 FIELDS
   </FONT></TD>
@@ -45,11 +45,43 @@ FIELDS
 <HR>
 <!-- End of nav bar -->
 <H2>
-Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionKey.html" target="_top"><tt>PartitionKey</tt></A>
+Class org.kitesdk.tools.<A HREF="../../apidocs/org/kitesdk/tools/CopyTask.html" target="_top"><tt>CopyTask</tt></A>
 </H2>
-<p><font size="+1">The superclass changed from <code>java.lang.Object</code> to <code>org.kitesdk.data.spi.PartitionKey</code>.<br></font>
-<p><font size="+1"><b>Now deprecated</b>.<br></font>
+<p><font size="+1">The superclass changed from <code>org.apache.hadoop.conf.Configured</code> to <code>org.kitesdk.tools.TransformTask<E, E></code>.<br></font>
 <a NAME="constructors"></a>
+<p>
+<a NAME="Added"></a>
+<TABLE summary="Added Constructors" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Constructors</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.tools.CopyTask.ctor_added(org.kitesdk.data.View<E>, org.kitesdk.data.View<E>)"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/tools/CopyTask.html#CopyTask(org.kitesdk.data.View<E>, org.kitesdk.data.View<E>)" target="_top"><tt>CopyTask</tt></A>(<code>View&lt;E&gt;,</nobr> View&lt;E&gt;<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">@since 0.16.0</TD>
+</TR>
+</TABLE>
+&nbsp;
+<p>
+<a NAME="Changed"></a>
+<TABLE summary="Changed Constructors" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Constructors</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.tools.CopyTask.ctor_changed(org.kitesdk.data.View<E>, org.kitesdk.data.View<E>, java.lang.Class<E>)"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/tools/CopyTask.html#CopyTask(org.kitesdk.data.View<E>, org.kitesdk.data.View<E>, java.lang.Class<E>)" target="_top"><tt>CopyTask</tt></A>(<code>View&lt;E&gt;,</nobr> View&lt;E&gt;<nobr>,</nobr> Class&lt;E&gt;<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+<b>Now deprecated</b>.<br>
+  </TD>
+  <TD VALIGN="TOP">will be removed in 0.17.0; use CopyTask(View, View)</TD>
+</TR>
+</TABLE>
+&nbsp;
 <a NAME="methods"></a>
 <p>
 <a NAME="Removed"></a>
@@ -59,58 +91,29 @@ Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionKey.html
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionKey.equals_removed(java.lang.Object)"></A>
-  <nobr><code>boolean</code>&nbsp;equals(<code>Object</code>)</nobr>
+  <A NAME="org.kitesdk.tools.CopyTask.getCount_removed()"></A>
+  <nobr><code>long</code>&nbsp;getCount()</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionKey.get_removed(int)"></A>
-  <nobr><code>Object</code>&nbsp;get(<code>int</code>)</nobr>
-  </TD>
-  <TD VALIGN="TOP">Return the value at the specified index in the key.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionKey.getLength_removed()"></A>
-  <nobr><code>int</code>&nbsp;getLength()</nobr>
-  </TD>
-  <TD VALIGN="TOP">Return the number of values in the key.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionKey.getValues_removed()"></A>
-  <nobr><code>List&lt;Object&gt;</code>&nbsp;getValues()</nobr>
+  <A NAME="org.kitesdk.tools.CopyTask.noCompaction_removed()"></A>
+  <nobr><code>CopyTask</code>&nbsp;noCompaction()</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionKey.hashCode_removed()"></A>
-  <nobr><code>int</code>&nbsp;hashCode()</nobr>
+  <A NAME="org.kitesdk.tools.CopyTask.run_removed()"></A>
+  <nobr><code>PipelineResult</code>&nbsp;run()</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionKey.toString_removed()"></A>
-  <nobr><code>String</code>&nbsp;toString()</nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-</TABLE>
-&nbsp;
-<p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
-<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionKey.set_added(int, java.lang.Object)"></A>
-  <nobr><code>void</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/PartitionKey.html#set(int, java.lang.Object)" target="_top"><tt>set</tt></A>(<code>int,</nobr> Object<nobr><nobr></code>)</nobr>
+  <A NAME="org.kitesdk.tools.CopyTask.setNumWriters_removed(int)"></A>
+  <nobr><code>CopyTask</code>&nbsp;setNumWriters(<code>int</code>)</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
@@ -124,9 +127,9 @@ Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionKey.html
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionKey.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/tools/CopyTask.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.tools.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="jdiff_help.html"><FONT CLASS="NavBarFont1"><B>Help</B></FONT></A>&nbsp;</TD>
     </TR>
@@ -136,11 +139,11 @@ Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionKey.html
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.DatasetWriter.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="org.kitesdk.data.PartitionStrategy.html"><B>NEXT CLASS</B></A>
+&nbsp;<B>PREV CLASS</B>&nbsp;
+&nbsp;<A HREF="org.kitesdk.tools.TaskUtil.ConfigBuilder.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
-  &nbsp;<A HREF="org.kitesdk.data.PartitionKey.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
+  &nbsp;<A HREF="org.kitesdk.tools.CopyTask.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
 <TD BGCOLOR="0xFFFFFF" CLASS="NavBarCell3"></TD>
 </TR>
 </TABLE>

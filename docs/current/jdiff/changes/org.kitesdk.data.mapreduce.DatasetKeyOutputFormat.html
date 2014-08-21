@@ -18,7 +18,7 @@ org.kitesdk.data.mapreduce.DatasetKeyOutputFormat
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.mapreduce.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -31,7 +31,7 @@ org.kitesdk.data.mapreduce.DatasetKeyOutputFormat
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<A HREF="org.kitesdk.data.mapreduce.DatasetKeyInputFormat.html"><B>PREV CLASS</B></A>
-&nbsp;<B>NEXT CLASS</B>&nbsp;
+&nbsp;<A HREF="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -50,94 +50,66 @@ Class org.kitesdk.data.mapreduce.<A HREF="../../apidocs/org/kitesdk/data/mapredu
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.configure_added(org.apache.hadoop.conf.Configuration)"></A>
-  <nobr><code>ConfigBuilder</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html#configure(org.apache.hadoop.conf.Configuration)" target="_top"><tt>configure</tt></A>(<code>Configuration</code>)</nobr>
+  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.setDatasetName_removed(org.apache.hadoop.mapreduce.Job, java.lang.String)"></A>
+  <nobr><code>void</code>&nbsp;setDatasetName(<code>Job,</nobr> String<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Returns a helper to add output options to the given {@code Configuration}.</TD>
+  <TD VALIGN="TOP">@deprecated will be removed in 0.16.0; use <A HREF="../../apidocs/.html#configure(Job)"><TT>.configure(Job)</TT></A> instead</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.configure_added(org.apache.hadoop.mapreduce.Job)"></A>
-  <nobr><code>ConfigBuilder</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html#configure(org.apache.hadoop.mapreduce.Job)" target="_top"><tt>configure</tt></A>(<code>Job</code>)</nobr>
+  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.setRepositoryUri_removed(org.apache.hadoop.mapreduce.Job, java.net.URI)"></A>
+  <nobr><code>void</code>&nbsp;setRepositoryUri(<code>Job,</nobr> URI<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Configures the {@code Job} to use the {@code DatasetKeyOutputFormat} and
- returns a helper to add further configuration.</TD>
-</TR>
-</TABLE>
-&nbsp;
-<p>
-<a NAME="Changed"></a>
-<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
-<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
+  <TD VALIGN="TOP">@deprecated will be removed in 0.16.0; use <A HREF="../../apidocs/.html#configure(Job)"><TT>.configure(Job)</TT></A> instead</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.setDatasetName_changed(org.apache.hadoop.mapreduce.Job, java.lang.String)"></A>
-  <nobr><code>void</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html#setDatasetName(org.apache.hadoop.mapreduce.Job, java.lang.String)" target="_top"><tt>setDatasetName</tt></A>(<code>Job,</nobr> String<nobr><nobr></code>)  </nobr>
+  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.setView_removed(org.apache.hadoop.conf.Configuration, org.kitesdk.data.View<E>)"></A>
+  <nobr><code>void</code>&nbsp;setView(<code>Configuration,</nobr> View&lt;E&gt;<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link #configure(Job)} instead</TD>
+  <TD VALIGN="TOP">@deprecated will be removed in 0.16.0; use <A HREF="../../apidocs/.html#configure(Configuration)"><TT>.configure(Configuration)</TT></A></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.setRepositoryUri_changed(org.apache.hadoop.mapreduce.Job, java.net.URI)"></A>
-  <nobr><code>void</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html#setRepositoryUri(org.apache.hadoop.mapreduce.Job, java.net.URI)" target="_top"><tt>setRepositoryUri</tt></A>(<code>Job,</nobr> URI<nobr><nobr></code>)  </nobr>
+  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.setView_removed(org.apache.hadoop.mapreduce.Job, org.kitesdk.data.View<E>)"></A>
+  <nobr><code>void</code>&nbsp;setView(<code>Job,</nobr> View&lt;E&gt;<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link #configure(Job)} instead</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.setView_changed(org.apache.hadoop.conf.Configuration, org.kitesdk.data.View<E>)"></A>
-  <nobr><code>void</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html#setView(org.apache.hadoop.conf.Configuration, org.kitesdk.data.View<E>)" target="_top"><tt>setView</tt></A>(<code>Configuration,</nobr> View&lt;E&gt;<nobr><nobr></code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link #configure(Configuration)}</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.setView_changed(org.apache.hadoop.mapreduce.Job, org.kitesdk.data.View<E>)"></A>
-  <nobr><code>void</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html#setView(org.apache.hadoop.mapreduce.Job, org.kitesdk.data.View<E>)" target="_top"><tt>setView</tt></A>(<code>Job,</nobr> View&lt;E&gt;<nobr><nobr></code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link #configure(Job)} instead</TD>
+  <TD VALIGN="TOP">@deprecated will be removed in 0.16.0; use <A HREF="../../apidocs/.html#configure(Job)"><TT>.configure(Job)</TT></A> instead</TD>
 </TR>
 </TABLE>
 &nbsp;
 <a NAME="fields"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Fields" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Fields" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Fields</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Fields</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.KITE_OUTPUT_URI"></A>
-  <nobr><code>String</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html#KITE_OUTPUT_URI" target="_top"><tt>KITE_OUTPUT_URI</tt></A></nobr>
+  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.KITE_CONSTRAINTS"></A>
+  <code>String</code>&nbsp;KITE_CONSTRAINTS
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.KITE_TYPE"></A>
-  <nobr><code>String</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html#KITE_TYPE" target="_top"><tt>KITE_TYPE</tt></A></nobr>
+  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.KITE_DATASET_NAME"></A>
+  <code>String</code>&nbsp;KITE_DATASET_NAME
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.KITE_REPOSITORY_URI"></A>
+  <code>String</code>&nbsp;KITE_REPOSITORY_URI
   </TD>
   <TD>&nbsp;</TD>
 </TR>
@@ -150,7 +122,7 @@ Class org.kitesdk.data.mapreduce.<A HREF="../../apidocs/org/kitesdk/data/mapredu
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/mapreduce/DatasetKeyOutputFormat.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.mapreduce.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -163,7 +135,7 @@ Class org.kitesdk.data.mapreduce.<A HREF="../../apidocs/org/kitesdk/data/mapredu
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<A HREF="org.kitesdk.data.mapreduce.DatasetKeyInputFormat.html"><B>PREV CLASS</B></A>
-&nbsp;<B>NEXT CLASS</B>&nbsp;
+&nbsp;<A HREF="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

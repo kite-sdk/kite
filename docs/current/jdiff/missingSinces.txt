@@ -1,34 +1,18 @@
-NO DOC BLOCK: org.kitesdk.tools.CopyTask Class
-NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyInputFormat.ConfigBuilder Class
-NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Class
-OK: org.kitesdk.data.Datasets Class
-MISSING @SINCE TAG: org.kitesdk.morphline.stdlib.RemoveFieldsBuilder Class
-NO DOC BLOCK: org.kitesdk.tools.TaskUtil Class
-NO DOC BLOCK: org.kitesdk.tools.TaskUtil.ConfigBuilder Class
-MISSING @SINCE TAG: org.kitesdk.morphline.avro.ToAvroMapBuilder Class
-OK: org.kitesdk.data.TypeNotFoundException Class
-OK: org.kitesdk.data.crunch.CrunchDatasets Method asSource(java.lang.String, java.lang.Class<E>)
-OK: org.kitesdk.data.crunch.CrunchDatasets Method asSource(java.net.URI, java.lang.Class<E>)
-OK: org.kitesdk.data.crunch.CrunchDatasets Method asSource(org.kitesdk.data.View<E>)
-OK: org.kitesdk.data.crunch.CrunchDatasets Method asTarget(java.lang.String)
-OK: org.kitesdk.data.crunch.CrunchDatasets Method asTarget(java.net.URI)
-OK: org.kitesdk.data.mapreduce.DatasetKeyInputFormat Method configure(org.apache.hadoop.conf.Configuration)
-OK: org.kitesdk.data.mapreduce.DatasetKeyInputFormat Method configure(org.apache.hadoop.mapreduce.Job)
-OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat Method configure(org.apache.hadoop.conf.Configuration)
-OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat Method configure(org.apache.hadoop.mapreduce.Job)
-OK: org.kitesdk.data.DatasetRepository Method create(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)
-NO DOC BLOCK: org.kitesdk.data.RandomAccessDatasetRepository Method create(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)
-OK: org.kitesdk.data.PartitionStrategy Method getPartitioner(java.lang.String)
-OK: org.kitesdk.data.View Method getType()
-OK: org.kitesdk.data.Dataset Method getUri()
-OK: org.kitesdk.data.PartitionStrategy Method hasPartitioner(java.lang.String)
-OK: org.kitesdk.data.View Method isEmpty()
-OK: org.kitesdk.data.DatasetRepository Method load(java.lang.String, java.lang.Class<E>)
-NO DOC BLOCK: org.kitesdk.data.RandomAccessDatasetRepository Method load(java.lang.String, java.lang.Class<E>)
-NO DOC BLOCK: org.kitesdk.data.PartitionKey Method set(int, java.lang.Object)
-OK: org.kitesdk.data.DatasetRepository Method update(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)
-NO DOC BLOCK: org.kitesdk.data.RandomAccessDatasetRepository Method update(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)
-NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyInputFormat Field KITE_INPUT_URI
-NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat Field KITE_OUTPUT_URI
-NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyInputFormat Field KITE_TYPE
-NO DOC BLOCK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat Field KITE_TYPE
+OK: org.kitesdk.tools.TransformTask Class
+NO DOC BLOCK: org.kitesdk.tools.TransformTask.CheckEntityClass Class
+OK: org.kitesdk.tools.CopyTask Constructor (org.kitesdk.data.View<E>, org.kitesdk.data.View<E>)
+OK: org.kitesdk.tools.TaskUtil.ConfigBuilder Method addJars(java.util.List<java.lang.String>)
+OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method appendTo(java.lang.String)
+OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method appendTo(java.net.URI)
+OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method appendTo(org.kitesdk.data.View<?>)
+NO DOC BLOCK: org.kitesdk.morphline.api.MorphlineContext Method getSettings()
+OK: org.kitesdk.data.View Method getUri()
+OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method overwrite(java.lang.String)
+OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method overwrite(java.net.URI)
+OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method overwrite(org.kitesdk.data.View<?>)
+OK: org.kitesdk.data.crunch.CrunchDatasets Method partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.Dataset<E>)
+OK: org.kitesdk.data.crunch.CrunchDatasets Method partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.Dataset<E>, int)
+OK: org.kitesdk.data.crunch.CrunchDatasets Method partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.View<E>)
+OK: org.kitesdk.data.crunch.CrunchDatasets Method partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.View<E>, int)
+NO DOC BLOCK: org.kitesdk.morphline.api.MorphlineContext.Builder Method setSettings(java.util.Map<java.lang.String, java.lang.Object>)
+OK: org.kitesdk.data.DatasetWriter Method sync()

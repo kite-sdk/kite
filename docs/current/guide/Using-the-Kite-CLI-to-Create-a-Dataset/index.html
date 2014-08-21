@@ -7,10 +7,10 @@
     <title>Using the Kite Command Line Interface to Create a Dataset</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Documentation for the Kite open source project on GitHub.">
-    <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">
+    <link rel="canonical" href="http://kitesdk.org/Using-the-Kite-CLI-to-Create-a-Dataset/">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/docs/current/guide/css/main.css">
+    <link rel="stylesheet" href="/css/main.css">
 
 </head>
 
@@ -21,7 +21,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/docs/current/guide/">Kite SDK Development Guide</a>
+    <a class="site-title" href="/">Kite SDK Development Guide</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -37,35 +37,45 @@
       </a>
       <!--div class="trigger">
         
-          <a class="page-link" href="/docs/current/guide/Column-Mapping/">Column Mapping</a>
+          <a class="page-link" href="/Column-Mapping/">Column Mapping</a>
         
-          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/">HBase Storage Cells</a>
+          <a class="page-link" href="/HBase-Storage-Cells/">HBase Storage Cells</a>
         
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
+          <a class="page-link" href="/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
         
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
+          <a class="page-link" href="/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
         
-          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
+          <a class="page-link" href="/Interval-Notation/">Interval Notation</a>
         
-          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
+          <a class="page-link" href="/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
         
-          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/">What is Kite?</a>
+          <a class="page-link" href="/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
         
-          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
+          <a class="page-link" href="/Kite-SDK-Guide/">What is Kite?</a>
         
-          <a class="page-link" href="/docs/current/guide/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
+          <a class="page-link" href="/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
         
-          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/">Partitioned Datasets</a>
+          <a class="page-link" href="/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
         
-          <a class="page-link" href="/docs/current/guide/Schema-URL-Warning/">Schema URL Warning</a>
+          <a class="page-link" href="/Partitioned-Datasets/">Partitioned Datasets</a>
         
-          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+          <a class="page-link" href="/Restricted-Views/">Restricted Views</a>
         
-          <a class="page-link" href="/docs/current/guide/about/">About Kite SDK</a>
+          <a class="page-link" href="/Schema-Evolution/">Schema Evolution</a>
         
-          <a class="page-link" href="/docs/current/guide/feed.xml"></a>
+          <a class="page-link" href="/Schema-URL-Warning/">Schema URL Warning</a>
         
-          <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
+          <a class="page-link" href="/URIs/">Dataset and View URIs</a>
+        
+          <a class="page-link" href="/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/Viewing-with-Impala/">Viewing a Kite CLI Dataset with Impala</a>
+        
+          <a class="page-link" href="/about/">About Kite SDK</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/">Kite SDK Documentation</a>
         
       </div -->
     </nav>
@@ -117,39 +127,21 @@ PBJ, Peanut butter and grape jelly on white bread.
 
 <p>If you open <em>sandwich.avsc</em> in a text editor, it looks something like the code block below. <code>csv-schema</code> infers the names of the columns from the header, and the data type for each column from the first row of values.</p>
 
-<div><table class="CodeRay"><tr>
-  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
-<a href="#n2" name="n2">2</a>
-<a href="#n3" name="n3">3</a>
-<a href="#n4" name="n4">4</a>
-<a href="#n5" name="n5">5</a>
-<a href="#n6" name="n6">6</a>
-<a href="#n7" name="n7">7</a>
-<a href="#n8" name="n8">8</a>
-<a href="#n9" name="n9">9</a>
-<strong><a href="#n10" name="n10">10</a></strong>
-<a href="#n11" name="n11">11</a>
-<a href="#n12" name="n12">12</a>
-<a href="#n13" name="n13">13</a>
-<a href="#n14" name="n14">14</a>
-</pre></td>
-  <td class="code"><pre>{
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Sandwich</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Schema generated by Kite</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span> : [ {
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">name</span><span style="color:#710">&quot;</span></span>,
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from </span><span style="color:#b0b">\&quot;</span><span style="color:#D20">Reuben</span><span style="color:#b0b">\&quot;</span><span style="color:#710">&quot;</span></span>
+<pre><code class="language-json">{
+  "type" : "record",
+  "name" : "Sandwich",
+  "doc" : "Schema generated by Kite",
+  "fields" : [ {
+    "name" : "name",
+    "type" : [ "null", "string" ],
+    "doc" : "Type inferred from \"Reuben\""
   }, {
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">description</span><span style="color:#710">&quot;</span></span>,
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from </span><span style="color:#b0b">\&quot;</span><span style="color:#D20"> Pastrami and sauerkraut on toasted rye with Russian dressing.</span><span style="color:#b0b">\&quot;</span><span style="color:#710">&quot;</span></span>
+    "name" : "description",
+    "type" : [ "null", "string" ],
+    "doc" : "Type inferred from \" Pastrami and sauerkraut on toasted rye with Russian dressing.\""
   } ]
 }
-</pre></td>
-</tr></table>
-</div>
+</code></pre>
 
 <h2 id="create-the-dataset">Create the Dataset</h2>
 
@@ -166,39 +158,21 @@ PBJ, Peanut butter and grape jelly on white bread.
 
 <p>You’ll get the same schema back, but this time, trust me, it’s coming from the Hive repository. Honest.</p>
 
-<div><table class="CodeRay"><tr>
-  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
-<a href="#n2" name="n2">2</a>
-<a href="#n3" name="n3">3</a>
-<a href="#n4" name="n4">4</a>
-<a href="#n5" name="n5">5</a>
-<a href="#n6" name="n6">6</a>
-<a href="#n7" name="n7">7</a>
-<a href="#n8" name="n8">8</a>
-<a href="#n9" name="n9">9</a>
-<strong><a href="#n10" name="n10">10</a></strong>
-<a href="#n11" name="n11">11</a>
-<a href="#n12" name="n12">12</a>
-<a href="#n13" name="n13">13</a>
-<a href="#n14" name="n14">14</a>
-</pre></td>
-  <td class="code"><pre>{
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Sandwich</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Schema generated by Kite</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span> : [ {
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">name</span><span style="color:#710">&quot;</span></span>,
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from </span><span style="color:#b0b">\&quot;</span><span style="color:#D20">Reuben</span><span style="color:#b0b">\&quot;</span><span style="color:#710">&quot;</span></span>
+<pre><code class="language-json">{
+  "type" : "record",
+  "name" : "Sandwich",
+  "doc" : "Schema generated by Kite",
+  "fields" : [ {
+    "name" : "name",
+    "type" : [ "null", "string" ],
+    "doc" : "Type inferred from \"Reuben\""
   }, {
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">description</span><span style="color:#710">&quot;</span></span>,
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from </span><span style="color:#b0b">\&quot;</span><span style="color:#D20"> Pastrami and sauerkraut on toasted rye with Russian dressing.</span><span style="color:#b0b">\&quot;</span><span style="color:#710">&quot;</span></span>
+    "name" : "description",
+    "type" : [ "null", "string" ],
+    "doc" : "Type inferred from \" Pastrami and sauerkraut on toasted rye with Russian dressing.\""
   } ]
 }
-</pre></td>
-</tr></table>
-</div>
+</code></pre>
 
 <h2 id="import-the-csv-data">Import the CSV Data</h2>
 <p>You’ve created a dataset in the Hive repository, which is the container, but not the information itself. Next, you might want to add some data so that you can run some queries. Use the following command to import the sandwiches in your CSV file.</p>

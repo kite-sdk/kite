@@ -18,7 +18,7 @@ org.kitesdk.data.Dataset
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/Dataset.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/Dataset.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -50,58 +50,33 @@ Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/Dataset.html"
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.Dataset.getUri_added()"></A>
-  <nobr><code>URI</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/Dataset.html#getUri()" target="_top"><tt>getUri</tt></A>()</nobr>
+  <A NAME="org.kitesdk.data.Dataset.dropPartition_removed(org.kitesdk.data.spi.PartitionKey)"></A>
+  <nobr><code>void</code>&nbsp;dropPartition(<code>PartitionKey</code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Return a {@code URI} for this {@code Dataset}.</TD>
-</TR>
-</TABLE>
-&nbsp;
-<p>
-<a NAME="Changed"></a>
-<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
-<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
+  <TD VALIGN="TOP">Drop a partition for a <A HREF="../../apidocs/PartitionKey.html"><TT>PartitionKey</TT></A>.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.Dataset.dropPartition_changed(org.kitesdk.data.spi.PartitionKey)"></A>
-  <nobr><code>void</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/Dataset.html#dropPartition(org.kitesdk.data.spi.PartitionKey)" target="_top"><tt>dropPartition</tt></A>(<code>PartitionKey</code>)  </nobr>
+  <A NAME="org.kitesdk.data.Dataset.getPartition_removed(org.kitesdk.data.spi.PartitionKey, boolean)"></A>
+  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;getPartition(<code>PartitionKey,</nobr> boolean<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-Change in signature from <code>org.kitesdk.data.PartitionKey</code> to <code>org.kitesdk.data.spi.PartitionKey</code>.<br>
- <b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link #deleteAll()} on an appropriate  view instead</TD>
+  <TD VALIGN="TOP">Get a partition for a <A HREF="../../apidocs/PartitionKey.html"><TT>PartitionKey</TT></A>, optionally creating the
+ partition if it doesn't already exist.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.Dataset.getPartition_changed(org.kitesdk.data.spi.PartitionKey, boolean)"></A>
-  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/Dataset.html#getPartition(org.kitesdk.data.spi.PartitionKey, boolean)" target="_top"><tt>getPartition</tt></A>(<code>PartitionKey,</nobr> boolean<nobr><nobr></code>)  </nobr>
+  <A NAME="org.kitesdk.data.Dataset.getPartitions_removed()"></A>
+  <nobr><code>Iterable&lt;Dataset&lt;E&gt;&gt;</code>&nbsp;getPartitions()</nobr>
   </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-Change in signature from (<code>org.kitesdk.data.PartitionKey, boolean</code>) to (<code>org.kitesdk.data.spi.PartitionKey, boolean</code>).<br>
- <b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}  methods instead</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.Dataset.getPartitions_changed()"></A>
-  <nobr><code>Iterable&lt;Dataset&lt;E&gt;&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/Dataset.html#getPartitions()" target="_top"><tt>getPartitions</tt></A>()  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-Change in return type from <code>java.lang.Iterable<org.kitesdk.data.Dataset<E>></code> to (<code>java.lang.Iterable<? extends org.kitesdk.data.Dataset<E>></code>).<br>
- <b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}  methods instead</TD>
+  <TD VALIGN="TOP"><p>
+ Return partitions, if this dataset is partitioned.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -113,7 +88,7 @@ Change in return type from <code>java.lang.Iterable<org.kitesdk.data.Dataset<E>>
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/Dataset.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/Dataset.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>

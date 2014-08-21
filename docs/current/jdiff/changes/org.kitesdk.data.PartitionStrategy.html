@@ -18,7 +18,7 @@ org.kitesdk.data.PartitionStrategy
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -30,8 +30,8 @@ org.kitesdk.data.PartitionStrategy
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.PartitionKey.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="org.kitesdk.data.PartitionStrategy.Builder.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.Datasets.html"><B>PREV CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.RandomAccessDatasetRepository.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="org.kitesdk.data.PartitionStrategy.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -50,62 +50,36 @@ Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionStrategy.getPartitioner_added(java.lang.String)"></A>
-  <nobr><code>FieldPartitioner</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html#getPartitioner(java.lang.String)" target="_top"><tt>getPartitioner</tt></A>(<code>String</code>)</nobr>
+  <A NAME="org.kitesdk.data.PartitionStrategy.partitionKey_removed(java.lang.Object[])"></A>
+  <nobr><code>PartitionKey</code>&nbsp;partitionKey(<code>Object[]</code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Get a partitioner by partition name.</TD>
+  <TD VALIGN="TOP"><p>
+ Construct a partition key with a variadic array of values corresponding to
+ the field partitioners in this partition strategy.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionStrategy.hasPartitioner_added(java.lang.String)"></A>
-  <nobr><code>boolean</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html#hasPartitioner(java.lang.String)" target="_top"><tt>hasPartitioner</tt></A>(<code>String</code>)</nobr>
+  <A NAME="org.kitesdk.data.PartitionStrategy.partitionKeyForEntity_removed(java.lang.Object)"></A>
+  <nobr><code>PartitionKey</code>&nbsp;partitionKeyForEntity(<code>Object</code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Check if a partitioner for the partition name exists.</TD>
-</TR>
-</TABLE>
-&nbsp;
-<p>
-<a NAME="Changed"></a>
-<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
-<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
+  <TD VALIGN="TOP"><p>
+ Construct a partition key for the given entity.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionStrategy.partitionKey_changed(java.lang.Object[])"></A>
-  <nobr><code>PartitionKey</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html#partitionKey(java.lang.Object[])" target="_top"><tt>partitionKey</tt></A>(<code>Object[]</code>)  </nobr>
+  <A NAME="org.kitesdk.data.PartitionStrategy.partitionKeyForEntity_removed(java.lang.Object, org.kitesdk.data.PartitionKey)"></A>
+  <nobr><code>PartitionKey</code>&nbsp;partitionKeyForEntity(<code>Object,</nobr> PartitionKey<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}  methods instead</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionStrategy.partitionKeyForEntity_changed(java.lang.Object)"></A>
-  <nobr><code>PartitionKey</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html#partitionKeyForEntity(java.lang.Object)" target="_top"><tt>partitionKeyForEntity</tt></A>(<code>Object</code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}  methods instead</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.PartitionStrategy.partitionKeyForEntity_changed(java.lang.Object, org.kitesdk.data.PartitionKey)"></A>
-  <nobr><code>PartitionKey</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html#partitionKeyForEntity(java.lang.Object, org.kitesdk.data.PartitionKey)" target="_top"><tt>partitionKeyForEntity</tt></A>(<code>Object,</nobr> PartitionKey<nobr><nobr></code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link org.kitesdk.data.RefinableView}  methods instead</TD>
+  <TD VALIGN="TOP"><p>
+ Construct a partition key for the given entity, reusing the supplied key if 
+ not null.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -117,7 +91,7 @@ Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -129,8 +103,8 @@ Class org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.PartitionKey.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="org.kitesdk.data.PartitionStrategy.Builder.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.Datasets.html"><B>PREV CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.RandomAccessDatasetRepository.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="org.kitesdk.data.PartitionStrategy.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

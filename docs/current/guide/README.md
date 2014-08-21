@@ -7,7 +7,12 @@ This repository contains the Kite SDK Guide.
 
 ## Building
 
-If you haven't already done so, [install Jekyll](http://jekyllrb.com/docs/installation/) on your system.
+If you haven't already done so, [install Jekyll](http://jekyllrb.com/docs/installation/) on your system. You may also
+need to install Coderay for syntax highlighting:
+
+```
+sudo gem install coderay
+```
 
 Then, you can build the current version of the documentation by executing:
 

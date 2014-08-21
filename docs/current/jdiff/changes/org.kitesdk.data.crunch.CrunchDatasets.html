@@ -18,7 +18,7 @@ org.kitesdk.data.crunch.CrunchDatasets
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.crunch.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -50,6 +50,35 @@ Class org.kitesdk.data.crunch.<A HREF="../../apidocs/org/kitesdk/data/crunch/Cru
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.asSource_removed(org.kitesdk.data.Dataset<E>, java.lang.Class<E>)"></A>
+  <nobr><code>ReadableSource&lt;E&gt;</code>&nbsp;asSource(<code>Dataset&lt;E&gt;,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Expose the given <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> as a Crunch <A HREF="../../apidocs/ReadableSource.html"><TT>ReadableSource</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.asSource_removed(org.kitesdk.data.View<E>, java.lang.Class<E>)"></A>
+  <nobr><code>ReadableSource&lt;E&gt;</code>&nbsp;asSource(<code>View&lt;E&gt;,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Expose the given <A HREF="../../apidocs/View.html"><TT>View</TT></A> as a Crunch <A HREF="../../apidocs/ReadableSource.html"><TT>ReadableSource</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.asTarget_removed(org.kitesdk.data.Dataset<E>)"></A>
+  <nobr><code>Target</code>&nbsp;asTarget(<code>Dataset&lt;E&gt;</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Expose the given <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> as a Crunch <A HREF="../../apidocs/Target.html"><TT>Target</TT></A>.</TD>
+</TR>
+</TABLE>
+&nbsp;
+<p>
 <a NAME="Added"></a>
 <TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
@@ -57,80 +86,31 @@ Class org.kitesdk.data.crunch.<A HREF="../../apidocs/org/kitesdk/data/crunch/Cru
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.asSource_added(java.lang.String, java.lang.Class<E>)"></A>
-  <nobr><code>ReadableSource&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#asSource(java.lang.String, java.lang.Class<E>)" target="_top"><tt>asSource</tt></A>(<code>String,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.partition_added(org.apache.crunch.PCollection<E>, org.kitesdk.data.Dataset<E>)"></A>
+  <nobr><code>PCollection&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.Dataset<E>)" target="_top"><tt>partition</tt></A>(<code>PCollection&lt;E&gt;,</nobr> Dataset&lt;E&gt;<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Expose the <A HREF="../../apidocs/View.html"><TT>View</TT></A> or <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> represented by the URI
- as a Crunch <A HREF="../../apidocs/ReadableSource.html"><TT>ReadableSource</TT></A>.</TD>
+  <TD VALIGN="TOP">Partitions {@code collection} to be stored efficiently in {@code dataset}.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.asSource_added(java.net.URI, java.lang.Class<E>)"></A>
-  <nobr><code>ReadableSource&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#asSource(java.net.URI, java.lang.Class<E>)" target="_top"><tt>asSource</tt></A>(<code>URI,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.partition_added(org.apache.crunch.PCollection<E>, org.kitesdk.data.Dataset<E>, int)"></A>
+  <nobr><code>PCollection&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.Dataset<E>, int)" target="_top"><tt>partition</tt></A>(<code>PCollection&lt;E&gt;,</nobr> Dataset&lt;E&gt;<nobr>,</nobr> int<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Expose the <A HREF="../../apidocs/View.html"><TT>View</TT></A> or <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> represented by the URI
- as a Crunch <A HREF="../../apidocs/ReadableSource.html"><TT>ReadableSource</TT></A>.</TD>
+  <TD VALIGN="TOP">Partitions {@code collection} to be stored efficiently in {@code dataset}.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.asSource_added(org.kitesdk.data.View<E>)"></A>
-  <nobr><code>ReadableSource&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#asSource(org.kitesdk.data.View<E>)" target="_top"><tt>asSource</tt></A>(<code>View&lt;E&gt;</code>)</nobr>
+  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.partition_added(org.apache.crunch.PCollection<E>, org.kitesdk.data.View<E>)"></A>
+  <nobr><code>PCollection&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.View<E>)" target="_top"><tt>partition</tt></A>(<code>PCollection&lt;E&gt;,</nobr> View&lt;E&gt;<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Expose the given <A HREF="../../apidocs/View.html"><TT>View</TT></A> as a Crunch <A HREF="../../apidocs/ReadableSource.html"><TT>ReadableSource</TT></A>.</TD>
+  <TD VALIGN="TOP">Partitions {@code collection} to be stored efficiently in {@code View}.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.asTarget_added(java.lang.String)"></A>
-  <nobr><code>Target</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#asTarget(java.lang.String)" target="_top"><tt>asTarget</tt></A>(<code>String</code>)</nobr>
+  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.partition_added(org.apache.crunch.PCollection<E>, org.kitesdk.data.View<E>, int)"></A>
+  <nobr><code>PCollection&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.View<E>, int)" target="_top"><tt>partition</tt></A>(<code>PCollection&lt;E&gt;,</nobr> View&lt;E&gt;<nobr>,</nobr> int<nobr><nobr></code>)</nobr>
   </TD>
-  <TD VALIGN="TOP">Expose the <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> or <A HREF="../../apidocs/View.html"><TT>View</TT></A> represented by the given
- URI as a Crunch <A HREF="../../apidocs/Target.html"><TT>Target</TT></A>.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.asTarget_added(java.net.URI)"></A>
-  <nobr><code>Target</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#asTarget(java.net.URI)" target="_top"><tt>asTarget</tt></A>(<code>URI</code>)</nobr>
-  </TD>
-  <TD VALIGN="TOP">Expose the <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> or <A HREF="../../apidocs/View.html"><TT>View</TT></A> represented by the given
- URI as a Crunch <A HREF="../../apidocs/Target.html"><TT>Target</TT></A>.</TD>
-</TR>
-</TABLE>
-&nbsp;
-<p>
-<a NAME="Changed"></a>
-<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
-<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.asSource_changed(org.kitesdk.data.Dataset<E>, java.lang.Class<E>)"></A>
-  <nobr><code>ReadableSource&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#asSource(org.kitesdk.data.Dataset<E>, java.lang.Class<E>)" target="_top"><tt>asSource</tt></A>(<code>Dataset&lt;E&gt;,</nobr> Class&lt;E&gt;<nobr><nobr></code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link #asSource(View)}</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.asSource_changed(org.kitesdk.data.View<E>, java.lang.Class<E>)"></A>
-  <nobr><code>ReadableSource&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#asSource(org.kitesdk.data.View<E>, java.lang.Class<E>)" target="_top"><tt>asSource</tt></A>(<code>View&lt;E&gt;,</nobr> Class&lt;E&gt;<nobr><nobr></code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link #asSource(View)}</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.crunch.CrunchDatasets.asTarget_changed(org.kitesdk.data.Dataset<E>)"></A>
-  <nobr><code>Target</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html#asTarget(org.kitesdk.data.Dataset<E>)" target="_top"><tt>asTarget</tt></A>(<code>Dataset&lt;E&gt;</code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
-  </TD>
-  <TD VALIGN="TOP">will be removed in 0.16.0; use {@link #asTarget(View)}</TD>
+  <TD VALIGN="TOP">Partitions {@code collection} to be stored efficiently in {@code View}.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -142,7 +122,7 @@ Class org.kitesdk.data.crunch.<A HREF="../../apidocs/org/kitesdk/data/crunch/Cru
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/crunch/CrunchDatasets.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.crunch.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>

@@ -7,10 +7,10 @@
     <title>Partitioned Datasets</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Documentation for the Kite open source project on GitHub.">
-    <link rel="canonical" href="http://kitesdk.org/docs/current/guide/Partitioned-Datasets/">
+    <link rel="canonical" href="http://kitesdk.org/Partitioned-Datasets/">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/docs/current/guide/css/main.css">
+    <link rel="stylesheet" href="/css/main.css">
 
 </head>
 
@@ -21,7 +21,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/docs/current/guide/">Kite SDK Development Guide</a>
+    <a class="site-title" href="/">Kite SDK Development Guide</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -37,35 +37,45 @@
       </a>
       <!--div class="trigger">
         
-          <a class="page-link" href="/docs/current/guide/Column-Mapping/">Column Mapping</a>
+          <a class="page-link" href="/Column-Mapping/">Column Mapping</a>
         
-          <a class="page-link" href="/docs/current/guide/HBase-Storage-Cells/">HBase Storage Cells</a>
+          <a class="page-link" href="/HBase-Storage-Cells/">HBase Storage Cells</a>
         
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
+          <a class="page-link" href="/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
         
-          <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
+          <a class="page-link" href="/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
         
-          <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
+          <a class="page-link" href="/Interval-Notation/">Interval Notation</a>
         
-          <a class="page-link" href="/docs/current/guide/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
+          <a class="page-link" href="/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
         
-          <a class="page-link" href="/docs/current/guide/Kite-SDK-Guide/">What is Kite?</a>
+          <a class="page-link" href="/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
         
-          <a class="page-link" href="/docs/current/guide/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
+          <a class="page-link" href="/Kite-SDK-Guide/">What is Kite?</a>
         
-          <a class="page-link" href="/docs/current/guide/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
+          <a class="page-link" href="/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
         
-          <a class="page-link" href="/docs/current/guide/Partitioned-Datasets/">Partitioned Datasets</a>
+          <a class="page-link" href="/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
         
-          <a class="page-link" href="/docs/current/guide/Schema-URL-Warning/">Schema URL Warning</a>
+          <a class="page-link" href="/Partitioned-Datasets/">Partitioned Datasets</a>
         
-          <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+          <a class="page-link" href="/Restricted-Views/">Restricted Views</a>
         
-          <a class="page-link" href="/docs/current/guide/about/">About Kite SDK</a>
+          <a class="page-link" href="/Schema-Evolution/">Schema Evolution</a>
         
-          <a class="page-link" href="/docs/current/guide/feed.xml"></a>
+          <a class="page-link" href="/Schema-URL-Warning/">Schema URL Warning</a>
         
-          <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
+          <a class="page-link" href="/URIs/">Dataset and View URIs</a>
+        
+          <a class="page-link" href="/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/Viewing-with-Impala/">Viewing a Kite CLI Dataset with Impala</a>
+        
+          <a class="page-link" href="/about/">About Kite SDK</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/">Kite SDK Documentation</a>
         
       </div -->
     </nav>
@@ -114,83 +124,44 @@
 
 <h4 id="highrollersavsc">HighRollers.avsc</h4>
 
-<div><table class="CodeRay"><tr>
-  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
-<a href="#n2" name="n2">2</a>
-<a href="#n3" name="n3">3</a>
-<a href="#n4" name="n4">4</a>
-<a href="#n5" name="n5">5</a>
-<a href="#n6" name="n6">6</a>
-<a href="#n7" name="n7">7</a>
-<a href="#n8" name="n8">8</a>
-<a href="#n9" name="n9">9</a>
-<strong><a href="#n10" name="n10">10</a></strong>
-<a href="#n11" name="n11">11</a>
-<a href="#n12" name="n12">12</a>
-<a href="#n13" name="n13">13</a>
-<a href="#n14" name="n14">14</a>
-<a href="#n15" name="n15">15</a>
-<a href="#n16" name="n16">16</a>
-<a href="#n17" name="n17">17</a>
-<a href="#n18" name="n18">18</a>
-</pre></td>
-  <td class="code"><pre>{
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">HighRollersClub</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Schema generated by Kite</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span> : [ {
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">UserID</span><span style="color:#710">&quot;</span></span>,
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">long</span><span style="color:#710">&quot;</span></span> ],
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Unique customer identifier.</span><span style="color:#710">&quot;</span></span>
+<pre><code class="language-json">{
+  "type" : "record",
+  "name" : "HighRollersClub",
+  "doc" : "Schema generated by Kite",
+  "fields" : [ {
+    "name" : "UserID",
+    "type" : [ "null", "long" ],
+    "doc" : "Unique customer identifier."
   }, {
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">EntryTime</span><span style="color:#710">&quot;</span></span>,
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">long</span><span style="color:#710">&quot;</span></span>,
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Timestamp at entry in milliseconds since Unix epoch</span><span style="color:#710">&quot;</span></span>
+    "name" : "EntryTime",
+    "type" : "long",
+    "doc" : "Timestamp at entry in milliseconds since Unix epoch"
   }, {
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Duration</span><span style="color:#710">&quot;</span></span>,
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">long</span><span style="color:#710">&quot;</span></span> ],
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Time interval in milliseconds</span><span style="color:#710">&quot;</span></span>
+    "name" : "Duration",
+    "type" : [ "null", "long" ],
+    "doc" : "Time interval in milliseconds"
   } ]
 }
-</pre></td>
-</tr></table>
-</div>
+</code></pre>
 
 <p>Since the most common query against this data is time-based, you can define a partition strategy that gives Hadoop a hint that it should partition the information by year, month, and day. The partition strategy looks like this.</p>
 
 <h4 id="highrollersjson">HighRollers.json</h4>
 
-<div><table class="CodeRay"><tr>
-  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
-<a href="#n2" name="n2">2</a>
-<a href="#n3" name="n3">3</a>
-<a href="#n4" name="n4">4</a>
-<a href="#n5" name="n5">5</a>
-<a href="#n6" name="n6">6</a>
-<a href="#n7" name="n7">7</a>
-<a href="#n8" name="n8">8</a>
-<a href="#n9" name="n9">9</a>
-<strong><a href="#n10" name="n10">10</a></strong>
-<a href="#n11" name="n11">11</a>
-<a href="#n12" name="n12">12</a>
-<a href="#n13" name="n13">13</a>
-</pre></td>
-  <td class="code"><pre>[ {
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">EntryTime</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">year</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">year</span><span style="color:#710">&quot;</span></span>
+<pre><code class="language-json">[ {
+  "source" : "EntryTime",
+  "type" : "year",
+  "name" : "year"
 }, {
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">EntryTime</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">month</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">month</span><span style="color:#710">&quot;</span></span>
+  "source" : "EntryTime",
+  "type" : "month",
+  "name" : "month"
 }, {
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">EntryTime</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">day</span><span style="color:#710">&quot;</span></span>,
-  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">day</span><span style="color:#710">&quot;</span></span>
+  "source" : "EntryTime",
+  "type" : "day",
+  "name" : "day"
 } ]
-</pre></td>
-</tr></table>
-</div>
+</code></pre>
 
 <p>You can also use the command <code>partition-config</code> from the command line interface to generate the JSON file. See <a href="../Kite-Dataset-Command-Line-Interface/index.html#partition-config">partition-config</a>.</p>
 
@@ -200,13 +171,8 @@
 
 <p>For example, you can create a dataset for our High Rollers club using this command.</p>
 
-<div><table class="CodeRay"><tr>
-  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
-</pre></td>
-  <td class="code"><pre>dataset create HighRollersClub -s HighRollers.avsc -p HighRollers.json 
-</pre></td>
-</tr></table>
-</div>
+<pre><code class="language-bash">dataset create HighRollersClub -s HighRollers.avsc -p HighRollers.json 
+</code></pre>
 
 <p>See <a href="../Kite-Dataset-Command-Line-Interface/index.html#create">create</a> for more options when creating a dataset.</p>
 

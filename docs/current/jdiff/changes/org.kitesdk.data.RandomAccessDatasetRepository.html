@@ -18,7 +18,7 @@ org.kitesdk.data.RandomAccessDatasetRepository
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/RandomAccessDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/RandomAccessDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -30,7 +30,7 @@ org.kitesdk.data.RandomAccessDatasetRepository
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.PartitionStrategy.Builder.html"><B>PREV CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.PartitionStrategy.html"><B>PREV CLASS</B></A>
 &nbsp;<A HREF="org.kitesdk.data.View.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
@@ -47,32 +47,55 @@ FIELDS
 <H2>
 Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/RandomAccessDatasetRepository.html" target="_top"><tt>RandomAccessDatasetRepository</tt></A>
 </H2>
+<p><font size="+1">Removed interface <code>org.kitesdk.data.DatasetRepository</code>.<br> Added interface <code>org.kitesdk.data.spi.RandomAccessDatasetRepository</code>.<br></font>
+<p><font size="+1"><b>Now deprecated</b>.<br></font>
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.RandomAccessDatasetRepository.create_added(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)"></A>
-  <nobr><code>RandomAccessDataset&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/RandomAccessDatasetRepository.html#create(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)" target="_top"><tt>create</tt></A>(<code>String,</nobr> DatasetDescriptor<nobr>,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  <A NAME="org.kitesdk.data.RandomAccessDatasetRepository.create_removed(java.lang.String, org.kitesdk.data.DatasetDescriptor)"></A>
+  <nobr><code>RandomAccessDataset&lt;E&gt;</code>&nbsp;create(<code>String,</nobr> DatasetDescriptor<nobr><nobr></code>)</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.RandomAccessDatasetRepository.load_added(java.lang.String, java.lang.Class<E>)"></A>
-  <nobr><code>RandomAccessDataset&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/RandomAccessDatasetRepository.html#load(java.lang.String, java.lang.Class<E>)" target="_top"><tt>load</tt></A>(<code>String,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  <A NAME="org.kitesdk.data.RandomAccessDatasetRepository.create_removed(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)"></A>
+  <nobr><code>RandomAccessDataset&lt;E&gt;</code>&nbsp;create(<code>String,</nobr> DatasetDescriptor<nobr>,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.RandomAccessDatasetRepository.update_added(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)"></A>
-  <nobr><code>RandomAccessDataset&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/RandomAccessDatasetRepository.html#update(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)" target="_top"><tt>update</tt></A>(<code>String,</nobr> DatasetDescriptor<nobr>,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  <A NAME="org.kitesdk.data.RandomAccessDatasetRepository.load_removed(java.lang.String)"></A>
+  <nobr><code>RandomAccessDataset&lt;E&gt;</code>&nbsp;load(<code>String</code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.RandomAccessDatasetRepository.load_removed(java.lang.String, java.lang.Class<E>)"></A>
+  <nobr><code>RandomAccessDataset&lt;E&gt;</code>&nbsp;load(<code>String,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.RandomAccessDatasetRepository.update_removed(java.lang.String, org.kitesdk.data.DatasetDescriptor)"></A>
+  <nobr><code>RandomAccessDataset&lt;E&gt;</code>&nbsp;update(<code>String,</nobr> DatasetDescriptor<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.RandomAccessDatasetRepository.update_removed(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)"></A>
+  <nobr><code>RandomAccessDataset&lt;E&gt;</code>&nbsp;update(<code>String,</nobr> DatasetDescriptor<nobr>,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
@@ -86,7 +109,7 @@ Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/RandomAccessD
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/RandomAccessDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/RandomAccessDatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -98,7 +121,7 @@ Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/RandomAccessD
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.PartitionStrategy.Builder.html"><B>PREV CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.PartitionStrategy.html"><B>PREV CLASS</B></A>
 &nbsp;<A HREF="org.kitesdk.data.View.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;

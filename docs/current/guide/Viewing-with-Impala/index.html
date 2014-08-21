@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Viewing a Kite CLI Dataset with Impala</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="Documentation for the Kite open source project on GitHub.">
+    <link rel="canonical" href="http://kitesdk.org/Viewing-with-Impala/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/">Kite SDK Development Guide</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <!--div class="trigger">
+        
+          <a class="page-link" href="/Column-Mapping/">Column Mapping</a>
+        
+          <a class="page-link" href="/HBase-Storage-Cells/">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/Interval-Notation/">Interval Notation</a>
+        
+          <a class="page-link" href="/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/Kite-SDK-Guide/">What is Kite?</a>
+        
+          <a class="page-link" href="/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/Partitioned-Datasets/">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/Restricted-Views/">Restricted Views</a>
+        
+          <a class="page-link" href="/Schema-Evolution/">Schema Evolution</a>
+        
+          <a class="page-link" href="/Schema-URL-Warning/">Schema URL Warning</a>
+        
+          <a class="page-link" href="/URIs/">Dataset and View URIs</a>
+        
+          <a class="page-link" href="/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/Viewing-with-Impala/">Viewing a Kite CLI Dataset with Impala</a>
+        
+          <a class="page-link" href="/about/">About Kite SDK</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/">Kite SDK Documentation</a>
+        
+      </div -->
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Viewing a Kite CLI Dataset with Impala</h1>
+  </header>
+
+  <article class="post-content">
+  <p>You can create datasets using the Kite CLI, then view the data in a variety of ways using Impala.</p>
+
+<p>This example uses datasets based on the MovieLens dataset provided by the GroupLens Research Group at the University of Minnesota. You can get a copy of the original dataset at the <a href="http://grouplens.org/datasets/movielens/">Grouplens site</a>. For this example, the <em>movies.csv</em> and <em>ratings.csv</em> data files are converted from the original plain text dataset to CSV format. The Release field, which is stored in string format, has been formatted as yyyy-mm-dd so that the dates sort properly. You can modify the Grouplens files yourself as a starting point, you can create your own sample CSV files based on the table descriptions below, or you can use <a href="https://github.com/DennisDawson/KiteImages/raw/master/movies.zip">Dennis’s Random Ratings Dataset</a>, a list of random ratings for movies that do not exist (at least not yet).</p>
+
+<h2 id="preparation">Preparation</h2>
+
+<p>If you have not done so already, download the Kite command-line interface jar. This jar is the executable that runs the command-line interface, so save it as <code>dataset</code>. To download with curl, run:</p>
+
+<pre><code>curl http://central.maven.org/maven2/org/kitesdk/kite-tools/0.15.0/kite-tools-0.15.0-binary.jar -o dataset
+chmod +x dataset
+</code></pre>
+
+<p>If you are using a quickstart virtual machine, Impala is installed for you. If you need to install Impala on your own system, see the <a href="http://www.cloudera.com/content/support/en/documentation.html">Impala</a> documentation for your version of CDH.</p>
+
+<h2 id="infer-schemas-from-csv-files">Infer Schemas from CSV Files</h2>
+
+<p>Use the <code>csv-schema</code> CLI command to infer the schemas for both files.</p>
+
+<pre><code>$ dataset csv-schema movies.csv -o movies.avsc --record-name movies 
+$ dataset csv-schema ratings.csv -o ratings.avsc --record-name ratings 
+</code></pre>
+
+<h2 id="create-datasets">Create Datasets</h2>
+
+<p>Now that you have the schema, you can create the metadata for your tables in Hadoop. Use the <code>create</code> CLI command to add the metadata to Hadoop.</p>
+
+<pre><code>$ dataset create "movies" --schema movies.avsc
+$ dataset create "ratings" --schema ratings.avsc
+</code></pre>
+
+<h2 id="import-data">Import Data</h2>
+
+<p>Hadoop is now prepared with empty tables, ready to import your CSV data.</p>
+
+<pre><code>$ dataset csv-import movies.csv movies
+$ dataset csv-import ratings.csv ratings
+</code></pre>
+
+<h2 id="view-datasets-with-impala">View Datasets with Impala</h2>
+
+<p>In a new terminal window, begin an Impala shell session.</p>
+
+<pre><code>$ impala-shell
+</code></pre>
+
+<h3 id="invalidate-metadata">Invalidate Metadata</h3>
+
+<p>Impala maintains its own copy of your dataset metadata to enhance performance. When you create a table outside of Impala, you need to flag the existing metadata as out of date, so that Impala knows it needs to refresh the metadata. After you create your table using the CLI, you must run the following command.</p>
+
+<pre><code>&gt; invalidate metadata;
+</code></pre>
+
+<h3 id="verify-that-tables-are-created-properly">Verify That Tables Are Created Properly</h3>
+
+<pre><code>&gt; show tables;
+Query: show tables
++-----------+
+| name      |
++-----------+
+| movies    |
+| ratings   |
+| sample_07 |
+| sample_08 |
++-----------+
+
+</code></pre>
+
+<p>The movies dataset is broad, with many columns. Use the desc[ribe] query to view the metadata for the table.</p>
+
+<pre><code>&gt; desc movies;
+Query: describe movies
++-------------+--------+-------------------+
+| name        | type   | comment           |
++-------------+--------+-------------------+
+| id          | bigint | from deserializer |
+| title       | string | from deserializer |
+| release     | string | from deserializer |
+| action      | bigint | from deserializer |
+| adventure   | bigint | from deserializer |
+| animation   | bigint | from deserializer |
+| children    | bigint | from deserializer |
+| comedy      | bigint | from deserializer |
+| crime       | bigint | from deserializer |
+| documentary | bigint | from deserializer |
+| drama       | bigint | from deserializer |
+| fantasy     | bigint | from deserializer |
+| filmnoir    | bigint | from deserializer |
+| horror      | bigint | from deserializer |
+| musical     | bigint | from deserializer |
+| mystery     | bigint | from deserializer |
+| romance     | bigint | from deserializer |
+| scifi       | bigint | from deserializer |
+| thriller    | bigint | from deserializer |
+| war         | bigint | from deserializer |
+| western     | bigint | from deserializer |
++-------------+--------+-------------------+
+ 
+</code></pre>
+
+<p>Ratings, on the other hand, is narrow. It has only 3 columns, but around 2500 records.</p>
+
+<pre><code>&gt; desc ratings;
+Query: describe ratings
++--------+--------+-------------------+
+| name   | type   | comment           |
++--------+--------+-------------------+
+| id     | bigint | from deserializer |
+| critic | bigint | from deserializer |
+| rating | bigint | from deserializer |
++--------+--------+-------------------+
+
+</code></pre>
+
+<h3 id="verify-data">Verify Data</h3>
+
+<p>The <em>movies</em> dataset is broad, but short, with only 50 records. You can select the first 10 records, just to see that they loaded properly.</p>
+
+<pre><code>&gt; select * from movies limit 10;
+Query: select * from movies limit 10
++----+------------------------+------------+--------+-----------+-----------+----------+--------+-------+-------------+-------+---------+----------+--------+---------+---------+---------+-------+----------+-----+---------+
+| id | title                  | release    | action | adventure | animation | children | comedy | crime | documentary | drama | fantasy | filmnoir | horror | musical | mystery | romance | scifi | thriller | war | western |
++----+------------------------+------------+--------+-----------+-----------+----------+--------+-------+-------------+-------+---------+----------+--------+---------+---------+---------+-------+----------+-----+---------+
+| 1  | Anticoagulance         | 2003-11-15 | 1      | 0         | 0         | 0        | 0      | 0     | 0           | 0     | 0       | 0        | 1      | 0       | 0       | 0       | 1     | 0        | 1   | 0       |
+| 2  | Boy and His Cattle, A  | 2012-03-18 | 0      | 0         | 1         | 1        | 0      | 0     | 0           | 0     | 0       | 0        | 0      | 0       | 0       | 0       | 0     | 0        | 0   | 0       |
+| 3  | Carpool to Vermont     | 2005-10-01 | 0      | 0         | 0         | 0        | 0      | 0     | 0           | 0     | 0       | 0        | 0      | 0       | 0       | 0       | 1     | 0        | 0   | 0       |
+| 4  | Chameleon Chameleon    | 2009-02-20 | 1      | 1         | 0         | 0        | 0      | 0     | 0           | 0     | 0       | 0        | 0      | 0       | 0       | 0       | 0     | 0        | 0   | 0       |
+| 5  | Champion of Mediocrity | 2011-01-09 | 0      | 0         | 0         | 0        | 0      | 0     | 0           | 0     | 0       | 0        | 0      | 1       | 0       | 0       | 0     | 1        | 0   | 0       |
+| 6  | Chest Pains            | 2001-12-14 | 0      | 0         | 0         | 0        | 1      | 0     | 0           | 1     | 0       | 0        | 1      | 1       | 0       | 0       | 0     | 1        | 0   | 0       |
+| 7  | Chuck Maggot           | 2003-07-16 | 0      | 0         | 1         | 0        | 0      | 0     | 0           | 0     | 0       | 0        | 0      | 0       | 0       | 0       | 0     | 0        | 0   | 0       |
+| 8  | Cock Crows Thrice, The | 2005-06-26 | 0      | 1         | 0         | 1        | 0      | 0     | 0           | 0     | 1       | 0        | 0      | 1       | 0       | 1       | 0     | 0        | 0   | 0       |
+| 9  | Cormack!               | 2003-03-10 | 0      | 0         | 0         | 0        | 1      | 0     | 0           | 0     | 1       | 0        | 0      | 0       | 0       | 0       | 0     | 0        | 0   | 0       |
+| 10 | Dancing in Detroit     | 2004-08-19 | 0      | 0         | 0         | 0        | 0      | 1     | 0           | 0     | 0       | 0        | 0      | 1       | 0       | 0       | 0     | 0        | 0   | 0       |
++----+------------------------+------------+--------+-----------+-----------+----------+--------+-------+-------------+-------+---------+----------+--------+---------+---------+---------+-------+----------+-----+---------+
+
+</code></pre>
+<p>The ratings dataset is narrow but tall, with about 2500 records. Check the first 10 to be sure that they loaded properly, as well.</p>
+
+<pre><code>&gt; select * from ratings limit 10;
+Query: select * from ratings limit 10
++----+--------+--------+
+| id | critic | rating |
++----+--------+--------+
+| 1  | 1      | 1      |
+| 1  | 2      | 2      |
+| 1  | 3      | 1      |
+| 1  | 4      | 1      |
+| 1  | 5      | 1      |
+| 1  | 6      | 1      |
+| 1  | 7      | 1      |
+| 1  | 8      | 1      |
+| 1  | 9      | 1      |
+| 1  | 10     | 2      |
++----+--------+--------+
+
+</code></pre>
+
+<h3 id="peek-at-the-data">Peek at the Data</h3>
+
+<p>Now that there is data in the datasets, you can view the results in a variety of ways.</p>
+
+<pre><code>&gt; select * from movies where animation=1;
+Query: select * from movies where animation=1
++----+-----------------------+------------+--------+-----------+-----------+----------+--------+-------+-------------+-------+---------+----------+--------+---------+---------+---------+-------+----------+-----+---------+
+| id | title                 | release    | action | adventure | animation | children | comedy | crime | documentary | drama | fantasy | filmnoir | horror | musical | mystery | romance | scifi | thriller | war | western |
++----+-----------------------+------------+--------+-----------+-----------+----------+--------+-------+-------------+-------+---------+----------+--------+---------+---------+---------+-------+----------+-----+---------+
+| 2  | Boy and His Cattle, A | 2012-03-18 | 0      | 0         | 1         | 1        | 0      | 0     | 0           | 0     | 0       | 0        | 0      | 0       | 0       | 0       | 0     | 0        | 0   | 0       |
+| 7  | Chuck Maggot          | 2003-07-16 | 0      | 0         | 1         | 0        | 0      | 0     | 0           | 0     | 0       | 0        | 0      | 0       | 0       | 0       | 0     | 0        | 0   | 0       |
+| 11 | Dingo!                | 2010-08-04 | 0      | 0         | 1         | 0        | 0      | 0     | 0           | 0     | 0       | 0        | 0      | 1       | 0       | 0       | 1     | 0        | 0   | 0       |
+| 25 | Naughty Randy         | 2003-04-27 | 0      | 0         | 1         | 0        | 0      | 0     | 1           | 0     | 0       | 1        | 0      | 0       | 1       | 0       | 0     | 0        | 0   | 0       |
+| 37 | Space Dentist         | 2014-02-18 | 0      | 0         | 1         | 1        | 0      | 0     | 0           | 0     | 0       | 0        | 0      | 0       | 0       | 0       | 1     | 0        | 0   | 0       |
+| 47 | Trout Catchers        | 2010-07-25 | 0      | 0         | 1         | 0        | 0      | 0     | 0           | 0     | 0       | 1        | 0      | 0       | 0       | 0       | 0     | 0        | 0   | 1       |
++----+-----------------------+------------+--------+-----------+-----------+----------+--------+-------+-------------+-------+---------+----------+--------+---------+---------+---------+-------+----------+-----+---------+
+
+</code></pre>
+
+<p>Most of the columns are concerned with genre. Since you’re selecting rows based on the genre, there’s no reason to display them. You can just show the title and release date.</p>
+
+<pre><code>&gt; &gt; select title, release from movies where animation=1;
+Query: select title, release from movies where animation=1
++-----------------------+------------+
+| title                 | release    |
++-----------------------+------------+
+| Boy and His Cattle, A | 2012-03-18 |
+| Chuck Maggot          | 2003-07-16 |
+| Dingo!                | 2010-08-04 |
+| Naughty Randy         | 2003-04-27 |
+| Space Dentist         | 2014-02-18 |
+| Trout Catchers        | 2010-07-25 |
++-----------------------+------------+
+</code></pre>
+
+<p>If you narrow the search with additional genre criteria, you can get a short list of movies that interest you most. You might look for animated science fiction films.</p>
+
+<pre><code>&gt; &gt; select title, release from movies where animation=1 and scifi=1;
+Query: select title, release from movies where animation=1 and scifi=1
++---------------+------------+
+| title         | release    |
++---------------+------------+
+| Dingo!        | 2010-08-04 |
+| Space Dentist | 2014-02-18 |
++---------------+------------+
+
+</code></pre>
+
+<h3 id="realistic-examples">Realistic Examples</h3>
+
+<p>It can be helpful to sort the results of your queries. You can use <code>ORDER BY</code> to choose your sort criteria.  Impala requires any query including an <code>ORDER BY</code> clause to also use a <code>LIMIT</code> clause. The reason is that sorting a huge result set can require a lot of memory. “Top-N” queries are common Impala use cases. By limiting the returned results, you avoid overwhelming memory capacity on the query’s coordinator node.</p>
+
+<p>Show Westerns from newest to oldest release dates.</p>
+
+<pre><code>&gt; select title, release from movies where western=1 order by release desc limit 2000;
+Query: select title, release from movies where western=1 order by release desc limit 2000
++------------------+------------+
+| title            | release    |
++------------------+------------+
+| Wrastlin'!       | 2013-04-08 |
+| Trout Catchers   | 2010-07-25 |
+| Empty Wagons     | 2009-10-23 |
+| Traffic Surgeon  | 2006-12-13 |
+| Simple Pleasures | 2006-05-12 |
+| Tutti and Frutti | 2001-06-29 |
+| Numbskull        | 2001-03-03 |
++------------------+------------+
+
+</code></pre>
+<p>Show movies with titles that start with <em>S</em>, sorted by title.</p>
+
+<pre><code> &gt; select title, avg(ratings.rating) 
+from movies join ratings on movies.id=ratings.id
+where title like "S%"
+group by title
+order by title 
+limit 5000;
+Query: select title, avg(ratings.rating) from movies join ratings on movies.id=ratings.id where title like "S%" group by title order by title limit 5000
++----------------------+---------------------+
+| title                | avg(ratings.rating) |
++----------------------+---------------------+
+| Simple Pleasures     | 4.28                |
+| Something Shapely    | 1.34                |
+| Sometimes It's a Boy | 2.24                |
+| Space Dentist        | 2.22                |
+| Spaetzle             | 3.22                |
+| Spaetzle 2           | 2.24                |
+| Stegoceratops!       | 1.26                |
++----------------------+---------------------+
+
+</code></pre>
+
+<p>Show crime movies, sorted by highest to lowest rating.</p>
+
+<pre><code>
+&gt; select title, avg(ratings.rating) 
+from movies join ratings on movies.id=ratings.id 
+where crime=1
+group by title 
+order by avg(ratings.rating) desc
+limit 5000;
+Query: select title, avg(ratings.rating) from movies join ratings on movies.id=ratings.id where crime=1 group by title order by avg(ratings.rating) desc limit 5000
++--------------------+---------------------+
+| title              | avg(ratings.rating) |
++--------------------+---------------------+
+| Embryoglio         | 4.12                |
+| Dancing in Detroit | 1.22                |
+| Tattlers           | 1                   |
++--------------------+---------------------+
+
+
+</code></pre>
+<p>You might find it surprising that a modern classic like “Tattlers” received an average rating of “1,” despite its iconic status. It might be helpful to know how many reviews were received for each of the films. You can use the <code>COUNT</code> function to see how many critics actually ranked for each film. Doing so casts an entirely different light on that rating. You can use the <code>ROUND</code> function to make the ratings column easier to read. Sorting by title makes it easier to find a specific movie.</p>
+
+<pre><code>&gt;  &gt; select title, round(avg(ratings.rating), 2), count(ratings.id)
+from movies join ratings on movies.id=ratings.id 
+where crime=1
+group by title, ratings.id
+order by title
+limit 5000;
+Query: select title, round(avg(ratings.rating), 2), count(ratings.id) from movies join ratings on movies.id=ratings.id where crime=1 group by title, ratings.id order by title limit 5000
++--------------------+-------------------------------+-------------------+
+| title              | round(avg(ratings.rating), 2) | count(ratings.id) |
++--------------------+-------------------------------+-------------------+
+| Dancing in Detroit | 1.22                          | 50                |
+| Embryoglio         | 4.12                          | 50                |
+| Tattlers           | 1.00                          | 1                 |
++--------------------+-------------------------------+-------------------+
+
+</code></pre>
+
+<p>If you use a query frequently, you can store it as a view. A view is a named query that you can use as shorthand when conducting additional analysis.</p>
+
+<pre><code>&gt; create view children as select title, round(avg(ratings.rating),2)
+from movies join ratings on movies.id=ratings.id 
+where children=1 
+group by title 
+order by avg(ratings.rating) desc 
+limit 5000;
+Query: create view children as select title, round(avg(ratings.rating),2) from movies join ratings on movies.id=ratings.id where children=1 group by title order by avg(ratings.rating) desc limit 5000
+
+Returned 0 row(s) in 0.04s
+
+</code></pre>
+
+<p>No rows are returned as a result of the query, but Impala creates a new view.</p>
+
+<p>One advantage of working with a view is that you can use the aggregate column (rating, named _c1 in the view) in a WHERE clause. If you only want to see the highest rated movies for children, you can run an additional query on the view.</p>
+
+<pre><code>&gt; &gt; select * from children where _c1&gt; 2.5;
+Query: select * from children where _c1&gt; 2.5
++-----------------------+------+
+| title                 | _c1  |
++-----------------------+------+
+| Simple Pleasures      | 4.28 |
+| Return from Mars      | 4.24 |
+| Tell 'Em Mikey's Back | 4.12 |
+| Fledgling             | 3.30 |
+| Boy and His Cattle, A | 3.24 |
++-----------------------+------+
+
+</code></pre>
+
+<p>Beyond that, it’s all variations on the SQL calls supported by Impala. See the <a href="http://www.cloudera.com/content/support/en/documentation.html">Impala documentation</a> for more detail on your available SQL options.</p>
+
+  </article>
+
+</div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap">
+
+    <h2 class="footer-heading">Kite SDK Development Guide</h2>
+
+    <div class="footer-col-1 column">
+      <ul>
+        <li>Kite SDK Development Guide</li>
+        <li><a href="mailto:cdk-dev@cloudera.org">cdk-dev@cloudera.org</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+      <ul>
+        <li>
+          <a href="https://github.com/">
+            <span class="icon github">
+              <svg version="1.1" class="github-icon-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                 viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+                <path fill-rule="evenodd" clip-rule="evenodd" fill="#C2C2C2" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761
+                c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32
+                c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472
+                c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037
+                C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65
+                c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261
+                c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082
+                c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129
+                c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+            <span class="username"></span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/">
+            <span class="icon twitter">
+              <svg version="1.1" class="twitter-icon-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                 viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+                <path fill="#C2C2C2" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27
+                c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767
+                c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206
+                C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271
+                c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469
+                c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/>
+              </svg>
+            </span>
+            <span class="username"></span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-3 column">
+      <p class="text">Documentation for the Kite open source project on GitHub.</p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>

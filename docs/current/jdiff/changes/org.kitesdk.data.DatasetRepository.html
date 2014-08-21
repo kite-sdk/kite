@@ -18,7 +18,7 @@ org.kitesdk.data.DatasetRepository
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/DatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/DatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -30,7 +30,7 @@ org.kitesdk.data.DatasetRepository
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.DatasetReader.html"><B>PREV CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.DatasetRepositories.html"><B>PREV CLASS</B></A>
 &nbsp;<A HREF="org.kitesdk.data.DatasetWriter.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
@@ -47,32 +47,85 @@ FIELDS
 <H2>
 Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/DatasetRepository.html" target="_top"><tt>DatasetRepository</tt></A>
 </H2>
+<p><font size="+1">Added interface <code>org.kitesdk.data.spi.DatasetRepository</code>.<br></font>
+<p><font size="+1"><b>Now deprecated</b>.<br></font>
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
-<a NAME="Added"></a>
-<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.DatasetRepository.create_added(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)"></A>
-  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/DatasetRepository.html#create(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)" target="_top"><tt>create</tt></A>(<code>String,</nobr> DatasetDescriptor<nobr>,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  <A NAME="org.kitesdk.data.DatasetRepository.create_removed(java.lang.String, org.kitesdk.data.DatasetDescriptor)"></A>
+  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;create(<code>String,</nobr> DatasetDescriptor<nobr><nobr></code>)</nobr>
   </TD>
   <TD VALIGN="TOP">Create a <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> with the supplied {@code descriptor}.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.DatasetRepository.load_added(java.lang.String, java.lang.Class<E>)"></A>
-  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/DatasetRepository.html#load(java.lang.String, java.lang.Class<E>)" target="_top"><tt>load</tt></A>(<code>String,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  <A NAME="org.kitesdk.data.DatasetRepository.create_removed(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)"></A>
+  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;create(<code>String,</nobr> DatasetDescriptor<nobr>,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Create a <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> with the supplied {@code descriptor}.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.DatasetRepository.delete_removed(java.lang.String)"></A>
+  <nobr><code>boolean</code>&nbsp;delete(<code>String</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Delete data for the <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> named {@code name} and remove its
+ <A HREF="../../apidocs/DatasetDescriptor.html"><TT>DatasetDescriptor</TT></A> from the underlying metadata provider.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.DatasetRepository.exists_removed(java.lang.String)"></A>
+  <nobr><code>boolean</code>&nbsp;exists(<code>String</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Checks if there is a <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> in this repository named {@code name}.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.DatasetRepository.getUri_removed()"></A>
+  <nobr><code>URI</code>&nbsp;getUri()</nobr>
+  </TD>
+  <TD VALIGN="TOP">Return the <A HREF="../../apidocs/URI.html"><TT>URI</TT></A> of this repository.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.DatasetRepository.list_removed()"></A>
+  <nobr><code>Collection&lt;String&gt;</code>&nbsp;list()</nobr>
+  </TD>
+  <TD VALIGN="TOP">List the names of the <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A>s in this {@code DatasetRepository}.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.DatasetRepository.load_removed(java.lang.String)"></A>
+  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;load(<code>String</code>)</nobr>
   </TD>
   <TD VALIGN="TOP">Get the latest version of a named <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A>.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.DatasetRepository.update_added(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)"></A>
-  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/DatasetRepository.html#update(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)" target="_top"><tt>update</tt></A>(<code>String,</nobr> DatasetDescriptor<nobr>,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  <A NAME="org.kitesdk.data.DatasetRepository.load_removed(java.lang.String, java.lang.Class<E>)"></A>
+  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;load(<code>String,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Get the latest version of a named <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.DatasetRepository.update_removed(java.lang.String, org.kitesdk.data.DatasetDescriptor)"></A>
+  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;update(<code>String,</nobr> DatasetDescriptor<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Update an existing <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> to reflect the supplied
+ {@code descriptor}.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="org.kitesdk.data.DatasetRepository.update_removed(java.lang.String, org.kitesdk.data.DatasetDescriptor, java.lang.Class<E>)"></A>
+  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;update(<code>String,</nobr> DatasetDescriptor<nobr>,</nobr> Class&lt;E&gt;<nobr><nobr></code>)</nobr>
   </TD>
   <TD VALIGN="TOP">Update an existing <A HREF="../../apidocs/Dataset.html"><TT>Dataset</TT></A> to reflect the supplied
  {@code descriptor}.</TD>
@@ -87,7 +140,7 @@ Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/DatasetReposi
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/DatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.15.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/DatasetRepository.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -99,7 +152,7 @@ Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/DatasetReposi
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="org.kitesdk.data.DatasetReader.html"><B>PREV CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.DatasetRepositories.html"><B>PREV CLASS</B></A>
 &nbsp;<A HREF="org.kitesdk.data.DatasetWriter.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
