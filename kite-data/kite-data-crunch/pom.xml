@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-data</artifactId>
-    <version>0.16.0</version>
+    <version>0.16.1-SNAPSHOT</version>
   </parent>
 
   <name>Kite Data Crunch Module</name>
@@ -98,23 +98,23 @@
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
-      <version>0.16.0</version>
+      <version>0.16.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-mapreduce</artifactId>
-      <version>0.16.0</version>
+      <version>0.16.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-hcatalog</artifactId>
-      <version>0.16.0</version>
+      <version>0.16.1-SNAPSHOT</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-hbase</artifactId>
-      <version>0.16.0</version>
+      <version>0.16.1-SNAPSHOT</version>
       <optional>true</optional>
     </dependency>
 
@@ -192,14 +192,14 @@
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
-      <version>0.16.0</version>
+      <version>0.16.1-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-hbase</artifactId>
-      <version>0.16.0</version>
+      <version>0.16.1-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
