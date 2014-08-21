@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-parent</artifactId>
-    <version>0.15.1-SNAPSHOT</version>
+    <version>0.16.0</version>
   </parent>
 
   <name>Kite Maven Plugin</name>
@@ -74,17 +74,17 @@
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-core</artifactId>
-      <version>0.15.1-SNAPSHOT</version>
+      <version>0.16.0</version>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-hbase</artifactId>
-      <version>0.15.1-SNAPSHOT</version>
+      <version>0.16.0</version>
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-hcatalog</artifactId>
-      <version>0.15.1-SNAPSHOT</version>
+      <version>0.16.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
