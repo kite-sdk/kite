@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Column Mapping</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="Documentation for the Kite open source project on GitHub.">
+    <link rel="canonical" href="http://kitesdk.org/Column-Mapping/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/">Kite SDK Development Guide</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <!--div class="trigger">
+        
+          <a class="page-link" href="/Column-Mapping/">Column Mapping</a>
+        
+          <a class="page-link" href="/HBase-Storage-Cells/">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/Inferring-a-Schema-from-a-Java-Class/">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/Interval-Notation/">Interval Notation</a>
+        
+          <a class="page-link" href="/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/Kite-Dataset-Command-Line-Interface/">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/Kite-SDK-Guide/">What is Kite?</a>
+        
+          <a class="page-link" href="/Parquet-vs-Avro-Format/">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/Partition-Strategy-Format/">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/Partitioned-Datasets/">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/Restricted-Views/">Restricted Views</a>
+        
+          <a class="page-link" href="/Schema-Evolution/">Schema Evolution</a>
+        
+          <a class="page-link" href="/Schema-URL-Warning/">Schema URL Warning</a>
+        
+          <a class="page-link" href="/URIs/">Dataset and View URIs</a>
+        
+          <a class="page-link" href="/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/Viewing-with-Impala/">Viewing a Kite CLI Dataset with Impala</a>
+        
+          <a class="page-link" href="/about/">About Kite SDK</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/">Kite SDK Documentation</a>
+        
+      </div -->
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Column Mapping</h1>
+  </header>
+
+  <article class="post-content">
+  <p>Column mapping allows you to configure how your records should be stored in HBase for maximum performance and efficiency. You define the column mapping in JSON format in a data-centric way. Kite stores and retrieves the data correctly.</p>
+
+<p>A column mapping is a JSON list of definitions that specify how to store each field in the record. Each definition is a JSON object with a <code>source</code>, a <code>type</code>, and any additional properties required by the type. The <code>source</code> property specifies which field in the source record the definition applies to. The <code>type</code> property controls where the source field’s data is stored.</p>
+
+<p>The most common type is <code>column</code>, which stores the source field in a cell. HBase cells are identified by column family and column qualifier, which are the two required properties for <code>column</code>. For example, here is a single column definition for a timestamp field, with a family <em>m</em> and a qualifier <em>ts</em>.</p>
+
+<pre><code class="language-json">{"source" : "timestamp", "type" : "column", "family" : "m", "qualifier" : "ts"}
+</code></pre>
+
+<p>The identifiers are stored repeatedly in the dataset, so it’s best practice to keep the names short, but long enough to provide context. The table structure in the data store is similar to this:</p>
+
+<p><img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/14.1ColumnMapping.png" alt="Example table." /></p>
+
+<p>Each source field should have a corresponding column definition in the complete mapping. Below is an example of a complete column mapping for a simple user record.</p>
+
+<pre><code class="language-json">[
+  {"source" : "email", "type" : "column", "family" : "u", "qualifier" : "mail"},
+  {"source" : "first_name", "type" : "column", "family" : "u", "qualifier" : "fname"},
+  {"source" : "last_name", "type" : "column", "family" : "u", "qualifier" : "lname"},
+  {"source" : "created_at", "type" : "column", "family" : "u", "qualifier" : "ts"}
+]
+</code></pre>
+
+<h2 id="mapping-types">Mapping types</h2>
+
+<p>There are five mapping types: <em>column</em>, <em>counter</em>, <em>keyAsColumn</em>, <em>key</em>, and <em>version</em>.</p>
+
+<h3 id="column-mapping">Column mapping</h3>
+<p>The <code>column</code> type maps a value to a single cell identified by the <code>family</code> and <code>qualifier</code> properties.</p>
+
+<p>The value in a cell is not necessarily a primitive type. It can be a more complex type, such as an entire Avro record or table.</p>
+
+<h3 id="counter-mapping">Counter mapping</h3>
+<p>The <code>counter</code> is similar to column, but can be incremented using HBase’s atomic increment. The field data is stored in a cell identified by the required <code>family</code> and <code>qualifier</code> properties, and the source field for a counter must be an integer or a long. A good example is user visits to a website. Every time the user visits the site, the site increments the user’s visit counter.</p>
+
+<pre><code class="language-json">{"source" : "visits", "type" : "counter", "family" : "u", "prefix" : "visits"}
+</code></pre>
+
+<p>HBase increments the counter atomically. If there are two visits at the same time, it guarantees that they will not be mistakenly combined into one, but will be counted separately. The sequence is</p>
+
+<ul>
+  <li>read the value</li>
+  <li>increment by one</li>
+  <li>store the value</li>
+</ul>
+
+<p>Even if another user reads the value and begins an edit in between, HBase guarantees that the information is stored correctly (that is, your change will not overwrite changes made concurrently).</p>
+
+<h3 id="key-mapping">Key mapping</h3>
+
+<p>HBase stores everything by a unique key for each record, made from the record’s data. For example, users might be stored by their e-mail address. You could use <code>column</code> to store the e-mail in a cell, but it is already stored in key for the record. Kite can retrieve the email value from the key. It doesn’t have to be stored a second time in the data.</p>
+
+<pre><code class="language-json">{"source" : "email", "type" : "key"}
+</code></pre>
+
+<p>In Kite, we define the key using a partition strategy. For the above e-mail mapping, you would need to use a partition strategy that includes the e-mail like this.</p>
+
+<pre><code class="language-json">[
+  {"source" : "email", "type" : "identity"}
+]
+</code></pre>
+
+<p>On the file system side, the keys overlap. That’s how we group things together into common buckets that have properties such as Year, Month, and Day for all of the events in the same bucket.</p>
+
+<p>HBase does that partitioning for you: it groups items together based on unique keys. If it needs to, it will split the file when it gets to be of sufficient size. The keys don’t point to a group. The keys point to an individual record, and then groups are made from those keys, dynamically.</p>
+
+<p>What you want to do is take your unique identifiers and store those as your keys.</p>
+
+<h3 id="complex-record-mapping">Complex record mapping</h3>
+
+<p>Use <code>keyAsColumn</code> to store a complex record or a hash map in a particular column family. </p>
+
+<p>For example, if you store locations made of a latitude, longitude pair, you could store the location record in the <code>loc</code> family using the following mapping.</p>
+
+<pre><code class="language-json">{"source" : "location", "type" : "keyAsColumn", "family" : "loc"}
+</code></pre>
+
+<pre><code class="language-javascript">location = {"lat" : 12.34, "long" : 128.14}
+</code></pre>
+
+<p>Kite uses the <code>family</code> property you provide as the column family, but uses the names of the individual elements of the column record to name the qualifiers. The <code>family</code> property is required.</p>
+
+<p><img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/14.1_keyAsColumn.png" alt="keyAsColumn" /></p>
+
+<p>This also supports an optional <code>prefix</code> for the qualifiers. For example, you could add the prefix “m_” to your column definition for easier identification.</p>
+
+<pre><code class="language-json">{"source" : "location", "type" : "keyAsColumn", "family" : "loc", "prefix" : "m_"}
+</code></pre>
+
+<p><img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/14.1_keyAsColumnWithPrefix.png" alt="keyAsColumn with prefix" /></p>
+
+<p>A <code>keyAsColumn</code> source field must be a record or a map. The difference when using a map is that you don’t know the names of the qualifiers in advance. Keys is used as the qualifiers, and the values is stored in the cells.</p>
+
+<p>The fields in the record or map can themselves be complex objects.</p>
+
+<h3 id="version-mapping">Version mapping</h3>
+
+<p>The <code>occVersion</code> mapping is a special type of counter. It’s the only counter allowed on the record. Counters use atomic updating, where the increment is handled inside the database. Version, being the version of the record, is the only counter allowed. It has an automatic storage system that the user cannot control. You can access the version on the record itself, but you have no opportunity to change the value. </p>
+
+<pre><code class="language-json">{"source" : "record_version", "type" : "occVersion"}
+</code></pre>
+
+<p>The version is incremented every time you “put” the record. This provides a concurrency guarantee. You update the record, store all the data, then update the version with an atomic operation. It uses OCC (Optimistic Concurrency Control). If you begin an edit based on version 6, it checks to see if it is still at version 6 before allowing you to store the record. If someone else has changed it in the interim, you get a rejection message. Typically, such collisions are rare, so working under the assumption that such a collision won’t occur is the most efficient mode of operations most of the time.</p>
+
+  </article>
+
+</div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap">
+
+    <h2 class="footer-heading">Kite SDK Development Guide</h2>
+
+    <div class="footer-col-1 column">
+      <ul>
+        <li>Kite SDK Development Guide</li>
+        <li><a href="mailto:cdk-dev@cloudera.org">cdk-dev@cloudera.org</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+      <ul>
+        <li>
+          <a href="https://github.com/">
+            <span class="icon github">
+              <svg version="1.1" class="github-icon-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                 viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+                <path fill-rule="evenodd" clip-rule="evenodd" fill="#C2C2C2" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761
+                c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32
+                c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472
+                c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037
+                C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65
+                c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261
+                c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082
+                c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129
+                c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+            <span class="username"></span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/">
+            <span class="icon twitter">
+              <svg version="1.1" class="twitter-icon-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                 viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+                <path fill="#C2C2C2" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27
+                c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767
+                c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206
+                C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271
+                c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469
+                c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/>
+              </svg>
+            </span>
+            <span class="username"></span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-3 column">
+      <p class="text">Documentation for the Kite open source project on GitHub.</p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>
