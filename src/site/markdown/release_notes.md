@@ -10,11 +10,11 @@ Release date: 21 August 2014
 Version 0.16.0 contains the following notable changes:
 
 * Kite datasets can be read from and written to by Apache Spark jobs. See the new
-[Spark example](https://github.com/kite-sdk/kite-examples/spark) for details on usage.
+[Spark example](https://github.com/kite-sdk/kite-examples/tree/master/spark) for details on usage.
 * Added a CLI [transform task](https://issues.cloudera.org/browse/CDK-549) for transforming
 entities read from a source dataset before storing then into a target dataset.
 * Added a CDH5 application parent POM that makes it easy to build Kite applications on CDH5 using Maven.
-The [Spark example](https://github.com/kite-sdk/kite-examples/spark) uses this parent POM.
+The [Spark example](https://github.com/kite-sdk/kite-examples/tree/master/spark) uses this parent POM.
 * The `DatasetRepository` and `DatasetRepositories` APIs have been moved to the SPI and
 deprecated from the public API. Users should move to the new
 [`Datasets`](http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/Datasets.html) API before the
