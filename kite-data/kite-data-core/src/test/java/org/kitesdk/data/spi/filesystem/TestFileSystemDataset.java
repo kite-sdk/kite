@@ -43,6 +43,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.kitesdk.data.CompressionFormat;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.PartitionedDataset;
 import org.slf4j.Logger;
@@ -61,20 +62,29 @@ public class TestFileSystemDataset extends MiniDFSTest {
   public static Collection<Object[]> data() throws IOException {
     MiniDFSTest.setupFS();
     Object[][] data = new Object[][] {
-        { Formats.AVRO, getDFS() },
-        { Formats.AVRO, getFS() },
-        { Formats.PARQUET, getDFS() },
-        { Formats.PARQUET, getFS() } };
+        { Formats.AVRO, getDFS(), CompressionFormat.Snappy },
+        { Formats.AVRO, getDFS(), CompressionFormat.Deflate},
+        { Formats.AVRO, getDFS(), CompressionFormat.Bzip2},
+        { Formats.AVRO, getFS(), CompressionFormat.Snappy},
+        { Formats.AVRO, getFS(), CompressionFormat.Deflate},
+        { Formats.AVRO, getFS(), CompressionFormat.Bzip2},
+        { Formats.PARQUET, getDFS(), CompressionFormat.Snappy },
+        { Formats.PARQUET, getDFS(), CompressionFormat.Deflate },
+        { Formats.PARQUET, getFS(), CompressionFormat.Snappy },
+        { Formats.PARQUET, getFS(), CompressionFormat.Deflate } };
     return Arrays.asList(data);
   }
 
-  private Format format;
-  private FileSystem fileSystem;
+  private final Format format;
+  private final FileSystem fileSystem;
+  private final CompressionFormat compressionFormat;
   private Path testDirectory;
 
-  public TestFileSystemDataset(Format format, FileSystem fs) {
+  public TestFileSystemDataset(Format format, FileSystem fs,
+      CompressionFormat compressionFormat) {
     this.format = format;
     this.fileSystem = fs;
+    this.compressionFormat = compressionFormat;
   }
 
   @Before
@@ -96,6 +106,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schemaUri(USER_SCHEMA_URL)
             .format(format)
+            .compressionFormat(compressionFormat)
             .location(testDirectory)
             .build())
         .type(Record.class)
@@ -120,6 +131,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
+            .compressionFormat(compressionFormat)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .build())
@@ -166,6 +178,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
+            .compressionFormat(compressionFormat)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .build())
@@ -243,6 +256,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
+            .compressionFormat(compressionFormat)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .build())
@@ -271,6 +285,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
+            .compressionFormat(compressionFormat)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .build())
@@ -314,6 +329,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
+            .compressionFormat(compressionFormat)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .build())
@@ -332,6 +348,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
+            .compressionFormat(compressionFormat)
             .location(newTestDirectory)
             .partitionStrategy(partitionStrategy)
             .build())
@@ -431,6 +448,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
+            .compressionFormat(compressionFormat)
             .location(testDirectory)
             .build())
         .type(Record.class)
@@ -453,6 +471,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
         .descriptor(new DatasetDescriptor.Builder()
             .schema(USER_SCHEMA)
             .format(format)
+            .compressionFormat(compressionFormat)
             .location(testDirectory)
             .partitionStrategy(partitionStrategy)
             .build())

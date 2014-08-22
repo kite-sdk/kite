@@ -71,6 +71,7 @@ public class DatasetDescriptor {
   private final Map<String, String> properties;
   private final PartitionStrategy partitionStrategy;
   private final ColumnMapping columnMappings;
+  private final CompressionFormat compressionFormat;
 
   /**
    * Create an instance of this class with the supplied {@link Schema},
@@ -96,6 +97,24 @@ public class DatasetDescriptor {
       @Nullable Map<String, String> properties,
       @Nullable PartitionStrategy partitionStrategy,
       @Nullable ColumnMapping columnMapping) {
+    this(schema, schemaUrl, format, location, properties, partitionStrategy,
+        columnMapping, null);
+  }
+
+  /**
+   * Create an instance of this class with the supplied {@link Schema}, optional
+   * URL, {@link Format}, optional location URL, optional
+   * {@link PartitionStrategy}, optional {@link ColumnMapping}, and optional
+   * {@link CompressionFormat}.
+   *
+   * @since 0.17.0
+   */
+  public DatasetDescriptor(Schema schema, @Nullable URL schemaUrl,
+      Format format, @Nullable URI location,
+      @Nullable Map<String, String> properties,
+      @Nullable PartitionStrategy partitionStrategy,
+      @Nullable ColumnMapping columnMapping,
+      @Nullable CompressionFormat compressionFormat) {
     // URI can be null if the descriptor is configuring a new Dataset
     Preconditions.checkArgument(
         (location == null) || (location.getScheme() != null),
@@ -112,6 +131,7 @@ public class DatasetDescriptor {
     }
     this.partitionStrategy = partitionStrategy;
     this.columnMappings = columnMapping;
+    this.compressionFormat = compressionFormat;
   }
 
   /**
@@ -226,6 +246,17 @@ public class DatasetDescriptor {
   }
 
   /**
+   * Get the {@link CompressionFormat}
+   *
+   * @return the compression format
+   *
+   * @since 0.17.0
+   */
+  public CompressionFormat getCompressionFormat() {
+    return compressionFormat;
+  }
+
+  /**
    * Returns true if an associated dataset is partitioned (that is, has an
    * associated {@link PartitionStrategy}), false otherwise.
    */
@@ -298,6 +329,7 @@ public class DatasetDescriptor {
     private Map<String, String> properties;
     private PartitionStrategy partitionStrategy;
     private ColumnMapping columnMapping;
+    private CompressionFormat compressionFormat;
 
     public Builder() {
       this.properties = Maps.newHashMap();
@@ -457,7 +489,7 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema by using the schema from an existing Avro
-     * data file. A schema is required, and can be set using one of the methods 
+     * data file. A schema is required, and can be set using one of the methods
      * {@code schema}, {@code schemaLiteral}, {@code schemaUri}, or
      * {@code schemaFromAvroDataFile}.
      *
@@ -502,7 +534,7 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's schema by using the schema from an existing Avro
-     * data file. A schema is required, and can be set using one of the methods 
+     * data file. A schema is required, and can be set using one of the methods
      * {@code schema}, {@code schemaLiteral}, {@code schemaUri}, or
      * {@code schemaFromAvroDataFile}.
      *
@@ -852,6 +884,35 @@ public class DatasetDescriptor {
     }
 
     /**
+     * Configure the dataset's compression format (optional). If not set,
+     * default to {@link CompressionFormat#Snappy}.
+     *
+     * @param compressionFormat the compression format
+     *
+     * @return This builder for method chaining
+     *
+     * @since 0.17.0
+     */
+    public Builder compressionFormat(CompressionFormat compressionFormat) {
+      this.compressionFormat = compressionFormat;
+      return this;
+    }
+
+    /**
+     * Configure the dataset's compression format (optional). If not set,
+     * default to {@link CompressionFormat#Snappy}.
+     *
+     * @param compressionFormatName  the name of the compression format
+     *
+     * @return This builder for method chaining
+     *
+     * @since 0.17.0
+     */
+    public Builder compressionFormat(String compressionFormatName) {
+      return compressionFormat(CompressionFormat.forName(compressionFormatName));
+    }
+
+    /**
      * Build an instance of the configured dataset descriptor. Subsequent calls
      * produce new instances that are similarly configured.
      *
@@ -883,13 +944,19 @@ public class DatasetDescriptor {
         }
       }
 
+      // if no compression format is present, get the default from the format
+      if (compressionFormat == null) {
+        compressionFormat = format.getDefaultCompressionFormat();
+      }
+
       checkPartitionStrategy(schema, partitionStrategy);
       checkColumnMappings(schema, partitionStrategy, columnMapping);
       // TODO: verify that all fields have a mapping?
+      checkCompressionFormat(format, compressionFormat);
 
       return new DatasetDescriptor(
           schema, schemaUrl, format, location, properties, partitionStrategy,
-          columnMapping);
+          columnMapping, compressionFormat);
     }
 
     private static void checkPartitionStrategy(Schema schema, PartitionStrategy strategy) {
@@ -910,6 +977,14 @@ public class DatasetDescriptor {
             "Field type %s does not match partitioner %s",
             field.schema().getType(), fp);
       }
+    }
+
+    private static void checkCompressionFormat(Format format,
+        CompressionFormat compressionFormat) {
+      Preconditions.checkState(Sets.newHashSet(
+          format.getSupportedCompressionFormats()).contains(compressionFormat),
+          "Format %s doesn't support compression format %s", format.getName(),
+          compressionFormat.getName());
     }
   }
 

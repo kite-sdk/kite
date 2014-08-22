@@ -21,7 +21,12 @@ final class AccessorImpl extends Accessor {
 
   @Override
   public Format newFormat(String name) {
-    return new Format(name);
+    try {
+      return Formats.fromString(name);
+    } catch (IllegalArgumentException ex) {
+      return new Format(name, CompressionFormat.Uncompressed, new CompressionFormat[]
+        { CompressionFormat.Uncompressed });
+    }
   }
 
   @Override
