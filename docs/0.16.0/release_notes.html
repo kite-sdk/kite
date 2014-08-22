@@ -103,9 +103,9 @@
  <p>Release date: 21 August 2014</p> 
  <p>Version 0.16.0 contains the following notable changes:</p> 
  <ul> 
-  <li>Kite datasets can be read from and written to by Apache Spark jobs. See the new <a class="externalLink" href="https://github.com/kite-sdk/kite-examples/spark">Spark example</a> for details on usage.</li> 
+  <li>Kite datasets can be read from and written to by Apache Spark jobs. See the new <a class="externalLink" href="https://github.com/kite-sdk/kite-examples/tree/master/spark">Spark example</a> for details on usage.</li> 
   <li>Added a CLI <a class="externalLink" href="https://issues.cloudera.org/browse/CDK-549">transform task</a> for transforming entities read from a source dataset before storing then into a target dataset.</li> 
-  <li>Added a CDH5 application parent POM that makes it easy to build Kite applications on CDH5 using Maven. The <a class="externalLink" href="https://github.com/kite-sdk/kite-examples/spark">Spark example</a> uses this parent POM.</li> 
+  <li>Added a CDH5 application parent POM that makes it easy to build Kite applications on CDH5 using Maven. The <a class="externalLink" href="https://github.com/kite-sdk/kite-examples/tree/master/spark">Spark example</a> uses this parent POM.</li> 
   <li>The <tt>DatasetRepository</tt> and <tt>DatasetRepositories</tt> APIs have been moved to the SPI and deprecated from the public API. Users should move to the new <a class="externalLink" href="http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/Datasets.html"><tt>Datasets</tt></a> API before the next release.</li> 
   <li>Kite will now properly generate Parquet Hive tables on Hive 0.13 and later.</li> 
   <li>Writing to a non-empty dataset or view from MapReduce or Crunch will now fail unless the write mode is explicitly set to append or overwrite. This is a change from the previous behavior which was to append. See <a class="externalLink" href="https://issues.cloudera.org/browse/CDK-572">CDK-572</a> and <a class="externalLink" href="https://issues.cloudera.org/browse/CDK-347">CDK-347</a> for details.</li> 
