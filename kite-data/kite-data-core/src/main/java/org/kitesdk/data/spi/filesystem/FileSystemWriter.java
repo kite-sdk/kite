@@ -223,13 +223,15 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
       if (DescriptorUtil.isEnabled(
           FileSystemProperties.NON_DURABLE_PARQUET_PROP, descriptor)) {
         return (FileAppender<E>) new ParquetAppender(
-            fs, temp, descriptor.getSchema(), conf, true);
+            fs, temp, descriptor.getSchema(), conf,
+            descriptor.getCompressionType());
       } else {
         return (FileAppender<E>) new DurableParquetAppender(
-            fs, temp, descriptor.getSchema(), conf, true);
+            fs, temp, descriptor.getSchema(), conf, descriptor.getCompressionType());
       }
     } else if (Formats.AVRO.equals(format)) {
-      return new AvroAppender<E>(fs, temp, descriptor.getSchema(), true);
+      return new AvroAppender<E>(fs, temp, descriptor.getSchema(),
+          descriptor.getCompressionType());
     } else if (Formats.CSV.equals(format) &&
         DescriptorUtil.isEnabled(FileSystemProperties.ALLOW_CSV_PROP, descriptor)) {
       return new CSVAppender<E>(fs, temp, descriptor);

@@ -16,15 +16,17 @@
 package org.kitesdk.data;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 import javax.annotation.concurrent.Immutable;
 
 /**
  * <p>
- * The data format used for encoding the data in a {@link Dataset} when stored 
+ * The data format used for encoding the data in a {@link Dataset} when stored
  * in a {@link DatasetRepository}.
  * </p>
  * <p>
- * There are a small number of formats provided. The default is 
+ * There are a small number of formats provided. The default is
  * {@link Formats#AVRO}, which is used when you do not explicitly configure a
  * format.
  * </p>
@@ -34,9 +36,14 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class Format {
   private final String name;
+  private final CompressionType defaultCompressionType;
+  private final Set<CompressionType> supportedCompressionTypes;
 
-  Format(String name) {
+  Format(String name, CompressionType defaultCompressionType,
+      CompressionType[] supportedCompressionTypes) {
     this.name = name;
+    this.defaultCompressionType = defaultCompressionType;
+    this.supportedCompressionTypes = ImmutableSet.copyOf(supportedCompressionTypes);
   }
 
   /**
@@ -54,6 +61,28 @@ public class Format {
    */
   public String getExtension() {
     return name;
+  }
+
+  /**
+   * Get the {@link CompressionType}s supported by this {@code Format}.
+   *
+   * @return the supported compression types
+   *
+   * @since 0.17.0
+   */
+  public Set<CompressionType> getSupportedCompressionTypes() {
+    return supportedCompressionTypes;
+  }
+
+  /**
+   * Get the default {@link CompressionType} supported by this {@code Format}.
+   *
+   * @return the default compression type
+   *
+   * @since 0.17.0
+   */
+  public CompressionType getDefaultCompressionType() {
+    return defaultCompressionType;
   }
 
   @Override

@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Formats;
 import org.kitesdk.data.spi.InitializeAccessor;
 
 public abstract class TestFileSystemWriters<E> {
@@ -62,7 +63,7 @@ public abstract class TestFileSystemWriters<E> {
   public void testWrite() throws IOException {
     AvroAppender<String> writer = new AvroAppender<String>(
         fs, new Path(testDirectory, "write-1.avro"),
-        Schema.create(Schema.Type.STRING), true);
+        Schema.create(Schema.Type.STRING), Formats.AVRO.getDefaultCompressionType());
 
     writer.open();
 

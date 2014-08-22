@@ -18,6 +18,7 @@ package org.kitesdk.data.spi.filesystem;
 import com.google.common.base.Objects;
 import com.google.common.io.Closeables;
 import java.io.IOException;
+import java.util.Arrays;
 import org.apache.avro.Schema;
 import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
@@ -27,6 +28,8 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.compat.Hadoop;
+import org.kitesdk.data.CompressionType;
+import org.kitesdk.data.Formats;
 
 class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
 
@@ -34,16 +37,19 @@ class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
   private final FileSystem fileSystem;
   private final Path path;
   private final boolean enableCompression;
+  private final CompressionType compressionType;
 
   private FSDataOutputStream out = null;
   private DataFileWriter<E> dataFileWriter = null;
   private DatumWriter<E> writer = null;
 
-  public AvroAppender(FileSystem fileSystem, Path path, Schema schema, boolean enableCompression) {
+  public AvroAppender(FileSystem fileSystem, Path path, Schema schema,
+      CompressionType compressionType) {
     this.fileSystem = fileSystem;
     this.path = path;
     this.schema = schema;
-    this.enableCompression = enableCompression;
+    this.enableCompression = compressionType != CompressionType.Uncompressed;
+    this.compressionType = compressionType;
   }
 
   @Override
@@ -51,13 +57,8 @@ class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
     writer = new ReflectDatumWriter<E>();
     dataFileWriter = new DataFileWriter<E>(writer);
 
-    /*
-     * We may want to expose the codec in the writer and simply rely on the
-     * builder and proper instantiation from dataset-level configuration.
-     * Hard-coding snappy seems a little too draconian.
-     */
     if (enableCompression) {
-      dataFileWriter.setCodec(CodecFactory.snappyCodec());
+      dataFileWriter.setCodec(getCodecFactory());
     }
 
     out = fileSystem.create(path, true);
@@ -102,5 +103,24 @@ class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
       .add("dataFileWriter", dataFileWriter)
       .add("writer", writer)
       .toString();
+  }
+
+  private CodecFactory getCodecFactory() {
+    switch (compressionType) {
+      case Snappy:
+        return CodecFactory.snappyCodec();
+
+      case Deflate:
+        return CodecFactory.deflateCodec(9);
+
+      case Bzip2:
+        return CodecFactory.bzip2Codec();
+
+      default:
+        throw new IllegalArgumentException(String.format(
+            "Unsupported compression format %s. Supported formats: %s",
+            compressionType.getName(), Arrays.toString(
+                Formats.AVRO.getSupportedCompressionTypes().toArray())));
+    }
   }
 }
