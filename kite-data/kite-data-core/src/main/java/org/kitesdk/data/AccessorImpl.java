@@ -24,8 +24,8 @@ final class AccessorImpl extends Accessor {
     try {
       return Formats.fromString(name);
     } catch (IllegalArgumentException ex) {
-      return new Format(name, CompressionFormat.Uncompressed, new CompressionFormat[]
-        { CompressionFormat.Uncompressed });
+      return new Format(name, CompressionType.Uncompressed, new CompressionType[]
+        { CompressionType.Uncompressed });
     }
   }
 

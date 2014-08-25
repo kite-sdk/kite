@@ -24,7 +24,7 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.kitesdk.data.CompressionFormat;
+import org.kitesdk.data.CompressionType;
 import org.kitesdk.data.Formats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,18 +43,18 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
   private final FileSystem fileSystem;
   private final Configuration conf;
   private final boolean enableCompression;
-  private final CompressionFormat compressionFormat;
+  private final CompressionType compressionType;
 
   private AvroParquetWriter<E> avroParquetWriter = null;
 
   public ParquetAppender(FileSystem fileSystem, Path path, Schema schema,
-                         Configuration conf, CompressionFormat compressionFormat) {
+                         Configuration conf, CompressionType compressionType) {
     this.fileSystem = fileSystem;
     this.path = path;
     this.schema = schema;
     this.conf = conf;
-    this.enableCompression = compressionFormat != CompressionFormat.Uncompressed;
-    this.compressionFormat = compressionFormat;
+    this.enableCompression = compressionType != CompressionType.Uncompressed;
+    this.compressionType = compressionType;
   }
 
   @Override
@@ -105,7 +105,7 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
   }
 
   private CompressionCodecName getCompressionCodecName() {
-    switch (compressionFormat) {
+    switch (compressionType) {
       case Snappy:
         return CompressionCodecName.SNAPPY;
 
@@ -118,8 +118,8 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
       default:
         throw new IllegalArgumentException(String.format(
             "Unsupported compression format %s. Supported formats: %s",
-            compressionFormat.getName(), Arrays.toString(
-                Formats.PARQUET.getSupportedCompressionFormats().toArray())));
+            compressionType.getName(), Arrays.toString(
+                Formats.PARQUET.getSupportedCompressionTypes().toArray())));
     }
   }
 

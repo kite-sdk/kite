@@ -65,6 +65,7 @@ class HiveUtils {
 
   private static final String CUSTOM_PROPERTIES_PROPERTY_NAME = "kite.custom.property.names";
   private static final String PARTITION_EXPRESSION_PROPERTY_NAME = "kite.partition.expression";
+  private static final String COMPRESSION_TYPE_PROPERTY_NAME = "kite.compression.type";
   private static final String OLD_CUSTOM_PROPERTIES_PROPERTY_NAME = "cdk.custom.property.names";
   private static final String OLD_PARTITION_EXPRESSION_PROPERTY_NAME = "cdk.partition.expression";
   private static final String AVRO_SCHEMA_URL_PROPERTY_NAME = "avro.schema.url";
@@ -91,9 +92,11 @@ class HiveUtils {
   static DatasetDescriptor descriptorForTable(Configuration conf, Table table) {
     final DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder();
 
+    Format format;
     final String serializationLib = table.getSd().getSerdeInfo().getSerializationLib();
     if (SERDE_TO_FORMAT.containsKey(serializationLib)) {
-      builder.format(SERDE_TO_FORMAT.get(serializationLib));
+      format = SERDE_TO_FORMAT.get(serializationLib);
+      builder.format(format);
     } else {
       // TODO: should this use an "unknown" format? others fail in open()
       throw new UnknownFormatException(
@@ -142,6 +145,15 @@ class HiveUtils {
     String schemaLiteral = properties.get(AVRO_SCHEMA_LITERAL_PROPERTY_NAME);
     if (schemaLiteral != null) {
       builder.schemaLiteral(schemaLiteral);
+    }
+
+    String compressionType = properties.get(COMPRESSION_TYPE_PROPERTY_NAME);
+    if (compressionType == null) {
+      // if the compression type isn't set, the table probably pre-dates
+      // compression configuration support and should default to the Format default
+      builder.compressionType(format.getDefaultCompressionType());
+    } else {
+      builder.compressionType(compressionType);
     }
 
     try {
@@ -223,6 +235,9 @@ class HiveUtils {
           AVRO_SCHEMA_URL_PROPERTY_NAME,
           schemaURL.toExternalForm());
     }
+
+    table.getParameters().put(COMPRESSION_TYPE_PROPERTY_NAME,
+        descriptor.getCompressionType().getName());
 
     // convert the schema to Hive columns
     table.getSd().setCols(convertSchema(descriptor.getSchema()));

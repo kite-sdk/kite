@@ -63,7 +63,7 @@ public abstract class TestFileSystemWriters<E> {
   public void testWrite() throws IOException {
     AvroAppender<String> writer = new AvroAppender<String>(
         fs, new Path(testDirectory, "write-1.avro"),
-        Schema.create(Schema.Type.STRING), Formats.AVRO.getDefaultCompressionFormat());
+        Schema.create(Schema.Type.STRING), Formats.AVRO.getDefaultCompressionType());
 
     writer.open();
 

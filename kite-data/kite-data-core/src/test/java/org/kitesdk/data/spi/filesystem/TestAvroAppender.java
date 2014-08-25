@@ -38,7 +38,7 @@ public class TestAvroAppender extends MiniDFSTest {
     final FileSystem fs = getDFS();
     final Path path = new Path("hdfs://" + auth + "/tmp/test.avro");
     AvroAppender<String> appender = new AvroAppender<String>(
-        fs, path, schema, Formats.AVRO.getDefaultCompressionFormat());
+        fs, path, schema, Formats.AVRO.getDefaultCompressionType());
 
     appender.open();
     for (int i = 0; i < 10; i += 1) {
@@ -85,7 +85,7 @@ public class TestAvroAppender extends MiniDFSTest {
     final FileSystem fs = FileSystem.getLocal(getConfiguration());
     final Path path = new Path("file:/tmp/test.avro");
     AvroAppender<String> appender = new AvroAppender<String>(
-        fs, path, schema, Formats.AVRO.getDefaultCompressionFormat());
+        fs, path, schema, Formats.AVRO.getDefaultCompressionType());
 
     appender.open();
     for (int i = 0; i < 10; i += 1) {

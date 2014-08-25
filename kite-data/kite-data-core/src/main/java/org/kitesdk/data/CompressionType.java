@@ -20,12 +20,14 @@ import com.google.common.base.Objects;
 
 /**
  * <p>
- * Contains constant definitions for the standard compression formats we support.
- * Not every {@link Format} supports every compression format. Use 
+ * Contains constant definitions for the standard compression types we support.
+ * Not every {@link Format} supports every compression type. Use
+ * {@link Format#getSupportedCompressionTypes()} to see what compression
+ * types your {@link Format} supports.
  * </p>
  * @since 0.17.0
  */
-public enum CompressionFormat {
+public enum CompressionType {
 
   Snappy("snappy"),
   Deflate("deflate"),
@@ -35,15 +37,15 @@ public enum CompressionFormat {
 
   private final String name;
 
-  private CompressionFormat(String name) {
+  private CompressionType(String name) {
     this.name = name;
   }
 
   /**
-   * Get the {@code String} name for this compression format. This name can be
+   * Get the {@code String} name for this compression type. This name can be
    * passed to {@link #forName(java.lang.String)} to return this instance.
-   * 
-   * @return the name of the compression format
+   *
+   * @return the name of the compression type
    */
   public String getName() {
     return name;
@@ -55,24 +57,24 @@ public enum CompressionFormat {
   }
 
   /**
-   * Return a {@code CompressionFormat} for the compression format name
-   * specified. If {@code name} is not a valid name, an
-   * {@link IllegalArgumentException} is thrown. Current the compression formats
+   * Return a {@code CompressionType} for the compression type name specified.
+   * If {@code name} is not a valid name, an
+   * {@link IllegalArgumentException} is thrown. Current the compression types
    * <q>snappy</q>, <q>deflate</q>, <q>bzip2</q>, and <q>lzo</q> are supported.
-   * Not all compression formats are supported by all {@link Format}s.
-   * 
-   * @param name the name of the compression format
-   * @return the appropriate CompressionFormat
-   * 
-   * @throws IllegalArgumentException if {@code name} is not a valid compression format.
+   * Not all compression types are supported by all {@link Format}s.
+   *
+   * @param name the name of the compression type
+   * @return the appropriate CompressionType
+   *
+   * @throws IllegalArgumentException if {@code name} is not a valid compression type.
    */
-  public static CompressionFormat forName(String name) {
-    for (CompressionFormat format : values()) {
-      if (format.name.equals(name)) {
-        return format;
+  public static CompressionType forName(String name) {
+    for (CompressionType type : values()) {
+      if (type.name.equals(name)) {
+        return type;
       }
     }
-    throw new IllegalArgumentException("Unknown compression format: " + name);
+    throw new IllegalArgumentException("Unknown compression type: " + name);
   }
 
 }

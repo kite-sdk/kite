@@ -16,7 +16,7 @@
 package org.kitesdk.data;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import javax.annotation.concurrent.Immutable;
 
@@ -36,14 +36,14 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class Format {
   private final String name;
-  private final CompressionFormat defaultCompressionFormat;
-  private final CompressionFormat[] supportedCompressionFormats;
+  private final CompressionType defaultCompressionType;
+  private final Set<CompressionType> supportedCompressionTypes;
 
-  Format(String name, CompressionFormat defaultCompressionFormat,
-      CompressionFormat[] supportedCompressionFormats) {
+  Format(String name, CompressionType defaultCompressionType,
+      CompressionType[] supportedCompressionTypes) {
     this.name = name;
-    this.defaultCompressionFormat = defaultCompressionFormat;
-    this.supportedCompressionFormats = supportedCompressionFormats;
+    this.defaultCompressionType = defaultCompressionType;
+    this.supportedCompressionTypes = ImmutableSet.copyOf(supportedCompressionTypes);
   }
 
   /**
@@ -64,25 +64,25 @@ public class Format {
   }
 
   /**
-   * Get the {@link CompressionFormat}s supported by this {@code Format}.
+   * Get the {@link CompressionType}s supported by this {@code Format}.
    *
-   * @return the supported compression formats
+   * @return the supported compression types
    *
    * @since 0.17.0
    */
-  public Set<CompressionFormat> getSupportedCompressionFormats() {
-    return Sets.newHashSet(supportedCompressionFormats);
+  public Set<CompressionType> getSupportedCompressionTypes() {
+    return supportedCompressionTypes;
   }
 
   /**
-   * Get the default {@link CompressionFormat} supported by this {@code Format}.
+   * Get the default {@link CompressionType} supported by this {@code Format}.
    *
-   * @return the default compression format
+   * @return the default compression type
    *
    * @since 0.17.0
    */
-  public CompressionFormat getDefaultCompressionFormat() {
-    return defaultCompressionFormat;
+  public CompressionType getDefaultCompressionType() {
+    return defaultCompressionType;
   }
 
   @Override

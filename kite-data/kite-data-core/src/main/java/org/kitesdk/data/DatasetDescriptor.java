@@ -71,7 +71,7 @@ public class DatasetDescriptor {
   private final Map<String, String> properties;
   private final PartitionStrategy partitionStrategy;
   private final ColumnMapping columnMappings;
-  private final CompressionFormat compressionFormat;
+  private final CompressionType compressionType;
 
   /**
    * Create an instance of this class with the supplied {@link Schema},
@@ -105,7 +105,7 @@ public class DatasetDescriptor {
    * Create an instance of this class with the supplied {@link Schema}, optional
    * URL, {@link Format}, optional location URL, optional
    * {@link PartitionStrategy}, optional {@link ColumnMapping}, and optional
-   * {@link CompressionFormat}.
+   * {@link CompressionType}.
    *
    * @since 0.17.0
    */
@@ -114,7 +114,7 @@ public class DatasetDescriptor {
       @Nullable Map<String, String> properties,
       @Nullable PartitionStrategy partitionStrategy,
       @Nullable ColumnMapping columnMapping,
-      @Nullable CompressionFormat compressionFormat) {
+      @Nullable CompressionType compressionType) {
     // URI can be null if the descriptor is configuring a new Dataset
     Preconditions.checkArgument(
         (location == null) || (location.getScheme() != null),
@@ -131,7 +131,15 @@ public class DatasetDescriptor {
     }
     this.partitionStrategy = partitionStrategy;
     this.columnMappings = columnMapping;
-    this.compressionFormat = compressionFormat;
+
+    // if no compression format is present, get the default from the format
+    if (compressionType == null) {
+      compressionType = format.getDefaultCompressionType();
+    } else {
+      checkCompressionType(format, compressionType);
+    }
+
+    this.compressionType = compressionType;
   }
 
   /**
@@ -246,14 +254,14 @@ public class DatasetDescriptor {
   }
 
   /**
-   * Get the {@link CompressionFormat}
+   * Get the {@link CompressionType}
    *
    * @return the compression format
    *
    * @since 0.17.0
    */
-  public CompressionFormat getCompressionFormat() {
-    return compressionFormat;
+  public CompressionType getCompressionType() {
+    return compressionType;
   }
 
   /**
@@ -277,7 +285,7 @@ public class DatasetDescriptor {
   @Override
   public int hashCode() {
     return Objects.hashCode(schema, format, location, properties,
-        partitionStrategy, columnMappings);
+        partitionStrategy, columnMappings, compressionType);
   }
 
   @Override
@@ -295,7 +303,8 @@ public class DatasetDescriptor {
         Objects.equal(location, other.location) &&
         Objects.equal(properties, other.properties) &&
         Objects.equal(partitionStrategy, other.partitionStrategy) &&
-        Objects.equal(columnMappings, columnMappings));
+        Objects.equal(columnMappings, other.columnMappings)) &&
+        Objects.equal(compressionType, other.compressionType);
   }
 
   @Override
@@ -305,7 +314,8 @@ public class DatasetDescriptor {
         .add("schema", schema)
         .add("location", location)
         .add("properties", properties)
-        .add("partitionStrategy", partitionStrategy);
+        .add("partitionStrategy", partitionStrategy)
+        .add("compressionType", compressionType);
     if (isColumnMapped()) {
       helper.add("columnMapping", columnMappings);
     }
@@ -329,7 +339,7 @@ public class DatasetDescriptor {
     private Map<String, String> properties;
     private PartitionStrategy partitionStrategy;
     private ColumnMapping columnMapping;
-    private CompressionFormat compressionFormat;
+    private CompressionType compressionType;
 
     public Builder() {
       this.properties = Maps.newHashMap();
@@ -885,31 +895,31 @@ public class DatasetDescriptor {
 
     /**
      * Configure the dataset's compression format (optional). If not set,
-     * default to {@link CompressionFormat#Snappy}.
+     * default to {@link CompressionType#Snappy}.
      *
-     * @param compressionFormat the compression format
+     * @param compressionType the compression format
      *
      * @return This builder for method chaining
      *
      * @since 0.17.0
      */
-    public Builder compressionFormat(CompressionFormat compressionFormat) {
-      this.compressionFormat = compressionFormat;
+    public Builder compressionType(CompressionType compressionType) {
+      this.compressionType = compressionType;
       return this;
     }
 
     /**
      * Configure the dataset's compression format (optional). If not set,
-     * default to {@link CompressionFormat#Snappy}.
+     * default to {@link CompressionType#Snappy}.
      *
-     * @param compressionFormatName  the name of the compression format
+     * @param compressionTypeName  the name of the compression format
      *
      * @return This builder for method chaining
      *
      * @since 0.17.0
      */
-    public Builder compressionFormat(String compressionFormatName) {
-      return compressionFormat(CompressionFormat.forName(compressionFormatName));
+    public Builder compressionType(String compressionTypeName) {
+      return compressionType(CompressionType.forName(compressionTypeName));
     }
 
     /**
@@ -944,19 +954,13 @@ public class DatasetDescriptor {
         }
       }
 
-      // if no compression format is present, get the default from the format
-      if (compressionFormat == null) {
-        compressionFormat = format.getDefaultCompressionFormat();
-      }
-
       checkPartitionStrategy(schema, partitionStrategy);
       checkColumnMappings(schema, partitionStrategy, columnMapping);
       // TODO: verify that all fields have a mapping?
-      checkCompressionFormat(format, compressionFormat);
 
       return new DatasetDescriptor(
           schema, schemaUrl, format, location, properties, partitionStrategy,
-          columnMapping, compressionFormat);
+          columnMapping, compressionType);
     }
 
     private static void checkPartitionStrategy(Schema schema, PartitionStrategy strategy) {
@@ -979,13 +983,14 @@ public class DatasetDescriptor {
       }
     }
 
-    private static void checkCompressionFormat(Format format,
-        CompressionFormat compressionFormat) {
-      Preconditions.checkState(Sets.newHashSet(
-          format.getSupportedCompressionFormats()).contains(compressionFormat),
-          "Format %s doesn't support compression format %s", format.getName(),
-          compressionFormat.getName());
-    }
+  }
+
+  private static void checkCompressionType(Format format,
+      CompressionType compressionType) {
+    Preconditions.checkState(format.getSupportedCompressionTypes()
+        .contains(compressionType),
+        "Format %s doesn't support compression format %s", format.getName(),
+        compressionType.getName());
   }
 
   private static void checkColumnMappings(Schema schema,

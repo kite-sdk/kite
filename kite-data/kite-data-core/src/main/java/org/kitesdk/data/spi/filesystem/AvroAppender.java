@@ -28,7 +28,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.compat.Hadoop;
-import org.kitesdk.data.CompressionFormat;
+import org.kitesdk.data.CompressionType;
 import org.kitesdk.data.Formats;
 
 class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
@@ -37,19 +37,19 @@ class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
   private final FileSystem fileSystem;
   private final Path path;
   private final boolean enableCompression;
-  private final CompressionFormat compressionFormat;
+  private final CompressionType compressionType;
 
   private FSDataOutputStream out = null;
   private DataFileWriter<E> dataFileWriter = null;
   private DatumWriter<E> writer = null;
 
   public AvroAppender(FileSystem fileSystem, Path path, Schema schema,
-      CompressionFormat compressionFormat) {
+      CompressionType compressionType) {
     this.fileSystem = fileSystem;
     this.path = path;
     this.schema = schema;
-    this.enableCompression = compressionFormat != CompressionFormat.Uncompressed;
-    this.compressionFormat = compressionFormat;
+    this.enableCompression = compressionType != CompressionType.Uncompressed;
+    this.compressionType = compressionType;
   }
 
   @Override
@@ -106,7 +106,7 @@ class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
   }
 
   private CodecFactory getCodecFactory() {
-    switch (compressionFormat) {
+    switch (compressionType) {
       case Snappy:
         return CodecFactory.snappyCodec();
 
@@ -119,8 +119,8 @@ class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
       default:
         throw new IllegalArgumentException(String.format(
             "Unsupported compression format %s. Supported formats: %s",
-            compressionFormat.getName(), Arrays.toString(
-                Formats.AVRO.getSupportedCompressionFormats().toArray())));
+            compressionType.getName(), Arrays.toString(
+                Formats.AVRO.getSupportedCompressionTypes().toArray())));
     }
   }
 }
