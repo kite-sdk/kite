@@ -28,12 +28,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +35,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Parser;
 import org.apache.avro.reflect.ReflectData;
-import org.apache.commons.codec.binary.Base64;
-import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
 import org.kitesdk.data.spi.predicates.Exists;
@@ -64,9 +54,7 @@ import static com.google.common.base.Predicates.alwaysTrue;
  * This class accumulates combine manages a set of logical constraints.
  */
 @Immutable
-public class Constraints implements Serializable{
-
-  private static final long serialVersionUID = -155119355851820161L;
+public class Constraints {
 
   private static final Logger LOG = LoggerFactory.getLogger(Constraints.class);
 
@@ -452,57 +440,6 @@ public class Constraints implements Serializable{
       }
     }
     return new Constraints(schema, strategy, constraints);
-  }
-
-  /**
-   * Writes out the {@link Constraints} using Java serialization.
-   */
-  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-    out.defaultWriteObject();
-    out.writeUTF(schema.toString());
-    out.writeUTF(strategy != null ? strategy.toString() : "");
-    ConstraintsSerialization.writeConstraints(schema, strategy, constraints, out);
-  }
-
-
-  /**
-   * Reads in the {@link Constraints} from the provided {@code in} stream.
-   * @param in the stream from which to deserialize the object.
-   * @throws IOException error deserializing the {@link Constraints}
-   * @throws ClassNotFoundException Unable to properly access values inside the {@link Constraints}
-  */
-  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
-    in.defaultReadObject();
-    schema = new Parser().parse(in.readUTF());
-    String json = in.readUTF();
-    if (!json.isEmpty()) {
-      strategy = PartitionStrategyParser.parse(json);
-    }
-    constraints = ImmutableMap.copyOf(ConstraintsSerialization.readConstraints(schema, strategy, in));
-  }
-
-  public static String serialize(Constraints constraints) {
-    try {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ObjectOutputStream out = new ObjectOutputStream(baos);
-      out.writeObject(constraints);
-      out.close();
-      return Base64.encodeBase64String(baos.toByteArray());
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot serialize constraints " + constraints, e);
-    }
-  }
-
-  public static Constraints deserialize(String s) {
-    try {
-      ByteArrayInputStream bais = new ByteArrayInputStream(Base64.decodeBase64(s));
-      ObjectInputStream in = new ObjectInputStream(bais);
-      return (Constraints) in.readObject();
-    } catch (IOException e) {
-      throw new DatasetIOException("Cannot deserialize constraints", e);
-    } catch (ClassNotFoundException e) {
-      throw new DatasetException("Cannot deserialize constraints", e);
-    }
   }
 
   @SuppressWarnings("unchecked")
