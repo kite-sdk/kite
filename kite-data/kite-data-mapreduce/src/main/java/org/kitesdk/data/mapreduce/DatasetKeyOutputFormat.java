@@ -240,6 +240,14 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
       return writeTo(uri);
     }
 
+    /**
+     * Sets the entity Class that will be output by the Job.
+     * <p>
+     * This Class is used to configure the output {@code Dataset}.
+     *
+     * @param type the entity Class that will be produced
+     * @return this for method chaining
+     */
     public <E> ConfigBuilder withType(Class<E> type) {
       conf.setClass(KITE_TYPE, type, type);
       return this;

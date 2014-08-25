@@ -38,7 +38,6 @@ import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.TypeNotFoundException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.InputFormatAccessor;
-import org.kitesdk.data.spi.URIBuilder;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,6 +123,16 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
       return readFrom(URI.create(uri));
     }
 
+    /**
+     * Sets the entity Class that the input Dataset should produce.
+     * <p>
+     * This Class is used to configure the input {@code Dataset}. If this class
+     * cannot be found during job setup, the job will fail and throw a
+     * {@link org.kitesdk.data.TypeNotFoundException}.
+     *
+     * @param type the entity Class that will be produced
+     * @return this for method chaining
+     */
     public <E> ConfigBuilder withType(Class<E> type) {
       conf.setClass(KITE_TYPE, type, type);
       return this;
