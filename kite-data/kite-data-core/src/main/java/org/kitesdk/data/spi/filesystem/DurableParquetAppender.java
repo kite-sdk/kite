@@ -16,7 +16,6 @@
 package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Splitter;
 import com.google.common.io.Closeables;
 import java.io.IOException;
 import org.apache.avro.Schema;
@@ -24,11 +23,9 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.CompressionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parquet.avro.AvroParquetWriter;
-import parquet.hadoop.ParquetWriter;
-import parquet.hadoop.metadata.CompressionCodecName;
 
 class DurableParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileAppender<E> {
 
@@ -43,15 +40,15 @@ class DurableParquetAppender<E extends IndexedRecord> implements FileSystemWrite
   private final FileSystem fs;
 
   public DurableParquetAppender(FileSystem fs, Path path, Schema schema,
-                                Configuration conf, boolean enableCompression) {
+                                Configuration conf, CompressionType compressionType) {
     this.fs = fs;
     this.path = path;
     this.schema = schema;
     this.avroPath = avroPath(path);
     this.avroAppender = new AvroAppender<E>(
-        fs, avroPath, schema, enableCompression);
+        fs, avroPath, schema, CompressionType.Snappy);
     this.parquetAppender = new ParquetAppender<E>(
-        fs, path, schema, conf, enableCompression);
+        fs, path, schema, conf, compressionType);
   }
 
   @Override

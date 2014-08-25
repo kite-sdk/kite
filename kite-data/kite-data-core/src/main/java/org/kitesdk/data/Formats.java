@@ -15,6 +15,8 @@
  */
 package org.kitesdk.data;
 
+import static org.kitesdk.data.CompressionType.*;
+
 /**
  * <p>
  * Contains constant definitions for the standard {@link Format} instances
@@ -33,19 +35,22 @@ public class Formats {
    * <a href="http://avro.apache.org/docs/current/spec.html#Object+Container+Files">
    * Avro row-oriented format</a>
    */
-  public static final Format AVRO = new Format("avro");
+  public static final Format AVRO = new Format("avro", Snappy,
+      new CompressionType[] { Snappy, Deflate, Bzip2 });
 
   /**
    * PARQUET: the <a href="http://parquet.io/">Parquet columnar format</a>
    */
-  public static final Format PARQUET = new Format("parquet");
+  public static final Format PARQUET = new Format("parquet", Snappy,
+      new CompressionType[] { Snappy, Deflate });
 
   /**
    * CSV: comma-separated values (read-only).
    *
    * @since 0.9.0
    */
-  public static final Format CSV = new Format("csv");
+  public static final Format CSV = new Format("csv", Uncompressed,
+      new CompressionType[] { Uncompressed });
 
   /**
    * Return a {@link Format} for the format name specified. If

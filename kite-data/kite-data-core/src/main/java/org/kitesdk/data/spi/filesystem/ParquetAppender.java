@@ -18,12 +18,14 @@ package org.kitesdk.data.spi.filesystem;
 import com.google.common.base.Objects;
 import com.google.common.io.Closeables;
 import java.io.IOException;
+import java.util.Arrays;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.CompressionType;
+import org.kitesdk.data.Formats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parquet.avro.AvroParquetWriter;
@@ -41,23 +43,25 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
   private final FileSystem fileSystem;
   private final Configuration conf;
   private final boolean enableCompression;
+  private final CompressionType compressionType;
 
   private AvroParquetWriter<E> avroParquetWriter = null;
 
   public ParquetAppender(FileSystem fileSystem, Path path, Schema schema,
-                         Configuration conf, boolean enableCompression) {
+                         Configuration conf, CompressionType compressionType) {
     this.fileSystem = fileSystem;
     this.path = path;
     this.schema = schema;
     this.conf = conf;
-    this.enableCompression = enableCompression;
+    this.enableCompression = compressionType != CompressionType.Uncompressed;
+    this.compressionType = compressionType;
   }
 
   @Override
   public void open() throws IOException {
     CompressionCodecName codecName = CompressionCodecName.UNCOMPRESSED;
     if (enableCompression) {
-      codecName = CompressionCodecName.SNAPPY;
+      codecName = getCompressionCodecName();
     }
     avroParquetWriter = new AvroParquetWriter<E>(fileSystem.makeQualified(path),
         schema, codecName, DEFAULT_BLOCK_SIZE,
@@ -98,6 +102,25 @@ class ParquetAppender<E extends IndexedRecord> implements FileSystemWriter.FileA
       .add("fileSystem", fileSystem)
       .add("avroParquetWriter", avroParquetWriter)
       .toString();
+  }
+
+  private CompressionCodecName getCompressionCodecName() {
+    switch (compressionType) {
+      case Snappy:
+        return CompressionCodecName.SNAPPY;
+
+      case Lzo:
+        return CompressionCodecName.LZO;
+
+      case Deflate:
+        return CompressionCodecName.GZIP;
+
+      default:
+        throw new IllegalArgumentException(String.format(
+            "Unsupported compression format %s. Supported formats: %s",
+            compressionType.getName(), Arrays.toString(
+                Formats.PARQUET.getSupportedCompressionTypes().toArray())));
+    }
   }
 
 }
