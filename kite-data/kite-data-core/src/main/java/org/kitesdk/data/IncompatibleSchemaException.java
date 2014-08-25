@@ -23,7 +23,7 @@ package org.kitesdk.data;
  * <p>
  * @since 0.9.0
  */
-public class IncompatibleSchemaException extends DatasetException {
+public class IncompatibleSchemaException extends ValidationException {
 
   public IncompatibleSchemaException(String message) {
     super(message);

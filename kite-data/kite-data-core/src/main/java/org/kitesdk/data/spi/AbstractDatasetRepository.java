@@ -17,7 +17,6 @@ package org.kitesdk.data.spi;
 
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetRepository;
 
 /**
  * A common DatasetRepository base class to simplify implementation.

@@ -20,10 +20,10 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import com.google.common.collect.Sets;
@@ -365,7 +365,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
 
   }
 
-  @Test(expected = DatasetRepositoryException.class)
+  @Test(expected = ValidationException.class)
   public void testCannotMergeDatasetsWithDifferentFormats() throws IOException {
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
         .name("users")
@@ -390,7 +390,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
     ds.merge(dsUpdate);
   }
 
-  @Test(expected = DatasetRepositoryException.class)
+  @Test(expected = ValidationException.class)
   public void testCannotMergeDatasetsWithDifferentPartitionStrategies() throws IOException {
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
         .name("users")
@@ -417,7 +417,7 @@ public class TestFileSystemDataset extends MiniDFSTest {
     ds.merge(dsUpdate);
   }
 
-  @Test(expected = DatasetRepositoryException.class)
+  @Test(expected = ValidationException.class)
   public void testCannotMergeDatasetsWithDifferentSchemas() throws IOException {
     FileSystemDataset<Record> ds = new FileSystemDataset.Builder<Record>()
         .name("users")

@@ -131,40 +131,6 @@ public class Datasets {
   }
 
   /**
-   * Load a {@link DatasetRepository} for the given dataset or view URI.
-   * <p>
-   * URI formats are defined by {@code Dataset} implementations, but must begin
-   * with "dataset:" or "view:".
-   *
-   * @param uri a {@code Dataset} or {@code View} URI.
-   * @param <R> The type of {@code DatasetRepository} expected.
-   * @return a {@code DatasetRepository} responsible for the given URI.
-   *
-   * @deprecated will be removed in 0.17.0.
-   */
-  @Deprecated
-  public static <R extends DatasetRepository> R repositoryFor(URI uri) {
-    return org.kitesdk.data.spi.DatasetRepositories.repositoryFor(uri);
-  }
-
-  /**
-   * Load a {@link DatasetRepository} for the given dataset or view URI string.
-   * <p>
-   * URI formats are defined by {@code Dataset} implementations, but must begin
-   * with "dataset:" or "view:".
-   *
-   * @param uriString a {@code Dataset} or {@code View} URI.
-   * @param <R> The type of {@code DatasetRepository} expected.
-   * @return a {@code DatasetRepository} responsible for the given URI.
-   *
-   * @deprecated will be removed in 0.17.0.
-   */
-  @Deprecated
-  public static <R extends DatasetRepository> R repositoryFor(String uriString) {
-    return org.kitesdk.data.spi.DatasetRepositories.repositoryFor(uriString);
-  }
-
-  /**
    * Create a {@link Dataset} for the given dataset or view URI.
    * <p>
    * URI formats are defined by {@code Dataset} implementations, but must begin

@@ -24,11 +24,6 @@ import org.kitesdk.data.DatasetDescriptor;
  * A service provider interface for metadata system plugins.
  * </p>
  * <p>
- * Implementations of {@link org.kitesdk.data.DatasetRepository} are written against this
- * interface and, by extension, can store dataset metadata information contained
- * in the {@link org.kitesdk.data.DatasetDescriptor} in a system of the user's choosing.
- * </p>
- * <p>
  * Implementations of {@link MetadataProvider} are typically not thread-safe; that is,
  * the behavior when accessing a single instance from multiple threads is undefined.
  * </p>

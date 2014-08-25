@@ -19,9 +19,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.kitesdk.data.TestDatasetRepositories;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
 import java.io.IOException;
@@ -91,7 +91,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     try {
       repo.update(NAME, changed);
       Assert.fail("Should fail due to format change");
-    } catch (DatasetRepositoryException e) {
+    } catch (ValidationException e) {
       // expected
     }
 
@@ -122,7 +122,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     try {
       repo.update(NAME, changed);
       Assert.fail("Should fail due to partition strategy change");
-    } catch (DatasetRepositoryException e) {
+    } catch (ValidationException e) {
       // expected
     }
 
@@ -144,7 +144,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     try {
       repo.update(NAME, changed);
       Assert.fail("Should fail due to data location change");
-    } catch (DatasetRepositoryException ex) {
+    } catch (ValidationException ex) {
       // expected
     }
 
@@ -171,7 +171,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     try {
       repo.update(NAME, new DatasetDescriptor.Builder().schema(testSchemaV2).build());
       Assert.fail("Should fail due to incompatible update");
-    } catch (DatasetRepositoryException e) {
+    } catch (ValidationException e) {
       // expected
     }
     dataset = repo.load(NAME);

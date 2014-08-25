@@ -15,14 +15,14 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import javax.annotation.Nullable;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.spi.SchemaValidationUtil;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.DatasetRepositoryException;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.IncompatibleSchemaException;
 import org.kitesdk.data.PartitionStrategy;
@@ -53,11 +53,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- * A {@link org.kitesdk.data.DatasetRepository} that stores data in a Hadoop {@link FileSystem}.
+ * A {@link org.kitesdk.data.spi.DatasetRepository} that stores data in a Hadoop {@link FileSystem}.
  * </p>
  * <p>
  * Given a {@link FileSystem}, a root directory, and a {@link MetadataProvider},
- * this {@link org.kitesdk.data.DatasetRepository} implementation can load and store
+ * this {@link org.kitesdk.data.spi.DatasetRepository} implementation can load and store
  * {@link Dataset}s on both local filesystems as well as the Hadoop Distributed
  * FileSystem (HDFS). Users may directly instantiate this class with the three
  * dependencies above and then perform dataset-related operations using any of
@@ -78,10 +78,10 @@ import org.slf4j.LoggerFactory;
  * effect.
  * </p>
  *
- * @see org.kitesdk.data.DatasetRepository
  * @see org.kitesdk.data.Dataset
  * @see org.kitesdk.data.DatasetDescriptor
  * @see org.kitesdk.data.PartitionStrategy
+ * @see org.kitesdk.data.spi.DatasetRepository
  * @see org.kitesdk.data.spi.MetadataProvider
  */
 public class FileSystemDatasetRepository extends AbstractDatasetRepository
@@ -158,35 +158,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
 
     // oldDescriptor is valid if load didn't throw NoSuchDatasetException
 
-    if (!oldDescriptor.getFormat().equals(descriptor.getFormat())) {
-      throw new DatasetRepositoryException("Cannot change dataset format from " +
-          oldDescriptor.getFormat() + " to " + descriptor.getFormat());
-    }
-
-    final URI oldLocation = oldDescriptor.getLocation();
-    if ((oldLocation != null) && !(oldLocation.equals(descriptor.getLocation()))) {
-      throw new DatasetRepositoryException(
-          "Cannot change the dataset's location");
-    }
-
-    if (oldDescriptor.isPartitioned() != descriptor.isPartitioned()) {
-      throw new DatasetRepositoryException("Cannot change an unpartitioned dataset to " +
-          " partitioned or vice versa.");
-    } else if (oldDescriptor.isPartitioned() && descriptor.isPartitioned() &&
-        !oldDescriptor.getPartitionStrategy().equals(descriptor.getPartitionStrategy())) {
-      throw new DatasetRepositoryException("Cannot change partition strategy from " +
-          oldDescriptor.getPartitionStrategy() + " to " + descriptor.getPartitionStrategy());
-    }
-
-    // check can read records written with old schema using new schema
-    final Schema oldSchema = oldDescriptor.getSchema();
-    final Schema newSchema = descriptor.getSchema();
-    if (!SchemaValidationUtil.canRead(oldSchema, newSchema)) {
-      throw new IncompatibleSchemaException("New schema cannot read data " +
-          "written using " +
-          "old schema. New schema: " + newSchema.toString(true) + "\nOld schema: " +
-          oldSchema.toString(true));
-    }
+    checkUpdate(oldDescriptor, descriptor);
 
     DatasetDescriptor updatedDescriptor = metadataProvider.update(name, descriptor);
 
@@ -240,15 +212,9 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
       return false;
     }
 
-    boolean changed;
-    try {
-      // don't care about the return value here -- if it already doesn't exist
-      // we still need to delete the data directory
-      changed = metadataProvider.delete(name);
-    } catch (DatasetException ex) {
-      throw new DatasetRepositoryException(
-          "Failed to delete descriptor for name:" + name, ex);
-    }
+    // don't care about the return value here -- if it already doesn't exist
+    // we still need to delete the data directory
+    boolean changed = metadataProvider.delete(name);
 
     final Path dataLocation = new Path(descriptor.getLocation());
     final FileSystem fs = fsForPath(dataLocation, conf);
@@ -258,14 +224,14 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
         if (fs.delete(dataLocation, true)) {
           changed = true;
         } else {
-          throw new DatasetRepositoryException(
+          throw new IOException(
               "Failed to delete dataset name:" + name +
               " location:" + dataLocation);
         }
       }
     } catch (IOException e) {
-      throw new DatasetRepositoryException(
-          "Internal failure when removing location:" + dataLocation);
+      throw new DatasetIOException(
+          "Internal failure when removing location:" + dataLocation, e);
     }
 
     return changed;
@@ -303,8 +269,11 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
    * @param name A String dataset name
    * @return the correct dataset Path
    */
-  static Path pathForDataset(Path root, String name) {
-    Preconditions.checkArgument(name != null, "Dataset name cannot be null");
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+      justification="Checked in precondition")
+  static Path pathForDataset(Path root, @Nullable String name) {
+    Preconditions.checkNotNull(name, "Dataset name cannot be null");
 
     // Why replace '.' here? Is this a namespacing hack?
     return new Path(root, name.replace('.', Path.SEPARATOR_CHAR));
@@ -400,9 +369,46 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
     try {
       return dataPath.getFileSystem(conf);
     } catch (IOException ex) {
-      throw new DatasetRepositoryException(
+      throw new DatasetIOException(
           "Cannot get FileSystem for descriptor", ex);
     }
+  }
+
+  private static void checkUpdate(DatasetDescriptor existing,
+                                  DatasetDescriptor updated) {
+    checkNotChanged("location", existing.getLocation(), updated.getLocation());
+    checkCompatible(existing, updated);
+  }
+
+  static void checkCompatible(DatasetDescriptor existing,
+                              DatasetDescriptor test) {
+    checkNotChanged("format", existing.getFormat(), test.getFormat());
+
+    checkNotChanged("partitioning",
+        existing.isPartitioned(), test.isPartitioned());
+
+    if (existing.isPartitioned()) {
+      checkNotChanged("partition strategy",
+          existing.getPartitionStrategy(), test.getPartitionStrategy());
+    }
+
+    // check can read records written with old schema using new schema
+    Schema oldSchema = existing.getSchema();
+    Schema testSchema = test.getSchema();
+    if (!SchemaValidationUtil.canRead(oldSchema, testSchema)) {
+      throw new IncompatibleSchemaException("Schema cannot read data " +
+          "written using existing schema. Schema: " + testSchema.toString(true) +
+          "\nExisting schema: " + oldSchema.toString(true));
+    }
+
+  }
+
+  private static void checkNotChanged(String what, @Nullable Object existing,
+                                      @Nullable Object test) {
+    ValidationException.check(
+        (existing == test) || (existing != null && existing.equals(test)),
+        "Dataset %s is not compatible with existing: %s != %s",
+        what, String.valueOf(existing), String.valueOf(test));
   }
 
   /**

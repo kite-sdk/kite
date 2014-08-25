@@ -1,11 +1,11 @@
 /*
- * Copyright 2013 Cloudera.
+ * Copyright 2013 Cloudera Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,20 +17,11 @@
 package org.kitesdk.data;
 
 /**
- * Exception thrown when trying to create a dataset that already exists.
- *
- * @since 0.8.0
+ * {@link DatasetException} thrown when an implementation-specific step fails
+ * and prevents a dataset operation from completing successfully.
  */
-public class DatasetExistsException extends DatasetException {
-  public DatasetExistsException(String message) {
-    super(message);
-  }
-
-  public DatasetExistsException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public DatasetExistsException(Throwable cause) {
-    super(cause);
+public class DatasetOperationException extends DatasetException {
+  public DatasetOperationException(String message, Throwable t) {
+    super(message, t);
   }
 }

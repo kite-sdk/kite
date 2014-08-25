@@ -43,7 +43,7 @@ public class MockRepositories {
           public DatasetRepository getFromOptions(Map<String, String> options) {
             DatasetRepository repo = repos.get(options.get("id"));
             if (repo == null) {
-              repo = mock(org.kitesdk.data.DatasetRepository.class);
+              repo = mock(org.kitesdk.data.spi.DatasetRepository.class);
               when(repo.getUri()).thenReturn(
                   URI.create("repo:" + mockPattern.construct(options)));
               repos.put(options.get("id"), repo);
