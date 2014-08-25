@@ -21,9 +21,8 @@ import java.net.URI;
 import org.apache.hadoop.hbase.HConstants;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
-import org.kitesdk.data.DatasetRepositoryException;
+import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.RandomAccessDataset;
-import org.kitesdk.data.RandomAccessDatasetRepository;
 import org.kitesdk.data.hbase.avro.GenericAvroDao;
 import org.kitesdk.data.hbase.avro.SpecificAvroDao;
 import org.kitesdk.data.hbase.impl.Dao;
@@ -43,7 +42,7 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.kitesdk.data.spi.URIBuilder;
 
-public class HBaseDatasetRepository extends AbstractDatasetRepository implements RandomAccessDatasetRepository {
+public class HBaseDatasetRepository extends AbstractDatasetRepository {
 
   private HTablePool tablePool;
   private SchemaManager schemaManager;
@@ -127,7 +126,7 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
             .forName(descriptor.getSchema().getFullName());
         subEntityClasses.add(subEntityClass);
       } catch (ClassNotFoundException e) {
-        throw new DatasetRepositoryException(e);
+        throw new DatasetOperationException("Failed to resolve sub-type", e);
       }
     }
     Dao dao = SpecificAvroDao.buildCompositeDaoWithEntityManager(tablePool,
@@ -194,10 +193,10 @@ public class HBaseDatasetRepository extends AbstractDatasetRepository implements
       try {
         admin = new HBaseAdmin(configuration);
       } catch (MasterNotRunningException e) {
-        throw new DatasetRepositoryException(
+        throw new DatasetOperationException(
             "Problem creating HBaseDatasetRepository.", e);
       } catch (ZooKeeperConnectionException e) {
-        throw new DatasetRepositoryException(
+        throw new DatasetOperationException(
             "Problem creating HBaseDatasetRepository.", e);
       } catch (IOException e) {
         throw new DatasetIOException(
