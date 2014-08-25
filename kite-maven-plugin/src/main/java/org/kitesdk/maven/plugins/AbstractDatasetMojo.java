@@ -18,7 +18,6 @@ package org.kitesdk.maven.plugins;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
-import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Resources;
 import java.io.File;
@@ -37,6 +36,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.spi.DatasetRepositories;
+import org.kitesdk.data.spi.hive.HiveManagedDatasetRepository;
 
 abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
 
@@ -77,8 +77,8 @@ abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
       FileSystemDatasetRepository.Builder();
 
   @VisibleForTesting
-  HCatalogDatasetRepository.Builder hcatRepoBuilder = new
-      HCatalogDatasetRepository.Builder();
+  HiveManagedDatasetRepository.Builder hcatRepoBuilder = new
+      HiveManagedDatasetRepository.Builder();
 
   private Configuration getConf() {
     Configuration conf = new Configuration(false);

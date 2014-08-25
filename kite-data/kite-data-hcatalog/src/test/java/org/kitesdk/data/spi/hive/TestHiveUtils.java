@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;

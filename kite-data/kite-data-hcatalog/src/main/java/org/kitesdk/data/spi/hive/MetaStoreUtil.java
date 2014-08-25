@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.hcatalog.impl;
+package org.kitesdk.data.spi.hive;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -30,13 +30,13 @@ import org.apache.hadoop.hive.metastore.api.UnknownDBException;
 import org.apache.thrift.TException;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.DatasetRepositoryException;
+import org.kitesdk.data.DatasetOperationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HCatalog {
+public class MetaStoreUtil {
 
-  private static final Logger LOG = LoggerFactory.getLogger(HCatalog.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MetaStoreUtil.class);
 
   private final HiveMetaStoreClient client;
   private final HiveConf hiveConf;
@@ -66,7 +66,7 @@ public final class HCatalog {
     }
   }
 
-  public HCatalog(Configuration conf) {
+  public MetaStoreUtil(Configuration conf) {
     this.hiveConf = new HiveConf(conf, HiveConf.class);
     if (conf.get(Loader.HIVE_METASTORE_URI_PROP) == null) {
       LOG.warn("Using a local Hive MetaStore (for testing only)");
@@ -74,7 +74,7 @@ public final class HCatalog {
     try {
       client = new HiveMetaStoreClient(hiveConf);
     } catch (TException e) {
-      throw new DatasetRepositoryException("Hive metastore exception", e);
+      throw new DatasetOperationException("Hive metastore exception", e);
     }
   }
 
@@ -95,7 +95,7 @@ public final class HCatalog {
     } catch (MetaException e) {
       throw new DatasetNotFoundException("Hive table lookup exception", e);
     } catch (TException e) {
-      throw new DatasetRepositoryException(
+      throw new DatasetOperationException(
           "Exception communicating with the Hive MetaStore", e);
     }
 
@@ -119,9 +119,9 @@ public final class HCatalog {
     } catch (UnknownDBException e) {
       return false;
     } catch (MetaException e) {
-      throw new DatasetRepositoryException("Hive MetaStore exception", e);
+      throw new DatasetOperationException("Hive MetaStore exception", e);
     } catch (TException e) {
-      throw new DatasetRepositoryException(
+      throw new DatasetOperationException(
           "Exception communicating with the Hive MetaStore", e);
     }
   }
@@ -143,11 +143,11 @@ public final class HCatalog {
     } catch (AlreadyExistsException e) {
       throw new DatasetExistsException("Hive table exists", e);
     } catch (InvalidObjectException e) {
-      throw new DatasetRepositoryException("Invalid table", e);
+      throw new DatasetOperationException("Invalid table", e);
     } catch (MetaException e) {
-      throw new DatasetRepositoryException("Hive MetaStore exception", e);
+      throw new DatasetOperationException("Hive MetaStore exception", e);
     } catch (TException e) {
-      throw new DatasetRepositoryException(
+      throw new DatasetOperationException(
           "Exception communicating with the Hive MetaStore", e);
     }
   }
@@ -168,13 +168,13 @@ public final class HCatalog {
     } catch (NoSuchObjectException e) {
       throw new DatasetNotFoundException("Hive table lookup exception", e);
     } catch (InvalidObjectException e) {
-      throw new DatasetRepositoryException("Invalid table", e);
+      throw new DatasetOperationException("Invalid table", e);
     } catch (InvalidOperationException e) {
-      throw new DatasetRepositoryException("Invalid table change", e);
+      throw new DatasetOperationException("Invalid table change", e);
     } catch (MetaException e) {
-      throw new DatasetRepositoryException("Hive MetaStore exception", e);
+      throw new DatasetOperationException("Hive MetaStore exception", e);
     } catch (TException e) {
-      throw new DatasetRepositoryException(
+      throw new DatasetOperationException(
           "Exception communicating with the Hive MetaStore", e);
     }
   }
@@ -195,9 +195,9 @@ public final class HCatalog {
     } catch (NoSuchObjectException e) {
       // this is okay
     } catch (MetaException e) {
-      throw new DatasetRepositoryException("Hive MetaStore exception", e);
+      throw new DatasetOperationException("Hive MetaStore exception", e);
     } catch (TException e) {
-      throw new DatasetRepositoryException(
+      throw new DatasetOperationException(
           "Exception communicating with the Hive MetaStore", e);
     }
   }
@@ -221,11 +221,11 @@ public final class HCatalog {
     } catch (AlreadyExistsException e) {
       // this is okay
     } catch (InvalidObjectException e) {
-      throw new DatasetRepositoryException("Invalid partition", e);
+      throw new DatasetOperationException("Invalid partition", e);
     } catch (MetaException e) {
-      throw new DatasetRepositoryException("Hive MetaStore exception", e);
+      throw new DatasetOperationException("Hive MetaStore exception", e);
     } catch (TException e) {
-      throw new DatasetRepositoryException(
+      throw new DatasetOperationException(
           "Exception communicating with the Hive MetaStore", e);
     }
   }
@@ -248,9 +248,9 @@ public final class HCatalog {
     } catch (NoSuchObjectException e) {
       return ImmutableList.of();
     } catch (MetaException e) {
-      throw new DatasetRepositoryException("Hive MetaStore exception", e);
+      throw new DatasetOperationException("Hive MetaStore exception", e);
     } catch (TException e) {
-      throw new DatasetRepositoryException(
+      throw new DatasetOperationException(
           "Exception communicating with the Hive MetaStore", e);
     }
   }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -22,11 +22,10 @@ import javax.annotation.Nullable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.hcatalog.impl.Loader;
 import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
 
-class HCatalogAbstractDatasetRepository extends FileSystemDatasetRepository {
+class HiveAbstractDatasetRepository extends FileSystemDatasetRepository {
 
   private final MetadataProvider provider;
   private final URI repoUri;
@@ -34,8 +33,8 @@ class HCatalogAbstractDatasetRepository extends FileSystemDatasetRepository {
   /**
    * Create an HCatalog dataset repository with external tables.
    */
-  HCatalogAbstractDatasetRepository(Configuration conf, Path rootDirectory,
-                                    MetadataProvider provider) {
+  HiveAbstractDatasetRepository(Configuration conf, Path rootDirectory,
+                                MetadataProvider provider) {
     super(conf, rootDirectory, provider);
     this.provider = provider;
     this.repoUri = getRepositoryUri(conf, rootDirectory);
@@ -44,7 +43,7 @@ class HCatalogAbstractDatasetRepository extends FileSystemDatasetRepository {
   /**
    * Create an HCatalog dataset repository with managed tables.
    */
-  HCatalogAbstractDatasetRepository(Configuration conf, MetadataProvider provider) {
+  HiveAbstractDatasetRepository(Configuration conf, MetadataProvider provider) {
     // Because the managed provider overrides dataset locations, the only time
     // the storage path is used is to create temporary dataset repositories
     super(conf, new Path("/tmp"), provider);
@@ -77,8 +76,8 @@ class HCatalogAbstractDatasetRepository extends FileSystemDatasetRepository {
 
   private boolean isManaged(String name) {
     MetadataProvider provider = getMetadataProvider();
-    if (provider instanceof HCatalogMetadataProvider) {
-      return ((HCatalogMetadataProvider) provider).isManaged(name);
+    if (provider instanceof HiveAbstractMetadataProvider) {
+      return ((HiveAbstractMetadataProvider) provider).isManaged(name);
     }
     // if the provider isn't talking to Hive, then it isn't managed
     return false;

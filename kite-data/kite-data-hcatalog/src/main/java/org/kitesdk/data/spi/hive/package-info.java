@@ -18,6 +18,6 @@
  * and stores data in a Hadoop {@link org.apache.hadoop.fs.FileSystem}.
  */
 @ParametersAreNonnullByDefault
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.filesystem.TestFileSystemDatasetRepository;
@@ -27,24 +27,23 @@ import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.MetadataProvider;
 
-public class TestManagedHCatalogDatasetRepository extends TestFileSystemDatasetRepository {
+public class TestHiveManagedDatasetRepository extends TestFileSystemDatasetRepository {
 
-  public TestManagedHCatalogDatasetRepository(boolean distributed) {
+  public TestHiveManagedDatasetRepository(boolean distributed) {
     super(distributed);
   }
 
   @Override
   public DatasetRepository newRepo(MetadataProvider provider) {
     // use null URI because TestDatasetRepositories expects no URI
-    return new HCatalogDatasetRepository(conf, provider);
+    return new HiveManagedDatasetRepository(conf, provider);
   }
 
   @Override
   public MetadataProvider newProvider(Configuration conf) {
-    return new HCatalogManagedMetadataProvider(conf);
+    return new HiveManagedMetadataProvider(conf);
   }
 
   private HiveMetaStoreClient client;
@@ -57,7 +56,7 @@ public class TestManagedHCatalogDatasetRepository extends TestFileSystemDatasetR
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    HCatalog hcat = new HCatalog(conf);
+    MetaStoreUtil hcat = new MetaStoreUtil(conf);
     for (String tableName : hcat.getAllTables("default")) {
       hcat.dropTable("default", tableName);
     }

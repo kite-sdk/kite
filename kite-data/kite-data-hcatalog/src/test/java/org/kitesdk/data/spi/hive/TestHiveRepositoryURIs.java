@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import org.kitesdk.data.spi.filesystem.Loader;
 import org.kitesdk.data.spi.filesystem.TestFileSystemRepositoryURIs;
@@ -26,7 +26,6 @@ import java.net.URI;
 import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
@@ -42,13 +41,13 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
   @BeforeClass
   public static void registerURIs() {
     new Loader().load();
-    new org.kitesdk.data.hcatalog.impl.Loader().load();
+    new org.kitesdk.data.spi.hive.Loader().load();
   }
 
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    HCatalog hcat = new HCatalog(new Configuration());
+    MetaStoreUtil hcat = new MetaStoreUtil(new Configuration());
     for (String tableName : hcat.getAllTables("default")) {
       hcat.dropTable("default", tableName);
     }
@@ -60,11 +59,11 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
 
     Assert.assertNotNull("Received a repository", repo);
     Assert.assertTrue("Repo should be a HCatalogDatasetRepository",
-        repo instanceof HCatalogDatasetRepository);
-    MetadataProvider provider = ((HCatalogDatasetRepository) repo)
+        repo instanceof HiveManagedDatasetRepository);
+    MetadataProvider provider = ((HiveManagedDatasetRepository) repo)
         .getMetadataProvider();
     Assert.assertTrue("Repo should be using a HCatalogManagedMetadataProvider",
-        provider instanceof HCatalogManagedMetadataProvider);
+        provider instanceof HiveManagedMetadataProvider);
     Assert.assertEquals("Repository URI", new URI("repo:hive"), repo.getUri());
   }
 
@@ -74,11 +73,11 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
         .repositoryFor("repo:hive://meta-host:1234");
     Assert.assertNotNull("Received a repository", repo);
     Assert.assertTrue("Repo should be a HCatalogDatasetRepository",
-        repo instanceof HCatalogDatasetRepository);
-    MetadataProvider provider = ((HCatalogDatasetRepository) repo)
+        repo instanceof HiveManagedDatasetRepository);
+    MetadataProvider provider = ((HiveManagedDatasetRepository) repo)
         .getMetadataProvider();
     Assert.assertTrue("Repo should be using a HCatalogManagedMetadataProvider",
-        provider instanceof HCatalogManagedMetadataProvider);
+        provider instanceof HiveManagedMetadataProvider);
     Assert.assertEquals("Repository URI",
         URI.create("repo:hive://meta-host:1234"), repo.getUri());
   }
@@ -90,7 +89,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
 
     Assert.assertNotNull("Received a repository", repo);
     org.junit.Assert.assertTrue("Repo should be a HCatalogExternalDatasetRepository",
-        repo instanceof HCatalogExternalDatasetRepository);
+        repo instanceof HiveExternalDatasetRepository);
     Assert.assertEquals("Repository URI", repoUri, repo.getUri());
 
     // verify location
@@ -111,7 +110,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
 
     Assert.assertNotNull("Received a repository", repo);
     org.junit.Assert.assertTrue("Repo should be a HCatalogExternalDatasetRepository",
-        repo instanceof HCatalogExternalDatasetRepository);
+        repo instanceof HiveExternalDatasetRepository);
     Assert.assertEquals("Repository URI", repoUri, repo.getUri());
 
     // verify location
@@ -134,7 +133,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
 
     Assert.assertNotNull("Received a repository", repo);
     org.junit.Assert.assertTrue("Repo should be a HCatalogExternalDatasetRepository",
-        repo instanceof HCatalogExternalDatasetRepository);
+        repo instanceof HiveExternalDatasetRepository);
     Assert.assertEquals("Repository URI", repoUri, repo.getUri());
 
     // verify location
@@ -161,7 +160,7 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
 
     Assert.assertNotNull("Received a repository", repo);
     org.junit.Assert.assertTrue("Repo should be a HCatalogExternalDatasetRepository",
-        repo instanceof HCatalogExternalDatasetRepository);
+        repo instanceof HiveExternalDatasetRepository);
     Assert.assertEquals("Repository URI", repoUri, repo.getUri());
   }
 
@@ -173,11 +172,11 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
     DatasetRepository repo = DatasetRepositories.repositoryFor(repoUri);
     Assert.assertNotNull("Received a repository", repo);
     Assert.assertTrue("Repo should be a HCatalogExternalDatasetRepository",
-        repo instanceof HCatalogExternalDatasetRepository);
-    MetadataProvider provider = ((HCatalogExternalDatasetRepository) repo)
+        repo instanceof HiveExternalDatasetRepository);
+    MetadataProvider provider = ((HiveExternalDatasetRepository) repo)
         .getMetadataProvider();
     Assert.assertTrue("Repo should be using a HCatalogExternalMetadataProvider",
-        provider instanceof HCatalogExternalMetadataProvider);
+        provider instanceof HiveExternalMetadataProvider);
     Assert.assertEquals("Repository URI", repoUri, repo.getUri());
   }
 
@@ -189,11 +188,11 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
     DatasetRepository repo = DatasetRepositories.repositoryFor(repoUri);
     Assert.assertNotNull("Received a repository", repo);
     Assert.assertTrue("Repo should be a HCatalogExternalDatasetRepository",
-        repo instanceof HCatalogExternalDatasetRepository);
-    MetadataProvider provider = ((HCatalogExternalDatasetRepository) repo)
+        repo instanceof HiveExternalDatasetRepository);
+    MetadataProvider provider = ((HiveExternalDatasetRepository) repo)
         .getMetadataProvider();
     Assert.assertTrue("Repo should be using a HCatalogManagedMetadataProvider",
-        provider instanceof HCatalogExternalMetadataProvider);
+        provider instanceof HiveExternalMetadataProvider);
     Assert.assertEquals("Repository URI", repoUri, repo.getUri());
   }
 }

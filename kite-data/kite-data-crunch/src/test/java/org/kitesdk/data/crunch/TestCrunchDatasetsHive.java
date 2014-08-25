@@ -18,12 +18,12 @@ package org.kitesdk.data.crunch;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.junit.After;
-import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
-import org.kitesdk.data.hcatalog.impl.HCatalog;
+import org.kitesdk.data.spi.hive.HiveManagedDatasetRepository;
+import org.kitesdk.data.spi.hive.MetaStoreUtil;
 import org.kitesdk.data.spi.DatasetRepository;
 
-public class TestCrunchDatasetsHCatalog extends TestCrunchDatasets {
-  public TestCrunchDatasetsHCatalog(FileSystem fs) {
+public class TestCrunchDatasetsHive extends TestCrunchDatasets {
+  public TestCrunchDatasetsHive(FileSystem fs) {
     super(fs);
   }
 
@@ -33,7 +33,7 @@ public class TestCrunchDatasetsHCatalog extends TestCrunchDatasets {
     // since the external directory is created before the table is
     fileSystem.getConf().setBoolean(HiveConf.ConfVars.HIVESTATSAUTOGATHER.varname,
         false);
-    return new HCatalogDatasetRepository.Builder()
+    return new HiveManagedDatasetRepository.Builder()
         .configuration(fileSystem.getConf())
         .rootDirectory(testDirectory).build();
   }
@@ -41,7 +41,7 @@ public class TestCrunchDatasetsHCatalog extends TestCrunchDatasets {
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    HCatalog hcat = new HCatalog(fileSystem.getConf());
+    MetaStoreUtil hcat = new MetaStoreUtil(fileSystem.getConf());
     for (String tableName : hcat.getAllTables("default")) {
       hcat.dropTable("default", tableName);
     }

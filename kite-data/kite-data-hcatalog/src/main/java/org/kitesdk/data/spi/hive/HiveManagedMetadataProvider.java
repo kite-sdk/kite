@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import java.net.URISyntaxException;
 import org.apache.hadoop.conf.Configuration;
@@ -25,12 +25,12 @@ import org.kitesdk.data.spi.Compatibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
+class HiveManagedMetadataProvider extends HiveAbstractMetadataProvider {
 
   private static final Logger LOG = LoggerFactory
-      .getLogger(HCatalogManagedMetadataProvider.class);
+      .getLogger(HiveManagedMetadataProvider.class);
 
-  public HCatalogManagedMetadataProvider(Configuration conf) {
+  public HiveManagedMetadataProvider(Configuration conf) {
     super(conf);
     LOG.info("Default FS: " + conf.get("fs.defaultFS"));
   }
@@ -39,7 +39,7 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
   public DatasetDescriptor load(String name) {
     Compatibility.checkDatasetName(name);
 
-    final Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
+    final Table table = getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name);
 
     return HiveUtils.descriptorForTable(conf, table);
   }
@@ -61,10 +61,10 @@ class HCatalogManagedMetadataProvider extends HCatalogMetadataProvider {
         name, descriptor, false /* managed table */);
 
     // create it
-    getHcat().createTable(table);
+    getMetaStoreUtil().createTable(table);
 
     // load the created table to get the data location
-    final Table newTable = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
+    final Table newTable = getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name);
 
     try {
       return new DatasetDescriptor.Builder(descriptor)

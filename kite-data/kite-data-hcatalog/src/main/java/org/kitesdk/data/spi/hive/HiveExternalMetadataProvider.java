@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.kitesdk.data.DatasetDescriptor;
@@ -29,16 +29,16 @@ import org.kitesdk.data.spi.Compatibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
+class HiveExternalMetadataProvider extends HiveAbstractMetadataProvider {
 
   private static final Logger LOG = LoggerFactory
-      .getLogger(HCatalogExternalMetadataProvider.class);
+      .getLogger(HiveExternalMetadataProvider.class);
   private final Path rootDirectory;
   private final FileSystem rootFileSystem;
 
-  public HCatalogExternalMetadataProvider(Configuration conf, Path rootDirectory) {
+  public HiveExternalMetadataProvider(Configuration conf, Path rootDirectory) {
     super(conf);
-    Preconditions.checkArgument(rootDirectory != null, "Root cannot be null");
+    Preconditions.checkNotNull(rootDirectory, "Root cannot be null");
 
     try {
       this.rootFileSystem = rootDirectory.getFileSystem(conf);
@@ -52,7 +52,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
   public DatasetDescriptor load(String name) {
     Compatibility.checkDatasetName(name);
 
-    final Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
+    final Table table = getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name);
 
     return HiveUtils.descriptorForTable(conf, table);
   }
@@ -83,7 +83,7 @@ class HCatalogExternalMetadataProvider extends HCatalogMetadataProvider {
         name, newDescriptor, true /* external table */ );
 
     // assign the location of the the table
-    getHcat().createTable(table);
+    getMetaStoreUtil().createTable(table);
 
     return newDescriptor;
   }

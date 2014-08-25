@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.spi.MetadataProvider;
 
-class HCatalogExternalDatasetRepository extends HCatalogAbstractDatasetRepository {
+class HiveExternalDatasetRepository extends HiveAbstractDatasetRepository {
 
   /**
    * Create an HCatalog dataset repository with external tables.
    */
-  HCatalogExternalDatasetRepository(Configuration conf, Path rootDirectory) {
+  HiveExternalDatasetRepository(Configuration conf, Path rootDirectory) {
     super(conf, rootDirectory,
-        new HCatalogExternalMetadataProvider(conf, rootDirectory));
+        new HiveExternalMetadataProvider(conf, rootDirectory));
   }
 
   /**
    * Create an HCatalog dataset repository with external tables.
    */
-  HCatalogExternalDatasetRepository(Configuration conf, Path rootDirectory,
-                                    MetadataProvider provider) {
+  HiveExternalDatasetRepository(Configuration conf, Path rootDirectory,
+                                MetadataProvider provider) {
     super(conf, rootDirectory, provider);
   }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -35,25 +35,24 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.MetadataProvider;
 
-public class TestExternalHCatalogDatasetRepository extends TestFileSystemDatasetRepository {
+public class TestHiveExternalDatasetRepository extends TestFileSystemDatasetRepository {
 
-  public TestExternalHCatalogDatasetRepository(boolean distributed) {
+  public TestHiveExternalDatasetRepository(boolean distributed) {
     super(distributed);
   }
 
   @Override
   public DatasetRepository newRepo(MetadataProvider provider) {
     // use null URI because TestDatasetRepositories expects no URI
-    return new HCatalogExternalDatasetRepository(conf, testDirectory, provider);
+    return new HiveExternalDatasetRepository(conf, testDirectory, provider);
   }
 
   @Override
   public MetadataProvider newProvider(Configuration conf) {
-    return new HCatalogExternalMetadataProvider(conf, testDirectory);
+    return new HiveExternalMetadataProvider(conf, testDirectory);
   }
 
   private HiveMetaStoreClient client;
@@ -66,7 +65,7 @@ public class TestExternalHCatalogDatasetRepository extends TestFileSystemDataset
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    HCatalog hcat = new HCatalog(conf);
+    MetaStoreUtil hcat = new MetaStoreUtil(conf);
     for (String tableName : hcat.getAllTables("default")) {
       hcat.dropTable("default", tableName);
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -26,33 +26,31 @@ import org.apache.hadoop.hive.metastore.api.Table;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetNotFoundException;
-import org.kitesdk.data.UnknownFormatException;
-import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.AbstractMetadataProvider;
 import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.PartitionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class HCatalogMetadataProvider extends AbstractMetadataProvider implements
+abstract class HiveAbstractMetadataProvider extends AbstractMetadataProvider implements
     PartitionListener {
 
   private static final Logger LOG = LoggerFactory
-      .getLogger(HCatalogMetadataProvider.class);
+      .getLogger(HiveAbstractMetadataProvider.class);
 
   protected final Configuration conf;
-  private HCatalog hcat;
+  private MetaStoreUtil metastore;
 
-  HCatalogMetadataProvider(Configuration conf) {
+  HiveAbstractMetadataProvider(Configuration conf) {
     Preconditions.checkNotNull(conf, "Configuration cannot be null");
     this.conf = conf;
   }
 
-  protected HCatalog getHcat() {
-    if (hcat == null) {
-      hcat = new HCatalog(conf);
+  protected MetaStoreUtil getMetaStoreUtil() {
+    if (metastore == null) {
+      metastore = new MetaStoreUtil(conf);
     }
-    return hcat;
+    return metastore;
   }
 
   /**
@@ -62,7 +60,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
    * @throws DatasetNotFoundException If the table does not exist in Hive
    */
   protected boolean isManaged(String name) {
-    return isManaged(getHcat().getTable(HiveUtils.DEFAULT_DB, name));
+    return isManaged(getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name));
   }
 
   /**
@@ -72,7 +70,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
    * @throws DatasetNotFoundException If the table does not exist in Hive
    */
   protected boolean isExternal(String name) {
-    return isExternal(getHcat().getTable(HiveUtils.DEFAULT_DB, name));
+    return isExternal(getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name));
   }
 
   @Override
@@ -84,9 +82,9 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
       throw new DatasetNotFoundException("Table not found: " + name);
     }
 
-    Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
+    Table table = getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name);
     HiveUtils.updateTableSchema(table, descriptor);
-    getHcat().alterTable(table);
+    getMetaStoreUtil().alterTable(table);
     return descriptor;
   }
 
@@ -98,7 +96,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
     if (!exists(name)) {
       return false;
     }
-    getHcat().dropTable(HiveUtils.DEFAULT_DB, name);
+    getMetaStoreUtil().dropTable(HiveUtils.DEFAULT_DB, name);
     return true;
   }
 
@@ -106,15 +104,15 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
   public boolean exists(String name) {
     Compatibility.checkDatasetName(name);
 
-    return getHcat().exists(HiveUtils.DEFAULT_DB, name);
+    return getMetaStoreUtil().exists(HiveUtils.DEFAULT_DB, name);
   }
 
   @Override
   public Collection<String> list() {
-    Collection<String> tables = getHcat().getAllTables(HiveUtils.DEFAULT_DB);
+    Collection<String> tables = getMetaStoreUtil().getAllTables(HiveUtils.DEFAULT_DB);
     List<String> readableTables = Lists.newArrayList();
     for (String name : tables) {
-      Table table = getHcat().getTable(HiveUtils.DEFAULT_DB, name);
+      Table table = getMetaStoreUtil().getTable(HiveUtils.DEFAULT_DB, name);
       if (isManaged(table) || isExternal(table)) { // readable table types
         try {
           // get a descriptor for the table. if this succeeds, it is readable
@@ -137,7 +135,7 @@ abstract class HCatalogMetadataProvider extends AbstractMetadataProvider impleme
   @Override
   @SuppressWarnings("unchecked")
   public void partitionAdded(String name, String path) {
-    getHcat().addPartition(HiveUtils.DEFAULT_DB, name, path);
+    getMetaStoreUtil().addPartition(HiveUtils.DEFAULT_DB, name, path);
   }
 
   private boolean isManaged(Table table) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import org.kitesdk.data.DatasetDescriptor;
 import com.google.common.io.Files;
@@ -25,28 +25,27 @@ import org.junit.After;
 import org.junit.Test;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
-import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.MetadataProvider;
 import org.kitesdk.data.spi.TestMetadataProviders;
 
-public class TestExternalHCatalogMetadataProvider extends TestMetadataProviders {
+public class TestHiveExternalMetadataProvider extends TestMetadataProviders {
 
   private Path testDirectory;
 
-  public TestExternalHCatalogMetadataProvider(boolean distributed) {
+  public TestHiveExternalMetadataProvider(boolean distributed) {
     super(distributed);
   }
 
   @Override
   public MetadataProvider newProvider(Configuration conf) {
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    return new HCatalogExternalMetadataProvider(conf, testDirectory);
+    return new HiveExternalMetadataProvider(conf, testDirectory);
   }
 
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    HCatalog hcat = new HCatalog(conf);
+    MetaStoreUtil hcat = new MetaStoreUtil(conf);
     for (String tableName : hcat.getAllTables("default")) {
       hcat.dropTable("default", tableName);
     }

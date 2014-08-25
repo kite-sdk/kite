@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import org.apache.hadoop.conf.Configuration;
 import org.junit.After;
-import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.MetadataProvider;
 import org.kitesdk.data.spi.TestMetadataProviders;
 
-public class TestManagedHCatalogMetadataProvider extends TestMetadataProviders {
+public class TestHiveManagedMetadataProvider extends TestMetadataProviders {
 
-  public TestManagedHCatalogMetadataProvider(boolean distributed) {
+  public TestHiveManagedMetadataProvider(boolean distributed) {
     super(distributed);
   }
 
   @Override
   public MetadataProvider newProvider(Configuration conf) {
-    return new HCatalogManagedMetadataProvider(conf);
+    return new HiveManagedMetadataProvider(conf);
   }
 
   @After
   public void cleanHCatalog() {
     // ensures all tables are removed
-    HCatalog hcat = new HCatalog(conf);
+    MetaStoreUtil hcat = new MetaStoreUtil(conf);
     for (String tableName : hcat.getAllTables("default")) {
       hcat.dropTable("default", tableName);
     }

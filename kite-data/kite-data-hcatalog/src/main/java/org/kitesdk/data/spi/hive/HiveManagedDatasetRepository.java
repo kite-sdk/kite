@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -47,19 +47,19 @@ import org.kitesdk.data.spi.MetadataProvider;
  * @see DatasetRepository
  * @see Dataset
  */
-public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository {
+public class HiveManagedDatasetRepository extends HiveAbstractDatasetRepository {
 
   /**
    * Create an HCatalog dataset repository with managed tables.
    */
-  HCatalogDatasetRepository(Configuration conf) {
-    super(conf, new HCatalogManagedMetadataProvider(conf));
+  HiveManagedDatasetRepository(Configuration conf) {
+    super(conf, new HiveManagedMetadataProvider(conf));
   }
 
   /**
    * Create an HCatalog dataset repository with managed tables.
    */
-  HCatalogDatasetRepository(Configuration conf, MetadataProvider provider) {
+  HiveManagedDatasetRepository(Configuration conf, MetadataProvider provider) {
     super(conf, provider);
   }
 
@@ -71,7 +71,7 @@ public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository
   }
 
   /**
-   * A fluent builder to aid in the construction of {@link HCatalogDatasetRepository}
+   * A fluent builder to aid in the construction of {@link HiveManagedDatasetRepository}
    * instances.
    * @since 0.3.0
    */
@@ -120,7 +120,7 @@ public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository
     }
 
     /**
-     * Build an instance of the configured {@link HCatalogDatasetRepository}.
+     * Build an instance of the configured {@link HiveManagedDatasetRepository}.
      *
      * @since 0.9.0
      */
@@ -132,9 +132,9 @@ public class HCatalogDatasetRepository extends HCatalogAbstractDatasetRepository
       }
 
       if (rootDirectory != null) {
-        return new HCatalogExternalDatasetRepository(configuration, rootDirectory);
+        return new HiveExternalDatasetRepository(configuration, rootDirectory);
       } else {
-        return new HCatalogDatasetRepository(configuration);
+        return new HiveManagedDatasetRepository(configuration);
       }
     }
   }

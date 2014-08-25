@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
@@ -31,7 +31,6 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.TestHelpers;
-import org.kitesdk.data.hcatalog.impl.HCatalog;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
 
@@ -58,7 +57,7 @@ public class TestManagedExternalHandling {
 
   @Test
   public void testManagedWithExternal() {
-    HCatalogMetadataProvider provider = new HCatalogManagedMetadataProvider(
+    HiveAbstractMetadataProvider provider = new HiveManagedMetadataProvider(
         new HiveConf());
     Assert.assertTrue(provider.isExternal("external"));
 
@@ -93,7 +92,7 @@ public class TestManagedExternalHandling {
 
   @Test
   public void testExternalWithManaged() {
-    HCatalogMetadataProvider provider = new HCatalogManagedMetadataProvider(
+    HiveAbstractMetadataProvider provider = new HiveManagedMetadataProvider(
         new HiveConf());
     Assert.assertTrue(provider.isManaged("managed"));
 
@@ -129,7 +128,7 @@ public class TestManagedExternalHandling {
   @Test
   public void testRepositoryList() throws Exception {
     // create unreadable hive tables
-    HCatalog metastore = new HCatalog(new Configuration());
+    MetaStoreUtil metastore = new MetaStoreUtil(new Configuration());
     metastore.dropTable("default", "bad_type");
     metastore.dropTable("default", "bad_serde");
     metastore.dropTable("default", "bad_schema");

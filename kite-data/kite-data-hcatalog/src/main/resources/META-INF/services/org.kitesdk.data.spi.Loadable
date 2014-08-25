@@ -13,4 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-org.kitesdk.data.hcatalog.impl.Loader
+org.kitesdk.data.spi.hive.Loader

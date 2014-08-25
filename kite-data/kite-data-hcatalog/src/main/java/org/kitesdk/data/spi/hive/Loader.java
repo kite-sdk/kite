@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.hcatalog.impl;
+package org.kitesdk.data.spi.hive;
 
 import org.kitesdk.compat.DynConstructors;
-import org.kitesdk.data.DatasetRepositoryException;
-import org.kitesdk.data.hcatalog.HCatalogDatasetRepository;
+import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
@@ -78,7 +78,7 @@ public class Loader implements Loadable {
       try {
         fs = FileSystem.get(fileSystemURI(match), envConf);
       } catch (IOException ex) {
-        throw new DatasetRepositoryException(
+        throw new DatasetIOException(
             "Could not get a FileSystem", ex);
       }
 
@@ -86,7 +86,7 @@ public class Loader implements Loadable {
       Configuration conf = new Configuration(envConf);
       setMetaStoreURI(conf, match);
 
-      return new HCatalogDatasetRepository.Builder()
+      return new HiveManagedDatasetRepository.Builder()
           .configuration(conf)
           .rootDirectory(fs.makeQualified(root))
           .build();
@@ -109,7 +109,7 @@ public class Loader implements Loadable {
       Preconditions.checkArgument(!ALWAYS_REPLACED.equals(match.get("host")),
           "[BUG] URI matched but authority was not replaced.");
       setMetaStoreURI(conf, match);
-      return new HCatalogDatasetRepository.Builder()
+      return new HiveManagedDatasetRepository.Builder()
           .configuration(conf)
           .build();
     }
@@ -213,7 +213,7 @@ public class Loader implements Loadable {
         return new URI("file", userInfo, "", UNSPECIFIED_PORT, "/", null, null);
       }
     } catch (URISyntaxException ex) {
-      throw new DatasetRepositoryException("Could not build FS URI", ex);
+      throw new DatasetOperationException("Could not build FS URI", ex);
     }
   }
 
@@ -244,7 +244,7 @@ public class Loader implements Loadable {
                  null, null).toString());
       }
     } catch (URISyntaxException ex) {
-      throw new DatasetRepositoryException(
+      throw new DatasetOperationException(
           "Could not build metastore URI", ex);
     }
   }

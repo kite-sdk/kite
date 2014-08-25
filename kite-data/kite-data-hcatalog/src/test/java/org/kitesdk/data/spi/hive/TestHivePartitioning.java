@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kitesdk.data.hcatalog;
+package org.kitesdk.data.spi.hive;
 
 import java.util.List;
 import org.apache.avro.Schema;
@@ -22,7 +22,6 @@ import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
