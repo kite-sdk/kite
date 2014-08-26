@@ -65,12 +65,6 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
   }
 
   @Override
-  @Deprecated
-  public Integer valueFromString(String stringValue) {
-    return Integer.parseInt(stringValue);
-  }
-
-  @Override
   @SuppressWarnings("unchecked")
   public Predicate<Integer> project(Predicate<S> predicate) {
     if (predicate instanceof Exists) {

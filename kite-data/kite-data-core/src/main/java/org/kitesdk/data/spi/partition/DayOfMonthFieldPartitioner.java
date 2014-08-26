@@ -39,10 +39,4 @@ public class DayOfMonthFieldPartitioner extends CalendarFieldPartitioner {
     format.setMinimumIntegerDigits(2);
     format.setMaximumIntegerDigits(2);
   }
-
-  @Override
-  @Deprecated
-  public String valueToString(Integer value) {
-    return format.format(value);
-  }
 }

@@ -16,7 +16,6 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import java.util.Comparator;
 import javax.annotation.concurrent.Immutable;
@@ -109,50 +108,6 @@ public abstract class FieldPartitioner<S, T> implements Function<S, T>, Comparat
    */
   @Override
   public abstract T apply(S value);
-
-  /**
-   * <p>
-   * Retrieve the value for the field from the string representation.
-   * </p>
-   * @since 0.3.0
-   *
-   * @deprecated will be removed with the partition API
-   */
-  @Deprecated
-  public T valueFromString(String stringValue, Class<? extends T> expectedType) {
-    Preconditions.checkArgument(getType().isAssignableFrom(expectedType),
-        "Bad expected type: " + expectedType);
-    return valueFromString(stringValue);
-  }
-
-  /**
-   * <p>
-   * Retrieve the value for the field from the string representation.
-   * </p>
-   * @since 0.3.0
-   *
-   * @deprecated will be removed with the partition API
-   */
-  @Deprecated
-  protected T valueFromString(String stringValue) {
-    throw new UnsupportedOperationException(
-        "Implementation did not override valueFromString: " + getClass());
-  }
-
-  /**
-   * <p>
-   * Retrieve the value for the field formatted as a {@link String}. By default,
-   * this is the object's {@link Object#toString()} representation,
-   * but some {@link FieldPartitioner}s may choose to provide a different representation.
-   * </p>
-   * @since 0.4.0
-   *
-   * @deprecated will be removed with the partition API
-   */
-  @Deprecated
-  public String valueToString(T value) {
-    return value.toString();
-  }
 
   /**
    * <p>

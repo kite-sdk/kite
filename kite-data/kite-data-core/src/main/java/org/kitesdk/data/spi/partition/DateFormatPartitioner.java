@@ -88,12 +88,6 @@ public class DateFormatPartitioner extends FieldPartitioner<Long, String> {
   }
 
   @Override
-  @Deprecated
-  public String valueFromString(String stringValue) {
-    return stringValue;
-  }
-
-  @Override
   public Predicate<String> project(Predicate<Long> predicate) {
     if (predicate instanceof Exists) {
       return Predicates.exists();

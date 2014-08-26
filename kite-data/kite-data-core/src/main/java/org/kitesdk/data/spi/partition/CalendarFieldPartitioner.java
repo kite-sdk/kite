@@ -70,12 +70,6 @@ public class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
   }
 
   @Override
-  @Deprecated
-  public Integer valueFromString(String stringValue) {
-    return Integer.parseInt(stringValue);
-  }
-
-  @Override
   public boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;

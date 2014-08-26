@@ -53,20 +53,6 @@ public class IdentityFieldPartitioner<S extends Comparable> extends FieldPartiti
   }
 
   @Override
-  @Deprecated
-  @SuppressWarnings("unchecked")
-  public S valueFromString(String stringValue, Class<? extends S> expectedType) {
-    if (expectedType.isAssignableFrom(Integer.class)) {
-      return expectedType.cast(Integer.valueOf(stringValue));
-    } else if (expectedType.isAssignableFrom(Long.class)) {
-      return expectedType.cast(Long.valueOf(stringValue));
-    } else if (expectedType.isAssignableFrom(String.class)) {
-      return expectedType.cast(stringValue);
-    }
-    throw new IllegalArgumentException("Cannot convert string to type " + getType());
-  }
-
-  @Override
   public Predicate<S> project(Predicate<S> predicate) {
     return predicate;
   }

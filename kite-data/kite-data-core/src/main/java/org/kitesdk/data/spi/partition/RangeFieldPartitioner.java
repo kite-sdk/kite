@@ -65,12 +65,6 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
   }
 
   @Override
-  @Deprecated
-  public String valueFromString(String stringValue) {
-    return stringValue;
-  }
-
-  @Override
   public Predicate<String> project(Predicate<String> predicate) {
     if (predicate instanceof Exists) {
       return Predicates.exists();

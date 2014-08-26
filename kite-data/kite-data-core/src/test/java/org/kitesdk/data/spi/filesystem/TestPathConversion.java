@@ -72,9 +72,9 @@ public class TestPathConversion {
 
   @Test
   public void testIgnoresPartitionName() {
-    Assert.assertEquals("10", convert.valueStringForDirname("10"));
-    Assert.assertEquals("10", convert.valueStringForDirname("=10"));
-    Assert.assertEquals("10", convert.valueStringForDirname("anything=10"));
+    Assert.assertEquals("10", convert.dirnameToValueString("10"));
+    Assert.assertEquals("10", convert.dirnameToValueString("=10"));
+    Assert.assertEquals("10", convert.dirnameToValueString("anything=10"));
     Assert.assertEquals(10, (int) convert.valueForDirname(
         new MonthFieldPartitioner("timestamp", "month"), "10"));
     Assert.assertEquals(10, (int) convert.valueForDirname(

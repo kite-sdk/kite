@@ -62,12 +62,6 @@ public class IntRangeFieldPartitioner extends FieldPartitioner<Integer, Integer>
   }
 
   @Override
-  @Deprecated
-  public Integer valueFromString(String stringValue) {
-    return Integer.parseInt(stringValue);
-  }
-
-  @Override
   public Predicate<Integer> project(Predicate<Integer> predicate) {
     if (predicate instanceof Exists) {
       return Predicates.exists();

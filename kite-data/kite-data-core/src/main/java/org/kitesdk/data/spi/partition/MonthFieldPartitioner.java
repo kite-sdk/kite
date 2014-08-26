@@ -47,10 +47,4 @@ public class MonthFieldPartitioner extends CalendarFieldPartitioner {
     cal.setTimeInMillis(timestamp);
     return cal.get(calendarField) + 1; // Calendar month is 0-based
   }
-
-  @Override
-  @Deprecated
-  public String valueToString(Integer value) {
-    return format.format(value);
-  }
 }

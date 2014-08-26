@@ -337,8 +337,7 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
       }
       String stringValue = split.next();
 
-      values.add(fp.valueFromString(stringValue,
-          SchemaUtil.getPartitionType(fp, schema)));
+      values.add(PathConversion.valueForDirname(fp, schema, stringValue));
     }
     return new PartitionKey(values.toArray(new Object[values.size()]));
   }
