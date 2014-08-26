@@ -17,6 +17,7 @@ package org.kitesdk.data.hbase.impl;
 
 import org.kitesdk.data.hbase.HBaseDatasetRepository;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.Registration;
@@ -48,7 +49,7 @@ public class Loader implements Loadable {
         new OptionBuilder<DatasetRepository>() {
           @Override
           public DatasetRepository getFromOptions(Map<String, String> options) {
-            Configuration conf = HBaseConfiguration.create();
+            Configuration conf = HBaseConfiguration.create(DefaultConfiguration.get());
             String[] hostsAndPort = parseHostsAndPort(options.get("zk"));
             conf.set(HConstants.ZOOKEEPER_QUORUM, hostsAndPort[0]);
             String port = hostsAndPort[1];

@@ -15,10 +15,8 @@
  */
 package org.kitesdk.data.spi.hive;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import javax.annotation.Nullable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;

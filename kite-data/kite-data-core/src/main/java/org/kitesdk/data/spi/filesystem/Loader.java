@@ -23,10 +23,10 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.Registration;
@@ -49,12 +49,6 @@ public class Loader implements Loadable {
    */
   private static class URIBuilder implements OptionBuilder<DatasetRepository> {
 
-    private final Configuration envConf;
-
-    public URIBuilder(Configuration envConf) {
-      this.envConf = envConf;
-    }
-
     @Override
     public DatasetRepository getFromOptions(Map<String, String> match) {
       final Path root;
@@ -65,14 +59,16 @@ public class Loader implements Loadable {
       } else {
         root = (path == null || path.isEmpty()) ? new Path(".") : new Path(path);
       }
-      final FileSystem fs;
+
+      Configuration conf = DefaultConfiguration.get();
+      FileSystem fs;
       try {
-        fs = FileSystem.get(fileSystemURI(match), envConf);
+        fs = FileSystem.get(fileSystemURI(match), conf);
       } catch (IOException ex) {
         throw new DatasetIOException("Could not get a FileSystem", ex);
       }
       return new FileSystemDatasetRepository.Builder()
-          .configuration(new Configuration(envConf)) // make a modifiable copy
+          .configuration(new Configuration(conf)) // make a modifiable copy
           .rootDirectory(fs.makeQualified(root))
           .build();
     }
@@ -80,10 +76,7 @@ public class Loader implements Loadable {
 
   @Override
   public void load() {
-    // get a default Configuration to configure defaults (so it's okay!)
-    Configuration conf = new Configuration();
-    OptionBuilder<DatasetRepository> builder =
-        new URIBuilder(conf);
+    OptionBuilder<DatasetRepository> builder = new URIBuilder();
 
     Registration.register(
         new URIPattern("file:/*path?absolute=true"),
@@ -94,20 +87,8 @@ public class Loader implements Loadable {
         new URIPattern("file:*path/:namespace/:dataset"),
         builder);
 
-    String hdfsAuthority;
-    try {
-      // Use a HDFS URI with no authority and the environment's configuration
-      // to find the default HDFS information
-      URI hdfs = FileSystem.get(URI.create("hdfs:/"), conf).getUri();
-      hdfsAuthority = hdfs.getAuthority();
-    } catch (IOException ex) {
-      LOG.warn(
-          "Could not locate HDFS, host and port will not be set by default.");
-      hdfsAuthority = "";
-    }
-
     Registration.register(
-        new URIPattern("hdfs://" + hdfsAuthority + "/*path?absolute=true"),
+        new URIPattern("hdfs:/*path?absolute=true"),
         new URIPattern("hdfs:/*path/:namespace/:dataset?absolute=true"),
         builder
     );

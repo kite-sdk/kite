@@ -20,6 +20,7 @@ import org.kitesdk.compat.DynConstructors;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.Loadable;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.Registration;
@@ -50,18 +51,14 @@ public class Loader implements Loadable {
   private static final String OLD_HDFS_HOST = "hdfs-host";
   private static final String OLD_HDFS_PORT = "hdfs-port";
 
+  private static DynConstructors.Ctor<Configuration> HIVE_CONF;
+
   /**
    * This class builds configured instances of
    * {@code FileSystemDatasetRepository} from a Map of options. This is for the
    * URI system.
    */
   private static class ExternalBuilder implements OptionBuilder<DatasetRepository> {
-
-    private final Configuration envConf;
-
-    public ExternalBuilder(Configuration envConf) {
-      this.envConf = envConf;
-    }
 
     @Override
     public DatasetRepository getFromOptions(Map<String, String> match) {
@@ -74,16 +71,18 @@ public class Loader implements Loadable {
       } else {
         root = (path == null || path.isEmpty()) ? new Path(".") : new Path(path);
       }
-      final FileSystem fs;
+
+      // make a modifiable copy (it may be changed)
+      Configuration conf = newHiveConf(DefaultConfiguration.get());
+      FileSystem fs;
       try {
-        fs = FileSystem.get(fileSystemURI(match), envConf);
+        fs = FileSystem.get(fileSystemURI(match, conf), conf);
       } catch (IOException ex) {
         throw new DatasetIOException(
             "Could not get a FileSystem", ex);
       }
 
-      // make a modifiable copy and setup the MetaStore URI
-      Configuration conf = new Configuration(envConf);
+      // setup the MetaStore URI
       setMetaStoreURI(conf, match);
 
       return new HiveManagedDatasetRepository.Builder()
@@ -94,17 +93,11 @@ public class Loader implements Loadable {
   }
 
   private static class ManagedBuilder implements OptionBuilder<DatasetRepository> {
-    private final Configuration envConf;
-
-    public ManagedBuilder(Configuration envConf) {
-      this.envConf = envConf;
-    }
-
     @Override
     public DatasetRepository getFromOptions(Map<String, String> match) {
       LOG.debug("Managed URI options: {}", match);
       // make a modifiable copy and setup the MetaStore URI
-      Configuration conf = new Configuration(envConf);
+      Configuration conf = newHiveConf(DefaultConfiguration.get());
       // sanity check the URI
       Preconditions.checkArgument(!ALWAYS_REPLACED.equals(match.get("host")),
           "[BUG] URI matched but authority was not replaced.");
@@ -117,32 +110,12 @@ public class Loader implements Loadable {
 
   @Override
   public void load() {
-    // Need to use a HiveConf so that the hive-site.xml file is used, but Hive
-    // may not be available. If the constructor can't be found, don't register.
-    DynConstructors.Ctor<Configuration> hiveConf = new DynConstructors.Builder()
-        .impl("org.apache.hadoop.hive.conf.HiveConf")
-        .build();
-
-    // get a default Configuration to configure defaults (so it's okay!)
-    Configuration conf = hiveConf.newInstance();
-
-    String hiveAuthority;
-    if (conf.get(HIVE_METASTORE_URI_PROP) != null) {
-      try {
-        hiveAuthority = new URI(conf.get(HIVE_METASTORE_URI_PROP))
-            .getAuthority();
-      } catch (URISyntaxException ex) {
-        hiveAuthority = "";
-      }
-    } else {
-      hiveAuthority = "";
-    }
+    checkHiveDependencies();
 
     // Hive-managed data sets
     // Managed sets use the same URI for both repository and dataset, which
     // means that dataset must be passed as a query argument
-    final OptionBuilder<DatasetRepository> managedBuilder =
-        new ManagedBuilder(conf);
+    OptionBuilder<DatasetRepository> managedBuilder = new ManagedBuilder();
     URIPattern basic = new URIPattern("hive?namespace=default");
     Registration.register(basic, basic, managedBuilder);
     // add a URI with no path to allow overriding the metastore authority
@@ -153,31 +126,11 @@ public class Loader implements Loadable {
     Registration.register(basicAuth, basicAuth, managedBuilder);
 
     // external data sets
-    final OptionBuilder<DatasetRepository> externalBuilder =
-        new ExternalBuilder(conf);
-
-    String hdfsAuthority;
-    try {
-      // Use a HDFS URI with no authority and the environment's configuration
-      // to find the default HDFS information
-      final URI hdfs = FileSystem.get(URI.create("hdfs:/"), conf).getUri();
-      hdfsAuthority = "&" + HDFS_HOST + "=" + hdfs.getHost() +
-          "&" + HDFS_PORT + "=" + hdfs.getPort();
-    } catch (IOException ex) {
-      LOG.warn(
-          "Could not locate HDFS, hdfs-host and hdfs-port " +
-          "will not be set by default for Hive repositories.");
-      hdfsAuthority = "";
-    }
+    OptionBuilder<DatasetRepository> externalBuilder = new ExternalBuilder();
 
     Registration.register(
-        new URIPattern(
-            "hive://" + hiveAuthority + "/*path?absolute=true" + hdfsAuthority
-        ),
-        new URIPattern(
-            "hive://" + hiveAuthority +
-                "/*path/:namespace/:dataset?absolute=true" + hdfsAuthority
-        ),
+        new URIPattern("hive:/*path?absolute=true"),
+        new URIPattern("hive:/*path/:namespace/:dataset?absolute=true"),
         externalBuilder
     );
     Registration.register(
@@ -186,7 +139,22 @@ public class Loader implements Loadable {
         externalBuilder);
   }
 
-  private static URI fileSystemURI(Map<String, String> match) {
+  private static Configuration newHiveConf(Configuration base) {
+    checkHiveDependencies(); // ensure HIVE_CONF is present
+    return HIVE_CONF.newInstance(base, HIVE_CONF.getConstructedClass());
+  }
+
+  private synchronized static void checkHiveDependencies() {
+    if (Loader.HIVE_CONF == null) {
+      // check that Hive is available by resolving the HiveConf constructor
+      // this is also needed by newHiveConf(Configuration)
+      Loader.HIVE_CONF = new DynConstructors.Builder()
+          .impl("org.apache.hadoop.hive.conf.HiveConf", Configuration.class, Class.class)
+          .build();
+    }
+  }
+
+  private static URI fileSystemURI(Map<String, String> match, Configuration conf) {
     final String userInfo;
     if (match.containsKey(URIPattern.USERNAME)) {
       if (match.containsKey(URIPattern.PASSWORD)) {
@@ -198,6 +166,7 @@ public class Loader implements Loadable {
     } else {
       userInfo = null;
     }
+
     try {
       if (match.containsKey(HDFS_HOST) || match.containsKey(OLD_HDFS_HOST)) {
         int port = UNSPECIFIED_PORT;
@@ -211,7 +180,13 @@ public class Loader implements Loadable {
         return new URI("hdfs", userInfo, first(match, HDFS_HOST, OLD_HDFS_HOST),
             port, "/", null, null);
       } else {
-        return new URI("file", userInfo, "", UNSPECIFIED_PORT, "/", null, null);
+        String defaultScheme;
+        try {
+          defaultScheme = FileSystem.get(conf).getUri().getScheme();
+        } catch (IOException e) {
+          throw new DatasetIOException("Cannot determine the default FS", e);
+        }
+        return new URI(defaultScheme, userInfo, "", UNSPECIFIED_PORT, "/", null, null);
       }
     } catch (URISyntaxException ex) {
       throw new DatasetOperationException("Could not build FS URI", ex);
