@@ -26,14 +26,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.avro.generic.GenericRecord;
-
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -140,33 +134,12 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
    * @since 0.9.0
    */
   @SuppressWarnings("unchecked")
-  public StorageKey reuseFor(Object entity) {
-    final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
+  public <E> StorageKey reuseFor(E entity, EntityAccessor<E> accessor) {
+    List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
 
     for (int i = 0; i < partitioners.size(); i++) {
-      final FieldPartitioner fp = partitioners.get(i);
-      final Object value;
-      // TODO: this should probably live elsewhere and be extensible
-      if (entity instanceof GenericRecord) {
-        value = ((GenericRecord) entity).get(fp.getSourceName());
-      } else {
-        final String name = fp.getSourceName();
-        try {
-          PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name,
-              entity.getClass(), getter(name), null /* assume read only */);
-          value = propertyDescriptor.getReadMethod().invoke(entity);
-        } catch (IllegalAccessException e) {
-          throw new IllegalStateException("Cannot read property " + name +
-              " from " + entity, e);
-        } catch (InvocationTargetException e) {
-          throw new IllegalStateException("Cannot read property " + name +
-              " from " + entity, e);
-        } catch (IntrospectionException e) {
-          throw new IllegalStateException("Cannot read property " + name +
-              " from " + entity, e);
-        }
-      }
-      replace(i, fp.apply(value));
+      FieldPartitioner fp = partitioners.get(i);
+      replace(i, fp.apply(accessor.get(entity, fp.getSourceName())));
     }
 
     return this;
@@ -209,12 +182,6 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
   @Override
   public String toString() {
     return Objects.toStringHelper(this).add("values", values).toString();
-  }
-
-  private static String getter(String name) {
-    return "get" +
-        name.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-        name.substring(1);
   }
 
   /**

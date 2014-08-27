@@ -21,9 +21,9 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetReaderException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
+import org.kitesdk.data.spi.EntityAccessor;
 import org.kitesdk.data.spi.ReaderWriterState;
 import com.google.common.base.Preconditions;
 import org.apache.avro.Schema;
@@ -31,7 +31,6 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.reflect.ReflectData;
-import org.apache.avro.specific.SpecificData;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -40,7 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
-import org.kitesdk.data.spi.DataModelUtil;
 
 class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
@@ -67,15 +65,14 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
   @SuppressWarnings("unchecked")
   public CSVFileReader(FileSystem fileSystem, Path path,
-      DatasetDescriptor descriptor, Class<E> type) {
+      DatasetDescriptor descriptor, EntityAccessor<E> accessor) {
     this.fs = fileSystem;
     this.path = path;
-    this.schema = descriptor.getSchema();
-    this.recordClass = DataModelUtil.resolveType(type, schema);
+    this.schema = accessor.getEntitySchema();
+    this.recordClass = accessor.getType();
     this.state = ReaderWriterState.NEW;
     this.props = CSVProperties.fromDescriptor(descriptor);
 
-    Schema schema = descriptor.getSchema();
     Preconditions.checkArgument(Schema.Type.RECORD.equals(schema.getType()),
         "Schemas for CSV files must be records of primitive types");
 

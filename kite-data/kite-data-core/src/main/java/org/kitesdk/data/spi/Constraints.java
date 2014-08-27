@@ -35,7 +35,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
-import org.apache.avro.reflect.ReflectData;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
 import org.kitesdk.data.spi.predicates.Exists;
@@ -100,8 +99,8 @@ public class Constraints {
    * @param <E> The type of entities to be matched
    * @return a Predicate to test if entity objects satisfy this constraint set
    */
-  public <E> Predicate<E> toEntityPredicate() {
-    return entityPredicate(constraints, schema, strategy);
+  public <E> Predicate<E> toEntityPredicate(EntityAccessor<E> accessor) {
+    return entityPredicate(constraints, schema, accessor, strategy);
   }
 
   /**
@@ -112,15 +111,15 @@ public class Constraints {
    * @param key a StorageKey for entities tested with the Predicate
    * @return a Predicate to test if entity objects satisfy this constraint set
    */
-  public <E> Predicate<E> toEntityPredicate(StorageKey key) {
+  public <E> Predicate<E> toEntityPredicate(StorageKey key, EntityAccessor<E> accessor) {
     if (key != null) {
       Map<String, Predicate> predicates = minimizeFor(key);
       if (predicates.isEmpty()) {
         return alwaysTrue();
       }
-      return entityPredicate(predicates, schema, strategy);
+      return entityPredicate(predicates, schema, accessor, strategy);
     }
-    return toEntityPredicate();
+    return toEntityPredicate(accessor);
   }
 
   @VisibleForTesting
@@ -465,11 +464,12 @@ public class Constraints {
 
   private static <E> Predicate<E> entityPredicate(
       Map<String, Predicate> predicates, Schema schema,
+      EntityAccessor<E> accessor,
       PartitionStrategy strategy) {
     if (Schema.Type.RECORD != schema.getType()) {
       return alwaysTrue();
     }
-    return new EntityPredicate<E>(predicates, schema, strategy);
+    return new EntityPredicate<E>(predicates, schema, accessor, strategy);
   }
 
   /**
@@ -488,12 +488,15 @@ public class Constraints {
    */
   private static class EntityPredicate<E> implements Predicate<E> {
     private final List<Map.Entry<Schema.Field, Predicate>> predicatesByField;
+    private final EntityAccessor<E> accessor;
 
     @SuppressWarnings("unchecked")
     public EntityPredicate(Map<String, Predicate> predicates, Schema schema,
+                           EntityAccessor<E> accessor,
                            PartitionStrategy strategy) {
 
       List<Schema.Field> fields = schema.getFields();
+      this.accessor = accessor;
       Map<Schema.Field, Predicate> predicateMap = Maps.newHashMap();
 
       // in the case of identical source and partition names, the predicate
@@ -538,7 +541,7 @@ public class Constraints {
 
       // check each constraint and fail immediately
       for (Map.Entry<Schema.Field, Predicate> entry : predicatesByField) {
-        Object eValue = get(entity, entry.getKey());
+        Object eValue = accessor.get(entity, ImmutableList.of(entry.getKey()));
         if (!entry.getValue().apply(eValue)) {
           return false;
         }
@@ -571,12 +574,6 @@ public class Constraints {
           .add("predicates", predicatesByField)
           .toString();
     }
-  }
-
-  private static Object get(Object entity, Schema.Field field) {
-    // TODO: this should use the correct Avro data model, not just reflect
-    // if this fails to find the field, it throws AvroRuntimeException
-    return ReflectData.get().getField(entity, field.name(), field.pos());
   }
 
   /**

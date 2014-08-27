@@ -19,6 +19,8 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
+import org.kitesdk.data.spi.DataModelUtil;
+import org.kitesdk.data.spi.EntityAccessor;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.PartitionListener;
 import org.kitesdk.data.spi.StorageKey;
@@ -49,6 +51,7 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
   private LoadingCache<StorageKey, DatasetWriter<E>> cachedWriters;
 
   private final StorageKey reusedKey;
+  private final EntityAccessor<E> accessor;
 
   private ReaderWriterState state;
 
@@ -76,12 +79,14 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
     this.state = ReaderWriterState.NEW;
     this.reusedKey = new StorageKey(partitionStrategy);
+    this.accessor = DataModelUtil.accessor(view.getType(),
+        view.getDataset().getDescriptor().getSchema());
   }
 
   @Override
   public void initialize() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
-      "Unable to open a writer from state:%s", state);
+        "Unable to open a writer from state:%s", state);
 
     LOG.debug("Opening partitioned dataset writer w/strategy:{}",
       partitionStrategy);
@@ -98,7 +103,7 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
         "Attempt to write to a writer in state:%s", state);
 
-    reusedKey.reuseFor(entity);
+    reusedKey.reuseFor(entity, accessor);
 
     DatasetWriter<E> writer = cachedWriters.getIfPresent(reusedKey);
     if (writer == null) {

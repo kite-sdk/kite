@@ -134,7 +134,7 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
     if (view != null) {
       // use the constraints to filter out entities from the reader
       return new FilteredRecordReader<E>(unfilteredRecordReader,
-          ((AbstractRefinableView) view).getConstraints());
+          ((AbstractRefinableView) view).getConstraints(), view.getAccessor());
     }
     return unfilteredRecordReader;
   }

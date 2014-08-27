@@ -27,6 +27,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.MiniDFSTest;
+import org.kitesdk.data.spi.DataModelUtil;
 
 public class TestCSVAppender extends MiniDFSTest {
   private static final Schema schema = SchemaBuilder
@@ -129,7 +130,8 @@ public class TestCSVAppender extends MiniDFSTest {
 
   public int count(FileSystem fs, Path path, DatasetDescriptor descriptor) {
     CSVFileReader<GenericRecord> reader = new CSVFileReader<GenericRecord>(
-            fs, path, descriptor, GenericRecord.class);
+        fs, path, descriptor,
+        DataModelUtil.accessor(GenericRecord.class, descriptor.getSchema()));
     int count = 0;
     reader.initialize();
     for (GenericRecord r : reader) {

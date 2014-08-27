@@ -37,6 +37,8 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.View;
+import org.kitesdk.data.spi.DataModelUtil;
+import org.kitesdk.data.spi.EntityAccessor;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.SchemaUtil;
@@ -142,7 +144,6 @@ public class CrunchDatasets {
    * @param view a {@link View} of a dataset to partition the collection for
    * @param <E> the type of entities in the collection and underlying dataset
    * @return an equivalent collection of entities partitioned for the view
-   * @see {@link #partition(PCollection, Dataset)}
    *
    * @since 0.16.0
    */
@@ -161,13 +162,12 @@ public class CrunchDatasets {
    * @param dataset a dataset to partition the collection for
    * @param <E> the type of entities in the collection and underlying dataset
    * @return an equivalent collection of entities partitioned for the view
-   * @see {@link #partition(PCollection, Dataset)}
    *
    * @since 0.16.0
    */
   public static <E> PCollection<E> partition(PCollection<E> collection,
                                              Dataset<E> dataset) {
-    return partition(collection, dataset.getDescriptor(), -1);
+    return partition(collection, dataset, -1);
   }
 
   /**
@@ -184,14 +184,15 @@ public class CrunchDatasets {
    * @param numWriters the number of writers that should be used
    * @param <E> the type of entities in the collection and underlying dataset
    * @return an equivalent collection of entities partitioned for the view
-   * @see {@link #partition(PCollection, Dataset)}
+   * @see {@link #partition(PCollection, View)}
    *
    * @since 0.16.0
    */
   public static <E> PCollection<E> partition(PCollection<E> collection,
                                              View<E> view,
                                              int numWriters) {
-    return partition(collection, view.getDataset(), numWriters);
+    return partition(collection, view.getDataset().getDescriptor(),
+        view.getType(), numWriters);
   }
 
   /**
@@ -215,15 +216,17 @@ public class CrunchDatasets {
   public static <E> PCollection<E> partition(PCollection<E> collection,
                                              Dataset<E> dataset,
                                              int numWriters) {
-    return partition(collection, dataset.getDescriptor(), numWriters);
+    return partition(collection, dataset.getDescriptor(), dataset.getType(),
+        numWriters);
   }
 
   private static <E> PCollection<E> partition(PCollection<E> collection,
                                               DatasetDescriptor descriptor,
+                                              Class<E> type,
                                               int numReducers) {
     if (descriptor.isPartitioned()) {
       GetStorageKey<E> getKey = new GetStorageKey<E>(
-          descriptor.getPartitionStrategy(), descriptor.getSchema());
+          descriptor.getPartitionStrategy(), descriptor.getSchema(), type);
       PTable<GenericData.Record, E> table = collection
           .by(getKey, Avros.generics(getKey.schema()));
       PGroupedTable<GenericData.Record, E> grouped =
@@ -260,11 +263,14 @@ public class CrunchDatasets {
   private static class GetStorageKey<E> extends MapFn<E, GenericData.Record> {
     private final String strategyString;
     private final String schemaString;
+    private final Class<E> type;
     private transient AvroStorageKey key = null;
+    private transient EntityAccessor<E> accessor = null;
 
-    private GetStorageKey(PartitionStrategy strategy, Schema schema) {
+    private GetStorageKey(PartitionStrategy strategy, Schema schema, Class<E> type) {
       this.strategyString = strategy.toString(false /* no white space */);
       this.schemaString = schema.toString(false /* no white space */);
+      this.type = type;
     }
 
     public Schema schema() {
@@ -278,12 +284,13 @@ public class CrunchDatasets {
         PartitionStrategy strategy = PartitionStrategyParser.parse(strategyString);
         Schema schema = new Schema.Parser().parse(schemaString);
         this.key = new AvroStorageKey(strategy, schema);
+        this.accessor = DataModelUtil.accessor(type, schema);
       }
     }
 
     @Override
     public AvroStorageKey map(E entity) {
-      return key.reuseFor(entity);
+      return key.reuseFor(entity, accessor);
     }
   }
 
@@ -292,25 +299,19 @@ public class CrunchDatasets {
       justification="StorageKey equals is correct, compares the values")
   private static class AvroStorageKey extends GenericData.Record {
     private final PartitionStrategy strategy;
-    private final Schema schema;
 
     private AvroStorageKey(PartitionStrategy strategy, Schema schema) {
       super(SchemaUtil.keySchema(schema, strategy));
       this.strategy = strategy;
-      this.schema = schema;
     }
 
     @SuppressWarnings("unchecked")
-    public AvroStorageKey reuseFor(Object entity) {
+    public <E> AvroStorageKey reuseFor(E entity, EntityAccessor<E> accessor) {
       List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
 
       for (int i = 0; i < partitioners.size(); i++) {
         FieldPartitioner fp = partitioners.get(i);
-        Schema.Field field = schema.getField(fp.getSourceName());
-        // TODO: this should use the correct Avro data model, not just reflect
-        Object value = ReflectData.get().getField(
-            entity, field.name(), field.pos());
-        put(i, fp.apply(value));
+        put(i, fp.apply(accessor.get(entity, fp.getSourceName())));
       }
 
       return this;

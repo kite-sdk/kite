@@ -82,14 +82,17 @@ public class TestConstraints {
     }
   }
 
+  public static final EntityAccessor<GenericEvent> accessor =
+      DataModelUtil.accessor(GenericEvent.class, schema);
+
   @Test
   public void testEmptyConstraintsEntityPredicate() {
     Assert.assertNotNull("Empty constraints should produce an entity predicate",
-        emptyConstraints.toEntityPredicate());
+        emptyConstraints.toEntityPredicate(accessor));
     Assert.assertTrue("Should match event",
-        emptyConstraints.toEntityPredicate().apply(new GenericEvent()));
+        emptyConstraints.toEntityPredicate(accessor).apply(new GenericEvent()));
     Assert.assertFalse("Should not match null",
-        emptyConstraints.toEntityPredicate().apply(null));
+        emptyConstraints.toEntityPredicate(accessor).apply(null));
 
     Assert.assertNotNull("Should produce an unbound key range",
         emptyConstraints.toKeyRanges());
@@ -128,11 +131,11 @@ public class TestConstraints {
 
     GenericEvent event = new GenericEvent();
     Assert.assertTrue("Should match event with non-null id",
-        exists.toEntityPredicate().apply(event));
+        exists.toEntityPredicate(accessor).apply(event));
 
     event.id = null;
     Assert.assertFalse("Should not match event with null id",
-        exists.toEntityPredicate().apply(event));
+        exists.toEntityPredicate(accessor).apply(event));
 
     Assert.assertNotNull("Should produce a key range",
         exists.toKeyRanges());
@@ -188,11 +191,11 @@ public class TestConstraints {
 
     GenericEvent event = new GenericEvent();
     Assert.assertFalse("Should not match event with incorrect id",
-        withSingle.toEntityPredicate().apply(event));
+        withSingle.toEntityPredicate(accessor).apply(event));
 
     event.id = id;
     Assert.assertTrue("Should match event with correct id",
-        withSingle.toEntityPredicate().apply(event));
+        withSingle.toEntityPredicate(accessor).apply(event));
 
     Assert.assertFalse("Non-empty constraints (with) should not be unbounded",
         withSingle.isUnbounded());
@@ -211,14 +214,14 @@ public class TestConstraints {
 
     GenericEvent event = new GenericEvent();
     Assert.assertFalse("Should not match event with incorrect id",
-        withMultiple.toEntityPredicate().apply(event));
+        withMultiple.toEntityPredicate(accessor).apply(event));
 
     event.id = ids[0];
     Assert.assertTrue("Should match event with correct id",
-        withMultiple.toEntityPredicate().apply(event));
+        withMultiple.toEntityPredicate(accessor).apply(event));
     event.id = ids[1];
     Assert.assertTrue("Should match event with correct id",
-        withMultiple.toEntityPredicate().apply(event));
+        withMultiple.toEntityPredicate(accessor).apply(event));
 
     Assert.assertFalse("Non-empty constraints (with) should not be unbounded",
         withMultiple.isUnbounded());
@@ -454,41 +457,41 @@ public class TestConstraints {
   @Test
   public void testBasicMatches() {
     GenericEvent e = new GenericEvent();
-    StorageKey key = new StorageKey(strategy).reuseFor(e);
+    StorageKey key = new StorageKey(strategy).reuseFor(e, accessor);
 
     Constraints time = emptyConstraints.partitionedBy(strategy)
         .from("timestamp", START)
         .to("timestamp", START + 100000);
     Predicate<StorageKey> matchKeys = time.toKeyPredicate();
-    Predicate<GenericEvent> matchEvents = time.toEntityPredicate();
+    Predicate<GenericEvent> matchEvents = time.toEntityPredicate(accessor);
     Assert.assertTrue(matchKeys.apply(key));
     Assert.assertTrue(matchEvents.apply(e));
 
     Constraints timeAndUUID = time.with("id", e.getId());
     Assert.assertTrue(timeAndUUID.toKeyPredicate().apply(key));
-    Assert.assertTrue(timeAndUUID.toEntityPredicate().apply(e));
+    Assert.assertTrue(timeAndUUID.toEntityPredicate(accessor).apply(e));
 
     // just outside the actual range should match partition but not event
     e.timestamp = START - 1;
-    key.reuseFor(e);
-    Assert.assertFalse(time.toEntityPredicate().apply(e));
-    Assert.assertFalse(timeAndUUID.toEntityPredicate().apply(e));
+    key.reuseFor(e, accessor);
+    Assert.assertFalse(time.toEntityPredicate(accessor).apply(e));
+    Assert.assertFalse(timeAndUUID.toEntityPredicate(accessor).apply(e));
     Assert.assertTrue(time.toKeyPredicate().apply(key));
     Assert.assertTrue(timeAndUUID.toKeyPredicate().apply(key));
 
     // just outside the actual range should match partition but not event
     e.timestamp = START - 100001;
-    key.reuseFor(e);
-    Assert.assertFalse(time.toEntityPredicate().apply(e));
-    Assert.assertFalse(timeAndUUID.toEntityPredicate().apply(e));
+    key.reuseFor(e, accessor);
+    Assert.assertFalse(time.toEntityPredicate(accessor).apply(e));
+    Assert.assertFalse(timeAndUUID.toEntityPredicate(accessor).apply(e));
     Assert.assertTrue(time.toKeyPredicate().apply(key));
     Assert.assertTrue(timeAndUUID.toKeyPredicate().apply(key));
 
     // a different day will cause the partition to stop matching
     e.timestamp = START - ONE_DAY_MILLIS;
-    key.reuseFor(e);
-    Assert.assertFalse(time.toEntityPredicate().apply(e));
-    Assert.assertFalse(timeAndUUID.toEntityPredicate().apply(e));
+    key.reuseFor(e, accessor);
+    Assert.assertFalse(time.toEntityPredicate(accessor).apply(e));
+    Assert.assertFalse(timeAndUUID.toEntityPredicate(accessor).apply(e));
     Assert.assertFalse(time.toKeyPredicate().apply(key));
     Assert.assertFalse(timeAndUUID.toKeyPredicate().apply(key));
   }
@@ -615,7 +618,7 @@ public class TestConstraints {
     GenericEvent e = new GenericEvent();
 
     e.timestamp = oct_25_2013;
-    StorageKey key = new StorageKey(timeOnly).reuseFor(e);
+    StorageKey key = new StorageKey(timeOnly).reuseFor(e, accessor);
 
     Constraints empty = emptyConstraints.partitionedBy(timeOnly);
 
@@ -626,7 +629,7 @@ public class TestConstraints {
     LOG.info("Constraints: {}", c);
 
     e.timestamp = oct_25_2013;
-    key.reuseFor(e);
+    key.reuseFor(e, accessor);
     Assert.assertFalse("Should not match toBefore", c.toKeyPredicate().apply(key));
   }
 
@@ -698,7 +701,8 @@ public class TestConstraints {
     Assert.assertNotNull("Should produce a KeyPredicate", keyPredicate);
     Assert.assertTrue("Should match key", keyPredicate.apply(eventKey));
 
-    Predicate<GenericEvent> entityPredicate = eventDay.toEntityPredicate();
+    Predicate<GenericEvent> entityPredicate = eventDay
+        .toEntityPredicate(accessor);
     Assert.assertNotNull("Should produce an EntityPredicate", entityPredicate);
     Assert.assertTrue("Should match entity", entityPredicate.apply(e));
   }

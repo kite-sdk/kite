@@ -36,7 +36,6 @@ import org.kitesdk.data.hbase.impl.BaseEntityScanner;
 import org.kitesdk.data.hbase.impl.Dao;
 import org.kitesdk.data.hbase.impl.EntityMapper;
 import org.kitesdk.data.spi.AbstractKeyRecordReaderWrapper;
-import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.FilteredRecordReader;
 
 import static org.apache.hadoop.hbase.mapreduce.TableInputFormat.SCAN;
@@ -76,10 +75,10 @@ class HBaseViewKeyInputFormat<E> extends InputFormat<E, Void> {
     TableInputFormat delegate = getDelegate(conf);
     RecordReader<E, Void> unfilteredRecordReader = new HBaseRecordReaderWrapper<E>(
         delegate.createRecordReader(inputSplit, taskAttemptContext), entityMapper);
-    if (view != null && view instanceof AbstractRefinableView) {
+    if (view != null) {
       // use the constraints to filter out entities from the reader
       return new FilteredRecordReader<E>(unfilteredRecordReader,
-          ((AbstractRefinableView) view).getConstraints());
+          view.getConstraints(), view.getAccessor());
     }
     return unfilteredRecordReader;
   }

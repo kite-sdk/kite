@@ -79,8 +79,8 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
 
   @Override
   public DatasetReader<E> newReader() {
-    AbstractDatasetReader<E> reader = new MultiFileDatasetReader<E>(
-        fs, pathIterator(), dataset.getDescriptor(), constraints, type);
+    AbstractDatasetReader<E> reader = new MultiFileDatasetReader<E>(fs,
+        pathIterator(), dataset.getDescriptor(), constraints, getAccessor());
     reader.initialize();
     return reader;
   }

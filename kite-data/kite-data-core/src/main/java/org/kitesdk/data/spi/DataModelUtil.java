@@ -156,4 +156,9 @@ public class DataModelUtil {
 
     return null;
   }
+
+  public static <E> EntityAccessor<E> accessor(Class<E> type, Schema schema) {
+    return new EntityAccessor<E>(type, schema);
+  }
+
 }

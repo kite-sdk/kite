@@ -44,8 +44,8 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
   protected final Dataset<E> dataset;
   protected final MarkerComparator comparator;
   protected final Constraints constraints;
+  protected final EntityAccessor<E> accessor;
   protected final Predicate<E> entityTest;
-  protected final Class<E> type;
 
   // This class is Immutable and must be thread-safe
   protected final ThreadLocal<StorageKey> keys;
@@ -68,20 +68,20 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
       this.comparator = null;
       this.keys = null;
     }
-    this.entityTest = constraints.toEntityPredicate();
-    this.type = DataModelUtil.resolveType(type, dataset.getDescriptor().getSchema());
+    this.accessor = DataModelUtil.accessor(type, descriptor.getSchema());
+    this.entityTest = constraints.toEntityPredicate(accessor);
   }
 
   protected AbstractRefinableView(AbstractRefinableView<E> view, Constraints constraints) {
     this.dataset = view.dataset;
     this.comparator = view.comparator;
     this.constraints = constraints;
-    this.entityTest = constraints.toEntityPredicate();
     // thread-safe, so okay to reuse when views share a partition strategy
     this.keys = view.keys;
     // No need to resolve type here as it would have been resolved by our parent
     // view
-    this.type = view.type;
+    this.accessor = view.accessor;
+    this.entityTest = constraints.toEntityPredicate(accessor);
   }
 
   public Constraints getConstraints() {
@@ -103,7 +103,11 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
 
   @Override
   public Class<E> getType() {
-    return type;
+    return accessor.getType();
+  }
+
+  public EntityAccessor<E> getAccessor() {
+    return accessor;
   }
 
   /**

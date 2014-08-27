@@ -16,7 +16,9 @@
 
 package org.kitesdk.data.spi;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.io.ByteArrayInputStream;
@@ -47,6 +49,9 @@ import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 
 public class SchemaUtil {
+
+  static final Splitter NAME_SPLITTER = Splitter.on('.');
+  static final Joiner NAME_JOINER = Joiner.on('.');
 
   private static final ImmutableMap<Schema.Type, Class<?>> TYPE_TO_CLASS =
       ImmutableMap.<Schema.Type, Class<?>>builder()
@@ -192,15 +197,39 @@ public class SchemaUtil {
    */
   public static Schema fieldSchema(Schema schema, PartitionStrategy strategy,
                                    String name) {
-    Schema.Field field = schema.getField(name);
-    if (field != null) {
-      return field.schema();
-    } else if (strategy != null && strategy.hasPartitioner(name)) {
+    if (strategy != null && strategy.hasPartitioner(name)) {
       return partitionFieldSchema(strategy.getPartitioner(name), schema);
-    } else {
-      throw new IllegalArgumentException(
-          "Not a schema or partition field: " + name);
     }
+    Schema nested = fieldSchema(schema, name);
+    if (nested != null) {
+      return nested;
+    }
+    throw new IllegalArgumentException(
+        "Not a schema or partition field: " + name);
+  }
+
+  /**
+   * Returns the nested {@link Schema} for the given field name.
+   *
+   * @param schema a record Schema
+   * @param name a String field name
+   * @return the nested Schema for the field
+   */
+  private static Schema fieldSchema(Schema schema, String name) {
+    Schema nested = schema;
+    List<String> levels = Lists.newArrayList();
+    for (String level : NAME_SPLITTER.split(name)) {
+      levels.add(level);
+      Preconditions.checkArgument(Schema.Type.RECORD == schema.getType(),
+          "Cannot get schema for %s: %s is not a record schema: %s",
+          name, NAME_JOINER.join(levels), nested.toString(true));
+      Schema.Field field = nested.getField(level);
+      Preconditions.checkArgument(field != null,
+          "Cannot get schema for %s: %s is not a field",
+          name, NAME_JOINER.join(levels));
+      nested = field.schema();
+    }
+    return nested;
   }
 
   /**

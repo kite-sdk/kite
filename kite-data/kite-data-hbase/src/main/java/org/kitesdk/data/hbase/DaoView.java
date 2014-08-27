@@ -71,8 +71,8 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
   @Override
   public DatasetReader<E> newReader() {
     final DatasetReader<E> wrappedReader = newEntityScanner();
-    final UnmodifiableIterator<E> filteredIterator =
-        Iterators.filter(wrappedReader.iterator(), constraints.toEntityPredicate());
+    final UnmodifiableIterator<E> filteredIterator = Iterators.filter(
+        wrappedReader.iterator(), constraints.toEntityPredicate(getAccessor()));
     AbstractDatasetReader<E> reader = new AbstractDatasetReader<E>() {
       @Override
       public void initialize() {
@@ -145,7 +145,7 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
 
       @Override
       public void write(E entity) {
-        StorageKey key = partitionStratKey.reuseFor(entity);
+        StorageKey key = partitionStratKey.reuseFor(entity, getAccessor());
         if (!keyPredicate.apply(key)) {
           throw new IllegalArgumentException("View does not contain entity: " + entity);
         }

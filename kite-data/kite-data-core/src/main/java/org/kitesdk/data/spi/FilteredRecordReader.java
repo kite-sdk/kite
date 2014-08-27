@@ -26,9 +26,11 @@ public class FilteredRecordReader<E> extends RecordReader<E, Void> {
   private Predicate<E> predicate;
   private E current;
 
-  public FilteredRecordReader(RecordReader<E, Void> unfiltered, Constraints constraints) {
+  public FilteredRecordReader(RecordReader<E, Void> unfiltered,
+                              Constraints constraints,
+                              EntityAccessor<E> accessor) {
     this.unfiltered = unfiltered;
-    this.predicate = constraints.toEntityPredicate(); // TODO: optimize with storage key
+    this.predicate = constraints.toEntityPredicate(accessor); // TODO: optimize with storage key
   }
 
   @Override

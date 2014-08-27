@@ -23,6 +23,7 @@ import org.kitesdk.data.Formats;
 import org.kitesdk.data.UnknownFormatException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.EntityAccessor;
 import org.kitesdk.data.spi.ReaderWriterState;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -36,7 +37,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   private final FileSystem fileSystem;
   private final DatasetDescriptor descriptor;
   private final Constraints constraints;
-  private final Class<E> type;
+  private final EntityAccessor<E> accessor;
 
   private final Iterator<Path> filesIter;
   private final PathIterator pathIter;
@@ -46,15 +47,15 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   private ReaderWriterState state;
 
   public MultiFileDatasetReader(FileSystem fileSystem, Iterable<Path> files,
-      DatasetDescriptor descriptor, Constraints constraints, Class<E> type) {
-    Preconditions.checkArgument(fileSystem != null, "FileSystem cannot be null");
-    Preconditions.checkArgument(descriptor != null, "Descriptor cannot be null");
-    Preconditions.checkArgument(files != null, "Partition paths cannot be null");
+      DatasetDescriptor descriptor, Constraints constraints,
+      EntityAccessor<E> accessor) {
+    Preconditions.checkNotNull(fileSystem, "FileSystem cannot be null");
+    Preconditions.checkNotNull(descriptor, "Descriptor cannot be null");
+    Preconditions.checkNotNull(files, "Partition paths cannot be null");
 
     this.fileSystem = fileSystem;
     this.descriptor = descriptor;
     this.constraints = constraints;
-    this.type = type;
     this.filesIter = files.iterator();
     this.state = ReaderWriterState.NEW;
     if (files instanceof PathIterator) {
@@ -62,6 +63,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
     } else {
       this.pathIter = null;
     }
+    this.accessor = accessor;
   }
 
   @Override
@@ -82,18 +84,18 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
   private void openNextReader() {
     if (Formats.PARQUET.equals(descriptor.getFormat())) {
       this.reader = new ParquetFileSystemDatasetReader(fileSystem,
-          filesIter.next(), descriptor.getSchema(), type);
+          filesIter.next(), accessor.getEntitySchema(), accessor.getType());
     } else if (Formats.CSV.equals(descriptor.getFormat())) {
       this.reader = new CSVFileReader<E>(fileSystem, filesIter.next(),
-          descriptor, type);
+          descriptor, accessor);
     } else {
       this.reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
-          descriptor.getSchema(), type);
+          accessor.getEntitySchema(), accessor.getType());
     }
     reader.initialize();
     this.readerIterator = Iterators.filter(reader,
         constraints.toEntityPredicate(
-            pathIter != null ? pathIter.getStorageKey() : null));
+            (pathIter != null ? pathIter.getStorageKey() : null), accessor));
   }
 
   @Override

@@ -33,6 +33,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import org.kitesdk.data.spi.DataModelUtil;
 
 public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
   /*
@@ -120,7 +121,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .schema(VALIDATOR_SCHEMA)
         .build();
     return new CSVFileReader<GenericData.Record>(localfs, validatorFile, desc,
-        GenericData.Record.class);
+        DataModelUtil.accessor(GenericData.Record.class, desc.getSchema()));
   }
 
   @Override
@@ -146,7 +147,8 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     final DatasetDescriptor desc = new DatasetDescriptor.Builder()
         .schema(SchemaBuilder.array().items().stringType())
         .build();
-    new CSVFileReader<GenericData.Record>(localfs, csvFile, desc, GenericData.Record.class);
+    new CSVFileReader<GenericData.Record>(localfs, csvFile, desc,
+        DataModelUtil.accessor(GenericData.Record.class, desc.getSchema()));
   }
 
   @Test
@@ -156,7 +158,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .build();
     final CSVFileReader<GenericData.Record> reader =
         new CSVFileReader<GenericData.Record>(localfs, csvFile, desc,
-            GenericData.Record.class);
+            DataModelUtil.accessor(GenericData.Record.class, desc.getSchema()));
 
     reader.initialize();
     Assert.assertTrue(reader.hasNext());
@@ -192,7 +194,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .build();
     final CSVFileReader<GenericData.Record> reader =
         new CSVFileReader<GenericData.Record>(localfs, tsvFile, desc,
-            GenericData.Record.class);
+            DataModelUtil.accessor(GenericData.Record.class, desc.getSchema()));
 
     reader.initialize();
     Assert.assertTrue(reader.hasNext());
@@ -228,7 +230,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .build();
     final CSVFileReader<GenericData.Record> reader =
         new CSVFileReader<GenericData.Record>(localfs, tsvFile, desc,
-            GenericData.Record.class);
+            DataModelUtil.accessor(GenericData.Record.class, desc.getSchema()));
 
     reader.initialize();
     Assert.assertTrue(reader.hasNext());
@@ -262,7 +264,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .build();
     final CSVFileReader<GenericData.Record> reader =
         new CSVFileReader<GenericData.Record>(localfs, csvFile, desc,
-            GenericData.Record.class);
+            DataModelUtil.accessor(GenericData.Record.class, desc.getSchema()));
 
     reader.initialize();
     Assert.assertTrue(reader.hasNext());
@@ -297,7 +299,8 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .schema(BEAN_SCHEMA)
         .build();
     final CSVFileReader<TestBean> reader =
-        new CSVFileReader<TestBean>(localfs, csvFile, desc, TestBean.class);
+        new CSVFileReader<TestBean>(localfs, csvFile, desc,
+            DataModelUtil.accessor(TestBean.class, desc.getSchema()));
 
     reader.initialize();
     Assert.assertTrue(reader.hasNext());
@@ -308,11 +311,22 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     Assert.assertEquals(false, bean.myBool);
 
     Assert.assertTrue(reader.hasNext());
-    bean = reader.next();
-    Assert.assertEquals("str,2", bean.myStr);
-    Assert.assertEquals((Integer) 0, bean.myInt);
-    Assert.assertEquals((Float) 4.0f, bean.myFloat);
-    Assert.assertEquals(true, bean.myBool);
+    TestHelpers.assertThrows("Should complain about missing default",
+        AvroRuntimeException.class, new Runnable() {
+          @Override
+          public void run() {
+            reader.next();
+          }
+        });
+//    The following fails with a missing default until Avro 1.7.6. This happens
+//    because the TestBean class's Schema doesn't have a default for myInt.
+//
+//    Assert.assertTrue(reader.hasNext());
+//    bean = reader.next();
+//    Assert.assertEquals("str,2", bean.myStr);
+//    Assert.assertEquals((Integer) 0, bean.myInt);
+//    Assert.assertEquals((Float) 4.0f, bean.myFloat);
+//    Assert.assertEquals(true, bean.myBool);
 
     Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about missing default",
@@ -333,7 +347,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         .build();
     final CSVFileReader<TestGenericRecord> reader =
         new CSVFileReader<TestGenericRecord>(localfs, csvFile, desc,
-        TestGenericRecord.class);
+        DataModelUtil.accessor(TestGenericRecord.class, desc.getSchema()));
 
     reader.initialize();
     Assert.assertTrue(reader.hasNext());

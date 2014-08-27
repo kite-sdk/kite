@@ -71,13 +71,13 @@ public class DaoViewTest {
   }
 
   @Before
-  @SuppressWarnings("unchecked")
   public void setup() throws Exception {
     repo = new HBaseDatasetRepository.Builder().configuration(
         HBaseTestUtils.getConf()).build();
     DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schemaLiteral(testEntity).build();
-    ds = (DaoDataset) repo.create("default", tableName, descriptor);
+    ds = (DaoDataset<TestEntity>) repo.create(
+        "default", tableName, descriptor, TestEntity.class);
   }
 
   @After
