@@ -17,8 +17,9 @@ package org.kitesdk.data.flume;
 
 import java.net.URI;
 import org.kitesdk.data.Dataset;
+import org.kitesdk.data.spi.DataModelUtil;
+import org.kitesdk.data.spi.EntityAccessor;
 import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import java.net.URL;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.apache.avro.Schema;
 import org.apache.flume.FlumeException;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.URIBuilder;
+import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.filesystem.PathConversion;
 
 public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jAppender {
@@ -36,9 +38,10 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
   private String datasetNamespace;
   private String datasetName;
   private boolean initialized;
-  
+
   private PartitionStrategy partitionStrategy;
-  private PartitionKey key;
+  private EntityAccessor<Object> accessor;
+  private StorageKey key;
 
   public Log4jAppender() {
     super();
@@ -94,9 +97,12 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
       // cycle in Configuration and log4j
       try {
         URI datasetUri = new URIBuilder(datasetRepositoryUri, datasetNamespace, datasetName).build();
-        Dataset dataset = Datasets.load(datasetUri);
+        Dataset<Object> dataset = Datasets.load(datasetUri, Object.class);
         if (dataset.getDescriptor().isPartitioned()) {
           partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
+          accessor = DataModelUtil.accessor(
+              dataset.getType(), dataset.getDescriptor().getSchema());
+          key = new StorageKey(partitionStrategy);
         }
         URL schemaUrl = dataset.getDescriptor().getSchemaUrl();
         if (schemaUrl != null) {
@@ -110,7 +116,7 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
     }
     super.populateAvroHeaders(hdrs, schema, message);
     if (partitionStrategy != null) {
-      key = PartitionKey.partitionKeyForEntity(partitionStrategy, message, key);
+      key.reuseFor(message, accessor);
       int i = 0;
       for (FieldPartitioner fp : partitionStrategy.getFieldPartitioners()) {
         hdrs.put(PARTITION_PREFIX + fp.getName(),
