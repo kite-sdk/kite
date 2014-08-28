@@ -100,9 +100,13 @@ public class KiteStorage extends LoadFunc implements StoreFuncInterface, LoadMet
 
   @Override
   public String relativeToAbsolutePath(String location, Path curDir) throws IOException {
-    String[] parts = location.split(":", 2);
-    if (parts[1].charAt(0) != '/') {
-      return parts[0] + ":/" + parts[1];
+    int colon = location.indexOf(':');
+    if (colon != -1) {
+      String scheme = location.substring(0, colon);
+      String path = location.substring(colon+1);
+      if (path.charAt(0) != '/') {
+        return scheme + ":/" + path;
+      }
     }
 
     return location;
@@ -180,7 +184,8 @@ public class KiteStorage extends LoadFunc implements StoreFuncInterface, LoadMet
     return null;
   }
 
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="PZLA_PREFER_ZERO_LENGTH_ARRAYS",
+      justification="The Pig API states: 'Implementations should return null to indicate that there are no partition keys'")
   @Override
   public String[] getPartitionKeys(String location, Job job) throws IOException {
     return null;
@@ -191,9 +196,13 @@ public class KiteStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   }
 
   public static String fixLocation(String location) {
-    String[] parts = location.split(":", 2);
-    if (parts[1].charAt(0) == '/') {
-      return parts[0] + ":" + parts[1].substring(1);
+    int colon = location.indexOf(':');
+    if (colon != -1) {
+      String scheme = location.substring(0, colon);
+      String path = location.substring(colon+1);
+      if (path.charAt(0) == '/') {
+        return scheme + ":" + path.substring(1);
+      }
     }
     return location;
   }
