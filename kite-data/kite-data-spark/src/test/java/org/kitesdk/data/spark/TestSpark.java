@@ -78,7 +78,7 @@ public class TestSpark extends FileSystemTestBase {
   @Test
   @SuppressWarnings("deprecation")
   public void testSparkJob() throws Exception {
-    Dataset<Record> inputDataset = repo.create("in",
+    Dataset<Record> inputDataset = repo.create("ns", "in",
         new DatasetDescriptor.Builder()
           .property("kite.allow.csv", "true")
           .schema(TestMapReduce.STRING_SCHEMA)
@@ -94,7 +94,7 @@ public class TestSpark extends FileSystemTestBase {
     writer.close();
 
 
-    Dataset<Record> outputDataset = repo.create("out",
+    Dataset<Record> outputDataset = repo.create("ns", "out",
         new DatasetDescriptor.Builder()
           .property("kite.allow.csv", "true")
           .schema(TestMapReduce.STATS_SCHEMA)
