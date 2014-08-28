@@ -215,7 +215,7 @@ public class SchemaUtil {
    * @param name a String field name
    * @return the nested Schema for the field
    */
-  private static Schema fieldSchema(Schema schema, String name) {
+  public static Schema fieldSchema(Schema schema, String name) {
     Schema nested = schema;
     List<String> levels = Lists.newArrayList();
     for (String level : NAME_SPLITTER.split(name)) {

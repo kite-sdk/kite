@@ -979,19 +979,24 @@ public class DatasetDescriptor {
       if (strategy == null) {
         return;
       }
+      // TODO: the exceptions thrown by this should all be ValidationException
       Preconditions.checkState(schema.getType() == Schema.Type.RECORD,
           "Cannot partition non-records: " + schema);
       for (org.kitesdk.data.spi.FieldPartitioner fp : strategy.getFieldPartitioners()) {
         // the source name should be a field in the schema, but not necessarily
         // the record.
-        Schema.Field field = schema.getField(fp.getSourceName());
-        Preconditions.checkState(field != null,
-            "Cannot partition on %s (missing from schema)", fp.getSourceName());
+        Schema fieldSchema;
+        try {
+          fieldSchema = SchemaUtil.fieldSchema(schema, fp.getSourceName());
+        } catch (IllegalArgumentException e) {
+          throw new IllegalStateException(
+              "Cannot partition on " + fp.getSourceName(), e);
+        }
         Preconditions.checkState(
             SchemaUtil.isConsistentWithExpectedType(
-                field.schema().getType(), fp.getSourceType()),
+                fieldSchema.getType(), fp.getSourceType()),
             "Field type %s does not match partitioner %s",
-            field.schema().getType(), fp);
+            fieldSchema.getType(), fp);
       }
     }
 
