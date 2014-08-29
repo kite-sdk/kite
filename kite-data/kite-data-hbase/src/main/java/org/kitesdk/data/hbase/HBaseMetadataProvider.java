@@ -49,6 +49,7 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
       .getLogger(HBaseMetadataProvider.class);
 
   private static final String DEFAULT_NAMESPACE = "default";
+  private static final String REPLICATION_ID_PROP = "hbase.replication.scope";
 
   private HBaseAdmin hbaseAdmin;
   private SchemaManager schemaManager;
@@ -101,11 +102,11 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
     try {
       if (!hbaseAdmin.tableExists(tableName)) {
         HTableDescriptor desc = new HTableDescriptor(tableName);
-        desc.addFamily(new HColumnDescriptor(Constants.SYS_COL_FAMILY));
-        desc.addFamily(new HColumnDescriptor(Constants.OBSERVABLE_COL_FAMILY));
+        desc.addFamily(columnFamily(Constants.SYS_COL_FAMILY, descriptor));
+        desc.addFamily(columnFamily(Constants.OBSERVABLE_COL_FAMILY, descriptor));
         for (String columnFamily : entitySchema.getColumnMappingDescriptor()
             .getRequiredColumnFamilies()) {
-          desc.addFamily(new HColumnDescriptor(columnFamily));
+          desc.addFamily(columnFamily(columnFamily, descriptor));
         }
         hbaseAdmin.createTable(desc);
       } else {
@@ -125,7 +126,7 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
           hbaseAdmin.disableTable(tableName);
           try {
             for (String family : familiesToAdd) {
-              hbaseAdmin.addColumn(tableName, new HColumnDescriptor(family));
+              hbaseAdmin.addColumn(tableName, columnFamily(family, descriptor));
             }
           } finally {
             hbaseAdmin.enableTable(tableName);
@@ -284,6 +285,27 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
         .schema(schema)
         .location(location)
         .build();
+  }
+
+  private HColumnDescriptor columnFamily(byte[] family, DatasetDescriptor descriptor) {
+    return configure(new HColumnDescriptor(family), descriptor);
+  }
+
+  private HColumnDescriptor columnFamily(String family, DatasetDescriptor descriptor) {
+    return configure(new HColumnDescriptor(family), descriptor);
+  }
+
+  private HColumnDescriptor configure(HColumnDescriptor column, DatasetDescriptor descriptor) {
+    if (descriptor.hasProperty(REPLICATION_ID_PROP)) {
+      String value = descriptor.getProperty(REPLICATION_ID_PROP);
+      try {
+        column.setScope(Integer.valueOf(value));
+      } catch (NumberFormatException e) {
+        throw new IllegalArgumentException(
+            "Invalid replication scope: " + value, e);
+      }
+    }
+    return column;
   }
 
 }
