@@ -17,8 +17,11 @@ package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -28,6 +31,8 @@ import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Create an empty dataset")
 public class CreateDatasetCommand extends BaseDatasetCommand {
+
+  private static final Splitter PROP_VALUE_SEP = Splitter.on('=').limit(2);
 
   @Parameter(description = "<dataset name>")
   List<String> datasets;
@@ -47,6 +52,10 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
   @Parameter(names = {"-f", "--format"},
       description = "The file format: avro or parquet.")
   String format = Formats.AVRO.getName();
+
+  @Parameter(names = {"--set", "--property"},
+      description = "Add a property pair: prop.name=value")
+  List<String> properties;
 
   public CreateDatasetCommand(Logger console) {
     super(console);
@@ -77,6 +86,15 @@ public class CreateDatasetCommand extends BaseDatasetCommand {
 
     if (columnMappingFile != null) {
       descriptorBuilder.columnMappingUri(qualifiedURI(columnMappingFile));
+    }
+
+    if (properties != null) {
+      for (String propValue : properties) {
+        Iterator<String> parts = PROP_VALUE_SEP.split(propValue).iterator();
+        descriptorBuilder.property(
+            Iterators.getNext(parts, null),
+            Iterators.getNext(parts, null));
+      }
     }
 
     DatasetDescriptor descriptor = descriptorBuilder.build();
