@@ -20,6 +20,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.reflect.ReflectData;
 import org.apache.avro.reflect.ReflectDatumReader;
@@ -47,7 +48,7 @@ public class DataModelUtil {
     // implement GenericRecord
     if (SpecificRecord.class.isAssignableFrom(type)) {
       return new SpecificData(type.getClassLoader());
-    } else if (GenericRecord.class.isAssignableFrom(type)) {
+    } else if (IndexedRecord.class.isAssignableFrom(type)) {
       return GenericData.get();
     } else {
       return ReflectData.AllowNull.get();

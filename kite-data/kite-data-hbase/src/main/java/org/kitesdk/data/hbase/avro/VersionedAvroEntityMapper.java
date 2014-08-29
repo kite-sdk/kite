@@ -209,6 +209,11 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
   }
 
   @Override
+  public PartitionKey mapToKey(ENTITY entity) {
+    return entityMappers.get(version).mapToKey(entity);
+  }
+
+  @Override
   public ENTITY mapToEntity(Result result) {
     ManagedSchemaEntityVersion versionRecord = managedSchemaEntityVersionEntityMapper
         .mapToEntity(result);
@@ -335,7 +340,6 @@ public class VersionedAvroEntityMapper<ENTITY extends IndexedRecord> implements
    * @param keySchema
    * @param readSchema
    * @param writeSchema
-   * @param keyClass
    * @param entityClass
    * @return
    */

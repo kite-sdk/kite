@@ -36,6 +36,15 @@ import org.kitesdk.data.spi.PartitionKey;
 public interface EntityMapper<E> {
 
   /**
+   * Map an Entity of type E to a PartitionKey instance
+   *
+   * @param entity
+   *          The entity which this function will map to a PartitionKey.
+   * @return The PartitionKey
+   */
+  public PartitionKey mapToKey(E entity);
+
+  /**
    * Map an HBase Result instance to an Entity of type E.
    * 
    * @param result

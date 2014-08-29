@@ -16,6 +16,8 @@
 package org.kitesdk.data.hbase.impl;
 
 import java.util.Map;
+import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.PartitionKey;
 
 /**
  * An EntityComposer is an interface that supports entity construction and
@@ -48,6 +50,15 @@ public interface EntityComposer<E> {
    * @return The field value
    */
   public Object extractField(E entity, String fieldName);
+
+  /**
+   * Extract a PartitionKey for the given Strategy.
+   *
+   * @param strategy a PartitionStrategy for the entity
+   * @param entity The entity to extract a partition key from.
+   * @return a PartitionKey for the entity
+   */
+  public PartitionKey extractKey(PartitionStrategy strategy, E entity);
 
   /**
    * Transform the keyAsColumn field value into a Map

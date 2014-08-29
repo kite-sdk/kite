@@ -17,15 +17,10 @@ package org.kitesdk.data.spi;
 
 import com.google.common.base.Objects;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.apache.avro.generic.GenericRecord;
 import org.kitesdk.data.PartitionStrategy;
 
 /**
@@ -36,8 +31,7 @@ import org.kitesdk.data.PartitionStrategy;
  * A {@code PartitionKey} is an ordered sequence of values corresponding to the
  * {@link org.kitesdk.data.spi.FieldPartitioner}s in a
  * {@link org.kitesdk.data.PartitionStrategy}. You can obtain a {@link PartitionKey} using
- * {@link org.kitesdk.data.PartitionStrategy#partitionKey(Object...)} or
- * {@link org.kitesdk.data.PartitionStrategy#partitionKeyForEntity(Object)}.
+ * {@link PartitionKey#partitionKeyForEntity(org.kitesdk.data.PartitionStrategy, Object, EntityAccessor, PartitionKey)}.
  * </p>
  * <p>
  * Implementations of {@link PartitionKey} are typically not thread-safe; that 
@@ -85,9 +79,9 @@ public class PartitionKey {
    * written to, or to find a partition using objects from the entity domain.
    * </p>
    */
-  public static PartitionKey partitionKeyForEntity(PartitionStrategy strategy,
-      Object entity) {
-    return partitionKeyForEntity(strategy, entity, null);
+  public static <E> PartitionKey partitionKeyForEntity(PartitionStrategy strategy,
+      E entity, EntityAccessor<E> accessor) {
+    return partitionKeyForEntity(strategy, entity, accessor, null);
   }
 
   /**
@@ -101,8 +95,8 @@ public class PartitionKey {
    * </p>
    */
   @SuppressWarnings("unchecked")
-  public static PartitionKey partitionKeyForEntity(PartitionStrategy strategy,
-      Object entity, @Nullable PartitionKey reuseKey) {
+  public static <E> PartitionKey partitionKeyForEntity(PartitionStrategy strategy,
+      E entity, EntityAccessor<E> accessor, @Nullable PartitionKey reuseKey) {
     List<FieldPartitioner> fieldPartitioners = strategy.getFieldPartitioners();
 
     PartitionKey key = (reuseKey == null ?
@@ -110,33 +104,9 @@ public class PartitionKey {
 
     for (int i = 0; i < fieldPartitioners.size(); i++) {
       FieldPartitioner fp = fieldPartitioners.get(i);
-      String name = fp.getSourceName();
-      Object value;
-      if (entity instanceof GenericRecord) {
-        value = ((GenericRecord) entity).get(name);
-      } else {
-        try {
-          PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name,
-              entity.getClass(), getter(name), null /* assume read only */);
-          value = propertyDescriptor.getReadMethod().invoke(entity);
-        } catch (IllegalAccessException e) {
-          throw new RuntimeException("Cannot read property " + name + " from "
-              + entity, e);
-        } catch (InvocationTargetException e) {
-          throw new RuntimeException("Cannot read property " + name + " from "
-              + entity, e);
-        } catch (IntrospectionException e) {
-          throw new RuntimeException("Cannot read property " + name + " from "
-              + entity, e);
-        }
-      }
-      key.set(i, fp.apply(value));
+      key.set(i, fp.apply(accessor.get(entity, fp.getSourceName())));
     }
     return key;
-  }
-
-  private static String getter(String name) {
-    return "get" + name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1);
   }
 
   @Override

@@ -116,15 +116,19 @@ public class BaseEntityMapper<E> implements EntityMapper<E> {
   }
 
   @Override
+  public PartitionKey mapToKey(E entity) {
+    return getEntityComposer()
+        .extractKey(keySchema.getPartitionStrategy(), entity);
+  }
+
+  @Override
   public PutAction mapFromEntity(E entity) {
     List<PutAction> putActionList = new ArrayList<PutAction>();
     byte[] keyBytes;
     if (keySchema == null || keySerDe == null) {
       keyBytes = new byte[] { (byte) 0 };
     } else {
-      PartitionKey partitionKey = PartitionKey.partitionKeyForEntity(
-          keySchema.getPartitionStrategy(), entity);
-      keyBytes = keySerDe.serialize(partitionKey);
+      keyBytes = keySerDe.serialize(mapToKey(entity));
     }
     for (FieldMapping fieldMapping : entitySchema.getColumnMappingDescriptor()
         .getFieldMappings()) {

@@ -25,8 +25,12 @@ import org.apache.avro.generic.IndexedRecord;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.FieldMapping.MappingType;
+import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.hbase.impl.EntityComposer;
+import org.kitesdk.data.spi.DataModelUtil;
+import org.kitesdk.data.spi.EntityAccessor;
+import org.kitesdk.data.spi.PartitionKey;
 
 /**
  * An EntityComposer implementation for Avro records. It will handle both
@@ -42,6 +46,11 @@ public class AvroEntityComposer<E extends IndexedRecord> implements
    * The Avro schema for the Avro records this EntityComposer will compose.
    */
   private final AvroEntitySchema avroSchema;
+
+  /**
+   * The accessor used to read fields.
+   */
+  private final EntityAccessor<IndexedRecord> accessor;
 
   /**
    * Boolean to indicate whether this is a specific record or generic record
@@ -75,6 +84,7 @@ public class AvroEntityComposer<E extends IndexedRecord> implements
    */
   public AvroEntityComposer(AvroEntitySchema avroEntitySchema, boolean specific) {
     this.avroSchema = avroEntitySchema;
+    this.accessor = DataModelUtil.accessor(IndexedRecord.class, avroSchema.getAvroSchema());
     this.specific = specific;
     this.recordBuilderFactory = buildAvroRecordBuilderFactory(avroEntitySchema
         .getAvroSchema());
@@ -104,23 +114,16 @@ public class AvroEntityComposer<E extends IndexedRecord> implements
 
   @Override
   public Object extractField(E entity, String fieldName) {
-    Schema schema = avroSchema.getAvroSchema();
-    Field field = schema.getField(fieldName);
-    if (field == null) {
-      throw new ValidationException("No field named " + fieldName
-          + " in schema " + schema);
-    }
-    Object fieldValue = entity.get(field.pos());
-    if (fieldValue == null) {
-      // if the field value is null, and the field is a primitive type,
-      // we should make the field represent java's default type. This
-      // can happen when using GenericRecord. SpecificRecord has it's
-      // fields represented by members of a class, so a SpecificRecord's
-      // primitive fields will never be null. We are doing this so
-      // GenericRecord acts like SpecificRecord in this case.
-      fieldValue = getDefaultPrimitive(field);
-    }
-    return fieldValue;
+    // make sure the field is a direct child of the schema
+    ValidationException.check(
+        accessor.getEntitySchema().getField(fieldName) != null,
+        "No field named %s in schema %s", fieldName, accessor.getEntitySchema());
+    return accessor.get(entity, fieldName);
+  }
+
+  @Override
+  public PartitionKey extractKey(PartitionStrategy strategy, E entity) {
+    return PartitionKey.partitionKeyForEntity(strategy, entity, accessor);
   }
 
   @SuppressWarnings("unchecked")
@@ -229,37 +232,6 @@ public class AvroEntityComposer<E extends IndexedRecord> implements
     } else {
       return (AvroRecordBuilderFactory<E>) new GenericAvroRecordBuilderFactory(
           schema);
-    }
-  }
-
-  /**
-   * Get's the default value for the primitive types. This matches the default
-   * Java would assign to the following primitive types:
-   * 
-   * int, long, boolean, float, and double.
-   * 
-   * If field is any other type, this method will return null.
-   * 
-   * @param field
-   *          The Schema field
-   * @return The default value for the schema field's type, or null if the type
-   *         of field is not a primitive type.
-   */
-  private Object getDefaultPrimitive(Schema.Field field) {
-    Schema.Type type = field.schema().getType();
-    if (type == Schema.Type.INT) {
-      return 0;
-    } else if (type == Schema.Type.LONG) {
-      return 0L;
-    } else if (type == Schema.Type.BOOLEAN) {
-      return false;
-    } else if (type == Schema.Type.FLOAT) {
-      return 0.0f;
-    } else if (type == Schema.Type.DOUBLE) {
-      return 0.0d;
-    } else {
-      // not a primitive type, so return null
-      return null;
     }
   }
 }

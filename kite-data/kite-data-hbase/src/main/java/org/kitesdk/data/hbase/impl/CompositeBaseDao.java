@@ -72,6 +72,12 @@ public abstract class CompositeBaseDao<E, S> implements CompositeDao<E, S> {
     }
 
     @Override
+    public PartitionKey mapToKey(E entity) {
+      // all of the entities should map to the same row bytes, so use the first
+      return entityMappers.get(0).mapToKey(decompose(entity).get(0));
+    }
+
+    @Override
     public PutAction mapFromEntity(E entity) {
       List<PutAction> puts = new ArrayList<PutAction>();
       List<S> subEntities = decompose(entity);
