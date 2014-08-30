@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
@@ -42,12 +41,14 @@ import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.reflect.ReflectData;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.spi.ColumnMappingParser;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.HadoopFileSystemURLStreamHandler;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.SchemaUtil;
-import org.kitesdk.data.spi.URIPattern;
 import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 
 /**
@@ -66,6 +67,7 @@ public class DatasetDescriptor {
 
   private final Schema schema;
   private final URL schemaUrl;
+  private final URI schemaUri;
   private final Format format;
   private final URI location;
   private final Map<String, String> properties;
@@ -97,8 +99,8 @@ public class DatasetDescriptor {
       @Nullable Map<String, String> properties,
       @Nullable PartitionStrategy partitionStrategy,
       @Nullable ColumnMapping columnMapping) {
-    this(schema, schemaUrl, format, location, properties, partitionStrategy,
-        columnMapping, null);
+    this(schema, toURI(schemaUrl), format, location,
+        properties, partitionStrategy, columnMapping, null);
   }
 
   /**
@@ -109,7 +111,7 @@ public class DatasetDescriptor {
    *
    * @since 0.17.0
    */
-  public DatasetDescriptor(Schema schema, @Nullable URL schemaUrl,
+  public DatasetDescriptor(Schema schema, @Nullable URI schemaUri,
       Format format, @Nullable URI location,
       @Nullable Map<String, String> properties,
       @Nullable PartitionStrategy partitionStrategy,
@@ -122,7 +124,8 @@ public class DatasetDescriptor {
     checkCompressionType(format, compressionType);
 
     this.schema = schema;
-    this.schemaUrl = schemaUrl;
+    this.schemaUri = schemaUri;
+    this.schemaUrl = toURL(schemaUri);
     this.format = format;
     this.location = location;
     if (properties != null) {
@@ -162,6 +165,19 @@ public class DatasetDescriptor {
   @Nullable
   public URL getSchemaUrl() {
     return schemaUrl;
+  }
+
+  /**
+   * Get a URI from which the {@link Schema} can be retrieved (optional). This
+   * method might return {@code null} if the schema is not stored at a persistent
+   * URI (for example, if it were constructed from a literal string).
+   *
+   * @return a URI from which the schema can be retrieved
+   * @since 0.17.0
+   */
+  @Nullable
+  public URI getSchemaUri() {
+    return schemaUri;
   }
 
   /**
@@ -324,12 +340,13 @@ public class DatasetDescriptor {
   public static class Builder {
 
     // used to match resource:schema.avsc URIs
-    private static final String RESOURCE_PATH = "resource-path";
-    private static final URIPattern RESOURCE_URI_PATTERN =
-        new URIPattern("resource:*" + RESOURCE_PATH);
+    private static final String RESOURCE_URI_SCHEME = "resource";
+
+    private Configuration conf;
+    private URI defaultFS;
 
     private Schema schema;
-    private URL schemaUrl;
+    private URI schemaUri;
     private Format format = Formats.AVRO;
     private URI location;
     private Map<String, String> properties;
@@ -339,6 +356,12 @@ public class DatasetDescriptor {
 
     public Builder() {
       this.properties = Maps.newHashMap();
+      this.conf = DefaultConfiguration.get();
+      try {
+        this.defaultFS = FileSystem.get(conf).getUri();
+      } catch (IOException e) {
+        throw new DatasetIOException("Cannot get the default FS", e);
+      }
     }
 
     /**
@@ -350,15 +373,17 @@ public class DatasetDescriptor {
      * @since 0.7.0
      */
     public Builder(DatasetDescriptor descriptor) {
+      this();
       this.schema = descriptor.getSchema();
-      this.schemaUrl = descriptor.getSchemaUrl();
+      this.schemaUri = descriptor.getSchemaUri();
       this.format = descriptor.getFormat();
-      this.properties = Maps.newHashMap(descriptor.properties);
       this.location = descriptor.getLocation();
 
       if (descriptor.isPartitioned()) {
         this.partitionStrategy = descriptor.getPartitionStrategy();
       }
+
+      properties.putAll(descriptor.properties);
     }
 
     /**
@@ -410,30 +435,23 @@ public class DatasetDescriptor {
      *
      * @param uri a URI object for the schema's location.
      * @return An instance of the builder for method chaining.
-     * @throws MalformedURLException if {@code uri} is not a valid URL
      * @throws IOException
      *
      * @since 0.8.0
      */
     public Builder schemaUri(URI uri) throws IOException {
-      // special support for resource URIs
-      Map<String, String> match = RESOURCE_URI_PATTERN.getMatch(uri);
-      if (match != null) {
-        return schema(
-            Resources.getResource(match.get(RESOURCE_PATH)).openStream());
-      }
-
-      this.schemaUrl = toURL(uri);
+      this.schemaUri = qualifiedUri(uri);
 
       InputStream in = null;
       boolean threw = true;
       try {
-        in = schemaUrl.openStream();
+        in = open(uri);
+        schema(in);
         threw = false;
-        return schema(in);
       } finally {
         Closeables.close(in, threw);
       }
+      return this;
     }
 
     /**
@@ -444,24 +462,12 @@ public class DatasetDescriptor {
      *
      * @param uri a String URI
      * @return An instance of the builder for method chaining.
-     * @throws URISyntaxException if {@code uri} is not a valid URI
-     * @throws MalformedURLException if {@code uri} is not a valid URL
      * @throws IOException
      *
      * @since 0.8.0
      */
-    public Builder schemaUri(String uri) throws URISyntaxException, IOException {
-      return schemaUri(new URI(uri));
-    }
-
-    private URL toURL(URI uri) throws MalformedURLException {
-      try {
-        // try with installed URLStreamHandlers first...
-        return uri.toURL();
-      } catch (MalformedURLException e) {
-        // if that fails then try using the Hadoop protocol handler
-        return new URL(null, uri.toString(), new HadoopFileSystemURLStreamHandler());
-      }
+    public Builder schemaUri(String uri) throws IOException {
+      return schemaUri(URI.create(uri));
     }
 
     /**
@@ -550,12 +556,13 @@ public class DatasetDescriptor {
       InputStream in = null;
       boolean threw = true;
       try {
-        in = toURL(uri).openStream();
+        in = open(uri);
+        schemaFromAvroDataFile(in);
         threw = false;
-        return schemaFromAvroDataFile(in);
       } finally {
         Closeables.close(in, threw);
       }
+      return this;
     }
 
     /**
@@ -617,12 +624,11 @@ public class DatasetDescriptor {
      *
      * @param uri A location String URI
      * @return An instance of the builder for method chaining.
-     * @throws URISyntaxException if {@code uri} is not a valid URI
      *
      * @since 0.8.0
      */
-    public Builder location(String uri) throws URISyntaxException {
-      return location(new URI(uri));
+    public Builder location(String uri) {
+      return location(URI.create(uri));
     }
 
     /**
@@ -726,22 +732,16 @@ public class DatasetDescriptor {
      * @since 0.14.0
      */
     public Builder partitionStrategyUri(URI uri) throws IOException {
-      // special support for resource URIs
-      Map<String, String> match = RESOURCE_URI_PATTERN.getMatch(uri);
-      if (match != null) {
-        return partitionStrategy(
-            Resources.getResource(match.get(RESOURCE_PATH)).openStream());
-      }
-
       InputStream in = null;
       boolean threw = true;
       try {
-        in = toURL(uri).openStream();
+        in = open(uri);
+        partitionStrategy(in);
         threw = false;
-        return partitionStrategy(in);
       } finally {
         Closeables.close(in, threw);
       }
+      return this;
     }
 
     /**
@@ -752,13 +752,11 @@ public class DatasetDescriptor {
      * @return This builder for method chaining.
      * @throws ValidationException
      *          If the literal is not a valid JSON-encoded partition strategy
-     * @throws URISyntaxException if {@code uri} is not a valid URI
      *
      * @since 0.14.0
      */
-    public Builder partitionStrategyUri(String uri)
-        throws URISyntaxException, IOException {
-      return partitionStrategyUri(new URI(uri));
+    public Builder partitionStrategyUri(String uri) throws IOException {
+      return partitionStrategyUri(URI.create(uri));
     }
 
     /**
@@ -851,22 +849,16 @@ public class DatasetDescriptor {
      * @since 0.14.0
      */
     public Builder columnMappingUri(URI uri) throws IOException {
-      // special support for resource URIs
-      Map<String, String> match = RESOURCE_URI_PATTERN.getMatch(uri);
-      if (match != null) {
-        return columnMapping(
-            Resources.getResource(match.get(RESOURCE_PATH)).openStream());
-      }
-
       InputStream in = null;
       boolean threw = true;
       try {
-        in = toURL(uri).openStream();
+        in = open(uri);
+        columnMapping(in);
         threw = false;
-        return columnMapping(in);
       } finally {
         Closeables.close(in, threw);
       }
+      return this;
     }
 
     /**
@@ -879,14 +871,11 @@ public class DatasetDescriptor {
      *          If the literal is not valid JSON-encoded column mappings
      * @throws java.io.IOException
      *          If accessing the URI results in an IOException
-     * @throws URISyntaxException
-     *          If {@code uri} is not a valid URI
      *
      * @since 0.14.0
      */
-    public Builder columnMappingUri(String uri)
-        throws URISyntaxException, IOException {
-      return columnMappingUri(new URI(uri));
+    public Builder columnMappingUri(String uri) throws IOException {
+      return columnMappingUri(URI.create(uri));
     }
 
     /**
@@ -955,11 +944,31 @@ public class DatasetDescriptor {
       // TODO: verify that all fields have a mapping?
 
       return new DatasetDescriptor(
-          schema, schemaUrl, format, location, properties, partitionStrategy,
+          schema, schemaUri, format, location, properties, partitionStrategy,
           columnMapping, compressionType);
     }
 
-    private static void checkPartitionStrategy(Schema schema, PartitionStrategy strategy) {
+    private InputStream open(URI location) throws IOException {
+      if (RESOURCE_URI_SCHEME.equals(location.getScheme())) {
+        return Resources.getResource(location.getRawSchemeSpecificPart()).openStream();
+      } else {
+        Path filePath = new Path(location).makeQualified(defaultFS, new Path("/"));
+        // even though it was qualified using the default FS, it may not be in it
+        FileSystem fs = filePath.getFileSystem(conf);
+        return fs.open(filePath);
+      }
+    }
+
+    private URI qualifiedUri(URI location) throws IOException {
+      if (RESOURCE_URI_SCHEME.equals(location.getScheme())) {
+        return null;
+      } else {
+        return new Path(location).makeQualified(defaultFS, new Path("/")).toUri();
+      }
+    }
+
+    private static void checkPartitionStrategy(
+        Schema schema, @Nullable PartitionStrategy strategy) {
       if (strategy == null) {
         return;
       }
@@ -982,7 +991,7 @@ public class DatasetDescriptor {
   }
 
   private static void checkCompressionType(Format format,
-      CompressionType compressionType) {
+      @Nullable CompressionType compressionType) {
 
     if (compressionType == null) {
       return;
@@ -995,8 +1004,8 @@ public class DatasetDescriptor {
   }
 
   private static void checkColumnMappings(Schema schema,
-                                          PartitionStrategy strategy,
-                                          ColumnMapping mappings) {
+                                          @Nullable PartitionStrategy strategy,
+                                          @Nullable ColumnMapping mappings) {
     if (mappings == null) {
       return;
     }
@@ -1039,5 +1048,30 @@ public class DatasetDescriptor {
       builder.identity(keyMappings.get(index).getFieldName());
     }
     return builder.build();
+  }
+
+  private static URI toURI(@Nullable URL url) {
+    if (url == null) {
+      return null;
+    }
+    // throw IllegalArgumentException if the URL is not a URI
+    return URI.create(url.toExternalForm());
+  }
+
+  private static URL toURL(@Nullable URI uri) {
+    if (uri == null) {
+      return null;
+    }
+    try {
+      // try with installed URLStreamHandlers first...
+      return uri.toURL();
+    } catch (MalformedURLException e) {
+      try {
+        // if that fails then try using the Hadoop protocol handler
+        return new URL(null, uri.toString(), new HadoopFileSystemURLStreamHandler());
+      } catch (MalformedURLException _) {
+        return null; // can't produce a URL
+      }
+    }
   }
 }

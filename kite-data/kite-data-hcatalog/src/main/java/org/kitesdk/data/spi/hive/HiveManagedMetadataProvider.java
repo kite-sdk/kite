@@ -66,12 +66,8 @@ class HiveManagedMetadataProvider extends HiveAbstractMetadataProvider {
     // load the created table to get the data location
     final Table newTable = getMetaStoreUtil().getTable(namespace, name);
 
-    try {
-      return new DatasetDescriptor.Builder(descriptor)
-          .location(newTable.getSd().getLocation())
-          .build();
-    } catch (URISyntaxException e) {
-      throw new DatasetException(e);
-    }
+    return new DatasetDescriptor.Builder(descriptor)
+        .location(newTable.getSd().getLocation())
+        .build();
   }
 }
