@@ -21,6 +21,7 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.Resources;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 import org.junit.Before;
@@ -29,6 +30,7 @@ import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.OptionBuilder;
 import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.URIPattern;
@@ -110,6 +112,14 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
 
   @Test
   public void testBasicUseHDFSSchema() throws Exception {
+    // this test needs to set the default configuration so that the
+    // DatasetDescriptor can resolve HDFS to qualify the path. otherwise,
+    // the default FS is file:/ and the avsc path is not qualified, causing
+    // an IOException when it tries to read the file. Setting up HDFS correctly
+    // in the environment fixes the problem.
+    Configuration existing = DefaultConfiguration.get();
+    DefaultConfiguration.set(getConfiguration());
+
     String avsc = "hdfs:/tmp/schemas/hdfsUser.avsc";
     FSDataOutputStream out = getDFS()
         .create(new Path(avsc), true /* overwrite */ );
@@ -125,6 +135,9 @@ public class TestCreateDatasetCommandCluster extends MiniDFSTest {
 
     verify(getMockRepo()).create("default", "users", expectedDescriptor);
     verify(console).debug(contains("Created"), eq("users"));
+
+    // restore the previous Configuration
+    DefaultConfiguration.set(existing);
   }
 
 }
