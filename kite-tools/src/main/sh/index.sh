@@ -6,7 +6,7 @@
 clear
 echo "> Import a CSV-file and create the SOLR-index ... "
 
-export COLLECTION=$1
+export COLLECTION=gridka2014
 export SCHEMA=$2
 export CSVFILE=$3
 
@@ -58,7 +58,7 @@ solrctl --zk dev.loudacre.com:2181/solr collection --create $COLLECTION
 #
 echo # IMPORT via MapReduce / Spark
 hadoop jar /usr/lib/solr/contrib/mr/search-mr-1.1.0-job.jar org.apache.solr.hadoop.MapReduceIndexerTool \
---morphline-file $COLLECTION-csv-morphlines.conf \
+--morphline-file default-morphlines.conf \
 --output-dir hdfs://dev.loudacre.com/user/training/indexes/$COLLECTION \
 --zk-host dev.loudacre.com:2181/solr \
 --collection $COLLECTION hdfs://dev.loudacre.com/user/training/$COLLECTION \
