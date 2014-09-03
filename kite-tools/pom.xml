@@ -219,7 +219,7 @@
               <report>summary</report>
               <report>dependency-info</report>
               <report>dependencies</report>
-              <report>license</report>
+              <!--report>license</report-->
               <report>project-team</report>
             </reports>
           </reportSet>

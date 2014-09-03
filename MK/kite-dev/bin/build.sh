@@ -12,6 +12,8 @@ cd ./../../../kite-tools
 
 mvn clean compile package -DskipTests
 
+read 
+
 cd ./../MK/kite-dev/bin
 
 #ls ./../../../kite-tools/target/
