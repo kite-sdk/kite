@@ -75,6 +75,7 @@
     <kite.hive.version>0.12.0-cdh5.1.0</kite.hive.version>
     <kite.oozie.version>4.0.0-cdh5.1.0</kite.oozie.version>
     <kite.spark.version>1.0.0-cdh5.1.0</kite.spark.version>
+    <kite.parquet.version>1.2.5-cdh5.1.0</kite.parquet.version>
 
     <!-- other properties to help apps -->
     <hadoop.guava.version>11.0.2</hadoop.guava.version>
@@ -212,6 +213,13 @@
       <groupId>org.kitesdk</groupId>
       <artifactId>kite-data-hcatalog</artifactId>
       <version>${kite.version}</version>
+      <exclusions>
+        <!-- cdh bundles parquet in Hive -->
+        <exclusion>
+          <artifactId>parquet-hive-bundle</artifactId>
+          <groupId>com.twitter</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -336,6 +344,11 @@
           <artifactId>servlet-api-2.5</artifactId>
           <groupId>org.mortbay.jetty</groupId>
         </exclusion>
+        <!-- Exclusions needed by Tomcat -->
+        <exclusion>
+          <artifactId>jsp-api</artifactId>
+          <groupId>javax.servlet.jsp</groupId>
+        </exclusion>
       </exclusions>
     </dependency>
 
@@ -419,6 +432,17 @@
             <groupId>javax.servlet</groupId>
           </exclusion>
         </exclusions>
+      </dependency>
+      <!-- manage parquet dependency versions !-->
+      <dependency>
+        <groupId>com.twitter</groupId>
+        <artifactId>parquet-avro</artifactId>
+        <version>${kite.parquet.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.twitter</groupId>
+        <artifactId>parquet-hadoop-bundle</artifactId>
+        <version>${kite.parquet.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
