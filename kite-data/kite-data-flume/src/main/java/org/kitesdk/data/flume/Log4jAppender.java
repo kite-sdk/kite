@@ -25,7 +25,7 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.flume.FlumeException;
 import org.kitesdk.data.Datasets;
-import org.kitesdk.data.spi.URIBuilder;
+import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.spi.filesystem.PathConversion;
 
 public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jAppender {

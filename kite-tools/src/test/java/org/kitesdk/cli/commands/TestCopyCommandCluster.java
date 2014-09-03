@@ -46,9 +46,9 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
-import org.kitesdk.data.spi.URIBuilder;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
 import org.slf4j.Logger;
@@ -201,7 +201,7 @@ public class TestCopyCommandCluster extends MiniDFSTest {
     command.repoURI = repoUri;
     command.numWriters = 3;
     command.datasets = Lists.newArrayList(source, "dest_partitioned");
-    URI dsUri = new URIBuilder("repo:" + repoUri, "default", "dest_partitioned").build();
+    URI dsUri = URIBuilder.build("repo:" + repoUri, "default", "dest_partitioned");
     Datasets.<Object, Dataset<Object>>create(dsUri, new DatasetDescriptor.Builder()
         .partitionStrategy(new PartitionStrategy.Builder()
             .hash("id", 2)

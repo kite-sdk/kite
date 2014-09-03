@@ -29,7 +29,6 @@ import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.AbstractRefinableView;
 import org.kitesdk.data.spi.Constraints;
-import org.kitesdk.data.spi.URIBuilder;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;

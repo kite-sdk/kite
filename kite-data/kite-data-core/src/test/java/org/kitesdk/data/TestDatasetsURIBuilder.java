@@ -18,7 +18,6 @@ package org.kitesdk.data;
 import java.net.URI;
 
 import org.junit.Test;
-import org.kitesdk.data.spi.URIBuilder;
 
 import junit.framework.Assert;
 

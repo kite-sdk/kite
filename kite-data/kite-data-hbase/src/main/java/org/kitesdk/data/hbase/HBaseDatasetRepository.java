@@ -40,7 +40,7 @@ import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
-import org.kitesdk.data.spi.URIBuilder;
+import org.kitesdk.data.URIBuilder;
 
 public class HBaseDatasetRepository extends AbstractDatasetRepository {
 

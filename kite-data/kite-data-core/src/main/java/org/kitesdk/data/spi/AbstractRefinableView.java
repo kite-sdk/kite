@@ -19,11 +19,13 @@ package org.kitesdk.data.spi;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import java.net.URI;
+import java.util.Map;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.RefinableView;
+import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -211,6 +213,10 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
 
   @Override
   public URI getUri() {
-    return new URIBuilder(dataset.getUri()).constraints(constraints).build();
+    URIBuilder builder = new URIBuilder(dataset.getUri());
+    for (Map.Entry<String, String> entry : constraints.toQueryMap().entrySet()) {
+      builder.with(entry.getKey(), entry.getValue());
+    }
+    return builder.build();
   }
 }

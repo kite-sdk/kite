@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kitesdk.data.spi;
+package org.kitesdk.data;
 
 import java.net.URI;
 import java.util.UUID;
@@ -23,8 +23,7 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.util.Utf8;
 import org.junit.Assert;
 import org.junit.Test;
-import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.spi.Constraints;
 
 public class TestURIBuilder {
   private static final Schema SCHEMA = SchemaBuilder.record("Event").fields()

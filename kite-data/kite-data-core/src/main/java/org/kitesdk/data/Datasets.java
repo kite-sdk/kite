@@ -29,7 +29,6 @@ import org.kitesdk.data.spi.AbstractDataset;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.Pair;
 import org.kitesdk.data.spi.Registration;
-import org.kitesdk.data.spi.URIBuilder;
 
 /**
  * <p>Convenience methods for working with {@link Dataset} instances.</p>

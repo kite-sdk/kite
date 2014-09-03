@@ -19,6 +19,7 @@ package org.kitesdk.data.spi;
 import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.Map;
+import org.kitesdk.data.URIBuilder;
 
 public class DatasetRepositories {
 

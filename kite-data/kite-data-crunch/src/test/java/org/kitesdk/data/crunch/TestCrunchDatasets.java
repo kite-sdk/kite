@@ -46,7 +46,7 @@ import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.PartitionedDataset;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.LastModifiedAccessor;
-import org.kitesdk.data.spi.URIBuilder;
+import org.kitesdk.data.URIBuilder;
 
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
