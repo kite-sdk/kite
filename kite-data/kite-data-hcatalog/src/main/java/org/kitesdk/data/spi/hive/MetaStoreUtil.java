@@ -15,8 +15,10 @@
  */
 package org.kitesdk.data.spi.hive;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import javax.annotation.Nullable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
@@ -28,7 +30,6 @@ import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.UnknownDBException;
-import org.apache.hadoop.hive.ql.metadata.Hive;
 import org.apache.thrift.TException;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.DatasetNotFoundException;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
 public class MetaStoreUtil {
 
   private static final Logger LOG = LoggerFactory.getLogger(MetaStoreUtil.class);
+  private static final String ALLOW_LOCAL_METASTORE = "kite.hive.allow-local-metastore";
 
   private final HiveMetaStoreClient client;
   private final HiveConf hiveConf;
@@ -70,14 +72,28 @@ public class MetaStoreUtil {
 
   public MetaStoreUtil(Configuration conf) {
     this.hiveConf = new HiveConf(conf, HiveConf.class);
-    if (conf.get(Loader.HIVE_METASTORE_URI_PROP) == null) {
-      LOG.warn("Using a local Hive MetaStore (for testing only)");
+    if (allowLocalMetaStore(hiveConf) ||
+        notEmpty(hiveConf, Loader.HIVE_METASTORE_URI_PROP)) {
+      LOG.warn("Aborting use of local MetaStore. " +
+          "Allow local MetaStore by seting %s=true in HiveConf",
+          ALLOW_LOCAL_METASTORE);
+      throw new IllegalArgumentException(
+          "Missing Hive MetaStore connection URI");
     }
     try {
       client = new HiveMetaStoreClient(hiveConf);
     } catch (TException e) {
       throw new DatasetOperationException("Hive metastore exception", e);
     }
+  }
+
+  private boolean allowLocalMetaStore(HiveConf conf) {
+    return conf.getBoolean(ALLOW_LOCAL_METASTORE, false);
+  }
+
+  private boolean notEmpty(HiveConf conf, String prop) {
+    String value = conf.get(prop);
+    return (value != null && !value.isEmpty());
   }
 
   public Table getTable(final String dbName, final String tableName) {
