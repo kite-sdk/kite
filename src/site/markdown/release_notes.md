@@ -3,6 +3,17 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version 0.17.0
+
+Release date:
+
+Version 0.17.0 contains the following notable changes:
+
+* Kite will no longer use an embedded MetaStore if it is not configured to
+  connect to a remote MetaStore. Instead, Kite will throw an exception to avoid
+  confusing behavior. See [CDK-651](https://issues.cloudera.org/browse/CDK-651)
+  for more information.
+
 ## Version 0.16.0
 
 Release date: 21 August 2014
