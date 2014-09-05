@@ -355,6 +355,8 @@ public class DatasetDescriptor {
       this.format = descriptor.getFormat();
       this.properties = Maps.newHashMap(descriptor.properties);
       this.location = descriptor.getLocation();
+      this.columnMapping = descriptor.getColumnMapping();
+      this.compressionType = descriptor.getCompressionType();
 
       if (descriptor.isPartitioned()) {
         this.partitionStrategy = descriptor.getPartitionStrategy();
