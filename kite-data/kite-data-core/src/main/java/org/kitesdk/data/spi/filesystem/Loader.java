@@ -96,6 +96,12 @@ public class Loader implements Loadable {
         new URIPattern("hdfs:*path"),
         new URIPattern("hdfs:*path/:namespace/:dataset"),
         builder);
+
+    Registration.register(
+        new URIPattern("webhdfs:/*path?absolute=true"),
+        new URIPattern("webhdfs:/*path/:namespace/:dataset?absolute=true"),
+        builder
+    );
   }
 
   private static URI fileSystemURI(Map<String, String> match) {

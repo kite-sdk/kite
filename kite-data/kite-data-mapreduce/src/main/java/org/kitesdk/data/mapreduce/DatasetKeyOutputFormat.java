@@ -472,11 +472,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   private static <E> boolean usePerTaskAttemptDatasets(View<E> target) {
     // new API output committers are not called properly in Hadoop 1
-    return !isHadoop1() && target.getDataset() instanceof Mergeable;
-  }
-
-  private static boolean isHadoop1() {
-    return !JobContext.class.isInterface();
+    return !Hadoop.isHadoop1() && target.getDataset() instanceof Mergeable;
   }
 
   // TODO: Remove the need to use DatasetRepositories.repositoryFor()
