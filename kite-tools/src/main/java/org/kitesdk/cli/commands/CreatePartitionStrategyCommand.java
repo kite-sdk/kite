@@ -83,6 +83,8 @@ public class CreatePartitionStrategyCommand extends BaseCommand {
           strategyBuilder.hour(fieldName);
         } else if ("minute".equals(m.group(2))) {
           strategyBuilder.minute(fieldName);
+        } else if ("provided".equals(m.group(2))) {
+          strategyBuilder.provided(fieldName);
         } else {
           throw new ValidationException(
               "Unknown partitioner type: " + m.group(2));
