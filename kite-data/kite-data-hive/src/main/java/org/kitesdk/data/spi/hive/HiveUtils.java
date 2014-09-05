@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi.hive;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.hadoop.hive.metastore.api.Order;
@@ -352,10 +353,30 @@ class HiveUtils {
     return columns;
   }
 
+  private static final Map<String, String> PROVIDED_TYPES = ImmutableMap
+      .<String, String>builder()
+      .put("tinyint", "int")
+      .put("smallint", "int")
+      .put("int", "int")
+      .put("bigint", "long")
+      .build();
+
+  /**
+   * Builds a {@link PartitionStrategy} from a list of Hive partition fields.
+   *
+   * @param fields a List of FieldSchemas
+   * @return a PartitionStrategy for the Hive partitions
+   */
+  @VisibleForTesting
   static PartitionStrategy fromPartitionColumns(List<FieldSchema> fields) {
-    throw new UnsupportedOperationException(
-        "Cannot build partition strategy from Hive table");
-    // this will be possible with provided field partitioners
+    PartitionStrategy.Builder builder = new PartitionStrategy.Builder();
+    for (FieldSchema hiveSchema : fields) {
+      TypeInfo type = hiveTypeForName.invoke(hiveSchema.getType());
+      // any types not in the map will be treated as Strings
+      builder.provided(hiveSchema.getName(),
+          PROVIDED_TYPES.get(type.getTypeName()));
+    }
+    return builder.build();
   }
 
   private static String getHiveType(Class<?> type) {
@@ -384,12 +405,12 @@ class HiveUtils {
     return SchemaUtil.visit(schema, new Converter());
   }
 
-  static class Converter extends SchemaUtil.SchemaVisitor<TypeInfo> {
-    private static DynMethods.StaticMethod hiveTypeForName =
-        new DynMethods.Builder("getPrimitiveTypeInfo")
-            .impl(TypeInfoFactory.class, String.class)
-            .buildStatic();
+  private static DynMethods.StaticMethod hiveTypeForName =
+      new DynMethods.Builder("getPrimitiveTypeInfo")
+          .impl(TypeInfoFactory.class, String.class)
+          .buildStatic();
 
+  static class Converter extends SchemaUtil.SchemaVisitor<TypeInfo> {
     static final ImmutableMap<Schema.Type, TypeInfo> TYPE_TO_TYPEINFO =
         ImmutableMap.<Schema.Type, TypeInfo>builder()
             .put(Schema.Type.BOOLEAN, hiveTypeForName.<TypeInfo>invoke("boolean"))

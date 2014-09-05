@@ -15,6 +15,7 @@
  */
 package org.kitesdk.data.spi.hive;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -148,4 +149,21 @@ public class TestHivePartitioning {
     repo.delete("ns", "records"); // clean up
   }
 
+  @Test
+  public void testProvidedPartitions() {
+    PartitionStrategy expected = new PartitionStrategy.Builder()
+        .provided("year", "int")
+        .provided("month", "int")
+        .provided("day", "long")
+        .provided("us_state")
+        .build();
+    List<FieldSchema> partCols = Lists.newArrayList(
+        new FieldSchema("year", "tinyint", "comment"),
+        new FieldSchema("month", "int", "comment"),
+        new FieldSchema("day", "bigint", "comment"),
+        new FieldSchema("us_state", "string", "comment")
+    );
+    Assert.assertEquals("Should convert to correct provided types",
+        expected, HiveUtils.fromPartitionColumns(partCols));
+  }
 }
