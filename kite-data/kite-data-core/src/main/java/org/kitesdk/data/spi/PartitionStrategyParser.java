@@ -40,6 +40,7 @@ import org.kitesdk.data.spi.partition.HourFieldPartitioner;
 import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 import org.kitesdk.data.spi.partition.MinuteFieldPartitioner;
 import org.kitesdk.data.spi.partition.MonthFieldPartitioner;
+import org.kitesdk.data.spi.partition.ProvidedFieldPartitioner;
 import org.kitesdk.data.spi.partition.YearFieldPartitioner;
 
 /**
@@ -47,6 +48,7 @@ import org.kitesdk.data.spi.partition.YearFieldPartitioner;
  * 
  * <pre>
  * [
+ *   { "type": "provided", "name": "version", "values": "int" }
  *   { "type": "identity", "source": "id", "name": "id" },
  *   { "type": "year", "source": "created" },
  *   { "type": "month", "source": "created" },
@@ -66,6 +68,7 @@ public class PartitionStrategyParser {
   private static final String NAME = "name";
   private static final String BUCKETS = "buckets";
   private static final String FORMAT = "format";
+  private static final String VALUES = "values";
 
   /**
    * Parses a PartitionStrategy from a JSON string.
@@ -137,13 +140,21 @@ public class PartitionStrategyParser {
       JsonNode fieldPartitioner = it.next();
       ValidationException.check(fieldPartitioner.isObject(),
           "A partitioner must be a JSON record");
+
       ValidationException.check(fieldPartitioner.has(TYPE),
           "Partitioners must have a %s", TYPE);
-      ValidationException.check(fieldPartitioner.has(SOURCE),
+      String type = fieldPartitioner.get(TYPE).asText();
+
+      // only provided partitioners do not need a source field
+      boolean isProvided = type.equals("provided");
+      ValidationException.check(isProvided || fieldPartitioner.has(SOURCE),
           "Partitioners must have a %s", SOURCE);
 
-      String type = fieldPartitioner.get(TYPE).asText();
-      String source = fieldPartitioner.get(SOURCE).asText();
+      String source = null;
+      // only provided has no source field
+      if (!isProvided) {
+        source = fieldPartitioner.get(SOURCE).asText();
+      }
 
       String name = null;
       if (fieldPartitioner.has(NAME)) {
@@ -180,6 +191,15 @@ public class PartitionStrategyParser {
             "Date format partitioner %s must have a %s.", name, FORMAT);
         String format = fieldPartitioner.get(FORMAT).asText();
         builder.dateFormat(source, name, format);
+      } else if (isProvided) {
+        ValidationException.check(name != null,
+            "Provided partitioners must have a %s.", NAME);
+        String valuesType = null;
+        if (fieldPartitioner.has(VALUES)) {
+          valuesType = fieldPartitioner.get(VALUES).asText();
+        }
+        builder.provided(name, valuesType);
+
       } else {
         throw new ValidationException("Invalid FieldPartitioner: " + type);
       }
@@ -191,31 +211,42 @@ public class PartitionStrategyParser {
     ArrayNode strategyJson = JsonNodeFactory.instance.arrayNode();
     for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
       ObjectNode partitioner = JsonNodeFactory.instance.objectNode();
-      partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
+      partitioner.set(NAME, TextNode.valueOf(fp.getName()));
       if (fp instanceof IdentityFieldPartitioner) {
+        partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("identity"));
       } else if (fp instanceof HashFieldPartitioner) {
+        partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("hash"));
         partitioner.set(BUCKETS, LongNode.valueOf(fp.getCardinality()));
       } else if (fp instanceof YearFieldPartitioner) {
+        partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("year"));
       } else if (fp instanceof MonthFieldPartitioner) {
+        partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("month"));
       } else if (fp instanceof DayOfMonthFieldPartitioner) {
+        partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("day"));
       } else if (fp instanceof HourFieldPartitioner) {
+        partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("hour"));
       } else if (fp instanceof MinuteFieldPartitioner) {
+        partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("minute"));
       } else if (fp instanceof DateFormatPartitioner) {
+        partitioner.set(SOURCE, TextNode.valueOf(fp.getSourceName()));
         partitioner.set(TYPE, TextNode.valueOf("dateFormat"));
         partitioner.set(FORMAT,
             TextNode.valueOf(((DateFormatPartitioner) fp).getPattern()));
+      } else if (fp instanceof ProvidedFieldPartitioner) {
+        partitioner.set(TYPE, TextNode.valueOf("provided"));
+        partitioner.set(VALUES,
+            TextNode.valueOf(((ProvidedFieldPartitioner) fp).getTypeAsString()));
       } else {
         throw new ValidationException(
             "Unknown partitioner class: " + fp.getClass());
       }
-      partitioner.set(NAME, TextNode.valueOf(fp.getName()));
       strategyJson.add(partitioner);
     }
     return strategyJson;

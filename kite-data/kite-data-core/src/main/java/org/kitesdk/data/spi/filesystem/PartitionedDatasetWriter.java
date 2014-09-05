@@ -15,11 +15,11 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import java.util.Map;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
-import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.EntityAccessor;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.PartitionListener;
@@ -52,6 +52,7 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
   private final StorageKey reusedKey;
   private final EntityAccessor<E> accessor;
+  private final Map<String, Object> provided;
 
   private ReaderWriterState state;
 
@@ -79,8 +80,8 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
     this.state = ReaderWriterState.NEW;
     this.reusedKey = new StorageKey(partitionStrategy);
-    this.accessor = DataModelUtil.accessor(view.getType(),
-        view.getDataset().getDescriptor().getSchema());
+    this.accessor = view.getAccessor();
+    this.provided = view.getProvidedValues();
   }
 
   @Override
@@ -103,7 +104,7 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
         "Attempt to write to a writer in state:%s", state);
 
-    reusedKey.reuseFor(entity, accessor);
+    accessor.keyFor(entity, provided, reusedKey);
 
     DatasetWriter<E> writer = cachedWriters.getIfPresent(reusedKey);
     if (writer == null) {

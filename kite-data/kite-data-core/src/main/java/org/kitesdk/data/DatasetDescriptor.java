@@ -46,10 +46,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.spi.ColumnMappingParser;
 import org.kitesdk.data.spi.DefaultConfiguration;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.HadoopFileSystemURLStreamHandler;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.SchemaUtil;
 import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
+import org.kitesdk.data.spi.partition.ProvidedFieldPartitioner;
 
 /**
  * <p>
@@ -980,9 +982,16 @@ public class DatasetDescriptor {
         return;
       }
       // TODO: the exceptions thrown by this should all be ValidationException
-      Preconditions.checkState(schema.getType() == Schema.Type.RECORD,
-          "Cannot partition non-records: " + schema);
-      for (org.kitesdk.data.spi.FieldPartitioner fp : strategy.getFieldPartitioners()) {
+      for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+        if (fp instanceof ProvidedFieldPartitioner) {
+          // provided partitioners are not based on the entity fields
+          continue;
+        }
+
+        // check the entity is a record if there is a non-provided partitioner
+        Preconditions.checkState(schema.getType() == Schema.Type.RECORD,
+            "Cannot partition non-records: " + schema);
+
         // the source name should be a field in the schema, but not necessarily
         // the record.
         Schema fieldSchema;
@@ -999,7 +1008,6 @@ public class DatasetDescriptor {
             fieldSchema.getType(), fp);
       }
     }
-
   }
 
   private static void checkCompressionType(Format format,
@@ -1039,7 +1047,7 @@ public class DatasetDescriptor {
     }
     // verify that all key mapped fields have a corresponding id partitioner
     if (strategy != null) {
-      for (org.kitesdk.data.spi.FieldPartitioner fp : strategy.getFieldPartitioners()) {
+      for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
         if (fp instanceof IdentityFieldPartitioner) {
           keyMappedFields.remove(fp.getSourceName());
         }

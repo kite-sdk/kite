@@ -16,13 +16,18 @@
 
 package org.kitesdk.data.spi;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
+import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.partition.ProvidedFieldPartitioner;
 
 @Immutable
 public class EntityAccessor<E> {
@@ -88,4 +93,35 @@ public class EntityAccessor<E> {
     }
     return value;
   }
+
+  public StorageKey keyFor(E object, @Nullable Map<String, Object> provided,
+                           StorageKey reuse) {
+    Preconditions.checkNotNull(reuse, "Cannot use null key");
+    PartitionStrategy strategy = reuse.getPartitionStrategy();
+    List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
+    for (int i = 0, n = partitioners.size(); i < n; i += 1) {
+      reuse.replace(i, partitionValue(object, provided, partitioners.get(i)));
+    }
+    return reuse;
+  }
+
+  @VisibleForTesting
+  StorageKey keyFor(E object, StorageKey reuse) {
+    return keyFor(object, null, reuse);
+  }
+
+  @SuppressWarnings("unchecked")
+  private Object partitionValue(E object, @Nullable Map<String, Object> provided,
+                                FieldPartitioner fp) {
+    if (fp instanceof ProvidedFieldPartitioner) {
+      String name = fp.getName();
+      Preconditions.checkArgument(
+          (provided != null) && provided.containsKey(name),
+          "Cannot construct key, missing provided value: %s", name);
+      return provided.get(name);
+    } else {
+      return fp.apply(get(object, fp.getSourceName()));
+    }
+  }
+
 }

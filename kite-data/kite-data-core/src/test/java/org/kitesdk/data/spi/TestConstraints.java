@@ -457,7 +457,7 @@ public class TestConstraints {
   @Test
   public void testBasicMatches() {
     GenericEvent e = new GenericEvent();
-    StorageKey key = new StorageKey(strategy).reuseFor(e, accessor);
+    StorageKey key = accessor.keyFor(e, new StorageKey(strategy));
 
     Constraints time = emptyConstraints.partitionedBy(strategy)
         .from("timestamp", START)
@@ -473,7 +473,7 @@ public class TestConstraints {
 
     // just outside the actual range should match partition but not event
     e.timestamp = START - 1;
-    key.reuseFor(e, accessor);
+    key = accessor.keyFor(e, key);
     Assert.assertFalse(time.toEntityPredicate(accessor).apply(e));
     Assert.assertFalse(timeAndUUID.toEntityPredicate(accessor).apply(e));
     Assert.assertTrue(time.toKeyPredicate().apply(key));
@@ -481,7 +481,7 @@ public class TestConstraints {
 
     // just outside the actual range should match partition but not event
     e.timestamp = START - 100001;
-    key.reuseFor(e, accessor);
+    key = accessor.keyFor(e, key);
     Assert.assertFalse(time.toEntityPredicate(accessor).apply(e));
     Assert.assertFalse(timeAndUUID.toEntityPredicate(accessor).apply(e));
     Assert.assertTrue(time.toKeyPredicate().apply(key));
@@ -489,7 +489,7 @@ public class TestConstraints {
 
     // a different day will cause the partition to stop matching
     e.timestamp = START - ONE_DAY_MILLIS;
-    key.reuseFor(e, accessor);
+    key = accessor.keyFor(e, key);
     Assert.assertFalse(time.toEntityPredicate(accessor).apply(e));
     Assert.assertFalse(timeAndUUID.toEntityPredicate(accessor).apply(e));
     Assert.assertFalse(time.toKeyPredicate().apply(key));
@@ -618,7 +618,7 @@ public class TestConstraints {
     GenericEvent e = new GenericEvent();
 
     e.timestamp = oct_25_2013;
-    StorageKey key = new StorageKey(timeOnly).reuseFor(e, accessor);
+    StorageKey key = accessor.keyFor(e, new StorageKey(timeOnly));
 
     Constraints empty = emptyConstraints.partitionedBy(timeOnly);
 
@@ -629,7 +629,7 @@ public class TestConstraints {
     LOG.info("Constraints: {}", c);
 
     e.timestamp = oct_25_2013;
-    key.reuseFor(e, accessor);
+    key = accessor.keyFor(e, key);
     Assert.assertFalse("Should not match toBefore", c.toKeyPredicate().apply(key));
   }
 

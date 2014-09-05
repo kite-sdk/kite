@@ -145,7 +145,8 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
 
       @Override
       public void write(E entity) {
-        StorageKey key = partitionStratKey.reuseFor(entity, getAccessor());
+        StorageKey key = getAccessor().keyFor(entity,
+            constraints.getProvidedValues(), partitionStratKey);
         if (!keyPredicate.apply(key)) {
           throw new IllegalArgumentException("View does not contain entity: " + entity);
         }

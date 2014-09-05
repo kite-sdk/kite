@@ -37,6 +37,7 @@ import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
+import org.kitesdk.data.spi.partition.ProvidedFieldPartitioner;
 import org.kitesdk.data.spi.predicates.Exists;
 import org.kitesdk.data.spi.predicates.In;
 import org.kitesdk.data.spi.predicates.Predicates;
@@ -57,9 +58,10 @@ public class Constraints {
 
   private static final Logger LOG = LoggerFactory.getLogger(Constraints.class);
 
-  private transient Schema schema;
-  private transient PartitionStrategy strategy;
-  private transient Map<String, Predicate> constraints;
+  private final Schema schema;
+  private final PartitionStrategy strategy;
+  private final Map<String, Predicate> constraints;
+  private final Map<String, Object> provided;
 
   public Constraints(Schema schema) {
     this(schema, null);
@@ -69,28 +71,36 @@ public class Constraints {
     this.schema = schema;
     this.strategy = strategy;
     this.constraints = ImmutableMap.of();
-  }
-
-  private Constraints(Schema schema, PartitionStrategy strategy,
-                      Map<String, Predicate> constraints) {
-    this.schema = schema;
-    this.strategy = strategy;
-    this.constraints = constraints;
+    this.provided = ImmutableMap.of();
   }
 
   private Constraints(Schema schema, PartitionStrategy strategy,
                       Map<String, Predicate> constraints,
-                      String name, Predicate predicate) {
+                      Map<String, Object> provided) {
     this.schema = schema;
     this.strategy = strategy;
-    Map<String, Predicate> copy = Maps.newHashMap(constraints);
-    copy.put(name, predicate);
-    this.constraints = ImmutableMap.copyOf(copy);
+    this.constraints = constraints;
+    this.provided = provided;
+  }
+
+  private Constraints(Constraints copy, String name, Predicate predicate) {
+    this.schema = copy.schema;
+    this.strategy = copy.strategy;
+    this.constraints = updateImmutable(copy.constraints, name, predicate);
+    this.provided = copy.provided;
+  }
+
+  private Constraints(Constraints copy,
+                      String name, Predicate predicate, Object value) {
+    this.schema = copy.schema;
+    this.strategy = copy.strategy;
+    this.constraints = updateImmutable(copy.constraints, name, predicate);
+    this.provided = updateImmutable(copy.provided, name, value);
   }
 
   @VisibleForTesting
   Constraints partitionedBy(PartitionStrategy strategy) {
-    return new Constraints(schema, strategy, constraints);
+    return new Constraints(schema, strategy, constraints, provided);
   }
 
   /**
@@ -300,19 +310,33 @@ public class Constraints {
     return true;
   }
 
+  /**
+   * Returns a map of provided or fixed values for this constraint set. These
+   * values were accumulated by calls to with(String, Object).
+   *
+   * @return a Map of provided single values.
+   */
+  public Map<String, Object> getProvidedValues() {
+    return provided; // Immutable, okay to return without copying
+  }
+
   @SuppressWarnings("unchecked")
   public Constraints with(String name, Object... values) {
     SchemaUtil.checkTypeConsistency(schema, strategy, name, values);
     if (values.length > 0) {
       checkContained(name, values);
       // this is the most specific constraint and is idempotent under "and"
-      return new Constraints(schema, strategy, constraints, name,
-          Predicates.in(values));
+      In added = Predicates.in(values);
+      if (values.length == 1) {
+        // if there is only one value, it is a provided value
+        return new Constraints(this, name, added, values[0]);
+      } else {
+        return new Constraints(this, name, added);
+      }
     } else {
       if (!constraints.containsKey(name)) {
         // no other constraint => add the exists
-        return new Constraints(schema, strategy, constraints, name,
-            Predicates.exists());
+        return new Constraints(this, name, Predicates.exists());
       } else {
         // satisfied by an existing constraint
         return this;
@@ -324,48 +348,28 @@ public class Constraints {
     SchemaUtil.checkTypeConsistency(schema, strategy, name, value);
     checkContained(name, value);
     Range added = Ranges.atLeast(value);
-    if (constraints.containsKey(name)) {
-      return new Constraints(schema, strategy, constraints, name,
-          combine(constraints.get(name), added));
-    } else {
-      return new Constraints(schema, strategy, constraints, name, added);
-    }
+    return new Constraints(this, name, combine(constraints.get(name), added));
   }
 
   public Constraints fromAfter(String name, Comparable value) {
     SchemaUtil.checkTypeConsistency(schema, strategy, name, value);
     checkContained(name, value);
     Range added = Ranges.greaterThan(value);
-    if (constraints.containsKey(name)) {
-      return new Constraints(schema, strategy, constraints, name,
-          combine(constraints.get(name), added));
-    } else {
-      return new Constraints(schema, strategy, constraints, name, added);
-    }
+    return new Constraints(this, name, combine(constraints.get(name), added));
   }
 
   public Constraints to(String name, Comparable value) {
     SchemaUtil.checkTypeConsistency(schema, strategy, name, value);
     checkContained(name, value);
     Range added = Ranges.atMost(value);
-    if (constraints.containsKey(name)) {
-      return new Constraints(schema, strategy, constraints, name,
-          combine(constraints.get(name), added));
-    } else {
-      return new Constraints(schema, strategy, constraints, name, added);
-    }
+    return new Constraints(this, name, combine(constraints.get(name), added));
   }
 
   public Constraints toBefore(String name, Comparable value) {
     SchemaUtil.checkTypeConsistency(schema, strategy, name, value);
     checkContained(name, value);
     Range added = Ranges.lessThan(value);
-    if (constraints.containsKey(name)) {
-      return new Constraints(schema, strategy, constraints, name,
-          combine(constraints.get(name), added));
-    } else {
-      return new Constraints(schema, strategy, constraints, name, added);
-    }
+    return new Constraints(this, name, combine(constraints.get(name), added));
   }
 
   /**
@@ -438,7 +442,8 @@ public class Constraints {
             Predicates.fromString(entry.getValue(), fieldSchema));
       }
     }
-    return new Constraints(schema, strategy, constraints);
+    return new Constraints(
+        schema, strategy, constraints, ImmutableMap.<String, Object>of());
   }
 
   @SuppressWarnings("unchecked")
@@ -470,6 +475,27 @@ public class Constraints {
       return alwaysTrue();
     }
     return new EntityPredicate<E>(predicates, schema, accessor, strategy);
+  }
+
+  private static <K, V> Map<K, V> updateImmutable(Map<K, V> existing,
+                                                  K key, V value) {
+    ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
+    boolean added = false;
+
+    for (Map.Entry<K, V> entry : existing.entrySet()) {
+      if (key.equals(entry.getKey())) {
+        builder.put(key, value);
+        added = true;
+      } else {
+        builder.put(entry.getKey(), entry.getValue());
+      }
+    }
+
+    if (!added) {
+      builder.put(key, value);
+    }
+
+    return builder.build();
   }
 
   /**
@@ -512,6 +538,10 @@ public class Constraints {
       if (strategy != null) {
         // there could be partition predicates to add
         for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+          if (fp instanceof ProvidedFieldPartitioner) {
+            // no source field for provided partitioners, so no values to test
+            continue;
+          }
           Predicate partitionPredicate = predicates.get(fp.getName());
           if (partitionPredicate != null) {
             Predicate transformPredicate = new TransformPredicate(

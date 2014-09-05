@@ -28,7 +28,6 @@ import org.kitesdk.data.spi.partition.MonthFieldPartitioner;
 import org.kitesdk.data.spi.partition.PartitionFunctions;
 import java.util.List;
 
-import java.util.Locale;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
@@ -552,6 +551,42 @@ public class PartitionStrategy {
      */
     public Builder dateFormat(String sourceName, String name, String format) {
       add(PartitionFunctions.dateFormat(sourceName, name, format));
+      return this;
+    }
+
+    /**
+     * Configure a partitioner that uses values always provided at runtime.
+     * <p>
+     * The partitioner created by this method will expect {@link String} values.
+     *
+     * @param name
+     *          A name for the partitions
+     * @return This builder for method chaining
+     *
+     * @since 0.17.0
+     */
+    public Builder provided(String name) {
+      add(PartitionFunctions.provided(name, null));
+      return this;
+    }
+
+    /**
+     * Configure a partitioner that uses values always provided at runtime.
+     * <p>
+     * The partitioner created by this method will expect values based on the
+     * given {@code valuesType}: "string", "int", or "long".
+     *
+     * @param name
+     *          A name for the partitions
+     * @param valuesType
+     *          A type string for values this partitioner will expect; one of
+     *          "string", "int", or "long". If null, the default is "string".
+     * @return This builder for method chaining
+     *
+     * @since 0.17.0
+     */
+    public Builder provided(String name, @Nullable String valuesType) {
+      add(PartitionFunctions.provided(name, valuesType));
       return this;
     }
 

@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.PartitionStrategy;
@@ -199,6 +200,7 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
   /**
    * A fluent {@code Builder} for creating a {@link StorageKey}.
    */
+  @VisibleForTesting
   public static class Builder {
     private final PartitionStrategy strategy;
     private final Map<String, Object> values;

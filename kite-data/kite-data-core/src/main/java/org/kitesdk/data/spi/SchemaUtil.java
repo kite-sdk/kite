@@ -47,6 +47,7 @@ import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
+import org.kitesdk.data.spi.partition.ProvidedFieldPartitioner;
 
 public class SchemaUtil {
 
@@ -76,6 +77,10 @@ public class SchemaUtil {
 
   @SuppressWarnings("unchecked")
   public static <S, T> Class<? extends T> getPartitionType(FieldPartitioner<S, T> fp, Schema schema) {
+    if (fp instanceof ProvidedFieldPartitioner) {
+      // provided partitioners have no source field schema
+      return fp.getType();
+    }
     Class<? extends S> inputType = (Class<S>) getClassForType(
         schema.getField(fp.getSourceName()).schema().getType());
     return fp.getType(inputType);

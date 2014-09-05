@@ -112,6 +112,10 @@ public abstract class AbstractRefinableView<E> implements RefinableView<E> {
     return accessor;
   }
 
+  public Map<String, Object> getProvidedValues() {
+    return constraints.getProvidedValues();
+  }
+
   /**
    * Returns an Iterable of non-overlapping {@link View} objects that partition
    * the underlying {@link org.kitesdk.data.Dataset} and cover this {@code View}.

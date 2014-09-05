@@ -98,6 +98,12 @@ public class PartitionFunctions {
   }
 
   @Beta
+  public static FieldPartitioner provided(String name, @Nullable String valuesType) {
+    return new ProvidedFieldPartitioner(name,
+        ProvidedFieldPartitioner.valuesType(valuesType));
+  }
+
+  @Beta
   public static String toExpression(FieldPartitioner fieldPartitioner) {
     // TODO: add other strategies
     if (fieldPartitioner instanceof HashFieldPartitioner) {
@@ -157,6 +163,10 @@ public class PartitionFunctions {
     } else if (fieldPartitioner instanceof MinuteFieldPartitioner) {
       return String.format("minute(\"%s\", \"%s\")", fieldPartitioner.getSourceName(),
           fieldPartitioner.getName());
+    } else if (fieldPartitioner instanceof ProvidedFieldPartitioner) {
+      return String.format("provided(\"%s\", \"%s\")",
+          fieldPartitioner.getName(),
+          ((ProvidedFieldPartitioner) fieldPartitioner).getTypeAsString());
     }
 
     throw new IllegalArgumentException("Unrecognized partition function: "

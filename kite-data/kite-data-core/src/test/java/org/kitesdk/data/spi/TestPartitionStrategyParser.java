@@ -21,7 +21,6 @@ import java.io.InputStream;
 
 import org.apache.avro.Schema;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.PartitionStrategy;
@@ -162,8 +161,53 @@ public class TestPartitionStrategyParser {
   }
 
   @Test
+  public void testProvided() {
+    checkParser(new PartitionStrategy.Builder().provided("version").build(),
+        "[ {\"type\": \"provided\", \"name\": \"version\"} ]");
+    checkParser(new PartitionStrategy.Builder().provided("version").build(),
+        "[ {\"type\": \"provided\", \"name\": \"version\", \"values\": \"string\"} ]");
+    checkParser(new PartitionStrategy.Builder().provided("version", "string").build(),
+        "[ {\"type\": \"provided\", \"name\": \"version\", \"values\": \"string\"} ]");
+    checkParser(new PartitionStrategy.Builder().provided("version", "int").build(),
+        "[ {\"type\": \"provided\", \"name\": \"version\", \"values\": \"int\"} ]");
+    checkParser(new PartitionStrategy.Builder().provided("version", "long").build(),
+        "[ {\"type\": \"provided\", \"name\": \"version\", \"values\": \"long\"} ]");
+
+    TestHelpers.assertThrows("Should reject missing name",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            PartitionStrategyParser.parse("[ {\"type\": \"provided\"} ]");
+          }
+        });
+    TestHelpers.assertThrows("Should reject unsupported values type",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            PartitionStrategyParser.parse("[ {" +
+                "\"type\": \"provided\", " +
+                "\"name\": \"version\", " +
+                "\"values\": \"float\"" +
+                "} ]");
+          }
+        });
+    TestHelpers.assertThrows("Should reject invalid values type",
+        ValidationException.class, new Runnable() {
+          @Override
+          public void run() {
+            PartitionStrategyParser.parse("[ {" +
+                "\"type\": \"provided\", " +
+                "\"name\": \"version\", " +
+                "\"values\": \"unknown\"" +
+                "} ]");
+          }
+        });
+  }
+
+  @Test
   public void testMultipleFields() {
     checkParser(new PartitionStrategy.Builder()
+            .provided("version")
             .hash("username", 64)
             .identity("username", "u")
             .year("time")
@@ -174,6 +218,7 @@ public class TestPartitionStrategyParser {
             .dateFormat("time", "datetime", "yyyy_MM_dd_HHmmss")
             .build(),
         "[ " +
+            "{\"type\": \"provided\", \"name\": \"version\"}," +
             "{\"type\": \"hash\", \"source\": \"username\", \"buckets\": 64}," +
             "{\"type\": \"identity\"," +
                 "\"source\": \"username\", \"name\": \"u\"}," +

@@ -1,11 +1,11 @@
 /*
- * Copyright "2013" Cloudera.
+ * Copyright 2013 Cloudera Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,19 +18,17 @@ package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import javax.annotation.Nullable;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.kitesdk.data.spi.Constraints;
-import org.kitesdk.data.MiniDFSTest;
-import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.spi.Pair;
-import org.kitesdk.data.spi.StorageKey;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nullable;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
@@ -38,40 +36,34 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.spi.Constraints;
+import org.kitesdk.data.spi.Pair;
+import org.kitesdk.data.spi.StorageKey;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-@RunWith(Parameterized.class)
-public class TestFileSystemPartitionIterator extends MiniDFSTest {
-
-  public FileSystem fileSystem;
-  public Path testDirectory;
-  public static List<StorageKey> keys;
+public class TestFileSystemPartitionIteratorProvidedPartitioners {
 
   public static final PartitionStrategy strategy = new PartitionStrategy.Builder()
-      .year("timestamp")
-      .month("timestamp")
-      .day("timestamp")
+      .provided("year")
+      .provided("month", "int")
+      .provided("day", "long")
       .build();
-
-  public static final Constraints emptyConstraints = new Constraints(
-      SchemaBuilder.record("Event").fields()
-          .requiredLong("timestamp")
-          .endRecord(), strategy);
 
   private static final Schema schema = SchemaBuilder.record("Event").fields()
       .requiredLong("id")
       .requiredLong("timestamp")
       .endRecord();
 
+  public static final Constraints emptyConstraints = new Constraints(schema, strategy);
+
+  public static FileSystem fileSystem;
+  public static List<StorageKey> keys;
+
+  public Path testDirectory;
   @BeforeClass
-  public static void createExpectedKeys() {
+  public static void createExpectedKeys() throws IOException {
+    fileSystem = FileSystem.getLocal(new Configuration());
     keys = Lists.newArrayList();
     for (Object year : Arrays.asList(2012, 2013)) {
       for (Object month : Arrays.asList(9, 10, 11, 12)) {
@@ -82,19 +74,6 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
         }
       }
     }
-  }
-
-  @Parameterized.Parameters
-  public static Collection<Object[]> data() throws IOException {
-    MiniDFSTest.setupFS();
-    Object[][] data = new Object[][] {
-        { getDFS() },
-        { getFS() } };
-    return Arrays.asList(data);
-  }
-
-  public TestFileSystemPartitionIterator(FileSystem fileSystem) {
-    this.fileSystem = fileSystem;
   }
 
   @Before
@@ -127,65 +106,79 @@ public class TestFileSystemPartitionIterator extends MiniDFSTest {
     assertIterableEquals(keys, partitions);
   }
 
-  public static final long oct_25_2012 = new DateTime(2012, 10, 25, 0, 0, DateTimeZone.UTC).getMillis();
-  public static final long oct_24_2013 = new DateTime(2013, 10, 24, 0, 0, DateTimeZone.UTC).getMillis();
-  public static final long oct_25_2013 = new DateTime(2013, 10, 25, 0, 0, DateTimeZone.UTC).getMillis();
-  public static final long oct_24_2013_end = oct_25_2013 - 1;
-
   @Test
-  public void testFrom() throws Exception {
+  public void testStringConstraint() throws IOException {
     Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.from("timestamp", oct_24_2013)));
-    assertIterableEquals(keys.subList(16, 24), partitions);
+        emptyConstraints.with("year", "2012")));
+    assertIterableEquals(keys.subList(0, 12), partitions);
+
+    TestHelpers.assertThrows("Should reject constraint with integer type",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            emptyConstraints.with("year", 2013);
+          }
+        });
+    TestHelpers.assertThrows("Should reject constraint with long type",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            emptyConstraints.with("year", 2013L);
+          }
+        });
   }
 
   @Test
-  public void testAfter() throws Exception {
+  public void testIntConstraint() throws IOException {
     Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.fromAfter("timestamp", oct_24_2013_end)));
-    assertIterableEquals(keys.subList(17, 24), partitions);
+        emptyConstraints.with("month", 9)));
+    List<StorageKey> expected = Lists.newArrayList();
+    expected.addAll(keys.subList(0, 3));
+    expected.addAll(keys.subList(12, 15));
+    assertIterableEquals(expected, partitions);
+
+    TestHelpers.assertThrows("Should reject constraint with string type",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            emptyConstraints.with("month", "10");
+          }
+        });
+    TestHelpers.assertThrows("Should reject constraint with long type",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            emptyConstraints.with("month", 11L);
+          }
+        });
   }
 
   @Test
-  public void testTo() throws Exception {
+  public void testLongConstraint() throws IOException {
     Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
         fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.to("timestamp", oct_25_2012)));
-    assertIterableEquals(keys.subList(0, 6), partitions);
-  }
+        emptyConstraints.with("day", 22L)));
+    List<StorageKey> expected = Lists.newArrayList(
+        keys.get(0), keys.get(3), keys.get(6), keys.get(9),
+        keys.get(12), keys.get(15), keys.get(18), keys.get(21));
+    assertIterableEquals(expected, partitions);
 
-  @Test
-  public void testBefore() throws Exception {
-    Iterable <StorageKey> partitions = firsts(new FileSystemPartitionIterator(
-        fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.toBefore("timestamp", oct_25_2012)));
-    assertIterableEquals(keys.subList(0, 5), partitions);
-  }
-
-  @Test
-  public void testWith() throws Exception {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
-        fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.with("timestamp", oct_24_2013)));
-    assertIterableEquals(keys.subList(16, 17), partitions);
-  }
-
-  @Test
-  public void testDayRange() throws Exception {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
-        fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.from("timestamp", oct_24_2013).to("timestamp", oct_24_2013_end)));
-    assertIterableEquals(keys.subList(16, 17), partitions);
-  }
-
-  @Test
-  public void testLargerRange() throws Exception {
-    Iterable<StorageKey> partitions = firsts(new FileSystemPartitionIterator(
-        fileSystem, testDirectory, strategy, schema,
-        emptyConstraints.from("timestamp", oct_25_2012).to("timestamp", oct_24_2013)));
-    assertIterableEquals(keys.subList(5, 17), partitions);
+    TestHelpers.assertThrows("Should reject constraint with string type",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            emptyConstraints.with("day", "24");
+          }
+        });
+    TestHelpers.assertThrows("Should reject constraint with long type",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            emptyConstraints.with("day", 25);
+          }
+        });
   }
 
   public static <T> Iterable<T> firsts(Iterable<Pair<T, Path>> pairs) {

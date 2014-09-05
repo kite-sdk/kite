@@ -15,9 +15,16 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import com.google.common.collect.Sets;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
+import org.apache.avro.generic.GenericRecord;
+import org.junit.Assert;
+import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.spi.MetadataProvider;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import java.io.IOException;
@@ -29,6 +36,8 @@ import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.kitesdk.data.TestHelpers;
+import org.kitesdk.data.View;
 
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.USER_SCHEMA;
 
@@ -91,6 +100,77 @@ public class TestPartitionedDatasetWriter {
     writer.initialize();
     writer.close();
     writer.write(record);
+  }
+
+  @Test
+  public void testProvidedPartitioner() throws IOException {
+    Schema user = SchemaBuilder.record("User").fields()
+        .requiredString("username")
+        .requiredString("email")
+        .endRecord();
+    PartitionStrategy strategy = new PartitionStrategy.Builder()
+        .provided("version", "int")
+        .build();
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(user)
+        .partitionStrategy(strategy)
+        .build();
+
+    Path datasetPath = new Path("file:" + testDirectory + "/provided/users");
+
+    final Dataset<GenericRecord> users = Datasets.create(
+        "dataset:" + datasetPath, descriptor);
+
+    final GenericRecord u1 = new GenericRecordBuilder(user)
+        .set("username", "test1")
+        .set("email", "a@example.com")
+        .build();
+    GenericRecord u2 = new GenericRecordBuilder(user)
+        .set("username", "test2")
+        .set("email", "b@example.com")
+        .build();
+
+    TestHelpers.assertThrows("Should reject write with unknown version",
+        IllegalArgumentException.class, new Runnable() {
+          @Override
+          public void run() {
+            writeToView(users, u1);
+          }
+        });
+
+    Assert.assertFalse(fileSystem.exists(new Path(datasetPath, "version=6")));
+    writeToView(users.with("version", 6), u1);
+    Assert.assertTrue(fileSystem.exists(new Path(datasetPath, "version=6")));
+
+    Assert.assertFalse(fileSystem.exists(new Path(datasetPath, "version=7")));
+    writeToView(users.with("version", 7), u2);
+    Assert.assertTrue(fileSystem.exists(new Path(datasetPath, "version=7")));
+
+    Assert.assertEquals("Should read from provided partitions without view",
+        Sets.newHashSet(u1, u2), DatasetTestUtilities.materialize(users));
+
+    Assert.assertEquals("Should read from provided partition",
+        Sets.newHashSet(u1),
+        DatasetTestUtilities.materialize(users.with("version", 6)));
+
+    Assert.assertEquals("Should read from provided partition",
+        Sets.newHashSet(u2),
+        DatasetTestUtilities.materialize(users.with("version", 7)));
+  }
+
+  private static <E> void writeToView(View<E> view, E... entities) {
+    DatasetWriter<E> writer = null;
+    try {
+      writer = view.newWriter();
+      for (E entity : entities) {
+        writer.write(entity);
+      }
+      writer.close();
+    } finally {
+      if (writer != null) {
+        writer.close();
+      }
+    }
   }
 
 }
