@@ -19,6 +19,11 @@ package org.kitesdk.compat;
 import org.apache.hadoop.conf.Configuration;
 
 public class Hadoop {
+
+  public static boolean isHadoop1() {
+    return !org.apache.hadoop.mapreduce.JobContext.class.isInterface();
+  }
+
   public static class Job {
     public static final DynMethods.StaticMethod newInstance =
         new DynMethods.Builder("getInstance")

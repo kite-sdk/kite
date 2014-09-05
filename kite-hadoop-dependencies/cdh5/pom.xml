@@ -41,14 +41,6 @@
       <exclusions>
         <exclusion>
           <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-client</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
           <artifactId>jersey-grizzly2</artifactId>
         </exclusion>
         <exclusion>
@@ -72,6 +64,12 @@
           <artifactId>jetty-util</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <!-- Missing from hadoop-client and needed for webhdfs client -->
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>1.9</version>
     </dependency>
     <dependency>
       <groupId>org.apache.avro</groupId>
@@ -109,6 +107,10 @@
                     <exclude>org.mortbay.jetty</exclude>
                     <exclude>tomcat</exclude>
                   </excludes>
+                  <includes>
+                    <include>com.sun.jersey:jersey-client</include>
+                    <include>com.sun.jersey:jersey-core</include>
+                  </includes>
                 </bannedDependencies>
               </rules>
               <fail>true</fail>

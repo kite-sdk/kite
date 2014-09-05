@@ -38,6 +38,13 @@
       <artifactId>hadoop-common</artifactId>
       <version>${vers.hadoop2}</version>
       <type>test-jar</type>
+      <exclusions>
+        <!-- brings in earlier version of org.apache.httpcomponents:httpclient that doesn't work with webhdfs -->
+        <exclusion>
+          <groupId>net.java.dev.jets3t</groupId>
+          <artifactId>jets3t</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>

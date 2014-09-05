@@ -18,9 +18,12 @@ package org.kitesdk.data.spi.filesystem;
 
 import java.net.URI;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DFSConfigKeys;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
@@ -169,5 +172,34 @@ public class TestHDFSDatasetURIs extends MiniDFSTest {
                 Object.class);
           }
         });
+  }
+
+  @Test
+  public void testAbsoluteWebHdfs() {
+    Assume.assumeTrue(!Hadoop.isHadoop1());
+
+    String webhdfsAuth = getConfiguration().get(
+        DFSConfigKeys.DFS_NAMENODE_HTTP_ADDRESS_KEY);
+    DatasetRepository repo = DatasetRepositories
+        .repositoryFor("repo:webhdfs://" + webhdfsAuth + "/tmp/data");
+    repo.delete("ns", "test");
+    repo.create("ns", "test", descriptor);
+
+    Dataset<Object> ds = Datasets.<Object, Dataset<Object>>
+        load("dataset:webhdfs://" + webhdfsAuth + "/tmp/data/ns/test", Object.class);
+
+    Assert.assertNotNull("Should load dataset", ds);
+    Assert.assertTrue(ds instanceof FileSystemDataset);
+    Assert.assertEquals("Locations should match",
+        URI.create("webhdfs://" + webhdfsAuth + "/tmp/data/ns/test"),
+        ds.getDescriptor().getLocation());
+    Assert.assertEquals("Descriptors should match",
+        repo.load("ns", "test").getDescriptor(), ds.getDescriptor());
+    Assert.assertEquals("Should report correct namespace",
+        "ns", ds.getNamespace());
+    Assert.assertEquals("Should report correct name",
+        "test", ds.getName());
+
+    repo.delete("ns", "test");
   }
 }
