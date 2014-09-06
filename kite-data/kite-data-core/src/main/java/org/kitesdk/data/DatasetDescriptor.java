@@ -965,7 +965,12 @@ public class DatasetDescriptor {
       if (RESOURCE_URI_SCHEME.equals(location.getScheme())) {
         return null;
       } else {
-        return new Path(location).makeQualified(defaultFS, new Path("/")).toUri();
+        boolean useDefault = defaultFS.getScheme().equals(location.getScheme());
+        // work around a bug in Path where the authority for a different scheme
+        // will be used for the location.
+        return new Path(location)
+            .makeQualified(useDefault ? defaultFS : location, new Path("/"))
+            .toUri();
       }
     }
 
