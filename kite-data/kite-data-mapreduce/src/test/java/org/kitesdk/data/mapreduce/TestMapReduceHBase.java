@@ -31,9 +31,9 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Datasets;
 import org.kitesdk.data.hbase.HBaseDatasetRepositoryTest;
 import org.kitesdk.data.hbase.testing.HBaseTestUtils;
-import org.kitesdk.data.spi.DatasetRepository;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -101,6 +101,68 @@ public class TestMapReduceHBase extends HBaseTestBase {
     AvroJob.setOutputKeySchema(job, new Schema.Parser().parse(testGenericEntity));
 
     DatasetKeyOutputFormat.configure(job).writeTo(outputDataset);
+
+    Assert.assertTrue(job.waitForCompletion(true));
+
+    int cnt = 0;
+    DatasetReader<GenericRecord> reader = outputDataset.newReader();
+    try {
+      for (GenericRecord entity : reader) {
+        HBaseDatasetRepositoryTest.compareEntitiesWithUtf8(cnt, entity);
+        cnt++;
+      }
+      assertEquals(10, cnt);
+    } finally {
+      reader.close();
+      assertFalse("Reader should be closed after calling close", reader.isOpen());
+    }
+
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void testJobCreate() throws Exception {
+    Job job = new Job(HBaseTestUtils.getConf());
+
+    String datasetName = tableName + ".TestGenericEntity";
+
+    Dataset<GenericRecord> inputDataset = repo.create("default", "in",
+        new DatasetDescriptor.Builder()
+            .schemaLiteral(testGenericEntity).build());
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schemaLiteral(testGenericEntity)
+        .build();
+    Dataset<GenericRecord> outputDataset = repo.create("default", datasetName, descriptor);
+
+    DatasetWriter<GenericRecord> writer = inputDataset.newWriter();
+    try {
+      for (int i = 0; i < 10; ++i) {
+        GenericRecord entity = HBaseDatasetRepositoryTest.createGenericEntity(i);
+        writer.write(entity);
+      }
+    } finally {
+      writer.close();
+    }
+
+    DatasetKeyInputFormat.configure(job).readFrom(inputDataset);
+
+    job.setMapperClass(AvroKeyWrapperMapper.class);
+    job.setMapOutputKeyClass(AvroKey.class);
+    job.setMapOutputValueClass(NullWritable.class);
+    AvroJob.setMapOutputKeySchema(job, new Schema.Parser().parse(testGenericEntity));
+
+    job.setReducerClass(AvroKeyWrapperReducer.class);
+    job.setOutputKeyClass(GenericData.Record.class);
+    job.setOutputValueClass(Void.class);
+    AvroJob.setOutputKeySchema(job, new Schema.Parser().parse(testGenericEntity));
+
+    DatasetKeyOutputFormat.configure(job)
+        .writeTo(outputDataset.getUri())
+        .withDescriptor(outputDataset.getDescriptor());
+
+    // Delete the dataset so that the output format will create it
+    Datasets.delete(outputDataset.getUri());
 
     Assert.assertTrue(job.waitForCompletion(true));
 

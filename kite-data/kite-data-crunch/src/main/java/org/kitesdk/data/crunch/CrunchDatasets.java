@@ -135,6 +135,32 @@ public class CrunchDatasets {
   }
 
   /**
+   * Expose the {@link Dataset} or {@link View} represented by the given
+   * URI as a Crunch {@link Target}.
+   *
+   * @param uri the dataset or view URI
+   * @return a {@link Target} for the dataset or view
+   *
+   * @since 0.17.0
+   */
+  public static Target asTarget(String uri, DatasetDescriptor descriptor) {
+    return asTarget(URI.create(uri), descriptor);
+  }
+
+  /**
+   * Expose the {@link Dataset} or {@link View} represented by the given
+   * URI as a Crunch {@link Target}.
+   *
+   * @param uri the dataset or view URI
+   * @return a {@link Target} for the dataset or view
+   *
+   * @since 0.17.0
+   */
+  public static Target asTarget(URI uri, DatasetDescriptor descriptor) {
+    return new DatasetTarget<Object>(uri, descriptor);
+  }
+
+  /**
    * Partitions {@code collection} to be stored efficiently in {@code View}.
    * <p>
    * This restructures the parallel collection so that all of the entities that

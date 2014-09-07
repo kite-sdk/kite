@@ -131,6 +131,29 @@ public abstract class TestCrunchDatasets extends MiniDFSTest {
   }
 
   @Test
+  public void testGenericCreate() throws IOException {
+    Dataset<Record> inputDataset = repo.create("ns", "in", new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build());
+    URI outputDataset = URIBuilder.build(repo.getUri(), "ns", "out");
+    DatasetDescriptor outputDescriptor = new DatasetDescriptor.Builder()
+        .schema(USER_SCHEMA).build();
+
+    // write two files, each of 5 records
+    writeTestUsers(inputDataset, 5, 0);
+    writeTestUsers(inputDataset, 5, 5);
+
+    Pipeline pipeline = new MRPipeline(TestCrunchDatasets.class);
+    PCollection<GenericData.Record> data = pipeline.read(
+        CrunchDatasets.asSource(inputDataset));
+    pipeline.write(data,
+        CrunchDatasets.asTarget(outputDataset, outputDescriptor),
+        Target.WriteMode.APPEND);
+    pipeline.run();
+
+    checkTestUsers(Datasets.load(outputDataset, Record.class).getDataset(), 10);
+  }
+
+  @Test
   public void testPartitionedSource() throws IOException {
     PartitionStrategy partitionStrategy = new PartitionStrategy.Builder().hash(
         "username", 2).build();

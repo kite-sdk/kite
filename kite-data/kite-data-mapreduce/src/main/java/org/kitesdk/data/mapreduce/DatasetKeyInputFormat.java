@@ -129,6 +129,9 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
      * This Class is used to configure the input {@code Dataset}. If this class
      * cannot be found during job setup, the job will fail and throw a
      * {@link org.kitesdk.data.TypeNotFoundException}.
+     * <p>
+     * If not set, the output type will be
+     * {@link org.apache.avro.generic.GenericRecord}.
      *
      * @param type the entity Class that will be produced
      * @return this for method chaining
@@ -229,7 +232,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
       justification="Delegate set by setConf")
   public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
       InterruptedException {
@@ -237,7 +241,8 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR",
       justification="Delegate set by setConf")
   public RecordReader<E, Void> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     return delegate.createRecordReader(inputSplit, taskAttemptContext);
