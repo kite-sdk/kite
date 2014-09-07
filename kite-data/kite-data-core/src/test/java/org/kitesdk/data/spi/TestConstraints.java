@@ -583,6 +583,15 @@ public class TestConstraints {
     // satisfy the original predicate.
     Assert.assertTrue("Should be satisfied by partition filtering on id",
         c.partitionedBy(strategy).alignedWithBoundaries());
+
+    // if the constraints are against partition fields, then they are aligned
+    Assert.assertTrue("Should be aligned for partition field predicates",
+        c.with("year", 2013).with("month", 9).with("day", 1)
+            .partitionedBy(strategy).alignedWithBoundaries());
+    Assert.assertFalse("Should not ignore other constraints",
+        c.with("year", 2013).with("month", 9).with("day", 1).from("timestamp",
+            new DateTime(2013, 9, 1, 12, 0, DateTimeZone.UTC).getMillis())
+            .partitionedBy(strategy).alignedWithBoundaries());
   }
 
   @Test

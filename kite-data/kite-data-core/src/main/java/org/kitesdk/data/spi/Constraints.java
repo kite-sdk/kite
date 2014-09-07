@@ -239,8 +239,10 @@ public class Constraints {
     Preconditions.checkNotNull(strategy,
         "Cannot produce key ranges without a partition strategy");
     Multimap<String, FieldPartitioner> partitioners = HashMultimap.create();
+    Set<String> partitionFields = Sets.newHashSet();
     for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
       partitioners.put(fp.getSourceName(), fp);
+      partitionFields.add(fp.getName());
     }
 
     // The key predicate is equivalent to a constraint set when the permissive
@@ -272,6 +274,11 @@ public class Constraints {
     // then this logic cannot determine that that the original predicate is
     // satisfied
     for (Map.Entry<String, Predicate> entry : constraints.entrySet()) {
+      if (partitionFields.contains(entry.getKey())) {
+        // constraint is against partition values and aligned by definition
+        continue;
+      }
+
       Collection<FieldPartitioner> fps = partitioners.get(entry.getKey());
       if (fps.isEmpty()) {
         LOG.debug("No field partitioners for key {}", entry.getKey());
