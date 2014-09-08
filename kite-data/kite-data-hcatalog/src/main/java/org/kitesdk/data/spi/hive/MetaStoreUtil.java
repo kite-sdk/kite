@@ -70,8 +70,8 @@ public class MetaStoreUtil {
 
   public MetaStoreUtil(Configuration conf) {
     this.hiveConf = new HiveConf(conf, HiveConf.class);
-    if (allowLocalMetaStore(hiveConf) ||
-        notEmpty(hiveConf, Loader.HIVE_METASTORE_URI_PROP)) {
+    if (!allowLocalMetaStore(hiveConf) &&
+        isEmpty(hiveConf, Loader.HIVE_METASTORE_URI_PROP)) {
       LOG.warn("Aborting use of local MetaStore. " +
           "Allow local MetaStore by setting {}=true in HiveConf",
           ALLOW_LOCAL_METASTORE);
@@ -89,9 +89,9 @@ public class MetaStoreUtil {
     return conf.getBoolean(ALLOW_LOCAL_METASTORE, false);
   }
 
-  private boolean notEmpty(HiveConf conf, String prop) {
+  private boolean isEmpty(HiveConf conf, String prop) {
     String value = conf.get(prop);
-    return (value != null && !value.isEmpty());
+    return (value == null || value.isEmpty());
   }
 
   public Table getTable(final String dbName, final String tableName) {
