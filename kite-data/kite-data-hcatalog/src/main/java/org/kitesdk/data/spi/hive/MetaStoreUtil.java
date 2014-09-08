@@ -73,7 +73,7 @@ public class MetaStoreUtil {
     if (allowLocalMetaStore(hiveConf) ||
         notEmpty(hiveConf, Loader.HIVE_METASTORE_URI_PROP)) {
       LOG.warn("Aborting use of local MetaStore. " +
-          "Allow local MetaStore by seting %s=true in HiveConf",
+          "Allow local MetaStore by setting {}=true in HiveConf",
           ALLOW_LOCAL_METASTORE);
       throw new IllegalArgumentException(
           "Missing Hive MetaStore connection URI");
