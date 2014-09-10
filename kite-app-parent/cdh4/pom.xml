@@ -209,7 +209,7 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-hcatalog</artifactId>
+      <artifactId>kite-data-hive</artifactId>
       <version>${kite.version}</version>
     </dependency>
 

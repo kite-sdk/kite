@@ -93,7 +93,7 @@
               <artifactSet>
                 <includes>
                   <include>org.kitesdk:kite-data-core</include>
-                  <include>org.kitesdk:kite-data-hcatalog</include>
+                  <include>org.kitesdk:kite-data-hive</include>
                   <include>com.twitter:parquet-avro</include>
                   <include>com.twitter:parquet-column</include>
                   <include>com.twitter:parquet-common</include>
@@ -107,7 +107,6 @@
                   <include>com.fasterxml.jackson.core:jackson-annotations</include>
                   <include>com.fasterxml.jackson.core:jackson-core</include>
                   <include>org.kitesdk:kite-data-hbase</include>
-                  <include>org.kitesdk:kite-data-hcatalog</include>
                   <include>com.twitter:parquet-hive-bundle</include>
                   <include>org.kitesdk:kite-data-mapreduce</include>
                   <include>org.kitesdk:kite-data-crunch</include>
@@ -238,7 +237,7 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-hcatalog</artifactId>
+      <artifactId>kite-data-hive</artifactId>
       <version>${project.version}</version>
     </dependency>
 

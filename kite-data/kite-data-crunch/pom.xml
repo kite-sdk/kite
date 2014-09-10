@@ -107,7 +107,7 @@
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-hcatalog</artifactId>
+      <artifactId>kite-data-hive</artifactId>
       <version>0.16.1-SNAPSHOT</version>
       <optional>true</optional>
     </dependency>
@@ -149,7 +149,7 @@
       <artifactId>avro</artifactId>
     </dependency>
 
-    <!-- These should be compile-dependencies of kite-data-hcatalog
+    <!-- These should be compile-dependencies of kite-data-hive
          But, hive-exec includes classes from other modules at Hive-specific
          versions, including avro's Schema. This causes errors in this and
          other modules, so these are marked provided.

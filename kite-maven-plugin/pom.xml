@@ -83,7 +83,7 @@
     </dependency>
     <dependency>
       <groupId>org.kitesdk</groupId>
-      <artifactId>kite-data-hcatalog</artifactId>
+      <artifactId>kite-data-hive</artifactId>
       <version>0.16.1-SNAPSHOT</version>
     </dependency>
     <dependency>
