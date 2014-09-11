@@ -35,11 +35,8 @@ import org.kitesdk.data.impl.Accessor;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -73,20 +70,30 @@ class HiveUtils {
   private static final Splitter NAME_SPLITTER = Splitter.on(',');
   private static final Joiner NAME_JOINER = Joiner.on(',');
 
-  private static final BiMap<Format, String> FORMAT_TO_SERDE = HashBiMap.create(2);
-  private static final BiMap<String, Format> SERDE_TO_FORMAT = FORMAT_TO_SERDE.inverse();
-  private static final Map<Format, String> FORMAT_TO_INPUT_FORMAT = Maps.newHashMap();
-  private static final Map<Format, String> FORMAT_TO_OUTPUT_FORMAT = Maps.newHashMap();
-  static {
-    FORMAT_TO_SERDE.put(Formats.AVRO, "org.apache.hadoop.hive.serde2.avro.AvroSerDe");
-    FORMAT_TO_SERDE.put(Formats.PARQUET, getHiveParquetSerde());
-
-    FORMAT_TO_INPUT_FORMAT.put(Formats.AVRO, "org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
-    FORMAT_TO_INPUT_FORMAT.put(Formats.PARQUET, getHiveParquetInputFormat());
-
-    FORMAT_TO_OUTPUT_FORMAT.put(Formats.AVRO, "org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat");
-    FORMAT_TO_OUTPUT_FORMAT.put(Formats.PARQUET, getHiveParquetOutputFormat());
-  }
+  private static final Map<Format, String> FORMAT_TO_SERDE = ImmutableMap
+      .<Format, String>builder()
+      .put(Formats.AVRO, "org.apache.hadoop.hive.serde2.avro.AvroSerDe")
+      .put(Formats.PARQUET, getHiveParquetSerde())
+      .build();
+  private static final Map<String, Format> SERDE_TO_FORMAT = ImmutableMap
+      .<String, Format>builder()
+      .put("org.apache.hadoop.hive.serde2.avro.AvroSerDe", Formats.AVRO)
+      .put("org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+           Formats.PARQUET)
+      .put("parquet.hive.serde.ParquetHiveSerDe", Formats.PARQUET)
+      .build();
+  private static final Map<Format, String> FORMAT_TO_INPUT_FORMAT = ImmutableMap
+      .<Format, String>builder()
+      .put(Formats.AVRO,
+           "org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat")
+      .put(Formats.PARQUET, getHiveParquetInputFormat())
+      .build();
+  private static final Map<Format, String> FORMAT_TO_OUTPUT_FORMAT = ImmutableMap
+      .<Format, String>builder()
+      .put(Formats.AVRO,
+           "org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat")
+      .put(Formats.PARQUET, getHiveParquetOutputFormat())
+      .build();
 
   static DatasetDescriptor descriptorForTable(Configuration conf, Table table) {
     final DatasetDescriptor.Builder builder = new DatasetDescriptor.Builder();
