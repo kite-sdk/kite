@@ -210,8 +210,9 @@ public class URIBuilder {
    */
   public URI build() {
     try {
+      URI optionsUri = pattern.construct(options);
       return new URI(isView ? VIEW_SCHEME : DATASET_SCHEME,
-          pattern.construct(options).toString(), null);
+          optionsUri.getScheme() + ":" + optionsUri.getSchemeSpecificPart(), null);
     } catch (URISyntaxException e) {
       throw new IllegalArgumentException("Could not build URI", e);
     }

@@ -101,10 +101,16 @@ public class TestViewUris {
 
   @Test
   public void testMixedConstraintViews() {
-    assertViewUriEquivalent("id, color, and time constriants",
+    assertViewUriEquivalent("id, color, and time constraints",
         "view:file:/tmp/test_name?color=,orange&id=exists()&timestamp=[0,9)",
         test.with("color", "", "orange").with("id")
             .from("timestamp", 0L).toBefore("timestamp", 9L));
+  }
+
+  @Test
+  public void testConstraintWithEncodedCharacters() {
+    View<GenericRecord> view = test.with("color", "a/b");
+    assertViewUriEquivalent("encoded constraints", view.getUri().toString(), view);
   }
 
   public void assertViewUriEquivalent(String desc, String uri,

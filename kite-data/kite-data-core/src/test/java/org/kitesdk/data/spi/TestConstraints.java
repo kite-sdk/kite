@@ -734,4 +734,29 @@ public class TestConstraints {
     Assert.assertEquals("Should match green",
         Predicates.in("green"), entry.getValue());
   }
+
+  @Test
+  public void testQueryMapConversion() {
+      String id1 = UUID.randomUUID().toString();
+      String id2 = UUID.randomUUID().toString();
+      String color = "red";
+      Constraints with = emptyConstraints.with("id", id1, id2)
+          .with("color", color);
+      Map<String, String> queryMap = with.toQueryMap();
+      Assert.assertEquals(2, queryMap.size());
+      Assert.assertEquals(id1 + "," + id2, queryMap.get("id"));
+      Assert.assertEquals(color, queryMap.get("color"));
+      Assert.assertEquals(with, Constraints.fromQueryMap(schema, strategy,
+          queryMap));
+  }
+
+  @Test
+  public void testQueryMapConversionWithEncodedCharacters() {
+      Constraints with = emptyConstraints.with("id", "a/b");
+      Map<String, String> queryMap = with.toQueryMap();
+      Assert.assertEquals(1, queryMap.size());
+      Assert.assertEquals("a%2Fb", queryMap.get("id"));
+      Assert.assertEquals(with, Constraints.fromQueryMap(schema, strategy,
+          queryMap));
+  }
 }
