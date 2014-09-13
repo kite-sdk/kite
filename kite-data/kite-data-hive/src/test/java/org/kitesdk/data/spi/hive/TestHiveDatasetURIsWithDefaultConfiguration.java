@@ -20,8 +20,10 @@ import java.net.URI;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.Dataset;
@@ -55,6 +57,17 @@ public class TestHiveDatasetURIsWithDefaultConfiguration extends MiniDFSTest {
   @AfterClass
   public static void resetDefaultConfiguration() {
     DefaultConfiguration.set(existing);
+  }
+
+  @Before
+  @After
+  public void cleanHive() {
+    // ensures all tables are removed
+    MetaStoreUtil metastore = new MetaStoreUtil(getConfiguration());
+    metastore.dropDatabase("ns", true);
+    for (String table : metastore.getAllTables("default")) {
+      metastore.dropTable("default", table);
+    }
   }
 
   @Test

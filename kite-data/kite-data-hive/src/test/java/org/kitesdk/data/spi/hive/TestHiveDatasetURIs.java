@@ -18,7 +18,9 @@ package org.kitesdk.data.spi.hive;
 
 import java.net.URI;
 import org.apache.hadoop.fs.Path;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kitesdk.data.Dataset;
@@ -48,6 +50,17 @@ public class TestHiveDatasetURIs extends MiniDFSTest {
     descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .build();
+  }
+
+  @Before
+  @After
+  public void cleanHive() {
+    // ensures all tables are removed
+    MetaStoreUtil metastore = new MetaStoreUtil(getConfiguration());
+    metastore.dropDatabase("ns", true);
+    for (String table : metastore.getAllTables("default")) {
+      metastore.dropTable("default", table);
+    }
   }
 
   @Test

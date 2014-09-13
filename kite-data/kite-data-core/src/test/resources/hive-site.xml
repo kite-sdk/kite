@@ -19,4 +19,8 @@
     <name>hive.metastore.warehouse.dir</name>
     <value>/tmp/test/user/hive/warehouse</value>
   </property>
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:derby:;databaseName=target/metastore_db;create=true</value>
+  </property>
 </configuration>

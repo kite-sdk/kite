@@ -19,14 +19,28 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.DefaultConfiguration;
 
 public class TestHivePartitioning {
+
+  @Before
+  @After
+  public void cleanHive() {
+    // ensures all tables are removed
+    MetaStoreUtil metastore = new MetaStoreUtil(DefaultConfiguration.get());
+    metastore.dropDatabase("ns", true);
+    for (String table : metastore.getAllTables("default")) {
+      metastore.dropTable("default", table);
+    }
+  }
 
   private static final Schema schema = SchemaBuilder.record("Record").fields()
       .requiredLong("timestamp")

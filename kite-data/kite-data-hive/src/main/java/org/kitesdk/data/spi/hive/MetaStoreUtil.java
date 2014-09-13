@@ -330,4 +330,26 @@ public class MetaStoreUtil {
           "Exception communicating with the Hive MetaStore", e);
     }
   }
+
+  public void dropDatabase(final String name, final boolean deleteData) {
+    ClientAction<Void> drop =
+        new ClientAction<Void>() {
+
+        @Override
+        public Void call() throws TException {
+          client.dropDatabase(name, deleteData, true);
+          return null;
+        }
+      };
+
+    try {
+      doWithRetry(drop);
+    } catch (NoSuchObjectException e) {
+    } catch (MetaException e) {
+      throw new DatasetOperationException("Hive MetaStore exception", e);
+    } catch (TException e) {
+      throw new DatasetOperationException(
+          "Exception communicating with the Hive MetaStore", e);
+    }
+  }
 }
