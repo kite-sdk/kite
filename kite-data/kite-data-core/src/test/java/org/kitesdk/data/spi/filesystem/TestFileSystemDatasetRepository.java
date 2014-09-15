@@ -15,26 +15,32 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Date;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
+import org.apache.avro.generic.GenericData.Record;
+import org.apache.avro.reflect.ReflectData;
 import org.apache.hadoop.conf.Configuration;
-import org.kitesdk.data.TestDatasetRepositories;
+import org.apache.hadoop.fs.Path;
+import org.junit.Assert;
+import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.TestDatasetRepositories;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
-import java.io.IOException;
-import java.net.URI;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
-import org.apache.hadoop.fs.Path;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
 
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.writeTestUsers;
-import org.apache.avro.generic.GenericData.Record;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.writeTestUsers;
+import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.writeTestUsers;
 
 public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
@@ -248,5 +254,25 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
     repo.delete(NAMESPACE, NAME);
 
     Assert.assertFalse(fileSystem.exists(dataPath));
+  }
+
+  private static class PoJo {
+    private Long id;
+    private String name;
+    private Date birthDate;
+  }
+
+  @Test
+  public void testWithAllowNullSchema() {
+    String name = "allo-null";
+    try {
+      repo.create(NAMESPACE, name, new DatasetDescriptor.Builder()
+          .schema(ReflectData.AllowNull.get().getSchema(PoJo.class))
+          .build());
+    } catch (RuntimeException e) {
+      throw e;
+    } finally {
+      repo.delete(NAMESPACE, name);
+    }
   }
 }
