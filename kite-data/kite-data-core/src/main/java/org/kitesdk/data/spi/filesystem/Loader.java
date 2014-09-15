@@ -76,6 +76,13 @@ public class Loader implements Loadable {
 
   @Override
   public void load() {
+    try {
+      // load hdfs-site.xml by loading HdfsConfiguration
+      FileSystem.getLocal(DefaultConfiguration.get());
+    } catch (IOException e) {
+      throw new DatasetIOException("Cannot load default config", e);
+    }
+
     OptionBuilder<DatasetRepository> builder = new URIBuilder();
 
     Registration.register(
@@ -90,8 +97,7 @@ public class Loader implements Loadable {
     Registration.register(
         new URIPattern("hdfs:/*path?absolute=true"),
         new URIPattern("hdfs:/*path/:namespace/:dataset?absolute=true"),
-        builder
-    );
+        builder);
     Registration.register(
         new URIPattern("hdfs:*path"),
         new URIPattern("hdfs:*path/:namespace/:dataset"),
@@ -100,8 +106,7 @@ public class Loader implements Loadable {
     Registration.register(
         new URIPattern("webhdfs:/*path?absolute=true"),
         new URIPattern("webhdfs:/*path/:namespace/:dataset?absolute=true"),
-        builder
-    );
+        builder);
   }
 
   private static URI fileSystemURI(Map<String, String> match) {
