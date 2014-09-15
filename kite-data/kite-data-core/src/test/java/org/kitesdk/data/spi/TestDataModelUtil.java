@@ -54,7 +54,7 @@ public class TestDataModelUtil {
   public void testDataModelForReflectType() {
     Class<String> type = String.class;
     GenericData result = DataModelUtil.getDataModelForType(type);
-    assertEquals(ReflectData.class, result.getClass());
+    assertEquals(ReflectData.AllowNull.class, result.getClass());
   }
 
   @Test
@@ -178,7 +178,7 @@ public class TestDataModelUtil {
   public void testGetReaderSchemaForCompatibleReflect() {
     Class<ReflectSmallEvent> type = ReflectSmallEvent.class;
     Schema writerSchema = ReflectData.get().getSchema(ReflectStandardEvent.class);
-    Schema expResult = ReflectData.get().getSchema(ReflectSmallEvent.class);
+    Schema expResult = ReflectData.AllowNull.get().getSchema(ReflectSmallEvent.class);
     Schema result = DataModelUtil.getReaderSchema(type, writerSchema);
     assertEquals(expResult, result);
   }

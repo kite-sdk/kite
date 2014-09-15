@@ -311,31 +311,18 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     Assert.assertEquals(false, bean.myBool);
 
     Assert.assertTrue(reader.hasNext());
-    TestHelpers.assertThrows("Should complain about missing default",
-        AvroRuntimeException.class, new Runnable() {
-          @Override
-          public void run() {
-            reader.next();
-          }
-        });
-//    The following fails with a missing default until Avro 1.7.6. This happens
-//    because the TestBean class's Schema doesn't have a default for myInt.
-//
-//    Assert.assertTrue(reader.hasNext());
-//    bean = reader.next();
-//    Assert.assertEquals("str,2", bean.myStr);
-//    Assert.assertEquals((Integer) 0, bean.myInt);
-//    Assert.assertEquals((Float) 4.0f, bean.myFloat);
-//    Assert.assertEquals(true, bean.myBool);
+    bean = reader.next();
+    Assert.assertEquals("str,2", bean.myStr);
+    Assert.assertEquals(null, bean.myInt);
+    Assert.assertEquals((Float) 4.0f, bean.myFloat);
+    Assert.assertEquals(true, bean.myBool);
 
     Assert.assertTrue(reader.hasNext());
-    TestHelpers.assertThrows("Should complain about missing default",
-        AvroRuntimeException.class, new Runnable() {
-      @Override
-      public void run() {
-        reader.next();
-      }
-    });
+    bean = reader.next();
+    Assert.assertEquals("str3", bean.myStr);
+    Assert.assertEquals(null, bean.myInt);
+    Assert.assertEquals(null, bean.myFloat);
+    Assert.assertEquals(null, bean.myBool);
 
     Assert.assertFalse(reader.hasNext());
   }

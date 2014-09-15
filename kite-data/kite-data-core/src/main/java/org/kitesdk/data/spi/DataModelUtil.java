@@ -50,7 +50,7 @@ public class DataModelUtil {
     } else if (GenericRecord.class.isAssignableFrom(type)) {
       return GenericData.get();
     } else {
-      return ReflectData.get();
+      return ReflectData.AllowNull.get();
     }
   }
 
