@@ -219,6 +219,11 @@ public class TestURIBuilder {
             .constraints(
                 empty.with("id", new Utf8(ID)).with("timestamp", 1405720705333L))
             .build());
+    Assert.assertEquals("Should add encoded equality constraints",
+        URI.create("view:file:/datasets/test?id=a%252Fb"),
+        new URIBuilder("dataset:file:/datasets/test")
+            .constraints(empty.with("id", new Utf8("a/b")))
+            .build());
   }
 
   @Test
