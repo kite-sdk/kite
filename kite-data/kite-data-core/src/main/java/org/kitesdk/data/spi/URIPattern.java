@@ -116,17 +116,20 @@ public class URIPattern {
       if (uriData.containsKey(SCHEME)) {
         scheme = uriData.remove(SCHEME);
       }
-      if (pattern.isOpaque()) {
-        String path = constructPath(uriData, patternPath);
-        String query = constructQuery(uriData, defaults);
-        return new URI(scheme, path + (query == null ? "" : "?" + query), null);
-      } else {
-        return new URI(scheme, constructUserInfo(uriData, defaults),
-            removeNonDefault(HOST, uriData, defaults),
-            constructPort(uriData, defaults),
-            constructPath(uriData, patternPath),
-            constructQuery(uriData, defaults), null);
-      }
+
+      // build the base URI, containing everything except the query part
+      URI baseUri = pattern.isOpaque()
+          ? new URI(scheme, constructPath(uriData, patternPath), null)
+          : new URI(scheme, constructUserInfo(uriData, defaults),
+              removeNonDefault(HOST, uriData, defaults),
+              constructPort(uriData, defaults),
+              constructPath(uriData, patternPath), null, null);
+
+      // if there is a query to attach, use the single-argument URI constructor
+      // to preserve it literally, since it is pre-encoded and we do not want
+      // to double-encode it
+      String query = constructQuery(uriData, defaults);
+      return query == null ? baseUri : new URI(baseUri.toString() + "?" + query);
     } catch (URISyntaxException ex) {
       throw new IllegalArgumentException("Could not build URI", ex);
     }
