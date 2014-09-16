@@ -34,12 +34,8 @@ import org.kitesdk.data.TestDatasetRepositories;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.MetadataProvider;
-import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
-import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
 
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.checkTestUsers;
-import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.writeTestUsers;
-import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.writeTestUsers;
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.writeTestUsers;
 
 public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
@@ -264,7 +260,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
 
   @Test
   public void testWithAllowNullSchema() {
-    String name = "allo-null";
+    String name = "allowNull";
     try {
       repo.create(NAMESPACE, name, new DatasetDescriptor.Builder()
           .schema(ReflectData.AllowNull.get().getSchema(PoJo.class))
