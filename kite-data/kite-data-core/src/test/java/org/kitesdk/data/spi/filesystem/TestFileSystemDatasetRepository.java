@@ -253,7 +253,7 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   }
 
   private static class PoJo {
-    private Long id;
+    private long id;
     private String name;
     private Date birthDate;
   }
