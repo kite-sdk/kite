@@ -47,6 +47,8 @@ public class DeleteDatasetMojo extends AbstractDatasetMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    getConf(); // ensure properties are added to DefaultConfig
+
     if (uri != null) {
       Datasets.delete(uri);
     } else {

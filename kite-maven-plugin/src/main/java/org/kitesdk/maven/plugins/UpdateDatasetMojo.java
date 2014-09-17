@@ -76,6 +76,8 @@ public class UpdateDatasetMojo extends AbstractDatasetMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    getConf(); // ensure properties are added to DefaultConfig
+
     if (avroSchemaFile == null && avroSchemaReflectClass == null) {
       throw new IllegalArgumentException("One of kite.avroSchemaFile or "
           + "kite.avroSchemaReflectClass must be specified");

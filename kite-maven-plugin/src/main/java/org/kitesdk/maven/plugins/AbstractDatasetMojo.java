@@ -15,16 +15,14 @@
  */
 package org.kitesdk.maven.plugins;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.spi.DatasetRepository;
-import org.kitesdk.data.spi.filesystem.FileSystemDatasetRepository;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -34,9 +32,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.kitesdk.data.Datasets;
 import org.kitesdk.data.spi.DatasetRepositories;
-import org.kitesdk.data.spi.hive.HiveManagedDatasetRepository;
+import org.kitesdk.data.spi.DefaultConfiguration;
 
 abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
 
@@ -69,53 +66,66 @@ abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
   /**
    * Hadoop configuration properties.
    */
+  @VisibleForTesting
   @Parameter(property = "kite.hadoopConfiguration")
-  private Properties hadoopConfiguration;
+  protected Properties hadoopConfiguration;
 
-  @VisibleForTesting
-  FileSystemDatasetRepository.Builder fsRepoBuilder = new
-      FileSystemDatasetRepository.Builder();
+  private static void addToConfiguration(Properties hadoopConfiguration) {
+    // base the new Configuration on the current defaults
+    Configuration conf = new Configuration(DefaultConfiguration.get());
 
-  @VisibleForTesting
-  HiveManagedDatasetRepository.Builder hcatRepoBuilder = new
-      HiveManagedDatasetRepository.Builder();
-
-  private Configuration getConf() {
-    Configuration conf = new Configuration(false);
+    // add all of the properties as config settings
     for (String key : hadoopConfiguration.stringPropertyNames()) {
       String value = hadoopConfiguration.getProperty(key);
       conf.set(key, value);
     }
-    return conf;
+
+    // replace the original Configuration
+    DefaultConfiguration.set(conf);
+
+    addedConf = true;
+  }
+
+  @VisibleForTesting
+  static boolean addedConf = false;
+
+  protected Configuration getConf() {
+    if (!addedConf) {
+      addToConfiguration(hadoopConfiguration);
+    }
+    // use the default
+    return DefaultConfiguration.get();
   }
 
   DatasetRepository getDatasetRepository() {
-    DatasetRepository repo;
+    getConf(); // ensure properties are added to DefaultConfig
+
     if (repositoryUri != null) {
       return DatasetRepositories.repositoryFor(repositoryUri);
     }
-    if (!hcatalog && rootDirectory == null) {
-      throw new IllegalArgumentException("Root directory must be specified if not " +
-          "using HCatalog.");
-    }
+
     if (rootDirectory != null) {
-      try {
-        URI uri = new URI(rootDirectory);
-        if (hcatalog) {
-          hcatRepoBuilder.rootDirectory(uri);
-        } else {
-          fsRepoBuilder.rootDirectory(uri);
-        }
-      } catch (URISyntaxException e) {
-        throw new IllegalArgumentException(e);
+      URI uri = URI.create(rootDirectory);
+      if (hcatalog) {
+        return DatasetRepositories.repositoryFor("repo:hive:" + uri.getPath());
+      } else if (uri.getScheme() != null) {
+        return DatasetRepositories.repositoryFor("repo:" + uri.toString());
+      } else if (getConf().get("fs.defaultFS") != null) {
+        URI defaultFS = URI.create(getConf().get("fs.defaultFS"));
+        return DatasetRepositories.repositoryFor(
+            "repo:" + defaultFS.getScheme() + ":" + uri.getPath());
+      } else if (getConf().get("fs.default.name") != null) {
+        URI defaultFS = URI.create(getConf().get("fs.default.name"));
+        return DatasetRepositories.repositoryFor(
+            "repo:" + defaultFS.getScheme() + ":" + uri.getPath());
+      } else {
+        return DatasetRepositories.repositoryFor("repo:file:" + uri.getPath());
       }
+    } else if (hcatalog) {
+      return DatasetRepositories.repositoryFor("repo:hive");
     }
-    if (hcatalog) {
-      repo = hcatRepoBuilder.configuration(getConf()).build();
-    } else {
-      repo = fsRepoBuilder.configuration(getConf()).build();
-    }
-    return repo;
+    throw new IllegalArgumentException(
+        "Root directory must be specified if not using Hive.");
   }
 
   void configureSchema(DatasetDescriptor.Builder descriptorBuilder, String
@@ -156,4 +166,5 @@ abstract class AbstractDatasetMojo extends AbstractHadoopMojo {
       }
     }
   }
+
 }

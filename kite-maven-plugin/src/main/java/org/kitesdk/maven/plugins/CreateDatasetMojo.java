@@ -15,6 +15,7 @@
  */
 package org.kitesdk.maven.plugins;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Resources;
 
@@ -46,14 +47,16 @@ public class CreateDatasetMojo extends AbstractDatasetMojo {
   /**
    * The name of the dataset to create. Ignored if kite.uri is set.
    */
+  @VisibleForTesting
   @Parameter(property = "kite.datasetNamespace", defaultValue = "default")
-  private String datasetNamespace;
+  String datasetNamespace;
 
   /**
    * The name of the dataset to create. Ignored if kite.uri is set.
    */
+  @VisibleForTesting
   @Parameter(property = "kite.datasetName")
-  private String datasetName;
+  String datasetName;
 
   /**
    * The file containing the Avro schema. If no file with the specified name is
@@ -61,16 +64,18 @@ public class CreateDatasetMojo extends AbstractDatasetMojo {
    * matching resource. One of either this property or
    * <code>kite.avroSchemaReflectClass</code> must be specified.
    */
+  @VisibleForTesting
   @Parameter(property = "kite.avroSchemaFile")
-  private String avroSchemaFile;
+  String avroSchemaFile;
 
   /**
    * The fully-qualified classname of the Avro reflect class to use to generate
    * a schema. The class must be available on the classpath. One of either this
    * property or <code>kite.avroSchemaFile</code> must be specified.
    */
+  @VisibleForTesting
   @Parameter(property = "kite.avroSchemaReflectClass")
-  private String avroSchemaReflectClass;
+  String avroSchemaReflectClass;
 
   /**
    * The file format (avro or parquet).
@@ -92,6 +97,8 @@ public class CreateDatasetMojo extends AbstractDatasetMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    getConf(); // ensure properties are added to DefaultConfig
+
     if (avroSchemaFile == null && avroSchemaReflectClass == null) {
       throw new IllegalArgumentException("One of kite.avroSchemaFile or "
           + "kite.avroSchemaReflectClass must be specified");
