@@ -75,11 +75,13 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     private final Configuration conf;
 
     private ConfigBuilder(Job job) {
-      this.conf = Hadoop.JobContext.getConfiguration.invoke(job);
+      this(Hadoop.JobContext.getConfiguration.<Configuration>invoke(job));
     }
 
     private ConfigBuilder(Configuration conf) {
       this.conf = conf;
+      // always use the new API for OutputCommitters, even for 0 reducers
+      conf.setBoolean("mapred.reducer.new-api", true);
     }
 
     /**
