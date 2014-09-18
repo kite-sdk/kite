@@ -13,6 +13,8 @@ Version 0.17.0 contains the following notable changes:
   connect to a remote MetaStore. Instead, Kite will throw an exception to avoid
   confusing behavior. See [CDK-651](https://issues.cloudera.org/browse/CDK-651)
   for more information.
+* Morphlines Library
+    * Added morphline command that removes all record field values for which the field name and value matches a blacklist but not a whitelist: [removeValues](kite-morphlines/morphlinesReferenceGuide.html#removeValues)
 
 ## Version 0.16.0
 
