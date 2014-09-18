@@ -55,7 +55,10 @@ public class Registration {
                               OptionBuilder<DatasetRepository> repoBuilder) {
     REPO_PATTERNS.put(repoPattern, repoBuilder);
     DATASET_PATTERNS.put(datasetPattern, repoBuilder);
-    REPO_TO_DATASET_PATTERNS.put(repoPattern, datasetPattern);
+    // the first dataset pattern for a repository pattern is always used
+    if (!REPO_TO_DATASET_PATTERNS.containsKey(repoPattern)) {
+      REPO_TO_DATASET_PATTERNS.put(repoPattern, datasetPattern);
+    }
   }
 
   public static Pair<URIPattern, Map<String, String>> lookupPatternByRepoUri(URI uri) {
