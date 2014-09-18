@@ -34,7 +34,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parquet.Preconditions;
 
 /**
  * A Loader implementation to register URIs for FileSystemDatasetRepositories.
@@ -45,7 +44,7 @@ public class Loader implements Loadable {
 
   public static final String HIVE_METASTORE_URI_PROP = "hive.metastore.uris";
   private static final int UNSPECIFIED_PORT = -1;
-  private static final String ALWAYS_REPLACED = "ALWAYS-REPLACED";
+  private static final String NOT_SET = "not-set";
   private static final String HDFS_HOST = "hdfs:host";
   private static final String HDFS_PORT = "hdfs:port";
   private static final String OLD_HDFS_HOST = "hdfs-host";
@@ -99,8 +98,6 @@ public class Loader implements Loadable {
       // make a modifiable copy and setup the MetaStore URI
       Configuration conf = newHiveConf(DefaultConfiguration.get());
       // sanity check the URI
-      Preconditions.checkArgument(!ALWAYS_REPLACED.equals(match.get("host")),
-          "[BUG] URI matched but authority was not replaced.");
       setMetaStoreURI(conf, match);
       return new HiveManagedDatasetRepository.Builder()
           .configuration(conf)
@@ -112,27 +109,39 @@ public class Loader implements Loadable {
   public void load() {
     checkHiveDependencies();
 
-    // Hive-managed data sets
-    // Managed sets use the same URI for both repository and dataset, which
-    // means that dataset must be passed as a query argument
     OptionBuilder<DatasetRepository> managedBuilder = new ManagedBuilder();
-    URIPattern basic = new URIPattern("hive?namespace=default");
-    Registration.register(basic, basic, managedBuilder);
-    // add a URI with no path to allow overriding the metastore authority
-    // the authority section is *always* a URI without it cannot match and one
-    // with a path (so missing authority) also cannot match
-    URIPattern basicAuth = new URIPattern(
-        "hive://" + ALWAYS_REPLACED + "?namespace=default");
-    Registration.register(basicAuth, basicAuth, managedBuilder);
-
-    // external data sets
     OptionBuilder<DatasetRepository> externalBuilder = new ExternalBuilder();
+
+    Registration.register(
+        new URIPattern("hive"),
+        new URIPattern("hive::namespace/:dataset"),
+        managedBuilder);
+    Registration.register(
+        new URIPattern("hive"),
+        new URIPattern("hive::dataset?namespace=default"),
+        managedBuilder);
+    Registration.register(
+        new URIPattern("hive"),
+        new URIPattern("hive?namespace=default"),
+        managedBuilder);
+
+    Registration.register(
+        new URIPattern("hive://" + NOT_SET),
+        new URIPattern("hive:/:namespace/:dataset"),
+        managedBuilder);
+    Registration.register(
+        new URIPattern("hive://" + NOT_SET),
+        new URIPattern("hive:/:dataset?namespace=default"),
+        managedBuilder);
+    Registration.register(
+        new URIPattern("hive://" + NOT_SET),
+        new URIPattern("hive://" + NOT_SET + "?namespace=default"),
+        managedBuilder);
 
     Registration.register(
         new URIPattern("hive:/*path?absolute=true"),
         new URIPattern("hive:/*path/:namespace/:dataset?absolute=true"),
-        externalBuilder
-    );
+        externalBuilder);
     Registration.register(
         new URIPattern("hive:*path"),
         new URIPattern("hive:*path/:namespace/:dataset"),
@@ -203,21 +212,18 @@ public class Loader implements Loadable {
   private static void setMetaStoreURI(
       Configuration conf, Map<String, String> match) {
     try {
-      int port = UNSPECIFIED_PORT;
-      if (match.containsKey(URIPattern.HOST)) {
+      // If the host is set, construct a new MetaStore URI and set the property
+      // in the Configuration. Otherwise, do not change the MetaStore URI.
+      String host = match.get(URIPattern.HOST);
+      if (host != null && !NOT_SET.equals(host)) {
+        int port;
         try {
           port = Integer.parseInt(match.get(URIPattern.PORT));
         } catch (NumberFormatException e) {
           port = UNSPECIFIED_PORT;
         }
-      }
-      // if either the host or the port is set, construct a new MetaStore URI
-      // and set the property in the Configuration. otherwise, this will not
-      // change the connection URI.
-      if (match.containsKey(URIPattern.HOST)) {
-         conf.set(HIVE_METASTORE_URI_PROP,
-             new URI("thrift", null, match.get(URIPattern.HOST), port, null,
-                 null, null).toString());
+        conf.set(HIVE_METASTORE_URI_PROP,
+            new URI("thrift", null, host, port, null, null, null).toString());
       }
     } catch (URISyntaxException ex) {
       throw new DatasetOperationException(

@@ -15,13 +15,13 @@
  */
 package org.kitesdk.data.spi.hive;
 
-import java.net.URISyntaxException;
+import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetExistsException;
 import org.kitesdk.data.spi.Compatibility;
+import org.kitesdk.data.spi.filesystem.FileSystemUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,16 +32,6 @@ class HiveManagedMetadataProvider extends HiveAbstractMetadataProvider {
 
   public HiveManagedMetadataProvider(Configuration conf) {
     super(conf);
-    LOG.info("Default FS: " + conf.get("fs.defaultFS"));
-  }
-
-  @Override
-  public DatasetDescriptor load(String namespace, String name) {
-    Compatibility.checkDatasetName(namespace, name);
-
-    final Table table = getMetaStoreUtil().getTable(namespace, name);
-
-    return HiveUtils.descriptorForTable(conf, table);
   }
 
   @Override
@@ -49,25 +39,62 @@ class HiveManagedMetadataProvider extends HiveAbstractMetadataProvider {
     Compatibility.checkDatasetName(namespace, name);
     Compatibility.checkDescriptor(descriptor);
 
-    if (exists(namespace, name)) {
-      throw new DatasetExistsException(
-          "Metadata already exists for dataset:" + name);
+    URI location = descriptor.getLocation();
+    String resolved = resolveNamespace(namespace, name, location);
+    if (resolved != null) {
+      if (resolved.equals(namespace)) {
+        // the requested dataset already exists
+        throw new DatasetExistsException(
+            "Metadata already exists for dataset: " + namespace + "." + name);
+      } else {
+        DatasetDescriptor loaded = load(resolved, name);
+        // replacing old default.name table
+        LOG.warn("Creating table managed table {}.{}: replaces default.{}",
+            new Object[]{namespace, name, name});
+        // validate that the new metadata can read the existing data
+        Compatibility.checkUpdate(loaded, descriptor);
+        // if the table in the default namespace matches, then the location is
+        // either null (and should be set to the existing) or matches. either
+        // way, use the loaded location.
+        location = loaded.getLocation();
+      }
     }
 
     LOG.info("Creating a managed Hive table named: " + name);
 
+    boolean isExternal = (location != null);
+
+    DatasetDescriptor toCreate = descriptor;
+    if (isExternal) {
+      // add the location to the descriptor that will be used
+      toCreate = new DatasetDescriptor.Builder(descriptor)
+          .location(location)
+          .build();
+    }
+
     // construct the table metadata from a descriptor
-    final Table table = HiveUtils.tableForDescriptor(
-        namespace, name, descriptor, false /* managed table */);
+    Table table = HiveUtils.tableForDescriptor(
+        namespace, name, toCreate, isExternal);
 
     // create it
     getMetaStoreUtil().createTable(table);
 
-    // load the created table to get the data location
-    final Table newTable = getMetaStoreUtil().getTable(namespace, name);
+    // load the created table to get the final data location
+    Table newTable = getMetaStoreUtil().getTable(namespace, name);
 
-    return new DatasetDescriptor.Builder(descriptor)
+    DatasetDescriptor newDescriptor = new DatasetDescriptor.Builder(descriptor)
         .location(newTable.getSd().getLocation())
         .build();
+
+    if (isExternal) {
+      FileSystemUtil.ensureLocationExists(newDescriptor, conf);
+    }
+
+    return newDescriptor;
+  }
+
+  @Override
+  protected URI expectedLocation(String namespace, String name) {
+    return null;
   }
 }

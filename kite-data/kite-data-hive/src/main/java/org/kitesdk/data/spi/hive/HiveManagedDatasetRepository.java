@@ -70,6 +70,13 @@ public class HiveManagedDatasetRepository extends HiveAbstractDatasetRepository 
     return load(namespace, name);
   }
 
+  @Override
+  public <E> Dataset<E> create(String namespace, String name, DatasetDescriptor descriptor, Class<E> type) {
+    // avoids calling fsRepository.create, which creates the data path
+    getMetadataProvider().create(namespace, name, descriptor);
+    return load(namespace, name, type);
+  }
+
   /**
    * A fluent builder to aid in the construction of {@link HiveManagedDatasetRepository}
    * instances.
