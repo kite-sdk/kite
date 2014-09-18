@@ -51,6 +51,9 @@ class JavaCompiler {
 
 	public JavaCompiler() {
 		tool = ToolProvider.getSystemJavaCompiler();
+		if (tool == null) {
+			throw new RuntimeException("Could not get Java compiler. Please, ensure that JDK is used instead of JRE.");
+		}
 		stdManager = tool.getStandardFileManager(null, null, null);
 	}
 
