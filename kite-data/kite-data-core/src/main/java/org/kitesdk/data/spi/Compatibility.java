@@ -101,10 +101,10 @@ public abstract class Compatibility {
     Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkArgument(Compatibility.isCompatibleName(namespace),
-        "Hive incompatible: Namespace %s is not alphanumeric (plus '_')",
+        "Deprecated: Namespace %s is not alphanumeric (plus '_')",
         namespace);
     Preconditions.checkArgument(Compatibility.isCompatibleName(name),
-        "Hive incompatible: Dataset name %s is not alphanumeric (plus '_')",
+        "Deprecated: Dataset name %s is not alphanumeric (plus '_')",
         name);
   }
 
@@ -117,7 +117,7 @@ public abstract class Compatibility {
     Preconditions.checkNotNull(schema, "Schema cannot be null");
     List<String> incompatible = getIncompatibleNames(schema);
     Preconditions.checkState(incompatible.isEmpty(),
-        "Hive incompatible: field names are not alphanumeric (plus '_'): %s",
+        "Deprecated: field names are not alphanumeric (plus '_'): %s",
         Joiner.on(", ").join(incompatible));
   }
 
@@ -156,10 +156,10 @@ public abstract class Compatibility {
         }
       }
       Preconditions.checkState(incompatible.isEmpty(),
-          "Hive incompatible: partition names are not alphanumeric (plus '_'): %s",
+          "Deprecated: partition names are not alphanumeric (plus '_'): %s",
           Joiner.on(", ").join(incompatible));
       Preconditions.checkState(duplicates.isEmpty(),
-          "Hive incompatible: partition names duplicate data fields: %s",
+          "Deprecated: partition names duplicate data fields: %s",
           Joiner.on(", ").join(duplicates));
     }
   }
