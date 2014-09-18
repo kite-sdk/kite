@@ -25,7 +25,6 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -215,6 +214,36 @@ public class MorphlineTest extends AbstractMorphlineTest {
   @Test(expected=IllegalArgumentException.class)
   public void testRemoveFieldsSyntaxErrorWithUnknownType() throws Exception {  
     createMorphline("test-morphlines/removeFieldsSyntaxErrorWithUnknownType");
+  }
+
+  @Test
+  public void testRemoveValues() throws Exception {
+    morphline = createMorphline("test-morphlines/removeValues");
+    for (int i = 0; i < 2; i++) {
+      Record record = new Record();
+      record.put("foobar", "data");
+      record.put("foo", "foo");
+      record.put("foo", "foobar");
+      record.put("foo", "barx");
+      record.put("foo", "barox");
+      record.put("foo", "baz");
+      record.put("foo", "baz");
+      record.put("foo", "hello");
+      record.put("barx", "foo");
+      record.put("barox", "foo");
+      record.put("baz", "foo");
+      record.put("baz", "foo");
+      record.put("hello", "foo");
+      
+      Record expected = new Record();
+      expected.put("foobar", "data");
+      expected.put("foo", "foobar");
+      expected.put("foo", "barox");
+      expected.put("foo", "hello");
+      expected.put("barox", "foo");
+      expected.put("hello", "foo");
+      processAndVerifySuccess(record, expected);
+    }
   }
 
   @Test

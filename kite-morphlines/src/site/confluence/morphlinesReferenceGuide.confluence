@@ -72,6 +72,7 @@ h3. kite\-morphlines\-core\-stdlib
 | [#not] | Inverts the boolean return value of a nested command. | 
 | [#pipe] | Pipes a record through a chain of commands. | 
 | [#removeFields] | Removes all record fields for which the field name matches a blacklist but not a whitelist. |
+| [#removeValues] | Removes all record field values for which the field name and value matches a blacklist but not a whitelist. |
 | [#sample] | Forwards each input record with a given probability to its child command. |
 | [#separateAttachments] | Emits one separate output record for each attachment in the input record's list of attachments. |
 | [#setValues] | Assigns a given list of values (or the contents of another field) to a given field. |
@@ -1129,6 +1130,54 @@ setValues {
   fieldB: []
   fieldC: [] 
 }
+{code}
+
+h2. removeValues
+
+The {{removeValues}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/RemoveValuesBuilder.java]) removes all record field values for which all of the following conditions hold:
+
+1) the field name matches at least one of the given nameBlacklist predicates but none of the given nameWhitelist predicates.
+
+2) the field value matches at least one of the given valueBlacklist predicates but none of the given valueWhitelist predicates.
+
+A predicate can be a regex pattern (e.g. "regex:foo.\*") or [POSIX glob pattern|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/shaded/org/apache/hadoop/fs/GlobPattern.java] (e.g. "glob:foo\*") or literal pattern (e.g. "literal:foo") or "\*" which is equivalent to "glob:\*".
+ 
+The command provides the following configuration options:
+
+|| Property Name || Default || Description ||
+| nameBlacklist | "[\*]" | The blacklist predicates to use for entry names (i.e. entry keys). If the blacklist specification is absent it defaults to MATCH ALL. |
+| nameWhitelist | "[]" | The whitelist predicates to use for entry names (i.e. entry keys). If the whitelist specification is absent it defaults to MATCH NONE. |
+| valueBlacklist | "[\*]" | The blacklist predicates to use for entry values. If the blacklist specification is absent it defaults to MATCH ALL. |
+| valueWhitelist | "[]" | The whitelist predicates to use for entry values. If the whitelist specification is absent it defaults to MATCH NONE. |
+
+Example usage:
+{code}
+# Remove all field values where the field name and value matches at least one of foo.* or bar* or baz, 
+# but matches none of foobar or baro*
+removeFields {
+  nameBlacklist : ["regex:foo.*", "glob:bar*", "literal:baz", "literal:xxxx"]
+  nameWhitelist: ["literal:foobar", "glob:baro*"]
+  valueBlacklist : ["regex:foo.*", "glob:bar*", "literal:baz", "literal:xxxx"]
+  valueWhitelist: ["literal:foobar", "glob:baro*"]
+}
+{code}
+
+Input record:
+{code}
+foobar:data
+foo:[foo,foobar,barx,barox,baz,baz,hello]
+barx:foo
+barox:foo
+baz:[foo,foo]
+hello:foo 
+{code}
+  
+Expected output:
+{code}
+foobar:data
+foo:[foobar,barox,hello]
+barox:foo
+hello:foo
 {code}
 
 h2. sample

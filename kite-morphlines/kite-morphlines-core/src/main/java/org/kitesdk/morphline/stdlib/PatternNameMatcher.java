@@ -45,15 +45,15 @@ final class PatternNameMatcher {
   private final Set<String> includeLiterals = new HashSet<String>(16, 0.5f);
   private final Set<String> excludeLiterals = new HashSet<String>(16, 0.5f);
 
-  public PatternNameMatcher(List<String> includeExpressions, List<String> excludeExpressions) {
-    includes = parseExpressions(includeExpressions, includeLiterals);
-    excludes = parseExpressions(excludeExpressions, excludeLiterals);
+  public PatternNameMatcher(List<String> includeExpressions, List<String> excludeExpressions, int cacheCapacity) {
+    includes = parseExpressions(includeExpressions, includeLiterals, cacheCapacity);
+    excludes = parseExpressions(excludeExpressions, excludeLiterals, cacheCapacity);
   }
   
-  private Expression[] parseExpressions(List<String> expressions, Set<String> literals) {
+  private Expression[] parseExpressions(List<String> expressions, Set<String> literals, int cacheCapacity) {
     List<Expression> parsedExpressions = new ArrayList<Expression>();
     for (int i = 0; i < expressions.size(); i++) {
-      Expression expr = parseExpression(expressions.get(i), literals);
+      Expression expr = parseExpression(expressions.get(i), literals, cacheCapacity);
       if (expr != null) {
         parsedExpressions.add(expr);
       }
@@ -61,7 +61,7 @@ final class PatternNameMatcher {
     return parsedExpressions.toArray(new Expression[parsedExpressions.size()]);
   }
   
-  private Expression parseExpression(String expr, Set<String> literals) {
+  private Expression parseExpression(String expr, Set<String> literals, int cacheCapacity) {
     if (expr.equals("*")) {
       expr = "glob:*";
     }
@@ -79,12 +79,12 @@ final class PatternNameMatcher {
       if (pattern.equals(".*")) {
         return new MatchAllExpression(); // optimization
       }
-      return new RegexExpression(Pattern.compile(pattern));
+      return new RegexExpression(Pattern.compile(pattern), cacheCapacity);
     } else if (type.equals("glob")) {
       if (pattern.equals("*")) {
         return new MatchAllExpression(); // optimization
       }
-      return new RegexExpression(GlobPattern.compile(pattern));
+      return new RegexExpression(GlobPattern.compile(pattern), cacheCapacity);
     } else {
       throw new IllegalArgumentException("Illegal match type: " + type);
     }
@@ -138,14 +138,21 @@ final class PatternNameMatcher {
   private static final class RegexExpression implements Expression {
     
     private final Matcher regex;
-    private final Map<String, Boolean> cache = new BoundedLRUHashMap<String, Boolean>(10000);
+    private final Map<String, Boolean> cache;
     
-    public RegexExpression(Pattern pattern) {
+    public RegexExpression(Pattern pattern, int cacheCapacity) {
       this.regex = pattern.matcher("");
+      if (cacheCapacity < 0) {
+        throw new IllegalArgumentException("Cache capacity must not be negative");
+      }
+      this.cache = cacheCapacity > 0 ? new BoundedLRUHashMap<String, Boolean>(10000) : null;
     }
     
     @Override
     public boolean matches(String str) {
+      if (cache == null) {
+        return regex.reset(str).matches();
+      }
       Boolean isMatch = cache.get(str);
       if (isMatch == null) {
         isMatch = regex.reset(str).matches();
