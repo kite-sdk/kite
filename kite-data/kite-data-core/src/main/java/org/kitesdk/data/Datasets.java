@@ -157,6 +157,12 @@ public class Datasets {
     DatasetRepository repo = pair.first();
     Map<String, String> uriOptions = pair.second();
 
+    if (descriptor.getLocation() == null && uriOptions.containsKey("location")) {
+      descriptor = new DatasetDescriptor.Builder(descriptor)
+          .location(uriOptions.get("location"))
+          .build();
+    }
+
     Dataset<E> dataset = repo.create(
         uriOptions.get(URIBuilder.NAMESPACE_OPTION),
         uriOptions.get(URIBuilder.DATASET_NAME_OPTION), descriptor, type);
