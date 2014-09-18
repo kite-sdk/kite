@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi.hive;
 
+import org.junit.Before;
 import org.kitesdk.data.spi.filesystem.Loader;
 import org.kitesdk.data.spi.filesystem.TestFileSystemRepositoryURIs;
 
@@ -44,13 +45,17 @@ public class TestHiveRepositoryURIs extends TestFileSystemRepositoryURIs {
     new org.kitesdk.data.spi.hive.Loader().load();
   }
 
+  @Before
   @After
-  public void cleanHCatalog() {
+  public void cleanHive() {
     // ensures all tables are removed
-    MetaStoreUtil metastore = new MetaStoreUtil(new Configuration());
-    for (String dbName : metastore.getAllDatabases()) {
-      for (String tableName : metastore.getAllTables(dbName)) {
-        metastore.dropTable(dbName, tableName);
+    MetaStoreUtil metastore = new MetaStoreUtil(getConfiguration());
+    for (String database : metastore.getAllDatabases()) {
+      for (String table : metastore.getAllTables(database)) {
+        metastore.dropTable(database, table);
+      }
+      if (!"default".equals(database)) {
+        metastore.dropDatabase(database, true);
       }
     }
   }

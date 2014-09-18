@@ -45,11 +45,16 @@ public class TestHiveExternalMetadataProvider extends TestMetadataProviders {
 
   @Before
   @After
-  public void cleanHCatalog() {
+  public void cleanHive() {
     // ensures all tables are removed
-    MetaStoreUtil metastore = new MetaStoreUtil(conf);
-    for (String tableName : metastore.getAllTables(NAMESPACE)) {
-      metastore.dropTable(NAMESPACE, tableName);
+    MetaStoreUtil metastore = new MetaStoreUtil(getConfiguration());
+    for (String database : metastore.getAllDatabases()) {
+      for (String table : metastore.getAllTables(database)) {
+        metastore.dropTable(database, table);
+      }
+      if (!"default".equals(database)) {
+        metastore.dropDatabase(database, true);
+      }
     }
   }
 

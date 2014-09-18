@@ -50,7 +50,7 @@ public class TestManagedExternalHandling {
     Datasets.delete("dataset:hive?dataset=managed");
     Datasets.delete("dataset:hive:target/test-repo/ns/external");
     // ensure no other metadata is left in the metastore
-    cleanHCatalog();
+    cleanHive();
     // create datasets
     this.managed = DatasetRepositories.repositoryFor("repo:hive");
     Datasets.create("dataset:hive?dataset=managed", descriptor);
@@ -59,12 +59,15 @@ public class TestManagedExternalHandling {
   }
 
   @After
-  public void cleanHCatalog() {
+  public void cleanHive() {
     // ensures all tables are removed
     MetaStoreUtil metastore = new MetaStoreUtil(new Configuration());
-    for (String dbName : metastore.getAllDatabases()) {
-      for (String tableName : metastore.getAllTables(dbName)) {
-        metastore.dropTable(dbName, tableName);
+    for (String database : metastore.getAllDatabases()) {
+      for (String table : metastore.getAllTables(database)) {
+        metastore.dropTable(database, table);
+      }
+      if (!"default".equals(database)) {
+        metastore.dropDatabase(database, true);
       }
     }
   }

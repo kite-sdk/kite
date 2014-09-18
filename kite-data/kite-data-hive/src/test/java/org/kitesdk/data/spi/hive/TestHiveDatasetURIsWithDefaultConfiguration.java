@@ -64,9 +64,13 @@ public class TestHiveDatasetURIsWithDefaultConfiguration extends MiniDFSTest {
   public void cleanHive() {
     // ensures all tables are removed
     MetaStoreUtil metastore = new MetaStoreUtil(getConfiguration());
-    metastore.dropDatabase("ns", true);
-    for (String table : metastore.getAllTables("default")) {
-      metastore.dropTable("default", table);
+    for (String database : metastore.getAllDatabases()) {
+      for (String table : metastore.getAllTables(database)) {
+        metastore.dropTable(database, table);
+      }
+      if (!"default".equals(database)) {
+        metastore.dropDatabase(database, true);
+      }
     }
   }
 

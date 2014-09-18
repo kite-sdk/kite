@@ -18,6 +18,7 @@ package org.kitesdk.data.spi.hive;
 import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.junit.After;
 import org.junit.Assert;
@@ -35,10 +36,14 @@ public class TestHivePartitioning {
   @After
   public void cleanHive() {
     // ensures all tables are removed
-    MetaStoreUtil metastore = new MetaStoreUtil(DefaultConfiguration.get());
-    metastore.dropDatabase("ns", true);
-    for (String table : metastore.getAllTables("default")) {
-      metastore.dropTable("default", table);
+    MetaStoreUtil metastore = new MetaStoreUtil(new Configuration());
+    for (String database : metastore.getAllDatabases()) {
+      for (String table : metastore.getAllTables(database)) {
+        metastore.dropTable(database, table);
+      }
+      if (!"default".equals(database)) {
+        metastore.dropDatabase(database, true);
+      }
     }
   }
 
