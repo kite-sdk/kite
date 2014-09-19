@@ -22,6 +22,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import java.util.List;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
@@ -125,6 +126,13 @@ abstract class BaseDatasetCommand extends BaseCommand {
     }
     console.trace("Repository URI: " + uri);
     return uri;
+  }
+
+  String buildDatasetUri(String uriOrName) {
+    if (isDataUri(uriOrName)) {
+      return uriOrName;
+    }
+    return new URIBuilder(buildRepoURI(), namespace, uriOrName).build().toString();
   }
 
 }
