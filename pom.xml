@@ -433,6 +433,7 @@
               <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
               <link>http://hadoop.apache.org/docs/r${vers.hadoop2}/api/</link>
             </links>
+            <additionalparam>${Xdoclint}</additionalparam>             
           </configuration>
           <executions>
             <execution>
@@ -1226,6 +1227,17 @@
       </properties>
     </profile>
 
+    <profile>
+      <id>jdk1.8+</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+      <properties>                  
+        <!-- see http://stackoverflow.com/questions/15886209/maven-is-not-working-in-java-8-when-javadoc-tags-are-incomplete -->
+        <Xdoclint>-Xdoclint:none</Xdoclint>
+      </properties>
+    </profile>
+    
   </profiles>
 
 </project>
