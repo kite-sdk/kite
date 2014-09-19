@@ -30,6 +30,7 @@
     <module>kite-app-parent</module>
     <module>kite-maven-plugin</module>
     <module>kite-tools</module>
+    <module>kite-minicluster</module>
     <module>kite-morphlines</module>
   </modules>
 
