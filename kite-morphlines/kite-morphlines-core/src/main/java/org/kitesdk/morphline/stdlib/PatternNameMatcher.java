@@ -16,6 +16,7 @@
 package org.kitesdk.morphline.stdlib;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,12 +43,22 @@ final class PatternNameMatcher {
   
   private final Expression[] includes;
   private final Expression[] excludes;
-  private final Set<String> includeLiterals = new HashSet<String>(16, 0.5f);
-  private final Set<String> excludeLiterals = new HashSet<String>(16, 0.5f);
+  private Set<String> includeLiterals = new HashSet<String>(16, 0.5f);
+  private Set<String> excludeLiterals = new HashSet<String>(16, 0.5f);
 
   public PatternNameMatcher(List<String> includeExpressions, List<String> excludeExpressions, int cacheCapacity) {
     includes = parseExpressions(includeExpressions, includeLiterals, cacheCapacity);
     excludes = parseExpressions(excludeExpressions, excludeLiterals, cacheCapacity);
+    includeLiterals = optimize(includeLiterals);
+    excludeLiterals = optimize(excludeLiterals);
+  }
+  
+  private Set<String> optimize(Set<String> items) {
+    if (items.size() == 1) {
+      return Collections.singleton(items.iterator().next());
+    } else {
+      return items;
+    }    
   }
   
   private Expression[] parseExpressions(List<String> expressions, Set<String> literals, int cacheCapacity) {
