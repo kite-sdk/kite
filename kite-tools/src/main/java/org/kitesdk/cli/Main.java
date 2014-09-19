@@ -40,7 +40,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.kitesdk.cli.commands.FlumeConfigCommand;
 import org.kitesdk.cli.commands.InfoCommand;
+import org.kitesdk.cli.commands.Log4jConfigCommand;
 import org.kitesdk.cli.commands.ObjectSchemaCommand;
 import org.kitesdk.cli.commands.SchemaCommand;
 import org.kitesdk.cli.commands.ShowRecordsCommand;
@@ -98,6 +100,8 @@ public class Main extends Configured implements Tool {
     jc.addCommand("obj-schema", new ObjectSchemaCommand(console));
     jc.addCommand("partition-config", new CreatePartitionStrategyCommand(console));
     jc.addCommand("mapping-config", new CreateColumnMappingCommand(console));
+    jc.addCommand("log4j-config", new Log4jConfigCommand(console));
+    jc.addCommand("flume-config", new FlumeConfigCommand(console));
   }
 
   @Override

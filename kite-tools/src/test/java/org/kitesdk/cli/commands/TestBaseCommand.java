@@ -122,6 +122,15 @@ public class TestBaseCommand {
   }
 
   @Test
+  public void testLocalDataset() {
+    command.local = true;
+    command.directory = "/tmp/data";
+    command.namespace = "ns";
+    Assert.assertEquals("dataset:file:/tmp/data/ns/users", command.buildDatasetUri("users"));
+    verify(console).trace(contains("repo:file:/tmp/data"));
+  }
+
+  @Test
   public void testLocalRepoRejectsNullPath() {
     command.hive = false;
     command.local = true;
