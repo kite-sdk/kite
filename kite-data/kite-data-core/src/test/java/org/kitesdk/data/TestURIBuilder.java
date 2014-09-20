@@ -16,8 +16,12 @@
 
 package org.kitesdk.data;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.Multiset;
 import java.net.URI;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.util.Utf8;
@@ -46,7 +50,7 @@ public class TestURIBuilder {
 
   @Test
   public void testRepoUriAndNameToDatasetUri() {
-    Assert.assertEquals("Should construct the correct dataset URI",
+    assertEquivalent("Should construct the correct dataset URI",
         URI.create("dataset:file:/datasets/ns/test-name"),
         new URIBuilder("repo:file:/datasets", "ns", "test-name").build());
   }
@@ -101,7 +105,7 @@ public class TestURIBuilder {
 
   @Test
   public void testRepoUriAndNameToDatasetUriPreservesOptions() {
-    Assert.assertEquals("Should construct the correct dataset URI",
+    assertEquivalent("Should construct the correct dataset URI",
         URI.create("dataset:file:/datasets/ns/test-name?hdfs:port=1080"),
         new URIBuilder("repo:file:/datasets?hdfs:port=1080", "ns", "test-name")
             .build());
@@ -109,13 +113,13 @@ public class TestURIBuilder {
 
   @Test
   public void testRepoUriAndNameAddEquals() {
-    Assert.assertEquals("Should construct the correct dataset URI",
+    assertEquivalent("Should construct the correct dataset URI",
         URI.create("view:file:/datasets/ns/test-name?prop=value"),
         new URIBuilder("repo:file:/datasets", "ns", "test-name")
             .with("prop", "value")
             .build());
     // order should be preserved
-    Assert.assertEquals("Should construct the correct dataset URI",
+    assertEquivalent("Should construct the correct dataset URI",
         URI.create("view:file:/datasets/ns/test-name?prop=value&num=34"),
         new URIBuilder("repo:file:/datasets", "ns", "test-name")
             .with("prop", "value")
@@ -125,7 +129,7 @@ public class TestURIBuilder {
 
   @Test
   public void testDatasetUriToDatasetUri() {
-    Assert.assertEquals("Should produce an equivalent dataset URI",
+    assertEquivalent("Should produce an equivalent dataset URI",
         URI.create("dataset:file:/datasets/test-name"),
         new URIBuilder("dataset:file:/datasets/test-name").build());
   }
@@ -158,7 +162,7 @@ public class TestURIBuilder {
   @Test
   public void testDatasetUriToDatasetUriPreservesOptions() {
     // this doesn't produce a view URI because the original isn't a view URI
-    Assert.assertEquals("Should construct the correct dataset URI",
+    assertEquivalent("Should construct the correct dataset URI",
         URI.create("dataset:file:/datasets/test-name?hdfs:port=1080"),
         new URIBuilder("dataset:file:/datasets/test-name?hdfs:port=1080")
             .build());
@@ -166,12 +170,12 @@ public class TestURIBuilder {
 
   @Test
   public void testDatasetUriAddEquals() {
-    Assert.assertEquals("Should produce an equivalent dataset URI",
+    assertEquivalent("Should produce an equivalent dataset URI",
         URI.create("view:file:/datasets/test-name?prop=value"),
         new URIBuilder("dataset:file:/datasets/test-name")
             .with("prop", "value")
             .build());
-    Assert.assertEquals("Should produce an equivalent dataset URI",
+    assertEquivalent("Should produce an equivalent dataset URI",
         URI.create("view:file:/datasets/test-name?prop=value&num=34"),
         new URIBuilder("dataset:file:/datasets/test-name")
             .with("prop", "value")
@@ -181,19 +185,19 @@ public class TestURIBuilder {
 
   @Test
   public void testViewUriToViewUri() {
-    Assert.assertEquals("Should produce an equivalent view URI",
+    assertEquivalent("Should produce an equivalent view URI",
         URI.create("view:file:/datasets/test-name?prop=value"),
         new URIBuilder("view:file:/datasets/test-name?prop=value").build());
   }
 
   @Test
   public void testViewUriAddEquals() {
-    Assert.assertEquals("Should produce an equivalent dataset URI",
+    assertEquivalent("Should produce an equivalent dataset URI",
         URI.create("view:file:/datasets/test-name?prop=value&field=v2"),
         new URIBuilder("view:file:/datasets/test-name?prop=value")
             .with("field", "v2")
             .build());
-    Assert.assertEquals("Should produce an equivalent dataset URI",
+    assertEquivalent("Should produce an equivalent dataset URI",
         URI.create("view:file:/datasets/test-name?prop=value&field=v2&num=34"),
         new URIBuilder("view:file:/datasets/test-name?prop=value")
             .with("field", "v2")
@@ -203,17 +207,17 @@ public class TestURIBuilder {
 
   @Test
   public void testAddEqualityConstraints() {
-    Assert.assertEquals("Should add equality constraints",
+    assertEquivalent("Should add equality constraints",
         URI.create("view:file:/datasets/test?id=" + ID),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty.with("id", new Utf8(ID)))
-                .build());
-    Assert.assertEquals("Should add equality constraints",
+            .build());
+    assertEquivalent("Should add equality constraints",
         URI.create("view:file:/datasets/test?id=a,b"),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty.with("id", new Utf8("a"), new Utf8("b")))
             .build());
-    Assert.assertEquals("Should add equality constraints",
+    assertEquivalent("Should add equality constraints",
         URI.create("view:file:/datasets/test?id=" + ID + "&timestamp=1405720705333"),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(
@@ -223,12 +227,12 @@ public class TestURIBuilder {
 
   @Test
   public void testAddExistsConstraints() {
-    Assert.assertEquals("Should add equality constraints",
+    assertEquivalent("Should add equality constraints",
         URI.create("view:file:/datasets/test?id="),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty.with("id"))
             .build());
-    Assert.assertEquals("Should add equality constraints",
+    assertEquivalent("Should add equality constraints",
         URI.create("view:file:/datasets/test?id=&timestamp="),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty.with("id").with("timestamp"))
@@ -237,17 +241,17 @@ public class TestURIBuilder {
 
   @Test
   public void testAddRangeConstraints() {
-    Assert.assertEquals("Should add equality constraints",
+    assertEquivalent("Should add equality constraints",
         URI.create("view:file:/datasets/test?color=[green,)"),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty.from("color", "green"))
             .build());
-    Assert.assertEquals("Should add equality constraints",
+    assertEquivalent("Should add equality constraints",
         URI.create("view:file:/datasets/test?color=(,green]"),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty.to("color", "green"))
             .build());
-    Assert.assertEquals("Should add equality constraints",
+    assertEquivalent("Should add equality constraints",
         URI.create("view:file:/datasets/test?timestamp=[0,1405720705333)&color=(green,red]"),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty
@@ -258,10 +262,32 @@ public class TestURIBuilder {
 
   @Test
   public void testEmptyConstraints() {
-    Assert.assertEquals("Empty constraints should produce dataset URI",
+    assertEquivalent("Empty constraints should produce dataset URI",
         URI.create("dataset:file:/datasets/test"),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty)
             .build());
+  }
+
+  public static void assertEquivalent(String message, URI expected, URI actual) {
+    Assert.assertEquals("URI scheme does not match (" + message + ")",
+        expected.getScheme(), actual.getScheme());
+    Assert.assertEquals("URI userInfo does not match (" + message + ")",
+        expected.getUserInfo(), actual.getUserInfo());
+    Assert.assertEquals("URI authority does not match (" + message + ")",
+        expected.getAuthority(), actual.getAuthority());
+    Assert.assertEquals("URI path does not match (" + message + ")",
+        expected.getPath(), actual.getPath());
+    Assert.assertEquals("URI fragment does not match (" + message + ")",
+        expected.getFragment(), actual.getFragment());
+    Assert.assertEquals("URI query does not match (" + message + ")",
+        set(expected.getQuery()), set(actual.getQuery()));
+  }
+
+  public static Multiset<String> set(@Nullable String ampSeparatedValues) {
+    if (ampSeparatedValues == null) {
+      return null;
+    }
+    return ImmutableMultiset.copyOf(Splitter.on('&').split(ampSeparatedValues));
   }
 }
