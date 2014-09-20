@@ -58,8 +58,18 @@ public class EntityAccessor<E> {
       fields = Lists.newArrayList();
       Schema nested = schema;
       for (String level : SchemaUtil.NAME_SPLITTER.split(name)) {
-        // assume that the nested schemas are Records
+        // assume that the nested schemas are Records or nullable Records
         // this is checked by SchemaUtil.fieldSchema(Schema, String)
+        if (nested.getType() == Schema.Type.UNION) {
+          // nullable Records are not allowed in partition fields, but the read
+          // schema may contain nullable records when using reflection.
+          List<Schema> types = nested.getTypes();
+          if (types.get(0).getType() == Schema.Type.NULL) {
+            nested = types.get(1);
+          } else {
+            nested = types.get(0);
+          }
+        }
         Schema.Field field = nested.getField(level);
         fields.add(field);
         nested = field.schema();

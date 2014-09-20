@@ -21,6 +21,7 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.PartitionStrategy;
@@ -30,11 +31,13 @@ public class TestNestedFieldPartitioning {
 
   private static final Schema schema = SchemaBuilder.record("Station").fields()
       .requiredString("name")
-      .name("position").type().record("Position").fields()
-          .requiredDouble("latitude")
-          .requiredDouble("longitude")
-          .endRecord().noDefault()
-      .endRecord();
+      .name("position").type().record("Position")
+          .namespace("org.kitesdk.data.spi.TestNestedFieldPartitioning$Station$")
+          .fields()
+              .requiredDouble("latitude")
+              .requiredDouble("longitude")
+              .endRecord().noDefault()
+          .endRecord();
 
   private static final PartitionStrategy strategy =
       new PartitionStrategy.Builder()
