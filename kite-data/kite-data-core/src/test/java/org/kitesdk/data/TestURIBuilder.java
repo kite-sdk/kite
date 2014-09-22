@@ -214,7 +214,7 @@ public class TestURIBuilder {
             .constraints(empty.with("id", new Utf8("a"), new Utf8("b")))
             .build());
     Assert.assertEquals("Should add equality constraints",
-        URI.create("view:file:/datasets/test?timestamp=1405720705333&id=" + ID),
+        URI.create("view:file:/datasets/test?id=" + ID + "&timestamp=1405720705333"),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(
                 empty.with("id", new Utf8(ID)).with("timestamp", 1405720705333L))
@@ -229,7 +229,7 @@ public class TestURIBuilder {
             .constraints(empty.with("id"))
             .build());
     Assert.assertEquals("Should add equality constraints",
-        URI.create("view:file:/datasets/test?timestamp=&id="),
+        URI.create("view:file:/datasets/test?id=&timestamp="),
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(empty.with("id").with("timestamp"))
             .build());
