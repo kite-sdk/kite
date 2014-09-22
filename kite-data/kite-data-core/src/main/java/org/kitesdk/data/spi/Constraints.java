@@ -421,7 +421,7 @@ public class Constraints {
   }
 
   public Map<String, String> toQueryMap() {
-    Map<String, String> query = Maps.newHashMap();
+    Map<String, String> query = Maps.newLinkedHashMap();
     for (Map.Entry<String, Predicate> entry : constraints.entrySet()) {
       String name = entry.getKey();
       Schema fieldSchema = SchemaUtil.fieldSchema(schema, strategy, name);
@@ -433,7 +433,7 @@ public class Constraints {
   public static Constraints fromQueryMap(Schema schema,
                                          PartitionStrategy strategy,
                                          Map<String, String> query) {
-    Map<String, Predicate> constraints = Maps.newHashMap();
+    Map<String, Predicate> constraints = Maps.newLinkedHashMap();
     for (Map.Entry<String, String> entry : query.entrySet()) {
       String name = entry.getKey();
       if (SchemaUtil.isField(schema, strategy, name)) {
