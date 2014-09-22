@@ -74,7 +74,18 @@ public final class RemoveValuesBuilder implements CommandBuilder {
     }
 
     @Override
-    protected boolean doProcess(Record record) {      
+    protected boolean doProcess(Record record) {
+      if (nameMatcher.getLiteralsOnly() == null) {
+        doProcessSlow(record); // general case
+      } else { 
+        doProcessFast(record); // fast path for common special case
+      }
+      
+      // pass record to next command in chain:
+      return super.doProcess(record);
+    }
+
+    private void doProcessSlow(Record record) {
       Iterator<Map.Entry<String, Collection<Object>>> iter = record.getFields().asMap().entrySet().iterator();
       while (iter.hasNext()) {
         Map.Entry<String, Collection<Object>> entry = iter.next();
@@ -91,9 +102,17 @@ public final class RemoveValuesBuilder implements CommandBuilder {
           }
         }
       }
-      
-      // pass record to next command in chain:
-      return super.doProcess(record);
+    }
+
+    private void doProcessFast(Record record) {
+      for (String name : nameMatcher.getLiteralsOnly()) {
+        List values = record.get(name);
+        for (int i = values.size(); --i >= 0; ) {
+          if (valueMatcher.matches(values.get(i).toString())) {
+            values.remove(i);
+          }
+        }
+      }
     }
 
   }

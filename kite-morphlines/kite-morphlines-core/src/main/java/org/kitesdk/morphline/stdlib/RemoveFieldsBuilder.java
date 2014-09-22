@@ -64,16 +64,30 @@ public final class RemoveFieldsBuilder implements CommandBuilder {
     }
 
     @Override
-    protected boolean doProcess(Record record) {      
+    protected boolean doProcess(Record record) {  
+      if (nameMatcher.getLiteralsOnly() == null) {
+        doProcessSlow(record); // general case
+      } else {
+        doProcessFast(record); // fast path for common special case
+      }
+      
+      // pass record to next command in chain:
+      return super.doProcess(record);
+    }
+
+    private void doProcessSlow(Record record) {
       Iterator<String> iter = record.getFields().asMap().keySet().iterator();
       while (iter.hasNext()) {
         if (nameMatcher.matches(iter.next())) {
           iter.remove();
         }
       }
-      
-      // pass record to next command in chain:
-      return super.doProcess(record);
+    }
+
+    private void doProcessFast(Record record) {
+      for (String name : nameMatcher.getLiteralsOnly()) {
+        record.removeAll(name);
+      }
     }
 
   }

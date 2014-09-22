@@ -1120,18 +1120,6 @@ barox:data
 hello:data
 {code}
 
-Performance: 
-The {{removeFields}} command is implemented efficiently.  However, if you merely want to 
-remove one or more literally named fields it is more efficient to instead use the [#setValues] command, like so: 
-{code}
-# remove the fields named fieldA, fieldB and fieldC
-setValues { 
-  fieldA: []
-  fieldB: []
-  fieldC: [] 
-}
-{code}
-
 h2. removeValues
 
 The {{removeValues}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/stdlib/RemoveValuesBuilder.java]) removes all record field values for which all of the following conditions hold:

@@ -199,6 +199,23 @@ public class MorphlineTest extends AbstractMorphlineTest {
   }
 
   @Test
+  public void testRemoveFieldsWithLiteralsOnly() throws Exception {
+    morphline = createMorphline("test-morphlines/removeFieldsWithLiteralsOnly");
+    for (int i = 0; i < 2; i++) {
+      Record record = new Record();
+      record.put("foo", "data");
+      record.put("baz", "data");
+      record.put("baz", "data");
+      record.put("hello", "data");
+      
+      Record expected = new Record();
+      expected.put("foo", "data");
+      expected.put("hello", "data");
+      processAndVerifySuccess(record, expected);
+    }
+  }
+
+  @Test
   public void testRemoveAllFields() throws Exception {
     morphline = createMorphline("test-morphlines/removeAllFields");    
     Record record = new Record();
@@ -242,6 +259,27 @@ public class MorphlineTest extends AbstractMorphlineTest {
       expected.put("foo", "hello");
       expected.put("barox", "foo");
       expected.put("hello", "foo");
+      processAndVerifySuccess(record, expected);
+    }
+  }
+
+  @Test
+  public void testRemoveValuesWithLiteralsOnly() throws Exception {
+    morphline = createMorphline("test-morphlines/removeValuesWithLiteralsOnly");
+    for (int i = 0; i < 2; i++) {
+      Record record = new Record();
+      record.put("foo", "foo");
+      record.put("foo", "baz");
+      record.put("bar", "bar");
+      record.put("baz", "baz");
+      record.put("baz", "xxxx");
+      record.put("hello", "data");
+      
+      Record expected = new Record();
+      expected.put("foo", "foo");
+      expected.put("foo", "baz");
+      expected.put("bar", "bar");
+      expected.put("hello", "data");
       processAndVerifySuccess(record, expected);
     }
   }

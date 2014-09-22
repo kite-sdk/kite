@@ -45,12 +45,24 @@ final class PatternNameMatcher {
   private final Expression[] excludes;
   private Set<String> includeLiterals = new HashSet<String>(16, 0.5f);
   private Set<String> excludeLiterals = new HashSet<String>(16, 0.5f);
+  private final String[] literalsOnly;
 
   public PatternNameMatcher(List<String> includeExpressions, List<String> excludeExpressions, int cacheCapacity) {
     includes = parseExpressions(includeExpressions, includeLiterals, cacheCapacity);
     excludes = parseExpressions(excludeExpressions, excludeLiterals, cacheCapacity);
+    includeLiterals.removeAll(excludeLiterals);
     includeLiterals = optimize(includeLiterals);
     excludeLiterals = optimize(excludeLiterals);
+    if (includes.length == 0 && excludes.length == 0) {
+      literalsOnly = includeLiterals.toArray(new String[includeLiterals.size()]);
+    } else {
+      literalsOnly = null;
+    }
+  }
+  
+  /** Expert mode; For optional performance optimizations */
+  public String[] getLiteralsOnly() {
+    return literalsOnly;
   }
   
   private Set<String> optimize(Set<String> items) {
