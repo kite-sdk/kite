@@ -20,6 +20,11 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
+  <properties>
+    <!-- TODO move to parent POM when building for multiple profiles -->
+    <vers.hive-cdh5>0.12.0-cdh${cdh5.version}</vers.hive-cdh5>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -55,7 +60,7 @@
             <configuration>
               <outputDirectory>${project.build.directory}/lib</outputDirectory>
               <includeScope>runtime</includeScope> <!-- excludes test jars; see http://jira.codehaus.org/browse/MDEP-128 -->
-              <excludeScope>provided</excludeScope>
+
             </configuration>
           </execution>
         </executions>
@@ -146,6 +151,12 @@
 
     <dependency>
       <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
       <artifactId>kite-hadoop-cdh5-dependencies</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
@@ -170,6 +181,30 @@
       <artifactId>kite-hbase-cdh5-test-dependencies</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-metastore</artifactId>
+      <version>${vers.hive-cdh5}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-common</artifactId>
+      <version>${vers.hive-cdh5}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-serde</artifactId>
+      <version>${vers.hive-cdh5}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-exec</artifactId>
+      <version>${vers.hive-cdh5}</version>
     </dependency>
 
     <dependency>

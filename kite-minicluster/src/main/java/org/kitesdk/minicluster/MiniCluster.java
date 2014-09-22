@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.hadoop.conf.Configuration;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.minicluster.Service.ServiceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,7 @@ public class MiniCluster {
   public static final String WORK_DIR_KEY = "directory";
   public static final String NAMENODE_RPC_PORT = "hdfs-namenode-rpc-port";
   public static final String ZK_PORT_KEY = "zk-port";
+  public static final String HIVE_METASTORE_PORT = "hive-metastore-port";
 
   private static final Map<String, Service> registeredServices = new ConcurrentHashMap<String, Service>();
 
@@ -119,6 +121,11 @@ public class MiniCluster {
     
     public Builder zkPort(int zkPort) {
       serviceConfig.set(ZK_PORT_KEY, Integer.toString(zkPort));
+      return this;
+    }
+
+    public Builder hiveMetastorePort(int port) {
+      serviceConfig.set(HIVE_METASTORE_PORT, Integer.toString(port));
       return this;
     }
 
@@ -246,6 +253,8 @@ public class MiniCluster {
           + service.getClass().getName());
       service.start();
       serviceConfig.setHadoopConf(service.getHadoopConf());
+      // set the default configuration so that the minicluster is used
+      DefaultConfiguration.set(serviceConfig.getHadoopConf());
     }
     logger.info("All Minicluster Services running.");
   }

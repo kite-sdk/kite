@@ -204,6 +204,8 @@ class HdfsService implements Service {
     logger.info("HDFS force binding to ip: " + bindIP);
     config = new KiteCompatibleConfiguration(config, bindIP, namenodeRpcPort,
         namenodeHttpPort);
+    config.set(DFSConfigKeys.FS_DEFAULT_NAME_KEY, "hdfs://" + bindIP + ":"
+        + namenodeRpcPort);
     config.set(DFSConfigKeys.DFS_DATANODE_ADDRESS_KEY, bindIP + ":"
         + datanodePort);
     config.set(DFSConfigKeys.DFS_DATANODE_IPC_ADDRESS_KEY, bindIP + ":"

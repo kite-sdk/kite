@@ -44,8 +44,11 @@ public class TestMiniCluster {
   public void testValidMiniCluster() throws IOException, InterruptedException {
     String workDir = "target/kite-minicluster-workdir-" + UUID.randomUUID();
     MiniCluster miniCluster = new MiniCluster.Builder().workDir(workDir)
-        .bindIP("127.0.0.1").addService(HdfsService.class)
-        .addService(ZookeeperService.class).addService(HBaseService.class)
+        .bindIP("127.0.0.1")
+        .addService(HdfsService.class)
+        .addService(ZookeeperService.class)
+        .addService(HBaseService.class)
+        .addService(HiveService.class)
         .clean(true).build();
     miniCluster.start();
     miniCluster.stop();

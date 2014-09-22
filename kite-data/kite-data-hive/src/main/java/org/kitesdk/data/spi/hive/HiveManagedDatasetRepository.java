@@ -23,6 +23,7 @@ import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.kitesdk.data.spi.MetadataProvider;
 
 /**
@@ -135,7 +136,7 @@ public class HiveManagedDatasetRepository extends HiveAbstractDatasetRepository 
     public DatasetRepository build() {
 
       if (configuration == null) {
-        this.configuration = new Configuration();
+        this.configuration = DefaultConfiguration.get();
       }
 
       if (rootDirectory != null) {
