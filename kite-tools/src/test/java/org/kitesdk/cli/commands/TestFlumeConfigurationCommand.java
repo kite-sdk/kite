@@ -92,7 +92,7 @@ public class TestFlumeConfigurationCommand {
   @Test
   public void testHdfsUri() throws Exception {
     URI expected = URI.create("repo:hdfs://" + hdfsHost + ":" + hdfsPort + "/datasets/ns");
-    URI actual = command.getRepoUri(
+    URI actual = command.getLegacyRepoUri(
         URI.create("dataset:hdfs:/datasets/ns/events"), "ns");
     Assert.assertEquals("Unexpected repository URI", expected, actual);
   }
@@ -100,7 +100,7 @@ public class TestFlumeConfigurationCommand {
   @Test
   public void testFileUri() throws Exception {
     URI expected = URI.create("repo:file:/datasets/ns");
-    URI actual = command.getRepoUri(
+    URI actual = command.getLegacyRepoUri(
         URI.create("dataset:file:/datasets/ns/events"), "ns");
     Assert.assertEquals("Unexpected repository URI", expected, actual);
   }
@@ -108,7 +108,7 @@ public class TestFlumeConfigurationCommand {
   @Test
   public void testManagedHiveUri() throws Exception {
     URI expected = URI.create("repo:hive");
-    URI actual = command.getRepoUri(
+    URI actual = command.getLegacyRepoUri(
         URI.create("dataset:hive?dataset=events"), "default");
     Assert.assertEquals("Unexpected repository URI", expected, actual);
   }
@@ -116,7 +116,7 @@ public class TestFlumeConfigurationCommand {
   @Test
   public void testExternalHiveUri() throws Exception {
     URI expected = URI.create("repo:hive:/datasets/ns?hdfs:host="+hdfsHost+"&hdfs:port="+hdfsPort);
-    URI actual = command.getRepoUri(
+    URI actual = command.getLegacyRepoUri(
         URI.create("dataset:hive:/datasets/ns/events?namespace=ns&dataset=events"), "ns");
     Assert.assertEquals("Unexpected repository URI", expected, actual);
   }
@@ -124,7 +124,7 @@ public class TestFlumeConfigurationCommand {
   @Test
   public void testHBaseUri() throws Exception {
     URI expected = URI.create("repo:hbase:"+zkQuorum+":"+zkPort);
-    URI actual = command.getRepoUri(
+    URI actual = command.getLegacyRepoUri(
         URI.create("dataset:hbase:" + zkQuorum + ":" + zkPort +
             "/events?namespace=ns"), "ns");
     Assert.assertEquals("Unexpected repository URI", expected, actual);

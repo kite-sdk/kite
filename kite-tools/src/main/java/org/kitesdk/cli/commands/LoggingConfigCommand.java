@@ -104,7 +104,9 @@ public class LoggingConfigCommand extends BaseDatasetCommand {
         "# Print log4j configuration to log to dataset \"users\":",
         "--host flume.cluster.com --class org.kitesdk.examples.MyLoggingApp users",
         "# Save log4j configuration to the file \"log4j.properties\":",
-        "--host flume.cluster.com --package org.kitesdk.examples -o log4j.properties users"
+        "--host flume.cluster.com --package org.kitesdk.examples -o log4j.properties users",
+        "# Print log4j configuration to log from all classes:",
+        "--host flume.cluster.com --log-all users"
     );
   }
 }

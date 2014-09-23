@@ -108,7 +108,7 @@ public class FlumeConfigCommand extends BaseDatasetCommand {
 
     Dataset<GenericRecord> dataset = load(datasetName.get(0), GenericRecord.class).getDataset();
     String datasetUri = buildDatasetUri(datasetName.get(0));
-    URI repoUri = getRepoUri(dataset);
+    URI repoUri = getLegacyRepoUri(dataset);
     String name = dataset.getName();
 
     StringBuilder sb = new StringBuilder();
@@ -181,12 +181,12 @@ public class FlumeConfigCommand extends BaseDatasetCommand {
     return 0;
   }
 
-  private URI getRepoUri(Dataset<GenericRecord> dataset) {
-    return getRepoUri(dataset.getUri(), dataset.getNamespace());
+  private URI getLegacyRepoUri(Dataset<GenericRecord> dataset) {
+    return FlumeConfigCommand.this.getLegacyRepoUri(dataset.getUri(), dataset.getNamespace());
   }
 
   @VisibleForTesting
-  URI getRepoUri(URI datasetUri, String namespace) {
+  URI getLegacyRepoUri(URI datasetUri, String namespace) {
     URI repoUri = DatasetRepositories.repositoryFor(datasetUri).getUri();
 
     URI specificUri = URI.create(repoUri.getSchemeSpecificPart());
@@ -210,7 +210,9 @@ public class FlumeConfigCommand extends BaseDatasetCommand {
   public List<String> getExamples() {
     return Lists.newArrayList(
         "# Print Flume configuration to log to dataset \"users\":",
-        "--channel-type memory users",
+        "--checkpoint-dir /data/0/flume/checkpoint --data-dir /data/1/flume/data users",
+        "# Print Flume configuration to log to dataset \"dataset:hdfs:/datasets/default/users\":",
+        "--channel-type memory dataset:hdfs:/datasets/default/users",
         "# Save Flume configuration to the file \"flume.properties\":",
         "--channel-type memory -o flume.properties users"
     );
