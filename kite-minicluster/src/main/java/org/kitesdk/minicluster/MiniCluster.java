@@ -18,6 +18,7 @@ package org.kitesdk.minicluster;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,8 @@ public class MiniCluster {
   public static final String NAMENODE_RPC_PORT = "hdfs-namenode-rpc-port";
   public static final String ZK_PORT_KEY = "zk-port";
   public static final String HIVE_METASTORE_PORT = "hive-metastore-port";
+  public static final String FLUME_CONFIGURATION = "flume-configuration";
+  public static final String FLUME_AGENT_NAME = "flume-agent-name";
 
   private static final Map<String, Service> registeredServices = new ConcurrentHashMap<String, Service>();
 
@@ -126,6 +129,16 @@ public class MiniCluster {
 
     public Builder hiveMetastorePort(int port) {
       serviceConfig.set(HIVE_METASTORE_PORT, Integer.toString(port));
+      return this;
+    }
+
+    public Builder flumeConfiguration(File file) {
+      serviceConfig.set(FLUME_CONFIGURATION, file.toString());
+      return this;
+    }
+
+    public Builder flumeAgentName(String name) {
+      serviceConfig.set(FLUME_AGENT_NAME, name);
       return this;
     }
 

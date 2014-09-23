@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ public class RunCommand implements Command {
   static {
     simpleServiceNameMap.put("hdfs", "org.kitesdk.minicluster.HdfsService");
     simpleServiceNameMap.put("zk", "org.kitesdk.minicluster.ZookeeperService");
+    simpleServiceNameMap.put("flume", "org.kitesdk.minicluster.FlumeService");
     simpleServiceNameMap.put("hbase", "org.kitesdk.minicluster.HBaseService");
     simpleServiceNameMap.put("hive", "org.kitesdk.minicluster.HiveService");
   }
@@ -70,8 +72,14 @@ public class RunCommand implements Command {
   @Parameter(names = "--hive-metastore-port", description = "The Hive Metastore port. Defaults to 9083.")
   int hiveMetastorePort = 9083;
 
+  @Parameter(names = "--flume-configuration" , description = "The Flume configuration file.")
+  String flumeConfiguration;
+
+  @Parameter(names = "--flume-agent-name" , description = "The name of the Flume agent.")
+  String flumeAgentName;
+
   @Parameter(names = { "-s", "--services" }, variableArity = true, description = "A space separated list of fully "
-      + "qualified service classnames to run. The following short names exist: hdfs, zk, hbase, hive")
+      + "qualified service classnames to run. The following short names exist: hdfs, zk, hbase, hive, flume")
   public List<String> services = new ArrayList<String>();
 
   @DynamicParameter(names = "-D", description = "Service specific configs go here. These configs are passed through "
@@ -93,8 +101,10 @@ public class RunCommand implements Command {
 
     MiniCluster.Builder builder = new MiniCluster.Builder().workDir(workDir)
         .clean(clean).hadoopConf(conf).bindIP(bindIP)
-        .namenodeRpcPort(namenodeRpcPort).zkPort(zkPort)
-        .hiveMetastorePort(hiveMetastorePort);
+        .namenodeRpcPort(namenodeRpcPort)
+        .zkPort(zkPort)
+        .hiveMetastorePort(hiveMetastorePort)
+        .flumeConfiguration(new File(flumeConfiguration)).flumeAgentName(flumeAgentName);
     for (String serviceName : services) {
       if (simpleServiceNameMap.containsKey(serviceName)) {
         serviceName = simpleServiceNameMap.get(serviceName);
