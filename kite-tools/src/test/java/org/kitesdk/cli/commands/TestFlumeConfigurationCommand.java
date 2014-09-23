@@ -179,6 +179,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -209,6 +213,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data, /data/2/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -239,6 +247,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -270,6 +282,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -300,6 +316,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "agent.channels.avro-event-channel.type = file\n" +
         "agent.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "agent.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "agent.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -331,6 +351,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -362,6 +386,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.my-channel.type = file\n" +
         "tier1.channels.my-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.my-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -393,6 +421,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.my-sink.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -424,6 +456,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -455,6 +491,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -485,6 +525,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data, /data/2/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -546,6 +590,10 @@ public class TestFlumeConfigurationCommand {
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.capacity = 42\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -578,6 +626,10 @@ public class TestFlumeConfigurationCommand {
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.transactionCapacity = 42\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -609,6 +661,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -640,6 +696,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -671,6 +731,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +
@@ -706,6 +770,10 @@ public class TestFlumeConfigurationCommand {
         "\n" +
         "tier1.channels.avro-event-channel.type = file\n" +
         "tier1.channels.avro-event-channel.checkpointDir = /data/0/flume/checkpoint\n" +
+        "\n" +
+        "# A list of directories where Flume will persist records that are waiting to be\n" +
+        "# processed by the sink. You can use multiple directories on different physical\n" +
+        "# disks to increase throughput.\n" +
         "tier1.channels.avro-event-channel.dataDirs = /data/1/flume/data\n" +
         "\n" +
         "tier1.sinks.kite-dataset.type = org.apache.flume.sink.kite.DatasetSink\n" +

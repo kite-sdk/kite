@@ -143,11 +143,15 @@ public class FlumeConfigCommand extends BaseDatasetCommand {
       sb.append(agent).append(".channels.").append(channelName).append(".transactionCapacity = ").append(transactionCapacity).append('\n');
     }
 
-    if ("file".equals(channelType) && checkpointDir != null) {
+    if ("file".equals(channelType)) {
       sb.append(agent).append(".channels.").append(channelName).append(".checkpointDir = ").append(checkpointDir).append('\n');
     }
 
-    if ("file".equals(channelType) && dataDirs != null && !dataDirs.isEmpty()) {
+    if ("file".equals(channelType)) {
+      sb.append("\n");
+      sb.append("# A list of directories where Flume will persist records that are waiting to be\n");
+      sb.append("# processed by the sink. You can use multiple directories on different physical\n");
+      sb.append("# disks to increase throughput.\n");
       sb.append(agent).append(".channels.").append(channelName).append(".dataDirs = ");
       boolean first = true;
       for (String dataDir : dataDirs) {
