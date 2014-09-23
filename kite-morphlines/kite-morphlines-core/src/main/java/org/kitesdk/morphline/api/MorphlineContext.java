@@ -58,7 +58,7 @@ public class MorphlineContext {
   }
 
   public TypedSettings getTypedSettings() {
-    return new TypedSettings(settings);
+    return new TypedSettings(getSettings());
   }
 
   public ExceptionHandler getExceptionHandler() {

@@ -31,7 +31,7 @@ public class TypedSettingsTest extends Assert {
   @Before 
   public void setUp() {
     map = new HashMap<String, Object>();
-    settings = new TypedSettings(map);
+    settings = new MorphlineContext.Builder().setSettings(map).build().getTypedSettings();
   }
   
   @Test
