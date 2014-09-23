@@ -16,6 +16,9 @@
 
 package org.kitesdk.data.spi;
 
+import com.google.common.annotations.VisibleForTesting;
+import java.lang.reflect.Field;
+import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumReader;
@@ -36,6 +39,24 @@ import org.kitesdk.data.IncompatibleSchemaException;
  */
 public class DataModelUtil {
 
+  // Replace this with ReflectData.AllowNull once AVRO-1589 is available
+  @VisibleForTesting
+  static class AllowNulls extends ReflectData {
+    private static final AllowNulls INSTANCE = new AllowNulls();
+
+    /** Return the singleton instance. */
+    public static AllowNulls get() { return INSTANCE; }
+
+    @Override
+    protected Schema createFieldSchema(Field field, Map<String, Schema> names) {
+      Schema schema = super.createFieldSchema(field, names);
+      if (field.getType().isPrimitive()) {
+        return schema;
+      }
+      return makeNullable(schema);
+    }
+  }
+
   /**
    * Get the data model for the given type.
    *
@@ -51,7 +72,7 @@ public class DataModelUtil {
     } else if (IndexedRecord.class.isAssignableFrom(type)) {
       return GenericData.get();
     } else {
-      return ReflectData.AllowNull.get();
+      return AllowNulls.get();
     }
   }
 
@@ -152,7 +173,7 @@ public class DataModelUtil {
       if (GenericData.Record.class.equals(type)) {
         return (E) GenericData.get().newRecord(null, schema);
       }
-      return (E)ReflectData.newInstance(type, schema);
+      return (E) ReflectData.newInstance(type, schema);
     }
 
     return null;

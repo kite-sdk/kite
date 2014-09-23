@@ -15,11 +15,9 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
-import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Date;
-import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData.Record;
@@ -27,13 +25,11 @@ import org.apache.avro.reflect.ReflectData;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Formats;
+import org.kitesdk.data.IncompatibleSchemaException;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestDatasetRepositories;
 import org.kitesdk.data.TestHelpers;
@@ -291,50 +287,20 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
   }
 
   @Test
-  /**
-   * Avro currently will convert primitive types to ["null", "type"] with
-   * ReflectData.AllowNulls. This is a bug and once fixed, this test will no
-   * longer work as we should get a incompatible schema error when trying to
-   * load the dataset.
-   */
   public void testReadNullsWithPrimitivesAllowNullSchema() {
-    List<ObjectPoJo> pojos = Lists.newArrayList(
-        new ObjectPoJo(1l, "name1", new Date()),
-        new ObjectPoJo(2l, "name2", new Date()),
-        new ObjectPoJo(null, "name3", new Date()));
-    String name = "allowNullPrimitives";
+    final String name = "allowNullPrimitives";
     try {
-      Dataset<ObjectPoJo> objectDataset = repo.create(NAMESPACE, name, new DatasetDescriptor.Builder()
+      repo.create(NAMESPACE, name, new DatasetDescriptor.Builder()
           .schema(ReflectData.AllowNull.get().getSchema(ObjectPoJo.class))
           .build(), ObjectPoJo.class);
 
-      DatasetWriter<ObjectPoJo> writer = objectDataset.newWriter();
-      for (ObjectPoJo pojo : pojos) {
-        writer.write(pojo);
-      }
-      writer.close();
-
-
-      Dataset<PrimitivePoJo> primitiveDataset = repo.load(NAMESPACE, name, PrimitivePoJo.class);
-      final DatasetReader<PrimitivePoJo> reader = primitiveDataset.newReader();
-
-      assertTrue(reader.hasNext());
-      Assert.assertNotNull(reader.next());
-
-      assertTrue(reader.hasNext());
-      Assert.assertNotNull(reader.next());
-
-      TestHelpers.assertThrows(
-          "Fail to read a null value into a primitive",
-          NullPointerException.class,
-          new Runnable() {
-
+      TestHelpers.assertThrows("AllowNull primitives should not accept null",
+          IncompatibleSchemaException.class, new Runnable() {
             @Override
             public void run() {
-              reader.hasNext();
+              repo.load(NAMESPACE, name, PrimitivePoJo.class);
             }
           });
-      reader.close();
 
     } catch (RuntimeException e) {
       throw e;
