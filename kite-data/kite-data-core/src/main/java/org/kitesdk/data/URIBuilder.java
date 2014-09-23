@@ -19,8 +19,10 @@ package org.kitesdk.data;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.Map;
 import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.Conversions;
@@ -168,7 +170,14 @@ public class URIBuilder {
    * @since 0.17.0
    */
   public URIBuilder with(String name, Object value) {
-    options.put(name, Conversions.makeString(value));
+    String valueAsString = Conversions.makeString(value);
+    try {
+      // encode value for safe inclusion in URI, since constraint query map is
+      // bypassed
+      options.put(name, URLEncoder.encode(valueAsString, "UTF-8"));
+    } catch (UnsupportedEncodingException e) {
+      throw new DatasetIOException("Failed to encode: " + valueAsString, e);
+    }
     this.isView = true;
     return this;
   }
@@ -210,8 +219,13 @@ public class URIBuilder {
    */
   public URI build() {
     try {
-      return new URI(isView ? VIEW_SCHEME : DATASET_SCHEME,
-          pattern.construct(options).toString(), null);
+      URI optionsUri = pattern.construct(options);
+
+      StringBuilder uri = new StringBuilder();
+      uri.append(isView ? VIEW_SCHEME : DATASET_SCHEME).append(":")
+          .append(optionsUri.getScheme()).append(":")
+          .append(optionsUri.getRawSchemeSpecificPart());
+      return new URI(uri.toString());
     } catch (URISyntaxException e) {
       throw new IllegalArgumentException("Could not build URI", e);
     }

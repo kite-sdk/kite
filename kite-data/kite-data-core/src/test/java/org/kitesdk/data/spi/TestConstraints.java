@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -733,5 +734,31 @@ public class TestConstraints {
         "color", entry.getKey());
     Assert.assertEquals("Should match green",
         Predicates.in("green"), entry.getValue());
+  }
+
+  @Test
+  public void testQueryMapConversion() {
+      String id1 = UUID.randomUUID().toString();
+      String id2 = UUID.randomUUID().toString();
+      String color = "red";
+      Constraints with = emptyConstraints.with("id", id1, id2)
+          .with("color", color);
+      Map<String, String> queryMap = with.toQueryMap();
+      Assert.assertEquals(2, queryMap.size());
+      Assert.assertEquals(Sets.newHashSet(id1, id2),
+          Sets.newHashSet(Splitter.on(',').split(queryMap.get("id"))));
+      Assert.assertEquals(color, queryMap.get("color"));
+      Assert.assertEquals(with, Constraints.fromQueryMap(schema, strategy,
+          queryMap));
+  }
+
+  @Test
+  public void testQueryMapConversionWithEncodedCharacters() {
+      Constraints with = emptyConstraints.with("id", "a/b,c");
+      Map<String, String> queryMap = with.toQueryMap();
+      Assert.assertEquals(1, queryMap.size());
+      Assert.assertEquals("a%2Fb%2Cc", queryMap.get("id"));
+      Assert.assertEquals(with, Constraints.fromQueryMap(schema, strategy,
+          queryMap));
   }
 }
