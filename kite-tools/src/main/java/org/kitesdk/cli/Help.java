@@ -29,10 +29,15 @@ public class Help implements Command {
 
   private final JCommander jc;
   private final Logger console;
+  private String programName;
 
   public Help(JCommander jc, Logger console) {
     this.jc = jc;
     this.console = console;
+  }
+
+  public void setProgramName(String programName) {
+    this.programName = programName;
   }
 
   @Override
@@ -42,7 +47,7 @@ public class Help implements Command {
     if (helpCommands.isEmpty()) {
       console.info(
           "\nUsage: {} [options] [command] [command options]",
-          Main.PROGRAM_NAME);
+          programName);
       console.info("\n  Options:\n");
       for (ParameterDescription param : jc.getParameters()) {
         hasRequired = printOption(console, param) || hasRequired;
@@ -57,9 +62,9 @@ public class Help implements Command {
       }
       console.info("\n  Examples:");
       console.info("\n    # print information for create\n    {} help create",
-          Main.PROGRAM_NAME);
+          programName);
       console.info("\n  See '{} help <command>' for more information on a " +
-          "specific command.", Main.PROGRAM_NAME);
+          "specific command.", programName);
 
     } else {
       for (String cmd : helpCommands) {
@@ -71,7 +76,7 @@ public class Help implements Command {
 
         console.info("\nUsage: {} [general options] {} {} [command options]",
             new Object[] {
-                Main.PROGRAM_NAME, cmd,
+                programName, cmd,
                 commander.getMainParameterDescription()});
         console.info("\n  Description:");
         console.info("\n    {}", jc.getCommandDescription(cmd));
@@ -93,7 +98,7 @@ public class Help implements Command {
               console.info("\n    {}", example);
             } else {
               console.info("    {} {} {}",
-                  new Object[] {Main.PROGRAM_NAME, cmd, example});
+                  new Object[] {programName, cmd, example});
             }
           }
         }

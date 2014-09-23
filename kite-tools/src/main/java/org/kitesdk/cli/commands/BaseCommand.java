@@ -31,7 +31,6 @@ import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
-import org.apache.crunch.util.DistCache;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.ChecksumFileSystem;
@@ -40,7 +39,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.cli.Command;
-import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.spi.HadoopFileSystemURLStreamHandler;
 import org.slf4j.Logger;
 

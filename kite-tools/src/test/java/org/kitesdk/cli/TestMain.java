@@ -91,7 +91,7 @@ public class TestMain {
     int rc = run();
     verify(console).info(
         contains("Usage: {} [options] [command] [command options]"),
-        eq(Main.PROGRAM_NAME));
+        eq(Main.DEFAULT_PROGRAM_NAME));
     assertEquals(1, rc);
   }
 
@@ -107,7 +107,7 @@ public class TestMain {
     int rc = run("help");
     verify(console).info(
         contains("Usage: {} [options] [command] [command options]"),
-        eq(Main.PROGRAM_NAME));
+        eq(Main.DEFAULT_PROGRAM_NAME));
     verify(console).info(contains("Options"));
     verify(console, times(2)).info(anyString(), any(Object[].class)); // -v, --version
     verify(console).info(contains("Commands"));
@@ -118,10 +118,10 @@ public class TestMain {
     verify(console).info(anyString(), eq("csv-schema"), anyString());
     verify(console).info(anyString(), eq("test"), eq("Test description"));
     verify(console).info(contains("Examples"));
-    verify(console).info(contains("{} help create"), eq(Main.PROGRAM_NAME));
+    verify(console).info(contains("{} help create"), eq(Main.DEFAULT_PROGRAM_NAME));
     verify(console).info(
         contains("See '{} help <command>' for more information"),
-        eq(Main.PROGRAM_NAME));
+        eq(Main.DEFAULT_PROGRAM_NAME));
     assertEquals(0, rc);
   }
 
@@ -130,14 +130,14 @@ public class TestMain {
     int rc = run("help", "test");
     verify(console).info(
         "\nUsage: {} [general options] {} {} [command options]",
-        new Object[]{ "dataset", "test", "<test dataset names>" });
+        new Object[]{ Main.DEFAULT_PROGRAM_NAME, "test", "<test dataset names>" });
     verify(console).info(contains("Description"));
     verify(console).info(anyString(), contains("Test description"));
     verify(console).info(contains("Command options"));
     verify(console).info(contains("Examples"));
     verify(console).info(anyString(), contains("# this is a comment"));
     verify(console).info(anyString(),
-        eq(new Object[] {Main.PROGRAM_NAME, "test", "test dataset-name"}));
+        eq(new Object[] {Main.DEFAULT_PROGRAM_NAME, "test", "test dataset-name"}));
     assertEquals(0, rc);
   }
 
@@ -146,21 +146,37 @@ public class TestMain {
     int rc = run("test", "--help");
     verify(console).info(
         "\nUsage: {} [general options] {} {} [command options]",
-        new Object[]{ "dataset", "test", "<test dataset names>" });
+        new Object[]{ Main.DEFAULT_PROGRAM_NAME, "test", "<test dataset names>" });
     verify(console).info(contains("Description"));
     verify(console).info(anyString(), contains("Test description"));
     verify(console).info(contains("Command options"));
     verify(console).info(contains("Examples"));
     verify(console).info(anyString(), contains("this is a comment"));
     verify(console).info(anyString(),
-        eq(new Object[] {Main.PROGRAM_NAME, "test", "test dataset-name"}));
+        eq(new Object[] {Main.DEFAULT_PROGRAM_NAME, "test", "test dataset-name"}));
+    assertEquals(0, rc);
+  }
+
+  @Test
+  public void testCommandHelpWithDollarZero() throws Exception {
+    int rc = run("--dollar-zero", "datasets", "test", "--help");
+    verify(console).info(
+        "\nUsage: {} [general options] {} {} [command options]",
+        new Object[]{ "datasets", "test", "<test dataset names>" });
+    verify(console).info(contains("Description"));
+    verify(console).info(anyString(), contains("Test description"));
+    verify(console).info(contains("Command options"));
+    verify(console).info(contains("Examples"));
+    verify(console).info(anyString(), contains("this is a comment"));
+    verify(console).info(anyString(),
+        eq(new Object[] {"datasets", "test", "test dataset-name"}));
     assertEquals(0, rc);
   }
 
   @Test
   public void testVersion() throws Exception {
     int rc = run("--version");
-    verify(console).info(contains("kite version"), anyString());
+    verify(console).info(contains("Kite version"), anyString());
     assertEquals(0, rc);
   }
 

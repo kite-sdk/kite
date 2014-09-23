@@ -32,7 +32,6 @@ import org.kitesdk.cli.commands.CreateDatasetCommand;
 import org.kitesdk.cli.commands.CreatePartitionStrategyCommand;
 import org.kitesdk.cli.commands.DeleteDatasetCommand;
 import com.google.common.collect.ImmutableSet;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.Set;
@@ -65,7 +64,12 @@ public class Main extends Configured implements Tool {
   private boolean printVersion = false;
 
   @VisibleForTesting
-  static final String PROGRAM_NAME = "dataset";
+  @Parameter(names="--dollar-zero",
+      description="A way for the runtime path to be passed in", hidden=true)
+  String programName = DEFAULT_PROGRAM_NAME;
+
+  @VisibleForTesting
+  static final String DEFAULT_PROGRAM_NAME = "kite-dataset";
 
   private static Set<String> HELP_ARGS = ImmutableSet.of("-h", "-help", "--help", "help");
 
@@ -79,7 +83,7 @@ public class Main extends Configured implements Tool {
     this.console = console;
     this.jc = new JCommander(this);
     this.help = new Help(jc, console);
-    jc.setProgramName(PROGRAM_NAME);
+    jc.setProgramName(DEFAULT_PROGRAM_NAME);
     jc.addCommand("help", help, "-h", "-help", "--help");
     jc.addCommand("create", new CreateDatasetCommand(console));
     jc.addCommand("copy", new CopyCommand(console));
@@ -104,6 +108,7 @@ public class Main extends Configured implements Tool {
       console.error(e.getMessage());
       return 1;
     } catch (ParameterException e) {
+      help.setProgramName(programName);
       String cmd = jc.getParsedCommand();
       if (args.length == 1) { // i.e., just the command (missing required arguments)
         help.helpCommands.add(cmd);
@@ -122,8 +127,10 @@ public class Main extends Configured implements Tool {
       return 1;
     }
 
+    help.setProgramName(programName);
+
     if (printVersion) {
-      console.info("kite version \"{}\"", getVersion());
+      console.info("Kite version \"{}\"", getVersion());
       return 0;
     }
 

@@ -137,11 +137,11 @@ export HIVE_CONF_DIR
 export HIVE_HOME
 
 if [ -x "$HADOOP_COMMON_HOME/bin/hadoop" ]; then
-  exec ${HADOOP_COMMON_HOME}/bin/hadoop jar "$0" $flags "$@"
+  exec ${HADOOP_COMMON_HOME}/bin/hadoop jar "$0" $flags --dollar-zero "$0" "$@"
 else
   # TODO: Add a stand-alone hadoop bundle
   echo "Cannot find hadoop, attempting to run without it"
-  exec java $flags -jar "$0" "$@"
+  exec java $flags -jar "$0" --dollar-zero "$0" "$@"
 fi
 
 # jar contents follows
