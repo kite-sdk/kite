@@ -112,6 +112,7 @@
     <!-- Java versions -->
     <javaVersion>1.7</javaVersion>
     <targetJavaVersion>1.6</targetJavaVersion>
+    <Xdoclint></Xdoclint> <!-- set by the java8 profile to turn off doclint -->
 
     <!-- used by jdiff, semver rule -->
     <previous.project.version>0.16.0</previous.project.version>
@@ -135,7 +136,7 @@
     <vers.crunch-base>0.10.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-hadoop2</vers.crunch>
     <vers.crunch-cdh5>0.9.0-cdh${cdh5.version}</vers.crunch-cdh5>
-    <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305>
+    <vers.findbugs.jsr305>3.0.0</vers.findbugs.jsr305>
     <vers.flume>1.4.0</vers.flume>
     <vers.guava>11.0.2</vers.guava>
     <vers.hadoop1>1.2.1</vers.hadoop1>
@@ -177,7 +178,7 @@
     <vers.doxia-module-markdown>1.4</vers.doxia-module-markdown>
     <vers.doxia-module-confluence>1.4</vers.doxia-module-confluence>
     <vers.build-helper-maven-plugin>1.8</vers.build-helper-maven-plugin>
-    <vers.findbugs-maven-plugin>2.5.2</vers.findbugs-maven-plugin>
+    <vers.findbugs-maven-plugin>3.0.0</vers.findbugs-maven-plugin>
     <vers.github-site-maven-plugin>0.8</vers.github-site-maven-plugin>
     <vers.maven-compiler-plugin>3.1</vers.maven-compiler-plugin>
     <vers.maven-enforcer-plugin>1.3.1</vers.maven-enforcer-plugin>
@@ -1228,6 +1229,16 @@
     </profile>
 
     <profile>
+      <id>jdk1.6</id>
+      <activation>
+        <jdk>1.6</jdk>
+      </activation>
+      <properties>                  
+        <vers.findbugs-maven-plugin>2.5.2</vers.findbugs-maven-plugin>
+      </properties>
+    </profile>
+
+    <profile>
       <id>jdk1.8+</id>
       <activation>
         <jdk>[1.8,)</jdk>
@@ -1237,7 +1248,7 @@
         <Xdoclint>-Xdoclint:none</Xdoclint>
       </properties>
     </profile>
-    
+
   </profiles>
 
 </project>

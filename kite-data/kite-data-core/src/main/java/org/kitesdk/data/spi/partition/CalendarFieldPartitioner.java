@@ -40,7 +40,7 @@ import org.kitesdk.data.spi.FieldPartitioner;
 public class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
 
   protected static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-  protected int calendarField;
+  protected final int calendarField;
 
   public CalendarFieldPartitioner(String sourceName, String name,
       int calendarField, int cardinality) {
@@ -70,6 +70,9 @@ public class CalendarFieldPartitioner extends FieldPartitioner<Long, Integer> {
   }
 
   @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION",
+      justification="Default annotation is not correct for equals")
   public boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;

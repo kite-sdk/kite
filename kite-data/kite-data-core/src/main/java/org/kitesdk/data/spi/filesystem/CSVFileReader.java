@@ -252,7 +252,7 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
             return string;
           } else {
             try {
-              return schema.getEnumSymbols().get(Integer.valueOf(string));
+              return schema.getEnumSymbols().get(Integer.parseInt(string));
             } catch (IndexOutOfBoundsException ex) {
               return null;
             }

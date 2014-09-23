@@ -18,6 +18,7 @@ package org.kitesdk.data.spi.partition;
 import com.google.common.base.Predicate;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.DiscreteDomains;
+import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -40,7 +41,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
   private final List<String> upperBounds;
 
   // lazily constructed DiscreteDomain for upper bounds; use domain()
-  private RangeDomain domain;
+  private final RangeDomain domain;
 
   public RangeFieldPartitioner(String sourceName, String... upperBounds) {
     this(sourceName, null, upperBounds);
@@ -50,7 +51,8 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
                                String... upperBounds) {
     super(sourceName, (name == null ? sourceName + "_bound" : name),
         String.class, String.class, upperBounds.length);
-    this.upperBounds = Arrays.asList(upperBounds);
+    this.upperBounds = ImmutableList.copyOf(upperBounds);
+    this.domain = new RangeDomain();
   }
 
   @Override
@@ -75,7 +77,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
       //   if this( abc ) => b then this( acc ) => b, so b must be included
       Range<String> transformed = Ranges.transformClosed(
           (Range<String>) predicate, this);
-      return Predicates.in(Ranges.asSet(transformed, domain()));
+      return Predicates.in(Ranges.asSet(transformed, domain));
     } else {
       return null;
     }
@@ -91,7 +93,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
     } else if (predicate instanceof Range) {
       Range<String> transformed = transformClosed((Range<String>) predicate);
       if (transformed != null) {
-        return Predicates.in(Ranges.asSet(transformed, domain()));
+        return Predicates.in(Ranges.asSet(transformed, domain));
       }
     }
     return null;
@@ -101,14 +103,10 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
     return upperBounds;
   }
 
-  private RangeDomain domain() {
-    if (domain == null) {
-      this.domain = new RangeDomain();
-    }
-    return domain;
-  }
-
   @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION",
+      justification="Default annotation is not correct for equals")
   public boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;
@@ -148,7 +146,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
     if (range.hasLowerBound()) {
       String lower = range.lowerEndpoint();
       // the special case, (a, _] and apply(a) == a is handled by skipping a
-      String afterLower = domain().next(apply(lower));
+      String afterLower = domain.next(apply(lower));
       if (afterLower != null) {
         if (range.hasUpperBound()) {
           String upper = range.upperEndpoint();
@@ -158,7 +156,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
             // include upper
             return Ranges.closed(afterLower, upperImage);
           } else {
-            String beforeUpper = domain().previous(upperImage);
+            String beforeUpper = domain.previous(upperImage);
             if (afterLower.compareTo(beforeUpper) <= 0) {
               return Ranges.closed(afterLower, beforeUpper);
             }
@@ -174,7 +172,7 @@ public class RangeFieldPartitioner extends FieldPartitioner<String, String> {
         // include upper
         return Ranges.atMost(upperImage);
       } else {
-        String beforeUpper = domain().previous(upperImage);
+        String beforeUpper = domain.previous(upperImage);
         if (beforeUpper != null) {
           return Ranges.atMost(beforeUpper);
         }

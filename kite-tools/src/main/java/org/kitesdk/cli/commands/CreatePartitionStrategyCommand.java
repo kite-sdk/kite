@@ -70,7 +70,7 @@ public class CreatePartitionStrategyCommand extends BaseCommand {
           String width = m.group(3);
           ValidationException.check(width != null,
               "Missing number of hash partitions: %s:hash[?]", fieldName);
-          strategyBuilder.hash(fieldName, Integer.valueOf(width));
+          strategyBuilder.hash(fieldName, Integer.parseInt(width));
         } else if ("copy".equals(m.group(2))) {
           strategyBuilder.identity(fieldName);
         } else if ("year".equals(m.group(2))) {

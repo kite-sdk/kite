@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.spi.filesystem;
 
-import com.fasterxml.jackson.core.io.CharacterEscapes;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.DatasetDescriptor;
 import org.slf4j.Logger;
@@ -100,7 +99,7 @@ public class CSVProperties {
     int lines = DEFAULT_LINES_TO_SKIP;
     if (linesToSkipString != null) {
       try {
-        lines = Integer.valueOf(linesToSkipString);
+        lines = Integer.parseInt(linesToSkipString);
       } catch (NumberFormatException ex) {
         LOG.debug("Defaulting lines to skip, failed to parse: {}",
             linesToSkipString);
