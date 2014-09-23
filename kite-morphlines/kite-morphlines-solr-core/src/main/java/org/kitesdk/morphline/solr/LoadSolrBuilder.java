@@ -28,6 +28,7 @@ import org.kitesdk.morphline.api.CommandBuilder;
 import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.api.MorphlineRuntimeException;
 import org.kitesdk.morphline.api.Record;
+import org.kitesdk.morphline.api.TypedSettings;
 import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.base.Metrics;
@@ -61,6 +62,7 @@ public final class LoadSolrBuilder implements CommandBuilder {
     private final DocumentLoader loader;
     private final Map<String, Float> boosts = new HashMap();
     private final Timer elapsedTime;    
+    private final boolean isDryRun;
     
     public LoadSolr(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);
@@ -74,6 +76,7 @@ public final class LoadSolrBuilder implements CommandBuilder {
         float boost = Float.parseFloat(entry.getValue().toString().trim());
         boosts.put(fieldName, boost);
       }
+      this.isDryRun = context.getTypedSettings().getBoolean(TypedSettings.DRY_RUN_SETTING_NAME, false);
       validateArguments();
       this.elapsedTime = getTimer(Metrics.ELAPSED_TIME);
     }
@@ -125,7 +128,11 @@ public final class LoadSolrBuilder implements CommandBuilder {
       Timer.Context timerContext = elapsedTime.time();
       SolrInputDocument doc = convert(record);
       try {
-        loader.load(doc);
+        if (isDryRun) {
+          System.out.println("dryrun: " + doc);        
+        } else {
+          loader.load(doc);
+        }
       } catch (IOException e) {
         throw new MorphlineRuntimeException(e);
       } catch (SolrServerException e) {
