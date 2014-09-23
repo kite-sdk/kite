@@ -24,6 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -441,16 +442,23 @@ public class Constraints {
                                          PartitionStrategy strategy,
                                          Map<String, String> query) {
     Map<String, Predicate> constraints = Maps.newLinkedHashMap();
+    Map<String, Object> provided = Maps.newHashMap();
     for (Map.Entry<String, String> entry : query.entrySet()) {
       String name = entry.getKey();
       if (SchemaUtil.isField(schema, strategy, name)) {
         Schema fieldSchema = SchemaUtil.fieldSchema(schema, strategy, name);
-        constraints.put(name,
-            Predicates.fromString(entry.getValue(), fieldSchema));
+        Predicate predicate = Predicates.fromString(
+            entry.getValue(), fieldSchema);
+        constraints.put(name, predicate);
+        if (predicate instanceof In) {
+          Set values = Predicates.asSet((In) predicate);
+          if (values.size() == 1) {
+            provided.put(name, Iterables.getOnlyElement(values));
+          }
+        }
       }
     }
-    return new Constraints(
-        schema, strategy, constraints, ImmutableMap.<String, Object>of());
+    return new Constraints(schema, strategy, constraints, provided);
   }
 
   @SuppressWarnings("unchecked")

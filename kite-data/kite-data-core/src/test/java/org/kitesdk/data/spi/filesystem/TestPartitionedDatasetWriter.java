@@ -143,7 +143,7 @@ public class TestPartitionedDatasetWriter {
     Assert.assertTrue(fileSystem.exists(new Path(datasetPath, "version=6")));
 
     Assert.assertFalse(fileSystem.exists(new Path(datasetPath, "version=7")));
-    writeToView(users.with("version", 7), u2);
+    writeToView(Datasets.load("view:" + datasetPath + "?version=7"), u2);
     Assert.assertTrue(fileSystem.exists(new Path(datasetPath, "version=7")));
 
     Assert.assertEquals("Should read from provided partitions without view",
