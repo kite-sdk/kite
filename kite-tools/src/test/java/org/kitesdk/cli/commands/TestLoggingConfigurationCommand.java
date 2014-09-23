@@ -21,7 +21,6 @@ import com.google.common.io.Files;
 import java.io.File;
 import java.util.concurrent.Callable;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.test.GenericTestUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,19 +36,24 @@ public class TestLoggingConfigurationCommand {
 
   private Logger console = null;
   private LoggingConfigCommand command;
-  private static final String DATASET_URI= "dataset:file:target/data/logConfig/users";
+  private static final String FILE_DATASET_URI = "dataset:file:target/data/logConfig/users";
+  private static final String HIVE_DATASET_NAME = "users";
 
   @BeforeClass
-  public static void createDataset() throws Exception {
+  public static void createDatasets() throws Exception {
     String avsc = "src/test/resources/test-schemas/user.avsc";
 
-    TestUtil.run("delete", DATASET_URI);
-    TestUtil.run("-v", "create", DATASET_URI, "-s", avsc);
+    TestUtil.run("delete", FILE_DATASET_URI);
+    TestUtil.run("-v", "create", FILE_DATASET_URI, "-s", avsc);
+
+    TestUtil.run("delete", HIVE_DATASET_NAME);
+    TestUtil.run("-v", "create", HIVE_DATASET_NAME, "-s", avsc);
   }
 
   @AfterClass
-  public static void deleteDataset() throws Exception {
-    TestUtil.run("delete", DATASET_URI);
+  public static void deleteDatasets() throws Exception {
+    TestUtil.run("delete", FILE_DATASET_URI);
+    TestUtil.run("delete", HIVE_DATASET_NAME);
   }
 
   @Before
@@ -63,7 +67,7 @@ public class TestLoggingConfigurationCommand {
   public void testCli() throws Exception {
     int rc = TestUtil.run(console, new Configuration(), "logging-config", "--host",
         "quickstart.cloudera", "--package", "org.kitesdk.test.logging",
-        DATASET_URI);
+        FILE_DATASET_URI);
     Assert.assertEquals("Return code should be 0", 0, rc);
     verify(console).info(matches(
         "log4j.appender.flume = org.apache.flume.clients.log4jappender.Log4jAppender\n" +
@@ -78,8 +82,27 @@ public class TestLoggingConfigurationCommand {
   }
 
   @Test
+  public void testCliHive() throws Exception {
+    int rc = TestUtil.run(console, new Configuration(), "logging-config", "--host",
+        "quickstart.cloudera", "--package", "org.kitesdk.test.logging",
+        "users");
+    Assert.assertEquals("Return code should be 0", 0, rc);
+    verify(console).trace(startsWith("Repository URI:"));
+    verify(console).warn("Warning: The dataset {} doese not have a schema URL. The schema will be sent with each event.", "users");
+    verify(console).info(matches(
+        "log4j.appender.flume = org.apache.flume.clients.log4jappender.Log4jAppender\n" +
+        "log4j.appender.flume.Hostname = quickstart.cloudera\n" +
+        "log4j.appender.flume.Port = 41415\n" +
+        "log4j.appender.flume.UnsafeMode = true\n" +
+        "\n" +
+        "# Log events from the following Java class/package:\n" +
+        "log4j.logger.org.kitesdk.test.logging = INFO, flume\n"));
+    verifyNoMoreInteractions(console);
+  }
+
+  @Test
   public void testDefaults() throws Exception {
-    command.datasetName = Lists.newArrayList(DATASET_URI);
+    command.datasetName = Lists.newArrayList(FILE_DATASET_URI);
     command.hostname = "quickstart.cloudera";
     command.packageName = "org.kitesdk.test.logging";
     int rc = command.run();
@@ -97,8 +120,28 @@ public class TestLoggingConfigurationCommand {
   }
 
   @Test
+  public void testHiveDataset() throws Exception {
+    command.datasetName = Lists.newArrayList("users");
+    command.hostname = "quickstart.cloudera";
+    command.packageName = "org.kitesdk.test.logging";
+    int rc = command.run();
+    Assert.assertEquals("Return code should be 0", 0, rc);
+    verify(console).trace(startsWith("Repository URI:"));
+    verify(console).warn("Warning: The dataset {} doese not have a schema URL. The schema will be sent with each event.", "users");
+    verify(console).info(matches(
+        "log4j.appender.flume = org.apache.flume.clients.log4jappender.Log4jAppender\n" +
+        "log4j.appender.flume.Hostname = quickstart.cloudera\n" +
+        "log4j.appender.flume.Port = 41415\n" +
+        "log4j.appender.flume.UnsafeMode = true\n" +
+        "\n" +
+        "# Log events from the following Java class/package:\n" +
+        "log4j.logger.org.kitesdk.test.logging = INFO, flume\n"));
+    verifyNoMoreInteractions(console);
+  }
+
+  @Test
   public void testLogAll() throws Exception {
-    command.datasetName = Lists.newArrayList(DATASET_URI);
+    command.datasetName = Lists.newArrayList(FILE_DATASET_URI);
     command.hostname = "quickstart.cloudera";
     command.logAll = true;
     int rc = command.run();
@@ -117,7 +160,7 @@ public class TestLoggingConfigurationCommand {
 
   @Test
   public void testCustomPort() throws Exception {
-    command.datasetName = Lists.newArrayList(DATASET_URI);
+    command.datasetName = Lists.newArrayList(FILE_DATASET_URI);
     command.hostname = "quickstart.cloudera";
     command.packageName = "org.kitesdk.test.logging";
     command.port = 4242;
@@ -138,7 +181,7 @@ public class TestLoggingConfigurationCommand {
   @Test
   public void testOutputPath() throws Exception {
     String outputPath = "target/logConfig/log4j.properties";
-    command.datasetName = Lists.newArrayList(DATASET_URI);
+    command.datasetName = Lists.newArrayList(FILE_DATASET_URI);
     command.hostname = "quickstart.cloudera";
     command.packageName = "org.kitesdk.test.logging";
     command.outputPath = outputPath;
@@ -146,7 +189,7 @@ public class TestLoggingConfigurationCommand {
     Assert.assertEquals("Return code should be 0", 0, rc);
     verifyNoMoreInteractions(console);
     String fileContent = Files.toString(new File(outputPath), BaseCommand.UTF8);
-    GenericTestUtils.assertMatches(fileContent,
+    TestUtil.assertMatches(
         "log4j.appender.flume = org.apache.flume.clients.log4jappender.Log4jAppender\n" +
         "log4j.appender.flume.Hostname = quickstart.cloudera\n" +
         "log4j.appender.flume.Port = 41415\n" +
@@ -154,7 +197,7 @@ public class TestLoggingConfigurationCommand {
         "log4j.appender.flume.AvroSchemaUrl = file:.*/target/data/logConfig/users/.metadata/schema.avsc\n" +
         "\n" +
         "# Log events from the following Java class/package:\n" +
-        "log4j.logger.org.kitesdk.test.logging = INFO, flume\n");
+        "log4j.logger.org.kitesdk.test.logging = INFO, flume\n", fileContent);
   }
 
   @Test
@@ -176,7 +219,7 @@ public class TestLoggingConfigurationCommand {
 
   @Test
   public void testHostnameRequired() throws Exception {
-    command.datasetName = Lists.newArrayList(DATASET_URI);
+    command.datasetName = Lists.newArrayList(FILE_DATASET_URI);
     command.packageName = "org.kitesdk.test.logging";
     final LoggingConfigCommand finalCommand = command;
     TestHelpers.assertThrows("Throw IllegalArgumentException when no hostname is provided",
@@ -193,7 +236,7 @@ public class TestLoggingConfigurationCommand {
 
   @Test
   public void testPackageNameOrLogAllRequired() throws Exception {
-    command.datasetName = Lists.newArrayList(DATASET_URI);
+    command.datasetName = Lists.newArrayList(FILE_DATASET_URI);
     command.hostname = "quickstart.cloudera";
     final LoggingConfigCommand finalCommand = command;
     TestHelpers.assertThrows("Throw IllegalArgumentException when package name and log all are not provided",

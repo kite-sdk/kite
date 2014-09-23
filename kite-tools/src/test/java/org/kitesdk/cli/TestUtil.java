@@ -19,10 +19,12 @@ package org.kitesdk.cli;
 import com.google.common.base.Preconditions;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.junit.Assert;
 import org.junit.internal.matchers.TypeSafeMatcher;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
@@ -63,6 +65,15 @@ public class TestUtil {
 
   public static Matcher<String> matchesSchema(Schema schema) {
     return new SchemaMatcher(schema, false);
+  }
+
+  public static Matcher<String> matchesPattern(String pattern) {
+    return new PatternMatcher(pattern);
+  }
+
+  public static void assertMatches(String pattern, String actual) {
+    Assert.assertTrue("Expected:\n\n" + pattern + "\n\n" + "\tbut was:\n" +
+        actual + "\n", matchesPattern(pattern).matches(actual));
   }
 
   private static class SchemaMatcher extends TypeSafeMatcher<String> {
@@ -198,5 +209,24 @@ public class TestUtil {
       description.appendText("DatasetDescriptor equivalent to ")
           .appendText(descriptor.toString());
     }
+  }
+
+  private static class PatternMatcher extends TypeSafeMatcher<String> {
+    private final Pattern pattern;
+
+    public PatternMatcher(String pattern) {
+      this.pattern = Pattern.compile(pattern);
+    }
+
+    @Override
+    public boolean matchesSafely(String item) {
+      return pattern.matcher(item).matches();
+    }
+
+    @Override
+    public void describeTo(Description description) {
+      description.appendText("String matches ").appendText(pattern.toString());
+    }
+
   }
 }

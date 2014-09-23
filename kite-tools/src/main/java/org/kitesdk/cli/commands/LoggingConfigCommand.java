@@ -29,20 +29,20 @@ import org.slf4j.Logger;
 @Parameters(commandDescription = "Build a log4j config to log events to a dataset")
 public class LoggingConfigCommand extends BaseDatasetCommand {
 
-  @Parameter(description = "<dataset name>", required = true)
+  @Parameter(description = "Dataset name or URI", required = true)
   List<String> datasetName;
 
-  @Parameter(names={"-h", "--host"}, description = "<flume hostname>", required = true)
+  @Parameter(names={"--host"}, description = "Flume hostname", required = true)
   String hostname;
 
-  @Parameter(names={"--class", "--package"}, description = "<Java class/package to log from>")
+  @Parameter(names={"--port"}, description = "Flume port")
+  int port = 41415;
+
+  @Parameter(names={"--class", "--package"}, description = "Java class/package to log from")
   String packageName;
 
-  @Parameter(names={"--log-all"}, description = "")
+  @Parameter(names={"--log-all"}, description = "Configure the root logger to send to Flume")
   boolean logAll;
-
-  @Parameter(names={"-p", "--port"}, description = "<flume port>")
-  int port = 41415;
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
       value="UWF_NULL_FIELD",

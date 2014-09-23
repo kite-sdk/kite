@@ -35,54 +35,54 @@ import org.slf4j.Logger;
 @Parameters(commandDescription = "Build a Flume config to log events to a dataset")
 public class FlumeConfigCommand extends BaseDatasetCommand {
 
-  @Parameter(description = "<dataset name>", required = true)
+  @Parameter(description = "Dataset name or URI", required = true)
   List<String> datasetName;
 
-  @Parameter(names={"--use-dataset-uri"}, description = "Configure Flume with a dataset URI. Requires Flume 1.6+ or CDH5.2+")
+  @Parameter(names={"--use-dataset-uri"}, description = "Configure Flume with a dataset URI. Requires Flume 1.6+")
   boolean newFlume;
 
-  @Parameter(names={"--agent"}, description = "<flume agent name>")
+  @Parameter(names={"--agent"}, description = "Flume agent name")
   String agent = "tier1";
 
-  @Parameter(names={"--source-name"}, description = "<source name>")
-  String sourceName = "avro-log-source";
+  @Parameter(names={"--source"}, description = "Flume source name")
+  String sourceName = "avro-event-source";
 
-  @Parameter(names={"--bind"}, description = "<avro source bind address>")
+  @Parameter(names={"--bind"}, description = "Avro source bind address")
   String bindAddress = "0.0.0.0";
 
-  @Parameter(names={"-p", "--port"}, description = "<avro source port>")
+  @Parameter(names={"--port"}, description = "Avro source port")
   int port = 41415;
 
-  @Parameter(names={"--channel-name"}, description = "<channel name>")
-  String channelName = "channel-1";
+  @Parameter(names={"--channel"}, description = "Flume channel name")
+  String channelName = "avro-event-channel";
 
-  @Parameter(names={"--channel-type"}, description = "<channel type>")
+  @Parameter(names={"--channel-type"}, description = "Flume channel type")
   String channelType = "file";
 
-  @Parameter(names={"--channel-capacity"}, description = "<channel capacity>")
+  @Parameter(names={"--channel-capacity"}, description = "Flume channel capacity")
   Integer capacity = null;
   int defaultMemoryChannelCapacity = 10000000;
 
-  @Parameter(names={"--channel-transaction-capacity"}, description = "<channel transaction capacity>")
+  @Parameter(names={"--channel-transaction-capacity"}, description = "Flume channel transaction capacity")
   Integer transactionCapacity = null;
   int defaultMemoryChannelTransactionCapacity = 1000;
 
-  @Parameter(names={"--checkpoint-dir"}, description = "<file channel checkpoint directory>")
+  @Parameter(names={"--checkpoint-dir"}, description = "File channel checkpoint directory")
   String checkpointDir = null;
 
-  @Parameter(names={"--data-dir"}, description = "<file channel data directory>")
+  @Parameter(names={"--data-dir"}, description = "File channel data directory, use the option multiple times for multiple data directories")
   List<String> dataDirs = null;
 
-  @Parameter(names={"--sink-name"}, description = "<sink name>")
+  @Parameter(names={"--sink"}, description = "Avro sink name")
   String sinkName = "kite-dataset";
 
-  @Parameter(names={"--batch-size"}, description = "<records per batch>")
+  @Parameter(names={"--batch-size"}, description = "Records to write per batch")
   int batchSize = 1000;
 
-  @Parameter(names={"--roll-interval"}, description = "<wait time in seconds>")
+  @Parameter(names={"--roll-interval"}, description = "Time in seconds before starting the next file")
   int rollInterval = 30;
 
-  @Parameter(names={"--proxy-user"}, description = "<user to write to HDFS as>")
+  @Parameter(names={"--proxy-user"}, description = "User to write to HDFS as")
   String proxyUser = null;
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(
@@ -100,6 +100,11 @@ public class FlumeConfigCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(
         datasetName != null && !datasetName.isEmpty(),
         "Missing dataset uri");
+
+    Preconditions.checkArgument(
+        !"file".equals(channelType) ||
+        (checkpointDir != null && dataDirs != null && !dataDirs.isEmpty()),
+        "--checkpoint-dir and --data-dir are required options when the channel type is 'file'");
 
     Dataset<GenericRecord> dataset = load(datasetName.get(0), GenericRecord.class).getDataset();
     String datasetUri = buildDatasetUri(datasetName.get(0));
