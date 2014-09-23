@@ -124,6 +124,9 @@ public class ListFieldPartitioner<S> extends FieldPartitioner<S, Integer> {
   }
 
   @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION",
+      justification="Default annotation is not correct for equals")
   public boolean equals(@Nullable Object o) {
     if (this == o) {
       return true;

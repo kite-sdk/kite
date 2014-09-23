@@ -59,8 +59,8 @@ public class FieldMapping {
     OCC_VERSION
   }
 
-  private static String SYS_COL_FAMILY = "_s";
-  private static String OCC_QUALIFIER = "w";
+  private static final String SYS_COL_FAMILY = "_s";
+  private static final String OCC_QUALIFIER = "w";
 
   public static FieldMapping key(String name) {
     return new FieldMapping(name, MappingType.KEY, null, null, null);
