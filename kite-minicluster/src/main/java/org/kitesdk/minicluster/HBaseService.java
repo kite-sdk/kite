@@ -126,6 +126,7 @@ class HBaseService implements Service {
   public void stop() throws IOException {
     if (hbaseCluster != null) {
       hbaseCluster.shutdown();
+      this.hbaseCluster.killAll();
       this.hbaseCluster.waitUntilShutDown();
       logger.info("HBase Minicluster Service Shut Down.");
       this.hbaseCluster = null;
@@ -224,7 +225,20 @@ class HBaseService implements Service {
    * @throws IOException
    */
   private static void waitForHBaseToComeOnline(MiniHBaseCluster hbaseCluster)
-      throws IOException {
+      throws IOException, InterruptedException {
+    // Wait for the master to be initialized. This is required because even
+    // before it's initialized, the regionserver can come online and the meta
+    // table can be scannable. If the cluster is quickly shut down after all of
+    // this before the master is initialized, it can cause the shutdown to hang
+    // indefinitely as initialization tasks will block forever.
+    //
+    // Unfortunately, no method available to wait for master to come online like
+    // regionservers, so we use a while loop with a sleep so we don't hammer the
+    // isInitialized method.
+    while (!hbaseCluster.getMaster().isInitialized()) {
+      Thread.sleep(1000);
+    }
+    // Now wait for the regionserver to come online.
     hbaseCluster.getRegionServer(0).waitForServerOnline();
     // Don't leave here till we've done a successful scan of the hbase:meta
     // This validates that not only is the regionserver up, but that the
