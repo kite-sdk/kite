@@ -42,40 +42,85 @@ import org.slf4j.LoggerFactory;
 /**
  * An HBase minicluster service implementation.
  */
-public class HBaseService implements Service {
-
+class HBaseService implements Service {
+  
   private static final Logger logger = LoggerFactory
       .getLogger(HBaseService.class);
+
+  /**
+   * Service registration for MiniCluster factory
+   */
+  static {
+    MiniCluster.registerService(HBaseService.class);
+  }
   
+  /**
+   * Service configuration keys
+   */
+  public static final String MASTER_PORT_KEY = "hbase-master-port";
+  public static final String REGIONSERVER_PORT_KEY = "hbase-regionserver-port";
+
   private static final String HBASE_META_TABLE = "hbase:meta";
   private static final String MANAGED_SCHEMAS_TABLE = "managed_schemas";
 
-  private Configuration conf;
-  private Integer zookeeperClientPort = null;
-  private String forceBindIP;
+  /**
+   * Configuration settings
+   */
+  private Configuration hadoopConf;
+  private int zookeeperClientPort = 28282;
+  private String bindIP = "127.0.0.1";
+  private int masterPort = 60000;
+  private int regionserverPort = 60020;
+  
+  /**
+   * Embedded HBase cluster
+   */
   private MiniHBaseCluster hbaseCluster;
 
+  public HBaseService() {
+  }
+
   @Override
-  public void start() throws IOException {
-    Preconditions.checkState(conf != null,
-        "Configuration must be set before starting mini HBase cluster");
-    Preconditions.checkState(zookeeperClientPort != null,
-        "The zookeeper client port must be configured");
+  public void configure(ServiceConfig serviceConfig) {
+    if (serviceConfig.contains(MiniCluster.BIND_IP_KEY)) {
+      bindIP = serviceConfig.get(MiniCluster.BIND_IP_KEY);
+    }
+    if (serviceConfig.contains(ZookeeperService.ZK_PORT_KEY)) {
+      zookeeperClientPort = Integer.parseInt(serviceConfig
+          .get(ZookeeperService.ZK_PORT_KEY));
+    }
+    if (serviceConfig.contains(MASTER_PORT_KEY)) {
+      masterPort = Integer.parseInt(serviceConfig.get(MASTER_PORT_KEY));
+    }
+    if (serviceConfig.contains(REGIONSERVER_PORT_KEY)) {
+      masterPort = Integer.parseInt(serviceConfig.get(REGIONSERVER_PORT_KEY));
+    }
+    hadoopConf = serviceConfig.getHadoopConf();
+  }
+
+  @Override
+  public Configuration getHadoopConf() {
+    return hadoopConf;
+  }
+
+  @Override
+  public void start() throws IOException, InterruptedException {
+    Preconditions.checkState(hadoopConf != null,
+        "Hadoop Configuration must be set before starting mini HBase cluster");
+    Preconditions.checkState(zookeeperClientPort != 0,
+        "The zookeeper client port must be configured to a non zero value");
 
     // We first start an empty HBase cluster before fully configuring it
-    try {
-      hbaseCluster = new MiniHBaseCluster(conf, 0, 0, null, null);
-    } catch (InterruptedException e) {
-      throw new IOException(e);
-    }
+    hbaseCluster = new MiniHBaseCluster(hadoopConf, 0, 0, null, null);
     // Configure the cluster, and start a master and regionserver.
-    conf = configureHBaseCluster(hbaseCluster.getConf(), zookeeperClientPort,
-        FileSystem.get(conf), forceBindIP);
+    hadoopConf = configureHBaseCluster(hbaseCluster.getConf(),
+        zookeeperClientPort, FileSystem.get(hadoopConf), bindIP, masterPort,
+        regionserverPort);
     hbaseCluster.startMaster();
     hbaseCluster.startRegionServer();
     waitForHBaseToComeOnline(hbaseCluster);
     // Create system tables required by Kite
-    createManagedSchemasTable(conf);
+    createManagedSchemasTable(hadoopConf);
     logger.info("HBase Minicluster Service Started.");
   }
 
@@ -90,41 +135,11 @@ public class HBaseService implements Service {
   }
 
   @Override
-  public Configuration getConf() {
-    return conf;
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
-  }
-
-  @Override
   public List<Class<? extends Service>> dependencies() {
     List<Class<? extends Service>> services = new ArrayList<Class<? extends Service>>();
     services.add(HdfsService.class);
     services.add(ZookeeperService.class);
     return services;
-  }
-
-  /**
-   * Set the port zookeeper is listening for client connections on.
-   * 
-   * @param zookeeperClientPort
-   */
-  void setZookeeperClientPort(int zookeeperClientPort) {
-    this.zookeeperClientPort = zookeeperClientPort;
-  }
-
-  /**
-   * Set an IP address for all sockets that listen to bind to. Useful for
-   * environments where you are restricted by which IP addresses you are allowed
-   * to bind to.
-   * 
-   * @param forceBindIP
-   */
-  void setForceBindIP(String forceBindIP) {
-    this.forceBindIP = forceBindIP;
   }
 
   /**
@@ -137,15 +152,19 @@ public class HBaseService implements Service {
    *          The client port zookeeper is listening on
    * @param hdfsFs
    *          The HDFS FileSystem this HBase cluster will run on top of
-   * @param forceBindIP
+   * @param bindIP
    *          The IP Address to force bind all sockets on. If null, will use
    *          defaults
+   * @param masterPort
+   *          The port the master listens on
+   * @param regionserverPort
+   *          The port the regionserver listens on
    * @return The updated Configuration object.
    * @throws IOException
    */
   private static Configuration configureHBaseCluster(Configuration config,
-      int zkClientPort, FileSystem hdfsFs, String forceBindIP)
-      throws IOException {
+      int zkClientPort, FileSystem hdfsFs, String bindIP, int masterPort,
+      int regionserverPort) throws IOException {
     // Configure the zookeeper port
     config
         .set(HConstants.ZOOKEEPER_CLIENT_PORT, Integer.toString(zkClientPort));
@@ -161,35 +180,37 @@ public class HBaseService implements Service {
     // Configure the bind addresses and ports. If running in Openshift, we only
     // have permission to bind to the private IP address, accessible through an
     // environment variable.
-    if (forceBindIP != null) {
-      logger.info("HBase force binding to ip: " + forceBindIP);
-      config.set("hbase.master.ipc.address", forceBindIP);
-      config.set("hbase.regionserver.ipc.address", forceBindIP);
-      config.set(HConstants.ZOOKEEPER_QUORUM, forceBindIP);
+    logger.info("HBase force binding to ip: " + bindIP);
+    config.set("hbase.master.ipc.address", bindIP);
+    config.set(HConstants.MASTER_PORT, Integer.toString(masterPort));
+    config.set("hbase.regionserver.ipc.address", bindIP);
+    config
+        .set(HConstants.REGIONSERVER_PORT, Integer.toString(regionserverPort));
+    config.set(HConstants.ZOOKEEPER_QUORUM, bindIP);
 
-      // By default, the HBase master and regionservers will report to zookeeper
-      // that it's hostname is what it determines by reverse DNS lookup, and not
-      // what we use as the bind address. This means when we set the bind
-      // address, daemons won't actually be able to connect to eachother if they
-      // are different. Here, we do something that's illegal in 48 states - use
-      // reflection to override a private static final field in the DNS class
-      // that is a cachedHostname. This way, we are forcing the hostname that
-      // reverse dns finds. This may not be compatible with newer versions of
-      // Hadoop.
-      try {
-        Field cachedHostname = DNS.class.getDeclaredField("cachedHostname");
-        cachedHostname.setAccessible(true);
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        modifiersField.setInt(cachedHostname, cachedHostname.getModifiers()
-            & ~Modifier.FINAL);
-        cachedHostname.set(null, forceBindIP);
-      } catch (Exception e) {
-        // Reflection can throw so many checked exceptions. Let's wrap in an
-        // IOException.
-        throw new IOException(e);
-      }
+    // By default, the HBase master and regionservers will report to zookeeper
+    // that it's hostname is what it determines by reverse DNS lookup, and not
+    // what we use as the bind address. This means when we set the bind
+    // address, daemons won't actually be able to connect to eachother if they
+    // are different. Here, we do something that's illegal in 48 states - use
+    // reflection to override a private static final field in the DNS class
+    // that is a cachedHostname. This way, we are forcing the hostname that
+    // reverse dns finds. This may not be compatible with newer versions of
+    // Hadoop.
+    try {
+      Field cachedHostname = DNS.class.getDeclaredField("cachedHostname");
+      cachedHostname.setAccessible(true);
+      Field modifiersField = Field.class.getDeclaredField("modifiers");
+      modifiersField.setAccessible(true);
+      modifiersField.setInt(cachedHostname, cachedHostname.getModifiers()
+          & ~Modifier.FINAL);
+      cachedHostname.set(null, bindIP);
+    } catch (Exception e) {
+      // Reflection can throw so many checked exceptions. Let's wrap in an
+      // IOException.
+      throw new IOException(e);
     }
+
     // By setting the info ports to -1 for, we won't launch the master or
     // regionserver info web interfaces
     config.set(HConstants.MASTER_INFO_PORT, "-1");
@@ -206,13 +227,12 @@ public class HBaseService implements Service {
    */
   private static void waitForHBaseToComeOnline(MiniHBaseCluster hbaseCluster)
       throws IOException {
-    // wait for regionserver to come online, and then break out of loop.
-    while (true) {
-      if (hbaseCluster.getRegionServer(0).isOnline()) {
-        break;
-      }
-    }
+    hbaseCluster.getRegionServer(0).waitForServerOnline();
     // Don't leave here till we've done a successful scan of the hbase:meta
+    // This validates that not only is the regionserver up, but that the
+    // meta region is online so there are no race conditions where operations
+    // requiring the meta region might run before it's available. Otherwise,
+    // operations are susceptible to region not online errors.
     HTable t = new HTable(hbaseCluster.getConf(), HBASE_META_TABLE);
     ResultScanner s = t.getScanner(new Scan());
     while (s.next() != null) {

@@ -23,27 +23,28 @@ public class TestMiniCluster {
 
   @Test(expected = IllegalStateException.class)
   public void testNoLocalBaseFsLocation() {
-    new MiniCluster.Builder().addHdfsService().build();
+    new MiniCluster.Builder().addService(HdfsService.class).build();
   }
 
   @Test(expected = IllegalStateException.class)
   public void testDoubleService() {
-    new MiniCluster.Builder().localBaseFsLocation("/tmp/kite-minicluster")
-        .addHdfsService().addHdfsService();
+    new MiniCluster.Builder().workDir("/tmp/kite-minicluster")
+        .addService(HdfsService.class).addService(HdfsService.class);
   }
 
   @Test(expected = IllegalStateException.class)
   public void testMissingDependency() {
-    new MiniCluster.Builder()
-        .localBaseFsLocation("/tmp/kite-minicluster").forceBindIP("127.0.0.1")
-        .addHdfsService().addHBaseService().build();
+    new MiniCluster.Builder().workDir("/tmp/kite-minicluster")
+        .bindIP("127.0.0.1").addService(HdfsService.class)
+        .addService(HBaseService.class).build();
   }
 
   @Test
-  public void testValidMiniCluster() throws IOException {
+  public void testValidMiniCluster() throws IOException, InterruptedException {
     MiniCluster miniCluster = new MiniCluster.Builder()
-        .localBaseFsLocation("/tmp/kite-minicluster").forceBindIP("127.0.0.1")
-        .addHdfsService().addZookeeperService(28282).addHBaseService().build();
+        .workDir("/tmp/kite-minicluster").bindIP("127.0.0.1")
+        .addService(HdfsService.class).addService(ZookeeperService.class)
+        .addService(HBaseService.class).clean(true).build();
     miniCluster.start();
     miniCluster.stop();
   }

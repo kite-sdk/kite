@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.hbase.HConstants;
 import org.apache.zookeeper.server.NIOServerCnxnFactory;
 import org.apache.zookeeper.server.ZooKeeperServer;
 import org.apache.zookeeper.server.persistence.FileTxnLog;
@@ -54,41 +53,68 @@ import org.slf4j.LoggerFactory;
  * 4. The ZK cluster will re-use a data dir on the local filesystem if it
  * already exists instead of blowing it away.
  */
-public class ZookeeperService implements Service {
+class ZookeeperService implements Service {
 
   private static final Logger logger = LoggerFactory
       .getLogger(ZookeeperService.class);
+  
+  static {
+    MiniCluster.registerService(ZookeeperService.class);
+  }
 
+  public static final String ZK_PORT_KEY = "zk-port";
   private static final int TICK_TIME = 2000;
   private static final int CONNECTION_TIMEOUT = 30000;
 
-  private boolean started;
-  private int clientPort;
-  private String localBaseFsLocation;
-  private String forceBindIP;
-  private boolean clean = false;
+  /**
+   * Configuration settings
+   */
+  private Configuration hadoopConf;
+  private String workDir;
+  private Integer clientPort = 28282;
+  private String bindIP = "127.0.0.1";
+  private Boolean clean = false;
+  private int tickTime = 0;
 
+  /**
+   * Embedded ZooKeeper cluster
+   */
   private NIOServerCnxnFactory standaloneServerFactory;
   private ZooKeeperServer zooKeeperServer;
-  private int tickTime = 0;
-  private Configuration conf;
+  private boolean started = false;
 
-  public ZookeeperService(int clientPort) {
-    this.started = false;
-    this.clientPort = clientPort;
-    zooKeeperServer = null;
-    standaloneServerFactory = null;
+  public ZookeeperService() {
   }
 
   @Override
-  public void start() throws IOException {
-    Preconditions.checkState(localBaseFsLocation != null,
+  public void configure(ServiceConfig serviceConfig) {
+    this.workDir = serviceConfig.get(MiniCluster.WORK_DIR_KEY);
+    if (serviceConfig.contains(MiniCluster.BIND_IP_KEY)) {
+      bindIP = serviceConfig.get(MiniCluster.BIND_IP_KEY);
+    }
+    if (serviceConfig.contains(MiniCluster.CLEAN_KEY)) {
+      clean = Boolean.parseBoolean(serviceConfig.get(MiniCluster.CLEAN_KEY));
+    }
+    if (serviceConfig.contains(ZK_PORT_KEY)) {
+      clientPort = Integer.parseInt(serviceConfig.get(ZK_PORT_KEY));
+    }
+    hadoopConf = serviceConfig.getHadoopConf();
+  }
+
+  @Override
+  public Configuration getHadoopConf() {
+    return hadoopConf;
+  }
+
+  @Override
+  public void start() throws IOException, InterruptedException {
+    Preconditions.checkState(workDir != null,
         "The localBaseFsLocation must be set before starting cluster.");
 
     setupTestEnv();
     stop();
 
-    File dir = new File(localBaseFsLocation, "zookeeper").getAbsoluteFile();
+    File dir = new File(workDir, "zookeeper").getAbsoluteFile();
     recreateDir(dir, clean);
     int tickTimeToUse;
     if (this.tickTime > 0) {
@@ -101,22 +127,12 @@ public class ZookeeperService implements Service {
 
     // NOTE: Changed from the original, where InetSocketAddress was
     // originally created to bind to the wildcard IP, we now configure it.
-    String bindIP;
-    if (forceBindIP != null) {
-      logger.info("Zookeeper force binding to: " + forceBindIP);
-      bindIP = forceBindIP;
-    } else {
-      bindIP = "127.0.0.1";
-    }
-    standaloneServerFactory.configure(new InetSocketAddress(bindIP,
-        clientPort), conf.getInt(HConstants.ZOOKEEPER_MAX_CLIENT_CNXNS, 1000));
+    logger.info("Zookeeper force binding to: " + this.bindIP);
+    standaloneServerFactory.configure(
+        new InetSocketAddress(bindIP, clientPort), 1000);
 
     // Start up this ZK server
-    try {
-      standaloneServerFactory.startup(zooKeeperServer);
-    } catch (InterruptedException e) {
-      throw new IOException(e);
-    }
+    standaloneServerFactory.startup(zooKeeperServer);
 
     String serverHostname;
     if (bindIP.equals("0.0.0.0")) {
@@ -153,38 +169,8 @@ public class ZookeeperService implements Service {
   }
 
   @Override
-  public Configuration getConf() {
-    return conf;
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
-  }
-
-  @Override
   public List<Class<? extends Service>> dependencies() {
     return null;
-  }
-
-  void setLocalBaseFsLocation(String localBaseFsLocation) {
-    this.localBaseFsLocation = localBaseFsLocation;
-  }
-
-  int getClientPort() {
-    return clientPort;
-  }
-
-  void setClientPort(int clientPort) {
-    this.clientPort = clientPort;
-  }
-
-  void setForceBindIP(String forceBindIP) {
-    this.forceBindIP = forceBindIP;
-  }
-
-  void setClean(boolean clean) {
-    this.clean = clean;
   }
 
   private void recreateDir(File dir, boolean clean) throws IOException {

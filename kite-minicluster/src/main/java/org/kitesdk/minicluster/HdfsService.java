@@ -32,29 +32,93 @@ import org.slf4j.LoggerFactory;
 /**
  * An HDFS minicluster service implementation.
  */
-public class HdfsService implements Service {
+class HdfsService implements Service {
 
   private static final Logger logger = LoggerFactory
       .getLogger(HdfsService.class);
+  
+  /**
+   * Service registration for MiniCluster factory
+   */
+  static {
+    MiniCluster.registerService(HdfsService.class);
+  }
 
-  private String localBaseFsLocation;
-  private String forceBindIP;
+  /**
+   * Service configuration keys
+   */
+  public static final String NAMENODE_RPC_PORT = "hdfs-namenode-rpc-port";
+  public static final String NAMENODE_HTTP_PORT = "hdfs-namenode-http-port";
+  public static final String DATANODE_PORT = "hdfs-datanode-port";
+  public static final String DATANODE_IPC_PORT = "hdfs-datanode-ipc-port";
+  public static final String DATANODE_HTTP_PORT = "hdfs-datanode-http-port";
+
+  /**
+   * Configuration settings
+   */
+  private Configuration hadoopConf;
+  private String workDir;
+  private String bindIP = "127.0.0.1";
+  private int namenodeRpcPort = 8020;
+  private int namenodeHttpPort = 50070;
+  private int datanodePort = 50010;
+  private int datanodeIpcPort = 50020;
+  private int datanodeHttpPort = 50075;
   private boolean clean = false;
 
-  private Configuration conf;
+  /**
+   * Embedded HDFS cluster
+   */
   private MiniDFSCluster miniDfsCluster;
+
+  public HdfsService() {
+  }
+
+  @Override
+  public void configure(ServiceConfig serviceConfig) {
+    this.workDir = serviceConfig.get(MiniCluster.WORK_DIR_KEY);
+    if (serviceConfig.contains(MiniCluster.BIND_IP_KEY)) {
+      bindIP = serviceConfig.get(MiniCluster.BIND_IP_KEY);
+    }
+    if (serviceConfig.contains(MiniCluster.CLEAN_KEY)) {
+      clean = Boolean.parseBoolean(serviceConfig.get(MiniCluster.CLEAN_KEY));
+    }
+    if (serviceConfig.contains(NAMENODE_RPC_PORT)) {
+      namenodeRpcPort = Integer.parseInt(serviceConfig.get(NAMENODE_RPC_PORT));
+    }
+    if (serviceConfig.contains(NAMENODE_HTTP_PORT)) {
+      namenodeHttpPort = Integer
+          .parseInt(serviceConfig.get(NAMENODE_HTTP_PORT));
+    }
+    if (serviceConfig.contains(DATANODE_PORT)) {
+      datanodePort = Integer.parseInt(serviceConfig.get(DATANODE_PORT));
+    }
+    if (serviceConfig.contains(DATANODE_IPC_PORT)) {
+      datanodeIpcPort = Integer.parseInt(serviceConfig.get(DATANODE_IPC_PORT));
+    }
+    if (serviceConfig.contains(DATANODE_HTTP_PORT)) {
+      datanodeHttpPort = Integer
+          .parseInt(serviceConfig.get(DATANODE_HTTP_PORT));
+    }
+    hadoopConf = serviceConfig.getHadoopConf();
+  }
+
+  @Override
+  public Configuration getHadoopConf() {
+    return hadoopConf;
+  }
 
   @Override
   public void start() throws IOException {
-    Preconditions.checkState(localBaseFsLocation != null,
-        "The localBaseFsLocation must be set before starting cluster.");
+    Preconditions.checkState(workDir != null,
+        "The work dir must be set before starting cluster.");
 
-    if (conf == null) {
-      conf = new Configuration();
+    if (hadoopConf == null) {
+      hadoopConf = new Configuration();
     }
 
-    // If clean, then remove the localFsLocation so we can start fresh.
-    String localDFSLocation = getDFSLocation(localBaseFsLocation);
+    // If clean, then remove the work dir so we can start fresh.
+    String localDFSLocation = getDFSLocation(workDir);
     if (clean) {
       logger.info("Cleaning HDFS cluster data at: " + localDFSLocation
           + " and starting fresh.");
@@ -64,8 +128,10 @@ public class HdfsService implements Service {
 
     // Configure and start the HDFS cluster
     boolean format = shouldFormatDFSCluster(localDFSLocation, clean);
-    conf = configureDFSCluster(conf, localDFSLocation, forceBindIP);
-    miniDfsCluster = new MiniDFSCluster.Builder(conf).numDataNodes(1)
+    hadoopConf = configureDFSCluster(hadoopConf, localDFSLocation, bindIP,
+        namenodeRpcPort, namenodeHttpPort, datanodePort, datanodeIpcPort,
+        datanodeHttpPort);
+    miniDfsCluster = new MiniDFSCluster.Builder(hadoopConf).numDataNodes(1)
         .format(format).checkDataNodeAddrConfig(true)
         .checkDataNodeHostConfig(true).build();
     logger.info("HDFS Minicluster service started.");
@@ -76,12 +142,7 @@ public class HdfsService implements Service {
     miniDfsCluster.shutdown();
     logger.info("HDFS Minicluster service shut down.");
     miniDfsCluster = null;
-    conf = null;
-  }
-
-  @Override
-  public Configuration getConf() {
-    return conf;
+    hadoopConf = null;
   }
 
   /**
@@ -125,29 +186,36 @@ public class HdfsService implements Service {
    *          for HDFS
    * @param localDFSLocation
    *          The location on the local filesystem where cluster data is stored
-   * @param forceBindIP
+   * @param bindIP
    *          An IP address we want to force the datanode and namenode to bind
    *          to.
+   * @param namenodeRpcPort
+   * @param namenodeHttpPort
+   * @param datanodePort
+   * @param datanodeIpcPort
+   * @param datanodeHttpPort
    * @return The updated Configuration object.
    */
   private static Configuration configureDFSCluster(Configuration config,
-      String localDFSLocation, String forceBindIP) {
+      String localDFSLocation, String bindIP, int namenodeRpcPort,
+      int namenodeHttpPort, int datanodePort, int datanodeIpcPort,
+      int datanodeHttpPort) {
 
-    // If running in env where we only have permission to bind to certain IP
-    // address, force very socket that listens to bind to that IP address.
-    if (forceBindIP != null) {
-      logger.info("HDFS force binding to ip: " + forceBindIP);
-      config = new OpenshiftCompatibleConfiguration(config, forceBindIP);
-      config.set("dfs.datanode.address", forceBindIP + ":50010");
-      config.set("dfs.datanode.http.address", forceBindIP + ":50075");
-      config.set("dfs.datanode.ipc.address", forceBindIP + ":50020");
-      // When a datanode registers with the namenode, the Namenode do a hostname
-      // check of the datanode which will fail on OpenShift due to reverse DNS
-      // issues with the internal IP addresses. This config disables that check,
-      // and will allow a datanode to connect regardless.
-      config.setBoolean("dfs.namenode.datanode.registration.ip-hostname-check",
-          false);
-    }
+    logger.info("HDFS force binding to ip: " + bindIP);
+    config = new KiteCompatibleConfiguration(config, bindIP,
+        namenodeRpcPort, namenodeHttpPort);
+    config.set(DFSConfigKeys.DFS_DATANODE_ADDRESS_KEY, bindIP + ":"
+        + datanodePort);
+    config.set(DFSConfigKeys.DFS_DATANODE_IPC_ADDRESS_KEY, bindIP + ":"
+        + datanodeIpcPort);
+    config.set(DFSConfigKeys.DFS_DATANODE_HTTP_ADDRESS_KEY, bindIP + ":"
+        + datanodeHttpPort);
+    // When a datanode registers with the namenode, the Namenode do a hostname
+    // check of the datanode which will fail on OpenShift due to reverse DNS
+    // issues with the internal IP addresses. This config disables that check,
+    // and will allow a datanode to connect regardless.
+    config.setBoolean("dfs.namenode.datanode.registration.ip-hostname-check",
+        false);
     config.set("hdfs.minidfs.basedir", localDFSLocation);
     return config;
   }
@@ -155,19 +223,19 @@ public class HdfsService implements Service {
   /**
    * A Hadoop Configuration class that won't override the Namenode RPC and
    * Namenode HTTP bind addresses. The mini DFS cluster sets this bind address
-   * to 127.0.0.1, and this can't be overridden. In environments where you 
-   * can't bind to 127.0.0.1 (like OpenShift), this will not work, so make sure
-   * these settings can't be overridden by the mini DFS cluster.
+   * to 127.0.0.1, and this can't be overridden. In environments where you can't
+   * bind to 127.0.0.1 (like OpenShift), this will not work, so make sure these
+   * settings can't be overridden by the mini DFS cluster.
    */
-  private static class OpenshiftCompatibleConfiguration extends Configuration {
+  private static class KiteCompatibleConfiguration extends Configuration {
 
-    public OpenshiftCompatibleConfiguration(Configuration config,
-        String bindAddress) {
+    public KiteCompatibleConfiguration(Configuration config,
+        String bindAddress, int namenodeRpcPort, int namenodeHttpPort) {
       super(config);
-      super.set(DFSConfigKeys.DFS_NAMENODE_RPC_ADDRESS_KEY, bindAddress
-          + ":8020");
-      super.set(DFSConfigKeys.DFS_NAMENODE_HTTP_ADDRESS_KEY, bindAddress
-          + ":50070");
+      super.set(DFSConfigKeys.DFS_NAMENODE_RPC_ADDRESS_KEY, bindAddress + ":"
+          + namenodeRpcPort);
+      super.set(DFSConfigKeys.DFS_NAMENODE_HTTP_ADDRESS_KEY, bindAddress + ":"
+          + namenodeHttpPort);
     }
 
     @Override
@@ -183,22 +251,5 @@ public class HdfsService implements Service {
   public List<Class<? extends Service>> dependencies() {
     // no dependencies
     return null;
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
-  }
-
-  void setLocalBaseFsLocation(String localBaseFsLocation) {
-    this.localBaseFsLocation = localBaseFsLocation;
-  }
-
-  void setForceBindIP(String forceBindIP) {
-    this.forceBindIP = forceBindIP;
-  }
-
-  void setClean(boolean clean) {
-    this.clean = clean;
   }
 }
