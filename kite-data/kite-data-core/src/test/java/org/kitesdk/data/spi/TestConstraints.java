@@ -761,4 +761,18 @@ public class TestConstraints {
       Assert.assertEquals(with, Constraints.fromQueryMap(schema, strategy,
           queryMap));
   }
+
+  @Test
+  public void testMultiValueQueryMapConversionWithEncodedCharacters() {
+      Constraints with = emptyConstraints.with("id", "a,b", "c");
+      Map<String, String> queryMap = with.toQueryMap();
+      Assert.assertEquals(1, queryMap.size());
+
+      // the query map encoding should contain one delimiter comma and encode
+      // the comma that is part of the constraint value
+      Assert.assertEquals(Sets.newHashSet("a%2Cb", "c"),
+          Sets.newHashSet(Splitter.on(',').split(queryMap.get("id"))));
+      Assert.assertEquals(with, Constraints.fromQueryMap(schema, strategy,
+          queryMap));
+  }
 }

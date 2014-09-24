@@ -114,6 +114,13 @@ public class TestViewUris {
         test.with("color", "a/b"));
   }
 
+  @Test
+  public void testMultiValueConstraintWithEncodedCharacters() {
+    assertViewUriEquivalent("encoded multi-value constraints",
+        "view:file:/tmp/test_name?color=a%2Cb,c",
+        test.with("color", "a,b", "c"));
+  }
+
   public void assertViewUriEquivalent(String desc, String uri,
                                       View<GenericRecord> view) {
     View<GenericRecord> loaded = Datasets.load(uri);
