@@ -17,6 +17,7 @@
 package org.kitesdk.data;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.UUID;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -187,7 +188,7 @@ public class TestURIBuilder {
   }
 
   @Test
-  public void testViewUriAddEquals() {
+  public void testViewUriAddEquals() throws Exception {
     Assert.assertEquals("Should produce an equivalent dataset URI",
         URI.create("view:file:/datasets/test-name?prop=value&field=v2"),
         new URIBuilder("view:file:/datasets/test-name?prop=value")
@@ -198,6 +199,16 @@ public class TestURIBuilder {
         new URIBuilder("view:file:/datasets/test-name?prop=value")
             .with("field", "v2")
             .with("num", 34)
+            .build());
+    Assert.assertEquals("Should produce an equivalent dataset URI",
+        URI.create("view:file:/datasets/test-name?field=a/b"),
+        new URIBuilder("view:file:/datasets/test-name")
+            .with("field", "a/b")
+            .build());
+    Assert.assertEquals("Should produce an equivalent dataset URI",
+        URI.create("view:file:/datasets/test-name?field=a%2Fb"),
+        new URIBuilder("view:file:/datasets/test-name")
+            .with("field", URLEncoder.encode("a/b", "UTF-8"))
             .build());
   }
 
@@ -218,6 +229,11 @@ public class TestURIBuilder {
         new URIBuilder("dataset:file:/datasets/test")
             .constraints(
                 empty.with("id", new Utf8(ID)).with("timestamp", 1405720705333L))
+            .build());
+    Assert.assertEquals("Should add encoded equality constraints",
+        URI.create("view:file:/datasets/test?id=a%2Fb"),
+        new URIBuilder("dataset:file:/datasets/test")
+            .constraints(empty.with("id", new Utf8("a/b")))
             .build());
   }
 

@@ -72,8 +72,8 @@ public class URIPattern {
       this.patternPath = Iterators.getNext(pathQuery, null);
       addQuery(Iterators.getNext(pathQuery, null), accumulator);
     } else {
-      patternPath = pattern.getPath();
-      addQuery(pattern.getQuery(), accumulator);
+      patternPath = pattern.getRawPath();
+      addQuery(pattern.getRawQuery(), accumulator);
       addAuthority(pattern, accumulator);
     }
     if (pattern.getScheme() != null) {
@@ -116,17 +116,40 @@ public class URIPattern {
       if (uriData.containsKey(SCHEME)) {
         scheme = uriData.remove(SCHEME);
       }
-      if (pattern.isOpaque()) {
-        String path = constructPath(uriData, patternPath);
-        String query = constructQuery(uriData, defaults);
-        return new URI(scheme, path + (query == null ? "" : "?" + query), null);
-      } else {
-        return new URI(scheme, constructUserInfo(uriData, defaults),
-            removeNonDefault(HOST, uriData, defaults),
-            constructPort(uriData, defaults),
-            constructPath(uriData, patternPath),
-            constructQuery(uriData, defaults), null);
+
+      StringBuilder builder = new StringBuilder();
+      builder.append(scheme).append(":");
+
+      if (!pattern.isOpaque()) {
+        // Build the URI(String,String,String,int,String,String,String)
+        StringBuilder authBuilder = new StringBuilder();
+        String user = constructUserInfo(uriData, defaults);
+        String host = removeNonDefault(HOST, uriData, defaults);
+        int port = constructPort(uriData, defaults);
+        if (user != null) {
+          authBuilder.append(user).append("@");
+        }
+        if (host != null) {
+          authBuilder.append(host);
+        }
+        if (port >= 0) {
+          authBuilder.append(":").append(port);
+        }
+        String auth = authBuilder.toString();
+        if (!auth.isEmpty()) {
+          builder.append("//").append(auth);
+        }
       }
+
+      builder.append(constructPath(uriData, patternPath));
+
+      String query = constructQuery(uriData, defaults);
+      if (query != null) {
+        builder.append("?").append(query);
+      }
+
+      return new URI(builder.toString());
+
     } catch (URISyntaxException ex) {
       throw new IllegalArgumentException("Could not build URI", ex);
     }
@@ -185,7 +208,7 @@ public class URIPattern {
       }
 
       Iterator<String> pathQuery = PATH_QUERY_SPLITTER
-          .split(uri.getSchemeSpecificPart()).iterator();
+          .split(uri.getRawSchemeSpecificPart()).iterator();
 
       if (!addPath(patternPath, Iterators.getNext(pathQuery, null), result)) {
         return null;
@@ -196,15 +219,15 @@ public class URIPattern {
     } else if (!uri.isOpaque()) {
       addAuthority(uri, result);
 
-      if (patternPath.isEmpty() && !uri.getPath().isEmpty()) {
+      if (patternPath.isEmpty() && !uri.getRawPath().isEmpty()) {
         return null;
       }
 
-      if (!addPath(patternPath, uri.getPath(), result)) {
+      if (!addPath(patternPath, uri.getRawPath(), result)) {
         return null;
       }
 
-      addQuery(uri.getQuery(), result);
+      addQuery(uri.getRawQuery(), result);
 
     } else {
       return null;

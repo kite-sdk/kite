@@ -302,7 +302,7 @@ public class TestURIPattern {
 
   @Test
   public void testDefaultQueryArgs() throws URISyntaxException {
-    URIPattern pattern = new URIPattern("scheme:/*path?custom-option=true&use-ssl=false");
+    URIPattern pattern = new URIPattern("scheme:/*path?custom-option=true&use-ssl=false&encoded=a%2Cb");
     String uri = "scheme:/path/to/data.avro";
     Assert.assertTrue(pattern.matches(uri));
 
@@ -311,6 +311,7 @@ public class TestURIPattern {
     expected.put("path", "path/to/data.avro");
     expected.put("custom-option", "true");
     expected.put("use-ssl", "false");
+    expected.put("encoded", "a%2Cb");
     Assert.assertEquals(expected, actual);
 
     URI constructed = pattern.construct(expected);
@@ -446,6 +447,50 @@ public class TestURIPattern {
     match = pattern.getMatch("file:/");
     Assert.assertNotNull(match);
     Assert.assertNull(match.get("path"));
+  }
+
+  @Test
+  public void testQueryEncoding() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("file:/path");
+    URI original = URI.create("file:/path?f1=a,b,a%2Cb");
+    Map<String, String> match = pattern.getMatch(original);
+    Assert.assertNotNull(match);
+    Assert.assertEquals("a,b,a%2Cb", match.get("f1"));
+    URI constructed = pattern.construct(match);
+    Assert.assertEquals(original, constructed);
+  }
+
+  @Test
+  public void testOpaqueQueryEncoding() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("file:path");
+    URI original = URI.create("file:path?f1=a,b,a%2Cb");
+    Map<String, String> match = pattern.getMatch(original);
+    Assert.assertNotNull(match);
+    Assert.assertEquals("a,b,a%2Cb", match.get("f1"));
+    URI constructed = pattern.construct(match);
+    Assert.assertEquals(original, constructed);
+  }
+
+  @Test
+  public void testPathEncoding() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("file:/*path");
+    URI original = URI.create("file:/a%2Fb/c");
+    Map<String, String> match = pattern.getMatch(original);
+    Assert.assertNotNull(match);
+    Assert.assertEquals("a%2Fb/c", match.get("path"));
+    URI constructed = pattern.construct(match);
+    Assert.assertEquals(original, constructed);
+  }
+
+  @Test
+  public void testOpaquePathEncoding() throws URISyntaxException {
+    URIPattern pattern = new URIPattern("file:*path");
+    URI original = URI.create("file:a%2Fb/c");
+    Map<String, String> match = pattern.getMatch(original);
+    Assert.assertNotNull(match);
+    Assert.assertEquals("a%2Fb/c", match.get("path"));
+    URI constructed = pattern.construct(match);
+    Assert.assertEquals(original, constructed);
   }
 
   // This is common in this type of matching, but the query part prevents it
