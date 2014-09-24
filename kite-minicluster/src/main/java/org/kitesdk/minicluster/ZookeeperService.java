@@ -57,12 +57,11 @@ class ZookeeperService implements Service {
 
   private static final Logger logger = LoggerFactory
       .getLogger(ZookeeperService.class);
-  
+
   static {
     MiniCluster.registerService(ZookeeperService.class);
   }
 
-  public static final String ZK_PORT_KEY = "zk-port";
   private static final int TICK_TIME = 2000;
   private static final int CONNECTION_TIMEOUT = 30000;
 
@@ -71,7 +70,7 @@ class ZookeeperService implements Service {
    */
   private Configuration hadoopConf;
   private String workDir;
-  private Integer clientPort = 28282;
+  private Integer clientPort = 2828;
   private String bindIP = "127.0.0.1";
   private Boolean clean = false;
   private int tickTime = 0;
@@ -95,8 +94,8 @@ class ZookeeperService implements Service {
     if (serviceConfig.contains(MiniCluster.CLEAN_KEY)) {
       clean = Boolean.parseBoolean(serviceConfig.get(MiniCluster.CLEAN_KEY));
     }
-    if (serviceConfig.contains(ZK_PORT_KEY)) {
-      clientPort = Integer.parseInt(serviceConfig.get(ZK_PORT_KEY));
+    if (serviceConfig.contains(MiniCluster.ZK_PORT_KEY)) {
+      clientPort = Integer.parseInt(serviceConfig.get(MiniCluster.ZK_PORT_KEY));
     }
     hadoopConf = serviceConfig.getHadoopConf();
   }

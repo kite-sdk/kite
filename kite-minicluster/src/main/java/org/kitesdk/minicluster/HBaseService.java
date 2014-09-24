@@ -67,7 +67,7 @@ class HBaseService implements Service {
    * Configuration settings
    */
   private Configuration hadoopConf;
-  private int zookeeperClientPort = 28282;
+  private int zookeeperClientPort = 2828;
   private String bindIP = "127.0.0.1";
   private int masterPort = 60000;
   private int regionserverPort = 60020;
@@ -85,9 +85,9 @@ class HBaseService implements Service {
     if (serviceConfig.contains(MiniCluster.BIND_IP_KEY)) {
       bindIP = serviceConfig.get(MiniCluster.BIND_IP_KEY);
     }
-    if (serviceConfig.contains(ZookeeperService.ZK_PORT_KEY)) {
+    if (serviceConfig.contains(MiniCluster.ZK_PORT_KEY)) {
       zookeeperClientPort = Integer.parseInt(serviceConfig
-          .get(ZookeeperService.ZK_PORT_KEY));
+          .get(MiniCluster.ZK_PORT_KEY));
     }
     if (serviceConfig.contains(MASTER_PORT_KEY)) {
       masterPort = Integer.parseInt(serviceConfig.get(MASTER_PORT_KEY));

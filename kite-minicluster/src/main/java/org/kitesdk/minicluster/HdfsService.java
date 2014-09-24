@@ -36,7 +36,7 @@ class HdfsService implements Service {
 
   private static final Logger logger = LoggerFactory
       .getLogger(HdfsService.class);
-  
+
   /**
    * Service registration for MiniCluster factory
    */
@@ -47,7 +47,6 @@ class HdfsService implements Service {
   /**
    * Service configuration keys
    */
-  public static final String NAMENODE_RPC_PORT = "hdfs-namenode-rpc-port";
   public static final String NAMENODE_HTTP_PORT = "hdfs-namenode-http-port";
   public static final String DATANODE_PORT = "hdfs-datanode-port";
   public static final String DATANODE_IPC_PORT = "hdfs-datanode-ipc-port";
@@ -83,8 +82,9 @@ class HdfsService implements Service {
     if (serviceConfig.contains(MiniCluster.CLEAN_KEY)) {
       clean = Boolean.parseBoolean(serviceConfig.get(MiniCluster.CLEAN_KEY));
     }
-    if (serviceConfig.contains(NAMENODE_RPC_PORT)) {
-      namenodeRpcPort = Integer.parseInt(serviceConfig.get(NAMENODE_RPC_PORT));
+    if (serviceConfig.contains(MiniCluster.NAMENODE_RPC_PORT)) {
+      namenodeRpcPort = Integer.parseInt(serviceConfig
+          .get(MiniCluster.NAMENODE_RPC_PORT));
     }
     if (serviceConfig.contains(NAMENODE_HTTP_PORT)) {
       namenodeHttpPort = Integer
@@ -202,8 +202,8 @@ class HdfsService implements Service {
       int datanodeHttpPort) {
 
     logger.info("HDFS force binding to ip: " + bindIP);
-    config = new KiteCompatibleConfiguration(config, bindIP,
-        namenodeRpcPort, namenodeHttpPort);
+    config = new KiteCompatibleConfiguration(config, bindIP, namenodeRpcPort,
+        namenodeHttpPort);
     config.set(DFSConfigKeys.DFS_DATANODE_ADDRESS_KEY, bindIP + ":"
         + datanodePort);
     config.set(DFSConfigKeys.DFS_DATANODE_IPC_ADDRESS_KEY, bindIP + ":"

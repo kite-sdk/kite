@@ -50,15 +50,21 @@ public class RunCommand implements Command {
   private final Configuration conf;
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_NULL_FIELD", justification = "Field set by JCommander")
-  @Parameter(names = { "-d", "--work-dir" }, description = "The base directory to store mini cluster data in.")
+  @Parameter(names = { "-d", "--work-dir" }, description = "The base directory to store mini cluster data in. Defaults to /tmp/kite-minicluster.")
   String workDir = "/tmp/kite-minicluster";
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_NULL_FIELD", justification = "Field set by JCommander")
-  @Parameter(names = { "-b", "--bind" }, description = "The IP address for all mini cluster services to bind to.")
+  @Parameter(names = { "-b", "--bind" }, description = "The IP address for all mini cluster services to bind to. Defaults to 127.0.0.1.")
   String bindIP = "127.0.0.1";
 
   @Parameter(names = { "-c", "--clean" }, description = "Clean the mini cluster data directory before starting.")
   boolean clean = false;
+
+  @Parameter(names = "--hdfs-namenode-rpc-port", description = "The namenode RPC port. Defaults to 8020.")
+  int namenodeRpcPort = 8020;
+
+  @Parameter(names = "--zk-port", description = "The zookeeper port. Defaults to 2828.")
+  int zkPort = 2828;
 
   @Parameter(names = { "-s", "--services" }, variableArity = true, description = "A space separated list of fully "
       + "qualified service classnames to run. The following short names exist: hdfs, zk, hbase ")
@@ -82,7 +88,8 @@ public class RunCommand implements Command {
         "A valid work dir is required.");
 
     MiniCluster.Builder builder = new MiniCluster.Builder().workDir(workDir)
-        .clean(clean).hadoopConf(conf).bindIP(bindIP);
+        .clean(clean).hadoopConf(conf).bindIP(bindIP)
+        .namenodeRpcPort(namenodeRpcPort).zkPort(zkPort);
     for (String serviceName : services) {
       if (simpleServiceNameMap.containsKey(serviceName)) {
         serviceName = simpleServiceNameMap.get(serviceName);

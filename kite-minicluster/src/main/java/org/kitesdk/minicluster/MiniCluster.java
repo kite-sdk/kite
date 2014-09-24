@@ -48,6 +48,8 @@ public class MiniCluster {
   public static final String BIND_IP_KEY = "bind-ip";
   public static final String CLEAN_KEY = "clean";
   public static final String WORK_DIR_KEY = "directory";
+  public static final String NAMENODE_RPC_PORT = "hdfs-namenode-rpc-port";
+  public static final String ZK_PORT_KEY = "zk-port";
 
   private static final Map<String, Service> registeredServices = new ConcurrentHashMap<String, Service>();
 
@@ -107,6 +109,16 @@ public class MiniCluster {
 
     public Builder bindIP(String bindIP) {
       serviceConfig.set(BIND_IP_KEY, bindIP);
+      return this;
+    }
+    
+    public Builder namenodeRpcPort(int namenodeRpcPort) {
+      serviceConfig.set(NAMENODE_RPC_PORT, Integer.toString(namenodeRpcPort));
+      return this;
+    }
+    
+    public Builder zkPort(int zkPort) {
+      serviceConfig.set(ZK_PORT_KEY, Integer.toString(zkPort));
       return this;
     }
 
