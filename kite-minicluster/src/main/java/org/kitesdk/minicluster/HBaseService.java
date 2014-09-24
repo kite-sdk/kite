@@ -26,11 +26,8 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HConstants;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MiniHBaseCluster;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -43,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * An HBase minicluster service implementation.
  */
 class HBaseService implements Service {
-  
+
   private static final Logger logger = LoggerFactory
       .getLogger(HBaseService.class);
 
@@ -53,15 +50,18 @@ class HBaseService implements Service {
   static {
     MiniCluster.registerService(HBaseService.class);
   }
-  
+
   /**
    * Service configuration keys
    */
   public static final String MASTER_PORT_KEY = "hbase-master-port";
   public static final String REGIONSERVER_PORT_KEY = "hbase-regionserver-port";
 
+  /**
+   * The name of the HBase meta table, which we need to successfully scan before
+   * considering the cluster launched.
+   */
   private static final String HBASE_META_TABLE = "hbase:meta";
-  private static final String MANAGED_SCHEMAS_TABLE = "managed_schemas";
 
   /**
    * Configuration settings
@@ -71,7 +71,7 @@ class HBaseService implements Service {
   private String bindIP = "127.0.0.1";
   private int masterPort = 60000;
   private int regionserverPort = 60020;
-  
+
   /**
    * Embedded HBase cluster
    */
@@ -119,8 +119,6 @@ class HBaseService implements Service {
     hbaseCluster.startMaster();
     hbaseCluster.startRegionServer();
     waitForHBaseToComeOnline(hbaseCluster);
-    // Create system tables required by Kite
-    createManagedSchemasTable(hadoopConf);
     logger.info("HBase Minicluster Service Started.");
   }
 
@@ -240,30 +238,5 @@ class HBaseService implements Service {
     }
     s.close();
     t.close();
-  }
-
-  /**
-   * Create the required HBase tables for the Kite HBase module. If those are
-   * already initialized, this method will do nothing.
-   * 
-   * @param config
-   *          The HBase configuration
-   */
-  private static void createManagedSchemasTable(Configuration config)
-      throws IOException {
-    HBaseAdmin admin = new HBaseAdmin(config);
-    try {
-      if (!admin.tableExists(MANAGED_SCHEMAS_TABLE)) {
-        logger.info("Created Table: " + MANAGED_SCHEMAS_TABLE);
-        @SuppressWarnings("deprecation")
-        HTableDescriptor desc = new HTableDescriptor(MANAGED_SCHEMAS_TABLE);
-        desc.addFamily(new HColumnDescriptor("meta"));
-        desc.addFamily(new HColumnDescriptor("schema"));
-        desc.addFamily(new HColumnDescriptor("_s"));
-        admin.createTable(desc);
-      }
-    } finally {
-      admin.close();
-    }
   }
 }
