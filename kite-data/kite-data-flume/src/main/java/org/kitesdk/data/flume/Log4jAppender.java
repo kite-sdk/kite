@@ -26,7 +26,6 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.flume.FlumeException;
 import org.kitesdk.data.Datasets;
-import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.spi.StorageKey;
 import org.kitesdk.data.spi.filesystem.PathConversion;
 
@@ -96,7 +95,12 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
       // initialize here rather than in activateOptions to avoid initialization
       // cycle in Configuration and log4j
       try {
-        URI datasetUri = new URIBuilder(datasetRepositoryUri, datasetNamespace, datasetName).build();
+        URI datasetUri;
+        if (datasetNamespace == null) {
+          datasetUri = new org.kitesdk.data.spi.URIBuilder(datasetRepositoryUri, datasetName).build();
+        } else {
+          datasetUri = new org.kitesdk.data.spi.URIBuilder(datasetRepositoryUri, datasetNamespace, datasetName).build();
+        }
         Dataset<Object> dataset = Datasets.load(datasetUri, Object.class);
         if (dataset.getDescriptor().isPartitioned()) {
           partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
