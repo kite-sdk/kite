@@ -44,6 +44,7 @@ public class RunCommand implements Command {
     simpleServiceNameMap.put("hdfs", "org.kitesdk.minicluster.HdfsService");
     simpleServiceNameMap.put("zk", "org.kitesdk.minicluster.ZookeeperService");
     simpleServiceNameMap.put("hbase", "org.kitesdk.minicluster.HBaseService");
+    simpleServiceNameMap.put("hive", "org.kitesdk.minicluster.HiveService");
   }
 
   private final Logger console;
@@ -66,8 +67,11 @@ public class RunCommand implements Command {
   @Parameter(names = "--zk-port", description = "The zookeeper port. Defaults to 2828.")
   int zkPort = 2828;
 
+  @Parameter(names = "--hive-metastore-port", description = "The Hive Metastore port. Defaults to 9083.")
+  int hiveMetastorePort = 9083;
+
   @Parameter(names = { "-s", "--services" }, variableArity = true, description = "A space separated list of fully "
-      + "qualified service classnames to run. The following short names exist: hdfs, zk, hbase ")
+      + "qualified service classnames to run. The following short names exist: hdfs, zk, hbase, hive")
   public List<String> services = new ArrayList<String>();
 
   @DynamicParameter(names = "-D", description = "Service specific configs go here. These configs are passed through "
@@ -89,7 +93,8 @@ public class RunCommand implements Command {
 
     MiniCluster.Builder builder = new MiniCluster.Builder().workDir(workDir)
         .clean(clean).hadoopConf(conf).bindIP(bindIP)
-        .namenodeRpcPort(namenodeRpcPort).zkPort(zkPort);
+        .namenodeRpcPort(namenodeRpcPort).zkPort(zkPort)
+        .hiveMetastorePort(hiveMetastorePort);
     for (String serviceName : services) {
       if (simpleServiceNameMap.containsKey(serviceName)) {
         serviceName = simpleServiceNameMap.get(serviceName);
