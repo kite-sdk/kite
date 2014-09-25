@@ -16,10 +16,15 @@
 package org.kitesdk.minicluster;
 
 import com.google.common.base.Preconditions;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import org.apache.flume.node.Application;
 import org.apache.flume.node.PropertiesFileConfigurationProvider;
 import org.apache.hadoop.conf.Configuration;
@@ -45,6 +50,10 @@ class FlumeService implements Service {
    * Configuration settings
    */
   private Configuration hadoopConf;
+  private String workDir;
+  private String bindIP = "127.0.0.1";
+  private File flumeConfiguration;
+  private String agentName;
   private PropertiesFileConfigurationProvider configurationProvider;
   private Application flumeApplication;
 
@@ -57,11 +66,12 @@ class FlumeService implements Service {
         "Missing configuration for Flume minicluster: " + FLUME_CONFIGURATION);
     Preconditions.checkState(serviceConfig.contains(FLUME_AGENT_NAME),
         "Missing configuration for Flume minicluster: " + FLUME_AGENT_NAME);
-    File flumeConfiguration = new File(serviceConfig.get(FLUME_CONFIGURATION));
-    String agentName = serviceConfig.get(FLUME_AGENT_NAME);
-    configurationProvider = new PropertiesFileConfigurationProvider(agentName,
-        flumeConfiguration);
-    flumeApplication = new Application();
+    this.workDir = serviceConfig.get(MiniCluster.WORK_DIR_KEY);
+    if (serviceConfig.contains(MiniCluster.BIND_IP_KEY)) {
+      bindIP = serviceConfig.get(MiniCluster.BIND_IP_KEY);
+    }
+    this.flumeConfiguration = new File(serviceConfig.get(FLUME_CONFIGURATION));
+    this.agentName = serviceConfig.get(FLUME_AGENT_NAME);
     hadoopConf = serviceConfig.getHadoopConf(); // not used
   }
 
@@ -72,9 +82,65 @@ class FlumeService implements Service {
 
   @Override
   public void start() throws IOException {
+    File newFlumeConfiguration = configureBindIp(flumeConfiguration);
+    configurationProvider = new PropertiesFileConfigurationProvider(agentName,
+        newFlumeConfiguration);
+    flumeApplication = new Application();
     flumeApplication.handleConfigurationEvent(configurationProvider.getConfiguration());
     flumeApplication.start();
     LOG.info("Flume Minicluster service started.");
+  }
+
+  private File configureBindIp(File flumeConfiguration) throws IOException {
+    Properties properties = readFromFile(flumeConfiguration);
+    fixBindAddresses(properties, bindIP);
+    File flumeWorkDir = new File(workDir, "flume");
+    flumeWorkDir.mkdirs();
+    File newFlumeConfiguration = new File(flumeWorkDir, "flume.properties");
+    writeToFile(properties, newFlumeConfiguration);
+    return newFlumeConfiguration;
+  }
+
+  private Properties readFromFile(File file) throws IOException {
+    BufferedReader reader = null;
+    try {
+      reader = new BufferedReader(new FileReader(file));
+      Properties properties = new Properties();
+      properties.load(reader);
+      return properties;
+    } finally {
+      if (reader != null) {
+        try {
+          reader.close();
+        } catch (IOException ex) {
+          LOG.warn("Unable to close file reader for file: " + file, ex);
+        }
+      }
+    }
+  }
+
+  private void writeToFile(Properties properties, File file) throws IOException {
+    BufferedWriter writer = null;
+    try {
+      writer = new BufferedWriter(new FileWriter(file));
+      properties.store(writer, null);
+    } finally {
+      if (writer != null) {
+        try {
+          writer.close();
+        } catch (IOException ex) {
+          LOG.warn("Unable to close file writer for file: " + file, ex);
+        }
+      }
+    }
+  }
+
+  void fixBindAddresses(Properties properties, String bindIP) {
+    for (String name : properties.stringPropertyNames()) {
+      if (name.endsWith(".bind")) {
+        properties.setProperty(name, bindIP);
+      }
+    }
   }
 
   @Override
