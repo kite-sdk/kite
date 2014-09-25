@@ -956,7 +956,7 @@ public class DatasetDescriptor {
       if (RESOURCE_URI_SCHEME.equals(location.getScheme())) {
         return Resources.getResource(location.getRawSchemeSpecificPart()).openStream();
       } else {
-        Path filePath = new Path(location).makeQualified(defaultFS, new Path("/"));
+        Path filePath = new Path(qualifiedUri(location));
         // even though it was qualified using the default FS, it may not be in it
         FileSystem fs = filePath.getFileSystem(conf);
         return fs.open(filePath);
