@@ -136,6 +136,7 @@ public class CSVImportCommand extends BaseDatasetCommand {
         new TemporaryFileSystemDatasetRepository(getConf(),
             // ensure the same FS as the file source is used
             sourceFS.makeQualified(new Path("/tmp")),
+            target.getDataset().getNamespace(),
             UUID.randomUUID().toString());
 
     try {

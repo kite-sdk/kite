@@ -25,8 +25,9 @@ public interface TemporaryDatasetRepositoryAccessor {
    * {@link org.kitesdk.data.spi.Mergeable}, then datasets created by the temp
    * repository should work when merged.
    *
+   * @param namespace the namespace for the temporary dataset
    * @param key a String identifier for the temporary repository
    * @return a {@code DatasetRepository}
    */
-  public TemporaryDatasetRepository getTemporaryRepository(String key);
+  public TemporaryDatasetRepository getTemporaryRepository(String namespace, String key);
 }

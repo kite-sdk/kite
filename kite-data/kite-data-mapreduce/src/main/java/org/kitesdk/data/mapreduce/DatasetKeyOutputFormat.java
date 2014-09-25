@@ -482,8 +482,10 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     Configuration conf = Hadoop.JobContext.getConfiguration.invoke(jobContext);
     DatasetRepository repo = DatasetRepositories.repositoryFor(conf.get(KITE_OUTPUT_URI));
     if (repo instanceof TemporaryDatasetRepositoryAccessor) {
+      Dataset<Object> dataset = load(jobContext).getDataset();
+      String namespace = dataset.getNamespace();
       repo = ((TemporaryDatasetRepositoryAccessor) repo)
-          .getTemporaryRepository(getJobDatasetName(jobContext));
+          .getTemporaryRepository(namespace, getJobDatasetName(jobContext));
     }
     return repo;
   }

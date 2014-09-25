@@ -23,28 +23,42 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.TemporaryDatasetRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Immutable
 public class TemporaryFileSystemDatasetRepository extends FileSystemDatasetRepository
     implements TemporaryDatasetRepository {
-  private static final String tempPath = ".temp";
+
+  private static final Logger LOG = LoggerFactory
+      .getLogger(FileSystemDatasetRepository.class);
+
+  private static final String TEMP_PATH = ".temp";
   private final FileSystem fs;
   private final Path root;
   private final Path storage;
 
-  public TemporaryFileSystemDatasetRepository(Configuration conf, Path root, String key) {
-    super(conf, new Path(root, new Path(tempPath, key)));
+  public TemporaryFileSystemDatasetRepository(Configuration conf, Path root,
+      String namespace, String key) {
+    super(conf, temporaryRoot(root, namespace, key));
     try {
       this.fs = root.getFileSystem(conf);
       this.root = fs.makeQualified(root);
-      this.storage = fs.makeQualified(new Path(root, new Path(tempPath, key)));
+      this.storage = fs.makeQualified(temporaryRoot(root, namespace, key));
     } catch (IOException e) {
       throw new DatasetIOException(
           "Cannot setup temporary repository: " + key, e);
     }
+    LOG.debug("Created temporary dataset repository with root {} and storage {}.", root,
+        storage);
+  }
+
+  private static Path temporaryRoot(Path root, String namespace, String key) {
+    return new Path(root, new Path(namespace, new Path(TEMP_PATH, key)));
   }
 
   public void delete() {
     FileSystemUtil.cleanlyDelete(fs, root, storage);
+    LOG.debug("Deleted temporary dataset repository with storage {}.", storage);
   }
 }
