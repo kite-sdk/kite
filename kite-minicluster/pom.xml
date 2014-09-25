@@ -220,6 +220,9 @@
       </exclusions>
     </dependency>
 
+    <!-- TODO: use the following instead of bundling the DatasetSink classes
+         directly when FLUME-2469 is released -->
+    <!--
     <dependency>
       <groupId>org.apache.flume.flume-ng-sinks</groupId>
       <artifactId>flume-dataset-sink</artifactId>
@@ -238,6 +241,13 @@
           <artifactId>hadoop-common</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    -->
+
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hive</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
