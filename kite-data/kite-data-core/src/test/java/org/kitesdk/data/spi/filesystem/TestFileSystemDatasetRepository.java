@@ -173,7 +173,8 @@ public class TestFileSystemDatasetRepository extends TestDatasetRepositories {
         .endRecord();
 
     try {
-      repo.update(NAMESPACE, NAME, new DatasetDescriptor.Builder().schema(testSchemaV2).build());
+      repo.update(NAMESPACE, NAME, new DatasetDescriptor.Builder(
+          dataset.getDescriptor()).schema(testSchemaV2).build());
       Assert.fail("Should fail due to incompatible update");
     } catch (ValidationException e) {
       // expected
