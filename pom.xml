@@ -196,6 +196,9 @@
     <vers.maven-jar-plugin>2.4</vers.maven-jar-plugin>
     <vers.maven-exec-plugin>1.2.1</vers.maven-exec-plugin>
 
+    <!-- Allow changing the phase findbugs binds to so that we can selctively run it -->
+    <findbugs.phase>verify</findbugs.phase>
+
     <url.cloudera>http://www.cloudera.com</url.cloudera>
     <url.project>http://kitesdk.org/</url.project>
     <url.jira>http://issues.cloudera.com/browse/CDK</url.jira>
@@ -581,7 +584,7 @@
           </configuration>
           <executions>
             <execution>
-              <phase>verify</phase>
+              <phase>${findbugs.phase}</phase>
               <goals>
                 <goal>check</goal>
               </goals>
