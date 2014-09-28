@@ -219,6 +219,10 @@ class HdfsService implements Service {
     config.setBoolean("dfs.namenode.datanode.registration.ip-hostname-check",
         false);
     config.set("hdfs.minidfs.basedir", localDFSLocation);
+    // allow current user to impersonate others
+    String user = System.getProperty("user.name");
+    config.set("hadoop.proxyuser." + user + ".groups", "*");
+    config.set("hadoop.proxyuser." + user + ".hosts", "*");
     return config;
   }
 

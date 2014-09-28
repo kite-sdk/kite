@@ -23,6 +23,7 @@
   <properties>
     <!-- TODO move to parent POM when building for multiple profiles -->
     <vers.hive-cdh5>0.12.0-cdh${cdh5.version}</vers.hive-cdh5>
+    <vers.flume-cdh5>1.4.0-cdh${cdh5.version}</vers.flume-cdh5>
   </properties>
 
   <build>
@@ -205,6 +206,49 @@
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-exec</artifactId>
       <version>${vers.hive-cdh5}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.flume</groupId>
+      <artifactId>flume-ng-node</artifactId>
+      <version>${vers.flume-cdh5}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- TODO: use the following instead of bundling the DatasetSink classes
+         directly when FLUME-2469 is released -->
+    <!--
+    <dependency>
+      <groupId>org.apache.flume.flume-ng-sinks</groupId>
+      <artifactId>flume-dataset-sink</artifactId>
+      <version>${vers.flume-cdh5}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.kitesdk</groupId>
+          <artifactId>kite-data-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-common</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    -->
+
+    <!-- TODO: remove the following when FLUME-2469 is released -->
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-data-hive</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
