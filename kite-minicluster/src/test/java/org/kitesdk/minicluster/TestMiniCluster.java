@@ -40,6 +40,13 @@ public class TestMiniCluster {
         .addService(HBaseService.class).build();
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void testMissingFlumeConfiguration() {
+    new MiniCluster.Builder().addService(FlumeService.class)
+        .flumeConfiguration("resource:missing-flume.properties").flumeAgentName("tier1")
+        .build();
+  }
+
   @Test
   public void testValidMiniCluster() throws IOException, InterruptedException {
     String workDir = "target/kite-minicluster-workdir-" + UUID.randomUUID();

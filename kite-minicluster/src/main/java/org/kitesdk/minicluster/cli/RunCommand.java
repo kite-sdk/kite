@@ -107,7 +107,7 @@ public class RunCommand implements Command {
         .namenodeRpcPort(namenodeRpcPort)
         .zkPort(zkPort)
         .hiveMetastorePort(hiveMetastorePort).hiveServerPort(hiveServerPort)
-        .flumeConfiguration(new File(flumeConfiguration)).flumeAgentName(flumeAgentName);
+        .flumeConfiguration(flumeConfiguration).flumeAgentName(flumeAgentName);
     for (String serviceName : services) {
       if (simpleServiceNameMap.containsKey(serviceName)) {
         serviceName = simpleServiceNameMap.get(serviceName);
