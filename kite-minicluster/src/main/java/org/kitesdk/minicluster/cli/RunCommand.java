@@ -36,7 +36,8 @@ import org.kitesdk.minicluster.MiniCluster;
 import org.kitesdk.minicluster.Service;
 import org.slf4j.Logger;
 
-@Parameters(commandDescription = "Run a minicluster")
+@Parameters(commandDescription = "Run a minicluster of services. The following" +
+    " service short names exist: hdfs, zk, hbase, hive, flume.")
 public class RunCommand implements Command {
 
   private static final Map<String, String> simpleServiceNameMap = Maps
@@ -51,6 +52,9 @@ public class RunCommand implements Command {
 
   private final Logger console;
   private final Configuration conf;
+
+  @Parameter(description = "<service names>")
+  public List<String> services = new ArrayList<String>();
 
   @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "UWF_NULL_FIELD", justification = "Field set by JCommander")
   @Parameter(names = { "-d", "--work-dir" }, description = "The base directory to store mini cluster data in. Defaults to /tmp/kite-minicluster.")
@@ -77,10 +81,6 @@ public class RunCommand implements Command {
 
   @Parameter(names = "--flume-agent-name" , description = "The name of the Flume agent.")
   String flumeAgentName;
-
-  @Parameter(names = { "-s", "--services" }, variableArity = true, description = "A space separated list of fully "
-      + "qualified service classnames to run. The following short names exist: hdfs, zk, hbase, hive, flume")
-  public List<String> services = new ArrayList<String>();
 
   @DynamicParameter(names = "-D", description = "Service specific configs go here. These configs are passed through "
       + "to the ServiceConfig using the key/value specified here.")
@@ -154,13 +154,13 @@ public class RunCommand implements Command {
     return Lists
         .newArrayList(
             "# Run a mini HDFS cluster:",
-            "-s hdfs -d /tmp/kite-minicluster",
+            "hdfs",
             "# Run an HBase cluster that forces everything to listen on IP 10.0.0.1:",
-            "-s hdfs zk hbase -d /tmp/kite-minicluster -b 10.0.0.1",
+            "hdfs zk hbase -b 10.0.0.1",
             "# Run an HBase cluster, cleaning out any data from previous cluster runs:",
-            "-s hdfs zk hbase -d /tmp/kite-minicluster -c",
+            "hdfs zk hbase -d /tmp/kite-minicluster -c",
             "# Run an HBase cluster with custom ports using the service configs:",
-            "-s hdfs zk hbase -d /tmp/kite-minicluster -Dhbase-master-port=63000 -Dhbase-regionserver-port=63020");
+            "hdfs zk hbase -Dhbase-master-port=63000 -Dhbase-regionserver-port=63020");
   }
 
 }
