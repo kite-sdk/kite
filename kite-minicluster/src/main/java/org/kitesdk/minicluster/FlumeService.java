@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import static org.kitesdk.minicluster.MiniCluster.FLUME_AGENT_NAME;
 import static org.kitesdk.minicluster.MiniCluster.FLUME_CONFIGURATION;
 
-class FlumeService implements Service {
+public class FlumeService implements Service {
 
   private static final Logger LOG = LoggerFactory
       .getLogger(FlumeService.class);

@@ -50,7 +50,7 @@ import org.apache.thrift.transport.TTransportFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class HiveService implements Service {
+public class HiveService implements Service {
 
   private static final Logger LOG = LoggerFactory
       .getLogger(HiveService.class);

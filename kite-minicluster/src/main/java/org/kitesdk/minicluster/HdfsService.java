@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An HDFS minicluster service implementation.
  */
-class HdfsService implements Service {
+public class HdfsService implements Service {
 
   private static final Logger logger = LoggerFactory
       .getLogger(HdfsService.class);

@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * 4. The ZK cluster will re-use a data dir on the local filesystem if it
  * already exists instead of blowing it away.
  */
-class ZookeeperService implements Service {
+public class ZookeeperService implements Service {
 
   private static final Logger logger = LoggerFactory
       .getLogger(ZookeeperService.class);
