@@ -209,6 +209,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-service</artifactId>
+      <version>${vers.hive-cdh5}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.flume</groupId>
       <artifactId>flume-ng-node</artifactId>
       <version>${vers.flume-cdh5}</version>

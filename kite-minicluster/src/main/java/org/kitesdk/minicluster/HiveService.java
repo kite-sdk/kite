@@ -36,6 +36,7 @@ import org.apache.hadoop.hive.metastore.TSetIpAddressProcessor;
 import org.apache.hadoop.hive.metastore.TUGIBasedProcessor;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.thrift.TUGIContainingTransport;
+import org.apache.hive.service.server.HiveServer2;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.server.TServer;
@@ -74,12 +75,14 @@ public class HiveService implements Service {
   private Configuration hadoopConf;
   private String workDir;
   private String bindIP = "127.0.0.1";
-  private int port = 9083;
+  private int metastorePort = 9083;
+  private int serverPort = 10000;
   private boolean clean = false;
 
   private Map<String, String> sysProps = Maps.newHashMap();
   private ExecutorService executorService;
   private TServer tServer;
+  private HiveServer2 hiveServer;
 
   public HiveService() {
   }
@@ -94,7 +97,10 @@ public class HiveService implements Service {
       clean = Boolean.parseBoolean(serviceConfig.get(MiniCluster.CLEAN_KEY));
     }
     if (serviceConfig.contains(MiniCluster.HIVE_METASTORE_PORT)) {
-      port = Integer.parseInt(serviceConfig.get(MiniCluster.HIVE_METASTORE_PORT));
+      metastorePort = Integer.parseInt(serviceConfig.get(MiniCluster.HIVE_METASTORE_PORT));
+    }
+    if (serviceConfig.contains(MiniCluster.HIVE_SERVER_PORT)) {
+      serverPort = Integer.parseInt(serviceConfig.get(MiniCluster.HIVE_SERVER_PORT));
     }
     hadoopConf = serviceConfig.getHadoopConf();
   }
@@ -124,7 +130,9 @@ public class HiveService implements Service {
     HiveConf serverConf = configureHive(hadoopConf, localHiveLocation);
 
     executorService = Executors.newSingleThreadExecutor();
-    tServer = startMetaStore(bindIP, port, serverConf);
+    tServer = startMetaStore(bindIP, metastorePort, serverConf);
+
+    hiveServer = startHiveServer(serverConf);
 
     String serverHostname;
     if (bindIP.equals("0.0.0.0")) {
@@ -132,7 +140,7 @@ public class HiveService implements Service {
     } else {
       serverHostname = bindIP;
     }
-    if (!waitForServerUp(serverConf, serverHostname, port, CONNECTION_TIMEOUT)) {
+    if (!waitForServerUp(serverConf, serverHostname, metastorePort, CONNECTION_TIMEOUT)) {
       throw new IOException("Waiting for startup of standalone server");
     }
 
@@ -145,8 +153,12 @@ public class HiveService implements Service {
     if (tServer != null) {
       tServer.stop();
     }
+    if (hiveServer != null) {
+      hiveServer.stop();
+    }
     LOG.info("Hive Minicluster service shut down.");
     tServer = null;
+    hiveServer = null;
     hadoopConf = null;
   }
 
@@ -158,7 +170,12 @@ public class HiveService implements Service {
 
   private HiveConf configureHive(Configuration conf, String localHiveLocation) throws IOException {
     conf.set("hive.metastore.local", "false");
-    conf.set("hive.metastore.uris", "thrift://" + bindIP + ":" + port);
+    conf.set(HiveConf.ConfVars.METASTOREURIS.varname, "thrift://" + bindIP + ":" + metastorePort);
+    conf.set(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_BIND_HOST.varname, bindIP);
+    conf.setInt(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_PORT.varname, serverPort);
+    // The following line to turn of SASL has no effect since HiveAuthFactory calls 'new HiveConf'
+    // Instead it is set in hive-site.xml in this module
+    //conf.set(HiveConf.ConfVars.HIVE_SERVER2_AUTHENTICATION.varname, "NOSASL");
     File localHiveDir = new File(localHiveLocation);
     localHiveDir.mkdirs();
     File metastoreDbDir = new File(localHiveDir, "metastore_db");
@@ -220,6 +237,13 @@ public class HiveService implements Service {
 
   private static String getHiveLocation(String baseLocation) {
     return baseLocation + Path.SEPARATOR + "hive";
+  }
+
+  private HiveServer2 startHiveServer(HiveConf serverConf) {
+    HiveServer2 hiveServer = new HiveServer2();
+    hiveServer.init(serverConf);
+    hiveServer.start();
+    return hiveServer;
   }
 
   // XXX: From org.apache.hadoop.hive.metastore.HiveMetaStore,

@@ -52,6 +52,7 @@ public class MiniCluster {
   public static final String NAMENODE_RPC_PORT = "hdfs-namenode-rpc-port";
   public static final String ZK_PORT_KEY = "zk-port";
   public static final String HIVE_METASTORE_PORT = "hive-metastore-port";
+  public static final String HIVE_SERVER_PORT = "hive-server-port";
   public static final String FLUME_CONFIGURATION = "flume-configuration";
   public static final String FLUME_AGENT_NAME = "flume-agent-name";
 
@@ -128,6 +129,11 @@ public class MiniCluster {
 
     public Builder hiveMetastorePort(int port) {
       serviceConfig.set(HIVE_METASTORE_PORT, Integer.toString(port));
+      return this;
+    }
+
+    public Builder hiveServerPort(int port) {
+      serviceConfig.set(HIVE_SERVER_PORT, Integer.toString(port));
       return this;
     }
 
@@ -250,6 +256,7 @@ public class MiniCluster {
         Class<? extends Service> klass) {
       return getServiceImpl(services, klass) != null;
     }
+
   }
 
   /**
