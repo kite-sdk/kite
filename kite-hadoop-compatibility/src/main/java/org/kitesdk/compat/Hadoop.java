@@ -37,11 +37,21 @@ public class Hadoop {
         new DynMethods.Builder("getConfiguration")
             .impl(org.apache.hadoop.mapreduce.JobContext.class)
             .build();
+
+    public static final DynMethods.UnboundMethod getJobID =
+        new DynMethods.Builder("getJobID")
+            .impl(org.apache.hadoop.mapreduce.JobContext.class)
+            .build();
   }
 
   public static class TaskAttemptContext {
     public static final DynMethods.UnboundMethod getConfiguration =
         new DynMethods.Builder("getConfiguration")
+            .impl(org.apache.hadoop.mapreduce.TaskAttemptContext.class)
+            .build();
+
+    public static final DynMethods.UnboundMethod getTaskAttemptID =
+        new DynMethods.Builder("getTaskAttemptID")
             .impl(org.apache.hadoop.mapreduce.TaskAttemptContext.class)
             .build();
   }

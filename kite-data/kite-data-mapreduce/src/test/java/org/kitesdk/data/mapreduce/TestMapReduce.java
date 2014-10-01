@@ -34,8 +34,9 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.Format;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Datasets;
+import org.kitesdk.data.Format;
 
 @RunWith(Parameterized.class)
 public class TestMapReduce extends FileSystemTestBase {
@@ -156,6 +157,40 @@ public class TestMapReduce extends FileSystemTestBase {
 
     Assert.assertTrue(job.waitForCompletion(true));
     checkOutput(true);
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  public void testJobCreate() throws Exception {
+    // Remove the output dataset so that it is created by the job
+    Datasets.delete(outputDataset.getUri());
+
+    DatasetDescriptor outputDescriptor = new DatasetDescriptor.Builder()
+        .property("kite.allow.csv", "true")
+        .schema(outputDataset.getDescriptor().getSchema())
+        .format(format)
+        .build();
+
+    populateInputDataset();
+
+    Job job = new Job();
+    DatasetKeyInputFormat.configure(job)
+        .readFrom(inputDataset)
+        .withType(GenericData.Record.class);
+
+    job.setMapperClass(LineCountMapper.class);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(IntWritable.class);
+
+    job.setReducerClass(GenericStatsReducer.class);
+
+    DatasetKeyOutputFormat.configure(job)
+        .appendTo(outputDataset.getUri())
+        .withType(GenericData.Record.class)
+        .withDescriptor(outputDescriptor);
+
+    Assert.assertTrue(job.waitForCompletion(true));
+    checkOutput(false);
   }
 
   private void populateInputDataset() {

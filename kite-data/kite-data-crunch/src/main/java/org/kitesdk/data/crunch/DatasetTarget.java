@@ -18,6 +18,7 @@ package org.kitesdk.data.crunch;
 import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.apache.crunch.CrunchRuntimeException;
 import org.apache.crunch.SourceTarget;
 import org.apache.crunch.Target;
@@ -31,6 +32,7 @@ import org.apache.crunch.types.avro.AvroType;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
+import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.Datasets;
@@ -58,10 +60,16 @@ class DatasetTarget<E> implements MapReduceTarget {
   }
 
   public DatasetTarget(URI uri) {
+    this(uri, null);
+  }
+
+  public DatasetTarget(URI uri, @Nullable DatasetDescriptor descriptor) {
     this.uri = uri;
     Configuration temp = emptyConf();
     // use appendTo since handleExisting checks for existing data
-    DatasetKeyOutputFormat.configure(temp).appendTo(uri);
+    DatasetKeyOutputFormat.configure(temp)
+        .appendTo(uri)
+        .withDescriptor(descriptor);
     this.formatBundle = outputBundle(temp);
   }
 
