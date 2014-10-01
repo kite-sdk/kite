@@ -29,7 +29,7 @@
     <module>kite-data</module>
     <module>kite-app-parent</module>
     <module>kite-maven-plugin</module>
-    <module>kite-tools</module>
+    <module>kite-tools-parent</module>
     <module>kite-minicluster</module>
     <module>kite-morphlines</module>
   </modules>
@@ -149,6 +149,7 @@
     <vers.hbase-cdh4>0.94.6-cdh${cdh4.version}</vers.hbase-cdh4>
     <vers.hbase-cdh5>0.96.1.1-cdh${cdh5.version}</vers.hbase-cdh5>
     <vers.hive>0.10.0</vers.hive>
+    <vers.hive-cdh5>0.12.0-cdh${cdh5.version}</vers.hive-cdh5>
     <vers.jetty>8.1.14.v20131031</vers.jetty>
     <vers.jexl>2.1.1</vers.jexl>
     <vers.compress>1.4.1</vers.compress>
@@ -195,6 +196,7 @@
     <vers.maven-antrun-plugin>1.7</vers.maven-antrun-plugin>
     <vers.maven-jar-plugin>2.4</vers.maven-jar-plugin>
     <vers.maven-exec-plugin>1.2.1</vers.maven-exec-plugin>
+    <vers.maven-assembly-plugin>2.4.1</vers.maven-assembly-plugin>
 
     <url.cloudera>http://www.cloudera.com</url.cloudera>
     <url.project>http://kitesdk.org/</url.project>
@@ -627,6 +629,11 @@
           <configuration>
             <downloadSources>true</downloadSources>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${vers.maven-assembly-plugin}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -1225,7 +1232,7 @@
         <cdh.version>${cdh5.version}</cdh.version>
         <vers.crunch>${vers.crunch-cdh5}</vers.crunch>
         <vers.flume>1.4.0-cdh${cdh5.version}</vers.flume>
-        <vers.hive>0.12.0-cdh${cdh5.version}</vers.hive>
+        <vers.hive>${vers.hive-cdh5}</vers.hive>
         <vers.oozie>4.0.0-cdh${cdh5.version}</vers.oozie>
         <vers.solr>${vers.solr-cdh5}</vers.solr>
         <solr.expected.version>${vers.solr-cdh5}</solr.expected.version> <!-- sanity check to verify we actually run against the expected version rather than some outdated version -->

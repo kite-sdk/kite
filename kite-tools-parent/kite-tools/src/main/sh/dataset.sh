@@ -24,12 +24,8 @@ function debug() {
   [ -n "$debug" ] && echo "$0 debug: $@"
 }
 
-bin="$1"
-
-if [ -z "${bin}" ]; then
-  bin=`dirname $0`
-  bin=`cd ${bin} && pwd`
-fi
+bin=`dirname $0`
+bin=`cd ${bin} && pwd`
 
 # Find paths to our dependency systems. If they are unset, use CDH defaults.
 
@@ -92,12 +88,6 @@ if [ -z "${HIVE_CONF_DIR}" ]; then
 fi
 debug "Using HIVE_CONF_DIR=${HIVE_CONF_DIR}"
 
-# Check: If we can't find our dependencies, give up here.
-if [ ! -d "${HADOOP_COMMON_HOME}" ]; then
-  echo "WARNING: Cannot find Hadoop installation!"
-  echo "You can fix this warning by setting HADOOP_HOME"
-fi
-
 # Add dependencies to classpath.
 KITE_CLASSPATH=""
 
@@ -139,9 +129,9 @@ export HIVE_HOME
 if [ -x "$HADOOP_COMMON_HOME/bin/hadoop" ]; then
   exec ${HADOOP_COMMON_HOME}/bin/hadoop jar "$0" $flags --dollar-zero "$0" "$@"
 else
-  # TODO: Add a stand-alone hadoop bundle
-  echo "Cannot find hadoop, attempting to run without it"
-  exec java $flags -jar "$0" --dollar-zero "$0" "$@"
+  echo "WARNING: Cannot find Hadoop installation!"
+  echo "You can fix this warning by setting HADOOP_HOME"
 fi
 
+exit
 # jar contents follows

@@ -17,7 +17,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>kite-tools</artifactId>
+  <artifactId>kite-tools-parent</artifactId>
+  <packaging>pom</packaging>
 
   <parent>
     <groupId>org.kitesdk</groupId>
@@ -25,164 +26,15 @@
     <version>0.16.1-SNAPSHOT</version>
   </parent>
 
+  <modules>
+    <module>kite-tools</module>
+  </modules>
+
   <name>Kite Tools Module</name>
   <description>
-    The Kite Tools module provides command-line tools and APIs for performing
-    common tasks with Kite.
+    The Kite Tools module provides command-line tools for performing common
+    tasks with Kite.
   </description>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <compilerArgs>
-            <!-- commented out due to org.apache.hadoop.filecache.DistributedCache deprecations in Hadoop 2 -->
-            <!-- <arg>-Werror</arg> --> <!-- fail on warnings -->
-            <!-- <arg>-Xlint:-options</arg> --> <!-- ignore cross-compilation warning -->
-            <arg>-Xlint:unchecked</arg>
-          </compilerArgs>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>test-jar</goal> <!-- publish test-jar for other modules -->
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>org.kitesdk.cli.Main</mainClass>
-                </transformer>
-              </transformers>
-              <createDependencyReducedPom>false</createDependencyReducedPom>
-              <!-- <minimizeJar>true</minimizeJar> -->
-              <artifactSet>
-                <includes>
-                  <include>org.kitesdk:kite-data-core</include>
-                  <include>org.kitesdk:kite-data-hive</include>
-                  <include>com.twitter:parquet-avro</include>
-                  <include>com.twitter:parquet-column</include>
-                  <include>com.twitter:parquet-common</include>
-                  <include>com.twitter:parquet-encoding</include>
-                  <include>com.twitter:parquet-generator</include>
-                  <include>com.twitter:parquet-hadoop</include>
-                  <include>com.twitter:parquet-format</include>
-                  <include>net.sf.opencsv:opencsv</include>
-                  <include>org.apache.commons:commons-jexl</include>
-                  <include>com.fasterxml.jackson.core:jackson-databind</include>
-                  <include>com.fasterxml.jackson.core:jackson-annotations</include>
-                  <include>com.fasterxml.jackson.core:jackson-core</include>
-                  <include>org.kitesdk:kite-data-hbase</include>
-                  <include>com.twitter:parquet-hive-bundle</include>
-                  <include>org.kitesdk:kite-data-mapreduce</include>
-                  <include>org.kitesdk:kite-data-crunch</include>
-                  <include>org.kitesdk:kite-hadoop-compatibility</include>
-                  <include>com.beust:jcommander</include>
-                  <include>org.slf4j:slf4j-api</include>
-                  <include>org.apache.crunch:crunch-core</include>
-                  <include>org.javassist:javassist</include>
-                  <include>com.google.code.findbugs:jsr305</include>
-                  <include>com.google.code.findbugs:annotations</include>
-                </includes>
-                <!-- <excludes>
-                  <exclude>*:*</exclude>
-                </excludes> -->
-              </artifactSet>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- make a chmod +x style executable from the jar -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <executable>/bin/sh</executable>
-          <arguments>
-            <argument>src/main/sh/build-executable.sh</argument>
-            <argument>src/main/sh/dataset.sh</argument>
-            <argument>target/${project.artifactId}-${project.version}.jar</argument>
-            <argument>target/kite-dataset</argument>
-          </arguments>
-          <!-- this option doesn't work :(
-          <outputFile>dataset</outputFile> -->
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>${project.build.directory}/kite-dataset</file>
-                  <classifier>binary</classifier>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
 
   <!--
     Seems like these reporting plugins aren't properly inherited from the parent
@@ -329,21 +181,9 @@
 
     <!-- Hadoop-provided dependencies (not bundled) -->
 
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>${artifact.hadoop-deps}</artifactId>
-      <type>pom</type>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>org.kitesdk</groupId>
-      <artifactId>${artifact.hbase-deps}</artifactId>
-      <type>pom</type>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
+    <!-- Do not include kite dependency bundles here because they are replaced
+         in the dependency modules
+         -->
 
     <dependency>
       <groupId>org.apache.avro</groupId>
