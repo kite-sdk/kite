@@ -28,6 +28,7 @@
 
   <modules>
     <module>kite-tools</module>
+    <module>kite-tools-cdh5</module>
   </modules>
 
   <name>Kite Tools Module</name>

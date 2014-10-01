@@ -84,7 +84,6 @@
             </goals>
             <configuration>
               <descriptor>src/main/assembly/runtime.xml</descriptor>
-              <appendAssemblyId>false</appendAssemblyId>
             </configuration>
           </execution>
         </executions>
@@ -106,11 +105,9 @@
           <arguments>
             <argument>src/main/sh/build-executable.sh</argument>
             <argument>src/main/sh/dataset.sh</argument>
-            <argument>target/${project.artifactId}-${project.version}.jar</argument>
+            <argument>target/${project.artifactId}-${project.version}-runtime.jar</argument>
             <argument>target/kite-dataset</argument>
           </arguments>
-          <!-- this option doesn't work :(
-          <outputFile>dataset</outputFile> -->
         </configuration>
       </plugin>
       <plugin>

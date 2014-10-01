@@ -129,7 +129,7 @@ export HIVE_HOME
 if [ -x "$HADOOP_COMMON_HOME/bin/hadoop" ]; then
   exec ${HADOOP_COMMON_HOME}/bin/hadoop jar "$0" $flags --dollar-zero "$0" "$@"
 else
-  echo "WARNING: Cannot find Hadoop installation!"
+  echo "ERROR: Cannot find Hadoop installation!"
   echo "You can fix this warning by setting HADOOP_HOME"
 fi
 
