@@ -65,7 +65,7 @@ public class TestLog4jConfigurationCommand {
 
   @Test
   public void testCli() throws Exception {
-    int rc = TestUtil.run(console, new Configuration(), "logging-config", "--host",
+    int rc = TestUtil.run(console, new Configuration(), "log4j-config", "--host",
         "quickstart.cloudera", "--package", "org.kitesdk.test.logging",
         FILE_DATASET_URI);
     Assert.assertEquals("Return code should be 0", 0, rc);
@@ -83,7 +83,7 @@ public class TestLog4jConfigurationCommand {
 
   @Test
   public void testCliHive() throws Exception {
-    int rc = TestUtil.run(console, new Configuration(), "logging-config", "--host",
+    int rc = TestUtil.run(console, new Configuration(), "log4j-config", "--host",
         "quickstart.cloudera", "--package", "org.kitesdk.test.logging",
         "users");
     Assert.assertEquals("Return code should be 0", 0, rc);
