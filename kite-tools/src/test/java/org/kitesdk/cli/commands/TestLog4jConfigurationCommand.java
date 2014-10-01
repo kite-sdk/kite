@@ -32,10 +32,10 @@ import org.kitesdk.data.TestHelpers;
 import static org.mockito.Mockito.*;
 import org.slf4j.Logger;
 
-public class TestLoggingConfigurationCommand {
+public class TestLog4jConfigurationCommand {
 
   private Logger console = null;
-  private LoggingConfigCommand command;
+  private Log4jConfigCommand command;
   private static final String FILE_DATASET_URI = "dataset:file:target/data/logConfig/users";
   private static final String HIVE_DATASET_NAME = "users";
 
@@ -59,7 +59,7 @@ public class TestLoggingConfigurationCommand {
   @Before
   public void setup() throws Exception {
     this.console = mock(Logger.class);
-    this.command = new LoggingConfigCommand(console);
+    this.command = new Log4jConfigCommand(console);
     command.setConf(new Configuration());
   }
 
@@ -204,7 +204,7 @@ public class TestLoggingConfigurationCommand {
   public void testDatasetRequired() throws Exception {
     command.hostname = "quickstart.cloudera";
     command.packageName = "org.kitesdk.test.logging";
-    final LoggingConfigCommand finalCommand = command;
+    final Log4jConfigCommand finalCommand = command;
     TestHelpers.assertThrows("Throw IllegalArgumentException when no dataset is provided",
         IllegalArgumentException.class, new Callable<Integer>() {
 
@@ -221,7 +221,7 @@ public class TestLoggingConfigurationCommand {
   public void testHostnameRequired() throws Exception {
     command.datasetName = Lists.newArrayList(FILE_DATASET_URI);
     command.packageName = "org.kitesdk.test.logging";
-    final LoggingConfigCommand finalCommand = command;
+    final Log4jConfigCommand finalCommand = command;
     TestHelpers.assertThrows("Throw IllegalArgumentException when no hostname is provided",
         IllegalArgumentException.class, new Callable<Integer>() {
 
@@ -238,7 +238,7 @@ public class TestLoggingConfigurationCommand {
   public void testPackageNameOrLogAllRequired() throws Exception {
     command.datasetName = Lists.newArrayList(FILE_DATASET_URI);
     command.hostname = "quickstart.cloudera";
-    final LoggingConfigCommand finalCommand = command;
+    final Log4jConfigCommand finalCommand = command;
     TestHelpers.assertThrows("Throw IllegalArgumentException when package name and log all are not provided",
         IllegalArgumentException.class, new Callable<Integer>() {
 

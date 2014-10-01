@@ -27,7 +27,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 
 @Parameters(commandDescription = "Build a log4j config to log events to a dataset")
-public class LoggingConfigCommand extends BaseDatasetCommand {
+public class Log4jConfigCommand extends BaseDatasetCommand {
 
   @Parameter(description = "Dataset name or URI", required = true)
   List<String> datasetName;
@@ -50,7 +50,7 @@ public class LoggingConfigCommand extends BaseDatasetCommand {
   @Parameter(names={"-o", "--output"}, description="Save logging config to path")
   String outputPath = null;
 
-  public LoggingConfigCommand(Logger console) {
+  public Log4jConfigCommand(Logger console) {
     super(console);
   }
 
