@@ -104,6 +104,13 @@
       <scope>runtime</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.kitesdk</groupId>
+      <artifactId>kite-minicluster</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
     <!-- This is based on the kite-tools POM so that its dependencies are
          inherited. Inheritance is necessary because the dependencies to bundle
          are provided, which are not included transitively. This section adds
