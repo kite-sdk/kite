@@ -15,6 +15,8 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import java.util.NoSuchElementException;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.ReaderWriterState;
 import org.kitesdk.data.DatasetReaderException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
@@ -74,8 +76,10 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDa
       reader = new AvroParquetReader<E>(
           fileSystem.getConf(), fileSystem.makeQualified(path));
     } catch (IOException e) {
-      throw new DatasetReaderException("Unable to create reader path:" + path, e);
+      throw new DatasetIOException("Unable to create reader path:" + path, e);
     }
+
+    advance();
 
     state = ReaderWriterState.OPEN;
   }
@@ -84,15 +88,6 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDa
   public boolean hasNext() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to read from a file in state:%s", state);
-    if (next == null) {
-      try {
-        next = reader.read();
-      } catch (EOFException e) {
-        return false;
-      } catch (IOException e) {
-        throw new DatasetReaderException("Unable to read next record from: " + path, e);
-      }
-    }
     return next != null;
   }
 
@@ -100,9 +95,12 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDa
   public E next() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to read from a file in state:%s", state);
+    if (next == null) {
+      throw new NoSuchElementException();
+    }
 
     E current = next;
-    next = null;
+    advance();
     return current;
   }
 
@@ -117,7 +115,8 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDa
     try {
       reader.close();
     } catch (IOException e) {
-      throw new DatasetReaderException("Unable to close reader path:" + path, e);
+      this.state = ReaderWriterState.ERROR;
+      throw new DatasetIOException("Unable to close reader path:" + path, e);
     }
 
     state = ReaderWriterState.CLOSED;
@@ -137,6 +136,17 @@ class ParquetFileSystemDatasetReader<E extends IndexedRecord> extends AbstractDa
       .add("state", state)
       .add("reader", reader)
       .toString();
+  }
+
+  private void advance() {
+    try {
+      this.next = reader.read();
+    } catch (EOFException e) {
+      this.next = null;
+    } catch (IOException e) {
+      this.state = ReaderWriterState.ERROR;
+      throw new DatasetIOException("Unable to read next record from: " + path, e);
+    }
   }
 
 }
