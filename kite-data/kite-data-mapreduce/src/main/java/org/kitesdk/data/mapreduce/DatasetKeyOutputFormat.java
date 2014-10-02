@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.mapreduce;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.URI;
@@ -57,7 +56,6 @@ import org.kitesdk.data.spi.filesystem.FileSystemProperties;
  *
  * @param <E> The type of entities in the {@code Dataset}.
  */
-@Beta
 public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
 
   public static final String KITE_OUTPUT_URI = "kite.outputUri";

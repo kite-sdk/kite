@@ -16,7 +16,6 @@
 package org.kitesdk.data;
 
 import org.kitesdk.data.spi.partition.PartitionFunctions;
-import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import java.util.HashMap;
@@ -30,7 +29,6 @@ import org.kitesdk.data.spi.FieldPartitioner;
  * Internal utility class for persisting partition strategies,
  * not a part of the public API.
  */
-@Beta
 class PartitionExpression {
 
   private JexlEngine engine;

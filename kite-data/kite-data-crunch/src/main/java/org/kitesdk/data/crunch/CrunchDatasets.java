@@ -16,11 +16,9 @@
 package org.kitesdk.data.crunch;
 
 import java.net.URI;
-import com.google.common.annotations.Beta;
 import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.reflect.ReflectData;
 import org.apache.crunch.DoFn;
 import org.apache.crunch.Emitter;
 import org.apache.crunch.MapFn;
@@ -49,7 +47,6 @@ import org.kitesdk.data.spi.SchemaUtil;
  * {@link ReadableSource}s or {@link Target}s.
  * </p>
  */
-@Beta
 public class CrunchDatasets {
 
   /**

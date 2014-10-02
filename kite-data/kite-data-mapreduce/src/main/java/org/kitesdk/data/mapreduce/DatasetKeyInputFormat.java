@@ -15,7 +15,6 @@
  */
 package org.kitesdk.data.mapreduce;
 
-import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -50,7 +49,6 @@ import org.slf4j.LoggerFactory;
  *
  * @param <E> The type of entities in the {@code Dataset}.
  */
-@Beta
 public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
     implements Configurable {
 
