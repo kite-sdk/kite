@@ -188,7 +188,7 @@ class HBaseService implements Service {
     config.set(HConstants.ZOOKEEPER_QUORUM, bindIP);
 
     // By default, the HBase master and regionservers will report to zookeeper
-    // that it's hostname is what it determines by reverse DNS lookup, and not
+    // that its hostname is what it determines by reverse DNS lookup, and not
     // what we use as the bind address. This means when we set the bind
     // address, daemons won't actually be able to connect to eachother if they
     // are different. Here, we do something that's illegal in 48 states - use
