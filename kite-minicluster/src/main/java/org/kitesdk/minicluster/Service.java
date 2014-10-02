@@ -42,7 +42,7 @@ import org.apache.hadoop.conf.Configuration;
 public interface Service {
 
   /**
-   * Configure this service with the SercieConfig
+   * Configure this service with the ServiceConfig
    * 
    * @param serviceConfig
    *          A Service Config instance

@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * Services that make up the MiniCluster. Examples of Services are HDFS, HBase,
  * Zookeeper, etc...
  * 
- * This MiniCluster should be built with it's internal Builder class, which will
+ * This MiniCluster should be built with its internal Builder class, which will
  * validate proper configuration of the MiniCluster. For example, a Service can
  * have dependencies, so the builder will validate that proper Service
  * dependencies have been added to the MiniCluster.
@@ -46,7 +46,6 @@ public class MiniCluster {
   private static final Logger logger = LoggerFactory
       .getLogger(MiniCluster.class);
 
-  public static final String HADOOP_CONFIG_KEY = "hadoop-config-key";
   public static final String BIND_IP_KEY = "bind-ip";
   public static final String CLEAN_KEY = "clean";
   public static final String WORK_DIR_KEY = "directory";
