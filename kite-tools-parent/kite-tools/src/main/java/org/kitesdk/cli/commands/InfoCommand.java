@@ -17,6 +17,7 @@
 package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -31,6 +32,7 @@ import org.kitesdk.data.spi.ColumnMappingParser;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.slf4j.Logger;
 
+@Parameters(commandDescription="Print all metadata for a Dataset")
 public class InfoCommand extends BaseDatasetCommand {
 
   private static final Splitter NEWLINE = Splitter.on('\n');
