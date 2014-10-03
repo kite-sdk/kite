@@ -170,19 +170,6 @@ public class DatasetDescriptor {
   }
 
   /**
-   * Get a URI from which the {@link Schema} can be retrieved (optional). This
-   * method might return {@code null} if the schema is not stored at a persistent
-   * URI (for example, if it were constructed from a literal string).
-   *
-   * @return a URI from which the schema can be retrieved
-   * @since 0.17.0
-   */
-  @Nullable
-  public URI getSchemaUri() {
-    return schemaUri;
-  }
-
-  /**
    * Get the associated {@link Format} the data is stored in.
    *
    * @return the format
@@ -376,17 +363,13 @@ public class DatasetDescriptor {
      */
     public Builder(DatasetDescriptor descriptor) {
       this();
-      this.schema = descriptor.getSchema();
-      this.schemaUri = descriptor.getSchemaUri();
-      this.format = descriptor.getFormat();
-      this.location = descriptor.getLocation();
-      this.columnMapping = descriptor.getColumnMapping();
-      this.compressionType = descriptor.getCompressionType();
-
-      if (descriptor.isPartitioned()) {
-        this.partitionStrategy = descriptor.getPartitionStrategy();
-      }
-
+      this.schema = descriptor.schema;
+      this.schemaUri = descriptor.schemaUri;
+      this.format = descriptor.format;
+      this.location = descriptor.location;
+      this.columnMapping = descriptor.columnMappings;
+      this.compressionType = descriptor.compressionType;
+      this.partitionStrategy = descriptor.partitionStrategy;
       properties.putAll(descriptor.properties);
     }
 
