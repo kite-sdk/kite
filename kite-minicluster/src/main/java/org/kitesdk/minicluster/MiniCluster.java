@@ -18,8 +18,12 @@ package org.kitesdk.minicluster;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,8 +56,11 @@ public class MiniCluster {
   public static final String NAMENODE_RPC_PORT = "hdfs-namenode-rpc-port";
   public static final String ZK_PORT_KEY = "zk-port";
   public static final String HIVE_METASTORE_PORT = "hive-metastore-port";
+  public static final String HIVE_SERVER_PORT = "hive-server-port";
   public static final String FLUME_CONFIGURATION = "flume-configuration";
   public static final String FLUME_AGENT_NAME = "flume-agent-name";
+
+  static final String RESOURCE_URI_SCHEME = "resource";
 
   private static final Map<String, Service> registeredServices = new ConcurrentHashMap<String, Service>();
 
@@ -76,9 +83,9 @@ public class MiniCluster {
    * Private constructor. The MiniCluster should be built with the Builder
    * class.
    * 
-   * @param mini
+   * @param services
    *          cluster services The services in run order
-   * @param conf
+   * @param serviceConfig
    *          The Hadoop Configuration to start running the mini cluster
    *          services with.
    */
@@ -131,14 +138,37 @@ public class MiniCluster {
       return this;
     }
 
-    public Builder flumeConfiguration(File file) {
-      serviceConfig.set(FLUME_CONFIGURATION, file.toString());
+    public Builder hiveServerPort(int port) {
+      serviceConfig.set(HIVE_SERVER_PORT, Integer.toString(port));
+      return this;
+    }
+
+    public Builder flumeConfiguration(String resource) {
+      serviceConfig.set(FLUME_CONFIGURATION, toUrl(resource).toExternalForm());
       return this;
     }
 
     public Builder flumeAgentName(String name) {
       serviceConfig.set(FLUME_AGENT_NAME, name);
       return this;
+    }
+
+    private URL toUrl(String resource) {
+      URI resourceUri = URI.create(resource);
+      if (RESOURCE_URI_SCHEME.equals(resourceUri.getScheme())) {
+        // following throws IllegalArgumentException if resource isn't found
+        return Resources.getResource(resourceUri.getRawSchemeSpecificPart());
+      } else { // treat as file path
+        File file = new File(resource);
+        if (!file.exists()) {
+          throw new IllegalArgumentException(String.format("File %s not found.", file));
+        }
+        try {
+          return file.toURI().toURL();
+        } catch (MalformedURLException e) {
+          throw new IllegalArgumentException(e);
+        }
+      }
     }
 
     /**
@@ -164,6 +194,7 @@ public class MiniCluster {
       try {
         Class.forName(klass.getName());
       } catch (ClassNotFoundException e) {
+        // ignore
       }
       Service service = registeredServices.get(klass.getName());
       Preconditions.checkState(service != null,
@@ -250,6 +281,7 @@ public class MiniCluster {
         Class<? extends Service> klass) {
       return getServiceImpl(services, klass) != null;
     }
+
   }
 
   /**

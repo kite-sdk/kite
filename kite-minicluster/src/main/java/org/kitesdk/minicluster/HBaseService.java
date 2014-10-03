@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An HBase minicluster service implementation.
  */
-class HBaseService implements Service {
+public class HBaseService implements Service {
 
   private static final Logger logger = LoggerFactory
       .getLogger(HBaseService.class);

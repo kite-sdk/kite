@@ -76,6 +76,9 @@ public class RunCommand implements Command {
   @Parameter(names = "--hive-metastore-port", description = "The Hive Metastore port. Defaults to 9083.")
   int hiveMetastorePort = 9083;
 
+  @Parameter(names = "--hive-server-port", description = "The Hive Server port. Defaults to 10000.")
+  int hiveServerPort = 10000;
+
   @Parameter(names = "--flume-configuration" , description = "The Flume configuration file.")
   String flumeConfiguration;
 
@@ -103,8 +106,8 @@ public class RunCommand implements Command {
         .clean(clean).hadoopConf(conf).bindIP(bindIP)
         .namenodeRpcPort(namenodeRpcPort)
         .zkPort(zkPort)
-        .hiveMetastorePort(hiveMetastorePort)
-        .flumeConfiguration(new File(flumeConfiguration)).flumeAgentName(flumeAgentName);
+        .hiveMetastorePort(hiveMetastorePort).hiveServerPort(hiveServerPort)
+        .flumeConfiguration(flumeConfiguration).flumeAgentName(flumeAgentName);
     for (String serviceName : services) {
       if (simpleServiceNameMap.containsKey(serviceName)) {
         serviceName = simpleServiceNameMap.get(serviceName);
