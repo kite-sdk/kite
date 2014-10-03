@@ -106,8 +106,13 @@ public class RunCommand implements Command {
         .clean(clean).hadoopConf(conf).bindIP(bindIP)
         .namenodeRpcPort(namenodeRpcPort)
         .zkPort(zkPort)
-        .hiveMetastorePort(hiveMetastorePort).hiveServerPort(hiveServerPort)
-        .flumeConfiguration(flumeConfiguration).flumeAgentName(flumeAgentName);
+        .hiveMetastorePort(hiveMetastorePort).hiveServerPort(hiveServerPort);
+    if (flumeConfiguration != null) {
+      builder.flumeConfiguration(flumeConfiguration);
+    }
+    if (flumeAgentName != null) {
+      builder.flumeAgentName(flumeAgentName);
+    }
     for (String serviceName : services) {
       if (simpleServiceNameMap.containsKey(serviceName)) {
         serviceName = simpleServiceNameMap.get(serviceName);
