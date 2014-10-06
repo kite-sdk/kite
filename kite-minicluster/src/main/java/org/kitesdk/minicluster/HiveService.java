@@ -173,8 +173,10 @@ public class HiveService implements Service {
     conf.set(HiveConf.ConfVars.METASTOREURIS.varname, "thrift://" + bindIP + ":" + metastorePort);
     conf.set(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_BIND_HOST.varname, bindIP);
     conf.setInt(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_PORT.varname, serverPort);
-    // The following line to turn of SASL has no effect since HiveAuthFactory calls 'new HiveConf'
-    // Instead it is set in hive-site.xml in this module
+    // The following line to turn of SASL has no effect since HiveAuthFactory calls
+    // 'new HiveConf()'. This is fixed by https://issues.apache.org/jira/browse/HIVE-6657,
+    // in Hive 0.14.
+    // As a workaround, the property is set in hive-site.xml in this module.
     //conf.set(HiveConf.ConfVars.HIVE_SERVER2_AUTHENTICATION.varname, "NOSASL");
     File localHiveDir = new File(localHiveLocation);
     localHiveDir.mkdirs();
