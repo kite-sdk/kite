@@ -58,7 +58,7 @@ public class TestParquetWriter extends TestFileSystemWriters<Object> {
   @Test
   public void testDefaultToParquetAppender() throws IOException {
     FileSystemWriter<Object> writer = (FileSystemWriter<Object>) fsWriter;
-    Assert.assertEquals("Should default to ParquetAppender",
+    Assert.assertEquals("Should default to non-durable parquet appender",
         ParquetAppender.class, writer.newAppender(testDirectory).getClass());
   }
 
@@ -75,7 +75,7 @@ public class TestParquetWriter extends TestFileSystemWriters<Object> {
                 .endRecord())
             .format("parquet")
             .build());
-    Assert.assertEquals("Should default to ParquetAppender",
+    Assert.assertEquals("Disabling the non-durable parquet appender should get us a durable appender",
         DurableParquetAppender.class, writer.newAppender(testDirectory).getClass());
   }
 }
