@@ -220,7 +220,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     Format format = descriptor.getFormat();
     if (Formats.PARQUET.equals(format)) {
       // by default, Parquet is not durable
-      if (!DescriptorUtil.isEnabled(
+      if (DescriptorUtil.isDisabled(
           FileSystemProperties.NON_DURABLE_PARQUET_PROP, descriptor)) {
         return (FileAppender<E>) new DurableParquetAppender(
             fs, temp, descriptor.getSchema(), conf, descriptor.getCompressionType());

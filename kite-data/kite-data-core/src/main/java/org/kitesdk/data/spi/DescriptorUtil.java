@@ -34,4 +34,19 @@ public class DescriptorUtil {
     }
     return false;
   }
+
+  /**
+   * Returns whether the value of the descriptor property is {@code false}.
+   *
+   * @param property a String property name
+   * @param descriptor a {@link DatasetDescriptor}
+   * @return {@code false} if set and "false", {@code true} otherwise.
+   */
+  public static boolean isDisabled(String property, DatasetDescriptor descriptor) {
+    if (descriptor.hasProperty(property)) {
+      // return true only if the property value is "true"
+      return Boolean.valueOf(descriptor.getProperty(property));
+    }
+    return true;
+  }
 }
