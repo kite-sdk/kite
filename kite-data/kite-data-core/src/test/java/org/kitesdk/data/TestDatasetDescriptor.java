@@ -126,7 +126,6 @@ public class TestDatasetDescriptor {
   }
 
   @Test
-  @Ignore
   public void testEmbeddedColumnMapping() {
     Schema schema = new Schema.Parser().parse("{" +
         "  \"type\": \"record\"," +
@@ -167,7 +166,141 @@ public class TestDatasetDescriptor {
   }
 
   @Test
-  @Ignore
+  public void testCopyUsesEmbeddedColumnMapping() {
+    Schema schema = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"partitions\": [" +
+        "    {\"type\": \"identity\", \"source\": \"id\", \"name\": \"id_copy\"}" +
+        "  ]," +
+        "  \"mapping\": [" +
+        "    {\"type\": \"key\", \"source\": \"id\"}," +
+        "    {\"type\": \"column\"," +
+        "     \"source\": \"username\"," +
+        "     \"family\": \"u\"," +
+        "     \"qualifier\": \"username\"}," +
+        "    {\"type\": \"column\"," +
+        "     \"source\": \"real_name\"," +
+        "     \"family\": \"u\"," +
+        "     \"qualifier\": \"name\"}" +
+        "  ]," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\"}," +
+        "    {\"name\": \"username\", \"type\": \"string\"}," +
+        "    {\"name\": \"real_name\", \"type\": \"string\"}" +
+        "  ]" +
+        "}");
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(schema)
+        .build();
+    Assert.assertTrue("Descriptor should have partition strategy",
+        descriptor.isPartitioned());
+
+    ColumnMapping expected = new ColumnMapping.Builder()
+        .key("id")
+        .column("username", "u", "username")
+        .column("real_name", "u", "name")
+        .build();
+    Assert.assertEquals(expected, descriptor.getColumnMapping());
+
+    schema = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"partitions\": [" +
+        "    {\"type\": \"identity\", \"source\": \"id\", \"name\": \"id_copy\"}" +
+        "  ]," +
+        "  \"mapping\": [" +
+        "    {\"type\": \"key\", \"source\": \"id\"}," +
+        "    {\"type\": \"column\"," +
+        "     \"source\": \"username\"," +
+        "     \"family\": \"u\"," +
+        "     \"qualifier\": \"username\"}," +
+        "    {\"type\": \"column\"," +
+        "     \"source\": \"real_name\"," +
+        "     \"family\": \"u\"," +
+        "     \"qualifier\": \"name\"}," +
+        "    {\"type\": \"column\"," +
+        "     \"source\": \"age\"," +
+        "     \"family\": \"u\"," +
+        "     \"qualifier\": \"age\"}" +
+        "  ]," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\"}," +
+        "    {\"name\": \"username\", \"type\": \"string\"}," +
+        "    {\"name\": \"real_name\", \"type\": \"string\"}," +
+        "    {\"name\": \"age\", \"type\": \"long\"}" +
+        "  ]" +
+        "}");
+
+    descriptor = new DatasetDescriptor.Builder(descriptor)
+        .schema(schema)
+        .build();
+    Assert.assertTrue("Descriptor should have partition strategy",
+        descriptor.isPartitioned());
+
+    expected = new ColumnMapping.Builder()
+        .key("id")
+        .column("username", "u", "username")
+        .column("real_name", "u", "name")
+        .column("age", "u", "age")
+        .build();
+    Assert.assertEquals(expected, descriptor.getColumnMapping());
+  }
+
+  @Test
+  public void testCopyUsesCopiedColumnMapping() {
+    Schema schema = new Schema.Parser().parse("{" +
+        "  \"type\": \"record\"," +
+        "  \"name\": \"User\"," +
+        "  \"partitions\": [" +
+        "    {\"type\": \"identity\", \"source\": \"id\", \"name\": \"id_copy\"}" +
+        "  ]," +
+        "  \"mapping\": [" +
+        "    {\"type\": \"key\", \"source\": \"id\"}," +
+        "    {\"type\": \"column\"," +
+        "     \"source\": \"username\"," +
+        "     \"family\": \"u\"," +
+        "     \"qualifier\": \"username\"}," +
+        "    {\"type\": \"column\"," +
+        "     \"source\": \"real_name\"," +
+        "     \"family\": \"u\"," +
+        "     \"qualifier\": \"name\"}" +
+        "  ]," +
+        "  \"fields\": [" +
+        "    {\"name\": \"id\", \"type\": \"long\"}," +
+        "    {\"name\": \"username\", \"type\": \"string\"}," +
+        "    {\"name\": \"real_name\", \"type\": \"string\"}" +
+        "  ]" +
+        "}");
+
+    DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+        .schema(schema)
+        .build();
+    Assert.assertTrue("Descriptor should have partition strategy",
+        descriptor.isPartitioned());
+
+    ColumnMapping expected = new ColumnMapping.Builder()
+        .key("id")
+        .column("username", "u", "username")
+        .column("real_name", "u", "name")
+        .build();
+    Assert.assertEquals(expected, descriptor.getColumnMapping());
+
+    descriptor = new DatasetDescriptor.Builder(descriptor)
+        .build();
+    Assert.assertTrue("Descriptor should have partition strategy",
+        descriptor.isPartitioned());
+
+    expected = new ColumnMapping.Builder()
+        .key("id")
+        .column("username", "u", "username")
+        .column("real_name", "u", "name")
+        .build();
+    Assert.assertEquals(expected, descriptor.getColumnMapping());
+  }
+
+  @Test
   public void testEmbeddedFieldMappings() {
     Schema schema = new Schema.Parser().parse("{\n" +
         "  \"type\": \"record\",\n" +

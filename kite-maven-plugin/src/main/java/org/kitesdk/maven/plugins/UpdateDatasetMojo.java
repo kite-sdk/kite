@@ -17,19 +17,16 @@ package org.kitesdk.maven.plugins;
 
 import com.google.common.base.Preconditions;
 import com.google.common.io.Resources;
-
 import java.io.File;
 import java.io.IOException;
-
-import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.Datasets;
-import org.kitesdk.data.spi.DatasetRepository;
-import org.kitesdk.data.impl.Accessor;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.Datasets;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
