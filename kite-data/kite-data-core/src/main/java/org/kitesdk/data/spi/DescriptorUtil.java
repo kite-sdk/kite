@@ -40,13 +40,13 @@ public class DescriptorUtil {
    *
    * @param property a String property name
    * @param descriptor a {@link DatasetDescriptor}
-   * @return {@code false} if set and "false", {@code true} otherwise.
+   * @return {@code true} if set and "false", {@code false} otherwise.
    */
   public static boolean isDisabled(String property, DatasetDescriptor descriptor) {
     if (descriptor.hasProperty(property)) {
-      // return false if and only if the property value is "false"
-      return Boolean.valueOf(descriptor.getProperty(property));
+      // return true if and only if the property value is "false"
+      return !Boolean.valueOf(descriptor.getProperty(property));
     }
-    return true;
+    return false;
   }
 }

@@ -52,8 +52,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
   protected final FileSystem fs;
   private final Path directory;
   private final DatasetDescriptor descriptor;
-  @VisibleForTesting
-  public FileAppender<E> appender;
+  private FileAppender<E> appender;
   private Path tempPath;
   private Path finalPath;
   private ReaderWriterState state;
@@ -216,8 +215,9 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     return new Path(location.getParent(), "." + location.getName() + ".tmp");
   }
 
+  @VisibleForTesting
   @SuppressWarnings("unchecked")
-  private <E> FileAppender<E> newAppender(Path temp) {
+  public <E> FileAppender<E> newAppender(Path temp) {
     Format format = descriptor.getFormat();
     if (Formats.PARQUET.equals(format)) {
       // by default, Parquet is not durable
