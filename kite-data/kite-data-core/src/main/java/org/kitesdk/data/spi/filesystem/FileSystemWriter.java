@@ -52,7 +52,8 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
   protected final FileSystem fs;
   private final Path directory;
   private final DatasetDescriptor descriptor;
-  private FileAppender<E> appender;
+  @VisibleForTesting
+  public FileAppender<E> appender;
   private Path tempPath;
   private Path finalPath;
   private ReaderWriterState state;

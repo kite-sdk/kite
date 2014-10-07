@@ -54,4 +54,28 @@ public class TestParquetWriter extends TestFileSystemWriters<Object> {
     Assert.assertEquals("Should copy properties to Configuration",
         34343434, writer.conf.getInt("parquet.block.size", -1));
   }
+
+  @Test
+  public void testDefaultToParquetAppender() throws IOException {
+    FileSystemWriter<Object> writer = (FileSystemWriter<Object>) fsWriter;
+    Assert.assertEquals("Should default to ParquetAppender",
+        ParquetAppender.class, writer.appender.getClass());
+  }
+
+  @Test
+  public void testConfigureDurableParquetAppender() throws IOException {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.getLocal(conf);
+    FileSystemWriter<Object> writer = new FileSystemWriter<Object>(
+        fs, new Path("/tmp"),
+        new DatasetDescriptor.Builder()
+            .property(FileSystemProperties.NON_DURABLE_PARQUET_PROP, "false")
+            .schema(SchemaBuilder.record("test").fields()
+                .requiredString("s")
+                .endRecord())
+            .format("parquet")
+            .build());
+    Assert.assertEquals("Should default to ParquetAppender",
+        DurableParquetAppender.class, writer.appender.getClass());
+  }
 }

@@ -29,7 +29,7 @@ public class DescriptorUtil {
    */
   public static boolean isEnabled(String property, DatasetDescriptor descriptor) {
     if (descriptor.hasProperty(property)) {
-      // return true only if the property value is "true"
+      // return true if and only if the property value is "true"
       return Boolean.valueOf(descriptor.getProperty(property));
     }
     return false;
@@ -44,7 +44,7 @@ public class DescriptorUtil {
    */
   public static boolean isDisabled(String property, DatasetDescriptor descriptor) {
     if (descriptor.hasProperty(property)) {
-      // return true only if the property value is "true"
+      // return false if and only if the property value is "false"
       return Boolean.valueOf(descriptor.getProperty(property));
     }
     return true;
