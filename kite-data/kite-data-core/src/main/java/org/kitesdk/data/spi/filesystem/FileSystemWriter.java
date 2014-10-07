@@ -217,7 +217,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
 
   @VisibleForTesting
   @SuppressWarnings("unchecked")
-  public <E> FileAppender<E> newAppender(Path temp) {
+  <E> FileAppender<E> newAppender(Path temp) {
     Format format = descriptor.getFormat();
     if (Formats.PARQUET.equals(format)) {
       // by default, Parquet is not durable
