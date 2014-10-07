@@ -490,60 +490,6 @@
         </repository>
       </distributionManagement>
     </profile>
-    <profile>
-      <id>hadoop-conf</id>
-      <activation>
-        <property>
-          <name>env.HADOOP_CONF_DIR</name>
-        </property>
-      </activation>
-      <build>
-        <resources>
-          <resource>
-            <directory>${env.HADOOP_CONF_DIR}</directory>
-            <includes>
-              <include>core-site.xml</include>
-              <include>hdfs-site.xml</include>
-              <include>yarn-site.xml</include>
-              <include>mapred-site.xml</include>
-            </includes>
-          </resource>
-          <resource>
-            <directory>${basedir}/src/main/resources</directory>
-            <excludes>
-              <exclude>core-site.xml</exclude>
-              <exclude>hdfs-site.xml</exclude>
-              <exclude>yarn-site.xml</exclude>
-              <exclude>mapred-site.xml</exclude>
-            </excludes>
-          </resource>
-        </resources>
-      </build>
-    </profile>
-    <profile>
-      <id>hive-conf</id>
-      <activation>
-        <property>
-          <name>env.HIVE_CONF_DIR</name>
-        </property>
-      </activation>
-      <build>
-        <resources>
-          <resource>
-            <directory>${env.HIVE_CONF_DIR}</directory>
-            <includes>
-              <include>hive-site.xml</include>
-            </includes>
-          </resource>
-          <resource>
-            <directory>${basedir}/src/main/resources</directory>
-            <excludes>
-              <exclude>hive-site.xml</exclude>
-            </excludes>
-          </resource>
-        </resources>
-      </build>
-    </profile>
   </profiles>
 
 </project>
