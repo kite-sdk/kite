@@ -54,4 +54,45 @@ public class TestParquetWriter extends TestFileSystemWriters<Object> {
     Assert.assertEquals("Should copy properties to Configuration",
         34343434, writer.conf.getInt("parquet.block.size", -1));
   }
+
+  @Test
+  public void testDefaultToParquetAppender() throws IOException {
+    FileSystemWriter<Object> writer = (FileSystemWriter<Object>) fsWriter;
+    Assert.assertEquals("Should default to non-durable parquet appender",
+        ParquetAppender.class, writer.newAppender(testDirectory).getClass());
+  }
+
+  @Test
+  public void testConfigureDurableParquetAppender() throws IOException {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.getLocal(conf);
+    FileSystemWriter<Object> writer = new FileSystemWriter<Object>(
+        fs, new Path("/tmp"),
+        new DatasetDescriptor.Builder()
+            .property(FileSystemProperties.NON_DURABLE_PARQUET_PROP, "false")
+            .schema(SchemaBuilder.record("test").fields()
+                .requiredString("s")
+                .endRecord())
+            .format("parquet")
+            .build());
+    Assert.assertEquals("Disabling the non-durable parquet appender should get us a durable appender",
+        DurableParquetAppender.class, writer.newAppender(testDirectory).getClass());
+  }
+
+  @Test
+  public void testConfigureNonDurableParquetAppender() throws IOException {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.getLocal(conf);
+    FileSystemWriter<Object> writer = new FileSystemWriter<Object>(
+        fs, new Path("/tmp"),
+        new DatasetDescriptor.Builder()
+            .property(FileSystemProperties.NON_DURABLE_PARQUET_PROP, "true")
+            .schema(SchemaBuilder.record("test").fields()
+                .requiredString("s")
+                .endRecord())
+            .format("parquet")
+            .build());
+    Assert.assertEquals("Enabling the non-durable parquet appender should get us a non-durable appender",
+        ParquetAppender.class, writer.newAppender(testDirectory).getClass());
+  }
 }

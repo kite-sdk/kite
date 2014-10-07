@@ -215,19 +215,20 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     return new Path(location.getParent(), "." + location.getName() + ".tmp");
   }
 
+  @VisibleForTesting
   @SuppressWarnings("unchecked")
-  private <E> FileAppender<E> newAppender(Path temp) {
+  <E> FileAppender<E> newAppender(Path temp) {
     Format format = descriptor.getFormat();
     if (Formats.PARQUET.equals(format)) {
-      // by default, guarantee durability with the more costly writer
-      if (DescriptorUtil.isEnabled(
+      // by default, Parquet is not durable
+      if (DescriptorUtil.isDisabled(
           FileSystemProperties.NON_DURABLE_PARQUET_PROP, descriptor)) {
+        return (FileAppender<E>) new DurableParquetAppender(
+            fs, temp, descriptor.getSchema(), conf, descriptor.getCompressionType());
+      } else {
         return (FileAppender<E>) new ParquetAppender(
             fs, temp, descriptor.getSchema(), conf,
             descriptor.getCompressionType());
-      } else {
-        return (FileAppender<E>) new DurableParquetAppender(
-            fs, temp, descriptor.getSchema(), conf, descriptor.getCompressionType());
       }
     } else if (Formats.AVRO.equals(format)) {
       return new AvroAppender<E>(fs, temp, descriptor.getSchema(),
