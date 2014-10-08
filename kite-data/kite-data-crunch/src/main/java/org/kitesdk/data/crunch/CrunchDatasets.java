@@ -181,7 +181,7 @@ public class CrunchDatasets {
    * @param numWriters the number of writers that should be used
    * @param <E> the type of entities in the collection and underlying dataset
    * @return an equivalent collection of entities partitioned for the view
-   * @see {@link #partition(PCollection, View)}
+   * @see #partition(PCollection, View)
    *
    * @since 0.16.0
    */
@@ -206,7 +206,7 @@ public class CrunchDatasets {
    * @param numWriters the number of writers that should be used
    * @param <E> the type of entities in the collection and underlying dataset
    * @return an equivalent collection of entities partitioned for the view
-   * @see {@link #partition(PCollection, Dataset)}
+   * @see #partition(PCollection, Dataset)
    *
    * @since 0.16.0
    */
@@ -302,7 +302,7 @@ public class CrunchDatasets {
       this.strategy = strategy;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "deprecation"})
     public <E> AvroStorageKey reuseFor(E entity, EntityAccessor<E> accessor) {
       List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
 

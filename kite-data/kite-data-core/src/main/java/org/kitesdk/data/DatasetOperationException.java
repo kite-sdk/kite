@@ -19,6 +19,8 @@ package org.kitesdk.data;
 /**
  * {@link DatasetException} thrown when an implementation-specific step fails
  * and prevents a dataset operation from completing successfully.
+ *
+ * @since 0.17.0
  */
 public class DatasetOperationException extends DatasetException {
   public DatasetOperationException(String message, Throwable t) {
