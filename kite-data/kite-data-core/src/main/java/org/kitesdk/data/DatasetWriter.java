@@ -30,8 +30,8 @@ import javax.annotation.concurrent.NotThreadSafe;
  * not expected to instantiate implementations directly. Instead, use the
  * containing dataset's {@link Dataset#newWriter()} method to get an appropriate
  * implementation. You should receive an instance of this interface from a
- * dataset, invoke {@link #write(Object)} and {@link #flush()} as necessary,
- * and {@link #close()} when they are done, or no more data exists.
+ * dataset, invoke {@link #write(Object)} and {@link #flush()} (or {@link #sync()}) as
+ * necessary, and {@link #close()} when they are done, or no more data exists.
  * </p>
  * <p>
  * Implementations can hold system resources until the {@link #close()} method
@@ -62,8 +62,8 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
    * Write an entity of type {@code E} to the associated dataset.
    * </p>
    * <p>
-   * Implementations can buffer entities internally (see the {@link #flush()}
-   * method). All instances of {@code entity} must conform to the dataset's
+   * Implementations can buffer entities internally (see the {@link #flush()} and {@link #sync()}
+   * methods). All instances of {@code entity} must conform to the dataset's
    * schema. If they don't, implementations should throw an exception, although
    * this is not required.
    * </p>
@@ -75,10 +75,15 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
 
   /**
    * <p>
-   * Force or commit any outstanding buffered data to the underlying stream.
+   * Force or commit any outstanding buffered data to the underlying stream (optional
+   * operation).
    * </p>
    * <p>
-   * Implementations of this interface must declare their durability guarantees.
+   * <strong>Note:</strong> Some implementations may not implement this method
+   * depending on the guarantees available to the underlying storage system.
+   * In particular, when using HDFS-backed datasets the {@link Formats#PARQUET Parquet
+   * format} does <em>not</em> implement {@link #flush()} by default,
+   * and calling it has no effect.
    * </p>
    *
    * @throws DatasetWriterException
@@ -88,10 +93,15 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
 
   /**
    * <p>
-   * Ensure that data in the underlying stream has been written to disk.
+   * Ensure that data in the underlying stream has been written to disk (optional
+   * operation).
    * </p>
    * <p>
-   * Implementations of this interface must declare their durability guarantees.
+   * <strong>Note:</strong> Some implementations may not implement this method
+   * depending on the guarantees available to the underlying storage system.
+   * In particular, when using HDFS-backed datasets the {@link Formats#PARQUET Parquet
+   * format} does <em>not</em> implement {@link #sync()} by default,
+   * and calling it has no effect.
    * </p>
    *
    * @throws DatasetWriterException
@@ -102,7 +112,9 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
 
   /**
    * <p>
-   * Close the writer and release any system resources.
+   * Close the writer and release any system resources. If this method returns without
+   * throwing an exception then any entity that was successfully written with
+   * {@link #write(Object)} will be stored to stable storage.
    * </p>
    * <p>
    * No further operations of this interface (other than additional calls to
