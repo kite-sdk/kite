@@ -48,8 +48,7 @@ import org.slf4j.LoggerFactory;
  * The strategy used to determine how a dataset is partitioned.
  * </p>
  * <p>
- * A {@code PartitionStrategy} is configured with one or more
- * {@link FieldPartitioner}s upon creation. When a {@link Dataset} is configured
+ * When a {@link Dataset} is configured
  * with a partition strategy, that data is considered partitioned. Any entities
  * written to a partitioned dataset are evaluated with its
  * {@code PartitionStrategy} to determine which partition to write to.
@@ -58,7 +57,6 @@ import org.slf4j.LoggerFactory;
  * You should use the inner {@link Builder} to create new instances.
  * </p>
  * 
- * @see FieldPartitioner
  * @see DatasetDescriptor
  * @see Dataset
  */
@@ -96,7 +94,9 @@ public class PartitionStrategy {
    * {@link FieldPartitioner}s are returned in the same order they are used
    * during partition selection.
    * </p>
+   * @deprecated will be removed in 0.18.0
    */
+  @Deprecated
   public List<FieldPartitioner> getFieldPartitioners() {
     return fieldPartitioners;
   }
@@ -105,7 +105,9 @@ public class PartitionStrategy {
    * Get a partitioner by partition name.
    * @return a FieldPartitioner with the given partition name
    * @since 0.15.0
+   * @deprecated will be removed in 0.18.0
    */
+  @Deprecated
   public FieldPartitioner getPartitioner(String name) {
     return partitionerMap.get(name);
   }
@@ -114,7 +116,9 @@ public class PartitionStrategy {
    * Check if a partitioner for the partition name exists.
    * @return {@code true} if this strategy has a partitioner for the name
    * @since 0.15.0
+   * @deprecated will be removed in 0.18.0
    */
+  @Deprecated
   public boolean hasPartitioner(String name) {
     return partitionerMap.containsKey(name);
   }

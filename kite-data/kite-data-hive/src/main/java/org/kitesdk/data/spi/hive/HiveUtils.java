@@ -342,6 +342,7 @@ class HiveUtils {
     return new Path(root, new Path(namespace, name.replace('.', Path.SEPARATOR_CHAR)));
   }
 
+  @SuppressWarnings("deprecation")
   static List<FieldSchema> partitionColumns(PartitionStrategy strategy, Schema schema) {
     List<FieldSchema> columns = Lists.newArrayList();
     for (FieldPartitioner<?, ?> fp : strategy.getFieldPartitioners()) {
