@@ -24,10 +24,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.kitesdk.data.ColumnMapping;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.Datasets;
-import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,11 +94,6 @@ public class UpdateDatasetMojo extends AbstractDatasetMojo {
 
     DatasetDescriptor.Builder descriptorBuilder = new DatasetDescriptor.Builder(
         descriptor);
-
-    // When updating a dataset, you need to provide a column mapping either in
-    // the avro schema or as a seperate file
-    descriptorBuilder.columnMapping((ColumnMapping)null);
-
     configureSchema(descriptorBuilder, avroSchemaFile, avroSchemaReflectClass);
 
     if (columnDescriptorFile != null) {

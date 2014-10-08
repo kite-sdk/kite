@@ -341,6 +341,7 @@ public class DatasetDescriptor {
     private Map<String, String> properties;
     private PartitionStrategy partitionStrategy;
     private ColumnMapping columnMapping;
+    private ColumnMapping copiedMapping;
     private CompressionType compressionType;
 
     public Builder() {
@@ -367,7 +368,7 @@ public class DatasetDescriptor {
       this.schemaUri = descriptor.schemaUri;
       this.format = descriptor.format;
       this.location = descriptor.location;
-      this.columnMapping = descriptor.columnMappings;
+      this.copiedMapping = descriptor.columnMappings;
       this.compressionType = descriptor.compressionType;
       this.partitionStrategy = descriptor.partitionStrategy;
       properties.putAll(descriptor.properties);
@@ -924,6 +925,12 @@ public class DatasetDescriptor {
                 ColumnMappingParser.parseKeyMappingsFromSchemaFields(schema));
           }
         }
+      }
+
+      // if we still don't have a column mapping, see if we had one copied from
+      // another descriptor
+      if (columnMapping == null && copiedMapping != null) {
+        columnMapping = copiedMapping;
       }
 
       checkPartitionStrategy(schema, partitionStrategy);
