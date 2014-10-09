@@ -58,6 +58,8 @@ Version 0.17.0 contains the following notable changes:
   or using the CLI. See [CDK-679](https://issues.cloudera.org/browse/CDK-679). The 
   minicluster is experimental since its API and CLI are still subject to 
   incompatible changes.
+* The Oozie portion of the [demo example](https://github.com/kite-sdk/kite-examples/tree/master/demo)
+  was removed. See [CDK-605](https://issues.cloudera.org/browse/CDK-605) for details.
 * Morphlines Library
     * Added morphline command that removes all record field values for which the field name and value matches a blacklist but not a whitelist: [removeValues](kite-morphlines/morphlinesReferenceGuide.html#removeValues)
 
