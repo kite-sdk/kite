@@ -14,7 +14,7 @@ Version 0.17.0 contains the following notable changes:
   version 5.1 or later.
 * Kite 0.15.0 and 0.16.0 default to an appender which writes to both Avro and Parquet files, thus incurring
   2x the I/O resources,  when writing to a Parquet dataset. That default has switched back to the behavior
-  from 0.14.0 and before which is to write just to Parquet. When using a Parquet dataset, the
+  from 0.14.0 and before, which is to write just to Parquet. When using a Parquet dataset, the
   `DatasetWriter#flush()` and `DatasetWriter#sync()` methods have no effect. That means data written to
   a Parquet dataset is not durable until after a successful call to `DatasetWriter#close()`. Users that
   want the behavior found in 0.15.0 and 0.16.0 can set the property __`kite.parquet.non-durable-writes`__ to
@@ -39,16 +39,25 @@ Version 0.17.0 contains the following notable changes:
   for details.
 * Hive external table URIs no long support relative locations. A URI with the pattern
   `dataset:hive:examples/ratings` now means to use a namespace of `examples` and a
-  dataset named `ratings`. You can create external URIs using the `location` query paramter.
+  dataset named `ratings`. You can create external URIs using the `location` query parameter.
   For example: `dataset:hive:examples/ratings?location=/tmp/data/examples/ratings`.
 * The Kite CLI tool has been renamed from `dataset` to `kite-dataset`. See
   [CDK-670](https://issues.cloudera.org/browse/CDK-670) for more information.
-* Kite will no longer use an embedded MetaStore if it is not configured to
+* Kite will no longer use an embedded Hive MetaStore if it is not configured to
   connect to a remote MetaStore. Instead, Kite will throw an exception to avoid
   confusing behavior. See [CDK-651](https://issues.cloudera.org/browse/CDK-651)
   for more information.
 * You can now partition datasets by sub-fields. See [CDK-435](https://issues.cloudera.org/browse/CDK-435)
   for details.
+* File-based dataset names that are not alphanumeric (plus underscore) now issue a 
+  deprecation warning. Non-conforming names will be made illegal in a future release. 
+  See [CDK-673](https://issues.cloudera.org/browse/CDK-673).
+* There is a new *experimental* module, `kite-minicluster`, for running Hadoop services 
+  for testing and development purposes. The minicluster currently supports HDFS, Hive, 
+  HBase, and Flume services, and can be run directly from a Java program, 
+  or using the CLI. See [CDK-679](https://issues.cloudera.org/browse/CDK-679). The 
+  minicluster is experimental since its API and CLI are still subject to 
+  incompatible changes.
 * Morphlines Library
     * Added morphline command that removes all record field values for which the field name and value matches a blacklist but not a whitelist: [removeValues](kite-morphlines/morphlinesReferenceGuide.html#removeValues)
 
