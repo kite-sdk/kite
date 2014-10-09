@@ -5,16 +5,55 @@ All past Kite releases are documented on this page. Upcoming release dates can b
 
 ## Version 0.17.0
 
-Release date:
+Release date: 9 October 2014
 
 Version 0.17.0 contains the following notable changes:
 
+* The [Kite examples](https://github.com/kite-sdk/kite-examples) now require the
+  [Cloudera Quickstart VM](http://www.cloudera.com/content/cloudera/en/downloads/quickstart_vms/cdh-5-1-x1.html)
+  version 5.1 or later.
+* Kite 0.15.0 and 0.16.0 default to an appender which writes to both Avro and Parquet files, thus incurring
+  2x the I/O resources,  when writing to a Parquet dataset. That default has switched back to the behavior
+  from 0.14.0 and before which is to write just to Parquet. When using a Parquet dataset, the
+  `DatasetWriter#flush()` and `DatasetWriter#sync()` methods have no effect. That means data written to
+  a Parquet dataset is not durable until after a successful call to `DatasetWriter#close()`. Users that
+  want the behavior found in 0.15.0 and 0.16.0 can set the property __`kite.parquet.non-durable-writes`__ to
+  __`false`__ using the API or the
+  [`update` command](http://kitesdk.org/docs/current/guide/Kite-Dataset-Command-Line-Interface/#update)
+  in the CLI. After setting the property, the `DatasetWriter#flush()` and `DatasetWriter#sync()` methods
+  will flush and sync the Avro version of the data respectively. If there is a failure before the writer
+  is closed, the data can be recovered by reading the Avro version of the file and writing the records
+  to Parquet. This recovery is a manual process.
+* Kite now supports namespaces for datasets. For Hive datasets, the Kite namespace maps to the
+  Hive database where the table will be stored. Namespaces also changed the file system repository
+  layout for local file and HDFS datasets. Dataset URIs used with previous releases will work
+  unmodified. New datasets created using the `DatasetRepository` API (which moved to the SPI in 0.16.0)
+  will not end up in the same location as in previous releases. The work-around is to use dataset URIs
+  with the `Datasets` API. See the docs on [dataset URIs](http://kitesdk.org/docs/current/guide/URIs/)
+  for more details.
+* Users can now select the compression codec for Avro and Parquet datasets. See
+  [CDK-299](https://issues.cloudera.org/browse/CDK-299) for more details.
+* The `kite-data-hcatalog` module has been renamed to `kite-data-hive`. A Maven relocation
+  was put in place to prevent projects from breaking. However, we strongly encourage you to update
+  your dependency to `kite-data-hive` in your projects. See [CDK-452](https://issues.cloudera.org/browse/CDK-452)
+  for details.
+* Hive external table URIs no long support relative locations. A URI with the pattern
+  `dataset:hive:examples/ratings` now means to use a namespace of `examples` and a
+  dataset named `ratings`. You can create external URIs using the `location` query paramter.
+  For example: `dataset:hive:examples/ratings?location=/tmp/data/examples/ratings`.
+* The Kite CLI tool has been renamed from `dataset` to `kite-dataset`. See
+  [CDK-670](https://issues.cloudera.org/browse/CDK-670) for more information.
 * Kite will no longer use an embedded MetaStore if it is not configured to
   connect to a remote MetaStore. Instead, Kite will throw an exception to avoid
   confusing behavior. See [CDK-651](https://issues.cloudera.org/browse/CDK-651)
   for more information.
+* You can now partition datasets by sub-fields. See [CDK-435](https://issues.cloudera.org/browse/CDK-435)
+  for details.
 * Morphlines Library
     * Added morphline command that removes all record field values for which the field name and value matches a blacklist but not a whitelist: [removeValues](kite-morphlines/morphlinesReferenceGuide.html#removeValues)
+
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10703)
+is available from JIRA.
 
 ## Version 0.16.0
 
