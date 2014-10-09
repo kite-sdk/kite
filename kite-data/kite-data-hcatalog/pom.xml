@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-data</artifactId>
-    <version>0.17.1-SNAPSHOT</version>
+    <version>0.16.1-SNAPSHOT</version>
   </parent>
 
   <name>Kite Data HCatalog Module</name>
