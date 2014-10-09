@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-tools-parent</artifactId>
-    <version>0.17.0</version>
+    <version>0.17.1-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
 
