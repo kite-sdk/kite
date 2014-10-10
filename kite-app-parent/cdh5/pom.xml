@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-app-parent-cdh5</artifactId>
-  <version>0.17.1-SNAPSHOT</version>
+  <version>0.16.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Kite Application POM for CDH5</name>
@@ -68,7 +68,7 @@
 
   <properties>
     <!-- dependency version properties -->
-    <kite.version>0.17.1-SNAPSHOT</kite.version>
+    <kite.version>0.16.1-SNAPSHOT</kite.version>
     <kite.avro.version>1.7.5-cdh5.1.0</kite.avro.version>
     <kite.crunch.version>0.10.0-cdh5.1.0</kite.crunch.version>
     <kite.findbugs.version>2.0.1</kite.findbugs.version>
