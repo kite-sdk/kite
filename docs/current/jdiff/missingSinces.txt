@@ -1,18 +1,16 @@
-OK: org.kitesdk.tools.TransformTask Class
-NO DOC BLOCK: org.kitesdk.tools.TransformTask.CheckEntityClass Class
-OK: org.kitesdk.tools.CopyTask Constructor (org.kitesdk.data.View<E>, org.kitesdk.data.View<E>)
-OK: org.kitesdk.tools.TaskUtil.ConfigBuilder Method addJars(java.util.List<java.lang.String>)
-OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method appendTo(java.lang.String)
-OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method appendTo(java.net.URI)
-OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method appendTo(org.kitesdk.data.View<?>)
-NO DOC BLOCK: org.kitesdk.morphline.api.MorphlineContext Method getSettings()
-OK: org.kitesdk.data.View Method getUri()
-OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method overwrite(java.lang.String)
-OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method overwrite(java.net.URI)
-OK: org.kitesdk.data.mapreduce.DatasetKeyOutputFormat.ConfigBuilder Method overwrite(org.kitesdk.data.View<?>)
-OK: org.kitesdk.data.crunch.CrunchDatasets Method partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.Dataset<E>)
-OK: org.kitesdk.data.crunch.CrunchDatasets Method partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.Dataset<E>, int)
-OK: org.kitesdk.data.crunch.CrunchDatasets Method partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.View<E>)
-OK: org.kitesdk.data.crunch.CrunchDatasets Method partition(org.apache.crunch.PCollection<E>, org.kitesdk.data.View<E>, int)
-NO DOC BLOCK: org.kitesdk.morphline.api.MorphlineContext.Builder Method setSettings(java.util.Map<java.lang.String, java.lang.Object>)
-OK: org.kitesdk.data.DatasetWriter Method sync()
+OK: org.kitesdk.data.CompressionType Class
+OK: org.kitesdk.data.DatasetOperationException Class
+MISSING @SINCE TAG: org.kitesdk.morphline.stdlib.RemoveValuesBuilder Class
+MISSING @SINCE TAG: org.kitesdk.morphline.api.TypedSettings Class
+OK: org.kitesdk.data.URIBuilder Class
+OK: org.kitesdk.data.DatasetDescriptor Constructor (org.apache.avro.Schema, java.net.URI, org.kitesdk.data.Format, java.net.URI, java.util.Map<java.lang.String, java.lang.String>, org.kitesdk.data.PartitionStrategy, org.kitesdk.data.ColumnMapping, org.kitesdk.data.CompressionType)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method compressionType(java.lang.String)
+OK: org.kitesdk.data.DatasetDescriptor.Builder Method compressionType(org.kitesdk.data.CompressionType)
+OK: org.kitesdk.data.DatasetDescriptor Method getCompressionType()
+OK: org.kitesdk.data.Format Method getDefaultCompressionType()
+OK: org.kitesdk.data.Dataset Method getNamespace()
+OK: org.kitesdk.data.Format Method getSupportedCompressionTypes()
+NO DOC BLOCK: org.kitesdk.morphline.api.MorphlineContext Method getTypedSettings()
+OK: org.kitesdk.data.PartitionStrategy.Builder Method provided(java.lang.String)
+OK: org.kitesdk.data.PartitionStrategy.Builder Method provided(java.lang.String, java.lang.String)
+NO DOC BLOCK: org.kitesdk.data.flume.Log4jAppender Method setDatasetNamespace(java.lang.String)

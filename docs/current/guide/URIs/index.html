@@ -45,6 +45,8 @@
         
           <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
         
+          <a class="page-link" href="/docs/current/guide/Install-Kite/">Install the Kite Command Line Interface</a>
+        
           <a class="page-link" href="/docs/current/guide/Interval-Notation/">Interval Notation</a>
         
           <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
@@ -67,6 +69,8 @@
         
           <a class="page-link" href="/docs/current/guide/URIs/">Dataset and View URIs</a>
         
+          <a class="page-link" href="/docs/current/guide/Using-Kite-with-Apache-Maven/"></a>
+        
           <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
         
           <a class="page-link" href="/docs/current/guide/Viewing-with-Impala/">Viewing a Kite CLI Dataset with Impala</a>
@@ -76,6 +80,8 @@
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
           <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/docs/current/guide/lifecycle/">Kite Dataset Lifecycle</a>
         
       </div -->
     </nav>
@@ -110,15 +116,15 @@
   <tbody>
     <tr>
       <td><a href="#hive"><em>Hive</em></a></td>
-      <td><code>dataset:hive?dataset=&lt;dataset-name&gt;</code></td>
+      <td><code>dataset:hive:&lt;namespace&gt;/&lt;dataset&gt;</code></td>
     </tr>
     <tr>
       <td><a href="#hdfs"><em>HDFS</em></a></td>
-      <td><code>dataset:hdfs:/&lt;path&gt;/&lt;dataset-name&gt;</code></td>
+      <td><code>dataset:hdfs:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;</code></td>
     </tr>
     <tr>
       <td><a href="#local"><em>Local FS</em></a></td>
-      <td><code>dataset:file:/&lt;path&gt;/&lt;dataset-name&gt;</code></td>
+      <td><code>dataset:file:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;</code></td>
     </tr>
     <tr>
       <td><a href="#hbase"><em>HBase</em></a></td>
@@ -133,14 +139,21 @@
 
 <h3 id="hive">Hive</h3>
 
-<p>Hive manages your datatables for you. You only have to provide the dataset name.</p>
+<p>Hive manages your datatables for you. You only have to provide the dataset name. You also have the option of providing a namespace.</p>
 
-<pre><code>dataset:hive?dataset=&lt;dataset-name&gt;
+<pre><code>dataset:hive:&lt;namespace&gt;/&lt;dataset&gt;
 </code></pre>
 
-<p>If you want to use external Hive datatables, you must also provide a path to the dataset.</p>
+<p>If you want to use external Hive datatables, you must also provide a path to the dataset. If you don’t explicitly set a namespace, Kite uses the default namespace. For a Hive dataset, a Kite namespace maps one-to-one to a Hive database.</p>
 
-<pre><code>dataset:hive:/&lt;path&gt;/&lt;dataset-name&gt;
+<pre><code>dataset:hive:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
+</code></pre>
+
+<p>In earlier versions of Kite, <code>dataset:hive:a/b</code> meant directory ./a/b  Now, it has changed to <em>namespace</em>=a <em>dataset</em>=b.</p>
+
+<p>To create an external table, add <code>location=/path/to/data/dir</code> to the dataset URI. </p>
+
+<pre><code>dataset:hive:namespace/dataset?location=/path/to/data/dir
 </code></pre>
 
 <p><a name="hdfs"></a></p>
@@ -149,14 +162,14 @@
 
 <p>The URI for a dataset in HDFS uses the following pattern. You provide a path to the dataset.
 <code>
-dataset:hdfs:/&lt;path&gt;/&lt;dataset-name&gt;
+dataset:hdfs:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
 </code></p>
 
 <p>While it is not a typical use case, there might be times where it is useful to specify the HDFS host and port. You can insert the host and port before the path in the URI. You can use these URIs to select between HDFS instances.</p>
 
 <p>The host and port are required if your Hadoop configuration files aren’t on your classpath. This can happen if your application is running outside the cluster and you haven’t taken the step of deploying client configuration files to the server running the application. The host is the hostname for the namenode; the port is the port for the namenode (typically 8020). If you have an HA configuration, you always need client configuration files, and the host should be the NameService ID.</p>
 
-<pre><code>dataset:hdfs://&lt;host&gt;[:port]/&lt;path&gt;/&lt;dataset-name&gt;
+<pre><code>dataset:hdfs://&lt;host&gt;[:port]/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
 </code></pre>
 
 <p><a name="local"></a></p>
@@ -165,7 +178,7 @@ dataset:hdfs:/&lt;path&gt;/&lt;dataset-name&gt;
 
 <p>The local file system dataset URI follows a pattern similar to the HDFS URI, with the <code>file:</code> scheme.</p>
 
-<pre><code>dataset:file:/&lt;path&gt;/&lt;dataset-name&gt;
+<pre><code>dataset:file:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
 </code></pre>
 
 <p><a name="#hbase"></a></p>

@@ -45,6 +45,8 @@
         
           <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
         
+          <a class="page-link" href="/docs/current/guide/Install-Kite/">Install the Kite Command Line Interface</a>
+        
           <a class="page-link" href="/docs/current/guide/Interval-Notation/">Interval Notation</a>
         
           <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
@@ -67,6 +69,8 @@
         
           <a class="page-link" href="/docs/current/guide/URIs/">Dataset and View URIs</a>
         
+          <a class="page-link" href="/docs/current/guide/Using-Kite-with-Apache-Maven/"></a>
+        
           <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
         
           <a class="page-link" href="/docs/current/guide/Viewing-with-Impala/">Viewing a Kite CLI Dataset with Impala</a>
@@ -76,6 +80,8 @@
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
           <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/docs/current/guide/lifecycle/">Kite Dataset Lifecycle</a>
         
       </div -->
     </nav>
@@ -96,15 +102,11 @@
   <article class="post-content">
   <p>You can create datasets using the Kite CLI, then view the data in a variety of ways using Impala.</p>
 
-<p>This example uses datasets based on the MovieLens dataset provided by the GroupLens Research Group at the University of Minnesota. You can get a copy of the original dataset at the <a href="http://grouplens.org/datasets/movielens/">Grouplens site</a>. For this example, the <em>movies.csv</em> and <em>ratings.csv</em> data files are converted from the original plain text dataset to CSV format. The Release field, which is stored in string format, has been formatted as yyyy-mm-dd so that the dates sort properly. You can modify the Grouplens files yourself as a starting point, you can create your own sample CSV files based on the table descriptions below, or you can use <a href="https://github.com/DennisDawson/KiteImages/raw/master/movies.zip">Dennis’s Random Ratings Dataset</a>, a list of random ratings for movies that do not exist (at least not yet).</p>
+<p>This example uses datasets based on the MovieLens dataset provided by the GroupLens Research Group at the University of Minnesota. You can get a copy of the original dataset at the <a href="http://grouplens.org/datasets/movielens/">Grouplens site</a>. For this example, the <em>movies.csv</em> and <em>ratings.csv</em> data files are converted from the original plain text dataset to CSV format. The Release field, which is stored in string format, has been formatted as yyyy-mm-dd so that the dates sort properly. You can modify the GroupLens files yourself as a starting point, you can create your own sample CSV files based on the table descriptions below, or you can use <a href="https://github.com/DennisDawson/KiteImages/raw/master/movies.zip">Dennis’s Random Ratings Dataset</a>, a list of random ratings for movies that do not exist (at least not yet).</p>
 
 <h2 id="preparation">Preparation</h2>
 
-<p>If you have not done so already, download the Kite command-line interface jar. This jar is the executable that runs the command-line interface, so save it as <code>dataset</code>. To download with curl, run:</p>
-
-<pre><code>curl http://central.maven.org/maven2/org/kitesdk/kite-tools/0.15.0/kite-tools-0.15.0-binary.jar -o dataset
-chmod +x dataset
-</code></pre>
+<p>If you have not done so already, <a href="../Install-Kite/index.html">install the Kite command-line interface jar</a>.</p>
 
 <p>If you are using a quickstart virtual machine, Impala is installed for you. If you need to install Impala on your own system, see the <a href="http://www.cloudera.com/content/support/en/documentation.html">Impala</a> documentation for your version of CDH.</p>
 
@@ -112,24 +114,24 @@ chmod +x dataset
 
 <p>Use the <code>csv-schema</code> CLI command to infer the schemas for both files.</p>
 
-<pre><code>$ dataset csv-schema movies.csv -o movies.avsc --record-name movies 
-$ dataset csv-schema ratings.csv -o ratings.avsc --record-name ratings 
+<pre><code>$ kite-dataset csv-schema movies.csv -o movies.avsc --record-name movies 
+$ kite-dataset csv-schema ratings.csv -o ratings.avsc --record-name ratings 
 </code></pre>
 
 <h2 id="create-datasets">Create Datasets</h2>
 
 <p>Now that you have the schema, you can create the metadata for your tables in Hadoop. Use the <code>create</code> CLI command to add the metadata to Hadoop.</p>
 
-<pre><code>$ dataset create "movies" --schema movies.avsc
-$ dataset create "ratings" --schema ratings.avsc
+<pre><code>$ kite-dataset create "movies" --schema movies.avsc
+$ kite-dataset create "ratings" --schema ratings.avsc
 </code></pre>
 
 <h2 id="import-data">Import Data</h2>
 
 <p>Hadoop is now prepared with empty tables, ready to import your CSV data.</p>
 
-<pre><code>$ dataset csv-import movies.csv movies
-$ dataset csv-import ratings.csv ratings
+<pre><code>$ kite-dataset csv-import movies.csv movies
+$ kite-dataset csv-import ratings.csv ratings
 </code></pre>
 
 <h2 id="view-datasets-with-impala">View Datasets with Impala</h2>
@@ -362,9 +364,10 @@ Query: select title, avg(ratings.rating) from movies join ratings on movies.id=r
 
 
 </code></pre>
+
 <p>You might find it surprising that a modern classic like “Tattlers” received an average rating of “1,” despite its iconic status. It might be helpful to know how many reviews were received for each of the films. You can use the <code>COUNT</code> function to see how many critics actually ranked for each film. Doing so casts an entirely different light on that rating. You can use the <code>ROUND</code> function to make the ratings column easier to read. Sorting by title makes it easier to find a specific movie.</p>
 
-<pre><code>&gt;  &gt; select title, round(avg(ratings.rating), 2), count(ratings.id)
+<pre><code>&gt; select title, round(avg(ratings.rating), 2), count(ratings.id)
 from movies join ratings on movies.id=ratings.id 
 where crime=1
 group by title, ratings.id
@@ -399,7 +402,7 @@ Returned 0 row(s) in 0.04s
 
 <p>One advantage of working with a view is that you can use the aggregate column (rating, named _c1 in the view) in a WHERE clause. If you only want to see the highest rated movies for children, you can run an additional query on the view.</p>
 
-<pre><code>&gt; &gt; select * from children where _c1&gt; 2.5;
+<pre><code>&gt; select * from children where _c1&gt; 2.5;
 Query: select * from children where _c1&gt; 2.5
 +-----------------------+------+
 | title                 | _c1  |

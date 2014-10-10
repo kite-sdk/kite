@@ -45,6 +45,8 @@
         
           <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
         
+          <a class="page-link" href="/docs/current/guide/Install-Kite/">Install the Kite Command Line Interface</a>
+        
           <a class="page-link" href="/docs/current/guide/Interval-Notation/">Interval Notation</a>
         
           <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
@@ -67,6 +69,8 @@
         
           <a class="page-link" href="/docs/current/guide/URIs/">Dataset and View URIs</a>
         
+          <a class="page-link" href="/docs/current/guide/Using-Kite-with-Apache-Maven/"></a>
+        
           <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
         
           <a class="page-link" href="/docs/current/guide/Viewing-with-Impala/">Viewing a Kite CLI Dataset with Impala</a>
@@ -76,6 +80,8 @@
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
           <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/docs/current/guide/lifecycle/">Kite Dataset Lifecycle</a>
         
       </div -->
     </nav>
@@ -108,6 +114,7 @@
   <li><a href="#datasets">datasets</a></li>
   <li><a href="#repositories">dataset repositories</a></li>
   <li><a href="#loading">loading data</a></li>
+  <li><a href="#writers">dataset writers</a></li>
   <li><a href="#viewing">viewing data</a></li>
 </ul>
 
@@ -127,18 +134,33 @@
 
 <p>A schema defines the field names and datatypes for a dataset. Kite relies on an Apache Avro schema definition for each dataset. For example, this is the schema definition for a table listing movies from the <code>movies.csv</code> dataset.<a href="#notes"><sup>1</sup></a></p>
 
-<pre><code class="language-json">{
-  "type":"record",
-  "name":"Movie",
-  "namespace":"org.kitesdk.examples.data",
-  "fields":[
-    {"name":"id","type":"int"},
-    {"name":"title","type":"string"},
-    {"name":"releaseDate","type":"string"},
-    {"name":"imdbUrl","type":"string"}
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+</pre></td>
+  <td class="code"><pre>{
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Movie</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>namespace</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">org.kitesdk.examples.data</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span>:[
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">id</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">int</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">title</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">releaseDate</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">imdbUrl</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>}
   ]
 }
-</code></pre>
+</pre></td>
+</tr></table>
+</div>
 
 <p>The goal is to get the schema into <code>.avsc</code> format and store it in the Hadoop file system. There are several ways to get the schema into the correct format. The following links provide examples for some of these approaches.</p>
 
@@ -170,7 +192,7 @@
 
 <p>You can work with a subset of dataset entities using the Views API.</p>
 
-<p>Datasets are identified by URIs. See <a href="../URIs">Dataset URIs</a>.</p>
+<p>Datasets are identified by URIs. See <a href="../URIs">Dataset URIs</a>. Dataset names cannot contain a period (.).</p>
 
 <p><a name="repositories"></a></p>
 
@@ -189,6 +211,22 @@
 <h2 id="loading-data-from-csv">Loading Data from CSV</h2>
 
 <p>You can load comma separated value data into a dataset repository using the command line interface function <a href="../Kite-Dataset-Command-Line-Interface/index.html#csvImport">csv-import</a>. </p>
+
+<p><a name="writers"></a></p>
+
+<h2 id="dataset-writers">Dataset Writers</h2>
+
+<p>Dataset writers add entities to your datasets (that is, add rows to your data tables). </p>
+
+<p>The <code>DatasetWriter</code> lifecycle is as follows:</p>
+
+<ol>
+  <li><code>Dataset#newWriter()</code> returns a DatasetWriter instance.</li>
+  <li><code>DatasetWriter#write()</code> writes an entity to a dataset.</li>
+  <li><code>DatasetWriter#flush()</code> attempts to push buffered data from the client to the remote hosts. Some dataset implementations might not implement this method, depending on the guarantees available to the underlying storage system. In particular, when using HDFS-backed datasets, the Parquet format does not implement <code>flush()</code> by default.</li>
+  <li><code>DatasetWriter#sync()</code> executes a <code>flush()</code> and waits for the remote hosts to force their buffers to persistent storage (for example, hard disks). Like <code>flush()</code>, <code>sync()</code> depends on support of the underlying format: Parquet is not supported by default.</li>
+  <li><code>DatasetWriter#close()</code> closes the writer. If it returns without throwing an exception, any entity that was successfully written with <code>DatasetWriter#write()</code> is safely stored to persistent storage in all locations.</li>
+</ol>
 
 <p><a name="viewing"></a></p>
 

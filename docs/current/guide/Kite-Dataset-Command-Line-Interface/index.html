@@ -45,6 +45,8 @@
         
           <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
         
+          <a class="page-link" href="/docs/current/guide/Install-Kite/">Install the Kite Command Line Interface</a>
+        
           <a class="page-link" href="/docs/current/guide/Interval-Notation/">Interval Notation</a>
         
           <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
@@ -67,6 +69,8 @@
         
           <a class="page-link" href="/docs/current/guide/URIs/">Dataset and View URIs</a>
         
+          <a class="page-link" href="/docs/current/guide/Using-Kite-with-Apache-Maven/"></a>
+        
           <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
         
           <a class="page-link" href="/docs/current/guide/Viewing-with-Impala/">Viewing a Kite CLI Dataset with Impala</a>
@@ -76,6 +80,8 @@
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
           <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/docs/current/guide/lifecycle/">Kite Dataset Lifecycle</a>
         
       </div -->
     </nav>
@@ -105,18 +111,22 @@
 <hr />
 <ul>
   <li><a href="#general">general options</a>: options for all commands.</li>
-  <li><a href="#csvSchema">csv-schema</a>: create a schema from a CSV data file.</li>
-  <li><a href="#objSchema">obj-schema</a>: create a schema from a Java object.</li>
-  <li><a href="#create">create</a>: create a dataset based on an existing schema.</li>
-  <li><a href="#update">update</a>: update the metadata descriptor for a dataset. </li>
-  <li><a href="#schema">schema</a> : view the schema for an existing dataset.</li>
-  <li><a href="#csvImport">csv-import</a>: import a CSV data file.</li>
-  <li><a href="#show">show</a>: show the first <em>n</em> records of a dataset.</li>
-  <li><a href="#copy">copy</a>: copy one dataset to another dataset.</li>
-  <li><a href="#delete">delete</a>: delete a dataset.</li>
-  <li><a href="#partition-config">partition-config</a>: create a partition strategy for a schema.</li>
-  <li><a href="#mapping-config">mapping-config</a>: create a partition strategy for a schema.</li>
   <li><a href="#help">help</a>: get help for the dataset command in general or a specific command.</li>
+  <li><a href="#create">create</a>: create a dataset based on an existing schema.</li>
+  <li><a href="#copy">copy</a>: copy one dataset to another dataset.</li>
+  <li><a href="#transform">transform</a>: transform records from one dataset and store them in another dataset.</li>
+  <li><a href="#update">update</a>: update the metadata descriptor for a dataset. </li>
+  <li><a href="#delete">delete</a>: delete a dataset.</li>
+  <li><a href="#schema">schema</a> : view the schema for an existing dataset.</li>
+  <li><a href="#info">info</a>: show metadata for a dataset.</li>
+  <li><a href="#show">show</a>: show the first <em>n</em> records of a dataset.</li>
+  <li><a href="#csvSchema">csv-schema</a>: create a schema from a CSV data file.</li>
+  <li><a href="#csvImport">csv-import</a>: import a CSV data file.</li>
+  <li><a href="#objSchema">obj-schema</a>: create a schema from a Java object.</li>
+  <li><a href="#partition-config">partition-config</a>: create a partition strategy for a schema.</li>
+  <li><a href="#mapping-config">mapping-config</a>: create a mapping strategy for a schema.</li>
+  <li><a href="#log4j-config">log4j-config</a>: Configure Log4j.</li>
+  <li><a href="#flume-config">flume-config</a>: Configure Flume.</li>
 </ul>
 
 <hr />
@@ -124,7 +134,7 @@
 
 <h2 id="general-options">General options</h2>
 
-<p>Every command begins with <code>dataset</code>, followed by general options. Currently, the only general option turns on debugging, which will show a stack trace if something goes awry during execution of the command. A concise set of additional options might be added as the product matures.</p>
+<p>Every command begins with <code>kite-dataset</code>, followed by general options. Currently, the only general option turns on debugging, which will show a stack trace if something goes awry during execution of the command. A concise set of additional options might be added as the product matures.</p>
 
 <table>
   <tbody>
@@ -134,6 +144,43 @@
     </tr>
   </tbody>
 </table>
+
+<p>The Kite CLI supports the following environment variables.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>HIVE_HOME</code></td>
+      <td>Root directory of Hive instance</td>
+    </tr>
+    <tr>
+      <td><code>HIVE_CONF_DIR</code></td>
+      <td>Configuration directory for Hive instance</td>
+    </tr>
+    <tr>
+      <td><code>HBASE_HOME</code></td>
+      <td>Root directory of HBase instance</td>
+    </tr>
+    <tr>
+      <td><code>HADOOP_MAPRED_HOME</code></td>
+      <td>Root directory for MapReduce</td>
+    </tr>
+    <tr>
+      <td><code>HADOOP_HOME</code></td>
+      <td>Root directory for Hadoop instance</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>To show the values for these variables at runtime, set the  <code>debug=</code> option to <em>true</em>. This can be helpful when troubleshooting issues where one or more of these resources is not found.  For example:</p>
+
+<pre><code>debug=true kite-dataset info users
+</code></pre>
+
+<p>Use the <code>flags=</code> option to pass arguments to the internal Hadoop jar command. For example:</p>
+
+<pre><code>flags="-Xmx512m" kite-dataset info users`
+</code></pre>
 
 <hr />
 <p><a href="#top">Back to the Top</a></p>
@@ -147,7 +194,7 @@
 
 <h3 id="syntax">Syntax</h3>
 
-<pre><code>dataset [-v] csv-schema &lt;sample csv path&gt; [command options]
+<pre><code>kite-dataset [-v] csv-schema &lt;sample csv path&gt; [command options]
 </code></pre>
 
 <h3 id="options">Options</h3>
@@ -193,12 +240,12 @@
 
 <p>Print the schema to standard out:</p>
 
-<pre><code>dataset csv-schema sample.csv --class Sample
+<pre><code>kite-dataset csv-schema sample.csv --class Sample
 </code></pre>
 
 <p>Write the schema to sample.avsc:</p>
 
-<pre><code>dataset csv-schema sample.csv --class Sample -o sample.avsc
+<pre><code>kite-dataset csv-schema sample.csv --class Sample -o sample.avsc
 </code></pre>
 
 <hr />
@@ -210,11 +257,11 @@
 <p><a name="objSchema"></a></p>
 
 <h2 id="obj-schema">obj-schema</h2>
-<p>Build a schema from a Java class.</p>
+<p>Build a schema from a Java class. Fields are assumed to be nullable by default. You can edit the generated schema directly to remove the “null” option for specific fields.</p>
 
 <h3 id="syntax-1">Syntax</h3>
 
-<pre><code>dataset [-v] obj-schema &lt;class name&gt; [command options]
+<pre><code>kite-dataset [-v] obj-schema &lt;class name&gt; [command options]
 </code></pre>
 
 <h3 id="options-1">Options</h3>
@@ -244,17 +291,17 @@
 
 <p>Create a schema for an example User class:</p>
 
-<pre><code>dataset obj-schema org.kitesdk.cli.example.User
+<pre><code>kite-dataset obj-schema org.kitesdk.cli.example.User
 </code></pre>
 
 <p>Create a schema for a class in a jar:</p>
 
-<pre><code>dataset obj-schema com.example.MyRecord --jar my-application.jar
+<pre><code>kite-dataset obj-schema com.example.MyRecord --jar my-application.jar
 </code></pre>
 
 <p>Save the schema for the example User class to user.avsc:</p>
 
-<pre><code>dataset obj-schema org.kitesdk.cli.example.User -o user.avsc
+<pre><code>kite-dataset obj-schema org.kitesdk.cli.example.User -o user.avsc
 </code></pre>
 
 <hr />
@@ -269,7 +316,7 @@
 
 <h3 id="usage">Usage</h3>
 
-<pre><code>dataset [-v] create &lt;dataset&gt; [command options]
+<pre><code>kite-dataset [-v] create &lt;dataset&gt; [command options]
 </code></pre>
 
 <h3 id="options-2">Options</h3>
@@ -292,24 +339,35 @@
       <td><code>-m, --mapping</code></td>
       <td>A file containing a JSON-formatted column mapping.</td>
     </tr>
+    <tr>
+      <td><code>--set, --property</code></td>
+      <td>A property to set in the dataset’s descriptor: <code>prop.name=value</code>.</td>
+    </tr>
   </tbody>
 </table>
+
+<p><b>Note:</b> The dataset name must not contain a period (.).</p>
 
 <h3 id="examples-2">Examples:</h3>
 
 <p>Create dataset “users” in Hive:</p>
 
-<pre><code>dataset create users --schema user.avsc
+<pre><code>kite-dataset create users --schema user.avsc
 </code></pre>
 
 <p>Create dataset “users” using Parquet:</p>
 
-<pre><code>dataset create users --schema user.avsc --format parquet
+<pre><code>kite-dataset create users --schema user.avsc --format parquet
 </code></pre>
 
-<p>Create dataset “users” partitioned by JSON configuration:</p>
+<p>Create dataset “users” partitioned by JSON configuration using a cache size of 20 (rather than the default cache size of 10):</p>
 
-<pre><code>dataset create users --schema user.avsc --partition-by user_part.json
+<pre><code>kite-dataset create users --schema user.avsc --partition-by user_part.json --set kite.writer.cache-size=20
+</code></pre>
+
+<p>Create dataset “users” and set multiple properties:</p>
+
+<pre><code>kite-dataset create users --schema user.avsc --set kite.writer.cache-size=20 --set dfs.blocksize=256m
 </code></pre>
 
 <hr />
@@ -326,7 +384,7 @@
 
 <h3 id="syntax-2">Syntax</h3>
 
-<pre><code>dataset [-v] update-dataset &lt;dataset&gt; [command options]
+<pre><code>kite-dataset [-v] update-dataset &lt;dataset&gt; [command options]
 </code></pre>
 
 <h3 id="options-3">Options</h3>
@@ -348,12 +406,12 @@
 
 <p>Update schema for dataset “users” in Hive:</p>
 
-<pre><code>dataset update users --schema user.avsc
+<pre><code>kite-dataset update users --schema user.avsc
 </code></pre>
 
 <p>Update HDFS dataset by URI, add property:</p>
 
-<pre><code>dataset update dataset:hdfs:/user/me/datasets/users --set kite.write.cache-size=20
+<pre><code>kite-dataset update dataset:hdfs:/user/me/datasets/users --set kite.write.cache-size=20
 </code></pre>
 
 <hr />
@@ -370,7 +428,7 @@
 
 <h3 id="syntax-3">Syntax</h3>
 
-<pre><code>dataset [-v] schema &lt;dataset&gt; [command options]
+<pre><code>kite-dataset [-v] schema &lt;dataset&gt; [command options]
 </code></pre>
 
 <h3 id="options-4">Options</h3>
@@ -392,7 +450,7 @@
 
 <p>Print the schema for dataset “users” to standard out:</p>
 
-<pre><code>dataset schema users
+<pre><code>kite-dataset schema users
 </code></pre>
 
 <p>Save the schema for dataset “users” to user.avsc:</p>
@@ -414,7 +472,7 @@
 
 <h3 id="syntax-4">Syntax</h3>
 
-<pre><code>dataset [-v] csv-import &lt;csv path&gt; &lt;dataset&gt; [command options]
+<pre><code>kite-dataset [-v] csv-import &lt;csv path&gt; &lt;dataset&gt; [command options]
 </code></pre>
 
 <h3 id="options-5">Options</h3>
@@ -448,7 +506,7 @@
 
 <p>Copy the records from <code>sample.csv</code> to a Hive dataset named “sample”:</p>
 
-<pre><code>dataset csv-import path/to/sample.csv sample
+<pre><code>kite-dataset csv-import path/to/sample.csv sample
 </code></pre>
 
 <hr />
@@ -465,7 +523,7 @@
 
 <h3 id="syntax-5">Syntax</h3>
 
-<pre><code>dataset [-v] show &lt;dataset&gt; [command options]
+<pre><code>kite-dataset [-v] show &lt;dataset&gt; [command options]
 </code></pre>
 
 <h3 id="options-6">Options</h3>
@@ -483,12 +541,12 @@
 
 <p>Show the first 10 records in dataset “users”:</p>
 
-<pre><code>dataset show users
+<pre><code>kite-dataset show users
 </code></pre>
 
 <p>Show the first 50 records in dataset “users”:</p>
 
-<pre><code>dataset show users -n 50
+<pre><code>kite-dataset show users -n 50
 </code></pre>
 
 <hr />
@@ -505,7 +563,7 @@
 
 <h3 id="syntax-6">Syntax</h3>
 
-<pre><code>dataset [-v] copy &lt;source dataset&gt; &lt;destination dataset&gt; [command options]
+<pre><code>kite-dataset [-v] copy &lt;source dataset&gt; &lt;destination dataset&gt; [command options]
 </code></pre>
 
 <h3 id="options-7">Options</h3>
@@ -527,12 +585,12 @@
 
 <p>Copy the contents of <code>movies_avro</code> to <code>movies_parquet</code>:</p>
 
-<pre><code>dataset copy movies_avro movies_parquet
+<pre><code>kite-dataset copy movies_avro movies_parquet
 </code></pre>
 
 <p>Copy the movies dataset into HBase in a map-only job:</p>
 
-<pre><code>dataset copy movies dataset:hbase:zk-host/movies --no-compaction
+<pre><code>kite-dataset copy movies dataset:hbase:zk-host/movies --no-compaction
 </code></pre>
 
 <hr />
@@ -549,14 +607,14 @@
 
 <h3 id="syntax-7">Syntax</h3>
 
-<pre><code>dataset [-v] delete &lt;datasets&gt; [command options]
+<pre><code>kite-dataset [-v] delete &lt;datasets&gt; [command options]
 </code></pre>
 
 <h3 id="examples-8">Examples</h3>
 
 <p>Delete all data and metadata for the dataset “users”:</p>
 
-<pre><code>dataset delete users
+<pre><code>kite-dataset delete users
 </code></pre>
 
 <hr />
@@ -573,7 +631,7 @@
 
 <h3 id="syntax-8">Syntax</h3>
 
-<pre><code>dataset [-v] partition-config &lt;field:type pairs&gt; [command options]
+<pre><code>kite-dataset [-v] partition-config &lt;field:type pairs&gt; [command options]
 </code></pre>
 
 <h3 id="options-8">Options:</h3>
@@ -599,12 +657,12 @@
 
 <p>Partition by email address, balanced across 16 hash partitions and save to a file.</p>
 
-<pre><code>dataset partition-config email:hash[16] email:copy -s user.avsc -o part.json
+<pre><code>kite-dataset partition-config email:hash[16] email:copy -s user.avsc -o part.json
 </code></pre>
 
 <p>Partition by <code>created_at</code> time’s year, month, and day:</p>
 
-<pre><code>dataset partition-config created_at:year created_at:month created_at:day -s event.avsc
+<pre><code>kite-dataset partition-config created_at:year created_at:month created_at:day -s event.avsc
 </code></pre>
 
 <hr />
@@ -642,7 +700,7 @@
 
 <h3 id="syntax-9">Syntax</h3>
 
-<pre><code>dataset [-v] create-column-mapping &lt;field:type pairs&gt; [command options]
+<pre><code>kite-dataset  [-v] create-column-mapping &lt;field:type pairs&gt; [command options]
 </code></pre>
 
 <h3 id="options-9">Options</h3>
@@ -668,17 +726,17 @@
 
 <p>Store email in the key, other fields in column family <code>u</code>:</p>
 
-<pre><code>dataset mapping-config email:key username:u id:u --schema user.avsc -o user-cols.json
+<pre><code>kite-dataset  mapping-config email:key username:u id:u --schema user.avsc -o user-cols.json
 </code></pre>
 
 <p>Store preferences hash-map in column family <code>prefs</code>:</p>
 
-<pre><code>dataset mapping-config preferences:prefs --schema user.avsc
+<pre><code>kite-dataset  mapping-config preferences:prefs --schema user.avsc
 </code></pre>
 
 <p>Use the <code>version</code> field as an OCC version:</p>
 
-<pre><code>dataset mapping-config version:version --schema user.avsc
+<pre><code>kite-dataset  mapping-config version:version --schema user.avsc
 </code></pre>
 
 <hr />
@@ -689,20 +747,247 @@
 
 <p><a name="help"></a></p>
 
-<h2 id="help">Help</h2>
+<h2 id="help">help</h2>
 
 <p>Retrieves details on the functions of one or more dataset commands.</p>
 
 <h3 id="syntax-10">Syntax</h3>
 
-<pre><code>dataset [-v] help &lt;commands&gt; [command options]
+<pre><code>kite-dataset  [-v] help &lt;commands&gt; [command options]
 </code></pre>
 
 <h3 id="examples-11">Examples</h3>
 
 <p>Retrieve details for the create, show, and delete commands.</p>
 
-<pre><code>dataset help create show delete
+<pre><code>kite-dataset help create show delete
+
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<p><a name="transform"></a></p>
+
+<h2 id="transform">transform</h2>
+<p>Transforms records from one dataset and stores them in another dataset.</p>
+
+<h3 id="syntax-11">Syntax</h3>
+
+<pre><code>kite-dataset transform &lt;source dataset&gt; &lt;destination dataset&gt; [command options]
+</code></pre>
+
+<h3 id="options-10">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>--no-compaction</code></td>
+      <td>Copy to output without compacting the data</td>
+    </tr>
+    <tr>
+      <td><code>--num-writers</code></td>
+      <td>The number of writer processes to use</td>
+    </tr>
+    <tr>
+      <td><code>--transform</code></td>
+      <td>A transform DoFn class name</td>
+    </tr>
+    <tr>
+      <td><code>--jar</code></td>
+      <td>Add a jar to the runtime class path</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-12">Examples</h3>
+
+<p>Transform the contents of <code>movies_src</code> using <code>com.example.TransformFn</code>:</p>
+
+<pre><code>kite-dataset  transform movies_src movies --transform com.example.TransformFn --jar fns.jar
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<p><a name="info"></a></p>
+
+<h2 id="info">info</h2>
+
+<p>Print all metadata for a dataset.</p>
+
+<h3 id="syntax-12">Syntax</h3>
+
+<pre><code>kite-dataset info &lt;dataset name&gt;
+</code></pre>
+
+<h3 id="example">Example</h3>
+
+<p>Print all metadata for the “users” dataset:</p>
+
+<pre><code>kite-dataset info users
+</code></pre>
+
+<p><a name="log4j-config"></a></p>
+
+<h2 id="log4j-config">log4j-config</h2>
+
+<p>Builds a log4j configuration to log events to a dataset.</p>
+
+<h3 id="syntax-13">Syntax</h3>
+
+<pre><code>kite-dataset log4j-config &lt;dataset name&gt; --host &lt;flume hostname&gt; [command options]
+</code></pre>
+
+<h3 id="options-11">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>--port</code></td>
+      <td>Flume port</td>
+    </tr>
+    <tr>
+      <td><code>--class</code>, <code>--package</code></td>
+      <td>Java class or package from which to log</td>
+    </tr>
+    <tr>
+      <td><code>--log-all</code></td>
+      <td>Configure the root logger to send to Flume</td>
+    </tr>
+    <tr>
+      <td><code>-o, --output</code></td>
+      <td>Save the log4j configuration to a file</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-13">Examples</h3>
+
+<p>Print log4j configuration to log to dataset “users”:</p>
+
+<pre><code>kite-dataset log4j-config --host flume.cluster.com --class org.kitesdk.examples.MyLoggingApp users
+</code></pre>
+
+<p>Save log4j configuration to the file <code>log4j.properties</code>:</p>
+
+<pre><code>kite-dataset log4j-config --host flume.cluster.com --package org.kitesdk.examples -o log4j.properties users
+</code></pre>
+
+<p>Print log4j configuration to log from all classes:</p>
+
+<pre><code>kite-dataset log4j-config --host flume.cluster.com --log-all users
+</code></pre>
+
+<hr />
+
+<p><a href="#top">Back to the Top</a></p>
+
+<hr />
+
+<p><a name="flume-config"></a></p>
+
+<h2 id="flume-config">flume-config</h2>
+
+<p>Builds a Flume configuration to log events to a dataset.</p>
+
+<h3 id="syntax-14">Syntax</h3>
+
+<pre><code>kite-dataset flume-config &lt;dataset name or URI&gt; [command options]
+</code></pre>
+
+<h3 id="options-12">Options</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td><code>--use-dataset-uri</code></td>
+      <td>Configure Flume with a dataset URI. Requires Flume 1.6 or later.</td>
+    </tr>
+    <tr>
+      <td><code>--agent</code></td>
+      <td>Flume agent name</td>
+    </tr>
+    <tr>
+      <td><code>--source</code></td>
+      <td>Flume source name</td>
+    </tr>
+    <tr>
+      <td><code>--bind</code></td>
+      <td>Avro source bind address</td>
+    </tr>
+    <tr>
+      <td><code>--port</code></td>
+      <td>Avro source port</td>
+    </tr>
+    <tr>
+      <td><code>--channel</code></td>
+      <td>Flume channel name</td>
+    </tr>
+    <tr>
+      <td><code>--channel-type</code></td>
+      <td>Flume channel type (<code>memory</code> or <code>file</code>)</td>
+    </tr>
+    <tr>
+      <td><code>--channel-capacity</code></td>
+      <td>Flume channel capacity</td>
+    </tr>
+    <tr>
+      <td><code>--channel-transaction-capacity</code></td>
+      <td>Flume channel transaction capacity</td>
+    </tr>
+    <tr>
+      <td><code>--checkpoint-dir</code></td>
+      <td>File channel checkpoint directory (required when using <code>--channel-type file</code>)</td>
+    </tr>
+    <tr>
+      <td><code>--data-dir</code></td>
+      <td>File channel data directory. Use the option multiple times for multiple data directories. (required when using <code>--channel-type file</code>)</td>
+    </tr>
+    <tr>
+      <td><code>--sink</code></td>
+      <td>Flume sink name</td>
+    </tr>
+    <tr>
+      <td><code>--batch-size</code></td>
+      <td>Records to write per batch</td>
+    </tr>
+    <tr>
+      <td><code>--roll-interval</code></td>
+      <td>Time in seconds before starting the next file</td>
+    </tr>
+    <tr>
+      <td><code>--proxy-user</code></td>
+      <td>User identity to use when writing to HDFS</td>
+    </tr>
+    <tr>
+      <td><code>-o, --output</code></td>
+      <td>Save the Flume configuration to a file</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="examples-14">Examples</h3>
+
+<p>Print Flume configuration to log to dataset “users”:</p>
+
+<pre><code>kite-dataset flume-config --checkpoint-dir /data/0/flume/checkpoint --data-dir /data/1/flume/data users
+</code></pre>
+
+<p>Print Flume configuration to log to dataset <code>dataset:hdfs:/datasets/default/users</code>:</p>
+
+<pre><code>kite-dataset flume-config --channel-type memory dataset:hdfs:/datasets/default/users
+</code></pre>
+
+<p>Save Flume configuration to the file <code>flume.properties</code>:</p>
+
+<pre><code>kite-dataset flume-config --channel-type memory -o flume.properties users
 </code></pre>
 
 <hr />

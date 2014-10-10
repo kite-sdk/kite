@@ -45,6 +45,8 @@
         
           <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
         
+          <a class="page-link" href="/docs/current/guide/Install-Kite/">Install the Kite Command Line Interface</a>
+        
           <a class="page-link" href="/docs/current/guide/Interval-Notation/">Interval Notation</a>
         
           <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
@@ -67,6 +69,8 @@
         
           <a class="page-link" href="/docs/current/guide/URIs/">Dataset and View URIs</a>
         
+          <a class="page-link" href="/docs/current/guide/Using-Kite-with-Apache-Maven/"></a>
+        
           <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
         
           <a class="page-link" href="/docs/current/guide/Viewing-with-Impala/">Viewing a Kite CLI Dataset with Impala</a>
@@ -76,6 +80,8 @@
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
           <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/docs/current/guide/lifecycle/">Kite Dataset Lifecycle</a>
         
       </div -->
     </nav>
@@ -100,8 +106,13 @@
 
 <p>The most common type is <code>column</code>, which stores the source field in a cell. HBase cells are identified by column family and column qualifier, which are the two required properties for <code>column</code>. For example, here is a single column definition for a timestamp field, with a family <em>m</em> and a qualifier <em>ts</em>.</p>
 
-<pre><code class="language-json">{"source" : "timestamp", "type" : "column", "family" : "m", "qualifier" : "ts"}
-</code></pre>
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>{<span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">timestamp</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">column</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>family</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">m</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>qualifier</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">ts</span><span style="color:#710">&quot;</span></span>}
+</pre></td>
+</tr></table>
+</div>
 
 <p>The identifiers are stored repeatedly in the dataset, so it’s best practice to keep the names short, but long enough to provide context. The table structure in the data store is similar to this:</p>
 
@@ -109,13 +120,23 @@
 
 <p>Each source field should have a corresponding column definition in the complete mapping. Below is an example of a complete column mapping for a simple user record.</p>
 
-<pre><code class="language-json">[
-  {"source" : "email", "type" : "column", "family" : "u", "qualifier" : "mail"},
-  {"source" : "first_name", "type" : "column", "family" : "u", "qualifier" : "fname"},
-  {"source" : "last_name", "type" : "column", "family" : "u", "qualifier" : "lname"},
-  {"source" : "created_at", "type" : "column", "family" : "u", "qualifier" : "ts"}
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+</pre></td>
+  <td class="code"><pre>[
+  {<span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">email</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">column</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>family</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">u</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>qualifier</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">mail</span><span style="color:#710">&quot;</span></span>},
+  {<span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">first_name</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">column</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>family</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">u</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>qualifier</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">fname</span><span style="color:#710">&quot;</span></span>},
+  {<span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">last_name</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">column</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>family</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">u</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>qualifier</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">lname</span><span style="color:#710">&quot;</span></span>},
+  {<span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">created_at</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">column</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>family</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">u</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>qualifier</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">ts</span><span style="color:#710">&quot;</span></span>}
 ]
-</code></pre>
+</pre></td>
+</tr></table>
+</div>
 
 <h2 id="mapping-types">Mapping types</h2>
 
@@ -129,8 +150,13 @@
 <h3 id="counter-mapping">Counter mapping</h3>
 <p>The <code>counter</code> is similar to column, but can be incremented using HBase’s atomic increment. The field data is stored in a cell identified by the required <code>family</code> and <code>qualifier</code> properties, and the source field for a counter must be an integer or a long. A good example is user visits to a website. Every time the user visits the site, the site increments the user’s visit counter.</p>
 
-<pre><code class="language-json">{"source" : "visits", "type" : "counter", "family" : "u", "prefix" : "visits"}
-</code></pre>
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>{<span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">visits</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">counter</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>family</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">u</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>prefix</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">visits</span><span style="color:#710">&quot;</span></span>}
+</pre></td>
+</tr></table>
+</div>
 
 <p>HBase increments the counter atomically. If there are two visits at the same time, it guarantees that they will not be mistakenly combined into one, but will be counted separately. The sequence is</p>
 
@@ -146,15 +172,27 @@
 
 <p>HBase stores everything by a unique key for each record, made from the record’s data. For example, users might be stored by their e-mail address. You could use <code>column</code> to store the e-mail in a cell, but it is already stored in key for the record. Kite can retrieve the email value from the key. It doesn’t have to be stored a second time in the data.</p>
 
-<pre><code class="language-json">{"source" : "email", "type" : "key"}
-</code></pre>
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>{<span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">email</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">key</span><span style="color:#710">&quot;</span></span>}
+</pre></td>
+</tr></table>
+</div>
 
 <p>In Kite, we define the key using a partition strategy. For the above e-mail mapping, you would need to use a partition strategy that includes the e-mail like this.</p>
 
-<pre><code class="language-json">[
-  {"source" : "email", "type" : "identity"}
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+</pre></td>
+  <td class="code"><pre>[
+  {<span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">email</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">identity</span><span style="color:#710">&quot;</span></span>}
 ]
-</code></pre>
+</pre></td>
+</tr></table>
+</div>
 
 <p>On the file system side, the keys overlap. That’s how we group things together into common buckets that have properties such as Year, Month, and Day for all of the events in the same bucket.</p>
 
@@ -168,11 +206,21 @@
 
 <p>For example, if you store locations made of a latitude, longitude pair, you could store the location record in the <code>loc</code> family using the following mapping.</p>
 
-<pre><code class="language-json">{"source" : "location", "type" : "keyAsColumn", "family" : "loc"}
-</code></pre>
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>{<span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">location</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">keyAsColumn</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>family</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">loc</span><span style="color:#710">&quot;</span></span>}
+</pre></td>
+</tr></table>
+</div>
 
-<pre><code class="language-javascript">location = {"lat" : 12.34, "long" : 128.14}
-</code></pre>
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>location = {<span style="color:#606"><span style="color:#404">&quot;</span><span>lat</span><span style="color:#404">&quot;</span></span> : <span style="color:#60E">12.34</span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>long</span><span style="color:#404">&quot;</span></span> : <span style="color:#60E">128.14</span>}
+</pre></td>
+</tr></table>
+</div>
 
 <p>Kite uses the <code>family</code> property you provide as the column family, but uses the names of the individual elements of the column record to name the qualifiers. The <code>family</code> property is required.</p>
 
@@ -180,8 +228,13 @@
 
 <p>This also supports an optional <code>prefix</code> for the qualifiers. For example, you could add the prefix “m_” to your column definition for easier identification.</p>
 
-<pre><code class="language-json">{"source" : "location", "type" : "keyAsColumn", "family" : "loc", "prefix" : "m_"}
-</code></pre>
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>{<span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">location</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">keyAsColumn</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>family</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">loc</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>prefix</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">m_</span><span style="color:#710">&quot;</span></span>}
+</pre></td>
+</tr></table>
+</div>
 
 <p><img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/14.1_keyAsColumnWithPrefix.png" alt="keyAsColumn with prefix" /></p>
 
@@ -193,8 +246,13 @@
 
 <p>The <code>occVersion</code> mapping is a special type of counter. It’s the only counter allowed on the record. Counters use atomic updating, where the increment is handled inside the database. Version, being the version of the record, is the only counter allowed. It has an automatic storage system that the user cannot control. You can access the version on the record itself, but you have no opportunity to change the value. </p>
 
-<pre><code class="language-json">{"source" : "record_version", "type" : "occVersion"}
-</code></pre>
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>{<span style="color:#606"><span style="color:#404">&quot;</span><span>source</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record_version</span><span style="color:#710">&quot;</span></span>, <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">occVersion</span><span style="color:#710">&quot;</span></span>}
+</pre></td>
+</tr></table>
+</div>
 
 <p>The version is incremented every time you “put” the record. This provides a concurrency guarantee. You update the record, store all the data, then update the version with an atomic operation. It uses OCC (Optimistic Concurrency Control). If you begin an edit based on version 6, it checks to see if it is still at version 6 before allowing you to store the record. If someone else has changed it in the interim, you get a rejection message. Typically, such collisions are rare, so working under the assumption that such a collision won’t occur is the most efficient mode of operations most of the time.</p>
 

@@ -45,6 +45,8 @@
         
           <a class="page-link" href="/docs/current/guide/Inferring-a-Schema-from-an-Avro-Data-File/">Inferring a Schema from an Avro Data File</a>
         
+          <a class="page-link" href="/docs/current/guide/Install-Kite/">Install the Kite Command Line Interface</a>
+        
           <a class="page-link" href="/docs/current/guide/Interval-Notation/">Interval Notation</a>
         
           <a class="page-link" href="/docs/current/guide/Kite-Data-Module-Overview/">Kite Data Module Overview</a>
@@ -67,6 +69,8 @@
         
           <a class="page-link" href="/docs/current/guide/URIs/">Dataset and View URIs</a>
         
+          <a class="page-link" href="/docs/current/guide/Using-Kite-with-Apache-Maven/"></a>
+        
           <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
         
           <a class="page-link" href="/docs/current/guide/Viewing-with-Impala/">Viewing a Kite CLI Dataset with Impala</a>
@@ -76,6 +80,8 @@
           <a class="page-link" href="/docs/current/guide/feed.xml"></a>
         
           <a class="page-link" href="/docs/current/guide/">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/docs/current/guide/lifecycle/">Kite Dataset Lifecycle</a>
         
       </div -->
     </nav>
@@ -98,86 +104,168 @@
 
 <p>For example, the following class defines a Java object that provides access to the ID, Title, Release Date, and IMDB URL for a movie database.</p>
 
-<pre><code class="language-java"> package org.kitesdk.examples.data;
- /** Movie class */
- class Movie {
-   private int id;
-   private String title;
-   private String releaseDate;
-   private String imdbUrl;
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+<a href="#n12" name="n12">12</a>
+<a href="#n13" name="n13">13</a>
+<a href="#n14" name="n14">14</a>
+<a href="#n15" name="n15">15</a>
+<a href="#n16" name="n16">16</a>
+<a href="#n17" name="n17">17</a>
+<a href="#n18" name="n18">18</a>
+<a href="#n19" name="n19">19</a>
+<strong><a href="#n20" name="n20">20</a></strong>
+<a href="#n21" name="n21">21</a>
+<a href="#n22" name="n22">22</a>
+<a href="#n23" name="n23">23</a>
+<a href="#n24" name="n24">24</a>
+<a href="#n25" name="n25">25</a>
+<a href="#n26" name="n26">26</a>
+<a href="#n27" name="n27">27</a>
+<a href="#n28" name="n28">28</a>
+<a href="#n29" name="n29">29</a>
+<strong><a href="#n30" name="n30">30</a></strong>
+<a href="#n31" name="n31">31</a>
+<a href="#n32" name="n32">32</a>
+<a href="#n33" name="n33">33</a>
+<a href="#n34" name="n34">34</a>
+<a href="#n35" name="n35">35</a>
+<a href="#n36" name="n36">36</a>
+<a href="#n37" name="n37">37</a>
+<a href="#n38" name="n38">38</a>
+<a href="#n39" name="n39">39</a>
+<strong><a href="#n40" name="n40">40</a></strong>
+<a href="#n41" name="n41">41</a>
+<a href="#n42" name="n42">42</a>
+<a href="#n43" name="n43">43</a>
+<a href="#n44" name="n44">44</a>
+<a href="#n45" name="n45">45</a>
+<a href="#n46" name="n46">46</a>
+<a href="#n47" name="n47">47</a>
+<a href="#n48" name="n48">48</a>
+<a href="#n49" name="n49">49</a>
+<strong><a href="#n50" name="n50">50</a></strong>
+<a href="#n51" name="n51">51</a>
+<a href="#n52" name="n52">52</a>
+<a href="#n53" name="n53">53</a>
+<a href="#n54" name="n54">54</a>
+<a href="#n55" name="n55">55</a>
+<a href="#n56" name="n56">56</a>
+</pre></td>
+  <td class="code"><pre> <span style="color:#080;font-weight:bold">package</span> <span style="color:#707;font-weight:bold">org.kitesdk.examples.data</span>;
+ <span style="color:#777">/** Movie class */</span>
+ <span style="color:#339;font-weight:bold">class</span> <span style="color:#B06;font-weight:bold">Movie</span> {
+   <span style="color:#088;font-weight:bold">private</span> <span style="color:#339;font-weight:bold">int</span> id;
+   <span style="color:#088;font-weight:bold">private</span> <span style="color:#0a8;font-weight:bold">String</span> title;
+   <span style="color:#088;font-weight:bold">private</span> <span style="color:#0a8;font-weight:bold">String</span> releaseDate;
+   <span style="color:#088;font-weight:bold">private</span> <span style="color:#0a8;font-weight:bold">String</span> imdbUrl;
 
-   public Movie(int id, String title, String releaseDate, String imdbUrl) {
-     this.id = id;
-     this.title = title;
-     this.releaseDate = releaseDate;
-     this.imdbUrl = imdbUrl;
+   <span style="color:#088;font-weight:bold">public</span> Movie(<span style="color:#339;font-weight:bold">int</span> id, <span style="color:#0a8;font-weight:bold">String</span> title, <span style="color:#0a8;font-weight:bold">String</span> releaseDate, <span style="color:#0a8;font-weight:bold">String</span> imdbUrl) {
+     <span style="color:#950">this</span>.id = id;
+     <span style="color:#950">this</span>.title = title;
+     <span style="color:#950">this</span>.releaseDate = releaseDate;
+     <span style="color:#950">this</span>.imdbUrl = imdbUrl;
    }
-	
-   public Movie() {
-     // Empty constructor for serialization purposes
-   }
-
-   public int getId() {
-     return id;
+        
+   <span style="color:#088;font-weight:bold">public</span> Movie() {
+     <span style="color:#777">// Empty constructor for serialization purposes</span>
    }
 
-   public void setId (int id) {
-     this.id = id;
+   <span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">int</span> getId() {
+     <span style="color:#080;font-weight:bold">return</span> id;
    }
 
-   public String getTitle() {
-     return title;
+   <span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> setId (<span style="color:#339;font-weight:bold">int</span> id) {
+     <span style="color:#950">this</span>.id = id;
    }
 
-   public void setTitle(String title) {
-     this.title = title;
+   <span style="color:#088;font-weight:bold">public</span> <span style="color:#0a8;font-weight:bold">String</span> getTitle() {
+     <span style="color:#080;font-weight:bold">return</span> title;
+   }
+
+   <span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> setTitle(<span style="color:#0a8;font-weight:bold">String</span> title) {
+     <span style="color:#950">this</span>.title = title;
    }
   
-   public String getReleaseDate() {
-      return releaseDate;
+   <span style="color:#088;font-weight:bold">public</span> <span style="color:#0a8;font-weight:bold">String</span> getReleaseDate() {
+      <span style="color:#080;font-weight:bold">return</span> releaseDate;
    }
   
-   public void setReleaseDate (String releaseDate) {
-     this.releaseDate = releaseDate;
+   <span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> setReleaseDate (<span style="color:#0a8;font-weight:bold">String</span> releaseDate) {
+     <span style="color:#950">this</span>.releaseDate = releaseDate;
    }
   
-   public String getImdbUrl () {
-     return imdbUrl;
+   <span style="color:#088;font-weight:bold">public</span> <span style="color:#0a8;font-weight:bold">String</span> getImdbUrl () {
+     <span style="color:#080;font-weight:bold">return</span> imdbUrl;
    }
   
-   public void setImdbUrl (String imdbUrl) {
-     this.imdbUrl = imdbUrl;
+   <span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> setImdbUrl (<span style="color:#0a8;font-weight:bold">String</span> imdbUrl) {
+     <span style="color:#950">this</span>.imdbUrl = imdbUrl;
    }
 
-   public void describeMovie() {
-     System.out.println(title + ", ID: " + id + ", was released on " + 
-       releaseDate + ". For more info, see " + imdbUrl + ".");
+   <span style="color:#088;font-weight:bold">public</span> <span style="color:#339;font-weight:bold">void</span> describeMovie() {
+     <span style="color:#0a8;font-weight:bold">System</span>.out.println(title + <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">, ID: </span><span style="color:#710">&quot;</span></span> + id + <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">, was released on </span><span style="color:#710">&quot;</span></span> + 
+       releaseDate + <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">. For more info, see </span><span style="color:#710">&quot;</span></span> + imdbUrl + <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">.</span><span style="color:#710">&quot;</span></span>);
    }
  }
-</code></pre>
+</pre></td>
+</tr></table>
+</div>
 
 <hr />
 <p>Use the <code>schema(Class&lt;?&gt;)</code> builder method to create a descriptor that uses the Avro schema inferred from the <code>Movie</code> class.</p>
 
-<pre><code class="language-java">DatasetDescriptor movieDesc = new DatasetDescriptor.Builder()
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+</pre></td>
+  <td class="code"><pre>DatasetDescriptor movieDesc = <span style="color:#080;font-weight:bold">new</span> DatasetDescriptor.Builder()
     .schema(Movie.class)
     .build();
-</code></pre>
+</pre></td>
+</tr></table>
+</div>
 
 <p>The Builder uses the field names and data types to construct an Avro schema definition, which for the <code>Movie</code> class looks like this.</p>
 
-<pre><code class="language-json">{
-  "type":"record",
-  "name":"Movie",
-  "namespace":"org.kitesdk.examples.data",
-  "fields":[
-    {"name":"id","type":"int"},
-    {"name":"title","type":"string"},
-    {"name":"releaseDate","type":"string"},
-    {"name":"imdbUrl","type":"string"}
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+</pre></td>
+  <td class="code"><pre>{
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Movie</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>namespace</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">org.kitesdk.examples.data</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span>:[
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">id</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">int</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">title</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">releaseDate</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>},
+    {<span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">imdbUrl</span><span style="color:#710">&quot;</span></span>,<span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>:<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>}
   ]
 }
-</code></pre>
+</pre></td>
+</tr></table>
+</div>
 
   </article>
 

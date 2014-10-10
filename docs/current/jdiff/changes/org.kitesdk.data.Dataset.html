@@ -18,7 +18,7 @@ org.kitesdk.data.Dataset
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/Dataset.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/Dataset.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.17.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -31,7 +31,7 @@ org.kitesdk.data.Dataset
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV CLASS</B>&nbsp;
-&nbsp;<A HREF="org.kitesdk.data.DatasetReader.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.DatasetDescriptor.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="org.kitesdk.data.Dataset.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -50,33 +50,17 @@ Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/Dataset.html"
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
-<a NAME="Removed"></a>
-<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<a NAME="Added"></a>
+<TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.Dataset.dropPartition_removed(org.kitesdk.data.spi.PartitionKey)"></A>
-  <nobr><code>void</code>&nbsp;dropPartition(<code>PartitionKey</code>)</nobr>
+  <A NAME="org.kitesdk.data.Dataset.getNamespace_added()"></A>
+  <nobr><code>String</code>&nbsp;<A HREF="../../apidocs/org/kitesdk/data/Dataset.html#getNamespace()" target="_top"><tt>getNamespace</tt></A>()</nobr>
   </TD>
-  <TD VALIGN="TOP">Drop a partition for a <A HREF="../../apidocs/PartitionKey.html"><TT>PartitionKey</TT></A>.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.Dataset.getPartition_removed(org.kitesdk.data.spi.PartitionKey, boolean)"></A>
-  <nobr><code>Dataset&lt;E&gt;</code>&nbsp;getPartition(<code>PartitionKey,</nobr> boolean<nobr><nobr></code>)</nobr>
-  </TD>
-  <TD VALIGN="TOP">Get a partition for a <A HREF="../../apidocs/PartitionKey.html"><TT>PartitionKey</TT></A>, optionally creating the
- partition if it doesn't already exist.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="org.kitesdk.data.Dataset.getPartitions_removed()"></A>
-  <nobr><code>Iterable&lt;Dataset&lt;E&gt;&gt;</code>&nbsp;getPartitions()</nobr>
-  </TD>
-  <TD VALIGN="TOP"><p>
- Return partitions, if this dataset is partitioned.</TD>
+  <TD VALIGN="TOP">Get the namespace that contains this {@code Dataset}.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -88,7 +72,7 @@ Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/Dataset.html"
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/Dataset.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/Dataset.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.17.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="pkg_org.kitesdk.data.html"><FONT CLASS="NavBarFont1"><B>Package</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Class</B></FONT>&nbsp;</TD>
@@ -101,7 +85,7 @@ Interface org.kitesdk.data.<A HREF="../../apidocs/org/kitesdk/data/Dataset.html"
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV CLASS</B>&nbsp;
-&nbsp;<A HREF="org.kitesdk.data.DatasetReader.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="org.kitesdk.data.DatasetDescriptor.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="org.kitesdk.data.Dataset.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

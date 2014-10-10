@@ -18,7 +18,7 @@ org.kitesdk.data
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.17.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -31,13 +31,13 @@ org.kitesdk.data
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV PACKAGE</B>&nbsp;
-&nbsp;<A HREF="pkg_org.kitesdk.data.crunch.html"><B>NEXT PACKAGE</B></A>
+&nbsp;<A HREF="pkg_org.kitesdk.data.flume.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="pkg_org.kitesdk.data.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell3"><FONT SIZE="-2"> DETAIL: &nbsp;
 <a href="#Removed">REMOVED</a>&nbsp;|&nbsp;
-ADDED&nbsp;|&nbsp;
+<a href="#Added">ADDED</a>&nbsp;|&nbsp;
 <a href="#Changed">CHANGED</a>
   </FONT></TD>
 </TR>
@@ -49,17 +49,75 @@ Package <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_t
 </H2>
 <p>
 <a NAME="Removed"></a>
-<TABLE summary="Removed Classes" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TABLE summary="Removed Classes and Interfaces" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Classes</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Classes and Interfaces</B></FONT></TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="PartitionKey"></A>
-  PartitionKey
+  <A NAME="DatasetRepositories"></A>
+  DatasetRepositories
+  </TD>
+  <TD VALIGN="TOP"><p>Convenience methods for working with <A HREF="../../apidocs/org/kitesdk/data/DatasetRepositories/DatasetRepository.html"><TT>DatasetRepository</TT></A> instances.</p>
+
+ </TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="DatasetRepository"></A>
+  <I>DatasetRepository</I>
   </TD>
   <TD VALIGN="TOP"><p>
- A key for retrieving partitions from a <A HREF="../../apidocs/org/kitesdk/data/PartitionKey/Dataset.html"><TT>Dataset</TT></A>.</TD>
+ A logical repository (storage system) of <A HREF="../../apidocs/org/kitesdk/data/DatasetRepository/Dataset.html"><TT>Dataset</TT></A>s.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="DatasetRepositoryException"></A>
+  DatasetRepositoryException
+  </TD>
+  <TD VALIGN="TOP"><p>
+ Exception thrown for dataset repository-related failures.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="RandomAccessDatasetRepository"></A>
+  <I>RandomAccessDatasetRepository</I>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ A logical repository (storage system) of <A HREF="../../apidocs/org/kitesdk/data/RandomAccessDatasetRepository/RandomAccessDataset.html"><TT>RandomAccessDataset</TT></A>s.</TD>
+</TR>
+</TABLE>
+&nbsp;
+<p>
+<a NAME="Added"></a>
+<TABLE summary="Added Classes" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Classes</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="CompressionType"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/data/CompressionType.html" target="_top"><tt>CompressionType</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ Contains constant definitions for the standard compression types we support.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="DatasetOperationException"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/data/DatasetOperationException.html" target="_top"><tt>DatasetOperationException</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP"><A HREF="../../apidocs/org/kitesdk/data/DatasetOperationException/DatasetException.html"><TT>DatasetException</TT></A> thrown when an implementation-specific step fails
+ and prevents a dataset operation from completing successfully.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="URIBuilder"></A>
+  <nobr><A HREF="../../apidocs/org/kitesdk/data/URIBuilder.html" target="_top"><tt>URIBuilder</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Builds dataset and view URIs
+
+ </TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -79,35 +137,33 @@ Package <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_t
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="DatasetReader"></A>
-  <nobr><A HREF="org.kitesdk.data.DatasetReader.html"><I>DatasetReader</I></A></nobr>
+  <A NAME="DatasetDescriptor"></A>
+  <nobr><A HREF="org.kitesdk.data.DatasetDescriptor.html">DatasetDescriptor</A></nobr>
   </TD>
   <TD VALIGN="TOP"><p>
- A stream-oriented dataset reader.</TD>
+ The structural definition of a <A HREF="../../apidocs/org/kitesdk/data/DatasetDescriptor/Dataset.html"><TT>Dataset</TT></A>.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="DatasetRepositories"></A>
-  <nobr><A HREF="org.kitesdk.data.DatasetRepositories.html">DatasetRepositories</A></nobr>
+  <A NAME="DatasetDescriptor.Builder"></A>
+  <nobr><A HREF="org.kitesdk.data.DatasetDescriptor.Builder.html">DatasetDescriptor.Builder</A></nobr>
   </TD>
-  <TD VALIGN="TOP"><p>Convenience methods for working with <A HREF="../../apidocs/org/kitesdk/data/DatasetRepositories/DatasetRepository.html"><TT>DatasetRepository</TT></A> instances.</p>
-
- </TD>
+  <TD VALIGN="TOP">A fluent builder to aid in the construction of <A HREF="../../apidocs/org/kitesdk/data/DatasetDescriptor/Builder/DatasetDescriptor.html"><TT>DatasetDescriptor</TT></A>s.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="DatasetRepository"></A>
-  <nobr><A HREF="org.kitesdk.data.DatasetRepository.html"><I>DatasetRepository</I></A></nobr>
+  <A NAME="DatasetExistsException"></A>
+  <nobr><A HREF="org.kitesdk.data.DatasetExistsException.html">DatasetExistsException</A></nobr>
   </TD>
-  <TD VALIGN="TOP">will be removed in 0.17.0.</TD>
+  <TD VALIGN="TOP">Exception thrown when trying to create a dataset that already exists.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="DatasetWriter"></A>
-  <nobr><A HREF="org.kitesdk.data.DatasetWriter.html"><I>DatasetWriter</I></A></nobr>
+  <A NAME="DatasetNotFoundException"></A>
+  <nobr><A HREF="org.kitesdk.data.DatasetNotFoundException.html">DatasetNotFoundException</A></nobr>
   </TD>
   <TD VALIGN="TOP"><p>
- A stream-oriented dataset writer.</TD>
+ Exception thrown to indicate that a dataset was not found.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -120,6 +176,24 @@ Package <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_t
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="Format"></A>
+  <nobr><A HREF="org.kitesdk.data.Format.html">Format</A></nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ The data format used for encoding the data in a <A HREF="../../apidocs/org/kitesdk/data/Format/Dataset.html"><TT>Dataset</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="IncompatibleSchemaException"></A>
+  <nobr><A HREF="org.kitesdk.data.IncompatibleSchemaException.html">IncompatibleSchemaException</A></nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ Exception thrown when a schema update is not compatible
+ with the previous schema (or schemas) or with existing
+ datasets (if shared storage is used, for example).</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="PartitionStrategy"></A>
   <nobr><A HREF="org.kitesdk.data.PartitionStrategy.html">PartitionStrategy</A></nobr>
   </TD>
@@ -128,17 +202,10 @@ Package <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_t
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="RandomAccessDatasetRepository"></A>
-  <nobr><A HREF="org.kitesdk.data.RandomAccessDatasetRepository.html"><I>RandomAccessDatasetRepository</I></A></nobr>
+  <A NAME="PartitionStrategy.Builder"></A>
+  <nobr><A HREF="org.kitesdk.data.PartitionStrategy.Builder.html">PartitionStrategy.Builder</A></nobr>
   </TD>
-  <TD VALIGN="TOP">will be removed in 0.17.0.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="View"></A>
-  <nobr><A HREF="org.kitesdk.data.View.html"><I>View</I></A></nobr>
-  </TD>
-  <TD VALIGN="TOP">A {@code View} is a subset of a <A HREF="../../apidocs/org/kitesdk/data/View/Dataset.html"><TT>Dataset</TT></A>.</TD>
+  <TD VALIGN="TOP">A fluent builder to aid in the construction of <A HREF="../../apidocs/org/kitesdk/data/PartitionStrategy/Builder/PartitionStrategy.html"><TT>PartitionStrategy</TT></A>s.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -149,7 +216,7 @@ Package <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_t
     <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
     <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.16.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>Kite SDK 0.17.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1Rev"> &nbsp;<FONT CLASS="NavBarFont1Rev"><B>Package</B></FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -162,7 +229,7 @@ Package <A HREF="../../apidocs/org/kitesdk/data/package-summary.html" target="_t
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV PACKAGE</B>&nbsp;
-&nbsp;<A HREF="pkg_org.kitesdk.data.crunch.html"><B>NEXT PACKAGE</B></A>
+&nbsp;<A HREF="pkg_org.kitesdk.data.flume.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="pkg_org.kitesdk.data.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

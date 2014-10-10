@@ -1,9 +1,8 @@
 org.kitesdk.data
 org.kitesdk.data.crunch
-org.kitesdk.data.filesystem
 org.kitesdk.data.flume
-org.kitesdk.data.hcatalog
 org.kitesdk.data.mapreduce
+org.kitesdk.minicluster
 org.kitesdk.morphline.api
 org.kitesdk.morphline.avro
 org.kitesdk.morphline.base
