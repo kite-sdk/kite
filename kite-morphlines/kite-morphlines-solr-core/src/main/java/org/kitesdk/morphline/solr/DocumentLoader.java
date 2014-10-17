@@ -23,8 +23,9 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 
 /**
- * A vehicle to load a list of Solr documents into some kind of destination,
- * such as a SolrServer or MapReduce RecordWriter.
+ * A vehicle to load (or delete) Solr documents into some kind of destination,
+ * such as a SolrServer or MapReduce RecordWriter;
+ * This class should be considered private and it's API is subject to change without notice.
  */
 public interface DocumentLoader {
 
@@ -33,6 +34,12 @@ public interface DocumentLoader {
 
   /** Loads the given document into the destination */
   public void load(SolrInputDocument doc) throws IOException, SolrServerException;
+
+  /** Deletes the document with the given id from the destination */
+  public void deleteById(String id) throws IOException, SolrServerException;
+
+  /** Deletes the documents matching the given query from the destination */
+  public void deleteByQuery(String id) throws IOException, SolrServerException;
 
   /**
    * Sends any outstanding documents to the destination and waits for a positive

@@ -35,6 +35,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -170,12 +171,22 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
     return morphline.process(record);
   }
   
-  protected int queryResultSetSize(String query) {
-//    return collector.getRecords().size();
+  protected QueryResponse query(String query) {
     try {
       testServer.commitTransaction();
       solrServer.commit(false, true, true);
-      QueryResponse rsp = solrServer.query(new SolrQuery(query).setRows(Integer.MAX_VALUE));
+      QueryResponse rsp = solrServer.query(
+          new SolrQuery(query).setRows(Integer.MAX_VALUE).setSort(Fields.ID, SolrQuery.ORDER.asc));
+      return rsp;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  protected int queryResultSetSize(String query) {
+    // return collector.getRecords().size();
+    try {
+      QueryResponse rsp = query(query);
       LOGGER.debug("rsp: {}", rsp);
       int i = 0;
       for (SolrDocument doc : rsp.getResults()) {
@@ -187,7 +198,7 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
       throw new RuntimeException(e);
     }
   }
-  
+
   private void deleteAllDocuments() throws SolrServerException, IOException {
     collector.reset();
     SolrServer s = solrServer;

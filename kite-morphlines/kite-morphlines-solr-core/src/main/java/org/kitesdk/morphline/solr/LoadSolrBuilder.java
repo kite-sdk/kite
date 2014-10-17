@@ -31,6 +31,7 @@ import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.api.TypedSettings;
 import org.kitesdk.morphline.base.AbstractCommand;
 import org.kitesdk.morphline.base.Configs;
+import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Metrics;
 import org.kitesdk.morphline.base.Notifications;
 
@@ -39,9 +40,11 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 /**
- * A command that loads a record into a SolrServer or MapReduce SolrOutputFormat.
+ * A command that loads (or deletes) a record into a SolrServer or MapReduce SolrOutputFormat.
  */
 public final class LoadSolrBuilder implements CommandBuilder {
+
+  static final String LOAD_SOLR_TYPE = "_loadSolrType";
 
   @Override
   public Collection<String> getNames() {
@@ -63,7 +66,7 @@ public final class LoadSolrBuilder implements CommandBuilder {
     private final Map<String, Float> boosts = new HashMap();
     private final Timer elapsedTime;    
     private final boolean isDryRun;
-    
+
     public LoadSolr(CommandBuilder builder, Config config, Command parent, Command child, MorphlineContext context) {
       super(builder, config, parent, child, context);
       Config solrLocatorConfig = getConfigs().getConfig(config, "solrLocator");
@@ -126,12 +129,34 @@ public final class LoadSolrBuilder implements CommandBuilder {
     @Override
     protected boolean doProcess(Record record) {
       Timer.Context timerContext = elapsedTime.time();
-      SolrInputDocument doc = convert(record);
+      Object type = record.getFirstValue(LOAD_SOLR_TYPE);
       try {
-        if (isDryRun) {
-          System.out.println("dryrun: " + doc);        
+        if (type == null || "update".equals(type)) {
+          SolrInputDocument doc = convert(record);
+          doc.removeField(LOAD_SOLR_TYPE);
+          if (isDryRun) {
+            System.out.println("dryrun: update: " + doc);        
+          } else {
+            loader.load(doc);
+          }
+        } else if ("deleteById".equals(type)) {
+          for (Object id : record.get(Fields.ID)) {
+            if (isDryRun) {
+              System.out.println("dryrun: deleteById: " + id.toString());
+            } else {
+              loader.deleteById(id.toString());
+            }
+          }
+        } else if ("deleteByQuery".equals(type)) {
+          for (Object query : record.get(Fields.ID)) {
+            if (isDryRun) {
+              System.out.println("dryrun: deleteByQuery: " + query.toString());
+            } else {
+              loader.deleteByQuery(query.toString());
+            }
+          }
         } else {
-          loader.load(doc);
+          throw new MorphlineRuntimeException("Illegal value for field " + LOAD_SOLR_TYPE + ": " + type);
         }
       } catch (IOException e) {
         throw new MorphlineRuntimeException(e);

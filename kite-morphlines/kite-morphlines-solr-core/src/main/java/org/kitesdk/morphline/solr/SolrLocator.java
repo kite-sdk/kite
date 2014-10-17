@@ -81,14 +81,7 @@ public class SolrLocator {
     configs.validateArguments(config);
   }
   
-  public DocumentLoader getLoader() {
-    if (context instanceof SolrMorphlineContext) {
-      DocumentLoader loader = ((SolrMorphlineContext)context).getDocumentLoader();
-      if (loader != null) {
-        return loader;
-      }
-    }
-
+  SolrServer getSolrServer() {
     if (zkHost != null && zkHost.length() > 0) {
       if (collectionName == null || collectionName.length() == 0) {
         throw new MorphlineCompilationException("Parameter 'zkHost' requires that you also pass parameter 'collection'", config);
@@ -97,7 +90,7 @@ public class SolrLocator {
         CloudSolrServer cloudSolrServer = new CloudSolrServer(zkHost);
         cloudSolrServer.setDefaultCollection(collectionName);
         cloudSolrServer.connect();
-        return new SolrServerDocumentLoader(cloudSolrServer, batchSize);
+        return cloudSolrServer;
       } catch (MalformedURLException e) {
         throw new MorphlineRuntimeException(e);
       }
@@ -106,7 +99,7 @@ public class SolrLocator {
         CoreContainer coreContainer = new CoreContainer(solrHomeDir);
         coreContainer.load();
         EmbeddedSolrServer embeddedSolrServer = new EmbeddedSolrServer(coreContainer, collectionName);
-        return new SolrServerDocumentLoader(embeddedSolrServer, batchSize);
+        return embeddedSolrServer;
       }
       if (solrUrl == null || solrUrl.length() == 0) {
         throw new MorphlineCompilationException("Missing parameter 'solrUrl'", config);
@@ -114,9 +107,19 @@ public class SolrLocator {
       int solrServerNumThreads = 2;
       int solrServerQueueLength = solrServerNumThreads;
       SolrServer server = new SafeConcurrentUpdateSolrServer(solrUrl, solrServerQueueLength, solrServerNumThreads);
-
-      return new SolrServerDocumentLoader(server, batchSize);
+      return server;
     }
+  }
+
+  public DocumentLoader getLoader() {
+    if (context instanceof SolrMorphlineContext) {
+      DocumentLoader loader = ((SolrMorphlineContext)context).getDocumentLoader();
+      if (loader != null) {
+        return loader;
+      }
+    }
+    SolrServer solrServer = getSolrServer();
+    return new SolrServerDocumentLoader(solrServer, batchSize);
   }
 
   public IndexSchema getIndexSchema() {

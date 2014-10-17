@@ -29,15 +29,18 @@ import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
- * A vehicle to load a list of Solr documents into a local or remote {@link SolrServer}.
+ * A vehicle to load (or delete) documents into a local or remote {@link SolrServer}.
+ * This class should be considered private and it's API is subject to change without notice.
  */
 public class SolrServerDocumentLoader implements DocumentLoader {
 
   private final SolrServer server; // proxy to local or remote solr server
-  private long numLoadedDocs = 0; // number of documents loaded in the current transaction
+  private long numSentItems = 0; // number of requests sent in the current transaction
   private final int batchSize;
-  private final List<SolrInputDocument> batch = new ArrayList();
+  private final List batch = new ArrayList();
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SolrServerDocumentLoader.class);
 
@@ -56,7 +59,7 @@ public class SolrServerDocumentLoader implements DocumentLoader {
   public void beginTransaction() {
     LOGGER.trace("beginTransaction");
     batch.clear();
-    numLoadedDocs = 0;
+    numSentItems = 0;
     if (server instanceof SafeConcurrentUpdateSolrServer) {
       ((SafeConcurrentUpdateSolrServer) server).clearException();
     }
@@ -64,33 +67,91 @@ public class SolrServerDocumentLoader implements DocumentLoader {
 
   @Override
   public void load(SolrInputDocument doc) throws IOException, SolrServerException {
+    Preconditions.checkNotNull(doc);
     LOGGER.trace("load doc: {}", doc);
     batch.add(doc);
     if (batch.size() >= batchSize) {
-      loadBatch();
+      sendBatch();
     }
+  }
+
+  @Override
+  public void deleteById(String id) throws IOException, SolrServerException {
+    Preconditions.checkNotNull(id);
+    LOGGER.trace("deleteById: {}", id);
+    batch.add(id);
+    if (batch.size() >= batchSize) {
+      sendBatch();
+    }    
+  }
+
+  @Override
+  public void deleteByQuery(String query) throws IOException, SolrServerException {
+    Preconditions.checkNotNull(query);
+    LOGGER.trace("deleteByQuery: {}", query);
+    batch.add(new StringBuilder(query));
+    if (batch.size() >= batchSize) {
+      sendBatch();
+    }    
   }
 
   @Override
   public void commitTransaction() throws SolrServerException, IOException {
     LOGGER.trace("commitTransaction");
     if (batch.size() > 0) {
-      loadBatch();
+      sendBatch();
     }
-    if (numLoadedDocs > 0) {
+    if (numSentItems > 0) {
       if (server instanceof ConcurrentUpdateSolrServer) {
         ((ConcurrentUpdateSolrServer) server).blockUntilFinished();
       }
     }
   }
 
-  private void loadBatch() throws SolrServerException, IOException {
-    numLoadedDocs += batch.size();
+  private void sendBatch() throws SolrServerException, IOException {    
+    numSentItems += batch.size();
     try {
-      UpdateResponse rsp = server.add(batch);
+      List<SolrInputDocument> loads = new ArrayList(batch.size());
+      List<String> deleteByIds = new ArrayList(batch.size());
+      
+      for (Object item : batch) {
+        if (item instanceof SolrInputDocument) { // it's a load request
+          sendDeleteByIds(deleteByIds);
+          loads.add((SolrInputDocument) item);
+        } else if (item instanceof String) { // it's a deleteById request
+          sendLoads(loads);         
+          deleteByIds.add((String) item);
+        } else if (item instanceof StringBuilder) { // it's a deleteByQuery request
+          sendLoads(loads);         
+          sendDeleteByIds(deleteByIds);
+          log(server.deleteByQuery(item.toString()));
+        } else {
+          throw new IllegalStateException("unreachable");
+        }
+      }
+      
+      sendLoads(loads);
+      sendDeleteByIds(deleteByIds);
     } finally {
       batch.clear();
     }
+  }
+
+  private void sendLoads(List<SolrInputDocument> loads) throws SolrServerException, IOException {
+    if (loads.size() > 0) {
+      log(server.add(loads));
+      loads.clear();
+    }
+  }
+
+  private void sendDeleteByIds(List<String> deleteByIds) throws SolrServerException, IOException {
+    if (deleteByIds.size() > 0) {
+      log(server.deleteById(deleteByIds));
+      deleteByIds.clear();
+    }
+  }
+  
+  private void log(UpdateResponse response) {    
   }
 
   @Override
@@ -118,5 +179,5 @@ public class SolrServerDocumentLoader implements DocumentLoader {
   public SolrServer getSolrServer() {
     return server;
   }
-
+  
 }

@@ -15,9 +15,11 @@
  */
 package org.kitesdk.morphline.solr;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
@@ -55,6 +57,16 @@ class CollectingDocumentLoader implements DocumentLoader {
     if (batch.size() >= batchSize) {
       loadBatch();
     }
+  }
+  
+  @Override
+  public void deleteById(String id) throws IOException, SolrServerException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void deleteByQuery(String id) throws IOException, SolrServerException {
+    throw new UnsupportedOperationException();
   }
 
   @Override

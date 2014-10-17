@@ -81,7 +81,7 @@ public final class SanitizeUnknownSolrFieldsBuilder implements CommandBuilder {
       Collection<Map.Entry> entries = new ArrayList<Map.Entry>(record.getFields().asMap().entrySet());
       for (Map.Entry<String, Collection<Object>> entry : entries) {
         String key = entry.getKey();
-        if (schema.getFieldOrNull(key) == null) {
+        if (schema.getFieldOrNull(key) == null && !LoadSolrBuilder.LOAD_SOLR_TYPE.equals(key)) {
           LOG.debug("Sanitizing unknown Solr field: {}", key);
           Collection values = entry.getValue();
           if (renameToPrefix != null) {
