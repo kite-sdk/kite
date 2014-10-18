@@ -69,30 +69,21 @@ public class SolrServerDocumentLoader implements DocumentLoader {
   public void load(SolrInputDocument doc) throws IOException, SolrServerException {
     Preconditions.checkNotNull(doc);
     LOGGER.trace("load doc: {}", doc);
-    batch.add(doc);
-    if (batch.size() >= batchSize) {
-      sendBatch();
-    }
+    addItem(doc);
   }
 
   @Override
   public void deleteById(String id) throws IOException, SolrServerException {
     Preconditions.checkNotNull(id);
     LOGGER.trace("deleteById: {}", id);
-    batch.add(id);
-    if (batch.size() >= batchSize) {
-      sendBatch();
-    }    
+    addItem(id);    
   }
 
   @Override
   public void deleteByQuery(String query) throws IOException, SolrServerException {
     Preconditions.checkNotNull(query);
     LOGGER.trace("deleteByQuery: {}", query);
-    batch.add(new StringBuilder(query));
-    if (batch.size() >= batchSize) {
-      sendBatch();
-    }    
+    addItem(new StringBuilder(query));    
   }
 
   @Override
@@ -105,6 +96,13 @@ public class SolrServerDocumentLoader implements DocumentLoader {
       if (server instanceof ConcurrentUpdateSolrServer) {
         ((ConcurrentUpdateSolrServer) server).blockUntilFinished();
       }
+    }
+  }
+
+  private void addItem(Object item) throws SolrServerException, IOException {
+    batch.add(item);
+    if (batch.size() >= batchSize) {
+      sendBatch();
     }
   }
 
