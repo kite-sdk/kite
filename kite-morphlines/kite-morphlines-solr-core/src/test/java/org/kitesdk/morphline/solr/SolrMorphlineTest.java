@@ -127,22 +127,27 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
     assertTrue(morphline.process(record.copy()));
     assertEquals(7, collector.getRecords().size());
     
+    record.replaceValues(Fields.ID, "id20");
+    record.removeAll(LoadSolrBuilder.LOAD_SOLR_TYPE);
+    assertTrue(morphline.process(record.copy()));
+    assertEquals(8, collector.getRecords().size());
+
     record.replaceValues(Fields.ID, "id:NonExistent*");
     record.replaceValues(LoadSolrBuilder.LOAD_SOLR_TYPE, "deleteByQuery");
     assertTrue(morphline.process(record.copy()));
-    assertEquals(8, collector.getRecords().size());
-    
-    record.replaceValues(Fields.ID, "id3");
-    record.removeAll(LoadSolrBuilder.LOAD_SOLR_TYPE);
-    assertTrue(morphline.process(record.copy()));
     assertEquals(9, collector.getRecords().size());
-
+    
+    record.replaceValues(Fields.ID, "id:NonExistent2*");
+    record.replaceValues(LoadSolrBuilder.LOAD_SOLR_TYPE, "deleteByQuery");
+    assertTrue(morphline.process(record.copy()));
+    assertEquals(10, collector.getRecords().size());
+    
     Notifications.notifyCommitTransaction(morphline);
     SolrDocumentList docs = query("*:*").getResults();
     assertEquals(2, docs.size());
     assertEquals("id1", docs.get(0).getFirstValue(Fields.ID));
     assertNull(docs.get(0).getFirstValue(LoadSolrBuilder.LOAD_SOLR_TYPE));    
-    assertEquals("id3", docs.get(1).getFirstValue(Fields.ID));
+    assertEquals("id20", docs.get(1).getFirstValue(Fields.ID));
     assertNull(docs.get(1).getFirstValue(LoadSolrBuilder.LOAD_SOLR_TYPE));    
     
     Notifications.notifyRollbackTransaction(morphline);
