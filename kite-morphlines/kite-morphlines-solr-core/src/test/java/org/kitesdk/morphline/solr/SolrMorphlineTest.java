@@ -123,7 +123,18 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
     assertEquals(123, docs.get(0).getFirstValue("user_friends_count"));
     assertEquals(Arrays.asList("hello world", "goodbye moon"), docs.get(0).get("text"));    
 
-    // add 5 to user_friends_count field; retain other fields as-is
+    // set "text" field to multiple values ["hello sun", "goodbye mars"]; retain other fields as-is
+    record = new Record();
+    record.put(Fields.ID, "id0");
+    record.put("text", ImmutableMap.of("set", Arrays.asList("hello sun", "goodbye mars")));
+    assertTrue(morphline.process(record));    
+    docs = query("*:*").getResults();
+    assertEquals(1, docs.size());
+    assertEquals("id0", docs.get(0).getFirstValue(Fields.ID));
+    assertEquals(123, docs.get(0).getFirstValue("user_friends_count"));
+    assertEquals(Arrays.asList("hello sun", "goodbye mars"), docs.get(0).getFieldValue("text"));
+    
+    // increment user_friends_count by 5; retain other fields as-is
     record = new Record();
     record.put(Fields.ID, "id0");
     record.put("user_friends_count", ImmutableMap.of("inc", 5));
@@ -132,7 +143,7 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
     assertEquals(1, docs.size());
     assertEquals("id0", docs.get(0).getFirstValue(Fields.ID));
     assertEquals(128, docs.get(0).getFirstValue("user_friends_count"));
-    assertEquals(Arrays.asList("hello world", "goodbye moon"), docs.get(0).get("text"));    
+    assertEquals(Arrays.asList("hello sun", "goodbye mars"), docs.get(0).get("text"));    
 
     Notifications.notifyCommitTransaction(morphline);
     Notifications.notifyShutdown(morphline);    
