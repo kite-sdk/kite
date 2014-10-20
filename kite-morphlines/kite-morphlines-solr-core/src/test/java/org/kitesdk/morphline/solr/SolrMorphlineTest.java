@@ -15,6 +15,7 @@
  */
 package org.kitesdk.morphline.solr;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 
 import java.io.File;
@@ -85,6 +86,56 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
     assertEquals(1, queryResultSetSize("*:*"));
     Notifications.notifyRollbackTransaction(morphline);
     Notifications.notifyShutdown(morphline);
+  }
+  
+  public void testLoadSolrWithPartialUpdate() throws Exception {
+    morphline = createMorphline("test-morphlines" + File.separator + "loadSolrBasic");    
+    
+    // insert a document with a bunch of fields
+    Record record = new Record();
+    record.put(Fields.ID, "id0");
+    record.put("user_friends_count", 123);
+    record.put("text", "myText");
+    Notifications.notifyBeginTransaction(morphline);
+    assertTrue(morphline.process(record));
+    assertEquals(1, collector.getRecords().size());
+    assertEquals(1, query("*:*").getResults().size());
+
+    // set "text" field to "hello world"; retain other fields as-is
+    record = new Record();
+    record.put(Fields.ID, "id0");
+    record.put("text", ImmutableMap.of("set", "hello world"));
+    assertTrue(morphline.process(record));    
+    SolrDocumentList docs = query("*:*").getResults();
+    assertEquals(1, docs.size());
+    assertEquals("id0", docs.get(0).getFirstValue(Fields.ID));
+    assertEquals(123, docs.get(0).getFirstValue("user_friends_count"));
+    assertEquals("hello world", docs.get(0).getFirstValue("text"));
+    
+    // add "goodbye moon" to text field; retain other fields as-is
+    record = new Record();
+    record.put(Fields.ID, "id0");
+    record.put("text", ImmutableMap.of("add", "goodbye moon"));
+    assertTrue(morphline.process(record));    
+    docs = query("*:*").getResults();
+    assertEquals(1, docs.size());
+    assertEquals("id0", docs.get(0).getFirstValue(Fields.ID));
+    assertEquals(123, docs.get(0).getFirstValue("user_friends_count"));
+    assertEquals(Arrays.asList("hello world", "goodbye moon"), docs.get(0).get("text"));    
+
+    // add 5 to user_friends_count field; retain other fields as-is
+    record = new Record();
+    record.put(Fields.ID, "id0");
+    record.put("user_friends_count", ImmutableMap.of("inc", 5));
+    assertTrue(morphline.process(record));    
+    docs = query("*:*").getResults();
+    assertEquals(1, docs.size());
+    assertEquals("id0", docs.get(0).getFirstValue(Fields.ID));
+    assertEquals(128, docs.get(0).getFirstValue("user_friends_count"));
+    assertEquals(Arrays.asList("hello world", "goodbye moon"), docs.get(0).get("text"));    
+
+    Notifications.notifyCommitTransaction(morphline);
+    Notifications.notifyShutdown(morphline);    
   }
     
   @Test
