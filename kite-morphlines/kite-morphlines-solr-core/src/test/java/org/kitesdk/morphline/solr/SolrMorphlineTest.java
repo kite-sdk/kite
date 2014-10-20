@@ -20,6 +20,8 @@ import com.google.common.io.Files;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.common.SolrDocumentList;
@@ -101,12 +103,25 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
     assertEquals(1, collector.getRecords().size());
     assertEquals(1, query("*:*").getResults().size());
 
+    // remove "text" field; retain other fields as-is
+    record = new Record();
+    record.put(Fields.ID, "id0");
+    Map<String, Object> map = new HashMap();
+    map.put("set", null);
+    record.put("text", map);
+    assertTrue(morphline.process(record));    
+    SolrDocumentList docs = query("*:*").getResults();
+    assertEquals(1, docs.size());
+    assertEquals("id0", docs.get(0).getFirstValue(Fields.ID));
+    assertEquals(123, docs.get(0).getFirstValue("user_friends_count"));
+    assertNull(docs.get(0).getFieldValue("text"));
+
     // set "text" field to "hello world"; retain other fields as-is
     record = new Record();
     record.put(Fields.ID, "id0");
     record.put("text", ImmutableMap.of("set", "hello world"));
     assertTrue(morphline.process(record));    
-    SolrDocumentList docs = query("*:*").getResults();
+    docs = query("*:*").getResults();
     assertEquals(1, docs.size());
     assertEquals("id0", docs.get(0).getFirstValue(Fields.ID));
     assertEquals(123, docs.get(0).getFirstValue("user_friends_count"));
