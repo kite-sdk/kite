@@ -2880,7 +2880,17 @@ Per the W3C specs, every valid XPath (e.g. //tweets/tweet\[@color='blue'\]) is a
 
 An XQuery result sequence contains zero or more items such as element nodes, attribute nodes, text nodes, atomic values, etc. For each item in the query result sequence, the morphline command converts the item to a record and pipes that record to the next morphline command. For an attribute node the attribute's [XPath string value|http://www.w3.org/TR/xquery-operators/#func-string] is filled into the record field named after the attribute name. For an element node the attributes and children of the element are treated as follows: The XPath string value of the attribute or child is filled into the record field named after the child's name.
 
-The command provides the following configuration options:
+For example, in order to generate a morphline record with a {{myFoo}} field that contains {{foo}}, 
+as well as a {{myBar}} field that contains {{bar}}, your xquery command should be formulated such 
+that it outputs an XML fragment like this:
+{code}
+<record>
+ <myFoo>foo</myFoo>
+ <myBar>bar</myBar>
+</record>
+{code}
+
+The xquery command provides the following configuration options:
 
 || Property Name || Default || Description ||
 | supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
@@ -2918,13 +2928,13 @@ xquery {
         
         for $tweet in /tweets/tweet
         return 
-        <user>
+        <record>
           {$tweet/@id} 
           {$tweet/user/@screen_name} 
           <myStatusCounts>{string($tweet/user/@statuses_count)}</myStatusCounts>
           <text>{$tweet/text}</text>
           <greeting>{$myVariable}</greeting>
-        </user>
+        </record>
       """
     }
   ]
@@ -2950,7 +2960,7 @@ xquery {
         (: Example xquery :)
         for $req in /request
         return
-          <fieldsToIndex>
+          <record>
             <date> { string($req/data/agreementDate) } </date>
             <tradeId> { string($req/trade/@tradeId) } </tradeId>              
             <partyId>
@@ -2961,7 +2971,7 @@ xquery {
               }
             </partyId>
             <fullText> { $req } </fullText>
-        </fieldsToIndex>
+        </record>
       """
     }
   ]
