@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServerException;
@@ -44,7 +45,8 @@ import com.typesafe.config.ConfigFactory;
  */
 public final class LoadSolrBuilder implements CommandBuilder {
 
-  static final String LOAD_SOLR_TYPE = "_loadSolrType";
+  static final String LOAD_SOLR_DELETE_BY_ID = "_loadSolr_deleteById";
+  static final String LOAD_SOLR_DELETE_BY_QUERY = "_loadSolr_deleteByQuery";
 
   @Override
   public Collection<String> getNames() {
@@ -129,34 +131,31 @@ public final class LoadSolrBuilder implements CommandBuilder {
     @Override
     protected boolean doProcess(Record record) {
       Timer.Context timerContext = elapsedTime.time();
-      Object type = record.getFirstValue(LOAD_SOLR_TYPE);
+      List deleteById = record.get(LOAD_SOLR_DELETE_BY_ID);
+      List deleteByQuery = record.get(LOAD_SOLR_DELETE_BY_QUERY);
       try {
-        if (type == null || "update".equals(type)) {
+        if (deleteById.size() == 0 && deleteByQuery.size() == 0) {
           SolrInputDocument doc = convert(record);
-          doc.removeField(LOAD_SOLR_TYPE);
           if (isDryRun) {
             System.out.println("dryrun: update: " + doc);        
           } else {
             loader.load(doc);
           }
-        } else if ("deleteById".equals(type)) {
-          for (Object id : record.get(Fields.ID)) {
+        } else {
+          for (Object id : deleteById) {
             if (isDryRun) {
               System.out.println("dryrun: deleteById: " + id.toString());
             } else {
               loader.deleteById(id.toString());
             }
           }
-        } else if ("deleteByQuery".equals(type)) {
-          for (Object query : record.get(Fields.ID)) {
+          for (Object query : deleteByQuery) {
             if (isDryRun) {
               System.out.println("dryrun: deleteByQuery: " + query.toString());
             } else {
               loader.deleteByQuery(query.toString());
             }
           }
-        } else {
-          throw new MorphlineRuntimeException("Illegal value for field " + LOAD_SOLR_TYPE + ": " + type);
         }
       } catch (IOException e) {
         throw new MorphlineRuntimeException(e);

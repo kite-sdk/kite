@@ -3096,27 +3096,25 @@ loadSolr {
 
 Example usage for deleteById:
 {code}
-# Tell Solr to delete the documents with the value "123" or "456" in the unique key field.
+# Tell loadSolr command to delete the documents with the value "123" or "456" in the unique key field.
 setValues {
-  _loadSolrType:deleteById
-  id:[123, 456]
+  _loadSolr_deleteById:[123, 456]
 }
 loadSolr {
-  ... same as above for inserts goes here
+  ... solrLocator goes here
 }
 {code}
 
 Example usage for deleteByQuery:
 {code}
-# Tell Solr to delete all documents for which the following conditions hold: 
+# Tell loadSolr command to delete all documents for which the following conditions hold: 
 # The city field starts with "Paris*" AND the color field equals "blue" OR
 # The city field starts with "London*" AND the color field equals "purple"
 setValues {
-  _loadSolrType:deleteByQuery
-  id:["(city:Paris*)AND(color:blue)", "(city:London*)AND(color:purple)"]
+  _loadSolr_deleteByQuery:["(city:Paris*)AND(color:blue)", "(city:London*)AND(color:purple)"]
 }
 loadSolr {
-  ... same as above for inserts goes here
+  ... solrLocator goes here
 }
 {code}
 
