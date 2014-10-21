@@ -23,6 +23,7 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrServer;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrServer;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
@@ -110,26 +111,25 @@ public class SolrServerDocumentLoader implements DocumentLoader {
     numSentItems += batch.size();
     try {
       List<SolrInputDocument> loads = new ArrayList(batch.size());
-      List<String> deleteByIds = new ArrayList(batch.size());
+      List deletes = new ArrayList(batch.size());
       
       for (Object item : batch) {
         if (item instanceof SolrInputDocument) { // it's a load request
-          sendDeleteByIds(deleteByIds);
+          sendDeletes(deletes);
           loads.add((SolrInputDocument) item);
         } else if (item instanceof String) { // it's a deleteById request
           sendLoads(loads);         
-          deleteByIds.add((String) item);
+          deletes.add(item);
         } else if (item instanceof StringBuilder) { // it's a deleteByQuery request
           sendLoads(loads);         
-          sendDeleteByIds(deleteByIds);
-          log(server.deleteByQuery(item.toString()));
+          deletes.add(item);
         } else {
           throw new IllegalStateException("unreachable");
         }
       }
       
       sendLoads(loads);
-      sendDeleteByIds(deleteByIds);
+      sendDeletes(deletes);
     } finally {
       batch.clear();
     }
@@ -142,10 +142,19 @@ public class SolrServerDocumentLoader implements DocumentLoader {
     }
   }
 
-  private void sendDeleteByIds(List<String> deleteByIds) throws SolrServerException, IOException {
-    if (deleteByIds.size() > 0) {
-      log(server.deleteById(deleteByIds));
-      deleteByIds.clear();
+  private void sendDeletes(List<String> deletes) throws SolrServerException, IOException {
+    if (deletes.size() > 0) {
+      UpdateRequest req = new UpdateRequest();
+      for (Object delete : deletes) {
+        if (delete instanceof String) {
+          req.deleteById((String)delete); // add the delete to the req list
+        } else {
+          req.deleteByQuery(((StringBuilder)delete).toString()); // add the delete to the req list
+        }
+      }
+      req.setCommitWithin(-1);
+      log(req.process(server));
+      deletes.clear();
     }
   }
   
