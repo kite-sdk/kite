@@ -142,7 +142,7 @@ public class SolrServerDocumentLoader implements DocumentLoader {
     }
   }
 
-  private void sendDeletes(List<String> deletes) throws SolrServerException, IOException {
+  private void sendDeletes(List deletes) throws SolrServerException, IOException {
     if (deletes.size() > 0) {
       UpdateRequest req = new UpdateRequest();
       for (Object delete : deletes) {
