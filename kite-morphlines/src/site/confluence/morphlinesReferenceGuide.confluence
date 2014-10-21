@@ -175,7 +175,7 @@ h3. kite\-morphlines\-saxon
 \\
 h3. kite\-morphlines\-solr\-core
 | [#solrLocator] | Specifies a set of configuration parameters that identify the location and schema of a Solr server or SolrCloud. |
-| [#loadSolr] | Loads a record into a Solr server or MapReduce Reducer. |
+| [#loadSolr] | Inserts, updates or deletes records into a Solr server or MapReduce Reducer. |
 | [#generateSolrSequenceKey] | Assigns a unique key that is the concatenation of a field and a running count of the record number within the current session. |
 | [#sanitizeUnknownSolrFields] | Removes record fields that are unknown to Solr {{schema.xml}}, or moves them to fields with a given prefix. |
 | [#tokenizeText] | Uses the embedded [Solr/Lucene Analyzer library|http://wiki.apache.org/solr/AnalyzersTokenizersTokenFilters] to generate tokens from a text string, without sending data to a Solr server. |
@@ -3066,7 +3066,8 @@ solrLocator : {
 
 h2. loadSolr
 
-The {{loadSolr}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-solr-core/src/main/java/org/kitesdk/morphline/solr/LoadSolrBuilder.java]) loads a record into a Solr server or MapReduce Reducer.
+The {{loadSolr}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-solr-core/src/main/java/org/kitesdk/morphline/solr/LoadSolrBuilder.java]) 
+inserts, updates or deletes records into a Solr server or MapReduce Reducer.
 
 The command provides the following configuration options:
 
@@ -3074,7 +3075,7 @@ The command provides the following configuration options:
 | solrLocator | n/a | Solr location parameters as described separately above. |
 | boosts | \[\] | An optional JSON object containing zero or more fieldName\-boostValue mappings where the fieldName is a String and the boostValue is a float. The default boost is {{1.0}}. |
 
-Example usage:
+Example usage to insert or update:
 {code}
 loadSolr {
   solrLocator : {
@@ -3090,6 +3091,32 @@ loadSolr {
   boosts : {
     id : 2.0 # assign to the id field a boost value 2.0
   }
+}
+{code}
+
+Example usage for deleteById:
+{code}
+# Tell Solr to delete the documents with the value "123" or "456" in the unique key field.
+setValues {
+  _loadSolrType:deleteById
+  id:[123, 456]
+}
+loadSolr {
+  ... same as above for inserts goes here
+}
+{code}
+
+Example usage for deleteByQuery:
+{code}
+# Tell Solr to delete all documents for which the following conditions hold: 
+# The city field starts with "Paris*" AND the color field equals "blue" OR
+# The city field starts with "London*" AND the color field equals "purple"
+setValues {
+  _loadSolrType:deleteByQuery
+  id:["(city:Paris*)AND(color:blue)", "(city:London*)AND(color:purple)"]
+}
+loadSolr {
+  ... same as above for inserts goes here
 }
 {code}
 
