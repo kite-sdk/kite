@@ -3115,16 +3115,16 @@ java { code : """
   record.put("first_name", Collections.singletonMap("set", "Nadja"));
 
   // set "tags" field to multiple values ["smart", "creative"]; retain other fields as-is
-  record.put("tags", Collections.singletonMap("set", Arrays.asList("smart", "creative"))));
+  record.put("tags", Collections.singletonMap("set", Arrays.asList("smart", "creative")));
 
   // add "San Francisco" to the existing values of the cities field; retain other fields as-is
-  record.put("cities", Collections.singletonMap("add", "San Francisco")));
+  record.put("cities", Collections.singletonMap("add", "San Francisco"));
   
   // remove the "text" field from a document stored in Solr; retain other fields as-is
   record.put("text", Collections.singletonMap("set", null));
   
   // increment user_friends_count by 5; retain other fields as-is
-  record.put("user_friends_count", Collections.singletonMap("inc", 5)));
+  record.put("user_friends_count", Collections.singletonMap("inc", 5));
 
   // pass record to next command in chain
   return child.process(record); 
