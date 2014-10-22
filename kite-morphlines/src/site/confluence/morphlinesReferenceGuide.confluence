@@ -3136,7 +3136,7 @@ loadSolr {
 }
 {code}
 
-Note that partial updates require that all Solr fields be configured as {{stored="true"}} in {{schema.xml}}, 
+Note that partial document updates require that all Solr fields be configured as {{stored="true"}} in {{schema.xml}}, 
 not just the field that shall be updated. This is because this kind of "update" is implemented 
 as a document delete followed by a document insert: the old values of all fields are fetched 
 from Solr (requires {{stored="true"}} markers), then the old document is deleted and then a new document 
