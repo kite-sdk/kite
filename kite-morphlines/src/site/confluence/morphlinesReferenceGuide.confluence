@@ -3108,7 +3108,7 @@ loadSolr {
 h3. Example loadSolr usage to update a subset of fields of an existing document stored in Solr ("partial update")
 {code}
 java { code : """ 
-  // specify unique key of document
+  // specify the unique key of the document stored in Solr that shall be updated
   record.put("id", 123); 
 
   // set "first_name" field to "Najda"; retain other fields as-is
