@@ -3111,19 +3111,19 @@ java { code : """
   // specify the unique key of the document stored in Solr that shall be updated
   record.put("id", 123); 
 
-  // set "first_name" field to "Najda"; retain other fields as-is
+  // set "first_name" field of stored Solr document to "Najda"; retain other fields as-is
   record.put("first_name", Collections.singletonMap("set", "Nadja"));
 
-  // set "tags" field to multiple values ["smart", "creative"]; retain other fields as-is
+  // set "tags" field of stored Solr document to multiple values ["smart", "creative"]; retain other fields as-is
   record.put("tags", Collections.singletonMap("set", Arrays.asList("smart", "creative")));
 
-  // add "San Francisco" to the existing values of the cities field; retain other fields as-is
+  // add "San Francisco" to the existing values of the cities field of the stored Solr document; retain other fields as-is
   record.put("cities", Collections.singletonMap("add", "San Francisco"));
   
   // remove the "text" field from a document stored in Solr; retain other fields as-is
   record.put("text", Collections.singletonMap("set", null));
   
-  // increment user_friends_count by 5; retain other fields as-is
+  // increment user_friends_count by 5; retain other fields of stored Solr document as-is
   record.put("user_friends_count", Collections.singletonMap("inc", 5));
 
   // pass record to next command in chain
