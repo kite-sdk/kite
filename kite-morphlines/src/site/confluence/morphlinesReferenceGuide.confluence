@@ -3075,7 +3075,16 @@ The command provides the following configuration options:
 | solrLocator | n/a | Solr location parameters as described separately above. |
 | boosts | \[\] | An optional JSON object containing zero or more fieldName\-boostValue mappings where the fieldName is a String and the boostValue is a float. The default boost is {{1.0}}. |
 
-Example usage to insert or update:
+Examples:
+- [#loadSolrUpdate]
+- [#loadSolrPartialUpdate]
+- [#loadSolrDeleteById]
+- [#loadSolrDeleteByQuery]
+
+{anchor:loadSolrUpdate}
+\\
+\\
+h3. Example loadSolr usage to insert a document or update an existing document stored in Solr ("update")
 {code}
 loadSolr {
   solrLocator : {
@@ -3093,19 +3102,66 @@ loadSolr {
   }
 }
 {code}
+{anchor:loadSolrPartialUpdate}
+\\
+\\
+h3. Example loadSolr usage to update a subset of fields of an existing document stored in Solr ("partial update")
+{code}
+java { code : """ 
+  // specify unique key of document
+  record.put("id", 123); 
 
-Example usage for deleteById:
+  // set "first_name" field to "Najda"; retain other fields as-is
+  record.put("first_name", Collections.singletonMap("set", "Nadja"));
+
+  // set "tags" field to multiple values ["smart", "creative"]; retain other fields as-is
+  record.put("tags", Collections.singletonMap("set", Arrays.asList("smart", "creative"))));
+
+  // add "San Francisco" to the existing values of the cities field; retain other fields as-is
+  record.put("cities", Collections.singletonMap("add", "San Francisco")));
+  
+  // remove the "text" field from a document stored in Solr; retain other fields as-is
+  record.put("text", Collections.singletonMap("set", null));
+  
+  // increment user_friends_count by 5; retain other fields as-is
+  record.put("user_friends_count", Collections.singletonMap("inc", 5)));
+
+  // pass record to next command in chain
+  return child.process(record); 
+              """
+}
+
+loadSolr {
+  <solrLocator goes here>
+}
+{code}
+
+Note that partial updates require that all Solr fields be configured as {{stored="true"}} in {{schema.xml}}, 
+not just the field that shall be updated. This is because this kind of "update" is implemented 
+as a document delete followed by a document insert: the old values of all fields are fetched 
+from Solr (requires {{stored="true"}} markers), then the old document is deleted and then a new document 
+is inserted with the old values plus the new field value. 
+For details see [https://wiki.apache.org/solr/Atomic_Updates] and 
+[http://stackoverflow.com/questions/12183798/solrj-api-for-partial-document-update]
+
+{anchor:loadSolrDeleteById}
+\\
+\\
+h3. Example loadSolr usage for deleteById
 {code}
 # Tell loadSolr command to delete the documents for which the unique key field equals 123 or 456.
 setValues {
   _loadSolr_deleteById:[123, 456]
 }
+
 loadSolr {
-  ... solrLocator goes here
+  <solrLocator goes here>
 }
 {code}
-
-Example usage for deleteByQuery:
+{anchor:loadSolrDeleteByQuery}
+\\
+\\
+h3. Example loadSolr usage for deleteByQuery
 {code}
 # Tell loadSolr command to delete all documents for which the following conditions hold: 
 # The city field starts with "Paris" AND the color field equals "blue" OR
@@ -3113,8 +3169,9 @@ Example usage for deleteByQuery:
 setValues {
   _loadSolr_deleteByQuery:["(city:Paris*)AND(color:blue)", "(city:London*)AND(color:purple)"]
 }
+
 loadSolr {
-  ... solrLocator goes here
+  <solrLocator goes here>
 }
 {code}
 
