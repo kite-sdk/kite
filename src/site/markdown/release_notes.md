@@ -3,6 +3,18 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
+## Version TBD
+
+Release date: TBD
+
+Version TBD contains the following notable changes:
+
+* Morphlines Library
+    * Added support for deleting documents stored in Solr [by unique id](kite-morphlines/morphlinesReferenceGuide.html#loadSolrDeleteById) as well as [by query](kite-morphlines/morphlinesReferenceGuide.html#loadSolrDeleteByQuery)
+    * Added documentation on how to update a subset of fields of an existing document stored in Solr: [partial document updates](kite-morphlines/morphlinesReferenceGuide.html#loadSolrPartialUpdate)
+    * Enhanced documentation for [xquery](kite-morphlines/morphlinesReferenceGuide.html#xquery) morphline command.
+    * Upgraded kite-morphlines-maxmind module from maxmind-db-0.3.3 to bug fix release maxmind-db-1.0.0
+    
 ## Version 0.17.0
 
 Release date: 9 October 2014
