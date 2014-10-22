@@ -3105,7 +3105,7 @@ loadSolr {
 {anchor:loadSolrPartialUpdate}
 \\
 \\
-h3. Example loadSolr usage to update a subset of fields of an existing document stored in Solr ("partial update")
+h3. Example loadSolr usage to update a subset of fields of an existing document stored in Solr ("partial document update")
 {code}
 java { code : """ 
   // specify the unique key of the document stored in Solr that shall be updated

@@ -20,6 +20,7 @@ import com.google.common.io.Files;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -119,7 +120,7 @@ public class SolrMorphlineTest extends AbstractSolrMorphlineTest {
     // set "text" field to "hello world"; retain other fields as-is
     record = new Record();
     record.put(Fields.ID, "id0");
-    record.put("text", ImmutableMap.of("set", "hello world"));
+    record.put("text", Collections.singletonMap("set", "hello world"));
     assertTrue(morphline.process(record));    
     docs = query("*:*").getResults();
     assertEquals(1, docs.size());
