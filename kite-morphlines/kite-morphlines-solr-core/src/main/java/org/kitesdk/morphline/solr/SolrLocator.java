@@ -81,7 +81,7 @@ public class SolrLocator {
     configs.validateArguments(config);
   }
   
-  SolrServer getSolrServer() {
+  public SolrServer getSolrServer() {
     if (zkHost != null && zkHost.length() > 0) {
       if (collectionName == null || collectionName.length() == 0) {
         throw new MorphlineCompilationException("Parameter 'zkHost' requires that you also pass parameter 'collection'", config);
