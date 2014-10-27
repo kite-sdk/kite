@@ -44,8 +44,6 @@ import com.typesafe.config.ConfigFactory;
  */
 public final class LoadSolrBuilder implements CommandBuilder {
 
-  public static final String SOLR_LOCATOR_COUNTER_NAME_PREFIX = "solrLocator: ";
-
   static final String LOAD_SOLR_DELETE_BY_ID = "_loadSolr_deleteById";
   static final String LOAD_SOLR_DELETE_BY_QUERY = "_loadSolr_deleteByQuery";
 
@@ -77,10 +75,6 @@ public final class LoadSolrBuilder implements CommandBuilder {
       LOG.debug("solrLocator: {}", locator);
       this.loader = locator.getLoader();
 
-      // Tell job driver which Solr servers and collections we talk to. 
-      // This enables the job driver to later (on job success) send a commit to Solr.
-      getContext().getMetricRegistry().counter(SOLR_LOCATOR_COUNTER_NAME_PREFIX + locator).inc();
-      
       Config boostsConfig = getConfigs().getConfig(config, "boosts", ConfigFactory.empty());
       for (Map.Entry<String, Object> entry : new Configs().getEntrySet(boostsConfig)) {
         String fieldName = entry.getKey();        
