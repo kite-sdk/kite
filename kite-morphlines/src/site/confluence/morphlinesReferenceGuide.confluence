@@ -2134,8 +2134,6 @@ h1. kite\-morphlines\-maxmind
 
 h2. geoIP
 
-*Status: EXPERIMENTAL*
-
 The {{geoIP}} command ([source code|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-maxmind/src/main/java/org/kitesdk/morphline/maxmind/GeoIPBuilder.java]) returns Geolocation information for a given IP address, using an efficient in\-memory Maxmind database lookup. The command stores a corresponding Jackson JsonNode Java object into the \_attachment\_body record field. The most recent version of the Maxmind GeoLite2 database can be downloaded as a flat data file from [Maxmind|http://dev.maxmind.com/geoip/geoip2/geolite2].
 
 Often, the {{geoIP}} command is combined with commands such as [#extractJsonPaths].
