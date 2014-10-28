@@ -180,18 +180,25 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- Include Avro -->
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro-mapred</artifactId>
+      <scope>compile</scope>
+      <version>${vers.avro}</version>
+    </dependency>
+
     <!-- Hadoop-provided dependencies (not bundled) -->
 
     <!-- Do not include kite dependency bundles here because they are replaced
          in the dependency modules
          -->
-
-    <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
 
     <dependency>
       <groupId>org.apache.hive</groupId>

@@ -106,8 +106,7 @@ public class TransformTask<S, T> extends Configured {
 
     if (runInParallel) {
       TaskUtil.configure(getConf())
-          .addJarPathForClass(HiveConf.class)
-          .addJarForClass(AvroKeyInputFormat.class);
+          .addJarPathForClass(HiveConf.class);
 
       Pipeline pipeline = new MRPipeline(getClass(), getConf());
 
