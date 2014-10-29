@@ -15,13 +15,17 @@
  */
 package org.kitesdk.data.hbase.avro;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -192,25 +196,47 @@ public class AvroEntityMapperTest {
     assertArrayEquals(new byte[] { (byte) 0, (byte) 0, (byte) 0, (byte) 2 },
         ((KeyValue) field2.get(0)).getValue());
 
-    Map famMap = put.getFamilyMap();
-    assertArrayEquals(
-        concat(new byte[]{(byte) 14}, stringToBytes("string3")),
-        ((KeyValue) ((List) famMap.get(stringToBytes("map"))).get(0)).getValue());
-    assertArrayEquals(
-        concat(new byte[]{(byte) 14}, stringToBytes("string2")),
-        ((KeyValue) ((List) famMap.get(stringToBytes("map"))).get(1)).getValue());
-    assertArrayEquals(
-        concat(new byte[]{(byte) 14}, stringToBytes("string1")),
-        ((KeyValue) ((List) famMap.get(stringToBytes("map"))).get(2)).getValue());
+    Map<byte[],List<KeyValue>> famMap = put.getFamilyMap();
+    assertKeyValuesMatchMap(famMap.get(stringToBytes("map")), map);
 
-    assertArrayEquals(new byte[]{0x02},
-        ((KeyValue) ((List) famMap.get(stringToBytes("record"))).get(0)).getValue());
-    assertArrayEquals(new byte[]{0x04},
-        ((KeyValue) ((List) famMap.get(stringToBytes("record"))).get(1)).getValue());
+    assertKeyValuesMatchRecordMap(famMap.get(stringToBytes("record")),
+        ImmutableMap.of("sub_field1", new byte[] {0x02}, "sub_field2", new byte[] {0x04}));
+  }
+
+  private void assertKeyValuesMatchMap(List<KeyValue> kvs, Map<String, Utf8> map)
+      throws UnsupportedEncodingException {
+    Set<String> keys = Sets.newHashSet();
+    for (KeyValue kv : kvs) {
+      String key = bytesToString(kv.getQualifierArray(),
+          kv.getQualifierOffset(), kv.getQualifierLength());
+
+      assertArrayEquals(
+        concat(new byte[]{(byte) 14}, stringToBytes(map.get(key).toString())),
+        kv.getValue());
+      keys.add(key);
+    }
+    assertEquals(keys, map.keySet());
+  }
+
+  private void assertKeyValuesMatchRecordMap(List<KeyValue> kvs, Map<String, byte[]> map)
+      throws UnsupportedEncodingException {
+    Set<String> keys = Sets.newHashSet();
+    for (KeyValue kv : kvs) {
+      String key = bytesToString(kv.getQualifierArray(),
+          kv.getQualifierOffset(), kv.getQualifierLength());
+
+      assertArrayEquals(map.get(key), kv.getValue());
+      keys.add(key);
+    }
+    assertEquals(keys, map.keySet());
   }
 
   private byte[] stringToBytes(String str) throws UnsupportedEncodingException {
     return str.getBytes("UTF-8");
+  }
+
+  private String bytesToString(byte[] bytes, int offset, int len) throws UnsupportedEncodingException {
+    return new String(bytes, offset, len, "UTF-8");
   }
 
   private byte[] concat(byte[] A, byte[] B) {
