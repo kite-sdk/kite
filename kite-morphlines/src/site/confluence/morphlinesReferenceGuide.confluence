@@ -3109,7 +3109,7 @@ java { code : """
   // specify the unique key of the document stored in Solr that shall be updated
   record.put("id", 123); 
 
-  // set "first_name" field of stored Solr document to "Najda"; retain other fields as-is
+  // set "first_name" field of stored Solr document to "Nadja"; retain other fields as-is
   record.put("first_name", Collections.singletonMap("set", "Nadja"));
 
   // set "tags" field of stored Solr document to multiple values ["smart", "creative"]; retain other fields as-is
