@@ -28,6 +28,7 @@ public final class Metrics {
   public static final String NUM_EXCEPTION_RECORDS = "numExceptionRecords";
   public static final String NUM_CACHE_HITS = "numCacheHits";
   public static final String NUM_CACHE_MISSES = "numCacheMisses";
+  public static final String NUM_FINAL_CHILD_RECORDS = "numFinalChildRecords";
   
   public static final String ELAPSED_TIME = "elapsedTime";
   //public static final String ELAPSED_TOTAL_TIME = "elapsedTotalTime";
