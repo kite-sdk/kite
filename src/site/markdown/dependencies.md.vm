@@ -176,5 +176,5 @@ $h2 Kite Morphlines Modules
 $h2 Kite Tools Modules
 
 * Kite Tools
- [Dependency Information](kite-tools/dependency-info.html),
- [Dependencies](kite-tools/dependencies.html)
+ [Dependency Information](kite-tools-parent/kite-tools/dependency-info.html),
+ [Dependencies](kite-tools-parent/kite-tools/dependencies.html)

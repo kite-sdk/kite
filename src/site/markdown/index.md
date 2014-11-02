@@ -30,7 +30,7 @@ goals for packaging, deploying, and running distributed applications.
 and skills necessary to build and change Hadoop
 ETL stream processing applications that extract, transform and load data into Apache
 Solr, Enterprise Data Warehouses, HDFS, HBase or Analytic Online Dashboards.
-* [__Kite Tools__](kite-tools/index.html) The tools module provides command-line tools and
+* [__Kite Tools__](kite-tools-parent/index.html) The tools module provides command-line tools and
 APIs for performing common tasks with Kite.
 
 There is also __example code__ demonstrating how to use the Kite SDK in a separate GitHub

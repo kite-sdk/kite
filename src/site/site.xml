@@ -73,7 +73,7 @@
       <item name="Kite Data" href="kite-data/index.html"/>
       <item name="Kite Maven Plugin" href="kite-maven-plugin/index.html"/>
       <item name="Kite Morphlines" href="kite-morphlines/index.html"/>
-      <item name="Kite Tools" href="kite-tools/index.html"/>
+      <item name="Kite Tools" href="kite-tools-parent/index.html"/>
     </menu>
 
     <menu name="Contribute" inherit="bottom">
