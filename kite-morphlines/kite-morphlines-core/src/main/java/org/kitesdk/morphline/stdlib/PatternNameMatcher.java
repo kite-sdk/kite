@@ -168,7 +168,7 @@ final class PatternNameMatcher {
       if (cacheCapacity < 0) {
         throw new IllegalArgumentException("Cache capacity must not be negative");
       }
-      this.cache = cacheCapacity > 0 ? new BoundedLRUHashMap<String, Boolean>(10000) : null;
+      this.cache = cacheCapacity > 0 ? new BoundedLRUHashMap<String, Boolean>(cacheCapacity) : null;
     }
     
     @Override
