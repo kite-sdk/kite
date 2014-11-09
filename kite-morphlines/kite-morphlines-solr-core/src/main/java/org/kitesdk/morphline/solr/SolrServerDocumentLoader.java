@@ -84,7 +84,7 @@ public class SolrServerDocumentLoader implements DocumentLoader {
   public void deleteByQuery(String query) throws IOException, SolrServerException {
     Preconditions.checkNotNull(query);
     LOGGER.trace("deleteByQuery: {}", query);
-    addItem(new StringBuilder(query));    
+    addItem(new QueryStringHolder(query));    
   }
 
   @Override
@@ -120,7 +120,7 @@ public class SolrServerDocumentLoader implements DocumentLoader {
         } else if (item instanceof String) { // it's a deleteById request
           sendLoads(loads);         
           deletes.add(item);
-        } else if (item instanceof StringBuilder) { // it's a deleteByQuery request
+        } else if (item instanceof QueryStringHolder) { // it's a deleteByQuery request
           sendLoads(loads);         
           deletes.add(item);
         } else {
@@ -149,7 +149,8 @@ public class SolrServerDocumentLoader implements DocumentLoader {
         if (delete instanceof String) {
           req.deleteById((String)delete); // add the delete to the req list
         } else {
-          req.deleteByQuery(((StringBuilder)delete).toString()); // add the delete to the req list
+          String query = ((QueryStringHolder)delete).getQuery();
+          req.deleteByQuery(query); // add the delete to the req list
         }
       }
       req.setCommitWithin(-1);
@@ -187,4 +188,21 @@ public class SolrServerDocumentLoader implements DocumentLoader {
     return server;
   }
   
+  
+  ///////////////////////////////////////////////////////////////////////////////
+  // Nested classes:
+  ///////////////////////////////////////////////////////////////////////////////
+  private static final class QueryStringHolder {
+    
+    private String query;
+    
+    public QueryStringHolder(String query) {
+      this.query = query;
+    }
+    
+    public String getQuery() {
+      return query;
+    }
+  }
+
 }
