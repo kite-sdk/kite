@@ -89,7 +89,6 @@ public class SolrLocator {
       try {
         CloudSolrServer cloudSolrServer = new CloudSolrServer(zkHost);
         cloudSolrServer.setDefaultCollection(collectionName);
-        cloudSolrServer.connect();
         return cloudSolrServer;
       } catch (MalformedURLException e) {
         throw new MorphlineRuntimeException(e);
