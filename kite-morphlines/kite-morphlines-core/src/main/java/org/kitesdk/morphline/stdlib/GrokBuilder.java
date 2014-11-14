@@ -15,9 +15,9 @@
  */
 package org.kitesdk.morphline.stdlib;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +31,7 @@ import org.kitesdk.morphline.base.Validator;
 import org.kitesdk.morphline.shaded.com.google.code.regexp.GroupInfo;
 import org.kitesdk.morphline.shaded.com.google.code.regexp.Matcher;
 
-import com.google.common.collect.Maps;
+import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -65,7 +65,7 @@ public final class GrokBuilder implements CommandBuilder {
   ///////////////////////////////////////////////////////////////////////////////
   private static final class Grok extends AbstractCommand {
 
-    private final Map<String, Matcher> regexes = Maps.newHashMap();
+    private final List<Regex> regexes = new ArrayList<Regex>();
     private final boolean extract;
     private final boolean extractInPlace;
     private final NumRequiredMatches numRequiredMatches;
@@ -81,9 +81,9 @@ public final class GrokBuilder implements CommandBuilder {
       Config exprConfig = getConfigs().getConfig(config, "expressions", ConfigFactory.empty());
       for (Map.Entry<String, Object> entry : new Configs().getEntrySet(exprConfig)) {
         String expr = entry.getValue().toString();
-        this.regexes.put(entry.getKey(), dict.compileExpression(expr).matcher(""));
+        this.regexes.add(new Regex(entry.getKey(), dict.compileExpression(expr).matcher("")));
       }
-      this.firstKey = (regexes.size() == 0 ? null : regexes.entrySet().iterator().next().getKey());
+      this.firstKey = (regexes.size() == 0 ? null : regexes.iterator().next().getRecordInputField());
 
       String extractStr = getConfigs().getString(config, "extract", "true");
       this.extractInPlace = extractStr.equals("inplace");
@@ -144,9 +144,9 @@ public final class GrokBuilder implements CommandBuilder {
     }
 
     private boolean doMatch(Record inputRecord, Record outputRecord, boolean doExtract) {
-      for (Map.Entry<String, Matcher> regexEntry : regexes.entrySet()) {
-        Matcher matcher = regexEntry.getValue();
-        List values = inputRecord.get(regexEntry.getKey());
+      for (Regex regex : regexes) {        
+        Matcher matcher = regex.getMatcher();
+        List values = inputRecord.get(regex.getRecordInputField());
         int todo = values.size();
         int minMatches = 1;
         int maxMatches = Integer.MAX_VALUE;
@@ -174,7 +174,7 @@ public final class GrokBuilder implements CommandBuilder {
                           values, renderedConfig);
                 return false;
               }
-              extract(outputRecord, matcher, doExtract);
+              extract(outputRecord, regex, doExtract);
             }
           } else {
             int previousNumMatches = numMatches;
@@ -190,7 +190,7 @@ public final class GrokBuilder implements CommandBuilder {
                   break; // fast path
                 }
               }
-              extract(outputRecord, matcher, doExtract);
+              extract(outputRecord, regex, doExtract);
             }
           }
           todo--;
@@ -207,25 +207,63 @@ public final class GrokBuilder implements CommandBuilder {
       return true;
     }
 
-    private void extract(Record outputRecord, Matcher matcher, boolean doExtract) {
+    private void extract(Record outputRecord, Regex regex, boolean doExtract) {
       if (doExtract) {
-        extractFast(outputRecord, matcher);
+        regex.extract(outputRecord, addEmptyStrings);
       }
     }
 
-    private void extractFast(Record outputRecord, Matcher matcher) {
-      for (Map.Entry<String, List<GroupInfo>> entry : matcher.namedPattern().groupInfo().entrySet()) {
-        String groupName = entry.getKey();
-        List<GroupInfo> list = entry.getValue();
-        int idx = list.get(0).groupIndex();
-        int group = idx > -1 ? idx + 1 : -1; // TODO cache that number (perf)?
-        String value = matcher.group(group);
-        if (value != null && (value.length() > 0 || addEmptyStrings)) {
-          outputRecord.put(groupName, value);
+    
+    ///////////////////////////////////////////////////////////////////////////////
+    // Nested classes:
+    ///////////////////////////////////////////////////////////////////////////////
+    /* Caches various regex matcher info for best performance */
+    private static final class Regex {
+      
+      private final String recordInputField;
+      private final Matcher matcher;
+      private final String[] groupNames;
+      private final int[] groupNumbers;
+          
+      public Regex(String recordInputField, Matcher matcher) {
+        Preconditions.checkNotNull(recordInputField);
+        Preconditions.checkNotNull(matcher);
+        this.recordInputField = recordInputField;
+        this.matcher = matcher;
+        groupNames = new String[matcher.namedPattern().groupInfo().entrySet().size()]; 
+        groupNumbers = new int[groupNames.length];
+        int i = 0;
+        for (Map.Entry<String, List<GroupInfo>> entry : matcher.namedPattern().groupInfo().entrySet()) {
+          String groupName = entry.getKey();
+          assert groupName != null;
+          List<GroupInfo> list = entry.getValue();
+          int idx = list.get(0).groupIndex();
+          int group = idx > -1 ? idx + 1 : -1;
+          groupNames[i] = groupName;
+          groupNumbers[i] = group;
+          i++;
         }
       }
-    }
+      
+      public void extract(Record outputRecord, boolean addEmptyStrings) {
+        for (int i = 0; i < groupNumbers.length; i++) {
+          String value = matcher.group(groupNumbers[i]);
+          if (value != null && (value.length() > 0 || addEmptyStrings)) {
+            outputRecord.put(groupNames[i], value);
+          }
+        }
+      }
 
+      public String getRecordInputField() {
+        return recordInputField;
+      }
+      
+      public Matcher getMatcher() {
+        return matcher;
+      }
+      
+    }     
+    
     
     ///////////////////////////////////////////////////////////////////////////////
     // Nested classes:
