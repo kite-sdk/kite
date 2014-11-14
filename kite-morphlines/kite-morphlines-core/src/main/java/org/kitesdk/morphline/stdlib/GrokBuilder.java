@@ -230,8 +230,9 @@ public final class GrokBuilder implements CommandBuilder {
         Preconditions.checkNotNull(matcher);
         this.recordInputField = recordInputField;
         this.matcher = matcher;
-        groupNames = new String[matcher.namedPattern().groupInfo().entrySet().size()]; 
-        groupNumbers = new int[groupNames.length];
+        this.groupNames = new String[matcher.namedPattern().groupInfo().entrySet().size()]; 
+        this.groupNumbers = new int[groupNames.length];
+        
         int i = 0;
         for (Map.Entry<String, List<GroupInfo>> entry : matcher.namedPattern().groupInfo().entrySet()) {
           String groupName = entry.getKey();
