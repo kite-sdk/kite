@@ -2878,13 +2878,13 @@ Per the W3C specs, every valid XPath (e.g. //tweets/tweet\[@color='blue'\]) is a
 
 An XQuery result sequence contains zero or more items such as element nodes, attribute nodes, text nodes, atomic values, etc. For each item in the query result sequence, the morphline command converts the item to a record and pipes that record to the next morphline command. For an attribute node the attribute's [XPath string value|http://www.w3.org/TR/xquery-operators/#func-string] is filled into the record field named after the attribute name. For an element node the attributes and children of the element are treated as follows: The XPath string value of the attribute or child is filled into the record field named after the child's name.
 
-For example, in order to generate a morphline record with a {{myFoo}} field that contains {{foo}}, 
-as well as a {{myBar}} field that contains {{bar}}, your xquery command should be formulated such 
+For example, in order to generate a morphline record with a {{firstName}} field that contains {{foo}}, 
+as well as a {{lastName}} field that contains {{bar}}, your xquery command should be formulated such 
 that it outputs an XML fragment like this:
 {code}
 <record>
- <myFoo>foo</myFoo>
- <myBar>bar</myBar>
+ <firstName>foo</firstName>
+ <lastName>bar</lastName>
 </record>
 {code}
 
