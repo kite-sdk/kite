@@ -13,3 +13,4 @@ kite-data/kite-data-hcatalog/derby.log
 .idea
 *.iml
 nbactions.xml
+dependency-reduced-pom.xml

@@ -16,10 +16,7 @@
 package org.kitesdk.data.hbase;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.UnmodifiableIterator;
 import java.util.Iterator;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetReader;
@@ -71,8 +68,8 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
   @Override
   public DatasetReader<E> newReader() {
     final DatasetReader<E> wrappedReader = newEntityScanner();
-    final UnmodifiableIterator<E> filteredIterator = Iterators.filter(
-        wrappedReader.iterator(), constraints.toEntityPredicate(getAccessor()));
+    final Iterator<E> filteredIterator = constraints.filter(
+        wrappedReader.iterator(), getAccessor());
     AbstractDatasetReader<E> reader = new AbstractDatasetReader<E>() {
       @Override
       public void initialize() {
@@ -134,7 +131,7 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
     // Return a dataset writer that checks on write that an entity is within the
     // range of the view
     AbstractDatasetWriter<E> writer = new AbstractDatasetWriter<E>() {
-      private Predicate<StorageKey> keyPredicate = constraints.toKeyPredicate();
+      private Constraints.KeyPredicate keyPredicate = constraints.toKeyPredicate();
 
       @Override
       public void initialize() {

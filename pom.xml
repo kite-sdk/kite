@@ -189,7 +189,7 @@
     <vers.maven-project-info-reports-plugin>2.7</vers.maven-project-info-reports-plugin>
     <vers.maven-release-plugin>2.5.1</vers.maven-release-plugin>
     <vers.git-provider>1.8.1</vers.git-provider>
-    <vers.maven-shade-plugin>2.1</vers.maven-shade-plugin>
+    <vers.maven-shade-plugin>2.3</vers.maven-shade-plugin>
     <vers.maven-site-plugin>3.3</vers.maven-site-plugin>
     <vers.maven-source-plugin>2.2.1</vers.maven-source-plugin>
     <vers.maven-surefire-plugin>2.14.1</vers.maven-surefire-plugin>
@@ -548,6 +548,7 @@
               <exclude>**/build/**</exclude>
               <exclude>**/metastore_db/**</exclude>
               <exclude>**/target/**</exclude>
+              <exclude>**/dependency-reduced-pom.xml</exclude>
               <exclude>.git/**</exclude>
               <exclude>.gitignore</exclude>
               <exclude>.idea/**</exclude>
@@ -609,6 +610,27 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
           <version>${vers.maven-shade-plugin}</version>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>shade</goal>
+              </goals>
+              <configuration>
+                <artifactSet>
+                  <includes>
+                    <include>com.google.guava:guava</include>
+                  </includes>
+                </artifactSet>
+                <relocations>
+                  <relocation>
+                    <pattern>com.google.common</pattern>
+                    <shadedPattern>org.kitesdk.shaded.com.google.common</shadedPattern>
+                  </relocation>
+                </relocations>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
