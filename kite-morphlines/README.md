@@ -9,26 +9,7 @@ See [Online Documentation](http://kitesdk.org/docs/current/kite-morphlines/index
 
 ## Usage in your Maven Project 
 
-* To use Morphlines in your Maven project, add the following repository to the `<repositories>` section of your pom.xml:
-
-```xml
-<project ...>
-  ...
-  <repositories>
-    <repository>
-      <id>cdh.repo</id>
-      <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
-      <name>Cloudera Repositories</name>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  ...
-</project>
-```
-
-* Also, to pull in the minimum set of dependencies add the following dependency to the `<dependencies>` section of your pom.xml:
+* To pull in the minimum set of dependencies add the following dependency to the `<dependencies>` section of your pom.xml:
 
 ```xml
 <dependency>
