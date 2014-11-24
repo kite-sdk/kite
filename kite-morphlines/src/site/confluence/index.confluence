@@ -34,26 +34,7 @@ The [morphline commands|morphlinesReferenceGuide.html] were developed as part of
 \\
 h1. Usage in your Maven Project 
 
-To use Morphlines in your Maven project, add the following repository to the {{<repositories>}} section of your pom.xml:
-
-{code}
-<project ...>
-  ...
-  <repositories>
-    <repository>
-      <id>cdh.repo</id>
-      <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
-      <name>Cloudera Repositories</name>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  ...
-</project>
-{code}
-
-Also, to pull in the minimum set of dependencies add the following dependency to the {{<dependencies>}} section of your pom.xml:
+To pull in the minimum set of dependencies add the following dependency to the {{<dependencies>}} section of your pom.xml:
 
 {code}
 <dependency>
