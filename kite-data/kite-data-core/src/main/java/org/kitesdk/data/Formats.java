@@ -36,13 +36,13 @@ public class Formats {
    * Avro row-oriented format</a>
    */
   public static final Format AVRO = new Format("avro", Snappy,
-      new CompressionType[] { Snappy, Deflate, Bzip2 });
+      new CompressionType[] { Uncompressed, Snappy, Deflate, Bzip2 });
 
   /**
    * PARQUET: the <a href="http://parquet.io/">Parquet columnar format</a>
    */
   public static final Format PARQUET = new Format("parquet", Snappy,
-      new CompressionType[] { Snappy, Deflate });
+      new CompressionType[] { Uncompressed, Snappy, Deflate });
 
   /**
    * CSV: comma-separated values (read-only).

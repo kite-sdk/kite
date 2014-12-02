@@ -62,14 +62,18 @@ public class TestFileSystemDataset extends MiniDFSTest {
   public static Collection<Object[]> data() throws IOException {
     MiniDFSTest.setupFS();
     Object[][] data = new Object[][] {
+        { Formats.AVRO, getDFS(), CompressionType.Uncompressed },
         { Formats.AVRO, getDFS(), CompressionType.Snappy },
         { Formats.AVRO, getDFS(), CompressionType.Deflate},
         { Formats.AVRO, getDFS(), CompressionType.Bzip2},
+        { Formats.AVRO, getFS(), CompressionType.Uncompressed},
         { Formats.AVRO, getFS(), CompressionType.Snappy},
         { Formats.AVRO, getFS(), CompressionType.Deflate},
         { Formats.AVRO, getFS(), CompressionType.Bzip2},
+        { Formats.PARQUET, getDFS(), CompressionType.Uncompressed },
         { Formats.PARQUET, getDFS(), CompressionType.Snappy },
         { Formats.PARQUET, getDFS(), CompressionType.Deflate },
+        { Formats.PARQUET, getFS(), CompressionType.Uncompressed },
         { Formats.PARQUET, getFS(), CompressionType.Snappy },
         { Formats.PARQUET, getFS(), CompressionType.Deflate } };
     return Arrays.asList(data);
