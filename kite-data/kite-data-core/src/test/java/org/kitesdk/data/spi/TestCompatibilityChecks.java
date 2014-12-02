@@ -23,6 +23,10 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.kitesdk.data.spi.Compatibility.isCompatibleName;
+
 public class TestCompatibilityChecks {
 
   private static final Schema schema = SchemaBuilder.record("Record").fields()
@@ -34,6 +38,21 @@ public class TestCompatibilityChecks {
       .requiredFloat("float")
       .requiredBytes("payload")
       .endRecord();
+
+  @Test
+  public void testIsCompatibleName() {
+    assertTrue(isCompatibleName("foo"));
+    assertTrue(isCompatibleName("Foo"));
+    assertTrue(isCompatibleName("bAr"));
+    assertTrue(isCompatibleName("3foo"));
+    assertTrue(isCompatibleName("_foo")); // needs to be quoted in Hive: `_foo`
+    assertTrue(isCompatibleName("foo3"));
+    assertTrue(isCompatibleName("foo_"));
+    assertTrue(isCompatibleName("foo_bar"));
+    assertFalse(isCompatibleName("foo.bar"));
+    assertFalse(isCompatibleName("foo-bar"));
+    assertFalse(isCompatibleName("foo*"));
+  }
 
   @Test
   public void testAllowedPartitionSchemaCombinations() {

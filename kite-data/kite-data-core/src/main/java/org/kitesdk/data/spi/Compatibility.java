@@ -38,11 +38,12 @@ public abstract class Compatibility {
 
   private static final Logger LOG = LoggerFactory.getLogger(Compatibility.class);
 
-  // https://github.com/apache/hive/blob/trunk/ql/src/java/org/apache/hadoop/hive/ql/parse/HiveLexer.g#L426
+  // https://github.com/apache/hive/blob/trunk/ql/src/java/org/apache/hadoop/hive/ql/parse/HiveLexer.g#L431
   // The above reference includes a comment that states column names can be
-  // quoted strings with any character, but this is not the case in practice.
+  // quoted strings with any character, but this is not true in general. However,
+  // a leading underscore (_) is allowed if the name is quoted.
   private static Pattern hiveCompatible = Pattern
-      .compile("[a-zA-Z0-9][a-zA-Z0-9_]*");
+      .compile("[a-zA-Z0-9_]+");
   
   //As per the Avro specs mentioned here -http://avro.apache.org/docs/1.7.5/spec.html
   // It should start with [A-Za-z_] and subsequently contain only [A-Za-z0-9_]
