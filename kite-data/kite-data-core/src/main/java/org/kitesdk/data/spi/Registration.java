@@ -106,7 +106,9 @@ public class Registration {
         return Pair.of(DATASET_PATTERNS.get(pattern).getFromOptions(match), match);
       }
     }
-    throw new DatasetNotFoundException("Unknown dataset URI: " + datasetUri);
+    throw new DatasetNotFoundException(String.format("Unknown dataset URI: %s. Check " +
+        "that JARs for %s datasets are on the classpath.", datasetUri,
+        datasetUri.getScheme()));
   }
 
   static {
