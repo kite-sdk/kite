@@ -180,7 +180,7 @@
     <vers.doxia-module-confluence>1.4</vers.doxia-module-confluence>
     <vers.build-helper-maven-plugin>1.8</vers.build-helper-maven-plugin>
     <vers.findbugs-maven-plugin>2.5.2</vers.findbugs-maven-plugin>
-    <vers.github-site-maven-plugin>0.8</vers.github-site-maven-plugin>
+    <vers.github-site-maven-plugin>0.10</vers.github-site-maven-plugin>
     <vers.maven-compiler-plugin>3.1</vers.maven-compiler-plugin>
     <vers.maven-enforcer-plugin>1.3.1</vers.maven-enforcer-plugin>
     <vers.semver-enforcer>0.9.18</vers.semver-enforcer>
