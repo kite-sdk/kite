@@ -51,6 +51,7 @@ import org.kitesdk.cli.commands.UpdateDatasetCommand;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.ValidationException;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,6 +107,8 @@ public class Main extends Configured implements Tool {
 
   @Override
   public int run(String[] args) throws Exception {
+    DefaultConfiguration.set(getConf());
+
     try {
       jc.parse(args);
     } catch (MissingCommandException e) {
