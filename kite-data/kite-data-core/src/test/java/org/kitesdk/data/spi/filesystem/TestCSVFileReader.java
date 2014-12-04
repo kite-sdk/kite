@@ -46,6 +46,12 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
       "\"str,2\",,4,true\n" +
       "str3,\"\",null");
 
+  public static final String REORDERED_CSV_CONTENT = (
+      "myBool,myFloat,myInt,myStr,ignored\n" +
+      "false,2.11,34,str,68\r\n" +
+      "true,4,,\"str,2\"\n" +
+      ",null,\"\",str3\n");
+
   public static final String VALIDATOR_CSV_CONTENT =
       "id,string,even\n" +
           "0,a,true\n" +
@@ -60,6 +66,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
   public static FileSystem localfs = null;
   public static Path csvFile = null;
+  public static Path reorderedFile = null;
   public static Path validatorFile = null;
   public static Path tsvFile = null;
 
@@ -88,7 +95,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
   public static Schema SCHEMA = SchemaBuilder.record("Normal")
       .fields()
-      .name("myString").type().stringType().noDefault()
+      .name("myStr").type().stringType().noDefault()
       .name("myInt").type().intType().intDefault(0)
       .name("myFloat").type().floatType().noDefault()
       .name("myBool").type().booleanType().booleanDefault(false)
@@ -98,11 +105,16 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
   public static void createCSVFiles() throws IOException {
     localfs = FileSystem.getLocal(new Configuration());
     csvFile = new Path("target/temp.csv");
+    reorderedFile = new Path("target/reordered.csv");
     tsvFile = new Path("target/temp.tsv");
     validatorFile = new Path("target/validator.csv");
 
     FSDataOutputStream out = localfs.create(csvFile, true);
     out.writeBytes(CSV_CONTENT);
+    out.close();
+
+    out = localfs.create(reorderedFile, true);
+    out.writeBytes(REORDERED_CSV_CONTENT);
     out.close();
 
     out = localfs.create(validatorFile, true);
@@ -289,6 +301,80 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         reader.next();
       }
     });
+
+    Assert.assertFalse(reader.hasNext());
+  }
+
+  @Test
+  public void testNormalSchemaWithReorderedContent() {
+    final DatasetDescriptor desc = new DatasetDescriptor.Builder()
+        .property("kite.csv.has-header", "true")
+        .schema(SCHEMA)
+        .build();
+    final CSVFileReader<GenericData.Record> reader =
+        new CSVFileReader<GenericData.Record>(localfs, reorderedFile, desc,
+            DataModelUtil.accessor(GenericData.Record.class, desc.getSchema()));
+
+    reader.initialize();
+    Assert.assertTrue(reader.hasNext());
+    GenericData.Record rec = reader.next();
+    Assert.assertEquals("str", rec.get(0));
+    Assert.assertEquals(34, rec.get(1));
+    Assert.assertEquals(2.11f, rec.get(2));
+    Assert.assertEquals(false, rec.get(3));
+
+    Assert.assertTrue(reader.hasNext());
+    rec = reader.next();
+    Assert.assertEquals("str,2", rec.get(0));
+    Assert.assertEquals(0, rec.get(1));
+    Assert.assertEquals(4.0f, rec.get(2));
+    Assert.assertEquals(true, rec.get(3));
+
+    Assert.assertTrue(reader.hasNext());
+    TestHelpers.assertThrows("Should complain about missing default",
+        AvroRuntimeException.class, new Runnable() {
+          @Override
+          public void run() {
+            reader.next();
+          }
+        });
+
+    Assert.assertFalse(reader.hasNext());
+  }
+
+  @Test
+  public void testReflectNormalSchemaWithReorderedContent() {
+    final DatasetDescriptor desc = new DatasetDescriptor.Builder()
+        .property("kite.csv.has-header", "true")
+        .schema(BEAN_SCHEMA)
+        .build();
+    final CSVFileReader<TestBean> reader =
+        new CSVFileReader<TestBean>(localfs, reorderedFile, desc,
+            DataModelUtil.accessor(TestBean.class, desc.getSchema()));
+
+    reader.initialize();
+    Assert.assertTrue(reader.hasNext());
+    TestBean bean = reader.next();
+    Assert.assertEquals("str", bean.myStr);
+    Assert.assertEquals((Integer) 34, bean.myInt);
+    Assert.assertEquals((Float) 2.11f, bean.myFloat);
+    Assert.assertEquals(false, bean.myBool);
+
+    Assert.assertTrue(reader.hasNext());
+    bean = reader.next();
+    Assert.assertEquals("str,2", bean.myStr);
+    Assert.assertEquals(null, bean.myInt);
+    Assert.assertEquals((Float) 4.0f, bean.myFloat);
+    Assert.assertEquals(true, bean.myBool);
+
+    Assert.assertTrue(reader.hasNext());
+    bean = reader.next();
+    Assert.assertEquals("str3", bean.myStr);
+    Assert.assertEquals(null, bean.myInt);
+    Assert.assertEquals(null, bean.myFloat);
+    // not null because there is a value present in the data, which is false
+    // when converted with Boolean.valueOf
+    Assert.assertEquals(false, bean.myBool);
 
     Assert.assertFalse(reader.hasNext());
   }
