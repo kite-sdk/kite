@@ -46,7 +46,9 @@ class HiveManagedMetadataProvider extends HiveAbstractMetadataProvider {
         // the requested dataset already exists
         throw new DatasetExistsException(
             "Metadata already exists for dataset: " + namespace + "." + name);
-      } else {
+      } else if (location != null) {
+        // if the location was set and matches an existing dataset, then this
+        // dataset is replacing the existing and using its data
         DatasetDescriptor loaded = load(resolved, name);
         // replacing old default.name table
         LOG.warn("Creating table managed table {}.{}: replaces default.{}",
