@@ -16,7 +16,6 @@
 
 package org.kitesdk.data.spi.filesystem;
 
-import com.fasterxml.jackson.core.io.CharacterEscapes;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.DatasetDescriptor;
 import org.slf4j.Logger;
@@ -32,7 +31,6 @@ public class CSVProperties {
   public static final String QUOTE_CHAR_PROPERTY = "kite.csv.quote-char";
   public static final String ESCAPE_CHAR_PROPERTY = "kite.csv.escape-char";
   public static final String HAS_HEADER_PROPERTY = "kite.csv.has-header";
-  public static final String ORDER_BY_HEADER_PROPERTY = "kite.csv.order-by-header";
   public static final String LINES_TO_SKIP_PROPERTY = "kite.csv.lines-to-skip";
 
   // old properties
@@ -47,7 +45,6 @@ public class CSVProperties {
   public static final String DEFAULT_QUOTE = "\"";
   public static final String DEFAULT_ESCAPE = "\\";
   public static final String DEFAULT_HAS_HEADER = "false";
-  public static final String DEFAULT_ORDER_BY_HEADER = "false";
   public static final int DEFAULT_LINES_TO_SKIP = 0;
 
   // configuration
@@ -56,18 +53,15 @@ public class CSVProperties {
   public final String quote;
   public final String escape;
   public final boolean useHeader;
-  public final boolean orderByHeader;
   public final int linesToSkip;
 
   private CSVProperties(String charset, String delimiter, String quote,
-                       String escape, boolean useHeader, boolean orderByHeader,
-                       int linesToSkip) {
+                       String escape, boolean useHeader, int linesToSkip) {
     this.charset = charset;
     this.delimiter = delimiter;
     this.quote = quote;
     this.escape = escape;
     this.useHeader = useHeader;
-    this.orderByHeader = orderByHeader;
     this.linesToSkip = linesToSkip;
   }
 
@@ -88,19 +82,16 @@ public class CSVProperties {
         descriptor.getProperty(ESCAPE_CHAR_PROPERTY),
         descriptor.getProperty(OLD_ESCAPE_CHAR_PROPERTY),
         DEFAULT_ESCAPE);
-    this.useHeader = Boolean.valueOf(coalesce(
+    this.useHeader = Boolean.parseBoolean(coalesce(
         descriptor.getProperty(HAS_HEADER_PROPERTY),
         DEFAULT_HAS_HEADER));
-    this.orderByHeader = Boolean.valueOf(coalesce(
-        descriptor.getProperty(ORDER_BY_HEADER_PROPERTY),
-        DEFAULT_ORDER_BY_HEADER));
     final String linesToSkipString = coalesce(
         descriptor.getProperty(LINES_TO_SKIP_PROPERTY),
         descriptor.getProperty(OLD_LINES_TO_SKIP_PROPERTY));
     int lines = DEFAULT_LINES_TO_SKIP;
     if (linesToSkipString != null) {
       try {
-        lines = Integer.valueOf(linesToSkipString);
+        lines = Integer.parseInt(linesToSkipString);
       } catch (NumberFormatException ex) {
         LOG.debug("Defaulting lines to skip, failed to parse: {}",
             linesToSkipString);
@@ -144,7 +135,6 @@ public class CSVProperties {
     private String quote = DEFAULT_QUOTE;
     private String escape = DEFAULT_ESCAPE;
     private boolean useHeader = Boolean.valueOf(DEFAULT_HAS_HEADER);
-    private boolean orderByHeader = Boolean.valueOf(DEFAULT_ORDER_BY_HEADER);
     private int linesToSkip = DEFAULT_LINES_TO_SKIP;
 
     public Builder charset(String charset) {
@@ -182,11 +172,6 @@ public class CSVProperties {
       return this;
     }
 
-    public Builder orderByHeader() {
-      this.orderByHeader = true;
-      return this;
-    }
-
     public Builder linesToSkip(int linesToSkip) {
       this.linesToSkip = linesToSkip;
       return this;
@@ -195,7 +180,7 @@ public class CSVProperties {
     public CSVProperties build() {
       return new CSVProperties(
           charset, delimiter, quote, escape,
-          useHeader, orderByHeader, linesToSkip);
+          useHeader, linesToSkip);
     }
   }
 }

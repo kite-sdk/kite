@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import au.com.bytecode.opencsv.CSVReader;
+import javax.annotation.Nullable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -62,6 +63,8 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
   private ReaderWriterState state = ReaderWriterState.NEW;
   private boolean hasNext = false;
   private String[] next = null;
+  private Schema.Field[] fields = null;
+  private int[] indexes = null; // Record position to CSV field position
 
   @SuppressWarnings("unchecked")
   public CSVFileReader(FileSystem fileSystem, Path path,
@@ -92,10 +95,35 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
     }
 
     this.reader = CSVUtil.newReader(incoming, props);
-    // header is determined by the schema, so skip the file header
-    // TODO: support the orderByHeader property
+
     if (props.useHeader) {
       this.hasNext = advance();
+    }
+
+    // initialize the index and field arrays
+    fields = schema.getFields().toArray(new Schema.Field[schema.getFields().size()]);
+    indexes = new int[fields.length];
+
+    if (next != null) {
+      for (int i = 0; i < fields.length; i += 1) {
+        fields[i] = schema.getFields().get(i);
+        indexes[i] = Integer.MAX_VALUE; // never present in the row
+      }
+
+      // there's a header in next
+      for (int i = 0; i < next.length; i += 1) {
+        Schema.Field field = schema.getField(next[i]);
+        if (field != null) {
+          indexes[field.pos()] = i;
+        }
+      }
+
+    } else {
+      // without a header, map to fields by position
+      for (int i = 0; i < fields.length; i += 1) {
+        fields[i] = schema.getFields().get(i);
+        indexes[i] = i;
+      }
     }
 
     // initialize by reading the first record
@@ -182,32 +210,29 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
     if (record instanceof IndexedRecord) {
       fillIndexed((IndexedRecord) record, next);
     } else {
-      fillReflect(record, next, schema);
+      fillReflect(record, next);
     }
     return record;
   }
 
-  private static void fillIndexed(IndexedRecord record, String[] data) {
-    Schema schema = record.getSchema();
-    for (int i = 0, n = schema.getFields().size(); i < n; i += 1) {
-      final Schema.Field field = schema.getFields().get(i);
-      if (i < data.length) {
-        record.put(i, makeValue(data[i], field));
-      } else {
-        record.put(i, makeValue(null, field));
-      }
+  private void fillIndexed(IndexedRecord record, String[] data) {
+    for (int i = 0; i < indexes.length; i += 1) {
+      int index = indexes[i];
+      record.put(i,
+          makeValue(index < data.length ? data[index] : null, fields[i]));
     }
   }
 
-  private static void fillReflect(Object record, String[] data, Schema schema) {
-    for (int i = 0, n = schema.getFields().size(); i < n; i += 1) {
-      Schema.Field field = schema.getFields().get(i);
-      Object value = makeValue(i < data.length ? data[i] : null, field);
+  private void fillReflect(Object record, String[] data) {
+    for (int i = 0; i < indexes.length; i += 1) {
+      Schema.Field field = fields[i];
+      int index = indexes[i];
+      Object value = makeValue(index < data.length ? data[index] : null, field);
       ReflectData.get().setField(record, field.name(), i, value);
     }
   }
 
-  private static Object makeValue(String string, Schema.Field field) {
+  private static Object makeValue(@Nullable String string, Schema.Field field) {
     Object value = makeValue(string, field.schema());
     if (value != null || nullOk(field.schema())) {
       return value;
@@ -227,7 +252,7 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
    * @param schema a Schema
    * @return the string coerced to the correct type from the schema or null
    */
-  private static Object makeValue(String string, Schema schema) {
+  private static Object makeValue(@Nullable String string, Schema schema) {
     if (string == null) {
       return null;
     }
