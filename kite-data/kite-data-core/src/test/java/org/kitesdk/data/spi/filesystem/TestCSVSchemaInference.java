@@ -241,4 +241,43 @@ public class TestCSVSchemaInference {
     Assert.assertEquals("Should set namespace",
         "com.example", schema.getNamespace());
   }
+
+  @Test
+  public void testSamplePrintableCharactersNotChanged() {
+    String upper = "ABCDEFGHIJKLMNOPQRXTUVWXYZ";
+    Assert.assertEquals("Upper case letters shouldn't be removed",
+        upper, CSVUtil.sample(upper));
+    String lower = "abcdefghijklmnopqrstuvwxyz";
+    Assert.assertEquals("Lower case letters shouldn't be removed",
+        lower, CSVUtil.sample(lower));
+    String numbers = "0123456789";
+    Assert.assertEquals("Numbers shouldn't be removed",
+        numbers, CSVUtil.sample(numbers));
+    String punctuation = " _-~+!@#$%^&*(){}[]<>,.?:;`'\"/\\|";
+    Assert.assertEquals("Punctuation shouldn't be removed",
+        punctuation, CSVUtil.sample(punctuation));
+  }
+
+  @Test
+  public void testUnicodeRemoved() {
+    String hasUnicode = "Unicode snowflake: \u2744";
+    Assert.assertEquals("Should remove unicode",
+        "Unicode snowflake: .", CSVUtil.sample(hasUnicode));
+  }
+
+  @Test
+  public void testSampleTruncated() {
+    String longUrl = "https://github.com/kite-sdk/kite/commit/" +
+        "bbe3e917875e879ca58b8afe90efa96cdd4691d1";
+    Assert.assertEquals("Should truncate long values",
+        "https://github.com/kite-sdk/kite/commit/bbe3e91787",
+        CSVUtil.sample(longUrl));
+  }
+
+  @Test
+  public void testSampleNull() {
+    String nullString = null;
+    Assert.assertEquals("Should handle null like String.valueOf",
+        String.valueOf(nullString), CSVUtil.sample(nullString));
+  }
 }
