@@ -18,6 +18,7 @@ package org.kitesdk.data.spi.filesystem;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
+import org.codehaus.jackson.node.NullNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -131,7 +132,8 @@ public class CSVUtil {
       }
       fields.add(new Schema.Field(
           header[i].trim(), schema(types[i], makeNullable || nullable[i]),
-          "Type inferred from '" + String.valueOf(values[i]) + "'", null));
+          "Type inferred from '" + String.valueOf(values[i]) + "'",
+          (makeNullable || nullable[i]) ? NullNode.getInstance() : null));
     }
 
     Schema record = Schema.createRecord(

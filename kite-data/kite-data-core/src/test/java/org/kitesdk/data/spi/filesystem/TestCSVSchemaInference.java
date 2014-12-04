@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import org.apache.avro.Schema;
+import org.codehaus.jackson.node.NullNode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -190,16 +191,28 @@ public class TestCSVSchemaInference {
 
     Assert.assertEquals("Should infer a long",
         schema(Schema.Type.LONG), schema.getField("field_0").schema());
+    Assert.assertNull("Should not have a default value",
+        schema.getField("field_0").defaultValue());
     Assert.assertEquals("Should infer a float (ends in f)",
         schema(Schema.Type.FLOAT), schema.getField("field_1").schema());
+    Assert.assertNull("Should not have a default value",
+        schema.getField("field_1").defaultValue());
     Assert.assertEquals("Should infer a double (ends in d)",
         nullable(Schema.Type.DOUBLE), schema.getField("field_2").schema());
+    Assert.assertEquals("Should have default value null",
+        schema.getField("field_2").defaultValue(), NullNode.getInstance());
     Assert.assertEquals("Should infer a double (decimal defaults to double)",
         nullable(Schema.Type.DOUBLE), schema.getField("field_3").schema());
+    Assert.assertEquals("Should have default value null",
+        schema.getField("field_3").defaultValue(), NullNode.getInstance());
     Assert.assertEquals("Should infer a string (not numeric)",
         nullable(Schema.Type.STRING), schema.getField("field_4").schema());
+    Assert.assertEquals("Should have default value null",
+        schema.getField("field_4").defaultValue(), NullNode.getInstance());
     Assert.assertEquals("Should infer a long (second line is a long)",
         nullable(Schema.Type.LONG), schema.getField("field_5").schema());
+    Assert.assertEquals("Should have default value null",
+        schema.getField("field_5").defaultValue(), NullNode.getInstance());
   }
 
   @Test
