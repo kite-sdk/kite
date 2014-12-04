@@ -18,6 +18,7 @@ package org.kitesdk.data.mapreduce;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.reflect.ReflectData;
@@ -36,13 +37,17 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TypeNotFoundException;
 import org.kitesdk.data.View;
+import org.kitesdk.data.spi.AbstractDataset;
+import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
 import org.kitesdk.data.spi.Mergeable;
 import org.kitesdk.data.spi.PartitionKey;
+import org.kitesdk.data.spi.Registration;
 import org.kitesdk.data.spi.TemporaryDatasetRepository;
 import org.kitesdk.data.spi.TemporaryDatasetRepositoryAccessor;
 import org.kitesdk.data.spi.filesystem.FileSystemDataset;
@@ -418,7 +423,7 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     View<E> working;
 
     if (usePerTaskAttemptDatasets(target)) {
-      working = loadOrCreateTaskAttemptDataset(taskAttemptContext);
+      working = loadOrCreateTaskAttemptView(taskAttemptContext);
     } else {
       working = target;
     }
@@ -553,6 +558,27 @@ public class DatasetKeyOutputFormat<E> extends OutputFormat<E, Void> {
     } else {
       return repo.create(TEMP_NAMESPACE, taskAttemptDatasetName,
           copy(jobDataset.getDescriptor()));
+    }
+  }
+
+  private static <E> View<E> loadOrCreateTaskAttemptView(TaskAttemptContext taskContext) {
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(taskContext);
+    Map<String, String> uriOptions = Registration.lookupDatasetUri(
+        URI.create(URI.create(conf.get(KITE_OUTPUT_URI)).getSchemeSpecificPart())).second();
+    Dataset<E> dataset = loadOrCreateTaskAttemptDataset(taskContext);
+
+    if (dataset instanceof AbstractDataset) {
+      DatasetDescriptor descriptor = dataset.getDescriptor();
+      Schema schema = descriptor.getSchema();
+      PartitionStrategy strategy = null;
+      if (descriptor.isPartitioned()) {
+        strategy = descriptor.getPartitionStrategy();
+      }
+      Constraints constraints = Constraints.fromQueryMap(
+          schema, strategy, uriOptions);
+      return ((AbstractDataset<E>) dataset).filter(constraints);
+    } else {
+      return dataset;
     }
   }
 

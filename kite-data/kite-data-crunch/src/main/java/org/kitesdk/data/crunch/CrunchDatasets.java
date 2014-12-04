@@ -17,8 +17,12 @@ package org.kitesdk.data.crunch;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.IndexedRecord;
 import org.apache.crunch.DoFn;
 import org.apache.crunch.Emitter;
 import org.apache.crunch.MapFn;
@@ -35,11 +39,14 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.View;
+import org.kitesdk.data.spi.AbstractRefinableView;
+import org.kitesdk.data.spi.Constraints;
 import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.EntityAccessor;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.PartitionStrategyParser;
 import org.kitesdk.data.spi.SchemaUtil;
+import org.kitesdk.data.spi.StorageKey;
 
 /**
  * <p>
@@ -188,8 +195,17 @@ public class CrunchDatasets {
   public static <E> PCollection<E> partition(PCollection<E> collection,
                                              View<E> view,
                                              int numWriters) {
-    return partition(collection, view.getDataset().getDescriptor(),
-        view.getType(), numWriters);
+    DatasetDescriptor descriptor = view.getDataset().getDescriptor();
+    if (descriptor.isPartitioned()) {
+      GetStorageKey<E> getKey = new GetStorageKey<E>(view);
+      PTable<GenericData.Record, E> table = collection
+          .by(getKey, Avros.generics(getKey.schema()));
+      PGroupedTable<GenericData.Record, E> grouped =
+          numWriters > 0 ? table.groupByKey(numWriters) : table.groupByKey();
+      return grouped.ungroup().values();
+    } else {
+      return partition(collection, numWriters);
+    }
   }
 
   /**
@@ -209,29 +225,13 @@ public class CrunchDatasets {
    * @see #partition(PCollection, Dataset)
    *
    * @since 0.16.0
+   * @deprecated will be removed in 0.19.0; use partition(PCollection, View, int)
    */
+  @Deprecated
   public static <E> PCollection<E> partition(PCollection<E> collection,
                                              Dataset<E> dataset,
                                              int numWriters) {
-    return partition(collection, dataset.getDescriptor(), dataset.getType(),
-        numWriters);
-  }
-
-  private static <E> PCollection<E> partition(PCollection<E> collection,
-                                              DatasetDescriptor descriptor,
-                                              Class<E> type,
-                                              int numReducers) {
-    if (descriptor.isPartitioned()) {
-      GetStorageKey<E> getKey = new GetStorageKey<E>(
-          descriptor.getPartitionStrategy(), descriptor.getSchema(), type);
-      PTable<GenericData.Record, E> table = collection
-          .by(getKey, Avros.generics(getKey.schema()));
-      PGroupedTable<GenericData.Record, E> grouped =
-          numReducers > 0 ? table.groupByKey(numReducers) : table.groupByKey();
-      return grouped.ungroup().values();
-    } else {
-      return partition(collection, numReducers);
-    }
+    return partition(collection, (View<E>) dataset, numWriters);
   }
 
   private static <E> PCollection<E> partition(PCollection<E> collection,
@@ -261,13 +261,25 @@ public class CrunchDatasets {
     private final String strategyString;
     private final String schemaString;
     private final Class<E> type;
+    private final Map<String, String> constraints;
     private transient AvroStorageKey key = null;
     private transient EntityAccessor<E> accessor = null;
+    private transient Map<String, Object> provided = null;
 
-    private GetStorageKey(PartitionStrategy strategy, Schema schema, Class<E> type) {
-      this.strategyString = strategy.toString(false /* no white space */);
-      this.schemaString = schema.toString(false /* no white space */);
-      this.type = type;
+    private GetStorageKey(View<E> view) {
+      DatasetDescriptor descriptor = view.getDataset().getDescriptor();
+      // get serializable versions of transient objects
+      this.strategyString = descriptor.getPartitionStrategy()
+          .toString(false /* no white space */);
+      this.schemaString = descriptor.getSchema()
+          .toString(false /* no white space */);
+      this.type = view.getType();
+      if (view instanceof AbstractRefinableView) {
+        this.constraints = ((AbstractRefinableView) view).getConstraints()
+            .toQueryMap();
+      } else {
+        this.constraints = null;
+      }
     }
 
     public Schema schema() {
@@ -278,16 +290,22 @@ public class CrunchDatasets {
     @Override
     public void initialize() {
       if (key == null) {
+        // restore transient objects from serializable versions
         PartitionStrategy strategy = PartitionStrategyParser.parse(strategyString);
         Schema schema = new Schema.Parser().parse(schemaString);
         this.key = new AvroStorageKey(strategy, schema);
         this.accessor = DataModelUtil.accessor(type, schema);
+        if (constraints != null) {
+          this.provided = Constraints
+              .fromQueryMap(schema, strategy, constraints)
+              .getProvidedValues();
+        }
       }
     }
 
     @Override
     public AvroStorageKey map(E entity) {
-      return key.reuseFor(entity, accessor);
+      return key.reuseFor(entity, provided, accessor);
     }
   }
 
@@ -295,23 +313,29 @@ public class CrunchDatasets {
       value="EQ_DOESNT_OVERRIDE_EQUALS",
       justification="StorageKey equals is correct, compares the values")
   private static class AvroStorageKey extends GenericData.Record {
-    private final PartitionStrategy strategy;
+    private final StorageKey key;
 
     private AvroStorageKey(PartitionStrategy strategy, Schema schema) {
       super(SchemaUtil.keySchema(schema, strategy));
-      this.strategy = strategy;
+      this.key = new StorageKey(strategy);
     }
 
     @SuppressWarnings({"unchecked", "deprecation"})
-    public <E> AvroStorageKey reuseFor(E entity, EntityAccessor<E> accessor) {
-      List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
-
-      for (int i = 0; i < partitioners.size(); i++) {
-        FieldPartitioner fp = partitioners.get(i);
-        put(i, fp.apply(accessor.get(entity, fp.getSourceName())));
-      }
-
+    public <E> AvroStorageKey reuseFor(E entity,
+                                       @Nullable Map<String, Object> provided,
+                                       EntityAccessor<E> accessor) {
+      accessor.keyFor(entity, provided, key);
       return this;
+    }
+
+    @Override
+    public void put(int i, Object v) {
+      key.replace(i, v);
+    }
+
+    @Override
+    public Object get(int i) {
+      return key.get(i);
     }
   }
 

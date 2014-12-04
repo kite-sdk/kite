@@ -60,20 +60,20 @@ public class DatasetTestUtilities {
     }
   }
 
-  public static void writeTestUsers(Dataset<GenericData.Record> ds, int count) {
+  public static void writeTestUsers(View<GenericData.Record> ds, int count) {
     writeTestUsers(ds, count, 0);
   }
 
-  public static void writeTestUsers(Dataset<GenericData.Record> ds, int count, int start) {
+  public static void writeTestUsers(View<GenericData.Record> ds, int count, int start) {
     writeTestUsers(ds, count, start, "email");
   }
 
-  public static void writeTestUsers(Dataset<GenericData.Record> ds, int count, int start, String... fields) {
+  public static void writeTestUsers(View<GenericData.Record> view, int count, int start, String... fields) {
     DatasetWriter<GenericData.Record> writer = null;
     try {
-      writer = ds.newWriter();
+      writer = view.newWriter();
       for (int i = start; i < count + start; i++) {
-        GenericRecordBuilder recordBuilder = new GenericRecordBuilder(ds.getDescriptor
+        GenericRecordBuilder recordBuilder = new GenericRecordBuilder(view.getDataset().getDescriptor
             ().getSchema()).set("username", "test-" + i);
         for (String field : fields) {
           recordBuilder.set(field, field + "-" + i);
