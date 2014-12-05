@@ -18,10 +18,12 @@ package org.kitesdk.data.spi.filesystem;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
+import com.google.common.collect.ImmutableSet;
+import java.util.Set;
+import javax.annotation.Nullable;
 import org.codehaus.jackson.node.NullNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -60,21 +62,38 @@ public class CSVUtil {
   private static final Pattern DOUBLE = Pattern.compile("\\d*\\.\\d*[dD]?");
   private static final Pattern FLOAT = Pattern.compile("\\d*\\.\\d*[fF]?");
   private static final int DEFAULT_INFER_LINES = 25;
+  private static final Set<String> NO_REQUIRED_FIELDS = ImmutableSet.of();
 
   public static Schema inferNullableSchema(String name, InputStream incoming,
-                                   CSVProperties props)
+                                           CSVProperties props)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, true);
+    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, true);
+  }
+
+  public static Schema inferNullableSchema(String name, InputStream incoming,
+                                           CSVProperties props,
+                                           Set<String> requiredFields)
+      throws IOException {
+    return inferSchemaInternal(name, incoming, props, requiredFields, true);
   }
 
   public static Schema inferSchema(String name, InputStream incoming,
-                                           CSVProperties props)
+                                   CSVProperties props)
       throws IOException {
-    return inferSchemaInternal(name, incoming, props, false);
+    return inferSchemaInternal(name, incoming, props, NO_REQUIRED_FIELDS, false);
+  }
+
+  public static Schema inferSchema(String name, InputStream incoming,
+                                   CSVProperties props,
+                                   Set<String> requiredFields)
+      throws IOException {
+    return inferSchemaInternal(name, incoming, props, requiredFields, false);
   }
 
   private static Schema inferSchemaInternal(String name, InputStream incoming,
-                                   CSVProperties props, boolean makeNullable)
+                                            CSVProperties props,
+                                            Set<String> requiredFields,
+                                            boolean makeNullable)
       throws IOException {
     CSVReader reader = newReader(incoming, props);
 
@@ -100,25 +119,35 @@ public class CSVUtil {
     Schema.Type[] types = new Schema.Type[header.length];
     String[] values = new String[header.length];
     boolean[] nullable = new boolean[header.length];
+    boolean[] empty = new boolean[header.length];
 
     for (int processed = 0; processed < DEFAULT_INFER_LINES; processed += 1) {
-      for (int i = 0; i < header.length; i += 1) {
-        if (types[i] == null) {
-          types[i] = inferFieldType(line[i]);
-          if (types[i] == null) {
-            nullable[i] = true;
-          } else {
-            // keep track of the value used
-            values[i] = line[i];
-          }
-        } else if (line[i] == null || line[i].isEmpty()) {
-          nullable[i] = true;
-        }
-      }
-      line = reader.readNext();
       if (line == null) {
         break;
       }
+
+      for (int i = 0; i < header.length; i += 1) {
+        if (i < line.length) {
+          if (types[i] == null) {
+            types[i] = inferFieldType(line[i]);
+            if (types[i] != null) {
+              // keep track of the value used
+              values[i] = line[i];
+            }
+          }
+
+          if (line[i] == null) {
+            nullable[i] = true;
+          } else if (line[i].isEmpty()) {
+            empty[i] = true;
+          }
+        } else {
+          // no value results in null
+          nullable[i] = true;
+        }
+      }
+
+      line = reader.readNext();
     }
 
     // types may be missing, but fieldSchema will return a nullable string
@@ -135,10 +164,24 @@ public class CSVUtil {
               "or _ and can contain only alphanumerics and _ " +
               i + ": \"" + header[i] + "\"");
       }
-      fields.add(new Schema.Field(
-          header[i].trim(), schema(types[i], makeNullable || nullable[i]),
-          "Type inferred from '" + sample(values[i]) + "'",
-          (makeNullable || nullable[i]) ? NullNode.getInstance() : null));
+
+      // the empty string is not considered null for string fields
+      boolean foundNull = (nullable[i] ||
+          (empty[i] && types[i] != Schema.Type.STRING));
+
+      if (requiredFields.contains(header[i])) {
+        if (foundNull) {
+          throw new DatasetException("Found null value for required field: " +
+              header[i] + " (" + types[i] + ")");
+        }
+        fields.add(new Schema.Field(header[i].trim(), schema(types[i], false),
+            "Type inferred from '" + sample(values[i]) + "'", null));
+      } else {
+        fields.add(new Schema.Field(
+            header[i].trim(), schema(types[i], makeNullable || foundNull),
+            "Type inferred from '" + sample(values[i]) + "'",
+            (makeNullable || foundNull) ? NullNode.getInstance() : null));
+      }
     }
 
     Schema record = Schema.createRecord(
@@ -151,7 +194,7 @@ public class CSVUtil {
       .inRange('\u0020', '\u007e').negate();
 
   @VisibleForTesting
-  static String sample(String value) {
+  static String sample(@Nullable String value) {
     if (value != null) {
       return NON_PRINTABLE.replaceFrom(
           value.subSequence(0, min(50, value.length())), '.');

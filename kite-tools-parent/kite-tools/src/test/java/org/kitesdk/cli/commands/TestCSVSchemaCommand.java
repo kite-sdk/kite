@@ -39,6 +39,7 @@ public class TestCSVSchemaCommand {
   private static String sample = null;
   private static String failedSample = null;
   private static Schema schema = null;
+  private static Schema requiredSchema = null;
   private Logger console = null;
   private CSVSchemaCommand command;
 
@@ -71,6 +72,12 @@ public class TestCSVSchemaCommand {
         .optionalString("username")
         .optionalString("email")
         .endRecord();
+
+    requiredSchema = SchemaBuilder.record("User").fields()
+        .requiredLong("id")
+        .optionalString("username")
+        .optionalString("email")
+        .endRecord();
   }
 
   @Before
@@ -87,6 +94,17 @@ public class TestCSVSchemaCommand {
     int rc = command.run();
     Assert.assertEquals("Should return success code", 0, rc);
     verify(console).info(argThat(TestUtil.matchesSchema(schema)));
+    verifyNoMoreInteractions(console);
+  }
+
+  @Test
+  public void testSchemaRequiredFields() throws Exception {
+    command.samplePaths = Lists.newArrayList("target/users.csv");
+    command.recordName = "User";
+    command.requiredFields = Lists.newArrayList("id");
+    int rc = command.run();
+    Assert.assertEquals("Should return success code", 0, rc);
+    verify(console).info(argThat(TestUtil.matchesSchema(requiredSchema)));
     verifyNoMoreInteractions(console);
   }
 

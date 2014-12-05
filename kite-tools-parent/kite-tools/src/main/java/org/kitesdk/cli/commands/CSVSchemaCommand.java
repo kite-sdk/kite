@@ -21,9 +21,11 @@ import com.beust.jcommander.Parameters;
 import com.beust.jcommander.internal.Lists;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.kitesdk.data.spi.filesystem.CSVProperties;
 import org.kitesdk.data.spi.filesystem.CSVUtil;
@@ -80,6 +82,10 @@ public class CSVSchemaCommand extends BaseCommand {
   @Parameter(names="--charset", description="Character set name", hidden = true)
   String charsetName = Charset.defaultCharset().displayName();
 
+  @Parameter(names="--require",
+      description="Do not allow null values for the given field")
+  List<String> requiredFields;
+
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(samplePaths != null && !samplePaths.isEmpty(),
@@ -96,9 +102,15 @@ public class CSVSchemaCommand extends BaseCommand {
         .charset(charsetName)
         .build();
 
+    Set<String> required = ImmutableSet.of();
+    if (requiredFields != null) {
+      required = ImmutableSet.copyOf(requiredFields);
+    }
+
     // assume fields are nullable by default, users can easily change this
     String sampleSchema = CSVUtil
-        .inferNullableSchema(recordName, open(samplePaths.get(0)), props)
+        .inferNullableSchema(
+            recordName, open(samplePaths.get(0)), props, required)
         .toString(!minimize);
 
     output(sampleSchema, console, outputPath);
