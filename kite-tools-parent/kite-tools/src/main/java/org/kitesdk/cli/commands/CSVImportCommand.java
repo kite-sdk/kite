@@ -102,6 +102,12 @@ public class CSVImportCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(targets != null && targets.size() == 2,
         "CSV path and target dataset name are required.");
 
+    if (skipSchemaChecks) {
+      console.warn(
+          "--skip-schema-check is no longer used and will be removed in " +
+          "0.19.0\nSee CDK-800 for details.");
+    }
+
     Path source = qualifiedPath(targets.get(0));
     FileSystem sourceFS = source.getFileSystem(getConf());
     Preconditions.checkArgument(sourceFS.exists(source),
@@ -146,19 +152,6 @@ public class CSVImportCommand extends BaseDatasetCommand {
       Iterator<Path> iter = csvDataset.pathIterator().iterator();
       Preconditions.checkArgument(iter.hasNext(),
           "CSV path has no data files: " + source);
-      Schema csvSchema = CSVUtil.inferSchema(
-          datasetSchema.getFullName(), sourceFS.open(iter.next()), props);
-
-      if (!skipSchemaChecks) {
-        Preconditions.checkArgument(
-            SchemaValidationUtil.canRead(csvSchema, datasetSchema),
-            "Incompatible schemas\nCSV: %s\nDataset: %s",
-            csvSchema.toString(true), datasetSchema.toString(true));
-        // TODO: add support for orderByHeaders
-        Preconditions.checkArgument(verifyFieldOrder(csvSchema, datasetSchema),
-            "Incompatible schema field order\nCSV: %s\nDataset: %s",
-            csvSchema.toString(true), datasetSchema.toString(true));
-      }
 
       TaskUtil.configure(getConf()).addJars(jars);
 
@@ -219,28 +212,5 @@ public class CSVImportCommand extends BaseDatasetCommand {
         "# Copy the records from an HDFS directory to \"sample\"",
         "csv-import hdfs:/data/path/samples/ sample"
     );
-  }
-
-  /**
-   * Validates that field names are in the same order because the datasetSchema
-   * ordering will be used when reading CSV. Types are assumed to match.
-   *
-   * @param csvSchema
-   * @param datasetSchema
-   * @return
-   */
-  public boolean verifyFieldOrder(Schema csvSchema, Schema datasetSchema) {
-    List<Schema.Field> csvFields = csvSchema.getFields();
-    List<Schema.Field> datasetFields = datasetSchema.getFields();
-    for (int i = 0; i < csvFields.size(); i += 1) {
-      // don't check generated field names (no header info)
-      if (csvFields.get(i).name().startsWith("field_")) {
-        continue;
-      }
-      if (!csvFields.get(i).name().equals(datasetFields.get(i).name())) {
-        return false;
-      }
-    }
-    return true;
   }
 }

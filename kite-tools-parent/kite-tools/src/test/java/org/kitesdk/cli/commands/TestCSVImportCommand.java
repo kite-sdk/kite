@@ -23,6 +23,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -68,7 +69,8 @@ public class TestCSVImportCommand {
     writer.append("2,user,user@example.com\n");
     writer.close();
 
-    TestUtil.run("-v", "csv-schema", sample, "-o", avsc, "--class", "User");
+    TestUtil.run("-v", "csv-schema", sample, "-o", avsc, "--class", "User",
+        "--require", "id");
 
     GenericRecordBuilder builder = new GenericRecordBuilder(
         new Schema.Parser().parse(new File(avsc)));
@@ -142,12 +144,12 @@ public class TestCSVImportCommand {
     command.targets = Lists.newArrayList("missing.csv", datasetName);
     TestHelpers.assertThrows("Should complain about missing CSV data path",
         IllegalArgumentException.class, new Callable() {
-      @Override
-      public Object call() throws Exception {
-        command.run();
-        return null;
-      }
-    });
+          @Override
+          public Object call() throws Exception {
+            command.run();
+            return null;
+          }
+        });
     verifyNoMoreInteractions(console);
   }
 
@@ -184,28 +186,6 @@ public class TestCSVImportCommand {
   }
 
   @Test
-  public void testIncompatibleSchemaFieldOrder() throws Exception {
-    BufferedWriter writer = Files.newWriter(
-        new File("target/incompatible.csv"), CSVSchemaCommand.SCHEMA_CHARSET);
-    writer.append("email,username,id\n");
-    writer.append("test@example.com,test,1\n");
-    writer.close();
-
-    command.targets = Lists.newArrayList("target/incompatible.csv", datasetName);
-    TestHelpers.assertThrows("Should complain about field order",
-        IllegalArgumentException.class, new Callable() {
-          @Override
-          public Object call() throws Exception {
-            command.run();
-            return null;
-          }
-        }
-    );
-    verify(console).trace(contains("repo:file:target/data"));
-    verifyNoMoreInteractions(console);
-  }
-
-  @Test
   public void testIncompatibleSchemaFieldType() throws Exception {
     BufferedWriter writer = Files.newWriter(
         new File("target/incompatible.csv"), CSVSchemaCommand.SCHEMA_CHARSET);
@@ -213,9 +193,10 @@ public class TestCSVImportCommand {
     writer.append("NaN,test,test@example.com\n"); // id will be String
     writer.close();
 
+    // This will fail because NaN isn't a valid long and the field is required
     command.targets = Lists.newArrayList("target/incompatible.csv", datasetName);
     TestHelpers.assertThrows("Should complain about schema compatibility",
-        IllegalArgumentException.class, new Callable() {
+        AvroRuntimeException.class, new Callable() {
           @Override
           public Object call() throws Exception {
             command.run();
