@@ -102,7 +102,6 @@ public class CSVUtil {
     if (props.useHeader) {
       // read the header and then the first line
       header = reader.readNext();
-      checkHeader(header);
       line = reader.readNext();
       Preconditions.checkNotNull(line, "No content to infer schema");
 
@@ -155,30 +154,34 @@ public class CSVUtil {
     for (int i = 0; i < header.length; i += 1) {
       if (header[i] == null) {
         throw new DatasetException("Bad header for field " + i + ": null");
-      } else if (header[i].trim().isEmpty()) {
+      }
+
+      String fieldName = header[i].trim();
+
+      if (fieldName.isEmpty()) {
         throw new DatasetException(
-            "Bad header for field " + i + ": \"" + header[i] + "\"");
-      } else if(!Compatibility.isAvroCompatibleName(header[i].trim())) {
+            "Bad header for field " + i + ": \"" + fieldName + "\"");
+      } else if(!Compatibility.isAvroCompatibleName(fieldName)) {
     	  throw new DatasetException(
               "Bad header for field, should start with a character " +
               "or _ and can contain only alphanumerics and _ " +
-              i + ": \"" + header[i] + "\"");
+              i + ": \"" + fieldName + "\"");
       }
 
       // the empty string is not considered null for string fields
       boolean foundNull = (nullable[i] ||
           (empty[i] && types[i] != Schema.Type.STRING));
 
-      if (requiredFields.contains(header[i])) {
+      if (requiredFields.contains(fieldName)) {
         if (foundNull) {
           throw new DatasetException("Found null value for required field: " +
-              header[i] + " (" + types[i] + ")");
+              fieldName + " (" + types[i] + ")");
         }
-        fields.add(new Schema.Field(header[i].trim(), schema(types[i], false),
+        fields.add(new Schema.Field(fieldName, schema(types[i], false),
             "Type inferred from '" + sample(values[i]) + "'", null));
       } else {
         fields.add(new Schema.Field(
-            header[i].trim(), schema(types[i], makeNullable || foundNull),
+            fieldName, schema(types[i], makeNullable || foundNull),
             "Type inferred from '" + sample(values[i]) + "'",
             (makeNullable || foundNull) ? NullNode.getInstance() : null));
       }
@@ -233,17 +236,5 @@ public class CSVUtil {
       return Schema.Type.FLOAT;
     }
     return Schema.Type.STRING;
-  }
-
-  private static void checkHeader(String[] header) {
-    Preconditions.checkNotNull(header, "No header content");
-    for (int i = 0; i < header.length; i += 1) {
-      if (header[i] == null) {
-        throw new RuntimeException("Bad header for field " + i + ": null");
-      } else if (header[i].trim().isEmpty()) {
-        throw new RuntimeException(
-            "Bad header for field " + i + ": \"" + header[i] + "\"");
-      }
-    }
   }
 }
