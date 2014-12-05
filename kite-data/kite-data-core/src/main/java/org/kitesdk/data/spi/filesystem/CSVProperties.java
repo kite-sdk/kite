@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import javax.annotation.concurrent.Immutable;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.kitesdk.data.DatasetDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,22 +144,17 @@ public class CSVProperties {
     }
 
     public Builder delimiter(String delimiter) {
-      // handle tab
-      if ("\\t".equals(delimiter)) {
-        this.delimiter = "\t";
-      } else {
-        this.delimiter = delimiter;
-      }
+      this.delimiter = StringEscapeUtils.unescapeJava(delimiter);
       return this;
     }
 
     public Builder quote(String quote) {
-      this.quote = quote;
+      this.quote = StringEscapeUtils.unescapeJava(quote);
       return this;
     }
 
     public Builder escape(String escape) {
-      this.escape = escape;
+      this.escape = StringEscapeUtils.unescapeJava(escape);
       return this;
     }
 
