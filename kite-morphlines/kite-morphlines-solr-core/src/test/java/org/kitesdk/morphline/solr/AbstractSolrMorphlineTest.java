@@ -89,10 +89,9 @@ public class AbstractSolrMorphlineTest extends SolrTestCaseJ4 {
   protected static void myInitCore(String baseDirName) throws Exception {
     Joiner joiner = Joiner.on(File.separator);
     initCore(
-        joiner.join(RESOURCES_DIR, baseDirName, "collection1", "conf", "solrconfig.xml"),
-        joiner.join(RESOURCES_DIR, baseDirName, "collection1", "conf", "schema.xml"),
+        "solrconfig.xml", "schema.xml",
         joiner.join(RESOURCES_DIR, baseDirName)
-        );    
+    );    
   }
   
   @Before
