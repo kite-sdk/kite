@@ -18,6 +18,7 @@ package org.kitesdk.morphline.solr;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 
 import org.apache.commons.lang.SystemUtils;
 import org.apache.lucene.LucenePackage;
@@ -66,7 +67,11 @@ public class EnvironmentTest extends Assert {
   }
   
   private static Version getMinorLuceneVersion(String version) {
-    return Version.valueOf(version.replaceFirst("^(\\d)\\.(\\d).*", "LUCENE_$1$2"));
+    try {
+      return Version.parseLeniently(version.replaceFirst("^(\\d)\\.(\\d).*", "LUCENE_$1$2"));
+    } catch (ParseException e) {
+      throw new RuntimeException(e);
+    }
   }
   
 }
