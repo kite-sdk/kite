@@ -3091,7 +3091,7 @@ solrLocator : {
   zkHost : "127.0.0.1:2181/solr"
 
   # Max number of documents to pass per RPC from morphline to Solr Server
-  # batchSize : 1000
+  # batchSize : 10000
 }
 {code}
 
@@ -3126,7 +3126,7 @@ loadSolr {
     zkHost : "127.0.0.1:2181/solr"
 
     # Max number of docs to pass per RPC from morphline to Solr Server
-    # batchSize : 1000
+    # batchSize : 10000
   }
   boosts : {
     id : 2.0 # assign to the id field a boost value 2.0
