@@ -87,6 +87,7 @@ public class SolrLocator {
       }
       CloudSolrServer cloudSolrServer = new CloudSolrServer(zkHost);
       cloudSolrServer.setDefaultCollection(collectionName);
+      cloudSolrServer.setIdField(getIndexSchema().getUniqueKeyField().getName());
       return cloudSolrServer;
     } else {
       if (solrUrl == null && solrHomeDir != null) {
