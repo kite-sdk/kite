@@ -159,8 +159,8 @@ public class DetectMimeTypesTest extends AbstractMorphlineTest {
         path + "/cars.tsv", "text/plain", "text/tab-separated-values",
         path + "/cars.ssv", "text/plain", "text/space-separated-values",
         path + "/cars.csv", "text/plain", "text/csv",
-        path + "/cars.csv.gz", "application/x-gzip", "application/x-gzip",
-        path + "/cars.tar.gz", "application/x-gzip", "application/x-gzip",
+        path + "/cars.csv.gz", "application/gzip", "application/gzip",
+        path + "/cars.tar.gz", "application/gzip", "application/gzip",
         path + "/sample-statuses-20120906-141433.avro", "avro/binary", "avro/binary",
         
         path + "/testPPT_various.ppt", "application/x-tika-msoffice", "application/vnd.ms-powerpoint",
@@ -182,8 +182,8 @@ public class DetectMimeTypesTest extends AbstractMorphlineTest {
         path + "/testMP3i18n.mp3", "audio/mpeg", "audio/mpeg",
         path + "/testAIFF.aif", "audio/x-aiff", "audio/x-aiff",
         path + "/testFLAC.flac", "audio/x-flac", "audio/x-flac",
-        path + "/testFLAC.oga", "audio/ogg", "audio/ogg",
-        path + "/testVORBIS.ogg",  "audio/ogg", "audio/ogg",
+        path + "/testFLAC.oga", "application/ogg", "audio/ogg",
+        path + "/testVORBIS.ogg",  "audio/vorbis", "audio/vorbis",
         path + "/testMP4.m4a", "audio/mp4", "audio/mp4",
         path + "/testWAV.wav",  "audio/x-wav", "audio/x-wav",
         path + "/testWMA.wma",  "audio/x-ms-wma", "audio/x-ms-wma",
@@ -201,7 +201,7 @@ public class DetectMimeTypesTest extends AbstractMorphlineTest {
         path + "/test-documents.cpio",  "application/x-cpio", "application/x-cpio",
         path + "/test-documents.tar",  "application/x-gtar", "application/x-gtar",
         path + "/test-documents.tbz2",  "application/x-bzip2", "application/x-bzip2",
-        path + "/test-documents.tgz",  "application/x-gzip", "application/x-gzip",
+        path + "/test-documents.tgz",  "application/gzip", "application/gzip",
         path + "/test-documents.zip",  "application/zip", "application/zip",
         path + "/test-zip-of-zip.zip",  "application/zip", "application/zip",
         path + "/testJAR.jar",  "application/zip", "application/java-archive",
@@ -216,6 +216,7 @@ public class DetectMimeTypesTest extends AbstractMorphlineTest {
     };
     
     for (int i = 0; i < files.length; i += 3) {
+      System.out.println("files[" + i + "]=" + files[i]);
       byte[] body = Files.toByteArray(new File(files[i+0]));
       ListMultimap<String, Object> emptyMap = ArrayListMultimap.create();
       Record event = createEvent(new ByteArrayInputStream(body), emptyMap);
