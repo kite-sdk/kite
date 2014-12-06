@@ -24,6 +24,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
 import org.apache.solr.cloud.AbstractFullDistribZkTestBase;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.SolrTestCaseJ4.SuppressSSL;
 import org.apache.solr.common.cloud.SolrZkClient;
 import org.junit.After;
 import org.junit.Before;
@@ -42,6 +43,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ListMultimap;
 import com.typesafe.config.Config;
 
+@SuppressSSL
 public abstract class AbstractSolrMorphlineZkTest extends AbstractFullDistribZkTestBase {
   
   protected static final String RESOURCES_DIR = "target/test-classes";
@@ -150,7 +152,7 @@ public abstract class AbstractSolrMorphlineZkTest extends AbstractFullDistribZkT
       throws Exception {
     
     JettySolrRunner jetty = new JettySolrRunner(solrHome.getAbsolutePath(),
-        context, 0, solrConfigOverride, schemaOverride);
+        context, 0, solrConfigOverride, schemaOverride, true, null, sslConfig);
 
     jetty.setShards(shardList);
     
