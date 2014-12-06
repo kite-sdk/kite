@@ -18,6 +18,7 @@ package org.kitesdk.morphline.solr;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Locale;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
@@ -42,7 +43,6 @@ import com.google.common.collect.ListMultimap;
 import com.typesafe.config.Config;
 
 public abstract class AbstractSolrMorphlineZkTest extends AbstractFullDistribZkTestBase {
-  private static final File solrHomeDirectory = new File(TEMP_DIR, AbstractSolrMorphlineZkTest.class.getName());
   
   protected static final String RESOURCES_DIR = "target/test-classes";
   private static final File SOLR_INSTANCE_DIR = new File(RESOURCES_DIR + "/solr");
@@ -64,6 +64,8 @@ public abstract class AbstractSolrMorphlineZkTest extends AbstractFullDistribZkT
   
   @BeforeClass
   public static void setupClass() throws Exception {
+    assumeFalse("This test fails on UNIX with Turkish default locale (https://issues.apache.org/jira/browse/SOLR-6387)",
+        new Locale("tr").getLanguage().equals(Locale.getDefault().getLanguage()));
     createTempDir();
   }
   
