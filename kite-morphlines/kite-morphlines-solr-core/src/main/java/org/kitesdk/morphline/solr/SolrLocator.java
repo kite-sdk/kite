@@ -58,7 +58,7 @@ public class SolrLocator {
   private String zkHost;
   private String solrUrl;
   private String solrHomeDir;
-  private int batchSize = 1000;
+  private int batchSize = 10000;
   
   private static final Logger LOG = LoggerFactory.getLogger(SolrLocator.class);
 
