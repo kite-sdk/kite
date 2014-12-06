@@ -87,7 +87,6 @@ public class SolrLocator {
       }
       CloudSolrServer cloudSolrServer = new CloudSolrServer(zkHost);
       cloudSolrServer.setDefaultCollection(collectionName);
-      cloudSolrServer.setIdField(getIndexSchema().getUniqueKeyField().getName());
       return cloudSolrServer;
     } else {
       if (solrUrl == null && solrHomeDir != null) {
@@ -113,7 +112,21 @@ public class SolrLocator {
         return loader;
       }
     }
+    
     SolrServer solrServer = getSolrServer();
+    if (solrServer instanceof CloudSolrServer) {
+      try {
+        ((CloudSolrServer)solrServer).setIdField(getIndexSchema().getUniqueKeyField().getName());
+      } catch (RuntimeException e) {
+        try {
+          solrServer.shutdown(); // release resources
+        } catch (Exception ex2) {
+          LOG.debug("Cannot get index schema and cannot shutdown CloudSolrServer", ex2);
+        }
+        throw new RuntimeException(e); // rethrow root cause
+      }      
+    }
+    
     return new SolrServerDocumentLoader(solrServer, batchSize);
   }
 
