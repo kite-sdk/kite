@@ -17,7 +17,6 @@ package org.kitesdk.morphline.solr;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -86,13 +85,9 @@ public class SolrLocator {
       if (collectionName == null || collectionName.length() == 0) {
         throw new MorphlineCompilationException("Parameter 'zkHost' requires that you also pass parameter 'collection'", config);
       }
-      try {
-        CloudSolrServer cloudSolrServer = new CloudSolrServer(zkHost);
-        cloudSolrServer.setDefaultCollection(collectionName);
-        return cloudSolrServer;
-      } catch (MalformedURLException e) {
-        throw new MorphlineRuntimeException(e);
-      }
+      CloudSolrServer cloudSolrServer = new CloudSolrServer(zkHost);
+      cloudSolrServer.setDefaultCollection(collectionName);
+      return cloudSolrServer;
     } else {
       if (solrUrl == null && solrHomeDir != null) {
         CoreContainer coreContainer = new CoreContainer(solrHomeDir);
