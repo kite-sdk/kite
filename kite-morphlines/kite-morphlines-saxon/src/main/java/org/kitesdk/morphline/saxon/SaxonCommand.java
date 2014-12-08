@@ -72,17 +72,17 @@ abstract class SaxonCommand extends AbstractParser {
     }
     
     for (String clazz : getConfigs().getStringList(config, "extensionFunctions", Collections.<String>emptyList())) {
-      Object fun;
+      Object function;
       try {
-        fun = Class.forName(clazz).newInstance();
+        function = Class.forName(clazz).newInstance();
       } catch (Exception e) {
         throw new MorphlineCompilationException("Cannot instantiate extension function: " + clazz, config);
       }
       
-      if (fun instanceof ExtensionFunctionDefinition) {
-        processor.registerExtensionFunction((ExtensionFunctionDefinition) fun);              
-      } else if (fun instanceof ExtensionFunction) {
-        processor.registerExtensionFunction((ExtensionFunction) fun);              
+      if (function instanceof ExtensionFunctionDefinition) {
+        processor.registerExtensionFunction((ExtensionFunctionDefinition) function);              
+      } else if (function instanceof ExtensionFunction) {
+        processor.registerExtensionFunction((ExtensionFunction) function);              
       } else {
         throw new MorphlineCompilationException("Extension function has wrong class: " + clazz, config);
       }
