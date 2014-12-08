@@ -35,23 +35,20 @@ public class MyConcatExtensionFunction implements ExtensionFunction {
 
   @Override
   public SequenceType getResultType() {
-    return SequenceType.makeSequenceType(
-        ItemType.STRING, OccurrenceIndicator.ONE
-    );
+    return SequenceType.makeSequenceType(ItemType.STRING, OccurrenceIndicator.ONE);
   }
   
   @Override
   public SequenceType[] getArgumentTypes() {
-    return new SequenceType[]{
-        SequenceType.makeSequenceType(
-            ItemType.ANY_ITEM, OccurrenceIndicator.ONE_OR_MORE)};
+    return new SequenceType[] {
+      SequenceType.makeSequenceType(ItemType.ANY_ITEM, OccurrenceIndicator.ONE_OR_MORE)};
   }
   
   @Override
   public XdmValue call(XdmValue[] arguments) throws SaxonApiException {
     StringBuffer buf = new StringBuffer();
-    for (XdmValue seq : arguments) {
-      XdmSequenceIterator iter = seq.iterator();
+    for (XdmValue argument : arguments) {
+      XdmSequenceIterator iter = argument.iterator();
       while (iter.hasNext()) {
         buf.append(iter.next().getStringValue());
       }
