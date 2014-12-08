@@ -57,6 +57,7 @@ public final class DecodeBase64Builder implements CommandBuilder {
     @Override
     protected Object transformFieldValue(Object value) {
       String str = value.toString();
+      // consider switching to com.fasterxml.jackson.core.Base64Variants.MIME.decode(String, ByteArrayBuilder) for performance?
       byte[] bytes = base64.decode(str);
       return bytes;
     }
