@@ -119,6 +119,22 @@ public class SaxonMorphlineTest extends AbstractMorphlineTest {
   }  
 
   @Test
+  public void testXQueryExtensionFunctions() throws Exception {
+    morphline = createMorphline("test-morphlines/xquery-functions");    
+    InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/sample-statuses-20120906-141433.xml"));
+    Record record = new Record();
+    record.put("id", "123");
+    record.put(Fields.ATTACHMENT_BODY, in);
+    processAndVerifySuccess(record, 
+        ImmutableMultimap.of(
+            "id", "123", 
+            "text", "sample tweet onesample tweet two", 
+            "bar", "sample tweet onesample tweet two")
+        );    
+    in.close();
+  }  
+
+  @Test
   public void testXsltIdentityHelloWorld() throws Exception {
     morphline = createMorphline("test-morphlines/xslt-helloworld-identity");    
     InputStream in = new FileInputStream(new File(RESOURCES_DIR + "/test-documents/helloworld.xml"));

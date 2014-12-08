@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
@@ -29,14 +30,17 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
 
+import net.sf.saxon.lib.ExtensionFunctionDefinition;
 import net.sf.saxon.s9api.BuildingStreamWriterImpl;
 import net.sf.saxon.s9api.DocumentBuilder;
+import net.sf.saxon.s9api.ExtensionFunction;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmNode;
 
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
+import org.kitesdk.morphline.api.MorphlineCompilationException;
 import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.api.MorphlineRuntimeException;
 import org.kitesdk.morphline.api.Record;
@@ -65,6 +69,23 @@ abstract class SaxonCommand extends AbstractParser {
     Config features = getConfigs().getConfig(config, "features", ConfigFactory.empty());
     for (Map.Entry<String, Object> entry : new Configs().getEntrySet(features)) {
       processor.setConfigurationProperty(entry.getKey(), entry.getValue());
+    }
+    
+    for (String clazz : getConfigs().getStringList(config, "extensionFunctions", Collections.<String>emptyList())) {
+      Object fun;
+      try {
+        fun = Class.forName(clazz).newInstance();
+      } catch (Exception e) {
+        throw new MorphlineCompilationException("Cannot instantiate extension function: " + clazz, config);
+      }
+      
+      if (fun instanceof ExtensionFunctionDefinition) {
+        processor.registerExtensionFunction((ExtensionFunctionDefinition) fun);              
+      } else if (fun instanceof ExtensionFunction) {
+        processor.registerExtensionFunction((ExtensionFunction) fun);              
+      } else {
+        throw new MorphlineCompilationException("Extension function has wrong class: " + clazz, config);
+      }
     }
   }
 
