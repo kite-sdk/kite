@@ -90,8 +90,8 @@ public class TestCSVSchemaInference {
                   new ByteArrayInputStream(csvLines.getBytes("utf8")),
                   new CSVProperties.Builder().hasHeader().build(),
                   ImmutableSet.of("nullable_long"));
-            } catch (IOException _) {
-              // these aren't the droids you're looking for
+            } catch (IOException e) {
+              throw new RuntimeException("Schema inference threw IOException", e);
             }
           }
         });
@@ -105,8 +105,8 @@ public class TestCSVSchemaInference {
                   new ByteArrayInputStream(csvLines.getBytes("utf8")),
                   new CSVProperties.Builder().hasHeader().build(),
                   ImmutableSet.of("nullable_string"));
-            } catch (IOException _) {
-              // these aren't the droids you're looking for
+            } catch (IOException e) {
+              throw new RuntimeException("Schema inference threw IOException", e);
             }
           }
         });
