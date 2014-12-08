@@ -46,7 +46,7 @@ public class MyConcatExtensionFunction implements ExtensionFunction {
   
   @Override
   public XdmValue call(XdmValue[] arguments) throws SaxonApiException {
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     for (XdmValue argument : arguments) {
       XdmSequenceIterator iter = argument.iterator();
       while (iter.hasNext()) {

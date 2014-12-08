@@ -52,7 +52,7 @@ public class MyConcatExtensionFunctionDefinition extends ExtensionFunctionDefini
         if (secs.length == 0) {
           throw new XPathException("Missing argument");
         } else {
-          StringBuffer buf = new StringBuffer();
+          StringBuilder buf = new StringBuilder();
           for (Sequence seq : secs) {
             SequenceIterator<? extends Item> iter = seq.iterate();
             while (iter.next() != null) {
