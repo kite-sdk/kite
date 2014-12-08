@@ -2979,6 +2979,9 @@ xquery {
 
 More examples can be found in the [unit tests|https://github.com/kite-sdk/kite/tree/master/kite-morphlines/kite-morphlines-saxon/src/test/resources/test-morphlines].
 
+Here is an [example extension function|https://github.com/kite-sdk/kite/tree/master/kite-morphlines/kite-morphlines-saxon/src/test/java/org/kitesdk/morphline/saxon/MyConcatExtensionFunction.java] 
+along with a corresponding [example xquery|https://github.com/kite-sdk/kite/tree/master/kite-morphlines/kite-morphlines-saxon/src/test/resources/test-morphlines/xquery-functions.conf].
+
 For more background, see resources such as the [XQuery Primer|http://www.stylusstudio.com/xquery_primer_new.html] and [XQuery FLOWR Tutorial|http://www.stylusstudio.com/xquery_flwor.html] and [XQuery: A Guided Tour|http://www.datadirect.com/resources/dis/xquery-guided-tour/index.html] and [Wikipedia|http://en.wikipedia.org/wiki/XQuery].
 
 h2. xslt
