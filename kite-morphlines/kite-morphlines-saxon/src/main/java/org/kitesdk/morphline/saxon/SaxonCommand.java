@@ -30,7 +30,6 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
 
-import net.sf.saxon.lib.ExtensionFunctionDefinition;
 import net.sf.saxon.s9api.BuildingStreamWriterImpl;
 import net.sf.saxon.s9api.DocumentBuilder;
 import net.sf.saxon.s9api.ExtensionFunction;
@@ -79,10 +78,11 @@ abstract class SaxonCommand extends AbstractParser {
         throw new MorphlineCompilationException("Cannot instantiate extension function: " + clazz, config);
       }
       
-      if (function instanceof ExtensionFunctionDefinition) {
-        processor.registerExtensionFunction((ExtensionFunctionDefinition) function);              
-      } else if (function instanceof ExtensionFunction) {
+      if (function instanceof ExtensionFunction) {
         processor.registerExtensionFunction((ExtensionFunction) function);              
+//      }
+//      else if (function instanceof ExtensionFunctionDefinition) {
+//        processor.registerExtensionFunction((ExtensionFunctionDefinition) function);              
       } else {
         throw new MorphlineCompilationException("Extension function has wrong class: " + clazz, config);
       }

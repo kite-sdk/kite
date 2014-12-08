@@ -128,8 +128,9 @@ public class SaxonMorphlineTest extends AbstractMorphlineTest {
     processAndVerifySuccess(record, 
         ImmutableMultimap.of(
             "id", "123", 
-            "text", "sample tweet onesample tweet two", 
-            "bar", "sample tweet onesample tweet two")
+            "text", "sample tweet onesample tweet two" 
+            //"bar", "sample tweet onesample tweet two"
+            )
         );    
     in.close();
   }  
