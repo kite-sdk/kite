@@ -184,7 +184,11 @@ public final class ReadAvroParquetFileBuilder implements CommandBuilder {
       } catch (IOException e) {
         throw new MorphlineRuntimeException(e);
       } finally {
-        Closeables.closeQuietly(reader);
+        try {
+          Closeables.closeQuietly(reader);
+        } catch (Exception e) {
+          ; // tmp work-around for https://issues.apache.org/jira/browse/PARQUET-145
+        }
       }
     }
         
