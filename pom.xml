@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kitesdk</groupId>
   <artifactId>kite-parent</artifactId>
-  <version>0.17.2-SNAPSHOT</version>
+  <version>0.17.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
