@@ -107,7 +107,9 @@ public class Main extends Configured implements Tool {
 
   @Override
   public int run(String[] args) throws Exception {
-    DefaultConfiguration.set(getConf());
+    if (getConf() != null) {
+      DefaultConfiguration.set(getConf());
+    }
 
     try {
       jc.parse(args);

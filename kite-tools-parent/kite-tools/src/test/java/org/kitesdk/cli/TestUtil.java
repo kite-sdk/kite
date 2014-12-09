@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.internal.matchers.TypeSafeMatcher;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.spi.DefaultConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class TestUtil {
   }
 
   public static int run(Logger console, String... args) throws Exception {
-    return run(console, new Configuration(), args);
+    return run(console, DefaultConfiguration.get(), args);
   }
 
   public static int run(Configuration conf, String... args) throws Exception {
