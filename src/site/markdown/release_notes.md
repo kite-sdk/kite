@@ -3,12 +3,15 @@
 All past Kite releases are documented on this page. Upcoming release dates can be found in
 [JIRA](https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel).
 
-## Version TBD
+## Version 0.17.1
 
-Release date: TBD
+Release date: 9 December 2014
 
-Version TBD contains the following notable changes:
+Version 0.17.1 contains the following notable changes:
 
+* Kite data
+    * CSV imports will now use the dataset schema to read CSV records rather than inferring a schema from the data (see [CDK-800](https://issues.cloudera.org/browse/CDK-800)).
+    * CSV floats or doubles read with an integer or long type will result in NumberFormatException during import. Previously, this was caught by checking the inferred schema with the dataset schema, but this method was unreliable. See [CDK-801](https://issues.cloudera.org/browse/CDK-801) for more information.
 * Morphlines Library
     * Added support for deleting documents stored in Solr [by unique id](kite-morphlines/morphlinesReferenceGuide.html#loadSolrDeleteById) as well as [by query](kite-morphlines/morphlinesReferenceGuide.html#loadSolrDeleteByQuery)
     * Added documentation on how to update a subset of fields of an existing document stored in Solr: [partial document updates](kite-morphlines/morphlinesReferenceGuide.html#loadSolrPartialUpdate)

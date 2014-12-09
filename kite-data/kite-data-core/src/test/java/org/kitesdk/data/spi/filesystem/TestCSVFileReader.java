@@ -44,13 +44,15 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
   public static final String CSV_CONTENT = (
       "str,34,2.11,false\r\n" +
       "\"str,2\",,4,true\n" +
-      "str3,\"\",null");
+      "str3,\"\",null\n" +
+      "str4,,,");
 
   public static final String REORDERED_CSV_CONTENT = (
       "myBool,myFloat,myInt,myStr,ignored\n" +
       "false,2.11,34,str,68\r\n" +
       "true,4,,\"str,2\"\n" +
-      ",null,\"\",str3\n");
+      "true,null,\"\",str3\n" +
+      ",,,str4\n");
 
   public static final String VALIDATOR_CSV_CONTENT =
       "id,string,even\n" +
@@ -98,6 +100,14 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
       .name("myStr").type().stringType().noDefault()
       .name("myInt").type().intType().intDefault(0)
       .name("myFloat").type().floatType().noDefault()
+      .name("myBool").type().booleanType().booleanDefault(false)
+      .endRecord();
+
+  public static Schema TYPE_ERROR_SCHEMA = SchemaBuilder.record("Normal")
+      .fields()
+      .name("myString").type().stringType().noDefault()
+      .name("myInt").type().intType().intDefault(0)
+      .name("myFloat").type().intType().intDefault(34)
       .name("myBool").type().booleanType().booleanDefault(false)
       .endRecord();
 
@@ -193,6 +203,13 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     Assert.assertEquals("", rec.get(1));
     Assert.assertEquals("null", rec.get(2));
     Assert.assertEquals("missing value", rec.get(3));
+
+    Assert.assertTrue(reader.hasNext());
+    rec = reader.next();
+    Assert.assertEquals("str4", rec.get(0));
+    Assert.assertEquals("", rec.get(1));
+    Assert.assertEquals("", rec.get(2));
+    Assert.assertEquals("", rec.get(3));
 
     Assert.assertFalse(reader.hasNext());
   }
@@ -294,6 +311,15 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     Assert.assertEquals(true, rec.get(3));
 
     Assert.assertTrue(reader.hasNext());
+    TestHelpers.assertThrows("Should complain about null as a number",
+        NumberFormatException.class, new Runnable() {
+          @Override
+          public void run() {
+            reader.next();
+          }
+        });
+
+    Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about missing default",
         AvroRuntimeException.class, new Runnable() {
       @Override
@@ -303,6 +329,24 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     });
 
     Assert.assertFalse(reader.hasNext());
+  }
+
+  @Test
+  public void testBadNumericSchema() {
+    final DatasetDescriptor desc = new DatasetDescriptor.Builder()
+        .schema(TYPE_ERROR_SCHEMA)
+        .build();
+    final CSVFileReader<GenericData.Record> reader =
+        new CSVFileReader<GenericData.Record>(localfs, csvFile, desc,
+            DataModelUtil.accessor(GenericData.Record.class, desc.getSchema()));
+    reader.initialize();
+    Assert.assertTrue(reader.hasNext());
+    TestHelpers.assertThrows("Should reject float value for integer schema",
+        NumberFormatException.class, new Runnable() {
+          @Override public void run() {
+            reader.next();
+          }
+        });
   }
 
   @Test
@@ -329,6 +373,15 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     Assert.assertEquals(0, rec.get(1));
     Assert.assertEquals(4.0f, rec.get(2));
     Assert.assertEquals(true, rec.get(3));
+
+    Assert.assertTrue(reader.hasNext());
+    TestHelpers.assertThrows("Should complain about null as a number",
+        NumberFormatException.class, new Runnable() {
+          @Override
+          public void run() {
+            reader.next();
+          }
+        });
 
     Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about missing default",
@@ -368,9 +421,19 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     Assert.assertEquals(true, bean.myBool);
 
     Assert.assertTrue(reader.hasNext());
+    TestHelpers.assertThrows("Should complain about null as a number",
+        NumberFormatException.class, new Runnable() {
+          @Override
+          public void run() {
+            reader.next();
+          }
+        });
+
+    Assert.assertTrue(reader.hasNext());
     bean = reader.next();
-    Assert.assertEquals("str3", bean.myStr);
+    Assert.assertEquals("str4", bean.myStr);
     Assert.assertEquals(null, bean.myInt);
+    // null because the read schema from ReflectData.AllowNull permits it
     Assert.assertEquals(null, bean.myFloat);
     // not null because there is a value present in the data, which is false
     // when converted with Boolean.valueOf
@@ -404,11 +467,23 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     Assert.assertEquals(true, bean.myBool);
 
     Assert.assertTrue(reader.hasNext());
+    TestHelpers.assertThrows("Should complain about null as a number",
+        NumberFormatException.class, new Runnable() {
+          @Override
+          public void run() {
+            reader.next();
+          }
+        });
+
+    Assert.assertTrue(reader.hasNext());
     bean = reader.next();
-    Assert.assertEquals("str3", bean.myStr);
+    Assert.assertEquals("str4", bean.myStr);
     Assert.assertEquals(null, bean.myInt);
+    // null because the read schema from ReflectData.AllowNull permits it
     Assert.assertEquals(null, bean.myFloat);
-    Assert.assertEquals(null, bean.myBool);
+    // not null because there is a value present in the data, which is false
+    // when converted with Boolean.valueOf
+    Assert.assertEquals(false, bean.myBool);
 
     Assert.assertFalse(reader.hasNext());
   }
@@ -438,6 +513,15 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     Assert.assertEquals(true, record.get(3));
 
     Assert.assertTrue(reader.hasNext());
+    TestHelpers.assertThrows("Should complain about null as a number",
+        NumberFormatException.class, new Runnable() {
+      @Override
+      public void run() {
+        reader.next();
+      }
+    });
+
+    Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about missing default",
         AvroRuntimeException.class, new Runnable() {
       @Override
@@ -445,7 +529,6 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
         reader.next();
       }
     });
-
     Assert.assertFalse(reader.hasNext());
   }
 }
