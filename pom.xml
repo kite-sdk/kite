@@ -187,7 +187,7 @@
     <vers.maven-javadoc-plugin>2.9.1</vers.maven-javadoc-plugin>
     <vers.maven-plugin-plugin>3.1</vers.maven-plugin-plugin>
     <vers.maven-project-info-reports-plugin>2.7</vers.maven-project-info-reports-plugin>
-    <vers.maven-release-plugin>2.4.1</vers.maven-release-plugin>
+    <vers.maven-release-plugin>2.5.1</vers.maven-release-plugin>
     <vers.git-provider>1.8.1</vers.git-provider>
     <vers.maven-shade-plugin>2.1</vers.maven-shade-plugin>
     <vers.maven-site-plugin>3.3</vers.maven-site-plugin>
