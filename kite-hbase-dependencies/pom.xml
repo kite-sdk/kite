@@ -34,7 +34,7 @@
   <parent>
     <groupId>org.kitesdk</groupId>
     <artifactId>kite-parent</artifactId>
-    <version>0.17.2-SNAPSHOT</version>
+    <version>0.17.1-SNAPSHOT</version>
   </parent>
 
   <name>Kite HBase Dependencies Module</name>
