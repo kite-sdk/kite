@@ -7,7 +7,7 @@ All past Kite releases are documented on this page. Upcoming release dates can b
 
 Release date: 9 December 2014
 
-Version 0.17.1 contains the following notable changes:
+Version 0.17.1 is a bug-fix release with the following notable changes:
 
 * Kite data
     * CSV imports will now use the dataset schema to read CSV records rather than inferring a schema from the data (see [CDK-800](https://issues.cloudera.org/browse/CDK-800)).
@@ -18,6 +18,9 @@ Version 0.17.1 contains the following notable changes:
     * Added ability to register custom Java extension functions with xquery and xslt morphline commands: [xquery](kite-morphlines/morphlinesReferenceGuide.html#xquery) morphline command.
     * Enhanced documentation for [xquery](kite-morphlines/morphlinesReferenceGuide.html#xquery) morphline command.
     * Upgraded kite-morphlines-maxmind module from maxmind-db-0.3.3 to bug fix release maxmind-db-1.0.0
+    
+The full [change log](https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10904)
+is available from JIRA.
     
 ## Version 0.17.0
 
