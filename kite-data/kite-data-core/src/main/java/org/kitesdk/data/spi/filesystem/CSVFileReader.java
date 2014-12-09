@@ -298,8 +298,13 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
           throw new DatasetReaderException(
               "Unsupported field type:" + schema.getType());
       }
-    } catch (NumberFormatException ex) {
-      return null;
+    } catch (NumberFormatException e) {
+      // empty string is considered null for numeric types
+      if (string.isEmpty()) {
+        return null;
+      } else {
+        throw e;
+      }
     }
   }
 
