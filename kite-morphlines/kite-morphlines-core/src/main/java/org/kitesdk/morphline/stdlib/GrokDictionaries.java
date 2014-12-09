@@ -15,11 +15,15 @@
  */
 package org.kitesdk.morphline.stdlib;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
+
 import org.kitesdk.morphline.shaded.com.google.common.io.Closeables;
+
 import com.typesafe.config.Config;
+
 import org.kitesdk.morphline.api.MorphlineCompilationException;
 import org.kitesdk.morphline.base.Configs;
 import org.kitesdk.morphline.shaded.com.google.code.regexp.Pattern;
@@ -72,7 +76,7 @@ final class GrokDictionaries {
         );
 
         LOG.debug("Loading grok dictionary:{} source:classpath", dictionaryResource);
-        InputStreamReader inputStreamReader = new InputStreamReader(resource.openStream());
+        InputStreamReader inputStreamReader = new InputStreamReader(resource.openStream(), Charsets.UTF_8);
         loadDictionary(inputStreamReader);
         inputStreamReader.close();
       }
@@ -123,7 +127,7 @@ final class GrokDictionaries {
         loadDictionaryFile(file);
       }
     } else {
-      Reader reader = new InputStreamReader(new FileInputStream(fileOrDir), "UTF-8");
+      Reader reader = new InputStreamReader(new FileInputStream(fileOrDir), Charsets.UTF_8);
       try {
         loadDictionary(reader);
       } finally {
