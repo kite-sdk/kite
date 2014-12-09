@@ -186,7 +186,7 @@ public final class ReadAvroParquetFileBuilder implements CommandBuilder {
       } finally {
         try {
           Closeables.closeQuietly(reader);
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
           ; // tmp work-around for https://issues.apache.org/jira/browse/PARQUET-145
         }
       }
