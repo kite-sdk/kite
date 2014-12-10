@@ -69,7 +69,7 @@
         
           <a class="page-link" href="/docs/current/guide/URIs/">Dataset and View URIs</a>
         
-          <a class="page-link" href="/docs/current/guide/Using-Kite-with-Apache-Maven/"></a>
+          <a class="page-link" href="/docs/current/guide/Using-Kite-with-Apache-Maven/">Using Kite with Apache Maven</a>
         
           <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
         
@@ -120,9 +120,9 @@
   <li><a href="#schema">schema</a> : view the schema for an existing dataset.</li>
   <li><a href="#info">info</a>: show metadata for a dataset.</li>
   <li><a href="#show">show</a>: show the first <em>n</em> records of a dataset.</li>
-  <li><a href="#csvSchema">csv-schema</a>: create a schema from a CSV data file.</li>
-  <li><a href="#csvImport">csv-import</a>: import a CSV data file.</li>
-  <li><a href="#objSchema">obj-schema</a>: create a schema from a Java object.</li>
+  <li><a href="#csv-schema">csv-schema</a>: create a schema from a CSV data file.</li>
+  <li><a href="#csv-import">csv-import</a>: import a CSV data file.</li>
+  <li><a href="#obj-schema">obj-schema</a>: create a schema from a Java object.</li>
   <li><a href="#partition-config">partition-config</a>: create a partition strategy for a schema.</li>
   <li><a href="#mapping-config">mapping-config</a>: create a mapping strategy for a schema.</li>
   <li><a href="#log4j-config">log4j-config</a>: Configure Log4j.</li>
@@ -186,11 +186,14 @@
 <p><a href="#top">Back to the Top</a></p>
 
 <hr />
-<p><a name="csvSchema"></a></p>
 
 <h2 id="csv-schema">csv-schema</h2>
 
 <p>Use <code>csv-schema</code> to generate an Avro schema from a comma separated value (CSV) file.</p>
+
+<p>The schema produced by this command is a record based on the first few lines of the file. If the first line is a header, it is used to name the fields.</p>
+
+<p>Field schemas are set by inspecting the first non-empty value in each field. Fields are nullable unless the field’s name is passed using <code>--require</code>. Nullable fields default to <code>null</code>.</p>
 
 <h3 id="syntax">Syntax</h3>
 
@@ -202,12 +205,24 @@
 <table>
   <tbody>
     <tr>
-      <td><code>--skip-lines</code></td>
-      <td>The number of lines to skip before the start of the CSV data. Default is 0.</td>
+      <td><code>--class,</code><br /><code>--record-name</code></td>
+      <td>A class name or record name for the schema result. This value is <strong>required</strong>.</td>
     </tr>
     <tr>
-      <td><code>--quote</code></td>
-      <td>Quote character in the CSV data file. Default is the double-quote (“).</td>
+      <td><code>-o, --output</code></td>
+      <td>Save schema avsc to path.</td>
+    </tr>
+    <tr>
+      <td><code>--require</code></td>
+      <td>Mark a field required; the schema for this field will not allow null values.<br />Use more than once to require multiple fields.</td>
+    </tr>
+    <tr>
+      <td><code>--no-header</code></td>
+      <td>Use this option when the CSV data file does not have header information in the first line.<br />Fields are given the default names <em>field_0</em>, <em>field_1,…field_n</em>.</td>
+    </tr>
+    <tr>
+      <td><code>--skip-lines</code></td>
+      <td>The number of lines to skip before the start of the CSV data. Default is 0.</td>
     </tr>
     <tr>
       <td><code>--delimiter</code></td>
@@ -218,16 +233,8 @@
       <td>Escape character in the CSV data file. Default is the backslash (\).</td>
     </tr>
     <tr>
-      <td><code>--class,</code><br /><code>--record-name</code></td>
-      <td>A class name or record name for the schema result. This value is <strong>required</strong>.</td>
-    </tr>
-    <tr>
-      <td><code>-o, --output</code></td>
-      <td>Save schema avsc to path.</td>
-    </tr>
-    <tr>
-      <td><code>--no-header</code></td>
-      <td>Use this option when the CSV data file does not have header information in the first line.<br />Fields are given the default names <em>field_0</em>, <em>field_1,…field_n</em>.</td>
+      <td><code>--quote</code></td>
+      <td>Quote character in the CSV data file. Default is the double-quote (“).</td>
     </tr>
     <tr>
       <td><code>--minimize</code></td>
@@ -254,10 +261,11 @@
 
 <hr />
 
-<p><a name="objSchema"></a></p>
-
 <h2 id="obj-schema">obj-schema</h2>
-<p>Build a schema from a Java class. Fields are assumed to be nullable by default. You can edit the generated schema directly to remove the “null” option for specific fields.</p>
+
+<p>Build a schema from a Java class.</p>
+
+<p>Fields are assumed to be nullable if they are Objects, or required if they are primitives. You can edit the generated schema directly to remove the <code>null</code> option for specific fields.</p>
 
 <h3 id="syntax-1">Syntax</h3>
 
@@ -384,7 +392,7 @@
 
 <h3 id="syntax-2">Syntax</h3>
 
-<pre><code>kite-dataset [-v] update-dataset &lt;dataset&gt; [command options]
+<pre><code>kite-dataset [-v] update &lt;dataset&gt; [command options]
 </code></pre>
 
 <h3 id="options-3">Options</h3>
@@ -464,11 +472,13 @@
 
 <hr />
 
-<p><a name="csvImport"></a></p>
-
 <h2 id="csv-import">csv-import</h2>
 
 <p>Copy CSV records into a dataset.</p>
+
+<p>Kite matches the CSV header to the target record schema’s fields by name. If a header is not present (that is, you use the <code>--no-header</code> option), then CSV columns are matched with the target fields based on their position.</p>
+
+<p>As Kite constructs each record, it validates values using the target field’s schema. Invalid values (in numeric fields) and null values (in required fields) cause exceptions. Kite handles empty strings as null values for numeric fields.</p>
 
 <h3 id="syntax-4">Syntax</h3>
 
@@ -480,24 +490,24 @@
 <table>
   <tbody>
     <tr>
-      <td><code>--escape</code></td>
-      <td>Escape character. Default is backslash (\).</td>
-    </tr>
-    <tr>
-      <td><code>--delimiter</code></td>
-      <td>Delimiter character. Default is comma (,).</td>
-    </tr>
-    <tr>
-      <td><code>--quote</code></td>
-      <td>Quote character. Default is double quote (“).</td>
+      <td><code>--no-header</code></td>
+      <td>Use this option when the CSV data file does not have header information in the first line.<br />Fields are given the default names <em>field_0</em>, <em>field_1,…field_n</em>.</td>
     </tr>
     <tr>
       <td><code>--skip-lines</code></td>
       <td>Lines to skip before CSV start (default: 0)</td>
     </tr>
     <tr>
-      <td><code>--no-header</code></td>
-      <td>Use this option when the CSV data file does not have header information in the first line.<br />Fields are given the default names <em>field_0</em>, <em>field_1,…field_n</em>.</td>
+      <td><code>--delimiter</code></td>
+      <td>Delimiter character. Default is comma (,).</td>
+    </tr>
+    <tr>
+      <td><code>--escape</code></td>
+      <td>Escape character. Default is backslash (\).</td>
+    </tr>
+    <tr>
+      <td><code>--quote</code></td>
+      <td>Quote character. Default is double quote (“).</td>
     </tr>
   </tbody>
 </table>

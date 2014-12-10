@@ -69,7 +69,7 @@
         
           <a class="page-link" href="/docs/current/guide/URIs/">Dataset and View URIs</a>
         
-          <a class="page-link" href="/docs/current/guide/Using-Kite-with-Apache-Maven/"></a>
+          <a class="page-link" href="/docs/current/guide/Using-Kite-with-Apache-Maven/">Using Kite with Apache Maven</a>
         
           <a class="page-link" href="/docs/current/guide/Using-the-Kite-CLI-to-Create-a-Dataset/">Using the Kite Command Line Interface to Create a Dataset</a>
         
@@ -115,9 +115,9 @@
 
 <p>If you don’t have a CSV file handy, you can copy the next code snippet and save it as a plain text file named <em>sandwiches.csv</em>.</p>
 
-<pre><code>name, description
-Reuben, Pastrami and sauerkraut on toasted rye with Russian dressing.
-PBJ, Peanut butter and grape jelly on white bread.
+<pre><code>name,description
+Reuben,Pastrami and sauerkraut on toasted rye with Russian dressing.
+PBJ,Peanut butter and grape jelly on white bread.
 </code></pre>
 
 <h2 id="infer-the-schema">Infer the Schema</h2>
@@ -144,6 +144,8 @@ PBJ, Peanut butter and grape jelly on white bread.
 <a href="#n12" name="n12">12</a>
 <a href="#n13" name="n13">13</a>
 <a href="#n14" name="n14">14</a>
+<a href="#n15" name="n15">15</a>
+<a href="#n16" name="n16">16</a>
 </pre></td>
   <td class="code"><pre>{
   <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
@@ -152,11 +154,13 @@ PBJ, Peanut butter and grape jelly on white bread.
   <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span> : [ {
     <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">name</span><span style="color:#710">&quot;</span></span>,
     <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from </span><span style="color:#b0b">\&quot;</span><span style="color:#D20">Reuben</span><span style="color:#b0b">\&quot;</span><span style="color:#710">&quot;</span></span>
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from 'Reuben'</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>default</span><span style="color:#404">&quot;</span></span> : <span style="color:#088">null</span>
   }, {
     <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">description</span><span style="color:#710">&quot;</span></span>,
     <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from </span><span style="color:#b0b">\&quot;</span><span style="color:#D20"> Pastrami and sauerkraut on toasted rye with Russian dressing.</span><span style="color:#b0b">\&quot;</span><span style="color:#710">&quot;</span></span>
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from 'Pastrami and sauerkraut on toasted rye with Russia'</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>default</span><span style="color:#404">&quot;</span></span> : <span style="color:#088">null</span>
   } ]
 }
 </pre></td>
@@ -193,6 +197,8 @@ PBJ, Peanut butter and grape jelly on white bread.
 <a href="#n12" name="n12">12</a>
 <a href="#n13" name="n13">13</a>
 <a href="#n14" name="n14">14</a>
+<a href="#n15" name="n15">15</a>
+<a href="#n16" name="n16">16</a>
 </pre></td>
   <td class="code"><pre>{
   <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
@@ -201,11 +207,13 @@ PBJ, Peanut butter and grape jelly on white bread.
   <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span> : [ {
     <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">name</span><span style="color:#710">&quot;</span></span>,
     <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from </span><span style="color:#b0b">\&quot;</span><span style="color:#D20">Reuben</span><span style="color:#b0b">\&quot;</span><span style="color:#710">&quot;</span></span>
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from 'Reuben'</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>default</span><span style="color:#404">&quot;</span></span> : <span style="color:#088">null</span>
   }, {
     <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">description</span><span style="color:#710">&quot;</span></span>,
     <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
-    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from </span><span style="color:#b0b">\&quot;</span><span style="color:#D20"> Pastrami and sauerkraut on toasted rye with Russian dressing.</span><span style="color:#b0b">\&quot;</span><span style="color:#710">&quot;</span></span>
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from 'Pastrami and sauerkraut on toasted rye with Russia'</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>default</span><span style="color:#404">&quot;</span></span> : <span style="color:#088">null</span>
   } ]
 }
 </pre></td>
@@ -234,8 +242,8 @@ PBJ, Peanut butter and grape jelly on white bread.
 
 <p>By default, CLI retrieves up to the first 10 records from your dataset.</p>
 
-<pre><code>{"name": "Reuben", "description": " Pastrami and sauerkraut on toasted rye with Russian dressing."}
-{"name": "PBJ", "description": " Peanut butter and grape jelly on white bread."}
+<pre><code>{"name": "Reuben", "description": "Pastrami and sauerkraut on toasted rye with Russian dressing."}
+{"name": "PBJ", "description": "Peanut butter and grape jelly on white bread."}
 </code></pre>
 
 <p>If you find that number of sandwiches overwhelming, you can change the number of records the query returns.</p>
@@ -245,7 +253,7 @@ PBJ, Peanut butter and grape jelly on white bread.
 
 <p>This time only the first record prints to screen.</p>
 
-<pre><code>{"name": "Reuben", "description": " Pastrami and sauerkraut on toasted rye with Russian dressing."}
+<pre><code>{"name": "Reuben", "description": "Pastrami and sauerkraut on toasted rye with Russian dressing."}
 </code></pre>
 
 <p>You can import additional records to the database and use Hive or Impala to query the results.</p>
