@@ -2894,7 +2894,7 @@ The xquery command provides the following configuration options:
 | supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
 | languageVersion | "1.0" | Must be {{"1.0"}} for XQuery 1.0 or {{"3.0"}} for XQuery 3.0. |
 | features | null | An optional JSON object containing zero or more name\-value pairs that represent configuration properties for [Saxon features|http://www.saxonica.com/html/documentation/javadoc/net/sf/saxon/lib/FeatureKeys.html]. |
-| extensionFunctions | \[\] | An optional list of Java class names that implement custom Saxon extension functions. Each such Java class must implement {{net.sf.saxon.s9api.ExtensionFunction}} or {{net.sf.saxon.lib.ExtensionFunctionDefinition}} as described in the [Saxon documentation|http://www.saxonica.com/documentation/#!extensibility/integratedfunctions]. |
+| extensionFunctions | \[\] | An optional list of Java class names that implement custom Saxon extension functions. Each such Java class must implement {{net.sf.saxon.s9api.ExtensionFunction}} as described in the [Saxon documentation|http://www.saxonica.com/documentation/#!extensibility/integratedfunctions]. |
 | fragments | n/a | An array containing exactly one _fragment_ JSON object, as described below. |
 
 Each fragment provides the following configuration options:
@@ -2997,7 +2997,7 @@ The command provides the following configuration options:
 || Property Name || Default || Description ||
 | supportedMimeTypes | null | Optionally, require the input record to match one of the MIME types in this list. |
 | features | null | An optional JSON object containing zero or more name\-value pairs that represent configuration properties for [Saxon features|http://www.saxonica.com/html/documentation/javadoc/net/sf/saxon/lib/FeatureKeys.html]. |
-| extensionFunctions | \[\] | An optional list of Java class names that implement custom Saxon extension functions. Each such Java class must implement {{net.sf.saxon.s9api.ExtensionFunction}} or {{net.sf.saxon.lib.ExtensionFunctionDefinition}} as described in the [Saxon documentation|http://www.saxonica.com/documentation/#!extensibility/integratedfunctions]. |
+| extensionFunctions | \[\] | An optional list of Java class names that implement custom Saxon extension functions. Each such Java class must implement {{net.sf.saxon.s9api.ExtensionFunction}} as described in the [Saxon documentation|http://www.saxonica.com/documentation/#!extensibility/integratedfunctions]. |
 | fragments | n/a | An array containing exactly one _fragment_ JSON object, as described below. |
 
 Each fragment provides the following configuration options:
