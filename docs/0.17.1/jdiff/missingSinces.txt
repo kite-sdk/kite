@@ -1,0 +1,7 @@
+MISSING @SINCE TAG: org.kitesdk.morphline.solr.DocumentLoader Method deleteById(java.lang.String)
+NO DOC BLOCK: org.kitesdk.morphline.solr.SolrServerDocumentLoader Method deleteById(java.lang.String)
+MISSING @SINCE TAG: org.kitesdk.morphline.solr.DocumentLoader Method deleteByQuery(java.lang.String)
+NO DOC BLOCK: org.kitesdk.morphline.solr.SolrServerDocumentLoader Method deleteByQuery(java.lang.String)
+NO DOC BLOCK: org.kitesdk.morphline.solr.SolrLocator Method getSolrServer()
+NO DOC BLOCK: org.kitesdk.morphline.base.Metrics Field NUM_FINAL_CHILD_RECORDS
+NO DOC BLOCK: org.kitesdk.morphline.solr.LoadSolrBuilder Field SOLR_LOCATOR_PARAM
