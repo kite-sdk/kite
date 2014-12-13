@@ -20,12 +20,15 @@ import com.beust.jcommander.internal.Lists;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.DatasetRepositories;
 import org.kitesdk.data.spi.DatasetRepository;
+import org.kitesdk.data.spi.Registration;
 import org.slf4j.Logger;
 
 abstract class BaseDatasetCommand extends BaseCommand {
@@ -77,16 +80,31 @@ abstract class BaseDatasetCommand extends BaseCommand {
     return repo;
   }
 
-  protected boolean isDataUri(String uriOrName) {
-    return (uriOrName.startsWith("dataset:") || uriOrName.startsWith("view:"));
+  protected static Map<String, String> optionsForUri(URI uri) {
+    Preconditions.checkArgument(isDatasetOrViewUri(uri.toString()),
+        "Must be a dataset or view URI: " + uri);
+    return Registration.lookupDatasetUri(
+        URI.create(uri.getSchemeSpecificPart())).second();
   }
 
-  protected boolean isRepoUri(String uriOrName) {
+  protected static boolean isViewUri(String uriOrName) {
+    return uriOrName.startsWith("view:");
+  }
+
+  protected static boolean isDatasetUri(String uriOrName) {
+    return uriOrName.startsWith("dataset:");
+  }
+
+  protected static boolean isDatasetOrViewUri(String uriOrName) {
+    return (isDatasetUri(uriOrName) || isViewUri(uriOrName));
+  }
+
+  protected static boolean isRepoUri(String uriOrName) {
     return uriOrName.startsWith("repo:");
   }
 
   protected <E> View<E> load(String uriOrName, Class<E> type) {
-    if (isDataUri(uriOrName)) {
+    if (isDatasetOrViewUri(uriOrName)) {
       return Datasets.<E, View<E>>load(uriOrName, type);
     } else {
       return getDatasetRepository().load(namespace, uriOrName);
@@ -129,7 +147,7 @@ abstract class BaseDatasetCommand extends BaseCommand {
   }
 
   String buildDatasetUri(String uriOrName) {
-    if (isDataUri(uriOrName)) {
+    if (isDatasetOrViewUri(uriOrName)) {
       return uriOrName;
     }
     return new URIBuilder(buildRepoURI(), namespace, uriOrName).build().toString();

@@ -77,7 +77,7 @@ public class UpdateDatasetCommand extends BaseDatasetCommand {
 
     DatasetDescriptor descriptor = descriptorBuilder.build();
 
-    if (isDataUri(dataset)) {
+    if (isDatasetOrViewUri(dataset)) {
       Datasets.<GenericData.Record, Dataset<GenericData.Record>> update(dataset, descriptor, GenericData.Record.class);
     } else {
       getDatasetRepository().update(namespace, dataset, descriptor);

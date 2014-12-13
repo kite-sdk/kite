@@ -30,7 +30,7 @@ import org.kitesdk.cli.commands.CopyCommand;
 import org.kitesdk.cli.commands.CreateColumnMappingCommand;
 import org.kitesdk.cli.commands.CreateDatasetCommand;
 import org.kitesdk.cli.commands.CreatePartitionStrategyCommand;
-import org.kitesdk.cli.commands.DeleteDatasetCommand;
+import org.kitesdk.cli.commands.DeleteCommand;
 import com.google.common.collect.ImmutableSet;
 import java.io.InputStream;
 import java.util.Properties;
@@ -92,7 +92,7 @@ public class Main extends Configured implements Tool {
     jc.addCommand("copy", new CopyCommand(console));
     jc.addCommand("transform", new TransformCommand(console));
     jc.addCommand("update", new UpdateDatasetCommand(console));
-    jc.addCommand("delete", new DeleteDatasetCommand(console));
+    jc.addCommand("delete", new DeleteCommand(console));
     jc.addCommand("schema", new SchemaCommand(console));
     jc.addCommand("info", new InfoCommand(console));
     jc.addCommand("show", new ShowRecordsCommand(console));
