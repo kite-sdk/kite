@@ -22,6 +22,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.TableType;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.junit.After;
 import org.junit.Assert;
@@ -159,12 +160,16 @@ public class TestManagedExternalHandling {
     badSerDe.getSd().getSerdeInfo().setSerializationLib("com.example.ExampleHiveSerDe");
     metastore.createTable(badSerDe);
 
-    Table badSchema = HiveUtils.createEmptyTable("bad", "bad_schema");
-    badSchema.setTableType(TableType.MANAGED_TABLE.toString()); // readable type
-    badSchema.getSd().getSerdeInfo().setSerializationLib("org.apache.hadoop.hive.serde2.avro.AvroSerDe");
-    badSchema.getSd().setInputFormat("org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
-    badSchema.getSd().setOutputFormat("org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat");
-    metastore.createTable(badSchema);
+    // add a bad schema if decimal is supported (not supported by Kite)
+    if (HiveSchemaConverter.decimalClass != null) {
+      Table badSchema = HiveUtils.createEmptyTable("bad", "bad_schema");
+      badSchema.setTableType(TableType.MANAGED_TABLE.toString()); // readable type
+      badSchema.getSd().getSerdeInfo().setSerializationLib("org.apache.hadoop.hive.serde2.avro.AvroSerDe");
+      badSchema.getSd().setInputFormat("org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat");
+      badSchema.getSd().setOutputFormat("org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat");
+      badSchema.getSd().getCols().add(new FieldSchema("invalid", "decimal(1,2)", null));
+      metastore.createTable(badSchema);
+    }
 
     // note that unreadable tables are not in the lists
     Set<String> expectedNamespaces = Sets.newHashSet("default", "ns");

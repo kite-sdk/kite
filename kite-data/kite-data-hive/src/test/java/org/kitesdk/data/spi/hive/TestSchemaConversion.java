@@ -67,18 +67,18 @@ public class TestSchemaConversion {
         }
       };
 
-  private static final TypeInfo BOOLEAN_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.BOOLEAN);
-  private static final TypeInfo INT_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.INT);
-  private static final TypeInfo LONG_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.LONG);
-  private static final TypeInfo FLOAT_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.FLOAT);
-  private static final TypeInfo DOUBLE_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.DOUBLE);
-  private static final TypeInfo STRING_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.STRING);
-  private static final TypeInfo BINARY_TYPE_INFO = HiveUtils.Converter.TYPE_TO_TYPEINFO.get(Schema.Type.BYTES);
+  private static final TypeInfo BOOLEAN_TYPE_INFO = HiveSchemaConverter.TYPE_TO_TYPEINFO.get(Schema.Type.BOOLEAN);
+  private static final TypeInfo INT_TYPE_INFO = HiveSchemaConverter.TYPE_TO_TYPEINFO.get(Schema.Type.INT);
+  private static final TypeInfo LONG_TYPE_INFO = HiveSchemaConverter.TYPE_TO_TYPEINFO.get(Schema.Type.LONG);
+  private static final TypeInfo FLOAT_TYPE_INFO = HiveSchemaConverter.TYPE_TO_TYPEINFO.get(Schema.Type.FLOAT);
+  private static final TypeInfo DOUBLE_TYPE_INFO = HiveSchemaConverter.TYPE_TO_TYPEINFO.get(Schema.Type.DOUBLE);
+  private static final TypeInfo STRING_TYPE_INFO = HiveSchemaConverter.TYPE_TO_TYPEINFO.get(Schema.Type.STRING);
+  private static final TypeInfo BINARY_TYPE_INFO = HiveSchemaConverter.TYPE_TO_TYPEINFO.get(Schema.Type.BYTES);
 
   @Test
   public void testConvertSchemaWithPrimitive() {
     Schema primitiveSchema = SchemaBuilder.builder().stringType();
-    List<FieldSchema> fields = HiveUtils.convertSchema(primitiveSchema);
+    List<FieldSchema> fields = HiveSchemaConverter.convertSchema(primitiveSchema);
 
     Assert.assertEquals("Should be a single FieldSchema", 1, fields.size());
     Assert.assertEquals("Should be named \"column\"",
@@ -90,7 +90,7 @@ public class TestSchemaConversion {
   @Test
   public void testConvertSchemaWithSimpleRecord() {
     // convertSchema returns a list of FieldSchema objects rather than TypeInfo
-    List<FieldSchema> fields = HiveUtils.convertSchema(SIMPLE_RECORD);
+    List<FieldSchema> fields = HiveSchemaConverter.convertSchema(SIMPLE_RECORD);
 
     Assert.assertEquals("Field names should match",
         Lists.newArrayList("id", "name"),
@@ -105,7 +105,7 @@ public class TestSchemaConversion {
   @Test
   public void testConvertSchemaWithComplexRecord() {
     // convertSchema returns a list of FieldSchema objects rather than TypeInfo
-    List<FieldSchema> fields = HiveUtils.convertSchema(COMPLEX_RECORD);
+    List<FieldSchema> fields = HiveSchemaConverter.convertSchema(COMPLEX_RECORD);
 
     Assert.assertEquals("Field names should match",
         Lists.newArrayList("groupName", "simpleRecords"),
@@ -124,7 +124,7 @@ public class TestSchemaConversion {
 
   @Test
   public void testSimpleRecord() {
-    TypeInfo type = HiveUtils.convert(SIMPLE_RECORD);
+    TypeInfo type = HiveSchemaConverter.convert(SIMPLE_RECORD);
 
     Assert.assertTrue("Record should be converted to struct",
         type instanceof StructTypeInfo);
@@ -140,7 +140,7 @@ public class TestSchemaConversion {
 
   @Test
   public void testArray() {
-    TypeInfo type = HiveUtils.convert(SchemaBuilder.array()
+    TypeInfo type = HiveSchemaConverter.convert(SchemaBuilder.array()
         .items().floatType());
 
     Assert.assertEquals("Array should be converted to list",
@@ -150,7 +150,7 @@ public class TestSchemaConversion {
 
   @Test
   public void testMap() {
-    TypeInfo type = HiveUtils.convert(SchemaBuilder.builder().map()
+    TypeInfo type = HiveSchemaConverter.convert(SchemaBuilder.builder().map()
         .values().booleanType());
 
     Assert.assertEquals("Map should be converted to map",
@@ -160,7 +160,7 @@ public class TestSchemaConversion {
 
   @Test
   public void testUnion() {
-    TypeInfo type = HiveUtils.convert(SchemaBuilder.builder().unionOf()
+    TypeInfo type = HiveSchemaConverter.convert(SchemaBuilder.builder().unionOf()
         .bytesType().and()
         .fixed("fixed").size(12).and()
         .doubleType().and()
@@ -178,7 +178,7 @@ public class TestSchemaConversion {
 
   @Test
   public void testEnum() {
-    TypeInfo type = HiveUtils.convert(SchemaBuilder.builder()
+    TypeInfo type = HiveSchemaConverter.convert(SchemaBuilder.builder()
         .enumeration("TestEnum").symbols("a", "b", "c"));
 
     Assert.assertEquals("Enum should be converted to string",
@@ -192,6 +192,6 @@ public class TestSchemaConversion {
         .name("children").type().array().items()
             .type("RecursiveRecord").noDefault()
         .endRecord();
-    HiveUtils.convert(recursiveRecord);
+    HiveSchemaConverter.convert(recursiveRecord);
   }
 }

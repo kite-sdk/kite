@@ -17,22 +17,6 @@
 package org.kitesdk.data.spi.hive;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.ArrayList;
-import java.util.HashMap;
-import org.apache.hadoop.hive.metastore.api.Order;
-import org.apache.hadoop.hive.metastore.api.SerDeInfo;
-import org.apache.hadoop.hive.metastore.api.SkewedInfo;
-import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
-import org.kitesdk.compat.DynMethods;
-import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetException;
-import org.kitesdk.data.DatasetIOException;
-import org.kitesdk.data.spi.FieldPartitioner;
-import org.kitesdk.data.Format;
-import org.kitesdk.data.Formats;
-import org.kitesdk.data.PartitionStrategy;
-import org.kitesdk.data.UnknownFormatException;
-import org.kitesdk.data.impl.Accessor;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -42,19 +26,32 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.TableType;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
+import org.apache.hadoop.hive.metastore.api.Order;
+import org.apache.hadoop.hive.metastore.api.SerDeInfo;
+import org.apache.hadoop.hive.metastore.api.SkewedInfo;
+import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
-import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
+import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.Format;
+import org.kitesdk.data.Formats;
+import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.UnknownFormatException;
+import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.SchemaUtil;
 
 class HiveUtils {
@@ -126,17 +123,19 @@ class HiveUtils {
       }
     }
 
+    PartitionStrategy partitionStrategy = null;
     if (isPartitioned(table)) {
       String partitionProperty = coalesce(
           properties.get(PARTITION_EXPRESSION_PROPERTY_NAME),
           properties.get(OLD_PARTITION_EXPRESSION_PROPERTY_NAME));
       if (partitionProperty != null) {
-        builder.partitionStrategy(
-            Accessor.getDefault().fromExpression(partitionProperty));
+        partitionStrategy = Accessor.getDefault()
+            .fromExpression(partitionProperty);
       } else {
         // build a partition strategy for the table from the Hive strategy
-        builder.partitionStrategy(fromPartitionColumns(getPartCols(table)));
+        partitionStrategy = fromPartitionColumns(getPartCols(table));
       }
+      builder.partitionStrategy(partitionStrategy);
     }
 
     String schemaUrlString = properties.get(AVRO_SCHEMA_URL_PROPERTY_NAME);
@@ -147,11 +146,15 @@ class HiveUtils {
       } catch (IOException e) {
         throw new DatasetIOException("Could not read schema", e);
       }
-    }
-
-    String schemaLiteral = properties.get(AVRO_SCHEMA_LITERAL_PROPERTY_NAME);
-    if (schemaLiteral != null) {
-      builder.schemaLiteral(schemaLiteral);
+    } else {
+      String schemaLiteral = properties.get(AVRO_SCHEMA_LITERAL_PROPERTY_NAME);
+      if (schemaLiteral != null) {
+        builder.schemaLiteral(schemaLiteral);
+      } else {
+        builder.schema(HiveSchemaConverter.convertTable(
+            table.getTableName(), table.getSd().getCols(),
+            partitionStrategy));
+      }
     }
 
     String compressionType = properties.get(COMPRESSION_TYPE_PROPERTY_NAME);
@@ -244,7 +247,7 @@ class HiveUtils {
         descriptor.getCompressionType().getName());
 
     // convert the schema to Hive columns
-    table.getSd().setCols(convertSchema(descriptor.getSchema()));
+    table.getSd().setCols(HiveSchemaConverter.convertSchema(descriptor.getSchema()));
 
     // copy partitioning info
     if (descriptor.isPartitioned()) {
@@ -372,7 +375,7 @@ class HiveUtils {
   static PartitionStrategy fromPartitionColumns(List<FieldSchema> fields) {
     PartitionStrategy.Builder builder = new PartitionStrategy.Builder();
     for (FieldSchema hiveSchema : fields) {
-      TypeInfo type = hiveTypeForName.invoke(hiveSchema.getType());
+      TypeInfo type = HiveSchemaConverter.parseTypeInfo(hiveSchema.getType());
       // any types not in the map will be treated as Strings
       builder.provided(hiveSchema.getName(),
           PROVIDED_TYPES.get(type.getTypeName()));
@@ -386,86 +389,6 @@ class HiveUtils {
       throw new DatasetException("Unsupported FieldPartitioner type: " + type);
     }
     return typeName;
-  }
-
-  static List<FieldSchema> convertSchema(Schema avroSchema) {
-    List<FieldSchema> columns = Lists.newArrayList();
-    if (Schema.Type.RECORD.equals(avroSchema.getType())) {
-      for (Field field : avroSchema.getFields()) {
-        columns.add(new FieldSchema(
-            field.name(), convert(field.schema()).getTypeName(), field.doc()));
-      }
-    } else {
-      columns.add(new FieldSchema(
-          "column", convert(avroSchema).getTypeName(), avroSchema.getDoc()));
-    }
-    return columns;
-  }
-
-  public static TypeInfo convert(Schema schema) {
-    return SchemaUtil.visit(schema, new Converter());
-  }
-
-  private static DynMethods.StaticMethod hiveTypeForName =
-      new DynMethods.Builder("getPrimitiveTypeInfo")
-          .impl(TypeInfoFactory.class, String.class)
-          .buildStatic();
-
-  static class Converter extends SchemaUtil.SchemaVisitor<TypeInfo> {
-    static final ImmutableMap<Schema.Type, TypeInfo> TYPE_TO_TYPEINFO =
-        ImmutableMap.<Schema.Type, TypeInfo>builder()
-            .put(Schema.Type.BOOLEAN, hiveTypeForName.<TypeInfo>invoke("boolean"))
-            .put(Schema.Type.INT, hiveTypeForName.<TypeInfo>invoke("int"))
-            .put(Schema.Type.LONG, hiveTypeForName.<TypeInfo>invoke("bigint"))
-            .put(Schema.Type.FLOAT, hiveTypeForName.<TypeInfo>invoke("float"))
-            .put(Schema.Type.DOUBLE, hiveTypeForName.<TypeInfo>invoke("double"))
-            .put(Schema.Type.STRING, hiveTypeForName.<TypeInfo>invoke("string"))
-            .put(Schema.Type.ENUM, hiveTypeForName.<TypeInfo>invoke("string"))
-            .put(Schema.Type.BYTES, hiveTypeForName.<TypeInfo>invoke("binary"))
-            .put(Schema.Type.FIXED, hiveTypeForName.<TypeInfo>invoke("binary"))
-            .build();
-
-    public TypeInfo record(Schema record, List<String> names, List<TypeInfo> types) {
-      return TypeInfoFactory.getStructTypeInfo(names, types);
-    }
-
-    @Override
-    public TypeInfo union(Schema union, List<TypeInfo> options) {
-      boolean nullable = false;
-      List<TypeInfo> nonNullTypes = Lists.newArrayList();
-      for (TypeInfo type : options) {
-        if (type != null) {
-          nonNullTypes.add(type);
-        } else {
-          nullable = true;
-        }
-      }
-
-      // handle a single field in the union
-      if (nonNullTypes.size() == 1) {
-        return nonNullTypes.get(0);
-      }
-
-      // TODO: where does nullability get passed?
-
-      return TypeInfoFactory.getUnionTypeInfo(nonNullTypes);
-    }
-
-    @Override
-    public TypeInfo array(Schema array, TypeInfo element) {
-      return TypeInfoFactory.getListTypeInfo(element);
-    }
-
-    @Override
-    public TypeInfo map(Schema map, TypeInfo value) {
-      return TypeInfoFactory.getMapTypeInfo(
-          TYPE_TO_TYPEINFO.get(Schema.Type.STRING), value);
-    }
-
-    @Override
-    public TypeInfo primitive(Schema primitive) {
-      return TYPE_TO_TYPEINFO.get(primitive.getType());
-    }
   }
 
   private static String getHiveParquetInputFormat() {
