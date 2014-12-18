@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Kite: A Data API for Hadoop</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/staging/">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/staging/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/staging/">Kite Development Guide</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <!--div class="trigger">
+        
+          <a class="page-link" href="/docs/staging/Column-Mapping.html">Column Mapping</a>
+        
+          <a class="page-link" href="/docs/staging/HBase-Storage-Cells.html">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/docs/staging/Inferring-a-Schema-from-a-Java-Class.html">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/docs/staging/Inferring-a-Schema-from-an-Avro-Data-File.html">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/docs/staging/Install-Kite.html">Install the Kite Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/staging/Interval-Notation.html">Interval Notation</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-Data-Module-Overview.html">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-Dataset-Command-Line-Interface.html">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-SDK-Guide.html">What is Kite?</a>
+        
+          <a class="page-link" href="/docs/staging/Parquet-vs-Avro-Format.html">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/docs/staging/Partition-Strategy-Format.html">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/docs/staging/Restricted-Views.html">Restricted Views</a>
+        
+          <a class="page-link" href="/docs/staging/Schema-Evolution.html">Schema Evolution</a>
+        
+          <a class="page-link" href="/docs/staging/Schema-URL-Warning.html">Schema URL Warning</a>
+        
+          <a class="page-link" href="/docs/staging/URIs.html">Dataset and View URIs</a>
+        
+          <a class="page-link" href="/docs/staging/Using-Kite-with-Apache-Maven.html">Using Kite with Apache Maven</a>
+        
+          <a class="page-link" href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/docs/staging/Viewing-with-Impala.html">Viewing a Kite CLI Dataset with Impala</a>
+        
+          <a class="page-link" href="/docs/staging/about.html">About Kite SDK</a>
+        
+          <a class="page-link" href="/docs/staging/all-pages.html">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/docs/staging/maven/create-dataset-mojo.html">Maven Goal: create-dataset</a>
+        
+          <a class="page-link" href="/docs/staging/maven/delete-dataset-mojo.html">Maven Goal: delete-dataset</a>
+        
+          <a class="page-link" href="/docs/staging/maven/deploy-app-mojo.html">Maven Goal: deploy-app</a>
+        
+          <a class="page-link" href="/docs/staging/faq.html">Frequently Asked Questions</a>
+        
+          <a class="page-link" href="/docs/staging/feed.xml"></a>
+        
+          <a class="page-link" href="/docs/staging/maven/help-mojo.html">Maven Goal: help</a>
+        
+          <a class="page-link" href="/docs/staging/morphlines/index.html">Morphlines Introduction</a>
+        
+          <a class="page-link" href="/docs/staging/index.html">Kite: A Data API for Hadoop</a>
+        
+          <a class="page-link" href="/docs/staging/known-limitations.html">Known Limitations</a>
+        
+          <a class="page-link" href="/docs/staging/lifecycle.html">Kite Dataset Lifecycle</a>
+        
+          <a class="page-link" href="/docs/staging/morphlines/morphlines-reference-guide.html">Morphlines Reference Guide</a>
+        
+          <a class="page-link" href="/docs/staging/maven/package-app-mojo.html">Maven Goal: package-app</a>
+        
+          <a class="page-link" href="/docs/staging/maven/plugin-info.html">Maven Plugin Goals</a>
+        
+          <a class="page-link" href="/docs/staging/release-notes.html">Kite SDK Release Notes</a>
+        
+          <a class="page-link" href="/docs/staging/maven/run-app-mojo.html">Maven Goal: run-app</a>
+        
+          <a class="page-link" href="/docs/staging/maven/run-tool-mojo.html">Maven Goal: run-tool</a>
+        
+          <a class="page-link" href="/docs/staging/maven/update-dataset-mojo.html">Maven Goal: update-dataset</a>
+        
+      </div -->
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Kite: A Data API for Hadoop</h1>
+  </header>
+
+  <article class="post-content">
+  <p>Kite is a high-level data layer for Hadoop. It is an API and a set of tools that speed up development. You configure how Kite stores your data in Hadoop, instead of building and maintaining that infrastructure yourself.</p>
+
+<h2 id="high-level-tools">High-level tools</h2>
+
+<p>Kite’s API and tools are built around datasets. Datasets are uniquely identified URIs, like <code>dataset:hive:ratings</code>.</p>
+
+<p>Dataset is a consistent interface for working with your data. You have control of implementation details, such as whether to use Avro or Parquet format, HDFS or HBase storage, and snappy compression or another. You only have to tell Kite what to do; Kite handles the implementation for you.</p>
+
+<div class="right">
+
+<div class="highlight"><pre><code class="language-text" data-lang="text">$&gt; kite-dataset csv-import ratings.csv \
+              dataset:hbase:zk/ratings
+Added 1000000 records to dataset &quot;ratings&quot;</code></pre></div>
+
+</div>
+
+<p>Kite’s command-line interface helps you manage datasets with pre-built tasks like creating datasets, migrating schemas, and loading data. It also helps you configure Kite and other Hadoop projects.</p>
+
+<p><a href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html"><i class="fa fa-chevron-right"></i>  Get started with Kite’s CSV tutorial</a></p>
+
+<div class="left">
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">View</span> <span class="n">latest</span> <span class="o">=</span> <span class="n">Datasets</span><span class="o">.</span><span class="na">load</span><span class="o">(</span><span class="n">uri</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="s">&quot;time&quot;</span><span class="o">,</span> <span class="n">startOfToday</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">to</span><span class="o">(</span><span class="s">&quot;time&quot;</span><span class="o">,</span> <span class="n">now</span><span class="o">);</span></code></pre></div>
+
+</div>
+
+<p>Kite’s data API provides programmatic access to datasets. Using the API, you can build applications that directly interact with your datasets. For example, you can load a dataset and select a subset of it for a MapReduce pipeline.</p>
+
+<p><a href="/docs/staging/Kite-Data-Module-Overview.html"><i class="fa fa-chevron-right"></i>  Learn more about Kite datasets</a></p>
+
+<h2 id="low-level-control">Low-level control</h2>
+
+<p>When you create a dataset, you control your data layout, record schema, and other options with straight-forward configuration. Then you can focus on building your application, while Kite handles data storage for you. Kite automatically partitions records when writing and prunes partitions when reading. It will even keep Hive up-to-date with a dataset’s newest partitions.</p>
+
+<div class="columns">
+  <div class="left">
+
+<div class="highlight"><pre><code class="language-text" data-lang="text">time,rating,user_id,item_id
+1412361369702,4,34,18865
+...</code></pre></div>
+
+    <div class="center"><i class="fa fa-plus"></i></div>
+
+<div class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">[</span>
+  <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="nt">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">},</span>
+  <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="nt">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">},</span>
+  <span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span> <span class="nt">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">},</span>
+<span class="p">]</span></code></pre></div>
+
+  </div>
+  <div class="middle"><i class="fa fa-arrow-right"></i></div>
+  <div class="right">
+
+<div class="highlight"><pre><code class="language-text" data-lang="text">datasets/
+└── ratings/
+    └── year=2014/
+        ├── month=09/
+        │   ├── day=01/
+        │   ├── ...
+        │   └── day=30/
+        ├── month=10/
+        │   ├── day=01/
+        │   ├── ...</code></pre></div>
+
+  </div>
+</div>
+
+<p><a href="/docs/staging/configuraton-formats.html"><i class="fa fa-chevron-right"></i>  Learn more about configuring Kite</a></p>
+
+<h2 id="configuration-based-transformation">Configuration-based transformation</h2>
+
+<p>Kite morphlines is a flexible way to express data transformations as configuration.</p>
+
+<p><a href="/docs/staging/morphlines/"><i class="fa fa-chevron-right"></i>  Go to the Morphlines reference guide</a></p>
+
+
+  </article>
+
+</div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Development Guide</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+      </ul>
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>

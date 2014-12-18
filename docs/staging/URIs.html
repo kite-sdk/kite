@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Dataset and View URIs</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/staging/URIs.html">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/staging/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/staging/">Kite Development Guide</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <!--div class="trigger">
+        
+          <a class="page-link" href="/docs/staging/Column-Mapping.html">Column Mapping</a>
+        
+          <a class="page-link" href="/docs/staging/HBase-Storage-Cells.html">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/docs/staging/Inferring-a-Schema-from-a-Java-Class.html">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/docs/staging/Inferring-a-Schema-from-an-Avro-Data-File.html">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/docs/staging/Install-Kite.html">Install the Kite Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/staging/Interval-Notation.html">Interval Notation</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-Data-Module-Overview.html">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-Dataset-Command-Line-Interface.html">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-SDK-Guide.html">What is Kite?</a>
+        
+          <a class="page-link" href="/docs/staging/Parquet-vs-Avro-Format.html">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/docs/staging/Partition-Strategy-Format.html">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/docs/staging/Restricted-Views.html">Restricted Views</a>
+        
+          <a class="page-link" href="/docs/staging/Schema-Evolution.html">Schema Evolution</a>
+        
+          <a class="page-link" href="/docs/staging/Schema-URL-Warning.html">Schema URL Warning</a>
+        
+          <a class="page-link" href="/docs/staging/URIs.html">Dataset and View URIs</a>
+        
+          <a class="page-link" href="/docs/staging/Using-Kite-with-Apache-Maven.html">Using Kite with Apache Maven</a>
+        
+          <a class="page-link" href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/docs/staging/Viewing-with-Impala.html">Viewing a Kite CLI Dataset with Impala</a>
+        
+          <a class="page-link" href="/docs/staging/about.html">About Kite SDK</a>
+        
+          <a class="page-link" href="/docs/staging/all-pages.html">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/docs/staging/maven/create-dataset-mojo.html">Maven Goal: create-dataset</a>
+        
+          <a class="page-link" href="/docs/staging/maven/delete-dataset-mojo.html">Maven Goal: delete-dataset</a>
+        
+          <a class="page-link" href="/docs/staging/maven/deploy-app-mojo.html">Maven Goal: deploy-app</a>
+        
+          <a class="page-link" href="/docs/staging/faq.html">Frequently Asked Questions</a>
+        
+          <a class="page-link" href="/docs/staging/feed.xml"></a>
+        
+          <a class="page-link" href="/docs/staging/maven/help-mojo.html">Maven Goal: help</a>
+        
+          <a class="page-link" href="/docs/staging/morphlines/index.html">Morphlines Introduction</a>
+        
+          <a class="page-link" href="/docs/staging/index.html">Kite: A Data API for Hadoop</a>
+        
+          <a class="page-link" href="/docs/staging/known-limitations.html">Known Limitations</a>
+        
+          <a class="page-link" href="/docs/staging/lifecycle.html">Kite Dataset Lifecycle</a>
+        
+          <a class="page-link" href="/docs/staging/morphlines/morphlines-reference-guide.html">Morphlines Reference Guide</a>
+        
+          <a class="page-link" href="/docs/staging/maven/package-app-mojo.html">Maven Goal: package-app</a>
+        
+          <a class="page-link" href="/docs/staging/maven/plugin-info.html">Maven Plugin Goals</a>
+        
+          <a class="page-link" href="/docs/staging/release-notes.html">Kite SDK Release Notes</a>
+        
+          <a class="page-link" href="/docs/staging/maven/run-app-mojo.html">Maven Goal: run-app</a>
+        
+          <a class="page-link" href="/docs/staging/maven/run-tool-mojo.html">Maven Goal: run-tool</a>
+        
+          <a class="page-link" href="/docs/staging/maven/update-dataset-mojo.html">Maven Goal: update-dataset</a>
+        
+      </div -->
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Dataset and View URIs</h1>
+  </header>
+
+  <article class="post-content">
+  <p>Datasets are identified by URI. As a general rule, you can use a URI any time you would specify a dataset or view. If you attempt to perform an action on a view that is not allowed, the action fails. For example, if you try to delete a view using <code>Datasets.delete()</code>, the command fails, because you can only delete datasets, not views of the dataset, when using the Datasets API. </p>
+
+<h2 id="dataset-uris">Dataset URIs</h2>
+
+<p>You construct a dataset URI using one of the following patterns, depending on your chosen dataset scheme.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Scheme</th>
+      <th>Pattern</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="#hive"><em>Hive</em></a></td>
+      <td><code>dataset:hive:&lt;namespace&gt;/&lt;dataset&gt;</code></td>
+    </tr>
+    <tr>
+      <td><a href="#hdfs"><em>HDFS</em></a></td>
+      <td><code>dataset:hdfs:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;</code></td>
+    </tr>
+    <tr>
+      <td><a href="#local"><em>Local FS</em></a></td>
+      <td><code>dataset:file:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;</code></td>
+    </tr>
+    <tr>
+      <td><a href="#hbase"><em>HBase</em></a></td>
+      <td><code>dataset:hbase:&lt;zookeeper&gt;/&lt;dataset-name&gt;</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Dataset patterns always begin with the <code>dataset:</code> prefix. Any of these patterns can be modified to create a <a href="#view">View URI</a>.</p>
+
+<h3 id="hive">Hive</h3>
+
+<p>Hive manages your datatables for you. You only have to provide the dataset name. You also have the option of providing a namespace.</p>
+
+<pre><code>dataset:hive:&lt;namespace&gt;/&lt;dataset&gt;
+</code></pre>
+
+<p>If you want to use external Hive datatables, you must also provide a path to the dataset. If you don’t explicitly set a namespace, Kite uses the default namespace. For a Hive dataset, a Kite namespace maps one-to-one to a Hive database.</p>
+
+<pre><code>dataset:hive:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
+</code></pre>
+
+<p>In earlier versions of Kite, <code>dataset:hive:a/b</code> meant directory ./a/b  Now, it has changed to <em>namespace</em>=a <em>dataset</em>=b.</p>
+
+<p>To create an external table, add <code>location=/path/to/data/dir</code> to the dataset URI. </p>
+
+<pre><code>dataset:hive:namespace/dataset?location=/path/to/data/dir
+</code></pre>
+
+<h3 id="hdfs">HDFS</h3>
+
+<p>The URI for a dataset in HDFS uses the following pattern. You provide a path to the dataset.
+<code>
+dataset:hdfs:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
+</code></p>
+
+<p>While it is not a typical use case, there might be times where it is useful to specify the HDFS host and port. You can insert the host and port before the path in the URI. You can use these URIs to select between HDFS instances.</p>
+
+<p>The host and port are required if your Hadoop configuration files aren’t on your classpath. This can happen if your application is running outside the cluster and you haven’t taken the step of deploying client configuration files to the server running the application. The host is the hostname for the namenode; the port is the port for the namenode (typically 8020). If you have an HA configuration, you always need client configuration files, and the host should be the NameService ID.</p>
+
+<pre><code>dataset:hdfs://&lt;host&gt;[:port]/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
+</code></pre>
+
+<p><a name="local"></a></p>
+
+<h3 id="local-file-system-datasets">Local File System Datasets</h3>
+
+<p>The local file system dataset URI follows a pattern similar to the HDFS URI, with the <code>file:</code> scheme.</p>
+
+<pre><code>dataset:file:/&lt;path&gt;/&lt;namespace&gt;/&lt;dataset-name&gt;
+</code></pre>
+
+<h3 id="hbase">HBase</h3>
+
+<pre><code>hbase:&lt;zookeeper&gt;/&lt;dataset-name&gt;
+</code></pre>
+
+<p>The <em>zookeeper</em> argument is a comma separated list of hosts.  For example</p>
+
+<pre><code>hbase:host1,host2:9999,host3/myDataset
+</code></pre>
+
+<p><a name="view"></a></p>
+
+<h2 id="view-uris">View URIs</h2>
+
+<p>A view URI is constructed by changing the prefix of a dataset URI from <code>dataset:</code> to <code>view:</code>. You then add query arguments as name/value pairs, similar to query arguments in an HTTP URL. Query arguments place constraints on the information returned in the view. </p>
+
+<pre><code>view:&lt;scheme-specific-URI&gt;?&lt;field&gt;=&lt;constraint&gt;
+</code></pre>
+
+<p>For example, you can restrict values returned from a table of <em>users</em> to users whose favorite color is pink.</p>
+
+<pre><code>view:hdfs:/default/cloudera/users?favoriteColor=pink
+</code></pre>
+<p>You can insert records in a view, and the changes are reflected in the source dataset. </p>
+
+<p>You can also set constraints based on dataset partitions. For example, if a dataset of movie ratings were partitioned by date, you might create the view URI this way, constraining the ratings returned to March, 2014.</p>
+
+<pre><code>view:hdfs:/default/cloudera/ratings?year=2014&amp;month=3
+</code></pre>
+
+<p>If the URI begins with <code>dataset:</code>, any constraints are ignored.</p>
+
+<p>There are three formats used to set constraint values. The values can be numbers or strings, but the values you specify must match the schema definition for the field.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Format</th>
+      <th>Constraint Type</th>
+      <th>Example</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>empty</td>
+      <td>Exists (value is not null)</td>
+      <td><code>favoriteColor=</code></td>
+      <td>Field <em>favoriteColor</em> is populated.</td>
+    </tr>
+    <tr>
+      <td>comma-separated list</td>
+      <td>In (any of the specified values)</td>
+      <td><code>genre=comedy,animation</code></td>
+      <td>Field <em>genre</em> is <em>comedy</em> or <em>animation</em>.</td>
+    </tr>
+    <tr>
+      <td>interval</td>
+      <td>Range of values</td>
+      <td><code>month=[1,4]</code></td>
+      <td>Date is from January 1 through April 30.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>See <a href="/docs/staging/Interval-Notation.html">Interval Notation</a> for more examples of defining ranges of values.</p>
+
+
+  </article>
+
+</div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Development Guide</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+      </ul>
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>

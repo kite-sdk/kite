@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Using the Kite Command Line Interface to Create a Dataset</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/staging/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/staging/">Kite Development Guide</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <!--div class="trigger">
+        
+          <a class="page-link" href="/docs/staging/Column-Mapping.html">Column Mapping</a>
+        
+          <a class="page-link" href="/docs/staging/HBase-Storage-Cells.html">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/docs/staging/Inferring-a-Schema-from-a-Java-Class.html">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/docs/staging/Inferring-a-Schema-from-an-Avro-Data-File.html">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/docs/staging/Install-Kite.html">Install the Kite Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/staging/Interval-Notation.html">Interval Notation</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-Data-Module-Overview.html">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-Dataset-Command-Line-Interface.html">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-SDK-Guide.html">What is Kite?</a>
+        
+          <a class="page-link" href="/docs/staging/Parquet-vs-Avro-Format.html">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/docs/staging/Partition-Strategy-Format.html">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/docs/staging/Restricted-Views.html">Restricted Views</a>
+        
+          <a class="page-link" href="/docs/staging/Schema-Evolution.html">Schema Evolution</a>
+        
+          <a class="page-link" href="/docs/staging/Schema-URL-Warning.html">Schema URL Warning</a>
+        
+          <a class="page-link" href="/docs/staging/URIs.html">Dataset and View URIs</a>
+        
+          <a class="page-link" href="/docs/staging/Using-Kite-with-Apache-Maven.html">Using Kite with Apache Maven</a>
+        
+          <a class="page-link" href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/docs/staging/Viewing-with-Impala.html">Viewing a Kite CLI Dataset with Impala</a>
+        
+          <a class="page-link" href="/docs/staging/about.html">About Kite SDK</a>
+        
+          <a class="page-link" href="/docs/staging/all-pages.html">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/docs/staging/maven/create-dataset-mojo.html">Maven Goal: create-dataset</a>
+        
+          <a class="page-link" href="/docs/staging/maven/delete-dataset-mojo.html">Maven Goal: delete-dataset</a>
+        
+          <a class="page-link" href="/docs/staging/maven/deploy-app-mojo.html">Maven Goal: deploy-app</a>
+        
+          <a class="page-link" href="/docs/staging/faq.html">Frequently Asked Questions</a>
+        
+          <a class="page-link" href="/docs/staging/feed.xml"></a>
+        
+          <a class="page-link" href="/docs/staging/maven/help-mojo.html">Maven Goal: help</a>
+        
+          <a class="page-link" href="/docs/staging/morphlines/index.html">Morphlines Introduction</a>
+        
+          <a class="page-link" href="/docs/staging/index.html">Kite: A Data API for Hadoop</a>
+        
+          <a class="page-link" href="/docs/staging/known-limitations.html">Known Limitations</a>
+        
+          <a class="page-link" href="/docs/staging/lifecycle.html">Kite Dataset Lifecycle</a>
+        
+          <a class="page-link" href="/docs/staging/morphlines/morphlines-reference-guide.html">Morphlines Reference Guide</a>
+        
+          <a class="page-link" href="/docs/staging/maven/package-app-mojo.html">Maven Goal: package-app</a>
+        
+          <a class="page-link" href="/docs/staging/maven/plugin-info.html">Maven Plugin Goals</a>
+        
+          <a class="page-link" href="/docs/staging/release-notes.html">Kite SDK Release Notes</a>
+        
+          <a class="page-link" href="/docs/staging/maven/run-app-mojo.html">Maven Goal: run-app</a>
+        
+          <a class="page-link" href="/docs/staging/maven/run-tool-mojo.html">Maven Goal: run-tool</a>
+        
+          <a class="page-link" href="/docs/staging/maven/update-dataset-mojo.html">Maven Goal: update-dataset</a>
+        
+      </div -->
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Using the Kite Command Line Interface to Create a Dataset</h1>
+  </header>
+
+  <article class="post-content">
+  <p><a href="https://www.youtube.com/watch?v=li3erFGiEw8&amp;list=PLGzsQf6UXBR-BJz5BGzJb2mMulWTfTu99&amp;index=2">
+<img src="https://raw.githubusercontent.com/DennisDawson/KiteImages/master/CLItitle.jpg" alt="Kite CLI Video" width="240" height="180" border="10" align="right" title="Link to Kite CLI Video" /></a></p>
+
+<p>Kite provides a set of tools that handle the basic legwork for creating a dataset, allowing you to focus on the specifics of the business problem you want to solve. This short tutorial walks you through the process of creating a dataset and viewing the results using the command line interface (CLI).</p>
+
+<h2 id="preparation">Preparation</h2>
+
+<p>If you have not done so already, install the <a href="/docs/staging/Install-Kite.html">Kite command-line interface</a>.</p>
+
+<h2 id="create-a-csv-data-file">Create a CSV Data File</h2>
+
+<p>If you have a CSV file sitting around waiting to be used, you can substitute your file for the one that follows. The truth is, it doesn’t matter if you have 100 columns or 2 columns, the process is the same. Larger datasets are only larger, not more complex.</p>
+
+<p>If you don’t have a CSV file handy, you can copy the next code snippet and save it as a plain text file named <em>sandwiches.csv</em>.</p>
+
+<pre><code>name,description
+Reuben,Pastrami and sauerkraut on toasted rye with Russian dressing.
+PBJ,Peanut butter and grape jelly on white bread.
+</code></pre>
+
+<h2 id="infer-the-schema">Infer the Schema</h2>
+
+<p>All right. Now we get to use the CLI. Start by inferring an Avro schema file from the <em>sandwiches.csv</em> file you just created. Enter the following command to create an Avro schema file named <em>sandwich.avsc</em> with the class name <em>Sandwich</em>. The schema details are based on the headings and data in <em>sandwiches.csv</em>.</p>
+
+<pre><code>kite-dataset csv-schema sandwiches.csv --class Sandwich -o sandwich.avsc
+</code></pre>
+
+<p>If you open <em>sandwich.avsc</em> in a text editor, it looks something like the code block below. <code>csv-schema</code> infers the names of the columns from the header, and the data type for each column from the first row of values.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+<a href="#n12" name="n12">12</a>
+<a href="#n13" name="n13">13</a>
+<a href="#n14" name="n14">14</a>
+<a href="#n15" name="n15">15</a>
+<a href="#n16" name="n16">16</a>
+</pre></td>
+  <td class="code"><pre>{
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Sandwich</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Schema generated by Kite</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span> : [ {
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">name</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from 'Reuben'</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>default</span><span style="color:#404">&quot;</span></span> : <span style="color:#088">null</span>
+  }, {
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">description</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from 'Pastrami and sauerkraut on toasted rye with Russia'</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>default</span><span style="color:#404">&quot;</span></span> : <span style="color:#088">null</span>
+  } ]
+}
+</pre></td>
+</tr></table>
+</div>
+
+<h2 id="create-the-dataset">Create the Dataset</h2>
+
+<p>With a schema, you can create a new dataset. Enter the following command.</p>
+
+<pre><code>kite-dataset create sandwiches -s sandwich.avsc
+</code></pre>
+
+<p>While it does not create actual sandwiches, it does create an empty dataset in which you can store sandwich descriptions, which is the next best thing. Probably.</p>
+
+<p>Just for giggles, you can reverse the process you just completed and look at the underlying schema of your dataset using the following command.</p>
+
+<p><code>kite-dataset schema sandwiches</code></p>
+
+<p>You’ll get the same schema back, but this time, trust me, it’s coming from the Hive repository. Honest.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+<a href="#n12" name="n12">12</a>
+<a href="#n13" name="n13">13</a>
+<a href="#n14" name="n14">14</a>
+<a href="#n15" name="n15">15</a>
+<a href="#n16" name="n16">16</a>
+</pre></td>
+  <td class="code"><pre>{
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Sandwich</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Schema generated by Kite</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span> : [ {
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">name</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from 'Reuben'</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>default</span><span style="color:#404">&quot;</span></span> : <span style="color:#088">null</span>
+  }, {
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">description</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span> : [ <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">null</span><span style="color:#710">&quot;</span></span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span> ],
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span> : <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Type inferred from 'Pastrami and sauerkraut on toasted rye with Russia'</span><span style="color:#710">&quot;</span></span>,
+    <span style="color:#606"><span style="color:#404">&quot;</span><span>default</span><span style="color:#404">&quot;</span></span> : <span style="color:#088">null</span>
+  } ]
+}
+</pre></td>
+</tr></table>
+</div>
+
+<h2 id="import-the-csv-data">Import the CSV Data</h2>
+<p>You’ve created a dataset in the Hive repository, which is the container, but not the information itself. Next, you might want to add some data so that you can run some queries. Use the following command to import the sandwiches in your CSV file.</p>
+
+<pre><code>kite-dataset csv-import sandwiches.csv sandwiches
+</code></pre>
+
+<p>The method returns a record count. </p>
+
+<pre><code>Added 2 records to dataset "sandwiches"
+</code></pre>
+
+<p>But can you believe that? Inquiring minds want to verify that the information is actually in the dataset.</p>
+
+<h2 id="show-the-results">Show the Results</h2>
+
+<p>You can list records from your newly created dataset using the <code>show</code> command.</p>
+
+<pre><code>kite-dataset show sandwiches
+</code></pre>
+
+<p>By default, CLI retrieves up to the first 10 records from your dataset.</p>
+
+<pre><code>{"name": "Reuben", "description": "Pastrami and sauerkraut on toasted rye with Russian dressing."}
+{"name": "PBJ", "description": "Peanut butter and grape jelly on white bread."}
+</code></pre>
+
+<p>If you find that number of sandwiches overwhelming, you can change the number of records the query returns.</p>
+
+<pre><code>kite-dataset show sandwiches -n 1
+</code></pre>
+
+<p>This time only the first record prints to screen.</p>
+
+<pre><code>{"name": "Reuben", "description": "Pastrami and sauerkraut on toasted rye with Russian dressing."}
+</code></pre>
+
+<p>You can import additional records to the database and use Hive or Impala to query the results.</p>
+
+<h2 id="delete-the-dataset">Delete the Dataset</h2>
+
+<p>Given the ease with which you just created the sandwiches dataset, it seems a shame to destroy it out of hand. Keep in mind that this was only an example, and not something you were meant to treasure. I suppose you don’t have to delete it, you might want to keep it around as a souvenir, like the first dollar earned or something like that. If so, create a dataset you hate, and prepare to annihilate it using this unassuming command.</p>
+
+<pre><code>kite-dataset delete sandwiches
+</code></pre>
+
+<p>There they go. Reuben and PBJ are gone. But you can create them again, or any other dataset you choose, using the CLI.</p>
+
+<hr />
+
+<p>Next: <a href="/docs/staging/Kite-Dataset-Command-Line-Interface.html">go to the Kite CLI command reference</a></p>
+
+
+  </article>
+
+</div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Development Guide</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+      </ul>
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>

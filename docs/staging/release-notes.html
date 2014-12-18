@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Kite SDK Release Notes</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/staging/release-notes.html">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/staging/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/staging/">Kite Development Guide</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <!--div class="trigger">
+        
+          <a class="page-link" href="/docs/staging/Column-Mapping.html">Column Mapping</a>
+        
+          <a class="page-link" href="/docs/staging/HBase-Storage-Cells.html">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/docs/staging/Inferring-a-Schema-from-a-Java-Class.html">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/docs/staging/Inferring-a-Schema-from-an-Avro-Data-File.html">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/docs/staging/Install-Kite.html">Install the Kite Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/staging/Interval-Notation.html">Interval Notation</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-Data-Module-Overview.html">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-Dataset-Command-Line-Interface.html">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-SDK-Guide.html">What is Kite?</a>
+        
+          <a class="page-link" href="/docs/staging/Parquet-vs-Avro-Format.html">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/docs/staging/Partition-Strategy-Format.html">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/docs/staging/Restricted-Views.html">Restricted Views</a>
+        
+          <a class="page-link" href="/docs/staging/Schema-Evolution.html">Schema Evolution</a>
+        
+          <a class="page-link" href="/docs/staging/Schema-URL-Warning.html">Schema URL Warning</a>
+        
+          <a class="page-link" href="/docs/staging/URIs.html">Dataset and View URIs</a>
+        
+          <a class="page-link" href="/docs/staging/Using-Kite-with-Apache-Maven.html">Using Kite with Apache Maven</a>
+        
+          <a class="page-link" href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/docs/staging/Viewing-with-Impala.html">Viewing a Kite CLI Dataset with Impala</a>
+        
+          <a class="page-link" href="/docs/staging/about.html">About Kite SDK</a>
+        
+          <a class="page-link" href="/docs/staging/all-pages.html">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/docs/staging/maven/create-dataset-mojo.html">Maven Goal: create-dataset</a>
+        
+          <a class="page-link" href="/docs/staging/maven/delete-dataset-mojo.html">Maven Goal: delete-dataset</a>
+        
+          <a class="page-link" href="/docs/staging/maven/deploy-app-mojo.html">Maven Goal: deploy-app</a>
+        
+          <a class="page-link" href="/docs/staging/faq.html">Frequently Asked Questions</a>
+        
+          <a class="page-link" href="/docs/staging/feed.xml"></a>
+        
+          <a class="page-link" href="/docs/staging/maven/help-mojo.html">Maven Goal: help</a>
+        
+          <a class="page-link" href="/docs/staging/morphlines/index.html">Morphlines Introduction</a>
+        
+          <a class="page-link" href="/docs/staging/index.html">Kite: A Data API for Hadoop</a>
+        
+          <a class="page-link" href="/docs/staging/known-limitations.html">Known Limitations</a>
+        
+          <a class="page-link" href="/docs/staging/lifecycle.html">Kite Dataset Lifecycle</a>
+        
+          <a class="page-link" href="/docs/staging/morphlines/morphlines-reference-guide.html">Morphlines Reference Guide</a>
+        
+          <a class="page-link" href="/docs/staging/maven/package-app-mojo.html">Maven Goal: package-app</a>
+        
+          <a class="page-link" href="/docs/staging/maven/plugin-info.html">Maven Plugin Goals</a>
+        
+          <a class="page-link" href="/docs/staging/release-notes.html">Kite SDK Release Notes</a>
+        
+          <a class="page-link" href="/docs/staging/maven/run-app-mojo.html">Maven Goal: run-app</a>
+        
+          <a class="page-link" href="/docs/staging/maven/run-tool-mojo.html">Maven Goal: run-tool</a>
+        
+          <a class="page-link" href="/docs/staging/maven/update-dataset-mojo.html">Maven Goal: update-dataset</a>
+        
+      </div -->
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Kite SDK Release Notes</h1>
+  </header>
+
+  <article class="post-content">
+  <p>All past Kite releases are documented on this page. Upcoming release dates can be found in
+<a href="https://issues.cloudera.org/browse/CDK#selectedTab=com.atlassian.jira.plugin.system.project%3Aversions-panel">JIRA</a>.</p>
+
+<h2 id="version-0171">Version 0.17.1</h2>
+
+<p>Release date: 9 December 2014</p>
+
+<p>Version 0.17.1 is a bug-fix release with the following notable changes:</p>
+
+<ul>
+  <li>Kite data
+    <ul>
+      <li>CSV imports will now use the dataset schema to read CSV records rather than inferring a schema from the data (see <a href="https://issues.cloudera.org/browse/CDK-800">CDK-800</a>).</li>
+      <li>CSV floats or doubles read with an integer or long type will result in NumberFormatException during import. Previously, this was caught by checking the inferred schema with the dataset schema, but this method was unreliable. See <a href="https://issues.cloudera.org/browse/CDK-801">CDK-801</a> for more information.</li>
+    </ul>
+  </li>
+  <li>Morphlines Library
+    <ul>
+      <li>Added support for deleting documents stored in Solr <a href="kite-morphlines/morphlinesReferenceGuide.html#loadSolrDeleteById">by unique id</a> as well as <a href="kite-morphlines/morphlinesReferenceGuide.html#loadSolrDeleteByQuery">by query</a></li>
+      <li>Added documentation on how to update a subset of fields of an existing document stored in Solr: <a href="kite-morphlines/morphlinesReferenceGuide.html#loadSolrPartialUpdate">partial document updates</a></li>
+      <li>Added ability to register custom Java extension functions with xquery and xslt morphline commands: <a href="kite-morphlines/morphlinesReferenceGuide.html#xquery">xquery</a> morphline command.</li>
+      <li>Enhanced documentation for <a href="kite-morphlines/morphlinesReferenceGuide.html#xquery">xquery</a> morphline command.</li>
+      <li>Upgraded kite-morphlines-maxmind module from maxmind-db-0.3.3 to bug fix release maxmind-db-1.0.0</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10904">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-0170">Version 0.17.0</h2>
+
+<p>Release date: 9 October 2014</p>
+
+<p>Version 0.17.0 contains the following notable changes:</p>
+
+<ul>
+  <li>The <a href="https://github.com/kite-sdk/kite-examples">Kite examples</a> now require the
+<a href="http://www.cloudera.com/content/cloudera/en/downloads/quickstart_vms/cdh-5-1-x1.html">Cloudera Quickstart VM</a><br />
+version 5.1 or later.</li>
+  <li>Kite 0.15.0 and 0.16.0 default to an appender which writes to both Avro and Parquet files, thus incurring<br />
+2x the I/O resources,  when writing to a Parquet dataset. That default has switched back to the behavior<br />
+from 0.14.0 and before, which is to write just to Parquet. When using a Parquet dataset, the
+<code>DatasetWriter#flush()</code> and <code>DatasetWriter#sync()</code> methods have no effect. That means data written to<br />
+a Parquet dataset is not durable until after a successful call to <code>DatasetWriter#close()</code>. Users that<br />
+want the behavior found in 0.15.0 and 0.16.0 can set the property <strong><code>kite.parquet.non-durable-writes</code></strong> to
+<strong><code>false</code></strong> using the API or the
+<a href="http://kitesdk.org/docs/current/guide/Kite-Dataset-Command-Line-Interface/#update"><code>update</code> command</a><br />
+in the CLI. After setting the property, the <code>DatasetWriter#flush()</code> and <code>DatasetWriter#sync()</code> methods<br />
+will flush and sync the Avro version of the data respectively. If there is a failure before the writer<br />
+is closed, the data can be recovered by reading the Avro version of the file and writing the records<br />
+to Parquet. This recovery is a manual process.</li>
+  <li>Kite now supports namespaces for datasets. For Hive datasets, the Kite namespace maps to the<br />
+Hive database where the table will be stored. Namespaces also changed the file system repository<br />
+layout for local file and HDFS datasets. Dataset URIs used with previous releases will work<br />
+unmodified. New datasets created using the <code>DatasetRepository</code> API (which moved to the SPI in 0.16.0)<br />
+will not end up in the same location as in previous releases. The work-around is to use dataset URIs<br />
+with the <code>Datasets</code> API. See the docs on <a href="http://kitesdk.org/docs/current/guide/URIs/">dataset URIs</a><br />
+for more details.</li>
+  <li>Users can now select the compression codec for Avro and Parquet datasets. See
+<a href="https://issues.cloudera.org/browse/CDK-299">CDK-299</a> for more details.</li>
+  <li>The <code>kite-data-hcatalog</code> module has been renamed to <code>kite-data-hive</code>. A Maven relocation<br />
+was put in place to prevent projects from breaking. However, we strongly encourage you to update<br />
+your dependency to <code>kite-data-hive</code> in your projects. See <a href="https://issues.cloudera.org/browse/CDK-452">CDK-452</a><br />
+for details.</li>
+  <li>Hive external table URIs no long support relative locations. A URI with the pattern
+<code>dataset:hive:examples/ratings</code> now means to use a namespace of <code>examples</code> and a<br />
+dataset named <code>ratings</code>. You can create external URIs using the <code>location</code> query parameter.<br />
+For example: <code>dataset:hive:examples/ratings?location=/tmp/data/examples/ratings</code>.</li>
+  <li>The Kite CLI tool has been renamed from <code>dataset</code> to <code>kite-dataset</code>. See
+<a href="https://issues.cloudera.org/browse/CDK-670">CDK-670</a> for more information.</li>
+  <li>Kite will no longer use an embedded Hive MetaStore if it is not configured to<br />
+connect to a remote MetaStore. Instead, Kite will throw an exception to avoid<br />
+confusing behavior. See <a href="https://issues.cloudera.org/browse/CDK-651">CDK-651</a><br />
+for more information.</li>
+  <li>You can now partition datasets by sub-fields. See <a href="https://issues.cloudera.org/browse/CDK-435">CDK-435</a><br />
+for details.</li>
+  <li>File-based dataset names that are not alphanumeric (plus underscore) now issue a <br />
+deprecation warning. Non-conforming names will be made illegal in a future release. <br />
+See <a href="https://issues.cloudera.org/browse/CDK-673">CDK-673</a>.</li>
+  <li>There is a new <em>experimental</em> module, <code>kite-minicluster</code>, for running Hadoop services <br />
+for testing and development purposes. The minicluster currently supports HDFS, Hive, <br />
+HBase, and Flume services, and can be run directly from a Java program, <br />
+or using the CLI. See <a href="https://issues.cloudera.org/browse/CDK-679">CDK-679</a>. The <br />
+minicluster is experimental since its API and CLI are still subject to <br />
+incompatible changes.</li>
+  <li>The Oozie portion of the <a href="https://github.com/kite-sdk/kite-examples/tree/master/demo">demo example</a><br />
+was removed. See <a href="https://issues.cloudera.org/browse/CDK-605">CDK-605</a> for details.</li>
+  <li>Morphlines Library
+    <ul>
+      <li>Added morphline command that removes all record field values for which the field name and value matches a blacklist but not a whitelist: <a href="kite-morphlines/morphlinesReferenceGuide.html#removeValues">removeValues</a></li>
+    </ul>
+  </li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10703">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-0160">Version 0.16.0</h2>
+
+<p>Release date: 21 August 2014</p>
+
+<p>Version 0.16.0 contains the following notable changes:</p>
+
+<ul>
+  <li>Kite datasets can be read from and written to by Apache Spark jobs. See the new
+<a href="https://github.com/kite-sdk/kite-examples/tree/master/spark">Spark example</a> for details on usage.</li>
+  <li>Added a CLI <a href="https://issues.cloudera.org/browse/CDK-549">transform task</a> for transforming<br />
+entities read from a source dataset before storing then into a target dataset.</li>
+  <li>Added a CDH5 application parent POM that makes it easy to build Kite applications on CDH5 using Maven.<br />
+The <a href="https://github.com/kite-sdk/kite-examples/tree/master/spark">Spark example</a> uses this parent POM.</li>
+  <li>The <code>DatasetRepository</code> and <code>DatasetRepositories</code> APIs have been moved to the SPI and<br />
+deprecated from the public API. Users should move to the new
+<a href="http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/Datasets.html"><code>Datasets</code></a> API before the<br />
+next release.</li>
+  <li>Kite will now properly generate Parquet Hive tables on Hive 0.13 and later.</li>
+  <li>Writing to a non-empty dataset or view from MapReduce or Crunch will now fail unless <br />
+the write mode is explicitly set to append or overwrite. This is a change from <br />
+the previous behavior which was to append. See
+<a href="https://issues.cloudera.org/browse/CDK-572">CDK-572</a> and
+<a href="https://issues.cloudera.org/browse/CDK-347">CDK-347</a> for details.</li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10609">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-0150">Version 0.15.0</h2>
+
+<p>Release date: 15 July 2014</p>
+
+<p>Version 0.15.0 contains the following notable changes:</p>
+
+<ul>
+  <li>Kite artifacts are built against Apache Hadoop 2 and related projects, <br />
+and are now available in Maven Central.</li>
+  <li>Added new <a href="http://kitesdk.org/docs/current/guide">introduction and concepts documentation</a>.</li>
+  <li>Added a new <a href="http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/Datasets.html">Datasets</a> <br />
+convenience class for opening and working with Datasets, superseding DatasetRepositories.</li>
+  <li>Deprecated partition related methods in <a href="http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/Dataset.html">Dataset</a> in favor of the views API.</li>
+  <li>Added a CLI <a href="https://issues.cloudera.org/browse/CDK-374">copy task</a> for copying <br />
+datasets and also for dataset format conversion and data compaction.</li>
+  <li>Added an application parent POM that makes it easy to use Kite in a Maven project. <br />
+The <a href="https://github.com/kite-sdk/kite-examples">examples</a> now use this parent POM.</li>
+  <li>Updated to Crunch 0.10.0</li>
+  <li>Morphlines Library
+    <ul>
+      <li>Added morphline command that parses an InputStream that contains protobuf data: <a href="kite-morphlines/morphlinesReferenceGuide.html#readProtobuf">readProtobuf</a> (Rober Fiser via whoschek)</li>
+      <li>Added morphline command that extracts specific values from a protobuf object, akin to a simple form of XPath: <a href="kite-morphlines/morphlinesReferenceGuide.html#extractProtobufPaths">extractProtobufPaths</a> (Rober Fiser via whoschek)</li>
+      <li>Added morphline command that removes all record fields for which the field name matches a blacklist but not a whitelist: <a href="kite-morphlines/morphlinesReferenceGuide.html#removeFields">removeFields</a></li>
+      <li>Added optional parameters <code>maxCharactersPerRecord</code> and <code>onMaxCharactersPerRecord</code> to morphline command <a href="kite-morphlines/morphlinesReferenceGuide.html#readCSV">readCSV</a></li>
+      <li>Upgraded kite-morphlines-maxmind module from maxmind-db-0.3.1 to bug fix release maxmind-db-0.3.3</li>
+      <li>Upgraded kite-morphlines-core module from metrics-0.3.1 to bug fix release metrics-0.3.2</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10603">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-0141">Version 0.14.1</h2>
+
+<p>Release date: 23 May 2014</p>
+
+<p>Version 0.14.1 is a bug-fix release with the following notable changes:</p>
+
+<ul>
+  <li>Usability improvements for the CLI, <a href="https://issues.cloudera.org/browse/CDK-424">CDK-424</a></li>
+  <li>Fixed Dataset examples: <a href="https://github.com/kite-sdk/kite-examples/tree/master/dataset-hbase">dataset-hbase</a>,
+<a href="https://github.com/kite-sdk/kite-examples/tree/master/dataset-staging">dataset-staging</a>,
+<a href="https://github.com/kite-sdk/kite-examples/tree/master/dataset-compatibility">dataset-compatibility</a></li>
+  <li>Fixed a bug in the Kite Maven Plugin, <a href="https://issues.cloudera.org/browse/CDK-406">CDK-406</a></li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10518">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-0140">Version 0.14.0</h2>
+
+<p>Release date: 13 May 2014</p>
+
+<p>Version 0.14.0 has the following notable additions:</p>
+
+<ul>
+  <li>Added View support to Kite <a href="http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/mapreduce/package-summary.html">MapReduce</a> and <a href="http://kitesdk.org/docs/current/apidocs/org/kitesdk/data/crunch/CrunchDatasets.html">Crunch</a></li>
+  <li>Added more <a href="http://kitesdk.org/docs/current/overview.html">documentation on kitesdk.org</a>
+    <ul>
+      <li><a href="http://kitesdk.org/docs/current/usingkiteclicreatedataset.html">Kite command-line interface tutorial</a> and <a href="http://kitesdk.org/docs/current/kitedatasetcli.html">reference</a></li>
+    </ul>
+  </li>
+  <li>Added HBase storage option to the CLI, <code>--use-hbase</code> (experimental)</li>
+  <li>Added a new JSON configuration format for partition strategies
+    <ul>
+      <li>Supports hash, identity, year, month, day, hour, minute parititoners</li>
+      <li><a href="http://kitesdk.org/docs/current/overview.html#Defining_a_Partitioning_Strategy">Partition strategy documentation</a></li>
+    </ul>
+  </li>
+  <li>Added partition strategy support to the CLI
+    <ul>
+      <li>Create and validate partition strategies using <a href="kitedatasetcli.html#partition-config">partition-config</a></li>
+      <li>Create partitioned datasets with <a href="kitedatasetcli.html#create">create</a></li>
+    </ul>
+  </li>
+  <li>Added a builder and JSON configuration format for HBase column mappings
+    <ul>
+      <li>Supports column, counter, keyAsColumn, key, and version mappings</li>
+    </ul>
+  </li>
+  <li>Updated to parquet 1.4.1</li>
+</ul>
+
+<p>And the following bug fixes:</p>
+
+<ul>
+  <li>Updated CLI environment setup for CDH5.0 QuickStart VM</li>
+  <li>Fixed compatibility with CDH5 Hive, <a href="https://issues.cloudera.org/browse/CDK-416">CDK-416</a></li>
+  <li>Fixed schema update validation bug, <a href="https://issues.cloudera.org/browse/CDK-410">CDK-410</a></li>
+  <li>Added reconnect support when Hive connections drop, <a href="https://issues.cloudera.org/browse/CDK-415">CDK-415</a></li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10515">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-0130">Version 0.13.0</h2>
+
+<p>Release date: April 23, 2014</p>
+
+<p>Version 0.13.0 has the following notable changes:</p>
+
+<ul>
+  <li>Added datasets command-line interface
+    <ul>
+      <li>Build avro schemas from CSV data samples and java classes</li>
+      <li>Create, view, and delete Kite datasets</li>
+      <li>Import CSV data into a dataset</li>
+    </ul>
+  </li>
+  <li>Morphlines Library
+    <ul>
+      <li>Added morphline command that opens an HDFS file for read and returns a corresponding Java InputStream: <a href="kite-morphlines/morphlinesReferenceGuide.html#openHdfsFile">openHdfsFile</a></li>
+      <li>Added morphline command that converts an InputStream to a byte array in main memory: <a href="kite-morphlines/morphlinesReferenceGuide.html#readBlob">readBlob</a></li>
+      <li>Upgraded kite-morphlines-saxon module from Saxon-HE-9.5.1-4 to Saxon-HE-9.5.1-5</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10510">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-0121">Version 0.12.1</h2>
+
+<p>Release date: March 18, 2014</p>
+
+<p>Version 0.12.1 is a bug-fix release with the following notable changes:</p>
+
+<ul>
+  <li>Fixed slow job setup for crunch when using large Datasets (thanks Gabriel Reid!)</li>
+  <li>Fixed CDK-328, Hive metastore concurrent access bug (thanks Karel Vervaeke!)</li>
+  <li>Clarified documentation for deleting datasets</li>
+  <li>Added more better checking to catch errors earlier
+    <ul>
+      <li>Catch partition strategies that rely on missing data fields</li>
+      <li>Catch Hive-incompatible table, column, and partition names</li>
+    </ul>
+  </li>
+  <li>Added warnings when creating FS or HBase datasets that are incompatible with Hive</li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10517">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-0120">Version 0.12.0</h2>
+
+<p>Release date: March 10, 2014</p>
+
+<p>Version 0.12.0 has the following notable changes:</p>
+
+<ul>
+  <li>MapReduce support for Datasets. New input and output formats (DatasetKeyInputFormat<br />
+and DatasetKeyOutputFormat) make it possible to use Datasets with MapReduce.</li>
+  <li>Views API. There is an incompatible change in this release: RefineableView in the<br />
+org.kitesdk.data package has been renamed to RefinableView (no ‘e’). Clients should<br />
+update and recompile.</li>
+  <li>Morphlines Library
+    <ul>
+      <li>Added a sampling command that forwards each input record with a given probability to its child command: <a href="kite-morphlines/morphlinesReferenceGuide.html#sample">sample</a></li>
+      <li>Added a command that ignores all input records beyond the N-th record, akin to the Unix head command: <a href="kite-morphlines/morphlinesReferenceGuide.html#head">head</a></li>
+      <li>Improved morphline import performance if all commands are specified via fully qualified class names.</li>
+      <li>Added several performance enhancements.</li>
+      <li>Added an <a href="https://github.com/kite-sdk/kite-examples/tree/master/kite-examples-morphlines">example module</a> that describes how to unit test Morphline config files and custom Morphline commands.</li>
+      <li>Improved documentation.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10509">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-0110">Version 0.11.0</h2>
+
+<p>Release date: February 6, 2014</p>
+
+<p>Version 0.11.0 has the following notable changes:</p>
+
+<ul>
+  <li>Views API. A new API for expressing a subset of a dataset using logical constraints<br />
+such as field matching or ranges. See the documentation for <a href="http://kitesdk.org/docs/0.11.0/apidocs/org/kitesdk/data/RefineableView.html">RefineableView</a><br />
+for details. The <a href="https://github.com/kite-sdk/kite-examples/tree/master/dataset-hbase">HBase example</a><br />
+has been extended to use a view for doing a partial scan of the table.</li>
+  <li>Dataset API. Removed APIs that were deprecated in 0.9.0. See the
+<a href="http://kitesdk.org/docs/0.11.0/jdiff/changes.html">API Diffs</a> for all the changes.</li>
+  <li>Upgrade to Crunch 0.9.0.</li>
+  <li>Morphlines Library
+    <ul>
+      <li>Added morphline command to read from Hadoop Avro Parquet Files: <a href="kite-morphlines/morphlinesReferenceGuide.html#readAvroParquetFile">readAvroParquetFile</a></li>
+      <li>Added support for multi-character separators as well as a regex separators to <a href="kite-morphlines/morphlinesReferenceGuide.html#splitKeyValue">splitKeyValue</a> command.</li>
+      <li>Added <code>addEmptyStrings</code> parameter to <a href="kite-morphlines/morphlinesReferenceGuide.html#readCSV">readCSV</a> command to indicate whether or not to add zero length strings to the output field.</li>
+      <li>Upgraded kite-morphlines-solr-* modules from solr-4.6.0 to solr-4.6.1.</li>
+      <li>Upgraded kite-morphlines-json module from jackson-databind-2.2.1 to jackson-databind-2.3.1.</li>
+      <li>Upgraded kite-morphlines-metrics-servlets module from jetty-8.1.13.v20130916 to jetty-8.1.14.v20131031.</li>
+      <li>Upgraded kite-morphlines-saxon module from Saxon-HE-9.5.1-3 to Saxon-HE-9.5.1-4.</li>
+      <li>Fixed CDK-282 <code>readRCFile</code> command is broken (Prasanna Rajaperumal via whoschek).</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10401">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-0101">Version 0.10.1</h2>
+
+<p>Release date: January 13, 2014</p>
+
+<p>Version 0.10.1 includes the following bug fixes:</p>
+
+<ul>
+  <li>CDK-249: Correctly add new partitions to the Hive MetaStore</li>
+  <li>CDK-260: Fixed the date-format partition function in expressions</li>
+  <li>CDK-266: Fixed file name uniqueness</li>
+  <li>CDK-273: Fixed spurious batch size warning in log4j integration</li>
+  <li>Fixed NoClassDefFoundError for crunch in kite-tools module</li>
+  <li>Added more debug logging to Morphlines</li>
+  <li>Solr should fail fast if ZK has no solr configuration</li>
+</ul>
+
+<p>This patch release is fully-compatible with 0.9.1, which uses the deprecated CDK packages.</p>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10507">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-0100">Version 0.10.0</h2>
+
+<p>Release date: December 9, 2013</p>
+
+<p>Version 0.10.0 has the following notable changes:</p>
+
+<ul>
+  <li>Renamed the project from CDK to Kite.<br />
+The main goal of Kite is to increase the accessibility of Apache Hadoop as a platform. <br />
+This isn’t specific to Cloudera, so we updated the name to correctly represent the project as an open, community-driven set of tools.<br />
+To make migration easier, there are no <strong>feature changes</strong> and <a href="migrating.html">migration instructions</a> have been added for existing projects.
+    <ul>
+      <li>Renamed java packages <code>com.cloudera.cdk.*</code> to <code>org.kitesdk.*</code>. This change is trivial and mechanical but it does break backwards compatibility. This is a one-time event - going forward no such backwards incompatible renames are planned. This mass rename is the only change going from the <code>cdk-0.9.0</code> release to the <code>kite-0.10.0</code> release.</li>
+      <li>Renamed maven module names and jar files from <code>cdk-*</code> to <code>kite-*</code>.</li>
+      <li>Moved github repo from http://github.com/cloudera/cdk to http://github.com/kite-sdk/kite.</li>
+      <li>Moved documentation from http://cloudera.github.io/cdk/docs/current to http://kitesdk.org/docs/current.</li>
+      <li>Moved morphline reference guide from http://cloudera.github.io/cdk/docs/current/cdk-morphlines/morphlinesReferenceGuide.html to http://kitesdk.org/docs/current/kite-morphlines/morphlinesReferenceGuide.html.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="version-090">Version 0.9.0</h2>
+
+<p>Release date: December 5, 2013</p>
+
+<p>Version 0.9.0 has the following notable changes:</p>
+
+<ul>
+  <li>HBase support. There is a new experimental API working with random access datasets<br />
+stored in HBase. The API exposes get/put operations, but there is no support for<br />
+scans from an arbitrary row in this release. (The latter will be added in 0.11.0 as a<br />
+part of the forthcoming <a href="https://issues.cloudera.org/browse/CDK-177">views API</a>.) For<br />
+usage information, consult the new
+<a href="https://github.com/cloudera/cdk-examples/tree/master/dataset-hbase">HBase example</a>.</li>
+  <li>Parquet. Datasets in Parquet format can now be written (and read) using Crunch.</li>
+  <li>CSV. Datasets in CSV format can now be read using the dataset APIs. See the
+<a href="https://github.com/cloudera/cdk-examples/tree/master/dataset-compatibility">compatibility example</a>.</li>
+  <li>Dataset API. Removed APIs that were deprecated in 0.8.0. See the
+<a href="http://cloudera.github.io/cdk/docs/0.9.0/jdiff/changes.html">API Diffs</a> for all the<br />
+changes.</li>
+  <li>Morphlines Library
+    <ul>
+      <li>Added morphline command to read from RCFile: <a href="kite-morphlines/morphlinesReferenceGuide.html#readRCFile">readRCFile</a> (Prasanna Rajaperumal via whoschek)</li>
+      <li>Added morphline command to convert a morphline record to an Avro record: <a href="kite-morphlines/morphlinesReferenceGuide.html#toAvro">toAvro</a></li>
+      <li>Added morphline command that serializes Avro records into a byte array: <a href="kite-morphlines/morphlinesReferenceGuide.html#writeAvroToByteArray">writeAvroToByteArray</a></li>
+      <li>Added morphline command that returns Geolocation information for a given IP address, using an efficient in-memory Maxmind database lookup:
+<a href="kite-morphlines/morphlinesReferenceGuide.html#geoIP">geoIP</a></li>
+      <li>Added morphline command that parses a user agent string and returns structured higher level data like user agent family, operating system, version, and device type:
+<a href="kite-morphlines/morphlinesReferenceGuide.html#userAgent">userAgent</a></li>
+      <li>Added option to fail the following commands if an URI is syntactically invalid:
+<a href="kite-morphlines/morphlinesReferenceGuide.html#extractURIComponents">extractURIComponents</a>,
+<a href="kite-morphlines/morphlinesReferenceGuide.html#extractURIComponent">extractURIComponent</a>,
+<a href="kite-morphlines/morphlinesReferenceGuide.html#extractURIQueryParameters">extractURIQueryParameters</a></li>
+      <li>Upgraded cdk-morphlines-solr-core module from solr-4.4 to solr-4.6.</li>
+      <li>Upgraded cdk-morphlines-saxon module from saxon-HE-9.5.1-2 to saxon-HE-9.5.1-3.</li>
+      <li>Fixed race condition on parallel initialization of multiple Solr morphlines within the same JVM.</li>
+      <li>For enhanced safety readSequenceFile command nomore reuses the identity of Hadoop Writeable objects.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10277">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-081">Version 0.8.1</h2>
+
+<p>Release date: October 23, 2013</p>
+
+<p>Version 0.8.1 has the following notable changes:</p>
+
+<ul>
+  <li>Morphlines Library
+    <ul>
+      <li>Made xquery and xslt commands also compatible with woodstox-3.2.7 (not just woodstox-4.x).</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="version-080">Version 0.8.0</h2>
+
+<p>Release date: October 7, 2013</p>
+
+<p>Version 0.8.0 has the following notable changes:</p>
+
+<ul>
+  <li>Dataset Repository URIs. Repositories can be referred to (and opened) by a URI. For<br />
+example, repo:hdfs://namenode:8020/data specifies a Dataset Repository stored in HDFS.<br />
+Dataset descriptors carry the repository URI.</li>
+  <li>Dataset API. Removed APIs that were deprecated in 0.7.0. Deprecated some constructors<br />
+in favor of builders. See <a href="http://cloudera.github.io/cdk/docs/0.8.0/jdiff/changes.html">API Diffs</a><br />
+for all the changes.</li>
+  <li>Upgrade to Parquet 1.2.0.</li>
+  <li>Morphlines Library
+    <ul>
+      <li>Added option for commands to register health checks (not just metrics) with the MorphlineContext.</li>
+      <li>Added <a href="kite-morphlines/morphlinesReferenceGuide.html#registerJVMMetrics">registerJVMMetrics</a> command that registers metrics that are related to the Java Virtual Machine<br />
+with the MorphlineContext. For example, this includes metrics for garbage collection events,<br />
+buffer pools, threads and thread deadlocks.</li>
+      <li>Added morphline commands to publish the metrics of all morphline commands to JMX, SLF4J and CSV files.<br />
+The new commands are:
+<a href="kite-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToJMX">startReportingMetricsToJMX</a>,
+<a href="kite-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToSLF4J">startReportingMetricsToSLF4</a> and
+<a href="kite-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToCSV">startReportingMetricsToCSV</a>.</li>
+      <li>Added EXPERIMENTAL <code>cdk-morphlines-metrics-servlets</code> maven module with new
+<a href="kite-morphlines/morphlinesReferenceGuide.html#startReportingMetricsToHTTP">startReportingMetricsToHTTP</a> command that<br />
+exposes liveness status, health check status, metrics state and thread dumps via a set of HTTP URIs served by Jetty,<br />
+using the AdminServlet.</li>
+      <li>Added <code>cdk-morphlines-hadoop-core</code> maven module with new
+<a href="kite-morphlines/morphlinesReferenceGuide.html#downloadHdfsFile">downloadHdfsFile</a><br />
+command for transferring HDFS files, e.g. to help with centralized configuration file management.</li>
+      <li>Added option to specify boost values to
+<a href="kite-morphlines/morphlinesReferenceGuide.html#loadSolr">loadSolr</a> command.</li>
+      <li>Added several performance enhancements.</li>
+      <li>Upgraded <code>cdk-morphlines-solr-cell</code> maven module from tika-1.3 to tika-1.4 to pick up some bug fixes.</li>
+      <li>Upgraded <code>cdk-morphlines-core</code> maven module from com.google.code.regexp-0.1.9 to 0.2.3 to pick up some bug fixes (Internally shaded version).</li>
+      <li>The constructor of AbstractCommand now has an additional parameter that refers to the CommandBuilder.<br />
+The old constructor has been deprecated and will be removed in the next release.</li>
+      <li>The ISO8601_TIMEZONE grok pattern now allows the omission of minutes in a timezone offset.</li>
+      <li>Ensured morphline commands can refer to record field names containing arbitrary characters.<br />
+Previously some commands could not refer to record field names containing the ‘.’ dot character.<br />
+This limitation has been removed.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10268">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-070">Version 0.7.0</h2>
+
+<p>Release date: September 5, 2013</p>
+
+<p>Version 0.7.0 has the following notable changes:</p>
+
+<ul>
+  <li>Dataset API. Changes to make the API more consistent and better integrated with<br />
+standard Java APIs like Iterator, Iterable, Flushable, and Closeable.</li>
+  <li>Java 7. CDK now also works with Java 7.</li>
+  <li>Upgrade to Avro 1.7.5.</li>
+  <li>Morphlines Library
+    <ul>
+      <li>Added commands <code>splitKeyValue</code>, <code>extractURIComponent</code> and <code>toByteArray</code></li>
+      <li>Added <code>outputFields</code> parameter to the <code>split</code> command to support a list of column names similar to the <code>readCSV</code> command</li>
+      <li>Added tika-xmp maven module as a dependency to cdk-morphline-solr-cell module</li>
+      <li>Added several performance enhancements</li>
+      <li>Upgraded cdk-morphlines-saxon module from saxon-HE-9.5.1-1 to saxon-HE-9.5.1-2</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10264">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-060">Version 0.6.0</h2>
+
+<p>Release date: August 16, 2013</p>
+
+<p>Version 0.6.0 has the following notable changes:</p>
+
+<ul>
+  <li>Dependency management. Solr and Lucene dependencies have been upgrade to 4.4.</li>
+  <li>Build system. The version of the Maven Javadoc plugin has been upgraded.</li>
+</ul>
+
+<h2 id="version-050">Version 0.5.0</h2>
+
+<p>Release date: August 1, 2013</p>
+
+<p>Version 0.5.0 has the following notable changes:</p>
+
+<ul>
+  <li>Examples. All examples can be run from the user’s host machine,<br />
+as an alternative to running from within the QuickStart VM guest.</li>
+  <li>CDK Maven Plugin. A new
+<a href="http://cloudera.github.io/cdk/docs/0.5.0/cdk-maven-plugin/usage.html">plugin</a> with<br />
+goals for manipulating datasets, and packaging, deploying,<br />
+and running distributed applications.</li>
+  <li>Dependency management. Hadoop components are now marked as provided to give users<br />
+more control. See the
+<a href="http://cloudera.github.io/cdk/docs/0.5.0/dependencies.html">dependencies page</a>.</li>
+  <li>Upgrade to Parquet 1.0.0 and Crunch 0.7.0.</li>
+  <li>Morphlines Library
+    <ul>
+      <li>Added commands <code>xquery</code>, <code>xslt</code>, <code>convertHTML</code> for reading, extracting and transforming XML and HTML with XPath, XQuery and XSLT</li>
+      <li>Added <code>tokenizeText</code> command that uses the embedded Solr/Lucene Analyzer library to generate tokens from a text string, without sending data to a Solr server</li>
+      <li>Added <code>translate</code> command that examines each value in a given field and replaces it with the replacement value defined in a given dictionary aka lookup hash table</li>
+      <li>By default, disable quoting and multi-line fields feature and comment line feature for the <code>readCSV</code> morphline command.</li>
+      <li>Added several performance enhancements</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10256">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-041">Version 0.4.1</h2>
+
+<p>Release date: July 11, 2013</p>
+
+<p>Version 0.4.1 has the following notable changes:</p>
+
+<ul>
+  <li>Morphlines Library
+    <ul>
+      <li>Expanded documentation and examples</li>
+      <li>Made <code>SolrLocator</code> and <code>ZooKeeperDownloader</code> collection alias aware</li>
+      <li>Added commands <code>readJson</code> and <code>extractJsonPaths</code> for reading, extracting, and transforming JSON files and JSON objects, in the same style as Avro support</li>
+      <li>Added commands <code>split</code>, <code>findReplace</code>, <code>extractURIComponents</code>, <code>extractURIQueryParameters</code>, <code>decodeBase64</code></li>
+      <li>Fixed <code>extractAvroPaths</code> exception with flatten = true if path represents a non-leaf node of type Record</li>
+      <li>Added several performance enhancements</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="version-040">Version 0.4.0</h2>
+
+<p>Release date: June 22, 2013</p>
+
+<p>Version 0.4.0 has the following notable changes:</p>
+
+<ul>
+  <li>Morphlines Library. A morphline is a rich configuration file that makes it easy to<br />
+define an ETL transformation chain embedded in Hadoop components such as Search, Flume,<br />
+MapReduce, Pig, Hive, Sqoop.</li>
+  <li>An Oozie example. A new example of using Oozie to run a transformation job<br />
+periodically.</li>
+  <li>QuickStart VM update. The examples now use version 4.3.0 of the
+<a href="https://ccp.cloudera.com/display/SUPPORT/Cloudera+QuickStart+VM">Cloudera QuickStart VM</a>.</li>
+  <li>Java package changes. The <code>com.cloudera.data</code> package and subpackages<br />
+have been renamed to <code>com.cloudera.cdk.data</code>, and <code>com.cloudera.cdk.flume</code> has become
+<code>com.cloudera.cdk.data.flume</code>.</li>
+  <li>Finer-grained Maven modules. The module organization and naming has changed,<br />
+including making all group IDs <code>com.cloudera.cdk</code>. Please see the new <a href="http://cloudera.github.io/cdk/docs/0.4.0/dependencies.html">dependencies<br />
+page</a> for details.</li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10253">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-030">Version 0.3.0</h2>
+
+<p>Release date: June 6, 2013</p>
+
+<p>Version 0.3.0 has the following notable changes:</p>
+
+<ul>
+  <li>Logging to a dataset. Using log4j as the logging API and Flume as the log transport,<br />
+it is now possible to log application events to datasets.</li>
+  <li>Crunch support. Datasets can be exposed as Crunch sources and targets.</li>
+  <li>Date partitioning. New partitioning functions for partitioning datasets by<br />
+year/month/day/hour/minute.</li>
+  <li>New examples. The new <a href="https://github.com/cloudera/cdk-examples">examples repository</a><br />
+has examples for all these new features. The examples use the
+<a href="https://ccp.cloudera.com/display/SUPPORT/Cloudera+QuickStart+VM">Cloudera QuickStart VM</a>,<br />
+version 4.2.0, to make running the examples as simple as possible.</li>
+</ul>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10244">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-020">Version 0.2.0</h2>
+
+<p>Release date: May 2, 2013</p>
+
+<p>Version 0.2.0 has two major additions:</p>
+
+<ul>
+  <li>Experimental support for reading and writing datasets in
+<a href="https://github.com/Parquet/parquet-format">Parquet format</a>.</li>
+  <li>Support for storing dataset metadata in a Hive/HCatalog metastore.</li>
+</ul>
+
+<p>The examples module has example code for both of these usages.</p>
+
+<p>The full <a href="https://issues.cloudera.org/secure/ReleaseNote.jspa?projectId=10143&amp;version=10239">change log</a><br />
+is available from JIRA.</p>
+
+<h2 id="version-010">Version 0.1.0</h2>
+
+<p>Release date: April 5, 2013</p>
+
+<p>Version 0.1.0 is the first release of the CDK Data module. This is considered a
+<em>beta</em> release. As a sub-1.0.0 release, this version is <em>not</em> subject to the<br />
+normal API compatibility guarantees. See the <em>Compatibility Statement</em> for<br />
+information about API compatibility guarantees.</p>
+
+  </article>
+
+</div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Development Guide</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+      </ul>
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>
