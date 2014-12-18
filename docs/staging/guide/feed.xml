@@ -10,7 +10,12 @@
         <p><strong>Redirecting...</strong></p>
         <p><a href='../feed.xml'>Click here if you are not redirected.</a></p>
         <script>
-          document.location.href = "../feed.xml";
+          var urlSplit = document.URL.split("#");
+          if (urlSplit[1]) {
+            document.location.href = "../feed.xml" + "#" + urlSplit[1];
+          } else {
+            document.location.href = "../feed.xml";
+          }
         </script>
       </body>
       </html>

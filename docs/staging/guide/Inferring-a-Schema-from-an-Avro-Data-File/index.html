@@ -10,7 +10,12 @@
         <p><strong>Redirecting...</strong></p>
         <p><a href='../../Inferring-a-Schema-from-an-Avro-Data-File.html'>Click here if you are not redirected.</a></p>
         <script>
-          document.location.href = "../../Inferring-a-Schema-from-an-Avro-Data-File.html";
+          var urlSplit = document.URL.split("#");
+          if (urlSplit[1]) {
+            document.location.href = "../../Inferring-a-Schema-from-an-Avro-Data-File.html" + "#" + urlSplit[1];
+          } else {
+            document.location.href = "../../Inferring-a-Schema-from-an-Avro-Data-File.html";
+          }
         </script>
       </body>
       </html>

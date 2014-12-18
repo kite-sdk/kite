@@ -10,7 +10,12 @@
         <p><strong>Redirecting...</strong></p>
         <p><a href='../../Partition-Strategy-Format.html'>Click here if you are not redirected.</a></p>
         <script>
-          document.location.href = "../../Partition-Strategy-Format.html";
+          var urlSplit = document.URL.split("#");
+          if (urlSplit[1]) {
+            document.location.href = "../../Partition-Strategy-Format.html" + "#" + urlSplit[1];
+          } else {
+            document.location.href = "../../Partition-Strategy-Format.html";
+          }
         </script>
       </body>
       </html>

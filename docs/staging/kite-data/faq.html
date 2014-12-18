@@ -10,7 +10,12 @@
         <p><strong>Redirecting...</strong></p>
         <p><a href='../faq.html'>Click here if you are not redirected.</a></p>
         <script>
-          document.location.href = "../faq.html";
+          var urlSplit = document.URL.split("#");
+          if (urlSplit[1]) {
+            document.location.href = "../faq.html" + "#" + urlSplit[1];
+          } else {
+            document.location.href = "../faq.html";
+          }
         </script>
       </body>
       </html>

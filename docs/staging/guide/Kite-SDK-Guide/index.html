@@ -10,7 +10,12 @@
         <p><strong>Redirecting...</strong></p>
         <p><a href='../../Kite-SDK-Guide.html'>Click here if you are not redirected.</a></p>
         <script>
-          document.location.href = "../../Kite-SDK-Guide.html";
+          var urlSplit = document.URL.split("#");
+          if (urlSplit[1]) {
+            document.location.href = "../../Kite-SDK-Guide.html" + "#" + urlSplit[1];
+          } else {
+            document.location.href = "../../Kite-SDK-Guide.html";
+          }
         </script>
       </body>
       </html>

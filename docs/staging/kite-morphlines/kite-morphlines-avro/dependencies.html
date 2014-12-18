@@ -10,7 +10,12 @@
         <p><strong>Redirecting...</strong></p>
         <p><a href='../../dependencies/kite-morphlines-json.html#Project_Dependencies'>Click here if you are not redirected.</a></p>
         <script>
-          document.location.href = "../../dependencies/kite-morphlines-json.html#Project_Dependencies";
+          var urlSplit = document.URL.split("#");
+          if (urlSplit[1]) {
+            document.location.href = "../../dependencies/kite-morphlines-json.html#Project_Dependencies" + "#" + urlSplit[1];
+          } else {
+            document.location.href = "../../dependencies/kite-morphlines-json.html#Project_Dependencies";
+          }
         </script>
       </body>
       </html>

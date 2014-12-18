@@ -10,7 +10,12 @@
         <p><strong>Redirecting...</strong></p>
         <p><a href='../../lifecycle.html'>Click here if you are not redirected.</a></p>
         <script>
-          document.location.href = "../../lifecycle.html";
+          var urlSplit = document.URL.split("#");
+          if (urlSplit[1]) {
+            document.location.href = "../../lifecycle.html" + "#" + urlSplit[1];
+          } else {
+            document.location.href = "../../lifecycle.html";
+          }
         </script>
       </body>
       </html>
