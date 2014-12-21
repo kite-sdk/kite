@@ -16,6 +16,7 @@
 
 package org.kitesdk.data.spi.filesystem;
 
+import au.com.bytecode.opencsv.CSVParser;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.collect.ImmutableSet;
@@ -41,6 +42,14 @@ import org.kitesdk.data.spi.Compatibility;
 import static java.lang.Math.min;
 
 public class CSVUtil {
+
+  public static CSVParser newParser(CSVProperties props) {
+    return new CSVParser(
+        props.delimiter.charAt(0), props.quote.charAt(0),
+        props.escape.charAt(0),
+        false /* strict quotes off: don't ignore unquoted strings */,
+        true /* ignore leading white-space */ );
+  }
 
   public static CSVReader newReader(InputStream incoming, CSVProperties props) {
     return new CSVReader(

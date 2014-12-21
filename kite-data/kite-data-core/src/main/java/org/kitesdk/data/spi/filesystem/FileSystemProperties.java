@@ -43,4 +43,9 @@ public class FileSystemProperties {
    */
   @VisibleForTesting
   static final String ALLOW_CSV_PROP = "kite.allow.csv";
+
+  /**
+   * Used to enable record reuse, if supported by the implementation.
+   */
+  public static final String REUSE_RECORDS = "kite.reader.reuse-records";
 }

@@ -18,21 +18,18 @@ package org.kitesdk.data.spi.filesystem;
 
 import au.com.bytecode.opencsv.CSVReader;
 import java.io.InputStream;
-import javax.annotation.Nullable;
+import com.google.common.collect.Lists;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReaderException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
+import org.kitesdk.data.spi.DescriptorUtil;
 import org.kitesdk.data.spi.EntityAccessor;
 import org.kitesdk.data.spi.ReaderWriterState;
 import com.google.common.base.Preconditions;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.IndexedRecord;
-import org.apache.avro.reflect.ReflectData;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -43,6 +40,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
+import static org.kitesdk.data.spi.filesystem.FileSystemProperties.REUSE_RECORDS;
+
 public class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
   private static final Logger LOG = LoggerFactory
@@ -52,10 +51,12 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
   private final FileSystem fs;
   private final Path path;
   private final Schema schema;
+  private final boolean reuseRecords;
 
   private final Class<E> recordClass;
 
   private CSVReader reader = null;
+  private CSVRecordBuilder<E> builder;
 
   // progress reporting
   private long size = 0;
@@ -65,18 +66,20 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
   private ReaderWriterState state = ReaderWriterState.NEW;
   private boolean hasNext = false;
   private String[] next = null;
-  private Schema.Field[] fields = null;
-  private int[] indexes = null; // Record position to CSV field position
+  private E record = null;
 
   @SuppressWarnings("unchecked")
   public CSVFileReader(FileSystem fileSystem, Path path,
-      DatasetDescriptor descriptor, EntityAccessor<E> accessor) {
+                       DatasetDescriptor descriptor,
+                       EntityAccessor<E> accessor) {
     this.fs = fileSystem;
     this.path = path;
     this.schema = accessor.getEntitySchema();
     this.recordClass = accessor.getType();
     this.state = ReaderWriterState.NEW;
     this.props = CSVProperties.fromDescriptor(descriptor);
+    // defaults to false: assume that callers will not make defensive copies
+    this.reuseRecords = DescriptorUtil.isEnabled(REUSE_RECORDS, descriptor);
 
     Preconditions.checkArgument(Schema.Type.RECORD.equals(schema.getType()),
         "Schemas for CSV files must be records of primitive types");
@@ -91,6 +94,7 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
     this.recordClass = type;
     this.state = ReaderWriterState.NEW;
     this.props = props;
+    this.reuseRecords = false;
 
     Preconditions.checkArgument(Schema.Type.RECORD.equals(schema.getType()),
         "Schemas for CSV files must be records of primitive types");
@@ -121,31 +125,8 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
       this.hasNext = advance();
     }
 
-    // initialize the index and field arrays
-    fields = schema.getFields().toArray(new Schema.Field[schema.getFields().size()]);
-    indexes = new int[fields.length];
-
-    if (next != null) {
-      for (int i = 0; i < fields.length; i += 1) {
-        fields[i] = schema.getFields().get(i);
-        indexes[i] = Integer.MAX_VALUE; // never present in the row
-      }
-
-      // there's a header in next
-      for (int i = 0; i < next.length; i += 1) {
-        Schema.Field field = schema.getField(next[i]);
-        if (field != null) {
-          indexes[field.pos()] = i;
-        }
-      }
-
-    } else {
-      // without a header, map to fields by position
-      for (int i = 0; i < fields.length; i += 1) {
-        fields[i] = schema.getFields().get(i);
-        indexes[i] = i;
-      }
-    }
+    this.builder = new CSVRecordBuilder<E>(schema, recordClass,
+        next == null ? null : Lists.newArrayList((String[]) next));
 
     // initialize by reading the first record
     this.hasNext = advance();
@@ -170,8 +151,12 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
     }
 
     try {
-      E record = makeRecord();
-      return record;
+      if (reuseRecords) {
+        this.record = builder.makeRecord(next, record);
+        return record;
+      } else {
+        return builder.makeRecord(next, null);
+      }
     } finally {
       this.hasNext = advance();
     }
@@ -206,127 +191,6 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
   @Override
   public boolean isOpen() {
     return (this.state == ReaderWriterState.OPEN);
-  }
-
-  private E makeRecord() {
-    if (recordClass != GenericData.Record.class && !recordClass.isInterface()) {
-      E record = makeReflectRecord();
-      if (record != null) {
-        return record;
-      }
-    }
-    return makeGenericRecord();
-  }
-
-  @SuppressWarnings("unchecked")
-  private E makeGenericRecord() {
-    GenericRecord record = new GenericData.Record(schema);
-    fillIndexed(record, next);
-    return (E) record;
-  }
-
-  @SuppressWarnings("unchecked")
-  private E makeReflectRecord() {
-    E record = (E) ReflectData.get().newInstance(recordClass, schema);
-    if (record instanceof IndexedRecord) {
-      fillIndexed((IndexedRecord) record, next);
-    } else {
-      fillReflect(record, next);
-    }
-    return record;
-  }
-
-  private void fillIndexed(IndexedRecord record, String[] data) {
-    for (int i = 0; i < indexes.length; i += 1) {
-      int index = indexes[i];
-      record.put(i,
-          makeValue(index < data.length ? data[index] : null, fields[i]));
-    }
-  }
-
-  private void fillReflect(Object record, String[] data) {
-    for (int i = 0; i < indexes.length; i += 1) {
-      Schema.Field field = fields[i];
-      int index = indexes[i];
-      Object value = makeValue(index < data.length ? data[index] : null, field);
-      ReflectData.get().setField(record, field.name(), i, value);
-    }
-  }
-
-  private static Object makeValue(@Nullable String string, Schema.Field field) {
-    Object value = makeValue(string, field.schema());
-    if (value != null || SchemaUtil.nullOk(field.schema())) {
-      return value;
-    } else {
-      // this will fail if there is no default value
-      return ReflectData.get().getDefaultValue(field);
-    }
-  }
-
-  /**
-   * Returns a the value as the first matching schema type or null.
-   *
-   * Note that if the value may be null even if the schema does not allow the
-   * value to be null.
-   *
-   * @param string a String representation of the value
-   * @param schema a Schema
-   * @return the string coerced to the correct type from the schema or null
-   */
-  private static Object makeValue(@Nullable String string, Schema schema) {
-    if (string == null) {
-      return null;
-    }
-
-    try {
-      switch (schema.getType()) {
-        case BOOLEAN:
-          return Boolean.valueOf(string);
-        case STRING:
-          return string;
-        case FLOAT:
-          return Float.valueOf(string);
-        case DOUBLE:
-          return Double.valueOf(string);
-        case INT:
-          return Integer.valueOf(string);
-        case LONG:
-          return Long.valueOf(string);
-        case ENUM:
-          // TODO: translate to enum class
-          if (schema.hasEnumSymbol(string)) {
-            return string;
-          } else {
-            try {
-              return schema.getEnumSymbols().get(Integer.parseInt(string));
-            } catch (IndexOutOfBoundsException ex) {
-              return null;
-            }
-          }
-        case UNION:
-          Object value = null;
-          for (Schema possible : schema.getTypes()) {
-            value = makeValue(string, possible);
-            if (value != null) {
-              return value;
-            }
-          }
-          return null;
-        case NULL:
-          return null;
-        default:
-          // FIXED, BYTES, MAP, ARRAY, RECORD are not supported
-          throw new DatasetReaderException(
-              "Unsupported field type:" + schema.getType());
-      }
-    } catch (NumberFormatException e) {
-      // empty string is considered null for numeric types
-      if (string.isEmpty()) {
-        return null;
-      } else {
-        throw e;
-      }
-    }
   }
 
   public RecordReader<E, Void> asRecordReader() {

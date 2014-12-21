@@ -18,9 +18,9 @@ package org.kitesdk.data.spi.filesystem;
 
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
+import org.kitesdk.data.DatasetRecordException;
 import org.kitesdk.data.TestDatasetReaders;
 import org.kitesdk.data.TestHelpers;
-import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
@@ -312,7 +312,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
     Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about null as a number",
-        NumberFormatException.class, new Runnable() {
+        DatasetRecordException.class, new Runnable() {
           @Override
           public void run() {
             reader.next();
@@ -321,7 +321,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
     Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about missing default",
-        AvroRuntimeException.class, new Runnable() {
+        DatasetRecordException.class, new Runnable() {
       @Override
       public void run() {
         reader.next();
@@ -342,7 +342,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
     reader.initialize();
     Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should reject float value for integer schema",
-        NumberFormatException.class, new Runnable() {
+        DatasetRecordException.class, new Runnable() {
           @Override public void run() {
             reader.next();
           }
@@ -376,7 +376,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
     Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about null as a number",
-        NumberFormatException.class, new Runnable() {
+        DatasetRecordException.class, new Runnable() {
           @Override
           public void run() {
             reader.next();
@@ -385,7 +385,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
     Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about missing default",
-        AvroRuntimeException.class, new Runnable() {
+        DatasetRecordException.class, new Runnable() {
           @Override
           public void run() {
             reader.next();
@@ -422,7 +422,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
     Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about null as a number",
-        NumberFormatException.class, new Runnable() {
+        DatasetRecordException.class, new Runnable() {
           @Override
           public void run() {
             reader.next();
@@ -468,7 +468,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
     Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about null as a number",
-        NumberFormatException.class, new Runnable() {
+        DatasetRecordException.class, new Runnable() {
           @Override
           public void run() {
             reader.next();
@@ -514,7 +514,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
     Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about null as a number",
-        NumberFormatException.class, new Runnable() {
+        DatasetRecordException.class, new Runnable() {
       @Override
       public void run() {
         reader.next();
@@ -523,7 +523,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
     Assert.assertTrue(reader.hasNext());
     TestHelpers.assertThrows("Should complain about missing default",
-        AvroRuntimeException.class, new Runnable() {
+        DatasetRecordException.class, new Runnable() {
       @Override
       public void run() {
         reader.next();
