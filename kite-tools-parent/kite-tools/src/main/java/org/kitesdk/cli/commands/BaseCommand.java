@@ -48,6 +48,7 @@ public abstract class BaseCommand implements Command, Configurable {
   static final Charset UTF8 = Charset.forName("utf8");
 
   private static final String RESOURCE_URI_SCHEME = "resource";
+  private static final String STDIN_AS_SOURCE = "stdin";
 
   private Configuration conf = null;
   private LocalFileSystem localFS = null;
@@ -175,6 +176,10 @@ public abstract class BaseCommand implements Command, Configurable {
    * @throws IllegalArgumentException If the file does not exist
    */
   public InputStream open(String filename) throws IOException {
+    if (STDIN_AS_SOURCE.equals(filename)) {
+      return System.in;
+    }
+
     URI uri = qualifiedURI(filename);
     if (RESOURCE_URI_SCHEME.equals(uri.getScheme())) {
       return Resources.getResource(uri.getRawSchemeSpecificPart()).openStream();
