@@ -7,10 +7,10 @@
     <title>Writing to Views</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/docs/staging/writing-to-views.html">
+    <link rel="canonical" href="http://kitesdk.org/writing-to-views.html">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/docs/staging/css/main.css">
+    <link rel="stylesheet" href="/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/docs/staging/">Kite Software Development Kit</a>
+    <a class="site-title" href="/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -37,6 +37,141 @@
             c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
         </svg>
       </a>
+      <!--div class="trigger">
+        
+          <a class="page-link" href="/API-Overview.html">Kite Dataset API</a>
+        
+          <a class="page-link" href="/Column-Mapping.html">Column Mapping</a>
+        
+          <a class="page-link" href="/HBase-Storage-Cells.html">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/Inferring-a-Schema-from-a-Java-Class.html">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/Inferring-a-Schema-from-an-Avro-Data-File.html">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/Install-Kite.html">Install the Kite Command Line Interface</a>
+        
+          <a class="page-link" href="/Interval-Notation.html">Interval Notation</a>
+        
+          <a class="page-link" href="/Kite-Data-Module-Overview.html">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/Kite-Dataset-Command-Line-Interface.html">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/Kite-SDK-Guide.html">What is Kite?</a>
+        
+          <a class="page-link" href="/Parquet-vs-Avro-Format.html">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/Partition-Strategy-Format.html">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/Partitioned-Datasets.html">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/Schema-Evolution.html">Schema Evolution</a>
+        
+          <a class="page-link" href="/Schema-URL-Warning.html">Schema URL Warning</a>
+        
+          <a class="page-link" href="/URIs.html">Dataset and View URIs</a>
+        
+          <a class="page-link" href="/Using-Kite-with-Apache-Maven.html">Using Kite with Apache Maven</a>
+        
+          <a class="page-link" href="/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/Viewing-with-Impala.html">Viewing a Kite CLI Dataset with Impala</a>
+        
+          <a class="page-link" href="/about.html">About Kite SDK</a>
+        
+          <a class="page-link" href="/all-pages.html">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/maven/create-dataset-mojo.html">Maven Goal: create-dataset</a>
+        
+          <a class="page-link" href="/maven/delete-dataset-mojo.html">Maven Goal: delete-dataset</a>
+        
+          <a class="page-link" href="/maven/deploy-app-mojo.html">Maven Goal: deploy-app</a>
+        
+          <a class="page-link" href="/faq.html">Frequently Asked Questions</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/maven/help-mojo.html">Maven Goal: help</a>
+        
+          <a class="page-link" href="/morphlines/index.html">Morphlines Introduction</a>
+        
+          <a class="page-link" href="/index.html">Kite: A Data API for Hadoop</a>
+        
+          <a class="page-link" href="/dependencies/index.html">Dependency Information</a>
+        
+          <a class="page-link" href="/dependencies/kite-data-core.html">kite-data-core</a>
+        
+          <a class="page-link" href="/dependencies/kite-data-crunch.html">kite-data-crunch</a>
+        
+          <a class="page-link" href="/dependencies/kite-data-hbase.html">kite-data-hbase</a>
+        
+          <a class="page-link" href="/dependencies/kite-data-hive.html">kite-data-hive</a>
+        
+          <a class="page-link" href="/dependencies/kite-data-mapreduce.html">kite-data-mapreduce</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-all-except-solr.html">kite-morphlines-all-except-solr</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-all.html">kite-morphlines-all</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-avro.html">kite-morphlines-avro</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-core.html">kite-morphlines-core</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-hadoop-core.html">kite-morphlines-hadoop-core</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-hadoop-parquet-avro.html">kite-morphlines-hadoop-parquet-avro</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-hadoop-rcfile.html">kite-morphlines-hadoop-rcfile</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-hadoop-sequencefile.html">kite-morphlines-hadoop-sequencefile</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-json.html">kite-morphlines-json</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-maxmind.html">kite-morphlines-maxmind</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-metrics-servlets.html">kite-morphlines-metrics-servlets</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-protobuf.html">kite-morphlines-protobuf</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-saxon.html">kite-morphlines-saxon</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-solr-cell.html">kite-morphlines-solr-cell</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-solr-core.html">kite-morphlines-solr-core</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-tika-core.html">kite-morphlines-tika-core</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-tika-decompress.html">kite-morphlines-tika-decompress</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-twitter.html">kite-morphlines-twitter</a>
+        
+          <a class="page-link" href="/dependencies/kite-morphlines-useragent.html">kite-morphlines-useragent</a>
+        
+          <a class="page-link" href="/dependencies/kite-tools.html">kite-tools</a>
+        
+          <a class="page-link" href="/known-limitations.html">Known Limitations</a>
+        
+          <a class="page-link" href="/lifecycle.html">Kite Dataset Lifecycle</a>
+        
+          <a class="page-link" href="/morphlines/morphlines-reference-guide.html">Morphlines Reference Guide</a>
+        
+          <a class="page-link" href="/maven/package-app-mojo.html">Maven Goal: package-app</a>
+        
+          <a class="page-link" href="/maven/plugin-info.html">Maven Plugin Goals</a>
+        
+          <a class="page-link" href="/release-notes.html">Kite SDK Release Notes</a>
+        
+          <a class="page-link" href="/maven/run-app-mojo.html">Maven Goal: run-app</a>
+        
+          <a class="page-link" href="/maven/run-tool-mojo.html">Maven Goal: run-tool</a>
+        
+          <a class="page-link" href="/maven/update-dataset-mojo.html">Maven Goal: update-dataset</a>
+        
+          <a class="page-link" href="/view-api.html">Kite View API</a>
+        
+          <a class="page-link" href="/writing-to-views.html">Writing to Views</a>
+        
+      </div -->
     </nav>
 
   </div>
@@ -52,101 +187,10 @@
     <h1>Writing to Views</h1>
   </header>
 
-  
-  <div class="sidebar">
-  
-    <h4>About Kite</h4>
-    <ul>
-      
-    </ul>
-  
-    <h4></h4>
-    <ul>
-      
-      
-      <li><a href="/docs/staging/Kite-SDK-Guide.html">Kite Background</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
-      
-      
-    </ul>
-  
-    <h4>Kite CLI</h4>
-    <ul>
-      
-      
-      <li><a href="/docs/staging/Install-Kite.html">Installing the CLI</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Kite-Dataset-Command-Line-Interface.html">Kite CLI Reference</a></li>
-      
-      
-    </ul>
-  
-    <h4>Kite API</h4>
-    <ul>
-      
-      
-      <li><a href="/docs/staging/API-Overview.html">API Introduction</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/view-api.html">Views API</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
-      
-      
-    </ul>
-  
-    <h4>Reference</h4>
-    <ul>
-      
-      
-      <li><a href="/docs/staging/URIs.html">Kite URIs</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Schema-Evolution.html">Schema Evolution</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/HBase-Storage-Cells.html">HBase Storage</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/Column-Mapping.html">Column Mapping</a></li>
-      
-      
-      
-      <li><a href="/docs/staging/lifecycle.html">Dataset Lifecycle</a></li>
-      
-      
-    </ul>
-  
-  </div>
-  
-
   <article class="post-content">
   <p>In Kite, a view is a logical collection of records defined by a set of constraints. When reading a view, Kite filters out records that don’t match the view’s constraints. Similarly, you can use a view to restrict the records that a writer will accept to the subset of your dataset that is included in a view.</p>
 
-<p>Kite <code>DatasetWriters</code> created using <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#newWriter()"><code>View#newWriter</code></a> reject records that don’t match the view’s constraints by throwing an exception. This is useful when you want to guarantee writers behave a certain way. If, however, storage guarantees are not significant in your application, you can avoid these checks by creating writers for the dataset.</p>
+<p>Kite <code>DatasetWriters</code> created using <a href="/apidocs/org/kitesdk/data/View.html#newWriter()"><code>View#newWriter</code></a> reject records that don’t match the view’s constraints by throwing an exception. This is useful when you want to guarantee writers behave a certain way. If, however, storage guarantees are not significant in your application, you can avoid these checks by creating writers for the dataset.</p>
 
 <h2 id="why-restrict-writes">Why restrict writes?</h2>
 
@@ -181,7 +225,6 @@ kite-dataset csv-import $file $current_uri || mv $file bad_files/
   </article>
 
 </div>
-
       </div>
     </div>
 
@@ -220,7 +263,7 @@ kite-dataset csv-import $file $current_uri || mv $file bad_files/
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
               <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
               <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
-              <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+              <li><a href="/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>
         </div>

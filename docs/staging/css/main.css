@@ -203,23 +203,6 @@ table td {
   background-color: #fff;
 }
 
-.sidebar {
-  border-left: 1px solid #d5d5e9;
-  margin-left: 0.5em;
-  padding: 0.5em; /* supplied by negative right position */
-  float: right;
-  width: 12em;
-  position: relative;
-  right: -1em;
-}
-
-.sidebar h4 {
-  margin-top: 0.2em;
-  line-height: 1;
-  font-weight: 400;
-  font-size: 14pt;
-}
-
 
 /* Home styles */
 /* ----------------------------------------------------------*/
@@ -253,6 +236,7 @@ table td {
   letter-spacing: -1.75px;
   line-height: 1;
   font-weight: 500;
+
 }
 
 .post-header .meta {
@@ -290,10 +274,6 @@ table td {
 .post-content h4 {
   font-size: 20px;
   letter-spacing: -1px;
-}
-
-.post-content .video-link {
-  float: right;
 }
 
 .post-content blockquote {

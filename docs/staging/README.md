@@ -72,16 +72,7 @@ rm -rf staging/
 ```
 cp -r ../../kite-docs/_site/ staging
 ```
-4. Copy `_includes/current/apidocs/` into `docs/staging/`
-```
-cd staging
-cp -r ../../../kite-docs/_includes/current/apidocs/ apidocs
-```
-5. Copy `_includes/current/jdiff/` into `docs/staging/`
-```
-cp -r ../../../kite-docs/_includes/current/jdiff/ jdiff
-```
-6. Commit and push the staging site.
+4. Commit and push the staging site.
 ```
 git add .
 git commit -m "<RELEASE ISSUE>: Deploying staging site"
@@ -99,18 +90,9 @@ rm -rf <version>/
 ```
 5. Copy the `_site` directory to `docs/<version>/`
 ```
-cp -r ../../kite-docs/_site/ staging
+cp -r ../../kite-docs/_site/ <version>
 ```
-6. Copy `_includes/current/apidocs/` into `docs/staging/`
-```
-cd staging
-cp -r ../../../kite-docs/_includes/current/apidocs/ apidocs
-```
-7. Copy `_includes/current/jdiff/` into `docs/staging/`
-```
-cp -r ../../../kite-docs/_includes/current/jdiff/ jdiff
-```
-8. Commit and push the staging site.
+6. Commit and push the site.
 ```
 git add .
 git commit -m "<RELEASE ISSUE>: Deploying staging site"
@@ -134,8 +116,6 @@ rm -rf $VERSION
 # copy the site content
 cp -r $KITE_DOCS/_site $VERSION
 cd $VERSION
-cp -r $KITE_DOCS/_includes/current/apidocs/ apidocs
-cp -r $KITE_DOCS/_includes/current/jdiff/ jdiff
 
 # prepare a commit with the changes
 git add .
