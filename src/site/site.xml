@@ -20,71 +20,9 @@
   <version position="bottom" />
 
   <skin>
-    <groupId>lt.velykis.maven.skins</groupId>
-    <artifactId>reflow-maven-skin</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.cloudera</groupId>
+    <artifactId>empty-maven-skin</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
   </skin>
-  <custom>
-    <reflowSkin>
-      <smoothScroll>true</smoothScroll>
-      <theme>default</theme>
-      <highlightJs>true</highlightJs>
-      <highlightJsTheme>github</highlightJsTheme>
-      <brand>
-        <!-- Brand text in top-left part of the site -->
-        <name>Kite Software Development Kit</name>
-      </brand>
-
-      <!-- Split menus in the bottom navigation -->
-      <bottomNav>
-        <column>Main</column>
-        <column>Modules|Kite.*</column>
-        <column>Contribute</column>
-      </bottomNav>
-
-      <pages>
-          <index project="kite-parent">
-            <titleTemplate>Kite Software Development Kit</titleTemplate>
-            <breadcrumbs>false</breadcrumbs>
-            <toc>false</toc>
-            <markPageHeader>false</markPageHeader>
-            <sections>
-              <body/>
-              <columns>2</columns>
-            </sections>
-          </index>
-      </pages>
-    </reflowSkin>
-  </custom>
-
-  <body>
-    <menu name="Main" inherit="top">
-      <item name="Home" href="index.html"/>
-      <item name="Development Guide" href="guide"/>
-      <item name="Release Notes" href="release_notes.html"/>
-      <item name="Javadoc" href="apidocs/index.html"/>
-      <item name="API Diffs" href="jdiff/changes.html"/>
-      <item name="Dependency Information" href="dependencies.html"/>
-      <item name="Migrating from CDK" href="migrating.html"/>
-      <item name="Examples" href="http://github.com/kite-sdk/kite-examples"/>
-    </menu>
-
-    <menu name="Modules" inherit="top">
-      <item name="Kite Data" href="kite-data/index.html"/>
-      <item name="Kite Maven Plugin" href="kite-maven-plugin/index.html"/>
-      <item name="Kite Morphlines" href="kite-morphlines/index.html"/>
-      <item name="Kite Tools" href="kite-tools-parent/index.html"/>
-    </menu>
-
-    <menu name="Contribute" inherit="bottom">
-      <item name="Source Repository" href="http://github.com/kite-sdk/kite"/>
-      <item name="JIRA" href="https://issues.cloudera.org/browse/CDK"/>
-      <item name="Mailing List" href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"/>
-      <item name="How To Contribute" href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"/>
-      <item name="Adding a Module" href="adding_a_module.html"/>
-      <item name="Project Information" href="project-info.html"/>
-    </menu>
-
-  </body>
 
 </project>
