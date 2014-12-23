@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Kite Dataset API</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/staging/API-Overview.html">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/staging/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/staging/">Kite Software Development Kit</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <!--div class="trigger">
+        
+          <a class="page-link" href="/docs/staging/API-Overview.html">Kite Dataset API</a>
+        
+          <a class="page-link" href="/docs/staging/Column-Mapping.html">Column Mapping</a>
+        
+          <a class="page-link" href="/docs/staging/HBase-Storage-Cells.html">HBase Storage Cells</a>
+        
+          <a class="page-link" href="/docs/staging/Inferring-a-Schema-from-a-Java-Class.html">Inferring a Schema from a Java Class</a>
+        
+          <a class="page-link" href="/docs/staging/Inferring-a-Schema-from-an-Avro-Data-File.html">Inferring a Schema from an Avro Data File</a>
+        
+          <a class="page-link" href="/docs/staging/Install-Kite.html">Install the Kite Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/staging/Interval-Notation.html">Interval Notation</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-Data-Module-Overview.html">Kite Data Module Overview</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-Dataset-Command-Line-Interface.html">Kite Dataset Command Line Interface</a>
+        
+          <a class="page-link" href="/docs/staging/Kite-SDK-Guide.html">What is Kite?</a>
+        
+          <a class="page-link" href="/docs/staging/Parquet-vs-Avro-Format.html">Parquet vs Avro Format</a>
+        
+          <a class="page-link" href="/docs/staging/Partition-Strategy-Format.html">Partition Strategy JSON Format</a>
+        
+          <a class="page-link" href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a>
+        
+          <a class="page-link" href="/docs/staging/Schema-Evolution.html">Schema Evolution</a>
+        
+          <a class="page-link" href="/docs/staging/Schema-URL-Warning.html">Schema URL Warning</a>
+        
+          <a class="page-link" href="/docs/staging/URIs.html">Dataset and View URIs</a>
+        
+          <a class="page-link" href="/docs/staging/Using-Kite-with-Apache-Maven.html">Using Kite with Apache Maven</a>
+        
+          <a class="page-link" href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite Command Line Interface to Create a Dataset</a>
+        
+          <a class="page-link" href="/docs/staging/Viewing-with-Impala.html">Viewing a Kite CLI Dataset with Impala</a>
+        
+          <a class="page-link" href="/docs/staging/about.html">About Kite SDK</a>
+        
+          <a class="page-link" href="/docs/staging/all-pages.html">Kite SDK Documentation</a>
+        
+          <a class="page-link" href="/docs/staging/maven/create-dataset-mojo.html">Maven Goal: create-dataset</a>
+        
+          <a class="page-link" href="/docs/staging/maven/delete-dataset-mojo.html">Maven Goal: delete-dataset</a>
+        
+          <a class="page-link" href="/docs/staging/maven/deploy-app-mojo.html">Maven Goal: deploy-app</a>
+        
+          <a class="page-link" href="/docs/staging/faq.html">Frequently Asked Questions</a>
+        
+          <a class="page-link" href="/docs/staging/feed.xml"></a>
+        
+          <a class="page-link" href="/docs/staging/maven/help-mojo.html">Maven Goal: help</a>
+        
+          <a class="page-link" href="/docs/staging/morphlines/index.html">Morphlines Introduction</a>
+        
+          <a class="page-link" href="/docs/staging/index.html">Kite: A Data API for Hadoop</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/index.html">Dependency Information</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-data-core.html">kite-data-core</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-data-crunch.html">kite-data-crunch</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-data-hbase.html">kite-data-hbase</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-data-hive.html">kite-data-hive</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-data-mapreduce.html">kite-data-mapreduce</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-all-except-solr.html">kite-morphlines-all-except-solr</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-all.html">kite-morphlines-all</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-avro.html">kite-morphlines-avro</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-core.html">kite-morphlines-core</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-hadoop-core.html">kite-morphlines-hadoop-core</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-hadoop-parquet-avro.html">kite-morphlines-hadoop-parquet-avro</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-hadoop-rcfile.html">kite-morphlines-hadoop-rcfile</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-hadoop-sequencefile.html">kite-morphlines-hadoop-sequencefile</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-json.html">kite-morphlines-json</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-maxmind.html">kite-morphlines-maxmind</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-metrics-servlets.html">kite-morphlines-metrics-servlets</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-protobuf.html">kite-morphlines-protobuf</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-saxon.html">kite-morphlines-saxon</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-solr-cell.html">kite-morphlines-solr-cell</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-solr-core.html">kite-morphlines-solr-core</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-tika-core.html">kite-morphlines-tika-core</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-tika-decompress.html">kite-morphlines-tika-decompress</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-twitter.html">kite-morphlines-twitter</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-morphlines-useragent.html">kite-morphlines-useragent</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/kite-tools.html">kite-tools</a>
+        
+          <a class="page-link" href="/docs/staging/known-limitations.html">Known Limitations</a>
+        
+          <a class="page-link" href="/docs/staging/lifecycle.html">Kite Dataset Lifecycle</a>
+        
+          <a class="page-link" href="/docs/staging/morphlines/morphlines-reference-guide.html">Morphlines Reference Guide</a>
+        
+          <a class="page-link" href="/docs/staging/maven/package-app-mojo.html">Maven Goal: package-app</a>
+        
+          <a class="page-link" href="/docs/staging/maven/plugin-info.html">Maven Plugin Goals</a>
+        
+          <a class="page-link" href="/docs/staging/release-notes.html">Kite SDK Release Notes</a>
+        
+          <a class="page-link" href="/docs/staging/maven/run-app-mojo.html">Maven Goal: run-app</a>
+        
+          <a class="page-link" href="/docs/staging/maven/run-tool-mojo.html">Maven Goal: run-tool</a>
+        
+          <a class="page-link" href="/docs/staging/maven/update-dataset-mojo.html">Maven Goal: update-dataset</a>
+        
+          <a class="page-link" href="/docs/staging/view-api.html">Kite View API</a>
+        
+          <a class="page-link" href="/docs/staging/writing-to-views.html">Writing to Views</a>
+        
+      </div -->
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Kite Dataset API</h1>
+  </header>
+
+  <article class="post-content">
+  <p>Most of the time, you can create datasets and system prototypes using the <a href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Kite command line interface</a> (CLI). When you want to perform these tasks using a Java program, you can use the Kite API. With the Kite API, you can perform tasks such as reading a dataset, defining and reading views of a dataset, and using MapReduce to process a dataset.</p>
+
+<h2 id="dataset">Dataset</h2>
+
+<p>A dataset is a collection of records, like a relational table. Records are similar to table rows, but the columns can contain strings, numbers, or nested data structures such as lists, maps, and other records.</p>
+
+<p>The <code>Dataset</code> interface provides methods to work with the collection of records it represents. A <code>Dataset</code> is <a href="https://jsr-305.googlecode.com/svn/trunk/javadoc/javax/annotation/concurrent/Immutable.html">immutable</a>.</p>
+
+<h3 id="dataset-uris">Dataset URIs</h3>
+
+<p>Datasets are identified by URI. The dataset URI determines how Kite stores your dataset and its configuration metadata.</p>
+
+<p>For example, if you want to create the <code>products</code> dataset in Hive, you can use this URI.</p>
+
+<pre><code>dataset:hive:products
+</code></pre>
+
+<p>Common dataset URI patterns are Hive, HDFS, Local FileSystem, and HBase. See <a href="/docs/staging/URIs.html">Dataset and View URIs</a>.</p>
+
+<h3 id="datasetdescriptors">DatasetDescriptors</h3>
+
+<p>A <code>DatasetDescriptor</code> provides the structural definition of a dataset. It encapsulates all of the configuration needed to read and write data.</p>
+
+<p>When you create a <code>Dataset</code>, you supply a <code>DatasetDescriptor</code>. That descriptor is saved and used by Kite when you interact with the dataset.</p>
+
+<p>At a minimum, a <code>DatasetDescriptor</code> requires the record <a href="#avro-schema">schema</a>, which describes the records. You create a <code>DatasetDescriptor</code> object using the fluent <a href="/docs/staging/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html"><code>DatasetDescriptor.Builder</code></a> to set the schema and other configuration. See <a href="#datasetdescriptor-options">DatasetDescriptor Options</a> for more configuration options.</p>
+
+<h2 id="datasets">Datasets</h2>
+
+<p>The <code>Datasets</code> class is the starting point when working with the Kite Data API. It provides operations around datasets, such as creating or deleting a dataset.</p>
+
+<h3 id="create">create</h3>
+
+<p>With a storage URI and a DatasetDescriptor, you can use <code>Datasets.create</code> to create a dataset instance. This example creates a dataset named <em>products</em> in the Hive metastore.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+</pre></td>
+  <td class="code"><pre>DatasetDescriptor descriptor = <span style="color:#080;font-weight:bold">new</span> DatasetDescriptor.Builder()
+  .schemaUri(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">resource:product.avsc</span><span style="color:#710">&quot;</span></span>)
+  .build();
+
+Dataset&lt;Record&gt; products = Datasets.create(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">dataset:hive:products</span><span style="color:#710">&quot;</span></span>, descriptor);
+</pre></td>
+</tr></table>
+</div>
+
+<p>The <code>create</code> command creates an empty dataset. You can use a <a href="#datasetwriter"><code>DatasetWriter</code></a> to populate your dataset.</p>
+
+<h3 id="load">load</h3>
+
+<p>Load an existing dataset for processing using the <code>load</code> method. The load method verifies that the dataset exists, retrieves the dataset’s metadata, and verifies that you can communicate with its services. </p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>Dataset&lt;Record&gt; products = Datasets.load(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">dataset:hive:products</span><span style="color:#710">&quot;</span></span>);
+</pre></td>
+</tr></table>
+</div>
+
+<p>Once you load the dataset, you can retrieve and view the dataset records using <a href="#datasetreader"><code>DatasetReader</code></a>.</p>
+
+<p>The <code>load</code> method can also be used with a <a href="/docs/staging/URIs.html#view-uris">view URI</a>.</p>
+
+<h3 id="update">update</h3>
+
+<p>Over time, your dataset requirements might change. You can use <code>update</code> to change a dataset’s configuration by replacing its <code>DatasetDescriptor</code>.</p>
+
+<p>You can add, remove, or change the datatype of columns in your dataset, provided you don’t attempt a change that would corrupt the data. Kite follows the guidelines in the <a href="http://avro.apache.org/docs/current/spec.html#Schema+Resolution">Avro schema</a>. See <a href="../Schema-Evolution/">Schema Evolution</a> for more detail and examples.</p>
+
+<p>This example updates the schema for the existing <em>products</em> dataset. First, it creates a new descriptor builder from the existing descriptor, to copy its settings, then adds <code>products_v2.avsc</code> as the schema and builds a new descriptor. Then it updates the dataset to use that new descriptor.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+</pre></td>
+  <td class="code"><pre>Dataset&lt;Record&gt; products = Datasets.load(
+  <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">dataset:hive:products</span><span style="color:#710">&quot;</span></span>, Record.class);
+
+DatasetDescriptor updatedDescriptor = <span style="color:#080;font-weight:bold">new</span> DatasetDescriptor.Builder(originalDescriptor)
+  .schemaUri(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">resource:product_v2.avsc</span><span style="color:#710">&quot;</span></span>)
+  .build(); 
+
+Datasets.update(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">dataset:hive:products</span><span style="color:#710">&quot;</span></span>, updatedDescriptor);
+</pre></td>
+</tr></table>
+</div>
+
+<h3 id="delete">delete</h3>
+
+<p>Delete a dataset, based on its URI, with the <code>delete</code> method. Kite takes care of any housekeeping, such as deleting both data and any metadata stored separately.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+</pre></td>
+  <td class="code"><pre>Datasets.delete(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">dataset:hive:products</span><span style="color:#710">&quot;</span></span>);
+</pre></td>
+</tr></table>
+</div>
+
+<h2 id="working-with-datasets">Working with Datasets</h2>
+
+<h3 id="avro-objects">Avro Objects</h3>
+
+<p>Regardless of the underlying storage format, Kite uses Avro’s object models for its in-memory representations of data. This means you can write applications that use the same object classes and store the dataset in any of the available formats. To change the underlying storage format in your application, you only need to change its dataset URI.</p>
+
+<p>In this introduction, Kite returns Avro’s <a href="https://avro.apache.org/docs/1.7.7/api/java/index.html?org/apache/avro/generic/package-summary.html">generic</a> data classes. Kite also supports Avro’s <a href="http://avro.apache.org/docs/1.7.7/api/java/index.html?org/apache/avro/specific/package-summary.html">specific</a> and <a href="https://avro.apache.org/docs/1.7.7/api/java/index.html?org/apache/avro/reflect/package-summary.html">reflect</a> object models.</p>
+
+<h4 id="avro-schema">Avro Schema</h4>
+
+<p>A schema defines the field names and data types for records in a dataset. For example, this is the schema definition for the products dataset. It defines a <em>name</em> field as a string and an <em>id</em> field as an integer.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+<a href="#n12" name="n12">12</a>
+<a href="#n13" name="n13">13</a>
+<a href="#n14" name="n14">14</a>
+<a href="#n15" name="n15">15</a>
+<a href="#n16" name="n16">16</a>
+</pre></td>
+  <td class="code"><pre>{
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">record</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">Product</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>namespace</span><span style="color:#404">&quot;</span></span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">org.kitesdk.examples.data.generic</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>doc</span><span style="color:#404">&quot;</span></span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">A product record</span><span style="color:#710">&quot;</span></span>,
+  <span style="color:#606"><span style="color:#404">&quot;</span><span>fields</span><span style="color:#404">&quot;</span></span>: [
+    {
+      <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">name</span><span style="color:#710">&quot;</span></span>,
+      <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">string</span><span style="color:#710">&quot;</span></span>
+    },
+    {
+      <span style="color:#606"><span style="color:#404">&quot;</span><span>name</span><span style="color:#404">&quot;</span></span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">id</span><span style="color:#710">&quot;</span></span>,
+      <span style="color:#606"><span style="color:#404">&quot;</span><span>type</span><span style="color:#404">&quot;</span></span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">long</span><span style="color:#710">&quot;</span></span>
+    }
+  ]
+}
+</pre></td>
+</tr></table>
+</div>
+
+<p>Once you have defined a schema, you can use <code>DatasetDescriptor.Builder</code> to create a descriptor instance and then a dataset using that descriptor. Once a dataset is created, its schema is loaded automatically.</p>
+
+<h3 id="datasetdescriptor-options">DatasetDescriptor Options</h3>
+
+<p>A <code>DatasetDescriptor</code> encapsulates the configuration needed to read and write a dataset. A <code>DatasetDescriptor</code> is <a href="https://jsr-305.googlecode.com/svn/trunk/javadoc/javax/annotation/concurrent/Immutable.html">immutable</a>, and is created by <a href="/docs/staging/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html"><code>DatasetDescriptor.Builder</code></a>.</p>
+
+<p>There are several options available when creating a descriptor:<br />
+* <a href="#schema">Set the record schema</a>, <strong>required</strong><br />
+* <a href="#partition-strategy">Add a partition strategy</a><br />
+* <a href="#storage-format">Choose the data format</a> and <a href="#compression-type">compression</a><br />
+* Add custom key-value properties</p>
+
+<h4 id="schema">Schema</h4>
+
+<p>A key element of the dataset descriptor is the record schema. There are a number of ways to find and set the schema using the <a href="/docs/staging/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#schema(org.apache.avro.Schema)"><code>DatasetDescriptor.Builder#schema</code></a> methods. For example, you can read a schema definition file from HDFS or the classpath, you can use the schema from an existing data file, or you can use the builder to inspect any Java class and build a schema for it.</p>
+
+<p>This example reads a schema definition file, <em>product.avsc</em>, from a project’s JAR that was built with the schema in <code>src/main/resources/</code>.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+</pre></td>
+  <td class="code"><pre>DatasetDescriptor descriptor = <span style="color:#080;font-weight:bold">new</span> DatasetDescriptor.Builder()
+    .schema(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">resource:product.avsc</span><span style="color:#710">&quot;</span></span>)
+    .build();
+</pre></td>
+</tr></table>
+</div>
+
+<h4 id="partition-strategy">Partition Strategy</h4>
+
+<p>Datasets commonly use a partition strategy to control the data layout for efficient storage and retrieval. You can pass both a <a href="/docs/staging/apidocs/org/kitesdk/data/PartitionStrategy.html"><code>PartitionStrategy</code></a> object or a <a href="/docs/staging/Partition-Strategy-Format.html">partition strategy JSON definition</a> to <a href="/docs/staging/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#partitionStrategy(org.kitesdk.data.PartitionStrategy)"><code>DatasetDescriptor.Builder#partitionStrategy</code></a>. See <a href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a> for a conceptual introduction. </p>
+
+<p>This example constructs a descriptor with its partition strategy created by [<code>PartitionStrategy.Builder</code>][javadoc-strategy-builder].</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+</pre></td>
+  <td class="code"><pre>PartitionStrategy ymd = <span style="color:#080;font-weight:bold">new</span> PartitionStrategy.Builder()
+    .year(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">timestamp</span><span style="color:#710">&quot;</span></span>)
+    .month(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">timestamp</span><span style="color:#710">&quot;</span></span>)
+    .day(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">timestamp</span><span style="color:#710">&quot;</span></span>)
+    .build();
+
+DatasetDescriptor descriptor = <span style="color:#080;font-weight:bold">new</span> DatasetDescriptor.Builder()
+    .schema(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">resource:event.avsc</span><span style="color:#710">&quot;</span></span>)
+    .partitionStrategy(ymd)
+    .build();
+</pre></td>
+</tr></table>
+</div>
+
+<p>Note that a <a href="#schema">schema</a> is always required to build a descriptor.</p>
+
+<h4 id="storage-format">Storage Format</h4>
+
+<p>Storage format is set when you create a dataset and cannot be changed. See <a href="/docs/staging/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#format(java.lang.String)"><code>DatasetDescriptor.Builder#format</code></a>.</p>
+
+<p>The default storage format is Avro, which is the recommended format for most use cases.</p>
+
+<p>You can alternatively use the Parquet format, which can result in smaller files and better read performance when using a subset of the dataset’s record fields (columns).</p>
+
+<p>Both Avro and Parquet are efficient binary formats that are designed for Hadoop. You can use the Kite CLI or the Hue data browser to view the compressed binary data stored in these formats.</p>
+
+<h4 id="compression-type">Compression Type</h4>
+
+<p>Kite uses <em>Snappy</em> compression by default. You also have the option of using <em>Deflate</em>, <em>Bzip2</em>, <em>Lzo</em>, or <em>Uncompressed</em> compression. See <a href="/docs/staging/apidocs/org/kitesdk/data/DatasetDescriptor.Builder.html#compressionType(java.lang.String)"><code>DatasetDescriptor.Builder#compressionType</code></a></p>
+
+<h3 id="datasetwriter">DatasetWriter</h3>
+
+<p>The <code>DatasetWriter</code> class stores data in your dataset, using the layout and format you choose when creating the dataset.</p>
+
+<p>This code snippet uses an Avro generic record builder to create a product from a list of names, assigns an ID number, and writes each record to the dataset.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+<a href="#n12" name="n12">12</a>
+<a href="#n13" name="n13">13</a>
+<a href="#n14" name="n14">14</a>
+<a href="#n15" name="n15">15</a>
+<a href="#n16" name="n16">16</a>
+<a href="#n17" name="n17">17</a>
+<a href="#n18" name="n18">18</a>
+<a href="#n19" name="n19">19</a>
+<strong><a href="#n20" name="n20">20</a></strong>
+<a href="#n21" name="n21">21</a>
+<a href="#n22" name="n22">22</a>
+<a href="#n23" name="n23">23</a>
+<a href="#n24" name="n24">24</a>
+<a href="#n25" name="n25">25</a>
+</pre></td>
+  <td class="code"><pre>DatasetWriter&lt;Record&gt; writer = <span style="color:#069">null</span>;
+
+Dataset&lt;Record&gt; products = Datasets.load(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">dataset:hive:products</span><span style="color:#710">&quot;</span></span>, Record.class);
+
+<span style="color:#080;font-weight:bold">try</span> {
+  <span style="color:#339;font-weight:bold">int</span> i = <span style="color:#00D">0</span>;
+
+  writer = products.newWriter();
+
+  <span style="color:#080;font-weight:bold">for</span> (<span style="color:#0a8;font-weight:bold">String</span> item : items) {
+
+    Record product = builder
+      .set(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">name</span><span style="color:#710">&quot;</span></span>, item)
+      .set(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">id</span><span style="color:#710">&quot;</span></span>, i)
+      .build();
+
+    writer.write(product);
+
+    i += <span style="color:#00D">1</span>;
+  }
+} <span style="color:#080;font-weight:bold">finally</span> {
+  <span style="color:#080;font-weight:bold">if</span> (writer != <span style="color:#069">null</span>) {
+    writer.close();
+  }
+}
+</pre></td>
+</tr></table>
+</div>
+
+<h3 id="datasetreader">DatasetReader</h3>
+
+<p><code>DatasetReader</code> retrieves records in a dataset for inspection and processing. It has supports iterating through the records as they are read.</p>
+
+<p>This code snippet shows the code you use to load a dataset, then print each record to the console.</p>
+
+<div><table class="CodeRay"><tr>
+  <td class="line-numbers"><pre><a href="#n1" name="n1">1</a>
+<a href="#n2" name="n2">2</a>
+<a href="#n3" name="n3">3</a>
+<a href="#n4" name="n4">4</a>
+<a href="#n5" name="n5">5</a>
+<a href="#n6" name="n6">6</a>
+<a href="#n7" name="n7">7</a>
+<a href="#n8" name="n8">8</a>
+<a href="#n9" name="n9">9</a>
+<strong><a href="#n10" name="n10">10</a></strong>
+<a href="#n11" name="n11">11</a>
+<a href="#n12" name="n12">12</a>
+<a href="#n13" name="n13">13</a>
+<a href="#n14" name="n14">14</a>
+<a href="#n15" name="n15">15</a>
+<a href="#n16" name="n16">16</a>
+</pre></td>
+  <td class="code"><pre>Dataset&lt;Record&gt; products = Datasets.load(
+  <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">dataset:hive:products</span><span style="color:#710">&quot;</span></span>, Record.class);
+
+DatasetReader&lt;Record&gt; reader = <span style="color:#069">null</span>;
+
+<span style="color:#080;font-weight:bold">try</span> {
+  reader = products.newReader();
+
+  <span style="color:#080;font-weight:bold">for</span> (GenericRecord product : reader) {
+    <span style="color:#0a8;font-weight:bold">System</span>.out.println(product);
+  }
+} <span style="color:#080;font-weight:bold">finally</span> {
+  <span style="color:#080;font-weight:bold">if</span> (reader != <span style="color:#069">null</span>) {
+    reader.close();
+  }
+}
+</pre></td>
+</tr></table>
+</div>
+
+<p>If you don’t need the entire dataset, you can use the <a href="/docs/staging/view-api.html">View API</a> to select a subset of its records.</p>
+
+<h2 id="kite-data-artifacts">Kite Data Artifacts</h2>
+
+<p>You can use the Kite data API by adding dependencies for the artifacts described below.</p>
+
+<ul>
+  <li><a href="/docs/staging/dependencies/kite-data-core.html"><code>kite-data-core</code></a> has the Kite data API, including all of the Kite classes used in this introduction. It also includes the Dataset implementation for both HDFS and local file systems.</li>
+  <li><a href="/docs/staging/dependencies/kite-data-hive.html"><code>kite-data-hive</code></a> is a Dataset implementation that creates Datasets as Hive tables and stores metadata in the Hive MetaStore. Add a dependency on kite-data-hive if you want to interact with your data through Hive or Impala</li>
+  <li><a href="/docs/staging/dependencies/kite-data-hbase.html"><code>kite-data-hbase</code></a> is an experimental Dataset implementation that creates datasets as HBase tables.</li>
+  <li><a href="/docs/staging/dependencies/kite-data-crunch.html"><code>kite-data-crunch</code></a> provides helpers to use a Kite dataset as a source or target in a Crunch pipeline.</li>
+  <li><a href="/docs/staging/dependencies/kite-data-mapreduce.html"><code>kite-data-mapreduce</code></a> provides MR input and output formats that read from or write to Kite datasets.</li>
+</ul>
+
+<p>See the <a href="/docs/staging/dependencies/">dependencies</a> article for more information.</p>
+
+
+  </article>
+
+</div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Software Development Kit, 0.17.1</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+        <li>&nbsp;</li>
+        <li>Generated on 22 December 2014</li>
+      </ul>
+
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
+              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>

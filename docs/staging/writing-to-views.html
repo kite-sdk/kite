@@ -4,10 +4,10 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Restricted Views</title>
+    <title>Writing to Views</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/docs/staging/Restricted-Views.html">
+    <link rel="canonical" href="http://kitesdk.org/docs/staging/writing-to-views.html">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/docs/staging/css/main.css">
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/docs/staging/">Kite Development Guide</a>
+    <a class="site-title" href="/docs/staging/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -38,6 +38,8 @@
         </svg>
       </a>
       <!--div class="trigger">
+        
+          <a class="page-link" href="/docs/staging/API-Overview.html">Kite Dataset API</a>
         
           <a class="page-link" href="/docs/staging/Column-Mapping.html">Column Mapping</a>
         
@@ -62,8 +64,6 @@
           <a class="page-link" href="/docs/staging/Partition-Strategy-Format.html">Partition Strategy JSON Format</a>
         
           <a class="page-link" href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a>
-        
-          <a class="page-link" href="/docs/staging/Restricted-Views.html">Restricted Views</a>
         
           <a class="page-link" href="/docs/staging/Schema-Evolution.html">Schema Evolution</a>
         
@@ -95,9 +95,9 @@
         
           <a class="page-link" href="/docs/staging/morphlines/index.html">Morphlines Introduction</a>
         
-          <a class="page-link" href="/docs/staging/dependencies/index.html">Dependency Information</a>
-        
           <a class="page-link" href="/docs/staging/index.html">Kite: A Data API for Hadoop</a>
+        
+          <a class="page-link" href="/docs/staging/dependencies/index.html">Dependency Information</a>
         
           <a class="page-link" href="/docs/staging/dependencies/kite-data-core.html">kite-data-core</a>
         
@@ -167,6 +167,10 @@
         
           <a class="page-link" href="/docs/staging/maven/update-dataset-mojo.html">Maven Goal: update-dataset</a>
         
+          <a class="page-link" href="/docs/staging/view-api.html">Kite View API</a>
+        
+          <a class="page-link" href="/docs/staging/writing-to-views.html">Writing to Views</a>
+        
       </div -->
     </nav>
 
@@ -180,17 +184,43 @@
       <div class="post">
 
   <header class="post-header">
-    <h1>Restricted Views</h1>
+    <h1>Writing to Views</h1>
   </header>
 
   <article class="post-content">
-  <p>Kite lets you write records to views. Kite then adds the records to the source tables. Kite does not store data in the wrong location when you write to a view. This prevents loss or corruption of data. In the context of a MapReduce or Crunch job, writing records to the wrong place causes the job to fail with an <code>IllegalArgument</code> exception. </p>
+  <p>In Kite, a view is a logical collection of records defined by a set of constraints. When reading a view, Kite filters out records that don’t match the view’s constraints. Similarly, you can use a view to restrict the records that a writer will accept to the subset of your dataset that is included in a view.</p>
 
-<p>For example, you might have a Movies dataset partitioned by decade. Your application works with a view on that dataset. Your application attempts to store a record with a release date of 1941 in the 1950s partition. The operation fails.</p>
+<p>Kite <code>DatasetWriters</code> created using <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#newWriter()"><code>View#newWriter</code></a> reject records that don’t match the view’s constraints by throwing an exception. This is useful when you want to guarantee writers behave a certain way. If, however, storage guarantees are not significant in your application, you can avoid these checks by creating writers for the dataset.</p>
 
-<p>It’s important to write your applications so that they “do the right thing” when they write to a view. This will avoid the exception and its unhelpful message. </p>
+<h2 id="why-restrict-writes">Why restrict writes?</h2>
 
-<p>If storage rules are not significant in your application, you can avoid these checks by writing directly to the top-level dataset.</p>
+<p>Take, for example, an ingest process that monitors a directory for today’s data and imports CSV files to a dataset when they arrive. A simple approach is to use the dataset’s URI as the import target:</p>
+
+<pre><code>kite-dataset csv-import $file dataset:hive:logs
+</code></pre>
+
+<p>If one of the processes creating those files has a clock problem and starts producing files with records in January 1970, this import command will happily add the data as though it were valid.</p>
+
+<p>To fix this problem, you can add the expectation that the data is for today, using a view URI for the target:</p>
+
+<pre><code>current_uri=view:hive:logs?year=`date +%Y`\&amp;month=`date +%m`\&amp;day=`date +%d`
+kite-dataset csv-import $file $current_uri || mv $file bad_files/
+</code></pre>
+
+<p>Now, files with invalid dates will be rejected.</p>
+
+<h2 id="other-uses">Other uses</h2>
+
+<p>You may also want to restrict writers to guarantee data pipelines written with the Kite API behave in expected ways. This is useful for cases such as:</p>
+
+<ul>
+  <li>Ensuring a writer is responsible for no more than N partitions to avoid file thrashing</li>
+  <li>Ensuring writers are not responsible for the same set of partitions to minimize the number of files</li>
+  <li>Ensuring writers are sent the correct data (when dividing work between several writers)</li>
+</ul>
+
+<p>For example, you might have two writers working in parallel on the same dataset partitioned by time. You can set a constraint on writer1 so that it only writes to a view (and its partition) for the month of June, and a constraint on writer2 so that it only writes to a view for the month of July. This ensures the writers will not write to the same partition, which would create extra files, and validates that no records in July are sent to writer1.</p>
+
 
   </article>
 
@@ -203,13 +233,13 @@
   <div class="wrap columns">
 
     <div class="left">
-      <h2 class="footer-heading">Kite Development Guide, 0.17.1</h2>
+      <h2 class="footer-heading">Kite Software Development Kit, 0.17.1</h2>
 
       <ul>
         <li>Kite is licensed under</li>
         <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
         <li>&nbsp;</li>
-        <li>Generated on 19 December 2014</li>
+        <li>Generated on 22 December 2014</li>
       </ul>
 
     </div>
