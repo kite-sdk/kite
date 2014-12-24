@@ -4,13 +4,13 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Kite View API</title>
+    <title>Kite Views API</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="An open source data API for Hadoop.">
-    <link rel="canonical" href="http://kitesdk.org/view-api.html">
+    <link rel="canonical" href="http://kitesdk.org/docs/staging/view-api.html">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/docs/staging/css/main.css">
     <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -23,7 +23,7 @@
 
   <div class="wrap">
 
-    <a class="site-title" href="/">Kite Software Development Kit</a>
+    <a class="site-title" href="/docs/staging/">Kite Software Development Kit</a>
 
     <nav class="site-nav">
       <a href="#" class="menu-icon">
@@ -37,141 +37,6 @@
             c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
         </svg>
       </a>
-      <!--div class="trigger">
-        
-          <a class="page-link" href="/API-Overview.html">Kite Dataset API</a>
-        
-          <a class="page-link" href="/Column-Mapping.html">Column Mapping</a>
-        
-          <a class="page-link" href="/HBase-Storage-Cells.html">HBase Storage Cells</a>
-        
-          <a class="page-link" href="/Inferring-a-Schema-from-a-Java-Class.html">Inferring a Schema from a Java Class</a>
-        
-          <a class="page-link" href="/Inferring-a-Schema-from-an-Avro-Data-File.html">Inferring a Schema from an Avro Data File</a>
-        
-          <a class="page-link" href="/Install-Kite.html">Install the Kite Command Line Interface</a>
-        
-          <a class="page-link" href="/Interval-Notation.html">Interval Notation</a>
-        
-          <a class="page-link" href="/Kite-Data-Module-Overview.html">Kite Data Module Overview</a>
-        
-          <a class="page-link" href="/Kite-Dataset-Command-Line-Interface.html">Kite Dataset Command Line Interface</a>
-        
-          <a class="page-link" href="/Kite-SDK-Guide.html">What is Kite?</a>
-        
-          <a class="page-link" href="/Parquet-vs-Avro-Format.html">Parquet vs Avro Format</a>
-        
-          <a class="page-link" href="/Partition-Strategy-Format.html">Partition Strategy JSON Format</a>
-        
-          <a class="page-link" href="/Partitioned-Datasets.html">Partitioned Datasets</a>
-        
-          <a class="page-link" href="/Schema-Evolution.html">Schema Evolution</a>
-        
-          <a class="page-link" href="/Schema-URL-Warning.html">Schema URL Warning</a>
-        
-          <a class="page-link" href="/URIs.html">Dataset and View URIs</a>
-        
-          <a class="page-link" href="/Using-Kite-with-Apache-Maven.html">Using Kite with Apache Maven</a>
-        
-          <a class="page-link" href="/Using-the-Kite-CLI-to-Create-a-Dataset.html">Using the Kite Command Line Interface to Create a Dataset</a>
-        
-          <a class="page-link" href="/Viewing-with-Impala.html">Viewing a Kite CLI Dataset with Impala</a>
-        
-          <a class="page-link" href="/about.html">About Kite SDK</a>
-        
-          <a class="page-link" href="/all-pages.html">Kite SDK Documentation</a>
-        
-          <a class="page-link" href="/maven/create-dataset-mojo.html">Maven Goal: create-dataset</a>
-        
-          <a class="page-link" href="/maven/delete-dataset-mojo.html">Maven Goal: delete-dataset</a>
-        
-          <a class="page-link" href="/maven/deploy-app-mojo.html">Maven Goal: deploy-app</a>
-        
-          <a class="page-link" href="/faq.html">Frequently Asked Questions</a>
-        
-          <a class="page-link" href="/feed.xml"></a>
-        
-          <a class="page-link" href="/maven/help-mojo.html">Maven Goal: help</a>
-        
-          <a class="page-link" href="/morphlines/index.html">Morphlines Introduction</a>
-        
-          <a class="page-link" href="/index.html">Kite: A Data API for Hadoop</a>
-        
-          <a class="page-link" href="/dependencies/index.html">Dependency Information</a>
-        
-          <a class="page-link" href="/dependencies/kite-data-core.html">kite-data-core</a>
-        
-          <a class="page-link" href="/dependencies/kite-data-crunch.html">kite-data-crunch</a>
-        
-          <a class="page-link" href="/dependencies/kite-data-hbase.html">kite-data-hbase</a>
-        
-          <a class="page-link" href="/dependencies/kite-data-hive.html">kite-data-hive</a>
-        
-          <a class="page-link" href="/dependencies/kite-data-mapreduce.html">kite-data-mapreduce</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-all-except-solr.html">kite-morphlines-all-except-solr</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-all.html">kite-morphlines-all</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-avro.html">kite-morphlines-avro</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-core.html">kite-morphlines-core</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-hadoop-core.html">kite-morphlines-hadoop-core</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-hadoop-parquet-avro.html">kite-morphlines-hadoop-parquet-avro</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-hadoop-rcfile.html">kite-morphlines-hadoop-rcfile</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-hadoop-sequencefile.html">kite-morphlines-hadoop-sequencefile</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-json.html">kite-morphlines-json</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-maxmind.html">kite-morphlines-maxmind</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-metrics-servlets.html">kite-morphlines-metrics-servlets</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-protobuf.html">kite-morphlines-protobuf</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-saxon.html">kite-morphlines-saxon</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-solr-cell.html">kite-morphlines-solr-cell</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-solr-core.html">kite-morphlines-solr-core</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-tika-core.html">kite-morphlines-tika-core</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-tika-decompress.html">kite-morphlines-tika-decompress</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-twitter.html">kite-morphlines-twitter</a>
-        
-          <a class="page-link" href="/dependencies/kite-morphlines-useragent.html">kite-morphlines-useragent</a>
-        
-          <a class="page-link" href="/dependencies/kite-tools.html">kite-tools</a>
-        
-          <a class="page-link" href="/known-limitations.html">Known Limitations</a>
-        
-          <a class="page-link" href="/lifecycle.html">Kite Dataset Lifecycle</a>
-        
-          <a class="page-link" href="/morphlines/morphlines-reference-guide.html">Morphlines Reference Guide</a>
-        
-          <a class="page-link" href="/maven/package-app-mojo.html">Maven Goal: package-app</a>
-        
-          <a class="page-link" href="/maven/plugin-info.html">Maven Plugin Goals</a>
-        
-          <a class="page-link" href="/release-notes.html">Kite SDK Release Notes</a>
-        
-          <a class="page-link" href="/maven/run-app-mojo.html">Maven Goal: run-app</a>
-        
-          <a class="page-link" href="/maven/run-tool-mojo.html">Maven Goal: run-tool</a>
-        
-          <a class="page-link" href="/maven/update-dataset-mojo.html">Maven Goal: update-dataset</a>
-        
-          <a class="page-link" href="/view-api.html">Kite View API</a>
-        
-          <a class="page-link" href="/writing-to-views.html">Writing to Views</a>
-        
-      </div -->
     </nav>
 
   </div>
@@ -184,8 +49,107 @@
       <div class="post">
 
   <header class="post-header">
-    <h1>Kite View API</h1>
+    <h1>Kite Views API</h1>
   </header>
+
+  
+  <div class="sidebar">
+  
+    <h4>About Kite</h4>
+    <ul>
+      
+    </ul>
+  
+    <h4></h4>
+    <ul>
+      
+      
+      <li><a href="/docs/staging/Kite-SDK-Guide.html">Kite Background</a></li>
+      
+      
+      
+      <li><a href="/docs/staging/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+      
+      
+    </ul>
+  
+    <h4>Kite CLI</h4>
+    <ul>
+      
+      
+      <li><a href="/docs/staging/Install-Kite.html">Installing the CLI</a></li>
+      
+      
+      
+      <li><a href="/docs/staging/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+      
+      
+      
+      <li><a href="/docs/staging/Kite-Dataset-Command-Line-Interface.html">Kite CLI Reference</a></li>
+      
+      
+    </ul>
+  
+    <h4>Kite API</h4>
+    <ul>
+      
+      
+      <li><a href="/docs/staging/API-Overview.html">API Introduction</a></li>
+      
+      
+      
+      <li><b>Views API</b></li>
+      
+      
+      
+      <li><a href="/docs/staging/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+      
+      
+    </ul>
+  
+    <h4>Reference</h4>
+    <ul>
+      
+      
+      <li><a href="/docs/staging/URIs.html">Kite URIs</a></li>
+      
+      
+      
+      <li><a href="/docs/staging/Schema-Evolution.html">Schema Evolution</a></li>
+      
+      
+      
+      <li><a href="/docs/staging/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+      
+      
+      
+      <li><a href="/docs/staging/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+      
+      
+      
+      <li><a href="/docs/staging/HBase-Storage-Cells.html">HBase Storage</a></li>
+      
+      
+      
+      <li><a href="/docs/staging/Column-Mapping.html">Column Mapping</a></li>
+      
+      
+      
+      <li><a href="/docs/staging/lifecycle.html">Dataset Lifecycle</a></li>
+      
+      
+      
+      <li><a href="/docs/staging/maven">Maven Plugin</a></li>
+      
+      
+      
+      <li><a href="/docs/staging/dependencies">Dependency Info</a></li>
+      
+      
+    </ul>
+  
+  </div>
+  
 
   <article class="post-content">
   <p>Most of the time, you don’t need to work with all of the records stored in a dataset. It is common to work with subsets, like events <em>last month</em> rather than <em>all</em> events. The Views API is a way to express constraints for the records that Kite loads.</p>
@@ -196,9 +160,9 @@
 
 <h2 id="views">Views</h2>
 
-<p>Kite’s <a href="/apidocs/org/kitesdk/data/View.html"><code>View</code></a> interface represents a logical collection of records in a dataset. It might seem as though a view is a subset of a dataset, but it is more accurate to think of a dataset as a view with no constraints applied.</p>
+<p>Kite’s <a href="/docs/staging/apidocs/org/kitesdk/data/View.html"><code>View</code></a> interface represents a logical collection of records in a dataset. It might seem as though a view is a subset of a dataset, but it is more accurate to think of a dataset as a view with no constraints applied.</p>
 
-<p>You can use a view as the input for a MapReduce job or read its content directly by using <a href="/apidocs/org/kitesdk/data/View.html#newReader()"><code>View#newReader</code></a> to get a <code>DatasetReader</code> that returns only records in the view.</p>
+<p>You can use a view as the input for a MapReduce job or read its content directly by using <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#newReader()"><code>View#newReader</code></a> to get a <code>DatasetReader</code> that returns only records in the view.</p>
 
 <p><code>View</code> instances are <a href="https://jsr-305.googlecode.com/svn/trunk/javadoc/javax/annotation/concurrent/Immutable.html">immutable</a>. You can pass the view to other operations, safe in the knowledge that it won’t be changed at all.</p>
 
@@ -214,37 +178,37 @@
       <td>Example</td>
     </tr>
     <tr>
-      <td><a href="/apidocs/org/kitesdk/data/RefinableView.html#with(java.lang.String,%20java.lang.Object...)"><code>with</code></a></td>
+      <td><a href="/docs/staging/apidocs/org/kitesdk/data/RefinableView.html#with(java.lang.String,%20java.lang.Object...)"><code>with</code></a></td>
       <td>Add a non-null constraint for a field</td>
       <td><code>events.with("level")</code></td>
     </tr>
     <tr>
-      <td><a href="/apidocs/org/kitesdk/data/RefinableView.html#with(java.lang.String,%20java.lang.Object...)"><code>with</code></a></td>
+      <td><a href="/docs/staging/apidocs/org/kitesdk/data/RefinableView.html#with(java.lang.String,%20java.lang.Object...)"><code>with</code></a></td>
       <td>Add an equality constraint for a field</td>
       <td><code>events.with("level", "FATAL")</code></td>
     </tr>
     <tr>
-      <td><a href="/apidocs/org/kitesdk/data/RefinableView.html#with(java.lang.String,%20java.lang.Object...)"><code>with</code></a></td>
+      <td><a href="/docs/staging/apidocs/org/kitesdk/data/RefinableView.html#with(java.lang.String,%20java.lang.Object...)"><code>with</code></a></td>
       <td>Add a set-inclusion constraint for a field</td>
       <td><code>events.with("level", "WARNING", "ERROR")</code></td>
     </tr>
     <tr>
-      <td><a href="/apidocs/org/kitesdk/data/RefinableView.html#from(java.lang.String,%20java.lang.Comparable)"><code>from</code></a></td>
+      <td><a href="/docs/staging/apidocs/org/kitesdk/data/RefinableView.html#from(java.lang.String,%20java.lang.Comparable)"><code>from</code></a></td>
       <td>Add a &gt;= constraint for a field</td>
       <td><code>events.from("day", 1)</code></td>
     </tr>
     <tr>
-      <td><a href="/apidocs/org/kitesdk/data/RefinableView.html#fromAfter(java.lang.String,%20java.lang.Comparable)"><code>fromAfter</code></a></td>
+      <td><a href="/docs/staging/apidocs/org/kitesdk/data/RefinableView.html#fromAfter(java.lang.String,%20java.lang.Comparable)"><code>fromAfter</code></a></td>
       <td>Add a &gt; constraint for a field</td>
       <td><code>events.fromAfter("day", 4)</code></td>
     </tr>
     <tr>
-      <td><a href="/apidocs/org/kitesdk/data/RefinableView.html#to(java.lang.String,%20java.lang.Comparable)"><code>to</code></a></td>
+      <td><a href="/docs/staging/apidocs/org/kitesdk/data/RefinableView.html#to(java.lang.String,%20java.lang.Comparable)"><code>to</code></a></td>
       <td>Add a &lt;= constraint for a field</td>
       <td><code>events.to("year", 2014)</code></td>
     </tr>
     <tr>
-      <td><a href="/apidocs/org/kitesdk/data/RefinableView.html#toBefore(java.lang.String,%20java.lang.Comparable)"><code>toBefore</code></a></td>
+      <td><a href="/docs/staging/apidocs/org/kitesdk/data/RefinableView.html#toBefore(java.lang.String,%20java.lang.Comparable)"><code>toBefore</code></a></td>
       <td>Add a &lt; constraint for a field</td>
       <td><code>events.toBefore("year", 2015)</code></td>
     </tr>
@@ -277,11 +241,11 @@
 </tr></table>
 </div>
 
-<p>If the ratings dataset is partitioned by <code>time</code>, then the view will automatically take advantage of dataset partitioning. Kite intelligently determines which partitions to draw from in response to this filter value. See <a href="/Partitioned-Datasets.html" title="See [Partitioned Datasets][partitioned-datasets].">Partitioned Datasets</a>.</p>
+<p>If the ratings dataset is partitioned by <code>time</code>, then the view will automatically take advantage of dataset partitioning. Kite intelligently determines which partitions to draw from in response to this filter value. See <a href="/docs/staging/Partitioned-Datasets.html" title="See [Partitioned Datasets][partitioned-datasets].">Partitioned Datasets</a>.</p>
 
 <h2 id="loading-a-view">Loading a View</h2>
 
-<p>In addition to creating a view with the API, you can load a view from a <a href="/URIs.html#view-uris">view URI</a>. A view URIs is analogous to a dataset URI, where the scheme is <code>view:</code> instead of <code>dataset:</code> and constraints are added as query arguments.</p>
+<p>In addition to creating a view with the API, you can load a view from a <a href="/docs/staging/URIs.html#view-uris">view URI</a>. A view URIs is analogous to a dataset URI, where the scheme is <code>view:</code> instead of <code>dataset:</code> and constraints are added as query arguments.</p>
 
 <p>The following code snippet creates a view for a dataset of movie ratings submitted by the critic with <code>user_id</code> 125. </p>
 
@@ -299,15 +263,15 @@
 
 <h3 id="isempty">isEmpty</h3>
 
-<p>The <a href="/apidocs/org/kitesdk/data/View.html#isEmpty()"><code>isEmpty</code></a> method returns whether your <code>View</code> contains any records at all.</p>
+<p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#isEmpty()"><code>isEmpty</code></a> method returns whether your <code>View</code> contains any records at all.</p>
 
 <h3 id="geturi">getUri</h3>
 
-<p>The <a href="/apidocs/org/kitesdk/data/View.html#getUri()"><code>getUri</code></a> method returns a URI for a <code>View</code> that can be passed to <code>Datasets.load</code>.</p>
+<p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#getUri()"><code>getUri</code></a> method returns a URI for a <code>View</code> that can be passed to <code>Datasets.load</code>.</p>
 
 <h3 id="includes">includes</h3>
 
-<p>The <a href="/apidocs/org/kitesdk/data/View.html#includes(E)"><code>includes</code></a> method returns whether an entity matches a view’s constraints. That is, whether the record would be included in this <code>View</code> if it were present in the <code>Dataset</code>.</p>
+<p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#includes(E)"><code>includes</code></a> method returns whether an entity matches a view’s constraints. That is, whether the record would be included in this <code>View</code> if it were present in the <code>Dataset</code>.</p>
 
 <h2 id="working-with-records-in-a-view">Working with Records in a View</h2>
 
@@ -315,21 +279,21 @@
 
 <h3 id="newreader">newReader</h3>
 
-<p>The <a href="/apidocs/org/kitesdk/data/View.html#newReader()"><code>newReader</code></a> method creates an appropriate <code>DatasetReader</code> that returns only records that match the view’s constraints.</p>
+<p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#newReader()"><code>newReader</code></a> method creates an appropriate <code>DatasetReader</code> that returns only records that match the view’s constraints.</p>
 
 <h3 id="newwriter">newWriter</h3>
 
-<p>The <a href="/apidocs/org/kitesdk/data/View.html#newWriter()"><code>newWriter</code></a> method creates an appropriate <code>DatasetWriter</code> that will write only records that match the view’s constraints. For more information, see <a href="/writing-to-views.html">Writing to Views</a>.</p>
+<p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#newWriter()"><code>newWriter</code></a> method creates an appropriate <code>DatasetWriter</code> that will write only records that match the view’s constraints. For more information, see <a href="/docs/staging/writing-to-views.html">Writing to Views</a>.</p>
 
 <p>See [Restricted Views][restricted-views].</p>
 
 <h3 id="deleteall">deleteAll</h3>
 
-<p>The <a href="/apidocs/org/kitesdk/data/View.html#deleteAll()"><code>deleteAll</code></a> method deletes all entities in the dataset that match the view’s constraints.</p>
+<p>The <a href="/docs/staging/apidocs/org/kitesdk/data/View.html#deleteAll()"><code>deleteAll</code></a> method deletes all entities in the dataset that match the view’s constraints.</p>
 
 <p>If the delete cannot be completed cleanly, then the method throws an <code>UnsupportedOperationException</code>. In the FileSystem implementation, for example, individual records cannot be deleted, only entire files. That means that Kite only allows you to delete an entire partition directory.</p>
 
-<p>This method will delete records in a dataset, and will not delete the dataset itself. When called on a dataset, all records in the dataset will be removed. To delete a dataset in addition to the data stored in that dataset, use <a href="/API-Overview.html#delete"><code>Datasets.delete</code></a>.</p>
+<p>This method will delete records in a dataset, and will not delete the dataset itself. When called on a dataset, all records in the dataset will be removed. To delete a dataset in addition to the data stored in that dataset, use <a href="/docs/staging/API-Overview.html#delete"><code>Datasets.delete</code></a>.</p>
 
 <hr />
 
@@ -342,6 +306,7 @@
   </article>
 
 </div>
+
       </div>
     </div>
 
@@ -380,7 +345,7 @@
               <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
               <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
               <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
-              <li><a href="/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+              <li><a href="/docs/staging/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
             </ul>
           </div>
         </div>
