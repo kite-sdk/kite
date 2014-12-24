@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Known Limitations</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/0.17.1/known-limitations.html">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/0.17.1/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/0.17.1/">Kite Software Development Kit</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Known Limitations</h1>
+  </header>
+
+  
+  <div class="sidebar">
+  
+    <h4>About Kite</h4>
+    <ul>
+      
+    </ul>
+  
+    <h4></h4>
+    <ul>
+      
+      
+      <li><a href="/docs/0.17.1/Kite-SDK-Guide.html">Kite Background</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+      
+      
+    </ul>
+  
+    <h4>Kite CLI</h4>
+    <ul>
+      
+      
+      <li><a href="/docs/0.17.1/Install-Kite.html">Installing the CLI</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/cli-reference.html">Kite CLI Reference</a></li>
+      
+      
+    </ul>
+  
+    <h4>Kite API</h4>
+    <ul>
+      
+      
+      <li><a href="/docs/0.17.1/API-Overview.html">API Introduction</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/view-api.html">Views API</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+      
+      
+    </ul>
+  
+    <h4>Reference</h4>
+    <ul>
+      
+      
+      <li><a href="/docs/0.17.1/URIs.html">Kite URIs</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Schema-Evolution.html">Schema Evolution</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/HBase-Storage-Cells.html">HBase Storage</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Column-Mapping.html">Column Mapping</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/lifecycle.html">Dataset Lifecycle</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/maven">Maven Plugin</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/dependencies">Dependency Info</a></li>
+      
+      
+    </ul>
+  
+  </div>
+  
+
+  <article class="post-content">
+  <p>Kite datasets have the following known limitations:</p>
+
+<ul>
+  <li>It’s not currently possible to rename datasets.</li>
+  <li>There’s no inter-process coordination or locking when operating on datasets. As a result, races can occur if two processes each try and create the same dataset.</li>
+</ul>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Software Development Kit, 0.17.1</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+        <li>&nbsp;</li>
+        <li>Generated on 23 December 2014</li>
+      </ul>
+
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
+              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/0.17.1/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>

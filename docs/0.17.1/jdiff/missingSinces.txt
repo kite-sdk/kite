@@ -1,3 +1,4 @@
+MISSING @SINCE TAG: org.kitesdk.data.DatasetRecordException Class
 MISSING @SINCE TAG: org.kitesdk.morphline.solr.DocumentLoader Method deleteById(java.lang.String)
 NO DOC BLOCK: org.kitesdk.morphline.solr.SolrServerDocumentLoader Method deleteById(java.lang.String)
 MISSING @SINCE TAG: org.kitesdk.morphline.solr.DocumentLoader Method deleteByQuery(java.lang.String)

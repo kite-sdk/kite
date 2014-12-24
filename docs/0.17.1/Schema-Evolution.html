@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Schema Evolution</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/0.17.1/Schema-Evolution.html">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/0.17.1/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/0.17.1/">Kite Software Development Kit</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Schema Evolution</h1>
+  </header>
+
+  
+  <div class="sidebar">
+  
+    <h4>About Kite</h4>
+    <ul>
+      
+    </ul>
+  
+    <h4></h4>
+    <ul>
+      
+      
+      <li><a href="/docs/0.17.1/Kite-SDK-Guide.html">Kite Background</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Kite-Data-Module-Overview.html">Datasets Overview</a></li>
+      
+      
+    </ul>
+  
+    <h4>Kite CLI</h4>
+    <ul>
+      
+      
+      <li><a href="/docs/0.17.1/Install-Kite.html">Installing the CLI</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Using-the-Kite-CLI-to-Create-a-Dataset.html">Importing CSV data</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/cli-reference.html">Kite CLI Reference</a></li>
+      
+      
+    </ul>
+  
+    <h4>Kite API</h4>
+    <ul>
+      
+      
+      <li><a href="/docs/0.17.1/API-Overview.html">API Introduction</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/view-api.html">Views API</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Using-Kite-with-Apache-Maven.html">Using Kite with Maven</a></li>
+      
+      
+    </ul>
+  
+    <h4>Reference</h4>
+    <ul>
+      
+      
+      <li><a href="/docs/0.17.1/URIs.html">Kite URIs</a></li>
+      
+      
+      
+      <li><b>Schema Evolution</b></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Partitioned-Datasets.html">Partitioned Datasets</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Parquet-vs-Avro-Format.html">Parquet vs Avro</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/HBase-Storage-Cells.html">HBase Storage</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/Column-Mapping.html">Column Mapping</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/lifecycle.html">Dataset Lifecycle</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/maven">Maven Plugin</a></li>
+      
+      
+      
+      <li><a href="/docs/0.17.1/dependencies">Dependency Info</a></li>
+      
+      
+    </ul>
+  
+  </div>
+  
+
+  <article class="post-content">
+  <p>Over time, you might want to add or remove fields in an existing schema. The precise rules for schema evolution are inherited from Avro, and are documented in the Avro specification as rules for <a href="http://avro.apache.org/docs/current/spec.html#Schema+Resolution" title="schemaSpec">Avro schema resolution</a>. For the purposes of working in Kite, here are some important things to note.</p>
+
+<h2 id="writer-schemas-and-reader-schemas">Writer Schemas and Reader Schemas</h2>
+
+<p>Writer schemas describe a dataset as it is being written. Reader schemas describe a dataset as it is being read from a datastore. Writer and reader schemas must be compatible, but they do not have to match exactly. See the <a href="http://avro.apache.org/docs/current/spec.html#Schema+Resolution" title="schemaSpec">Avro schema resolution</a> specification for the exhaustive list of rules for matching one schema to another.</p>
+
+<h2 id="changing-field-types">Changing Field Types</h2>
+
+<p>You can use schema resolution to change the type used to store a value. For example, you can change an <code>int</code> to a <code>long</code> to handle values that grow larger than initially anticipated.</p>
+
+<h2 id="removing-fields-from-a-dataset">Removing Fields from a Dataset</h2>
+
+<p>When you remove fields from a dataset schema, the data already written remains unchanged. The fields you remove are not required when records are written going forward. The field must not be added back, unless it is identical to the existing field (since the data isn’t actually removed from the dataset).</p>
+
+<h2 id="adding-fields-to-a-dataset">Adding Fields to a Dataset</h2>
+
+<p>You can add fields to a dataset’s schema, provided the the schema is compatible with the existing data. If you do so, you must define a default value for the fields you add to the dataset schema. New data that includes the field will be populated normally. Records that do not include the field are populated with the default you provide.</p>
+
+<h2 id="reading-with-different-schemas">Reading with Different Schemas</h2>
+
+<p>You can have a schema that reads fewer fields than are defined by the schema used to write a dataset, provided that the field definitions in the reader schema are compatible with the chosen fields in the writer schema. This is useful when the writer schema provides more fields than are needed for the business case supported by the reader schema.</p>
+
+<p>Removing unnecessary fields allows Kite to read data more efficiently. The performance gain can be significant when using Parquet format, in particular.</p>
+
+<p>Kite ensures that each change to a schema is compatible with the last version of the schema. Older data can always be read by the current schema.</p>
+
+<h2 id="example-of-schema-evolution">Example of Schema Evolution</h2>
+
+<p>Here’s an example that demonstrates how to use the Kite CLI to update the schema for a movies dataset. Complete sample data is available in <a href="../samples/movies.tar.gz">movies.tar.gz</a>.</p>
+
+<p>Begin with a CSV data file (movies.csv).</p>
+
+<pre><code>id,title
+1,Anticoagulance
+2,"Boy and His Cattle, A"
+3,Carpool to Vermont
+</code></pre>
+
+<p>Generate an Avro schema file (<code>movies.avsc</code>) using <code>movies.csv</code>.</p>
+
+<pre><code>$ kite-dataset csv-schema movies.csv --class movies -o movies.avsc
+</code></pre>
+
+<p>The schema <code>movies.avsc</code> describes fields for <em>id</em> number and the <em>title</em> of the movie.</p>
+
+<pre><code>{
+  "type" : "record",
+  "name" : "movie",
+  "doc" : "Schema generated by Kite",
+  "fields" : [ {
+    "name" : "id",
+    "type" : [ "null", "long" ],
+    "doc" : "Type inferred from \"1\""
+  }, {
+    "name" : "title",
+    "type" : [ "null", "string" ],
+    "doc" : "Type inferred from \"Anticoagulance\""
+  } ]
+}
+</code></pre>
+
+<p>Create the <em>movies</em> dataset.</p>
+
+<pre><code>$ kite-dataset create movies --schema movies.avsc
+</code></pre>
+
+<p>Import the CSV data.</p>
+
+<pre><code>$ kite-dataset csv-import movies.csv movies
+</code></pre>
+
+<p>Validate the dataset by showing the first few records.</p>
+
+<pre><code>$ kite-dataset show movies
+{"id": 1, "title": "Anticoagulance"}
+{"id": 2, "title": "Boy and His Cattle, A"}
+{"id": 3, "title": "Carpool to Vermont"}
+</code></pre>
+
+<p>Now that you’ve created your dataset, you immediately receive a request from your director to add a field for a movie rating, 1 through 5. Sigh. You modify the Avro schema file to add the <em>rating</em> field. When you add a new field, you must provide a default value that is used to fill in the field for existing records.</p>
+
+<p>In this case, the default value is <em>null</em>. Note that you don’t put quotation marks around <em>null</em> when setting it as the default value.</p>
+
+<p>The source code for this file is <code>movies2.avsc</code>.</p>
+
+<pre><code>{
+  "type" : "record",
+  "name" : "movies",
+  "doc" : "Schema generated by Kite",
+  "fields" : [ {
+    "name" : "id",
+    "type" : [ "null", "long" ],
+    "doc" : "Type inferred from '1'"
+  }, {
+    "name" : "title",
+    "type" : [ "null", "string" ],
+    "doc" : "Type inferred from 'Anticoagulance'"
+  }, {
+    "name" : "rating",
+    "type" : [ "null", "long"],
+    "default" : null,
+    "doc" : "Movie rating."
+  } ]
+}
+</code></pre>
+
+<p>Use the CLI <code>update</code> command to add the new field.</p>
+
+<pre><code>$ kite-dataset update movies --schema movies2.avsc
+</code></pre>
+
+<p>Now you can load more records that include values for the <em>rating</em> field.  These records are in the file <code>movies2.csv</code>.</p>
+
+<pre><code>id,title,rating
+4,Chameleon Chameleon,5
+5,Champion of Mediocrity,3
+6,Chest Pains,1
+
+</code></pre>
+
+<p>After you import <code>movies2.csv</code>, the existing records display <em>null</em> for the <em>rating</em> field.</p>
+
+<pre><code>$ kite-dataset csv-import movies2.csv movies
+Added 3 records to "movies"
+$ kite-dataset show movies
+{"id": 1, "title": "Anticoagulance", "rating": null}
+{"id": 2, "title": "Boy and His Cattle, A", "rating": null}
+{"id": 3, "title": "Carpool to Vermont", "rating": null}
+{"id": 4, "title": "Chameleon Chameleon", "rating": 5}
+{"id": 5, "title": "Champion of Mediocrity", "rating": 3}
+{"id": 6, "title": "Chest Pains", "rating": 1}
+</code></pre>
+
+<p>What a complete and satisfying movies dataset. But not so fast. Your director realizes that the <em>rating</em> field should actually allow decimals to store the average ratings from multiple reviewers.</p>
+
+<p>Update the schema definition, changing the <em>rating</em> field datatype from <em>long</em> to <em>double</em>. The source code for this file is <code>movies3.avsc</code>.</p>
+
+<pre><code>{
+  "type" : "record",
+  "name" : "movies",
+  "doc" : "Schema generated by Kite",
+  "fields" : [ {
+    "name" : "id",
+    "type" : [ "null", "long" ],
+    "doc" : "Type inferred from '1'"
+  }, {
+    "name" : "title",
+    "type" : [ "null", "string" ],
+    "doc" : "Type inferred from 'Anticoagulance'"
+  }, {
+    "name" : "rating",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "doc" : "Movie rating."
+  } ]
+}
+</code></pre>
+
+<p>Once again, update the schema.</p>
+
+<pre><code>$ kite-dataset update movies --schema movies3.avsc
+</code></pre>
+<p>If you run the <code>show</code> command, you’ll see that the existing integer <em>id</em> field values now display values with a decimal point and 0.</p>
+
+<pre><code>$ kite-dataset show movies
+{"id": 1, "title": ""Anticoagulance", "rating": null}
+{"id": 2, "title": "Boy and His Cattle, A", "rating": null}
+{"id": 3, "title": "Carpool to Vermont", "rating": null}
+{"id": 4, "title": "Chameleon Chameleon", "rating": 5.0}
+{"id": 5, "title": "Champion of Mediocrity", "rating": 3.0}
+{"id": 6, "title": "Chest Pains", "rating": 1.0}
+
+</code></pre>
+<p>The <em>rating</em> values are small, and could easily fit into a <em>float</em> datatype. However, the current datatype is <em>long</em>. You have to convert the field to a <em>double</em> datatype, because the highest potential value in a <em>long</em> integer is too high to store in a <em>float</em> field.</p>
+
+<p>The datafile <code>movies3.csv</code> contains records with decimal <em>rating</em> numbers.</p>
+
+<pre><code>id,title,rating
+7,Chuck Maggot,2.5
+8,"Cock Crows Thrice, The",3.2
+9,Cormack!,4.75
+</code></pre>
+
+<p>Import the records and show the table.</p>
+
+<pre><code>$ kite-dataset csv-import movies3.csv movies
+Added 3 records to "movies"
+$ kite-dataset show movies
+{"id": 1, "title": "Anticoagulance", "rating": null}
+{"id": 2, "title": "Boy and His Cattle, A", "rating": null}
+{"id": 3, "title": "Carpool to Vermont", "rating": null}
+{"id": 4, "title": "Chameleon Chameleon", "rating": 5.0}
+{"id": 5, "title": "Champion of Mediocrity", "rating": 3.0}
+{"id": 6, "title": "Chest Pains", "rating": 1.0}
+{"id": 7, "title": "Chuck Maggot", "rating": 2.5}
+{"id": 8, "title": "Cock Crows Thrice, The", "rating": 3.2}
+{"id": 9, "title": "Cormack!", "rating": 4.75}
+</code></pre>
+
+<p>See <a href="http://avro.apache.org/docs/current/spec.html#Schema+Resolution" title="schemaSpec">Avro schema resolution</a> for further options.</p>
+
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Software Development Kit, 0.17.1</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+        <li>&nbsp;</li>
+        <li>Generated on 23 December 2014</li>
+      </ul>
+
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
+              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/0.17.1/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>
