@@ -191,6 +191,7 @@
       <groupId>org.apache.avro</groupId>
       <artifactId>avro-mapred</artifactId>
       <scope>compile</scope>
+      <classifier>hadoop2</classifier>
       <version>${vers.avro}</version>
     </dependency>
 
