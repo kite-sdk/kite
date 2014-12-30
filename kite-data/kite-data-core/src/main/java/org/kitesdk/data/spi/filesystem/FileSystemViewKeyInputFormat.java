@@ -101,6 +101,9 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
       } else if (Formats.CSV.equals(format)) {
         // this generates an unchecked cast exception?
         return new CSVInputFormat().getSplits(jobContext);
+      } else if (Formats.INPUTFORMAT.equals(format)) {
+        return InputFormatUtil.newInputFormatInstance(dataset.getDescriptor())
+            .getSplits(jobContext);
       } else {
         throw new UnsupportedOperationException(
             "Not a supported format: " + format);
@@ -146,13 +149,9 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     Format format = dataset.getDescriptor().getFormat();
     if (Formats.AVRO.equals(format)) {
-      AvroKeyInputFormat<E> delegate = new AvroKeyInputFormat<E>();
-      return new KeyReaderWrapper(
-          delegate.createRecordReader(inputSplit, taskAttemptContext));
+      return new AvroKeyReaderWrapper(new AvroKeyInputFormat<E>());
     } else if (Formats.PARQUET.equals(format)) {
-      AvroParquetInputFormat delegate = new AvroParquetInputFormat();
-      return new ValueReaderWrapper(
-          delegate.createRecordReader(inputSplit, taskAttemptContext));
+      return new ValueReaderWrapper(new AvroParquetInputFormat());
     } else if (Formats.JSON.equals(format)) {
       JSONInputFormat<E> delegate = new JSONInputFormat<E>();
       delegate.setDescriptor(dataset.getDescriptor());
@@ -163,33 +162,23 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
       delegate.setDescriptor(dataset.getDescriptor());
       delegate.setType(dataset.getType());
       return delegate.createRecordReader(inputSplit, taskAttemptContext);
+    } else if (Formats.INPUTFORMAT.equals(format)) {
+      return InputFormatUtil.newRecordReader(dataset.getDescriptor());
     } else {
       throw new UnsupportedOperationException(
           "Not a supported format: " + format);
     }
   }
 
-  private static class KeyReaderWrapper<E> extends
+  private static class AvroKeyReaderWrapper<E> extends
       AbstractKeyRecordReaderWrapper<E, AvroKey<E>, NullWritable> {
-    public KeyReaderWrapper(RecordReader<AvroKey<E>, NullWritable> delegate) {
-      super(delegate);
+    public AvroKeyReaderWrapper(AvroKeyInputFormat<E> inputFormat) {
+      super(inputFormat);
     }
 
     @Override
     public E getCurrentKey() throws IOException, InterruptedException {
       return delegate.getCurrentKey().datum();
-    }
-  }
-
-  private static class ValueReaderWrapper<E> extends
-      AbstractKeyRecordReaderWrapper<E, Void, E> {
-    public ValueReaderWrapper(RecordReader<Void, E> delegate) {
-      super(delegate);
-    }
-
-    @Override
-    public E getCurrentKey() throws IOException, InterruptedException {
-      return delegate.getCurrentValue();
     }
   }
 

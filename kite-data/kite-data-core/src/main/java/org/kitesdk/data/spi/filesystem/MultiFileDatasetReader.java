@@ -16,6 +16,8 @@
 package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Sets;
+import java.util.Set;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.Format;
@@ -33,6 +35,11 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
+
+  private static final Set<Format> SUPPORTED_FORMATS = Sets.newHashSet(
+      Formats.AVRO, Formats.PARQUET, Formats.CSV, Formats.JSON,
+      Formats.INPUTFORMAT
+  );
 
   private final FileSystem fileSystem;
   private final DatasetDescriptor descriptor;
@@ -72,8 +79,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
       "A reader may not be opened more than once - current state:%s", state);
 
     final Format format = descriptor.getFormat();
-    if (!(Formats.AVRO.equals(format) || Formats.PARQUET.equals(format)
-        || Formats.CSV.equals(format) || Formats.JSON.equals(format))) {
+    if (!SUPPORTED_FORMATS.contains(format)) {
       throw new UnknownFormatException("Cannot open format:" + format.getName());
     }
 
@@ -91,6 +97,8 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
     } else if (Formats.CSV.equals(descriptor.getFormat())) {
       this.reader = new CSVFileReader<E>(fileSystem, filesIter.next(),
           descriptor, accessor);
+    } else if (Formats.INPUTFORMAT.equals(descriptor.getFormat())) {
+      this.reader = new InputFormatReader(fileSystem, filesIter.next(), descriptor);
     } else {
       this.reader = new FileSystemDatasetReader<E>(fileSystem, filesIter.next(),
           accessor.getEntitySchema(), accessor.getType());

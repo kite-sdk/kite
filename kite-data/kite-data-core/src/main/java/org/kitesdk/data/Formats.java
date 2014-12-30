@@ -61,10 +61,18 @@ public class Formats {
       new CompressionType[] { Uncompressed });
 
   /**
-   * Return a {@link Format} for the format name specified. If
-   * {@code formatName} is not a valid name, an IllegalArgumentException is
-   * thrown. Currently the formats <q>avro</q>, <q>csv</q>, and <q>parquet</q>
-   * are supported. Format names are case sensitive.
+   * INPUTFORMAT: a mapreduce InputFormat (read-only).
+   *
+   * @since 0.18.0
+   */
+  public static final Format INPUTFORMAT = new Format("inputformat", Uncompressed,
+      new CompressionType[] { Uncompressed });
+
+  /**
+   * Return a {@link Format} for the format name specified. If {@code formatName}
+   * is not a valid name, an IllegalArgumentException is thrown. Currently the
+   * formats <q>avro</q>, <q>csv</q>, and <q>parquet</q> are supported. Format names are
+   * case sensitive.
    *
    * @since 0.9.0
    * @return an appropriate instance of Format
@@ -79,6 +87,8 @@ public class Formats {
       return JSON;
     } else if (formatName.equals("csv")) {
       return CSV;
+    } else if (formatName.equals("inputformat")) {
+      return INPUTFORMAT;
     } else {
       throw new IllegalArgumentException("Unknown format type: " + formatName);
     }

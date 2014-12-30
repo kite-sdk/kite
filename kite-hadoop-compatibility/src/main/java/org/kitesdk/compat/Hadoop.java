@@ -17,6 +17,8 @@
 package org.kitesdk.compat;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.TaskAttemptID;
 
 public class Hadoop {
 
@@ -40,6 +42,17 @@ public class Hadoop {
   }
 
   public static class TaskAttemptContext {
+    public static final DynConstructors.
+        Ctor<org.apache.hadoop.mapreduce.TaskAttemptContext> ctor =
+        new DynConstructors.Builder(org.apache.hadoop.mapreduce.TaskAttemptContext.class)
+            .hiddenImpl(
+                "org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl",
+                Configuration.class, TaskAttemptID.class)
+            .hiddenImpl(
+                "org.apache.hadoop.mapreduce.TaskAttemptContext",
+                Configuration.class, TaskAttemptID.class)
+            .build();
+
     public static final DynMethods.UnboundMethod getConfiguration =
         new DynMethods.Builder("getConfiguration")
             .impl(org.apache.hadoop.mapreduce.TaskAttemptContext.class)

@@ -206,9 +206,9 @@ public class DatasetTestUtilities {
 
     for (R record : reader) {
       // add calls to hasNext, which should not affect the iteration
-      reader.hasNext();
-      Assert.assertNotNull(record);
       validator.validate(record, recordCount);
+      Assert.assertNotNull(record);
+      reader.hasNext();
       recordCount++;
     }
 

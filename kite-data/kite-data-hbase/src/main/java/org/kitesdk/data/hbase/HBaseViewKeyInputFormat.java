@@ -72,9 +72,8 @@ class HBaseViewKeyInputFormat<E> extends InputFormat<E, Void> {
       TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     Configuration conf = Hadoop.TaskAttemptContext
         .getConfiguration.invoke(taskAttemptContext);
-    TableInputFormat delegate = getDelegate(conf);
-    RecordReader<E, Void> unfilteredRecordReader = new HBaseRecordReaderWrapper<E>(
-        delegate.createRecordReader(inputSplit, taskAttemptContext), entityMapper);
+    RecordReader<E, Void> unfilteredRecordReader =
+        new HBaseRecordReaderWrapper<E>(getDelegate(conf), entityMapper);
     if (view != null) {
       // use the constraints to filter out entities from the reader
       return new FilteredRecordReader<E>(unfilteredRecordReader,
@@ -103,8 +102,8 @@ class HBaseViewKeyInputFormat<E> extends InputFormat<E, Void> {
       AbstractKeyRecordReaderWrapper<E, ImmutableBytesWritable, Result> {
     private final EntityMapper<E> entityMapper;
 
-    public HBaseRecordReaderWrapper(RecordReader<ImmutableBytesWritable, Result> delegate,
-        EntityMapper<E> entityMapper) {
+    public HBaseRecordReaderWrapper(TableInputFormat delegate,
+                                    EntityMapper<E> entityMapper) {
       super(delegate);
       this.entityMapper = entityMapper;
     }

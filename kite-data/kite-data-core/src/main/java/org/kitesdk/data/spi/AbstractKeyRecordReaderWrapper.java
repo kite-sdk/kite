@@ -16,6 +16,7 @@
 package org.kitesdk.data.spi;
 
 import java.io.IOException;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -31,15 +32,21 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  */
 public abstract class AbstractKeyRecordReaderWrapper<E, K, V> extends RecordReader<E, Void> {
 
-  protected RecordReader<K, V> delegate;
+  protected RecordReader<K, V> delegate = null;
+  private InputFormat<K, V> inputFormat = null;
 
-  public AbstractKeyRecordReaderWrapper(RecordReader<K, V> delegate) {
-    this.delegate = delegate;
+  public AbstractKeyRecordReaderWrapper(InputFormat<K, V> inputFormat) {
+    this.inputFormat = inputFormat;
   }
 
   @Override
-  public void initialize(InputSplit inputSplit,
-      TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+  public void initialize(InputSplit inputSplit, TaskAttemptContext taskAttemptContext)
+      throws IOException, InterruptedException {
+    // clean up the current wrapped reader, if present
+    if (delegate != null) {
+      delegate.close();
+    }
+    this.delegate = inputFormat.createRecordReader(inputSplit, taskAttemptContext);
     delegate.initialize(inputSplit, taskAttemptContext);
   }
 
@@ -60,6 +67,9 @@ public abstract class AbstractKeyRecordReaderWrapper<E, K, V> extends RecordRead
 
   @Override
   public void close() throws IOException {
-    delegate.close();
+    if (delegate != null) {
+      delegate.close();
+      delegate = null;
+    }
   }
 }

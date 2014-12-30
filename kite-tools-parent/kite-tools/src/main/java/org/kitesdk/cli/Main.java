@@ -42,6 +42,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.kitesdk.cli.commands.FlumeConfigCommand;
 import org.kitesdk.cli.commands.InfoCommand;
+import org.kitesdk.cli.commands.InputFormatImportCommand;
 import org.kitesdk.cli.commands.JSONImportCommand;
 import org.kitesdk.cli.commands.JSONSchemaCommand;
 import org.kitesdk.cli.commands.Log4jConfigCommand;
@@ -99,6 +100,7 @@ public class Main extends Configured implements Tool {
     jc.addCommand("info", new InfoCommand(console));
     jc.addCommand("show", new ShowRecordsCommand(console));
     jc.addCommand("obj-schema", new ObjectSchemaCommand(console));
+    jc.addCommand("inputformat-import", new InputFormatImportCommand(console));
     jc.addCommand("csv-schema", new CSVSchemaCommand(console));
     jc.addCommand("csv-import", new CSVImportCommand(console));
     jc.addCommand("json-schema", new JSONSchemaCommand(console));
