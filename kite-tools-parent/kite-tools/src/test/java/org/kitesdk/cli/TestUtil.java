@@ -51,9 +51,13 @@ public class TestUtil {
 
   public static int run(Logger console, Configuration conf, String... args)
       throws Exception {
+    // ensure the default config is not changed by calling Main
+    Configuration original = DefaultConfiguration.get();
     Main main = new Main(console);
     main.setConf(conf);
-    return main.run(args);
+    int rc = main.run(args);
+    DefaultConfiguration.set(original);
+    return rc;
   }
 
   public static Matcher<DatasetDescriptor> matches(DatasetDescriptor desc) {

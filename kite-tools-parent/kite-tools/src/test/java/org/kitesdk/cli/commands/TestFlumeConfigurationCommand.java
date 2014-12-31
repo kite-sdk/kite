@@ -25,6 +25,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HConstants;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,6 +47,7 @@ public class TestFlumeConfigurationCommand {
   private static String hdfsHost;
   private static String hdfsPort;
   private static final String DATASET_URI= "dataset:file:target/data/flumeConfig/users";
+  private static boolean hdfsIsDefault = false;
 
   @BeforeClass
   public static void setConfiguration() throws Exception {
@@ -59,6 +61,7 @@ public class TestFlumeConfigurationCommand {
     zkPort = conf.get(HConstants.ZOOKEEPER_CLIENT_PORT);
 
     URI defaultFs = URI.create(conf.get("fs.default.name"));
+    hdfsIsDefault = "hdfs".equals(defaultFs.getScheme());
     hdfsHost = defaultFs.getHost();
     hdfsPort = Integer.toString(defaultFs.getPort());
   }
@@ -91,6 +94,7 @@ public class TestFlumeConfigurationCommand {
 
   @Test
   public void testHdfsUri() throws Exception {
+    Assume.assumeTrue(hdfsIsDefault);
     URI expected = URI.create("repo:hdfs://" + hdfsHost + ":" + hdfsPort + "/datasets/ns");
     URI actual = command.getLegacyRepoUri(
         URI.create("dataset:hdfs:/datasets/ns/events"), "ns");
@@ -115,6 +119,7 @@ public class TestFlumeConfigurationCommand {
 
   @Test
   public void testExternalHiveUri() throws Exception {
+    Assume.assumeTrue(hdfsIsDefault);
     URI expected = URI.create("repo:hive:/datasets/ns?hdfs:host="+hdfsHost+"&hdfs:port="+hdfsPort);
     URI actual = command.getLegacyRepoUri(
         URI.create("dataset:hive:/datasets/ns/events?namespace=ns&dataset=events"), "ns");
@@ -163,7 +168,7 @@ public class TestFlumeConfigurationCommand {
 
   @Test
   public void testCli() throws Exception {
-    int rc = TestUtil.run(console, new Configuration(), "flume-config",
+    int rc = TestUtil.run(console, "flume-config",
         "--checkpoint-dir", "/data/0/flume/checkpoint", "--data-dir",
         "/data/1/flume/data", DATASET_URI);
     Assert.assertEquals("Return code should be 0", 0, rc);
@@ -196,7 +201,7 @@ public class TestFlumeConfigurationCommand {
 
   @Test
   public void testCliDataDirs() throws Exception {
-    int rc = TestUtil.run(console, new Configuration(), "flume-config",
+    int rc = TestUtil.run(console, "flume-config",
         "--checkpoint-dir", "/data/0/flume/checkpoint",
         "--data-dir", "/data/1/flume/data", "--data-dir", "/data/2/flume/data",
         DATASET_URI);
