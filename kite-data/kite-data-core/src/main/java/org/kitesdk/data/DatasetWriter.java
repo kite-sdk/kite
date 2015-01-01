@@ -38,13 +38,14 @@ import javax.annotation.concurrent.NotThreadSafe;
  * is called, so you <strong>must</strong> follow the normal try / finally
  * pattern to ensure these resources are properly freed when the writer is no
  * longer needed. Do not rely on implementations automatically invoking the
- * {@code close()} method upon object finalization (implementations must not do
+ * {@code close} method upon object finalization (implementations must not do
  * so). All implementations must silently ignore multiple invocations of
- * {@code close()} as well as a close of an unopened writer.
+ * {@code close} as well as a close of an unopened writer.
  * </p>
  * <p>
- * If any method throws an exception, the writer is no longer valid, and the
- * only method that can be subsequently called is {@code close()}.
+ * If any method throws an exception other than {@link DatasetRecordException},
+ * the writer is no longer valid, and the only method that can be subsequently
+ * called is {@code close}.
  * </p>
  * <p>
  * Implementations of {@link DatasetWriter} are typically not thread-safe; that
@@ -59,16 +60,18 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
 
   /**
    * <p>
-   * Write an entity of type {@code E} to the associated dataset.
+   * Write an entity to the underlying dataset.
    * </p>
    * <p>
-   * Implementations can buffer entities internally (see the {@link #flush()} and {@link #sync()}
-   * methods). All instances of {@code entity} must conform to the dataset's
-   * schema. If they don't, implementations should throw an exception, although
-   * this is not required.
+   * If any exception other than {@link DatasetRecordException} is thrown, this
+   * writer is no longer valid and should be closed.
    * </p>
    *
    * @param entity The entity to write
+   * @throws DatasetRecordException
+   *            If a record could not be written, but the writer is still valid.
+   * @throws DatasetIOException
+   *            To wrap an internal {@link java.io.IOException}
    * @throws DatasetWriterException
    */
   void write(E entity);

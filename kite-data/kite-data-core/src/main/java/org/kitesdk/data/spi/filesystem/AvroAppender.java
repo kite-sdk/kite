@@ -29,6 +29,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.CompressionType;
+import org.kitesdk.data.DatasetRecordException;
 import org.kitesdk.data.Formats;
 
 class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
@@ -67,7 +68,11 @@ class AvroAppender<E> implements FileSystemWriter.FileAppender<E> {
 
   @Override
   public void append(E entity) throws IOException {
-    dataFileWriter.append(entity);
+    try {
+      dataFileWriter.append(entity);
+    } catch (DataFileWriter.AppendWriteException e) {
+      throw new DatasetRecordException("Failed to append record", e);
+    }
   }
 
   @Override

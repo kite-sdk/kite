@@ -18,6 +18,7 @@ package org.kitesdk.data.spi.filesystem;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.DatasetRecordException;
 import org.kitesdk.data.DatasetWriterException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
@@ -117,6 +119,10 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     try {
       appender.append(entity);
       count += 1;
+    } catch (RuntimeException e) {
+      Throwables.propagateIfInstanceOf(e, DatasetRecordException.class);
+      this.state = ReaderWriterState.ERROR;
+      throw e;
     } catch (IOException e) {
       this.state = ReaderWriterState.ERROR;
       throw new DatasetIOException(
