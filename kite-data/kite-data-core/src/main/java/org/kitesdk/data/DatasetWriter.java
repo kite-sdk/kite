@@ -16,7 +16,6 @@
 package org.kitesdk.data;
 
 import java.io.Closeable;
-import java.io.Flushable;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -56,7 +55,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  * @param <E> The type of entity accepted by this writer.
  */
 @NotThreadSafe
-public interface DatasetWriter<E> extends Flushable, Closeable {
+public interface DatasetWriter<E> extends Flushable, Syncable, Closeable {
 
   /**
    * <p>
@@ -78,20 +77,25 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
 
   /**
    * <p>
-   * Force or commit any outstanding buffered data to the underlying stream (optional
-   * operation).
+   * Force or commit any outstanding buffered data to the underlying stream if
+   * supported.
    * </p>
    * <p>
-   * <strong>Note:</strong> Some implementations may not implement this method
-   * depending on the guarantees available to the underlying storage system.
-   * In particular, when using HDFS-backed datasets the {@link Formats#PARQUET Parquet
-   * format} does <em>not</em> implement {@link #flush()} by default,
-   * and calling it has no effect.
+   * <strong>Note:</strong> Some implementations do not implement this method.
+   * In particular, {@link Formats#PARQUET Parquet format} does <em>not</em>
+   * implement {@link #flush()} and calling it has no effect.
+   * </p>
+   * <p>
+   * After 0.18.0, DatasetWriter will no longer require flush. Instead,
+   * implementations that can support a durability guarantee, such as Avro,
+   * can be {@link Flushable} and {@link Syncable}.
    * </p>
    *
    * @throws DatasetWriterException
+   * @deprecated will be removed after 0.18.0; use {@link Flushable#flush}
    */
   @Override
+  @Deprecated
   void flush();
 
   /**
@@ -100,17 +104,23 @@ public interface DatasetWriter<E> extends Flushable, Closeable {
    * operation).
    * </p>
    * <p>
-   * <strong>Note:</strong> Some implementations may not implement this method
-   * depending on the guarantees available to the underlying storage system.
-   * In particular, when using HDFS-backed datasets the {@link Formats#PARQUET Parquet
-   * format} does <em>not</em> implement {@link #sync()} by default,
-   * and calling it has no effect.
+   * <strong>Note:</strong> Some implementations do not implement this method.
+   * In particular, {@link Formats#PARQUET Parquet format} does <em>not</em>
+   * implement {@link #flush()} and calling it has no effect.
+   * </p>
+   * <p>
+   * After 0.18.0, DatasetWriter will no longer require sync. Instead,
+   * implementations that can support a durability guarantee, such as Avro,
+   * can be {@link Flushable} and {@link Syncable}.
    * </p>
    *
    * @throws DatasetWriterException
    *
    * @since 0.16.0
+   * @deprecated will be removed after 0.18.0; use {@link Syncable#sync}
    */
+  @Override
+  @Deprecated
   void sync();
 
   /**
