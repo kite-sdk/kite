@@ -18,6 +18,7 @@ package org.kitesdk.data.mapreduce;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import org.apache.avro.generic.GenericData;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
@@ -30,6 +31,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.Dataset;
+import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.Datasets;
 import org.kitesdk.data.spi.PartitionKey;
@@ -65,10 +67,6 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   public static class ConfigBuilder {
     private final Configuration conf;
 
-    private ConfigBuilder(Job job) {
-      this.conf = Hadoop.JobContext.getConfiguration.invoke(job);
-    }
-
     private ConfigBuilder(Configuration conf) {
       this.conf = conf;
     }
@@ -85,8 +83,7 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
      * @return this for method chaining
      */
     public ConfigBuilder readFrom(URI uri) {
-      conf.set(KITE_INPUT_URI, uri.toString());
-      return this;
+      return readFrom(Datasets.load(uri));
     }
 
     /**
@@ -97,13 +94,18 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
      * @return this for method chaining
      */
     public ConfigBuilder readFrom(View<?> view) {
+      DatasetDescriptor descriptor = view.getDataset().getDescriptor();
+      // if this is a partitioned dataset, add the partition location
       if (view instanceof FileSystemDataset) {
-        FileSystemDataset dataset = (FileSystemDataset) view;
-        conf.set(KITE_PARTITION_DIR,
-            String.valueOf(dataset.getDescriptor().getLocation()));
+        conf.set(KITE_PARTITION_DIR, String.valueOf(descriptor.getLocation()));
+      }
+      // add descriptor properties to the config
+      for (String property : descriptor.listProperties()) {
+        conf.set(property, descriptor.getProperty(property));
       }
       withType(view.getType());
-      return readFrom(view.getUri());
+      conf.set(KITE_INPUT_URI, view.getUri().toString());
+      return this;
     }
 
     /**
@@ -147,18 +149,31 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
    */
   public static ConfigBuilder configure(Job job) {
     job.setInputFormatClass(DatasetKeyInputFormat.class);
-    return new ConfigBuilder(job);
+    Configuration conf = Hadoop.JobContext.getConfiguration.invoke(job);
+    return new ConfigBuilder(conf);
   }
 
   /**
-   * Returns a helper to add input options to the given {@code Configuration}.
+   * Adds settings to {@code Configuration} to use {@code DatasetKeyInputFormat}
+   * and returns a helper to add further configuration.
    *
    * @param conf a {@code Configuration}
    *
    * @since 0.15.0
    */
   public static ConfigBuilder configure(Configuration conf) {
+    setInputFormatClass(conf);
     return new ConfigBuilder(conf);
+  }
+
+  private static void setInputFormatClass(Configuration conf) {
+    // build a job with an empty conf
+    Job fakeJob = Hadoop.Job.newInstance.invoke(new Configuration(false));
+    fakeJob.setInputFormatClass(DatasetKeyInputFormat.class);
+    // then copy any created entries into the real conf
+    for (Map.Entry<String, String> entry : fakeJob.getConfiguration()) {
+      conf.set(entry.getKey(), entry.getValue());
+    }
   }
 
   @Override
