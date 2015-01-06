@@ -30,17 +30,17 @@ import org.junit.Test;
 /** Print and verify some info about the environment in which the unit tests are running */
 public class EnvironmentTest extends Assert {
 
-  // see pom.xml, example: "4.2.0" 
+  // see pom.xml, example: "4.2.0"
   private static final String EXPECTED_SOLR_VERSION = System.getProperty("solr.expected.version");
-  
+
   @Test
   public void testEnvironment() throws UnknownHostException {
     System.out.println("EXPECTED_SOLR_VERSION: " + EXPECTED_SOLR_VERSION);
-    
+
     System.out.println("Running test suite with java version: " + SystemUtils.JAVA_VERSION + " "
         + SystemUtils.JAVA_VM_NAME + " on " + SystemUtils.OS_NAME + " " + SystemUtils.OS_VERSION + "/"
         + SystemUtils.OS_ARCH + " on host: " + InetAddress.getLocalHost().getHostName());
-    
+
     Package p = SolrCore.class.getPackage();
     System.out.println("Running test suite with solr-spec-version: " + p.getSpecificationVersion()
         + ", solr-impl-version: " + p.getImplementationVersion());
@@ -50,28 +50,28 @@ public class EnvironmentTest extends Assert {
       assertTrue("unexpected version: " + p.getImplementationVersion(),
           p.getImplementationVersion().startsWith(EXPECTED_SOLR_VERSION));
     }
-    
+
     p = LucenePackage.class.getPackage();
     System.out.println("Running test suite with lucene-spec-version: " + p.getSpecificationVersion()
-        + ", lucene-impl-version: " + p.getImplementationVersion());    
+        + ", lucene-impl-version: " + p.getImplementationVersion());
     if (EXPECTED_SOLR_VERSION != null) {
       assertTrue("unexpected version: " + p.getSpecificationVersion(),
           p.getSpecificationVersion().startsWith(EXPECTED_SOLR_VERSION));
       assertTrue("unexpected version: " + p.getImplementationVersion(),
           p.getImplementationVersion().startsWith(EXPECTED_SOLR_VERSION));
-      
+
       Version expectedMinorLuceneVersion = getMinorLuceneVersion(EXPECTED_SOLR_VERSION);
       System.out.println("expectedMinorLuceneVersion: " + expectedMinorLuceneVersion);
-      assertTrue(Version.LUCENE_CURRENT.onOrAfter(expectedMinorLuceneVersion));
-    }    
+      assertTrue(Version.LATEST.onOrAfter(expectedMinorLuceneVersion));
+    }
   }
-  
+
   private static Version getMinorLuceneVersion(String version) {
     try {
-      return Version.parseLeniently(version.replaceFirst("^(\\d)\\.(\\d).*", "LUCENE_$1$2"));
+      return Version.parse(version);
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
   }
-  
+
 }
