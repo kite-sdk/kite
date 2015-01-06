@@ -104,7 +104,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
 
     this.count = 0;
 
-    LOG.debug("Opened appender {} for {}", appender, finalPath);
+    LOG.info("Opened output appender {} for {}", appender, finalPath);
 
     this.state = ReaderWriterState.OPEN;
   }
