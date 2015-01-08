@@ -950,8 +950,8 @@ The {{java}} command ([source code|https://github.com/kite-sdk/kite/blob/master/
 
 The following enclosing method declaration is used to pass parameters to the Java code block:
 
+{{public static boolean evaluate(}}[Record|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/api/Record.java] {{record, com.typesafe.config.Config config,}} [Command|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/api/Command.java] {{parent,}} [Command|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/api/Command.java] {{child,}} [MorphlineContext|https://github.com/kite-sdk/kite/blob/master/kite-morphlines/kite-morphlines-core/src/main/java/org/kitesdk/morphline/api/MorphlineContext.java] {{context, org.slf4j.Logger logger) }} \{
 {code}
-public static boolean evaluate(Record record, Config config, Command parent, Command child, MorphlineContext context, Logger logger) {
   // your custom java code block goes here...
 }
 {code}
