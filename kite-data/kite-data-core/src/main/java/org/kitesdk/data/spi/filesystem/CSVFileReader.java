@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import au.com.bytecode.opencsv.CSVReader;
+import java.io.InputStream;
 import javax.annotation.Nullable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-class CSVFileReader<E> extends AbstractDatasetReader<E> {
+public class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
   private static final Logger LOG = LoggerFactory
       .getLogger(CSVFileReader.class);
@@ -57,7 +58,7 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
   // progress reporting
   private long size = 0;
-  private FSDataInputStream incoming = null;
+  private InputStream incoming = null;
 
   // state
   private ReaderWriterState state = ReaderWriterState.NEW;
@@ -78,7 +79,20 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
     Preconditions.checkArgument(Schema.Type.RECORD.equals(schema.getType()),
         "Schemas for CSV files must be records of primitive types");
+  }
 
+  public CSVFileReader(InputStream incoming, CSVProperties props,
+                       Schema schema, Class<E> type) {
+    this.fs = null;
+    this.path = null;
+    this.incoming = incoming;
+    this.schema = schema;
+    this.recordClass = type;
+    this.state = ReaderWriterState.NEW;
+    this.props = props;
+
+    Preconditions.checkArgument(Schema.Type.RECORD.equals(schema.getType()),
+        "Schemas for CSV files must be records of primitive types");
   }
 
   @Override
@@ -87,11 +101,17 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "A reader may not be opened more than once - current state:%s", state);
 
-    try {
-      this.incoming =  fs.open(path);
-      this.size = fs.getFileStatus(path).getLen();
-    } catch (IOException ex) {
-      throw new DatasetReaderException("Cannot open path: " + path, ex);
+    if (incoming != null) {
+      this.size = 1; // avoid divide by 0 errors
+    } else {
+      Preconditions.checkNotNull(fs, "FileSystem cannot be null");
+      Preconditions.checkNotNull(path, "Path cannot be null");
+      try {
+        this.incoming = fs.open(path);
+        this.size = fs.getFileStatus(path).getLen();
+      } catch (IOException ex) {
+        throw new DatasetReaderException("Cannot open path: " + path, ex);
+      }
     }
 
     this.reader = CSVUtil.newReader(incoming, props);
@@ -328,6 +348,8 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
   }
 
   public RecordReader<E, Void> asRecordReader() {
+    Preconditions.checkArgument(incoming instanceof FSDataInputStream,
+        "Cannot use {} in a record reader", incoming.getClass());
     return new CSVRecordReader();
   }
 
@@ -360,7 +382,7 @@ class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
     @Override
     public float getProgress() throws IOException, InterruptedException {
-      return ((float) incoming.getPos()) / size;
+      return ((float) ((FSDataInputStream) incoming).getPos()) / size;
     }
 
     @Override
