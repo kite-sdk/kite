@@ -20,9 +20,9 @@
   <version position="bottom" />
 
   <skin>
-    <groupId>com.cloudera</groupId>
-    <artifactId>empty-maven-skin</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <groupId>lt.velykis.maven.skins</groupId>
+    <artifactId>blank-maven-skin</artifactId>
+    <version>1.0.0</version>
   </skin>
 
 </project>
