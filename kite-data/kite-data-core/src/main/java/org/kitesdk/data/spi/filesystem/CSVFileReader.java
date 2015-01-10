@@ -36,6 +36,7 @@ import org.apache.avro.reflect.ReflectData;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.kitesdk.data.spi.SchemaUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -254,7 +255,7 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
   private static Object makeValue(@Nullable String string, Schema.Field field) {
     Object value = makeValue(string, field.schema());
-    if (value != null || nullOk(field.schema())) {
+    if (value != null || SchemaUtil.nullOk(field.schema())) {
       return value;
     } else {
       // this will fail if there is no default value
@@ -326,25 +327,6 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
         throw e;
       }
     }
-  }
-
-  /**
-   * Returns whether null is allowed by the schema.
-   *
-   * @param schema a Schema
-   * @return true if schema allows the value to be null
-   */
-  private static boolean nullOk(Schema schema) {
-    if (Schema.Type.NULL == schema.getType()) {
-      return true;
-    } else if (Schema.Type.UNION == schema.getType()) {
-      for (Schema possible : schema.getTypes()) {
-        if (nullOk(possible)) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   public RecordReader<E, Void> asRecordReader() {

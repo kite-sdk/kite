@@ -443,7 +443,7 @@ public class SchemaUtil {
     }
     Schema result = iter.next();
     while (iter.hasNext()) {
-      result = mergeOrThrow(result, iter.next());
+      result = merge(result, iter.next());
     }
     return result;
   }
@@ -495,10 +495,10 @@ public class SchemaUtil {
    * @return a merged {@code Schema}
    * @throws IncompatibleSchemaException if the schemas are not compatible
    */
-  private static Schema mergeOrThrow(Schema left, Schema right) {
+  public static Schema merge(Schema left, Schema right) {
     Schema merged = mergeOnly(left, right);
     IncompatibleSchemaException.check(merged != null,
-        "Cannot mergeOrThrow %s and %s", left, right);
+        "Cannot merge %s and %s", left, right);
     return merged;
   }
 
@@ -798,5 +798,24 @@ public class SchemaUtil {
       }
     }
     return null;
+  }
+
+  /**
+   * Returns whether null is allowed by the schema.
+   *
+   * @param schema a Schema
+   * @return true if schema allows the value to be null
+   */
+  public static boolean nullOk(Schema schema) {
+    if (Schema.Type.NULL == schema.getType()) {
+      return true;
+    } else if (Schema.Type.UNION == schema.getType()) {
+      for (Schema possible : schema.getTypes()) {
+        if (nullOk(possible)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
