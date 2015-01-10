@@ -96,6 +96,8 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
         // AvroParquetInputFormat.setReadSchema(job, view.getDescriptor().getSchema());
         AvroParquetInputFormat delegate = new AvroParquetInputFormat();
         return delegate.getSplits(jobContext);
+      } else if (Formats.JSON.equals(format)) {
+        return new JSONInputFormat().getSplits(jobContext);
       } else if (Formats.CSV.equals(format)) {
         // this generates an unchecked cast exception?
         return new CSVInputFormat().getSplits(jobContext);
@@ -151,6 +153,11 @@ class FileSystemViewKeyInputFormat<E> extends InputFormat<E, Void> {
       AvroParquetInputFormat delegate = new AvroParquetInputFormat();
       return new ValueReaderWrapper(
           delegate.createRecordReader(inputSplit, taskAttemptContext));
+    } else if (Formats.JSON.equals(format)) {
+      JSONInputFormat<E> delegate = new JSONInputFormat<E>();
+      delegate.setDescriptor(dataset.getDescriptor());
+      delegate.setType(dataset.getType());
+      return delegate.createRecordReader(inputSplit, taskAttemptContext);
     } else if (Formats.CSV.equals(format)) {
       CSVInputFormat<E> delegate = new CSVInputFormat<E>();
       delegate.setDescriptor(dataset.getDescriptor());

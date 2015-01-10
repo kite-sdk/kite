@@ -73,7 +73,7 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
 
     final Format format = descriptor.getFormat();
     if (!(Formats.AVRO.equals(format) || Formats.PARQUET.equals(format)
-        || Formats.CSV.equals(format))) {
+        || Formats.CSV.equals(format) || Formats.JSON.equals(format))) {
       throw new UnknownFormatException("Cannot open format:" + format.getName());
     }
 
@@ -85,6 +85,9 @@ class MultiFileDatasetReader<E> extends AbstractDatasetReader<E> {
     if (Formats.PARQUET.equals(descriptor.getFormat())) {
       this.reader = new ParquetFileSystemDatasetReader(fileSystem,
           filesIter.next(), accessor.getEntitySchema(), accessor.getType());
+    } else if (Formats.JSON.equals(descriptor.getFormat())) {
+      this.reader = new JSONFileReader<E>(
+          fileSystem, filesIter.next(), accessor);
     } else if (Formats.CSV.equals(descriptor.getFormat())) {
       this.reader = new CSVFileReader<E>(fileSystem, filesIter.next(),
           descriptor, accessor);

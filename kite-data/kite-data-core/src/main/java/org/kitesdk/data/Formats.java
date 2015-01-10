@@ -45,6 +45,14 @@ public class Formats {
       new CompressionType[] { Uncompressed, Snappy, Deflate });
 
   /**
+   * JSON: white-space separated json values (read-only).
+   *
+   * @since 0.18.0
+   */
+  public static final Format JSON = new Format("json", Uncompressed,
+      new CompressionType[] { Uncompressed });
+
+  /**
    * CSV: comma-separated values (read-only).
    *
    * @since 0.9.0
@@ -67,6 +75,8 @@ public class Formats {
       return AVRO;
     } else if (formatName.equals("parquet")) {
       return PARQUET;
+    } else if (formatName.equals("json")) {
+      return JSON;
     } else if (formatName.equals("csv")) {
       return CSV;
     } else {
