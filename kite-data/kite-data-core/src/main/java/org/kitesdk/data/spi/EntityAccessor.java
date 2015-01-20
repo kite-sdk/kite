@@ -111,6 +111,8 @@ public class EntityAccessor<E> {
   }
 
   @SuppressWarnings("unchecked")
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="NP_NULL_ON_SOME_PATH",
+      justification="Null case checked by precondition")
   private Object partitionValue(E object, @Nullable Map<String, Object> provided,
                                 FieldPartitioner fp) {
     if (fp instanceof ProvidedFieldPartitioner) {
