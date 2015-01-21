@@ -39,19 +39,21 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.List;
 
-@Parameters(commandDescription="Import files in tarball into a Dataset")
+@Parameters(commandDescription = "Import files in tarball into a Dataset")
 public class TarImportCommand extends BaseDatasetCommand {
 
-  private static final List<String> SUPPORTED_TAR_COMPRESSION_TYPES = Lists.newArrayList("none", "gzip", "bzip2");
+  private static final List<String> SUPPORTED_TAR_COMPRESSION_TYPES =
+      Lists.newArrayList("none", "gzip", "bzip2");
 
   public TarImportCommand(Logger console) {
     super(console);
   }
 
-  @Parameter(description="<tar path> <dataset name>")
+  @Parameter(description = "<tar path> <dataset name>")
   List<String> targets;
 
-  @Parameter(names="--compression", description="Compression type (none, gzip, bzip2)")
+  @Parameter(names = "--compression",
+      description = "Compression type (none, gzip, bzip2)")
   String compressionType = "none";
 
   @Override
@@ -64,7 +66,8 @@ public class TarImportCommand extends BaseDatasetCommand {
     Preconditions.checkArgument(sourceFS.exists(source),
         "Tar path does not exist: " + source);
 
-    Preconditions.checkArgument(SUPPORTED_TAR_COMPRESSION_TYPES.contains(compressionType),
+    Preconditions.checkArgument(
+        SUPPORTED_TAR_COMPRESSION_TYPES.contains(compressionType),
         "Compression type " + compressionType + " is not supported");
 
     String datasetName = targets.get(1);
@@ -75,7 +78,8 @@ public class TarImportCommand extends BaseDatasetCommand {
 
     Dataset<GenericRecord> tarImport = null;
     if (!repo.exists(namespace, datasetName)) {
-      console.info("Creating dataset {} in repo {}", datasetName, repo.getUri());
+      console.info("Creating dataset {} in repo {}", datasetName,
+          repo.getUri());
       tarImport = repo.create(namespace, datasetName,
           new DatasetDescriptor.Builder()
               .schema(new Schema.Parser().parse(
@@ -97,7 +101,8 @@ public class TarImportCommand extends BaseDatasetCommand {
               .build()
       );
     } else {
-      console.info("Using existing dataset {} at {}", datasetName, repo.getUri());
+      console
+          .info("Using existing dataset {} at {}", datasetName, repo.getUri());
       tarImport = repo.load(namespace, datasetName);
     }
 
@@ -107,14 +112,17 @@ public class TarImportCommand extends BaseDatasetCommand {
     // Enhancement would be to use native compression libs
     TarInputStream tis = null;
     if (compressionType.equals("gzip")) {
-      tis = new TarInputStream(new GzipCompressorInputStream(sourceFS.open(source)));
+      tis = new TarInputStream(
+          new GzipCompressorInputStream(sourceFS.open(source)));
     } else if (compressionType.equals("bzip2")) {
-      tis = new TarInputStream(new BZip2CompressorInputStream(sourceFS.open(source)));
+      tis = new TarInputStream(
+          new BZip2CompressorInputStream(sourceFS.open(source)));
     } else {
       tis = new TarInputStream(sourceFS.open(source));
     }
     TarEntry entry = null;
-    GenericRecordBuilder builder = new GenericRecordBuilder(tarImport.getDescriptor().getSchema());
+    GenericRecordBuilder builder =
+        new GenericRecordBuilder(tarImport.getDescriptor().getSchema());
 
     try {
       int count = 0;
@@ -125,28 +133,31 @@ public class TarImportCommand extends BaseDatasetCommand {
           byte[] buf = new byte[(int) size];
           int read = 0;
           int br = 0;
-          // TarInputStream does not always read what you ask for so loop until it does
-          // Note that this requires the entire tar entry (not entire file) to fit into memory
+          // TarInputStream does not always read what you ask for so loop
+          // until it does. Note that this requires the entire tar entry (not
+          // entire file) to fit into memory
           while (br != -1 && read != size) {
             br = tis.read(buf, read, (int) size - read);
             read += br;
           }
           if (read != size) {
-            console.error("Did not read entry {} successfully (bytes read {}, entry size {})",
-              new Object[] { entry.getName(), read, size });
+            console.error("Did not read entry {} successfully " +
+                    "(bytes read {}, entry size {})",
+                new Object[]{entry.getName(), read, size});
             success = 1;
             readError = true;
           } else {
             writer.write(
-                    builder.set("filename", entry.getName())
-                      .set("filecontent", buf)
-                      .build()
+                builder.set("filename", entry.getName())
+                    .set("filecontent", buf)
+                    .build()
             );
             count++;
           }
         }
       }
-      console.info("Added {} records to \"{}\"", count, repo.getUri() + "::" + datasetName );
+      console.info("Added {} records to \"{}\"", count,
+          repo.getUri() + "::" + datasetName);
     } finally {
       IOUtils.closeStream(writer);
       IOUtils.closeStream(tis);
@@ -158,10 +169,11 @@ public class TarImportCommand extends BaseDatasetCommand {
   @Override
   public List<String> getExamples() {
     return Lists.newArrayList(
-            "# Copy the contents of from sample.tar.gz to dataset \"sample\"",
-            "csv-import path/to/sample.tar.gz sample --compression gzip",
-            "# Copy the records from sample.tar.bz2 to a dataset in HDFS",
-            "csv-import path/to/sample.tar.bz2 sample --compression bzip2 --use-hdfs -d datasets"
+        "# Copy the contents of from sample.tar.gz to dataset \"sample\"",
+        "tar-import path/to/sample.tar.gz sample --compression gzip",
+        "# Copy the records from sample.tar.bz2 to a dataset in HDFS",
+        "tar-import path/to/sample.tar.bz2 sample --compression bzip2" +
+            " --use-hdfs -d datasets"
     );
   }
 }
