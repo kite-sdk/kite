@@ -137,7 +137,7 @@
     <vers.crunch-base>0.10.0</vers.crunch-base>
     <vers.crunch>${vers.crunch-base}-hadoop2</vers.crunch>
     <vers.crunch-cdh5>0.9.0-cdh${cdh5.version}</vers.crunch-cdh5>
-    <vers.findbugs.jsr305>3.0.0</vers.findbugs.jsr305>
+    <vers.findbugs.jsr305>2.0.1</vers.findbugs.jsr305> <!-- don't update to 3.0.0 since that is JDK 1.7 or later -->
     <vers.flume>1.4.0</vers.flume>
     <vers.guava>11.0.2</vers.guava>
     <vers.hadoop1>1.2.1</vers.hadoop1>
@@ -1246,7 +1246,7 @@
       <activation>
         <jdk>1.6</jdk>
       </activation>
-      <properties>                  
+      <properties>
         <vers.findbugs-maven-plugin>2.5.2</vers.findbugs-maven-plugin>
       </properties>
     </profile>
