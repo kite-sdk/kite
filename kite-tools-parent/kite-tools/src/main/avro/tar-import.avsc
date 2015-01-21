@@ -1,6 +1,7 @@
 {
+ "namespace": "org.kitesdk.cli.commands.tarimport.avro",
  "type": "record",
- "name": "tarimport",
+ "name": "TarFileEntry",
  "fields": [
    {
      "type": "string",

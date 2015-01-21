@@ -17,8 +17,9 @@
 package org.kitesdk.cli.commands;
 
 import com.beust.jcommander.internal.Lists;
-import org.apache.commons.compress.compressors.bzip2.
-    BZip2CompressorOutputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream;
 import org.apache.commons.io.FileUtils;
@@ -28,9 +29,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.*;
-import org.kamranzafar.jtar.TarEntry;
-import org.kamranzafar.jtar.TarHeader;
-import org.kamranzafar.jtar.TarOutputStream;
+import org.kitesdk.cli.commands.tarimport.avro.TarFileEntry;
 import org.kitesdk.cli.TestUtil;
 import org.slf4j.Logger;
 
@@ -72,33 +71,32 @@ public class TestTarImportCommand {
     FileSystem testFS = testData.getFileSystem(new Configuration());
     cwd = testFS.getWorkingDirectory().toString();
 
-    TarOutputStream tosNoCompression = null;
-    TarOutputStream tosGzipCompression = null;
-    TarOutputStream tosBzip2Compression = null;
+    TarArchiveOutputStream tosNoCompression = null;
+    TarArchiveOutputStream tosGzipCompression = null;
+    TarArchiveOutputStream tosBzip2Compression = null;
     XZCompressorOutputStream xzos = null;
-    TarHeader rootDirHeader = null;
+    TarArchiveEntry tarArchiveEntry = null;
     try {
       // No compression
       tosNoCompression =
-          new TarOutputStream(testFS.create(new Path(TAR_TEST_FILE), true));
-      rootDirHeader = TarHeader
-          .createHeader(TAR_TEST_ROOT_PREFIX, 0, System.currentTimeMillis(),
-              true);
-      tosNoCompression.putNextEntry(new TarEntry(rootDirHeader));
+          new TarArchiveOutputStream(testFS.create(new Path(TAR_TEST_FILE),
+              true));
+      TestTarImportCommand.writeToTarFile(tosNoCompression,
+          TAR_TEST_ROOT_PREFIX + "/", null);
 
       // Gzip compression
-      tosGzipCompression = new TarOutputStream(new GzipCompressorOutputStream(
+      tosGzipCompression = new TarArchiveOutputStream(new
+          GzipCompressorOutputStream(
           testFS.create(new Path(TAR_TEST_GZIP_FILE), true)));
-      rootDirHeader = TarHeader.createHeader(TAR_TEST_GZIP_ROOT_PREFIX, 0,
-          System.currentTimeMillis(), true);
-      tosGzipCompression.putNextEntry(new TarEntry(rootDirHeader));
+      TestTarImportCommand.writeToTarFile(tosGzipCompression,
+          TAR_TEST_GZIP_ROOT_PREFIX + "/", null);
 
       // BZip2 compression
-      tosBzip2Compression = new TarOutputStream(new BZip2CompressorOutputStream(
+      tosBzip2Compression = new TarArchiveOutputStream(new
+          BZip2CompressorOutputStream(
           testFS.create(new Path(TAR_TEST_BZIP2_FILE), true)));
-      rootDirHeader = TarHeader.createHeader(TAR_TEST_BZIP2_ROOT_PREFIX, 0,
-          System.currentTimeMillis(), true);
-      tosBzip2Compression.putNextEntry(new TarEntry(rootDirHeader));
+      TestTarImportCommand.writeToTarFile(tosBzip2Compression,
+          TAR_TEST_BZIP2_ROOT_PREFIX + "/", null);
 
       // Generate test files with random names and content
       Random random = new Random(1);
@@ -137,16 +135,20 @@ public class TestTarImportCommand {
     FileUtils.deleteDirectory(new File(TEST_DATASET_DIR));
   }
 
-  private static void writeToTarFile(TarOutputStream tos, String name,
+  private static void writeToTarFile(TarArchiveOutputStream tos, String name,
                                      String content) throws IOException {
-    TarHeader tarHeader = TarHeader
-        .createHeader(name, content.length(), System.currentTimeMillis(),
-            false);
-    TarEntry tarEntry = new TarEntry(tarHeader);
-    tos.putNextEntry(tarEntry);
-    byte[] buf = content.getBytes();
-    tos.write(buf, 0, content.length());
-    tos.flush();
+    TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(name);
+    if (null != content) {
+      tarArchiveEntry.setSize(content.length());
+    }
+    tarArchiveEntry.setModTime(System.currentTimeMillis());
+    tos.putArchiveEntry(tarArchiveEntry);
+    if (null != content) {
+      byte[] buf = content.getBytes();
+      tos.write(buf, 0, content.length());
+      tos.flush();
+    }
+    tos.closeArchiveEntry();
   }
 
   @Test
@@ -156,7 +158,7 @@ public class TestTarImportCommand {
     command.run();
     verify(console).info("Added {} records to \"{}\"",
         NUM_TEST_FILES,
-        "repo:" + cwd + "/" + TEST_DATASET_DIR + "::" + TEST_DATASET_NAME);
+        TEST_DATASET_NAME);
     //verifyNoMoreInteractions(console);
   }
 
@@ -167,7 +169,7 @@ public class TestTarImportCommand {
     command.run();
     verify(console).info("Added {} records to \"{}\"",
         NUM_TEST_FILES,
-        "repo:" + cwd + "/" + TEST_DATASET_DIR + "::" + TEST_DATASET_NAME);
+        TEST_DATASET_NAME);
     //verifyNoMoreInteractions(console);
   }
 
@@ -179,7 +181,7 @@ public class TestTarImportCommand {
     command.run();
     verify(console).info("Added {} records to \"{}\"",
         NUM_TEST_FILES,
-        "repo:" + cwd + "/" + TEST_DATASET_DIR + "::" + TEST_DATASET_NAME);
+        TEST_DATASET_NAME);
     //verifyNoMoreInteractions(console);
   }
 
