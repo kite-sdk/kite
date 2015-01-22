@@ -149,10 +149,10 @@ public class JSONFileReader<E> extends AbstractDatasetReader<E> {
   public RecordReader<E, Void> asRecordReader() {
     Preconditions.checkArgument(incoming instanceof FSDataInputStream,
         "Cannot use {} in a record reader", incoming.getClass());
-    return new CSVRecordReader();
+    return new JSONRecordReader();
   }
 
-  public class CSVRecordReader extends RecordReader<E, Void> {
+  public class JSONRecordReader extends RecordReader<E, Void> {
     private E current;
 
     @Override

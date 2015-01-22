@@ -255,10 +255,9 @@ public class TestJsonUtil {
   public void testSimpleSchemaMerge() throws Exception {
     String jsonSample = "{\"id\": 1}\n{\"id\": 2}";
 
-    Schema schema = Schema.createRecord("Test", null, null, false);
-    schema.setFields(ImmutableList.of(
-        new Schema.Field("id", Schema.create(Schema.Type.INT), null, null)
-    ));
+    Schema schema = SchemaBuilder.record("Test").fields()
+        .requiredInt("id")
+        .endRecord();
 
     Assert.assertEquals("Should match expected schema",
         schema, mergeSchemas(jsonSample));
@@ -272,23 +271,13 @@ public class TestJsonUtil {
     String jsonSample = "{\"id\": 1, \"record\": {\"jam\": -6.5}}" +
         "{\"id\": 2, \"record\": {\"heist\": 10.0}}";
 
-    Schema inner = Schema.createRecord("record", null, null, false);
-    inner.setFields(ImmutableList.of(
-        new Schema.Field("jam", Schema.createUnion(ImmutableList.of(
-            Schema.create(Schema.Type.NULL),
-            Schema.create(Schema.Type.DOUBLE)
-        )), null, NullNode.getInstance()),
-        new Schema.Field("heist", Schema.createUnion(ImmutableList.of(
-            Schema.create(Schema.Type.NULL),
-            Schema.create(Schema.Type.DOUBLE)
-        )), null, NullNode.getInstance())
-    ));
-
-    Schema schema = Schema.createRecord("Test", null, null, false);
-    schema.setFields(ImmutableList.of(
-        new Schema.Field("id", Schema.create(Schema.Type.INT), null, null),
-        new Schema.Field("record", inner, null, null)
-    ));
+    Schema schema = SchemaBuilder.record("Test").fields()
+        .requiredInt("id")
+        .name("record").type().record("record").fields()
+            .optionalDouble("jam")
+            .optionalDouble("heist")
+            .endRecord().noDefault()
+        .endRecord();
 
     Assert.assertEquals("Should match expected schema",
         schema, mergeSchemas(jsonSample));
@@ -298,13 +287,10 @@ public class TestJsonUtil {
   public void testSchemaMergeUnionPrimitiveTypes() throws Exception {
     String jsonSample = "{\"id\": 1}\n{\"id\": 2}{\"id\": \"socket\"}";
 
-    Schema schema = Schema.createRecord("Test", null, null, false);
-    schema.setFields(ImmutableList.of(
-        new Schema.Field("id", Schema.createUnion(ImmutableList.of(
-            Schema.create(Schema.Type.INT),
-            Schema.create(Schema.Type.STRING)
-        )), null, null)
-    ));
+    Schema schema = SchemaBuilder.record("Test").fields()
+        .name("id").type()
+            .unionOf().intType().and().stringType().endUnion().noDefault()
+        .endRecord();
 
     Assert.assertEquals("Should match expected schema",
         schema, mergeSchemas(jsonSample));
@@ -315,17 +301,11 @@ public class TestJsonUtil {
     String jsonSample = "{\"id\": 1}\n{\"id\": 2}" +
         "{\"id\": \"socket\", \"sparse\": \"tenfold\"}";
 
-    Schema schema = Schema.createRecord("Test", null, null, false);
-    schema.setFields(ImmutableList.of(
-        new Schema.Field("id", Schema.createUnion(ImmutableList.of(
-            Schema.create(Schema.Type.INT),
-            Schema.create(Schema.Type.STRING)
-        )), null, null),
-        new Schema.Field("sparse", Schema.createUnion(ImmutableList.of(
-            Schema.create(Schema.Type.NULL),
-            Schema.create(Schema.Type.STRING)
-        )), null, NullNode.getInstance())
-    ));
+    Schema schema = SchemaBuilder.record("Test").fields()
+        .name("id").type()
+            .unionOf().intType().and().stringType().endUnion().noDefault()
+        .optionalString("sparse")
+        .endRecord();
 
     Assert.assertEquals("Should match expected schema",
         schema, mergeSchemas(jsonSample));
@@ -337,20 +317,12 @@ public class TestJsonUtil {
         "{\"id\": \"socket\", \"anArray\": [33, 34, 35]}" +
         "{\"id\": 3, \"anArray\": [\"badger\", \"porcupine\"]}";
 
-    Schema schema = Schema.createRecord("Test", null, null, false);
-    schema.setFields(ImmutableList.of(
-        new Schema.Field("id", Schema.createUnion(ImmutableList.of(
-            Schema.create(Schema.Type.INT),
-            Schema.create(Schema.Type.STRING)
-        )), null, null),
-        new Schema.Field("anArray", Schema.createUnion(ImmutableList.of(
-            Schema.create(Schema.Type.NULL),
-            Schema.createArray(Schema.createUnion(ImmutableList.of(
-                Schema.create(Schema.Type.INT),
-                Schema.create(Schema.Type.STRING)
-            )))
-        )), null, NullNode.getInstance())
-    ));
+    Schema schema = SchemaBuilder.record("Test").fields()
+        .name("id").type()
+            .unionOf().intType().and().stringType().endUnion().noDefault()
+        .name("anArray").type().optional().array().items()
+            .unionOf().intType().and().stringType().endUnion()
+        .endRecord();
 
     Assert.assertEquals("Should match expected schema",
         schema, mergeSchemas(jsonSample));
@@ -362,20 +334,12 @@ public class TestJsonUtil {
         "{\"id\": \"socket\", \"aMap\": {\"coffee\": 17}}" +
         "{\"id\": 3, \"aMap\": {\"badger\": \"porcupine\"}}";
 
-    Schema schema = Schema.createRecord("Test", null, null, false);
-    schema.setFields(ImmutableList.of(
-        new Schema.Field("id", Schema.createUnion(ImmutableList.of(
-            Schema.create(Schema.Type.INT),
-            Schema.create(Schema.Type.STRING)
-        )), null, null),
-        new Schema.Field("aMap", Schema.createUnion(ImmutableList.of(
-            Schema.create(Schema.Type.NULL),
-            Schema.createMap(Schema.createUnion(ImmutableList.of(
-                Schema.create(Schema.Type.INT),
-                Schema.create(Schema.Type.STRING)
-            )))
-        )), null, NullNode.getInstance())
-    ));
+    Schema schema = SchemaBuilder.record("Test").fields()
+        .name("id").type()
+            .unionOf().intType().and().stringType().endUnion().noDefault()
+        .name("aMap").type().optional().map().values()
+            .unionOf().intType().and().stringType().endUnion()
+        .endRecord();
 
     Assert.assertEquals("Should match expected schema",
         schema, mergeSchemasWithMaps(jsonSample));
@@ -391,24 +355,17 @@ public class TestJsonUtil {
         "{\"id\": \"socket\", \"union\": {\"coffee\": 17}}" +
         "{\"id\": 3, \"union\": {\"badger\": \"porcupine\"}}";
 
-    Schema schema = Schema.createRecord("Test", null, null, false);
-    schema.setFields(ImmutableList.of(
-        new Schema.Field("id", Schema.createUnion(ImmutableList.of(
-            Schema.create(Schema.Type.INT),
-            Schema.create(Schema.Type.STRING)
-        )), null, null),
-        new Schema.Field("union", Schema.createUnion(ImmutableList.of(
-            Schema.create(Schema.Type.NULL),
-            Schema.createArray(Schema.createUnion(ImmutableList.of(
-                Schema.create(Schema.Type.INT),
-                Schema.create(Schema.Type.STRING)
-            ))),
-            Schema.createMap(Schema.createUnion(ImmutableList.of(
-                Schema.create(Schema.Type.INT),
-                Schema.create(Schema.Type.STRING)
-            )))
-        )), null, NullNode.getInstance())
-    ));
+    Schema schema = SchemaBuilder.record("Test").fields()
+        .name("id").type()
+            .unionOf().intType().and().stringType().endUnion().noDefault()
+        .name("union").type().unionOf()
+            .nullType()
+            .and()
+            .array().items().unionOf().intType().and().stringType().endUnion()
+            .and()
+            .map().values().unionOf().intType().and().stringType().endUnion()
+            .endUnion().nullDefault()
+        .endRecord();
 
     Assert.assertEquals("Should match expected schema",
         schema,

@@ -666,8 +666,8 @@ public class SchemaUtil {
         symbols.addAll(right.getEnumSymbols());
         return Schema.createEnum(
             left.getName(),
-            coalesce(left.getDoc()),
-            coalesce(left.getNamespace()),
+            coalesce(left.getDoc(), right.getDoc()),
+            coalesce(left.getNamespace(), right.getNamespace()),
             ImmutableList.copyOf(symbols)
         );
 

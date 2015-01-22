@@ -33,10 +33,12 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +48,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.kitesdk.data.DatasetException;
@@ -345,86 +348,155 @@ public class JsonUtil {
   }
 
   private static Schema resolveUnion(JsonNode datum, Collection<Schema> schemas) {
+    Set<Schema.Type> primitives = Sets.newHashSet();
+    List<Schema> others = Lists.newArrayList();
     for (Schema schema : schemas) {
-      switch (schema.getType()) {
-        case RECORD:
-          if (datum.isObject()) {
-            // check that each field is present or has a default
-            boolean missingField = false;
-            for (Schema.Field field : schema.getFields()) {
-              if (!datum.has(field.name()) && field.defaultValue() == null) {
-                missingField = true;
-                break;
-              }
-            }
-            if (!missingField) {
-              return schema;
-            }
-          }
-          break;
-        case MAP:
-          if (datum.isObject()) {
-            return schema;
-          }
-          break;
-        case ARRAY:
-          if (datum.isArray()) {
-            return schema;
-          }
-          break;
-        case BOOLEAN:
-          if (datum.isBoolean()) {
-            return schema;
-          }
-          break;
-        case FLOAT:
-          if (datum.isFloat() || datum.isInt()) {
-            return schema;
-          }
-          break;
-        case DOUBLE:
-          if (datum.isDouble() || datum.isFloat() ||
-              datum.isLong() || datum.isInt()) {
-            return schema;
-          }
-          break;
-        case INT:
-          if (datum.isInt()) {
-            return schema;
-          }
-          break;
-        case LONG:
-          if (datum.isLong() || datum.isInt()) {
-            return schema;
-          }
-          break;
-        case STRING:
-          if (datum.isTextual()) {
-            return schema;
-          }
-          break;
-        case ENUM:
-          if (datum.isTextual() && schema.hasEnumSymbol(datum.textValue())) {
-            return schema;
-          }
-          break;
-        case BYTES:
-        case FIXED:
-          if (datum.isBinary()) {
-            return schema;
-          }
-          break;
-        case NULL:
-          if (datum == null || datum.isNull()) {
-            return schema;
-          }
-          break;
-        default: // UNION or unknown
-          throw new IllegalArgumentException("Unsupported schema: " + schema);
+      if (PRIMITIVES.containsKey(schema.getType())) {
+        primitives.add(schema.getType());
+      } else {
+        others.add(schema);
       }
     }
+
+    // Try to identify specific primitive types
+    Schema primitiveSchema = null;
+    if (datum == null || datum.isNull()) {
+      primitiveSchema = closestPrimitive(primitives, Schema.Type.NULL);
+    } else if (datum.isShort() || datum.isInt()) {
+      primitiveSchema = closestPrimitive(primitives,
+          Schema.Type.INT, Schema.Type.LONG,
+          Schema.Type.FLOAT, Schema.Type.DOUBLE);
+    } else if (datum.isLong()) {
+      primitiveSchema = closestPrimitive(primitives,
+          Schema.Type.LONG, Schema.Type.DOUBLE);
+    } else if (datum.isFloat()) {
+      primitiveSchema = closestPrimitive(primitives,
+          Schema.Type.FLOAT, Schema.Type.DOUBLE);
+    } else if (datum.isDouble()) {
+      primitiveSchema = closestPrimitive(primitives, Schema.Type.DOUBLE);
+    } else if (datum.isBoolean()) {
+      primitiveSchema = closestPrimitive(primitives, Schema.Type.BOOLEAN);
+    }
+
+    if (primitiveSchema != null) {
+      return primitiveSchema;
+    }
+
+    // otherwise, select the first schema that matches the datum
+    for (Schema schema : others) {
+      if (matches(datum, schema)) {
+        return schema;
+      }
+    }
+
     throw new DatasetException(String.format(
         "Cannot resolve union: %s not in %s", datum, schemas));
+  }
+
+  // this does not contain string, bytes, or fixed because the datum type
+  // doesn't necessarily determine the schema.
+  private static ImmutableMap<Schema.Type, Schema> PRIMITIVES = ImmutableMap
+      .<Schema.Type, Schema>builder()
+      .put(Schema.Type.NULL, Schema.create(Schema.Type.NULL))
+      .put(Schema.Type.BOOLEAN, Schema.create(Schema.Type.BOOLEAN))
+      .put(Schema.Type.INT, Schema.create(Schema.Type.INT))
+      .put(Schema.Type.LONG, Schema.create(Schema.Type.LONG))
+      .put(Schema.Type.FLOAT, Schema.create(Schema.Type.FLOAT))
+      .put(Schema.Type.DOUBLE, Schema.create(Schema.Type.DOUBLE))
+      .build();
+
+  private static Schema closestPrimitive(Set<Schema.Type> possible, Schema.Type... types) {
+    for (Schema.Type type : types) {
+      if (possible.contains(type) && PRIMITIVES.containsKey(type)) {
+        return PRIMITIVES.get(type);
+      }
+    }
+    return null;
+  }
+
+  private static boolean matches(JsonNode datum, Schema schema) {
+    switch (schema.getType()) {
+      case RECORD:
+        if (datum.isObject()) {
+          // check that each field is present or has a default
+          boolean missingField = false;
+          for (Schema.Field field : schema.getFields()) {
+            if (!datum.has(field.name()) && field.defaultValue() == null) {
+              missingField = true;
+              break;
+            }
+          }
+          if (!missingField) {
+            return true;
+          }
+        }
+        break;
+      case UNION:
+        if (resolveUnion(datum, schema.getTypes()) != null) {
+          return true;
+        }
+        break;
+      case MAP:
+        if (datum.isObject()) {
+          return true;
+        }
+        break;
+      case ARRAY:
+        if (datum.isArray()) {
+          return true;
+        }
+        break;
+      case BOOLEAN:
+        if (datum.isBoolean()) {
+          return true;
+        }
+        break;
+      case FLOAT:
+        if (datum.isFloat() || datum.isInt()) {
+          return true;
+        }
+        break;
+      case DOUBLE:
+        if (datum.isDouble() || datum.isFloat() ||
+            datum.isLong() || datum.isInt()) {
+          return true;
+        }
+        break;
+      case INT:
+        if (datum.isInt()) {
+          return true;
+        }
+        break;
+      case LONG:
+        if (datum.isLong() || datum.isInt()) {
+          return true;
+        }
+        break;
+      case STRING:
+        if (datum.isTextual()) {
+          return true;
+        }
+        break;
+      case ENUM:
+        if (datum.isTextual() && schema.hasEnumSymbol(datum.textValue())) {
+          return true;
+        }
+        break;
+      case BYTES:
+      case FIXED:
+        if (datum.isBinary()) {
+          return true;
+        }
+        break;
+      case NULL:
+        if (datum == null || datum.isNull()) {
+          return true;
+        }
+        break;
+      default: // UNION or unknown
+        throw new IllegalArgumentException("Unsupported schema: " + schema);
+    }
+    return false;
   }
 
   public static Schema inferSchema(InputStream incoming, final String name,
@@ -473,14 +545,16 @@ public class JsonUtil {
     }
 
     @Override
-    public Schema object(ObjectNode _, Map<String, Schema> fields) {
+    public Schema object(ObjectNode object, Map<String, Schema> fields) {
       if (objectsToRecords || recordLevels.size() < 1) {
         List<Schema.Field> recordFields = Lists.newArrayListWithExpectedSize(
             fields.size());
 
         for (Map.Entry<String, Schema> entry : fields.entrySet()) {
           recordFields.add(new Schema.Field(
-              entry.getKey(), entry.getValue(), null, null));
+              entry.getKey(), entry.getValue(),
+              "Type inferred from '" + object.get(entry.getKey()) + "'",
+              null));
         }
 
         Schema recordSchema;
@@ -509,7 +583,7 @@ public class JsonUtil {
     }
 
     @Override
-    public Schema array(ArrayNode _, List<Schema> elementSchemas) {
+    public Schema array(ArrayNode ignored, List<Schema> elementSchemas) {
       // use LinkedHashSet to preserve schema order
       switch (elementSchemas.size()) {
         case 0:
@@ -522,12 +596,12 @@ public class JsonUtil {
     }
 
     @Override
-    public Schema binary(BinaryNode _) {
+    public Schema binary(BinaryNode ignored) {
       return Schema.create(Schema.Type.BYTES);
     }
 
     @Override
-    public Schema text(TextNode _) {
+    public Schema text(TextNode ignored) {
       return Schema.create(Schema.Type.STRING);
     }
 
@@ -548,17 +622,17 @@ public class JsonUtil {
     }
 
     @Override
-    public Schema bool(BooleanNode _) {
+    public Schema bool(BooleanNode ignored) {
       return Schema.create(Schema.Type.BOOLEAN);
     }
 
     @Override
-    public Schema nullNode(NullNode _) {
+    public Schema nullNode(NullNode ignored) {
       return Schema.create(Schema.Type.NULL);
     }
 
     @Override
-    public Schema missing(MissingNode _) {
+    public Schema missing(MissingNode ignored) {
       throw new UnsupportedOperationException("MissingNode is not supported.");
     }
   }
