@@ -19,6 +19,7 @@ import java.util.Map;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.EntityAccessor;
 import org.kitesdk.data.spi.FieldPartitioner;
@@ -88,6 +89,11 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
   public void initialize() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "Unable to open a writer from state:%s", state);
+
+    DatasetDescriptor descriptor = view.getDataset().getDescriptor();
+    ValidationException.check(
+        FileSystemWriter.isSupportedFormat(descriptor),
+        "Not a supported format: %s", descriptor.getFormat());
 
     LOG.debug("Opening partitioned dataset writer w/strategy:{}",
       partitionStrategy);

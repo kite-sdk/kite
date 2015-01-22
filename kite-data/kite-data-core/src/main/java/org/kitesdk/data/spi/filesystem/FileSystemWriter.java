@@ -19,9 +19,11 @@ package org.kitesdk.data.spi.filesystem;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableSet;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -34,6 +36,7 @@ import org.kitesdk.data.DatasetRecordException;
 import org.kitesdk.data.DatasetWriterException;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
+import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.DescriptorUtil;
 import org.kitesdk.data.spi.ReaderWriterState;
@@ -43,6 +46,18 @@ import org.slf4j.LoggerFactory;
 class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileSystemWriter.class);
+  private static final Set<Format> SUPPORTED_FORMATS = ImmutableSet
+      .<Format>builder()
+      .add(Formats.AVRO)
+      .add(Formats.PARQUET)
+      .build();
+
+  static boolean isSupportedFormat(DatasetDescriptor descriptor) {
+    Format format = descriptor.getFormat();
+    return (SUPPORTED_FORMATS.contains(format) || (Formats.CSV.equals(format) &&
+        DescriptorUtil.isEnabled(FileSystemProperties.ALLOW_CSV_PROP, descriptor)
+    ));
+  }
 
   static interface FileAppender<E> extends Flushable, Closeable {
     public void open() throws IOException;
@@ -83,6 +98,9 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
   public final void initialize() {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "Unable to open a writer from state:%s", state);
+
+    ValidationException.check(isSupportedFormat(descriptor),
+        "Not a supported format: %s", descriptor.getFormat());
 
     // ensure the directory exists
     try {
