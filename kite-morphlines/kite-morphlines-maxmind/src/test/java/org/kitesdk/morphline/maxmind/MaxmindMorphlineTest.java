@@ -15,20 +15,139 @@
  */
 package org.kitesdk.morphline.maxmind;
 
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import org.kitesdk.morphline.api.AbstractMorphlineTest;
+import org.kitesdk.morphline.api.Command;
+import org.kitesdk.morphline.api.MorphlineCompilationException;
+import org.kitesdk.morphline.api.MorphlineContext;
 import org.kitesdk.morphline.api.Record;
 import org.kitesdk.morphline.base.Fields;
 import org.kitesdk.morphline.base.Notifications;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
 public class MaxmindMorphlineTest extends AbstractMorphlineTest {
+
+  private Command buildCommand(final String inputField, String db) {
+    final Config config = ConfigFactory.parseString(
+        String.format("inputField=%s\ndatabase=target/test-classes/%s\n", inputField, db)
+    );
+    return new GeoIPBuilder().build(config, new RootCommand(), collector, new MorphlineContext.Builder().build());
+  }
+
+  @After
+  @Override
+  public void tearDown() throws Exception {
+    if (morphline != null) {
+      Notifications.notifyShutdown(morphline);
+      Notifications.notifyShutdown(morphline);
+      morphline = null;
+    }
+    super.tearDown();
+  }
+
+  @Test
+  public void testIPv4CountryOnly() throws Exception {
+    morphline = buildCommand("ip", "GeoLite2-Country.mmdb");
+    final Record record = new Record();
+    final String ip = "128.101.101.101";
+    record.put("ip", ip);
+    processAndVerifySuccess2(record, true, false, 6252001, null);
+  }
+
+  @Test
+  public void testNotFoundIPv4() throws Exception {
+    morphline = buildCommand("ip", "GeoLite2-City.mmdb");
+    final Record record = new Record();
+    final String ip = "127.0.0.1";
+    record.put("ip", ip);
+    processAndVerifySuccess2(record, false, false, null, null);
+  }
+
+  @Test
+  public void testBadData() throws Exception {
+    morphline = buildCommand("ip", "GeoLite2-City.mmdb");
+    final Record record = new Record();
+    final String ip = "DAT DATA";
+    record.put("ip", ip);
+    processAndVerifySuccess2(record, false, false, null, null);
+  }
+
+  @Test
+  public void testEmpty() throws Exception {
+    morphline = buildCommand("ip", "GeoLite2-City.mmdb");
+    final Record record = new Record();
+    processAndVerifySuccess2(record, false, false, null, null);
+  }
+
+  @Test
+  public void testIPv6CountryOnly() throws Exception {
+    morphline = buildCommand("ip", "GeoLite2-Country.mmdb");
+    final Record record = new Record();
+    final String ip = "2001:4860:4860::8888";
+    record.put("ip", ip);
+    processAndVerifySuccess2(record, true, false, 6252001, null);
+  }
+
+  @Test
+  public void testNotFoundIPv6() throws Exception {
+    morphline = buildCommand("ip", "GeoLite2-City.mmdb");
+    final Record record = new Record();
+    final String ip = "::1";
+    record.put("ip", ip);
+    processAndVerifySuccess2(record, false, false, null, null);
+  }
+
+  @Test(expected = MorphlineCompilationException.class)
+  public void testBadDBPath() throws Exception {
+    buildCommand("ip", "BAD-PATH-MMDB");
+  }
+  
+  private void processAndVerifySuccess2(final Record input, final boolean isSuccess, boolean isSame,
+      final Integer countryGeoNameId, final Integer cityGeoNameId) {
+    final Record inputCopy = input.copy();
+    collector.reset();
+    startSession();
+    assertEquals(1, collector.getNumStartEvents());
+    assertEquals(isSuccess, morphline.process(inputCopy));
+    if (!isSuccess) {
+      assertEquals(0, collector.getRecords().size());
+    } else {
+      assertEquals(1, collector.getRecords().size());
+      final Record actual = collector.getFirstRecord();
+      final Object body = actual.getFirstValue(Fields.ATTACHMENT_BODY);
+      actual.removeAll(Fields.ATTACHMENT_BODY);
+      assertEquals(input, actual);
+      assertTrue(body instanceof JsonNode);
+      final JsonNode jsonNode = (JsonNode)body;
+      assertNotNull(jsonNode);
+      final JsonNode countryNode = jsonNode.get("country");
+      if (countryGeoNameId != null) {
+        assertNotNull(countryNode);
+        assertEquals(countryGeoNameId.intValue(), countryNode.get("geoname_id").asInt());
+      } else {
+        assertNull(countryNode);
+      }
+      final JsonNode cityNode = jsonNode.get("city");
+      if (cityGeoNameId != null) {
+        assertNotNull(cityNode);
+        assertEquals(cityGeoNameId.intValue(), cityNode.get("geoname_id").asInt());
+      } else {
+        assertNull(cityNode);
+      }
+    }
+  }
+
 
   @Test
   public void testIPv4() throws Exception {
-    morphline = createMorphline("test-morphlines/geoIP");    
-    
+    morphline = createMorphline("test-morphlines/geoIP");
+
     Record record = new Record();
     String ip = "128.101.101.101";
     record.put("ip", ip);
@@ -45,16 +164,14 @@ public class MaxmindMorphlineTest extends AbstractMorphlineTest {
     expected.put("/location/longitude", -93.2323);
     expected.put("/location/latitude_longitude", "44.9733,-93.2323");
     expected.put("/location/longitude_latitude", "-93.2323,44.9733");
-    
+
     processAndVerifySuccess(record, expected, false);
-    Notifications.notifyShutdown(morphline);
-    Notifications.notifyShutdown(morphline);
   }
-  
+
   @Test
   public void testIPv6() throws Exception {
-    morphline = createMorphline("test-morphlines/geoIP");    
-    
+    morphline = createMorphline("test-morphlines/geoIP");
+
     Record record = new Record();
     String ip = "2001:620::1";
     record.put("ip", ip);
@@ -67,12 +184,10 @@ public class MaxmindMorphlineTest extends AbstractMorphlineTest {
     expected.put("/location/longitude", 8.01427);
     expected.put("/location/latitude_longitude", "47.00016,8.01427");
     expected.put("/location/longitude_latitude", "8.01427,47.00016");
-    
+
     processAndVerifySuccess(record, expected, false);
-    Notifications.notifyShutdown(morphline);
-    Notifications.notifyShutdown(morphline);
   }
-  
+
   private void processAndVerifySuccess(Record input, Record expected, boolean isSame) {
     collector.reset();
     startSession();
@@ -81,9 +196,9 @@ public class MaxmindMorphlineTest extends AbstractMorphlineTest {
     collector.getFirstRecord().removeAll(Fields.ATTACHMENT_BODY);
     assertEquals(expected, collector.getFirstRecord());
     if (isSame) {
-      assertSame(input, collector.getFirstRecord());    
+      assertSame(input, collector.getFirstRecord());
     } else {
-      assertNotSame(input, collector.getFirstRecord());    
+      assertNotSame(input, collector.getFirstRecord());
     }
   }
 
@@ -163,5 +278,24 @@ public class MaxmindMorphlineTest extends AbstractMorphlineTest {
     reader.close();
   }
   */
-  
+
+  private static final class RootCommand implements Command {
+
+    @Override
+    public Command getParent() {
+      return null;
+    }
+
+    @Override
+    public void notify(Record notification) {
+      throw new UnsupportedOperationException("Root command should be invisible and must not be called");
+    }
+
+    @Override
+    public boolean process(Record record) {
+      throw new UnsupportedOperationException("Root command should be invisible and must not be called");
+    }
+
+  }
+
 }
