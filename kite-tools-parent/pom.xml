@@ -180,12 +180,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.kamranzafar</groupId>
-      <artifactId>jtar</artifactId>
-      <version>2.2</version>
-    </dependency>
-
     <!-- Include Avro -->
     <dependency>
       <groupId>org.apache.avro</groupId>
