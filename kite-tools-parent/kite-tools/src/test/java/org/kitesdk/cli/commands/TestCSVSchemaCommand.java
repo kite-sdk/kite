@@ -164,6 +164,7 @@ public class TestCSVSchemaCommand {
   @Test
   public void testInvalidCSVHeaderFail() throws Exception {
     command.samplePaths = Lists.newArrayList("target/users_failed.csv");
+    command.recordName = "User";
     TestHelpers.assertThrows("Should fail when csv header doesn't follow alphanumeric standards",
         DatasetException.class, new Callable<Void>() {
           @Override

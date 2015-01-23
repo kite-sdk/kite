@@ -51,11 +51,11 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -318,9 +318,9 @@ public class SchemaTool {
         return new ArrayList<String>();
       }
       List<String> result = new ArrayList<String>(node.get("tables").size());
-      for (Iterator<JsonNode> it = node.get("tables").getElements(); it
+      for (Iterator<JsonNode> it = node.get("tables").elements(); it
           .hasNext();) {
-        result.add(it.next().getTextValue());
+        result.add(it.next().textValue());
       }
       return result;
     } catch (JsonParseException e) {
@@ -338,7 +338,7 @@ public class SchemaTool {
       if (node.get("name") == null) {
         return null;
       }
-      return node.get("name").getTextValue();
+      return node.get("name").textValue();
     } catch (JsonParseException e) {
       throw new ValidationException(e);
     } catch (IOException e) {

@@ -231,7 +231,8 @@ public class AvroUtils {
 
   private static Schema.Field copy(Schema.Field f) {
     Schema.Field copy = AvroUtils.cloneField(f);
-    // retain mapping properties
+    // retain mapping properties, note that this needs to use the Jackson 1 API until
+    // we can use AVRO-1585
     for (Map.Entry<String, JsonNode> prop : f.getJsonProps().entrySet()) {
       copy.addProp(prop.getKey(), prop.getValue());
     }
