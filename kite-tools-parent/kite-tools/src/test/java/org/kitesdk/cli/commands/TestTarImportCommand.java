@@ -46,7 +46,7 @@ public class TestTarImportCommand {
   private Logger console = null;
   private TarImportCommand command;
 
-  private static String cwd;
+  private static String datasetUri;
 
   private static final int NUM_TEST_FILES = 10;
   private static final int MAX_FILENAME_LENGTH = 50;
@@ -70,7 +70,9 @@ public class TestTarImportCommand {
 
     Path testData = new Path(TEST_DATA_DIR);
     FileSystem testFS = testData.getFileSystem(new Configuration());
-    cwd = testFS.getWorkingDirectory().toString();
+
+    datasetUri = "dataset:file:" + System.getProperty(
+        "user.dir") + "/" + TEST_DATASET_DIR + "/" + TEST_DATASET_NAME;
 
     TarArchiveOutputStream tosNoCompression = null;
     TarArchiveOutputStream tosGzipCompression = null;
@@ -153,8 +155,20 @@ public class TestTarImportCommand {
   }
 
   @Test
+  public void testTarNoCompressionImportCreateDataset() throws Exception {
+    removeData();
+    command.targets = Lists.newArrayList(TAR_TEST_FILE, datasetUri);
+    assertEquals(0, command.run());
+    verify(console).info("Using {} compression",
+        TarImportCommand.CompressionType.NONE);
+    verify(console).info("Added {} records to \"{}\"",
+        NUM_TEST_FILES,
+        TEST_DATASET_NAME);
+  }
+
+  @Test
   public void testTarNoCompressionImportCommand() throws IOException {
-    command.targets = Lists.newArrayList(TAR_TEST_FILE, TEST_DATASET_NAME);
+    command.targets = Lists.newArrayList(TAR_TEST_FILE, datasetUri);
     command.compressionType = "none";
     assertEquals(0, command.run());
     verify(console).info("Using {} compression",
@@ -166,7 +180,7 @@ public class TestTarImportCommand {
 
   @Test
   public void testTarNoCompressionImportCommandAutoDetect() throws IOException {
-    command.targets = Lists.newArrayList(TAR_TEST_FILE, TEST_DATASET_NAME);
+    command.targets = Lists.newArrayList(TAR_TEST_FILE, datasetUri);
     assertEquals(0, command.run());
     verify(console).info("Using {} compression",
         TarImportCommand.CompressionType.NONE);
@@ -177,7 +191,7 @@ public class TestTarImportCommand {
 
   @Test
   public void testTarGzipImportCommand() throws IOException {
-    command.targets = Lists.newArrayList(TAR_TEST_GZIP_FILE, TEST_DATASET_NAME);
+    command.targets = Lists.newArrayList(TAR_TEST_GZIP_FILE, datasetUri);
     command.compressionType = "gzip";
     assertEquals(0, command.run());
     verify(console).info("Using {} compression",
@@ -189,7 +203,7 @@ public class TestTarImportCommand {
 
   @Test
   public void testTarGzipImportCommandAutoDetect() throws IOException {
-    command.targets = Lists.newArrayList(TAR_TEST_GZIP_FILE, TEST_DATASET_NAME);
+    command.targets = Lists.newArrayList(TAR_TEST_GZIP_FILE, datasetUri);
     assertEquals(0, command.run());
     verify(console).info("Using {} compression",
         TarImportCommand.CompressionType.GZIP);
@@ -201,7 +215,7 @@ public class TestTarImportCommand {
   @Test
   public void testTarBzip2ImportCommand() throws IOException {
     command.targets =
-        Lists.newArrayList(TAR_TEST_BZIP2_FILE, TEST_DATASET_NAME);
+        Lists.newArrayList(TAR_TEST_BZIP2_FILE, datasetUri);
     command.compressionType = "bzip2";
     assertEquals(0, command.run());
     verify(console).info("Using {} compression",
@@ -214,7 +228,7 @@ public class TestTarImportCommand {
   @Test
   public void testTarBzip2ImportCommandAutoDetect() throws IOException {
     command.targets =
-        Lists.newArrayList(TAR_TEST_BZIP2_FILE, TEST_DATASET_NAME);
+        Lists.newArrayList(TAR_TEST_BZIP2_FILE, datasetUri);
     assertEquals(0, command.run());
     verify(console).info("Using {} compression",
         TarImportCommand.CompressionType.BZIP2);
@@ -225,9 +239,7 @@ public class TestTarImportCommand {
 
   @Before
   public void setup() throws Exception {
-    TestUtil.run("-v", "create", TEST_DATASET_NAME,
-        "--use-local", "-d", TEST_DATASET_DIR,
-        "-s",
+    TestUtil.run("-v", "create", datasetUri, "-s",
         "kite-tools-parent/kite-tools/src/test/resources/test-schemas/" +
             "tar-import.avsc");
     this.console = mock(Logger.class);

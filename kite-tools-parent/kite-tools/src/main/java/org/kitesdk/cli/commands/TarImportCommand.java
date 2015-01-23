@@ -27,7 +27,6 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.hadoop.io.IOUtils;
 import org.kitesdk.cli.commands.tarimport.avro.TarFileEntry;
 import org.kitesdk.data.*;
-import org.kitesdk.data.spi.DatasetRepository;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -53,7 +52,7 @@ public class TarImportCommand extends BaseDatasetCommand {
     super(console);
   }
 
-  @Parameter(description = "<tar path> <dataset name>")
+  @Parameter(description = "<tar path> <dataset URI>")
   List<String> targets;
 
   @Parameter(names = "--compression",
@@ -63,35 +62,34 @@ public class TarImportCommand extends BaseDatasetCommand {
   @Override
   public int run() throws IOException {
     Preconditions.checkArgument(targets != null && targets.size() == 2,
-        "Tar path and target dataset name are required.");
+        "Tar path and target dataset URI are required.");
 
     Preconditions.checkArgument(
         SUPPORTED_TAR_COMPRESSION_TYPES.contains(compressionType),
         "Compression type " + compressionType + " is not supported");
 
     String source = targets.get(0);
-    String datasetName = targets.get(1);
+    String datasetUri = targets.get(1);
 
     long blockSize = getConf().getLong("dfs.blocksize", DEFAULT_BLOCK_SIZE);
 
     int success = 0;
 
-    DatasetRepository datasetRepository = getDatasetRepository();
-    if (datasetRepository.exists(namespace, datasetName)) {
-      console.info("Using existing dataset: {}", datasetName);
+    View<TarFileEntry> targetDataset;
+    if (Datasets.exists(datasetUri)) {
+      console.info("Using existing dataset: {}", datasetUri);
+      targetDataset = Datasets.load(datasetUri, TarFileEntry.class);
     } else {
-      console.info("Creating new dataset: {}", datasetName);
+      console.info("Creating new dataset: {}", datasetUri);
       DatasetDescriptor.Builder descriptorBuilder =
           new DatasetDescriptor.Builder();
       descriptorBuilder.format(Formats.AVRO);
       descriptorBuilder.schema(TarFileEntry.class);
-      DatasetDescriptor descriptor = descriptorBuilder.build();
-      datasetRepository.create(namespace, datasetName, descriptor);
+      targetDataset = Datasets.create(datasetUri,
+          descriptorBuilder.build(), TarFileEntry.class);
     }
 
-    View<TarFileEntry> target = load(datasetName, TarFileEntry.class);
-
-    DatasetWriter<TarFileEntry> writer = target.newWriter();
+    DatasetWriter<TarFileEntry> writer = targetDataset.newWriter();
 
     // Create a Tar input stream wrapped in appropriate decompressor
     // TODO: Enhancement would be to use native compression libs
@@ -160,7 +158,7 @@ public class TarImportCommand extends BaseDatasetCommand {
         }
       }
       console.info("Added {} records to \"{}\"", count,
-          target.getDataset().getName());
+              targetDataset.getDataset().getName());
     } finally {
       IOUtils.closeStream(writer);
       IOUtils.closeStream(tis);
@@ -172,12 +170,8 @@ public class TarImportCommand extends BaseDatasetCommand {
   @Override
   public List<String> getExamples() {
     return Lists.newArrayList(
-        "# Copy the contents of from sample.tar.gz to Hive dataset \"sample\"",
-        "tar-import path/to/sample.tar.gz sample",
-        "# Copy the records from sample.tar.bz2 to a dataset in HDFS stored " +
-            "at datasets/sample",
-        "tar-import path/to/sample.tar.bz2 sample " +
-            " --use-hdfs -d datasets"
+        "# Copy the contents of from sample.tar.gz to HDFS dataset \"sample\"",
+        "tar-import path/to/sample.tar.gz dataset:hdfs:sample"
     );
   }
 }
