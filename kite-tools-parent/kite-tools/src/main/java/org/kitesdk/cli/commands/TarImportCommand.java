@@ -171,7 +171,7 @@ public class TarImportCommand extends BaseDatasetCommand {
   public List<String> getExamples() {
     return Lists.newArrayList(
         "# Copy the contents of from sample.tar.gz to HDFS dataset \"sample\"",
-        "tar-import path/to/sample.tar.gz dataset:hdfs:/path/to/sample"
+        "path/to/sample.tar.gz dataset:hdfs:/path/to/sample"
     );
   }
 }
