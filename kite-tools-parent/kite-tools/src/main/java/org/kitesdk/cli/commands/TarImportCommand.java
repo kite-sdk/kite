@@ -26,8 +26,8 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.hadoop.io.IOUtils;
 import org.kitesdk.cli.commands.tarimport.avro.TarFileEntry;
-import org.kitesdk.data.DatasetWriter;
-import org.kitesdk.data.View;
+import org.kitesdk.data.*;
+import org.kitesdk.data.spi.DatasetRepository;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -37,8 +37,17 @@ import java.util.List;
 @Parameters(commandDescription = "Import files in tarball into a Dataset")
 public class TarImportCommand extends BaseDatasetCommand {
 
+  protected enum CompressionType {
+    NONE,
+    GZIP,
+    BZIP2,
+    XZ
+  }
+
   private static final List<String> SUPPORTED_TAR_COMPRESSION_TYPES =
-      Lists.newArrayList("none", "gzip", "bzip2");
+      Lists.newArrayList("", "none", "gzip", "bzip2");
+
+  private static final long DEFAULT_BLOCK_SIZE = 128 * 1024 * 1024;
 
   public TarImportCommand(Logger console) {
     super(console);
@@ -48,8 +57,8 @@ public class TarImportCommand extends BaseDatasetCommand {
   List<String> targets;
 
   @Parameter(names = "--compression",
-      description = "Compression type (none, gzip, bzip2)")
-  String compressionType = "none";
+      description = "Override compression type (none, gzip, bzip2)")
+  String compressionType = "";
 
   @Override
   public int run() throws IOException {
@@ -63,55 +72,91 @@ public class TarImportCommand extends BaseDatasetCommand {
     String source = targets.get(0);
     String datasetName = targets.get(1);
 
+    long blockSize = getConf().getLong("dfs.blocksize", DEFAULT_BLOCK_SIZE);
+
     int success = 0;
+
+    DatasetRepository datasetRepository = getDatasetRepository();
+    if (datasetRepository.exists(namespace, datasetName)) {
+      console.info("Using existing dataset: {}", datasetName);
+    } else {
+      console.info("Creating new dataset: {}", datasetName);
+      DatasetDescriptor.Builder descriptorBuilder =
+          new DatasetDescriptor.Builder();
+      descriptorBuilder.format(Formats.AVRO);
+      descriptorBuilder.schema(TarFileEntry.class);
+      DatasetDescriptor descriptor = descriptorBuilder.build();
+      datasetRepository.create(namespace, datasetName, descriptor);
+    }
 
     View<TarFileEntry> target = load(datasetName, TarFileEntry.class);
 
     DatasetWriter<TarFileEntry> writer = target.newWriter();
 
     // Create a Tar input stream wrapped in appropriate decompressor
-    // Enhancement would be to use native compression libs
-    TarArchiveInputStream tis = null;
+    // TODO: Enhancement would be to use native compression libs
+    TarArchiveInputStream tis;
+    CompressionType tarCompressionType = CompressionType.NONE;
 
-    if (compressionType.equals("gzip")) {
-      tis = new TarArchiveInputStream(
-          new GzipCompressorInputStream(open(source)));
+    if (compressionType.isEmpty()) {
+      if (source.endsWith(".tar")) {
+        tarCompressionType = CompressionType.NONE;
+      } else if (source.endsWith(".tar.gz")) {
+        tarCompressionType = CompressionType.GZIP;
+      } else if (source.endsWith(".tar.bz2")) {
+        tarCompressionType = CompressionType.BZIP2;
+      }
+    } else if (compressionType.equals("gzip")) {
+      tarCompressionType = CompressionType.GZIP;
     } else if (compressionType.equals("bzip2")) {
-      tis = new TarArchiveInputStream(
-          new BZip2CompressorInputStream(open(source)));
+      tarCompressionType = CompressionType.BZIP2;
     } else {
-      tis = new TarArchiveInputStream(open(source));
+      tarCompressionType = CompressionType.NONE;
     }
-    TarArchiveEntry entry = null;
+
+    console.info("Using {} compression", tarCompressionType);
+
+    switch (tarCompressionType) {
+      case GZIP:
+        tis = new TarArchiveInputStream(
+            new GzipCompressorInputStream(open(source)));
+        break;
+      case BZIP2:
+        tis = new TarArchiveInputStream(
+            new BZip2CompressorInputStream(open(source)));
+        break;
+      case NONE:
+      default:
+        tis = new TarArchiveInputStream(open(source));
+    }
+
+    TarArchiveEntry entry;
 
     try {
       int count = 0;
-      boolean readError = false;
-      while ((entry = tis.getNextTarEntry()) != null && !readError) {
+      while ((entry = tis.getNextTarEntry()) != null) {
         if (!entry.isDirectory()) {
           long size = entry.getSize();
+          if (size >= blockSize) {
+            console.warn("Entry in tarfile of size {} is greater than the " +
+                "HDFS block size of {}. This may result in remote block reads",
+                size, blockSize);
+          }
+
           byte[] buf = new byte[(int) size];
-          int read = 0;
-          int br = 0;
-          // Loop until entire entry read. Note that this requires the entire
-          // tar entry contents to fit into memory
-          while (br != -1 && read != size) {
-            br = tis.read(buf, read, (int) size - read);
-            read += br;
-          }
-          if (read != size) {
-            console.error("Did not read entry {} successfully " +
-                    "(bytes read {}, entry size {})",
-                new Object[]{entry.getName(), read, size});
+          try {
+            IOUtils.readFully(tis, buf, 0, (int) size);
+          } catch (IOException e) {
+            console.error("Did not read entry {} successfully (entry size {})",
+                entry.getName(), size);
             success = 1;
-            readError = true;
-          } else {
-            writer.write(
-                TarFileEntry.newBuilder().setFilename(entry.getName())
-                    .setFilecontent(ByteBuffer.wrap(buf)).build()
-            );
-            count++;
+            throw e;
           }
+          writer.write(
+              TarFileEntry.newBuilder().setFilename(entry.getName())
+                  .setFilecontent(ByteBuffer.wrap(buf)).build()
+          );
+          count++;
         }
       }
       console.info("Added {} records to \"{}\"", count,
@@ -127,10 +172,11 @@ public class TarImportCommand extends BaseDatasetCommand {
   @Override
   public List<String> getExamples() {
     return Lists.newArrayList(
-        "# Copy the contents of from sample.tar.gz to dataset \"sample\"",
-        "tar-import path/to/sample.tar.gz sample --compression gzip",
-        "# Copy the records from sample.tar.bz2 to a dataset in HDFS",
-        "tar-import path/to/sample.tar.bz2 sample --compression bzip2" +
+        "# Copy the contents of from sample.tar.gz to Hive dataset \"sample\"",
+        "tar-import path/to/sample.tar.gz sample",
+        "# Copy the records from sample.tar.bz2 to a dataset in HDFS stored " +
+            "at datasets/sample",
+        "tar-import path/to/sample.tar.bz2 sample " +
             " --use-hdfs -d datasets"
     );
   }

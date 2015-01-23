@@ -29,13 +29,14 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.*;
-import org.kitesdk.cli.commands.tarimport.avro.TarFileEntry;
 import org.kitesdk.cli.TestUtil;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
+
+import static org.junit.Assert.assertEquals;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -81,21 +82,21 @@ public class TestTarImportCommand {
       tosNoCompression =
           new TarArchiveOutputStream(testFS.create(new Path(TAR_TEST_FILE),
               true));
-      TestTarImportCommand.writeToTarFile(tosNoCompression,
+      writeToTarFile(tosNoCompression,
           TAR_TEST_ROOT_PREFIX + "/", null);
 
       // Gzip compression
       tosGzipCompression = new TarArchiveOutputStream(new
           GzipCompressorOutputStream(
           testFS.create(new Path(TAR_TEST_GZIP_FILE), true)));
-      TestTarImportCommand.writeToTarFile(tosGzipCompression,
+      writeToTarFile(tosGzipCompression,
           TAR_TEST_GZIP_ROOT_PREFIX + "/", null);
 
       // BZip2 compression
       tosBzip2Compression = new TarArchiveOutputStream(new
           BZip2CompressorOutputStream(
           testFS.create(new Path(TAR_TEST_BZIP2_FILE), true)));
-      TestTarImportCommand.writeToTarFile(tosBzip2Compression,
+      writeToTarFile(tosBzip2Compression,
           TAR_TEST_BZIP2_ROOT_PREFIX + "/", null);
 
       // Generate test files with random names and content
@@ -108,11 +109,11 @@ public class TestTarImportCommand {
         String fContent = RandomStringUtils.randomAscii(fContentLength);
 
         // Write the file to tarball
-        TestTarImportCommand.writeToTarFile(tosNoCompression,
+        writeToTarFile(tosNoCompression,
             TAR_TEST_ROOT_PREFIX + "/" + fName, fContent);
-        TestTarImportCommand.writeToTarFile(tosGzipCompression,
+        writeToTarFile(tosGzipCompression,
             TAR_TEST_GZIP_ROOT_PREFIX + "/" + fName, fContent);
-        TestTarImportCommand.writeToTarFile(tosBzip2Compression,
+        writeToTarFile(tosBzip2Compression,
             TAR_TEST_BZIP2_ROOT_PREFIX + "/" + fName, fContent);
 
         System.out.println("Wrote " + fName + " [" + fContentLength + "]");
@@ -155,22 +156,46 @@ public class TestTarImportCommand {
   public void testTarNoCompressionImportCommand() throws IOException {
     command.targets = Lists.newArrayList(TAR_TEST_FILE, TEST_DATASET_NAME);
     command.compressionType = "none";
-    command.run();
+    assertEquals(0, command.run());
+    verify(console).info("Using {} compression",
+        TarImportCommand.CompressionType.NONE);
     verify(console).info("Added {} records to \"{}\"",
         NUM_TEST_FILES,
         TEST_DATASET_NAME);
-    //verifyNoMoreInteractions(console);
+  }
+
+  @Test
+  public void testTarNoCompressionImportCommandAutoDetect() throws IOException {
+    command.targets = Lists.newArrayList(TAR_TEST_FILE, TEST_DATASET_NAME);
+    assertEquals(0, command.run());
+    verify(console).info("Using {} compression",
+        TarImportCommand.CompressionType.NONE);
+    verify(console).info("Added {} records to \"{}\"",
+        NUM_TEST_FILES,
+        TEST_DATASET_NAME);
   }
 
   @Test
   public void testTarGzipImportCommand() throws IOException {
     command.targets = Lists.newArrayList(TAR_TEST_GZIP_FILE, TEST_DATASET_NAME);
     command.compressionType = "gzip";
-    command.run();
+    assertEquals(0, command.run());
+    verify(console).info("Using {} compression",
+        TarImportCommand.CompressionType.GZIP);
     verify(console).info("Added {} records to \"{}\"",
         NUM_TEST_FILES,
         TEST_DATASET_NAME);
-    //verifyNoMoreInteractions(console);
+  }
+
+  @Test
+  public void testTarGzipImportCommandAutoDetect() throws IOException {
+    command.targets = Lists.newArrayList(TAR_TEST_GZIP_FILE, TEST_DATASET_NAME);
+    assertEquals(0, command.run());
+    verify(console).info("Using {} compression",
+        TarImportCommand.CompressionType.GZIP);
+    verify(console).info("Added {} records to \"{}\"",
+        NUM_TEST_FILES,
+        TEST_DATASET_NAME);
   }
 
   @Test
@@ -178,11 +203,24 @@ public class TestTarImportCommand {
     command.targets =
         Lists.newArrayList(TAR_TEST_BZIP2_FILE, TEST_DATASET_NAME);
     command.compressionType = "bzip2";
-    command.run();
+    assertEquals(0, command.run());
+    verify(console).info("Using {} compression",
+        TarImportCommand.CompressionType.BZIP2);
     verify(console).info("Added {} records to \"{}\"",
         NUM_TEST_FILES,
         TEST_DATASET_NAME);
-    //verifyNoMoreInteractions(console);
+  }
+
+  @Test
+  public void testTarBzip2ImportCommandAutoDetect() throws IOException {
+    command.targets =
+        Lists.newArrayList(TAR_TEST_BZIP2_FILE, TEST_DATASET_NAME);
+    assertEquals(0, command.run());
+    verify(console).info("Using {} compression",
+        TarImportCommand.CompressionType.BZIP2);
+    verify(console).info("Added {} records to \"{}\"",
+        NUM_TEST_FILES,
+        TEST_DATASET_NAME);
   }
 
   @Before
