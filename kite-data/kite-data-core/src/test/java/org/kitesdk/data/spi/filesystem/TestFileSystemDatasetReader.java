@@ -15,26 +15,22 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import org.apache.avro.SchemaBuilder;
 import org.kitesdk.data.TestDatasetReaders;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetReaderException;
-import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.codehaus.jackson.node.JsonNodeFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.kitesdk.data.spi.filesystem.DatasetTestUtilities.*;
-import org.apache.avro.generic.GenericData;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 
 public class TestFileSystemDatasetReader extends TestDatasetReaders<Record> {
@@ -71,11 +67,10 @@ public class TestFileSystemDatasetReader extends TestDatasetReaders<Record> {
 
   @Test
   public void testEvolvedSchema() throws IOException {
-    Schema schema = Schema.createRecord("mystring", null, null, false);
-    schema.setFields(Lists.newArrayList(
-        new Field("text", Schema.create(Type.STRING), null, null),
-        new Field("text2", Schema.create(Type.STRING), null,
-            JsonNodeFactory.instance.textNode("N/A"))));
+    Schema schema = SchemaBuilder.record("mystring").fields()
+        .requiredString("text")
+        .name("text2").type().stringType().stringDefault("N/A")
+        .endRecord();
 
     FileSystemDatasetReader<Record> reader = new FileSystemDatasetReader<Record>(
         fileSystem, new Path(Resources.getResource("data/strings-100.avro")

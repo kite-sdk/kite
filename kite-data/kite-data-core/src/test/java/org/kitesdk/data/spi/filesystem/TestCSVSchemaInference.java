@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import org.apache.avro.Schema;
-import org.codehaus.jackson.node.NullNode;
+import org.apache.avro.SchemaBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.DatasetException;
@@ -249,6 +249,10 @@ public class TestCSVSchemaInference {
     Assert.assertNotNull(schema.getField("field_5"));
     Assert.assertNotNull(schema.getField("field_6"));
 
+    // avoid referring to Jackson API
+    Object nullDefault = SchemaBuilder.record("Test").fields().optionalInt("f1")
+        .endRecord().getFields().get(0).defaultValue();
+
     Assert.assertEquals("Should infer a long",
         schema(Schema.Type.LONG), schema.getField("field_0").schema());
     Assert.assertNull("Should not have a default value",
@@ -260,11 +264,11 @@ public class TestCSVSchemaInference {
     Assert.assertEquals("Should infer a double (ends in d)",
         nullable(Schema.Type.DOUBLE), schema.getField("field_2").schema());
     Assert.assertEquals("Should have default value null",
-        schema.getField("field_2").defaultValue(), NullNode.getInstance());
+        schema.getField("field_2").defaultValue(), nullDefault);
     Assert.assertEquals("Should infer a double (decimal defaults to double)",
         nullable(Schema.Type.DOUBLE), schema.getField("field_3").schema());
     Assert.assertEquals("Should have default value null",
-        schema.getField("field_3").defaultValue(), NullNode.getInstance());
+        schema.getField("field_3").defaultValue(), nullDefault);
     Assert.assertEquals("Should infer a non-null string (not numeric)",
         schema(Schema.Type.STRING), schema.getField("field_4").schema());
     Assert.assertNull("Should not have a default value",
@@ -272,11 +276,11 @@ public class TestCSVSchemaInference {
     Assert.assertEquals("Should infer a long (second line is a long)",
         nullable(Schema.Type.LONG), schema.getField("field_5").schema());
     Assert.assertEquals("Should have default value null",
-        schema.getField("field_5").defaultValue(), NullNode.getInstance());
+        schema.getField("field_5").defaultValue(), nullDefault);
     Assert.assertEquals("Should infer a nullable string (second is missing)",
         nullable(Schema.Type.STRING), schema.getField("field_6").schema());
     Assert.assertEquals("Should have default value null",
-        schema.getField("field_6").defaultValue(), NullNode.getInstance());
+        schema.getField("field_6").defaultValue(), nullDefault);
   }
 
   @Test
