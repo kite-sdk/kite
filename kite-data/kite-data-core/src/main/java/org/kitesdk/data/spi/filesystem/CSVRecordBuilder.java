@@ -66,26 +66,18 @@ class CSVRecordBuilder<E> {
   }
 
   public E makeRecord(String[] fields, @Nullable E reuse) {
-    try {
-      E record = reuse;
-      if (record == null) {
-        record = newRecordInstance();
-      }
-
-      if (record instanceof IndexedRecord) {
-        fillIndexed((IndexedRecord) record, fields);
-      } else {
-        fillReflect(record, fields);
-      }
-
-      return record;
-    } catch (AvroRuntimeException e) {
-      // expected when a field has no default and no value can be constructed
-      throw new DatasetRecordException("Unable to construct record", e);
-    } catch (NumberFormatException e) {
-      // expected when a value should be a number but can't be parsed
-      throw new DatasetRecordException("Unable to construct record", e);
+    E record = reuse;
+    if (record == null) {
+      record = newRecordInstance();
     }
+
+    if (record instanceof IndexedRecord) {
+      fillIndexed((IndexedRecord) record, fields);
+    } else {
+      fillReflect(record, fields);
+    }
+
+    return record;
   }
 
   @SuppressWarnings("unchecked")
@@ -117,12 +109,26 @@ class CSVRecordBuilder<E> {
   }
 
   private static Object makeValue(@Nullable String string, Schema.Field field) {
-    Object value = makeValue(string, field.schema());
-    if (value != null || SchemaUtil.nullOk(field.schema())) {
-      return value;
-    } else {
-      // this will fail if there is no default value
-      return ReflectData.get().getDefaultValue(field);
+    try {
+      Object value = makeValue(string, field.schema());
+      if (value != null || SchemaUtil.nullOk(field.schema())) {
+        return value;
+      } else {
+        // this will fail if there is no default value
+        return ReflectData.get().getDefaultValue(field);
+      }
+    } catch (DatasetRecordException e) {
+      // add the field name to the error message
+      throw new DatasetRecordException(String.format(
+          "Cannot convert field %s", field.name()), e);
+    } catch (NumberFormatException e) {
+      throw new DatasetRecordException(String.format(
+          "Field %s: value not a %s: '%s'",
+          field.name(), field.schema(), string), e);
+    } catch (AvroRuntimeException e) {
+      throw new DatasetRecordException(String.format(
+          "Field %s: cannot make %s value: '%s'",
+          field.name(), field.schema(), string), e);
     }
   }
 

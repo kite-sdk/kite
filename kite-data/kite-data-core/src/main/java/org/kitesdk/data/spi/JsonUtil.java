@@ -49,10 +49,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
-import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.DatasetRecordException;
 import org.kitesdk.data.ValidationException;
 
 public class JsonUtil {
@@ -236,7 +237,7 @@ public class JsonUtil {
                                      Schema schema) {
     switch (schema.getType()) {
       case RECORD:
-        Preconditions.checkArgument(datum.isObject(),
+        DatasetRecordException.check(datum.isObject(),
             "Cannot convert non-object to record: %s", datum);
         Object record = model.newRecord(null, schema);
         for (Schema.Field field : schema.getFields()) {
@@ -246,7 +247,7 @@ public class JsonUtil {
         return record;
 
       case MAP:
-        Preconditions.checkArgument(datum.isObject(),
+        DatasetRecordException.check(datum.isObject(),
             "Cannot convert non-object to map: %s", datum);
         Map<String, Object> map = Maps.newLinkedHashMap();
         Iterator<Map.Entry<String, JsonNode>> iter = datum.fields();
@@ -258,7 +259,7 @@ public class JsonUtil {
         return map;
 
       case ARRAY:
-        Preconditions.checkArgument(datum.isArray(),
+        DatasetRecordException.check(datum.isArray(),
             "Cannot convert to array: %s", datum);
         List<Object> list = Lists.newArrayListWithExpectedSize(datum.size());
         for (JsonNode element : datum) {
@@ -271,61 +272,61 @@ public class JsonUtil {
             resolveUnion(datum, schema.getTypes()));
 
       case BOOLEAN:
-        Preconditions.checkArgument(datum.isBoolean(),
+        DatasetRecordException.check(datum.isBoolean(),
             "Cannot convert to boolean: %s", datum);
         return datum.booleanValue();
 
       case FLOAT:
-        Preconditions.checkArgument(datum.isFloat() || datum.isInt(),
+        DatasetRecordException.check(datum.isFloat() || datum.isInt(),
             "Cannot convert to float: %s", datum);
         return datum.floatValue();
 
       case DOUBLE:
-        Preconditions.checkArgument(
+        DatasetRecordException.check(
             datum.isDouble() || datum.isFloat() ||
             datum.isLong() || datum.isInt(),
             "Cannot convert to double: %s", datum);
         return datum.doubleValue();
 
       case INT:
-        Preconditions.checkArgument(datum.isInt(),
+        DatasetRecordException.check(datum.isInt(),
             "Cannot convert to int: %s", datum);
         return datum.intValue();
 
       case LONG:
-        Preconditions.checkArgument(datum.isLong() || datum.isInt(),
+        DatasetRecordException.check(datum.isLong() || datum.isInt(),
             "Cannot convert to long: %s", datum);
         return datum.longValue();
 
       case STRING:
-        Preconditions.checkArgument(datum.isTextual(),
+        DatasetRecordException.check(datum.isTextual(),
             "Cannot convert to string: %s", datum);
         return datum.textValue();
 
       case ENUM:
-        Preconditions.checkArgument(datum.isTextual(),
+        DatasetRecordException.check(datum.isTextual(),
             "Cannot convert to string: %s", datum);
         return model.createEnum(datum.textValue(), schema);
 
       case BYTES:
-        Preconditions.checkArgument(datum.isBinary(),
+        DatasetRecordException.check(datum.isBinary(),
             "Cannot convert to binary: %s", datum);
         try {
           return ByteBuffer.wrap(datum.binaryValue());
         } catch (IOException e) {
-          throw new DatasetIOException("Failed to read JSON binary", e);
+          throw new DatasetRecordException("Failed to read JSON binary", e);
         }
 
       case FIXED:
-        Preconditions.checkArgument(datum.isBinary(),
-            "Cannot convert to binary: %s", datum);
+        DatasetRecordException.check(datum.isBinary(),
+            "Cannot convert to fixed: %s", datum);
         byte[] bytes;
         try {
           bytes = datum.binaryValue();
         } catch (IOException e) {
-          throw new DatasetIOException("Failed to read JSON binary", e);
+          throw new DatasetRecordException("Failed to read JSON binary", e);
         }
-        Preconditions.checkArgument(bytes.length < schema.getFixedSize(),
+        DatasetRecordException.check(bytes.length < schema.getFixedSize(),
             "Binary data is too short: %s bytes for %s", bytes.length, schema);
         return model.createFixed(null, bytes, schema);
 
@@ -333,17 +334,28 @@ public class JsonUtil {
         return null;
 
       default:
+        // don't use DatasetRecordException because this is a Schema problem
         throw new IllegalArgumentException("Unknown schema type: " + schema);
     }
   }
 
   private static Object convertField(GenericData model, JsonNode datum,
                                      Schema.Field field) {
-    Object value = convertToAvro(model, datum, field.schema());
-    if (value != null || SchemaUtil.nullOk(field.schema())) {
-      return value;
-    } else {
-      return model.getDefaultValue(field);
+    try {
+      Object value = convertToAvro(model, datum, field.schema());
+      if (value != null || SchemaUtil.nullOk(field.schema())) {
+        return value;
+      } else {
+        return model.getDefaultValue(field);
+      }
+    } catch (DatasetRecordException e) {
+      // add the field name to the error message
+      throw new DatasetRecordException(String.format(
+          "Cannot convert field %s", field.name()), e);
+    } catch (AvroRuntimeException e) {
+      throw new DatasetRecordException(String.format(
+          "Field %s: cannot make %s value: '%s'",
+          field.name(), field.schema(), String.valueOf(datum)), e);
     }
   }
 
@@ -389,7 +401,7 @@ public class JsonUtil {
       }
     }
 
-    throw new DatasetException(String.format(
+    throw new DatasetRecordException(String.format(
         "Cannot resolve union: %s not in %s", datum, schemas));
   }
 
