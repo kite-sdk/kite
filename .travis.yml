@@ -9,7 +9,7 @@ env:
   - HADOOP_PROFILE=cdh5
 cache:
   directories:
-    - $HOME/.m2
+  - '$HOME/.m2/repository'
 
 install: mvn -q install -DskipTests=true -Dmaven.javadoc.skip=true -Dsource.skip=true -DjavaVersion=1.7
 before_script: umask 0022
