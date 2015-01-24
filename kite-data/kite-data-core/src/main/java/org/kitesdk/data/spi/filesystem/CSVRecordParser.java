@@ -20,6 +20,7 @@ import au.com.bytecode.opencsv.CSVParser;
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nullable;
+import org.apache.avro.Schema;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.DataModelUtil;
@@ -31,11 +32,17 @@ public class CSVRecordParser<E> {
   public CSVRecordParser(CSVProperties props,
                          View<E> view,
                          List<String> header) {
+    this(props, view.getDataset().getDescriptor().getSchema(), view.getType(),
+        header);
+  }
+
+  public CSVRecordParser(CSVProperties props,
+                         Schema schema,
+                         Class<E> type,
+                         List<String> header) {
     this.parser = CSVUtil.newParser(props);
     this.builder = new CSVRecordBuilder<E>(
-        DataModelUtil.getReaderSchema(
-            view.getType(), view.getDataset().getDescriptor().getSchema()),
-        view.getType(), header);
+        DataModelUtil.getReaderSchema(type, schema), type, header);
   }
 
   public E read(String line) {
