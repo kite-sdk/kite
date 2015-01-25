@@ -21,7 +21,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -37,7 +36,6 @@ import java.io.IOException;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -77,7 +75,6 @@ public class TestTarImportCommand {
     TarArchiveOutputStream tosNoCompression = null;
     TarArchiveOutputStream tosGzipCompression = null;
     TarArchiveOutputStream tosBzip2Compression = null;
-    XZCompressorOutputStream xzos = null;
     TarArchiveEntry tarArchiveEntry = null;
     try {
       // No compression
@@ -161,6 +158,7 @@ public class TestTarImportCommand {
     assertEquals(0, command.run());
     verify(console).info("Using {} compression",
         TarImportCommand.CompressionType.NONE);
+    verify(console).info("Creating new dataset: {}", datasetUri);
     verify(console).info("Added {} records to \"{}\"",
         NUM_TEST_FILES,
         TEST_DATASET_NAME);

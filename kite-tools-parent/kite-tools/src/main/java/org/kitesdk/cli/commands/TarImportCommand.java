@@ -77,7 +77,7 @@ public class TarImportCommand extends BaseDatasetCommand {
 
     View<TarFileEntry> targetDataset;
     if (Datasets.exists(datasetUri)) {
-      console.info("Using existing dataset: {}", datasetUri);
+      console.debug("Using existing dataset: {}", datasetUri);
       targetDataset = Datasets.load(datasetUri, TarFileEntry.class);
     } else {
       console.info("Creating new dataset: {}", datasetUri);
