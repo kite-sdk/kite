@@ -167,12 +167,17 @@ public class DatasetKeyInputFormat<E> extends InputFormat<E, Void>
   }
 
   private static void setInputFormatClass(Configuration conf) {
-    // build a job with an empty conf
-    Job fakeJob = Hadoop.Job.newInstance.invoke(new Configuration(false));
-    fakeJob.setInputFormatClass(DatasetKeyInputFormat.class);
-    // then copy any created entries into the real conf
-    for (Map.Entry<String, String> entry : fakeJob.getConfiguration()) {
-      conf.set(entry.getKey(), entry.getValue());
+    if (Hadoop.isHadoop1()) {
+      conf.set("mapreduce.inputformat.class",
+          DatasetKeyInputFormat.class.getName());
+    } else {
+      // build a job with an empty conf
+      Job fakeJob = Hadoop.Job.newInstance.invoke(new Configuration(false));
+      fakeJob.setInputFormatClass(DatasetKeyInputFormat.class);
+      // then copy any created entries into the real conf
+      for (Map.Entry<String, String> entry : fakeJob.getConfiguration()) {
+        conf.set(entry.getKey(), entry.getValue());
+      }
     }
   }
 
