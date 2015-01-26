@@ -61,6 +61,8 @@ public class TestTarImportCommand {
   private static final String TAR_TEST_BZIP2_FILE =
       TEST_DATA_DIR + "/test.tar.bz2";
   private static final String TAR_TEST_BZIP2_ROOT_PREFIX = "testbzip2";
+  private static final String TAR_TEST_LARGE_ENTRY_FILE =
+      TEST_DATA_DIR + "/testlarge.tar";
 
   @BeforeClass
   public static void createTestInputFiles() throws IOException {
@@ -75,6 +77,7 @@ public class TestTarImportCommand {
     TarArchiveOutputStream tosNoCompression = null;
     TarArchiveOutputStream tosGzipCompression = null;
     TarArchiveOutputStream tosBzip2Compression = null;
+    TarArchiveOutputStream tosLargeEntry = null;
     TarArchiveEntry tarArchiveEntry = null;
     try {
       // No compression
@@ -97,6 +100,12 @@ public class TestTarImportCommand {
           testFS.create(new Path(TAR_TEST_BZIP2_FILE), true)));
       writeToTarFile(tosBzip2Compression,
           TAR_TEST_BZIP2_ROOT_PREFIX + "/", null);
+
+      // "Large" entry file (10000 bytes)
+      tosLargeEntry = new TarArchiveOutputStream(
+          testFS.create(new Path(TAR_TEST_LARGE_ENTRY_FILE), true));
+      String largeEntry = RandomStringUtils.randomAscii(10000);
+      writeToTarFile(tosLargeEntry, "largeEntry", largeEntry);
 
       // Generate test files with random names and content
       Random random = new Random(1);
@@ -121,8 +130,8 @@ public class TestTarImportCommand {
       IOUtils.closeStream(tosNoCompression);
       IOUtils.closeStream(tosGzipCompression);
       IOUtils.closeStream(tosBzip2Compression);
+      IOUtils.closeStream(tosLargeEntry);
     }
-
   }
 
   @AfterClass
@@ -235,11 +244,26 @@ public class TestTarImportCommand {
         TEST_DATASET_NAME);
   }
 
+  @Test
+  public void testWarnOnLargeEntry() throws IOException {
+    command.getConf().setLong("dfs.blocksize",5000);
+    command.targets =
+        Lists.newArrayList(TAR_TEST_LARGE_ENTRY_FILE, datasetUri);
+    assertEquals(0, command.run());
+    verify(console).info("Using {} compression",
+        TarImportCommand.CompressionType.NONE);
+    verify(console).warn("Entry \"{}\" (size {}) is larger than the " +
+            "HDFS block size of {}. This may result in remote block reads",
+        new Object[] { "largeEntry", 10000l, 5000l });
+    verify(console).info("Added {} records to \"{}\"",
+        1,
+        TEST_DATASET_NAME);
+  }
+
   @Before
   public void setup() throws Exception {
     TestUtil.run("-v", "create", datasetUri, "-s",
-        "kite-tools-parent/kite-tools/src/test/resources/test-schemas/" +
-            "tar-import.avsc");
+        "kite-tools-parent/kite-tools/src/main/avro/tar-import.avsc");
     this.console = mock(Logger.class);
     this.command = new TarImportCommand(console);
     command.setConf(new Configuration());

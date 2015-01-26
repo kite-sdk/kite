@@ -39,8 +39,7 @@ public class TarImportCommand extends BaseDatasetCommand {
   protected enum CompressionType {
     NONE,
     GZIP,
-    BZIP2,
-    XZ
+    BZIP2
   }
 
   private static final List<String> SUPPORTED_TAR_COMPRESSION_TYPES =
@@ -136,9 +135,9 @@ public class TarImportCommand extends BaseDatasetCommand {
         if (!entry.isDirectory()) {
           long size = entry.getSize();
           if (size >= blockSize) {
-            console.warn("Entry in tarfile of size {} is greater than the " +
+            console.warn("Entry \"{}\" (size {}) is larger than the " +
                 "HDFS block size of {}. This may result in remote block reads",
-                size, blockSize);
+                new Object[] { entry.getName(), size, blockSize });
           }
 
           byte[] buf = new byte[(int) size];
