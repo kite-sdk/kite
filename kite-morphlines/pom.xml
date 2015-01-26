@@ -44,6 +44,7 @@
     <module>kite-morphlines-useragent</module>
     <module>kite-morphlines-solr-core</module>
     <module>kite-morphlines-solr-cell</module>
+    <module>kite-morphlines-phonenumber</module>
     <module>kite-morphlines-all</module>
     <module>kite-morphlines-all-except-solr</module>
   </modules>
