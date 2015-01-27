@@ -29,8 +29,8 @@ import javax.annotation.concurrent.NotThreadSafe;
  * not expected to instantiate implementations directly. Instead, use the
  * containing dataset's {@link Dataset#newWriter()} method to get an appropriate
  * implementation. You should receive an instance of this interface from a
- * dataset, invoke {@link #write(Object)} and {@link #flush()} (or {@link #sync()}) as
- * necessary, and {@link #close()} when they are done, or no more data exists.
+ * dataset, invoke {@link #write(Object)} and {@link #close()} when they are done,
+ * or no more data exists.
  * </p>
  * <p>
  * Implementations can hold system resources until the {@link #close()} method
@@ -55,7 +55,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  * @param <E> The type of entity accepted by this writer.
  */
 @NotThreadSafe
-public interface DatasetWriter<E> extends Flushable, Syncable, Closeable {
+public interface DatasetWriter<E> extends Closeable {
 
   /**
    * <p>
@@ -73,59 +73,6 @@ public interface DatasetWriter<E> extends Flushable, Syncable, Closeable {
    *            To wrap an internal {@link java.io.IOException}
    */
   void write(E entity);
-
-  /**
-   * <p>
-   * Force or commit any outstanding buffered data to the underlying stream if
-   * supported.
-   * </p>
-   * <p>
-   * <strong>Note:</strong> Some implementations do not implement this method.
-   * In particular, {@link Formats#PARQUET Parquet format} does <em>not</em>
-   * implement {@link #flush()} and calling it has no effect.
-   * </p>
-   * <p>
-   * After 0.18.0, DatasetWriter will no longer require flush. Instead,
-   * implementations that can support a durability guarantee, such as Avro,
-   * can be {@link Flushable} and {@link Syncable}.
-   * </p>
-   * @throws DatasetOperationException
-   *            If the operation did not succeed.
-   * @throws DatasetIOException
-   *            To wrap an internal {@link java.io.IOException}
-   *
-   * @deprecated will be removed after 0.18.0; use {@link Flushable#flush}
-   */
-  @Override
-  @Deprecated
-  void flush();
-
-  /**
-   * <p>
-   * Ensure that data in the underlying stream has been written to disk (optional
-   * operation).
-   * </p>
-   * <p>
-   * <strong>Note:</strong> Some implementations do not implement this method.
-   * In particular, {@link Formats#PARQUET Parquet format} does <em>not</em>
-   * implement {@link #flush()} and calling it has no effect.
-   * </p>
-   * <p>
-   * After 0.18.0, DatasetWriter will no longer require sync. Instead,
-   * implementations that can support a durability guarantee, such as Avro,
-   * can be {@link Flushable} and {@link Syncable}.
-   * </p>
-   * @throws DatasetOperationException
-   *            If the operation did not succeed.
-   * @throws DatasetIOException
-   *            To wrap an internal {@link java.io.IOException}
-   *
-   * @since 0.16.0
-   * @deprecated will be removed after 0.18.0; use {@link Syncable#sync}
-   */
-  @Override
-  @Deprecated
-  void sync();
 
   /**
    * <p>

@@ -169,22 +169,6 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     }
   }
 
-  /**
-   * @deprecated will be removed in 1.0.0; use Flushable#flush instead
-   */
-  @Override
-  @Deprecated
-  public void flush() {
-  }
-
-  /**
-   * @deprecated will be removed in 1.0.0; use Syncable#sync instead
-   */
-  @Override
-  @Deprecated
-  public void sync() {
-  }
-
   @Override
   public final void close() {
     try {
@@ -313,11 +297,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
     }
   }
 
-  @VisibleForTesting
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-      value="RI_REDUNDANT_INTERFACES",
-      justification="Interfaces will be removed from DatasetWriter in 1.0.0")
-  static class IncrementalWriter<E> extends FileSystemWriter<E>
+  private static class IncrementalWriter<E> extends FileSystemWriter<E>
       implements Flushable, Syncable {
     private IncrementalWriter(FileSystem fs, Path path,
                               DatasetDescriptor descriptor) {

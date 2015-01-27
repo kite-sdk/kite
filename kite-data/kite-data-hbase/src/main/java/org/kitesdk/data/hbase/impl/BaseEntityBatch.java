@@ -16,6 +16,7 @@
 package org.kitesdk.data.hbase.impl;
 
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.Flushable;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.ReaderWriterState;
 import com.google.common.base.Preconditions;
@@ -26,7 +27,7 @@ import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.HTablePool;
 
 public class BaseEntityBatch<E> extends AbstractDatasetWriter<E>
-    implements EntityBatch<E> {
+    implements EntityBatch<E>, Flushable {
   private final HTableInterface table;
   private final EntityMapper<E> entityMapper;
   private final HBaseClientTemplate clientTemplate;
@@ -125,11 +126,6 @@ public class BaseEntityBatch<E> extends AbstractDatasetWriter<E>
       throw new DatasetIOException("Error flushing commits for table ["
           + table + "]", e);
     }
-  }
-
-  @Override
-  public void sync() {
-    flush(); // there is no equivalent of sync, HBase manages durability
   }
 
   @Override

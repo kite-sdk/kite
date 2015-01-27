@@ -51,12 +51,12 @@ public class TestParquetWriter extends TestFileSystemWriters {
 
   @Test
   public void testIsFlushable() {
-    Assert.assertFalse(fsWriter instanceof FileSystemWriter.IncrementalWriter);
+    Assert.assertFalse(fsWriter instanceof Flushable);
   }
 
   @Test
   public void testIsSyncable() {
-    Assert.assertFalse(fsWriter instanceof FileSystemWriter.IncrementalWriter);
+    Assert.assertFalse(fsWriter instanceof Syncable);
   }
 
   @Test
