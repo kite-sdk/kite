@@ -31,7 +31,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -47,9 +54,11 @@ import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectData;
 import org.apache.avro.specific.SpecificData;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.codehaus.jackson.node.NullNode;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
+import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.FieldMapping;
 import org.kitesdk.data.IncompatibleSchemaException;
 import org.kitesdk.data.PartitionStrategy;
@@ -817,5 +826,144 @@ public class SchemaUtil {
       }
     }
     return false;
+  }
+
+  public static Digest digest(Schema schema) {
+    return new Digest(visit(schema, new SchemaDigestVisitor()));
+  }
+
+  public static class Digest {
+    private final byte[] bytes;
+
+    public Digest(byte[] bytes) {
+      this.bytes = bytes;
+    }
+
+    public ByteBuffer toByteBuffer() {
+      return ByteBuffer.wrap(bytes).asReadOnlyBuffer();
+    }
+
+    public byte[] toBytes() {
+      return Arrays.copyOf(bytes, bytes.length);
+    }
+
+    public String toString() {
+      return CharBuffer.wrap(Hex.encodeHex(bytes)).toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+
+      Digest that = (Digest) o;
+      return Arrays.equals(this.bytes, that.bytes);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode((Object) bytes);
+    }
+  }
+
+  private static class SchemaDigestVisitor extends SchemaVisitor<byte[]> {
+    private final MessageDigest digest;
+    private final CharsetEncoder encoder = Charset.forName("utf8").newEncoder();
+
+    public SchemaDigestVisitor() {
+      try {
+        this.digest = MessageDigest.getInstance("SHA1");
+      } catch (NoSuchAlgorithmException e) {
+        throw new DatasetOperationException("Cannot locate SHA1 algorithm", e);
+      }
+    }
+
+    @Override
+    public byte[] record(Schema record, List<String> names, List<byte[]> fields) {
+      add(record.getFullName());
+      addType(record);
+      Iterator<String> nameIter = names.iterator();
+      for (byte[] field : fields) {
+        Preconditions.checkArgument(
+            nameIter.hasNext(), "[BUG] Missing field name");
+        add(nameIter.next());
+        add(field);
+      }
+      return hash();
+    }
+
+    @Override
+    public byte[] union(Schema union, List<byte[]> options) {
+      addType(union);
+      addAll(options);
+      return hash();
+    }
+
+    @Override
+    public byte[] array(Schema array, byte[] element) {
+      addType(array);
+      add(element);
+      return hash();
+    }
+
+    @Override
+    public byte[] map(Schema map, byte[] value) {
+      addType(map);
+      add(value);
+      return hash();
+    }
+
+    @Override
+    public byte[] primitive(Schema primitive) {
+      addType(primitive);
+      switch (primitive.getType()) {
+        case FIXED:
+          // fixed is a named type
+          add(primitive.getFullName());
+          // do not translate directly to bytes to avoid endianness mismatches
+          add(Integer.toString(primitive.getFixedSize()));
+          break;
+        case ENUM:
+          // enum is a named type
+          add(primitive.getFullName());
+          for (String symbol : primitive.getEnumSymbols()) {
+            add(symbol);
+          }
+          break;
+      }
+      return hash();
+    }
+
+    private byte[] hash() {
+      byte[] hash = digest.digest();
+      digest.reset(); // discard the current state
+      return hash;
+    }
+
+    private void addType(Schema schema) {
+      digest.update((byte) schema.getType().ordinal());
+    }
+
+    private void addAll(List<byte[]> children) {
+      for (byte[] bytes : children) {
+        add(bytes);
+      }
+    }
+
+    private void add(byte[] bytes) {
+      digest.update(bytes);
+    }
+
+    private void add(String string) {
+      try {
+        digest.update(encoder.encode(CharBuffer.wrap(string)));
+      } catch (CharacterCodingException e) {
+        throw new DatasetOperationException("Failed to encode: " + string, e);
+      }
+    }
   }
 }
