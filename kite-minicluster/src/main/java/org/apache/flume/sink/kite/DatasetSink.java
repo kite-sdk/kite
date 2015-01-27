@@ -58,6 +58,7 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.Flushable;
 import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.Registration;
@@ -263,7 +264,9 @@ public class DatasetSink extends AbstractSink implements Configurable {
       }
 
       // TODO: Add option to sync, depends on CDK-203
-      writer.flush();
+      if (writer instanceof Flushable) {
+        ((Flushable) writer).flush();
+      }
 
       // commit after data has been written and flushed
       transaction.commit();

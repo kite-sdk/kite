@@ -51,12 +51,12 @@ public class TestAvroWriter extends TestFileSystemWriters {
 
   @Test
   public void testIsFlushable() {
-    Assert.assertTrue(fsWriter instanceof FileSystemWriter.IncrementalWriter);
+    Assert.assertTrue(fsWriter instanceof Flushable);
   }
 
   @Test
   public void testIsSyncable() {
-    Assert.assertTrue(fsWriter instanceof FileSystemWriter.IncrementalWriter);
+    Assert.assertTrue(fsWriter instanceof Syncable);
   }
 
   @Test
@@ -71,7 +71,7 @@ public class TestAvroWriter extends TestFileSystemWriters {
       written.add(record);
     }
 
-    ((FileSystemWriter.IncrementalWriter) fsWriter).flush();
+    ((Flushable) fsWriter).flush();
 
     for (i = 10000; i < 11000; i += 1) {
       fsWriter.write(record(i, "test-" + i));

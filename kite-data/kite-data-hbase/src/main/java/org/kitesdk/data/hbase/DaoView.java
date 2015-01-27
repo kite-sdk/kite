@@ -21,6 +21,8 @@ import java.util.Iterator;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Flushable;
+import org.kitesdk.data.hbase.impl.EntityBatch;
 import org.kitesdk.data.hbase.impl.EntityScanner;
 import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDatasetReader;
@@ -121,24 +123,20 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
 
   @Override
   public DatasetWriter<E> newWriter() {
-    final DatasetWriter<E> wrappedWriter = dataset.getDao().newBatch();
+    final EntityBatch<E> wrappedWriter = dataset.getDao().newBatch();
     if (constraints.isUnbounded()) {
-      if (wrappedWriter instanceof InitializeAccessor) {
-        ((InitializeAccessor) wrappedWriter).initialize();
-      }
+      wrappedWriter.initialize();
       return wrappedWriter;
     }
     final StorageKey partitionStratKey = new StorageKey(dataset.getDescriptor().getPartitionStrategy());
     // Return a dataset writer that checks on write that an entity is within the
     // range of the view
-    AbstractDatasetWriter<E> writer = new AbstractDatasetWriter<E>() {
+    AbstractDatasetWriter<E> writer = new AbstractFlushableDatasetWriter<E>() {
       private Constraints.KeyPredicate keyPredicate = constraints.toKeyPredicate();
 
       @Override
       public void initialize() {
-        if (wrappedWriter instanceof InitializeAccessor) {
-          ((InitializeAccessor) wrappedWriter).initialize();
-        }
+        wrappedWriter.initialize();
       }
 
       @Override
@@ -157,11 +155,6 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
       }
 
       @Override
-      public void sync() {
-        wrappedWriter.sync();
-      }
-
-      @Override
       public void close() {
         wrappedWriter.close();
       }
@@ -173,6 +166,10 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
     };
     writer.initialize();
     return writer;
+  }
+
+  abstract static class AbstractFlushableDatasetWriter<E> extends AbstractDatasetWriter<E>
+      implements Flushable {
   }
 
   @SuppressWarnings("deprecation")

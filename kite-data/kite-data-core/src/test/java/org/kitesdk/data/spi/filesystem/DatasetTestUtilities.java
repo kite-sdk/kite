@@ -18,6 +18,7 @@ package org.kitesdk.data.spi.filesystem;
 import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Flushable;
 import org.kitesdk.data.spi.PartitionKey;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -80,7 +81,9 @@ public class DatasetTestUtilities {
         }
         writer.write(recordBuilder.build());
       }
-      writer.flush();
+      if (writer instanceof Flushable) {
+        ((Flushable) writer).flush();
+      }
     } finally {
       if (writer != null) {
         writer.close();

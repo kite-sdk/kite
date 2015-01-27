@@ -19,10 +19,13 @@ import java.util.Map;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Flushable;
+import org.kitesdk.data.Format;
+import org.kitesdk.data.Formats;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.Syncable;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
+import org.kitesdk.data.spi.DescriptorUtil;
 import org.kitesdk.data.spi.EntityAccessor;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.PartitionListener;
@@ -47,19 +50,37 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
   private static final int DEFAULT_WRITER_CACHE_SIZE = 10;
 
-  private FileSystemView<E> view;
+  protected FileSystemView<E> view;
   private final int maxWriters;
 
   private final PartitionStrategy partitionStrategy;
-  private LoadingCache<StorageKey, DatasetWriter<E>> cachedWriters;
+  protected LoadingCache<StorageKey, FileSystemWriter<E>> cachedWriters;
 
   private final StorageKey reusedKey;
   private final EntityAccessor<E> accessor;
   private final Map<String, Object> provided;
 
-  private ReaderWriterState state;
+  protected ReaderWriterState state;
 
-  public PartitionedDatasetWriter(FileSystemView<E> view) {
+  static <E> PartitionedDatasetWriter<E> newWriter(FileSystemView<E> view) {
+    DatasetDescriptor descriptor = view.getDataset().getDescriptor();
+    Format format = descriptor.getFormat();
+    if (Formats.PARQUET.equals(format)) {
+      // by default, Parquet is not durable
+      if (DescriptorUtil.isDisabled(
+          FileSystemProperties.NON_DURABLE_PARQUET_PROP, descriptor)) {
+        return new IncrementalPartitionedDatasetWriter<E>(view);
+      } else {
+        return new PartitionedDatasetWriter<E>(view);
+      }
+    } else if (Formats.AVRO.equals(format) || Formats.CSV.equals(format)) {
+      return new IncrementalPartitionedDatasetWriter<E>(view);
+    } else {
+      return new PartitionedDatasetWriter<E>(view);
+    }
+  }
+
+  private PartitionedDatasetWriter(FileSystemView<E> view) {
     final DatasetDescriptor descriptor = view.getDataset().getDescriptor();
     Preconditions.checkArgument(descriptor.isPartitioned(),
         "Dataset " + view.getDataset() + " is not partitioned");
@@ -134,49 +155,6 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
   }
 
   @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-      value={"BC_VACUOUS_INSTANCEOF", "SIO_SUPERFLUOUS_INSTANCEOF"},
-      justification="Flushable will be removed from DatasetWriter in 1.0.0")
-  public void flush() {
-    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-      "Attempt to flush a writer in state:%s", state);
-
-    LOG.debug("Flushing all cached writers for view:{}", view);
-
-    /*
-     * There's a potential for flushing entries that are created by other
-     * threads while looping through the writers. While normally just wasteful,
-     * on HDFS, this is particularly bad. We should probably do something about
-     * this, but it will be difficult as Cache (ideally) uses multiple
-     * partitions to prevent cached writer contention.
-     */
-    for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
-      LOG.debug("Flushing partition writer:{}", writer);
-      if (writer instanceof Flushable) {
-        ((Flushable) writer).flush();
-      }
-    }
-  }
-
-  @Override
-  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-      value={"BC_VACUOUS_INSTANCEOF", "SIO_SUPERFLUOUS_INSTANCEOF"},
-      justification="Syncable will be removed from DatasetWriter in 1.0.0")
-  public void sync() {
-    Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
-        "Attempt to sync a writer in state:%s", state);
-
-    LOG.debug("Syncing all cached writers for view:{}", view);
-
-    for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
-      LOG.debug("Syncing partition writer:{}", writer);
-      if (writer instanceof Syncable) {
-        ((Syncable) writer).sync();
-      }
-    }
-  }
-
-  @Override
   public void close() {
     if (state.equals(ReaderWriterState.OPEN)) {
 
@@ -207,7 +185,7 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
   }
 
   private static class DatasetWriterCacheLoader<E> extends
-    CacheLoader<StorageKey, DatasetWriter<E>> {
+    CacheLoader<StorageKey, FileSystemWriter<E>> {
 
     private final FileSystemView<E> view;
     private final PathConversion convert;
@@ -219,13 +197,13 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
     }
 
     @Override
-    public DatasetWriter<E> load(StorageKey key) throws Exception {
+    public FileSystemWriter<E> load(StorageKey key) throws Exception {
       Preconditions.checkState(view.getDataset() instanceof FileSystemDataset,
           "FileSystemWriters cannot create writer for " + view.getDataset());
 
       FileSystemDataset dataset = (FileSystemDataset) view.getDataset();
       Path partition = convert.fromKey(key);
-      AbstractDatasetWriter<E> writer = FileSystemWriter.newWriter(
+      FileSystemWriter<E> writer = FileSystemWriter.newWriter(
           dataset.getFileSystem(),
           new Path(dataset.getDirectory(), partition),
           dataset.getDescriptor());
@@ -258,5 +236,50 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
       writer.close();
     }
 
+  }
+
+  private static class IncrementalPartitionedDatasetWriter<E> extends
+      PartitionedDatasetWriter<E> implements org.kitesdk.data.Flushable, Syncable {
+
+    private IncrementalPartitionedDatasetWriter(FileSystemView<E> view) {
+      super(view);
+    }
+
+    @Override
+    public void flush() {
+      Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+          "Attempt to flush a writer in state:%s", state);
+
+      LOG.debug("Flushing all cached writers for view:{}", view);
+
+    /*
+     * There's a potential for flushing entries that are created by other
+     * threads while looping through the writers. While normally just wasteful,
+     * on HDFS, this is particularly bad. We should probably do something about
+     * this, but it will be difficult as Cache (ideally) uses multiple
+     * partitions to prevent cached writer contention.
+     */
+      for (FileSystemWriter<E> writer : cachedWriters.asMap().values()) {
+        LOG.debug("Flushing partition writer:{}", writer);
+        if (writer instanceof Flushable) {
+          ((Flushable) writer).flush();
+        }
+      }
+    }
+
+    @Override
+    public void sync() {
+      Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
+          "Attempt to sync a writer in state:%s", state);
+
+      LOG.debug("Syncing all cached writers for view:{}", view);
+
+      for (FileSystemWriter<E> writer : cachedWriters.asMap().values()) {
+        LOG.debug("Syncing partition writer:{}", writer);
+        if (writer instanceof Syncable) {
+          ((Syncable) writer).sync();
+        }
+      }
+    }
   }
 }
