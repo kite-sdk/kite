@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import org.kitesdk.morphline.api.Command;
 import org.kitesdk.morphline.api.CommandBuilder;
@@ -79,8 +80,13 @@ public final class GeoIPBuilder implements CommandBuilder {
     }
 
     @Override
-    protected boolean doProcess(Record record) {      
-      for (Object value : record.get(inputFieldName)) {
+    protected boolean doProcess(Record record) {
+      final List values = record.get(inputFieldName);
+      if (values.isEmpty()) {
+        LOG.debug("No values found for field {}", inputFieldName);
+        return false;
+      }
+      for (Object value : values) {
         InetAddress addr;
         if (value instanceof InetAddress) {
           addr = (InetAddress) value;
@@ -99,7 +105,12 @@ public final class GeoIPBuilder implements CommandBuilder {
         } catch (IOException e) {
           throw new MorphlineRuntimeException("Cannot perform GeoIP lookup for IP: " + addr, e);
         }
-        
+
+        if (json == null) {
+          LOG.debug("No GeoIP record found for: {}", value);
+          return false;
+        }
+
         ObjectNode location = (ObjectNode) json.get("location");
         if (location != null) {
           JsonNode jlatitude = location.get("latitude");
@@ -110,7 +121,8 @@ public final class GeoIPBuilder implements CommandBuilder {
             location.put("latitude_longitude", latitude + "," + longitude);
             location.put("longitude_latitude", longitude + "," + latitude);
           }
-        }        
+        }
+
         record.put(Fields.ATTACHMENT_BODY, json);
       }
       
