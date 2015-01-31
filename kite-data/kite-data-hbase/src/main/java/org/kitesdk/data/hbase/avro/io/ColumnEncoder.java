@@ -90,7 +90,7 @@ public class ColumnEncoder extends Encoder {
 
   @Override
   public void writeString(Utf8 utf8) throws IOException {
-    out.write(utf8.getBytes(), 0, utf8.getBytesLength());
+    out.write(utf8.getBytes(), 0, utf8.getByteLength());
   }
 
   @Override
