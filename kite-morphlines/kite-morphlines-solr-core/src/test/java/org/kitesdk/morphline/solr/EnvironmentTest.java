@@ -68,7 +68,7 @@ public class EnvironmentTest extends Assert {
 
   private static Version getMinorLuceneVersion(String version) {
     try {
-      return Version.parse(version);
+      return Version.parseLeniently(version.replaceFirst("^(\\d)\\.(\\d).*", "LUCENE_$1$2"));
     } catch (ParseException e) {
       throw new RuntimeException(e);
     }
