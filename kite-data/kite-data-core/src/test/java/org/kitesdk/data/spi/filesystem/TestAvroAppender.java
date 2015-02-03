@@ -82,7 +82,7 @@ public class TestAvroAppender extends MiniDFSTest {
   @Test
   @Ignore(value="LocalFileSystem is broken!?")
   public void testAvroSyncLocalFS() throws Exception {
-    final FileSystem fs = FileSystem.getLocal(getConfiguration());
+    final FileSystem fs = getFS();
     final Path path = new Path("file:/tmp/test.avro");
     AvroAppender<String> appender = new AvroAppender<String>(
         fs, path, schema, Formats.AVRO.getDefaultCompressionType());

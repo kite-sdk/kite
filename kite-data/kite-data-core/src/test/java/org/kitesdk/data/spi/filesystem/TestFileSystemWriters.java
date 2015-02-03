@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import java.io.IOException;
 import org.apache.avro.Schema;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
@@ -29,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Formats;
+import org.kitesdk.data.LocalFileSystem;
 import org.kitesdk.data.spi.InitializeAccessor;
 
 public abstract class TestFileSystemWriters<E> {
@@ -41,7 +41,7 @@ public abstract class TestFileSystemWriters<E> {
 
   @Before
   public void setup() throws IOException {
-    this.fs = FileSystem.getLocal(new Configuration());
+    this.fs = LocalFileSystem.getInstance();
     this.testDirectory = new Path(Files.createTempDir().getAbsolutePath());
     this.fsWriter = newWriter(testDirectory);
   }

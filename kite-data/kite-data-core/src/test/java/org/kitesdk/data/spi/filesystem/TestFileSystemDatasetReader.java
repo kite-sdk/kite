@@ -16,6 +16,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import org.apache.avro.SchemaBuilder;
+import org.kitesdk.data.LocalFileSystem;
 import org.kitesdk.data.TestDatasetReaders;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetReaderException;
@@ -23,7 +24,6 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
@@ -38,7 +38,7 @@ public class TestFileSystemDatasetReader extends TestDatasetReaders<Record> {
   @Override
   public DatasetReader<Record> newReader() throws IOException {
     return new FileSystemDatasetReader<Record>(
-        FileSystem.getLocal(new Configuration()),
+        LocalFileSystem.getInstance(),
         new Path(Resources.getResource("data/strings-100.avro").getFile()),
         STRING_SCHEMA, Record.class);
   }
@@ -62,7 +62,7 @@ public class TestFileSystemDatasetReader extends TestDatasetReaders<Record> {
 
   @Before
   public void setUp() throws IOException {
-    fileSystem = FileSystem.getLocal(new Configuration());
+    fileSystem = LocalFileSystem.getInstance();
   }
 
   @Test

@@ -19,7 +19,6 @@ package org.kitesdk.data.spi.filesystem;
 import com.google.common.io.Files;
 import java.io.IOException;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.AfterClass;
@@ -29,6 +28,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.LocalFileSystem;
 import org.kitesdk.data.TestDatasetReaders;
 import org.kitesdk.data.spi.filesystem.DatasetTestUtilities.RecordValidator;
 
@@ -41,10 +41,10 @@ public class TestWriteReflectReadGeneric extends TestDatasetReaders<GenericRecor
 
   @BeforeClass
   public static void setup() throws IOException {
-    Configuration conf = new Configuration();
-    fs = FileSystem.getLocal(conf);
+    fs = LocalFileSystem.getInstance();
     testDirectory = new Path(Files.createTempDir().getAbsolutePath());
-    FileSystemDatasetRepository repo = new FileSystemDatasetRepository(conf, testDirectory);
+    FileSystemDatasetRepository repo = new FileSystemDatasetRepository(fs.getConf(),
+        testDirectory);
     Dataset<MyRecord> writerDataset = repo.create("ns", "test", new DatasetDescriptor.Builder()
                                    .schema(MyRecord.class)
                                    .build(), MyRecord.class);

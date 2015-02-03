@@ -19,12 +19,12 @@ package org.kitesdk.data.spi.filesystem;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetRecordException;
+import org.kitesdk.data.LocalFileSystem;
 import org.kitesdk.data.TestDatasetReaders;
 import org.kitesdk.data.TestHelpers;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -113,7 +113,7 @@ public class TestCSVFileReader extends TestDatasetReaders<GenericData.Record> {
 
   @BeforeClass
   public static void createCSVFiles() throws IOException {
-    localfs = FileSystem.getLocal(new Configuration());
+    localfs = LocalFileSystem.getInstance();
     csvFile = new Path("target/temp.csv");
     reorderedFile = new Path("target/reordered.csv");
     tsvFile = new Path("target/temp.tsv");

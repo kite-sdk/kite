@@ -28,7 +28,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
@@ -36,6 +35,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.kitesdk.data.LocalFileSystem;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.Constraints;
@@ -63,7 +63,7 @@ public class TestFileSystemPartitionIteratorProvidedPartitioners {
   public Path testDirectory;
   @BeforeClass
   public static void createExpectedKeys() throws IOException {
-    fileSystem = FileSystem.getLocal(new Configuration());
+    fileSystem = LocalFileSystem.getInstance();
     keys = Lists.newArrayList();
     for (Object year : Arrays.asList(2012, 2013)) {
       for (Object month : Arrays.asList(9, 10, 11, 12)) {

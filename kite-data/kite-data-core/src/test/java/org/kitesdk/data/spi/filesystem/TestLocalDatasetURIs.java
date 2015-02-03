@@ -19,7 +19,6 @@ package org.kitesdk.data.spi.filesystem;
 import java.net.URI;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.util.Utf8;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
@@ -29,6 +28,7 @@ import org.kitesdk.data.Dataset;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetNotFoundException;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.LocalFileSystem;
 import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.TestHelpers;
 import org.kitesdk.data.spi.Constraints;
@@ -42,7 +42,7 @@ public class TestLocalDatasetURIs {
 
   @BeforeClass
   public static void createRepositoryAndTestDatasets() throws Exception {
-    localFS = FileSystem.getLocal(new Configuration());
+    localFS = LocalFileSystem.getInstance();
     descriptor = new DatasetDescriptor.Builder()
         .schemaUri("resource:schema/user.avsc")
         .build();
