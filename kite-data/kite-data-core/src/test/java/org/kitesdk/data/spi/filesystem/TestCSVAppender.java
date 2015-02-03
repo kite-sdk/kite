@@ -85,7 +85,7 @@ public class TestCSVAppender extends MiniDFSTest {
   @Test
   @Ignore(value="LocalFileSystem is broken!?")
   public void testCSVSyncLocalFS() throws Exception {
-    final FileSystem fs = FileSystem.getLocal(getConfiguration());
+    final FileSystem fs = getFS();
     final Path path = new Path("file:/tmp/test.csv");
     final DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
         .schema(schema)

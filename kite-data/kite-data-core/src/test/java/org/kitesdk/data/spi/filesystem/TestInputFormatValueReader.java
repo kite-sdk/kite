@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import org.apache.avro.Schema;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -32,6 +31,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
+import org.kitesdk.data.LocalFileSystem;
 import org.kitesdk.data.TestDatasetReaders;
 
 public class TestInputFormatValueReader extends TestDatasetReaders<Text> {
@@ -70,7 +70,7 @@ public class TestInputFormatValueReader extends TestDatasetReaders<Text> {
 
   @BeforeClass
   public static void setup() throws IOException {
-    localfs = FileSystem.getLocal(new Configuration());
+    localfs = LocalFileSystem.getInstance();
     BufferedWriter writer = Files.newWriter(
         new File(userFile.toString()), Charset.forName("UTF-8"));
     for (String line : lines) {

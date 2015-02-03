@@ -18,13 +18,13 @@ package org.kitesdk.data.spi.filesystem;
 
 import java.io.IOException;
 import org.apache.avro.SchemaBuilder;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.LocalFileSystem;
 
 public class TestParquetWriter extends TestFileSystemWriters<Object> {
   @Override
@@ -40,8 +40,7 @@ public class TestParquetWriter extends TestFileSystemWriters<Object> {
 
   @Test
   public void testParquetConfiguration() throws IOException {
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.getLocal(conf);
+    FileSystem fs = LocalFileSystem.getInstance();
     FileSystemWriter<Object> writer = new FileSystemWriter<Object>(
         fs, new Path("/tmp"),
         new DatasetDescriptor.Builder()
@@ -64,8 +63,7 @@ public class TestParquetWriter extends TestFileSystemWriters<Object> {
 
   @Test
   public void testConfigureDurableParquetAppender() throws IOException {
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.getLocal(conf);
+    FileSystem fs = LocalFileSystem.getInstance();
     FileSystemWriter<Object> writer = new FileSystemWriter<Object>(
         fs, new Path("/tmp"),
         new DatasetDescriptor.Builder()
@@ -81,8 +79,7 @@ public class TestParquetWriter extends TestFileSystemWriters<Object> {
 
   @Test
   public void testConfigureNonDurableParquetAppender() throws IOException {
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.getLocal(conf);
+    FileSystem fs = LocalFileSystem.getInstance();
     FileSystemWriter<Object> writer = new FileSystemWriter<Object>(
         fs, new Path("/tmp"),
         new DatasetDescriptor.Builder()
