@@ -96,63 +96,32 @@ public class TransformTask<S, T> extends Configured {
   }
 
   public PipelineResult run() throws IOException {
-    boolean runInParallel = true;
-    if (isLocal(from.getDataset()) || isLocal(to.getDataset())) {
-      runInParallel = false;
-    }
-
     PType<T> toPType = ptype(to);
     MapFn<T, T> validate = new CheckEntityClass<T>(to.getType());
 
-    if (runInParallel) {
-      TaskUtil.configure(getConf())
-          .addJarPathForClass(HiveConf.class);
+    TaskUtil.configure(getConf())
+        .addJarPathForClass(HiveConf.class);
 
-      Pipeline pipeline = new MRPipeline(getClass(), getConf());
+    Pipeline pipeline = new MRPipeline(getClass(), getConf());
 
-      PCollection<T> collection = pipeline.read(CrunchDatasets.asSource(from))
-          .parallelDo(transform, toPType).parallelDo(validate, toPType);
+    PCollection<T> collection = pipeline.read(CrunchDatasets.asSource(from))
+        .parallelDo(transform, toPType).parallelDo(validate, toPType);
 
-      if (compact) {
-        // the transform must be run before partitioning
-        collection = CrunchDatasets.partition(collection, to, numWriters);
-      }
-
-      pipeline.write(collection, CrunchDatasets.asTarget(to), Target.WriteMode.APPEND);
-
-      PipelineResult result = pipeline.done();
-
-      StageResult sr = Iterables.getFirst(result.getStageResults(), null);
-      if (sr != null && MAP_INPUT_RECORDS != null) {
-        this.count = sr.getCounterValue(MAP_INPUT_RECORDS);
-      }
-
-      return result;
-
-    } else {
-      Pipeline pipeline = MemPipeline.getInstance();
-
-      PCollection<T> collection = pipeline.read(CrunchDatasets.asSource(from))
-          .parallelDo(transform, toPType).parallelDo(validate, toPType);
-
-      boolean threw = true;
-      DatasetWriter<T> writer = null;
-      try {
-        writer = to.newWriter();
-
-        for (T entity : collection.materialize()) {
-          writer.write(entity);
-          count += 1;
-        }
-
-        threw = false;
-
-      } finally {
-        Closeables.close(writer, threw);
-      }
-
-      return pipeline.done();
+    if (compact) {
+      // the transform must be run before partitioning
+      collection = CrunchDatasets.partition(collection, to, numWriters);
     }
+
+    pipeline.write(collection, CrunchDatasets.asTarget(to), Target.WriteMode.APPEND);
+
+    PipelineResult result = pipeline.done();
+
+    StageResult sr = Iterables.getFirst(result.getStageResults(), null);
+    if (sr != null && MAP_INPUT_RECORDS != null) {
+      this.count = sr.getCounterValue(MAP_INPUT_RECORDS);
+    }
+
+    return result;
   }
 
   private static boolean isLocal(Dataset<?> dataset) {

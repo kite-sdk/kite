@@ -196,15 +196,10 @@ public class TestCSVImportCommand {
 
     // This will fail because NaN isn't a valid long and the field is required
     command.targets = Lists.newArrayList("target/incompatible.csv", datasetName);
-    TestHelpers.assertThrows("Should complain about schema compatibility",
-        DatasetRecordException.class, new Callable() {
-          @Override
-          public Object call() throws Exception {
-            command.run();
-            return null;
-          }
-        }
-    );
+
+    int rc = command.run();
+    Assert.assertEquals(1, rc);
+
     verify(console).trace(contains("repo:file:target/data"));
     verifyNoMoreInteractions(console);
   }
