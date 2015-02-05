@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Lab 6: Create a Flume pipeline</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/0.17.1/labs/6-create-a-flume-pipeline.html">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/0.17.1/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/0.17.1/">Kite Software Development Kit</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      
+
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Lab 6: Create a Flume pipeline</h1>
+  </header>
+
+  <article class="post-content">
+  <p>In this lab, you will create a Flume pipeline to send movie ratings from a web application into HDFS. You will learn to:</p>
+
+<ol>
+  <li>Configure Flume to write records to a dataset</li>
+  <li>Build and run a movie rating web application</li>
+</ol>
+
+<p>If you haven’t already, make sure you’ve completed <a href="2-create-a-movies-dataset.html">Lab 2: Create a movies dataset</a> and <a href="5-create-a-partitioned-dataset.html">Lab 5: Create a partitioned dataset</a>.</p>
+
+<h2 id="background">Background</h2>
+
+<p>In this lab, you will build a Flume pipeline that adds movie ratings to the ratings dataset you created in lab 5.</p>
+
+<p><a href="https://flume.apache.org/FlumeUserGuide.html">Flume</a> collects individual ratings sent via RPC and constantly appends them to a dataset. Ratings are produced by a simple web application, located in <code>/home/cloudera/ratings-app</code>.</p>
+
+<p>This architecture mimics a real-world deployment:</p>
+
+<ul>
+  <li>The web application is decoupled from Hadoop. It does a minimal amount of work to send records, then moves on with its purpose: user interaction.</li>
+  <li>Flume accepts records from the application as quickly as possible to avoid interrupting the user experience.</li>
+  <li>Flume handles durability and eventual storage in HDFS.</li>
+  <li>The Hadoop cluster doesn’t need to be exposed to the web application tier, unless the application tier chooses to access Hadoop data directly. (This application caches the movies dataset.)</li>
+</ul>
+
+<h2 id="steps">Steps</h2>
+
+<h3 id="create-a-flume-configuration-named-flumeconf">1. Create a Flume configuration, named <code>flume.conf</code></h3>
+
+<p>You might want to refer to the <a href="http://kitesdk.org/docs/0.17.1/cli-reference.html#flume-config">online reference</a>, or the built-in help:</p>
+
+<pre><code>kite-dataset help flume-config
+</code></pre>
+
+<p><em>Hints</em>:</p>
+
+<ul>
+  <li>You should set the agent name to <em>agent</em> when generating your Flume configuration</li>
+  <li>The web application is configured to use the default RPC port, 41415</li>
+  <li>For this example, it is easier to use a memory channel</li>
+</ul>
+
+<h3 id="restart-flume-using-your-flumeconf">2. Restart Flume using your <code>flume.conf</code></h3>
+
+<p>Replace the <code>/etc/flume-ng/conf/flume.conf</code> file, where Flume will look for its configuration.</p>
+
+<pre><code>sudo cp flume.conf /etc/flume-ng/conf/flume.conf
+sudo /etc/init.d/flume-ng-agent restart
+</code></pre>
+
+<p>You can verify that there were no start-up errors by looking at the Flume log, <code>/var/log/flume-ng/flume.log</code>.</p>
+
+<h3 id="build-and-run-the-ratings-application">3. Build and run the ratings application</h3>
+
+<p>Build the ratings web application with Maven:</p>
+
+<pre><code>cd /home/cloudera/ratings-app
+mvn package
+</code></pre>
+
+<p>Then run the runtime jar with the <code>hadoop</code> command:</p>
+
+<pre><code>hadoop jar target/ratings-app-0.17.1-runtime.jar
+</code></pre>
+
+<h3 id="rate-some-movies">4. Rate some movies</h3>
+
+<p>Once the application has started, <a href="http://localhost:4567/">rate a few movies with the app</a>.</p>
+
+<p>In the terminal window where the application is running, you should see ratings shown as they are submitted:</p>
+
+<pre><code>&gt;&gt; Listening on 0.0.0.0:4567
+...
+Sending rating: {"timestamp": 1423073425248, "user_id": 34, "movie_id": 176, "rating": 5}
+Sending rating: {"timestamp": 1423073571712, "user_id": 34, "movie_id": 367, "rating": 4}
+</code></pre>
+
+<h3 id="verify-the-ratings-are-written-correctly">5. Verify the ratings are written correctly</h3>
+
+<p>The Flume configuration will release data files every 30 seconds. Use Impala or the Kite <code>show</code> command to see the new records that have been added by Flume.</p>
+
+<p>Remember, you can run individual Impala queries using <code>-q</code> and you will need to re-sync Impala’s metadata to pick up new partitions:</p>
+
+<pre><code>impala-shell -q 'invalidate metadata'
+</code></pre>
+
+<h2 id="next">Next</h2>
+
+<ul>
+  <li><a href="6-create-a-flume-pipeline-solution.html">View the solution</a></li>
+  <li>Move on to the next lab: <a href="7-analyze-ratings-with-crunch.html">Create a Flume pipeline</a></li>
+</ul>
+
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Software Development Kit, 0.17.1</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+        <li>&nbsp;</li>
+        <li>Generated on 04 February 2015</li>
+      </ul>
+
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
+              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/0.17.1/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>

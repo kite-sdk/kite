@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Lab 4: Using parquet-tools</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="An open source data API for Hadoop.">
+    <link rel="canonical" href="http://kitesdk.org/docs/0.17.1/labs/4-using-parquet-tools.html">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/docs/0.17.1/css/main.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:200,400,500,600,700' rel='stylesheet' type='text/css'>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+
+    <body>
+
+    <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/docs/0.17.1/">Kite Software Development Kit</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      
+
+      <div class="wrap">
+      <div class="post">
+
+  <header class="post-header">
+    <h1>Lab 4: Using parquet-tools</h1>
+  </header>
+
+  <article class="post-content">
+  <p>In this lab, you will use <code>parquet-tools</code> utility to inspect Parquet files. You will learn to:</p>
+
+<ol>
+  <li>Print the metadata and schema for a Parquet file</li>
+  <li>View column-level compression ratios</li>
+  <li>Dump the content of Parquet file</li>
+  <li>Explore the structure of a Parquet file from its metadata</li>
+</ol>
+
+<p>If you haven’t already, make sure you’ve completed <a href="2-create-a-movies-dataset.html">Lab 2: Create a movies dataset</a>.</p>
+
+<h2 id="create-a-parquet-dataset-of-movies">Create a Parquet dataset of movies</h2>
+
+<p>This lab requires a Parquet data file, you will create by copying an Avro dataset to a Parquet dataset.</p>
+
+<p>First, create a Parquet dataset in Hive. Use <code>--format</code> to configure the dataset to store data as Parquet files.</p>
+
+<pre><code>kite-dataset create dataset:hive:movies --schema movie.avsc --format parquet
+</code></pre>
+
+<p>Next, import the movies data using <code>csv-import</code>:</p>
+
+<pre><code>kite-dataset csv-import u.item --no-header --delimiter '|' dataset:hive:movies
+</code></pre>
+
+<p>You can verify the data import using either the <code>show</code> command.</p>
+
+<h2 id="copy-a-parquet-file-from-hdfs">Copy a Parquet file from HDFS</h2>
+
+<p>Start by listing the contents of the dataset you created above, which is in the Hive warehouse directory:</p>
+
+<pre><code>hadoop fs -ls hdfs:/user/hive/warehouse/movies
+</code></pre>
+
+<pre><code>Found 1 items
+-rw-r--r--   1 cloudera hive      77314 2015-02-03 17:26 /user/hive/warehouse/movies/72bc5d73-000f-4f16-ae03-fa14eeb74c38.parquet
+</code></pre>
+
+<p>Use the <code>hadoop</code> command to copy the <code>.parquet</code> file to the local file system.</p>
+
+<pre><code>hadoop fs -copyToLocal /user/hive/warehouse/movies/72bc5d73-000f-4f16-ae03-fa14eeb74c38.parquet movies.parquet
+</code></pre>
+
+<h2 id="inspect-a-parquet-data-file">Inspect a Parquet data file</h2>
+
+<p>For the rest of this lab, use <code>parquet-tools</code> to inspect the <code>movies.parquet</code> file.</p>
+
+<p>You might need to refer to the built-in help:</p>
+
+<pre><code>parquet-tools --help
+</code></pre>
+
+<p>Running a command with <code>-h</code> will print out help for using that command:</p>
+
+<pre><code>parquet-tools meta -h
+</code></pre>
+
+<p>Using <code>parquet-tools</code>:</p>
+
+<h3 id="find-the-file-schema">1. Find the file schema</h3>
+
+<h3 id="the-files-avro-schema">2. The file’s Avro schema</h3>
+
+<h3 id="print-the-content-of-the-data-file">3. Print the content of the data file</h3>
+
+<h3 id="find-the-column-with-the-best-compression-ratio">4. Find the column with the best compression ratio</h3>
+
+<h2 id="next">Next</h2>
+
+<ul>
+  <li><a href="4-using-parquet-tools-solution.html">View the solution</a></li>
+  <li>Move on to the next lab: <a href="5-create-a-partitioned-dataset.html">Create a partitioned dataset</a></li>
+</ul>
+
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrap columns">
+
+    <div class="left">
+      <h2 class="footer-heading">Kite Software Development Kit, 0.17.1</h2>
+
+      <ul>
+        <li>Kite is licensed under</li>
+        <li><a href="http://www.apache.org/licenses/LICENSE-2.0.html">The Apache License, Version 2.0</a></li>
+        <li>&nbsp;</li>
+        <li>Generated on 04 February 2015</li>
+      </ul>
+
+    </div>
+
+    <div class="middle">
+    </div>
+
+    <div class="right">
+      <p class="text">An open source data API for Hadoop.
+        <div class="columns">
+          <div class="left">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite"><i class="fa fa-github fa-lg"></i>&nbsp; Source</a></li>
+              <li><a href="https://issues.cloudera.org/browse/CDK"><i class="fa fa-bug fa-lg"></i>&nbsp; Issue tracking</a></li>
+              <li><a href="https://groups.google.com/a/cloudera.org/forum/#!forum/cdk-dev"><i class="fa fa-comments-o fa-lg"></i>&nbsp; Mailing list</a></li>
+              <li><a href="https://github.com/kite-sdk/kite/wiki/How-to-contribute"><i class="fa fa-cogs fa-lg"></i>&nbsp; How to contribute</a></li>
+            </ul>
+          </div>
+          <div class="right">
+            <ul>
+              <li><a href="https://github.com/kite-sdk/kite-examples"><i class="fa fa-play"></i>&nbsp; Examples</a></li>
+              <li><a href="/docs/0.17.1/apidocs/index.html"><i class="fa fa-file-text-o"></i>&nbsp; API Javadoc</a></li>
+              <li><a href="/docs/0.17.1/jdiff/changes.html"><i class="fa fa-bolt fs-lg"></i>&nbsp; API Changes</a></li>
+              <li><a href="/docs/0.17.1/release-notes"><i class="fa fa-info fa-lg"></i>&nbsp; Release Notes</a></li>
+            </ul>
+          </div>
+        </div>
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+    </body>
+</html>
