@@ -33,50 +33,51 @@ import org.kitesdk.data.spi.Registration;
 /**
  * Methods for working with {@link Dataset} instances.
  * <p>
- * <b>URIs</b><br />
+ * <b>URIs</b><br /><br />
  * All methods require a URI that identifies a dataset, view, or
  * repository. The URI must begin with the scheme {@code dataset:}, 
  * {@code view:}, or {@code repo:}. The remainder of the URI is 
  * implementation specific, depending on the dataset scheme.
  * <p>
- * For example, the URI {@code dataset:hive:/movies/ratings} 
+ * For example, the URI {@code dataset:hive:movies/ratings} 
  * references a Hive dataset named <i>ratings</i> in the
  * <i>movies</i> namespace.
  * <p>
- * The URI {@code view:hdfs:/user/myfiles/movies/ratings?year=2015&month=3}
+ * The URI {@code view:hdfs:/user/me/movies/ratings?year=2015&month=3}
  * references a view of an HDFS dataset named <i>ratings</i> in the
- * <i>movies</i> namespace in the {@code /user/myfiles} path. The view 
+ * <i>movies</i> namespace in the {@code /user/me} path. The view 
  * is filtered to include records from only March, 2015.
  * <p>
  * See <a href="http://kitesdk.org/docs/current/URIs.html">Dataset and View
  * URIs</a>.
  * <p>
- * <b>Entities</b><br />
+ * <b>Entities</b><br /><br />
  * <i>Entities</i> are analagous to <i>records</i> in database terminology.
  * The term is used in the API to emphasize that an entity can include not
  * only primitive objects, but also complex objects such as hash maps. 
- *  
+ * 
  * @since 0.8.0
  */
 public class Datasets {
 
   /**
-   * Load a {@link Dataset} or {@link View} for the given {@link URI}.
-   * {@code load} verifies that the dataset exists, retrieves the dataset's
-   * metadata, and verifies that you can communicate with its services.
+   * Load a {@link Dataset} or {@link View} for the given {@link URI} and
+   * retrieve its metadata.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    * <p>
    * If you use a dataset URI, {@code load} returns the unfiltered dataset.
-   * If you use a view URI, {@code load} returns a subset of the data, based on 
-   * your filter criteria.
+   * If you use a view URI, {@code load} returns a {@code View} configured to read 
+   * a subset of the dataset.
    *
    * @param uri a {@code Dataset} or {@code View} URI
-   * @param type a Java object that represents an entity in the dataset
-   * @param <E> the type of entities stored in the {@code Dataset}
+   * @param type a Java class that represents an entity in the dataset
+   * @param <E> the type used for readers and writers created by this {@code Dataset}
    * @param <V> the type of {@code View} expected
    * @return a {@code View} for the given URI
+   * @throws DatasetNotFoundException   if there is no dataset for the given URI}
+   * @throws DatasetRepositoryException
    */
   @SuppressWarnings("unchecked")
   public static <E, V extends View<E>> V load(URI uri, Class<E> type) {
@@ -106,63 +107,66 @@ public class Datasets {
   }
 
   /**
-   * Load a {@link Dataset} or {@link View} for the given {@link URI}.
-   * {@code load} verifies that the dataset exists, retrieves the dataset's
-   * metadata, and verifies that you can communicate with its services.
+   * Load a {@link Dataset} or {@link View} for the given {@link URI} and
+   * retrieve its metadata.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    * <p>
    * If you use a dataset URI, {@code load} returns the unfiltered dataset.
-   * If you use a view URI, {@code load} returns a subset of the data, based on 
-   * your filter criteria.
+   * If you use a view URI, {@code load} returns a {@code View} configured to read 
+   * a subset of the dataset.
    * 
    * @param uri a {@code Dataset} or {@code View} URI
    * @param <V> the type of {@code View} expected
    * @return a {@code View} for the given URI
-   */
+   * @throws DatasetNotFoundException   if there is no dataset for the given URI
+   * @throws DatasetRepositoryException
+  */
   @SuppressWarnings("unchecked")
   public static <V extends View<GenericRecord>> V load(URI uri) {
     return Datasets.<GenericRecord, V>load(uri, GenericRecord.class);
   }
 
   /**
-   * Load a {@link Dataset} or {@link View} for the given URI string.
-   * {@code load} verifies that the dataset exists, retrieves the dataset's
-   * metadata, and verifies that you can communicate with its services.
+   * Load a {@link Dataset} or {@link View} for the given {@link URI} and
+   * retrieve its metadata.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    * <p>
    * If you use a dataset URI, {@code load} returns the unfiltered dataset.
-   * If you use a view URI, {@code load} returns a subset of the data, based on 
-   * your filter criteria.
+   * If you use a view URI, {@code load} returns a {@code View} configured to read 
+   * a subset of the dataset.
    *
    * @param uriString a {@code Dataset} or {@code View} URI
-   * @param type a Java object that represents an entity in the dataset
-   * @param <E> the type of entities stored in the {@code Dataset}
+   * @param type a Java class that represents an entity in the dataset
+   * @param <E> the type used for readers and writers created by this {@code Dataset}
    * @param <V> the type of {@code View} expected
    * @return a {@code View} for the given URI
+   * @throws DatasetNotFoundException   if there is no dataset for the given URI
+   * @throws DatasetRepositoryException
    */
   public static <E, V extends View<E>> V load(String uriString, Class<E> type) {
     return Datasets.<E, V> load(URI.create(uriString), type);
   }
 
   /**
-   * Load a {@link Dataset} or {@link View} for the given URI string.
-   * {@code load} verifies that the dataset exists, retrieves the dataset's
-   * metadata, and verifies that you can communicate with its services.
+   * Load a {@link Dataset} or {@link View} for the given {@link URI} and
+   * retrieve its metadata.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    * <p>
    * If you use a dataset URI, {@code load} returns the unfiltered dataset.
-   * If you use a view URI, {@code load} returns a subset of the data, based on 
-   * your filter criteria.
+   * If you use a view URI, {@code load} returns a {@code View} configured to read 
+   * a subset of the dataset.
    *
    * @param uriString a {@code Dataset} or {@code View} URI
    * @param <V> the type of {@code View} expected
    * @return a {@code View} for the given URI
+   * @throws DatasetNotFoundException   if there is no dataset for the given URI
+   * @throws DatasetRepositoryException
    */
   public static <V extends View<GenericRecord>> V load(String uriString) {
     return Datasets.<GenericRecord, V>load(
@@ -175,14 +179,29 @@ public class Datasets {
    * {@link DatasetWriter} to populate your dataset.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} or {@code View} URI
-   * @param type a Java object that represents an entity in the dataset
-   * @param <E> the type of entities stored in the {@code Dataset}
+   * @param type a Java class that represents an entity in the dataset
+   * @param <E> the type used for readers and writers created by this {@code Dataset}
    * @param <V> the type of {@code Dataset} or {@code View} expected
    * @return a newly created {@code Dataset} responsible for the given URI
-   */
+   * @throws IllegalArgumentException   if {@code URI} or {@code descriptor}
+   *                                    is {@code null}
+   * @throws DatasetExistsException     if a {@code Dataset} for the given URI
+   *                                    already exists
+   * @throws ConcurrentSchemaModificationException
+   *                                    if the {@code Dataset}
+   *                                    schema is updated
+   *                                    concurrently
+   * @throws IncompatibleSchemaException
+   *                                    if the schema is not
+   *                                    compatible with existing
+   *                                    datasets with shared
+   *                                    storage (for example, in the
+   *                                    same HBase table)
+   * @throws DatasetRepositoryException
+  */
   @SuppressWarnings("unchecked")
   public static <E, V extends View<E>> V create(URI uri, DatasetDescriptor descriptor, Class<E> type) {
     boolean isView = URIBuilder.VIEW_SCHEME.equals(uri.getScheme());
@@ -221,12 +240,27 @@ public class Datasets {
    * {@link DatasetWriter} to populate your dataset.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} or {@code View} URI
    * @param <V> the type of {@code Dataset} or {@code View} expected
    * @return a newly created {@code Dataset} responsible for the given URI
-   */
+   * @throws IllegalArgumentException   if {@code URI} or {@code descriptor}
+   *                                    is {@code null}
+   * @throws DatasetExistsException     if a {@code Dataset} for the given URI
+   *                                    already exists
+   * @throws ConcurrentSchemaModificationException
+   *                                    if the {@code Dataset}
+   *                                    schema is updated
+   *                                    concurrently
+   * @throws IncompatibleSchemaException
+   *                                    if the schema is not
+   *                                    compatible with existing
+   *                                    datasets with shared
+   *                                    storage (for example, in the
+   *                                    same HBase table)
+   * @throws DatasetRepositoryException
+  */
   @SuppressWarnings("unchecked")
   public static <V extends View<GenericRecord>> V create(URI uri, DatasetDescriptor descriptor) {
     return Datasets.<GenericRecord, V>create(
@@ -239,13 +273,28 @@ public class Datasets {
    * {@link DatasetWriter} to populate your dataset.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} or {@code View} URI string
-   * @param type a Java object that represents an entity in the dataset
-   * @param <E> the type of entities stored in the {@code Dataset}
+   * @param type a Java class that represents an entity in the dataset
+   * @param <E> the type used for readers and writers created by this {@code Dataset}
    * @param <V> the type of {@code Dataset} or {@code View} expected
    * @return a newly created {@code Dataset} responsible for the given URI
+   * @throws IllegalArgumentException   if {@code URI} or {@code descriptor}
+   *                                    is {@code null}
+   * @throws DatasetExistsException     if a {@code Dataset} for the given URI
+   *                                    already exists
+   * @throws ConcurrentSchemaModificationException
+   *                                    if the {@code Dataset}
+   *                                    schema is updated
+   *                                    concurrently
+   * @throws IncompatibleSchemaException
+   *                                    if the schema is not
+   *                                    compatible with existing
+   *                                    datasets with shared
+   *                                    storage (for example, in the
+   *                                    same HBase table)
+   * @throws DatasetRepositoryException
    */
   public static <E, V extends View<E>> V create(String uri, DatasetDescriptor descriptor, Class<E> type) {
     return Datasets.<E, V> create(URI.create(uri), descriptor, type);
@@ -257,11 +306,26 @@ public class Datasets {
    * {@link DatasetWriter} to populate your dataset.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} or {@code View} URI string
    * @param <V> the type of {@code Dataset} or {@code View} expected
    * @return a newly created {@code Dataset} responsible for the given URI
+   * @throws IllegalArgumentException   if {@code URI} or {@code descriptor}
+   *                                    is {@code null}
+   * @throws DatasetExistsException     if a {@code Dataset} for the given URI
+   *                                    already exists
+   * @throws ConcurrentSchemaModificationException
+   *                                    if the {@code Dataset}
+   *                                    schema is updated
+   *                                    concurrently
+   * @throws IncompatibleSchemaException
+   *                                    if the schema is not
+   *                                    compatible with existing
+   *                                    datasets with shared
+   *                                    storage (for example, in the
+   *                                    same HBase table)
+   * @throws DatasetRepositoryException
    */
   @SuppressWarnings("unchecked")
   public static <V extends View<GenericRecord>> V create(String uri, DatasetDescriptor descriptor) {
@@ -272,20 +336,38 @@ public class Datasets {
   /**
    * Update a {@link Dataset} for the given dataset or view URI.
    * <p>
-   * You can add, remove, or change the datatype of columns in your dataset,
-   * provided you don't attempt a change that would corrupt the data. Kite
-   * follows the guidelines in the Avro schema. See 
+   * You can add columns, remove columns, or change the data type of columns 
+   * in your dataset, provided you don't attempt a change that would corrupt 
+   * the data. Kite follows the guidelines in the Avro schema. See 
    * <a href="http://kitesdk.org/docs/current/Schema-Evolution.html">Schema
    * Evolution</a>.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} or {@code View} URI
-   * @param type a Java object that represents an entity in the dataset
-   * @param <E> the type of entities stored in the {@code Dataset}
+   * @param type a Java class that represents an entity in the dataset
+   * @param <E> the type used for readers and writers created by this {@code Dataset}
    * @param <D> the type of {@code Dataset} expected
    * @return a newly created {@code Dataset} responsible for the given URI
+   * @throws IllegalArgumentException      if {@code URI} is null
+   * @throws DatasetNotFoundException      if there is no dataset for the given
+   *                                       URI
+   * @throws UnsupportedOperationException if descriptor updates are not
+   *                                       supported by the implementation
+   * @throws ConcurrentSchemaModificationException
+   *                                       if the {@code Dataset}
+   *                                       schema is updated
+   *                                       concurrently
+   * @throws IncompatibleSchemaException
+   *                                    if the schema is not
+   *                                    compatible with
+   *                                    previous schemas,
+   *                                    or with existing
+   *                                    datasets with shared
+   *                                    storage (for example, in the
+   *                                    same HBase table)
+   * @throws DatasetRepositoryException
    */
   @SuppressWarnings("unchecked")
   public static <E, D extends Dataset<E>> D update(
@@ -310,18 +392,36 @@ public class Datasets {
   /**
    * Update a {@link Dataset} for the given dataset or view URI.
    * <p>
-   * You can add, remove, or change the datatype of columns in your dataset,
-   * provided you don't attempt a change that would corrupt the data. Kite
-   * follows the Avro guidelines for updating schemas. See 
+   * You can add columns, remove columns, or change the data type of columns 
+   * in your dataset, provided you don't attempt a change that would corrupt 
+   * the data. Kite follows the guidelines in the Avro schema. See 
    * <a href="http://kitesdk.org/docs/current/Schema-Evolution.html">Schema
    * Evolution</a>.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} or {@code View} URI
    * @param <D> the type of {@code Dataset} expected
    * @return a newly created {@code Dataset} responsible for the given URI
+   * @throws IllegalArgumentException      if {@code URI} is null
+   * @throws DatasetNotFoundException      if there is no dataset for the given
+   *                                       URI
+   * @throws UnsupportedOperationException if descriptor updates are not
+   *                                       supported by the implementation
+   * @throws ConcurrentSchemaModificationException
+   *                                       if the {@code Dataset}
+   *                                       schema is updated
+   *                                       concurrently
+   * @throws IncompatibleSchemaException
+   *                                    if the schema is not
+   *                                    compatible with
+   *                                    previous schemas,
+   *                                    or with existing
+   *                                    datasets with shared
+   *                                    storage (for example, in the
+   *                                    same HBase table)
+   * @throws DatasetRepositoryException
    */
   @SuppressWarnings("unchecked")
   public static <D extends Dataset<GenericRecord>> D update(
@@ -332,20 +432,39 @@ public class Datasets {
 
   /**
    * Update a {@link Dataset} for the given dataset or view URI string.
-   * You can add, remove, or change the datatype of columns in your dataset,
-   * provided you don't attempt a change that would corrupt the data. Kite
-   * follows the Avro guidelines for updating schemas. See 
+   * <p>
+   * You can add columns, remove columns, or change the data type of columns 
+   * in your dataset, provided you don't attempt a change that would corrupt 
+   * the data. Kite follows the guidelines in the Avro schema. See 
    * <a href="http://kitesdk.org/docs/current/Schema-Evolution.html">Schema
    * Evolution</a>.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} or {@code View} URI string
-   * @param type a Java object that represents an entity in the dataset
-   * @param <E> the type of entities stored in the {@code Dataset}
+   * @param type a Java class that represents an entity in the dataset
+   * @param <E> the type used for readers and writers created by this {@code Dataset}
    * @param <D> the type of {@code Dataset} expected
    * @return a newly created {@code Dataset} responsible for the given URI
+   * @throws IllegalArgumentException      if {@code URI} is null
+   * @throws DatasetNotFoundException      if there is no dataset for the given
+   *                                       URI
+   * @throws UnsupportedOperationException if descriptor updates are not
+   *                                       supported by the implementation
+   * @throws ConcurrentSchemaModificationException
+   *                                       if the {@code Dataset}
+   *                                       schema is updated
+   *                                       concurrently
+   * @throws IncompatibleSchemaException
+   *                                    if the schema is not
+   *                                    compatible with
+   *                                    previous schemas,
+   *                                    or with existing
+   *                                    datasets with shared
+   *                                    storage (for example, in the
+   *                                    same HBase table)
+   * @throws DatasetRepositoryException
    */
   public static <E, D extends Dataset<E>> D update(String uri, DatasetDescriptor descriptor, Class<E> type) {
     return Datasets.<E, D> update(URI.create(uri), descriptor, type);
@@ -353,18 +472,37 @@ public class Datasets {
 
   /**
    * Update a {@link Dataset} for the given dataset or view URI string.
-   * You can add, remove, or change the datatype of columns in your dataset,
-   * provided you don't attempt a change that would corrupt the data. Kite
-   * follows the Avro guidelines for updating schemas. See 
+   * <p>
+   * You can add columns, remove columns, or change the data type of columns 
+   * in your dataset, provided you don't attempt a change that would corrupt 
+   * the data. Kite follows the guidelines in the Avro schema. See 
    * <a href="http://kitesdk.org/docs/current/Schema-Evolution.html">Schema
    * Evolution</a>.
    * <p>
    * URIs must begin with {@code dataset:} or {@code view:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} or {@code View} URI string
    * @param <D> the type of {@code Dataset} expected
    * @return a newly created {@code Dataset} responsible for the given URI
+   * @throws IllegalArgumentException      if {@code URI} is null
+   * @throws DatasetNotFoundException      if there is no dataset for the given
+   *                                       URI
+   * @throws UnsupportedOperationException if descriptor updates are not
+   *                                       supported by the implementation
+   * @throws ConcurrentSchemaModificationException
+   *                                       if the {@code Dataset}
+   *                                       schema is updated
+   *                                       concurrently
+   * @throws IncompatibleSchemaException
+   *                                    if the schema is not
+   *                                    compatible with
+   *                                    previous schemas,
+   *                                    or with existing
+   *                                    datasets with shared
+   *                                    storage (for example, in the
+   *                                    same HBase table)
+   * @throws DatasetRepositoryException
    */
   public static <D extends Dataset<GenericRecord>> D update(String uri, DatasetDescriptor descriptor) {
     return Datasets.<GenericRecord, D>update(
@@ -376,10 +514,15 @@ public class Datasets {
    * of any housekeeping, including deleting data and any metadata stored separately.
    * <p>
    * URIs must begin with {@code dataset:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} URI
-   * @return {@code true} if any data or metadata is removed, or {@code false}
+   * @return {@code true} if any data or metadata is removed, {@code false} otherwise
+   * @throws IllegalArgumentException if {@code URI} is null
+   * @throws ConcurrentSchemaModificationException
+   *                                  if the {@code Dataset}
+   *                                  schema is updated concurrently
+   * @throws DatasetRepositoryException
    */
   public static boolean delete(URI uri) {
     Preconditions.checkArgument(
@@ -401,11 +544,16 @@ public class Datasets {
    * of any housekeeping, including deleting data and any metadata stored separately.
    * <p>
    * URIs must begin with {@code dataset:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} URI string
-   * @return {@code true} if any data or metadata is removed, or {@code false}
-   */
+   * @return {@code true} if any data or metadata is removed, {@code false} otherwise
+   * @throws IllegalArgumentException if {@code URI} is null
+   * @throws ConcurrentSchemaModificationException
+   *                                  if the {@code Dataset}
+   *                                  schema is updated concurrently
+   * @throws DatasetRepositoryException
+  */
   public static boolean delete(String uri) {
     return delete(URI.create(uri));
   }
@@ -414,10 +562,12 @@ public class Datasets {
    * Check whether a {@link Dataset} identified by the given URI exists.
    * <p>
    * URIs must begin with {@code dataset:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} URI
-   * @return {@code true} if the dataset exists, or {@code false}
+   * @return {@code true} if the dataset exists, {@code false} otherwise
+   * @throws IllegalArgumentException if {@code URI} is null
+   * @throws DatasetRepositoryException
    */
   public static boolean exists(URI uri) {
     Preconditions.checkArgument(
@@ -438,10 +588,12 @@ public class Datasets {
    * Check whether a {@link Dataset} identified by the given URI string exists.
    * <p>
    * URIs must begin with {@code dataset:}. The remainder of
-   * the URI is implementation specfic, depending on the dataset scheme.
+   * the URI is implementation specific, depending on the dataset scheme.
    *
    * @param uri a {@code Dataset} URI string
-   * @return {@code true} if the dataset exists, or {@code false}
+   * @return {@code true} if the dataset exists, {@code false} otherwise
+   * @return a {@link Collection} of Dataset names ({@link String}s)
+   * @throws DatasetRepositoryException
    */
   public static boolean exists(String uri) {
     return exists(URI.create(uri));
@@ -452,11 +604,12 @@ public class Datasets {
    * <p>
    * URI formats are defined by {@code Dataset} implementations. The repository
    * URIs you pass to this method must begin with {@code repo:}. For example, to 
-   * list the {@code Dataset} URIs for the Hive repository {@code /default}, 
-   * provide the URI {@code repo:hive:/default}.
+   * list the {@code Dataset} URIs for the Hive repository, provide the URI
+   * {@code repo:hive}.
    *
    * @param uri a {@code DatasetRepository} URI
    * @return the URIs present in the {@code DatasetRepository}
+   * @throws DatasetRepositoryException
    */
   public static Collection<URI> list(URI uri) {
     boolean isRepo = URIBuilder.REPO_SCHEME.equals(uri.getScheme());
@@ -481,11 +634,12 @@ public class Datasets {
    * <p>
    * URI formats are defined by {@code Dataset} implementations. The repository
    * URIs you pass to this method must begin with {@code repo:}. For example, to 
-   * list the {@code Dataset} URIs for the Hive repository {@code /default}, 
-   * provide the URI {@code repo:hive:/default}.
+   * list the {@code Dataset} URIs for the Hive repository, provide the URI
+   * {@code repo:hive}.
    * 
    * @param uri a {@code DatasetRepository} URI string
    * @return the URIs present in the {@code DatasetRepository}
+   * @throws DatasetRepositoryException
    */
   public static Collection<URI> list(String uri) {
     return list(URI.create(uri));
