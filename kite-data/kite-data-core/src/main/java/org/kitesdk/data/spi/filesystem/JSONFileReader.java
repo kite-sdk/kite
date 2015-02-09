@@ -181,6 +181,9 @@ public class JSONFileReader<E> extends AbstractDatasetReader<E> {
 
     @Override
     public float getProgress() throws IOException, InterruptedException {
+      if (size == 0) {
+        return 0.0f;
+      }
       return ((float) ((FSDataInputStream) incoming).getPos()) / size;
     }
 
