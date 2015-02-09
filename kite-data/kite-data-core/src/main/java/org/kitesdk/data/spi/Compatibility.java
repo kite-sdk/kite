@@ -51,24 +51,19 @@ public abstract class Compatibility {
 		  compile("^[A-Za-z_][A-Za-z\\d_]*$");
 
   /**
-   * Checks the name and descriptor for known compatibility issues and warns.
+   * Checks the name and descriptor for known compatibility issues and throws an
+   * exception if an incompatibility is found.
    *
    * If the column names are not compatible across components or if any
-   * partition name duplicates its source field name, this will warn the user.
+   * partition name duplicates its source field name, this will cause an error.
    *
    * @param namespace a String namespace
    * @param name a String dataset name
    * @param descriptor a {@link DatasetDescriptor}
    */
-  public static void checkAndWarn(String namespace, String name, DatasetDescriptor descriptor) {
-    try {
-      checkDatasetName(namespace, name);
-      checkDescriptor(descriptor);
-    } catch (IllegalArgumentException e) {
-      LOG.warn(e.getMessage());
-    } catch (IllegalStateException e) {
-      LOG.warn(e.getMessage());
-    }
+  public static void check(String namespace, String name, DatasetDescriptor descriptor) {
+    checkDatasetName(namespace, name);
+    checkDescriptor(descriptor);
   }
 
   /**
@@ -102,10 +97,10 @@ public abstract class Compatibility {
     Preconditions.checkNotNull(namespace, "Namespace cannot be null");
     Preconditions.checkNotNull(name, "Dataset name cannot be null");
     Preconditions.checkArgument(Compatibility.isCompatibleName(namespace),
-        "Deprecated: Namespace %s is not alphanumeric (plus '_')",
+        "Namespace %s is not alphanumeric (plus '_')",
         namespace);
     Preconditions.checkArgument(Compatibility.isCompatibleName(name),
-        "Deprecated: Dataset name %s is not alphanumeric (plus '_')",
+        "Dataset name %s is not alphanumeric (plus '_')",
         name);
   }
 
@@ -118,7 +113,7 @@ public abstract class Compatibility {
     Preconditions.checkNotNull(schema, "Schema cannot be null");
     List<String> incompatible = getIncompatibleNames(schema);
     Preconditions.checkState(incompatible.isEmpty(),
-        "Deprecated: field names are not alphanumeric (plus '_'): %s",
+        "Field names are not alphanumeric (plus '_'): %s",
         Joiner.on(", ").join(incompatible));
   }
 
@@ -157,10 +152,10 @@ public abstract class Compatibility {
         }
       }
       Preconditions.checkState(incompatible.isEmpty(),
-          "Deprecated: partition names are not alphanumeric (plus '_'): %s",
+          "Partition names are not alphanumeric (plus '_'): %s",
           Joiner.on(", ").join(incompatible));
       Preconditions.checkState(duplicates.isEmpty(),
-          "Deprecated: partition names duplicate data fields: %s",
+          "Partition names duplicate data fields: %s",
           Joiner.on(", ").join(duplicates));
     }
   }
