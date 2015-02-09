@@ -31,7 +31,19 @@ import org.junit.Test;
 public class EnvironmentTest extends Assert {
 
   // see pom.xml, example: "4.2.0"
-  private static final String EXPECTED_SOLR_VERSION = System.getProperty("solr.expected.version");
+  private static final String EXPECTED_SOLR_VERSION;
+  
+  static {
+    String version = System.getProperty("solr.expected.version");
+    if (version != null) {
+      int i = version.indexOf('-');
+      if (i >= 0) {
+        // e.g. strip off "-cdh5.4.0-SNAPSHOT" from "4.10.3-cdh5.4.0-SNAPSHOT"
+        version = version.substring(0, i); 
+      }
+    }
+    EXPECTED_SOLR_VERSION = version;
+  }
 
   @Test
   public void testEnvironment() throws UnknownHostException {
