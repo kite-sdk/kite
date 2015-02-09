@@ -106,17 +106,13 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
     Preconditions.checkState(state.equals(ReaderWriterState.NEW),
         "A reader may not be opened more than once - current state:%s", state);
 
-    if (incoming != null) {
-      this.size = 1; // avoid divide by 0 errors
-    } else {
-      Preconditions.checkNotNull(fs, "FileSystem cannot be null");
-      Preconditions.checkNotNull(path, "Path cannot be null");
-      try {
-        this.incoming = fs.open(path);
-        this.size = fs.getFileStatus(path).getLen();
-      } catch (IOException ex) {
-        throw new DatasetReaderException("Cannot open path: " + path, ex);
-      }
+    Preconditions.checkNotNull(fs, "FileSystem cannot be null");
+    Preconditions.checkNotNull(path, "Path cannot be null");
+    try {
+      this.incoming = fs.open(path);
+      this.size = fs.getFileStatus(path).getLen();
+    } catch (IOException ex) {
+      throw new DatasetReaderException("Cannot open path: " + path, ex);
     }
 
     this.reader = CSVUtil.newReader(incoming, props);
@@ -228,6 +224,9 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
 
     @Override
     public float getProgress() throws IOException, InterruptedException {
+      if (size == 0) {
+        return 0.0f;
+      }
       return ((float) ((FSDataInputStream) incoming).getPos()) / size;
     }
 
