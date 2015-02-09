@@ -23,6 +23,14 @@ package org.kitesdk.data;
  * @since 0.17.0
  */
 public class DatasetOperationException extends DatasetException {
+  public DatasetOperationException(String message, Object... args) {
+    super(format(message, args));
+  }
+
+  public DatasetOperationException(Throwable t, String message, Object... args) {
+    super(format(message, args), t);
+  }
+
   public DatasetOperationException(String message, Throwable t) {
     super(message, t);
   }

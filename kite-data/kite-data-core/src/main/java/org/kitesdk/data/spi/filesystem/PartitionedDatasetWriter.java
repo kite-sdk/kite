@@ -18,7 +18,9 @@ package org.kitesdk.data.spi.filesystem;
 import java.util.Map;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Flushable;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.Syncable;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.EntityAccessor;
@@ -132,6 +134,9 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
   }
 
   @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value={"BC_VACUOUS_INSTANCEOF", "SIO_SUPERFLUOUS_INSTANCEOF"},
+      justification="Flushable will be removed from DatasetWriter in 1.0.0")
   public void flush() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
       "Attempt to flush a writer in state:%s", state);
@@ -147,11 +152,16 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
      */
     for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
       LOG.debug("Flushing partition writer:{}", writer);
-      writer.flush();
+      if (writer instanceof Flushable) {
+        ((Flushable) writer).flush();
+      }
     }
   }
 
   @Override
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+      value={"BC_VACUOUS_INSTANCEOF", "SIO_SUPERFLUOUS_INSTANCEOF"},
+      justification="Syncable will be removed from DatasetWriter in 1.0.0")
   public void sync() {
     Preconditions.checkState(state.equals(ReaderWriterState.OPEN),
         "Attempt to sync a writer in state:%s", state);
@@ -160,7 +170,9 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
     for (DatasetWriter<E> writer : cachedWriters.asMap().values()) {
       LOG.debug("Syncing partition writer:{}", writer);
-      writer.sync();
+      if (writer instanceof Syncable) {
+        ((Syncable) writer).sync();
+      }
     }
   }
 
@@ -213,7 +225,7 @@ class PartitionedDatasetWriter<E> extends AbstractDatasetWriter<E> {
 
       FileSystemDataset dataset = (FileSystemDataset) view.getDataset();
       Path partition = convert.fromKey(key);
-      AbstractDatasetWriter<E> writer = new FileSystemWriter<E>(
+      AbstractDatasetWriter<E> writer = FileSystemWriter.newWriter(
           dataset.getFileSystem(),
           new Path(dataset.getDirectory(), partition),
           dataset.getDescriptor());

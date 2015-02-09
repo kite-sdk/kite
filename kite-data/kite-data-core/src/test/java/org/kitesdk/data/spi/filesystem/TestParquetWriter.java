@@ -17,31 +17,52 @@
 package org.kitesdk.data.spi.filesystem;
 
 import java.io.IOException;
+import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericData.Record;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kitesdk.data.DatasetDescriptor;
+import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
+import org.kitesdk.data.Flushable;
 import org.kitesdk.data.LocalFileSystem;
+import org.kitesdk.data.Syncable;
 
-public class TestParquetWriter extends TestFileSystemWriters<Object> {
+public class TestParquetWriter extends TestFileSystemWriters {
   @Override
-  public DatasetWriter<Object> newWriter(Path directory) {
-    return new FileSystemWriter<Object>(fs, directory,
+  public FileSystemWriter<Record> newWriter(Path directory, Schema schema) {
+    return FileSystemWriter.newWriter(fs, directory,
         new DatasetDescriptor.Builder()
-            .schema(SchemaBuilder.record("test").fields()
-                .requiredString("s")
-                .endRecord())
+            .schema(schema)
             .format("parquet")
             .build());
+  }
+
+  @Override
+  public DatasetReader<Record> newReader(Path path, Schema schema) {
+    return new ParquetFileSystemDatasetReader<Record>(
+        fs, path, schema, Record.class);
+  }
+
+  @Test
+  public void testIsFlushable() {
+    Assert.assertFalse(fsWriter instanceof FileSystemWriter.IncrementalWriter);
+  }
+
+  @Test
+  public void testIsSyncable() {
+    Assert.assertFalse(fsWriter instanceof FileSystemWriter.IncrementalWriter);
   }
 
   @Test
   public void testParquetConfiguration() throws IOException {
     FileSystem fs = LocalFileSystem.getInstance();
-    FileSystemWriter<Object> writer = new FileSystemWriter<Object>(
+    FileSystemWriter<Object> writer = FileSystemWriter.newWriter(
         fs, new Path("/tmp"),
         new DatasetDescriptor.Builder()
             .property("parquet.block.size", "34343434")
@@ -56,15 +77,14 @@ public class TestParquetWriter extends TestFileSystemWriters<Object> {
 
   @Test
   public void testDefaultToParquetAppender() throws IOException {
-    FileSystemWriter<Object> writer = (FileSystemWriter<Object>) fsWriter;
     Assert.assertEquals("Should default to non-durable parquet appender",
-        ParquetAppender.class, writer.newAppender(testDirectory).getClass());
+        ParquetAppender.class, fsWriter.newAppender(testDirectory).getClass());
   }
 
   @Test
   public void testConfigureDurableParquetAppender() throws IOException {
     FileSystem fs = LocalFileSystem.getInstance();
-    FileSystemWriter<Object> writer = new FileSystemWriter<Object>(
+    FileSystemWriter<Object> writer = FileSystemWriter.newWriter(
         fs, new Path("/tmp"),
         new DatasetDescriptor.Builder()
             .property(FileSystemProperties.NON_DURABLE_PARQUET_PROP, "false")
@@ -80,7 +100,7 @@ public class TestParquetWriter extends TestFileSystemWriters<Object> {
   @Test
   public void testConfigureNonDurableParquetAppender() throws IOException {
     FileSystem fs = LocalFileSystem.getInstance();
-    FileSystemWriter<Object> writer = new FileSystemWriter<Object>(
+    FileSystemWriter<Object> writer = FileSystemWriter.newWriter(
         fs, new Path("/tmp"),
         new DatasetDescriptor.Builder()
             .property(FileSystemProperties.NON_DURABLE_PARQUET_PROP, "true")
