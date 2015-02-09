@@ -28,27 +28,26 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * <p>
  * Implementations of this interface read data from a {@link Dataset}.
  * Readers are use-once objects that read from the underlying storage system to
- * produce deserialized entities of type {@code E}. Normally, you are not
- * expected to instantiate implementations directly.
- * Instead, use the containing dataset's
+ * produce deserialized entities of type {@code E}. Normally, you do not
+ * instantiate implementations directly. Instead, use the containing dataset's
  * {@link Dataset#newReader()} method to get an appropriate implementation.
- * Normally, you receive an instance of this interface from a dataset, invoke
+ * You receive an instance of this interface from a dataset, invoke
  * {@link #hasNext()} and {@link #next()} as necessary, and {@link #close()}
  * when you are done or no more data exists.
  * </p>
  * <p>
- * Implementations can hold system resources until the {@link #close()} method
- * is called, so you <strong>must</strong> follow the normal try / finally
+ * Implementations can hold system resources until you call the {@link #close()}
+ * method, so you <strong>must</strong> follow the normal try/finally
  * pattern to ensure these resources are properly freed when the reader is
- * exhausted or no longer useful. Do not rely on implementations automatically
- * invoking the {@code close()} method upon object finalization (although
- * implementations are free to do so, if they choose). All implementations must
- * silently ignore multiple invocations of {@code close()} as well as a close of
- * an unopened reader.
+ * exhausted or no longer useful. You should not rely on implementations
+ * automatically invoking the {@code close()} method upon object finalization
+ * (although you are free to do so, if you choose). Your implementations must
+ * silently ignore multiple invocations of {@code close()}, as well as a close
+ * of an unopened reader.
  * </p>
  * <p>
- * If any method throws an exception, the reader is no longer valid, and the
- * only method that can be subsequently called is {@code close()}.
+ * If any method throws an exception, the reader is no longer valid. The
+ * only method that you can call after an exception is {@code close()}.
  * </p>
  * <p>
  * Implementations of {@link DatasetReader} are not required to be thread-safe;
@@ -62,7 +61,7 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
 
   /**
-   * Tests the reader to see if additional entities can be read.
+   * Test the reader to see if additional entities can be read.
    *
    * @return true if additional entities exist, false otherwise.
    * @throws DatasetReaderException
@@ -93,11 +92,11 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
 
   /**
    * <p>
-   * Remove the last entity from the reader (OPTIONAL).
+   * Removes from the underlying collection the last element returned by the
+   * reader (OPTIONAL). This has the same semantics as {@link
+   * Iterator#remove()}.
    * </p>
-   * <p>
-   * This has the same semantics as {@link Iterator#remove()}, but is unlikely
-   * to be implemented.
+   * For most applications, you do not need to implement {@code remove}.
    * </p>
    *
    * @since 0.7.0
@@ -108,11 +107,6 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
   /**
    * <p>
    * Close the reader and release any system resources.
-   * </p>
-   * <p>
-   * No further operations of this interface (other than additional calls of
-   * this method) can be performed, however implementations can choose to permit
-   * other method calls. See implementation documentation for details.
    * </p>
    *
    * @throws DatasetReaderException
