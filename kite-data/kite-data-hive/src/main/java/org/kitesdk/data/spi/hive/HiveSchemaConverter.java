@@ -39,6 +39,7 @@ import org.codehaus.jackson.node.NullNode;
 import org.kitesdk.compat.DynConstructors;
 import org.kitesdk.compat.DynMethods;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.SchemaUtil;
 
@@ -349,7 +350,7 @@ public class HiveSchemaConverter {
     }
 
     List<String[]> requiredFields = Lists.newArrayList();
-    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
       // source name is not present for provided partitioners
       if (fp.getSourceName() != null) {
         requiredFields.add(fp.getSourceName().split("\\."));

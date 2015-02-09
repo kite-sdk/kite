@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import org.kitesdk.data.impl.Accessor;
 
 /**
  * A StorageKey is a complete set of values for a PartitionStrategy.
@@ -45,7 +46,8 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
       new CacheLoader<PartitionStrategy, Map<String, Integer>>() {
         @Override
         public Map<String, Integer> load(PartitionStrategy strategy) {
-          final List<FieldPartitioner> fields = strategy.getFieldPartitioners();
+          final List<FieldPartitioner> fields =
+              Accessor.getDefault().getFieldPartitioners(strategy);
           final Map<String, Integer> fieldMap = Maps
               .newHashMapWithExpectedSize(fields.size());
           for (int i = 0, n = fields.size(); i < n; i += 1) {
@@ -61,7 +63,7 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
 
   public StorageKey(PartitionStrategy strategy) {
     this(strategy, Arrays.asList(
-        new Object[strategy.getFieldPartitioners().size()]));
+        new Object[Accessor.getDefault().getFieldPartitioners(strategy).size()]));
   }
 
   private StorageKey(PartitionStrategy strategy, List<Object> values) {
@@ -136,7 +138,8 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
    */
   @SuppressWarnings("unchecked")
   public <E> StorageKey reuseFor(E entity, EntityAccessor<E> accessor) {
-    List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
+    List<FieldPartitioner> partitioners =
+        Accessor.getDefault().getFieldPartitioners(strategy);
 
     for (int i = 0; i < partitioners.size(); i++) {
       FieldPartitioner fp = partitioners.get(i);
@@ -155,7 +158,8 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
       throw new RuntimeException("PartitionStrategy does not match");
     }
 
-    final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
+    final List<FieldPartitioner> partitioners =
+        Accessor.getDefault().getFieldPartitioners(strategy);
     for (int i = 0; i < partitioners.size(); i += 1) {
       final FieldPartitioner fp = partitioners.get(i);
       final int cmp = fp.compare(get(i), other.get(i));
@@ -226,7 +230,7 @@ public class StorageKey extends Marker implements Comparable<StorageKey> {
     @SuppressWarnings("unchecked")
     public StorageKey build() {
       final List<FieldPartitioner> partitioners =
-          strategy.getFieldPartitioners();
+          Accessor.getDefault().getFieldPartitioners(strategy);
       final List<Object> content = Lists.newArrayListWithCapacity(
           partitioners.size());
       for (FieldPartitioner fp : partitioners) {

@@ -348,7 +348,7 @@ class HiveUtils {
   @SuppressWarnings("deprecation")
   static List<FieldSchema> partitionColumns(PartitionStrategy strategy, Schema schema) {
     List<FieldSchema> columns = Lists.newArrayList();
-    for (FieldPartitioner<?, ?> fp : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner<?, ?> fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
       columns.add(new FieldSchema(fp.getName(),
           getHiveType(SchemaUtil.getPartitionType(fp, schema)),
           "Partition column derived from '" + fp.getSourceName() + "' column, " +

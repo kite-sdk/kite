@@ -22,6 +22,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.impl.Accessor;
 
 /**
  * <p>
@@ -97,7 +98,8 @@ public class PartitionKey {
   @SuppressWarnings("unchecked")
   public static <E> PartitionKey partitionKeyForEntity(PartitionStrategy strategy,
       E entity, EntityAccessor<E> accessor, @Nullable PartitionKey reuseKey) {
-    List<FieldPartitioner> fieldPartitioners = strategy.getFieldPartitioners();
+    List<FieldPartitioner> fieldPartitioners =
+        Accessor.getDefault().getFieldPartitioners(strategy);
 
     PartitionKey key = (reuseKey == null ?
         new PartitionKey(new Object[fieldPartitioners.size()]) : reuseKey);

@@ -27,6 +27,7 @@ import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.partition.ProvidedFieldPartitioner;
 
 @Immutable
@@ -98,7 +99,8 @@ public class EntityAccessor<E> {
                            StorageKey reuse) {
     Preconditions.checkNotNull(reuse, "Cannot use null key");
     PartitionStrategy strategy = reuse.getPartitionStrategy();
-    List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
+    List<FieldPartitioner> partitioners =
+        Accessor.getDefault().getFieldPartitioners(strategy);
     for (int i = 0, n = partitioners.size(); i < n; i += 1) {
       reuse.replace(i, partitionValue(object, provided, partitioners.get(i)));
     }

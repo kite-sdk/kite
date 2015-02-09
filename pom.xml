@@ -437,7 +437,8 @@
               <link>http://crunch.apache.org/apidocs/${vers.crunch-base}/</link>
               <link>http://hadoop.apache.org/docs/r${vers.hadoop2}/api/</link>
             </links>
-            <additionalparam>${Xdoclint}</additionalparam>             
+            <additionalparam>${Xdoclint}</additionalparam>
+            <maxmemory>1g</maxmemory>
           </configuration>
           <executions>
             <execution>

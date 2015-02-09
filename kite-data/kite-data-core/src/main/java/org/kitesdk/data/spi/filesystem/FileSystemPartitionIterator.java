@@ -21,6 +21,7 @@ import com.google.common.base.Predicate;
 import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.kitesdk.data.DatasetException;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.spi.Constraints;
@@ -93,7 +94,7 @@ class FileSystemPartitionIterator implements
     private final PathConversion convert;
 
     public MakeKey(PartitionStrategy strategy, Schema schema) {
-      this.partitioners = strategy.getFieldPartitioners();
+      this.partitioners = Accessor.getDefault().getFieldPartitioners(strategy);
       this.reusableKey = new StorageKey(strategy);
       this.convert = new PathConversion(schema);
     }
@@ -144,7 +145,8 @@ class FileSystemPartitionIterator implements
     this.rootDirectory = root;
     this.iterator = Iterators.filter(
         Iterators.transform(
-            new FileSystemIterator(strategy.getFieldPartitioners().size()),
+            new FileSystemIterator(
+                Accessor.getDefault().getFieldPartitioners(strategy).size()),
             new MakeKey(strategy, schema)),
         new KeyPredicate(constraints.toKeyPredicate()));
   }

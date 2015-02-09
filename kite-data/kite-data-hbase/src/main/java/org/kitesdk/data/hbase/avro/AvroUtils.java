@@ -45,6 +45,7 @@ import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificRecord;
 import org.codehaus.jackson.JsonNode;
+import org.kitesdk.data.impl.Accessor;
 
 /**
  * Utility functions for Avro instances.
@@ -219,7 +220,8 @@ public class AvroUtils {
     List<Field> fields = Lists.newArrayList();
     PartitionStrategy strategy = keySchema.getPartitionStrategy();
     for (Schema.Field field : keySchema.getAvroSchema().getFields()) {
-      String sourceName = strategy.getPartitioner(field.name()).getSourceName();
+      String sourceName = Accessor.getDefault().getPartitioner(strategy, field.name())
+          .getSourceName();
       fields.add(copy(schemaField.getField(sourceName)));
     }
     Schema schema = Schema.createRecord(keySchema.getAvroSchema().getName(),

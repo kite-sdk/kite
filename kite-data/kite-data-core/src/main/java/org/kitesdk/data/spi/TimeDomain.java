@@ -33,6 +33,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
 import org.kitesdk.data.spi.predicates.Exists;
 import org.kitesdk.data.spi.predicates.In;
@@ -66,7 +67,7 @@ public class TimeDomain {
 
   public TimeDomain(PartitionStrategy strategy, String sourceName) {
     Map<Integer, CalendarFieldPartitioner> mapping = Maps.newHashMap();
-    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
       // there may be partitioners for more than one source field
       if (sourceName.equals(fp.getSourceName()) &&
           fp instanceof CalendarFieldPartitioner) {

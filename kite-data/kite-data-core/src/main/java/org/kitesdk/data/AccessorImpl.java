@@ -15,7 +15,9 @@
  */
 package org.kitesdk.data;
 
+import java.util.List;
 import org.kitesdk.data.impl.Accessor;
+import org.kitesdk.data.spi.FieldPartitioner;
 
 final class AccessorImpl extends Accessor {
 
@@ -43,6 +45,23 @@ final class AccessorImpl extends Accessor {
   @Override
   public PartitionStrategy fromExpression(String partitionExpression) {
     return new PartitionExpression(partitionExpression, true).evaluate();
+  }
+
+  @Override
+  public List<FieldPartitioner> getFieldPartitioners(PartitionStrategy
+      partitionStrategy) {
+    return partitionStrategy.getFieldPartitioners();
+  }
+
+  @Override
+  public FieldPartitioner getPartitioner(PartitionStrategy partitionStrategy,
+      String name) {
+    return  partitionStrategy.getPartitioner(name);
+  }
+
+  @Override
+  public boolean hasPartitioner(PartitionStrategy partitionStrategy, String name) {
+    return partitionStrategy.hasPartitioner(name);
   }
 
 }

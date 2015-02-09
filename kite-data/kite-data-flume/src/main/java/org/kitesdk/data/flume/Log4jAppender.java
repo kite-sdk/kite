@@ -17,6 +17,8 @@ package org.kitesdk.data.flume;
 
 import java.net.URI;
 import org.kitesdk.data.Dataset;
+import org.kitesdk.data.URIBuilder;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.EntityAccessor;
 import org.kitesdk.data.spi.FieldPartitioner;
@@ -97,9 +99,9 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
       try {
         URI datasetUri;
         if (datasetNamespace == null) {
-          datasetUri = new org.kitesdk.data.spi.URIBuilder(datasetRepositoryUri, datasetName).build();
+          datasetUri = new URIBuilder(datasetRepositoryUri, URIBuilder.NAMESPACE_DEFAULT, datasetName).build();
         } else {
-          datasetUri = new org.kitesdk.data.spi.URIBuilder(datasetRepositoryUri, datasetNamespace, datasetName).build();
+          datasetUri = new URIBuilder(datasetRepositoryUri, datasetNamespace, datasetName).build();
         }
         Dataset<Object> dataset = Datasets.load(datasetUri, Object.class);
         if (dataset.getDescriptor().isPartitioned()) {
@@ -122,7 +124,8 @@ public class Log4jAppender extends org.apache.flume.clients.log4jappender.Log4jA
     if (partitionStrategy != null) {
       key.reuseFor(message, accessor);
       int i = 0;
-      for (FieldPartitioner fp : partitionStrategy.getFieldPartitioners()) {
+      for (FieldPartitioner fp :
+          Accessor.getDefault().getFieldPartitioners(partitionStrategy)) {
         hdrs.put(PARTITION_PREFIX + fp.getName(),
             PathConversion.valueToString(fp, key.get(i++)));
       }
