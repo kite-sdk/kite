@@ -22,6 +22,7 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetReader;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.hbase.impl.EntityScanner;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.FieldPartitioner;
@@ -187,7 +188,8 @@ class DaoView<E> extends AbstractRefinableView<E> implements InputFormatAccessor
   @Deprecated
   @SuppressWarnings("unchecked")
   static PartitionKey keyFor(PartitionStrategy strategy, Marker marker) {
-    final List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
+    final List<FieldPartitioner> partitioners =
+        Accessor.getDefault().getFieldPartitioners(strategy);
     final Object[] values = new Object[partitioners.size()];
 
     for (int i = 0, n = partitioners.size(); i < n; i += 1) {

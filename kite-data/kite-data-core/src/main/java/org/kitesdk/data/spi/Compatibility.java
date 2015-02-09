@@ -28,6 +28,7 @@ import org.apache.avro.Schema;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.IncompatibleSchemaException;
 import org.kitesdk.data.ValidationException;
+import org.kitesdk.data.impl.Accessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,8 +141,8 @@ public abstract class Compatibility {
 
       List<String> incompatible = Lists.newArrayList();
       List<String> duplicates = Lists.newArrayList();
-      for (FieldPartitioner fp :
-          descriptor.getPartitionStrategy().getFieldPartitioners()) {
+      for (FieldPartitioner fp : Accessor.getDefault().getFieldPartitioners(descriptor
+          .getPartitionStrategy())) {
         String name = fp.getName();
         if (!isCompatibleName(name)) {
           incompatible.add(name);

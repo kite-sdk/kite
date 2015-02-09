@@ -24,6 +24,7 @@ import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.ValidationException;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import com.google.common.collect.Sets;
@@ -568,8 +569,9 @@ public class TestFileSystemDataset extends MiniDFSTest {
     try {
       PartitionedDataset<Record> partition = ds.getPartition(key, false);
       if (subpartitionName != null) {
-        List<FieldPartitioner> fieldPartitioners = partition.getDescriptor()
-            .getPartitionStrategy().getFieldPartitioners();
+        List<FieldPartitioner> fieldPartitioners =
+            Accessor.getDefault().getFieldPartitioners(partition.getDescriptor()
+                .getPartitionStrategy());
         Assert.assertEquals(1, fieldPartitioners.size());
         Assert.assertEquals(subpartitionName, fieldPartitioners.get(0)
             .getName());

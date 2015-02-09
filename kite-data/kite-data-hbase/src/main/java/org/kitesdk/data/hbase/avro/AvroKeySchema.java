@@ -19,6 +19,7 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.hbase.impl.KeySchema;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.SchemaUtil;
 
@@ -37,10 +38,10 @@ public class AvroKeySchema extends KeySchema {
 
   @Override
   public boolean compatible(KeySchema keySchema) {
-    List<FieldPartitioner> fieldPartitioners = getPartitionStrategy()
-        .getFieldPartitioners();
-    List<FieldPartitioner> otherFieldPartitioners = keySchema
-        .getPartitionStrategy().getFieldPartitioners();
+    List<FieldPartitioner> fieldPartitioners = Accessor.getDefault()
+        .getFieldPartitioners(getPartitionStrategy());
+    List<FieldPartitioner> otherFieldPartitioners = Accessor.getDefault()
+        .getFieldPartitioners(keySchema.getPartitionStrategy());
     if (fieldPartitioners.size() != otherFieldPartitioners.size()) {
       return false;
     }

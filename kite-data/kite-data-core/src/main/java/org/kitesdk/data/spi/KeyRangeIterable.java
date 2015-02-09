@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import javax.annotation.Nullable;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
 import org.kitesdk.data.spi.predicates.In;
 import org.kitesdk.data.spi.predicates.Predicates;
@@ -51,7 +52,7 @@ class KeyRangeIterable implements Iterable<MarkerRange> {
     // this should be part of PartitionStrategy
     final LinkedListMultimap<String, FieldPartitioner> partitioners =
         LinkedListMultimap.create();
-    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
       partitioners.put(fp.getSourceName(), fp);
     }
 

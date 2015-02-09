@@ -22,6 +22,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.Key;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.RandomAccessDataset;
@@ -125,7 +126,7 @@ class DaoDataset<E> extends AbstractDataset<E> implements RandomAccessDataset<E>
 
   @Deprecated
   static PartitionKey keyFor(PartitionStrategy strategy, Key key) {
-    final int size = strategy.getFieldPartitioners().size();
+    final int size = Accessor.getDefault().getFieldPartitioners(strategy).size();
     final Object[] values = new Object[size];
 
     for (int i = 0; i < size; i += 1) {

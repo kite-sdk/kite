@@ -28,6 +28,7 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.RefinableView;
 import org.kitesdk.data.View;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.Conversions;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.SchemaUtil;
@@ -77,7 +78,7 @@ public class FileSystemDatasets {
 
     RefinableView<E> view = dataset;
     Iterator<String> parts = PATH_SPLITTER.split(relative.toString()).iterator();
-    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
       if (!parts.hasNext()) {
         break;
       }

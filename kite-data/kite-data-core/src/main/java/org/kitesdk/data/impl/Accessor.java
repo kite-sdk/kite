@@ -15,8 +15,10 @@
  */
 package org.kitesdk.data.impl;
 
+import java.util.List;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.spi.FieldPartitioner;
 
 /**
  * <p>
@@ -61,5 +63,14 @@ public abstract class Accessor {
   public abstract String toExpression(PartitionStrategy partitionStrategy);
 
   public abstract PartitionStrategy fromExpression(String partitionExpression);
+
+  public abstract List<FieldPartitioner> getFieldPartitioners(
+      PartitionStrategy partitionStrategy);
+
+  public abstract FieldPartitioner getPartitioner(PartitionStrategy partitionStrategy,
+      String name);
+
+  public abstract boolean hasPartitioner(PartitionStrategy partitionStrategy,
+      String name);
 
 }

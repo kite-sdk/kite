@@ -33,6 +33,7 @@ import org.apache.avro.Schema;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.PartitionStrategy;
 import org.kitesdk.data.ValidationException;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.partition.DateFormatPartitioner;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
 import org.kitesdk.data.spi.partition.HashFieldPartitioner;
@@ -209,7 +210,7 @@ public class PartitionStrategyParser {
 
   private static JsonNode toJson(PartitionStrategy strategy) {
     ArrayNode strategyJson = JsonNodeFactory.instance.arrayNode();
-    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
       ObjectNode partitioner = JsonNodeFactory.instance.objectNode();
       partitioner.set(NAME, TextNode.valueOf(fp.getName()));
       if (fp instanceof IdentityFieldPartitioner) {

@@ -94,32 +94,24 @@ public class PartitionStrategy {
    * {@link FieldPartitioner}s are returned in the same order they are used
    * during partition selection.
    * </p>
-   * @deprecated will be removed in 0.18.0
    */
-  @Deprecated
-  public List<FieldPartitioner> getFieldPartitioners() {
+  List<FieldPartitioner> getFieldPartitioners() {
     return fieldPartitioners;
   }
 
   /**
    * Get a partitioner by partition name.
    * @return a FieldPartitioner with the given partition name
-   * @since 0.15.0
-   * @deprecated will be removed in 0.18.0
    */
-  @Deprecated
-  public FieldPartitioner getPartitioner(String name) {
+  FieldPartitioner getPartitioner(String name) {
     return partitionerMap.get(name);
   }
 
   /**
    * Check if a partitioner for the partition name exists.
    * @return {@code true} if this strategy has a partitioner for the name
-   * @since 0.15.0
-   * @deprecated will be removed in 0.18.0
    */
-  @Deprecated
-  public boolean hasPartitioner(String name) {
+  boolean hasPartitioner(String name) {
     return partitionerMap.containsKey(name);
   }
 

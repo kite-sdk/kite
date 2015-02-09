@@ -16,6 +16,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import javax.annotation.Nullable;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.Compatibility;
 import org.kitesdk.data.spi.PartitionKey;
 import org.kitesdk.data.Dataset;
@@ -331,7 +332,8 @@ public class FileSystemDatasetRepository extends AbstractDatasetRepository
     Iterable<String> parts = Splitter.on('/').split(relativizedUri.getPath());
 
     PartitionStrategy partitionStrategy = dataset.getDescriptor().getPartitionStrategy();
-    List<FieldPartitioner> fieldPartitioners = partitionStrategy.getFieldPartitioners();
+    List<FieldPartitioner> fieldPartitioners =
+        Accessor.getDefault().getFieldPartitioners(partitionStrategy);
     if (Iterables.size(parts) > fieldPartitioners.size()) {
       throw new IllegalArgumentException(String.format("Too many partition directories " +
           "for %s (%s), expecting %s.", partitionUri, Iterables.size(parts),

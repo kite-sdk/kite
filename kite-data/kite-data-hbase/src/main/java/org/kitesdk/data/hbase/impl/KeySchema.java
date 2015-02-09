@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.partition.IdentityFieldPartitioner;
 
@@ -37,7 +38,8 @@ public class KeySchema {
     this.partitionStrategy = partitionStrategy;
     this.fieldPositions = Maps.newHashMap();
 
-    List<FieldPartitioner> partitioners = partitionStrategy.getFieldPartitioners();
+    List<FieldPartitioner> partitioners =
+        Accessor.getDefault().getFieldPartitioners(partitionStrategy);
     for (int i = 0; i < partitioners.size(); i += 1) {
       FieldPartitioner fp = partitioners.get(i);
       if (fp instanceof IdentityFieldPartitioner) {

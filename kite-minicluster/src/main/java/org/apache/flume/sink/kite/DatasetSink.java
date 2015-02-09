@@ -58,9 +58,9 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetException;
 import org.kitesdk.data.DatasetWriter;
 import org.kitesdk.data.Datasets;
+import org.kitesdk.data.URIBuilder;
 import org.kitesdk.data.View;
 import org.kitesdk.data.spi.Registration;
-import org.kitesdk.data.spi.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,7 +168,8 @@ public class DatasetSink extends AbstractSink implements Configurable {
           DatasetSinkConstants.CONFIG_KITE_DATASET_NAME);
       Preconditions.checkNotNull(datasetName, "Dataset name is missing");
 
-      this.target = new URIBuilder(repositoryURI, datasetName).build();
+      this.target = new URIBuilder(repositoryURI, URIBuilder.NAMESPACE_DEFAULT,
+          datasetName).build();
     }
 
     this.setName(target.toString());

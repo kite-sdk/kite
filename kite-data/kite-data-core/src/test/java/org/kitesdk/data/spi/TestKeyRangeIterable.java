@@ -24,6 +24,7 @@ import org.apache.avro.SchemaBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.impl.Accessor;
 
 public class TestKeyRangeIterable {
   public static final Constraints emptyConstraints = new Constraints(
@@ -103,7 +104,7 @@ public class TestKeyRangeIterable {
   public void testGroupSet() {
     String[] ids = new String[]{
       UUID.randomUUID().toString(), UUID.randomUUID().toString()};
-    FieldPartitioner hashFunc = hash.getFieldPartitioners().get(0);
+    FieldPartitioner hashFunc = Accessor.getDefault().getFieldPartitioners(hash).get(0);
 
     Constraints c = emptyConstraints.partitionedBy(hash).with("id", ids[0]);
 
@@ -211,7 +212,7 @@ public class TestKeyRangeIterable {
     };
     String[] ids = new String[]{
         UUID.randomUUID().toString(), UUID.randomUUID().toString()};
-    FieldPartitioner hashFunc = hash.getFieldPartitioners().get(0);
+    FieldPartitioner hashFunc = Accessor.getDefault().getFieldPartitioners(hash).get(0);
 
     Constraints c = emptyConstraints.partitionedBy(strategy)
         .from("timestamp", timestamps[0]).to("timestamp", timestamps[1])

@@ -17,6 +17,7 @@
 package org.kitesdk.data.spi.filesystem;
 
 import org.apache.avro.Schema;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.FieldPartitioner;
 import org.kitesdk.data.spi.SchemaUtil;
 import org.kitesdk.data.spi.partition.DayOfMonthFieldPartitioner;
@@ -48,7 +49,7 @@ public class PathConversion {
 
   public StorageKey toKey(Path fromPath, StorageKey storage) {
     final List<FieldPartitioner> partitioners =
-        storage.getPartitionStrategy().getFieldPartitioners();
+        Accessor.getDefault().getFieldPartitioners(storage.getPartitionStrategy());
     final List<Object> values = Lists.newArrayList(
         new Object[partitioners.size()]);
 
@@ -72,7 +73,7 @@ public class PathConversion {
   public Path fromKey(StorageKey key) {
     final StringBuilder pathBuilder = new StringBuilder();
     final List<FieldPartitioner> partitioners =
-        key.getPartitionStrategy().getFieldPartitioners();
+        Accessor.getDefault().getFieldPartitioners(key.getPartitionStrategy());
 
     for (int i = 0; i < partitioners.size(); i++) {
       final FieldPartitioner fp = partitioners.get(i);

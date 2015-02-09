@@ -19,6 +19,7 @@ package org.kitesdk.data.spi;
 import org.kitesdk.data.PartitionStrategy;
 import java.util.Comparator;
 import javax.annotation.concurrent.Immutable;
+import org.kitesdk.data.impl.Accessor;
 
 /**
  * Comparison methods for {@link Marker} objects with respect to a
@@ -55,7 +56,7 @@ public class MarkerComparator implements Comparator<Marker> {
    */
   @SuppressWarnings("unchecked")
   public boolean contains(Marker container, Marker test) {
-    for (FieldPartitioner field : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner field : Accessor.getDefault().getFieldPartitioners(strategy)) {
       Object containerValue = container.valueFor(field);
       if (containerValue != null) {
         Object testValue = test.valueFor(field);
@@ -120,7 +121,7 @@ public class MarkerComparator implements Comparator<Marker> {
   @Override
   @SuppressWarnings("unchecked")
   public int compare(Marker m1, Marker m2) {
-    for (FieldPartitioner field : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner field : Accessor.getDefault().getFieldPartitioners(strategy)) {
       Object m1Value = m1.valueFor(field);
       Object m2Value = m2.valueFor(field);
       // if either is null, but not both, then they are Incomparable
@@ -189,7 +190,7 @@ public class MarkerComparator implements Comparator<Marker> {
    */
   @SuppressWarnings("unchecked")
   public int rightCompare(Marker m1, Marker m2) {
-    for (FieldPartitioner field : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner field : Accessor.getDefault().getFieldPartitioners(strategy)) {
       Object m1Value = m1.valueFor(field);
       Object m2Value = m2.valueFor(field);
       if (m1Value == null) {
@@ -257,7 +258,7 @@ public class MarkerComparator implements Comparator<Marker> {
    */
   @SuppressWarnings("unchecked")
   public int leftCompare(Marker m1, Marker m2) {
-    for (FieldPartitioner field : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner field : Accessor.getDefault().getFieldPartitioners(strategy)) {
       Object m1Value = m1.valueFor(field);
       Object m2Value = m2.valueFor(field);
       if (m1Value == null) {

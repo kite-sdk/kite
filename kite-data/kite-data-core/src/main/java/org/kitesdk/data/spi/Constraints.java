@@ -39,6 +39,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import org.apache.avro.Schema;
 import org.kitesdk.data.PartitionStrategy;
+import org.kitesdk.data.impl.Accessor;
 import org.kitesdk.data.spi.partition.CalendarFieldPartitioner;
 import org.kitesdk.data.spi.partition.ProvidedFieldPartitioner;
 import org.kitesdk.data.spi.predicates.Exists;
@@ -142,7 +143,7 @@ public class Constraints {
     PartitionStrategy strategy = key.getPartitionStrategy();
     Set<String> timeFields = Sets.newHashSet();
     int i = 0;
-    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
       String partition = fp.getName();
       Predicate partitionPredicate = unsatisfied.get(partition);
       if (partitionPredicate != null && partitionPredicate.apply(key.get(i))) {
@@ -253,7 +254,7 @@ public class Constraints {
         "Cannot produce key ranges without a partition strategy");
     Multimap<String, FieldPartitioner> partitioners = HashMultimap.create();
     Set<String> partitionFields = Sets.newHashSet();
-    for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+    for (FieldPartitioner fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
       partitioners.put(fp.getSourceName(), fp);
       partitionFields.add(fp.getName());
     }
@@ -564,7 +565,7 @@ public class Constraints {
 
       if (strategy != null) {
         // there could be partition predicates to add
-        for (FieldPartitioner fp : strategy.getFieldPartitioners()) {
+        for (FieldPartitioner fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
           if (fp instanceof ProvidedFieldPartitioner) {
             // no source field for provided partitioners, so no values to test
             continue;
@@ -654,7 +655,8 @@ public class Constraints {
       // itself. usually the function is identity when this happens and there is
       // no problem because of the combine identity check.
 
-      List<FieldPartitioner> partitioners = strategy.getFieldPartitioners();
+      List<FieldPartitioner> partitioners =
+          Accessor.getDefault().getFieldPartitioners(strategy);
       Predicate[] preds = new Predicate[partitioners.size()];
 
       Map<String, Predicate> timeFields = Maps.newHashMap();

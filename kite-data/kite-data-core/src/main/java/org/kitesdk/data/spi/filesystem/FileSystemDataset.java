@@ -351,7 +351,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
   private Path toDirectoryName(@Nullable Path dir, PartitionKey key) {
     Path result = dir;
     for (int i = 0; i < key.getLength(); i++) {
-      final FieldPartitioner fp = partitionStrategy.getFieldPartitioners().get(i);
+      final FieldPartitioner fp = Accessor.getDefault().getFieldPartitioners(partitionStrategy).get(i);
       if (result != null) {
         result = new Path(result, PathConversion.dirnameForValue(fp, key.get(i)));
       } else {
@@ -367,7 +367,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
 
   @SuppressWarnings("unchecked")
   private PartitionKey keyFromDirectory(String name) {
-    final FieldPartitioner fp = partitionStrategy.getFieldPartitioners().get(0);
+    final FieldPartitioner fp = Accessor.getDefault().getFieldPartitioners(partitionStrategy).get(0);
     final List<Object> values = Lists.newArrayList();
 
     if (partitionKey != null) {
@@ -397,7 +397,7 @@ public class FileSystemDataset<E> extends AbstractDataset<E> implements
       relDir = relDir.getParent();
     }
 
-    List<FieldPartitioner> fps = partitionStrategy.getFieldPartitioners();
+    List<FieldPartitioner> fps = Accessor.getDefault().getFieldPartitioners(partitionStrategy);
     Preconditions.checkState(pathComponents.size() <= fps.size(),
         "Number of components in partition directory %s (%s) exceeds number of field " +
             "partitioners %s", dir, pathComponents, partitionStrategy);
