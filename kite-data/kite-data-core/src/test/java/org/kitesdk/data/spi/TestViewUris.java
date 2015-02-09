@@ -37,7 +37,7 @@ public class TestViewUris {
       .endRecord();
 
   private static final PartitionStrategy STRATEGY = new PartitionStrategy.Builder()
-      .hash("id", "id-hash", 64)
+      .hash("id", "id_hash", 64)
       .year("timestamp")
       .month("timestamp")
       .day("timestamp")
