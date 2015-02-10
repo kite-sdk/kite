@@ -33,11 +33,11 @@ import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.DatasetRecordException;
-import org.kitesdk.data.DatasetWriterException;
 import org.kitesdk.data.Flushable;
 import org.kitesdk.data.Format;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.Syncable;
+import org.kitesdk.data.UnknownFormatException;
 import org.kitesdk.data.ValidationException;
 import org.kitesdk.data.spi.AbstractDatasetWriter;
 import org.kitesdk.data.spi.DescriptorUtil;
@@ -291,7 +291,7 @@ class FileSystemWriter<E> extends AbstractDatasetWriter<E> {
       return new CSVAppender<E>(fs, temp, descriptor);
     } else {
       this.state = ReaderWriterState.ERROR;
-      throw new DatasetWriterException("Unknown format " + descriptor);
+      throw new UnknownFormatException("Unknown format " + descriptor);
     }
   }
 

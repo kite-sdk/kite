@@ -15,10 +15,10 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.TestDatasetReaders;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetReaderException;
 import org.kitesdk.data.UnknownFormatException;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
@@ -143,12 +143,12 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
     }
   }
 
-  @Test(expected = DatasetReaderException.class)
+  @Test(expected = DatasetIOException.class)
   public void testMissingPath() throws IOException {
     Path missingFile = new Path("data/no-such-file.avro");
 
     /*
-     * IMPORTANT: The DatasetReaderException should be thrown while iterating,
+     * IMPORTANT: The DatasetIOException should be thrown while iterating,
      * even though the first reader is the problem. This is because open()
      * should consistently validate the incoming files -- either fail when any
      * file is invalid or not check the validity of any files. Because we don't
@@ -176,7 +176,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
     }
   }
 
-  @Test(expected = DatasetReaderException.class)
+  @Test(expected = DatasetIOException.class)
   public void testEmptyFile() throws IOException {
     final Path emptyFile = new Path("/tmp/empty-file.avro");
 
@@ -185,7 +185,7 @@ public class TestMultiFileDatasetReader extends TestDatasetReaders {
         fileSystem.createNewFile(emptyFile));
 
     /*
-     * IMPORTANT: The DatasetReaderException should be thrown while iterating,
+     * IMPORTANT: The DatasetIOException should be thrown while iterating,
      * even though the first reader is the problem. This is because open()
      * should consistently validate the incoming files -- either fail when any
      * file is invalid or not check the validity of any files. Because we don't

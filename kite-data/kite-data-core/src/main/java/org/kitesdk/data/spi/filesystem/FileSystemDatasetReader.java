@@ -15,8 +15,8 @@
  */
 package org.kitesdk.data.spi.filesystem;
 
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.ReaderWriterState;
-import org.kitesdk.data.DatasetReaderException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.logging.Level;
 import org.kitesdk.data.spi.DataModelUtil;
 
 class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
@@ -70,7 +69,7 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
         fileSystem.getFileStatus(path).getLen()),
           DataModelUtil.getDatumReaderForType(type, schema));
     } catch (IOException e) {
-      throw new DatasetReaderException("Unable to create reader path:" + path, e);
+      throw new DatasetIOException("Unable to create reader path:" + path, e);
     }
 
     state = ReaderWriterState.OPEN;
@@ -92,7 +91,7 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
     try {
       return reader.next(record);
     } catch (IOException ex) {
-      throw new DatasetReaderException(ex);
+      throw new DatasetIOException("Cannot advance reader", ex);
     }
   }
 
@@ -107,7 +106,7 @@ class FileSystemDatasetReader<E> extends AbstractDatasetReader<E> {
     try {
       reader.close();
     } catch (IOException e) {
-      throw new DatasetReaderException("Unable to close reader path:" + path, e);
+      throw new DatasetIOException("Unable to close reader path:" + path, e);
     }
 
     state = ReaderWriterState.CLOSED;

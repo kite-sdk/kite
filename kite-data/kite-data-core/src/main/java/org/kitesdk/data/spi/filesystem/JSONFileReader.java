@@ -32,7 +32,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.kitesdk.data.DatasetReaderException;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.DataModelUtil;
 import org.kitesdk.data.spi.EntityAccessor;
@@ -90,7 +90,7 @@ public class JSONFileReader<E> extends AbstractDatasetReader<E> {
       this.incoming = fs.open(path);
       this.size = fs.getFileStatus(path).getLen();
     } catch (IOException ex) {
-      throw new DatasetReaderException("Cannot open path: " + path, ex);
+      throw new DatasetIOException("Cannot open path: " + path, ex);
     }
 
     this.iterator = Iterators.transform(JsonUtil.parser(incoming),
@@ -131,7 +131,7 @@ public class JSONFileReader<E> extends AbstractDatasetReader<E> {
     try {
       incoming.close();
     } catch (IOException e) {
-      throw new DatasetReaderException("Unable to close reader path:" + path, e);
+      throw new DatasetIOException("Unable to close reader path:" + path, e);
     }
 
     state = ReaderWriterState.CLOSED;

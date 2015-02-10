@@ -71,7 +71,6 @@ public interface DatasetWriter<E> extends Flushable, Syncable, Closeable {
    *            If a record could not be written, but the writer is still valid.
    * @throws DatasetIOException
    *            To wrap an internal {@link java.io.IOException}
-   * @throws DatasetWriterException
    */
   void write(E entity);
 
@@ -90,8 +89,11 @@ public interface DatasetWriter<E> extends Flushable, Syncable, Closeable {
    * implementations that can support a durability guarantee, such as Avro,
    * can be {@link Flushable} and {@link Syncable}.
    * </p>
+   * @throws DatasetOperationException
+   *            If the operation did not succeed.
+   * @throws DatasetIOException
+   *            To wrap an internal {@link java.io.IOException}
    *
-   * @throws DatasetWriterException
    * @deprecated will be removed after 0.18.0; use {@link Flushable#flush}
    */
   @Override
@@ -113,8 +115,10 @@ public interface DatasetWriter<E> extends Flushable, Syncable, Closeable {
    * implementations that can support a durability guarantee, such as Avro,
    * can be {@link Flushable} and {@link Syncable}.
    * </p>
-   *
-   * @throws DatasetWriterException
+   * @throws DatasetOperationException
+   *            If the operation did not succeed.
+   * @throws DatasetIOException
+   *            To wrap an internal {@link java.io.IOException}
    *
    * @since 0.16.0
    * @deprecated will be removed after 0.18.0; use {@link Syncable#sync}
@@ -134,8 +138,11 @@ public interface DatasetWriter<E> extends Flushable, Syncable, Closeable {
    * this method) can be performed; however, implementations can choose to
    * permit other method calls. See implementation documentation for details.
    * </p>
-   *
-   * @throws DatasetWriterException
+   * @throws DatasetOperationException
+   *            If the operation did not succeed.
+   * @throws DatasetIOException
+   *            To wrap an internal {@link java.io.IOException}
+
    */
   @Override
   void close();

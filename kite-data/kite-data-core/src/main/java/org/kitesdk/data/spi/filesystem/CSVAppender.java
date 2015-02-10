@@ -28,7 +28,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetReaderException;
+import org.kitesdk.data.DatasetOperationException;
 
 class CSVAppender<E> implements FileSystemWriter.FileAppender<E> {
 
@@ -144,7 +144,7 @@ class CSVAppender<E> implements FileSystemWriter.FileAppender<E> {
         return valueString(value, schema.getTypes().get(index));
       default:
         // FIXED, BYTES, MAP, ARRAY, RECORD are not supported
-        throw new DatasetReaderException(
+        throw new DatasetOperationException(
             "Unsupported field type:" + schema.getType());
     }
   }

@@ -65,7 +65,10 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    * Tests the reader to see if additional entities can be read.
    *
    * @return true if additional entities exist, false otherwise.
-   * @throws DatasetReaderException
+   * @throws DatasetOperationException
+   *            If the operation did not succeed.
+   * @throws DatasetIOException
+   *            To wrap an internal {@link java.io.IOException}
    */
   @Override
   boolean hasNext();
@@ -81,7 +84,10 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    * </p>
    *
    * @return An entity of type {@code E}.
-   * @throws DatasetReaderException
+   * @throws DatasetOperationException
+   *            If the operation did not succeed.
+   * @throws DatasetIOException
+   *            To wrap an internal {@link java.io.IOException}
    * @throws NoSuchElementException
    *
    * @since 0.7.0
@@ -115,7 +121,10 @@ public interface DatasetReader<E> extends Iterator<E>, Iterable<E>, Closeable {
    * other method calls. See implementation documentation for details.
    * </p>
    *
-   * @throws DatasetReaderException
+   * @throws DatasetOperationException
+   *            If the operation did not succeed.
+   * @throws DatasetIOException
+   *            To wrap an internal {@link java.io.IOException}
    */
   @Override
   void close();

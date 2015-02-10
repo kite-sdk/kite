@@ -23,7 +23,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.reflect.ReflectData;
-import org.kitesdk.data.DatasetReaderException;
+import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.DatasetRecordException;
 import org.kitesdk.data.spi.SchemaUtil;
 
@@ -185,7 +185,7 @@ class CSVRecordBuilder<E> {
           return null;
         default:
           // FIXED, BYTES, MAP, ARRAY, RECORD are not supported
-          throw new DatasetReaderException(
+          throw new DatasetOperationException(
               "Unsupported field type:" + schema.getType());
       }
     } catch (NumberFormatException e) {
