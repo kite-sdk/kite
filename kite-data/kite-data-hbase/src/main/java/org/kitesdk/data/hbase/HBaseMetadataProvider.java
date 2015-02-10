@@ -102,10 +102,11 @@ class HBaseMetadataProvider extends AbstractMetadataProvider {
     try {
       if (!hbaseAdmin.tableExists(tableName)) {
         HTableDescriptor desc = new HTableDescriptor(tableName);
-        desc.addFamily(columnFamily(Constants.SYS_COL_FAMILY, descriptor));
-        desc.addFamily(columnFamily(Constants.OBSERVABLE_COL_FAMILY, descriptor));
-        for (String columnFamily : entitySchema.getColumnMappingDescriptor()
-            .getRequiredColumnFamilies()) {
+        Set<String> familiesToAdd = entitySchema.getColumnMappingDescriptor()
+            .getRequiredColumnFamilies();
+        familiesToAdd.add(new String(Constants.SYS_COL_FAMILY));
+        familiesToAdd.add(new String(Constants.OBSERVABLE_COL_FAMILY));
+        for (String columnFamily : familiesToAdd) {
           desc.addFamily(columnFamily(columnFamily, descriptor));
         }
         hbaseAdmin.createTable(desc);
