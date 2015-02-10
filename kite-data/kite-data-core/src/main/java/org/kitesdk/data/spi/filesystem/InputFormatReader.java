@@ -33,7 +33,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.kitesdk.compat.Hadoop;
 import org.kitesdk.data.DatasetDescriptor;
 import org.kitesdk.data.DatasetIOException;
-import org.kitesdk.data.DatasetReaderException;
+import org.kitesdk.data.DatasetOperationException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.ReaderWriterState;
 
@@ -89,7 +89,7 @@ public class InputFormatReader<E> extends AbstractDatasetReader<E> {
 
     } catch (RuntimeException e) {
       this.state = ReaderWriterState.ERROR;
-      throw new DatasetReaderException("Cannot calculate splits", e);
+      throw new DatasetOperationException("Cannot calculate splits", e);
     } catch (IOException e) {
       this.state = ReaderWriterState.ERROR;
       throw new DatasetIOException("Cannot calculate splits", e);
@@ -130,7 +130,7 @@ public class InputFormatReader<E> extends AbstractDatasetReader<E> {
       return record;
     } catch (RuntimeException e) {
       this.state = ReaderWriterState.ERROR;
-      throw new DatasetReaderException("Cannot get record", e);
+      throw new DatasetOperationException("Cannot get record", e);
     } catch (IOException e) {
       this.state = ReaderWriterState.ERROR;
       throw new DatasetIOException("Cannot get record", e);
@@ -139,7 +139,7 @@ public class InputFormatReader<E> extends AbstractDatasetReader<E> {
       Thread.currentThread().interrupt();
       // error: it is unclear whether the underlying reader is valid
       this.state = ReaderWriterState.ERROR;
-      throw new DatasetReaderException("Interrupted", e);
+      throw new DatasetOperationException("Interrupted", e);
     }
   }
 
@@ -164,14 +164,14 @@ public class InputFormatReader<E> extends AbstractDatasetReader<E> {
       }
     } catch (RuntimeException e) {
       this.state = ReaderWriterState.ERROR;
-      throw new DatasetReaderException("Cannot advance reader", e);
+      throw new DatasetOperationException("Cannot advance reader", e);
     } catch (IOException e) {
       this.state = ReaderWriterState.ERROR;
       throw new DatasetIOException("Cannot advance reader", e);
     } catch (InterruptedException e) {
       // error: it is unclear whether the underlying reader is valid
       this.state = ReaderWriterState.ERROR;
-      throw new DatasetReaderException("Interrupted", e);
+      throw new DatasetOperationException("Interrupted", e);
     }
   }
 
@@ -188,7 +188,7 @@ public class InputFormatReader<E> extends AbstractDatasetReader<E> {
         currentReader.close();
       }
     } catch (IOException e) {
-      throw new DatasetReaderException("Unable to close reader path:" + path, e);
+      throw new DatasetIOException("Unable to close reader path:" + path, e);
     }
 
     this.hasNext = false;

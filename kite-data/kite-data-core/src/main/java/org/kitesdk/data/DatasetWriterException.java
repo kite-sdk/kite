@@ -26,7 +26,9 @@ package org.kitesdk.data;
  *
  * @see DatasetWriter
  * @since 0.2.0
+ * @deprecated will be removed after 0.18.0
  */
+@Deprecated
 public class DatasetWriterException extends DatasetException {
 
   public DatasetWriterException() {

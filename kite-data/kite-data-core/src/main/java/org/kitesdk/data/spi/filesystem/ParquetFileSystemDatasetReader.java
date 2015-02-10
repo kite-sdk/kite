@@ -18,7 +18,6 @@ package org.kitesdk.data.spi.filesystem;
 import java.util.NoSuchElementException;
 import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.ReaderWriterState;
-import org.kitesdk.data.DatasetReaderException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;

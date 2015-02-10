@@ -16,10 +16,10 @@
 package org.kitesdk.data.spi.filesystem;
 
 import org.apache.avro.SchemaBuilder;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.LocalFileSystem;
 import org.kitesdk.data.TestDatasetReaders;
 import org.kitesdk.data.DatasetReader;
-import org.kitesdk.data.DatasetReaderException;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import org.apache.avro.Schema;
@@ -97,7 +97,7 @@ public class TestFileSystemDatasetReader extends TestDatasetReaders<Record> {
         fileSystem, null, STRING_SCHEMA, String.class);
   }
 
-  @Test(expected = DatasetReaderException.class)
+  @Test(expected = DatasetIOException.class)
   public void testMissingFile() {
     AbstractDatasetReader<String> reader = new FileSystemDatasetReader<String>(
         fileSystem, new Path("/tmp/does-not-exist.avro"), STRING_SCHEMA,
@@ -109,7 +109,7 @@ public class TestFileSystemDatasetReader extends TestDatasetReaders<Record> {
     reader.initialize();
   }
 
-  @Test(expected = DatasetReaderException.class)
+  @Test(expected = DatasetIOException.class)
   public void testEmptyFile() throws IOException {
     final Path emptyFile = new Path("/tmp/empty-file.avro");
 

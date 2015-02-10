@@ -24,7 +24,7 @@ import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.kitesdk.data.DatasetReaderException;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.Formats;
 import org.kitesdk.data.MiniDFSTest;
 import org.kitesdk.data.TestHelpers;
@@ -47,7 +47,7 @@ public class TestAvroAppender extends MiniDFSTest {
     }
 
     TestHelpers.assertThrows("Should not be able to read file, nothing written",
-        DatasetReaderException.class, new Callable<Void>() {
+        DatasetIOException.class, new Callable<Void>() {
           @Override
           public Void call() throws IOException {
             count(fs, path);
@@ -94,7 +94,7 @@ public class TestAvroAppender extends MiniDFSTest {
     }
 
     TestHelpers.assertThrows("Should not be able to read file, nothing written",
-        DatasetReaderException.class, new Callable<Void>() {
+        DatasetIOException.class, new Callable<Void>() {
           @Override
           public Void call() throws IOException {
             count(fs, path);

@@ -23,7 +23,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.kitesdk.data.DatasetDescriptor;
-import org.kitesdk.data.DatasetReaderException;
+import org.kitesdk.data.DatasetIOException;
 import org.kitesdk.data.spi.AbstractDatasetReader;
 import org.kitesdk.data.spi.DescriptorUtil;
 import org.kitesdk.data.spi.EntityAccessor;
@@ -33,7 +33,6 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.kitesdk.data.spi.SchemaUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +111,7 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
       this.incoming = fs.open(path);
       this.size = fs.getFileStatus(path).getLen();
     } catch (IOException ex) {
-      throw new DatasetReaderException("Cannot open path: " + path, ex);
+      throw new DatasetIOException("Cannot open path: " + path, ex);
     }
 
     this.reader = CSVUtil.newReader(incoming, props);
@@ -162,7 +161,7 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
     try {
       next = reader.readNext();
     } catch (IOException ex) {
-      throw new DatasetReaderException("Could not read record", ex);
+      throw new DatasetIOException("Could not read record", ex);
     }
     return (next != null);
   }
@@ -178,7 +177,7 @@ public class CSVFileReader<E> extends AbstractDatasetReader<E> {
     try {
       reader.close();
     } catch (IOException e) {
-      throw new DatasetReaderException("Unable to close reader path:" + path, e);
+      throw new DatasetIOException("Unable to close reader path:" + path, e);
     }
 
     state = ReaderWriterState.CLOSED;
