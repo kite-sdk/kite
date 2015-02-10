@@ -246,10 +246,11 @@ public class SchemaTool {
       try {
         if (!hbaseAdmin.tableExists(tableName)) {
           HTableDescriptor desc = new HTableDescriptor(tableName);
-          desc.addFamily(new HColumnDescriptor(Constants.SYS_COL_FAMILY));
-          desc.addFamily(new HColumnDescriptor(Constants.OBSERVABLE_COL_FAMILY));
-          for (String columnFamily : entitySchema.getColumnMappingDescriptor()
-              .getRequiredColumnFamilies()) {
+          Set<String> familiesToAdd = entitySchema.getColumnMappingDescriptor()
+              .getRequiredColumnFamilies();
+          familiesToAdd.add(new String(Constants.SYS_COL_FAMILY));
+          familiesToAdd.add(new String(Constants.OBSERVABLE_COL_FAMILY));
+          for (String columnFamily : familiesToAdd) {
             desc.addFamily(new HColumnDescriptor(columnFamily));
           }
           hbaseAdmin.createTable(desc);
