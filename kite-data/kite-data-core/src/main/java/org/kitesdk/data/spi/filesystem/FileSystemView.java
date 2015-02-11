@@ -99,12 +99,6 @@ class FileSystemView<E> extends AbstractRefinableView<E> implements InputFormatA
 
   @Override
   public boolean deleteAll() {
-    DatasetDescriptor descriptor = getDataset().getDescriptor();
-    if (!descriptor.isPartitioned()) {
-      // at least one constraint, but not partitioning to satisfy it
-      throw new UnsupportedOperationException(
-          "Cannot cleanly delete view: " + this);
-    }
     if (!constraints.alignedWithBoundaries()) {
       throw new UnsupportedOperationException(
           "Cannot cleanly delete view: " + this);

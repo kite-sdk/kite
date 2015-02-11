@@ -250,8 +250,13 @@ public class Constraints {
    */
   @SuppressWarnings("unchecked")
   public boolean alignedWithBoundaries() {
-    Preconditions.checkNotNull(strategy,
-        "Cannot produce key ranges without a partition strategy");
+    if (constraints.isEmpty()) {
+      return true;
+    } else if (strategy == null) {
+      // constraints must align with partitions, which requires a strategy
+      return false;
+    }
+
     Multimap<String, FieldPartitioner> partitioners = HashMultimap.create();
     Set<String> partitionFields = Sets.newHashSet();
     for (FieldPartitioner fp : Accessor.getDefault().getFieldPartitioners(strategy)) {
