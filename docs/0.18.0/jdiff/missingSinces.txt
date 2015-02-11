@@ -1,0 +1,8 @@
+OK: org.kitesdk.data.DatasetRecordException Class
+OK: org.kitesdk.data.Flushable Interface
+OK: org.kitesdk.data.Syncable Interface
+NO DOC BLOCK: org.kitesdk.data.DatasetOperationException Constructor (java.lang.String, java.lang.Object[])
+NO DOC BLOCK: org.kitesdk.data.DatasetOperationException Constructor (java.lang.Throwable, java.lang.String, java.lang.Object[])
+NO DOC BLOCK: org.kitesdk.data.DatasetException Method format(java.lang.String, java.lang.Object[])
+OK: org.kitesdk.data.Formats Field INPUTFORMAT
+OK: org.kitesdk.data.Formats Field JSON
